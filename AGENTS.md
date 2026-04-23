@@ -150,86 +150,6 @@ This file provides guidance to Claude / Codex when working with code in this rep
 - HostApp 전용 UI 상태와 공통 렌더링 helper의 소유 경계를 유지한다.
 - 렌더링/FFI 변경 후 필수 검증을 수행한다.
 
-## Git 워크플로우
-
-### 브랜치 관리
-
-| 브랜치 | 용도 |
-|--------|------|
-| `main` | 최종 릴리스. 태그로 안정 버전 보존 |
-| `devel` | 개발 통합 브랜치 |
-| `local/task{issue}` | GitHub Issue 단위 작업 브랜치 |
-
-### 기준 브랜치 동기화
-
-새 작업 시작 전에는 반드시 `origin/devel`을 기준으로 작업 브랜치를 만든다.
-
-```bash
-git switch devel
-git fetch origin
-git pull --ff-only origin devel
-git switch -c local/task{issue}
-```
-
-이미 존재하는 작업 브랜치를 최신 `devel` 기준으로 갱신할 때는 변경 범위를 확인한 뒤 병합한다.
-
-```bash
-git switch devel
-git fetch origin
-git pull --ff-only origin devel
-git switch local/task{issue}
-git merge devel
-```
-
-`edwardkim/rhwp` upstream에는 이 저장소의 앱 작업 PR을 생성하지 않는다. 이 저장소의 모든 앱/bridge/문서 변경 PR은 `postmelee/alhangeul-macos`의 `devel`로 생성한다.
-
-### PR 생성
-
-최종 보고서 작성 후 PR을 생성한다. PR 본문은 최종 보고서를 기반으로 상세히 작성한다.
-
-```bash
-git push -u origin local/task{issue}
-gh pr create --repo postmelee/alhangeul-macos --base devel --head local/task{issue} --draft --title "Issue #{issue}: 제목"
-```
-
-PR 본문에는 다음을 포함한다.
-
-- `Closes #{issue}`
-- 작업 배경과 변경 요약
-- core submodule 변경 여부와 commit SHA
-- FFI ABI 변경 여부
-- 실행한 검증 명령과 결과
-- 남은 수동 검증 항목
-
-### 커밋 메시지
-
-```text
-Issue #{issue}: 변경 요약
-```
-
-예:
-
-```text
-Issue #7: Add agent guidelines
-```
-
-## 타스크 진행 절차
-
-1. GitHub Issue에 타스크 등록
-2. `origin/devel` 기준으로 `local/task{issue}` 브랜치 생성
-3. 수행 계획서 작성
-4. 구현 계획서 작성
-5. 단계별 진행
-6. 단계 완료 시 단계별 완료 보고서 작성
-7. 단계 소스 변경과 단계 보고서를 함께 커밋
-8. 모든 단계 완료 시 최종 보고서 작성
-9. 오늘 할일 문서 갱신
-10. `git status`로 미커밋 파일 확인
-11. 최종 보고서 기반 PR 생성
-12. PR merge 후 이슈 close 확인
-
-작업지시자가 단순 문서 수정, 명확한 한 줄 수정, 조사만 요청한 경우에는 절차를 필요한 수준으로 축소할 수 있다. 다만 GitHub Issue가 이미 생성된 작업은 최종 보고서와 PR 본문에 작업 결과를 남긴다.
-
 ## 검증 기준
 
 변경 유형별 상세 검증 명령은 `mydocs/manual/build_run_guide.md`를 따른다.
@@ -245,10 +165,90 @@ Issue #7: Add agent guidelines
 
 검증을 실행하지 못한 경우 최종 보고서와 PR 본문에 이유를 명시한다.
 
-## 작업 규칙
+## 워크플로우
+
+### 브랜치 관리
+
+| 브랜치 | 용도 |
+|--------|------|
+| `main` | 최종 릴리즈. 태그(v0.5.0 등)로 안정 버전 보존 |
+| `devel` | 개발 통합 |
+| `local/devel` | devel 브랜치의 로컬 작업 브랜치. 작업 완료 후 devel에 merge |
+| `local/task{num}` | 타스크별 작업 |
+
+### Git 워크플로우
+
+```
+local/task{N}  ──커밋──커밋──┐
+local/task{N+1}──커밋──커밋──┤
+                              ├─→ local/devel merge (작업 단위)
+                              │
+                              ├─→ devel merge (로컬) + push
+                              │
+                              ├─→ main PR 생성 + 리뷰 + merge + 태그 (릴리즈 시점)
+```
+
+- **타스크 브랜치**: `local/task{N}`에서 잘게 커밋. 작업 단위마다 커밋.
+- **local/devel 작업**: devel에서 직접 작업하지 않고 `local/devel` 브랜치에서 작업한다. 타스크 브랜치도 `local/devel`에서 분기하고 `local/devel`로 merge한다.
+- **원격 push**: `devel`만 push. `local/devel`과 `local/task` 브랜치는 **로컬 유지 (원격 push 금지)**.
+- **main merge (PR 기반)**: 릴리즈 시점에 `devel` → `main` PR 생성 → 리뷰(approve) → merge 후 태그 생성.
+
+#### 메인테이너 워크플로우
+
+```bash
+# 1. local/devel → devel (로컬 merge + push)
+git checkout devel
+git merge local/devel --no-ff -m "Merge local/devel: 제목"
+git push origin devel
+
+# 2. devel → main PR (릴리즈 시)
+gh pr create --base main --head devel --title "Release: 제목"
+gh pr review --approve
+gh pr merge --merge --delete-branch=false
+```
+
+#### 컨트리뷰터 워크플로우 (Fork 기반)
+
+```bash
+# 1. 원본 저장소 Fork (GitHub에서 1회)
+# 2. Fork한 저장소에서 작업
+git clone https://github.com/{contributor}/rhwp.git
+git checkout -b feature/my-task
+# ... 작업 + 커밋 ...
+git push origin feature/my-task
+
+# 3. 원본 저장소의 devel로 PR 생성
+gh pr create --repo edwardkim/rhwp --base devel --head {contributor}:feature/my-task --title "제목"
+
+# 4. 메인테이너가 리뷰 + merge
+```
+
+### 타스크 번호 관리
+
+- **GitHub Issues**를 타스크 번호로 사용한다. 자동 채번으로 중복 방지.
+- **마일스톤 표기**: `M{버전}` (예: M100=v1.0.0, M05x=v0.5.x)
+- 새 타스크 등록: `gh issue create --repo edwardkim/rhwp --title "제목" --body "설명" --milestone "v1.0.0"`
+- 브랜치명: `local/task{issue번호}` (예: `local/task1`)
+- 커밋 메시지: `Task #1: 내용` (Issue 번호 참조)
+- `mydocs/orders/`에서 `M100 #1` 형식으로 마일스톤+이슈 참조
+- 타스크 완료 시: `gh issue close {번호}` 또는 커밋 메시지에 `closes #번호`
+
+### 타스크 진행 절차
+
+1. GitHub Issue에 타스크 등록 → 작업지시자가 지정한 타스크 수행
+2. `local/task{issue번호}` 브랜치 생성 후 진행
+3. 수행 전 수행계획서 작성 → 승인 요청
+4. 구현 계획서 작성 (최소 3단계, 최대 6단계) → 승인 요청
+5. 단계별 진행 시작
+6. 각 단계 완료 후 단계별 완료보고서 작성 → 승인 요청
+7. **단계별 완료보고서(`_stage{N}.md`)는 해당 단계 소스 커밋과 함께 타스크 브랜치에서 커밋한다.**
+8. 승인 후 다음 단계 진행
+9. 모든 단계 완료 시 최종 결과 보고서 작성 → 승인 요청
+10. **최종 결과보고서(`_report.md`)와 오늘할일(`orders/`) 갱신도 타스크 브랜치에서 커밋한다. merge 전 반드시 `git status`로 미커밋 파일이 없는지 확인한다.**
+11. 승인 요청 시 작업지시자가 피드백 문서를 `mydocs/feedback/`에 등록
+12. 모든 테스트 통과 시 피드백 없음
+13. 최종 결과보고서 작성 후 오늘할일 해당 타스크 상태 갱신
+
+### 작업 규칙
 
 - 작업 시간의 시작과 종료는 작업지시자가 결정한다. Claude와 Codex가 임의로 작업 종료를 제안하거나 시간을 한정하지 않는다.
-- Claude와 Codex가 임의로 작업 범위를 확장하지 않는다.
-- unrelated refactor, formatter churn, 생성물 재생성은 요청 범위에 필요할 때만 수행한다.
-- `Vendor/rhwp` 내부 변경은 core 작업으로 분리한다.
-- destructive git 명령은 작업지시자의 명시적 요청 없이 실행하지 않는다.
