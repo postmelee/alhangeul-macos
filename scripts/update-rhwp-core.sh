@@ -19,7 +19,7 @@ git -C "$RHWP_ROOT" merge --ff-only origin/devel
 COMMIT="$(git -C "$RHWP_ROOT" rev-parse HEAD)"
 
 cat > "$LOCK_FILE" <<EOF
-rhwp_repo = "https://github.com/edwardkim/rhwp.git"
+rhwp_repo = "https://github.com/postmelee/rhwp.git"
 rhwp_branch = "devel"
 rhwp_commit = "$COMMIT"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"

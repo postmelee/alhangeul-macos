@@ -81,8 +81,11 @@ pub extern "C" fn rhwp_render_page_svg(handle: *const RhwpHandle, page: u32) -> 
 pub extern "C" fn rhwp_render_page_tree(handle: *const RhwpHandle, page: u32) -> *mut c_char {
     ffi_guard!(handle, ptr::null_mut(), {
         let h = unsafe { &*handle };
-        match h.doc.get_page_render_tree(page) {
-            Ok(json) => string_to_c(json),
+        match h.doc.build_page_render_tree(page) {
+            Ok(tree) => match serde_json::to_string(&tree.root) {
+                Ok(json) => string_to_c(json),
+                Err(_) => ptr::null_mut(),
+            },
             Err(_) => ptr::null_mut(),
         }
     })
@@ -90,14 +93,28 @@ pub extern "C" fn rhwp_render_page_tree(handle: *const RhwpHandle, page: u32) ->
 
 #[no_mangle]
 pub extern "C" fn rhwp_image_data(
-    _handle: *const RhwpHandle,
-    _bin_data_id: u16,
+    handle: *const RhwpHandle,
+    bin_data_id: u16,
     out_len: *mut usize,
 ) -> *const u8 {
-    if !out_len.is_null() {
-        unsafe { *out_len = 0; }
+    if handle.is_null() || out_len.is_null() || bin_data_id == 0 {
+        if !out_len.is_null() {
+            unsafe { *out_len = 0; }
+        }
+        return ptr::null();
     }
-    ptr::null()
+    let h = unsafe { &*handle };
+    let idx = (bin_data_id - 1) as usize;
+    match h.doc.get_bin_data(idx) {
+        Some(data) => {
+            unsafe { *out_len = data.len(); }
+            data.as_ptr()
+        }
+        None => {
+            unsafe { *out_len = 0; }
+            ptr::null()
+        }
+    }
 }
 
 #[no_mangle]
