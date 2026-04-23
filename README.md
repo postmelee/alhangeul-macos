@@ -1,4 +1,4 @@
-# rhwp-mac
+# alhangeul-macos
 
 macOS용 HWP/HWPX Quick Look, Finder thumbnail, 문서 viewer 앱입니다.
 
@@ -32,7 +32,7 @@ xcodebuild -project RhwpMac.xcodeproj -scheme HostApp -configuration Debug build
 
 ## rhwp 코어 최신화
 
-`rhwp` 코어는 upstream `devel` 브랜치를 기준으로 최신화합니다.
+`rhwp` 코어는 개인 fork `postmelee/rhwp`의 `devel` 브랜치를 기준으로 최신화합니다. upstream `edwardkim/rhwp`의 변경은 필요한 범위를 개인 fork에 반영한 뒤 이 저장소에서 submodule commit으로 고정합니다.
 
 ```bash
 ./scripts/update-rhwp-core.sh

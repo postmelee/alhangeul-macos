@@ -2,27 +2,20 @@
 
 ## 배경
 
-`rhwp-mac`은 upstream `rhwp`를 `Vendor/rhwp` submodule로 사용한다. 코어 최신화 기준은 `devel`이다.
+`alhangeul-macos`는 개인 fork `postmelee/rhwp`를 `Vendor/rhwp` submodule로 사용한다. 코어 최신화 기준은 `postmelee/rhwp`의 `devel`이다.
 
 기존 prototype은 `ios/devel`의 iOS viewer용 Swift/FFI 코드를 직접 공유했지만, 개인 레포 분리 후에는 이 전략을 유지하지 않는다. Swift bridge는 이 레포가 소유하고, `rhwp`는 코어 엔진으로만 소비한다.
 
 ## 현재 상태
 
-upstream `devel`에는 다음이 없다.
-
-- `staticlib` crate type
-- `cbindgen.toml`
-- `rhwp_open` 등 native viewer C ABI
-- Swift renderer가 기대하는 상세 render tree JSON public API
-
-따라서 기존 Quick Look/Thumbnail 렌더링을 그대로 복구하려면 bridge ABI 외에 renderer compatibility 단계를 별도 작업으로 진행해야 한다.
+upstream `devel`은 native viewer C ABI를 직접 제공하지 않는다. 이 레포는 `RustBridge`에서 C ABI를 소유하고, 개인 fork core는 Swift renderer가 기대하는 상세 render tree JSON과 이미지 데이터 조회에 필요한 최소 public API만 제공한다.
 
 ## 권장 방향
 
 1. 이 레포의 `RustBridge/` crate가 `Vendor/rhwp`를 path dependency로 사용하고, C ABI만 export한다.
 2. `cbindgen`은 `RustBridge`를 대상으로 실행한다.
 3. Swift는 `Rhwp.xcframework`의 `Rhwp` C module만 import한다.
-4. 부족한 render tree/image public API는 upstream core에 일반적인 public API로 제안한다.
+4. 부족한 render tree/image public API는 개인 fork `postmelee/rhwp`의 `devel`에서 먼저 고도화한다.
 
 ## RustBridge 구조
 

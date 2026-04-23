@@ -1,6 +1,6 @@
-rhwp_repo = "https://github.com/edwardkim/rhwp.git"
+rhwp_repo = "https://github.com/postmelee/rhwp.git"
 rhwp_branch = "devel"
-rhwp_commit = "a9b11e20607cca251df73b917d22ba2ef497eb6c"
+rhwp_commit = "1e9d78a3209d7750d47b6e3af4af621b8fed4127"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
 generated_artifacts = [
   "Frameworks/universal/librhwp.a",
