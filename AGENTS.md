@@ -248,7 +248,7 @@ Issue #7: Add agent guidelines
 
 ## 작업 규칙
 
-- 작업 시간의 시작과 종료는 작업지시자가 결정한다.
+- 작업 시간의 시작과 종료는 작업지시자가 결정한다. Claude와 Codex가 임의로 작업 종료를 제안하거나 시간을 한정하지 않는다.
 - Claude와 Codex가 임의로 작업 범위를 확장하지 않는다.
 - unrelated refactor, formatter churn, 생성물 재생성은 요청 범위에 필요할 때만 수행한다.
 - `Vendor/rhwp` 내부 변경은 core 작업으로 분리한다.
