@@ -3,7 +3,7 @@
 ## 1단계: 기준 문서와 저장소 구조 확인
 
 - upstream `CLAUDE.md`를 확인한다.
-- `README.md`, `docs/ARCHITECTURE.md`, 빌드 스크립트, `project.yml`을 확인한다.
+- `README.md`, `docs/ARCHITECTURE.md`(현재는 `mydocs/tech/project_architecture.md`로 이전), 빌드 스크립트, `project.yml`을 확인한다.
 
 ## 2단계: AGENTS.md 작성
 

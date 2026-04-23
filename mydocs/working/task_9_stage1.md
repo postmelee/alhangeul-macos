@@ -7,8 +7,8 @@
 - 다음 파일을 기준으로 현재 프로젝트 상태를 확인했다.
   - `README.md`
   - `AGENTS.md`
-  - `docs/ARCHITECTURE.md`
-  - `docs/RHWP_CORE_BRIDGE_PLAN.md`
+  - `docs/ARCHITECTURE.md` (현재는 `mydocs/tech/project_architecture.md`로 이전)
+  - `docs/RHWP_CORE_BRIDGE_PLAN.md` (현재는 중복 문서로 삭제되고 운영 기준은 `mydocs/tech/project_architecture.md`, `mydocs/manual/` 문서로 정리)
   - `Sources/HostApp`
   - `Sources/QLExtension`
   - `Sources/ThumbnailExtension`

@@ -53,8 +53,7 @@ This file provides guidance to Claude / Codex when working with code in this rep
 ### 필수 참조 문서
 
 - `README.md` - 프로젝트 개요, 초기 설정, 빌드
-- `docs/ARCHITECTURE.md` - 소유 경계, Swift bridge 정책, submodule 정책, FFI ABI 정책
-- `docs/RHWP_CORE_BRIDGE_PLAN.md` - Rust core bridge와 장기 운영 계획
+- `mydocs/tech/project_architecture.md` - 현재 코드베이스 기준 소유 경계, bridge 구조, FFI ABI 표면
 - `rhwp-core.lock` - 현재 고정된 `rhwp` core 저장소, 브랜치, commit, 생성 산출물
 - `mydocs/manual/pr_process_guide.md` - PR 처리 상세 절차
 - `mydocs/manual/build_run_guide.md` - 빌드/실행/검증 상세 절차
