@@ -9,7 +9,7 @@
 ## 권한 원칙
 
 - 릴리스/배포 작업은 저장소 소유자의 명시 지시가 있을 때만 수행한다.
-- Codex 또는 Claude Code가 임의로 버전 태그, GitHub Release, Homebrew Cask PR, 서명/공증 작업을 시작하지 않는다.
+- Claude와 Codex가 임의로 버전 태그, GitHub Release, Homebrew Cask PR, 서명/공증 작업을 시작하지 않는다.
 - 인증서, Apple Developer 계정, notarization credential, GitHub token, Homebrew tap 권한은 작업지시자가 직접 관리한다.
 - 민감 정보는 문서, commit, PR, shell history에 남기지 않는다.
 

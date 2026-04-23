@@ -14,16 +14,23 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 
 ## Codex 사용 시 주의사항
 
-이 프로젝트는 작업 추적과 문서화를 중시한다. Codex의 기본 동작인 빠른 자율 수정과 충돌하지 않도록 아래 원칙을 우선한다.
+이 프로젝트는 **하이퍼-워터폴** 방법론을 적용한다. Codex의 기본 동작(빠른 실행, 자율 수정)과 충돌이 발생할 수 있으므로 반드시 숙지한다.
+
+상세 내용: [`mydocs/manual/agent_code_hyperfall_rule_conflict.md`](mydocs/manual/agent_code_hyperfall_rule_conflict.md)
 
 **핵심 규칙 요약**:
 
+- 소스 수정 전 작업지시자 승인 요청을 기본 원칙으로 한다.
 - 작업은 GitHub Issue 기준으로 추적한다.
-- 새 기능, 버그 수정, 구조 변경은 `이슈 -> 브랜치 -> 계획서 -> 구현 -> 검증 -> 최종 보고서 -> PR` 순서로 진행한다.
-- 사용자가 "진행해줘", "작성해줘", "구현해줘"처럼 명확히 지시한 범위는 해당 단계 진행 승인으로 간주한다.
+- 새 기능, 버그 수정, 구조 변경은 `이슈 -> 브랜치 -> 오늘할일 -> 계획서 -> 구현 -> 검증 -> 최종 보고서 -> PR` 순서로 진행한다.
+- 각 단계 완료 후 승인 없이 다음 단계로 진행하지 않는다.
 - 범위가 불명확하거나 기존 작업과 충돌할 가능성이 있으면 먼저 확인한다.
 - 사용자나 다른 작업자가 만든 변경은 되돌리지 않는다.
 - 이슈 close는 작업지시자 승인 또는 PR merge 후에만 수행한다.
+
+운영 예외:
+
+- 작업지시자가 같은 스레드에서 "계속 진행", "다음 단계 진행"처럼 명시 지시한 경우 해당 단계 승인으로 간주한다.
 
 ## 문서 생성 규칙
 
@@ -54,6 +61,7 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 - `mydocs/manual/core_submodule_operation_guide.md` - core submodule 운영 상세 절차
 - `mydocs/manual/swift_macos_code_rules_guide.md` - Swift/macOS 코드 규칙 상세
 - `mydocs/manual/release_distribution_guide.md` - 릴리스/배포 상세 절차
+- `mydocs/manual/agent_code_hyperfall_rule_conflict.md` - 하이퍼-워터폴과 에이전트 기본 동작 충돌 규칙
 
 ### 문서 파일명 규칙
 
@@ -65,6 +73,22 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 - 최종 보고서: `task_{이슈번호}_report.md` (예: `task_7_report.md`)
 
 릴리스 마일스톤을 명시해야 하는 큰 작업은 `task_{milestone}_{이슈번호}.md` 형식을 사용할 수 있다. 예: `task_m100_7.md`.
+
+### 폴더 역할 (엄격 준수)
+
+| 폴더 | 용도 | 비고 |
+|------|------|------|
+| `orders/` | 오늘 할일 | `yyyymmdd.md`만 허용. 상세 조사/분석은 `tech/` 또는 `troubleshootings/`에 기록 |
+| `plans/` | 수행/구현 계획서 | `_stage{N}`, `_report` 파일은 두지 않는다 |
+| `plans/archives/` | 완료된 계획서 보관 | merge 후 정리 시 사용 |
+| `working/` | 단계별 완료 보고서 (`_stage{N}.md`) | 최종 보고서는 두지 않는다 |
+| `report/` | 최종 결과보고서 (`_report.md`) + 장기 보관 보고서 | 최종 보고서는 반드시 이 폴더 |
+| `feedback/` | 작업지시자 피드백, 코드 리뷰 의견 | |
+| `tech/` | 기술 조사, 구조/스펙 분석 | |
+| `manual/` | 매뉴얼, 가이드 | 사용자/개발자 문서 |
+| `troubleshootings/` | 트러블슈팅, 재발 방지 기록 | |
+| `pr/` | 외부 기여자 PR 검토 기록 | 내부 타스크와 분리 |
+| `pr/archives/` | 처리 완료된 PR 검토 기록 보관 | |
 
 ### 외부 기여자 PR 처리 (`mydocs/pr/`)
 
