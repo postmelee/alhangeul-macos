@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file provides guidance to OpenAI Codex when working with code in this repository.
+This file provides guidance to Claude / Codex when working with code in this repository.
 
 ## 프로젝트 개요
 
@@ -12,18 +12,25 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 - Rust `rhwp` core를 `Vendor/rhwp` git submodule로 고정하고, `RustBridge` C ABI와 `Rhwp.xcframework`를 통해 Swift/macOS 앱에서 사용
 - 앱, Quick Look/Thumbnail 확장, Swift bridge, 패키징과 배포 정책은 이 저장소가 소유
 
-## Codex 사용 시 주의사항
+## Claude / Codex 사용 시 주의사항
 
-이 프로젝트는 작업 추적과 문서화를 중시한다. Codex의 기본 동작인 빠른 자율 수정과 충돌하지 않도록 아래 원칙을 우선한다.
+이 프로젝트는 **하이퍼-워터폴** 방법론을 적용한다. Claude / Codex의 기본 동작(빠른 실행, 자율 수정)과 충돌이 발생할 수 있으므로 반드시 숙지한다.
+
+상세 내용: [`mydocs/manual/agent_code_hyperfall_rule_conflict.md`](mydocs/manual/agent_code_hyperfall_rule_conflict.md)
 
 **핵심 규칙 요약**:
 
-- 작업은 GitHub Issue 기준으로 추적한다.
-- 새 기능, 버그 수정, 구조 변경은 `이슈 -> 브랜치 -> 계획서 -> 구현 -> 검증 -> 최종 보고서 -> PR` 순서로 진행한다.
-- 사용자가 "진행해줘", "작성해줘", "구현해줘"처럼 명확히 지시한 범위는 해당 단계 진행 승인으로 간주한다.
-- 범위가 불명확하거나 기존 작업과 충돌할 가능성이 있으면 먼저 확인한다.
-- 사용자나 다른 작업자가 만든 변경은 되돌리지 않는다.
-- 이슈 close는 작업지시자 승인 또는 PR merge 후에만 수행한다.
+- 소스 수정 전 반드시 작업지시자 승인 요청
+- 작업은 GitHub Issue 기준으로 추적
+- 새 기능, 버그 수정, 구조 변경은 `이슈 -> 브랜치 -> 오늘할일 -> 계획서 -> 구현 -> 검증 -> 최종 보고서 -> PR` 순서 절대 생략 금지
+- 각 단계 완료 후 승인 없이 다음 단계 진행 금지
+- 범위가 불명확하거나 기존 작업과 충돌할 가능성이 있으면 먼저 확인
+- 사용자나 다른 작업자가 만든 변경은 되돌리지 않음
+- 이슈 close는 작업지시자 승인 후 또는 PR merge 확인 후에만 수행
+
+승인 간주 조건:
+
+- 작업지시자가 같은 스레드에서 "계속 진행", "다음 단계 진행"처럼 명시 지시한 경우에만 해당 단계 승인으로 간주한다.
 
 ## 문서 생성 규칙
 
@@ -45,153 +52,104 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 
 ### 필수 참조 문서
 
-- `README.md` - 프로젝트 개요, 초기 설정, 빌드, 릴리스 패키징
+- `README.md` - 프로젝트 개요, 초기 설정, 빌드
 - `docs/ARCHITECTURE.md` - 소유 경계, Swift bridge 정책, submodule 정책, FFI ABI 정책
 - `docs/RHWP_CORE_BRIDGE_PLAN.md` - Rust core bridge와 장기 운영 계획
 - `rhwp-core.lock` - 현재 고정된 `rhwp` core 저장소, 브랜치, commit, 생성 산출물
+- `mydocs/manual/pr_process_guide.md` - PR 처리 상세 절차
+- `mydocs/manual/build_run_guide.md` - 빌드/실행/검증 상세 절차
+- `mydocs/manual/core_submodule_operation_guide.md` - core submodule 운영 상세 절차
+- `mydocs/manual/swift_macos_code_rules_guide.md` - Swift/macOS 코드 규칙 상세
+- `mydocs/manual/release_distribution_guide.md` - 릴리스/배포 상세 절차
+- `mydocs/manual/agent_code_hyperfall_rule_conflict.md` - 하이퍼-워터폴과 에이전트 기본 동작 충돌 규칙
 
 ### 문서 파일명 규칙
 
-기본 형식은 GitHub Issue 번호를 기준으로 한다.
+신규 문서의 표준 형식은 GitHub Issue 번호와 마일스톤을 함께 사용한다.
 
-- 수행 계획서: `task_{이슈번호}.md` (예: `task_7.md`)
-- 구현 계획서: `task_{이슈번호}_impl.md` (예: `task_7_impl.md`)
-- 단계별 완료 보고서: `task_{이슈번호}_stage{N}.md` (예: `task_7_stage1.md`)
-- 최종 보고서: `task_{이슈번호}_report.md` (예: `task_7_report.md`)
+- 수행 계획서: `task_{milestone}_{이슈번호}.md` (예: `task_m100_7.md`)
+- 구현 계획서: `task_{milestone}_{이슈번호}_impl.md` (예: `task_m100_7_impl.md`)
+- 단계별 완료 보고서: `task_{milestone}_{이슈번호}_stage{N}.md` (예: `task_m100_7_stage1.md`)
+- 최종 보고서: `task_{milestone}_{이슈번호}_report.md` (예: `task_m100_7_report.md`)
 
-릴리스 마일스톤을 명시해야 하는 큰 작업은 `task_{milestone}_{이슈번호}.md` 형식을 사용할 수 있다. 예: `task_m100_7.md`.
+강제 규칙:
 
-### PR 처리 규칙 (`pr/`)
+- 신규 작성 문서는 반드시 `task_{milestone}_{이슈번호}` 형식을 사용한다.
+- 마일스톤은 항상 `m{숫자}` 형식으로 적는다. 예: `m100`, `m200`
+- 마일스톤 없이 `task_{이슈번호}` 형식으로 신규 문서를 만들지 않는다.
+- 기존 레거시 문서명은 유지할 수 있으나, 신규 이슈부터는 마일스톤 포함 형식을 고정한다.
 
-외부 기여자 PR 검토는 내부 타스크 구현과 분리한다.
+### 폴더 역할 (엄격 준수)
 
-- 검토 문서: `pr_{번호}_review.md`
-- 구현 계획서: `pr_{번호}_review_impl.md` (필요 시)
-- 최종 보고서: `pr_{번호}_report.md`
+| 폴더 | 용도 | 비고 |
+|------|------|------|
+| `orders/` | 오늘 할일 | `yyyymmdd.md`만 허용. 상세 조사/분석은 `tech/` 또는 `troubleshootings/`에 기록 |
+| `plans/` | 수행/구현 계획서 | `_stage{N}`, `_report` 파일은 두지 않는다 |
+| `plans/archives/` | 완료된 계획서 보관 | merge 후 정리 시 사용 |
+| `working/` | 단계별 완료 보고서 (`_stage{N}.md`) | 최종 보고서는 두지 않는다 |
+| `report/` | 최종 결과보고서 (`_report.md`) + 장기 보관 보고서 | 최종 보고서는 반드시 이 폴더 |
+| `feedback/` | 작업지시자 피드백, 코드 리뷰 의견 | |
+| `tech/` | 기술 조사, 구조/스펙 분석 | |
+| `manual/` | 매뉴얼, 가이드 | 사용자/개발자 문서 |
+| `troubleshootings/` | 트러블슈팅, 재발 방지 기록 | |
+| `pr/` | 외부 기여자 PR 검토 기록 | 내부 타스크와 분리 |
+| `pr/archives/` | 처리 완료된 PR 검토 기록 보관 | |
 
-PR 검토 절차:
+### 외부 기여자 PR 처리 (`mydocs/pr/`)
 
-1. PR 정보 확인: 연결 이슈, base/head, mergeable 상태, CI 상태
-2. `pr_{번호}_review.md` 작성
-3. 필요 시 `pr_{번호}_review_impl.md` 작성
-4. 빌드/테스트/코드 검토 후 `pr_{번호}_report.md` 작성
+외부 기여 PR 검토 상세 절차는 `mydocs/manual/pr_process_guide.md`를 따른다.
 
-처리 완료 PR 문서는 `pr/archives/`로 이동한다.
+강제 규칙:
+
+- 외부 기여자 PR은 내부 타스크와 다른 본질을 가지므로 별도 절차와 폴더를 사용한다.
+- 이 목차는 외부 기여 PR 검토에만 적용한다.
+- 외부 PR 검토 기록은 `mydocs/pr/`에 남긴다.
+- 파일명은 `pr_{번호}_review.md`, `pr_{번호}_review_impl.md`(필요 시), `pr_{번호}_report.md`를 사용한다.
+- 처리 완료 문서는 `mydocs/pr/archives/`로 이동한다.
+
+즉시 처리 절차:
+
+1. PR 정보 확인: 이슈 연결, base/head, mergeable, CI 상태 확인
+2. `pr_{번호}_review.md` 작성 후 승인 요청
+3. 필요 시 `pr_{번호}_review_impl.md` 작성 후 승인 요청
+4. 검증과 판단 후 `pr_{번호}_report.md` 작성
+
+내부 타스크의 `수행 -> 구현 -> 단계별 보고 -> 최종 보고` 절차는 외부 기여 PR 검토에 그대로 적용하지 않는다.
 
 ## 빌드 및 실행
 
-### 초기 설정
+상세 절차는 `mydocs/manual/build_run_guide.md`를 따른다.
 
-```bash
-git submodule update --init --recursive
-rustup target add aarch64-apple-darwin x86_64-apple-darwin
-cargo install cbindgen
-brew install xcodegen
-```
+강제 규칙:
 
-### Rust bridge 및 XCFramework 빌드
+- `project.yml`이 Xcode project의 원본이며 `RhwpMac.xcodeproj`를 직접 수정하지 않는다.
+- 변경 유형별 최소 검증은 반드시 수행한다.
+- `Sources/RhwpCoreBridge`에 AppKit/UIKit 직접 의존을 넣지 않는다.
 
-```bash
-./scripts/build-rust-macos.sh
-```
+### 릴리스/배포
 
-이 스크립트는 다음을 수행한다.
-
-- `RustBridge` staticlib를 `aarch64-apple-darwin`, `x86_64-apple-darwin`으로 빌드
-- `xcrun lipo`로 universal static library 생성
-- `cbindgen`으로 C header 생성
-- `rhwp-ffi-symbols.txt`와 생성된 `rhwp_` 심볼 목록 비교
-- `Frameworks/Rhwp.xcframework` 생성
-
-### Xcode 프로젝트 생성 및 빌드
-
-```bash
-xcodegen generate
-xcodebuild -project RhwpMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build
-```
-
-`project.yml`이 Xcode project의 원본이다. `RhwpMac.xcodeproj`를 직접 수정하지 말고 `project.yml`을 수정한 뒤 `xcodegen generate`를 실행한다.
-
-### 렌더링 검증
-
-```bash
-./scripts/validate-stage3-render.sh
-```
-
-기본 샘플:
-
-- `Vendor/rhwp/samples/basic/KTX.hwp`
-- `Vendor/rhwp/samples/basic/request.hwp`
-- `Vendor/rhwp/samples/exam_kor.hwp`
-
-렌더링 변경은 최소한 이 스크립트로 text run과 non-white pixel 결과를 확인한다.
-
-### 공유 Swift 코드 플랫폼 의존성 검사
-
-```bash
-./scripts/check-no-appkit.sh
-```
-
-`Sources/RhwpCoreBridge`는 HostApp, Quick Look, Thumbnail에서 함께 쓰는 bridge 계층이다. 이 계층에는 AppKit/UIKit 타입을 직접 넣지 않는다. 플랫폼 UI 타입이 필요하면 `Sources/Shared`, `Sources/HostApp`, `Sources/QLExtension`, `Sources/ThumbnailExtension` 경계에서 처리한다.
-
-### 릴리스 패키징
-
-```bash
-./scripts/package-release.sh 0.1.0
-```
-
-산출물은 `build/release/rhwp-mac-<version>.zip`에 생성된다. Homebrew Cask(`Casks/rhwp-mac.rb`)를 갱신할 때는 버전, URL, SHA256을 함께 검토한다.
+릴리스, 배포, Homebrew Cask, 서명, 공증, GitHub Release 작업은 저장소 소유자 명시 지시가 있을 때만 진행한다. 시작 전 반드시 `mydocs/manual/release_distribution_guide.md`를 읽고 따른다.
 
 ## rhwp Core Submodule 운영
 
-### 소유 경계
+상세 절차는 `mydocs/manual/core_submodule_operation_guide.md`를 따른다.
 
-- `Vendor/rhwp`: Rust HWP/HWPX parser/renderer core. 개인 fork `postmelee/rhwp`의 `devel`을 기준으로 추적한다.
-- `RustBridge`: 이 저장소가 소유하는 macOS용 C ABI bridge.
-- `Sources/RhwpCoreBridge`: Swift FFI wrapper와 CoreGraphics render bridge.
-- `Sources/HostApp`: macOS viewer app.
-- `Sources/QLExtension`: Quick Look preview extension.
-- `Sources/ThumbnailExtension`: Finder thumbnail extension.
-- `Sources/Shared`: HostApp/extension 공통 macOS helper.
+강제 규칙:
 
-### Core 최신화 기준
-
-`rhwp` core 최신화 기준은 다음 순서로 판단한다.
-
-1. `postmelee/rhwp`의 `devel`: 이 저장소가 실제로 사용하는 core 기준
-2. `edwardkim/rhwp`의 `devel`: upstream core 최신 변경 참고 기준
-3. `edwardkim/rhwp`의 `ios/devel`: native viewer 관련 변경 참고 기준
-
-앱 저장소에서 core 변경이 필요하면 `Vendor/rhwp` 안에서 임시 수정만 남기지 않는다. 먼저 `postmelee/rhwp`의 `devel`에 core 변경을 커밋/푸시한 뒤, 이 저장소에서는 submodule pointer와 `rhwp-core.lock`만 갱신한다.
-
-### Core 업데이트 절차
-
-```bash
-./scripts/update-rhwp-core.sh
-./scripts/build-rust-macos.sh
-./scripts/check-no-appkit.sh
-xcodegen generate
-xcodebuild -project RhwpMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build
-./scripts/validate-stage3-render.sh
-```
-
-업데이트 후 확인 항목:
-
-- `Vendor/rhwp` submodule commit과 `rhwp-core.lock`의 `rhwp_commit`이 일치하는가
-- `rhwp-ffi-symbols.txt` 변경이 의도된 ABI 변경인가
-- Swift `RenderTree` 모델과 core JSON 직렬화 구조가 호환되는가
-- Finder Quick Look/Thumbnail extension smoke test가 필요한 변경인가
+- core 최신화 기준은 `postmelee/rhwp` `devel`이다.
+- 앱 저장소에 `Vendor/rhwp` 임시 수정을 남기지 않는다.
+- core 변경은 먼저 core 저장소에 반영한 뒤 앱 저장소에서 submodule pointer + `rhwp-core.lock`을 함께 갱신한다.
 
 ## Swift 및 macOS 코드 규칙
 
-- iOS에서 가져온 Swift 코드는 초기 이식 자산으로만 본다. 분리 이후에는 이 저장소가 macOS용 bridge와 UI 코드를 독립적으로 소유한다.
-- 플랫폼 중립 이름을 사용한다. 예: `mapHWPFontToApple`, `resolveAppleFont`.
-- `Sources/RhwpCoreBridge`에는 AppKit/UIKit 의존성을 넣지 않는다.
-- Quick Look/Thumbnail extension에서 사용할 코드는 extension sandbox와 메모리 사용량을 고려한다.
-- HostApp 전용 UI 상태는 `Sources/HostApp`에 둔다.
-- HostApp/extension 공통 렌더링 helper는 `Sources/Shared`에 둔다.
-- Rust FFI 경계에서는 null pointer, length, ownership 해제를 명확히 처리한다.
-- `RhwpDocument`가 소유한 native handle 수명과 `rhwp_free_*` 호출 경계를 변경할 때는 crash/leak 가능성을 함께 검토한다.
+상세 규칙은 `mydocs/manual/swift_macos_code_rules_guide.md`를 따른다.
+
+강제 규칙:
+
+- `Sources/RhwpCoreBridge`에는 AppKit/UIKit 직접 의존을 넣지 않는다.
+- Rust FFI 경계의 포인터/길이/수명 규칙을 깨지 않는다.
+- HostApp 전용 UI 상태와 공통 렌더링 helper의 소유 경계를 유지한다.
+- 렌더링/FFI 변경 후 필수 검증을 수행한다.
 
 ## Git 워크플로우
 
@@ -253,7 +211,7 @@ Issue #{issue}: 변경 요약
 예:
 
 ```text
-Issue #7: Add Codex agent guidelines
+Issue #7: Add agent guidelines
 ```
 
 ## 타스크 진행 절차
@@ -275,21 +233,23 @@ Issue #7: Add Codex agent guidelines
 
 ## 검증 기준
 
-변경 유형별 기본 검증은 다음과 같다.
+변경 유형별 상세 검증 명령은 `mydocs/manual/build_run_guide.md`를 따른다.
+
+최소 기준은 다음과 같다.
 
 - 문서만 변경: `git diff --check`
 - Swift UI/bridge 변경: `xcodegen generate`, `xcodebuild ... HostApp ...`
 - Rust bridge 변경: `./scripts/build-rust-macos.sh`, `./scripts/check-no-appkit.sh`
 - 렌더링 변경: `./scripts/validate-stage3-render.sh`
 - core submodule 변경: `Vendor/rhwp` commit과 `rhwp-core.lock` 대조, Rust bridge 재빌드, HostApp 빌드
-- 릴리스 변경: `./scripts/package-release.sh <version>`, Cask checksum 확인
+- 릴리스/배포 변경: `mydocs/manual/release_distribution_guide.md` 확인 후 수행
 
 검증을 실행하지 못한 경우 최종 보고서와 PR 본문에 이유를 명시한다.
 
 ## 작업 규칙
 
 - 작업 시간의 시작과 종료는 작업지시자가 결정한다.
-- Codex가 임의로 작업 범위를 확장하지 않는다.
+- Claude와 Codex가 임의로 작업 범위를 확장하지 않는다.
 - unrelated refactor, formatter churn, 생성물 재생성은 요청 범위에 필요할 때만 수행한다.
 - `Vendor/rhwp` 내부 변경은 core 작업으로 분리한다.
 - destructive git 명령은 작업지시자의 명시적 요청 없이 실행하지 않는다.
