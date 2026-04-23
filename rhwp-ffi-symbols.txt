@@ -1,0 +1,8 @@
+rhwp_close
+rhwp_free_string
+rhwp_image_data
+rhwp_open
+rhwp_page_count
+rhwp_page_size
+rhwp_render_page_svg
+rhwp_render_page_tree

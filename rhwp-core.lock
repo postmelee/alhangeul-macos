@@ -1,0 +1,8 @@
+rhwp_repo = "https://github.com/edwardkim/rhwp.git"
+rhwp_branch = "devel"
+rhwp_commit = "a9b11e20607cca251df73b917d22ba2ef497eb6c"
+ffi_symbols_file = "rhwp-ffi-symbols.txt"
+generated_artifacts = [
+  "Frameworks/universal/librhwp.a",
+  "Frameworks/Rhwp.xcframework",
+]
