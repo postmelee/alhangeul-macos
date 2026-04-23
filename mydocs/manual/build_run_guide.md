@@ -105,11 +105,3 @@ preview 확인:
 ```bash
 qlmanage -p Vendor/rhwp/samples/basic/KTX.hwp
 ```
-
-## 변경 유형별 최소 검증
-
-- 문서 변경: `git diff --check`
-- Swift UI/bridge 변경: `xcodegen generate` + HostApp Debug build
-- Rust bridge 변경: `build-rust-macos.sh` + `check-no-appkit.sh`
-- 렌더링 변경: `validate-stage3-render.sh`
-- core submodule 변경: submodule/lock 대조 + Rust bridge 재빌드 + HostApp build
