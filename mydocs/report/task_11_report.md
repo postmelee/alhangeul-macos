@@ -18,6 +18,10 @@
 - `AGENTS.md`의 PR 관련 목차를 `외부 기여자 PR 처리`로 명확화하고, 외부 PR 검토 최소 규칙만 유지
 - `mydocs/manual/pr_process_guide.md`를 외부 기여 PR 검토 절차 중심으로 재정리
 - 하이퍼-워터폴 충돌 규칙 문서를 `manual` 경로로 이동하고 `Claude와 Codex` 기준으로 표현을 통일
+- `AGENTS.md`의 하이퍼-워터폴 규율 문구를 원본 수준으로 강화
+- 신규 문서 파일명 규칙을 `task_{milestone}_{이슈번호}` 형식으로 고정
+- 외부 기여자 PR 처리 절차를 `AGENTS.md` 본문에서 즉시 실행 가능한 수준으로 보강
+- `Codex` 단독 표기를 `Claude / Codex` 또는 `Claude와 Codex` 기준으로 정리
 - Issue #11 수행 계획서, 구현 계획서, 단계 보고서, 최종 보고서 추가
 - 오늘 할일 문서에 Issue #11 항목 추가
 

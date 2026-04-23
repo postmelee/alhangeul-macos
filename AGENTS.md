@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file provides guidance to OpenAI Codex when working with code in this repository.
+This file provides guidance to Claude / Codex when working with code in this repository.
 
 ## 프로젝트 개요
 
@@ -12,25 +12,25 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 - Rust `rhwp` core를 `Vendor/rhwp` git submodule로 고정하고, `RustBridge` C ABI와 `Rhwp.xcframework`를 통해 Swift/macOS 앱에서 사용
 - 앱, Quick Look/Thumbnail 확장, Swift bridge, 패키징과 배포 정책은 이 저장소가 소유
 
-## Codex 사용 시 주의사항
+## Claude / Codex 사용 시 주의사항
 
-이 프로젝트는 **하이퍼-워터폴** 방법론을 적용한다. Codex의 기본 동작(빠른 실행, 자율 수정)과 충돌이 발생할 수 있으므로 반드시 숙지한다.
+이 프로젝트는 **하이퍼-워터폴** 방법론을 적용한다. Claude / Codex의 기본 동작(빠른 실행, 자율 수정)과 충돌이 발생할 수 있으므로 반드시 숙지한다.
 
 상세 내용: [`mydocs/manual/agent_code_hyperfall_rule_conflict.md`](mydocs/manual/agent_code_hyperfall_rule_conflict.md)
 
 **핵심 규칙 요약**:
 
-- 소스 수정 전 작업지시자 승인 요청을 기본 원칙으로 한다.
-- 작업은 GitHub Issue 기준으로 추적한다.
-- 새 기능, 버그 수정, 구조 변경은 `이슈 -> 브랜치 -> 오늘할일 -> 계획서 -> 구현 -> 검증 -> 최종 보고서 -> PR` 순서로 진행한다.
-- 각 단계 완료 후 승인 없이 다음 단계로 진행하지 않는다.
-- 범위가 불명확하거나 기존 작업과 충돌할 가능성이 있으면 먼저 확인한다.
-- 사용자나 다른 작업자가 만든 변경은 되돌리지 않는다.
-- 이슈 close는 작업지시자 승인 또는 PR merge 후에만 수행한다.
+- 소스 수정 전 반드시 작업지시자 승인 요청
+- 작업은 GitHub Issue 기준으로 추적
+- 새 기능, 버그 수정, 구조 변경은 `이슈 -> 브랜치 -> 오늘할일 -> 계획서 -> 구현 -> 검증 -> 최종 보고서 -> PR` 순서 절대 생략 금지
+- 각 단계 완료 후 승인 없이 다음 단계 진행 금지
+- 범위가 불명확하거나 기존 작업과 충돌할 가능성이 있으면 먼저 확인
+- 사용자나 다른 작업자가 만든 변경은 되돌리지 않음
+- 이슈 close는 작업지시자 승인 후 또는 PR merge 확인 후에만 수행
 
-운영 예외:
+승인 간주 조건:
 
-- 작업지시자가 같은 스레드에서 "계속 진행", "다음 단계 진행"처럼 명시 지시한 경우 해당 단계 승인으로 간주한다.
+- 작업지시자가 같은 스레드에서 "계속 진행", "다음 단계 진행"처럼 명시 지시한 경우에만 해당 단계 승인으로 간주한다.
 
 ## 문서 생성 규칙
 
@@ -65,14 +65,19 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 
 ### 문서 파일명 규칙
 
-기본 형식은 GitHub Issue 번호를 기준으로 한다.
+신규 문서의 표준 형식은 GitHub Issue 번호와 마일스톤을 함께 사용한다.
 
-- 수행 계획서: `task_{이슈번호}.md` (예: `task_7.md`)
-- 구현 계획서: `task_{이슈번호}_impl.md` (예: `task_7_impl.md`)
-- 단계별 완료 보고서: `task_{이슈번호}_stage{N}.md` (예: `task_7_stage1.md`)
-- 최종 보고서: `task_{이슈번호}_report.md` (예: `task_7_report.md`)
+- 수행 계획서: `task_{milestone}_{이슈번호}.md` (예: `task_m100_7.md`)
+- 구현 계획서: `task_{milestone}_{이슈번호}_impl.md` (예: `task_m100_7_impl.md`)
+- 단계별 완료 보고서: `task_{milestone}_{이슈번호}_stage{N}.md` (예: `task_m100_7_stage1.md`)
+- 최종 보고서: `task_{milestone}_{이슈번호}_report.md` (예: `task_m100_7_report.md`)
 
-릴리스 마일스톤을 명시해야 하는 큰 작업은 `task_{milestone}_{이슈번호}.md` 형식을 사용할 수 있다. 예: `task_m100_7.md`.
+강제 규칙:
+
+- 신규 작성 문서는 반드시 `task_{milestone}_{이슈번호}` 형식을 사용한다.
+- 마일스톤은 항상 `m{숫자}` 형식으로 적는다. 예: `m100`, `m200`
+- 마일스톤 없이 `task_{이슈번호}` 형식으로 신규 문서를 만들지 않는다.
+- 기존 레거시 문서명은 유지할 수 있으나, 신규 이슈부터는 마일스톤 포함 형식을 고정한다.
 
 ### 폴더 역할 (엄격 준수)
 
@@ -96,10 +101,20 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 
 강제 규칙:
 
+- 외부 기여자 PR은 내부 타스크와 다른 본질을 가지므로 별도 절차와 폴더를 사용한다.
 - 이 목차는 외부 기여 PR 검토에만 적용한다.
 - 외부 PR 검토 기록은 `mydocs/pr/`에 남긴다.
 - 파일명은 `pr_{번호}_review.md`, `pr_{번호}_review_impl.md`(필요 시), `pr_{번호}_report.md`를 사용한다.
 - 처리 완료 문서는 `mydocs/pr/archives/`로 이동한다.
+
+즉시 처리 절차:
+
+1. PR 정보 확인: 이슈 연결, base/head, mergeable, CI 상태 확인
+2. `pr_{번호}_review.md` 작성 후 승인 요청
+3. 필요 시 `pr_{번호}_review_impl.md` 작성 후 승인 요청
+4. 검증과 판단 후 `pr_{번호}_report.md` 작성
+
+내부 타스크의 `수행 -> 구현 -> 단계별 보고 -> 최종 보고` 절차는 외부 기여 PR 검토에 그대로 적용하지 않는다.
 
 ## 빌드 및 실행
 
@@ -196,7 +211,7 @@ Issue #{issue}: 변경 요약
 예:
 
 ```text
-Issue #7: Add Codex agent guidelines
+Issue #7: Add agent guidelines
 ```
 
 ## 타스크 진행 절차
@@ -234,7 +249,7 @@ Issue #7: Add Codex agent guidelines
 ## 작업 규칙
 
 - 작업 시간의 시작과 종료는 작업지시자가 결정한다.
-- Codex가 임의로 작업 범위를 확장하지 않는다.
+- Claude와 Codex가 임의로 작업 범위를 확장하지 않는다.
 - unrelated refactor, formatter churn, 생성물 재생성은 요청 범위에 필요할 때만 수행한다.
 - `Vendor/rhwp` 내부 변경은 core 작업으로 분리한다.
 - destructive git 명령은 작업지시자의 명시적 요청 없이 실행하지 않는다.
