@@ -45,7 +45,7 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 
 ### 필수 참조 문서
 
-- `README.md` - 프로젝트 개요, 초기 설정, 빌드, 릴리스 패키징
+- `README.md` - 프로젝트 개요, 초기 설정, 빌드
 - `docs/ARCHITECTURE.md` - 소유 경계, Swift bridge 정책, submodule 정책, FFI ABI 정책
 - `docs/RHWP_CORE_BRIDGE_PLAN.md` - Rust core bridge와 장기 운영 계획
 - `rhwp-core.lock` - 현재 고정된 `rhwp` core 저장소, 브랜치, commit, 생성 산출물
@@ -134,13 +134,9 @@ xcodebuild -project RhwpMac.xcodeproj -scheme HostApp -configuration Debug -deri
 
 `Sources/RhwpCoreBridge`는 HostApp, Quick Look, Thumbnail에서 함께 쓰는 bridge 계층이다. 이 계층에는 AppKit/UIKit 타입을 직접 넣지 않는다. 플랫폼 UI 타입이 필요하면 `Sources/Shared`, `Sources/HostApp`, `Sources/QLExtension`, `Sources/ThumbnailExtension` 경계에서 처리한다.
 
-### 릴리스 패키징
+### 릴리스/배포
 
-```bash
-./scripts/package-release.sh 0.1.0
-```
-
-산출물은 `build/release/rhwp-mac-<version>.zip`에 생성된다. Homebrew Cask(`Casks/rhwp-mac.rb`)를 갱신할 때는 버전, URL, SHA256을 함께 검토한다.
+릴리스, 배포, Homebrew Cask, 서명, 공증, GitHub Release 작업은 저장소 소유자 명시 지시가 있을 때만 진행한다. 시작 전 반드시 `mydocs/manual/release_distribution_guide.md`를 읽고 따른다.
 
 ## rhwp Core Submodule 운영
 
@@ -282,7 +278,7 @@ Issue #7: Add Codex agent guidelines
 - Rust bridge 변경: `./scripts/build-rust-macos.sh`, `./scripts/check-no-appkit.sh`
 - 렌더링 변경: `./scripts/validate-stage3-render.sh`
 - core submodule 변경: `Vendor/rhwp` commit과 `rhwp-core.lock` 대조, Rust bridge 재빌드, HostApp 빌드
-- 릴리스 변경: `./scripts/package-release.sh <version>`, Cask checksum 확인
+- 릴리스/배포 변경: `mydocs/manual/release_distribution_guide.md` 확인 후 수행
 
 검증을 실행하지 못한 경우 최종 보고서와 PR 본문에 이유를 명시한다.
 
