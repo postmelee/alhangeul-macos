@@ -2,13 +2,18 @@
 
 ## 작업 요약
 
-릴리스/배포 상세 절차를 `mydocs/manual/release_distribution_guide.md`로 분리하고, `AGENTS.md`에는 필수 참조 규칙만 남겼다.
+`AGENTS.md`의 장문 운영 규칙을 manual 문서로 분리하고, `AGENTS.md`에는 강제 가드레일 + 필수 참조만 남기는 구조로 정리했다.
 
 ## 변경 내용
 
 - `mydocs/manual/release_distribution_guide.md` 추가
-- `AGENTS.md`의 릴리스 패키징 상세 설명 제거
-- `AGENTS.md`에 릴리스/배포 작업 전 manual 문서 필수 참조 규칙 추가
+- `mydocs/manual/pr_process_guide.md` 추가
+- `mydocs/manual/build_run_guide.md` 추가
+- `mydocs/manual/core_submodule_operation_guide.md` 추가
+- `mydocs/manual/swift_macos_code_rules_guide.md` 추가
+- `AGENTS.md`의 `PR 처리 규칙`, `빌드 및 실행`, `rhwp Core Submodule 운영`, `Swift 및 macOS 코드 규칙`을 강제 규칙 중심으로 축소
+- `AGENTS.md`에 각 항목 manual 필수 참조 경로 추가
+- `Git 워크플로우`는 `AGENTS.md`에 유지
 - Issue #11 수행 계획서, 구현 계획서, 단계 보고서, 최종 보고서 추가
 - 오늘 할일 문서에 Issue #11 항목 추가
 

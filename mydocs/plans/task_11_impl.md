@@ -8,7 +8,9 @@
 ## 2단계: AGENTS.md 축소
 
 - `AGENTS.md`에서 직접적인 릴리스 패키징 설명을 제거한다.
-- 릴리스/배포 작업 전 manual 문서를 반드시 읽는다는 짧은 규칙만 남긴다.
+- `AGENTS.md`의 `PR 처리 규칙`, `빌드 및 실행`, `rhwp Core Submodule 운영`, `Swift 및 macOS 코드 규칙`도 상세 설명을 manual로 분리한다.
+- 각 항목에는 강제 규칙만 남기고 상세 절차는 `mydocs/manual/*.md` 참조로 통일한다.
+- `Git 워크플로우`는 `AGENTS.md`에 유지한다.
 
 ## 3단계: 검증 및 보고
 

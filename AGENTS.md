@@ -49,6 +49,11 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 - `docs/ARCHITECTURE.md` - 소유 경계, Swift bridge 정책, submodule 정책, FFI ABI 정책
 - `docs/RHWP_CORE_BRIDGE_PLAN.md` - Rust core bridge와 장기 운영 계획
 - `rhwp-core.lock` - 현재 고정된 `rhwp` core 저장소, 브랜치, commit, 생성 산출물
+- `mydocs/manual/pr_process_guide.md` - PR 처리 상세 절차
+- `mydocs/manual/build_run_guide.md` - 빌드/실행/검증 상세 절차
+- `mydocs/manual/core_submodule_operation_guide.md` - core submodule 운영 상세 절차
+- `mydocs/manual/swift_macos_code_rules_guide.md` - Swift/macOS 코드 규칙 상세
+- `mydocs/manual/release_distribution_guide.md` - 릴리스/배포 상세 절차
 
 ### 문서 파일명 규칙
 
@@ -63,76 +68,24 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 
 ### PR 처리 규칙 (`pr/`)
 
-외부 기여자 PR 검토는 내부 타스크 구현과 분리한다.
+PR 생성, 리뷰, 외부 기여 PR 처리 상세 절차는 `mydocs/manual/pr_process_guide.md`를 따른다.
 
-- 검토 문서: `pr_{번호}_review.md`
-- 구현 계획서: `pr_{번호}_review_impl.md` (필요 시)
-- 최종 보고서: `pr_{번호}_report.md`
+강제 규칙:
 
-PR 검토 절차:
-
-1. PR 정보 확인: 연결 이슈, base/head, mergeable 상태, CI 상태
-2. `pr_{번호}_review.md` 작성
-3. 필요 시 `pr_{번호}_review_impl.md` 작성
-4. 빌드/테스트/코드 검토 후 `pr_{번호}_report.md` 작성
-
-처리 완료 PR 문서는 `pr/archives/`로 이동한다.
+- 앱/bridge/문서 변경 PR 대상은 `postmelee/alhangeul-macos`의 `devel`이다.
+- upstream `edwardkim/rhwp`에는 이 저장소 작업 PR을 만들지 않는다.
+- PR은 최종 보고서 작성 후 생성한다.
+- PR 본문은 최종 보고서를 기반으로 상세 작성한다.
 
 ## 빌드 및 실행
 
-### 초기 설정
+상세 절차는 `mydocs/manual/build_run_guide.md`를 따른다.
 
-```bash
-git submodule update --init --recursive
-rustup target add aarch64-apple-darwin x86_64-apple-darwin
-cargo install cbindgen
-brew install xcodegen
-```
+강제 규칙:
 
-### Rust bridge 및 XCFramework 빌드
-
-```bash
-./scripts/build-rust-macos.sh
-```
-
-이 스크립트는 다음을 수행한다.
-
-- `RustBridge` staticlib를 `aarch64-apple-darwin`, `x86_64-apple-darwin`으로 빌드
-- `xcrun lipo`로 universal static library 생성
-- `cbindgen`으로 C header 생성
-- `rhwp-ffi-symbols.txt`와 생성된 `rhwp_` 심볼 목록 비교
-- `Frameworks/Rhwp.xcframework` 생성
-
-### Xcode 프로젝트 생성 및 빌드
-
-```bash
-xcodegen generate
-xcodebuild -project RhwpMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build
-```
-
-`project.yml`이 Xcode project의 원본이다. `RhwpMac.xcodeproj`를 직접 수정하지 말고 `project.yml`을 수정한 뒤 `xcodegen generate`를 실행한다.
-
-### 렌더링 검증
-
-```bash
-./scripts/validate-stage3-render.sh
-```
-
-기본 샘플:
-
-- `Vendor/rhwp/samples/basic/KTX.hwp`
-- `Vendor/rhwp/samples/basic/request.hwp`
-- `Vendor/rhwp/samples/exam_kor.hwp`
-
-렌더링 변경은 최소한 이 스크립트로 text run과 non-white pixel 결과를 확인한다.
-
-### 공유 Swift 코드 플랫폼 의존성 검사
-
-```bash
-./scripts/check-no-appkit.sh
-```
-
-`Sources/RhwpCoreBridge`는 HostApp, Quick Look, Thumbnail에서 함께 쓰는 bridge 계층이다. 이 계층에는 AppKit/UIKit 타입을 직접 넣지 않는다. 플랫폼 UI 타입이 필요하면 `Sources/Shared`, `Sources/HostApp`, `Sources/QLExtension`, `Sources/ThumbnailExtension` 경계에서 처리한다.
+- `project.yml`이 Xcode project의 원본이며 `RhwpMac.xcodeproj`를 직접 수정하지 않는다.
+- 변경 유형별 최소 검증은 반드시 수행한다.
+- `Sources/RhwpCoreBridge`에 AppKit/UIKit 직접 의존을 넣지 않는다.
 
 ### 릴리스/배포
 
@@ -140,54 +93,24 @@ xcodebuild -project RhwpMac.xcodeproj -scheme HostApp -configuration Debug -deri
 
 ## rhwp Core Submodule 운영
 
-### 소유 경계
+상세 절차는 `mydocs/manual/core_submodule_operation_guide.md`를 따른다.
 
-- `Vendor/rhwp`: Rust HWP/HWPX parser/renderer core. 개인 fork `postmelee/rhwp`의 `devel`을 기준으로 추적한다.
-- `RustBridge`: 이 저장소가 소유하는 macOS용 C ABI bridge.
-- `Sources/RhwpCoreBridge`: Swift FFI wrapper와 CoreGraphics render bridge.
-- `Sources/HostApp`: macOS viewer app.
-- `Sources/QLExtension`: Quick Look preview extension.
-- `Sources/ThumbnailExtension`: Finder thumbnail extension.
-- `Sources/Shared`: HostApp/extension 공통 macOS helper.
+강제 규칙:
 
-### Core 최신화 기준
-
-`rhwp` core 최신화 기준은 다음 순서로 판단한다.
-
-1. `postmelee/rhwp`의 `devel`: 이 저장소가 실제로 사용하는 core 기준
-2. `edwardkim/rhwp`의 `devel`: upstream core 최신 변경 참고 기준
-3. `edwardkim/rhwp`의 `ios/devel`: native viewer 관련 변경 참고 기준
-
-앱 저장소에서 core 변경이 필요하면 `Vendor/rhwp` 안에서 임시 수정만 남기지 않는다. 먼저 `postmelee/rhwp`의 `devel`에 core 변경을 커밋/푸시한 뒤, 이 저장소에서는 submodule pointer와 `rhwp-core.lock`만 갱신한다.
-
-### Core 업데이트 절차
-
-```bash
-./scripts/update-rhwp-core.sh
-./scripts/build-rust-macos.sh
-./scripts/check-no-appkit.sh
-xcodegen generate
-xcodebuild -project RhwpMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build
-./scripts/validate-stage3-render.sh
-```
-
-업데이트 후 확인 항목:
-
-- `Vendor/rhwp` submodule commit과 `rhwp-core.lock`의 `rhwp_commit`이 일치하는가
-- `rhwp-ffi-symbols.txt` 변경이 의도된 ABI 변경인가
-- Swift `RenderTree` 모델과 core JSON 직렬화 구조가 호환되는가
-- Finder Quick Look/Thumbnail extension smoke test가 필요한 변경인가
+- core 최신화 기준은 `postmelee/rhwp` `devel`이다.
+- 앱 저장소에 `Vendor/rhwp` 임시 수정을 남기지 않는다.
+- core 변경은 먼저 core 저장소에 반영한 뒤 앱 저장소에서 submodule pointer + `rhwp-core.lock`을 함께 갱신한다.
 
 ## Swift 및 macOS 코드 규칙
 
-- iOS에서 가져온 Swift 코드는 초기 이식 자산으로만 본다. 분리 이후에는 이 저장소가 macOS용 bridge와 UI 코드를 독립적으로 소유한다.
-- 플랫폼 중립 이름을 사용한다. 예: `mapHWPFontToApple`, `resolveAppleFont`.
-- `Sources/RhwpCoreBridge`에는 AppKit/UIKit 의존성을 넣지 않는다.
-- Quick Look/Thumbnail extension에서 사용할 코드는 extension sandbox와 메모리 사용량을 고려한다.
-- HostApp 전용 UI 상태는 `Sources/HostApp`에 둔다.
-- HostApp/extension 공통 렌더링 helper는 `Sources/Shared`에 둔다.
-- Rust FFI 경계에서는 null pointer, length, ownership 해제를 명확히 처리한다.
-- `RhwpDocument`가 소유한 native handle 수명과 `rhwp_free_*` 호출 경계를 변경할 때는 crash/leak 가능성을 함께 검토한다.
+상세 규칙은 `mydocs/manual/swift_macos_code_rules_guide.md`를 따른다.
+
+강제 규칙:
+
+- `Sources/RhwpCoreBridge`에는 AppKit/UIKit 직접 의존을 넣지 않는다.
+- Rust FFI 경계의 포인터/길이/수명 규칙을 깨지 않는다.
+- HostApp 전용 UI 상태와 공통 렌더링 helper의 소유 경계를 유지한다.
+- 렌더링/FFI 변경 후 필수 검증을 수행한다.
 
 ## Git 워크플로우
 
@@ -271,7 +194,9 @@ Issue #7: Add Codex agent guidelines
 
 ## 검증 기준
 
-변경 유형별 기본 검증은 다음과 같다.
+변경 유형별 상세 검증 명령은 `mydocs/manual/build_run_guide.md`를 따른다.
+
+최소 기준은 다음과 같다.
 
 - 문서만 변경: `git diff --check`
 - Swift UI/bridge 변경: `xcodegen generate`, `xcodebuild ... HostApp ...`
