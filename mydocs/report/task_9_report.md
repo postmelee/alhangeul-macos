@@ -2,18 +2,17 @@
 
 ## 작업 요약
 
-`README.md`를 `alhangeul-macos`의 현재 구현 상태와 장기 로드맵 기준으로 상세 재작성했다.
+`README.md`를 upstream `rhwp` README의 순서와 작성 포맷을 따르도록 다시 재작성했다.
 
 ## 변경 내용
 
-- 프로젝트 소개를 macOS Quick Look, Thumbnail, HostApp viewer 중심으로 재작성했다.
-- 현재 구현된 기능과 아직 남은 안정화 항목을 분리해 정리했다.
-- 지원 UTI, 프로젝트 구조, Mermaid 아키텍처, Quick Start, Finder 통합 확인 절차를 추가했다.
-- `postmelee/rhwp` core submodule 운영 원칙과 `rhwp-core.lock` 관리 기준을 추가했다.
-- 릴리스 패키징과 Homebrew Cask 초안의 확인 필요 사항을 명시했다.
-- Claude Code와 OpenAI Codex를 함께 사용하는 개발 방식을 설명했다.
-- M0부터 M4까지 Viewer 안정화, Editing, Agent Plugin 로드맵을 추가했다.
-- npm package, WASM browser viewer/editor, browser extension은 이 저장소 범위가 아님을 명시했다.
+- 원본 README의 큰 순서인 `로드맵 -> 이정표 -> Features -> Quick Start (소스 빌드) -> AI 페어 프로그래밍으로 개발합니다` 흐름을 반영했다.
+- macOS Quick Look, Thumbnail, HostApp viewer, RustBridge, `postmelee/rhwp` submodule 기준으로 내용을 수정했다.
+- 온보딩 가이드는 추후 추가 예정임을 전제로 Quick Start 문구를 먼저 반영했다.
+- "AI 페어 프로그래밍으로 개발합니다" 섹션은 upstream README의 문제의식과 문체를 최대한 보존하고 출처를 명시했다.
+- Claude Code와 OpenAI Codex를 함께 사용하는 현재 개발 방식을 반영했다.
+- Viewer 안정화, Editing, Agent Plugin 로드맵을 이정표에 추가했다.
+- 릴리스/배포 절차는 타인용 README에서 제외했다. 해당 내용은 저장소 소유자용 `AGENTS.md` 또는 별도 릴리스 문서에서 다루는 것이 적절하다고 판단했다.
 
 ## 검증
 
@@ -21,5 +20,6 @@
 
 ## 남은 사항
 
-- 첫 공개 릴리스 전 cask token, zip 파일명, GitHub release URL, SHA256, 서명/notarization 정책을 확정해야 한다.
+- 온보딩 가이드는 후속 작업에서 추가해야 한다.
+- `CONTRIBUTING.md`는 후속 작업에서 추가해야 한다.
 - README에 삽입할 실제 screenshot 또는 동영상은 후속 작업에서 추가할 수 있다.
