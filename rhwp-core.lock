@@ -1,6 +1,6 @@
 rhwp_repo = "https://github.com/postmelee/rhwp.git"
 rhwp_branch = "devel"
-rhwp_commit = "1e9d78a3209d7750d47b6e3af4af621b8fed4127"
+rhwp_commit = "1e9d78a1d40c71779d81c6ec6870cd301d912626"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
 generated_artifacts = [
   "Frameworks/universal/librhwp.a",

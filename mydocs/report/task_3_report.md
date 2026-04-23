@@ -9,7 +9,7 @@
 ## 주요 변경
 
 - `Vendor/rhwp` submodule URL을 `https://github.com/postmelee/rhwp.git`로 변경했다.
-- `rhwp-core.lock`을 `postmelee/rhwp` commit `1e9d78a3209d7750d47b6e3af4af621b8fed4127`로 갱신했다.
+- `rhwp-core.lock`을 `postmelee/rhwp` commit `1e9d78a1d40c71779d81c6ec6870cd301d912626`로 갱신했다.
 - `postmelee/rhwp` core에 native viewer용 최소 API를 추가했다.
   - 상세 render tree serde JSON 직렬화
   - `build_page_render_tree`
