@@ -3,7 +3,7 @@
 ## 수행 내용
 
 - upstream `edwardkim/rhwp`의 `CLAUDE.md`를 확인했다.
-- `README.md`, `docs/ARCHITECTURE.md`, `project.yml`, `scripts/`를 확인해 `alhangeul-macos`의 실제 빌드와 운영 방식을 반영했다.
+- `README.md`, `docs/ARCHITECTURE.md`(현재는 `mydocs/tech/project_architecture.md`로 이전), `project.yml`, `scripts/`를 확인해 `alhangeul-macos`의 실제 빌드와 운영 방식을 반영했다.
 - `AGENTS.md`를 OpenAI Codex용 규칙 파일로 작성했다.
 
 ## 주요 반영 사항

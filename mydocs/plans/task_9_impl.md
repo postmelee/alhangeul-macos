@@ -2,7 +2,7 @@
 
 ## 1단계: 프로젝트 상태 조사
 
-- `README.md`, `AGENTS.md`, `docs/ARCHITECTURE.md`, `docs/RHWP_CORE_BRIDGE_PLAN.md`를 확인한다.
+- `README.md`, `AGENTS.md`, `docs/ARCHITECTURE.md`(현재는 `mydocs/tech/project_architecture.md`로 이전), `docs/RHWP_CORE_BRIDGE_PLAN.md`(현재는 중복 문서로 삭제)를 확인한다.
 - HostApp, Quick Look, Thumbnail, Swift bridge, RustBridge 코드를 확인한다.
 - 릴리스 스크립트와 Homebrew Cask 초안을 확인한다.
 
