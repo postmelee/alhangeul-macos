@@ -150,21 +150,6 @@ This file provides guidance to Codex when working with code in this repository.
 - HostApp 전용 UI 상태와 공통 렌더링 helper의 소유 경계를 유지한다.
 - 렌더링/FFI 변경 후 필수 검증을 수행한다.
 
-## 검증 기준
-
-변경 유형별 상세 검증 명령은 `mydocs/manual/build_run_guide.md`를 따른다.
-
-최소 기준은 다음과 같다.
-
-- 문서만 변경: `git diff --check`
-- Swift UI/bridge 변경: `xcodegen generate`, `xcodebuild ... HostApp ...`
-- Rust bridge 변경: `./scripts/build-rust-macos.sh`, `./scripts/check-no-appkit.sh`
-- 렌더링 변경: `./scripts/validate-stage3-render.sh`
-- core submodule 변경: `Vendor/rhwp` commit과 `rhwp-core.lock` 대조, Rust bridge 재빌드, HostApp 빌드
-- 릴리스/배포 변경: `mydocs/manual/release_distribution_guide.md` 확인 후 수행
-
-검증을 실행하지 못한 경우 최종 보고서와 PR 본문에 이유를 명시한다.
-
 ## 워크플로우
 
 ### 브랜치 관리
