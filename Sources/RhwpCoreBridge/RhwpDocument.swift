@@ -44,7 +44,7 @@ class RhwpDocument {
             guard let base = rawBuffer.baseAddress else { return nil }
             return rhwp_open(
                 base.assumingMemoryBound(to: UInt8.self),
-                data.count
+                UInt(data.count)
             )
         }
         guard let validHandle = result else {
