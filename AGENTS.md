@@ -173,35 +173,43 @@ This file provides guidance to Claude / Codex when working with code in this rep
 |--------|------|
 | `main` | 최종 릴리즈. 태그(v0.5.0 등)로 안정 버전 보존 |
 | `devel` | 개발 통합 |
-| `local/devel` | devel 브랜치의 로컬 작업 브랜치. 작업 완료 후 devel에 merge |
 | `local/task{num}` | 타스크별 작업 |
+| `publish/task{num}` | `devel` 대상 PR 생성을 위한 원격 게시 브랜치. PR merge 후 삭제 |
 
 ### Git 워크플로우
 
 ```
 local/task{N}  ──커밋──커밋──┐
 local/task{N+1}──커밋──커밋──┤
-                              ├─→ local/devel merge (작업 단위)
+                              ├─→ publish/task{N} push
                               │
-                              ├─→ devel merge (로컬) + push
+                              ├─→ devel 대상 PR 생성 + 리뷰 + merge
+                              │
+                              ├─→ devel 누적
                               │
                               ├─→ main PR 생성 + 리뷰 + merge + 태그 (릴리즈 시점)
 ```
 
 - **타스크 브랜치**: `local/task{N}`에서 잘게 커밋. 작업 단위마다 커밋.
-- **local/devel 작업**: devel에서 직접 작업하지 않고 `local/devel` 브랜치에서 작업한다. 타스크 브랜치도 `local/devel`에서 분기하고 `local/devel`로 merge한다.
-- **원격 push**: `devel`만 push. `local/devel`과 `local/task` 브랜치는 **로컬 유지 (원격 push 금지)**.
+- **원격 게시 브랜치**: `local/task{N}` 작업이 리뷰 가능한 상태가 되면 `publish/task{N}` 이름으로 원격에 push하고 `devel` 대상 PR을 생성한다.
+- **원격 push**: `local/task` 브랜치는 **로컬 유지 (원격 push 금지)**를 원칙으로 한다. 원격에는 `publish/task{N}`와 merge 결과 브랜치만 유지한다.
+- **devel 대상 PR**: 작업 단위 PR은 기본적으로 draft로 생성하고, 최종 보고와 검증 결과를 PR 본문에 반영한 뒤 review/merge 한다.
+- **merge 전략**: `devel` 대상 PR은 merge commit 유지 또는 `--no-ff` 원칙을 기본으로 한다. squash merge는 단계별 커밋 의미가 사라질 수 있으므로 기본값으로 두지 않는다.
 - **main merge (PR 기반)**: 릴리즈 시점에 `devel` → `main` PR 생성 → 리뷰(approve) → merge 후 태그 생성.
 
 #### 메인테이너 워크플로우
 
 ```bash
-# 1. local/devel → devel (로컬 merge + push)
-git checkout devel
-git merge local/devel --no-ff -m "Merge local/devel: 제목"
-git push origin devel
+# 1. local/taskN → publish/taskN push + devel 대상 draft PR
+git checkout local/task17
+git push origin local/task17:publish/task17
+gh pr create --base devel --head publish/task17 --draft --title "Task #17: 제목"
 
-# 2. devel → main PR (릴리즈 시)
+# 2. devel 대상 PR 리뷰 + merge
+gh pr review --approve
+gh pr merge --merge --delete-branch
+
+# 3. devel → main PR (릴리즈 시)
 gh pr create --base main --head devel --title "Release: 제목"
 gh pr review --approve
 gh pr merge --merge --delete-branch=false
@@ -212,13 +220,13 @@ gh pr merge --merge --delete-branch=false
 ```bash
 # 1. 원본 저장소 Fork (GitHub에서 1회)
 # 2. Fork한 저장소에서 작업
-git clone https://github.com/{contributor}/rhwp.git
+git clone https://github.com/{contributor}/alhangeul-macos.git
 git checkout -b feature/my-task
 # ... 작업 + 커밋 ...
 git push origin feature/my-task
 
 # 3. 원본 저장소의 devel로 PR 생성
-gh pr create --repo edwardkim/rhwp --base devel --head {contributor}:feature/my-task --title "제목"
+gh pr create --repo postmelee/alhangeul-macos --base devel --head {contributor}:feature/my-task --title "제목"
 
 # 4. 메인테이너가 리뷰 + merge
 ```
@@ -227,9 +235,14 @@ gh pr create --repo edwardkim/rhwp --base devel --head {contributor}:feature/my-
 
 - **GitHub Issues**를 타스크 번호로 사용한다. 자동 채번으로 중복 방지.
 - **마일스톤 표기**: `M{버전}` (예: M100=v1.0.0, M05x=v0.5.x)
-- 새 타스크 등록: `gh issue create --repo edwardkim/rhwp --title "제목" --body "설명" --milestone "v1.0.0"`
+- 새 타스크 등록: `gh issue create --repo postmelee/alhangeul-macos --title "제목" --body "설명" --milestone "rhwp-macos 기준 완전 이관"`
 - 브랜치명: `local/task{issue번호}` (예: `local/task1`)
-- 커밋 메시지: `Task #1: 내용` (Issue 번호 참조)
+- PR 생성용 원격 브랜치명: `publish/task{issue번호}` (예: `publish/task1`)
+- 커밋 메시지 규칙:
+  - 기본형: `Task #{issue번호}: 내용`
+  - 단계 커밋: `Task #{issue번호} Stage {N}: 내용`
+  - 세부 하위 단계 허용: `Task #{issue번호} [Stage {N.M}]: 내용`
+  - 단계 완료보고서 또는 최종 보고서와 함께 묶는 커밋: `Task #{issue번호} Stage {N} + 최종 보고서: 내용`
 - `mydocs/orders/`에서 `M100 #1` 형식으로 마일스톤+이슈 참조
 - 타스크 완료 시: `gh issue close {번호}` 또는 커밋 메시지에 `closes #번호`
 
@@ -244,10 +257,11 @@ gh pr create --repo edwardkim/rhwp --base devel --head {contributor}:feature/my-
 7. **단계별 완료보고서(`_stage{N}.md`)는 해당 단계 소스 커밋과 함께 타스크 브랜치에서 커밋한다.**
 8. 승인 후 다음 단계 진행
 9. 모든 단계 완료 시 최종 결과 보고서 작성 → 승인 요청
-10. **최종 결과보고서(`_report.md`)와 오늘할일(`orders/`) 갱신도 타스크 브랜치에서 커밋한다. merge 전 반드시 `git status`로 미커밋 파일이 없는지 확인한다.**
-11. 승인 요청 시 작업지시자가 피드백 문서를 `mydocs/feedback/`에 등록
-12. 모든 테스트 통과 시 피드백 없음
-13. 최종 결과보고서 작성 후 오늘할일 해당 타스크 상태 갱신
+10. **최종 결과보고서(`_report.md`)와 오늘할일(`orders/`) 갱신도 타스크 브랜치에서 커밋한다. PR 생성 전 반드시 `git status`로 미커밋 파일이 없는지 확인한다.**
+11. `publish/task{issue번호}`로 원격 push 후 `devel` 대상 draft PR 생성
+12. 승인 요청 시 작업지시자가 피드백 문서를 `mydocs/feedback/`에 등록
+13. 모든 테스트 통과 시 피드백 없음
+14. PR merge 확인 후 이슈 close 및 오늘할일 상태 최종 정리
 
 ### 작업 규칙
 
