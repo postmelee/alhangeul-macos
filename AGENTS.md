@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file provides guidance to Claude / Codex when working with code in this repository.
+This file provides guidance to Codex when working with code in this repository.
 
 ## 프로젝트 개요
 
@@ -12,9 +12,9 @@ This file provides guidance to Claude / Codex when working with code in this rep
 - Rust `rhwp` core를 `Vendor/rhwp` git submodule로 고정하고, `RustBridge` C ABI와 `Rhwp.xcframework`를 통해 Swift/macOS 앱에서 사용
 - 앱, Quick Look/Thumbnail 확장, Swift bridge, 패키징과 배포 정책은 이 저장소가 소유
 
-## Claude / Codex 사용 시 주의사항
+## Codex 사용 시 주의사항
 
-이 프로젝트는 **하이퍼-워터폴** 방법론을 적용한다. Claude / Codex의 기본 동작(빠른 실행, 자율 수정)과 충돌이 발생할 수 있으므로 반드시 숙지한다.
+이 프로젝트는 **하이퍼-워터폴** 방법론을 적용한다. Codex의 기본 동작(빠른 실행, 자율 수정)과 충돌이 발생할 수 있으므로 반드시 숙지한다.
 
 상세 내용: [`mydocs/manual/agent_code_hyperfall_rule_conflict.md`](mydocs/manual/agent_code_hyperfall_rule_conflict.md)
 
@@ -265,4 +265,4 @@ gh pr create --repo postmelee/alhangeul-macos --base devel --head {contributor}:
 
 ### 작업 규칙
 
-- 작업 시간의 시작과 종료는 작업지시자가 결정한다. Claude와 Codex가 임의로 작업 종료를 제안하거나 시간을 한정하지 않는다.
+- 작업 시간의 시작과 종료는 작업지시자가 결정한다. Codex가 임의로 작업 종료를 제안하거나 시간을 한정하지 않는다.
