@@ -15,18 +15,16 @@ upstream `devel`에는 다음이 없다.
 - `rhwp_open` 등 native viewer C ABI
 - Swift renderer가 기대하는 상세 render tree JSON public API
 
-따라서 기존 Quick Look/Thumbnail 렌더링을 그대로 복구하려면 core bridge 단계를 별도 작업으로 진행해야 한다.
+따라서 기존 Quick Look/Thumbnail 렌더링을 그대로 복구하려면 bridge ABI 외에 renderer compatibility 단계를 별도 작업으로 진행해야 한다.
 
 ## 권장 방향
 
-1. upstream `devel`에서 viewer가 필요한 public Rust API를 먼저 확인한다.
-2. 부족한 API는 upstream core에 일반적인 public API로 제안한다.
-3. 이 레포에는 `RustBridge/` crate를 추가한다.
-4. `RustBridge`는 `Vendor/rhwp`를 path dependency로 사용하고, C ABI만 이 레포에서 export한다.
-5. `cbindgen`은 `RustBridge`를 대상으로 실행한다.
-6. Swift는 `Rhwp.xcframework`의 `Rhwp` C module만 import한다.
+1. 이 레포의 `RustBridge/` crate가 `Vendor/rhwp`를 path dependency로 사용하고, C ABI만 export한다.
+2. `cbindgen`은 `RustBridge`를 대상으로 실행한다.
+3. Swift는 `Rhwp.xcframework`의 `Rhwp` C module만 import한다.
+4. 부족한 render tree/image public API는 upstream core에 일반적인 public API로 제안한다.
 
-## RustBridge 예상 구조
+## RustBridge 구조
 
 ```text
 RustBridge/

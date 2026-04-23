@@ -35,18 +35,22 @@ submodule 업데이트 후에는 다음을 확인한다.
 
 ## 현재 코어 API gap
 
-upstream `devel`은 최신 코어 브랜치지만, 기존 macOS prototype이 사용하던 iOS/macOS C ABI를 아직 제공하지 않는다.
+upstream `devel`은 최신 코어 브랜치지만, 기존 macOS prototype이 사용하던 iOS/macOS C ABI를 직접 제공하지 않는다. 이 레포는 `RustBridge` crate에서 C ABI를 소유한다.
 
-현재 필요한 항목:
+현재 구현된 항목:
 
-1. native staticlib 또는 파생 프로젝트에서 빌드 가능한 public bridge API
-2. `cbindgen` 대상 C ABI 정의
-3. `rhwp_render_page_tree`가 Swift `CGTreeRenderer`에서 필요한 상세 render tree JSON을 반환하는 경로
-4. 이미지 바이너리 조회 API (`rhwp_image_data` 상당)
+1. `RustBridge` staticlib
+2. `cbindgen` 기반 C header/modulemap 생성
+3. 기존 8개 FFI 심볼 export
 
-따라서 이 레포는 `Vendor/rhwp`를 upstream `devel` submodule로 고정하되, 기존 기능을 완전히 복구하려면 다음 중 하나가 필요하다.
+남은 gap:
 
-- upstream `devel`에 macOS/iOS viewer용 public native bridge API를 추가한다.
-- 이 레포에 별도 Rust bridge crate를 두되, upstream `devel`이 상세 render tree와 이미지 데이터를 public API로 노출하도록 먼저 정리한다.
+1. `rhwp_render_page_tree`는 upstream `devel`의 compact render tree JSON을 반환한다. 기존 Swift `CGTreeRenderer`가 기대하던 상세 style JSON과 다르므로 renderer 호환 작업이 필요하다.
+2. upstream `devel`은 bin data 직접 조회 public API를 제공하지 않는다. 현재 `rhwp_image_data`는 null을 반환하며, 이미지 렌더링 복구가 별도 작업이다.
+
+기존 기능을 완전히 복구하려면 다음 중 하나가 필요하다.
+
+- Swift renderer가 compact render tree JSON을 지원하도록 fallback renderer를 추가한다.
+- upstream `devel`이 상세 render tree와 이미지 데이터를 public API로 노출하도록 정리한다.
 
 `ios/devel`의 Swift/FFI 코드는 참고 자료로만 사용하고, 코어 최신화 기준으로 사용하지 않는다.

@@ -1,0 +1,12 @@
+[package]
+name = "rhwp_mac_bridge"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+rhwp = { path = "../Vendor/rhwp" }
+serde_json = "1"

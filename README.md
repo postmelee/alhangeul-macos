@@ -22,7 +22,7 @@ brew install xcodegen
 
 ## 빌드
 
-현재 upstream `devel`에는 macOS Swift bridge가 필요로 하는 C ABI와 풍부한 render tree JSON API가 아직 공개되어 있지 않습니다. `Vendor/rhwp`가 해당 API를 제공하기 전까지 `scripts/build-rust-macos.sh`는 코어 통합 검증 단계에서 실패할 수 있습니다.
+`RustBridge` crate가 `Vendor/rhwp`를 path dependency로 사용해 macOS 앱용 C ABI를 export합니다.
 
 ```bash
 ./scripts/build-rust-macos.sh
