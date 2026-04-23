@@ -66,16 +66,16 @@ This file provides guidance to OpenAI Codex when working with code in this repos
 
 릴리스 마일스톤을 명시해야 하는 큰 작업은 `task_{milestone}_{이슈번호}.md` 형식을 사용할 수 있다. 예: `task_m100_7.md`.
 
-### PR 처리 규칙 (`pr/`)
+### 외부 기여자 PR 처리 (`mydocs/pr/`)
 
-PR 생성, 리뷰, 외부 기여 PR 처리 상세 절차는 `mydocs/manual/pr_process_guide.md`를 따른다.
+외부 기여 PR 검토 상세 절차는 `mydocs/manual/pr_process_guide.md`를 따른다.
 
 강제 규칙:
 
-- 앱/bridge/문서 변경 PR 대상은 `postmelee/alhangeul-macos`의 `devel`이다.
-- upstream `edwardkim/rhwp`에는 이 저장소 작업 PR을 만들지 않는다.
-- PR은 최종 보고서 작성 후 생성한다.
-- PR 본문은 최종 보고서를 기반으로 상세 작성한다.
+- 이 목차는 외부 기여 PR 검토에만 적용한다.
+- 외부 PR 검토 기록은 `mydocs/pr/`에 남긴다.
+- 파일명은 `pr_{번호}_review.md`, `pr_{번호}_review_impl.md`(필요 시), `pr_{번호}_report.md`를 사용한다.
+- 처리 완료 문서는 `mydocs/pr/archives/`로 이동한다.
 
 ## 빌드 및 실행
 

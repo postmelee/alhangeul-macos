@@ -1,58 +1,20 @@
-# PR 처리 가이드
+# 외부 기여자 PR 처리 가이드
 
 ## 목적
 
-이 문서는 `alhangeul-macos` 저장소의 PR 처리 절차를 정리한다. `AGENTS.md`에는 강제 규칙만 유지하고, 상세 단계는 이 문서를 참조한다.
+이 문서는 `alhangeul-macos` 저장소의 외부 기여자 PR 검토 절차를 정리한다. 로컬 작업 브랜치 PR 생성 규칙은 `AGENTS.md`의 `Git 워크플로우 > PR 생성`을 따른다.
 
 ## 범위
 
-- 앱/bridge/문서 변경 PR
 - 외부 기여 PR 검토
-- PR 본문 작성 규칙
-- 머지 전 검증과 머지 후 정리
+- 리뷰 기록 문서 작성 규칙
+- 검토 완료 후 아카이브 절차
 
 ## 기본 원칙
 
-- 앱/bridge/문서 변경 PR 대상은 `postmelee/alhangeul-macos`의 `devel`이다.
-- upstream `edwardkim/rhwp`에는 이 저장소 작업 PR을 만들지 않는다.
-- PR은 최종 보고서 작성 후 생성한다.
-- PR 본문은 최종 보고서를 기반으로 상세 작성한다.
-
-## 앱/bridge/문서 PR 절차
-
-1. 작업 완료 후 `git status`로 미커밋 파일 확인
-2. 최종 보고서(`mydocs/report/task_{issue}_report.md`) 작성
-3. 브랜치 push
-
-```bash
-git push -u origin local/task{issue}
-```
-
-4. draft PR 생성
-
-```bash
-gh pr create \
-  --repo postmelee/alhangeul-macos \
-  --base devel \
-  --head local/task{issue} \
-  --draft \
-  --title "Issue #{issue}: 제목"
-```
-
-5. PR 본문 검토 후 필요 시 수정
-
-```bash
-gh pr edit <번호> --body-file <파일경로>
-```
-
-## PR 본문 필수 항목
-
-- `Closes #{issue}`
-- 작업 배경
-- 주요 변경 내용
-- 검증 명령과 결과
-- 수동 확인 필요 항목
-- 남은 리스크 또는 후속 작업
+- 외부 기여 PR은 코드 변경과 문서 변경을 함께 검토한다.
+- 외부 PR 검토 결과는 `mydocs/pr/` 문서 흐름으로 관리한다.
+- 검토 문서는 재현 가능해야 하며, 실행한 검증 명령/결과를 포함한다.
 
 ## 외부 기여 PR 검토 절차
 
@@ -64,22 +26,23 @@ gh pr edit <번호> --body-file <파일경로>
 
 절차:
 
-1. PR 메타데이터 확인 (base/head, mergeable, CI)
+1. PR 메타데이터 확인 (base/head, mergeable, CI, 연결 issue)
 2. 코드/문서 변경 범위 확인
 3. 필요한 검증 실행
-4. 리뷰 의견 작성
-5. 처리 완료 문서를 `mydocs/pr/archives/`로 이동
+4. `pr_{번호}_review.md`에 핵심 리스크와 수정 요청 정리
+5. 필요 시 `pr_{번호}_review_impl.md`에 재검토 계획 정리
+6. 최종 판단을 `pr_{번호}_report.md`로 기록
+7. 처리 완료 문서를 `mydocs/pr/archives/`로 이동
 
 ## 머지 전 체크
 
-- 대상 브랜치가 `devel`인지
-- `Closes #{issue}`가 포함됐는지
-- 작업 범위와 무관한 변경이 없는지
+- PR 대상 브랜치가 정책에 맞는지
+- 리뷰 코멘트가 해결/미해결로 구분되어 있는지
 - 필수 검증이 수행됐는지
-- 문서(`plans`, `working`, `report`, `orders`)가 누락되지 않았는지
+- 승인/보류/반려 판단 근거가 문서에 남았는지
 
 ## 머지 후 체크
 
-- issue 상태 확인 (auto close 또는 수동 close)
-- 다음 작업 브랜치 시작 전 `origin/devel` 동기화
-- 필요 시 `mydocs/orders/` 상태 업데이트
+- 관련 issue 상태 확인 (auto close 또는 수동 close)
+- 후속 작업이 있으면 신규 issue로 분리
+- 검토 문서를 `mydocs/pr/archives/`로 이동
