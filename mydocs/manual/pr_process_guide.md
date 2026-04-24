@@ -188,5 +188,7 @@ gh pr create \
 ## 머지 후 체크
 
 - 관련 issue 상태 확인 (auto close 또는 수동 close)
+- merge 완료된 `publish/task{번호}` 원격 브랜치 삭제 여부 확인
+- 다음 작업에 필요하지 않은 로컬 worktree, build 산출물, 설치 smoke test 산출물 정리
 - 후속 작업이 있으면 신규 issue로 분리
 - 검토 문서를 `mydocs/pr/archives/`로 이동
