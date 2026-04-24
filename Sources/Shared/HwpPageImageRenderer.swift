@@ -129,12 +129,34 @@ enum HwpPageImageRenderer {
             return nil
         }
 
+        guard shouldUseEmbeddedThumbnail(imageSize: CGSize(width: image.width, height: image.height), maximumPixelSize: maximumPixelSize) else {
+            return nil
+        }
+
         let width = thumbnail.width > 0 ? thumbnail.width : image.width
         let height = thumbnail.height > 0 ? thumbnail.height : image.height
         return HwpRenderedPage(
             image: image,
             size: CGSize(width: width, height: height)
         )
+    }
+
+    private static func shouldUseEmbeddedThumbnail(imageSize: CGSize, maximumPixelSize: CGSize?) -> Bool {
+        guard let maximumPixelSize else {
+            return true
+        }
+
+        let requestedMaxDimension = max(maximumPixelSize.width, maximumPixelSize.height)
+        let embeddedMaxDimension = max(imageSize.width, imageSize.height)
+        guard requestedMaxDimension > 0, embeddedMaxDimension > 0 else {
+            return true
+        }
+
+        if requestedMaxDimension <= 128 {
+            return true
+        }
+
+        return embeddedMaxDimension >= requestedMaxDimension * 0.75
     }
 
     private static func renderScale(pageSize: CGSize, maximumPixelSize: CGSize?) -> CGFloat {
