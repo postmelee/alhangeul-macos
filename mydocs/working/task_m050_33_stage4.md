@@ -37,7 +37,7 @@
   - project/app/zip 이름을 `AlhangeulMac`/`alhangeul-macos` 기준으로 변경했다.
 - `Casks/rhwp-mac.rb` -> `Casks/alhangeul-macos.rb`
   - Cask token, release asset URL, app stanza를 새 이름 기준으로 변경했다.
-- `README.md`, `.github/pull_request_template.md`, `mydocs/manual/*`, `mydocs/tech/project_architecture.md`
+- `README.md`, `AGENTS.md`, `.github/pull_request_template.md`, `mydocs/manual/*`, `mydocs/tech/project_architecture.md`
   - 빌드, 검증, 릴리스, PR 문서의 project/app/bundle id/cask 기준을 갱신했다.
 - `mydocs/plans/task_m050_33.md`, `mydocs/plans/task_m050_33_impl.md`
   - 추가 Stage 4를 반영하고 최종 보고 단계를 Stage 5로 조정했다.

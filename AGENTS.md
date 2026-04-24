@@ -124,7 +124,7 @@ This file provides guidance to Codex when working with code in this repository.
 
 강제 규칙:
 
-- `project.yml`이 Xcode project의 원본이며 `RhwpMac.xcodeproj`를 직접 수정하지 않는다.
+- `project.yml`이 Xcode project의 원본이며 `AlhangeulMac.xcodeproj`를 직접 수정하지 않는다.
 - 변경 유형별 최소 검증은 반드시 수행한다.
 - `Sources/RhwpCoreBridge`에 AppKit/UIKit 직접 의존을 넣지 않는다.
 
