@@ -95,7 +95,7 @@ xcodegen generate
 
 - 성공
 - release zip SHA256:
-  - `3b26f59e5c2adc581d143b1573dda3263a3e38bd498e607589a177d6f66558e5  alhangeul-macos-0.1.0.zip`
+  - `c921db79ce560348b07090200a09528db9863e05d6838495ca714bab22714010  alhangeul-macos-0.1.0.zip`
 
 ### 설치본 표시명
 
