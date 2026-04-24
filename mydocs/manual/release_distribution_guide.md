@@ -17,7 +17,7 @@
 
 현재 저장소에는 다음 릴리스 관련 자산이 있다.
 
-- `scripts/package-release.sh`: Release configuration으로 `알한글.app`을 빌드하고 zip 파일을 생성한다.
+- `scripts/package-release.sh`: Release configuration으로 내부 산출물 `RhwpMac.app`을 빌드한 뒤 `알한글.app`으로 zip 파일을 생성한다.
 - `Casks/rhwp-mac.rb`: Homebrew Cask 초안이다.
 - `Sources/HostApp/Info.plist`, `Sources/QLExtension/Info.plist`, `Sources/ThumbnailExtension/Info.plist`: 앱과 extension 버전 정보가 들어 있다.
 - `rhwp-core.lock`: 릴리스에 포함되는 `rhwp` core commit을 기록한다.
@@ -26,7 +26,8 @@
 
 - GitHub 저장소명 기준 release URL: 현재 저장소는 `postmelee/alhangeul-macos`다.
 - zip 파일명과 Homebrew Cask token: 현재 스크립트와 cask는 `rhwp-mac` 이름을 사용한다.
-- 앱 표시명: 현재 `알한글.app`이다.
+- 앱 표시명과 배포 앱 번들명: 현재 `알한글`, `알한글.app`이다.
+- 내부 Xcode product name: 현재 `RhwpMac.app`이다.
 - bundle identifier: 현재 `com.postmelee.rhwpmac` 계열이다.
 - SHA256 고정 여부: 공개 배포 시 `sha256 :no_check`를 유지할지 결정해야 한다.
 - Developer ID 서명과 notarization 적용 시점.
@@ -79,7 +80,10 @@ xcodebuild -project RhwpMac.xcodeproj \
 Finder 통합 smoke test:
 
 ```bash
-open build/DerivedData/Build/Products/Debug/알한글.app
+mkdir -p ~/Applications
+rm -rf ~/Applications/알한글.app
+ditto build/DerivedData/Build/Products/Debug/RhwpMac.app ~/Applications/알한글.app
+pluginkit -a ~/Applications/알한글.app
 pluginkit -m | grep com.postmelee.rhwpmac
 qlmanage -r
 qlmanage -r cache
@@ -127,7 +131,7 @@ build/release/rhwp-mac-0.1.0.zip
 - Rust bridge와 `Rhwp.xcframework` 재생성
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
-- `알한글.app`을 zip으로 압축
+- 내부 산출물 `RhwpMac.app`을 `알한글.app`으로 복사한 뒤 zip으로 압축
 - SHA256 출력
 
 주의:
@@ -187,8 +191,6 @@ Release note에 포함할 내용:
 - `homepage`이 현재 저장소를 가리키는가
 - `app "알한글.app"`이 산출물과 일치하는가
 - caveats 문구가 현재 extension 등록 흐름과 일치하는가
-
-초안의 URL은 과거 저장소명인 `postmelee/rhwp-mac` 기준이므로 첫 공개 릴리스 전에 반드시 갱신한다.
 
 ## Rollback
 

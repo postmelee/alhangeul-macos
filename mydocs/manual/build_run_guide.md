@@ -81,10 +81,19 @@ xcodebuild -project RhwpMac.xcodeproj \
 
 ## Finder 통합 확인
 
-앱 실행:
+앱 실행만 확인할 때:
 
 ```bash
-open build/DerivedData/Build/Products/Debug/알한글.app
+open build/DerivedData/Build/Products/Debug/RhwpMac.app
+```
+
+Finder 통합은 단일 설치본 기준으로 확인한다.
+
+```bash
+mkdir -p ~/Applications
+rm -rf ~/Applications/알한글.app
+ditto build/DerivedData/Build/Products/Debug/RhwpMac.app ~/Applications/알한글.app
+pluginkit -a ~/Applications/알한글.app
 ```
 
 extension 등록 확인:
@@ -105,3 +114,5 @@ preview 확인:
 ```bash
 qlmanage -p Vendor/rhwp/samples/basic/KTX.hwp
 ```
+
+build 산출물이 중복 discovery되어 잘못된 extension 경로가 잡힐 때만 기존 build 산출물을 임시로 제외한다.
