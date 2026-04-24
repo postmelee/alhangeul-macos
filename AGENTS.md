@@ -29,6 +29,7 @@ This file provides guidance to Codex when working with code in this repository.
 - 이슈 close는 작업지시자 승인 후 또는 PR merge 확인 후에만 수행
 - 문서 수정은 기존 내용을 먼저 읽고 필요한 부분만 수정하며, 불가피할 때만 내용을 추가
 - 작업 완료 후 다음 작업에 필요하지 않은 로컬/원격 부산물은 정리
+- PR merge와 이슈 close 후에는 `devel`로 돌아오고, 더 이상 필요 없는 `local/task{번호}` 브랜치와 임시 worktree를 정리한다.
 
 승인 간주 조건:
 
