@@ -82,7 +82,7 @@ This file provides guidance to Codex when working with code in this repository.
 
 | 폴더 | 용도 | 비고 |
 |------|------|------|
-| `orders/` | 오늘 할일 | `yyyymmdd.md`만 허용. 상세 조사/분석은 `tech/` 또는 `troubleshootings/`에 기록 |
+| `orders/` | 오늘 할일 | `yyyymmdd.md`만 허용. 상세 조사/분석은 `tech/` 또는 `troubleshootings/`에 기록. 완료 항목은 비고에 `완료: HH:mm` 형식으로 완료 시각 기록 |
 | `plans/` | 수행/구현 계획서 | `_stage{N}`, `_report` 파일은 두지 않는다 |
 | `plans/archives/` | 완료된 계획서 보관 | merge 후 정리 시 사용 |
 | `working/` | 단계별 완료 보고서 (`_stage{N}.md`) | 최종 보고서는 두지 않는다 |
