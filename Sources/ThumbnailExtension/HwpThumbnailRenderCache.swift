@@ -88,7 +88,8 @@ final class HwpThumbnailRenderCache {
                 let result = Result {
                     try HwpPageImageRenderer.renderFirstPage(
                         fileURL: request.fileURL,
-                        maximumPixelSize: request.maximumPixelSize
+                        maximumPixelSize: request.maximumPixelSize,
+                        embeddedThumbnailPolicy: .never
                     )
                 }
 
