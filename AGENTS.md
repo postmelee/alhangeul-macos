@@ -27,6 +27,8 @@ This file provides guidance to Codex when working with code in this repository.
 - 범위가 불명확하거나 기존 작업과 충돌할 가능성이 있으면 먼저 확인
 - 사용자나 다른 작업자가 만든 변경은 되돌리지 않음
 - 이슈 close는 작업지시자 승인 후 또는 PR merge 확인 후에만 수행
+- 문서 수정은 기존 내용을 먼저 읽고 필요한 부분만 수정하며, 불가피할 때만 내용을 추가
+- 작업 완료 후 다음 작업에 필요하지 않은 로컬/원격 부산물은 정리
 
 승인 간주 조건:
 
@@ -247,6 +249,7 @@ gh pr create --repo postmelee/alhangeul-macos --base devel --head {contributor}:
 12. 승인 요청 시 작업지시자가 피드백 문서를 `mydocs/feedback/`에 등록
 13. 모든 테스트 통과 시 피드백 없음
 14. PR merge 확인 후 이슈 close 및 오늘할일 상태 최종 정리
+15. merge 완료된 `publish/task{issue번호}` 원격 브랜치와 재생성 가능한 로컬 부산물을 정리
 
 ### 작업 규칙
 
