@@ -89,7 +89,7 @@ final class HwpThumbnailRenderCache {
                     try HwpPageImageRenderer.renderFirstPage(
                         fileURL: request.fileURL,
                         maximumPixelSize: request.maximumPixelSize,
-                        embeddedThumbnailPolicy: .smallFinderThumbnail(maxPixelDimension: 64)
+                        embeddedThumbnailPolicy: .never
                     )
                 }
 
