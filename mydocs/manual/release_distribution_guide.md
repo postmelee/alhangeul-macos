@@ -17,19 +17,19 @@
 
 현재 저장소에는 다음 릴리스 관련 자산이 있다.
 
-- `scripts/package-release.sh`: Release configuration으로 내부 산출물 `RhwpMac.app`을 빌드한 뒤 ASCII filesystem bundle name인 `RhwpMac.app`으로 zip 파일을 생성한다.
-- `Casks/rhwp-mac.rb`: Homebrew Cask 초안이다.
+- `scripts/package-release.sh`: Release configuration으로 내부 산출물 `AlhangeulMac.app`을 빌드한 뒤 ASCII filesystem bundle name인 `AlhangeulMac.app`으로 zip 파일을 생성한다.
+- `Casks/alhangeul-macos.rb`: Homebrew Cask 초안이다.
 - `Sources/HostApp/Info.plist`, `Sources/QLExtension/Info.plist`, `Sources/ThumbnailExtension/Info.plist`: 앱과 extension 버전 정보가 들어 있다.
 - `rhwp-core.lock`: 릴리스에 포함되는 `rhwp` core commit을 기록한다.
 
 첫 공개 릴리스 전 확정해야 할 사항:
 
 - GitHub 저장소명 기준 release URL: 현재 저장소는 `postmelee/alhangeul-macos`다.
-- zip 파일명과 Homebrew Cask token: 현재 스크립트와 cask는 `rhwp-mac` 이름을 사용한다.
+- zip 파일명과 Homebrew Cask token: 현재 스크립트와 cask는 `alhangeul-macos` 이름을 사용한다.
 - 앱 표시명: 현재 `알한글`이다.
-- 배포 앱 filesystem bundle name: 현재 `RhwpMac.app`이다. Quick Look/Thumbnail extension의 LaunchServices/ExtensionKit lookup 안정성을 위해 `.app` 경로는 ASCII로 유지한다.
-- 내부 Xcode product name: 현재 `RhwpMac.app`이다.
-- bundle identifier: 현재 `com.postmelee.rhwpmac` 계열이다.
+- 배포 앱 filesystem bundle name: 현재 `AlhangeulMac.app`이다. Quick Look/Thumbnail extension의 LaunchServices/ExtensionKit lookup 안정성을 위해 `.app` 경로는 ASCII로 유지한다.
+- 내부 Xcode product name: 현재 `AlhangeulMac.app`이다.
+- bundle identifier: 현재 `com.postmelee.alhangeulmac` 계열이다.
 - SHA256 고정 여부: 공개 배포 시 `sha256 :no_check`를 유지할지 결정해야 한다.
 - Developer ID 서명과 notarization 적용 시점.
 
@@ -58,7 +58,7 @@ cat rhwp-core.lock
 ./scripts/build-rust-macos.sh
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build/DerivedData \
@@ -70,7 +70,7 @@ xcodebuild -project RhwpMac.xcodeproj \
 Release configuration 검증:
 
 ```bash
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Release \
   -derivedDataPath build/DerivedDataRelease \
@@ -82,10 +82,10 @@ Finder 통합 smoke test:
 
 ```bash
 mkdir -p ~/Applications
-rm -rf ~/Applications/RhwpMac.app
-ditto build/DerivedData/Build/Products/Debug/RhwpMac.app ~/Applications/RhwpMac.app
-pluginkit -a ~/Applications/RhwpMac.app
-pluginkit -m | grep com.postmelee.rhwpmac
+rm -rf ~/Applications/AlhangeulMac.app
+ditto build/DerivedData/Build/Products/Debug/AlhangeulMac.app ~/Applications/AlhangeulMac.app
+pluginkit -a ~/Applications/AlhangeulMac.app
+pluginkit -m | grep com.postmelee.alhangeulmac
 qlmanage -r
 qlmanage -r cache
 qlmanage -p Vendor/rhwp/samples/basic/KTX.hwp
@@ -102,7 +102,7 @@ qlmanage -p Vendor/rhwp/samples/basic/KTX.hwp
 - `Sources/HostApp/Info.plist`
 - `Sources/QLExtension/Info.plist`
 - `Sources/ThumbnailExtension/Info.plist`
-- `Casks/rhwp-mac.rb`
+- `Casks/alhangeul-macos.rb`
 - Git tag: `v<version>`
 - GitHub Release 제목과 파일명
 
@@ -124,7 +124,7 @@ zip 생성:
 현재 산출물:
 
 ```text
-build/release/rhwp-mac-0.1.0.zip
+build/release/alhangeul-macos-0.1.0.zip
 ```
 
 스크립트가 수행하는 일:
@@ -132,13 +132,13 @@ build/release/rhwp-mac-0.1.0.zip
 - Rust bridge와 `Rhwp.xcframework` 재생성
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
-- 내부 산출물 `RhwpMac.app`을 release staging으로 복사한 뒤 `RhwpMac.app` 이름으로 zip 압축
+- 내부 산출물 `AlhangeulMac.app`을 release staging으로 복사한 뒤 `AlhangeulMac.app` 이름으로 zip 압축
 - SHA256 출력
 
 주의:
 
 - 현재 스크립트는 서명/공증을 자동 수행하지 않는다.
-- zip 파일명은 `rhwp-mac-<version>.zip`이다. 저장소명 `alhangeul-macos`와 맞출지 릴리스 전 결정해야 한다.
+- zip 파일명은 `alhangeul-macos-<version>.zip`이며 저장소명과 맞춘다.
 
 ## 서명과 공증
 
@@ -181,16 +181,16 @@ Release note에 포함할 내용:
 
 ## Homebrew Cask
 
-현재 `Casks/rhwp-mac.rb`는 초안이다.
+현재 `Casks/alhangeul-macos.rb`는 초안이다.
 
 릴리스 전 확인:
 
 - `url`이 `https://github.com/postmelee/alhangeul-macos/releases/...`를 가리키는가
 - `version`이 Git tag와 일치하는가
 - `sha256`을 실제 값으로 고정할 것인가
-- cask token을 `rhwp-mac`으로 유지할 것인가, `alhangeul-macos`로 바꿀 것인가
+- cask token이 `alhangeul-macos`인가
 - `homepage`이 현재 저장소를 가리키는가
-- `app "RhwpMac.app"`이 산출물과 일치하는가
+- `app "AlhangeulMac.app"`이 산출물과 일치하는가
 - caveats 문구가 현재 extension 등록 흐름과 일치하는가
 
 ## Rollback

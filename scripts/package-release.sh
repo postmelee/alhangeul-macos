@@ -12,23 +12,24 @@ ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 BUILD_DIR="$ROOT/build/release"
 XCODE_BUILD_DIR="$BUILD_DIR/xcodebuild"
 DERIVED_DATA_DIR="$BUILD_DIR/DerivedData"
-BUILD_APP_NAME="RhwpMac.app"
-APP_NAME="RhwpMac.app"
-ZIP_NAME="rhwp-mac-$VERSION.zip"
+PROJECT_NAME="AlhangeulMac"
+BUILD_APP_NAME="AlhangeulMac.app"
+APP_NAME="AlhangeulMac.app"
+ZIP_NAME="alhangeul-macos-$VERSION.zip"
 LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister"
 
 mkdir -p "$BUILD_DIR"
 rm -rf "$XCODE_BUILD_DIR"
 rm -rf "$DERIVED_DATA_DIR"
 rm -rf "$BUILD_DIR/$BUILD_APP_NAME" "$BUILD_DIR/$BUILD_APP_NAME.dSYM"
-rm -rf "$BUILD_DIR"/RhwpMac*.appex "$BUILD_DIR"/RhwpMac*.appex.dSYM "$BUILD_DIR"/RhwpMac*.swiftmodule
+rm -rf "$BUILD_DIR"/AlhangeulMac*.appex "$BUILD_DIR"/AlhangeulMac*.appex.dSYM "$BUILD_DIR"/AlhangeulMac*.swiftmodule
 rm -rf "$BUILD_DIR/include" "$BUILD_DIR/librhwp.a"
 
 "$ROOT/scripts/build-rust-macos.sh"
 
 cd "$ROOT"
 xcodegen generate
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project "$PROJECT_NAME.xcodeproj" \
   -scheme HostApp \
   -configuration Release \
   -derivedDataPath "$DERIVED_DATA_DIR" \

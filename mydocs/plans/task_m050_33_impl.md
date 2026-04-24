@@ -13,7 +13,8 @@
 - 실제 조사는 `devel` 최신 기준(`22aa57f`, PR #38까지 반영)에서 진행한다.
 - 원인 확인 전에는 code path를 넓게 수정하지 않는다.
 - `Vendor/rhwp` core 수정은 이번 단계의 기본 범위에서 제외한다.
-- `알한글` 표시명/배포명 정책은 #27 결정을 기준으로 유지한다.
+- 사용자 표시명은 `알한글`로 유지한다.
+- repository/build/distribution-facing ASCII 이름은 추가 Stage에서 `AlhangeulMac`/`alhangeul-macos` 계열로 정리한다.
 - 테스트용 파일은 `/Users/melee/Documents/projects/rhwp-mac/samples` 아래 파일만 사용한다.
 
 ## Stage 1. 기준 상태 동기화와 재현 조건 고정
@@ -28,7 +29,7 @@
 - `local/task33`에 #27 변경 반영 방식을 결정한다.
   - #26/#27/#37 merge가 반영된 `devel` 기준으로 재동기화한다.
 - `/Users/melee/Applications/알한글.app` 단일 설치 상태를 확인한다.
-- `/Users/melee/Applications/RhwpMac.app.stage27-smoke-disabled` 처리 상태를 확인한다.
+- `/Users/melee/Applications/AlhangeulMac.app.stage27-smoke-disabled` 처리 상태를 확인한다.
 - `project.yml`, HostApp/QLExtension/ThumbnailExtension Info.plist, package 산출물 Info.plist를 대조한다.
 - `/Users/melee/Documents/projects/rhwp-mac/samples/basic/KTX.hwp`와 대표 샘플 2개 이상으로 `qlmanage -t` 실패를 재현한다.
 
@@ -76,7 +77,29 @@
 - provider 미실행/실행 후 실패 여부가 구분된다.
 - 수정이 필요한 경우 변경 범위와 근거가 명확히 남는다.
 
-## Stage 4. 검증과 보고서
+## Stage 4. `AlhangeulMac` 이름 정합화
+
+### 목표
+
+- 사용자 표시명 `알한글`은 유지한다.
+- `RhwpMac`/`rhwpmac`으로 남아 있던 Xcode project, product, executable, bundle identifier, UTI, package, Cask 이름을 `alhangeul-macos` 저장소명과 맞는 ASCII 계열로 정리한다.
+
+### 작업
+
+- `project.yml`의 project/product/executable 이름을 `AlhangeulMac` 계열로 변경한다.
+- HostApp/QLExtension/ThumbnailExtension bundle identifier와 app-owned UTI를 `com.postmelee.alhangeulmac` 계열로 변경한다.
+- package zip, Homebrew Cask token/file, 문서의 배포 산출물 이름을 `alhangeul-macos`/`AlhangeulMac.app` 기준으로 변경한다.
+- `xcodegen generate`로 Xcode project 생성물을 갱신한다.
+- 새 식별자 기준으로 build/package/Finder thumbnail smoke test를 재수행한다.
+
+### 완료 기준
+
+- build 산출물과 package zip 내부 app bundle이 `AlhangeulMac.app`로 생성된다.
+- package 파일명이 `alhangeul-macos-<version>.zip`으로 생성된다.
+- 사용자 표시명은 `알한글` 계열로 유지된다.
+- `/Users/melee/Documents/projects/rhwp-mac/samples` 샘플 기준 thumbnail smoke test가 성공한다.
+
+## Stage 5. 검증과 보고서
 
 ### 목표
 

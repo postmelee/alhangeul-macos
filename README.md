@@ -178,12 +178,12 @@ brew install xcodegen
 xcodegen generate
 ```
 
-`project.yml`이 Xcode project의 원본입니다. target, source, bundle identifier, extension 설정을 바꿀 때는 `RhwpMac.xcodeproj`를 직접 수정하지 말고 `project.yml`을 수정한 뒤 다시 생성합니다.
+`project.yml`이 Xcode project의 원본입니다. target, source, bundle identifier, extension 설정을 바꿀 때는 `AlhangeulMac.xcodeproj`를 직접 수정하지 말고 `project.yml`을 수정한 뒤 다시 생성합니다.
 
 ### Native Build
 
 ```bash
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build/DerivedData \
@@ -194,19 +194,19 @@ xcodebuild -project RhwpMac.xcodeproj \
 개발 빌드 후 앱은 내부 산출물 이름으로 다음 경로에 생성됩니다.
 
 ```text
-build/DerivedData/Build/Products/Debug/RhwpMac.app
+build/DerivedData/Build/Products/Debug/AlhangeulMac.app
 ```
 
 ### Run
 
 ```bash
-open build/DerivedData/Build/Products/Debug/RhwpMac.app
+open build/DerivedData/Build/Products/Debug/AlhangeulMac.app
 ```
 
 Quick Look과 Thumbnail extension 등록 상태는 앱 사이드바 또는 `pluginkit`으로 확인할 수 있습니다.
 
 ```bash
-pluginkit -m | grep com.postmelee.rhwpmac
+pluginkit -m | grep com.postmelee.alhangeulmac
 ```
 
 Finder/Quick Look 캐시를 갱신해야 할 때:

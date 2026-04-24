@@ -27,7 +27,7 @@ stage 기반 작업이면 Stage 기준으로 적습니다.
 - [ ] `./scripts/check-no-appkit.sh`
 - [ ] `./scripts/build-rust-macos.sh`
 - [ ] `xcodegen generate`
-- [ ] `xcodebuild -project RhwpMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build`
+- [ ] `xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build`
 - [ ] `./scripts/validate-stage3-render.sh`
 - [ ] Finder / Quick Look / Thumbnail 수동 확인
 
