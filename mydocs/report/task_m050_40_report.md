@@ -6,7 +6,7 @@
 - 마일스톤: M050
 - 제목: Dock/Spotlight 표시명 한영 현지화
 - 작업 브랜치: `local/task40`
-- 기준 브랜치: `origin/devel` `5a66f9b`
+- 기준 브랜치: `origin/devel` `05cc8ac`
 
 ## 결론
 
@@ -22,6 +22,7 @@
 - 단일 설치 경로는 `AlhangeulMac.app`으로 유지한다.
 - 기본 plist name은 filesystem bundle name과 맞추고, 한글 표시명은 `ko.lproj/InfoPlist.strings`에서 제공한다.
 - `qlmanage -m plugins`는 app extension 등록 판정 기준으로 쓰지 않는다.
+- 개발 build와 package staging 산출물은 Spotlight 앱 검색 후보에 섞이지 않도록 `build.noindex/` 아래에 둔다.
 
 ## 단계별 결과
 
@@ -54,7 +55,7 @@
 
 - `xcodegen generate` 성공
 - `plutil -lint AlhangeulMac.xcodeproj/project.pbxproj` 성공
-- `xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -derivedDataPath build/DerivedDataList -list` 종료 코드 0
+- `xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -derivedDataPath build.noindex/DerivedDataList -list` 종료 코드 0
 
 ### Stage 3. 빌드 산출물과 등록 상태 검증
 
@@ -66,7 +67,7 @@
 - Debug/Release bundle 내부 localized `InfoPlist.strings` 포함 확인
 - `./scripts/package-release.sh 0.1.0` 성공
 - Release 설치본 `/Users/melee/Applications/AlhangeulMac.app` 기준 PlugInKit 등록 확인
-- `/Users/melee/Documents/projects/rhwp-mac/samples/basic/KTX.hwp` thumbnail smoke test 성공
+- `/Users/melee/Documents/projects/rhwp-mac/Vendor/rhwp/samples/basic/KTX.hwp` thumbnail smoke test 성공
 
 중요 관찰:
 
@@ -113,6 +114,28 @@
 - `mdfind -onlyin /Users/melee/Applications AlhangeulMac`에서 `/Users/melee/Applications/AlhangeulMac.app` 확인
 - PlugInKit의 parent name이 `알한글`로 표시됨
 
+### Stage 6. 개발 산출물 Spotlight 오염 방지
+
+변경:
+
+- `.gitignore`에 `/build.noindex/` 추가
+- `scripts/package-release.sh` 기본 build root를 `build.noindex`로 변경
+- `scripts/package-release.sh`가 build root에 `.metadata_never_index`를 생성하도록 변경
+- README, AGENTS, build 실행, release 배포, core submodule, PR manual의 Debug/Release/package 경로를 `build.noindex` 기준으로 갱신
+- Spotlight 오염 원인과 재발 방지 기준을 troubleshooting 문서에 추가
+
+원인 확인:
+
+- 설치본 `/Users/melee/Applications/AlhangeulMac.app`은 `알한글.app` display name과 `AlhangeulMac.app` filesystem name을 모두 가진 정상 구조였다.
+- 별도 검색 후보로 보인 원인은 repo `build/DerivedData`와 Xcode 기본 DerivedData에 남은 오래된 개발 `.app` 산출물이었다.
+
+검증:
+
+- `build.noindex/DerivedData` Debug build 성공
+- `build.noindex/release/AlhangeulMac.app` Release package 성공
+- 이전 generated DerivedData 앱 후보 제거 후 app bundle predicate 검색에서 `/Users/melee/Applications/AlhangeulMac.app` 하나만 확인
+- `알한글`과 `AlhangeulMac` 검색 모두 `/Users/melee/Applications/AlhangeulMac.app` 확인
+
 ## 최종 검증 요약
 
 ### 정적 검증
@@ -142,7 +165,7 @@ git diff --check
 xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
-  -derivedDataPath build/DerivedDataStage3 \
+  -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO \
   build
 ./scripts/package-release.sh 0.1.0
@@ -152,7 +175,7 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 
 - 모두 성공
 - release zip SHA256:
-  - `c921db79ce560348b07090200a09528db9863e05d6838495ca714bab22714010  alhangeul-macos-0.1.0.zip`
+  - `fae970ef947b91adecd29179ad3d2618ba9ebb7f60a2a2ee48612e4eb476a1f9  alhangeul-macos-0.1.0.zip`
 
 ### 설치본 검증
 
@@ -165,7 +188,9 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 - HostApp/QLExtension/ThumbnailExtension에 `ko.lproj`, `en.lproj` `InfoPlist.strings` 포함
 - HostApp/QLExtension/ThumbnailExtension에 `LSHasLocalizedDisplayName = true` 포함
 - Spotlight metadata에서 `알한글.app` display name과 `AlhangeulMac.app` filesystem name 확인
+- Spotlight metadata에서 `AlhangeulMac.app` alternate name 확인
 - Spotlight 검색에서 `알한글`, `AlhangeulMac` 모두 설치본 확인
+- 이전 generated DerivedData 앱 후보 제거 후 관련 설치 후보가 `/Users/melee/Applications/AlhangeulMac.app` 하나로 수렴함 확인
 - `com.postmelee.alhangeulmac.QLExtension` PlugInKit 등록 확인
 - `com.postmelee.alhangeulmac.ThumbnailExtension` PlugInKit 등록 확인
 - `qlmanage -t -x` thumbnail 생성 확인
@@ -173,6 +198,7 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 ## 남은 리스크와 운영 메모
 
 - Dock/Finder/Spotlight 표시명은 LaunchServices/Spotlight cache 영향을 받을 수 있으나, 현재 설치본 metadata와 Spotlight 검색 후보는 `알한글`과 `AlhangeulMac` 모두 확인됐다.
+- Codex sandbox 내부에서는 Spotlight server가 disabled로 보여 `mdfind`/`mdls`가 실패할 수 있다. Spotlight 검증은 sandbox 밖 권한에서 수행해야 하며, 이번 검증에서는 `/`와 `/System/Volumes/Data` indexing enabled를 확인했다.
 - 요청한 테스트 경로 `/Users/melee/Documents/projects/rhwp-mac/samples`에는 현재 `.DS_Store` 외 HWP/HWPX 파일이 없어 해당 경로로 thumbnail smoke를 수행할 수 없었다. 보조로 `/Users/melee/Documents/projects/rhwp-mac/Vendor/rhwp/samples/basic/KTX.hwp`를 사용해 thumbnail 생성은 확인했다.
 - 공개 배포용 서명/공증은 이번 작업 범위가 아니며 별도 release task에서 결정한다.
 
@@ -180,7 +206,7 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 
 - 수행 계획서: 작성 완료
 - 구현 계획서: 작성 완료
-- Stage 1-5 보고서: 작성 완료
+- Stage 1-6 보고서: 작성 완료
 - 최종 보고서: 작성 완료
 - 오늘할일: 완료 처리
 - PR 생성은 작업지시자 최종 승인 후 `publish/task40` 원격 브랜치로 push하고 `devel` 대상 draft PR로 진행한다.

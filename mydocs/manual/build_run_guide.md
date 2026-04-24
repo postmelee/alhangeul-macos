@@ -52,12 +52,14 @@ Debug:
 xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
-  -derivedDataPath build/DerivedData \
+  -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO \
   build
 ```
 
 Debug 빌드는 compile/link 확인용이다. `CODE_SIGNING_ALLOWED=NO` 산출물은 `Info.plist`와 resource sealing이 PlugInKit registration smoke test에 충분하지 않을 수 있으므로 Finder Quick Look/Thumbnail 등록 검증에 사용하지 않는다.
+
+개발 build 산출물은 Spotlight 앱 검색 후보에 섞이지 않도록 `build.noindex/` 아래에 둔다. `build/DerivedData`처럼 일반 디렉터리 아래에 `.app`을 만들면 Spotlight가 개발 산출물을 별도 앱으로 인덱싱해 표준 설치본과 경쟁할 수 있다.
 
 Release:
 
@@ -65,7 +67,7 @@ Release:
 xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Release \
-  -derivedDataPath build/DerivedDataRelease \
+  -derivedDataPath build.noindex/DerivedDataRelease \
   CODE_SIGNING_ALLOWED=NO \
   build
 ```
@@ -105,7 +107,7 @@ Finder 통합 검증은 세 계층을 분리한다.
 앱 실행만 확인할 때는 Debug 산출물을 바로 열 수 있다.
 
 ```bash
-open build/DerivedData/Build/Products/Debug/AlhangeulMac.app
+open build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app
 ```
 
 ### 표준 smoke test 흐름
@@ -120,7 +122,7 @@ APP="$HOME/Applications/AlhangeulMac.app"
 mkdir -p "$HOME/Applications"
 "$LSREGISTER" -u "$APP" >/dev/null 2>&1 || true
 rm -rf "$APP"
-ditto build/release/AlhangeulMac.app "$APP"
+ditto build.noindex/release/AlhangeulMac.app "$APP"
 "$LSREGISTER" -f -R -trusted "$APP"
 pluginkit -a "$APP"
 ```
@@ -164,6 +166,7 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql Vendor/rhwp/samples/basic/KTX.hwp
 ### 반복 시행착오 방지 규칙
 
 - `CODE_SIGNING_ALLOWED=NO` Debug 산출물로 `pluginkit` 등록 여부를 판정하지 않는다.
+- Debug/Release 중간 산출물은 `build.noindex/` 아래에 둔다. Spotlight 검색 결과에 `build/DerivedData/.../AlhangeulMac.app` 같은 개발 앱이 보이면 오래된 산출물 오염으로 보고 제거하거나 Spotlight 인덱스를 갱신한다.
 - `qlmanage -m plugins`는 app extension 기반 Quick Look/Thumbnail 등록 상태를 직접 반영하지 않을 수 있으므로 실패 판정의 근거로 쓰지 않는다.
 - `RhwpMac.app` 또는 `알한글.app` 같은 이전 설치본이 남아 discovery 충돌이 의심될 때만 작업지시자 승인 후 제거한다.
 - 동일 검증 중에는 설치 후보를 `$HOME/Applications/AlhangeulMac.app` 하나로 고정한다.

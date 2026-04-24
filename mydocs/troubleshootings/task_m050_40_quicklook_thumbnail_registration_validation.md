@@ -56,7 +56,7 @@ Sealed Resources=none
 - local signing과 sealed resources 적용
 - zip 생성과 SHA256 출력
 
-따라서 LaunchServices/PlugInKit 등록 확인과 `qlmanage -t` smoke test에는 `build/release/AlhangeulMac.app`을 기준으로 사용한다.
+따라서 LaunchServices/PlugInKit 등록 확인과 `qlmanage -t` smoke test에는 `build.noindex/release/AlhangeulMac.app`을 기준으로 사용한다.
 
 ### 4. app bundle filesystem name과 사용자 표시명은 분리한다
 
@@ -111,7 +111,7 @@ xcodegen generate
 xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
-  -derivedDataPath build/DerivedDataDebug \
+  -derivedDataPath build.noindex/DerivedDataDebug \
   CODE_SIGNING_ALLOWED=NO \
   build
 ```
@@ -127,11 +127,11 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 ### 4. 단일 설치 경로로 교체
 
 ```bash
-LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister"
 mkdir -p /Users/melee/Applications
 "$LSREGISTER" -u /Users/melee/Applications/AlhangeulMac.app >/dev/null 2>&1 || true
 rm -rf /Users/melee/Applications/AlhangeulMac.app
-ditto build/release/AlhangeulMac.app /Users/melee/Applications/AlhangeulMac.app
+ditto build.noindex/release/AlhangeulMac.app /Users/melee/Applications/AlhangeulMac.app
 "$LSREGISTER" -f -R -trusted /Users/melee/Applications/AlhangeulMac.app
 pluginkit -a /Users/melee/Applications/AlhangeulMac.app
 ```
@@ -157,10 +157,10 @@ pluginkit -mAvvv | grep com.postmelee.alhangeulmac
 
 ```bash
 mkdir -p /tmp/alhangeul-ql
-qlmanage -t -x -s 512 -o /tmp/alhangeul-ql /Users/melee/Documents/projects/rhwp-mac/samples/basic/KTX.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql /Users/melee/Documents/projects/rhwp-mac/Vendor/rhwp/samples/basic/KTX.hwp
 ```
 
-사용자 요청이 있으면 `/Users/melee/Documents/projects/rhwp-mac/samples` 아래 파일을 우선 사용한다.
+사용자 요청이 있으면 `/Users/melee/Documents/projects/rhwp-mac/samples` 아래 HWP/HWPX 파일을 우선 사용한다. 해당 폴더에 테스트 파일이 없으면 `Vendor/rhwp/samples`의 고정 샘플을 보조로 사용하고 보고서에 명시한다.
 
 ## 증상별 판단표
 
@@ -170,12 +170,13 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql /Users/melee/Documents/projects/rhwp-
 | Debug app이 `pluginkit`에 안 보임 | Debug 산출물 특성일 가능성 높음 | Release package 산출물로 재검증 |
 | `pluginkit` parent bundle이 이전 경로 | stale install/discovery 후보 | 표준 경로 재등록, 이전 설치본은 승인 후 제거 |
 | `qlmanage -m plugins`에 안 보임 | 판정 기준 아님 | `pluginkit -mAvvv`, `qlmanage -t -x` 확인 |
-| Spotlight/Dock이 `AlhangeulMac`만 검색/표시 | 기본 plist와 bundle name 불일치 또는 캐시 문제 | `CFBundleDisplayName`, `CFBundleName`, `LSHasLocalizedDisplayName`, `InfoPlist.strings`, `mdfind` 확인 |
+| Spotlight/Dock이 `AlhangeulMac`만 검색/표시 | 기본 plist와 bundle name 불일치, 캐시, 또는 개발 build 후보 오염 | `CFBundleDisplayName`, `CFBundleName`, `LSHasLocalizedDisplayName`, `InfoPlist.strings`, `mdfind`, `mdls`, `build/DerivedData` 후보 확인 |
 | thumbnail 생성 실패 | registration 또는 renderer 문제 | `pluginkit`, `mdls kMDItemContentType`, `qlmanage -t -x`, unified log 순서로 확인 |
 
 ## 금지할 습관
 
 - Debug `CODE_SIGNING_ALLOWED=NO` 산출물로 extension 등록 성공/실패를 결론 내리지 않는다.
+- 개발 build 산출물을 `build/DerivedData`처럼 Spotlight가 인덱싱하는 일반 경로에 두지 않는다. 표준은 `build.noindex/`다.
 - 문제가 보인다고 이전 앱 후보들을 무작정 삭제하지 않는다.
 - `qlmanage -m plugins` 미노출만으로 실패를 확정하지 않는다.
 - filesystem bundle name을 한글로 바꾸어 표시명 문제를 해결하려 하지 않는다.

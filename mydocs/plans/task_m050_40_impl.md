@@ -100,6 +100,23 @@
 - 설치본 `/Users/melee/Applications/AlhangeulMac.app`에 `LSHasLocalizedDisplayName`과 localized resources가 포함된다.
 - `mdfind`에서 `알한글`과 `AlhangeulMac` 검색 후보가 설치본을 찾는다.
 
+## Stage 6. 개발 산출물 Spotlight 오염 방지
+
+### 작업
+
+- Spotlight 검색 결과에 개발 build `.app`이 표준 설치본과 경쟁하는지 확인한다.
+- Debug/Release 중간 산출물과 package staging 경로를 `build.noindex/`로 표준화한다.
+- `scripts/package-release.sh`가 `build.noindex/release`를 사용하도록 수정한다.
+- README, AGENTS, build 실행/배포 관련 manual 문서의 표준 빌드 경로를 갱신한다.
+- 기존 `build/DerivedData` 및 예전 `RhwpMac` DerivedData 후보를 제한적으로 정리하고 Spotlight 검색 결과를 재확인한다.
+
+### 완료 조건
+
+- `build.noindex/`가 git ignore에 포함된다.
+- canonical build 문서에 신규 `build/DerivedData` app 경로를 만들지 않는다.
+- Release package가 `build.noindex/release/AlhangeulMac.app`과 zip을 생성한다.
+- Spotlight 앱 검색 후보에서 설치본 `/Users/melee/Applications/AlhangeulMac.app`이 `알한글`과 `AlhangeulMac` 모두의 기준 후보가 된다.
+
 ## 승인 요청
 
 위 Stage 기준으로 진행 승인을 요청한다.

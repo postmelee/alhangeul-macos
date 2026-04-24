@@ -61,7 +61,7 @@ xcodegen generate
 xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
-  -derivedDataPath build/DerivedData \
+  -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO \
   build
 ./scripts/validate-stage3-render.sh
@@ -73,7 +73,7 @@ Release configuration 검증:
 xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Release \
-  -derivedDataPath build/DerivedDataRelease \
+  -derivedDataPath build.noindex/DerivedDataRelease \
   CODE_SIGNING_ALLOWED=NO \
   build
 ```
@@ -88,7 +88,7 @@ APP="$HOME/Applications/AlhangeulMac.app"
 mkdir -p "$HOME/Applications"
 "$LSREGISTER" -u "$APP" >/dev/null 2>&1 || true
 rm -rf "$APP"
-ditto build/release/AlhangeulMac.app "$APP"
+ditto build.noindex/release/AlhangeulMac.app "$APP"
 "$LSREGISTER" -f -R -trusted "$APP"
 pluginkit -a "$APP"
 pluginkit -mAvvv | grep com.postmelee.alhangeulmac
@@ -102,6 +102,7 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql Vendor/rhwp/samples/basic/KTX.hwp
 주의:
 
 - `CODE_SIGNING_ALLOWED=NO` Debug 산출물은 Finder 통합 smoke test에 쓰지 않는다. compile/link 확인과 bundle resource 확인까지만 사용한다.
+- Debug/Release 중간 산출물과 package staging 산출물은 Spotlight 앱 검색 결과에 섞이지 않도록 `build.noindex/` 아래에 둔다.
 - Release package 산출물은 `Sign to Run Locally` 경로로 signing과 sealed resources가 적용되므로 LaunchServices/PlugInKit 등록 검증에 더 적합하다.
 - Dock/Finder/Spotlight 표시명 검증 시 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`이 실제 bundle filesystem name과 맞고, `ko.lproj/InfoPlist.strings`와 `LSHasLocalizedDisplayName`이 release bundle 안에 포함됐는지 먼저 확인한다.
 - 이전 이름의 설치본(`RhwpMac.app`, `알한글.app`)은 discovery 충돌이 확인되거나 의심될 때만 작업지시자 승인 후 제거한다.
@@ -138,7 +139,7 @@ zip 생성:
 현재 산출물:
 
 ```text
-build/release/alhangeul-macos-0.1.0.zip
+build.noindex/release/alhangeul-macos-0.1.0.zip
 ```
 
 스크립트가 수행하는 일:
