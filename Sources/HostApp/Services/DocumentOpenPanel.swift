@@ -19,8 +19,8 @@ enum DocumentOpenPanel {
     private static var supportedContentTypes: [UTType] {
         var types: [UTType] = [.data]
         [
-            "com.postmelee.rhwpmac.hwp",
-            "com.postmelee.rhwpmac.hwpx",
+            "com.postmelee.alhangeulmac.hwp",
+            "com.postmelee.alhangeulmac.hwpx",
             "com.hancom.hwp",
             "com.hancom.hwpx",
             "com.haansoft.hancomofficeviewer.mac.hwp",

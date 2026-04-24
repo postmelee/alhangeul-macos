@@ -34,7 +34,7 @@
 ./scripts/build-rust-macos.sh
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build/DerivedData \

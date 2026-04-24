@@ -49,9 +49,10 @@
 ### 5. 프로젝트 설정 경계
 
 - `project.yml`이 Xcode project의 원본이다.
-- `RhwpMac.xcodeproj`는 생성물로 취급한다.
+- `AlhangeulMac.xcodeproj`는 생성물로 취급한다.
 - target 구성, source 포함 범위, bundle identifier, extension embedding은 `project.yml`에서 관리한다.
-- 사용자 표시명과 배포 앱 번들명은 `알한글` 기준이고, 내부 Xcode product/executable/module 이름은 `RhwpMac` 계열을 유지한다.
+- 사용자 표시명은 `알한글` 기준이고, filesystem app bundle name과 내부 Xcode product/executable/module 이름은 `AlhangeulMac` 계열을 유지한다.
+- Finder/Quick Look 통합 검증과 배포 zip 내부 `.app` 경로는 ExtensionKit lookup 안정성을 위해 ASCII 이름인 `AlhangeulMac.app`을 사용한다.
 
 ## 런타임 데이터 흐름
 

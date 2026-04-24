@@ -51,9 +51,9 @@ private extension URLResourceValues {
 final class HwpThumbnailRenderCache {
     static let shared = HwpThumbnailRenderCache()
 
-    private let stateQueue = DispatchQueue(label: "com.postmelee.rhwpmac.thumbnail-cache")
+    private let stateQueue = DispatchQueue(label: "com.postmelee.alhangeulmac.thumbnail-cache")
     private let workerQueue = DispatchQueue(
-        label: "com.postmelee.rhwpmac.thumbnail-render",
+        label: "com.postmelee.alhangeulmac.thumbnail-render",
         qos: .utility,
         attributes: .concurrent
     )

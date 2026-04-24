@@ -33,14 +33,14 @@ brew install xcodegen
 xcodegen generate
 ```
 
-`project.yml`이 원본이며 `RhwpMac.xcodeproj`를 직접 수정하지 않는다.
+`project.yml`이 원본이며 `AlhangeulMac.xcodeproj`를 직접 수정하지 않는다.
 
 ## HostApp 빌드
 
 Debug:
 
 ```bash
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build/DerivedData \
@@ -51,7 +51,7 @@ xcodebuild -project RhwpMac.xcodeproj \
 Release:
 
 ```bash
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Release \
   -derivedDataPath build/DerivedDataRelease \
@@ -84,22 +84,24 @@ xcodebuild -project RhwpMac.xcodeproj \
 앱 실행만 확인할 때:
 
 ```bash
-open build/DerivedData/Build/Products/Debug/RhwpMac.app
+open build/DerivedData/Build/Products/Debug/AlhangeulMac.app
 ```
 
 Finder 통합은 단일 설치본 기준으로 확인한다.
 
 ```bash
 mkdir -p ~/Applications
-rm -rf ~/Applications/알한글.app
-ditto build/DerivedData/Build/Products/Debug/RhwpMac.app ~/Applications/알한글.app
-pluginkit -a ~/Applications/알한글.app
+rm -rf ~/Applications/AlhangeulMac.app
+ditto build/DerivedData/Build/Products/Debug/AlhangeulMac.app ~/Applications/AlhangeulMac.app
+pluginkit -a ~/Applications/AlhangeulMac.app
 ```
+
+앱과 extension의 사용자 표시명은 `Info.plist`에서 `알한글` 계열로 노출한다. Finder/Quick Look smoke test용 filesystem bundle path는 ExtensionKit lookup 안정성을 위해 `AlhangeulMac.app`처럼 ASCII 이름을 유지한다.
 
 extension 등록 확인:
 
 ```bash
-pluginkit -m | grep com.postmelee.rhwpmac
+pluginkit -m | grep com.postmelee.alhangeulmac
 ```
 
 Quick Look 캐시 갱신:
