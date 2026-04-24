@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		035C763D1AFA0DA46909BBDB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6729F28103B7C21748B627D7 /* InfoPlist.strings */; };
 		04826A6D082A7BA271809E2E /* ExtensionStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6557EB0999822D4A503FFACC /* ExtensionStatusModel.swift */; };
 		04F786BF8FD3100CDDC1FAA1 /* CGTreeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4C7377B231BA12026CD0A8 /* CGTreeRenderer.swift */; };
+		0C786955298FBD298FD5D3BE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 054AB0DF09AD7A7CEBF8003B /* InfoPlist.strings */; };
 		10D474457FFCF2C2E5B1C3AE /* RenderTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE58FDA2BFE00D5055F6ECCD /* RenderTree.swift */; };
 		13A6BD7074F74333D229983E /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264820B28D93821B34BC8369 /* RhwpDocument.swift */; };
 		19F30C2E288F6D6DA3183F40 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FB9505A870E7B20DEBD9A3 /* HwpPageImageRenderer.swift */; };
@@ -17,6 +19,7 @@
 		3E493DF69BC4FDC843C07693 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FB9505A870E7B20DEBD9A3 /* HwpPageImageRenderer.swift */; };
 		3FD0D49E5FCDCB09A8E4823B /* CGTreeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4C7377B231BA12026CD0A8 /* CGTreeRenderer.swift */; };
 		5222F18B40FB3ABEAEA82A7D /* HwpThumbnailProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3EBDA3B97538A87F0EFE88 /* HwpThumbnailProvider.swift */; };
+		559AF16A52577F78660A386F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 142B296A597FCC2F7282325E /* InfoPlist.strings */; };
 		5D8A5308E8D18507D1AF717D /* DocumentViewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0059FA2411515C760DF22DAC /* DocumentViewerView.swift */; };
 		75243835C9BE6F6C44F5F20E /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA8BCDFCBEAD6115FFE3554A /* Rhwp.xcframework */; };
 		79668181738E40F261D667EC /* FontFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED414CA9E748617ED5AC5770 /* FontFallback.swift */; };
@@ -77,18 +80,22 @@
 
 /* Begin PBXFileReference section */
 		0059FA2411515C760DF22DAC /* DocumentViewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentViewerView.swift; sourceTree = "<group>"; };
+		084056E90F96500CF2FC49A3 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		08D0A8A87C7F8BC532D06B42 /* HwpThumbnailRenderCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpThumbnailRenderCache.swift; sourceTree = "<group>"; };
 		1A0774AFA1AAF33840B28C7A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		1E11DF5DAE3681D87012640D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		264820B28D93821B34BC8369 /* RhwpDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpDocument.swift; sourceTree = "<group>"; };
 		2F334BFE86C869C93D352B47 /* HostApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HostApp.entitlements; sourceTree = "<group>"; };
 		47927CA6F14A54D1BCB55CC7 /* HostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostApp.swift; sourceTree = "<group>"; };
 		5E039FB3B00187086CB917B3 /* ThumbnailExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ThumbnailExtension.entitlements; sourceTree = "<group>"; };
 		6336DDBE52EE036D340608FB /* HwpPreviewProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewProvider.swift; sourceTree = "<group>"; };
 		6557EB0999822D4A503FFACC /* ExtensionStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionStatusModel.swift; sourceTree = "<group>"; };
+		77B0F8AD1D4E830F2B914ADB /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		7A4C7377B231BA12026CD0A8 /* CGTreeRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGTreeRenderer.swift; sourceTree = "<group>"; };
 		801780F983F003C6DFC80985 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		840B8833500367957AD264C8 /* ThumbnailExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ThumbnailExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		89902FCF2BE44AEF39BCB0F1 /* QLExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QLExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9199501DC6991A85F978CF58 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		92C494752765F206E7932946 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		9D3EBDA3B97538A87F0EFE88 /* HwpThumbnailProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpThumbnailProvider.swift; sourceTree = "<group>"; };
 		9D96E5B8871F5D53AF7C9737 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -101,6 +108,8 @@
 		BDD8FBF2A6F1FBF857E25264 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		BFB237499FC34A454309F367 /* DocumentPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPageView.swift; sourceTree = "<group>"; };
 		C752144C36555537BC4E0BF6 /* sample.hwpx */ = {isa = PBXFileReference; path = sample.hwpx; sourceTree = "<group>"; };
+		CB5619DA72A40986D792DB77 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CF67920811C5DFDDA906CE59 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D785AC207DC50ED5C5A409CD /* DocumentOpenRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentOpenRouter.swift; sourceTree = "<group>"; };
 		D89D32BE37F39A75E3BDB12A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E45E85E7D6181688EBD752C6 /* DocumentViewerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentViewerStore.swift; sourceTree = "<group>"; };
@@ -163,6 +172,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		20D9D5CF1E55532E529F5457 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				142B296A597FCC2F7282325E /* InfoPlist.strings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		2ADF061D0DEFFD804113F11C /* RhwpCoreBridge */ = {
 			isa = PBXGroup;
 			children = (
@@ -183,6 +200,7 @@
 				08D0A8A87C7F8BC532D06B42 /* HwpThumbnailRenderCache.swift */,
 				D89D32BE37F39A75E3BDB12A /* Info.plist */,
 				5E039FB3B00187086CB917B3 /* ThumbnailExtension.entitlements */,
+				F3D8685BFCEC3C0851D337E3 /* Resources */,
 			);
 			name = ThumbnailExtension;
 			path = Sources/ThumbnailExtension;
@@ -202,6 +220,7 @@
 			isa = PBXGroup;
 			children = (
 				C752144C36555537BC4E0BF6 /* sample.hwpx */,
+				6729F28103B7C21748B627D7 /* InfoPlist.strings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -221,6 +240,7 @@
 				6336DDBE52EE036D340608FB /* HwpPreviewProvider.swift */,
 				B34FB2A6230C67E6D0063696 /* Info.plist */,
 				B22508A024E2FE008BFAF33F /* QLExtension.entitlements */,
+				20D9D5CF1E55532E529F5457 /* Resources */,
 			);
 			name = QLExtension;
 			path = Sources/QLExtension;
@@ -265,6 +285,14 @@
 			);
 			sourceTree = "<group>";
 		};
+		F3D8685BFCEC3C0851D337E3 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				054AB0DF09AD7A7CEBF8003B /* InfoPlist.strings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		F5C7000A1CB40276B0044C16 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -283,6 +311,7 @@
 			buildConfigurationList = 7542561F5014C47EF6CFA41C /* Build configuration list for PBXNativeTarget "QLExtension" */;
 			buildPhases = (
 				1C9D07E803F0D9633C4BF855 /* Sources */,
+				57CCC2FDEF66B040DC57F48D /* Resources */,
 				186D0AFF90432507E0FD89D0 /* Frameworks */,
 			);
 			buildRules = (
@@ -323,6 +352,7 @@
 			buildConfigurationList = FD0552B53459DA1E9B5F84DF /* Build configuration list for PBXNativeTarget "ThumbnailExtension" */;
 			buildPhases = (
 				36C048C5B97B4D4F510D48BE /* Sources */,
+				CE456F6C79B4F14B8E2463FC /* Resources */,
 				5DFEC015CAE57F2E6C5F985C /* Frameworks */,
 			);
 			buildRules = (
@@ -362,6 +392,7 @@
 			knownRegions = (
 				Base,
 				en,
+				ko,
 			);
 			mainGroup = F33818F296F01F068C71F64D;
 			minimizedProjectReferenceProxies = 1;
@@ -378,12 +409,29 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		57CCC2FDEF66B040DC57F48D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				559AF16A52577F78660A386F /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8F2C8A2134B0ADF2EA699556 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				34FB4A934C2B659E514A5949 /* Assets.xcassets in Resources */,
+				035C763D1AFA0DA46909BBDB /* InfoPlist.strings in Resources */,
 				EEC6A9F2ACF281D9D33B6504 /* sample.hwpx in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CE456F6C79B4F14B8E2463FC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0C786955298FBD298FD5D3BE /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -452,6 +500,36 @@
 			targetProxy = F69506B5E7A01DA5AD2B47FB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		054AB0DF09AD7A7CEBF8003B /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CF67920811C5DFDDA906CE59 /* en */,
+				084056E90F96500CF2FC49A3 /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		142B296A597FCC2F7282325E /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1E11DF5DAE3681D87012640D /* en */,
+				9199501DC6991A85F978CF58 /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		6729F28103B7C21748B627D7 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				CB5619DA72A40986D792DB77 /* en */,
+				77B0F8AD1D4E830F2B914ADB /* ko */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		0775E6562414CC2B135ECB41 /* Release */ = {
