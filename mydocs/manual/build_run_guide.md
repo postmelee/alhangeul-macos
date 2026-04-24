@@ -91,10 +91,12 @@ Finder 통합은 단일 설치본 기준으로 확인한다.
 
 ```bash
 mkdir -p ~/Applications
-rm -rf ~/Applications/알한글.app
-ditto build/DerivedData/Build/Products/Debug/RhwpMac.app ~/Applications/알한글.app
-pluginkit -a ~/Applications/알한글.app
+rm -rf ~/Applications/RhwpMac.app
+ditto build/DerivedData/Build/Products/Debug/RhwpMac.app ~/Applications/RhwpMac.app
+pluginkit -a ~/Applications/RhwpMac.app
 ```
+
+앱과 extension의 사용자 표시명은 `Info.plist`에서 `알한글` 계열로 노출한다. Finder/Quick Look smoke test용 filesystem bundle path는 ExtensionKit lookup 안정성을 위해 `RhwpMac.app`처럼 ASCII 이름을 유지한다.
 
 extension 등록 확인:
 
