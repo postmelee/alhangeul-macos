@@ -7,7 +7,6 @@ import CoreText
 import Foundation
 import ImageIO
 
-@MainActor
 class CGTreeRenderer {
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?

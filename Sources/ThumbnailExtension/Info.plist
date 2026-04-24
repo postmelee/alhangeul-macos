@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>알한글 Thumbnail</string>
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
@@ -35,8 +35,6 @@
 				<string>com.haansoft.hancomofficeviewer.mac.hwp</string>
 				<string>com.haansoft.hancomofficeviewer.mac.hwpx</string>
 			</array>
-			<key>QLThumbnailMinimumDimension</key>
-			<integer>64</integer>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.quicklook.thumbnail</string>
