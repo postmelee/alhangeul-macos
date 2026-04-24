@@ -191,16 +191,16 @@ xcodebuild -project RhwpMac.xcodeproj \
   build
 ```
 
-개발 빌드 후 앱은 다음 경로에 생성됩니다.
+개발 빌드 후 앱은 내부 산출물 이름으로 다음 경로에 생성됩니다.
 
 ```text
-build/DerivedData/Build/Products/Debug/알한글.app
+build/DerivedData/Build/Products/Debug/RhwpMac.app
 ```
 
 ### Run
 
 ```bash
-open build/DerivedData/Build/Products/Debug/알한글.app
+open build/DerivedData/Build/Products/Debug/RhwpMac.app
 ```
 
 Quick Look과 Thumbnail extension 등록 상태는 앱 사이드바 또는 `pluginkit`으로 확인할 수 있습니다.
