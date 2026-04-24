@@ -186,7 +186,7 @@ xcodegen generate
 xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
-  -derivedDataPath build/DerivedData \
+  -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO \
   build
 ```
@@ -194,26 +194,41 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 개발 빌드 후 앱은 내부 산출물 이름으로 다음 경로에 생성됩니다.
 
 ```text
-build/DerivedData/Build/Products/Debug/AlhangeulMac.app
+build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app
 ```
 
 ### Run
 
 ```bash
-open build/DerivedData/Build/Products/Debug/AlhangeulMac.app
+open build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app
 ```
 
-Quick Look과 Thumbnail extension 등록 상태는 앱 사이드바 또는 `pluginkit`으로 확인할 수 있습니다.
+Debug build는 앱 실행과 compile/link 확인용입니다. `CODE_SIGNING_ALLOWED=NO`로 만든 Debug 산출물은 Quick Look/Thumbnail extension 등록 검증에 사용하지 않습니다.
+
+Finder Quick Look/Thumbnail smoke test는 Release package 산출물로 확인합니다. 실제 `.app` 경로는 ExtensionKit lookup 안정성을 위해 ASCII인 `AlhangeulMac.app`을 유지하고, 사용자 표시명은 `InfoPlist.strings`에서 언어별로 제공합니다. 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 실제 bundle filesystem name과 맞추고, 한국어 표시명 `알한글`은 `ko.lproj/InfoPlist.strings`에서 제공합니다.
+
+개발 build 산출물은 Spotlight 앱 검색 결과에 섞이지 않도록 `build.noindex/` 아래에 둡니다. 사용자가 실행하거나 Finder/Spotlight에서 확인할 기준 앱은 표준 설치 경로의 `~/Applications/AlhangeulMac.app`입니다.
 
 ```bash
-pluginkit -m | grep com.postmelee.alhangeulmac
+./scripts/package-release.sh 0.1.0
+mkdir -p ~/Applications
+ditto build.noindex/release/AlhangeulMac.app ~/Applications/AlhangeulMac.app
+pluginkit -a ~/Applications/AlhangeulMac.app
+pluginkit -mAvvv | grep com.postmelee.alhangeulmac
 ```
 
-Finder/Quick Look 캐시를 갱신해야 할 때:
+Quick Look 캐시를 갱신해야 할 때:
 
 ```bash
 qlmanage -r
 qlmanage -r cache
+```
+
+thumbnail smoke test:
+
+```bash
+mkdir -p /tmp/alhangeul-ql
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql path/to/sample.hwp
 ```
 
 특정 파일 preview를 강제로 열어볼 때:

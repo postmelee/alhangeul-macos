@@ -26,7 +26,7 @@
 
 - GitHub 저장소명 기준 release URL: 현재 저장소는 `postmelee/alhangeul-macos`다.
 - zip 파일명과 Homebrew Cask token: 현재 스크립트와 cask는 `alhangeul-macos` 이름을 사용한다.
-- 앱 표시명: 현재 `알한글`이다.
+- 앱 표시명: 한국어 사용자 환경에서는 `알한글`, 영어 사용자 환경에서는 `AlhangeulMac`이다. 기본 `Info.plist` 값은 실제 bundle filesystem name과 맞는 `AlhangeulMac`이며, 한국어 표시는 `ko.lproj/InfoPlist.strings`에서 제공한다.
 - 배포 앱 filesystem bundle name: 현재 `AlhangeulMac.app`이다. Quick Look/Thumbnail extension의 LaunchServices/ExtensionKit lookup 안정성을 위해 `.app` 경로는 ASCII로 유지한다.
 - 내부 Xcode product name: 현재 `AlhangeulMac.app`이다.
 - bundle identifier: 현재 `com.postmelee.alhangeulmac` 계열이다.
@@ -61,7 +61,7 @@ xcodegen generate
 xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
-  -derivedDataPath build/DerivedData \
+  -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO \
   build
 ./scripts/validate-stage3-render.sh
@@ -73,7 +73,7 @@ Release configuration 검증:
 xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Release \
-  -derivedDataPath build/DerivedDataRelease \
+  -derivedDataPath build.noindex/DerivedDataRelease \
   CODE_SIGNING_ALLOWED=NO \
   build
 ```
@@ -81,17 +81,32 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 Finder 통합 smoke test:
 
 ```bash
-mkdir -p ~/Applications
-rm -rf ~/Applications/AlhangeulMac.app
-ditto build/DerivedData/Build/Products/Debug/AlhangeulMac.app ~/Applications/AlhangeulMac.app
-pluginkit -a ~/Applications/AlhangeulMac.app
-pluginkit -m | grep com.postmelee.alhangeulmac
+./scripts/package-release.sh 0.1.0
+
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+APP="$HOME/Applications/AlhangeulMac.app"
+mkdir -p "$HOME/Applications"
+"$LSREGISTER" -u "$APP" >/dev/null 2>&1 || true
+rm -rf "$APP"
+ditto build.noindex/release/AlhangeulMac.app "$APP"
+"$LSREGISTER" -f -R -trusted "$APP"
+pluginkit -a "$APP"
+pluginkit -mAvvv | grep com.postmelee.alhangeulmac
 qlmanage -r
 qlmanage -r cache
-qlmanage -p Vendor/rhwp/samples/basic/KTX.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql Vendor/rhwp/samples/basic/KTX.hwp
 ```
 
-`qlmanage -p`는 GUI preview를 띄우므로 자동화 환경에서는 작업지시자 확인이 필요하다.
+`qlmanage -p`는 GUI preview를 띄우므로 자동화 환경에서는 작업지시자 확인이 필요하다. 자동화 가능한 smoke test는 `qlmanage -t -x`를 우선 사용한다.
+
+주의:
+
+- `CODE_SIGNING_ALLOWED=NO` Debug 산출물은 Finder 통합 smoke test에 쓰지 않는다. compile/link 확인과 bundle resource 확인까지만 사용한다.
+- Debug/Release 중간 산출물과 package staging 산출물은 Spotlight 앱 검색 결과에 섞이지 않도록 `build.noindex/` 아래에 둔다.
+- Release package 산출물은 `Sign to Run Locally` 경로로 signing과 sealed resources가 적용되므로 LaunchServices/PlugInKit 등록 검증에 더 적합하다.
+- Dock/Finder/Spotlight 표시명 검증 시 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`이 실제 bundle filesystem name과 맞고, `ko.lproj/InfoPlist.strings`와 `LSHasLocalizedDisplayName`이 release bundle 안에 포함됐는지 먼저 확인한다.
+- 이전 이름의 설치본(`RhwpMac.app`, `알한글.app`)은 discovery 충돌이 확인되거나 의심될 때만 작업지시자 승인 후 제거한다.
+- `qlmanage -m plugins` 미노출은 app extension 실행 실패의 직접 증거가 아니므로, 등록은 `pluginkit -mAvvv`, 실제 렌더링은 `qlmanage -t -x`로 판정한다.
 
 ## 버전 갱신
 
@@ -124,7 +139,7 @@ zip 생성:
 현재 산출물:
 
 ```text
-build/release/alhangeul-macos-0.1.0.zip
+build.noindex/release/alhangeul-macos-0.1.0.zip
 ```
 
 스크립트가 수행하는 일:
@@ -133,6 +148,7 @@ build/release/alhangeul-macos-0.1.0.zip
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
 - 내부 산출물 `AlhangeulMac.app`을 release staging으로 복사한 뒤 `AlhangeulMac.app` 이름으로 zip 압축
+- Release staging app은 local signing과 sealed resources가 적용되어 Finder 통합 smoke test의 기준 산출물로 사용할 수 있음
 - SHA256 출력
 
 주의:
