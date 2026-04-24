@@ -370,7 +370,7 @@ local/task{N}  ──커밋──커밋──┐
 2. `origin/devel` 기준으로 `local/task{issue번호}` 브랜치 생성
 3. 수행계획서 작성 → 구현 계획서 작성 → 구현 → 검증
 4. 단계별 완료 보고서와 최종 보고서 작성
-5. `publish/task{issue번호}`로 push 후 `devel` 대상 draft PR 생성
+5. `publish/task{issue번호}`로 push 후 `.github/pull_request_template.md` 기준으로 `devel` 대상 draft PR 생성
 6. PR merge 후 이슈와 오늘할일 상태 정리
 
 ### 디버깅 프로토콜

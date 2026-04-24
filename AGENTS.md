@@ -188,7 +188,7 @@ local/task{N+1}──커밋──커밋──┤
 # 1. local/taskN → publish/taskN push + devel 대상 draft PR
 git checkout local/task17
 git push origin local/task17:publish/task17
-gh pr create --base devel --head publish/task17 --draft --title "Task #17: 제목"
+gh pr create --base devel --head publish/task17 --draft --title "Task #17: 제목" --template .github/pull_request_template.md
 
 # 2. devel 대상 PR 리뷰 + merge
 gh pr review --approve
