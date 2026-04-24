@@ -1,0 +1,164 @@
+# Issue #40 최종 결과 보고서
+
+## 타스크
+
+- GitHub Issue: #40
+- 마일스톤: M050
+- 제목: Dock/Spotlight 표시명 한영 현지화
+- 작업 브랜치: `local/task40`
+- 기준 브랜치: `origin/devel` `5a66f9b`
+
+## 결론
+
+실제 app bundle filesystem name은 `AlhangeulMac.app`으로 유지하면서, 사용자 표시명은 `InfoPlist.strings`로 한국어와 영어를 분리했다.
+
+- 한국어 환경: `알한글`, `알한글 미리보기`, `알한글 썸네일`
+- 영어 환경: `AlhangeulMac`, `AlhangeulMac Preview`, `AlhangeulMac Thumbnail`
+
+또한 Quick Look/Thumbnail 검증 시행착오의 원인을 분석해 운영 문서에 재발 방지 기준을 추가했다.
+
+- `CODE_SIGNING_ALLOWED=NO` Debug 산출물은 registration smoke test에 쓰지 않는다.
+- LaunchServices/PlugInKit/Quick Look 검증은 signed/sealed Release package 산출물 기준으로 수행한다.
+- 단일 설치 경로는 `AlhangeulMac.app`으로 유지한다.
+- `qlmanage -m plugins`는 app extension 등록 판정 기준으로 쓰지 않는다.
+
+## 단계별 결과
+
+### Stage 1. 현지화 리소스 구조 추가
+
+추가 파일:
+
+- `Sources/HostApp/Resources/ko.lproj/InfoPlist.strings`
+- `Sources/HostApp/Resources/en.lproj/InfoPlist.strings`
+- `Sources/QLExtension/Resources/ko.lproj/InfoPlist.strings`
+- `Sources/QLExtension/Resources/en.lproj/InfoPlist.strings`
+- `Sources/ThumbnailExtension/Resources/ko.lproj/InfoPlist.strings`
+- `Sources/ThumbnailExtension/Resources/en.lproj/InfoPlist.strings`
+
+검증:
+
+- 6개 `InfoPlist.strings` `plutil -lint` 통과
+- `plutil -p`로 표시명 값 확인
+
+### Stage 2. XcodeGen 리소스 포함 및 프로젝트 재생성
+
+변경:
+
+- `xcodegen generate`로 `AlhangeulMac.xcodeproj` 재생성
+- target별 `PBXVariantGroup` 3개 추가
+- target별 Copy Bundle Resources에 `InfoPlist.strings` 포함
+- `knownRegions`에 `ko` 포함
+
+검증:
+
+- `xcodegen generate` 성공
+- `plutil -lint AlhangeulMac.xcodeproj/project.pbxproj` 성공
+- `xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -derivedDataPath build/DerivedDataList -list` 종료 코드 0
+
+### Stage 3. 빌드 산출물과 등록 상태 검증
+
+검증:
+
+- `git submodule update --init --recursive`
+- `./scripts/build-rust-macos.sh`
+- Debug build 성공
+- Debug/Release bundle 내부 localized `InfoPlist.strings` 포함 확인
+- `./scripts/package-release.sh 0.1.0` 성공
+- Release 설치본 `/Users/melee/Applications/AlhangeulMac.app` 기준 PlugInKit 등록 확인
+- `/Users/melee/Documents/projects/rhwp-mac/samples/basic/KTX.hwp` thumbnail smoke test 성공
+
+중요 관찰:
+
+- `CODE_SIGNING_ALLOWED=NO` Debug 산출물은 PlugInKit 등록 검증에 부적합했다.
+- Release package 산출물은 local signing과 sealed resources가 적용되어 PlugInKit 등록이 정상 확인됐다.
+- 현재 사용자 환경에서는 영어 localization이 선택되어 PlugInKit/Spotlight metadata가 `AlhangeulMac` 계열을 표시했다.
+
+### Stage 4. 문서와 최종 보고
+
+변경 문서:
+
+- `AGENTS.md`
+- `README.md`
+- `mydocs/manual/build_run_guide.md`
+- `mydocs/manual/release_distribution_guide.md`
+- `mydocs/tech/project_architecture.md`
+- `mydocs/troubleshootings/task_m050_40_quicklook_thumbnail_registration_validation.md`
+
+핵심 반영:
+
+- Debug build와 Finder integration smoke test의 목적 분리
+- Release package 산출물을 registration smoke test 기준으로 고정
+- 단일 ASCII 설치 경로 유지
+- 이전 설치본 삭제는 승인 후 제한적으로만 수행
+- 증상별 판단표와 금지할 습관 기록
+
+## 최종 검증 요약
+
+### 정적 검증
+
+```bash
+plutil -lint Sources/HostApp/Resources/ko.lproj/InfoPlist.strings \
+  Sources/HostApp/Resources/en.lproj/InfoPlist.strings \
+  Sources/QLExtension/Resources/ko.lproj/InfoPlist.strings \
+  Sources/QLExtension/Resources/en.lproj/InfoPlist.strings \
+  Sources/ThumbnailExtension/Resources/ko.lproj/InfoPlist.strings \
+  Sources/ThumbnailExtension/Resources/en.lproj/InfoPlist.strings
+plutil -lint AlhangeulMac.xcodeproj/project.pbxproj
+git diff --check
+```
+
+결과:
+
+- 모두 성공
+
+### Build/package 검증
+
+```bash
+./scripts/build-rust-macos.sh
+xcodebuild -project AlhangeulMac.xcodeproj \
+  -scheme HostApp \
+  -configuration Debug \
+  -derivedDataPath build/DerivedDataStage3 \
+  CODE_SIGNING_ALLOWED=NO \
+  build
+./scripts/package-release.sh 0.1.0
+```
+
+결과:
+
+- 모두 성공
+- release zip SHA256:
+  - `f248f77092e43c4f81a509e21cfd911586315b66501631f66b0dc21d09e1350b  alhangeul-macos-0.1.0.zip`
+
+### 설치본 검증
+
+설치본:
+
+- `/Users/melee/Applications/AlhangeulMac.app`
+
+확인:
+
+- HostApp/QLExtension/ThumbnailExtension에 `ko.lproj`, `en.lproj` `InfoPlist.strings` 포함
+- `com.postmelee.alhangeulmac.QLExtension` PlugInKit 등록 확인
+- `com.postmelee.alhangeulmac.ThumbnailExtension` PlugInKit 등록 확인
+- `qlmanage -t -x` thumbnail 생성 확인
+
+## 남은 리스크와 운영 메모
+
+- Dock/Finder/Spotlight 표시명은 사용자 언어 설정과 LaunchServices/Spotlight cache 영향을 받는다.
+- 현재 검증 환경에서는 영어 localization이 선택되어 `AlhangeulMac` 계열 표시명이 노출됐다.
+- 한국어 선호 환경에서 `ko` localization이 선택될 리소스 구조는 확인했지만, Dock/Spotlight UI 표시 자체는 수동 확인이 필요하다.
+- 공개 배포용 서명/공증은 이번 작업 범위가 아니며 별도 release task에서 결정한다.
+
+## PR 준비 상태
+
+- 수행 계획서: 작성 완료
+- 구현 계획서: 작성 완료
+- Stage 1-4 보고서: 작성 완료
+- 최종 보고서: 작성 완료
+- 오늘할일: 완료 처리
+- PR 생성은 작업지시자 최종 승인 후 `publish/task40` 원격 브랜치로 push하고 `devel` 대상 draft PR로 진행한다.
+
+## 승인 요청
+
+Issue #40 최종 결과 보고를 승인 요청한다.

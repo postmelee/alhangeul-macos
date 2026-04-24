@@ -81,17 +81,30 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 Finder 통합 smoke test:
 
 ```bash
-mkdir -p ~/Applications
-rm -rf ~/Applications/AlhangeulMac.app
-ditto build/DerivedData/Build/Products/Debug/AlhangeulMac.app ~/Applications/AlhangeulMac.app
-pluginkit -a ~/Applications/AlhangeulMac.app
-pluginkit -m | grep com.postmelee.alhangeulmac
+./scripts/package-release.sh 0.1.0
+
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+APP="$HOME/Applications/AlhangeulMac.app"
+mkdir -p "$HOME/Applications"
+"$LSREGISTER" -u "$APP" >/dev/null 2>&1 || true
+rm -rf "$APP"
+ditto build/release/AlhangeulMac.app "$APP"
+"$LSREGISTER" -f -R -trusted "$APP"
+pluginkit -a "$APP"
+pluginkit -mAvvv | grep com.postmelee.alhangeulmac
 qlmanage -r
 qlmanage -r cache
-qlmanage -p Vendor/rhwp/samples/basic/KTX.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql Vendor/rhwp/samples/basic/KTX.hwp
 ```
 
-`qlmanage -p`는 GUI preview를 띄우므로 자동화 환경에서는 작업지시자 확인이 필요하다.
+`qlmanage -p`는 GUI preview를 띄우므로 자동화 환경에서는 작업지시자 확인이 필요하다. 자동화 가능한 smoke test는 `qlmanage -t -x`를 우선 사용한다.
+
+주의:
+
+- `CODE_SIGNING_ALLOWED=NO` Debug 산출물은 Finder 통합 smoke test에 쓰지 않는다. compile/link 확인과 bundle resource 확인까지만 사용한다.
+- Release package 산출물은 `Sign to Run Locally` 경로로 signing과 sealed resources가 적용되므로 LaunchServices/PlugInKit 등록 검증에 더 적합하다.
+- 이전 이름의 설치본(`RhwpMac.app`, `알한글.app`)은 discovery 충돌이 확인되거나 의심될 때만 작업지시자 승인 후 제거한다.
+- `qlmanage -m plugins` 미노출은 app extension 실행 실패의 직접 증거가 아니므로, 등록은 `pluginkit -mAvvv`, 실제 렌더링은 `qlmanage -t -x`로 판정한다.
 
 ## 버전 갱신
 
@@ -133,6 +146,7 @@ build/release/alhangeul-macos-0.1.0.zip
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
 - 내부 산출물 `AlhangeulMac.app`을 release staging으로 복사한 뒤 `AlhangeulMac.app` 이름으로 zip 압축
+- Release staging app은 local signing과 sealed resources가 적용되어 Finder 통합 smoke test의 기준 산출물로 사용할 수 있음
 - SHA256 출력
 
 주의:
