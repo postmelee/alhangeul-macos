@@ -127,6 +127,14 @@ pluginkit -a "$APP"
 
 앱과 extension의 사용자 표시명은 `Info.plist`와 localized `InfoPlist.strings`에서 제공한다. Finder/Quick Look smoke test용 filesystem bundle path는 ExtensionKit lookup 안정성을 위해 `AlhangeulMac.app`처럼 ASCII 이름을 유지한다.
 
+표시명 현지화 기준:
+
+- 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 실제 bundle filesystem name과 맞춘다. 예: `AlhangeulMac.app`의 기본값은 `AlhangeulMac`이다.
+- `ko.lproj/InfoPlist.strings`에서 사용자 표시명 `알한글`을 제공한다.
+- `en.lproj/InfoPlist.strings`에서 영어 사용자 표시명 `AlhangeulMac`을 제공한다.
+- 각 app/extension bundle의 `Info.plist`에는 `LSHasLocalizedDisplayName`을 명시한다.
+- Finder/Spotlight 표시명 문제를 해결하려고 `.app` 또는 `.appex` 디렉터리 자체를 한글로 rename하지 않는다.
+
 extension 등록 확인:
 
 ```bash
@@ -160,4 +168,4 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql Vendor/rhwp/samples/basic/KTX.hwp
 - `RhwpMac.app` 또는 `알한글.app` 같은 이전 설치본이 남아 discovery 충돌이 의심될 때만 작업지시자 승인 후 제거한다.
 - 동일 검증 중에는 설치 후보를 `$HOME/Applications/AlhangeulMac.app` 하나로 고정한다.
 - `pluginkit`에 나타나지 않으면 먼저 `codesign -dv`, `plutil -p Contents/Info.plist`, `find ... InfoPlist.strings`로 산출물 상태를 확인한다. 바로 삭제/재설치를 반복하지 않는다.
-- Spotlight/Dock/Finder 표시명은 현재 사용자 언어와 LaunchServices/Spotlight 캐시 영향을 받는다. 표시명 문제를 extension 실행 실패와 혼동하지 않는다.
+- Spotlight/Dock/Finder 표시명은 현재 사용자 언어와 LaunchServices/Spotlight 캐시 영향을 받는다. 표시명 문제를 extension 실행 실패와 혼동하지 않는다. 다만 기본 `Info.plist` 표시명이 실제 bundle filesystem name과 불일치하면 localized 표시명이 선택되지 않을 수 있으므로 먼저 plist와 `InfoPlist.strings` 구조를 확인한다.

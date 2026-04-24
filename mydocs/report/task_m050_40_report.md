@@ -10,7 +10,7 @@
 
 ## 결론
 
-실제 app bundle filesystem name은 `AlhangeulMac.app`으로 유지하면서, 사용자 표시명은 `InfoPlist.strings`로 한국어와 영어를 분리했다.
+실제 app bundle filesystem name은 `AlhangeulMac.app`으로 유지하면서, 사용자 표시명은 `InfoPlist.strings`로 한국어와 영어를 분리했다. 추가로 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`을 실제 bundle filesystem name과 맞추고 `LSHasLocalizedDisplayName`을 명시해 Finder/Spotlight가 localized 표시명을 선택할 수 있게 보정했다.
 
 - 한국어 환경: `알한글`, `알한글 미리보기`, `알한글 썸네일`
 - 영어 환경: `AlhangeulMac`, `AlhangeulMac Preview`, `AlhangeulMac Thumbnail`
@@ -20,6 +20,7 @@
 - `CODE_SIGNING_ALLOWED=NO` Debug 산출물은 registration smoke test에 쓰지 않는다.
 - LaunchServices/PlugInKit/Quick Look 검증은 signed/sealed Release package 산출물 기준으로 수행한다.
 - 단일 설치 경로는 `AlhangeulMac.app`으로 유지한다.
+- 기본 plist name은 filesystem bundle name과 맞추고, 한글 표시명은 `ko.lproj/InfoPlist.strings`에서 제공한다.
 - `qlmanage -m plugins`는 app extension 등록 판정 기준으로 쓰지 않는다.
 
 ## 단계별 결과
@@ -92,6 +93,26 @@
 - 이전 설치본 삭제는 승인 후 제한적으로만 수행
 - 증상별 판단표와 금지할 습관 기록
 
+### Stage 5. Spotlight/Finder 표시명 기준 보정
+
+변경:
+
+- HostApp 기본 `Info.plist` 표시명을 `AlhangeulMac`으로 보정
+- QLExtension 기본 `Info.plist` 표시명을 `AlhangeulMacPreview`로 보정
+- ThumbnailExtension 기본 `Info.plist` 표시명을 `AlhangeulMacThumbnail`으로 보정
+- 세 target 모두 `LSHasLocalizedDisplayName = true` 추가
+- 한국어/영어 `InfoPlist.strings`는 사용자 표시명 소스로 유지
+
+검증:
+
+- 설치본 `mdls` 결과:
+  - `kMDItemDisplayName = 알한글.app`
+  - `kMDItemFSName = AlhangeulMac.app`
+  - `kMDItemCFBundleIdentifier = com.postmelee.alhangeulmac`
+- `mdfind -onlyin /Users/melee/Applications 알한글`에서 `/Users/melee/Applications/AlhangeulMac.app` 확인
+- `mdfind -onlyin /Users/melee/Applications AlhangeulMac`에서 `/Users/melee/Applications/AlhangeulMac.app` 확인
+- PlugInKit의 parent name이 `알한글`로 표시됨
+
 ## 최종 검증 요약
 
 ### 정적 검증
@@ -103,6 +124,9 @@ plutil -lint Sources/HostApp/Resources/ko.lproj/InfoPlist.strings \
   Sources/QLExtension/Resources/en.lproj/InfoPlist.strings \
   Sources/ThumbnailExtension/Resources/ko.lproj/InfoPlist.strings \
   Sources/ThumbnailExtension/Resources/en.lproj/InfoPlist.strings
+plutil -lint Sources/HostApp/Info.plist \
+  Sources/QLExtension/Info.plist \
+  Sources/ThumbnailExtension/Info.plist
 plutil -lint AlhangeulMac.xcodeproj/project.pbxproj
 git diff --check
 ```
@@ -128,7 +152,7 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 
 - 모두 성공
 - release zip SHA256:
-  - `f248f77092e43c4f81a509e21cfd911586315b66501631f66b0dc21d09e1350b  alhangeul-macos-0.1.0.zip`
+  - `3b26f59e5c2adc581d143b1573dda3263a3e38bd498e607589a177d6f66558e5  alhangeul-macos-0.1.0.zip`
 
 ### 설치본 검증
 
@@ -139,22 +163,24 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 확인:
 
 - HostApp/QLExtension/ThumbnailExtension에 `ko.lproj`, `en.lproj` `InfoPlist.strings` 포함
+- HostApp/QLExtension/ThumbnailExtension에 `LSHasLocalizedDisplayName = true` 포함
+- Spotlight metadata에서 `알한글.app` display name과 `AlhangeulMac.app` filesystem name 확인
+- Spotlight 검색에서 `알한글`, `AlhangeulMac` 모두 설치본 확인
 - `com.postmelee.alhangeulmac.QLExtension` PlugInKit 등록 확인
 - `com.postmelee.alhangeulmac.ThumbnailExtension` PlugInKit 등록 확인
 - `qlmanage -t -x` thumbnail 생성 확인
 
 ## 남은 리스크와 운영 메모
 
-- Dock/Finder/Spotlight 표시명은 사용자 언어 설정과 LaunchServices/Spotlight cache 영향을 받는다.
-- 현재 검증 환경에서는 영어 localization이 선택되어 `AlhangeulMac` 계열 표시명이 노출됐다.
-- 한국어 선호 환경에서 `ko` localization이 선택될 리소스 구조는 확인했지만, Dock/Spotlight UI 표시 자체는 수동 확인이 필요하다.
+- Dock/Finder/Spotlight 표시명은 LaunchServices/Spotlight cache 영향을 받을 수 있으나, 현재 설치본 metadata와 Spotlight 검색 후보는 `알한글`과 `AlhangeulMac` 모두 확인됐다.
+- 요청한 테스트 경로 `/Users/melee/Documents/projects/rhwp-mac/samples`에는 현재 `.DS_Store` 외 HWP/HWPX 파일이 없어 해당 경로로 thumbnail smoke를 수행할 수 없었다. 보조로 `/Users/melee/Documents/projects/rhwp-mac/Vendor/rhwp/samples/basic/KTX.hwp`를 사용해 thumbnail 생성은 확인했다.
 - 공개 배포용 서명/공증은 이번 작업 범위가 아니며 별도 release task에서 결정한다.
 
 ## PR 준비 상태
 
 - 수행 계획서: 작성 완료
 - 구현 계획서: 작성 완료
-- Stage 1-4 보고서: 작성 완료
+- Stage 1-5 보고서: 작성 완료
 - 최종 보고서: 작성 완료
 - 오늘할일: 완료 처리
 - PR 생성은 작업지시자 최종 승인 후 `publish/task40` 원격 브랜치로 push하고 `devel` 대상 draft PR로 진행한다.

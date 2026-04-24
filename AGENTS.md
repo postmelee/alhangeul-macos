@@ -129,6 +129,7 @@ This file provides guidance to Codex when working with code in this repository.
 - `Sources/RhwpCoreBridge`에 AppKit/UIKit 직접 의존을 넣지 않는다.
 - Quick Look/Thumbnail extension의 LaunchServices/PlugInKit 등록 검증은 `CODE_SIGNING_ALLOWED=NO` Debug 산출물로 수행하지 않는다. 이 산출물은 compile/link 확인용이며 `Info.plist`와 resource sealing이 registration smoke test에 충분하지 않을 수 있다.
 - Finder Quick Look/Thumbnail smoke test는 `./scripts/package-release.sh <version>`으로 만든 signed/sealed `build/release/AlhangeulMac.app`을 단일 ASCII 설치 경로(`/Users/melee/Applications/AlhangeulMac.app`)에 배치한 뒤 수행한다.
+- Dock/Finder/Spotlight 사용자 표시명은 localized `InfoPlist.strings`로 제공한다. 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 실제 bundle filesystem name과 맞는 ASCII 값으로 유지하고, `LSHasLocalizedDisplayName`을 켠다. 한글 표시를 위해 `.app` 또는 `.appex` 디렉터리명을 한글로 바꾸지 않는다.
 - 이전 이름의 설치본(`RhwpMac.app`, `알한글.app`)이 discovery 충돌 원인으로 의심될 때만 작업지시자 승인 후 제거한다. 무작위 삭제/재설치로 문제를 숨기지 않고 `pluginkit`, `lsregister`, `mdls`, `qlmanage -t` 결과를 순서대로 기록한다.
 - `qlmanage -m plugins`는 app extension 기반 Quick Look/Thumbnail 등록 상태를 직접 판정하는 기준으로 쓰지 않는다. 등록 확인은 `pluginkit -mAvvv`, 실제 렌더 확인은 `qlmanage -t -x` 또는 `qlmanage -p`로 수행한다.
 

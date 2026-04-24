@@ -52,6 +52,7 @@
 - `AlhangeulMac.xcodeproj`는 생성물로 취급한다.
 - target 구성, source 포함 범위, bundle identifier, extension embedding은 `project.yml`에서 관리한다.
 - 사용자 표시명은 localized `InfoPlist.strings`에서 제공한다. 한국어 환경은 `알한글` 계열, 영어 환경은 `AlhangeulMac` 계열을 사용한다.
+- 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 실제 app/extension bundle filesystem name과 맞는 ASCII 값으로 둔다. 예: `AlhangeulMac.app`은 `AlhangeulMac`, `AlhangeulMacPreview.appex`는 `AlhangeulMacPreview`다. 한글 표시는 `ko.lproj/InfoPlist.strings`와 `LSHasLocalizedDisplayName`으로 제공한다.
 - filesystem app bundle name과 내부 Xcode product/executable/module 이름은 `AlhangeulMac` 계열을 유지한다.
 - Finder/Quick Look 통합 검증과 배포 zip 내부 `.app` 경로는 ExtensionKit lookup 안정성을 위해 ASCII 이름인 `AlhangeulMac.app`을 사용한다.
 - LaunchServices/PlugInKit 등록 검증은 signed/sealed된 Release package 산출물 기준으로 수행한다. `CODE_SIGNING_ALLOWED=NO` Debug 산출물은 compile/link 및 bundle resource 확인용으로만 사용한다.

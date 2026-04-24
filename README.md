@@ -205,7 +205,7 @@ open build/DerivedData/Build/Products/Debug/AlhangeulMac.app
 
 Debug build는 앱 실행과 compile/link 확인용입니다. `CODE_SIGNING_ALLOWED=NO`로 만든 Debug 산출물은 Quick Look/Thumbnail extension 등록 검증에 사용하지 않습니다.
 
-Finder Quick Look/Thumbnail smoke test는 Release package 산출물로 확인합니다. 실제 `.app` 경로는 ExtensionKit lookup 안정성을 위해 ASCII인 `AlhangeulMac.app`을 유지하고, 사용자 표시명은 `InfoPlist.strings`에서 언어별로 제공합니다.
+Finder Quick Look/Thumbnail smoke test는 Release package 산출물로 확인합니다. 실제 `.app` 경로는 ExtensionKit lookup 안정성을 위해 ASCII인 `AlhangeulMac.app`을 유지하고, 사용자 표시명은 `InfoPlist.strings`에서 언어별로 제공합니다. 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 실제 bundle filesystem name과 맞추고, 한국어 표시명 `알한글`은 `ko.lproj/InfoPlist.strings`에서 제공합니다.
 
 ```bash
 ./scripts/package-release.sh 0.1.0

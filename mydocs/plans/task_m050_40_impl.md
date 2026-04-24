@@ -11,6 +11,8 @@
 
 - 실제 app bundle filesystem path는 `AlhangeulMac.app`으로 유지한다.
 - 사용자 표시명은 localized `InfoPlist.strings`로 제공한다.
+- 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 실제 bundle filesystem name과 맞춘다.
+- Finder/Spotlight가 localized name을 선택할 수 있도록 `LSHasLocalizedDisplayName`을 명시한다.
 - target별 표시명은 각 target bundle 안에 포함한다.
 - `project.yml`을 원본으로 수정하고 `AlhangeulMac.xcodeproj`는 XcodeGen으로 재생성한다.
 - `Sources/RhwpCoreBridge`에는 변경을 넣지 않는다.
@@ -80,6 +82,24 @@
 - 최종 보고서에 검증 결과와 캐시 관련 한계를 기록한다.
 - PR 생성 전 미커밋 변경이 없다.
 
+## Stage 5. Spotlight/Finder 표시명 기준 보정
+
+### 작업
+
+- Apple bundle 표시명 규칙과 카카오톡 설치본 구조를 비교한다.
+- HostApp/QLExtension/ThumbnailExtension 기본 `Info.plist` 표시명을 실제 bundle filesystem name과 맞춘다.
+- 각 target `Info.plist`에 `LSHasLocalizedDisplayName`을 추가한다.
+- Release package 산출물을 다시 만들고 표준 설치 경로에 재등록한다.
+- `알한글`과 `AlhangeulMac` Spotlight 검색 후보를 확인한다.
+- Stage 5 보고서와 관련 문서를 갱신한다.
+
+### 완료 조건
+
+- 기본 `Info.plist` 값과 실제 `.app`/`.appex` bundle name이 일치한다.
+- `ko.lproj/InfoPlist.strings`에는 `알한글` 계열 표시명이 유지된다.
+- 설치본 `/Users/melee/Applications/AlhangeulMac.app`에 `LSHasLocalizedDisplayName`과 localized resources가 포함된다.
+- `mdfind`에서 `알한글`과 `AlhangeulMac` 검색 후보가 설치본을 찾는다.
+
 ## 승인 요청
 
-위 4개 Stage 기준으로 Stage 1 구현 진행 승인을 요청한다.
+위 Stage 기준으로 진행 승인을 요청한다.

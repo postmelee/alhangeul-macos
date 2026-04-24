@@ -26,7 +26,7 @@
 
 - GitHub 저장소명 기준 release URL: 현재 저장소는 `postmelee/alhangeul-macos`다.
 - zip 파일명과 Homebrew Cask token: 현재 스크립트와 cask는 `alhangeul-macos` 이름을 사용한다.
-- 앱 표시명: 현재 `알한글`이다.
+- 앱 표시명: 한국어 사용자 환경에서는 `알한글`, 영어 사용자 환경에서는 `AlhangeulMac`이다. 기본 `Info.plist` 값은 실제 bundle filesystem name과 맞는 `AlhangeulMac`이며, 한국어 표시는 `ko.lproj/InfoPlist.strings`에서 제공한다.
 - 배포 앱 filesystem bundle name: 현재 `AlhangeulMac.app`이다. Quick Look/Thumbnail extension의 LaunchServices/ExtensionKit lookup 안정성을 위해 `.app` 경로는 ASCII로 유지한다.
 - 내부 Xcode product name: 현재 `AlhangeulMac.app`이다.
 - bundle identifier: 현재 `com.postmelee.alhangeulmac` 계열이다.
@@ -103,6 +103,7 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql Vendor/rhwp/samples/basic/KTX.hwp
 
 - `CODE_SIGNING_ALLOWED=NO` Debug 산출물은 Finder 통합 smoke test에 쓰지 않는다. compile/link 확인과 bundle resource 확인까지만 사용한다.
 - Release package 산출물은 `Sign to Run Locally` 경로로 signing과 sealed resources가 적용되므로 LaunchServices/PlugInKit 등록 검증에 더 적합하다.
+- Dock/Finder/Spotlight 표시명 검증 시 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`이 실제 bundle filesystem name과 맞고, `ko.lproj/InfoPlist.strings`와 `LSHasLocalizedDisplayName`이 release bundle 안에 포함됐는지 먼저 확인한다.
 - 이전 이름의 설치본(`RhwpMac.app`, `알한글.app`)은 discovery 충돌이 확인되거나 의심될 때만 작업지시자 승인 후 제거한다.
 - `qlmanage -m plugins` 미노출은 app extension 실행 실패의 직접 증거가 아니므로, 등록은 `pluginkit -mAvvv`, 실제 렌더링은 `qlmanage -t -x`로 판정한다.
 

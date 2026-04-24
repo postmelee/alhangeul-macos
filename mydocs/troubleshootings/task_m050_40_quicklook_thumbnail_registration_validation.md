@@ -65,10 +65,24 @@ Issue #33에서 non-ASCII filesystem path인 `알한글.app`은 ExtensionKit loo
 표준:
 
 - filesystem path: `/Users/melee/Applications/AlhangeulMac.app`
+- 기본 `Info.plist` 표시명: 실제 bundle filesystem name과 일치하는 `AlhangeulMac`
 - 한국어 사용자 표시명: `ko.lproj/InfoPlist.strings`의 `알한글`
 - 영어 사용자 표시명: `en.lproj/InfoPlist.strings`의 `AlhangeulMac`
+- localized 표시명 사용 선언: `LSHasLocalizedDisplayName = true`
 
 사용자에게 한글 이름을 보여주기 위해 `.app` 디렉터리 자체를 `알한글.app`으로 바꾸지 않는다.
+
+Apple의 `Core Foundation Keys` 문서에서 `CFBundleDisplayName`은 localized bundle name을 지원할 때 `Info.plist`와 언어별 `InfoPlist.strings`에 함께 넣어야 하는 키로 설명된다. 같은 문서는 macOS Finder가 localized name을 표시하기 전에 기본 표시명과 실제 filesystem name을 비교한다고 설명한다. 따라서 기본 plist 값을 한글로 직접 두면 `AlhangeulMac.app`과 불일치해 Spotlight/Finder가 `AlhangeulMac`만 신뢰하는 상태가 될 수 있다. 카카오톡도 같은 이유로 기본 plist는 `KakaoTalk`, `ko.lproj/InfoPlist.strings`는 `카카오톡` 구조를 사용한다.
+
+Apple의 `Display Names` 문서는 localized display name을 지원하는 앱에 `LSHasLocalizedDisplayName`을 포함하는 것을 권장한다.
+
+extension도 같은 원칙을 적용한다.
+
+| Bundle | 기본 `Info.plist` 표시명 | 한국어 `InfoPlist.strings` |
+|--------|--------------------------|-----------------------------|
+| `AlhangeulMac.app` | `AlhangeulMac` | `알한글` |
+| `AlhangeulMacPreview.appex` | `AlhangeulMacPreview` | `알한글 미리보기` |
+| `AlhangeulMacThumbnail.appex` | `AlhangeulMacThumbnail` | `알한글 썸네일` |
 
 ### 5. `qlmanage -m plugins`는 판정 기준이 아니다
 
@@ -156,7 +170,7 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql /Users/melee/Documents/projects/rhwp-
 | Debug app이 `pluginkit`에 안 보임 | Debug 산출물 특성일 가능성 높음 | Release package 산출물로 재검증 |
 | `pluginkit` parent bundle이 이전 경로 | stale install/discovery 후보 | 표준 경로 재등록, 이전 설치본은 승인 후 제거 |
 | `qlmanage -m plugins`에 안 보임 | 판정 기준 아님 | `pluginkit -mAvvv`, `qlmanage -t -x` 확인 |
-| Spotlight/Dock이 `AlhangeulMac` 표시 | 언어/캐시/metadata 문제 | `InfoPlist.strings`, `mdls`, 사용자 언어 설정 확인 |
+| Spotlight/Dock이 `AlhangeulMac`만 검색/표시 | 기본 plist와 bundle name 불일치 또는 캐시 문제 | `CFBundleDisplayName`, `CFBundleName`, `LSHasLocalizedDisplayName`, `InfoPlist.strings`, `mdfind` 확인 |
 | thumbnail 생성 실패 | registration 또는 renderer 문제 | `pluginkit`, `mdls kMDItemContentType`, `qlmanage -t -x`, unified log 순서로 확인 |
 
 ## 금지할 습관
@@ -165,6 +179,7 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql /Users/melee/Documents/projects/rhwp-
 - 문제가 보인다고 이전 앱 후보들을 무작정 삭제하지 않는다.
 - `qlmanage -m plugins` 미노출만으로 실패를 확정하지 않는다.
 - filesystem bundle name을 한글로 바꾸어 표시명 문제를 해결하려 하지 않는다.
+- 기본 `Info.plist` 표시명을 실제 bundle filesystem name과 다르게 두지 않는다.
 - 설치본 교체, LaunchServices 등록, PlugInKit 등록, Quick Look cache reset을 순서 없이 반복하지 않는다.
 
 ## 문서 반영
