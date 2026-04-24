@@ -1,4 +1,6 @@
 rhwp_close
+rhwp_extract_thumbnail
+rhwp_free_bytes
 rhwp_free_string
 rhwp_image_data
 rhwp_open

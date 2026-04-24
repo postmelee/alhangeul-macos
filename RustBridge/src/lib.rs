@@ -2,7 +2,7 @@ use std::ffi::{c_char, CString};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::ptr;
 
-use rhwp::wasm_api::HwpDocument;
+use rhwp::DocumentCore;
 
 macro_rules! ffi_guard {
     ($handle:expr, $default:expr, $body:expr) => {{
@@ -17,7 +17,7 @@ macro_rules! ffi_guard {
 }
 
 pub struct RhwpHandle {
-    doc: HwpDocument,
+    doc: DocumentCore,
 }
 
 #[repr(C)]
@@ -28,6 +28,64 @@ pub struct RhwpPageSize {
 }
 
 #[no_mangle]
+pub extern "C" fn rhwp_extract_thumbnail(
+    data: *const u8,
+    len: usize,
+    out_data: *mut *mut u8,
+    out_len: *mut usize,
+    out_width: *mut u32,
+    out_height: *mut u32,
+    out_format: *mut *mut c_char,
+) -> bool {
+    if data.is_null()
+        || len == 0
+        || out_data.is_null()
+        || out_len.is_null()
+        || out_width.is_null()
+        || out_height.is_null()
+        || out_format.is_null()
+    {
+        return false;
+    }
+
+    unsafe {
+        *out_data = ptr::null_mut();
+        *out_len = 0;
+        *out_width = 0;
+        *out_height = 0;
+        *out_format = ptr::null_mut();
+    }
+
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let bytes = unsafe { std::slice::from_raw_parts(data, len) };
+        let thumb = match rhwp::parser::extract_thumbnail_only(bytes) {
+            Some(thumb) => thumb,
+            None => return false,
+        };
+
+        let format = match CString::new(thumb.format) {
+            Ok(format) => format,
+            Err(_) => return false,
+        };
+        let mut owned = thumb.data.into_boxed_slice();
+        let owned_len = owned.len();
+        let owned_ptr = owned.as_mut_ptr();
+        std::mem::forget(owned);
+
+        unsafe {
+            *out_data = owned_ptr;
+            *out_len = owned_len;
+            *out_width = thumb.width;
+            *out_height = thumb.height;
+            *out_format = format.into_raw();
+        }
+        true
+    }));
+
+    result.unwrap_or(false)
+}
+
+#[no_mangle]
 pub extern "C" fn rhwp_open(data: *const u8, len: usize) -> *mut RhwpHandle {
     if data.is_null() || len == 0 {
         return ptr::null_mut();
@@ -35,7 +93,7 @@ pub extern "C" fn rhwp_open(data: *const u8, len: usize) -> *mut RhwpHandle {
 
     let result = catch_unwind(AssertUnwindSafe(|| {
         let bytes = unsafe { std::slice::from_raw_parts(data, len) };
-        match HwpDocument::from_bytes(bytes) {
+        match DocumentCore::from_bytes(bytes) {
             Ok(doc) => Box::into_raw(Box::new(RhwpHandle { doc })),
             Err(_) => ptr::null_mut(),
         }
@@ -121,6 +179,13 @@ pub extern "C" fn rhwp_image_data(
 pub extern "C" fn rhwp_free_string(ptr: *mut c_char) {
     if !ptr.is_null() {
         unsafe { drop(CString::from_raw(ptr)); }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn rhwp_free_bytes(ptr: *mut u8, len: usize) {
+    if !ptr.is_null() {
+        unsafe { drop(Vec::from_raw_parts(ptr, len, len)); }
     }
 }
 

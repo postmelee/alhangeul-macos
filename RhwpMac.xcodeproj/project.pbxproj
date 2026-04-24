@@ -37,6 +37,7 @@
 		DF5B6080BFA8C4135DFAFE99 /* DocumentOpenRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F7F314386F65D3115329DE /* DocumentOpenRouter.swift */; };
 		E9EA2350F03EE94ADF146B3D /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B5AA023F263DCFAD6F8B5D6 /* Rhwp.xcframework */; };
 		EAB5F41AD4E7D7AFBC60AFB4 /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16DE3288E2F8A233BC245AB8 /* RhwpDocument.swift */; };
+		EACCE151875ED82158EFE66C /* HwpThumbnailRenderCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989652C4D256966C6B1C52EE /* HwpThumbnailRenderCache.swift */; };
 		EFA2E950D11CF5A8EF550F85 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7FF97435E7DC2E83DDD7847 /* HwpPageImageRenderer.swift */; };
 		EFBDD3F470DFD0B9E6A0208D /* FontFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D5A747CBC3DD3904017EFEC /* FontFallback.swift */; };
 		F46C29F61BC1DDEBDCCF320C /* HostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA2AC35A93F10CDB30E5E218 /* HostApp.swift */; };
@@ -89,6 +90,7 @@
 		7AB45C92769C8141C6D321A0 /* ThumbnailExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ThumbnailExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		8BBB4293B1DF66D6308DC817 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		92FF2EC2F1F3AF82DD0665BC /* DocumentViewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentViewerView.swift; sourceTree = "<group>"; };
+		989652C4D256966C6B1C52EE /* HwpThumbnailRenderCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpThumbnailRenderCache.swift; sourceTree = "<group>"; };
 		9D5A747CBC3DD3904017EFEC /* FontFallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontFallback.swift; sourceTree = "<group>"; };
 		A717B7804A99A7F2314F7CC8 /* DocumentPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPageView.swift; sourceTree = "<group>"; };
 		B7F20D1D3A2381F4974AB4FD /* sample.hwpx */ = {isa = PBXFileReference; path = sample.hwpx; sourceTree = "<group>"; };
@@ -172,6 +174,7 @@
 			children = (
 				E57CF34A02A750F9E6818E13 /* .gitkeep */,
 				D39D31F2E27FE42F01A2FD88 /* HwpThumbnailProvider.swift */,
+				989652C4D256966C6B1C52EE /* HwpThumbnailRenderCache.swift */,
 				8BBB4293B1DF66D6308DC817 /* Info.plist */,
 				C0F6D72CB0515282F6BC022C /* ThumbnailExtension.entitlements */,
 			);
@@ -416,6 +419,7 @@
 				560CB413F200C0E8D3CD5BB3 /* FontFallback.swift in Sources */,
 				EFA2E950D11CF5A8EF550F85 /* HwpPageImageRenderer.swift in Sources */,
 				3A8005327A4303D22DE51C90 /* HwpThumbnailProvider.swift in Sources */,
+				EACCE151875ED82158EFE66C /* HwpThumbnailRenderCache.swift in Sources */,
 				3615F5A92CE720212B4C2358 /* RenderTree.swift in Sources */,
 				EAB5F41AD4E7D7AFBC60AFB4 /* RhwpDocument.swift in Sources */,
 			);
@@ -457,6 +461,7 @@
 				CODE_SIGN_ENTITLEMENTS = Sources/HostApp/HostApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_NAME = RhwpMacHost;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Frameworks\"",
@@ -467,7 +472,7 @@
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.postmelee.rhwpmac;
-				PRODUCT_NAME = "알한글";
+				PRODUCT_NAME = RhwpMac;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -478,6 +483,7 @@
 				CODE_SIGN_ENTITLEMENTS = Sources/ThumbnailExtension/ThumbnailExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_NAME = RhwpMacThumbnail;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Frameworks\"",
@@ -489,7 +495,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.postmelee.rhwpmac.ThumbnailExtension;
-				PRODUCT_NAME = "알한글 Thumbnail";
+				PRODUCT_NAME = RhwpMacThumbnail;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -501,6 +507,7 @@
 				CODE_SIGN_ENTITLEMENTS = Sources/HostApp/HostApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_NAME = RhwpMacHost;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Frameworks\"",
@@ -511,7 +518,7 @@
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.postmelee.rhwpmac;
-				PRODUCT_NAME = "알한글";
+				PRODUCT_NAME = RhwpMac;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -522,6 +529,7 @@
 				CODE_SIGN_ENTITLEMENTS = Sources/QLExtension/QLExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_NAME = RhwpMacPreview;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Frameworks\"",
@@ -533,7 +541,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.postmelee.rhwpmac.QLExtension;
-				PRODUCT_NAME = "알한글 Preview";
+				PRODUCT_NAME = RhwpMacPreview;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -663,6 +671,7 @@
 				CODE_SIGN_ENTITLEMENTS = Sources/ThumbnailExtension/ThumbnailExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_NAME = RhwpMacThumbnail;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Frameworks\"",
@@ -674,7 +683,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.postmelee.rhwpmac.ThumbnailExtension;
-				PRODUCT_NAME = "알한글 Thumbnail";
+				PRODUCT_NAME = RhwpMacThumbnail;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -685,6 +694,7 @@
 				CODE_SIGN_ENTITLEMENTS = Sources/QLExtension/QLExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_NAME = RhwpMacPreview;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Frameworks\"",
@@ -696,7 +706,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.postmelee.rhwpmac.QLExtension;
-				PRODUCT_NAME = "알한글 Preview";
+				PRODUCT_NAME = RhwpMacPreview;
 				SDKROOT = macosx;
 			};
 			name = Debug;

@@ -1,6 +1,13 @@
 import Foundation
 import Rhwp
 
+struct RhwpEmbeddedThumbnail {
+    let data: Data
+    let width: Int
+    let height: Int
+    let format: String?
+}
+
 /// Rust FFI 호출 에러
 enum RhwpError: LocalizedError {
     case parseFailure(filename: String?)
@@ -30,7 +37,6 @@ enum RhwpError: LocalizedError {
 /// - `rhwp_open`이 데이터를 파싱 후 IR로 복사하므로,
 ///   `Data.withUnsafeBytes` 밖에서 핸들을 사용해도 안전하다.
 /// - 향후 zero-copy 파싱 도입 시 이 가정을 재검토할 것.
-@MainActor
 class RhwpDocument {
     // 불완전 C 구조체(opaque type)이므로 rhwp_open 반환 타입 그대로 보관
     private let handle: OpaquePointer
@@ -96,5 +102,50 @@ class RhwpDocument {
             return nil
         }
         return Data(bytes: ptr, count: len)
+    }
+
+    static func extractEmbeddedThumbnail(from data: Data) -> RhwpEmbeddedThumbnail? {
+        guard !data.isEmpty else {
+            return nil
+        }
+
+        var outData: UnsafeMutablePointer<UInt8>?
+        var outLen: UInt = 0
+        var outWidth: UInt32 = 0
+        var outHeight: UInt32 = 0
+        var outFormat: UnsafeMutablePointer<CChar>?
+
+        let success = data.withUnsafeBytes { rawBuffer in
+            guard let base = rawBuffer.baseAddress else { return false }
+            return rhwp_extract_thumbnail(
+                base.assumingMemoryBound(to: UInt8.self),
+                UInt(data.count),
+                &outData,
+                &outLen,
+                &outWidth,
+                &outHeight,
+                &outFormat
+            )
+        }
+
+        defer {
+            if let ptr = outData, outLen > 0 {
+                rhwp_free_bytes(ptr, outLen)
+            }
+            if let formatPtr = outFormat {
+                rhwp_free_string(formatPtr)
+            }
+        }
+
+        guard success, let thumbnailPtr = outData, outLen > 0 else {
+            return nil
+        }
+
+        return RhwpEmbeddedThumbnail(
+            data: Data(bytes: thumbnailPtr, count: Int(outLen)),
+            width: Int(outWidth),
+            height: Int(outHeight),
+            format: outFormat.map { String(cString: $0) }
+        )
     }
 }

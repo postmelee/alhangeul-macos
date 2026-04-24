@@ -25,7 +25,8 @@ targets:
         embed: false
     settings:
       base:
-        PRODUCT_NAME: 알한글
+        PRODUCT_NAME: RhwpMac
+        EXECUTABLE_NAME: RhwpMacHost
         PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.rhwpmac
         INFOPLIST_FILE: Sources/HostApp/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/HostApp/HostApp.entitlements
@@ -44,7 +45,8 @@ targets:
         embed: false
     settings:
       base:
-        PRODUCT_NAME: 알한글 Preview
+        PRODUCT_NAME: RhwpMacPreview
+        EXECUTABLE_NAME: RhwpMacPreview
         PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.rhwpmac.QLExtension
         INFOPLIST_FILE: Sources/QLExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/QLExtension/QLExtension.entitlements
@@ -62,7 +64,8 @@ targets:
         embed: false
     settings:
       base:
-        PRODUCT_NAME: 알한글 Thumbnail
+        PRODUCT_NAME: RhwpMacThumbnail
+        EXECUTABLE_NAME: RhwpMacThumbnail
         PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.rhwpmac.ThumbnailExtension
         INFOPLIST_FILE: Sources/ThumbnailExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/ThumbnailExtension/ThumbnailExtension.entitlements
