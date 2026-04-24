@@ -2,10 +2,10 @@ cask "rhwp-mac" do
   version "0.1.0"
   sha256 :no_check
 
-  url "https://github.com/postmelee/rhwp-mac/releases/download/v#{version}/rhwp-mac-#{version}.zip"
-  name "rhwp-mac"
+  url "https://github.com/postmelee/alhangeul-macos/releases/download/v#{version}/rhwp-mac-#{version}.zip"
+  name "알한글"
   desc "Quick Look, thumbnail, and viewer app for HWP/HWPX documents"
-  homepage "https://github.com/postmelee/rhwp-mac"
+  homepage "https://github.com/postmelee/alhangeul-macos"
 
   depends_on macos: ">= :monterey"
 
