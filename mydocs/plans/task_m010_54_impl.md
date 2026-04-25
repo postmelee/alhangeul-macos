@@ -251,6 +251,39 @@ rg -n "edwardkim/rhwp.*devel|devel.*edwardkim/rhwp" README.md AGENTS.md mydocs/t
 - 최신 release tag 전환 실패 원인이 Stage 6 보고서와 Issue #30에 기록되어 있다.
 - 후속 Issue #30이 release tag와 resolved commit 기준으로만 진행되도록 보강되어 있다.
 
+## Stage 7: 후속 이슈 분리와 작업 순서 정리
+
+대상:
+
+- GitHub Issue #30
+- 신규 GitHub Issue
+- `mydocs/report/task_m010_54_report.md`
+
+작업:
+
+- release tag dependency 전환을 막고 있는 core API compatibility/update architecture 작업을 별도 이슈로 분리한다.
+- Issue #30에는 새 선행 이슈가 완료된 뒤 진행한다는 관계를 남긴다.
+- Issue #30, #31, #32, #52, 신규 이슈의 권장 진행 순서를 정리한다.
+- 최종 보고서에 원격 이슈 변경 사항과 권장 순서를 기록한다.
+
+산출물:
+
+- `mydocs/working/task_m010_54_stage7.md`
+
+검증:
+
+```bash
+gh issue view 55 --repo postmelee/alhangeul-macos --json number,title,url,state
+gh issue view 30 --repo postmelee/alhangeul-macos --json number,title,url,state
+git diff --check
+```
+
+완료 조건:
+
+- 새 선행 이슈가 등록되어 있다.
+- Issue #30과 새 선행 이슈의 관계가 GitHub에 기록되어 있다.
+- 후속 작업 순서가 최종 보고서에 기록되어 있다.
+
 ## 승인 요청
 
 이 구현 계획서 기준으로 Stage 1을 진행할지 승인 요청한다.

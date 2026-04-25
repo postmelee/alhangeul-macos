@@ -15,6 +15,8 @@
 - `hulryung/hwpql`의 git rev pinning + lock + release hash 검증 방식을 확인했다.
 - `edwardkim/rhwp` 최신 release `v0.7.3` 전환 빌드를 검증했고, 현재 `RustBridge` 필수 API가 없어 즉시 전환할 수 없음을 확인했다.
 - lock과 운영 문서에서 현재 core ref를 release tag 전환 대기 상태로 명시하고, `devel` branch를 안정 기준처럼 설명하는 문구를 제거했다.
+- release tag 전환을 막고 있는 API compatibility/update architecture 작업을 GitHub Issue #55로 분리했다.
+- Issue #30에는 #55 완료 후 진행한다는 관계를 남겼다.
 
 ## 최종 lock 상태
 
@@ -96,9 +98,21 @@ GitHub Issue 본문 변경은 remote state이므로 로컬 커밋에는 본문 d
 
 ## 후속 작업
 
-Issue #30은 이 기준 위에서 `Vendor/rhwp` submodule 제거와 `RustBridge` release tag dependency 전환을 다시 계획하면 된다. 진행 시점에는 `edwardkim/rhwp`의 최신 release tag와 resolved commit을 확인해야 한다.
+새 선행 이슈:
+
+- Issue #55: release tag dependency 전환을 위한 core API compatibility와 update architecture 정리
+
+Issue #30은 #55 완료 후 `Vendor/rhwp` submodule 제거와 `RustBridge` release tag dependency 전환을 다시 계획하면 된다. 진행 시점에는 `edwardkim/rhwp`의 최신 release tag와 resolved commit을 확인해야 한다.
 
 Issue #30은 release tag가 위 API를 포함하는지 먼저 검증해야 한다. 통과 전에는 branch나 floating ref를 안정 기준으로 사용하지 않는다.
+
+권장 진행 순서:
+
+1. Issue #52: 기존 PR 문서 링크를 merge 후 조회 가능한 고정 URL로 보정
+2. Issue #55: release tag dependency 전환을 위한 core API compatibility와 update architecture 정리
+3. Issue #31: README와 아키텍처 문서를 타깃별 제품 경계 중심으로 재정렬
+4. Issue #30: RustBridge를 release tag dependency로 전환하고 `Vendor/rhwp` submodule 제거
+5. Issue #32: 서명, 공증, DMG까지 포함한 release pipeline 자동화
 
 ## 완료 판단
 
