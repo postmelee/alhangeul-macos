@@ -98,9 +98,11 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 
 기본 샘플:
 
-- `Vendor/rhwp/samples/basic/KTX.hwp`
-- `Vendor/rhwp/samples/basic/request.hwp`
-- `Vendor/rhwp/samples/exam_kor.hwp`
+- `samples/basic/KTX.hwp`
+- `samples/basic/request.hwp`
+- `samples/exam_kor.hwp`
+
+기본 render smoke fixture는 앱 저장소 루트의 `samples/`가 소유한다. core submodule 내부 샘플 경로는 기본 검증 경로로 사용하지 않는다.
 
 ## Shared Swift bridge 검사
 
@@ -171,14 +173,14 @@ qlmanage -r cache
 preview 확인:
 
 ```bash
-qlmanage -p Vendor/rhwp/samples/basic/KTX.hwp
+qlmanage -p samples/basic/KTX.hwp
 ```
 
 thumbnail 확인:
 
 ```bash
 mkdir -p /tmp/alhangeul-ql
-qlmanage -t -x -s 512 -o /tmp/alhangeul-ql Vendor/rhwp/samples/basic/KTX.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
 ```
 
 ### 반복 시행착오 방지 규칙

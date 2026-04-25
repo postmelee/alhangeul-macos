@@ -95,10 +95,12 @@ pluginkit -a "$APP"
 pluginkit -mAvvv | grep com.postmelee.alhangeulmac
 qlmanage -r
 qlmanage -r cache
-qlmanage -t -x -s 512 -o /tmp/alhangeul-ql Vendor/rhwp/samples/basic/KTX.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
 ```
 
 `qlmanage -p`는 GUI preview를 띄우므로 자동화 환경에서는 작업지시자 확인이 필요하다. 자동화 가능한 smoke test는 `qlmanage -t -x`를 우선 사용한다.
+
+Finder 통합 smoke test의 기본 샘플은 앱 저장소 루트의 `samples/`에서 가져온다. 실제 사용자 파일 검증이 필요한 경우에는 `samples/basic/KTX.hwp` 대신 대상 `.hwp`/`.hwpx` 경로를 명시한다.
 
 주의:
 

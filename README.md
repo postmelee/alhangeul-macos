@@ -252,9 +252,11 @@ qlmanage -p path/to/sample.hwp
 
 기본 샘플:
 
-- `Vendor/rhwp/samples/basic/KTX.hwp`
-- `Vendor/rhwp/samples/basic/request.hwp`
-- `Vendor/rhwp/samples/exam_kor.hwp`
+- `samples/basic/KTX.hwp`
+- `samples/basic/request.hwp`
+- `samples/exam_kor.hwp`
+
+기본 render smoke fixture는 앱 저장소 루트의 `samples/`가 소유합니다. core submodule 내부 샘플 경로는 기본 검증 문서와 스크립트에서 직접 참조하지 않습니다.
 
 ### Shared Bridge Check
 
