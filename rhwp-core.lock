@@ -5,15 +5,15 @@ rhwp_commit = "1e9d78a1d40c71779d81c6ec6870cd301d912626"
 rhwp_release_transition_status = "demo-commit-pin"
 rhwp_latest_checked_release_tag = "v0.7.3"
 rhwp_latest_checked_release_commit = "c2e8a3461de800a02f76127ff4797bade1d4e532"
-built_at = ""
+built_at = "2026-04-25T23:54:56Z"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
 
 [[artifacts]]
 path = "Frameworks/universal/librhwp.a"
-sha256 = ""
-size = 0
+sha256 = "4548f87fdf93eef196a85d6f553869c78478075df4c6e4496f66e20ebb125ed5"
+size = 102635296
 
 [[artifacts]]
 path = "Frameworks/generated_rhwp.h"
-sha256 = ""
-size = 0
+sha256 = "69aeca5047bf743286d1b2260f8fc9a091ce4f1d7fd61c80084fab81c3a95ac5"
+size = 1349
