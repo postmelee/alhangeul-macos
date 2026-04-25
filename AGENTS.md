@@ -27,6 +27,9 @@ This file provides guidance to Codex when working with code in this repository.
 - 범위가 불명확하거나 기존 작업과 충돌할 가능성이 있으면 먼저 확인
 - 사용자나 다른 작업자가 만든 변경은 되돌리지 않음
 - 이슈 close는 작업지시자 승인 후 또는 PR merge 확인 후에만 수행
+- 문서 수정은 기존 내용을 먼저 읽고 필요한 부분만 수정하며, 불가피할 때만 내용을 추가
+- 작업 완료 후 다음 작업에 필요하지 않은 로컬/원격 부산물은 정리
+- PR merge와 이슈 close 후에는 `devel`로 돌아오고, 더 이상 필요 없는 `local/task{번호}` 브랜치와 임시 worktree를 정리한다.
 
 승인 간주 조건:
 
@@ -121,9 +124,15 @@ This file provides guidance to Codex when working with code in this repository.
 
 강제 규칙:
 
-- `project.yml`이 Xcode project의 원본이며 `RhwpMac.xcodeproj`를 직접 수정하지 않는다.
+- `project.yml`이 Xcode project의 원본이며 `AlhangeulMac.xcodeproj`를 직접 수정하지 않는다.
 - 변경 유형별 최소 검증은 반드시 수행한다.
 - `Sources/RhwpCoreBridge`에 AppKit/UIKit 직접 의존을 넣지 않는다.
+- Quick Look/Thumbnail extension의 LaunchServices/PlugInKit 등록 검증은 `CODE_SIGNING_ALLOWED=NO` Debug 산출물로 수행하지 않는다. 이 산출물은 compile/link 확인용이며 `Info.plist`와 resource sealing이 registration smoke test에 충분하지 않을 수 있다.
+- generated `.app`/`.appex` 산출물은 Spotlight 앱 검색 후보에 섞이지 않도록 `build.noindex/` 아래에 둔다. 문서나 스크립트에 새 `build/DerivedData` 앱 산출물 경로를 추가하지 않는다.
+- Finder Quick Look/Thumbnail smoke test는 `./scripts/package-release.sh <version>`으로 만든 signed/sealed `build.noindex/release/AlhangeulMac.app`을 단일 ASCII 설치 경로(`/Users/melee/Applications/AlhangeulMac.app`)에 배치한 뒤 수행한다.
+- Dock/Finder/Spotlight 사용자 표시명은 localized `InfoPlist.strings`로 제공한다. 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 실제 bundle filesystem name과 맞는 ASCII 값으로 유지하고, `LSHasLocalizedDisplayName`을 켠다. 한글 표시를 위해 `.app` 또는 `.appex` 디렉터리명을 한글로 바꾸지 않는다.
+- 이전 이름의 설치본(`RhwpMac.app`, `알한글.app`)이 discovery 충돌 원인으로 의심될 때만 작업지시자 승인 후 제거한다. 무작위 삭제/재설치로 문제를 숨기지 않고 `pluginkit`, `lsregister`, `mdls`, `qlmanage -t` 결과를 순서대로 기록한다.
+- `qlmanage -m plugins`는 app extension 기반 Quick Look/Thumbnail 등록 상태를 직접 판정하는 기준으로 쓰지 않는다. 등록 확인은 `pluginkit -mAvvv`, 실제 렌더 확인은 `qlmanage -t -x` 또는 `qlmanage -p`로 수행한다.
 
 ### 릴리스/배포
 
@@ -247,6 +256,7 @@ gh pr create --repo postmelee/alhangeul-macos --base devel --head {contributor}:
 12. 승인 요청 시 작업지시자가 피드백 문서를 `mydocs/feedback/`에 등록
 13. 모든 테스트 통과 시 피드백 없음
 14. PR merge 확인 후 이슈 close 및 오늘할일 상태 최종 정리
+15. merge 완료된 `publish/task{issue번호}` 원격 브랜치와 재생성 가능한 로컬 부산물을 정리
 
 ### 작업 규칙
 

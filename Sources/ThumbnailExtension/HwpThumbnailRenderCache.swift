@@ -51,9 +51,9 @@ private extension URLResourceValues {
 final class HwpThumbnailRenderCache {
     static let shared = HwpThumbnailRenderCache()
 
-    private let stateQueue = DispatchQueue(label: "com.postmelee.rhwpmac.thumbnail-cache")
+    private let stateQueue = DispatchQueue(label: "com.postmelee.alhangeulmac.thumbnail-cache")
     private let workerQueue = DispatchQueue(
-        label: "com.postmelee.rhwpmac.thumbnail-render",
+        label: "com.postmelee.alhangeulmac.thumbnail-render",
         qos: .utility,
         attributes: .concurrent
     )
@@ -88,7 +88,8 @@ final class HwpThumbnailRenderCache {
                 let result = Result {
                     try HwpPageImageRenderer.renderFirstPage(
                         fileURL: request.fileURL,
-                        maximumPixelSize: request.maximumPixelSize
+                        maximumPixelSize: request.maximumPixelSize,
+                        embeddedThumbnailPolicy: .never
                     )
                 }
 

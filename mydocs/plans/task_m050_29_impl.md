@@ -161,10 +161,10 @@ git diff --check -- scripts/package-release.sh
 ./scripts/build-rust-macos.sh
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
-  -derivedDataPath build/DerivedData \
+  -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO \
   build
 ./scripts/package-release.sh 0.0.0-test
@@ -174,7 +174,7 @@ git status --short
 
 ## 구현 시 주의사항
 
-- `AlhangeulMac.xcodeproj` 또는 `RhwpMac.xcodeproj`를 직접 수정하지 않는다.
+- `AlhangeulMac.xcodeproj`를 직접 수정하지 않는다.
 - `Sources/RhwpCoreBridge`에는 AppKit/UIKit 의존을 추가하지 않는다.
 - `Frameworks/` 산출물은 gitignore 대상이므로 산출물 자체를 커밋 대상으로 추가하지 않는다.
 - lock update는 명시 옵션에서만 수행한다.

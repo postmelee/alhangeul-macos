@@ -17,7 +17,7 @@
   - `Frameworks/universal/librhwp.a`
   - `Frameworks/generated_rhwp.h`
 - `rhwp-core.lock`이 core commit과 Rust bridge 산출물 provenance를 기록한다는 설명
-- Debug app 경로를 현재 product name인 `RhwpMac.app`으로 정정
+- Debug app 경로를 최신 product name인 `AlhangeulMac.app`으로 정정
 
 ### 빌드/실행 가이드 갱신
 
@@ -29,7 +29,7 @@
 
 - package 전 `./scripts/build-rust-macos.sh --verify-lock` 필수화
 - package 산출물 경로를 `build.noindex/release`로 정정
-- package 대상 app bundle을 `RhwpMac.app`으로 정정
+- package 대상 app bundle을 `AlhangeulMac.app`으로 정정
 - lock 검증 실패 시 app build와 zip 생성을 시작하지 않는다는 정책
 - 릴리스 체크리스트에 lock verify 항목 추가
 
@@ -44,7 +44,7 @@
 
 ### Homebrew Cask 초안 갱신
 
-package zip 안의 app bundle 이름이 `RhwpMac.app`이므로 `Casks/rhwp-mac.rb`의 `app` stanza도 `RhwpMac.app`으로 정정했다.
+package zip 안의 app bundle 이름이 `AlhangeulMac.app`이므로 `Casks/alhangeul-macos.rb`의 `app` stanza도 `AlhangeulMac.app`으로 정정했다.
 
 ### lock 최종 갱신
 
@@ -52,7 +52,7 @@ package zip 안의 app bundle 이름이 `RhwpMac.app`이므로 `Casks/rhwp-mac.r
 
 현재 기록:
 
-- `built_at`: `2026-04-25T00:30:08Z`
+- `built_at`: `2026-04-25T00:38:17Z`
 - `Frameworks/universal/librhwp.a`
   - sha256: `725b65ad445660292bb1a5f2a0f9107ff810e65a699ade78e0a3b26dd901dd50`
   - size: `102627384`
@@ -117,10 +117,10 @@ xcodegen generate
 ### HostApp Debug build
 
 ```bash
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
-  -derivedDataPath build/DerivedData \
+  -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO \
   build
 ```
@@ -144,19 +144,19 @@ xcodebuild -project RhwpMac.xcodeproj \
 확인된 흐름:
 
 - package 전 `--verify-lock` 실행
-- `RhwpMac.app` Release build 성공
-- `build.noindex/release/rhwp-mac-0.0.0-test.zip` 생성
+- `AlhangeulMac.app` Release build 성공
+- `build.noindex/release/alhangeul-macos-0.0.0-test.zip` 생성
 
 확인된 zip sha256:
 
 ```text
-384ba0a87e1e49c3d95020481eb94a9289b29816ca4a2441df25f8ef33e7c0fb
+0ff5b4b3963f09106655de8bd62f7ceba07f00e1ffc2bc825b981bac03a89143
 ```
 
 ### 직접 hash 확인
 
 ```bash
-shasum -a 256 build.noindex/release/rhwp-mac-0.0.0-test.zip Frameworks/universal/librhwp.a Frameworks/generated_rhwp.h
+shasum -a 256 build.noindex/release/alhangeul-macos-0.0.0-test.zip Frameworks/universal/librhwp.a Frameworks/generated_rhwp.h
 ```
 
 결과: lock과 산출물 hash 일치.

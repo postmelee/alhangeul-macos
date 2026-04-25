@@ -10,6 +10,11 @@ struct HwpRenderedPage: @unchecked Sendable {
     let size: CGSize
 }
 
+enum HwpEmbeddedThumbnailPolicy {
+    case never
+    case smallFinderThumbnail(maxPixelDimension: CGFloat)
+}
+
 enum HwpRenderError: Error {
     case fileTooLarge
     case emptyDocument
@@ -22,13 +27,21 @@ enum HwpRenderError: Error {
 
 enum HwpPageImageRenderer {
     static func renderFirstPage(fileURL: URL) throws -> HwpRenderedPage {
-        try renderFirstPage(fileURL: fileURL, maximumPixelSize: nil)
+        try renderFirstPage(fileURL: fileURL, maximumPixelSize: nil, embeddedThumbnailPolicy: .never)
     }
 
-    static func renderFirstPage(fileURL: URL, maximumPixelSize: CGSize?) throws -> HwpRenderedPage {
+    static func renderFirstPage(
+        fileURL: URL,
+        maximumPixelSize: CGSize?,
+        embeddedThumbnailPolicy: HwpEmbeddedThumbnailPolicy = .never
+    ) throws -> HwpRenderedPage {
         let values = try fileURL.resourceValues(forKeys: [.fileSizeKey])
         let data = try Data(contentsOf: fileURL, options: [.mappedIfSafe])
-        if let embedded = decodeEmbeddedThumbnail(from: data, maximumPixelSize: maximumPixelSize) {
+        if let embedded = decodeEmbeddedThumbnail(
+            from: data,
+            maximumPixelSize: maximumPixelSize,
+            policy: embeddedThumbnailPolicy
+        ) {
             return embedded
         }
         if let fileSize = values.fileSize, fileSize > hwpQuickLookMaxFileSize {
@@ -99,7 +112,11 @@ enum HwpPageImageRenderer {
         return data as Data
     }
 
-    private static func decodeEmbeddedThumbnail(from data: Data, maximumPixelSize: CGSize?) -> HwpRenderedPage? {
+    private static func decodeEmbeddedThumbnail(
+        from data: Data,
+        maximumPixelSize: CGSize?,
+        policy: HwpEmbeddedThumbnailPolicy
+    ) -> HwpRenderedPage? {
         guard let thumbnail = RhwpDocument.extractEmbeddedThumbnail(from: data) else {
             return nil
         }
@@ -129,12 +146,38 @@ enum HwpPageImageRenderer {
             return nil
         }
 
+        guard shouldUseEmbeddedThumbnail(
+            requestPixelSize: maximumPixelSize,
+            policy: policy
+        ) else {
+            return nil
+        }
+
         let width = thumbnail.width > 0 ? thumbnail.width : image.width
         let height = thumbnail.height > 0 ? thumbnail.height : image.height
         return HwpRenderedPage(
             image: image,
             size: CGSize(width: width, height: height)
         )
+    }
+
+    private static func shouldUseEmbeddedThumbnail(
+        requestPixelSize: CGSize?,
+        policy: HwpEmbeddedThumbnailPolicy
+    ) -> Bool {
+        switch policy {
+        case .never:
+            return false
+        case .smallFinderThumbnail(let maxPixelDimension):
+            guard let requestPixelSize else {
+                return false
+            }
+            let requestedMaxDimension = max(requestPixelSize.width, requestPixelSize.height)
+            guard requestedMaxDimension > 0 else {
+                return false
+            }
+            return requestedMaxDimension <= maxPixelDimension
+        }
     }
 
     private static func renderScale(pageSize: CGSize, maximumPixelSize: CGSize?) -> CGFloat {

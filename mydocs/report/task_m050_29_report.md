@@ -14,7 +14,7 @@
 - artifact metadata 누락/불일치 시 expected/actual 출력 추가
 - `scripts/package-release.sh`가 package 전 lock verify를 수행하도록 변경
 - package 산출물 경로를 `build.noindex/release`로 조정
-- `Casks/rhwp-mac.rb` app bundle 이름을 현재 산출물인 `RhwpMac.app`에 맞춤
+- `Casks/alhangeul-macos.rb` app bundle 이름을 현재 산출물인 `AlhangeulMac.app`에 맞춤
 - README와 manual 문서 갱신
 
 ## 최종 lock 상태
@@ -23,7 +23,7 @@
 
 - `lock_version`: `2`
 - `rhwp_commit`: `1e9d78a1d40c71779d81c6ec6870cd301d912626`
-- `built_at`: `2026-04-25T00:30:08Z`
+- `built_at`: `2026-04-25T00:38:17Z`
 
 Artifacts:
 
@@ -42,10 +42,10 @@ Artifacts:
 ./scripts/build-rust-macos.sh
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
-  -derivedDataPath build/DerivedData \
+  -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO \
   build
 ./scripts/package-release.sh 0.0.0-test
@@ -53,8 +53,8 @@ xcodebuild -project RhwpMac.xcodeproj \
 
 package smoke test 산출물:
 
-- `build.noindex/release/rhwp-mac-0.0.0-test.zip`
-- sha256: `384ba0a87e1e49c3d95020481eb94a9289b29816ca4a2441df25f8ef33e7c0fb`
+- `build.noindex/release/alhangeul-macos-0.0.0-test.zip`
+- sha256: `0ff5b4b3963f09106655de8bd62f7ceba07f00e1ffc2bc825b981bac03a89143`
 
 ## 참고 및 리스크
 
@@ -62,6 +62,7 @@ package smoke test 산출물:
 - `built_at`은 update 시점 기록이며 verify 비교 대상은 commit, artifact sha256, artifact size다.
 - GitHub Issue #29의 GitHub milestone은 `v0.1.0`이지만, 인계 문서와 작업 문서 prefix는 `task_m050_29`로 진행되었다. 이번 작업에서는 기존 문서 흐름을 유지했다.
 - 검증 중 CoreSimulatorService 관련 경고가 출력되었지만, macOS build/package 명령은 모두 성공했다.
+- 최신 `devel` 병합 후 PR #41 이름 변경 기준을 재확인해 현재 운용 파일의 app/project/package/Cask 이름을 `AlhangeulMac`/`alhangeul-macos` 기준으로 보정했다.
 
 ## 완료 판단
 

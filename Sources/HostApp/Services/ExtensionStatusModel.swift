@@ -17,9 +17,9 @@ enum ExtensionStatus: CaseIterable, Hashable {
     var bundleIdentifier: String {
         switch self {
         case .preview:
-            "com.postmelee.rhwpmac.QLExtension"
+            "com.postmelee.alhangeulmac.QLExtension"
         case .thumbnail:
-            "com.postmelee.rhwpmac.ThumbnailExtension"
+            "com.postmelee.alhangeulmac.ThumbnailExtension"
         }
     }
 }

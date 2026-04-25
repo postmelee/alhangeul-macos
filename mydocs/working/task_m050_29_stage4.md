@@ -50,10 +50,10 @@ build.noindex/DerivedDataRelease
 
 ### app bundle 이름 정정
 
-`project.yml`의 HostApp `PRODUCT_NAME`은 현재 `RhwpMac`이다. 따라서 package script의 app bundle 확인 대상도 다음과 같이 맞췄다.
+최신 `devel` 병합 후 `project.yml`의 HostApp `PRODUCT_NAME`은 `AlhangeulMac`이다. 따라서 package script의 app bundle 확인 대상도 다음과 같이 맞췄다.
 
 ```text
-RhwpMac.app
+AlhangeulMac.app
 ```
 
 기존 `알한글.app`은 현재 build product name과 맞지 않았다.
@@ -93,8 +93,8 @@ git diff --check -- scripts/package-release.sh
 1. `./scripts/build-rust-macos.sh --verify-lock` 실행
 2. `Verified: /private/tmp/rhwp-mac-task29/rhwp-core.lock` 출력 확인
 3. `xcodegen generate` 성공
-4. Release `RhwpMac.app` build 성공
-5. `build.noindex/release/rhwp-mac-0.0.0-test.zip` 생성
+4. Release `AlhangeulMac.app` build 성공
+5. `build.noindex/release/alhangeul-macos-0.0.0-test.zip` 생성
 6. zip sha256 출력
 
 확인된 zip sha256:
@@ -107,15 +107,15 @@ a68402288ad3a447d626758d80ded4d7569f41a3bc767135681ee2603ec8c1dd
 
 ```bash
 ls -la build.noindex/release
-shasum -a 256 build.noindex/release/rhwp-mac-0.0.0-test.zip
+shasum -a 256 build.noindex/release/alhangeul-macos-0.0.0-test.zip
 ```
 
 주요 산출물:
 
-- `build.noindex/release/RhwpMac.app`
-- `build.noindex/release/RhwpMacPreview.appex`
-- `build.noindex/release/RhwpMacThumbnail.appex`
-- `build.noindex/release/rhwp-mac-0.0.0-test.zip`
+- `build.noindex/release/AlhangeulMac.app`
+- `build.noindex/release/AlhangeulMacPreview.appex`
+- `build.noindex/release/AlhangeulMacThumbnail.appex`
+- `build.noindex/release/alhangeul-macos-0.0.0-test.zip`
 
 ## 참고 사항
 

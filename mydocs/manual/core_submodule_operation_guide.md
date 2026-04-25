@@ -35,10 +35,10 @@
 ./scripts/build-rust-macos.sh --verify-lock
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project RhwpMac.xcodeproj \
+xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
-  -derivedDataPath build/DerivedData \
+  -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO \
   build
 ./scripts/validate-stage3-render.sh

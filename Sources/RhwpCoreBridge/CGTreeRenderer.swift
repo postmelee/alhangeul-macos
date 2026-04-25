@@ -66,7 +66,7 @@ class CGTreeRenderer {
             renderRectangle(rect, bbox: node.bbox, in: ctx)
 
         case .line(let line):
-            renderLine(line, in: ctx)
+            renderLine(line, bbox: node.bbox, in: ctx)
 
         case .ellipse(let ell):
             renderEllipse(ell, bbox: node.bbox, in: ctx)
@@ -136,8 +136,10 @@ class CGTreeRenderer {
 
     // MARK: - 직선
 
-    private func renderLine(_ line: LineNode, in ctx: CGContext) {
+    private func renderLine(_ line: LineNode, bbox: BBox, in ctx: CGContext) {
         ctx.saveGState()
+        applyTransform(line.transform, bbox: bbox, in: ctx)
+
         let style = line.style
 
         ctx.setStrokeColor(colorRefToCGColor(style.color))
