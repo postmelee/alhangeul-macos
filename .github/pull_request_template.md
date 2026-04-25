@@ -35,13 +35,15 @@ stage 기반 작업이면 Stage 기준으로 적습니다.
 
 <!--
 관련 계획서, 단계 보고서, 최종 보고서, troubleshooting 문서를 적습니다.
+문서 링크는 PR 생성 직전 `git rev-parse HEAD`로 확인한 PR head commit SHA 기준의 GitHub blob URL을 사용합니다.
+표시는 raw URL 대신 `[파일명](https://github.com/postmelee/alhangeul-macos/blob/{head_sha}/mydocs/...)` 형식으로 적습니다.
 해당 없는 항목은 삭제합니다.
 -->
 
-- 수행 계획서: 
-- 구현 계획서: 
-- 단계 보고서: 
-- 최종 보고서: 
+- 수행 계획서: [task_m000_0.md](https://github.com/postmelee/alhangeul-macos/blob/{head_sha}/mydocs/plans/task_m000_0.md)
+- 구현 계획서: [task_m000_0_impl.md](https://github.com/postmelee/alhangeul-macos/blob/{head_sha}/mydocs/plans/task_m000_0_impl.md)
+- 단계 보고서: [task_m000_0_stage1.md](https://github.com/postmelee/alhangeul-macos/blob/{head_sha}/mydocs/working/task_m000_0_stage1.md)
+- 최종 보고서: [task_m000_0_report.md](https://github.com/postmelee/alhangeul-macos/blob/{head_sha}/mydocs/report/task_m000_0_report.md)
 
 ## 관련 이슈
 
