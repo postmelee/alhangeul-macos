@@ -20,9 +20,13 @@ COMMIT="$(git -C "$RHWP_ROOT" rev-parse HEAD)"
 
 cat > "$LOCK_FILE" <<EOF
 lock_version = 2
-rhwp_repo = "https://github.com/postmelee/rhwp.git"
+rhwp_repo = "https://github.com/edwardkim/rhwp.git"
+rhwp_ref_kind = "branch"
 rhwp_branch = "devel"
 rhwp_commit = "$COMMIT"
+rhwp_release_transition_status = "blocked-missing-bridge-apis"
+rhwp_latest_checked_release_tag = "v0.7.3"
+rhwp_latest_checked_release_commit = "c2e8a3461de800a02f76127ff4797bade1d4e532"
 built_at = ""
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
 

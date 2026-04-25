@@ -6,7 +6,7 @@ core bridge 포팅 및 macOS 연동 검증
 
 ## 수행 내용
 
-- `postmelee/rhwp`의 `devel`을 upstream 최신 기준 위에 갱신했다.
+- `edwardkim/rhwp`의 `devel`을 최신 기준으로 갱신했다.
 - `ios/devel`의 native viewer core 변경 중 필요한 항목만 선별 포팅했다.
   - render tree 타입 serde 직렬화
   - `DocumentCore::build_page_render_tree`
@@ -14,7 +14,7 @@ core bridge 포팅 및 macOS 연동 검증
   - 관련 style/model 타입 `Serialize` derive
 - `RustBridge`가 compact JSON 대신 상세 render tree JSON을 반환하도록 수정했다.
 - `rhwp_image_data`가 문서 내 bin data를 반환하도록 수정했다.
-- `alhangeul-macos`의 submodule URL과 lock 파일을 `postmelee/rhwp` 기준으로 전환했다.
+- `alhangeul-macos`의 submodule URL과 lock 파일을 `edwardkim/rhwp` 기준으로 전환했다.
 
 ## 검증
 

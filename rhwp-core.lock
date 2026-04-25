@@ -1,14 +1,18 @@
 lock_version = 2
-rhwp_repo = "https://github.com/postmelee/rhwp.git"
+rhwp_repo = "https://github.com/edwardkim/rhwp.git"
+rhwp_ref_kind = "branch"
 rhwp_branch = "devel"
 rhwp_commit = "1e9d78a1d40c71779d81c6ec6870cd301d912626"
-built_at = "2026-04-25T00:38:17Z"
+rhwp_release_transition_status = "blocked-missing-bridge-apis"
+rhwp_latest_checked_release_tag = "v0.7.3"
+rhwp_latest_checked_release_commit = "c2e8a3461de800a02f76127ff4797bade1d4e532"
+built_at = "2026-04-25T17:59:12Z"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
 
 [[artifacts]]
 path = "Frameworks/universal/librhwp.a"
-sha256 = "725b65ad445660292bb1a5f2a0f9107ff810e65a699ade78e0a3b26dd901dd50"
-size = 102627384
+sha256 = "09f9d18f54aa8012aba51fcf32e925286eecbbbd7222c033e37b7779674a7e20"
+size = 102631496
 
 [[artifacts]]
 path = "Frameworks/generated_rhwp.h"

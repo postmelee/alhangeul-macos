@@ -20,7 +20,7 @@
 - `scripts/package-release.sh`: Release configuration으로 내부 산출물 `AlhangeulMac.app`을 빌드한 뒤 ASCII filesystem bundle name인 `AlhangeulMac.app`으로 zip 파일을 생성한다.
 - `Casks/alhangeul-macos.rb`: Homebrew Cask 초안이다.
 - `Sources/HostApp/Info.plist`, `Sources/QLExtension/Info.plist`, `Sources/ThumbnailExtension/Info.plist`: 앱과 extension 버전 정보가 들어 있다.
-- `rhwp-core.lock`: 릴리스에 포함되는 `rhwp` core commit을 기록한다.
+- `rhwp-core.lock`: 릴리스에 포함되는 `edwardkim/rhwp` core commit과 Rust bridge 산출물 provenance를 기록한다.
 
 첫 공개 릴리스 전 확정해야 할 사항:
 
@@ -185,7 +185,7 @@ build.noindex/release/alhangeul-macos-0.1.0.zip
 GitHub Release 생성 전 확인:
 
 - release branch 또는 tag 기준 commit이 정확한가
-- `rhwp-core.lock` commit이 release note에 기록되었는가
+- `rhwp-core.lock`의 core repository와 commit이 release note에 기록되었는가
 - `validate-stage3-render.sh` 결과가 release report에 기록되었는가
 - zip 파일 SHA256이 기록되었는가
 - 알려진 한계와 수동 확인 항목이 기록되었는가
@@ -194,7 +194,7 @@ Release note에 포함할 내용:
 
 - 주요 변경 사항
 - 지원 macOS 버전
-- 포함된 `rhwp` core commit
+- 포함된 `edwardkim/rhwp` core commit
 - 설치/실행 주의사항
 - Quick Look/Thumbnail extension 등록 확인 방법
 - 알려진 문제

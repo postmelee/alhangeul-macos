@@ -15,7 +15,7 @@
 - 오래된 경로/표현 검색
   - 대상:
     - `build/DerivedData/Build/Products/.../알한글.app`
-    - `postmelee/rhwp-mac`
+    - 이전 저장소명
     - `알한글 Preview`
     - `알한글 Thumbnail`
   - 결과: 매칭 없음

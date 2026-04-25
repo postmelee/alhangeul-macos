@@ -35,6 +35,8 @@ mkdir -p "$OUT_DIR"
 BIN="$OUT_DIR/stage3_render_check"
 SWIFT_MODULE_CACHE="$OUT_DIR/swift-module-cache"
 CLANG_MODULE_CACHE="$OUT_DIR/clang-module-cache"
+# Swift/Clang module caches contain absolute paths and can outlive workspace moves.
+rm -rf "$SWIFT_MODULE_CACHE" "$CLANG_MODULE_CACHE"
 mkdir -p "$SWIFT_MODULE_CACHE" "$CLANG_MODULE_CACHE"
 
 swiftc -parse-as-library \

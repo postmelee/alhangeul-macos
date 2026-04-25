@@ -31,7 +31,7 @@
 
 ## 검증
 
-- `rg -n "build/DerivedData/Build/Products/(Debug|Release)/알한글\\.app|open build/DerivedData/Build/Products/Debug/알한글\\.app|postmelee/rhwp-mac|알한글 Preview|알한글 Thumbnail" README.md mydocs/manual mydocs/tech Casks Sources scripts`
+- `rg -n "build/DerivedData/Build/Products/(Debug|Release)/알한글\\.app|open build/DerivedData/Build/Products/Debug/알한글\\.app|이전 저장소명|알한글 Preview|알한글 Thumbnail" README.md mydocs/manual mydocs/tech Casks Sources scripts`
   - 결과: 매칭 없음
 - `git diff --check -- README.md mydocs/tech/project_architecture.md mydocs/manual/build_run_guide.md mydocs/manual/release_distribution_guide.md`
 
