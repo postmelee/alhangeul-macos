@@ -88,6 +88,10 @@ gh pr create --repo postmelee/alhangeul-macos --base devel --head {contributor}:
 
 원격에 `local/taskN`을 직접 올렸거나 잘못된 이름으로 push한 경우 즉시 추가 push를 멈춘다. 아직 PR을 만들지 않았다면 올바른 `publish/taskN` 브랜치를 새로 push하고, 잘못 올라간 원격 브랜치는 작업지시자 확인 후 삭제한다. 이미 PR을 만들었다면 PR base/head와 diff를 확인한 뒤, 새 PR을 만들지 기존 PR head를 보정할지 결정한다.
 
+### PR 본문에 문서 링크를 넣을 때
+
+PR 본문에서 계획서, 단계 보고서, 최종 보고서, troubleshooting 문서를 링크할 때는 merge 후에도 열리는 commit SHA 고정 GitHub blob URL을 우선 사용한다. PR 생성 직전 `git rev-parse HEAD`로 얻은 PR head commit SHA를 기준으로 `https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/...` 형식을 사용하면 `publish/taskN` 브랜치 삭제 후에도 링크가 유지된다. PR 본문 상대 링크나 `blob/publish/taskN/...` 링크는 merge 후 탐색성이 떨어질 수 있으므로 피한다.
+
 ### merge 후에도 로컬 브랜치가 남아 있을 때
 
 PR이 `MERGED` 상태인지 먼저 확인한다. merge 확인 후 `devel`로 돌아와 최신화하고, 원격 `publish/taskN`과 로컬 `local/taskN`을 정리한다. 이 절차는 [`pr-merge-cleanup`](../skills/pr-merge-cleanup/SKILL.md) SKILL이 문서화한 순서를 따른다.

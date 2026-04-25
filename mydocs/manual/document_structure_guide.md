@@ -10,23 +10,6 @@
 - **마일스톤 포함 문서명**: `task_m010_49.md`처럼 마일스톤과 이슈 번호를 함께 넣은 신규 문서명.
 - **Agent Skills 진실 원천**: Codex와 Claude Code가 함께 읽는 `mydocs/skills/{skill-name}/SKILL.md`.
 
-## 문서 폴더 구조
-
-`mydocs/` 하위:
-
-- `orders/` - 오늘 할일 문서 (`yyyymmdd.md`)
-- `plans/` - 수행 계획서, 구현 계획서
-- `plans/archives/` - 완료된 계획서 보관
-- `working/` - 단계별 완료 보고서
-- `report/` - 최종 보고서와 장기 보관 보고서
-- `feedback/` - 작업지시자 피드백, 코드 리뷰 의견
-- `tech/` - 기술 조사, 구조 분석, 스펙 정리
-- `manual/` - 개발자/사용자 매뉴얼
-- `troubleshootings/` - 트러블슈팅과 재발 방지 기록
-- `pr/` - 외부 PR 검토 기록
-- `pr/archives/` - 처리 완료 PR 검토 기록 보관
-- `skills/` - Agent Skills 진실 원천 (Codex/Claude Code 공용)
-
 ## 문서 파일명 규칙
 
 신규 문서의 표준 형식은 GitHub Issue 번호와 마일스톤을 함께 사용한다.
@@ -84,10 +67,6 @@
 - 모든 SKILL.md는 frontmatter에 `allow_implicit_invocation: false`를 명시해 양 도구에서 명시 호출만 허용한다.
 
 ## FAQ / 흔한 실수
-
-### 문서를 잘못된 폴더에 만들었을 때
-
-먼저 문서 성격을 다시 판정한다. 단계별 완료보고서면 `working/`, 최종 결과보고서면 `report/`, 장기 원인 분석이면 `troubleshootings/`, 구조·스펙 조사면 `tech/`가 기본 위치다. 아직 커밋 전이면 올바른 폴더로 이동하고, 이미 커밋된 뒤라면 다음 단계 보고서 또는 최종 보고서에 이동 이유를 짧게 기록한다.
 
 ### 마일스톤이 아직 확정되지 않았을 때
 
