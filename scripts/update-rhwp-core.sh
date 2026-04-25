@@ -20,7 +20,7 @@ COMMIT="$(git -C "$RHWP_ROOT" rev-parse HEAD)"
 
 cat > "$LOCK_FILE" <<EOF
 lock_version = 2
-rhwp_repo = "https://github.com/postmelee/rhwp.git"
+rhwp_repo = "https://github.com/edwardkim/rhwp.git"
 rhwp_branch = "devel"
 rhwp_commit = "$COMMIT"
 built_at = ""

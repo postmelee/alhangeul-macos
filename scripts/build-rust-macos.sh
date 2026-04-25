@@ -151,7 +151,7 @@ write_lock_file() {
 
   {
     echo 'lock_version = 2'
-    echo 'rhwp_repo = "https://github.com/postmelee/rhwp.git"'
+    echo 'rhwp_repo = "https://github.com/edwardkim/rhwp.git"'
     echo 'rhwp_branch = "devel"'
     echo "rhwp_commit = \"$commit\""
     echo "built_at = \"$built_at\""
