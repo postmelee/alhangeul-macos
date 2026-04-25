@@ -47,6 +47,7 @@ cat rhwp-core.lock
 
 - 작업 브랜치와 릴리스 기준 브랜치가 명확해야 한다.
 - `Vendor/rhwp` submodule commit과 `rhwp-core.lock`의 `rhwp_commit`이 일치해야 한다.
+- `./scripts/build-rust-macos.sh --verify-lock`이 통과해야 한다.
 - 의도하지 않은 미커밋 변경이 없어야 한다.
 - 릴리스에 포함할 PR이 모두 merge되어 있어야 한다.
 
@@ -55,7 +56,7 @@ cat rhwp-core.lock
 기본 검증:
 
 ```bash
-./scripts/build-rust-macos.sh
+./scripts/build-rust-macos.sh --verify-lock
 ./scripts/check-no-appkit.sh
 xcodegen generate
 xcodebuild -project AlhangeulMac.xcodeproj \
@@ -144,7 +145,7 @@ build.noindex/release/alhangeul-macos-0.1.0.zip
 
 스크립트가 수행하는 일:
 
-- Rust bridge와 `Rhwp.xcframework` 재생성
+- Rust bridge와 `Rhwp.xcframework` 재생성 후 `rhwp-core.lock` 검증
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
 - 내부 산출물 `AlhangeulMac.app`을 release staging으로 복사한 뒤 `AlhangeulMac.app` 이름으로 zip 압축
@@ -154,6 +155,7 @@ build.noindex/release/alhangeul-macos-0.1.0.zip
 주의:
 
 - 현재 스크립트는 서명/공증을 자동 수행하지 않는다.
+- lock 검증이 실패하면 app build와 zip 생성을 시작하지 않는다.
 - zip 파일명은 `alhangeul-macos-<version>.zip`이며 저장소명과 맞춘다.
 
 ## 서명과 공증
@@ -224,6 +226,7 @@ Release note에 포함할 내용:
 - [ ] 릴리스 버전 확정
 - [ ] 릴리스 기준 branch/commit 확정
 - [ ] `Vendor/rhwp`와 `rhwp-core.lock` 일치 확인
+- [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과
 - [ ] Debug build 통과
 - [ ] Release build 통과
 - [ ] `validate-stage3-render.sh` 통과

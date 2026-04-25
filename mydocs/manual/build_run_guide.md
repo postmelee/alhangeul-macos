@@ -27,6 +27,24 @@ brew install xcodegen
 - `rhwp-ffi-symbols.txt`와 생성 심볼 비교
 - `Frameworks/Rhwp.xcframework` 생성
 
+일반 build는 `rhwp-core.lock`을 수정하지 않는다. core commit 또는 Rust bridge 산출물을 lock에 반영해야 할 때만 명시적으로 update 모드를 사용한다.
+
+```bash
+./scripts/build-rust-macos.sh --update-lock
+```
+
+lock과 현재 산출물의 일치 여부만 확인할 때는 verify 모드를 사용한다.
+
+```bash
+./scripts/build-rust-macos.sh --verify-lock
+```
+
+검증 대상:
+
+- `Vendor/rhwp` 현재 commit과 `rhwp-core.lock`의 `rhwp_commit`
+- `Frameworks/universal/librhwp.a` sha256/size
+- `Frameworks/generated_rhwp.h` sha256/size
+
 ## Xcode 프로젝트 생성
 
 ```bash

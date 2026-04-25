@@ -19,15 +19,23 @@ git -C "$RHWP_ROOT" merge --ff-only origin/devel
 COMMIT="$(git -C "$RHWP_ROOT" rev-parse HEAD)"
 
 cat > "$LOCK_FILE" <<EOF
+lock_version = 2
 rhwp_repo = "https://github.com/postmelee/rhwp.git"
 rhwp_branch = "devel"
 rhwp_commit = "$COMMIT"
+built_at = ""
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
-generated_artifacts = [
-  "Frameworks/universal/librhwp.a",
-  "Frameworks/Rhwp.xcframework",
-]
+
+[[artifacts]]
+path = "Frameworks/universal/librhwp.a"
+sha256 = ""
+size = 0
+
+[[artifacts]]
+path = "Frameworks/generated_rhwp.h"
+sha256 = ""
+size = 0
 EOF
 
 echo "Updated rhwp core to $COMMIT"
-echo "Next: ./scripts/build-rust-macos.sh && ./scripts/check-no-appkit.sh"
+echo "Next: ./scripts/build-rust-macos.sh --update-lock && ./scripts/check-no-appkit.sh"

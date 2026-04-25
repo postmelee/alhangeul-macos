@@ -27,7 +27,7 @@ rm -rf "$BUILD_DIR/$BUILD_APP_NAME" "$BUILD_DIR/$BUILD_APP_NAME.dSYM"
 rm -rf "$BUILD_DIR"/AlhangeulMac*.appex "$BUILD_DIR"/AlhangeulMac*.appex.dSYM "$BUILD_DIR"/AlhangeulMac*.swiftmodule
 rm -rf "$BUILD_DIR/include" "$BUILD_DIR/librhwp.a"
 
-"$ROOT/scripts/build-rust-macos.sh"
+"$ROOT/scripts/build-rust-macos.sh" --verify-lock
 
 cd "$ROOT"
 xcodegen generate

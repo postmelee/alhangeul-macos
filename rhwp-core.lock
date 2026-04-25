@@ -1,8 +1,16 @@
+lock_version = 2
 rhwp_repo = "https://github.com/postmelee/rhwp.git"
 rhwp_branch = "devel"
 rhwp_commit = "1e9d78a1d40c71779d81c6ec6870cd301d912626"
+built_at = "2026-04-25T00:38:17Z"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
-generated_artifacts = [
-  "Frameworks/universal/librhwp.a",
-  "Frameworks/Rhwp.xcframework",
-]
+
+[[artifacts]]
+path = "Frameworks/universal/librhwp.a"
+sha256 = "725b65ad445660292bb1a5f2a0f9107ff810e65a699ade78e0a3b26dd901dd50"
+size = 102627384
+
+[[artifacts]]
+path = "Frameworks/generated_rhwp.h"
+sha256 = "69aeca5047bf743286d1b2260f8fc9a091ce4f1d7fd61c80084fab81c3a95ac5"
+size = 1349

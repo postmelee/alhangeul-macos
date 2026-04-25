@@ -31,7 +31,8 @@
 
 ```bash
 ./scripts/update-rhwp-core.sh
-./scripts/build-rust-macos.sh
+./scripts/build-rust-macos.sh --update-lock
+./scripts/build-rust-macos.sh --verify-lock
 ./scripts/check-no-appkit.sh
 xcodegen generate
 xcodebuild -project AlhangeulMac.xcodeproj \
@@ -46,6 +47,7 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 ## 업데이트 후 확인 항목
 
 - `Vendor/rhwp` commit과 `rhwp-core.lock`의 `rhwp_commit` 일치
+- `rhwp-core.lock`의 `Frameworks/universal/librhwp.a`, `Frameworks/generated_rhwp.h` sha256/size 기록 갱신 여부
 - `rhwp-ffi-symbols.txt` 변경 여부와 의도성
 - Swift `RenderTree` 모델과 core JSON 구조 호환성
 - Quick Look/Thumbnail smoke test 필요 여부
