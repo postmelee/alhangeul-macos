@@ -16,16 +16,16 @@
 
 ## core 최신화 기준
 
-1. `postmelee/rhwp`의 `devel`: 실제 사용 기준
-2. `edwardkim/rhwp`의 `devel`: upstream 참고 기준
-3. `edwardkim/rhwp`의 `ios/devel`: native viewer 변경 참고 기준
+1. `edwardkim/rhwp`의 `devel`: 현재 submodule 단계의 실제 사용 기준
+2. `edwardkim/rhwp`의 최신 릴리즈: 후속 git dependency 전환 기준
 
 ## 운영 원칙
 
 - 앱 저장소에서 `Vendor/rhwp`에 임시 수정을 남기지 않는다.
-- core API 변경은 먼저 `postmelee/rhwp` `devel`에 반영한다.
+- core API 변경은 먼저 `edwardkim/rhwp`에 반영한다.
 - 앱 저장소에서는 submodule pointer와 `rhwp-core.lock`을 함께 갱신한다.
 - ABI 변경은 `rhwp-ffi-symbols.txt`와 Swift bridge 영향 검토를 동반한다.
+- `Vendor/rhwp` 제거와 릴리즈 기반 git dependency 전환은 후속 Issue #30에서 진행한다.
 
 ## 업데이트 절차
 
@@ -58,4 +58,4 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 
 - `Vendor/rhwp` 변경만 커밋하고 `rhwp-core.lock`을 누락
 - ABI 영향 검토 없이 FFI 변경 반영
-- upstream 대상 PR과 앱 저장소 PR을 혼합 진행
+- core 저장소 PR과 앱 저장소 PR을 혼합 진행

@@ -13,17 +13,18 @@
 - `ThumbnailExtension`: Finder thumbnail extension
 - `Shared`: HostApp과 extension이 공유하는 macOS helper
 - `RhwpCoreBridge`: Swift FFI wrapper, render tree 디코딩, CoreGraphics/CoreText renderer
-- `RustBridge`: `Vendor/rhwp`를 C ABI로 노출하는 Rust staticlib crate
-- `Vendor/rhwp`: `postmelee/rhwp`의 `devel`을 고정한 core submodule
+- `RustBridge`: `Vendor/rhwp`의 `rhwp` core를 C ABI로 노출하는 Rust staticlib crate
+- `Vendor/rhwp`: `edwardkim/rhwp`의 `devel`을 고정한 core submodule
 
 ## 소유 경계
 
 ### 1. core와 앱 저장소의 경계
 
 - `Vendor/rhwp`는 Rust HWP/HWPX parser/renderer core다.
-- core API 변경은 먼저 `postmelee/rhwp` 저장소에 반영한다.
+- core API 변경은 먼저 `edwardkim/rhwp` 저장소에 반영한다.
 - 앱 저장소는 `Vendor/rhwp`의 submodule pointer, `rhwp-core.lock`, Swift/Rust bridge 적응만 소유한다.
 - 앱 저장소에 `Vendor/rhwp` 임시 수정을 남기지 않는다.
+- `Vendor/rhwp` 제거와 릴리즈 태그 기반 dependency 전환은 후속 dependency 전환 작업에서 수행한다.
 
 ### 2. RustBridge 경계
 

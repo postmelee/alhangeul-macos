@@ -8,7 +8,7 @@
 
 - Finder Quick Look preview / Thumbnail extension으로 `.hwp`, `.hwpx` 첫 페이지 미리보기·썸네일 제공
 - macOS viewer app: 다중 페이지 스크롤, 확대/축소
-- Rust `rhwp` core를 `Vendor/rhwp` git submodule로 고정, `RustBridge` C ABI와 `Rhwp.xcframework`로 Swift/macOS에서 사용
+- Rust `rhwp` core를 `edwardkim/rhwp` 기준 `Vendor/rhwp` git submodule로 고정, `RustBridge` C ABI와 `Rhwp.xcframework`로 Swift/macOS에서 사용
 - 앱, Quick Look/Thumbnail 확장, Swift bridge, 패키징·배포 정책은 본 저장소가 소유
 
 ## 하이퍼-워터폴 핵심 규칙
@@ -46,8 +46,8 @@
 - Rust FFI 경계의 포인터/길이/수명 규칙 준수 — 상세: 동일 매뉴얼
 - `project.yml`이 Xcode project 원본. `AlhangeulMac.xcodeproj` 직접 수정 금지 — 상세: [`build_run_guide.md`](mydocs/manual/build_run_guide.md)
 - 변경 유형별 최소 검증 필수 — 상세: 동일 매뉴얼
-- `build.noindex/` 아래에 `.app`/`.appex` 산출물 배치 (Spotlight 오염 방지) — 상세: 동일 매뉴얼
-- core 최신화 기준은 `postmelee/rhwp` `devel`. core 변경은 core 저장소 먼저, 이후 submodule pointer + `rhwp-core.lock` 갱신 — 상세: [`core_submodule_operation_guide.md`](mydocs/manual/core_submodule_operation_guide.md)
+- `build.noindex/` 아래에 `.app`/`.appex` 산출물 배치 (Spotlight 검색 혼선 방지) — 상세: 동일 매뉴얼
+- 릴리즈 기반 dependency 전환 전까지 core 최신화 기준은 `edwardkim/rhwp` `devel`. core 변경은 core 저장소 먼저, 이후 submodule pointer + `rhwp-core.lock` 갱신 — 상세: [`core_submodule_operation_guide.md`](mydocs/manual/core_submodule_operation_guide.md)
 - 릴리스/배포/서명/공증/Homebrew Cask는 작업지시자 명시 지시 시에만 — 상세: [`release_distribution_guide.md`](mydocs/manual/release_distribution_guide.md)
 
 ## 필수 참조 문서
