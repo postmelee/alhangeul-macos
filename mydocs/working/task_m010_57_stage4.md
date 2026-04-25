@@ -48,7 +48,7 @@ git status --short
 
 ## 잔여 위험
 
-- milestone/label 기준은 GitHub 저장소 설정 변화에 따라 갱신이 필요할 수 있다.
+- milestone/label 선택은 Skill 실행 시점의 GitHub live 조회 결과를 기준으로 한다. 다만 milestone 설명이나 label 설명 자체가 부정확하면 후보 판단이 모호할 수 있으므로, 이 경우 작업지시자 확인이 필요하다.
 - UI 차원의 Skill 노출 실측은 이번 단계에서 수행하지 않았다. 파일 시스템 경로와 심볼릭 링크 노출은 확인했다.
 
 ## 다음 단계 영향

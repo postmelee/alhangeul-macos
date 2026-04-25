@@ -38,30 +38,27 @@ allow_implicit_invocation: false
    gh api repos/postmelee/alhangeul-macos/milestones \
      --jq '.[] | {number,title,state,description,open_issues,closed_issues}'
    ```
+   - 조회 결과의 `title`, `state`, `description`을 기준으로 판단한다.
+   - 기억하고 있는 과거 milestone 목록이나 버전 매핑을 기준으로 단정하지 않는다.
 3. 기존 label 목록 확인
    ```bash
    gh api repos/postmelee/alhangeul-macos/labels --paginate \
      --jq '.[] | {name,description,color}'
    ```
+   - 조회 결과의 `name`, `description`을 기준으로 판단한다.
+   - 기억하고 있는 과거 label 목록을 기준으로 단정하지 않는다.
 4. milestone 후보 선택
-   - 운영 문서, Agent Skill, build/run 기반, core dependency 운영: `v0.1.0`
-   - 렌더링 지원 범위 확대, 회귀 테스트 기반: `v0.2.0`
-   - Quick Look preview, Finder thumbnail 안정화: `v0.3.0`
-   - HostApp viewer 문서 열기, 페이지 탐색, zoom, 대용량 UX/성능: `v0.4.0`
-   - 읽기 전용 beta 안정화, fallback, smoke test, 배포 전 검증: `v0.5.0`
-   - 편집 command/bridge 책임 경계와 FFI 설계: `v0.6.0`
-   - 텍스트 선택, 커서, 삽입, 삭제 최소 편집 루프: `v0.7.0`
-   - 편집 후 재조판, 렌더링 갱신, undo/redo, dirty state: `v0.8.0`
-   - 저장 경로, autosave, 손상 방지, 복구 정책: `v0.9.0`
-   - 첫 정식 편집 기반 릴리스: `v1.0.0`
-   - `alhangeul-macos 기준 완전 이관`은 독립 저장소 이관 잔여 작업이 명확할 때만 사용한다.
+   - 열린 milestone만 후보로 사용한다.
+   - 작업 목적, 범위, 대상 컴포넌트, 릴리스 단계가 조회된 milestone의 `title`/`description`과 가장 잘 맞는지 비교한다.
+   - 후보가 명확하면 milestone 제목과 선택 이유를 기록한다.
+   - 후보가 2개 이상이면 2~3개 후보와 각각의 이유를 작업지시자에게 제시하고 확인받는다.
+   - 적합한 열린 milestone이 없거나 설명이 부족하면 임의 선택하지 말고 작업지시자에게 확인한다.
 5. label 후보 선택
-   - 문서나 Skill 변경: `documentation`
-   - 기능, 구조, 운영 절차 개선: `enhancement`
-   - 동작 오류, 회귀, 검증 실패 수정: `bug`
-   - 정보 확인이 주목적이면 `question`
-   - 기존 이슈와 중복이면 새 이슈 생성 대신 `duplicate` 처리 여부를 확인한다.
-   - 애매하면 label을 비우거나 작업지시자에게 확인한다. 새 label은 만들지 않는다.
+   - 조회된 기존 label만 후보로 사용한다.
+   - 작업 성격이 label의 `name`/`description`과 명확히 대응할 때만 선택한다.
+   - 후보가 명확하면 label 이름과 선택 이유를 기록한다.
+   - 적합한 label이 없거나 애매하면 label 없이 생성하거나 작업지시자에게 확인한다.
+   - 새 label은 만들지 않는다.
 6. 이슈 초안 작성
    - 제목: 작업 단위가 드러나는 한 문장
    - 본문 권장 섹션:
@@ -70,10 +67,10 @@ allow_implicit_invocation: false
      - 범위
      - 제외
      - 참고
-   - milestone: 위 기준으로 고른 기존 milestone 1개
-   - label: 기존 label 0개 이상
+   - milestone: live 조회 결과에서 고른 열린 milestone 1개와 선택 이유
+   - label: live 조회 결과에서 고른 기존 label 0개 이상과 선택 이유
 7. 이슈 생성 전 승인 요청
-   - 작업지시자에게 제목, 본문, milestone, label 초안을 보여준다.
+   - 작업지시자에게 제목, 본문, milestone, label 초안과 선택 이유를 보여준다.
    - 작업지시자가 같은 스레드에서 생성 승인을 명시하기 전에는 `gh issue create`를 실행하지 않는다.
 8. 승인 후 이슈 생성
    ```bash
@@ -95,9 +92,9 @@ allow_implicit_invocation: false
 ## 검증
 
 - 생성된 이슈가 `OPEN` 상태여야 한다.
-- milestone이 비어 있지 않아야 한다.
+- milestone이 비어 있지 않고 live 조회 결과에 있던 열린 milestone이어야 한다.
 - label은 초안에서 승인된 기존 label만 붙어 있어야 한다.
-- 생성 결과 보고에 issue number, URL, milestone, label이 포함되어야 한다.
+- 생성 결과 보고에 issue number, URL, milestone, label, 선택 이유가 포함되어야 한다.
 
 ## 절대 하지 말 것
 
