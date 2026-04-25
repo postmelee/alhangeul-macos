@@ -8,5 +8,5 @@ license = "MIT"
 crate-type = ["staticlib"]
 
 [dependencies]
-rhwp = { path = "../Vendor/rhwp" }
+rhwp = { git = "https://github.com/edwardkim/rhwp.git", rev = "1e9d78a1d40c71779d81c6ec6870cd301d912626" }
 serde_json = "1"

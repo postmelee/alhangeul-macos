@@ -336,8 +336,8 @@ backup_cargo_files() {
 }
 
 update_cargo_lock() {
-  if ! cargo update --manifest-path "$CARGO_TOML" -p rhwp; then
-    echo "ERROR: dependency fetch failure: cargo update failed for rhwp" >&2
+  if ! cargo generate-lockfile --manifest-path "$CARGO_TOML"; then
+    echo "ERROR: dependency fetch failure: cargo lockfile generation failed for rhwp" >&2
     exit 1
   fi
 }
