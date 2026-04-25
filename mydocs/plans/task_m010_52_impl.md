@@ -19,7 +19,7 @@
 
 - PR #46 본문
 - PR #50 본문
-- 최근 merge PR 중 `publish/task` 또는 `mydocs/` 상대 링크가 포함된 PR 본문
+- 최근 merge PR 중 `publish/task`, `mydocs/` 상대 링크, 또는 문서 섹션의 비클릭 `mydocs/` 경로가 포함된 PR 본문
 
 작업:
 
@@ -27,6 +27,7 @@
 - 본문에 포함된 문서 링크를 추출하고, 다음 유형으로 분류한다.
   - `blob/publish/taskN/...` 링크
   - `mydocs/...` 상대 링크
+  - 문서 섹션에 코드 경로로만 적힌 비클릭 `mydocs/...` 경로
   - 이미 commit SHA 고정 URL인 링크
   - 보정 대상이 아닌 이슈/PR/외부 링크
 - 동일 유형이 반복되는 기존 PR이 있는지 제한적으로 검색한다.
