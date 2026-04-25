@@ -31,6 +31,7 @@
 - 앱 저장소에서는 submodule pointer와 `rhwp-core.lock`을 함께 갱신하되, 새 core 최신화는 release tag 전환 가능 여부와 Demo/Preview commit 기준을 먼저 확인한다.
 - ABI 변경은 `rhwp-ffi-symbols.txt`와 Swift bridge 영향 검토를 동반한다.
 - `Vendor/rhwp` 제거와 git dependency 전환은 후속 Issue #30에서 진행한다. release tag가 아직 필요한 API를 포함하지 않으면 Demo/Preview용 `rev` pin으로 먼저 전환할 수 있다.
+- git dependency 전환 후 `scripts/update-rhwp-core.sh`는 submodule update script가 아니라 Demo/Preview commit 또는 Stable release tag를 검증하고 lock skeleton을 갱신하는 dependency update gate가 된다.
 
 ## 업데이트 절차
 

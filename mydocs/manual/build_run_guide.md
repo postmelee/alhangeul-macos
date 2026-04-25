@@ -28,6 +28,15 @@ brew install xcodegen
 
 Demo/Preview는 필요한 core API가 포함된 commit을 고정할 때만 사용한다. Stable은 release tag compatibility gate를 통과해야 한다. 세부 기준은 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
 
+git dependency 전환 후 core 업데이트는 다음 형태로 분리한다.
+
+```bash
+./scripts/update-rhwp-core.sh --channel demo --rev <commit-sha>
+./scripts/update-rhwp-core.sh --channel stable --tag <release-tag>
+```
+
+첫 번째는 prerelease 성격의 Demo/Preview 기준이고, 두 번째는 정식 Stable 기준이다. 두 경우 모두 branch나 floating ref는 사용하지 않는다.
+
 ## Rust bridge 및 XCFramework
 
 ```bash
