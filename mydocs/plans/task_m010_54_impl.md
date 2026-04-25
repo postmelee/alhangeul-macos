@@ -207,6 +207,50 @@ git status --short
 - build와 render smoke 검증 결과가 최종 보고서에 기록되어 있다.
 - 후속 Issue #30이 새 기준으로 재작성 가능한 상태다.
 
+## Stage 6: release tag 전환 가능성 확인과 대기 상태 보정
+
+대상:
+
+- `rhwp-core.lock`
+- `scripts/build-rust-macos.sh`
+- `scripts/update-rhwp-core.sh`
+- `README.md`
+- `AGENTS.md`
+- `mydocs/tech/project_architecture.md`
+- `mydocs/manual/core_submodule_operation_guide.md`
+- `mydocs/report/task_m010_54_report.md`
+- GitHub Issue #30 본문
+
+작업:
+
+- `hulryung/hwpql`의 core pinning, lock, release 검증 방식을 확인한다.
+- `edwardkim/rhwp` 최신 release tag와 resolved commit을 확인한다.
+- 최신 release tag로 `RustBridge` 빌드 가능 여부를 검증한다.
+- 최신 release tag로 즉시 전환할 수 없으면 `rhwp-core.lock`과 운영 문서를 release tag 전환 대기 상태로 명확히 한다.
+- `devel` branch를 안정 기준처럼 설명하는 문구를 제거한다.
+- Issue #30 본문에 release tag + resolved commit 전환 조건과 API compatibility gate를 명시한다.
+
+산출물:
+
+- `mydocs/working/task_m010_54_stage6.md`
+
+검증:
+
+```bash
+git diff --check
+bash -n scripts/build-rust-macos.sh
+bash -n scripts/update-rhwp-core.sh
+./scripts/build-rust-macos.sh --verify-lock
+./scripts/check-no-appkit.sh
+rg -n "edwardkim/rhwp.*devel|devel.*edwardkim/rhwp" README.md AGENTS.md mydocs/tech mydocs/manual
+```
+
+완료 조건:
+
+- 현재 lock이 release tag 전환 대기 상태임을 명시한다.
+- 최신 release tag 전환 실패 원인이 Stage 6 보고서와 Issue #30에 기록되어 있다.
+- 후속 Issue #30이 release tag와 resolved commit 기준으로만 진행되도록 보강되어 있다.
+
 ## 승인 요청
 
 이 구현 계획서 기준으로 Stage 1을 진행할지 승인 요청한다.

@@ -111,6 +111,13 @@ lock_scalar() {
   ' "$LOCK_FILE"
 }
 
+existing_lock_scalar() {
+  local key="$1"
+  if [ -f "$LOCK_FILE" ]; then
+    lock_scalar "$key"
+  fi
+}
+
 lock_artifact_value() {
   local artifact_path="$1"
   local key="$2"
@@ -146,14 +153,37 @@ current_rhwp_commit() {
 write_lock_file() {
   local built_at
   local commit
+  local ref_kind
+  local release_status
+  local latest_checked_release_tag
+  local latest_checked_release_commit
   built_at="$(TZ=UTC date '+%Y-%m-%dT%H:%M:%SZ')"
   commit="$(current_rhwp_commit)"
+  ref_kind="$(existing_lock_scalar rhwp_ref_kind)"
+  release_status="$(existing_lock_scalar rhwp_release_transition_status)"
+  latest_checked_release_tag="$(existing_lock_scalar rhwp_latest_checked_release_tag)"
+  latest_checked_release_commit="$(existing_lock_scalar rhwp_latest_checked_release_commit)"
+
+  if [ -z "$ref_kind" ]; then
+    ref_kind="branch"
+  fi
+  if [ -z "$release_status" ]; then
+    release_status="blocked-missing-bridge-apis"
+  fi
 
   {
     echo 'lock_version = 2'
     echo 'rhwp_repo = "https://github.com/edwardkim/rhwp.git"'
+    echo "rhwp_ref_kind = \"$ref_kind\""
     echo 'rhwp_branch = "devel"'
     echo "rhwp_commit = \"$commit\""
+    echo "rhwp_release_transition_status = \"$release_status\""
+    if [ -n "$latest_checked_release_tag" ]; then
+      echo "rhwp_latest_checked_release_tag = \"$latest_checked_release_tag\""
+    fi
+    if [ -n "$latest_checked_release_commit" ]; then
+      echo "rhwp_latest_checked_release_commit = \"$latest_checked_release_commit\""
+    fi
     echo "built_at = \"$built_at\""
     echo 'ffi_symbols_file = "rhwp-ffi-symbols.txt"'
     echo

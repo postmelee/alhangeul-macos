@@ -12,18 +12,44 @@
 - GitHub Issue #29와 #30 본문을 현재 core 기준과 후속 release tag dependency 방향에 맞춰 정리했다.
 - `rhwp-core.lock`의 `librhwp.a` artifact sha256/size를 현재 고정 commit의 재생성 산출물 기준으로 갱신했다.
 - `scripts/validate-stage3-render.sh`가 자체 module cache를 새로 만들도록 해 기본 render smoke 명령의 재실행 안정성을 높였다.
+- `hulryung/hwpql`의 git rev pinning + lock + release hash 검증 방식을 확인했다.
+- `edwardkim/rhwp` 최신 release `v0.7.3` 전환 빌드를 검증했고, 현재 `RustBridge` 필수 API가 없어 즉시 전환할 수 없음을 확인했다.
+- lock과 운영 문서에서 현재 core ref를 release tag 전환 대기 상태로 명시하고, `devel` branch를 안정 기준처럼 설명하는 문구를 제거했다.
 
 ## 최종 lock 상태
 
 ```text
 rhwp_repo = "https://github.com/edwardkim/rhwp.git"
+rhwp_ref_kind = "branch"
 rhwp_branch = "devel"
 rhwp_commit = "1e9d78a1d40c71779d81c6ec6870cd301d912626"
-Frameworks/universal/librhwp.a sha256 = 5e1255b5eb30cef156c43d123faa177c3014ebfa3a4fd4daf5764f025a80db2f
-Frameworks/universal/librhwp.a size = 102631504
+rhwp_release_transition_status = "blocked-missing-bridge-apis"
+rhwp_latest_checked_release_tag = "v0.7.3"
+rhwp_latest_checked_release_commit = "c2e8a3461de800a02f76127ff4797bade1d4e532"
+Frameworks/universal/librhwp.a sha256 = 09f9d18f54aa8012aba51fcf32e925286eecbbbd7222c033e37b7779674a7e20
+Frameworks/universal/librhwp.a size = 102631496
 Frameworks/generated_rhwp.h sha256 = 69aeca5047bf743286d1b2260f8fc9a091ce4f1d7fd61c80084fab81c3a95ac5
 Frameworks/generated_rhwp.h size = 1349
 ```
+
+## release tag 전환 확인
+
+`edwardkim/rhwp` 최신 release 확인 결과:
+
+- latest release: `v0.7.3`
+- release target branch: `main`
+- resolved commit: `c2e8a3461de800a02f76127ff4797bade1d4e532`
+
+`Vendor/rhwp`를 일시적으로 `v0.7.3`으로 전환해 `RustBridge` arm64 build를 검증했다.
+
+결과: 실패.
+
+```text
+no method named `build_page_render_tree` found for struct `DocumentCore`
+no method named `get_bin_data` found for struct `DocumentCore`
+```
+
+현재 bridge가 사용하는 native render tree와 image data API가 최신 release에 포함되지 않아, 이번 작업에서는 release tag 전환 대기 상태를 lock과 문서에 기록했다.
 
 ## 검증 결과
 
@@ -36,6 +62,8 @@ git submodule update --init --recursive Vendor/rhwp
 ./scripts/build-rust-macos.sh --verify-lock
 ./scripts/build-rust-macos.sh
 ./scripts/check-no-appkit.sh
+bash -n scripts/build-rust-macos.sh
+bash -n scripts/update-rhwp-core.sh
 bash -n scripts/validate-stage3-render.sh
 xcodegen generate
 xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build
@@ -69,6 +97,8 @@ GitHub Issue 본문 변경은 remote state이므로 로컬 커밋에는 본문 d
 ## 후속 작업
 
 Issue #30은 이 기준 위에서 `Vendor/rhwp` submodule 제거와 `RustBridge` release tag dependency 전환을 다시 계획하면 된다. 진행 시점에는 `edwardkim/rhwp`의 최신 release tag와 resolved commit을 확인해야 한다.
+
+Issue #30은 release tag가 위 API를 포함하는지 먼저 검증해야 한다. 통과 전에는 branch나 floating ref를 안정 기준으로 사용하지 않는다.
 
 ## 완료 판단
 
