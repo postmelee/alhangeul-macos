@@ -98,6 +98,47 @@ require_artifact() {
   fi
 }
 
+lock_scalar() {
+  local key="$1"
+  awk -F' = ' -v key="$key" '
+    $1 == key {
+      value = $2
+      gsub(/^"/, "", value)
+      gsub(/"$/, "", value)
+      print value
+      exit
+    }
+  ' "$LOCK_FILE"
+}
+
+lock_artifact_value() {
+  local artifact_path="$1"
+  local key="$2"
+  awk -F' = ' -v artifact_path="$artifact_path" -v key="$key" '
+    /^\[\[artifacts\]\]/ {
+      in_artifact = 1
+      matched = 0
+      next
+    }
+    in_artifact && $1 == "path" {
+      value = $2
+      gsub(/^"/, "", value)
+      gsub(/"$/, "", value)
+      if (value == artifact_path) {
+        matched = 1
+      }
+      next
+    }
+    in_artifact && matched && $1 == key {
+      value = $2
+      gsub(/^"/, "", value)
+      gsub(/"$/, "", value)
+      print value
+      exit
+    }
+  ' "$LOCK_FILE"
+}
+
 current_rhwp_commit() {
   git -C "$RHWP_ROOT" rev-parse HEAD
 }
@@ -126,9 +167,74 @@ write_lock_file() {
       echo "path = \"$artifact_path\""
       echo "sha256 = \"$(artifact_sha256 "$abs_path")\""
       echo "size = $(artifact_size "$abs_path")"
-      echo
+      if [ "$artifact_path" != "${LOCK_ARTIFACTS[${#LOCK_ARTIFACTS[@]}-1]}" ]; then
+        echo
+      fi
     done
   } > "$LOCK_FILE"
+}
+
+verify_lock_file() {
+  if [ ! -f "$LOCK_FILE" ]; then
+    echo "ERROR: missing lock file: $LOCK_FILE" >&2
+    exit 1
+  fi
+
+  local lock_version
+  lock_version="$(lock_scalar lock_version)"
+  if [ "$lock_version" != "2" ]; then
+    echo "ERROR: unsupported rhwp-core.lock version: ${lock_version:-missing}" >&2
+    echo "Expected: 2" >&2
+    exit 1
+  fi
+
+  local expected_commit
+  local actual_commit
+  expected_commit="$(lock_scalar rhwp_commit)"
+  actual_commit="$(current_rhwp_commit)"
+  if [ "$expected_commit" != "$actual_commit" ]; then
+    echo "ERROR: rhwp core commit differs from $LOCK_FILE" >&2
+    echo "Expected rhwp_commit: $expected_commit" >&2
+    echo "Actual rhwp_commit:   $actual_commit" >&2
+    echo "Run: git submodule update --init --recursive" >&2
+    exit 1
+  fi
+
+  local artifact_path
+  for artifact_path in "${LOCK_ARTIFACTS[@]}"; do
+    require_artifact "$artifact_path"
+
+    local abs_path
+    local expected_sha256
+    local actual_sha256
+    local expected_size
+    local actual_size
+
+    abs_path="$(artifact_abs_path "$artifact_path")"
+    expected_sha256="$(lock_artifact_value "$artifact_path" sha256)"
+    expected_size="$(lock_artifact_value "$artifact_path" size)"
+    actual_sha256="$(artifact_sha256 "$abs_path")"
+    actual_size="$(artifact_size "$abs_path")"
+
+    if [ -z "$expected_sha256" ] || [ -z "$expected_size" ]; then
+      echo "ERROR: missing lock metadata for artifact: $artifact_path" >&2
+      echo "Run: ./scripts/build-rust-macos.sh --update-lock" >&2
+      exit 1
+    fi
+
+    if [ "$expected_sha256" != "$actual_sha256" ] || [ "$expected_size" != "$actual_size" ]; then
+      echo "ERROR: artifact differs from $LOCK_FILE" >&2
+      echo "Artifact: $artifact_path" >&2
+      echo "Expected sha256: $expected_sha256" >&2
+      echo "Actual sha256:   $actual_sha256" >&2
+      echo "Expected size:   $expected_size" >&2
+      echo "Actual size:     $actual_size" >&2
+      echo "Run: ./scripts/build-rust-macos.sh --update-lock if this artifact is intentional." >&2
+      exit 1
+    fi
+  done
+
+  echo "Verified: $LOCK_FILE"
 }
 
 require_tool cargo
@@ -211,6 +317,5 @@ if [ "$UPDATE_LOCK" -eq 1 ]; then
   write_lock_file
   echo "Updated: $LOCK_FILE"
 elif [ "$VERIFY_LOCK" -eq 1 ]; then
-  echo "Lock verification is not implemented yet. Stage 3 will complete --verify-lock." >&2
-  exit 1
+  verify_lock_file
 fi
