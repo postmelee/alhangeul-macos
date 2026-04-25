@@ -14,7 +14,8 @@
 
 - **GitHub Issues**를 타스크 번호로 사용한다. 자동 채번으로 중복 방지.
 - **마일스톤 표기**: `M{버전}` (예: M100=v1.0.0, M05x=v0.5.x)
-- 새 타스크 등록: `gh issue create --repo postmelee/alhangeul-macos --title "제목" --body "설명" --milestone "rhwp-macos 기준 완전 이관"`
+- 새 타스크 등록: 이슈가 없는 작업은 [`task-register`](../skills/task-register/SKILL.md) Skill로 중복 이슈, milestone, label을 확인하고 생성 전 승인을 받은 뒤 GitHub Issue를 만든다.
+- 타스크 시작: 이미 생성된 이슈 번호가 있으면 [`task-start`](../skills/task-start/SKILL.md) Skill로 브랜치, 오늘할일, 수행계획서를 만든다.
 - 브랜치명: `local/task{issue번호}` (예: `local/task1`)
 - PR 생성용 원격 브랜치명: `publish/task{issue번호}` (예: `publish/task1`)
 - 커밋 메시지 규칙:
@@ -27,8 +28,8 @@
 
 ## 타스크 진행 절차
 
-1. GitHub Issue에 타스크 등록 → 작업지시자가 지정한 타스크 수행
-2. `local/task{issue번호}` 브랜치 생성 후 진행
+1. 이슈가 없는 작업은 `task-register`로 GitHub Issue 등록. 기존 이슈가 있으면 해당 번호 사용
+2. 작업지시자가 지정한 이슈를 `task-start`로 시작하고 `local/task{issue번호}` 브랜치 생성 후 진행
 3. 수행 전 수행계획서 작성 → 승인 요청
 4. 구현 계획서 작성 (최소 3단계, 최대 6단계) → 승인 요청
 5. 단계별 진행 시작
@@ -71,6 +72,7 @@
 
 권장 형식:
 
+- `task-register 스킬을 호출합니다.`
 - `task-start 스킬을 호출합니다.`
 - `task-stage-report 스킬을 호출합니다.`
 - `task-final-report 스킬로 진행합니다.`
