@@ -14,7 +14,7 @@
 - `Shared`: HostApp과 extension이 공유하는 macOS helper
 - `RhwpCoreBridge`: Swift FFI wrapper, render tree 디코딩, CoreGraphics/CoreText renderer
 - `RustBridge`: `Vendor/rhwp`의 `rhwp` core를 C ABI로 노출하는 Rust staticlib crate
-- `Vendor/rhwp`: `edwardkim/rhwp` core submodule. release tag 전환 전까지 필요한 bridge API가 포함된 commit을 lock으로 고정한다.
+- `Vendor/rhwp`: `edwardkim/rhwp` core submodule. git dependency 전환 전까지 필요한 bridge API가 포함된 commit을 lock으로 고정한다.
 
 ## 소유 경계
 
@@ -24,9 +24,10 @@
 - core API 변경은 먼저 `edwardkim/rhwp` 저장소에 반영한다.
 - 앱 저장소는 `Vendor/rhwp`의 submodule pointer, `rhwp-core.lock`, Swift/Rust bridge 적응만 소유한다.
 - 앱 저장소에 `Vendor/rhwp` 임시 수정을 남기지 않는다.
-- 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
+- Stable 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
+- Demo/Preview 배포는 필요한 bridge API가 포함된 resolved commit을 `rev`로 고정하는 commit-pinned git dependency를 허용한다.
 - 현재 lock은 release tag 전환 대기 상태다. 최신 확인 release `v0.7.3`에는 `RustBridge`가 사용하는 `build_page_render_tree`, `get_bin_data` API가 없어 즉시 전환하지 않는다.
-- `Vendor/rhwp` 제거와 릴리즈 태그 기반 dependency 전환은 후속 dependency 전환 작업에서 수행한다.
+- `Vendor/rhwp` 제거와 git dependency 전환은 후속 dependency 전환 작업에서 수행한다. release tag가 필요한 API를 포함하기 전에는 Demo/Preview용 commit pin으로 먼저 전환할 수 있다.
 
 ### 2. RustBridge 경계
 
@@ -89,7 +90,9 @@
 - `rhwp_render_page_svg`
 - `rhwp_render_page_tree`
 - `rhwp_image_data`
+- `rhwp_extract_thumbnail`
 - `rhwp_free_string`
+- `rhwp_free_bytes`
 
 현재 제품 경로에서 핵심적으로 사용하는 API는 다음과 같다.
 
@@ -98,8 +101,10 @@
 - `rhwp_page_size`: 페이지 크기 조회
 - `rhwp_render_page_tree`: 상세 render tree JSON 반환
 - `rhwp_image_data`: `bin_data_id`에 대응하는 이미지 바이트 조회
+- `rhwp_extract_thumbnail`: embedded thumbnail 바이트와 메타데이터 조회
 - `rhwp_close`: 문서 핸들 해제
 - `rhwp_free_string`: Rust가 할당한 문자열 해제
+- `rhwp_free_bytes`: Rust가 소유권을 넘긴 byte buffer 해제
 
 `rhwp_render_page_svg`는 현재 HostApp/extension의 주 렌더링 경로는 아니지만, 진단/호환성 관점에서 ABI에 포함되어 있다.
 
@@ -109,6 +114,7 @@
 - `RhwpDocument`의 수명은 내부 `OpaquePointer` handle 수명과 일치해야 한다.
 - `rhwp_render_page_tree`와 `rhwp_render_page_svg`가 반환한 문자열은 반드시 `rhwp_free_string`으로 해제한다.
 - `rhwp_image_data`는 내부 문서 버퍼를 가리키므로, Swift에서는 즉시 `Data`로 복사해 사용한다.
+- `rhwp_extract_thumbnail`이 반환한 byte buffer는 Swift에서 복사 후 `rhwp_free_bytes`로 해제한다.
 - 이미지 조회의 `bin_data_id`는 1-indexed 규칙을 유지한다.
 
 ## 렌더링 구조
