@@ -7,7 +7,7 @@
 ## 변경 내용
 
 - 원본 README의 큰 순서인 `로드맵 -> 이정표 -> Features -> Quick Start (소스 빌드) -> AI 페어 프로그래밍으로 개발합니다` 흐름을 반영했다.
-- macOS Quick Look, Thumbnail, HostApp viewer, RustBridge, `postmelee/rhwp` submodule 기준으로 내용을 수정했다.
+- macOS Quick Look, Thumbnail, HostApp viewer, RustBridge, `edwardkim/rhwp` submodule 기준으로 내용을 수정했다.
 - 온보딩 가이드는 추후 추가 예정임을 전제로 Quick Start 문구를 먼저 반영했다.
 - "AI 페어 프로그래밍으로 개발합니다" 섹션은 upstream README의 문제의식과 문체를 최대한 보존하고 출처를 명시했다.
 - Claude Code와 OpenAI Codex를 함께 사용하는 현재 개발 방식을 반영했다.

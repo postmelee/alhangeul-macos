@@ -22,6 +22,7 @@
 `rhwp-core.lock`:
 
 - `lock_version`: `2`
+- `rhwp_repo`: `https://github.com/edwardkim/rhwp.git`
 - `rhwp_commit`: `1e9d78a1d40c71779d81c6ec6870cd301d912626`
 - `built_at`: `2026-04-25T00:38:17Z`
 

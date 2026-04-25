@@ -131,12 +131,14 @@ rg -n "github.com/[^/]+/rhwp|[^A-Za-z]rhwp.git" \
 - 필요 시 `mydocs/plans/task_m050_29.md`
 - 필요 시 `mydocs/report/task_m050_29_report.md`
 - 필요 시 `mydocs/working/task_m050_29_stage*.md`
+- GitHub Issue #29, #30 본문
 
 작업:
 
 - Issue #28 sample provenance 문서의 source repository 표기를 현재 기준으로 정리한다.
 - Issue #29 lock provenance 관련 문서 중 후속 작업자가 읽을 가능성이 큰 문서의 repository 기준을 정리한다.
 - Issue #30 수행계획서는 이번 작업 완료 전 구현 진행 금지 상태임을 문서 안에서 명확히 하고, 후속 재작성 지점을 남긴다.
+- GitHub Issue #29와 #30 본문을 현재 core 기준과 후속 릴리즈 태그 dependency 방향에 맞춰 정리한다.
 - 과거 완료 보고서 전체를 일괄 재작성하지 않고, 현재 운영 기준으로 계속 참조되는 문서만 좁게 수정한다.
 
 산출물:

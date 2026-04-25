@@ -19,7 +19,7 @@
 ### 원본 submodule 상태
 
 - 원본 경로: `Vendor/rhwp/samples`
-- 원본 저장소: `https://github.com/postmelee/rhwp.git`
+- 원본 저장소: `https://github.com/edwardkim/rhwp.git`
 - 원본 submodule commit: `1e9d78a1d40c71779d81c6ec6870cd301d912626`
 - license: MIT License
 

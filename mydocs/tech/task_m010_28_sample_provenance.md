@@ -16,12 +16,12 @@
 
 ## 원본 경로
 
-- 원본 저장소: `Vendor/rhwp`
-- 원본 저장소 URL: `https://github.com/postmelee/rhwp.git`
+- 원본 저장소: `edwardkim/rhwp`
+- 원본 저장소 URL: `https://github.com/edwardkim/rhwp.git`
 - 원본 submodule commit: `1e9d78a1d40c71779d81c6ec6870cd301d912626`
 - 원본 license: MIT License
 
-대표 3개 샘플의 `Vendor/rhwp` 내 변경 이력:
+대표 3개 샘플의 `edwardkim/rhwp` 내 변경 이력:
 
 ```text
 91d9374 Task #142: 수식 레이아웃 보정 — OVER 파서 재설계 및 TAC 너비/폭 추정 개선
