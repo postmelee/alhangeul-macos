@@ -2,18 +2,18 @@
 
 ## 목적
 
-이 문서는 `RustBridge`를 `edwardkim/rhwp` release tag 기반 dependency로 전환하기 전에 확인해야 하는 core API contract와 compatibility gate를 정의한다.
+이 문서는 `RustBridge`를 `edwardkim/rhwp` git dependency로 전환하기 전에 확인해야 하는 core API contract와 compatibility gate를 정의한다.
 
-후속 Issue #30은 이 문서의 gate를 통과한 release tag가 있을 때만 진행한다. `main`, `devel` 같은 branch나 floating ref는 필요한 API가 포함된 commit을 찾는 참고 출처일 뿐, 앱 core의 안정 기준으로 사용하지 않는다.
+정식 릴리즈의 안정 기준은 release tag + resolved commit이다. 다만 Demo/Preview 배포는 필요한 API가 이미 포함된 resolved commit을 `rev`로 고정하는 commit-pinned git dependency를 허용한다. `main`, `devel` 같은 branch나 floating ref는 필요한 API가 포함된 commit을 찾는 참고 출처일 뿐, 배포 기준으로 사용하지 않는다.
 
 ## 안정 기준
 
-앱 저장소의 core 안정 기준은 다음 둘을 함께 고정하는 것이다.
+앱 저장소의 Stable core 안정 기준은 다음 둘을 함께 고정하는 것이다.
 
 - `release tag`: GitHub release tag 이름. 예: `v0.7.3`
 - `resolved commit`: tag가 가리키는 실제 commit SHA. annotated tag인 경우 tag object가 아니라 `^{commit}`으로 해석한 commit이다.
 
-release tag 전환 이후 `rhwp-core.lock`은 최소한 다음 의미를 가져야 한다.
+Stable release tag 전환 이후 `rhwp-core.lock`은 최소한 다음 의미를 가져야 한다.
 
 ```toml
 lock_version = 2
@@ -34,7 +34,35 @@ sha256 = "<sha256>"
 size = <bytes>
 ```
 
-`Cargo.lock`은 `RustBridge/Cargo.toml`의 `rhwp` git dependency를 해석한 실제 source와 commit을 담는다. 후속 #30에서는 `Cargo.lock`의 `rhwp` package source가 `rhwp-core.lock`의 repo, release tag, resolved commit과 일치해야 한다.
+Demo/Preview 배포에서 아직 필요한 API가 upstream release tag에 포함되지 않았으면 다음처럼 commit-pinned 기준을 사용한다.
+
+```toml
+lock_version = 2
+rhwp_repo = "https://github.com/edwardkim/rhwp.git"
+rhwp_ref_kind = "commit"
+rhwp_commit = "<resolved commit>"
+rhwp_release_transition_status = "demo-commit-pin"
+rhwp_latest_checked_release_tag = "<latest checked release tag>"
+rhwp_latest_checked_release_commit = "<latest checked release resolved commit>"
+ffi_symbols_file = "rhwp-ffi-symbols.txt"
+```
+
+`Cargo.lock`은 `RustBridge/Cargo.toml`의 `rhwp` git dependency를 해석한 실제 source와 commit을 담는다. 후속 #30에서는 `Cargo.lock`의 `rhwp` package source가 `rhwp-core.lock`의 repo, ref kind, commit과 일치해야 한다. Stable 전환에서는 release tag와 resolved commit도 함께 일치해야 한다.
+
+## 배포 채널 기준
+
+| 채널 | core 기준 | 허용 dependency | 배포 의미 |
+|------|------|------|------|
+| Demo/Preview | API가 포함된 resolved commit | `git` + `rev` | 기능 검증용 공개 배포. GitHub Release는 prerelease로 게시하고 정식 안정 기준으로 표시하지 않는다. |
+| Stable | API가 포함된 release tag + resolved commit | `git` + `tag` | 일반 사용자 대상 정식 배포. compatibility gate 전체를 통과해야 한다. |
+
+Demo/Preview도 branch dependency는 사용하지 않는다. 반드시 commit SHA를 `rev`로 고정하고, `Cargo.lock`, `rhwp-core.lock`, 산출물 hash/size를 함께 남긴다.
+
+현재 Demo/Preview 후보 dependency 형식:
+
+```toml
+rhwp = { git = "https://github.com/edwardkim/rhwp.git", rev = "1e9d78a1d40c71779d81c6ec6870cd301d912626" }
+```
 
 ## 현재 release 상태
 
@@ -59,6 +87,8 @@ resolved commit: c2e8a3461de800a02f76127ff4797bade1d4e532
 - `DocumentCore::get_bin_data`
 
 따라서 현재 `v0.7.3`은 native render tree 경로를 유지하는 앱 기준을 충족하지 못한다. 실패 유형은 `missing core API`다.
+
+현재 lock commit `1e9d78a1d40c71779d81c6ec6870cd301d912626`에는 `DocumentCore::build_page_render_tree`와 `DocumentCore::get_bin_data`가 포함되어 있으므로 Demo/Preview용 commit-pinned git dependency 후보가 될 수 있다. 이 commit은 release tag 안정 기준이 아니므로 Stable 배포 기준으로 승격하지 않는다.
 
 ## RustBridge core API contract
 
@@ -102,7 +132,7 @@ resolved commit: c2e8a3461de800a02f76127ff4797bade1d4e532
 
 후속 #30은 schema 변화가 있는 release를 단순 dependency 전환으로 처리하지 않는다. schema 변화가 render 결과나 decoder 안정성에 영향을 주면 별도 Swift/Rust bridge 적응 작업으로 분리한다.
 
-## Compatibility gate
+## Stable compatibility gate
 
 새 `edwardkim/rhwp` release가 나왔을 때 다음 순서로 확인한다. 전환 후보 release는 모든 gate를 통과해야 한다.
 
@@ -228,11 +258,26 @@ release tag dependency 전환 후에는 다음 항목이 서로 일치해야 한
 
 실패하면 `render smoke failure`로 기록한다.
 
+## Demo/Preview commit gate
+
+Demo/Preview 채널은 release tag를 기다리지 않고 `Vendor/rhwp`를 제거할 수 있는 경로다. 단, 다음 조건을 모두 만족해야 한다.
+
+- commit SHA를 `rev`로 명시한다.
+- `Cargo.lock`의 `rhwp` source가 해당 commit으로 고정되어 있다.
+- `rhwp-core.lock`의 `rhwp_ref_kind`는 `commit`으로 기록한다.
+- `rhwp-core.lock`에 latest checked release tag와 해당 release의 resolved commit을 함께 남겨 Stable 전환 대기 상태를 보존한다.
+- `build_page_render_tree`, `get_bin_data`, `render_page_svg_native`, `get_page_info_native`, `extract_thumbnail_only` 존재를 확인한다.
+- arm64/x86_64 RustBridge build가 통과한다.
+- FFI symbol diff, artifact hash/size verify, render smoke가 통과한다.
+- GitHub Release는 prerelease로 게시하고 release note에 `unreleased rhwp commit` 기반임을 명시한다.
+
+Demo/Preview를 이유로 `main` 또는 `devel` branch dependency를 사용하지 않는다. commit-pinned Demo/Preview는 재현 가능한 빌드 경로이고, branch dependency는 재현 가능한 배포 경로가 아니다.
+
 ## 실패 유형
 
 | 실패 유형 | 의미 | 대표 증상 | 처리 |
 |------|------|------|------|
-| `missing core API` | RustBridge가 요구하는 core API가 target release에 없다. | `no method named build_page_render_tree`, `no method named get_bin_data` | #30 진행 금지. API가 포함된 upstream release를 기다리거나 core release를 먼저 준비한다. |
+| `missing core API` | RustBridge가 요구하는 core API가 target release에 없다. | `no method named build_page_render_tree`, `no method named get_bin_data` | Stable 전환 금지. Demo/Preview는 API가 포함된 별도 commit을 `rev`로 고정할 때만 진행한다. |
 | `Cargo.lock mismatch` | Cargo가 해석한 git dependency commit과 `rhwp-core.lock` 기준이 다르다. | `Cargo.lock` source hash와 `rhwp-core.lock.rhwp_commit` 불일치 | Cargo.lock/rhwp-core.lock 갱신 순서를 보정한다. |
 | `artifact hash mismatch` | 현재 빌드 산출물과 `rhwp-core.lock` artifact hash/size가 다르다. | `./scripts/build-rust-macos.sh --verify-lock` 실패 | 의도한 변경이면 `--update-lock`, 아니면 산출물 재생성/rollback을 검토한다. |
 | `FFI symbol diff` | generated C ABI symbol set이 기대값과 다르다. | `diff -u rhwp-ffi-symbols.txt Frameworks/generated_rhwp_symbols.txt` 실패 | Swift 영향 분석과 ABI 의도성 확인 전 merge 금지. |
@@ -240,9 +285,24 @@ release tag dependency 전환 후에는 다음 항목이 서로 일치해야 한
 
 `release lookup failure`는 네트워크나 GitHub release 조회 문제로, target release 자체의 compatibility 실패와 구분한다.
 
-## #30 unblock checklist
+## #30 진행 기준
 
-Issue #30은 다음 조건을 모두 만족할 때만 진행한다.
+Issue #30은 두 경로 중 하나로 진행할 수 있다.
+
+Demo/Preview commit-pinned 전환:
+
+- [ ] `edwardkim/rhwp` target commit SHA를 확인했다.
+- [ ] target commit이 `DocumentCore::build_page_render_tree`를 포함한다.
+- [ ] target commit이 `DocumentCore::get_bin_data`를 포함한다.
+- [ ] target commit이 `DocumentCore::render_page_svg_native`를 포함한다.
+- [ ] target commit이 `DocumentCore::get_page_info_native`를 포함한다.
+- [ ] target commit이 `rhwp::parser::extract_thumbnail_only`를 포함한다.
+- [ ] `RustBridge/Cargo.toml`이 `git` + `rev` dependency로 전환된다.
+- [ ] `Vendor/rhwp` submodule 제거 후 fresh checkout build가 통과한다.
+- [ ] `Cargo.lock`과 `rhwp-core.lock`의 repo, ref kind, commit 정합성 검증 방법이 준비되어 있다.
+- [ ] GitHub Release는 prerelease로 게시하고 Stable release로 표시하지 않는다.
+
+Stable release tag 전환:
 
 - [ ] `edwardkim/rhwp` target release tag와 release URL을 확인했다.
 - [ ] target release tag의 resolved commit을 `^{commit}` 기준으로 확인했다.
@@ -259,7 +319,7 @@ Issue #30은 다음 조건을 모두 만족할 때만 진행한다.
 - [ ] `rhwp-core.lock`에 release tag, resolved commit, artifact hash/size를 기록할 수 있다.
 - [ ] native render tree 경로가 HostApp, Quick Look, Thumbnail의 기준 경로로 유지된다.
 
-위 조건 중 하나라도 실패하면 #30은 blocked 상태를 유지한다.
+Stable 조건 중 하나라도 실패하면 Stable 전환은 blocked 상태를 유지한다. Demo/Preview 조건을 만족하면 #30은 commit-pinned git dependency 전환으로 진행할 수 있다.
 
 ## fallback 경계
 
@@ -271,4 +331,4 @@ Issue #30은 다음 조건을 모두 만족할 때만 진행한다.
 - image data API가 없어서 image node를 누락시키는 경우
 - render tree schema가 바뀌었지만 Swift decoder 실패를 무시하는 경우
 
-release tag dependency 전환의 목표는 앱 품질을 낮추지 않고 core source를 release tag 기준으로 재현 가능하게 고정하는 것이다.
+git dependency 전환의 목표는 앱 품질을 낮추지 않고 core source를 재현 가능하게 고정하는 것이다. Demo/Preview는 commit 기준, Stable은 release tag + resolved commit 기준을 사용한다.

@@ -16,19 +16,21 @@
 
 ## core 기준
 
-- 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
-- 현재 `Vendor/rhwp` submodule은 release tag 전환 전까지의 임시 운용 경로다.
+- Stable 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
+- Demo/Preview 배포는 필요한 bridge API가 포함된 resolved commit을 `rev`로 고정하는 commit-pinned git dependency를 허용한다.
+- 현재 `Vendor/rhwp` submodule은 git dependency 전환 전까지의 임시 운용 경로다.
 - 현재 lock은 release tag 전환 대기 상태를 기록한다.
 - 최신 확인 release `v0.7.3`에는 `RustBridge`가 사용하는 `build_page_render_tree`, `get_bin_data` API가 없어 즉시 전환하지 않는다.
 - `devel` branch는 필요한 API가 포함된 과도기 commit을 식별하는 출처일 뿐, 앱의 안정 기준으로 취급하지 않는다.
+- release tag compatibility와 Demo/Preview commit 기준은 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
 
 ## 운영 원칙
 
 - 앱 저장소에서 `Vendor/rhwp`에 임시 수정을 남기지 않는다.
 - core API 변경은 먼저 `edwardkim/rhwp`에 반영한다.
-- 앱 저장소에서는 submodule pointer와 `rhwp-core.lock`을 함께 갱신하되, 새 core 최신화는 release tag 전환 가능 여부를 먼저 확인한다.
+- 앱 저장소에서는 submodule pointer와 `rhwp-core.lock`을 함께 갱신하되, 새 core 최신화는 release tag 전환 가능 여부와 Demo/Preview commit 기준을 먼저 확인한다.
 - ABI 변경은 `rhwp-ffi-symbols.txt`와 Swift bridge 영향 검토를 동반한다.
-- `Vendor/rhwp` 제거와 릴리즈 기반 git dependency 전환은 후속 Issue #30에서 진행한다.
+- `Vendor/rhwp` 제거와 git dependency 전환은 후속 Issue #30에서 진행한다. release tag가 아직 필요한 API를 포함하지 않으면 Demo/Preview용 `rev` pin으로 먼저 전환할 수 있다.
 
 ## 업데이트 절차
 
@@ -49,7 +51,7 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 
 `validate-stage3-render.sh`의 기본 샘플은 앱 저장소 루트의 `samples/`를 사용한다. core submodule 갱신 후에도 기본 검증 경로는 submodule 내부 샘플 디렉터리에 의존하지 않아야 한다.
 
-이 절차는 release tag 전환 전까지의 submodule 검증 절차다. 새 release가 나왔을 때는 먼저 해당 tag의 resolved commit으로 `RustBridge`가 빌드되는지 확인하고, 통과하는 경우 후속 dependency 전환 계획에 반영한다.
+이 절차는 git dependency 전환 전까지의 submodule 검증 절차다. 새 release가 나왔을 때는 먼저 해당 tag의 resolved commit으로 `RustBridge`가 빌드되는지 확인하고, 통과하는 경우 Stable dependency 전환 계획에 반영한다. release tag가 필요한 API를 포함하지 않지만 특정 commit에는 포함되어 있으면 Demo/Preview 전환 후보로만 취급한다.
 
 ## 업데이트 후 확인 항목
 
@@ -58,9 +60,12 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 - `rhwp-ffi-symbols.txt` 변경 여부와 의도성
 - Swift `RenderTree` 모델과 core JSON 구조 호환성
 - Quick Look/Thumbnail smoke test 필요 여부
+- Demo/Preview 배포인지 Stable 배포인지와 해당 core 기준
 
 ## 금지 사항
 
 - `Vendor/rhwp` 변경만 커밋하고 `rhwp-core.lock`을 누락
 - ABI 영향 검토 없이 FFI 변경 반영
 - core 저장소 PR과 앱 저장소 PR을 혼합 진행
+- Demo/Preview 배포를 Stable release처럼 표시
+- `main`, `devel` 같은 branch dependency를 배포 기준으로 사용
