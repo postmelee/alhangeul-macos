@@ -3,7 +3,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-RHWP_ROOT="$ROOT/Vendor/rhwp"
 OUT_DIR="${1:-$ROOT/output/stage3-render}"
 
 if [ "$#" -gt 0 ]; then
@@ -13,9 +12,9 @@ fi
 SAMPLES=("$@")
 if [ "${#SAMPLES[@]}" -eq 0 ]; then
   SAMPLES=(
-    "$RHWP_ROOT/samples/basic/KTX.hwp"
-    "$RHWP_ROOT/samples/basic/request.hwp"
-    "$RHWP_ROOT/samples/exam_kor.hwp"
+    "$ROOT/samples/basic/KTX.hwp"
+    "$ROOT/samples/basic/request.hwp"
+    "$ROOT/samples/exam_kor.hwp"
   )
 fi
 

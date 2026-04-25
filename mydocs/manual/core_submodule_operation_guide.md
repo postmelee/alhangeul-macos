@@ -44,6 +44,8 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 ./scripts/validate-stage3-render.sh
 ```
 
+`validate-stage3-render.sh`의 기본 샘플은 앱 저장소 루트의 `samples/`를 사용한다. core submodule 갱신 후에도 기본 검증 경로는 submodule 내부 샘플 디렉터리에 의존하지 않아야 한다.
+
 ## 업데이트 후 확인 항목
 
 - `Vendor/rhwp` commit과 `rhwp-core.lock`의 `rhwp_commit` 일치
