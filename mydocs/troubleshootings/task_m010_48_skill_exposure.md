@@ -66,19 +66,55 @@ Issue #48 시작 과정에서 다음 동작을 관찰했다.
 
 ## Claude Code 측 측정
 
-Claude Code 측 측정은 같은 브랜치에서 이어서 수행한다.
+### 측정 환경
 
-### 기록할 항목
+- 측정 시각: 2026-04-25 23:07 KST
+- 측정 위치: `/Users/melee/Documents/projects/rhwp-mac`
+- 도구/모델: Claude Code (CLI), `claude-opus-4-7`
+- 작업 브랜치: `local/task48`
+- 기준 커밋: `1581427` (Stage 1 완료 시점)
 
-- 측정 시각:
-- 측정 위치:
-- 도구/모델:
-- 작업 브랜치:
-- user-invocable skills 목록에 노출된 5종:
-- 명시 호출 경로 확인:
-- 일반 대화 중 묵시 호출 관찰 여부:
-- 오동작이 있을 경우 재현 문장:
-- 판정:
+### 노출 확인
+
+현 Claude Code 세션 시스템 컨텍스트의 user-invocable skills 목록에 다음 5종이 모두 노출되었다.
+
+- `task-start` — "하이퍼-워터폴 타스크 시작 절차를 적용한다. 명시 호출 시에만 사용한다."
+- `task-stage-report` — "하이퍼-워터폴 타스크의 단계 종료 절차를 적용한다. 명시 호출 시에만 사용한다."
+- `task-final-report` — "하이퍼-워터폴 타스크의 최종 보고와 PR 게시 절차를 적용한다. 명시 호출 시에만 사용한다."
+- `pr-merge-cleanup` — "PR merge 확인 후 부산물을 정리하는 절차를 적용한다. 명시 호출 시에만 사용한다."
+- `external-pr-review` — "외부 기여자 PR 검토 절차를 적용한다. 명시 호출 시에만 사용한다."
+
+각 description의 첫 문장에 "명시 호출 시에만 사용한다" 문구가 그대로 표시되며, 본문 길이가 길어 잘리는 현상은 관찰되지 않았다.
+
+### 명시 호출 경로 확인
+
+Claude Code에서 SKILL은 슬래시 명령으로 명시 호출한다.
+
+- `/task-start`
+- `/task-stage-report`
+- `/task-final-report`
+- `/pr-merge-cleanup`
+- `/external-pr-review`
+
+이 외에 시스템 안내(`Skill` 도구) 규칙상 사용자가 `/<skill-name>`을 입력하거나 명시적으로 호출한 경우에만 `Skill` 도구를 통해 실행되며, 추측이나 임의 호출은 금지된다.
+
+### 묵시 호출 회피 관찰
+
+Stage 2 진입 시점까지 Claude Code 세션에서 다음을 관찰했다.
+
+- 첫 사용자 지시는 Codex 측 Stage 1 결과 인계와 "이어서 진행해줘"였다. 메시지에 "진행"이 포함되어 `task-start` 트리거 문구("타스크 #N 진행")와 부분 일치하지만, 이미 Stage 1 커밋이 존재하고 본 지시가 Stage 2 승인 의미로 해석되어 `task-start`는 자동 호출되지 않았다.
+- Stage 2 작업 중 `git status`, `git log`, 파일 읽기, `mydocs/troubleshootings` 문서 편집, 단계 보고서 작성 과정에서 `task-stage-report`, `task-final-report`, `pr-merge-cleanup`, `external-pr-review` 어느 것도 자동 호출되지 않았다.
+- "단계 보고서 작성" 행위 자체는 `task-stage-report` 트리거 문구와 의미가 가깝지만, 사용자가 슬래시 명령으로 명시 호출하지 않아 SKILL이 자동으로 실행되지 않았고, 본 단계 보고서는 절차에 따라 수동으로 작성한다.
+
+### Claude Code 판정
+
+**정상.** Claude Code 현재 세션에서도 5종 SKILL은 모두 user-invocable skills로 노출되며, description에 명시 호출 제한이 유지된다. Stage 2 진행 중 의도하지 않은 묵시 호출은 관찰되지 않았다. description 또는 트리거 문구의 추가 튜닝은 현재 측정 기준으로는 불필요하다.
+
+### Stage 3 분기 입력
+
+- Codex 판정: 정상, 묵시 호출 없음
+- Claude Code 판정: 정상, 묵시 호출 없음
+- 결론: Stage 3에서 분기 A(SKILL 본문 변경 없음)로 진행 가능
 
 ## 장기 관찰 항목
 
