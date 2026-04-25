@@ -9,7 +9,7 @@ cask "rhwp-mac" do
 
   depends_on macos: ">= :monterey"
 
-  app "알한글.app"
+  app "RhwpMac.app"
 
   caveats "앱을 한 번 실행하면 Quick Look 및 Thumbnail 확장이 등록됩니다."
 end

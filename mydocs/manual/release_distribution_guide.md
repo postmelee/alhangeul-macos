@@ -17,7 +17,7 @@
 
 현재 저장소에는 다음 릴리스 관련 자산이 있다.
 
-- `scripts/package-release.sh`: Release configuration으로 `알한글.app`을 빌드하고 zip 파일을 생성한다.
+- `scripts/package-release.sh`: Release configuration으로 `RhwpMac.app`을 빌드하고 zip 파일을 생성한다.
 - `Casks/rhwp-mac.rb`: Homebrew Cask 초안이다.
 - `Sources/HostApp/Info.plist`, `Sources/QLExtension/Info.plist`, `Sources/ThumbnailExtension/Info.plist`: 앱과 extension 버전 정보가 들어 있다.
 - `rhwp-core.lock`: 릴리스에 포함되는 `rhwp` core commit을 기록한다.
@@ -26,7 +26,8 @@
 
 - GitHub 저장소명 기준 release URL: 현재 저장소는 `postmelee/alhangeul-macos`다.
 - zip 파일명과 Homebrew Cask token: 현재 스크립트와 cask는 `rhwp-mac` 이름을 사용한다.
-- 앱 표시명: 현재 `알한글.app`이다.
+- 앱 bundle filesystem name: 현재 `RhwpMac.app`이다.
+- 사용자 표시명: 현재 `Info.plist` 기준 `알한글`이다.
 - bundle identifier: 현재 `com.postmelee.rhwpmac` 계열이다.
 - SHA256 고정 여부: 공개 배포 시 `sha256 :no_check`를 유지할지 결정해야 한다.
 - Developer ID 서명과 notarization 적용 시점.
@@ -45,6 +46,7 @@ cat rhwp-core.lock
 
 - 작업 브랜치와 릴리스 기준 브랜치가 명확해야 한다.
 - `Vendor/rhwp` submodule commit과 `rhwp-core.lock`의 `rhwp_commit`이 일치해야 한다.
+- `./scripts/build-rust-macos.sh --verify-lock`이 통과해야 한다.
 - 의도하지 않은 미커밋 변경이 없어야 한다.
 - 릴리스에 포함할 PR이 모두 merge되어 있어야 한다.
 
@@ -53,7 +55,7 @@ cat rhwp-core.lock
 기본 검증:
 
 ```bash
-./scripts/build-rust-macos.sh
+./scripts/build-rust-macos.sh --verify-lock
 ./scripts/check-no-appkit.sh
 xcodegen generate
 xcodebuild -project RhwpMac.xcodeproj \
@@ -79,7 +81,7 @@ xcodebuild -project RhwpMac.xcodeproj \
 Finder 통합 smoke test:
 
 ```bash
-open build/DerivedData/Build/Products/Debug/알한글.app
+open build/DerivedData/Build/Products/Debug/RhwpMac.app
 pluginkit -m | grep com.postmelee.rhwpmac
 qlmanage -r
 qlmanage -r cache
@@ -119,20 +121,21 @@ zip 생성:
 현재 산출물:
 
 ```text
-build/release/rhwp-mac-0.1.0.zip
+build.noindex/release/rhwp-mac-0.1.0.zip
 ```
 
 스크립트가 수행하는 일:
 
-- Rust bridge와 `Rhwp.xcframework` 재생성
+- Rust bridge와 `Rhwp.xcframework` 재생성 후 `rhwp-core.lock` 검증
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
-- `알한글.app`을 zip으로 압축
+- `RhwpMac.app`을 zip으로 압축
 - SHA256 출력
 
 주의:
 
 - 현재 스크립트는 서명/공증을 자동 수행하지 않는다.
+- lock 검증이 실패하면 app build와 zip 생성을 시작하지 않는다.
 - zip 파일명은 `rhwp-mac-<version>.zip`이다. 저장소명 `alhangeul-macos`와 맞출지 릴리스 전 결정해야 한다.
 
 ## 서명과 공증
@@ -185,7 +188,7 @@ Release note에 포함할 내용:
 - `sha256`을 실제 값으로 고정할 것인가
 - cask token을 `rhwp-mac`으로 유지할 것인가, `alhangeul-macos`로 바꿀 것인가
 - `homepage`이 현재 저장소를 가리키는가
-- `app "알한글.app"`이 산출물과 일치하는가
+- `app "RhwpMac.app"`이 산출물과 일치하는가
 - caveats 문구가 현재 extension 등록 흐름과 일치하는가
 
 초안의 URL은 과거 저장소명인 `postmelee/rhwp-mac` 기준이므로 첫 공개 릴리스 전에 반드시 갱신한다.
@@ -205,6 +208,7 @@ Release note에 포함할 내용:
 - [ ] 릴리스 버전 확정
 - [ ] 릴리스 기준 branch/commit 확정
 - [ ] `Vendor/rhwp`와 `rhwp-core.lock` 일치 확인
+- [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과
 - [ ] Debug build 통과
 - [ ] Release build 통과
 - [ ] `validate-stage3-render.sh` 통과

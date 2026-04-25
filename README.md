@@ -172,6 +172,15 @@ brew install xcodegen
 
 이 스크립트는 `RustBridge`를 arm64/x86_64 macOS staticlib로 빌드하고, `cbindgen` header를 생성한 뒤 `Frameworks/Rhwp.xcframework`를 만듭니다.
 
+`rhwp-core.lock`에는 core commit과 Rust bridge 산출물의 sha256/size가 기록됩니다. 일반 build는 lock을 수정하지 않습니다.
+
+```bash
+./scripts/build-rust-macos.sh --update-lock
+./scripts/build-rust-macos.sh --verify-lock
+```
+
+`--update-lock`은 현재 산출물 기준으로 lock을 갱신하고, `--verify-lock`은 `Frameworks/universal/librhwp.a`와 `Frameworks/generated_rhwp.h`가 lock 기록과 일치하는지 확인합니다.
+
 ### Xcode Project
 
 ```bash
@@ -194,13 +203,13 @@ xcodebuild -project RhwpMac.xcodeproj \
 개발 빌드 후 앱은 다음 경로에 생성됩니다.
 
 ```text
-build/DerivedData/Build/Products/Debug/알한글.app
+build/DerivedData/Build/Products/Debug/RhwpMac.app
 ```
 
 ### Run
 
 ```bash
-open build/DerivedData/Build/Products/Debug/알한글.app
+open build/DerivedData/Build/Products/Debug/RhwpMac.app
 ```
 
 Quick Look과 Thumbnail extension 등록 상태는 앱 사이드바 또는 `pluginkit`으로 확인할 수 있습니다.
@@ -246,11 +255,11 @@ qlmanage -p path/to/sample.hwp
 
 ```bash
 ./scripts/update-rhwp-core.sh
-./scripts/build-rust-macos.sh
+./scripts/build-rust-macos.sh --update-lock
 ./scripts/check-no-appkit.sh
 ```
 
-`rhwp` core는 `postmelee/rhwp`의 `devel` 브랜치를 기준으로 고정합니다. 현재 고정 commit은 [rhwp-core.lock](rhwp-core.lock)에 기록합니다.
+`rhwp` core는 `postmelee/rhwp`의 `devel` 브랜치를 기준으로 고정합니다. 현재 고정 commit과 Rust bridge 산출물 provenance는 [rhwp-core.lock](rhwp-core.lock)에 기록합니다.
 
 ## Project Structure
 
