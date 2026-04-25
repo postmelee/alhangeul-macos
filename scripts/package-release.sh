@@ -9,19 +9,21 @@ fi
 VERSION="$1"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-BUILD_DIR="$ROOT/build/release"
-APP_NAME="알한글.app"
+BUILD_DIR="$ROOT/build.noindex/release"
+DERIVED_DATA_DIR="$ROOT/build.noindex/DerivedDataRelease"
+APP_NAME="RhwpMac.app"
 ZIP_NAME="rhwp-mac-$VERSION.zip"
 
 mkdir -p "$BUILD_DIR"
 
-"$ROOT/scripts/build-rust-macos.sh"
+"$ROOT/scripts/build-rust-macos.sh" --verify-lock
 
 cd "$ROOT"
 xcodegen generate
 xcodebuild -project RhwpMac.xcodeproj \
   -scheme HostApp \
   -configuration Release \
+  -derivedDataPath "$DERIVED_DATA_DIR" \
   CONFIGURATION_BUILD_DIR="$BUILD_DIR" \
   build
 
