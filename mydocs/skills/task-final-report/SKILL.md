@@ -53,11 +53,15 @@ allow_implicit_invocation: false
    ```
 7. devel 대상 draft PR 생성
    ```bash
+   HEAD_SHA=$(git rev-parse HEAD)
    gh pr create --base devel --head publish/task{N} --draft \
      --title "Task #{N}: {제목}" \
      --template .github/pull_request_template.md
    ```
    - PR 본문에 최종 보고서 핵심 발췌, 검증 결과, 수용 기준 충족 여부를 포함
+   - `문서` 섹션의 모든 문서는 `HEAD_SHA` 기준 `https://github.com/postmelee/alhangeul-macos/blob/{HEAD_SHA}/mydocs/...` URL로 연결
+   - 링크 표시는 raw URL이 아니라 `[파일명](URL)` 형식으로 작성
+   - 상대 링크(`mydocs/...`)나 `blob/publish/task{N}/...` 링크는 사용하지 않음
 8. 작업지시자에게 PR URL 전달과 리뷰·merge 승인 요청
 
 ## 검증
@@ -65,6 +69,8 @@ allow_implicit_invocation: false
 - 모든 단계 보고서 + 최종 보고서 존재
 - `git status --short` 결과 빈 출력
 - `gh pr view` 결과에 draft 상태 PR이 정확한 base/head로 등록
+- `gh pr view` 결과의 `문서` 섹션이 commit SHA 고정 URL과 `[파일명](URL)` 표시 형식을 사용
+- PR 본문 `문서` 섹션에 raw GitHub blob URL, 상대 링크, `blob/publish/task{N}` 링크 없음
 - 오늘할일 #{N} 상태 `완료` + `완료: HH:mm`
 
 ## 절대 하지 말 것

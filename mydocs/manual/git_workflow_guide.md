@@ -90,7 +90,18 @@ gh pr create --repo postmelee/alhangeul-macos --base devel --head {contributor}:
 
 ### PR 본문에 문서 링크를 넣을 때
 
-PR 본문에서 계획서, 단계 보고서, 최종 보고서, troubleshooting 문서를 링크할 때는 merge 후에도 열리는 commit SHA 고정 GitHub blob URL을 우선 사용한다. PR 생성 직전 `git rev-parse HEAD`로 얻은 PR head commit SHA를 기준으로 `https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/...` 형식을 사용하면 `publish/taskN` 브랜치 삭제 후에도 링크가 유지된다. PR 본문 상대 링크나 `blob/publish/taskN/...` 링크는 merge 후 탐색성이 떨어질 수 있으므로 피한다.
+PR 본문에서 계획서, 단계 보고서, 최종 보고서, troubleshooting 문서를 링크할 때는 merge 후에도 열리는 commit SHA 고정 GitHub blob URL을 우선 사용한다. PR 생성 직전 `git rev-parse HEAD`로 얻은 PR head commit SHA를 기준으로 `https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/...` 형식을 사용하면 `publish/taskN` 브랜치 삭제 후에도 링크가 유지된다.
+
+문서 섹션의 표시 텍스트는 raw URL이 아니라 `[파일명](URL)` 형식으로 작성한다. 예시는 다음과 같다.
+
+```md
+- 수행 계획서: [task_m010_61.md](https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/plans/task_m010_61.md)
+- 구현 계획서: [task_m010_61_impl.md](https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/plans/task_m010_61_impl.md)
+- 단계 보고서: [task_m010_61_stage1.md](https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/working/task_m010_61_stage1.md)
+- 최종 보고서: [task_m010_61_report.md](https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/report/task_m010_61_report.md)
+```
+
+PR 본문 상대 링크, `blob/publish/taskN/...` 링크, URL만 그대로 노출하는 문서 링크는 merge 후 탐색성과 가독성을 떨어뜨리므로 사용하지 않는다.
 
 ### merge 후에도 로컬 브랜치가 남아 있을 때
 
