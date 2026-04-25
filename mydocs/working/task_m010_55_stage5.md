@@ -61,8 +61,12 @@ OK: shared Swift code has no AppKit/UIKit dependencies
 shellcheck:
 
 ```text
-$ if command -v shellcheck >/dev/null; then shellcheck scripts/update-rhwp-core.sh scripts/build-rust-macos.sh; else echo "shellcheck not installed"; fi
-shellcheck not installed
+$ shellcheck --version
+ShellCheck - shell script analysis tool
+version: 0.11.0
+
+$ shellcheck scripts/update-rhwp-core.sh scripts/build-rust-macos.sh
+결과: 통과.
 ```
 
 core API 검색 게이트:

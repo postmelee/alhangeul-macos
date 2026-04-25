@@ -87,6 +87,7 @@ bash -n scripts/update-rhwp-core.sh
 bash -n scripts/build-rust-macos.sh
 ./scripts/check-no-appkit.sh
 ./scripts/build-rust-macos.sh --verify-lock
+shellcheck scripts/update-rhwp-core.sh scripts/build-rust-macos.sh
 rg -n "build_page_render_tree|get_bin_data|render_page_svg_native|get_page_info_native|extract_thumbnail_only" RustBridge Sources scripts mydocs
 rg -n "release tag|resolved commit|Cargo.lock|rhwp-core.lock|compatibility gate|render smoke|unblock|Demo/Preview|Stable|demo-commit-pin|--channel demo|--channel stable" mydocs scripts rhwp-core.lock RustBridge
 ```
@@ -99,10 +100,13 @@ OK: shared Swift code has no AppKit/UIKit dependencies
 
 `./scripts/build-rust-macos.sh --verify-lock`는 FFI symbol 생성과 `rhwp-core.lock` 검증을 통과했다. `xcodebuild -create-xcframework` 실행 중 CoreSimulator/DVT cache 관련 경고가 있었지만 명령은 exit code 0으로 완료했다.
 
-미실행 또는 제한:
-
 ```text
-shellcheck not installed
+$ shellcheck --version
+ShellCheck - shell script analysis tool
+version: 0.11.0
+
+$ shellcheck scripts/update-rhwp-core.sh scripts/build-rust-macos.sh
+결과: 통과.
 ```
 
 ## GitHub Issue #30 반영
