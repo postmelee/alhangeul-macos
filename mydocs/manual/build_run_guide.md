@@ -239,10 +239,10 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
 
 ### 반복 시행착오 방지 규칙
 
+핵심 3개:
+
 - `CODE_SIGNING_ALLOWED=NO` Debug 산출물로 `pluginkit` 등록 여부를 판정하지 않는다.
 - Debug/Release 중간 산출물은 `build.noindex/` 아래에 둔다. Spotlight 검색 결과에 `build/DerivedData/.../AlhangeulMac.app` 같은 개발 앱이 보이면 오래된 산출물이 남은 상태로 보고 제거하거나 Spotlight 인덱스를 갱신한다.
-- `qlmanage -m plugins`는 app extension 기반 Quick Look/Thumbnail 등록 상태를 직접 반영하지 않을 수 있으므로 실패 판정의 근거로 쓰지 않는다.
-- `RhwpMac.app` 또는 `알한글.app` 같은 이전 설치본이 남아 discovery 충돌이 의심될 때만 작업지시자 승인 후 제거한다.
 - 동일 검증 중에는 설치 후보를 `$HOME/Applications/AlhangeulMac.app` 하나로 고정한다.
-- `pluginkit`에 나타나지 않으면 먼저 `codesign -dv`, `plutil -p Contents/Info.plist`, `find ... InfoPlist.strings`로 산출물 상태를 확인한다. 바로 삭제/재설치를 반복하지 않는다.
-- Spotlight/Dock/Finder 표시명은 현재 사용자 언어와 LaunchServices/Spotlight 캐시 영향을 받는다. 표시명 문제를 extension 실행 실패와 혼동하지 않는다. 다만 기본 `Info.plist` 표시명이 실제 bundle filesystem name과 불일치하면 localized 표시명이 선택되지 않을 수 있으므로 먼저 plist와 `InfoPlist.strings` 구조를 확인한다.
+
+`qlmanage -m plugins` 미노출 처리, `pluginkit -mAvvv` 미노출 시 진단 순서, 이전 이름(`RhwpMac.app`, `알한글.app`) 설치본 처리, 표시명 문제와 extension 실패 혼동 방지 등 추가 진단 기준은 [`finder_integration_validation_pitfalls.md`](../troubleshootings/finder_integration_validation_pitfalls.md)를 따른다.

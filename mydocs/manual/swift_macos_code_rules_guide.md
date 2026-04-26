@@ -21,8 +21,7 @@
 
 ## 네이밍과 코드 스타일
 
-- iOS에서 가져온 초기 이름은 가능하면 플랫폼 중립 이름으로 정리한다.
-  - 예: `mapHWPFontToApple`, `resolveAppleFont`
+- iOS에서 가져온 초기 이름은 macOS 또는 platform-neutral 이름으로 정리한다.
 - bridge 계층은 데이터 변환과 렌더링에 집중하고, UI 상태를 갖지 않는다.
 - HostApp은 문서 열기/줌/페이지 상태를 `Store` 계층에서 관리한다.
 

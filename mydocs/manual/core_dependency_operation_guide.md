@@ -2,7 +2,7 @@
 
 ## 목적
 
-이 문서는 `edwardkim/rhwp` core를 앱 저장소에서 고정하고 갱신하는 절차를 정리한다. 파일명은 과거 submodule 운영 문서명을 유지하지만, 현재 기준은 `RustBridge`의 git dependency와 lock provenance다.
+이 문서는 `edwardkim/rhwp` core를 앱 저장소에서 고정하고 갱신하는 절차를 정리한다. 현재 기준은 `RustBridge`의 git dependency와 lock provenance다.
 
 ## 소유 경계
 
