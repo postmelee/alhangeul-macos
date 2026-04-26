@@ -16,6 +16,12 @@ struct AlHangeulMacApp: App {
                 }
         }
         .commands {
+            CommandGroup(replacing: .appInfo) {
+                Button("알한글에 관하여") {
+                    AboutWindowPresenter.shared.show()
+                }
+            }
+
             CommandGroup(replacing: .newItem) {
                 Button("문서 열기...") {
                     viewerStore.openDocument()

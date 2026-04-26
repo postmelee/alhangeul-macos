@@ -1,10 +1,25 @@
 import Foundation
 
 enum BuildInfo {
+    private static var bundle: Bundle {
+        Bundle.main
+    }
+
+    static var displayName: String {
+        bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+            ?? bundle.object(forInfoDictionaryKey: "CFBundleName") as? String
+            ?? "알한글"
+    }
+
+    static var version: String {
+        bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.1.0"
+    }
+
+    static var build: String {
+        bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
+    }
+
     static var displayVersion: String {
-        let bundle = Bundle.main
-        let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.1.0"
-        let build = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "1"
         return "v\(version) (\(build))"
     }
 }

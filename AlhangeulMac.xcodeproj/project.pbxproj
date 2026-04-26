@@ -15,6 +15,7 @@
 		13A6BD7074F74333D229983E /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264820B28D93821B34BC8369 /* RhwpDocument.swift */; };
 		19F30C2E288F6D6DA3183F40 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FB9505A870E7B20DEBD9A3 /* HwpPageImageRenderer.swift */; };
 		34FB4A934C2B659E514A5949 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 801780F983F003C6DFC80985 /* Assets.xcassets */; };
+		3983B75CF83B8AEE507E8E1C /* AboutWindowPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6D138713B5F823A5DBB04D /* AboutWindowPresenter.swift */; };
 		3B375686F959A430270401B2 /* ThumbnailExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 840B8833500367957AD264C8 /* ThumbnailExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3E493DF69BC4FDC843C07693 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FB9505A870E7B20DEBD9A3 /* HwpPageImageRenderer.swift */; };
 		3FD0D49E5FCDCB09A8E4823B /* CGTreeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4C7377B231BA12026CD0A8 /* CGTreeRenderer.swift */; };
@@ -27,6 +28,7 @@
 		7D8B059E64BF3E1AFFC79B3E /* DocumentOpenPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B537B1B59BDD4F9B4E52C905 /* DocumentOpenPanel.swift */; };
 		8CE0187F61273E5CBDEF309E /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264820B28D93821B34BC8369 /* RhwpDocument.swift */; };
 		973F7ADF9618ED137FEEB16F /* DocumentOpenRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D785AC207DC50ED5C5A409CD /* DocumentOpenRouter.swift */; };
+		97E1ACD2F018F402DB260CAF /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1779E2E87C0FA74DC44AF3 /* AboutView.swift */; };
 		991B52CE3A28EB6FAE5F9CF8 /* HwpPreviewProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6336DDBE52EE036D340608FB /* HwpPreviewProvider.swift */; };
 		A1BFACD9027F1E1DA79D4BB9 /* HwpThumbnailRenderCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D0A8A87C7F8BC532D06B42 /* HwpThumbnailRenderCache.swift */; };
 		AEE20A63B40F7FFC431D8951 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D96E5B8871F5D53AF7C9737 /* ContentView.swift */; };
@@ -87,6 +89,7 @@
 		264820B28D93821B34BC8369 /* RhwpDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpDocument.swift; sourceTree = "<group>"; };
 		2F334BFE86C869C93D352B47 /* HostApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HostApp.entitlements; sourceTree = "<group>"; };
 		47927CA6F14A54D1BCB55CC7 /* HostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostApp.swift; sourceTree = "<group>"; };
+		5C1779E2E87C0FA74DC44AF3 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		5E039FB3B00187086CB917B3 /* ThumbnailExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ThumbnailExtension.entitlements; sourceTree = "<group>"; };
 		6336DDBE52EE036D340608FB /* HwpPreviewProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewProvider.swift; sourceTree = "<group>"; };
 		6557EB0999822D4A503FFACC /* ExtensionStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionStatusModel.swift; sourceTree = "<group>"; };
@@ -99,6 +102,7 @@
 		92C494752765F206E7932946 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		9D3EBDA3B97538A87F0EFE88 /* HwpThumbnailProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpThumbnailProvider.swift; sourceTree = "<group>"; };
 		9D96E5B8871F5D53AF7C9737 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AC6D138713B5F823A5DBB04D /* AboutWindowPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutWindowPresenter.swift; sourceTree = "<group>"; };
 		AE58FDA2BFE00D5055F6ECCD /* RenderTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderTree.swift; sourceTree = "<group>"; };
 		B22508A024E2FE008BFAF33F /* QLExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QLExtension.entitlements; sourceTree = "<group>"; };
 		B2FB9505A870E7B20DEBD9A3 /* HwpPageImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPageImageRenderer.swift; sourceTree = "<group>"; };
@@ -209,6 +213,7 @@
 		618A7A1E7DB12C6A8EF6AC7D /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				AC6D138713B5F823A5DBB04D /* AboutWindowPresenter.swift */,
 				B537B1B59BDD4F9B4E52C905 /* DocumentOpenPanel.swift */,
 				D785AC207DC50ED5C5A409CD /* DocumentOpenRouter.swift */,
 				6557EB0999822D4A503FFACC /* ExtensionStatusModel.swift */,
@@ -296,6 +301,7 @@
 		F5C7000A1CB40276B0044C16 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5C1779E2E87C0FA74DC44AF3 /* AboutView.swift */,
 				9D96E5B8871F5D53AF7C9737 /* ContentView.swift */,
 				BFB237499FC34A454309F367 /* DocumentPageView.swift */,
 				0059FA2411515C760DF22DAC /* DocumentViewerView.swift */,
@@ -469,6 +475,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				97E1ACD2F018F402DB260CAF /* AboutView.swift in Sources */,
+				3983B75CF83B8AEE507E8E1C /* AboutWindowPresenter.swift in Sources */,
 				F1B85EC992E13A931CB0FD71 /* BuildInfo.swift in Sources */,
 				04F786BF8FD3100CDDC1FAA1 /* CGTreeRenderer.swift in Sources */,
 				AEE20A63B40F7FFC431D8951 /* ContentView.swift in Sources */,
