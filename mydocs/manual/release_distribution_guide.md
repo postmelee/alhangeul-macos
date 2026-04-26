@@ -39,15 +39,15 @@
 
 ```bash
 git status --short --branch
-git submodule status Vendor/rhwp
 cat rhwp-core.lock
+./scripts/build-rust-macos.sh --verify-lock
 ```
 
 확인 기준:
 
 - 작업 브랜치와 릴리스 기준 브랜치가 명확해야 한다.
-- `Vendor/rhwp` submodule commit과 `rhwp-core.lock`의 `rhwp_commit`이 일치해야 한다.
-- `./scripts/build-rust-macos.sh --verify-lock`이 통과해야 한다.
+- `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`의 repo/ref/commit 기준이 일치해야 한다.
+- `Frameworks/universal/librhwp.a`, `Frameworks/generated_rhwp.h`의 hash/size가 `rhwp-core.lock`과 일치해야 한다.
 - 의도하지 않은 미커밋 변경이 없어야 한다.
 - 릴리스에 포함할 PR이 모두 merge되어 있어야 한다.
 
@@ -227,7 +227,7 @@ Release note에 포함할 내용:
 
 - [ ] 릴리스 버전 확정
 - [ ] 릴리스 기준 branch/commit 확정
-- [ ] `Vendor/rhwp`와 `rhwp-core.lock` 일치 확인
+- [ ] `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock` 정합성 확인
 - [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과
 - [ ] Debug build 통과
 - [ ] Release build 통과
