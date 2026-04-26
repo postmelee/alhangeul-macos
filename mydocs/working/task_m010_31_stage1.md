@@ -52,7 +52,7 @@ README, architecture, build/run 문서의 현재 구조와 실제 target/source 
 - Project Structure가 제품 target boundary보다 저장소 tree 나열에 가깝다. `HostApp`, `QLExtension`, `ThumbnailExtension`을 먼저 독립 제품 타깃으로 설명하고, 그 아래 `Shared`, `RhwpCoreBridge`, `RustBridge`, `Frameworks`, `scripts`, `mydocs` 순서로 재배열하는 편이 낫다.
 - 현재 Project Structure에는 `Frameworks/`, `project.yml`, `rhwp-core.lock`, `samples/`의 역할이 충분히 보이지 않는다.
 - README의 core release 표현 중 “최신 release `v0.7.3`에는 필요한 bridge API가 없어 즉시 전환할 수 없음”은 #30 이후 문맥에서는 “Stable release tag 승격이 blocked”로 더 정확히 쓰는 편이 좋다.
-- hwpql에서 의도적으로 도입하지 않는 항목인 HTML/WKWebView 중심 viewer/preview, embedded preview only, coarse-grained FFI 설명은 아직 없다.
+- 외부 참고 구현에서 의도적으로 도입하지 않는 항목인 HTML/WKWebView 중심 viewer/preview, embedded preview only, coarse-grained FFI 설명은 아직 없다.
 
 ## Architecture 현재 상태
 
@@ -68,7 +68,7 @@ README, architecture, build/run 문서의 현재 구조와 실제 target/source 
 - 상위 구조가 짧은 bullet list라 신규 진입자가 `project.yml`의 실제 target 구성과 source 포함 관계를 바로 알기 어렵다.
 - 소유 경계 섹션이 core 경계부터 시작한다. Issue #31 목표에는 제품 타깃 중심 재정렬이 더 적합하므로 `HostApp`/extension/공통 계층을 먼저 설명하고 core/RustBridge/provenance를 뒤에 배치하는 편이 좋다.
 - `Frameworks`가 generated artifact이며 commit 대상이 아니라는 설명은 RustBridge 경계에 있지만, 상위 구조에서는 별도 계층으로 보이지 않는다.
-- hwpql 비교에서 유지하지 않는 render 구조는 아직 architecture 문서에 없다.
+- 외부 참고 구현 비교에서 유지하지 않는 render 구조는 아직 architecture 문서에 없다.
 
 ## Build/Run Guide 현재 상태
 
@@ -89,12 +89,12 @@ README, architecture, build/run 문서의 현재 구조와 실제 target/source 
 실행:
 
 ```bash
-rg --line-number --glob '!RustBridge/target/**' 'HTML/WKWebView|embedded preview only|coarse-grained FFI|hwpql|Demo/Preview|Stable|release tag|resolved commit|Vendor/rhwp|git submodule|submodule|RhwpMac.xcodeproj|xcodeproj.*원본|project.yml' README.md mydocs/tech mydocs/manual Sources RustBridge
+rg --line-number --glob '!RustBridge/target/**' 'HTML/WKWebView|embedded preview only|coarse-grained FFI|<비교 대상 프로젝트명>|Demo/Preview|Stable|release tag|resolved commit|Vendor/rhwp|git submodule|submodule|RhwpMac.xcodeproj|xcodeproj.*원본|project.yml' README.md mydocs/tech mydocs/manual Sources RustBridge
 ```
 
 확인 결과:
 
-- `hwpql`, `HTML/WKWebView`, `embedded preview only`, `coarse-grained FFI` 비교 설명은 active README/manual/architecture에 아직 없다.
+- 비교 대상 프로젝트명, `HTML/WKWebView`, `embedded preview only`, `coarse-grained FFI` 비교 설명은 active README/manual/architecture에 아직 없다.
 - `Demo/Preview`, `Stable`, `release tag`, `resolved commit` 표현은 README, architecture, build guide, core compatibility/core dependency guide에 존재한다.
 - `Vendor/rhwp`는 active 사용자 문서에서는 대부분 제거되어 있고, `mydocs/tech/task_m010_28_sample_provenance.md`의 샘플 출처 증빙 기록에 남아 있다.
 - `core_submodule_operation_guide.md` 파일명 링크는 호환 유지 목적의 이름이다.
@@ -114,7 +114,7 @@ Stage 2에서는 README만 수정 대상으로 삼는다.
 - `Frameworks/`, `project.yml`, `rhwp-core.lock`, `samples/` 역할을 구조 설명에 포함
 - Quick Start의 “온보딩 가이드(추후 추가 예정)” 문구를 현재 존재하는 문서 경로와 읽기 순서로 대체
 - core release 문구를 “현재 Demo/Preview 목표, Stable release tag 승격 blocked”로 명확히 보정
-- hwpql에서 유지하지 않는 방향은 README에서는 짧게만 언급하고, 상세 비교는 architecture 또는 Stage 5에서 처리
+- 외부 참고 구현에서 유지하지 않는 방향은 README에서는 짧게만 언급하고, 상세 비교는 architecture 또는 Stage 5에서 처리
 
 ## 검증 결과
 
@@ -129,7 +129,7 @@ $ find Sources RustBridge -maxdepth 2 -name README.md -print
 ```
 
 ```text
-$ rg --line-number --glob '!RustBridge/target/**' 'HTML/WKWebView|embedded preview only|coarse-grained FFI|hwpql|Demo/Preview|Stable|release tag|resolved commit|Vendor/rhwp|git submodule|submodule|RhwpMac.xcodeproj|xcodeproj.*원본|project.yml' README.md mydocs/tech mydocs/manual Sources RustBridge
+$ rg --line-number --glob '!RustBridge/target/**' 'HTML/WKWebView|embedded preview only|coarse-grained FFI|<비교 대상 프로젝트명>|Demo/Preview|Stable|release tag|resolved commit|Vendor/rhwp|git submodule|submodule|RhwpMac.xcodeproj|xcodeproj.*원본|project.yml' README.md mydocs/tech mydocs/manual Sources RustBridge
 결과: 위 검색 결과와 분류 참고
 ```
 
