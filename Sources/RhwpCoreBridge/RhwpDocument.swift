@@ -86,13 +86,19 @@ class RhwpDocument {
 
     /// 특정 페이지의 렌더 트리를 반환한다.
     func renderPageTree(at page: Int) -> RenderNode? {
+        guard let json = renderPageTreeJSON(at: page),
+              let data = json.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(RenderNode.self, from: data)
+    }
+
+    /// 특정 페이지의 렌더 트리 원본 JSON 문자열을 반환한다.
+    func renderPageTreeJSON(at page: Int) -> String? {
         guard let jsonPtr = rhwp_render_page_tree(handle, UInt32(page)) else {
             return nil
         }
         let json = String(cString: jsonPtr)
         rhwp_free_string(jsonPtr)
-        guard let data = json.data(using: .utf8) else { return nil }
-        return try? JSONDecoder().decode(RenderNode.self, from: data)
+        return json
     }
 
     /// 이미지 바이너리 데이터를 반환한다 (bin_data_id는 1-indexed).
