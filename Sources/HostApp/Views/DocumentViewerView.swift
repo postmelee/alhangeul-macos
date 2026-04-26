@@ -15,6 +15,7 @@ struct DocumentViewerView: View {
                 EmptyDocumentView(store: store)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .safeAreaInset(edge: .bottom) {
             StatusBarView(store: store)
         }
@@ -124,6 +125,7 @@ private struct StatusBarView: View {
                 Text("\(Int(store.zoomScale * 100))%")
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .font(.caption)
         .foregroundStyle(.secondary)
         .padding(.horizontal, 14)

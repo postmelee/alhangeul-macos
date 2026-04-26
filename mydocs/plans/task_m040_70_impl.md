@@ -159,6 +159,37 @@
 
 - `Task #70 Stage 4 + 최종 보고서: 통합 검증과 보고`
 
+## Stage 5. 초기 상태바 레이아웃 보정
+
+### 목표
+
+- 사이드바 제거 후 빈 문서 상태에서 하단 상태바가 창 전체 하단이 아니라 콘텐츠 중앙 영역 하단에 붙어 보이는 문제를 보정한다.
+- `문서 없음` 상태 텍스트가 viewer 창의 왼쪽 하단에 안정적으로 표시되도록 한다.
+
+### 작업
+
+- `DocumentViewerView` 루트 콘텐츠가 창 전체 폭과 높이를 차지하도록 frame 제약을 추가한다.
+- `StatusBarView`가 전체 폭을 사용하도록 frame 제약을 추가한다.
+- Debug 앱을 실행해 빈 문서 초기 화면에서 왼쪽 사이드바 미노출과 `문서 없음` 하단 위치를 확인한다.
+
+### 완료 기준
+
+- 빈 문서 초기 화면에서 `문서 없음`이 창 왼쪽 하단에 표시된다.
+- 중앙 문서 열기 안내는 기존처럼 중앙에 유지된다.
+- 문서 열기 toolbar와 zoom toolbar가 유지된다.
+- HostApp Debug build가 성공한다.
+
+### 검증
+
+- `git diff --check`
+- `./scripts/check-no-appkit.sh`
+- `xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build`
+- Debug 앱 실행 후 초기 화면 수동 확인
+
+### 커밋 메시지
+
+- `Task #70 Stage 5: 초기 상태바 레이아웃 보정`
+
 ## 승인 요청 사항
 
-위 Stage 기준으로 Stage 1 진행 승인을 요청한다.
+Stage 5 보정까지 반영한 최종 결과 기준으로 PR 게시 승인을 요청한다.
