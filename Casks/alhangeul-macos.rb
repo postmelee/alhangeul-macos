@@ -2,7 +2,7 @@ cask "alhangeul-macos" do
   version "0.1.0"
   sha256 :no_check
 
-  url "https://github.com/postmelee/alhangeul-macos/releases/download/v#{version}/alhangeul-macos-#{version}.zip"
+  url "https://github.com/postmelee/alhangeul-macos/releases/download/v#{version}/alhangeul-macos-#{version}.dmg"
   name "알한글"
   desc "Quick Look, thumbnail, and viewer app for HWP/HWPX documents"
   homepage "https://github.com/postmelee/alhangeul-macos"

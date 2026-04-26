@@ -261,6 +261,18 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql path/to/sample.hwp
 qlmanage -p path/to/sample.hwp
 ```
 
+### Release Packaging
+
+`scripts/package-release.sh`는 개발/검증용 Release package를 만들고, `scripts/release.sh`는 공개 배포용 DMG release pipeline을 담당합니다. 현재 v0.1.0 목표는 Demo/Preview release이며, signed/notarized public DMG는 Apple Developer Program credential이 준비된 뒤 저장소 소유자의 명시 지시에 따라 생성합니다.
+
+credential 없이 로컬 release 흐름만 점검할 때:
+
+```bash
+./scripts/release.sh --skip-notarize 0.1.0
+```
+
+이 명령이 만드는 `*-rehearsal.dmg`는 public release나 Homebrew Cask에 사용하지 않습니다. 자세한 절차와 권한 정책은 [릴리스/배포 가이드](mydocs/manual/release_distribution_guide.md)를 기준으로 합니다.
+
 ### Render Smoke Test
 
 ```bash
