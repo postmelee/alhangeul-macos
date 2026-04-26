@@ -56,6 +56,12 @@ allow_implicit_invocation: false
 5. label 후보 선택
    - 조회된 기존 label만 후보로 사용한다.
    - 작업 성격이 label의 `name`/`description`과 명확히 대응할 때만 선택한다.
+   - label은 기본적으로 `type label 1개 + area label 1~2개 + kind/status label 0~1개`로 제한한다.
+   - type label은 `bug`, `documentation`, `enhancement`, `duplicate`, `question` 등 작업 성격을 나타내는 label 중 1개를 우선 고른다.
+   - `area:*` label은 영향을 받는 모든 영역이 아니라 주 작업 소유 영역 기준으로 고른다.
+   - `kind:*` label은 `kind:architecture`, `kind:automation`, `kind:regression`, `kind:verification`, `kind:follow-up`처럼 처리 방식이나 맥락을 실제로 구분할 때만 붙인다.
+   - 일반 이슈는 2~4개 label을 권장한다.
+   - 5개 이상 label이 필요하면 이슈 초안에 예외 사유를 적고 작업지시자 확인을 받는다.
    - 후보가 명확하면 label 이름과 선택 이유를 기록한다.
    - 적합한 label이 없거나 애매하면 label 없이 생성하거나 작업지시자에게 확인한다.
    - 새 label은 만들지 않는다.
@@ -69,6 +75,7 @@ allow_implicit_invocation: false
      - 참고
    - milestone: live 조회 결과에서 고른 열린 milestone 1개와 선택 이유
    - label: live 조회 결과에서 고른 기존 label 0개 이상과 선택 이유
+   - label 선택 이유는 type/area/kind 기준으로 나누어 적고, 5개 이상이면 예외 사유를 별도로 적는다.
 7. 이슈 생성 전 승인 요청
    - 작업지시자에게 제목, 본문, milestone, label 초안과 선택 이유를 보여준다.
    - 작업지시자가 같은 스레드에서 생성 승인을 명시하기 전에는 `gh issue create`를 실행하지 않는다.
@@ -94,6 +101,9 @@ allow_implicit_invocation: false
 - 생성된 이슈가 `OPEN` 상태여야 한다.
 - milestone이 비어 있지 않고 live 조회 결과에 있던 열린 milestone이어야 한다.
 - label은 초안에서 승인된 기존 label만 붙어 있어야 한다.
+- 일반 이슈 label은 2~4개 권장 범위인지 확인한다.
+- 5개 이상 label이면 승인된 예외 사유가 생성 결과 보고에 포함되어야 한다.
+- `area:*` label은 주 작업 소유 영역 기준으로 선택되어야 한다.
 - 생성 결과 보고에 issue number, URL, milestone, label, 선택 이유가 포함되어야 한다.
 
 ## 절대 하지 말 것
