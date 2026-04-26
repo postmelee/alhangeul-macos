@@ -22,16 +22,16 @@
 ## Git 워크플로우
 
 ```
-local/task{N}  ──커밋──커밋──┐
-local/task{N+1}──커밋──커밋──┤
-                              ├─→ publish/task{N} push
-                              │
-                              ├─→ devel 대상 PR 생성 + 리뷰 + merge
-                              │
-                              ├─→ devel 누적
-                              │
-                              ├─→ main PR 생성 + 리뷰 + merge + 태그 (릴리즈 시점)
+local/task{N} ── 커밋 · 커밋 · 커밋 ──→ publish/task{N} push
+                                          │
+                                          └─→ devel 대상 PR → 리뷰 → merge
+                                                                       │
+                                                                       └─→ devel 누적
+                                                                              │
+                                                                              └─→ main PR (릴리즈 시점) → 태그
 ```
+
+병렬 task는 각각 독립적인 `local/task{N}` 브랜치로 위 흐름을 반복한다.
 
 - **타스크 브랜치**: `local/task{N}`에서 잘게 커밋. 작업 단위마다 커밋.
 - **원격 게시 브랜치**: `local/task{N}` 작업이 리뷰 가능한 상태가 되면 `publish/task{N}` 이름으로 원격에 push하고 `devel` 대상 PR을 생성한다.

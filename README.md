@@ -102,6 +102,8 @@ v0.1.0의 현재 배포 목표는 Demo/Preview release입니다. 필요한 bridg
 - 실패 시 diff, screenshot, render output을 기반으로 다시 수정하는 검증 루프 구축
 - Codex Plugin 또는 Claude Code 연동 도구로 packaging
 
+---
+
 자세한 구조와 bridge 정책은 [아키텍처 문서](mydocs/tech/project_architecture.md)를 참조하세요.
 
 ---
@@ -403,12 +405,9 @@ local/task{N}  ──커밋──커밋──┐
 
 ### 타스크 진행 절차
 
-1. `gh issue create` → GitHub Issue 등록
-2. `origin/devel` 기준으로 `local/task{issue번호}` 브랜치 생성
-3. 수행계획서 작성 → 구현 계획서 작성 → 구현 → 검증
-4. 단계별 완료 보고서와 최종 보고서 작성
-5. `publish/task{issue번호}`로 push 후 `.github/pull_request_template.md` 기준으로 `devel` 대상 draft PR 생성
-6. PR merge 후 이슈, 오늘할일 상태, merge 완료된 `publish/task{issue번호}` 원격 브랜치 정리
+이슈 → 브랜치 → 오늘할일 → 수행계획서 → 구현계획서 → 구현 → 검증 → 단계 보고 → 최종 보고 → PR 게시 → merge 후 정리.
+
+15단계 상세, 승인 게이트, 커밋 메시지 규칙은 [`task_workflow_guide.md`](mydocs/manual/task_workflow_guide.md)를 참고하세요.
 
 ### 디버깅 프로토콜
 
