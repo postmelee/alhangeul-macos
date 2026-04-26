@@ -4,7 +4,7 @@
 
 이 문서는 `alhangeul-macos` 저장소의 내부 task PR 생성 규칙과 외부 기여자 PR 검토 절차를 정리한다.
 
-브랜치 흐름과 merge 전략은 `AGENTS.md`의 `Git 워크플로우`를 따른다.
+브랜치 흐름과 merge 전략은 [`git_workflow_guide.md`](git_workflow_guide.md)를 따른다.
 
 ## 범위
 
