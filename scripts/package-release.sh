@@ -23,7 +23,7 @@ mkdir -p "$BUILD_DIR"
 touch "$BUILD_ROOT/.metadata_never_index"
 rm -rf "$XCODE_BUILD_DIR"
 rm -rf "$DERIVED_DATA_DIR"
-rm -rf "$BUILD_DIR/$BUILD_APP_NAME" "$BUILD_DIR/$BUILD_APP_NAME.dSYM"
+rm -rf "${BUILD_DIR:?}/$BUILD_APP_NAME" "${BUILD_DIR:?}/$BUILD_APP_NAME.dSYM"
 rm -rf "$BUILD_DIR"/AlhangeulMac*.appex "$BUILD_DIR"/AlhangeulMac*.appex.dSYM "$BUILD_DIR"/AlhangeulMac*.swiftmodule
 rm -rf "$BUILD_DIR/include" "$BUILD_DIR/librhwp.a"
 
@@ -43,7 +43,7 @@ if [ ! -d "$XCODE_BUILD_DIR/$BUILD_APP_NAME" ]; then
   exit 1
 fi
 
-rm -rf "$BUILD_DIR/$APP_NAME"
+rm -rf "${BUILD_DIR:?}/$APP_NAME"
 # Keep the filesystem bundle name ASCII. Localized user-facing names are provided
 # by Info.plist; a non-ASCII .app path can break ExtensionKit lookup.
 ditto "$XCODE_BUILD_DIR/$BUILD_APP_NAME" "$BUILD_DIR/$APP_NAME"
