@@ -66,7 +66,7 @@ $ rg --line-number '온보딩 가이드|추후 추가 예정' README.md
 비교 대상 프로젝트 직접 언급 제거:
 
 ```text
-$ rg --line-number '<비교 대상 프로젝트명>|HTML/WKWebView|embedded preview only|coarse-grained FFI' README.md
+$ rg --line-number '<실제 비교 대상 프로젝트명>|<제외 비교 표현>' README.md
 결과: 출력 없음
 ```
 

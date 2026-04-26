@@ -72,7 +72,7 @@ $ rg --line-number '<실제 비교 대상 프로젝트명>' README.md mydocs/tec
 공개 구조 문서의 비교 표현:
 
 ```text
-$ rg --line-number 'HTML/WKWebView|embedded preview only|coarse-grained FFI' README.md mydocs/tech/project_architecture.md
+$ rg --line-number '<제외 비교 표현>' README.md mydocs/tech/project_architecture.md
 결과: 출력 없음
 ```
 

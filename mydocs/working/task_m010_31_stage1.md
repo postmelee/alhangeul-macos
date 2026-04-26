@@ -52,7 +52,7 @@ README, architecture, build/run 문서의 현재 구조와 실제 target/source 
 - Project Structure가 제품 target boundary보다 저장소 tree 나열에 가깝다. `HostApp`, `QLExtension`, `ThumbnailExtension`을 먼저 독립 제품 타깃으로 설명하고, 그 아래 `Shared`, `RhwpCoreBridge`, `RustBridge`, `Frameworks`, `scripts`, `mydocs` 순서로 재배열하는 편이 낫다.
 - 현재 Project Structure에는 `Frameworks/`, `project.yml`, `rhwp-core.lock`, `samples/`의 역할이 충분히 보이지 않는다.
 - README의 core release 표현 중 “최신 release `v0.7.3`에는 필요한 bridge API가 없어 즉시 전환할 수 없음”은 #30 이후 문맥에서는 “Stable release tag 승격이 blocked”로 더 정확히 쓰는 편이 좋다.
-- 외부 참고 구현에서 의도적으로 도입하지 않는 항목인 HTML/WKWebView 중심 viewer/preview, embedded preview only, coarse-grained FFI 설명은 아직 없다.
+- 외부 참고 구현에서 의도적으로 도입하지 않는 제외 비교 표현은 아직 없다.
 
 ## Architecture 현재 상태
 
@@ -89,12 +89,12 @@ README, architecture, build/run 문서의 현재 구조와 실제 target/source 
 실행:
 
 ```bash
-rg --line-number --glob '!RustBridge/target/**' 'HTML/WKWebView|embedded preview only|coarse-grained FFI|<비교 대상 프로젝트명>|Demo/Preview|Stable|release tag|resolved commit|Vendor/rhwp|git submodule|submodule|RhwpMac.xcodeproj|xcodeproj.*원본|project.yml' README.md mydocs/tech mydocs/manual Sources RustBridge
+rg --line-number --glob '!RustBridge/target/**' '<실제 비교 대상 프로젝트명>|<제외 비교 표현>|Demo/Preview|Stable|release tag|resolved commit|Vendor/rhwp|git submodule|submodule|RhwpMac.xcodeproj|xcodeproj.*원본|project.yml' README.md mydocs/tech mydocs/manual Sources RustBridge
 ```
 
 확인 결과:
 
-- 비교 대상 프로젝트명, `HTML/WKWebView`, `embedded preview only`, `coarse-grained FFI` 비교 설명은 active README/manual/architecture에 아직 없다.
+- 실제 비교 대상 프로젝트명과 제외 비교 표현은 active README/manual/architecture에 아직 없다.
 - `Demo/Preview`, `Stable`, `release tag`, `resolved commit` 표현은 README, architecture, build guide, core compatibility/core dependency guide에 존재한다.
 - `Vendor/rhwp`는 active 사용자 문서에서는 대부분 제거되어 있고, `mydocs/tech/task_m010_28_sample_provenance.md`의 샘플 출처 증빙 기록에 남아 있다.
 - `core_submodule_operation_guide.md` 파일명 링크는 호환 유지 목적의 이름이다.
@@ -129,7 +129,7 @@ $ find Sources RustBridge -maxdepth 2 -name README.md -print
 ```
 
 ```text
-$ rg --line-number --glob '!RustBridge/target/**' 'HTML/WKWebView|embedded preview only|coarse-grained FFI|<비교 대상 프로젝트명>|Demo/Preview|Stable|release tag|resolved commit|Vendor/rhwp|git submodule|submodule|RhwpMac.xcodeproj|xcodeproj.*원본|project.yml' README.md mydocs/tech mydocs/manual Sources RustBridge
+$ rg --line-number --glob '!RustBridge/target/**' '<실제 비교 대상 프로젝트명>|<제외 비교 표현>|Demo/Preview|Stable|release tag|resolved commit|Vendor/rhwp|git submodule|submodule|RhwpMac.xcodeproj|xcodeproj.*원본|project.yml' README.md mydocs/tech mydocs/manual Sources RustBridge
 결과: 위 검색 결과와 분류 참고
 ```
 

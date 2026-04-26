@@ -53,7 +53,7 @@ $ git diff --check
 직접 비교 명칭과 제외 표현:
 
 ```text
-$ rg --line-number '<실제 비교 대상 프로젝트명>|HTML/WKWebView|embedded preview only|coarse-grained FFI' README.md mydocs/tech/project_architecture.md mydocs/manual/build_run_guide.md Sources/README.md RustBridge/README.md
+$ rg --line-number '<실제 비교 대상 프로젝트명>|<제외 비교 표현>' README.md mydocs/tech/project_architecture.md mydocs/manual/build_run_guide.md Sources/README.md RustBridge/README.md
 결과: 출력 없음
 ```
 
