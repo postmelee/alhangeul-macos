@@ -5,15 +5,13 @@ import SwiftUI
 struct AlHangeulMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var viewerStore = DocumentViewerStore()
-    @StateObject private var extensionStatus = ExtensionStatusModel()
 
     var body: some Scene {
         WindowGroup {
-            ContentView(store: viewerStore, extensionStatus: extensionStatus)
+            ContentView(store: viewerStore)
                 .frame(minWidth: 900, minHeight: 620)
                 .task {
                     DocumentOpenRouter.bindStore(viewerStore)
-                    extensionStatus.refresh()
                     DocumentOpenRouter.openPendingURL()
                 }
         }
