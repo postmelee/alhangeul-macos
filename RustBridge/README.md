@@ -24,14 +24,9 @@
 
 ## Core dependency 기준
 
-현재 v0.1.0 목표는 Demo/Preview release다.
+현재 v0.1.0 목표는 Demo/Preview release이며, `RustBridge/Cargo.toml`은 `git` + `rev`로 commit pin 상태다. Stable은 release tag가 필요한 bridge API를 포함할 때만 별도 승격하고, branch/floating ref는 사용하지 않는다.
 
-| 채널 | dependency 기준 | lock 기준 |
-|------|------|------|
-| Demo/Preview | `git` + `rev` | `rhwp_ref_kind = "commit"`, resolved commit, artifact hash/size |
-| Stable | `git` + `tag` | `rhwp_ref_kind = "release-tag"`, release tag, resolved commit, artifact hash/size |
-
-Demo/Preview는 필요한 bridge API가 포함된 commit을 고정할 때만 사용한다. Stable은 release tag가 같은 API를 포함할 때 별도 승격한다. branch/floating ref는 배포 기준으로 사용하지 않는다.
+채널별 dependency 기준, lock 필드, compatibility gate 상세는 [`core_release_compatibility.md`](../mydocs/tech/core_release_compatibility.md)를 참조한다.
 
 ## 기본 명령
 

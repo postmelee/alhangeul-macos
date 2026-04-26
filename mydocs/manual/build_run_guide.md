@@ -37,18 +37,9 @@ brew install xcodegen
 
 ## Core dependency 모드
 
-현재 기본 개발 흐름은 `RustBridge/Cargo.toml`의 `edwardkim/rhwp` git dependency와 `RustBridge/Cargo.lock`, `rhwp-core.lock`을 함께 검증한다.
+현재 기본 개발 흐름은 `RustBridge/Cargo.toml`의 `edwardkim/rhwp` git dependency와 `RustBridge/Cargo.lock`, `rhwp-core.lock`을 함께 검증한다. 현재 v0.1.0 목표는 Demo/Preview release이며, 기본 업데이트 경로는 `--channel demo --rev`다.
 
-허용되는 배포 기준은 두 가지다.
-
-| 채널 | RustBridge dependency | lock 기준 |
-|------|------|------|
-| Demo/Preview | `git` + `rev` | `rhwp_ref_kind = "commit"`, resolved commit, artifact hash/size |
-| Stable | `git` + `tag` | `rhwp_ref_kind = "release-tag"`, release tag, resolved commit, artifact hash/size |
-
-Demo/Preview는 필요한 core API가 포함된 commit을 고정할 때만 사용한다. Stable은 release tag compatibility gate를 통과해야 한다. 세부 기준은 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
-
-현재 v0.1.0 목표는 Demo/Preview release다. 기본 업데이트 경로는 `--channel demo --rev`이며, Stable은 upstream release tag가 필요한 bridge API를 포함할 때 별도 승격한다.
+채널별 dependency/lock 기준과 compatibility gate 상세는 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
 
 core 업데이트는 다음 형태로 분리한다.
 

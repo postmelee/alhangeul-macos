@@ -19,12 +19,10 @@
 
 ## core 기준
 
-- Stable 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
-- Demo/Preview 배포는 필요한 bridge API가 포함된 resolved commit을 `rev`로 고정하는 commit-pinned git dependency를 허용한다.
-- 현재 `rhwp-core.lock`은 Demo/Preview commit pin 상태를 기록한다.
-- 최신 확인 release `v0.7.3`에는 `RustBridge`가 사용하는 `build_page_render_tree`, `get_bin_data` API가 없어 Stable 전환은 blocked 상태다.
-- `main`, `devel` 같은 branch는 필요한 API가 포함된 과도기 commit을 식별하는 출처일 뿐, 앱의 안정 기준으로 취급하지 않는다.
-- release tag compatibility와 Demo/Preview commit 기준은 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
+- Stable 안정 기준은 release tag + resolved commit. Demo/Preview는 필요한 API가 포함된 resolved commit을 `rev`로 고정.
+- 현재 `rhwp-core.lock`은 Demo/Preview commit pin 상태이며, 최신 release `v0.7.3`에는 `build_page_render_tree`, `get_bin_data`가 없어 Stable 전환은 blocked다.
+- `main`, `devel` 같은 branch는 필요한 API가 포함된 과도기 commit을 찾는 참고 출처일 뿐, 안정 기준으로 사용하지 않는다.
+- 채널별 dependency/lock 필드와 compatibility gate 상세는 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
 
 ## 운영 원칙
 

@@ -105,26 +105,11 @@ credential 없이 DMG layout과 checksum 생성만 확인할 때:
 
 Finder 통합 smoke test:
 
-```bash
-./scripts/package-release.sh 0.1.0
+전체 명령 시퀀스(`lsregister` 갱신, `ditto` 설치, `pluginkit` 등록 확인, `qlmanage` 캐시/렌더 검증)와 반복 시행착오 방지 규칙은 [`build_run_guide.md`](build_run_guide.md)의 "Finder 통합 확인" 섹션을 따른다. release pipeline 검증 시 추가로 다음을 적용한다.
 
-LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
-APP="$HOME/Applications/AlhangeulMac.app"
-mkdir -p "$HOME/Applications"
-"$LSREGISTER" -u "$APP" >/dev/null 2>&1 || true
-rm -rf "$APP"
-ditto build.noindex/release/AlhangeulMac.app "$APP"
-"$LSREGISTER" -f -R -trusted "$APP"
-pluginkit -a "$APP"
-pluginkit -mAvvv | grep com.postmelee.alhangeulmac
-qlmanage -r
-qlmanage -r cache
-qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
-```
-
-`qlmanage -p`는 GUI preview를 띄우므로 자동화 환경에서는 작업지시자 확인이 필요하다. 자동화 가능한 smoke test는 `qlmanage -t -x`를 우선 사용한다.
-
-Finder 통합 smoke test의 기본 샘플은 앱 저장소 루트의 `samples/`에서 가져온다. 실제 사용자 파일 검증이 필요한 경우에는 `samples/basic/KTX.hwp` 대신 대상 `.hwp`/`.hwpx` 경로를 명시한다.
+- 입력 산출물은 반드시 `./scripts/package-release.sh <version>`이 만든 signed/sealed Release package를 사용한다 (Debug 산출물 금지).
+- 자동화 환경에서는 `qlmanage -p`(GUI preview)를 사용하지 않고 `qlmanage -t -x`(headless thumbnail) 기준으로 판정한다.
+- 기본 샘플은 앱 저장소 루트의 `samples/basic/KTX.hwp`를 사용하고, 사용자 파일 검증이 필요하면 대상 경로를 명시한다.
 
 주의:
 
