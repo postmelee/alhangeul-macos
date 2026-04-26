@@ -4,6 +4,27 @@
 
 이 문서는 개발 중 필요한 빌드/실행/검증 절차를 정리한다. `AGENTS.md`에는 최소 강제 규칙만 유지하고, 상세 명령은 이 문서를 참조한다.
 
+## 먼저 읽을 문서
+
+새로 프로젝트에 들어온 개발자는 다음 순서로 읽는다.
+
+1. `README.md`의 `Project Structure`: 저장소 최상위 구조와 현재 Demo/Preview release 기준
+2. `mydocs/tech/project_architecture.md`: 제품 타깃, 공통 Swift 계층, Rust bridge, generated artifact 경계
+3. `Sources/README.md`: `Sources/` 아래 macOS 제품 타깃과 공통 Swift 계층의 역할
+4. `RustBridge/README.md`: Rust FFI crate, generated `Rhwp.xcframework`, lock 파일 관계
+5. 이 문서의 build/run 명령
+
+## 기본 실행 순서
+
+새 checkout 또는 새 worktree에서 기본 순서는 다음과 같다.
+
+1. 개발 도구와 Rust target을 준비한다.
+2. `./scripts/build-rust-macos.sh`로 `Frameworks/Rhwp.xcframework`를 생성한다.
+3. `xcodegen generate`로 `AlhangeulMac.xcodeproj`를 생성한다.
+4. `xcodebuild`로 `HostApp`을 build한다.
+5. `./scripts/check-no-appkit.sh`와 render smoke test로 문서 렌더 경계를 확인한다.
+6. Finder/Quick Look/Thumbnail 통합은 signed/sealed된 Release package 산출물 기준으로 별도 확인한다.
+
 ## 초기 설정
 
 현재 core dependency는 `RustBridge/Cargo.toml`의 `edwardkim/rhwp` git dependency로 고정한다. `RustBridge/Cargo.lock`은 Cargo가 해석한 실제 source commit을, `rhwp-core.lock`은 배포 provenance와 산출물 hash/size를 기록한다.
@@ -26,6 +47,8 @@ brew install xcodegen
 | Stable | `git` + `tag` | `rhwp_ref_kind = "release-tag"`, release tag, resolved commit, artifact hash/size |
 
 Demo/Preview는 필요한 core API가 포함된 commit을 고정할 때만 사용한다. Stable은 release tag compatibility gate를 통과해야 한다. 세부 기준은 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
+
+현재 v0.1.0 목표는 Demo/Preview release다. 기본 업데이트 경로는 `--channel demo --rev`이며, Stable은 upstream release tag가 필요한 bridge API를 포함할 때 별도 승격한다.
 
 core 업데이트는 다음 형태로 분리한다.
 
