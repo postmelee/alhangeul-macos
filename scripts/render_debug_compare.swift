@@ -22,11 +22,41 @@ struct NativeRenderResult {
     let nonWhitePixels: Int
 }
 
+struct ImageBitmap {
+    let width: Int
+    let height: Int
+    let bytesPerRow: Int
+    var pixels: [UInt8]
+}
+
+struct DiffStats {
+    let compareWidth: Int
+    let compareHeight: Int
+    let nativeWidth: Int
+    let nativeHeight: Int
+    let coreWidth: Int
+    let coreHeight: Int
+    let differentPixels: Int
+    let maxChannelDelta: Int
+
+    var differentPixelRatio: Double {
+        let total = compareWidth * compareHeight
+        guard total > 0 else { return 0 }
+        return Double(differentPixels) / Double(total)
+    }
+}
+
 @main
 struct RenderDebugCompare {
     @MainActor
     static func main() throws {
         var args = Array(CommandLine.arguments.dropFirst())
+
+        if args.first == "--diff-png" {
+            try runDiffMode(args: Array(args.dropFirst()))
+            return
+        }
+
         guard args.count >= 2 else {
             throw RenderDebugError(description: "usage: render_debug_compare <output-dir> [--page N] <hwp-or-hwpx> [...]")
         }
@@ -233,8 +263,119 @@ struct RenderDebugCompare {
         HangulScalars: \(stats.hangulScalarCount)
         MissingHangulGlyphs: \(stats.missingGlyphCount)
 
-        Diff: not generated in Stage 2
+        CoreRasterPNG: not generated
+        Diff: not generated
         """
+    }
+
+    private static func runDiffMode(args: [String]) throws {
+        guard args.count == 4 else {
+            throw RenderDebugError(description: "usage: render_debug_compare --diff-png <native-png> <core-png> <diff-png> <summary-txt>")
+        }
+
+        let nativeURL = absoluteURL(args[0])
+        let coreURL = absoluteURL(args[1])
+        let diffURL = absoluteURL(args[2])
+        let summaryURL = absoluteURL(args[3])
+
+        let stats = try writeDiffPNG(nativeURL: nativeURL, coreURL: coreURL, diffURL: diffURL)
+        try updateSummaryForDiff(
+            summaryURL: summaryURL,
+            coreURL: coreURL,
+            diffURL: diffURL,
+            stats: stats
+        )
+
+        print("DIFF native=\(nativeURL.path) core=\(coreURL.path) diff=\(diffURL.path) differentPixels=\(stats.differentPixels) ratio=\(stats.differentPixelRatio)")
+    }
+
+    private static func writeDiffPNG(nativeURL: URL, coreURL: URL, diffURL: URL) throws -> DiffStats {
+        let native = try loadRGBA(from: nativeURL)
+        let core = try loadRGBA(from: coreURL)
+        let compareWidth = min(native.width, core.width)
+        let compareHeight = min(native.height, core.height)
+        guard compareWidth > 0, compareHeight > 0 else {
+            throw RenderDebugError(description: "invalid comparison size \(compareWidth)x\(compareHeight)")
+        }
+
+        let bytesPerPixel = 4
+        let diffBytesPerRow = compareWidth * bytesPerPixel
+        var diffPixels = [UInt8](repeating: 255, count: compareHeight * diffBytesPerRow)
+        var differentPixels = 0
+        var maxChannelDelta = 0
+
+        for y in 0..<compareHeight {
+            for x in 0..<compareWidth {
+                let nativeIndex = y * native.bytesPerRow + x * bytesPerPixel
+                let coreIndex = y * core.bytesPerRow + x * bytesPerPixel
+                let diffIndex = y * diffBytesPerRow + x * bytesPerPixel
+
+                let dr = abs(Int(native.pixels[nativeIndex]) - Int(core.pixels[coreIndex]))
+                let dg = abs(Int(native.pixels[nativeIndex + 1]) - Int(core.pixels[coreIndex + 1]))
+                let db = abs(Int(native.pixels[nativeIndex + 2]) - Int(core.pixels[coreIndex + 2]))
+                let da = abs(Int(native.pixels[nativeIndex + 3]) - Int(core.pixels[coreIndex + 3]))
+                let maxDelta = max(max(dr, dg), max(db, da))
+                maxChannelDelta = max(maxChannelDelta, maxDelta)
+
+                if maxDelta > 0 {
+                    differentPixels += 1
+                    diffPixels[diffIndex] = 255
+                    diffPixels[diffIndex + 1] = UInt8(max(0, 255 - maxDelta))
+                    diffPixels[diffIndex + 2] = UInt8(max(0, 255 - maxDelta))
+                    diffPixels[diffIndex + 3] = 255
+                }
+            }
+        }
+
+        try writePNG(
+            pixels: &diffPixels,
+            width: compareWidth,
+            height: compareHeight,
+            bytesPerRow: diffBytesPerRow,
+            to: diffURL
+        )
+
+        return DiffStats(
+            compareWidth: compareWidth,
+            compareHeight: compareHeight,
+            nativeWidth: native.width,
+            nativeHeight: native.height,
+            coreWidth: core.width,
+            coreHeight: core.height,
+            differentPixels: differentPixels,
+            maxChannelDelta: maxChannelDelta
+        )
+    }
+
+    private static func updateSummaryForDiff(
+        summaryURL: URL,
+        coreURL: URL,
+        diffURL: URL,
+        stats: DiffStats
+    ) throws {
+        let original = (try? String(contentsOf: summaryURL, encoding: .utf8)) ?? ""
+        let keptLines = original
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .prefix { line in
+                !line.hasPrefix("CoreRasterPNG:") &&
+                !line.hasPrefix("DiffPNG:") &&
+                !line.hasPrefix("Diff:")
+            }
+        let prefix = keptLines.joined(separator: "\n")
+        let ratio = String(format: "%.6f", stats.differentPixelRatio)
+        let updated = """
+        \(prefix)
+        CoreRasterPNG: \(coreURL.path)
+        DiffPNG: \(diffURL.path)
+        Diff: generated
+        DiffCompareSize: \(stats.compareWidth)x\(stats.compareHeight)
+        DiffNativeSize: \(stats.nativeWidth)x\(stats.nativeHeight)
+        DiffCoreSize: \(stats.coreWidth)x\(stats.coreHeight)
+        DiffDifferentPixels: \(stats.differentPixels)
+        DiffDifferentPixelRatio: \(ratio)
+        DiffMaxChannelDelta: \(stats.maxChannelDelta)
+        """
+        try updated.write(to: summaryURL, atomically: true, encoding: .utf8)
     }
 
     private static func collectTextStats(_ node: RenderNode, into stats: inout RenderDebugTextStats) {
@@ -312,6 +453,58 @@ struct RenderDebugCompare {
         guard CGImageDestinationFinalize(destination) else {
             throw RenderDebugError(description: "failed to write PNG: \(url.path)")
         }
+    }
+
+    private static func writePNG(
+        pixels: inout [UInt8],
+        width: Int,
+        height: Int,
+        bytesPerRow: Int,
+        to url: URL
+    ) throws {
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGImageAlphaInfo.premultipliedLast.rawValue
+        guard let ctx = CGContext(
+            data: &pixels,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: colorSpace,
+            bitmapInfo: bitmapInfo
+        ), let image = ctx.makeImage() else {
+            throw RenderDebugError(description: "failed to create diff image")
+        }
+        try writePNG(image: image, to: url)
+    }
+
+    private static func loadRGBA(from url: URL) throws -> ImageBitmap {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+            throw RenderDebugError(description: "failed to load image: \(url.path)")
+        }
+
+        let width = image.width
+        let height = image.height
+        let bytesPerPixel = 4
+        let bytesPerRow = width * bytesPerPixel
+        var pixels = [UInt8](repeating: 255, count: height * bytesPerRow)
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGImageAlphaInfo.premultipliedLast.rawValue
+        guard let ctx = CGContext(
+            data: &pixels,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: colorSpace,
+            bitmapInfo: bitmapInfo
+        ) else {
+            throw RenderDebugError(description: "failed to create image decode context: \(url.path)")
+        }
+
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        return ImageBitmap(width: width, height: height, bytesPerRow: bytesPerRow, pixels: pixels)
     }
 
     private static func absoluteURL(_ path: String, isDirectory: Bool = false) -> URL {
