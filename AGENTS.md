@@ -47,19 +47,19 @@
 - `project.yml`이 Xcode project 원본. `AlhangeulMac.xcodeproj` 직접 수정 금지 — 상세: [`build_run_guide.md`](mydocs/manual/build_run_guide.md)
 - 변경 유형별 최소 검증 필수 — 상세: 동일 매뉴얼
 - `build.noindex/` 아래에 `.app`/`.appex` 산출물 배치 (Spotlight 검색 혼선 방지) — 상세: 동일 매뉴얼
-- core 안정 기준은 release tag + resolved commit. 현재 submodule lock은 release tag 전환 대기 상태이며, branch commit은 안정 기준으로 취급하지 않음 — 상세: [`core_submodule_operation_guide.md`](mydocs/manual/core_submodule_operation_guide.md)
+- core 안정 기준은 Stable의 경우 release tag + resolved commit, Demo/Preview의 경우 resolved commit `rev` pin. branch/floating ref는 안정 기준으로 취급하지 않음 — 상세: [`core_submodule_operation_guide.md`](mydocs/manual/core_submodule_operation_guide.md)
 - 릴리스/배포/서명/공증/Homebrew Cask는 작업지시자 명시 지시 시에만 — 상세: [`release_distribution_guide.md`](mydocs/manual/release_distribution_guide.md)
 
 ## 필수 참조 문서
 
 - [`README.md`](README.md) — 프로젝트 개요, 초기 설정, 빌드
-- [`rhwp-core.lock`](rhwp-core.lock) — 현재 고정된 `rhwp` core 저장소·브랜치·commit·산출물
+- [`rhwp-core.lock`](rhwp-core.lock) — 현재 고정된 `rhwp` core 저장소·ref kind·commit·산출물
 - [`mydocs/tech/project_architecture.md`](mydocs/tech/project_architecture.md) — 코드베이스 소유 경계, bridge 구조, FFI ABI 표면
 - [`mydocs/manual/document_structure_guide.md`](mydocs/manual/document_structure_guide.md) — `mydocs/` 폴더 역할, 문서 파일명, 외부 PR 폴더 정책, Skills 위치 정책
 - [`mydocs/manual/task_workflow_guide.md`](mydocs/manual/task_workflow_guide.md) — 타스크 진행 15단계, 커밋 메시지 규칙, 작업 시간 규칙
 - [`mydocs/manual/git_workflow_guide.md`](mydocs/manual/git_workflow_guide.md) — 브랜치 정책, Git 다이어그램, 메인테이너/컨트리뷰터 워크플로우
 - [`mydocs/manual/build_run_guide.md`](mydocs/manual/build_run_guide.md) — 빌드/실행/검증
-- [`mydocs/manual/core_submodule_operation_guide.md`](mydocs/manual/core_submodule_operation_guide.md) — core submodule 운영
+- [`mydocs/manual/core_submodule_operation_guide.md`](mydocs/manual/core_submodule_operation_guide.md) — core git dependency 운영
 - [`mydocs/manual/swift_macos_code_rules_guide.md`](mydocs/manual/swift_macos_code_rules_guide.md) — Swift/macOS 코드 규칙
 - [`mydocs/manual/release_distribution_guide.md`](mydocs/manual/release_distribution_guide.md) — 릴리스/배포
 - [`mydocs/manual/pr_process_guide.md`](mydocs/manual/pr_process_guide.md) — 외부 기여 PR 검토

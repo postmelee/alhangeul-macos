@@ -1,4 +1,0 @@
-[submodule "Vendor/rhwp"]
-	path = Vendor/rhwp
-	url = https://github.com/edwardkim/rhwp.git
-	branch = devel

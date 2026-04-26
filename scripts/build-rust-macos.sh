@@ -5,8 +5,11 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RHWP_ROOT="$ROOT/Vendor/rhwp"
 BRIDGE_ROOT="$ROOT/RustBridge"
+CARGO_TOML="$BRIDGE_ROOT/Cargo.toml"
+CARGO_LOCK="$BRIDGE_ROOT/Cargo.lock"
 OUT="$ROOT/Frameworks"
 LOCK_FILE="$ROOT/rhwp-core.lock"
+RHWP_REPO="https://github.com/edwardkim/rhwp.git"
 GENERATED_H="$OUT/generated_rhwp.h"
 MODMAP_DIR="$OUT/modulemap"
 EXPECTED_SYMBOLS="$ROOT/rhwp-ffi-symbols.txt"
@@ -146,43 +149,262 @@ lock_artifact_value() {
   ' "$LOCK_FILE"
 }
 
+normalize_repo() {
+  local repo="$1"
+  repo="${repo%/}"
+  echo "$repo"
+}
+
+cargo_toml_rhwp_line() {
+  awk '
+    /^\[dependencies\]/ {
+      in_dependencies = 1
+      next
+    }
+    /^\[/ {
+      in_dependencies = 0
+    }
+    in_dependencies && $1 == "rhwp" && $2 == "=" {
+      print
+      exit
+    }
+  ' "$CARGO_TOML"
+}
+
+rhwp_dependency_mode() {
+  local line
+  line="$(cargo_toml_rhwp_line)"
+  if [[ "$line" == *"path"* ]]; then
+    echo "path"
+  elif [[ "$line" == *"git"* ]]; then
+    echo "git"
+  else
+    echo "ERROR: unsupported rhwp dependency in $CARGO_TOML" >&2
+    echo "Expected path or git dependency." >&2
+    exit 1
+  fi
+}
+
+cargo_lock_rhwp_source() {
+  awk -F' = ' '
+    /^\[\[package\]\]/ {
+      in_package = 0
+    }
+    $1 == "name" && $2 == "\"rhwp\"" {
+      in_package = 1
+      next
+    }
+    in_package && $1 == "source" {
+      value = $2
+      gsub(/^"/, "", value)
+      gsub(/"$/, "", value)
+      print value
+      exit
+    }
+  ' "$CARGO_LOCK"
+}
+
+require_cargo_lock_rhwp_source() {
+  local source
+  source="$(cargo_lock_rhwp_source)"
+  if [ -z "$source" ]; then
+    echo "ERROR: Cargo.lock mismatch: missing rhwp git source in $CARGO_LOCK" >&2
+    echo "Run: cargo update --manifest-path $CARGO_TOML -p rhwp" >&2
+    exit 1
+  fi
+  echo "$source"
+}
+
+cargo_lock_rhwp_repo() {
+  local source
+  local repo
+  source="$(require_cargo_lock_rhwp_source)"
+  repo="${source#git+}"
+  repo="${repo%%#*}"
+  repo="${repo%%\?*}"
+  normalize_repo "$repo"
+}
+
+cargo_lock_rhwp_commit() {
+  local source
+  local commit
+  source="$(require_cargo_lock_rhwp_source)"
+  commit="${source##*#}"
+  if ! [[ "$commit" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "ERROR: Cargo.lock mismatch: missing resolved rhwp commit in $CARGO_LOCK" >&2
+    echo "Source: $source" >&2
+    exit 1
+  fi
+  echo "$commit"
+}
+
+cargo_lock_rhwp_query() {
+  local source
+  local query_source
+  source="$(require_cargo_lock_rhwp_source)"
+  query_source="${source%%#*}"
+  if [[ "$query_source" != *"?"* ]]; then
+    echo ""
+    return
+  fi
+  echo "${query_source#*\?}"
+}
+
+cargo_lock_rhwp_ref_kind() {
+  local query
+  query="$(cargo_lock_rhwp_query)"
+  if [[ "$query" == *"tag="* ]]; then
+    echo "release-tag"
+  elif [[ "$query" == *"rev="* ]]; then
+    echo "commit"
+  else
+    echo "unknown"
+  fi
+}
+
+cargo_lock_rhwp_release_tag() {
+  local query
+  local tag
+  query="$(cargo_lock_rhwp_query)"
+  if [[ "$query" != *"tag="* ]]; then
+    echo ""
+    return
+  fi
+  tag="${query#*tag=}"
+  tag="${tag%%&*}"
+  echo "$tag"
+}
+
+path_dependency_rhwp_repo() {
+  local repo
+  repo="$(git config -f "$ROOT/.gitmodules" --get submodule.Vendor/rhwp.url || true)"
+  if [ -z "$repo" ]; then
+    repo="$RHWP_REPO"
+  fi
+  normalize_repo "$repo"
+}
+
+path_dependency_rhwp_branch() {
+  local branch
+  branch="$(git -C "$RHWP_ROOT" rev-parse --abbrev-ref HEAD)"
+  if [ "$branch" = "HEAD" ]; then
+    branch="$(existing_lock_scalar rhwp_branch)"
+  fi
+  if [ -z "$branch" ]; then
+    branch="devel"
+  fi
+  echo "$branch"
+}
+
+current_rhwp_repo() {
+  case "$(rhwp_dependency_mode)" in
+    path)
+      path_dependency_rhwp_repo
+      ;;
+    git)
+      cargo_lock_rhwp_repo
+      ;;
+  esac
+}
+
 current_rhwp_commit() {
-  git -C "$RHWP_ROOT" rev-parse HEAD
+  case "$(rhwp_dependency_mode)" in
+    path)
+      git -C "$RHWP_ROOT" rev-parse HEAD
+      ;;
+    git)
+      cargo_lock_rhwp_commit
+      ;;
+  esac
+}
+
+current_rhwp_ref_kind() {
+  case "$(rhwp_dependency_mode)" in
+    path)
+      local ref_kind
+      ref_kind="$(existing_lock_scalar rhwp_ref_kind)"
+      if [ -z "$ref_kind" ]; then
+        ref_kind="branch"
+      fi
+      echo "$ref_kind"
+      ;;
+    git)
+      cargo_lock_rhwp_ref_kind
+      ;;
+  esac
+}
+
+current_rhwp_release_tag() {
+  case "$(rhwp_dependency_mode)" in
+    path)
+      existing_lock_scalar rhwp_release_tag
+      ;;
+    git)
+      cargo_lock_rhwp_release_tag
+      ;;
+  esac
+}
+
+ensure_rhwp_source_available() {
+  if [ "$(rhwp_dependency_mode)" = "path" ]; then
+    if [ ! -d "$RHWP_ROOT/.git" ] && [ ! -f "$RHWP_ROOT/.git" ]; then
+      echo "ERROR: rhwp submodule is missing: $RHWP_ROOT" >&2
+      echo "Run: git submodule update --init --recursive" >&2
+      exit 1
+    fi
+  fi
 }
 
 write_lock_file() {
   local built_at
+  local repo
   local commit
   local ref_kind
+  local branch
+  local release_tag
   local release_status
   local latest_checked_release_tag
   local latest_checked_release_commit
   built_at="$(TZ=UTC date '+%Y-%m-%dT%H:%M:%SZ')"
+  repo="$(current_rhwp_repo)"
   commit="$(current_rhwp_commit)"
-  ref_kind="$(existing_lock_scalar rhwp_ref_kind)"
+  ref_kind="$(current_rhwp_ref_kind)"
+  release_tag="$(current_rhwp_release_tag)"
   release_status="$(existing_lock_scalar rhwp_release_transition_status)"
   latest_checked_release_tag="$(existing_lock_scalar rhwp_latest_checked_release_tag)"
   latest_checked_release_commit="$(existing_lock_scalar rhwp_latest_checked_release_commit)"
 
   if [ -z "$ref_kind" ]; then
-    ref_kind="branch"
+    ref_kind="commit"
   fi
-  if [ -z "$release_status" ]; then
+  if [ -z "$release_status" ] && [ "$ref_kind" != "release-tag" ]; then
     release_status="blocked-missing-bridge-apis"
+  fi
+  if [ "$ref_kind" = "branch" ]; then
+    branch="$(path_dependency_rhwp_branch)"
+  else
+    branch=""
   fi
 
   {
     echo 'lock_version = 2'
-    echo 'rhwp_repo = "https://github.com/edwardkim/rhwp.git"'
+    echo "rhwp_repo = \"$repo\""
     echo "rhwp_ref_kind = \"$ref_kind\""
-    echo 'rhwp_branch = "devel"'
-    echo "rhwp_commit = \"$commit\""
-    echo "rhwp_release_transition_status = \"$release_status\""
-    if [ -n "$latest_checked_release_tag" ]; then
-      echo "rhwp_latest_checked_release_tag = \"$latest_checked_release_tag\""
+    if [ "$ref_kind" = "branch" ]; then
+      echo "rhwp_branch = \"$branch\""
     fi
-    if [ -n "$latest_checked_release_commit" ]; then
-      echo "rhwp_latest_checked_release_commit = \"$latest_checked_release_commit\""
+    if [ "$ref_kind" = "release-tag" ] && [ -n "$release_tag" ]; then
+      echo "rhwp_release_tag = \"$release_tag\""
+    fi
+    echo "rhwp_commit = \"$commit\""
+    if [ "$ref_kind" != "release-tag" ]; then
+      echo "rhwp_release_transition_status = \"$release_status\""
+      if [ -n "$latest_checked_release_tag" ]; then
+        echo "rhwp_latest_checked_release_tag = \"$latest_checked_release_tag\""
+      fi
+      if [ -n "$latest_checked_release_commit" ]; then
+        echo "rhwp_latest_checked_release_commit = \"$latest_checked_release_commit\""
+      fi
     fi
     echo "built_at = \"$built_at\""
     echo 'ffi_symbols_file = "rhwp-ffi-symbols.txt"'
@@ -218,15 +440,54 @@ verify_lock_file() {
     exit 1
   fi
 
+  local expected_repo
+  local actual_repo
+  expected_repo="$(lock_scalar rhwp_repo)"
+  actual_repo="$(current_rhwp_repo)"
+  if [ "$(normalize_repo "$expected_repo")" != "$(normalize_repo "$actual_repo")" ]; then
+    echo "ERROR: Cargo.lock mismatch: rhwp repo differs from $LOCK_FILE" >&2
+    echo "Expected rhwp_repo: $expected_repo" >&2
+    echo "Actual rhwp_repo:   $actual_repo" >&2
+    exit 1
+  fi
+
+  local expected_ref_kind
+  local actual_ref_kind
+  expected_ref_kind="$(lock_scalar rhwp_ref_kind)"
+  actual_ref_kind="$(current_rhwp_ref_kind)"
+  if [ "$expected_ref_kind" != "$actual_ref_kind" ]; then
+    echo "ERROR: Cargo.lock mismatch: rhwp ref kind differs from $LOCK_FILE" >&2
+    echo "Expected rhwp_ref_kind: $expected_ref_kind" >&2
+    echo "Actual rhwp_ref_kind:   $actual_ref_kind" >&2
+    exit 1
+  fi
+
+  if [ "$expected_ref_kind" = "release-tag" ]; then
+    local expected_release_tag
+    local actual_release_tag
+    expected_release_tag="$(lock_scalar rhwp_release_tag)"
+    actual_release_tag="$(current_rhwp_release_tag)"
+    if [ "$expected_release_tag" != "$actual_release_tag" ]; then
+      echo "ERROR: Cargo.lock mismatch: rhwp release tag differs from $LOCK_FILE" >&2
+      echo "Expected rhwp_release_tag: $expected_release_tag" >&2
+      echo "Actual rhwp_release_tag:   $actual_release_tag" >&2
+      exit 1
+    fi
+  fi
+
   local expected_commit
   local actual_commit
   expected_commit="$(lock_scalar rhwp_commit)"
   actual_commit="$(current_rhwp_commit)"
   if [ "$expected_commit" != "$actual_commit" ]; then
-    echo "ERROR: rhwp core commit differs from $LOCK_FILE" >&2
+    echo "ERROR: Cargo.lock mismatch: rhwp core commit differs from $LOCK_FILE" >&2
     echo "Expected rhwp_commit: $expected_commit" >&2
     echo "Actual rhwp_commit:   $actual_commit" >&2
-    echo "Run: git submodule update --init --recursive" >&2
+    if [ "$(rhwp_dependency_mode)" = "path" ]; then
+      echo "Run: git submodule update --init --recursive" >&2
+    else
+      echo "Run: cargo update --manifest-path $CARGO_TOML -p rhwp" >&2
+    fi
     exit 1
   fi
 
@@ -253,7 +514,7 @@ verify_lock_file() {
     fi
 
     if [ "$expected_sha256" != "$actual_sha256" ] || [ "$expected_size" != "$actual_size" ]; then
-      echo "ERROR: artifact differs from $LOCK_FILE" >&2
+      echo "ERROR: artifact hash mismatch: artifact differs from $LOCK_FILE" >&2
       echo "Artifact: $artifact_path" >&2
       echo "Expected sha256: $expected_sha256" >&2
       echo "Actual sha256:   $actual_sha256" >&2
@@ -281,15 +542,11 @@ require_rust_target x86_64-apple-darwin
 
 export MACOSX_DEPLOYMENT_TARGET=12.0
 
-if [ ! -d "$RHWP_ROOT/.git" ] && [ ! -f "$RHWP_ROOT/.git" ]; then
-  echo "ERROR: rhwp submodule is missing: $RHWP_ROOT" >&2
-  echo "Run: git submodule update --init --recursive" >&2
+if [ ! -f "$CARGO_TOML" ]; then
+  echo "ERROR: missing Rust bridge crate: $CARGO_TOML" >&2
   exit 1
 fi
-if [ ! -f "$BRIDGE_ROOT/Cargo.toml" ]; then
-  echo "ERROR: missing Rust bridge crate: $BRIDGE_ROOT" >&2
-  exit 1
-fi
+ensure_rhwp_source_available
 
 mkdir -p "$OUT"
 

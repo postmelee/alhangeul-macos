@@ -13,26 +13,25 @@
 - `ThumbnailExtension`: Finder thumbnail extension
 - `Shared`: HostApp과 extension이 공유하는 macOS helper
 - `RhwpCoreBridge`: Swift FFI wrapper, render tree 디코딩, CoreGraphics/CoreText renderer
-- `RustBridge`: `Vendor/rhwp`의 `rhwp` core를 C ABI로 노출하는 Rust staticlib crate
-- `Vendor/rhwp`: `edwardkim/rhwp` core submodule. git dependency 전환 전까지 필요한 bridge API가 포함된 commit을 lock으로 고정한다.
+- `RustBridge`: `edwardkim/rhwp` git dependency를 C ABI로 노출하는 Rust staticlib crate
+- `Cargo.lock`/`rhwp-core.lock`: core git dependency source, resolved commit, Rust bridge 산출물 provenance를 고정한다.
 
 ## 소유 경계
 
 ### 1. core와 앱 저장소의 경계
 
-- `Vendor/rhwp`는 Rust HWP/HWPX parser/renderer core다.
+- `edwardkim/rhwp`는 Rust HWP/HWPX parser/renderer core다.
 - core API 변경은 먼저 `edwardkim/rhwp` 저장소에 반영한다.
-- 앱 저장소는 `Vendor/rhwp`의 submodule pointer, `rhwp-core.lock`, Swift/Rust bridge 적응만 소유한다.
-- 앱 저장소에 `Vendor/rhwp` 임시 수정을 남기지 않는다.
+- 앱 저장소는 `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`, Swift/Rust bridge 적응만 소유한다.
+- 앱 저장소 안에서 core를 직접 수정하지 않는다. core 실험은 별도 clone 또는 Cargo patch/local override로 수행하고 커밋하지 않는다.
 - Stable 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
 - Demo/Preview 배포는 필요한 bridge API가 포함된 resolved commit을 `rev`로 고정하는 commit-pinned git dependency를 허용한다.
-- 현재 lock은 release tag 전환 대기 상태다. 최신 확인 release `v0.7.3`에는 `RustBridge`가 사용하는 `build_page_render_tree`, `get_bin_data` API가 없어 즉시 전환하지 않는다.
-- `Vendor/rhwp` 제거와 git dependency 전환은 후속 dependency 전환 작업에서 수행한다. release tag가 필요한 API를 포함하기 전에는 Demo/Preview용 commit pin으로 먼저 전환할 수 있다.
+- 현재 lock은 Demo/Preview commit pin 상태다. 최신 확인 release `v0.7.3`에는 `RustBridge`가 사용하는 `build_page_render_tree`, `get_bin_data` API가 없어 Stable 전환은 blocked 상태다.
 
 ### 2. RustBridge 경계
 
 - `RustBridge`는 이 저장소가 소유하는 macOS C ABI 계층이다.
-- Swift는 `Vendor/rhwp`를 직접 호출하지 않고 `Rhwp.xcframework`의 `Rhwp` C module만 import한다.
+- Swift는 Rust core를 직접 호출하지 않고 `Rhwp.xcframework`의 `Rhwp` C module만 import한다.
 - `Frameworks/Rhwp.xcframework`는 생성 산출물이며 원본은 `RustBridge/`와 `scripts/build-rust-macos.sh`다.
 - 기대 ABI 표면은 `rhwp-ffi-symbols.txt`로 고정한다.
 
