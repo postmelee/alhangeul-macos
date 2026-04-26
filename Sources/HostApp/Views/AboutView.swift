@@ -2,6 +2,8 @@ import AppKit
 import SwiftUI
 
 struct AboutView: View {
+    @StateObject private var extensionStatus = ExtensionStatusModel()
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             AboutHeaderView()
@@ -18,16 +20,33 @@ struct AboutView: View {
                 .padding(.vertical, 18)
 
             VStack(alignment: .leading, spacing: 12) {
-                Text("확장")
-                    .font(.headline)
+                HStack {
+                    Text("확장")
+                        .font(.headline)
+
+                    Spacer()
+
+                    Button {
+                        extensionStatus.refresh()
+                    } label: {
+                        Label("상태 새로고침", systemImage: "arrow.clockwise")
+                    }
+                    .controlSize(.small)
+                }
 
                 ForEach(ExtensionStatus.allCases, id: \.self) { status in
-                    AboutExtensionRow(status: status)
+                    AboutExtensionRow(
+                        status: status,
+                        snapshot: extensionStatus.snapshot(for: status)
+                    )
                 }
             }
         }
         .padding(24)
-        .frame(width: 480)
+        .frame(width: 520)
+        .task {
+            extensionStatus.refresh()
+        }
     }
 }
 
@@ -71,6 +90,7 @@ private struct AboutInfoRow: View {
 
 private struct AboutExtensionRow: View {
     let status: ExtensionStatus
+    let snapshot: ExtensionStatusSnapshot
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -85,10 +105,49 @@ private struct AboutExtensionRow: View {
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    AboutStatusLine(
+                        title: "앱 번들",
+                        label: snapshot.bundle.label,
+                        symbolName: snapshot.bundle.symbolName,
+                        color: snapshot.bundle.color
+                    )
+                    AboutStatusLine(
+                        title: "시스템 등록",
+                        label: snapshot.registration.label,
+                        symbolName: snapshot.registration.symbolName,
+                        color: snapshot.registration.color
+                    )
+                }
+                .padding(.top, 4)
             }
 
             Spacer(minLength: 0)
         }
+    }
+}
+
+private struct AboutStatusLine: View {
+    let title: String
+    let label: String
+    let symbolName: String
+    let color: Color
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(title)
+                .foregroundStyle(.secondary)
+                .frame(width: 72, alignment: .leading)
+
+            Image(systemName: symbolName)
+                .foregroundStyle(color)
+                .frame(width: 14)
+
+            Text(label)
+                .foregroundStyle(.secondary)
+        }
+        .font(.caption)
     }
 }
 
