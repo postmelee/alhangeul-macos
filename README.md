@@ -275,6 +275,14 @@ qlmanage -p path/to/sample.hwp
 
 기본 render smoke fixture는 앱 저장소 루트의 `samples/`가 소유합니다. core 저장소 내부 샘플 경로는 기본 검증 문서와 스크립트에서 직접 참조하지 않습니다.
 
+특정 파일에서 rhwp core SVG 결과와 native renderer PNG 결과를 비교해야 할 때:
+
+```bash
+./scripts/render-debug-compare.sh output/render-debug path/to/sample.hwp
+```
+
+상세 절차와 산출물 해석은 [`render_core_native_compare.md`](mydocs/troubleshootings/render_core_native_compare.md)를 기준으로 합니다.
+
 ### Shared Bridge Check
 
 ```bash
@@ -413,7 +421,8 @@ local/task{N}  ──커밋──커밋──┐
 1. `validate-stage3-render.sh` → 기본 샘플 렌더링 확인
 2. `pluginkit -m` → Quick Look/Thumbnail extension 등록 확인
 3. `qlmanage -p` → Finder preview 경로 확인
-4. 필요 시 별도 `edwardkim/rhwp` clone 또는 Cargo checkout에서 core rendering data 확인
+4. `render-debug-compare.sh` → 특정 파일의 render tree JSON, core SVG, native PNG, pixel diff 산출
+5. 필요 시 별도 `edwardkim/rhwp` clone 또는 Cargo checkout에서 core rendering data 확인
 
 ### 문서 생성 규칙
 

@@ -155,6 +155,18 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 
 기본 render smoke fixture는 앱 저장소 루트의 `samples/`가 소유한다. core 저장소 내부 샘플 경로는 기본 검증 경로로 사용하지 않는다.
 
+## core/native 렌더 비교 디버깅
+
+특정 파일에서 앱 native renderer와 rhwp core SVG 결과가 다른지 확인할 때:
+
+```bash
+./scripts/render-debug-compare.sh output/render-debug path/to/sample.hwp
+```
+
+이 스크립트는 render tree JSON, rhwp core SVG, native renderer PNG, summary를 생성한다. `qlmanage`가 동작하는 환경에서는 core SVG raster PNG와 pixel diff PNG도 선택적으로 생성한다.
+
+상세 절차와 판단 기준은 [`render_core_native_compare.md`](../troubleshootings/render_core_native_compare.md)를 따른다.
+
 ## Shared Swift bridge 검사
 
 ```bash
