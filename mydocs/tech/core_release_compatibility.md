@@ -10,7 +10,7 @@
 
 앱 저장소의 Stable core 안정 기준은 다음 둘을 함께 고정하는 것이다.
 
-- `release tag`: GitHub release tag 이름. 예: `v0.7.3`
+- `release tag`: GitHub release tag 이름. 예: `v0.7.6`
 - `resolved commit`: tag가 가리키는 실제 commit SHA. annotated tag인 경우 tag object가 아니라 `^{commit}`으로 해석한 commit이다.
 
 Stable release tag 전환 이후 `rhwp-core.lock`은 최소한 다음 의미를 가져야 한다.
@@ -66,27 +66,27 @@ rhwp = { git = "https://github.com/edwardkim/rhwp.git", rev = "1e9d78a1d40c71779
 
 ## 현재 release 상태
 
-2026-04-26 Stage 1 확인 기준 최신 release는 다음이다.
+2026-04-27 확인 기준 최신 release는 다음이다.
 
 ```text
-release tag: v0.7.3
+release tag: v0.7.6
 target branch: main
-publishedAt: 2026-04-19T12:38:52Z
-resolved commit: c2e8a3461de800a02f76127ff4797bade1d4e532
+publishedAt: 2026-04-26T09:35:00Z
+resolved commit: 92c5b6b79d22f6c784b3b317551c66466b3b63a5
 ```
 
-`v0.7.3`에는 다음 API가 있다.
+`v0.7.6`에는 다음 API가 있다.
 
 - `DocumentCore::render_page_svg_native`
 - `DocumentCore::get_page_info_native`
 - `rhwp::parser::extract_thumbnail_only`
 
-`v0.7.3`에는 다음 API가 없다.
+`v0.7.6`에는 다음 API가 없다.
 
 - `DocumentCore::build_page_render_tree`
 - `DocumentCore::get_bin_data`
 
-따라서 현재 `v0.7.3`은 native render tree 경로를 유지하는 앱 기준을 충족하지 못한다. 실패 유형은 `missing core API`다.
+따라서 현재 `v0.7.6`은 native render tree 경로를 유지하는 앱 기준을 충족하지 못한다. 실패 유형은 `missing core API`다.
 
 현재 lock commit `1e9d78a1d40c71779d81c6ec6870cd301d912626`에는 `DocumentCore::build_page_render_tree`와 `DocumentCore::get_bin_data`가 포함되어 있으므로 Demo/Preview용 commit-pinned git dependency 후보가 될 수 있다. 이 commit은 release tag 안정 기준이 아니므로 Stable 배포 기준으로 승격하지 않는다.
 

@@ -20,7 +20,7 @@
 ## core 기준
 
 - Stable 안정 기준은 release tag + resolved commit. Demo/Preview는 필요한 API가 포함된 resolved commit을 `rev`로 고정.
-- 현재 `rhwp-core.lock`은 Demo/Preview commit pin 상태이며, 최신 release `v0.7.3`에는 `build_page_render_tree`, `get_bin_data`가 없어 Stable 전환은 blocked다.
+- 현재 `rhwp-core.lock`은 Demo/Preview commit pin 상태이며, 2026-04-27 확인 기준 최신 release `v0.7.6`에도 `build_page_render_tree`, `get_bin_data`가 없어 Stable 전환은 blocked다.
 - `main`, `devel` 같은 branch는 필요한 API가 포함된 과도기 commit을 찾는 참고 출처일 뿐, 안정 기준으로 사용하지 않는다.
 - 채널별 dependency/lock 필드와 compatibility gate 상세는 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
 
