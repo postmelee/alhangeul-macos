@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>ko</string>
 	<key>CFBundleDisplayName</key>
-	<string>알한글</string>
+	<string>AlhangeulMac</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>AlhangeulMac</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -22,6 +22,8 @@
 	<string>1</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>12.0</string>
+	<key>LSHasLocalizedDisplayName</key>
+	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>CFBundleDocumentTypes</key>
@@ -35,8 +37,8 @@
 			<string>Alternate</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.postmelee.rhwpmac.hwp</string>
-				<string>com.postmelee.rhwpmac.hwpx</string>
+				<string>com.postmelee.alhangeulmac.hwp</string>
+				<string>com.postmelee.alhangeulmac.hwpx</string>
 				<string>com.hancom.hwp</string>
 				<string>com.hancom.hwpx</string>
 				<string>com.haansoft.hancomofficeviewer.mac.hwp</string>
@@ -48,7 +50,7 @@
 	<array>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.postmelee.rhwpmac.hwp</string>
+			<string>com.postmelee.alhangeulmac.hwp</string>
 			<key>UTTypeDescription</key>
 			<string>HWP Document</string>
 			<key>UTTypeConformsTo</key>
@@ -71,7 +73,7 @@
 		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.postmelee.rhwpmac.hwpx</string>
+			<string>com.postmelee.alhangeulmac.hwpx</string>
 			<key>UTTypeDescription</key>
 			<string>HWPX Document</string>
 			<key>UTTypeConformsTo</key>

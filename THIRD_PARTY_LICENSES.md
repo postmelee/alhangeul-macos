@@ -2,7 +2,7 @@
 
 ## rhwp
 
-This project uses `rhwp` as a git submodule.
+This project uses `rhwp` as a Cargo git dependency from `RustBridge/Cargo.toml`.
 
 - Repository: https://github.com/edwardkim/rhwp
 - License: MIT

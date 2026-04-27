@@ -1,6 +1,8 @@
 .DS_Store
 /Frameworks/
 /build/
+/build.noindex/
+/RustBridge/target/
 /output/
 /DerivedData/
 *.xcworkspace/xcuserdata/

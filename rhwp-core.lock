@@ -1,8 +1,19 @@
+lock_version = 2
 rhwp_repo = "https://github.com/edwardkim/rhwp.git"
-rhwp_branch = "devel"
-rhwp_commit = "a9b11e20607cca251df73b917d22ba2ef497eb6c"
+rhwp_ref_kind = "commit"
+rhwp_commit = "1e9d78a1d40c71779d81c6ec6870cd301d912626"
+rhwp_release_transition_status = "demo-commit-pin"
+rhwp_latest_checked_release_tag = "v0.7.6"
+rhwp_latest_checked_release_commit = "92c5b6b79d22f6c784b3b317551c66466b3b63a5"
+built_at = "2026-04-25T23:54:56Z"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
-generated_artifacts = [
-  "Frameworks/universal/librhwp.a",
-  "Frameworks/Rhwp.xcframework",
-]
+
+[[artifacts]]
+path = "Frameworks/universal/librhwp.a"
+sha256 = "4548f87fdf93eef196a85d6f553869c78478075df4c6e4496f66e20ebb125ed5"
+size = 102635296
+
+[[artifacts]]
+path = "Frameworks/generated_rhwp.h"
+sha256 = "69aeca5047bf743286d1b2260f8fc9a091ce4f1d7fd61c80084fab81c3a95ac5"
+size = 1349

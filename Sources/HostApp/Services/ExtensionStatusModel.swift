@@ -17,9 +17,64 @@ enum ExtensionStatus: CaseIterable, Hashable {
     var bundleIdentifier: String {
         switch self {
         case .preview:
-            "com.postmelee.rhwpmac.QLExtension"
+            "com.postmelee.alhangeulmac.QLExtension"
         case .thumbnail:
-            "com.postmelee.rhwpmac.ThumbnailExtension"
+            "com.postmelee.alhangeulmac.ThumbnailExtension"
+        }
+    }
+
+    var appexBundleName: String {
+        switch self {
+        case .preview:
+            "AlhangeulMacPreview.appex"
+        case .thumbnail:
+            "AlhangeulMacThumbnail.appex"
+        }
+    }
+}
+
+struct ExtensionStatusSnapshot: Equatable {
+    var bundle: ExtensionBundleState
+    var registration: ExtensionRegistrationState
+
+    static let checking = ExtensionStatusSnapshot(bundle: .checking, registration: .checking)
+}
+
+enum ExtensionBundleState: Equatable {
+    case checking
+    case bundled
+    case missing
+
+    var label: String {
+        switch self {
+        case .checking:
+            "확인 중"
+        case .bundled:
+            "앱에 포함됨"
+        case .missing:
+            "앱에 포함되지 않음"
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .checking:
+            "clock"
+        case .bundled:
+            "checkmark.circle.fill"
+        case .missing:
+            "exclamationmark.triangle.fill"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .checking:
+            .secondary
+        case .bundled:
+            .green
+        case .missing:
+            .orange
         }
     }
 }
@@ -27,19 +82,22 @@ enum ExtensionStatus: CaseIterable, Hashable {
 enum ExtensionRegistrationState: Equatable {
     case checking
     case registered
+    case disabled
     case missing
-    case unknown
+    case unavailable
 
     var label: String {
         switch self {
         case .checking:
             "확인 중"
         case .registered:
-            "등록됨"
+            "시스템 등록됨"
+        case .disabled:
+            "시스템 등록 비활성화됨"
         case .missing:
-            "등록되지 않음"
-        case .unknown:
-            "확인할 수 없음"
+            "시스템 등록 없음"
+        case .unavailable:
+            "시스템 등록 확인 불가"
         }
     }
 
@@ -49,9 +107,11 @@ enum ExtensionRegistrationState: Equatable {
             "clock"
         case .registered:
             "checkmark.circle.fill"
+        case .disabled:
+            "pause.circle.fill"
         case .missing:
             "exclamationmark.triangle.fill"
-        case .unknown:
+        case .unavailable:
             "questionmark.circle.fill"
         }
     }
@@ -62,9 +122,11 @@ enum ExtensionRegistrationState: Equatable {
             .secondary
         case .registered:
             .green
+        case .disabled:
+            .orange
         case .missing:
             .orange
-        case .unknown:
+        case .unavailable:
             .secondary
         }
     }
@@ -72,60 +134,100 @@ enum ExtensionRegistrationState: Equatable {
 
 @MainActor
 final class ExtensionStatusModel: ObservableObject {
-    @Published var preview: ExtensionRegistrationState = .checking
-    @Published var thumbnail: ExtensionRegistrationState = .checking
+    @Published private var snapshots: [ExtensionStatus: ExtensionStatusSnapshot]
+
+    init() {
+        snapshots = Self.checkingSnapshots()
+    }
 
     func state(for status: ExtensionStatus) -> ExtensionRegistrationState {
-        switch status {
-        case .preview:
-            preview
-        case .thumbnail:
-            thumbnail
-        }
+        snapshot(for: status).registration
+    }
+
+    func snapshot(for status: ExtensionStatus) -> ExtensionStatusSnapshot {
+        snapshots[status, default: .checking]
     }
 
     func refresh() {
-        preview = .checking
-        thumbnail = .checking
+        snapshots = Self.checkingSnapshots()
+
+        let appBundleURL = Bundle.main.bundleURL
 
         Task.detached {
-            let states = Dictionary(
+            let snapshots = Dictionary(
                 uniqueKeysWithValues: ExtensionStatus.allCases.map { status in
-                    (status, Self.registrationState(for: status))
+                    (status, Self.snapshot(for: status, appBundleURL: appBundleURL))
                 }
             )
 
             await MainActor.run {
-                self.preview = states[.preview, default: .unknown]
-                self.thumbnail = states[.thumbnail, default: .unknown]
+                self.snapshots = snapshots
             }
         }
+    }
+
+    private static func checkingSnapshots() -> [ExtensionStatus: ExtensionStatusSnapshot] {
+        Dictionary(
+            uniqueKeysWithValues: ExtensionStatus.allCases.map { status in
+                (status, .checking)
+            }
+        )
+    }
+
+    nonisolated private static func snapshot(
+        for status: ExtensionStatus,
+        appBundleURL: URL
+    ) -> ExtensionStatusSnapshot {
+        ExtensionStatusSnapshot(
+            bundle: bundleState(for: status, appBundleURL: appBundleURL),
+            registration: registrationState(for: status)
+        )
+    }
+
+    nonisolated private static func bundleState(
+        for status: ExtensionStatus,
+        appBundleURL: URL
+    ) -> ExtensionBundleState {
+        let appexURL = appBundleURL
+            .appendingPathComponent("Contents/PlugIns", isDirectory: true)
+            .appendingPathComponent(status.appexBundleName, isDirectory: true)
+
+        return FileManager.default.fileExists(atPath: appexURL.path) ? .bundled : .missing
     }
 
     nonisolated private static func registrationState(for status: ExtensionStatus) -> ExtensionRegistrationState {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/pluginkit")
-        process.arguments = ["-m"]
+        process.arguments = ["-m", "-i", status.bundleIdentifier, "-v"]
 
         let output = Pipe()
+        let error = Pipe()
         process.standardOutput = output
-        process.standardError = Pipe()
+        process.standardError = error
 
         do {
             try process.run()
             process.waitUntilExit()
+
+            let outputText = String(
+                data: output.fileHandleForReading.readDataToEndOfFile(),
+                encoding: .utf8
+            ) ?? ""
+            _ = error.fileHandleForReading.readDataToEndOfFile()
+
             guard process.terminationStatus == 0 else {
-                return .unknown
+                return .unavailable
             }
 
-            let data = output.fileHandleForReading.readDataToEndOfFile()
-            guard let text = String(data: data, encoding: .utf8) else {
-                return .unknown
+            guard let line = outputText
+                .split(separator: "\n")
+                .first(where: { $0.contains(status.bundleIdentifier) }) else {
+                return .missing
             }
 
-            return text.contains(status.bundleIdentifier) ? .registered : .missing
+            return line.trimmingCharacters(in: .whitespaces).hasPrefix("-") ? .disabled : .registered
         } catch {
-            return .unknown
+            return .unavailable
         }
     }
 }

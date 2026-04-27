@@ -1,4 +1,4 @@
-name: RhwpMac
+name: AlhangeulMac
 options:
   bundleIdPrefix: com.postmelee
   deploymentTarget:
@@ -25,8 +25,9 @@ targets:
         embed: false
     settings:
       base:
-        PRODUCT_NAME: 알한글
-        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.rhwpmac
+        PRODUCT_NAME: AlhangeulMac
+        EXECUTABLE_NAME: AlhangeulMacHost
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeulmac
         INFOPLIST_FILE: Sources/HostApp/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/HostApp/HostApp.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -44,8 +45,9 @@ targets:
         embed: false
     settings:
       base:
-        PRODUCT_NAME: 알한글 Preview
-        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.rhwpmac.QLExtension
+        PRODUCT_NAME: AlhangeulMacPreview
+        EXECUTABLE_NAME: AlhangeulMacPreview
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeulmac.QLExtension
         INFOPLIST_FILE: Sources/QLExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/QLExtension/QLExtension.entitlements
         CODE_SIGN_STYLE: Automatic
@@ -62,8 +64,9 @@ targets:
         embed: false
     settings:
       base:
-        PRODUCT_NAME: 알한글 Thumbnail
-        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.rhwpmac.ThumbnailExtension
+        PRODUCT_NAME: AlhangeulMacThumbnail
+        EXECUTABLE_NAME: AlhangeulMacThumbnail
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeulmac.ThumbnailExtension
         INFOPLIST_FILE: Sources/ThumbnailExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/ThumbnailExtension/ThumbnailExtension.entitlements
         CODE_SIGN_STYLE: Automatic

@@ -6,27 +6,38 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
         for request: QLFileThumbnailRequest,
         _ handler: @escaping (QLThumbnailReply?, Error?) -> Void
     ) {
-        Task { @MainActor in
-            do {
-                let renderedPage = try HwpPageImageRenderer.renderFirstPage(fileURL: request.fileURL)
-                let contextSize = Self.aspectFit(renderedPage.size, within: request.maximumSize)
-                let image = renderedPage.image
-                let reply = QLThumbnailReply(contextSize: contextSize) { context in
-                    Self.drawPageImage(image, in: context, size: contextSize)
-                    return true
+        do {
+            let renderRequest = try HwpThumbnailRenderRequest(
+                fileURL: request.fileURL,
+                maximumSize: request.maximumSize,
+                scale: request.scale
+            )
+            HwpThumbnailRenderCache.shared.renderedPage(for: renderRequest) { result in
+                switch result {
+                case .success(let renderedPage):
+                    let contextSize = Self.aspectFit(renderedPage.size, within: request.maximumSize)
+                    let image = renderedPage.image
+                    let reply = QLThumbnailReply(contextSize: contextSize) { context in
+                        Self.drawPageImage(image, in: context, size: contextSize)
+                        return true
+                    }
+                    reply.extensionBadge = request.fileURL.pathExtension.uppercased()
+                    handler(reply, nil)
+
+                case .failure(HwpRenderError.fileTooLarge):
+                    let reply = QLThumbnailReply(contextSize: request.maximumSize) { context in
+                        Self.drawFallback(in: context, size: request.maximumSize)
+                        return true
+                    }
+                    reply.extensionBadge = request.fileURL.pathExtension.uppercased()
+                    handler(reply, nil)
+
+                case .failure(let error):
+                    handler(nil, error)
                 }
-                reply.extensionBadge = request.fileURL.pathExtension.uppercased()
-                handler(reply, nil)
-            } catch HwpRenderError.fileTooLarge {
-                let reply = QLThumbnailReply(contextSize: request.maximumSize) { context in
-                    Self.drawFallback(in: context, size: request.maximumSize)
-                    return true
-                }
-                reply.extensionBadge = request.fileURL.pathExtension.uppercased()
-                handler(reply, nil)
-            } catch {
-                handler(nil, error)
             }
+        } catch {
+            handler(nil, error)
         }
     }
 
