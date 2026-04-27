@@ -23,17 +23,24 @@
 - `Sources/HostApp/Info.plist`, `Sources/QLExtension/Info.plist`, `Sources/ThumbnailExtension/Info.plist`: 앱과 extension 버전 정보가 들어 있다.
 - `rhwp-core.lock`: 릴리스에 포함되는 `edwardkim/rhwp` core commit과 Rust bridge 산출물 provenance를 기록한다.
 
-첫 공개 릴리스 전 확정해야 할 사항:
+### 확정된 기준
 
-- GitHub 저장소명 기준 release URL: 현재 저장소는 `postmelee/alhangeul-macos`다.
-- 산출물 파일명과 Homebrew Cask token: 현재 release script와 cask는 `alhangeul-macos` 이름을 사용한다.
-- 앱 표시명: 한국어 사용자 환경에서는 `알한글`, 영어 사용자 환경에서는 `AlhangeulMac`이다. 기본 `Info.plist` 값은 실제 bundle filesystem name과 맞는 `AlhangeulMac`이며, 한국어 표시는 `ko.lproj/InfoPlist.strings`에서 제공한다.
-- 배포 앱 filesystem bundle name: 현재 `AlhangeulMac.app`이다. Quick Look/Thumbnail extension의 LaunchServices/ExtensionKit lookup 안정성을 위해 `.app` 경로는 ASCII로 유지한다.
-- 내부 Xcode product name: 현재 `AlhangeulMac.app`이다.
-- bundle identifier: 현재 `com.postmelee.alhangeulmac` 계열이다.
-- 공개 배포 산출물명: `alhangeul-macos-<version>.dmg`를 기준으로 한다.
-- SHA256 고정 여부: public DMG 생성 후 `sha256 :no_check`를 실제 digest로 교체한다.
-- Developer ID 서명과 notarization 실행 시점: Apple Developer Program credential이 준비되고 작업지시자가 명시 지시한 때로 제한한다.
+다음 항목은 v0.1.0 시점에 이미 결정되어 release script, Cask, plist에 반영되어 있다.
+
+- GitHub 저장소: `postmelee/alhangeul-macos`
+- 산출물 파일명/Homebrew Cask token: `alhangeul-macos`
+- 앱 filesystem bundle name: `AlhangeulMac.app` (Quick Look/Thumbnail ExtensionKit lookup 안정성을 위해 ASCII 유지)
+- 내부 Xcode product name: `AlhangeulMac`
+- bundle identifier: `com.postmelee.alhangeulmac` 계열
+- 사용자 표시명: 한국어 `알한글` (`ko.lproj/InfoPlist.strings`), 영어 `AlhangeulMac` (`en.lproj/InfoPlist.strings`). 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 ASCII filesystem name과 동일
+- 공개 배포 산출물명: `alhangeul-macos-<version>.dmg`
+
+### 공개 release 전 확정 항목
+
+다음 항목은 첫 public release 시점에 작업지시자 결정이 필요하다.
+
+- DMG `sha256` 교체: Cask 초안의 `sha256 :no_check`를 public DMG 생성 후 실제 digest로 교체할 시점
+- Developer ID 서명/notarization 실행: Apple Developer Program credential이 준비되고 작업지시자가 명시 지시한 시점에만 수행
 
 ## 릴리스 전 확인
 
@@ -105,26 +112,11 @@ credential 없이 DMG layout과 checksum 생성만 확인할 때:
 
 Finder 통합 smoke test:
 
-```bash
-./scripts/package-release.sh 0.1.0
+전체 명령 시퀀스(`lsregister` 갱신, `ditto` 설치, `pluginkit` 등록 확인, `qlmanage` 캐시/렌더 검증)와 반복 시행착오 방지 규칙은 [`build_run_guide.md`](build_run_guide.md)의 "Finder 통합 확인" 섹션을 따른다. release pipeline 검증 시 추가로 다음을 적용한다.
 
-LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
-APP="$HOME/Applications/AlhangeulMac.app"
-mkdir -p "$HOME/Applications"
-"$LSREGISTER" -u "$APP" >/dev/null 2>&1 || true
-rm -rf "$APP"
-ditto build.noindex/release/AlhangeulMac.app "$APP"
-"$LSREGISTER" -f -R -trusted "$APP"
-pluginkit -a "$APP"
-pluginkit -mAvvv | grep com.postmelee.alhangeulmac
-qlmanage -r
-qlmanage -r cache
-qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
-```
-
-`qlmanage -p`는 GUI preview를 띄우므로 자동화 환경에서는 작업지시자 확인이 필요하다. 자동화 가능한 smoke test는 `qlmanage -t -x`를 우선 사용한다.
-
-Finder 통합 smoke test의 기본 샘플은 앱 저장소 루트의 `samples/`에서 가져온다. 실제 사용자 파일 검증이 필요한 경우에는 `samples/basic/KTX.hwp` 대신 대상 `.hwp`/`.hwpx` 경로를 명시한다.
+- 입력 산출물은 반드시 `./scripts/package-release.sh <version>`이 만든 signed/sealed Release package를 사용한다 (Debug 산출물 금지).
+- 자동화 환경에서는 `qlmanage -p`(GUI preview)를 사용하지 않고 `qlmanage -t -x`(headless thumbnail) 기준으로 판정한다.
+- 기본 샘플은 앱 저장소 루트의 `samples/basic/KTX.hwp`를 사용하고, 사용자 파일 검증이 필요하면 대상 경로를 명시한다.
 
 주의:
 
