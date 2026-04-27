@@ -17,8 +17,8 @@
 
 ---
 
-**Mac에서 한글 파일은 더 이상 이방인이 아닙니다.**<br/>
-<i>스페이스바로 미리보고, Finder에서 썸네일로 찾고, PDF/HWPX/Markdown으로 변환하세요.</i>
+### Mac에서 한글 파일은 더 이상 이방인이 아닙니다.
+스페이스바로 미리보고, Finder에서 썸네일로 찾고, PDF/HWPX/Markdown으로 변환하세요.
 
 ![home_banner](assets/home_banner.png)
 
