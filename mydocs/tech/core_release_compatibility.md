@@ -10,7 +10,7 @@
 
 앱 저장소의 Stable core 안정 기준은 다음 둘을 함께 고정하는 것이다.
 
-- `release tag`: GitHub release tag 이름. 예: `v0.7.6`
+- `release tag`: GitHub release tag 이름. 예: `v0.7.7`
 - `resolved commit`: tag가 가리키는 실제 commit SHA. annotated tag인 경우 tag object가 아니라 `^{commit}`으로 해석한 commit이다.
 
 Stable release tag 전환 이후 `rhwp-core.lock`은 최소한 다음 의미를 가져야 한다.
@@ -61,34 +61,39 @@ Demo/Preview도 branch dependency는 사용하지 않는다. 반드시 commit SH
 현재 Demo/Preview 후보 dependency 형식:
 
 ```toml
-rhwp = { git = "https://github.com/edwardkim/rhwp.git", rev = "1e9d78a1d40c71779d81c6ec6870cd301d912626" }
+rhwp = { git = "https://github.com/edwardkim/rhwp.git", rev = "e91ecea3174a0da0ad7a1ea495cacc4f8772c31d" }
 ```
 
 ## 현재 release 상태
 
-2026-04-27 확인 기준 최신 release는 다음이다.
+2026-04-29 확인 기준 최신 release는 다음이다.
 
 ```text
-release tag: v0.7.6
+release tag: v0.7.7
 target branch: main
-publishedAt: 2026-04-26T09:35:00Z
-resolved commit: 92c5b6b79d22f6c784b3b317551c66466b3b63a5
+publishedAt: 2026-04-27T04:21:36Z
+resolved commit: 033617e23847982135c02091a62f55031a3817b5
 ```
 
-`v0.7.6`에는 다음 API가 있다.
+`v0.7.7` 확인 명령은 다음 누락을 보고한다.
 
-- `DocumentCore::render_page_svg_native`
-- `DocumentCore::get_page_info_native`
-- `rhwp::parser::extract_thumbnail_only`
+```text
+ERROR: missing core API: build_page_render_tree
+ERROR: missing core API: target 033617e23847982135c02091a62f55031a3817b5 does not satisfy RustBridge requirements
+```
 
-`v0.7.6`에는 다음 API가 없다.
+따라서 현재 `v0.7.7`은 native render tree 경로를 유지하는 앱 기준을 충족하지 못한다. 실패 유형은 `missing core API`다.
 
-- `DocumentCore::build_page_render_tree`
-- `DocumentCore::get_bin_data`
+현재 lock commit `e91ecea3174a0da0ad7a1ea495cacc4f8772c31d`에는 RustBridge가 요구하는 core API가 포함되어 있으므로 Demo/Preview용 commit-pinned git dependency로 사용한다. 이 commit은 upstream PR #385 merge commit이며, release tag 안정 기준이 아니므로 Stable 배포 기준으로 승격하지 않는다.
 
-따라서 현재 `v0.7.6`은 native render tree 경로를 유지하는 앱 기준을 충족하지 못한다. 실패 유형은 `missing core API`다.
+2026-04-29 기준 alhangeul-macos use case 검증 결과는 다음이다.
 
-현재 lock commit `1e9d78a1d40c71779d81c6ec6870cd301d912626`에는 `DocumentCore::build_page_render_tree`와 `DocumentCore::get_bin_data`가 포함되어 있으므로 Demo/Preview용 commit-pinned git dependency 후보가 될 수 있다. 이 commit은 release tag 안정 기준이 아니므로 Stable 배포 기준으로 승격하지 않는다.
+- RustBridge lock verify, FFI symbol diff, no-AppKit 검증 통과
+- HostApp Debug build 통과
+- 기본 render smoke 통과: `KTX.hwp`, `request.hwp`, `exam_kor.hwp`
+- 이미지 포함 샘플의 `bin_data_id` 기반 `rhwp_image_data` 조회 smoke 통과
+- Release package 산출물을 표준 설치 경로에 설치한 뒤 Quick Look preview와 Finder thumbnail 직접 확인 완료
+- `qlmanage -t` thumbnail smoke 통과: `KTX.hwp`, `request.hwp`, `KTX-003.hwp`, `exam_kor.hwp`, 이미지 포함 샘플 4개
 
 ## RustBridge core API contract
 
