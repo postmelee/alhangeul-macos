@@ -68,7 +68,72 @@ xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug 
 Task #84 Stage 2: Viewer 첫 페이지 로드 수정 검증
 ```
 
-## Stage 3. 보고서와 작업 상태 정리
+## Stage 3. page view redraw lifecycle 보강
+
+### 목적
+
+`table-vpos-01.hwp`처럼 page 1/2 render tree와 native PNG는 정상 생성되지만 실제 Viewer 초기 화면에서 상단 페이지 drawing이 늦게 나타나는 경로를 보정한다.
+
+### 변경 대상
+
+- `Sources/HostApp/Views/DocumentPageView.swift`
+- `mydocs/plans/task_m010_84.md`
+- `mydocs/plans/task_m010_84_impl.md`
+- `mydocs/working/task_m010_84_stage3.md`
+
+### 작업
+
+- `DocumentPageNSView`의 drawing invalidation을 helper로 분리한다.
+- `configure(tree:pageSize:zoomScale:document:)`에서 `needsDisplay`와 layer redraw 요청을 함께 수행한다.
+- `setFrameSize(_:)`에서 frame size가 바뀔 때 redraw를 요청한다.
+- `viewDidMoveToWindow()`에서 window attach 시점에 redraw를 요청한다.
+- 기존 render tree, renderer, thumbnail, Quick Look 경로는 변경하지 않는다.
+
+### 검증
+
+- `git diff --check`
+- `/Users/melee/Documents/samples/table-vpos-01.hwp` page 1/2 render debug summary 확인
+- 소스 diff가 redraw lifecycle 보정에 한정되는지 확인
+
+### 커밋 메시지
+
+```text
+Task #84 Stage 3: Viewer page view redraw 보강
+```
+
+## Stage 4. 빌드 및 render debug 재검증
+
+### 목적
+
+Stage 3 변경이 HostApp build와 기존 render smoke 경로를 깨지 않았고, 재현 파일의 page 1/2 render data가 정상임을 기록한다.
+
+### 변경 대상
+
+- `mydocs/working/task_m010_84_stage4.md`
+
+### 검증 명령
+
+```bash
+xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build
+./scripts/validate-stage3-render.sh
+./scripts/render-debug-compare.sh /tmp/rhwp-viewer-first-page-task84 --page 1 samples/hwp-multi-001.hwp samples/20250130-hongbo.hwp
+./scripts/render-debug-compare.sh /tmp/rhwp-table-vpos-task84 --page 1 /Users/melee/Documents/samples/table-vpos-01.hwp
+./scripts/render-debug-compare.sh /tmp/rhwp-table-vpos-task84 --page 2 /Users/melee/Documents/samples/table-vpos-01.hwp
+```
+
+### 확인 기준
+
+- HostApp Debug build가 성공한다.
+- 기본 render smoke가 성공한다.
+- 대표 다중 페이지 `.hwp`와 `table-vpos-01.hwp` page 1/2의 render tree, core SVG, native PNG가 생성된다.
+
+### 커밋 메시지
+
+```text
+Task #84 Stage 4: Viewer redraw 보정 검증
+```
+
+## Stage 5. 보고서와 작업 상태 정리
 
 ### 목적
 
@@ -76,7 +141,7 @@ Task #84 Stage 2: Viewer 첫 페이지 로드 수정 검증
 
 ### 변경 대상
 
-- `mydocs/working/task_m010_84_stage3.md`
+- `mydocs/working/task_m010_84_stage5.md`
 - `mydocs/report/task_m010_84_report.md`
 - `mydocs/orders/20260429.md`
 
@@ -94,9 +159,9 @@ Task #84 Stage 2: Viewer 첫 페이지 로드 수정 검증
 ### 커밋 메시지
 
 ```text
-Task #84 Stage 3 + 최종 보고서: Viewer 첫 페이지 로드 수정 완료
+Task #84 Stage 5 + 최종 보고서: Viewer 첫 페이지 로드 수정 완료
 ```
 
 ## 승인 요청 사항
 
-위 3단계 구현 계획으로 Stage 1을 진행해도 되는지 승인 요청한다. 승인 전에는 `Sources/HostApp/Views/DocumentViewerView.swift`를 수정하지 않는다.
+Stage 2 이후 추가 재현 결과를 반영해 Stage 3~5를 보강했다. Stage 3은 `DocumentPageNSView` redraw lifecycle 보정으로 진행한다.

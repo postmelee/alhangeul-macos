@@ -35,8 +35,30 @@ final class DocumentPageNSView: NSView {
         self.zoomScale = zoomScale
         self.document = document
         wantsLayer = true
+        layerContentsRedrawPolicy = .onSetNeedsDisplay
         layer?.backgroundColor = NSColor.white.cgColor
+        invalidateDrawing()
+    }
+
+    override func setFrameSize(_ newSize: NSSize) {
+        let oldSize = frame.size
+        super.setFrameSize(newSize)
+        if oldSize != newSize {
+            invalidateDrawing()
+        }
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        invalidateDrawing()
+        DispatchQueue.main.async { [weak self] in
+            self?.invalidateDrawing()
+        }
+    }
+
+    private func invalidateDrawing() {
         needsDisplay = true
+        layer?.setNeedsDisplay()
     }
 
     override func draw(_ dirtyRect: NSRect) {
