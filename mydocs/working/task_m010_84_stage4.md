@@ -49,17 +49,24 @@ xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug 
 | table-vpos-01.hwp | 1 | 5 | 143246 | 89133 | 90 | 45 | 0 |
 | table-vpos-01.hwp | 2 | 5 | 92899 | 86141 | 67 | 38 | 0 |
 
-## 확인 사항
+## 자동 검증 확인 사항
 
 - 사용자 재현 파일의 page 1/2는 render tree, core SVG, native PNG가 모두 생성됐다.
 - page 1/2 모두 native PNG에 non-white pixel이 충분히 존재하고, 한글 glyph 누락은 0개다.
 - `qlmanage` 기반 SVG raster diff는 로컬 환경에서 실패해 optional diff PNG는 생성되지 않았다. 이 실패는 render tree/native PNG 생성 성공 여부와 별개이며, 스크립트는 정상 종료했다.
-- 검증 결과는 첫 페이지 누락의 원인이 render data 부재나 thumbnail cache 재사용이 아니라 Viewer 초기 drawing lifecycle 쪽이라는 Stage 3 판단과 일치한다.
+
+## 실제 UI 재검증 결과
+
+작업지시자가 `open -n "/tmp/rhwp-mac-task84/build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app"`로 실행한 뒤 첨부한 2026-04-29 07:11 테스트 영상에서는 첫 번째와 두 번째 페이지가 여전히 초기 화면에서 바로 표시되지 않았다.
+
+영상 1초/2초 프레임에서 page 1 상태 표시가 보이지만 본문은 `ProgressView`가 올라간 흰 페이지로 남아 있다. 따라서 Stage 3의 `DocumentPageNSView` redraw 보강만으로는 문제를 해결하지 못했다.
+
+이 결과는 `DocumentPageNSView.draw(_:)` 이후의 redraw 문제가 아니라, `store.pageTrees[0]` 또는 `store.pageTrees[1]`가 첫 화면 구성 시점에 준비되지 않아 placeholder가 먼저 나타나는 경로로 판단한다. 첫 화면 후보 page tree 준비를 `LazyVStack.onAppear`에만 맡기지 않고, 문서 로드 완료 시점에 store가 선로딩해야 한다.
 
 ## 잔여 리스크
 
-자동 검증은 Viewer App의 실제 초기 화면 표시를 픽셀 단위로 캡처하지 않는다. 최종 확인에는 작업지시자가 동일 파일을 HostApp에서 다시 열어 page 1/2가 첫 화면에서 표시되는지 확인하는 수동 검증이 필요하다.
+자동 검증은 Viewer App의 실제 초기 화면 표시를 픽셀 단위로 캡처하지 않는다. Stage 5에서 초기 page tree 선로딩 보정을 추가한 뒤 작업지시자가 동일 파일을 HostApp에서 다시 열어 page 1/2가 첫 화면에서 표시되는지 확인해야 한다.
 
 ## 다음 단계
 
-Stage 5에서 최종 보고서 작성, 오늘할일 상태 갱신, 작업 범위 요약을 수행한다.
+Stage 5에서 `DocumentViewerStore`가 문서 로드 직후 page 0/1 render tree를 선로딩하도록 보정하고 build/render debug를 다시 수행한다.
