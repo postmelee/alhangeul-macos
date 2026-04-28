@@ -151,6 +151,12 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 ./scripts/validate-stage3-render.sh output/stage3-render-custom path/to/sample.hwp
 ```
 
+사용법만 확인할 때는 Rust bridge 산출물 없이도 다음 명령을 사용할 수 있다.
+
+```bash
+./scripts/validate-stage3-render.sh --help
+```
+
 기본 샘플:
 
 - `samples/basic/KTX.hwp`
