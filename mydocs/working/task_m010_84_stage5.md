@@ -89,4 +89,4 @@ xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug 
 
 ## 다음 단계
 
-작업지시자의 실제 UI 재검증 결과를 확인한 뒤 Stage 6 최종 보고서와 오늘할일 상태 갱신을 진행한다.
+작업지시자의 실제 UI 재검증 결과를 확인한 뒤 Stage 6에서 원인 해결에 필수적이지 않은 window attach redraw 보정을 제거하고 재검증한다.

@@ -61,14 +61,6 @@ final class DocumentPageNSView: NSView {
         }
     }
 
-    override func viewDidMoveToWindow() {
-        super.viewDidMoveToWindow()
-        invalidateDrawing()
-        DispatchQueue.main.async { [weak self] in
-            self?.invalidateDrawing()
-        }
-    }
-
     private func invalidateDrawing() {
         needsDisplay = true
         layer?.setNeedsDisplay()

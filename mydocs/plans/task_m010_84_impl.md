@@ -177,7 +177,47 @@ xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug 
 Task #84 Stage 5: Viewer 초기 페이지 선로딩 보정
 ```
 
-## Stage 6. 보고서와 작업 상태 정리
+## Stage 6. 추측성 redraw 보강 제거와 재검증
+
+### 목적
+
+실제 UI 재검증으로 핵심 해결책이 초기 page tree 선로딩임이 확인됐으므로, 원인 해결에 필수적이지 않은 `DocumentPageNSView` window attach redraw 보정을 제거한다.
+
+### 변경 대상
+
+- `mydocs/working/task_m010_84_stage6.md`
+- `Sources/HostApp/Views/DocumentPageView.swift`
+- `mydocs/plans/task_m010_84.md`
+- `mydocs/plans/task_m010_84_impl.md`
+
+### 작업
+
+- `DocumentPageNSView.viewDidMoveToWindow()`의 즉시 redraw와 다음 runloop redraw를 제거한다.
+- `configure(...)`의 content invalidation과 `setFrameSize(_:)` redraw는 유지한다.
+- `DocumentViewerStore`의 초기 page 0/1 선로딩은 유지한다.
+
+### 검증 명령
+
+```bash
+git diff --check
+xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build
+./scripts/render-debug-compare.sh /tmp/rhwp-stage6-table-vpos-page1-task84 --page 1 /Users/melee/Documents/samples/table-vpos-01.hwp
+./scripts/render-debug-compare.sh /tmp/rhwp-stage6-table-vpos-page2-task84 --page 2 /Users/melee/Documents/samples/table-vpos-01.hwp
+```
+
+### 확인 기준
+
+- HostApp Debug build가 성공한다.
+- `table-vpos-01.hwp` page 1/2 render data가 계속 정상 생성된다.
+- 실제 UI 확인에서 성공한 초기 page tree 선로딩 경로는 유지된다.
+
+### 커밋 메시지
+
+```text
+Task #84 Stage 6: Viewer redraw 보강 범위 정리
+```
+
+## Stage 7. 보고서와 작업 상태 정리
 
 ### 목적
 
@@ -185,7 +225,7 @@ Task #84 Stage 5: Viewer 초기 페이지 선로딩 보정
 
 ### 변경 대상
 
-- `mydocs/working/task_m010_84_stage6.md`
+- `mydocs/working/task_m010_84_stage7.md`
 - `mydocs/report/task_m010_84_report.md`
 - `mydocs/orders/20260429.md`
 
@@ -203,9 +243,9 @@ Task #84 Stage 5: Viewer 초기 페이지 선로딩 보정
 ### 커밋 메시지
 
 ```text
-Task #84 Stage 6 + 최종 보고서: Viewer 첫 페이지 로드 수정 완료
+Task #84 Stage 7 + 최종 보고서: Viewer 첫 페이지 로드 수정 완료
 ```
 
 ## 승인 요청 사항
 
-Stage 4 이후 실제 UI 테스트 실패를 반영해 Stage 5~6을 보강했다. Stage 5는 `DocumentViewerStore` 초기 페이지 선로딩 보정으로 진행한다.
+Stage 5 실제 UI 성공을 반영해 Stage 6~7을 보강했다. Stage 6은 원인 해결에 필수적이지 않은 `DocumentPageNSView` window attach redraw 제거로 진행한다.
