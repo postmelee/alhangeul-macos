@@ -71,9 +71,6 @@ private struct DocumentPageContainer: View {
             store.setCurrentPage(page)
             store.loadPage(page)
         }
-        .onDisappear {
-            store.unloadPage(page)
-        }
     }
 }
 
