@@ -10,8 +10,10 @@
 
 - 릴리스/배포 작업은 저장소 소유자의 명시 지시가 있을 때만 수행한다.
 - Claude와 Codex가 임의로 버전 태그, GitHub Release, Homebrew Cask PR, 서명/공증 작업을 시작하지 않는다.
-- 인증서, Apple Developer 계정, notarization credential, GitHub token, Homebrew tap 권한은 작업지시자가 직접 관리한다.
+- 인증서 private key, Apple Developer 계정, notarization credential, GitHub token, Homebrew tap 권한은 작업지시자가 직접 관리한다.
 - 민감 정보는 문서, commit, PR, shell history에 남기지 않는다.
+- 문서에 기록할 수 있는 값은 Team ID, signing identity 표시명, keychain profile name처럼 비밀이 아닌 운영 식별자에 한정한다.
+- password, app-specific password, App Store Connect API private key(`.p8`), exported signing identity(`.p12`)와 그 password는 저장소에 기록하지 않는다.
 
 ## 현재 상태
 
@@ -35,12 +37,36 @@
 - 사용자 표시명: 한국어 `알한글` (`ko.lproj/InfoPlist.strings`), 영어 `AlhangeulMac` (`en.lproj/InfoPlist.strings`). 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 ASCII filesystem name과 동일
 - 공개 배포 산출물명: `alhangeul-macos-<version>.dmg`
 
+### Apple Developer Program 준비 상태
+
+2026-04-29 기준 Apple Developer Program 가입과 public release에 필요한 로컬 credential 준비가 완료된 상태다.
+
+비밀이 아닌 운영 값:
+
+- Team ID: `XH6JHKYXV8`
+- Developer ID Application signing identity: `Developer ID Application: Taegyu Lee (XH6JHKYXV8)`
+- notarytool keychain profile: `alhangeul-notary`
+
+로컬 확인 완료 항목:
+
+- Developer ID Application 인증서를 `로그인` Keychain에 설치했고, `security find-identity -v -p codesigning`에서 signing identity를 확인했다.
+- `xcrun notarytool store-credentials "alhangeul-notary" --apple-id <Apple ID> --team-id "XH6JHKYXV8"`로 credential을 Keychain에 저장했다.
+- `xcrun notarytool history --keychain-profile "alhangeul-notary"`가 credential validation을 통과했고, 아직 notarization submission history가 없는 상태를 확인했다.
+
+저장소에 기록하지 않는 값:
+
+- Apple ID password
+- app-specific password
+- App Store Connect API private key(`.p8`)
+- exported signing identity(`.p12`)와 password
+- Keychain에 저장된 notarytool credential payload
+
 ### 공개 release 전 확정 항목
 
 다음 항목은 첫 public release 시점에 작업지시자 결정이 필요하다.
 
 - DMG `sha256` 교체: Cask 초안의 `sha256 :no_check`를 public DMG 생성 후 실제 digest로 교체할 시점
-- Developer ID 서명/notarization 실행: Apple Developer Program credential이 준비되고 작업지시자가 명시 지시한 시점에만 수행
+- Developer ID 서명/notarization 실행 시점: credential은 준비됐지만 실제 public release 실행은 작업지시자가 버전과 release commit을 확정하고 명시 지시한 시점에만 수행
 
 ## 릴리스 전 확인
 
