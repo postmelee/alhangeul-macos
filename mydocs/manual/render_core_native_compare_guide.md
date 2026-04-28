@@ -6,6 +6,17 @@ macOS viewer가 그린 결과와 rhwp core가 그린 결과를 같은 입력 파
 
 이 절차의 목표는 한컴 viewer와의 완전 정합성을 판단하는 것이 아니다. 이 저장소의 viewer는 rhwp core를 사용하므로, 우선 rhwp core의 현재 구현 결과와 native renderer 결과가 같은지 확인하는 것이 기준이다.
 
+## 도구 역할 요약
+
+`validate-stage3-render.sh`와 `render-debug-compare.sh`는 목적이 다르다.
+
+| 도구 | 역할 | 사용 시점 |
+|------|------|----------|
+| `validate-stage3-render.sh` | 기본 샘플의 native render pipeline이 깨지지 않았는지 빠르게 확인하는 smoke test | renderer, bridge, core pin 변경 후 최소 회귀 확인 |
+| `render-debug-compare.sh` | 특정 파일에서 core SVG, render tree JSON, native PNG, pixel diff를 만들어 원인을 좁히는 진단 도구 | smoke는 통과하지만 특정 문서가 이상하거나 renderer 개선 전후 비교가 필요할 때 |
+
+`validate-stage3-render.sh`는 blank bitmap, 한글 glyph 누락, render tree 누락 같은 기본 실패를 잡는다. 하지만 native PNG에 일부 선만 그려져도 blank는 아니므로 시각적으로 큰 누락을 모두 잡지는 못한다. 이런 경우 `render-debug-compare.sh`로 core와 native 결과를 직접 비교한다.
+
 ## 기준 경로
 
 | 기준 | 산출물 | 의미 |
@@ -83,16 +94,16 @@ PageCount: 2
 PageSizePt: 793.7x1122.5
 
 RenderTreeJSON: .../table-in-tbox-page1-render-tree.json
-RenderTreeJSONBytes: 826451
+RenderTreeJSONBytes: 830673
 
 CoreSVG: .../table-in-tbox-page1-core.svg
-CoreSVGBytes: 434334
+CoreSVGBytes: 500175
 
 NativePNG: .../table-in-tbox-page1-native.png
 NativePNGSize: 794x1123
 NativeNonWhitePixels: 11845
 
-TextRuns: 472
+TextRuns: 471
 HangulRuns: 187
 HangulScalars: 779
 MissingHangulGlyphs: 0
@@ -103,8 +114,8 @@ Diff: generated
 DiffCompareSize: 794x1123
 DiffNativeSize: 794x1123
 DiffCoreSize: 795x1123
-DiffDifferentPixels: 179655
-DiffDifferentPixelRatio: 0.201483
+DiffDifferentPixels: 179854
+DiffDifferentPixelRatio: 0.201706
 DiffMaxChannelDelta: 255
 ```
 
@@ -171,6 +182,39 @@ anti-aliasing, rasterizer, 1px 반올림 차이일 수 있다.
 - 문서 내용 위치가 일정하게 1px 밀렸는지 확인
 - text anti-aliasing 차이인지, 실제 도형/표/이미지 누락인지 구분
 
+## 실제 활용 예시
+
+`table-in-tbox.hwp`처럼 core와 native 결과가 크게 다른 파일을 조사할 때:
+
+```bash
+./scripts/render-debug-compare.sh output/render-debug /path/to/table-in-tbox.hwp
+```
+
+산출물을 나란히 확인한다.
+
+- `table-in-tbox-page1-core.png`: 표, 본문, 안내 문구가 보인다.
+- `table-in-tbox-page1-native.png`: 외곽 테두리만 보이고 본문 대부분이 빠져 있다.
+- `table-in-tbox-page1-summary.txt`: `TextRuns`, `HangulRuns`, `MissingHangulGlyphs`를 확인한다.
+
+이때 summary에 다음처럼 기록되어 있으면 파싱 실패나 한글 glyph 누락보다는 Swift native renderer 해석 문제를 우선 의심한다.
+
+```text
+TextRuns: 471
+HangulRuns: 187
+HangulScalars: 779
+MissingHangulGlyphs: 0
+NativeNonWhitePixels: 11845
+DiffDifferentPixelRatio: 0.201706
+```
+
+판단:
+
+1. core PNG에는 내용이 있으므로 core SVG 경로는 적어도 해당 내용 일부를 알고 있다.
+2. render tree에 한글 text run이 있고 glyph 누락도 없으므로 단순 폰트 문제 가능성은 낮다.
+3. native PNG가 거의 비어 있으면 `RenderTree.swift` 디코딩 누락, `CGTreeRenderer`의 node 처리, transform, clipping, image data 해석을 먼저 확인한다.
+4. 수정 후 같은 명령을 다시 실행해 core/native 차이가 줄었는지 확인한다.
+5. 마지막에 `validate-stage3-render.sh`로 기본 샘플 회귀를 확인한다.
+
 ## qlmanage 실패 처리
 
 `qlmanage`는 macOS Quick Look server를 사용한다. sandbox 또는 실행 환경에 따라 다음처럼 실패할 수 있다.
@@ -196,7 +240,7 @@ DiffReason: qlmanage rasterize failed; see ...core.svg.qlmanage.log
 ./scripts/validate-stage3-render.sh
 ```
 
-이 명령은 대표 샘플이 깨지지 않는지 빠르게 확인하는 회귀 테스트다. 반면 `render-debug-compare.sh`는 특정 파일의 렌더링 차이를 좁히기 위한 디버깅 도구다.
+이 명령은 대표 샘플에서 문서 open, render tree, 한글 text run, glyph lookup, page size, native PNG non-white pixel이 깨지지 않았는지 빠르게 확인하는 회귀 테스트다. 반면 `render-debug-compare.sh`는 특정 파일의 렌더링 차이를 좁히기 위한 디버깅 도구다.
 
 권장 순서:
 
@@ -222,12 +266,12 @@ DiffReason: qlmanage rasterize failed; see ...core.svg.qlmanage.log
 ```text
 NativePNGSize: 794x1123
 NativeNonWhitePixels: 11845
-RenderTreeJSONBytes: 826451
-CoreSVGBytes: 434334
+RenderTreeJSONBytes: 830673
+CoreSVGBytes: 500175
 DiffNativeSize: 794x1123
 DiffCoreSize: 795x1123
-DiffDifferentPixels: 179655
-DiffDifferentPixelRatio: 0.201483
+DiffDifferentPixels: 179854
+DiffDifferentPixelRatio: 0.201706
 ```
 
 이 값은 디버깅 출발점이며 정답 기준이 아니다. renderer나 core가 개선되면 값은 달라질 수 있다.
