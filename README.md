@@ -251,7 +251,7 @@ open build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app
 ```
 
 - Core dependency - [core dependency 운영 가이드](mydocs/manual/core_dependency_operation_guide.md)
-- release packaging - [릴리스/배포 가이드](mydocs/manual/release_distribution_guide.md)
+- release packaging, signing, notarization - [릴리스/배포 가이드](mydocs/manual/release_distribution_guide.md)
 - Finder extension 등록 검증 - [빌드 및 실행 가이드](mydocs/manual/build_run_guide.md)
 
 ## Project Structure
