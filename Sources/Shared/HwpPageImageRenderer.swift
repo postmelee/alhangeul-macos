@@ -18,6 +18,7 @@ enum HwpEmbeddedThumbnailPolicy {
 enum HwpRenderError: Error {
     case fileTooLarge
     case emptyDocument
+    case pageOutOfRange
     case renderTreeUnavailable
     case invalidPageSize
     case bitmapContextUnavailable
@@ -52,11 +53,26 @@ enum HwpPageImageRenderer {
         guard document.pageCount > 0 else {
             throw HwpRenderError.emptyDocument
         }
-        guard let tree = document.renderPageTree(at: 0) else {
+        return try renderPage(
+            document: document,
+            pageIndex: 0,
+            maximumPixelSize: maximumPixelSize
+        )
+    }
+
+    static func renderPage(
+        document: RhwpDocument,
+        pageIndex: Int,
+        maximumPixelSize: CGSize? = nil
+    ) throws -> HwpRenderedPage {
+        guard pageIndex >= 0, pageIndex < document.pageCount else {
+            throw HwpRenderError.pageOutOfRange
+        }
+        guard let tree = document.renderPageTree(at: pageIndex) else {
             throw HwpRenderError.renderTreeUnavailable
         }
 
-        let pageSize = document.pageSize(at: 0)
+        let pageSize = document.pageSize(at: pageIndex)
         guard pageSize.width > 0, pageSize.height > 0 else {
             throw HwpRenderError.invalidPageSize
         }
