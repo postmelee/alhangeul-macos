@@ -115,20 +115,32 @@ xcodebuild -project AlhangeulMac.xcodeproj \
   build
 ```
 
-Release pipeline dry check:
+Public release credential 확인:
+
+```bash
+security find-identity -v -p codesigning
+xcrun notarytool history --keychain-profile "alhangeul-notary"
+```
+
+확인 기준:
+
+- `security find-identity` 출력에 `Developer ID Application: Taegyu Lee (XH6JHKYXV8)`가 있어야 한다.
+- `notarytool history`가 인증 오류 없이 실행되어야 한다. 제출 이력이 없으면 `No submission history.`가 나올 수 있으며 credential 검증 실패가 아니다.
+
+Release pipeline preflight check:
 
 ```bash
 ./scripts/release.sh --help
 env -u ALHANGEUL_DEVELOPER_ID_APPLICATION -u ALHANGEUL_NOTARY_PROFILE ./scripts/release.sh 0.1.0
 ```
 
-두 번째 명령은 credential 누락 검증용이다. build 전에 다음처럼 실패해야 정상이다.
+두 번째 명령은 credential 누락 시 build 전에 중단되는 fail-fast guard 검증용이다. 다음처럼 실패해야 정상이다.
 
 ```text
 ERROR: ALHANGEUL_DEVELOPER_ID_APPLICATION is required for public release
 ```
 
-credential 없이 DMG layout과 checksum 생성만 확인할 때:
+public release 전 DMG layout과 checksum 생성만 확인할 때:
 
 ```bash
 ./scripts/release.sh --skip-notarize 0.1.0
@@ -198,7 +210,7 @@ build.noindex/release/alhangeul-macos-0.1.0.zip
 
 주의:
 
-- 현재 스크립트는 서명/공증을 자동 수행하지 않는다.
+- `scripts/package-release.sh`는 서명/공증을 자동 수행하지 않는다.
 - lock 검증이 실패하면 app build와 zip 생성을 시작하지 않는다.
 - zip 파일명은 `alhangeul-macos-<version>.zip`이며 저장소명과 맞춘다.
 - 이 zip은 개발/검증용 산출물이다. public release와 Homebrew Cask 기준 산출물은 `scripts/release.sh`가 만드는 signed/notarized DMG다.
@@ -208,7 +220,7 @@ build.noindex/release/alhangeul-macos-0.1.0.zip
 public release DMG 생성:
 
 ```bash
-ALHANGEUL_DEVELOPER_ID_APPLICATION="Developer ID Application: ..." \
+ALHANGEUL_DEVELOPER_ID_APPLICATION="Developer ID Application: Taegyu Lee (XH6JHKYXV8)" \
 ALHANGEUL_NOTARY_PROFILE="alhangeul-notary" \
 ./scripts/release.sh 0.1.0
 ```
@@ -219,6 +231,8 @@ ALHANGEUL_NOTARY_PROFILE="alhangeul-notary" \
 ALHANGEUL_DEVELOPER_ID_DMG
 ALHANGEUL_BUILD_ROOT
 ```
+
+`ALHANGEUL_DEVELOPER_ID_DMG`를 지정하지 않으면 `ALHANGEUL_DEVELOPER_ID_APPLICATION`과 같은 identity로 DMG를 서명한다.
 
 public mode 산출물:
 
@@ -250,12 +264,13 @@ build.noindex/release/alhangeul-macos-0.1.0.dmg.sha256
 - public mode는 Apple Developer Program credential 없이 실행하지 않는다.
 - credential, password, app-specific password, API key, keychain profile 내용은 저장소에 기록하지 않는다.
 - notarytool keychain profile 생성과 credential 관리는 작업지시자가 직접 수행한다.
+- `scripts/release.sh` public mode는 clean worktree를 요구한다. 버전, release 기준 commit, 포함 PR을 확정한 뒤 실행한다.
 - GitHub Release 생성과 asset upload는 이 script가 수행하지 않는다.
 - Homebrew Cask PR 생성도 이 script가 수행하지 않는다.
 
 ## Rehearsal DMG
 
-Apple Developer Program credential이 없거나 public release 전 layout만 확인할 때 rehearsal mode를 사용한다.
+public release 전 layout, DMG 생성, checksum 생성만 확인할 때 rehearsal mode를 사용한다.
 
 ```bash
 ./scripts/release.sh --skip-notarize 0.1.0
@@ -290,16 +305,29 @@ rehearsal mode가 수행하지 않는 일:
 - `*-rehearsal.dmg`는 public release asset으로 업로드하지 않는다.
 - `*-rehearsal.dmg.sha256`은 Homebrew Cask `sha256`에 사용하지 않는다.
 - unsigned rehearsal build는 Finder Quick Look/Thumbnail 등록 보증에 쓰지 않는다.
+- signed/notarized public DMG 검증은 rehearsal 결과로 대체하지 않는다.
 
 ## 서명과 공증 검증 항목
 
-Apple Developer Program credential이 준비된 뒤 public mode에서 확인할 항목:
+public mode에서 확인할 항목:
 
 - HostApp, QLExtension, ThumbnailExtension이 모두 올바르게 서명되는가
 - extension bundle이 app bundle 안에 올바르게 embed되는가
 - sandbox entitlement가 preview/thumbnail 동작과 충돌하지 않는가
 - notarization 후 Gatekeeper에서 실행 가능한가
 - stapled app과 stapled DMG가 모두 검증되는가
+
+대표 확인 명령:
+
+```bash
+codesign --verify --deep --strict --verbose=2 build.noindex/release/AlhangeulMac.app
+xcrun stapler validate build.noindex/release/AlhangeulMac.app
+xcrun stapler validate build.noindex/release/alhangeul-macos-0.1.0.dmg
+spctl --assess --type execute --verbose build.noindex/release/AlhangeulMac.app
+spctl --assess --type open --context context:primary-signature --verbose build.noindex/release/alhangeul-macos-0.1.0.dmg
+```
+
+위 검증은 `scripts/release.sh` public mode가 이미 수행하는 항목을 수동으로 재확인할 때 사용한다.
 
 ## GitHub Release
 
