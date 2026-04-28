@@ -12,14 +12,13 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
     @MainActor
     private static func createPreview(for request: QLFilePreviewRequest) throws -> QLPreviewReply {
         do {
-            let result = try HwpPageImageRenderer.renderFirstPage(fileURL: request.fileURL)
-            let pngData = try HwpPageImageRenderer.encodePNG(result.image)
+            let result = try HwpPreviewPDFRenderer.render(fileURL: request.fileURL)
             return QLPreviewReply(
-                dataOfContentType: .png,
-                contentSize: result.size
+                dataOfContentType: .pdf,
+                contentSize: result.contentSize
             ) { reply in
                 reply.title = request.fileURL.lastPathComponent
-                return pngData
+                return result.data
             }
         } catch HwpRenderError.fileTooLarge {
             return Self.textReply("The file is larger than 50 MB.")

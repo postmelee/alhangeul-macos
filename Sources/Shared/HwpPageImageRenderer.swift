@@ -24,6 +24,7 @@ enum HwpRenderError: Error {
     case bitmapContextUnavailable
     case imageUnavailable
     case pngEncodingFailed
+    case pdfEncodingFailed
 }
 
 enum HwpPageImageRenderer {
