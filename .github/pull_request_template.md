@@ -27,8 +27,9 @@ stage 기반 작업이면 Stage 기준으로 적습니다.
 - [ ] `./scripts/check-no-appkit.sh`
 - [ ] `./scripts/build-rust-macos.sh`
 - [ ] `xcodegen generate`
-- [ ] `xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build/DerivedData CODE_SIGNING_ALLOWED=NO build`
+- [ ] `xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build`
 - [ ] `./scripts/validate-stage3-render.sh`
+- [ ] renderer 변경 시 `./scripts/render-debug-compare.sh output/render-debug <sample.hwp>`
 - [ ] Finder / Quick Look / Thumbnail 수동 확인
 
 ## 문서
@@ -67,5 +68,6 @@ Closes #
 
 <!--
 UI, Finder, Quick Look, Thumbnail 표시 변경처럼 시각 확인이 필요한 경우 첨부합니다.
+renderer 변경이면 가능하면 core PNG, native PNG, diff PNG 또는 summary를 첨부합니다.
 해당 없으면 이 섹션을 삭제합니다.
 -->

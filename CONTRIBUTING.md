@@ -71,6 +71,7 @@ HWP/HWPX 파일이 한컴 또는 rhwp core와 다르게 렌더링되거나, Find
    - 한컴 또는 rhwp core 결과 스크린샷
    - 알한글에서 본 결과 스크린샷
    - 가능하면 HWP/HWPX 파일 첨부 (개인정보 제거 후)
+   - 가능하면 `render-debug-compare.sh`가 만든 summary, core PNG, native PNG, diff PNG 첨부
 3. Quick Look/Thumbnail 등록 문제는 `pluginkit -mAvvv | grep com.postmelee.alhangeulmac` 결과를 함께 첨부
 
 ### 코드 기여 — Fork & PR 워크플로우
@@ -118,6 +119,8 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 ./scripts/validate-stage3-render.sh     # 렌더링 smoke test
 ```
 
+renderer 동작을 바꾸는 PR이면 문제 샘플에 대해 `./scripts/render-debug-compare.sh output/render-debug path/to/sample.hwp`를 추가로 실행하고, PR 본문에 summary와 core/native PNG 비교 결과를 적어주세요.
+
 위 명령이 모두 통과하는지 확인한 후 PR을 생성해주세요. PR 본문은 [`.github/pull_request_template.md`](.github/pull_request_template.md) 양식을 사용합니다.
 
 ### HWP/HWPX 샘플 파일 제공
@@ -147,7 +150,13 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 
 # 2. 특정 파일에서 rhwp core SVG와 native renderer PNG 비교
 ./scripts/render-debug-compare.sh output/render-debug path/to/sample.hwp
+```
 
+`validate-stage3-render.sh`는 기본 샘플에서 native render pipeline이 깨지지 않았는지 빠르게 확인하는 smoke test입니다. `render-debug-compare.sh`는 특정 문서에서 core SVG, render tree JSON, native PNG, summary, 선택적 pixel diff를 만들어 원인을 좁히는 진단 도구입니다.
+
+Finder/Quick Look 동작을 조사할 때:
+
+```bash
 # 3. Finder Quick Look 강제 실행
 qlmanage -p path/to/sample.hwp
 
@@ -155,7 +164,7 @@ qlmanage -p path/to/sample.hwp
 qlmanage -t -x -s 512 -o /tmp/alhangeul-ql path/to/sample.hwp
 ```
 
-`render-debug-compare.sh`는 render tree JSON, core SVG, native PNG, summary를 출력합니다. 상세 절차는 [`render_core_native_compare.md`](mydocs/troubleshootings/render_core_native_compare.md)를 참고하세요.
+core/native 비교 상세 절차는 [`render_core_native_compare_guide.md`](mydocs/manual/render_core_native_compare_guide.md)를 참고하세요.
 
 ## 프로젝트 구조
 
