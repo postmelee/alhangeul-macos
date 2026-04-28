@@ -72,7 +72,7 @@ sips -g pixelWidth -g pixelHeight \
   "/Users/melee/Documents/projects/Icon Exports/Icon-iOS-Default-256x256@2x.png" \
   "/Users/melee/Documents/projects/Icon Exports/Icon-iOS-Default-512x512@1x.png" \
   "/Users/melee/Documents/projects/Icon Exports/Icon-iOS-Default-1024x1024@1x.png"
-plutil -lint Sources/HostApp/Assets.xcassets/AppIcon.appiconset/Contents.json
+jq empty Sources/HostApp/Assets.xcassets/AppIcon.appiconset/Contents.json
 rg -n "ASSETCATALOG_COMPILER_APPICON_NAME|NSApp.applicationIconImage|AppIcon" project.yml Sources/HostApp
 git diff --check
 ```
@@ -109,7 +109,7 @@ Task #77 Stage 1: AppIcon 입력 자산 정합성 확인
 ```bash
 git status --short --branch
 sips -g pixelWidth -g pixelHeight Sources/HostApp/Assets.xcassets/AppIcon.appiconset/*.png
-plutil -lint Sources/HostApp/Assets.xcassets/AppIcon.appiconset/Contents.json
+jq empty Sources/HostApp/Assets.xcassets/AppIcon.appiconset/Contents.json
 git diff --check
 git diff --stat
 ```
