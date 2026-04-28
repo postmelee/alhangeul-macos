@@ -261,8 +261,8 @@ build.noindex/release/alhangeul-macos-0.1.0.dmg.sha256
 
 주의:
 
-- public mode는 Apple Developer Program credential 없이 실행하지 않는다.
-- credential, password, app-specific password, API key, keychain profile 내용은 저장소에 기록하지 않는다.
+- public mode는 위 Developer ID signing identity와 `notarytool` keychain profile이 확인된 환경에서만 실행한다.
+- password, app-specific password, API key, keychain profile 내부 credential payload는 저장소에 기록하지 않는다.
 - notarytool keychain profile 생성과 credential 관리는 작업지시자가 직접 수행한다.
 - `scripts/release.sh` public mode는 clean worktree를 요구한다. 버전, release 기준 commit, 포함 PR을 확정한 뒤 실행한다.
 - GitHub Release 생성과 asset upload는 이 script가 수행하지 않는다.
