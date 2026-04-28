@@ -21,7 +21,7 @@
 
 `Sources/HostApp/Views/DocumentPageView.swift`의 `DocumentPageNSView`를 보강했다.
 
-- `configure(...)`에서 `layerContentsRedrawPolicy = .onSetNeedsDisplay`를 지정했다.
+- `wantsLayer`, `layerContentsRedrawPolicy`, layer background 같은 고정 view 설정은 `DocumentPageNSView` 초기화 경로로 분리했다.
 - drawing invalidation을 `invalidateDrawing()` helper로 분리했다.
 - `configure(...)`에서 `needsDisplay`와 `layer?.setNeedsDisplay()`를 함께 요청한다.
 - `setFrameSize(_:)`에서 frame size가 바뀌면 redraw를 요청한다.

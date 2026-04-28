@@ -25,6 +25,16 @@ final class DocumentPageNSView: NSView {
     private weak var document: RhwpDocument?
     private let renderer = CGTreeRenderer()
 
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        configureLayer()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        configureLayer()
+    }
+
     override var isFlipped: Bool {
         true
     }
@@ -34,10 +44,13 @@ final class DocumentPageNSView: NSView {
         self.pageSize = pageSize
         self.zoomScale = zoomScale
         self.document = document
+        invalidateDrawing()
+    }
+
+    private func configureLayer() {
         wantsLayer = true
         layerContentsRedrawPolicy = .onSetNeedsDisplay
         layer?.backgroundColor = NSColor.white.cgColor
-        invalidateDrawing()
     }
 
     override func setFrameSize(_ newSize: NSSize) {
