@@ -59,6 +59,7 @@ Apple Developer Program 가입 후 준비된 Developer ID Application signing id
 - 실제 release 시 `./scripts/release.sh <version>` public mode로 app/DMG signing, notarization, staple, Gatekeeper 검증을 수행해야 한다.
 - public DMG `sha256`은 실제 signed/notarized DMG 생성 후 `Casks/alhangeul-macos.rb`에 반영해야 한다.
 - CI에서 서명/공증 자동화를 수행하려면 인증서와 notary credential을 GitHub Secrets에 별도로 등록해야 한다.
+- 후속 이슈 [#79](https://github.com/postmelee/alhangeul-macos/issues/79)에서 메인테이너용 public release 실행 runbook을 별도 문서로 작성한다.
 
 ## 작업지시자 승인 요청
 
