@@ -1,13 +1,9 @@
 <p align="center">
   <img src="assets/logo-256@2x.png" alt="rhwp logo" width="128" />
 </p>
-<div id="user-content-toc" align="center">
-  <ul>
-    <summary>
-      <h1>Alhanguel</h1>
-    </summary>
-  </ul>
-</div>
+
+# <div align="center">Alhangeul</div>
+
 <p align="center">
   <strong>알한글 for macOS</strong><br/>
   <em>Mac-native HWP/HWPX file utility</em>
