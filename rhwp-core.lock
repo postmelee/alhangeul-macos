@@ -3,15 +3,15 @@ rhwp_repo = "https://github.com/edwardkim/rhwp.git"
 rhwp_ref_kind = "release-tag"
 rhwp_release_tag = "v0.7.8"
 rhwp_commit = "42cf91b6ba7b50fa1c853c01158a52ef68b45442"
-built_at = ""
+built_at = "2026-04-29T21:32:27Z"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
 
 [[artifacts]]
 path = "Frameworks/universal/librhwp.a"
-sha256 = ""
-size = 0
+sha256 = "257f3689f86f661e7cebf7f2b0debdcdfe872fe1e3b9be132917976389a9859f"
+size = 104102400
 
 [[artifacts]]
 path = "Frameworks/generated_rhwp.h"
-sha256 = ""
-size = 0
+sha256 = "69aeca5047bf743286d1b2260f8fc9a091ce4f1d7fd61c80084fab81c3a95ac5"
+size = 1349
