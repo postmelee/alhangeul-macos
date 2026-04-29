@@ -63,7 +63,7 @@
 ```text
 release tag: v0.7.8
 resolved commit: 42cf91b6ba7b50fa1c853c01158a52ef68b45442
-tag object: 6813f3e03eea5cbeee41dbe8f63e1cb52be0fb56
+tag object: 6813f3ebc70a9476c4f9dc919ffda63f2a5c467d
 publishedAt: 2026-04-29T03:09:48Z
 ```
 
