@@ -14,6 +14,10 @@ class CGTreeRenderer {
     private var pageHeight: Double = 0
 
     func render(tree: RenderNode, in context: CGContext, pageHeight: Double, document: RhwpDocument?) {
+        // 이미지 binDataId는 문서 내부 식별자이므로 문서가 바뀌면 캐시를 이어 쓰면 안 된다.
+        if !isRenderingSameDocument(document) {
+            clearCache()
+        }
         self.document = document
         self.pageHeight = pageHeight
         // 호출 측은 좌상단 원점 좌표계로 CGContext를 전달한다.
@@ -25,6 +29,16 @@ class CGTreeRenderer {
 
     func clearCache() {
         imageCache.removeAll()
+    }
+
+    private func isRenderingSameDocument(_ document: RhwpDocument?) -> Bool {
+        guard let currentDocument = self.document else {
+            return document == nil
+        }
+        guard let document else {
+            return false
+        }
+        return currentDocument === document
     }
 
     // MARK: - 트리 순회
