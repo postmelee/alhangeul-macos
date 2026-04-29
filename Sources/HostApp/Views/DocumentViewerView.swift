@@ -35,6 +35,7 @@ private struct DocumentPagesView: View {
             .padding(28)
             .frame(maxWidth: .infinity)
         }
+        .id(store.documentRevision)
         .background(Color(nsColor: .underPageBackgroundColor))
     }
 }
@@ -68,8 +69,12 @@ private struct DocumentPageContainer: View {
         }
         .id(page)
         .onAppear {
+            store.markPageVisible(page)
             store.setCurrentPage(page)
             store.loadPage(page)
+        }
+        .onDisappear {
+            store.markPageNotVisible(page)
         }
     }
 }
