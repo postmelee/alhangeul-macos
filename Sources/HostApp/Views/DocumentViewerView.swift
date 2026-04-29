@@ -68,8 +68,12 @@ private struct DocumentPageContainer: View {
         }
         .id(page)
         .onAppear {
+            store.markPageVisible(page)
             store.setCurrentPage(page)
             store.loadPage(page)
+        }
+        .onDisappear {
+            store.markPageNotVisible(page)
         }
     }
 }

@@ -11,6 +11,12 @@ final class DocumentViewerStore: ObservableObject {
     @Published var pageTrees: [Int: RenderNode] = [:]
     @Published var zoomScale: Double = 0.8
 
+    private let maxCachedPageTreeCount = 12
+    private let protectedPageWindowRadius = 3
+    private var visiblePages: Set<Int> = []
+    private var pageAccessOrder: [Int: UInt64] = [:]
+    private var nextPageAccessOrder: UInt64 = 0
+
     let minimumZoomScale = 0.25
     let maximumZoomScale = 3.0
 
@@ -32,7 +38,7 @@ final class DocumentViewerStore: ObservableObject {
     func loadDocument(from url: URL) {
         isLoading = true
         errorMessage = nil
-        pageTrees.removeAll()
+        resetPageCache()
         currentPage = 0
 
         let didStartSecurityScope = url.startAccessingSecurityScopedResource()
@@ -67,14 +73,25 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func loadPage(_ page: Int) {
-        guard page >= 0, page < pageCount, pageTrees[page] == nil, let document else {
+        guard page >= 0, page < pageCount, let document else {
             return
         }
-        pageTrees[page] = document.renderPageTree(at: page)
+        markPageAccessed(page)
+
+        if pageTrees[page] == nil {
+            guard let tree = document.renderPageTree(at: page) else {
+                return
+            }
+            pageTrees[page] = tree
+        }
+
+        evictPageTreesIfNeeded(protecting: page)
     }
 
     func unloadPage(_ page: Int) {
         pageTrees.removeValue(forKey: page)
+        pageAccessOrder.removeValue(forKey: page)
+        visiblePages.remove(page)
     }
 
     func setCurrentPage(_ page: Int) {
@@ -82,6 +99,19 @@ final class DocumentViewerStore: ObservableObject {
             return
         }
         currentPage = page
+        markPageAccessed(page)
+    }
+
+    func markPageVisible(_ page: Int) {
+        guard page >= 0, page < pageCount else {
+            return
+        }
+        visiblePages.insert(page)
+        markPageAccessed(page)
+    }
+
+    func markPageNotVisible(_ page: Int) {
+        visiblePages.remove(page)
     }
 
     func zoomIn() {
@@ -117,6 +147,92 @@ final class DocumentViewerStore: ObservableObject {
         for page in 0..<preloadCount {
             loadPage(page)
         }
+    }
+
+    private func resetPageCache() {
+        pageTrees.removeAll()
+        visiblePages.removeAll()
+        pageAccessOrder.removeAll()
+        nextPageAccessOrder = 0
+    }
+
+    private func markPageAccessed(_ page: Int) {
+        guard page >= 0, page < pageCount else {
+            return
+        }
+        nextPageAccessOrder += 1
+        pageAccessOrder[page] = nextPageAccessOrder
+    }
+
+    private func evictPageTreesIfNeeded(protecting recentPage: Int) {
+        guard pageTrees.count > maxCachedPageTreeCount else {
+            return
+        }
+
+        let protectedPages = protectedPages(including: recentPage)
+        let removablePages = pageTrees.keys
+            .filter { !protectedPages.contains($0) }
+            .sorted {
+                (pageAccessOrder[$0] ?? 0) < (pageAccessOrder[$1] ?? 0)
+            }
+
+        guard !removablePages.isEmpty else {
+            return
+        }
+
+        var updatedPageTrees = pageTrees
+        for page in removablePages {
+            updatedPageTrees.removeValue(forKey: page)
+            pageAccessOrder.removeValue(forKey: page)
+            if updatedPageTrees.count <= maxCachedPageTreeCount {
+                break
+            }
+        }
+        pageTrees = updatedPageTrees
+    }
+
+    private func protectedPages(including recentPage: Int) -> Set<Int> {
+        var pages = Set<Int>()
+
+        insertInitialPages(into: &pages)
+        insertWindow(around: currentPage, into: &pages)
+        insertIfValid(recentPage, into: &pages)
+
+        for page in visiblePages {
+            insertWindow(around: page, into: &pages)
+        }
+
+        return pages
+    }
+
+    private func insertInitialPages(into pages: inout Set<Int>) {
+        let preloadCount = min(2, pageCount)
+        guard preloadCount > 0 else {
+            return
+        }
+
+        for page in 0..<preloadCount {
+            pages.insert(page)
+        }
+    }
+
+    private func insertWindow(around page: Int, into pages: inout Set<Int>) {
+        guard page >= 0, page < pageCount else {
+            return
+        }
+
+        let lowerBound = max(0, page - protectedPageWindowRadius)
+        let upperBound = min(pageCount - 1, page + protectedPageWindowRadius)
+        for protectedPage in lowerBound...upperBound {
+            pages.insert(protectedPage)
+        }
+    }
+
+    private func insertIfValid(_ page: Int, into pages: inout Set<Int>) {
+        guard page >= 0, page < pageCount else {
+            return
+        }
+        pages.insert(page)
     }
 }
 
