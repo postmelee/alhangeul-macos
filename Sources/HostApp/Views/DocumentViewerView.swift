@@ -35,6 +35,7 @@ private struct DocumentPagesView: View {
             .padding(28)
             .frame(maxWidth: .infinity)
         }
+        .id(store.documentRevision)
         .background(Color(nsColor: .underPageBackgroundColor))
     }
 }

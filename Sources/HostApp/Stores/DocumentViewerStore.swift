@@ -10,6 +10,7 @@ final class DocumentViewerStore: ObservableObject {
     @Published var isLoading = false
     @Published var pageTrees: [Int: RenderNode] = [:]
     @Published var zoomScale: Double = 0.8
+    @Published private(set) var documentRevision: Int = 0
 
     private let maxCachedPageTreeCount = 12
     private let protectedPageWindowRadius = 3
@@ -135,6 +136,7 @@ final class DocumentViewerStore: ObservableObject {
         self.filename = filename
         currentPage = 0
         zoomScale = 0.8
+        documentRevision += 1
         preloadInitialPages()
     }
 
