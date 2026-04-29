@@ -261,7 +261,46 @@ xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug 
 Task #84 Stage 7: Viewer page clipping 회귀 수정
 ```
 
-## Stage 8. 보고서와 작업 상태 정리
+## Stage 8. 문서 전환 시 renderer image cache 무효화
+
+### 목적
+
+Viewer에서 문서를 연속으로 열 때 재사용된 renderer가 이전 문서의 이미지를 새 문서 이미지 위치에 그리는 회귀를 수정한다.
+
+### 변경 대상
+
+- `mydocs/working/task_m010_84_stage8.md`
+- `Sources/RhwpCoreBridge/CGTreeRenderer.swift`
+- `mydocs/plans/task_m010_84.md`
+- `mydocs/plans/task_m010_84_impl.md`
+
+### 작업
+
+- `CGTreeRenderer.render(...)`가 렌더 대상 `RhwpDocument` identity 변경을 감지한다.
+- 문서가 바뀌면 `imageCache`를 비워 문서 내부 `binDataId` 충돌로 인한 이미지 재사용을 차단한다.
+- `DocumentPageView`의 SwiftUI/AppKit bridge 흐름은 변경하지 않는다.
+
+### 검증 명령
+
+```bash
+git diff --check
+xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build
+./scripts/render-debug-compare.sh /tmp/rhwp-stage8-image-cache-task84 --page 1 samples/복학원서.hwp samples/20250130-hongbo.hwp samples/aift.hwp
+```
+
+### 확인 기준
+
+- HostApp Debug build가 성공한다.
+- 문서별 page 1 render data가 정상 생성된다.
+- 실제 UI 확인은 작업지시자가 `복학원서.hwp` 이후 `20250130-hongbo.hwp`를 여는 순서로 재검증한다.
+
+### 커밋 메시지
+
+```text
+Task #84 Stage 8: Viewer image cache 문서 전환 보정
+```
+
+## Stage 9. 보고서와 작업 상태 정리
 
 ### 목적
 
@@ -269,7 +308,7 @@ Task #84 Stage 7: Viewer page clipping 회귀 수정
 
 ### 변경 대상
 
-- `mydocs/working/task_m010_84_stage8.md`
+- `mydocs/working/task_m010_84_stage9.md`
 - `mydocs/report/task_m010_84_report.md`
 - `mydocs/orders/20260429.md`
 
@@ -287,9 +326,9 @@ Task #84 Stage 7: Viewer page clipping 회귀 수정
 ### 커밋 메시지
 
 ```text
-Task #84 Stage 8 + 최종 보고서: Viewer 첫 페이지 로드 수정 완료
+Task #84 Stage 9 + 최종 보고서: Viewer 첫 페이지 로드 수정 완료
 ```
 
 ## 승인 요청 사항
 
-Stage 6 이후 렌더 회귀를 반영해 Stage 7~8을 보강했다. Stage 7은 Viewer page bounds clipping 보정으로 진행한다.
+Stage 7 이후 문서 전환 이미지 캐시 회귀를 반영해 Stage 8~9를 보강했다. Stage 8은 renderer image cache 문서 전환 보정으로 진행한다.
