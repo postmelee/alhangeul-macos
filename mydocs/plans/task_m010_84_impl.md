@@ -193,7 +193,7 @@ Task #84 Stage 5: Viewer 초기 페이지 선로딩 보정
 ### 작업
 
 - `DocumentPageNSView.viewDidMoveToWindow()`의 즉시 redraw와 다음 runloop redraw를 제거한다.
-- `configure(...)`의 content invalidation과 `setFrameSize(_:)` redraw는 유지한다.
+- `configure(...)`의 content invalidation은 유지한다.
 - `DocumentViewerStore`의 초기 page 0/1 선로딩은 유지한다.
 
 ### 검증 명령
@@ -217,7 +217,51 @@ xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug 
 Task #84 Stage 6: Viewer redraw 보강 범위 정리
 ```
 
-## Stage 7. 보고서와 작업 상태 정리
+## Stage 7. Viewer page bounds clipping 렌더 회귀 수정
+
+### 목적
+
+첫 페이지 로드 수정 이후 `복학원서.hwp`에서 page 오른쪽/아래 바깥으로 일부 텍스트가 새는 Viewer 렌더 회귀를 수정한다.
+
+### 변경 대상
+
+- `Sources/HostApp/Views/DocumentPageView.swift`
+- `mydocs/plans/task_m010_84.md`
+- `mydocs/plans/task_m010_84_impl.md`
+- `mydocs/working/task_m010_84_stage7.md`
+
+### 작업
+
+- `DocumentPageNSView`의 `layerContentsRedrawPolicy` 설정을 제거한다.
+- `DocumentPageNSView.setFrameSize(_:)` redraw override를 제거한다.
+- `invalidateDrawing()`은 `needsDisplay = true`만 수행하도록 축소한다.
+- `draw(_:)`에서 `context.clip(to: bounds)`를 먼저 적용해 page view 바깥 drawing을 차단한다.
+- `DocumentViewerStore`의 초기 page 0/1 선로딩은 유지한다.
+
+### 검증 명령
+
+```bash
+git diff --check
+xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build
+./scripts/render-debug-compare.sh /tmp/rhwp-stage7-bokhak-task84 --page 1 samples/복학원서.hwp
+./scripts/render-debug-compare.sh /tmp/rhwp-stage7-table-vpos-page1-task84 --page 1 /Users/melee/Documents/samples/table-vpos-01.hwp
+./scripts/render-debug-compare.sh /tmp/rhwp-stage7-table-vpos-page2-task84 --page 2 /Users/melee/Documents/samples/table-vpos-01.hwp
+```
+
+### 확인 기준
+
+- HostApp Debug build가 성공한다.
+- `복학원서.hwp` page 1 render data가 계속 정상 생성된다.
+- `table-vpos-01.hwp` page 1/2 render data가 계속 정상 생성된다.
+- 실제 UI 확인은 작업지시자가 동일 앱 실행 경로로 재검증한다.
+
+### 커밋 메시지
+
+```text
+Task #84 Stage 7: Viewer page clipping 회귀 수정
+```
+
+## Stage 8. 보고서와 작업 상태 정리
 
 ### 목적
 
@@ -225,7 +269,7 @@ Task #84 Stage 6: Viewer redraw 보강 범위 정리
 
 ### 변경 대상
 
-- `mydocs/working/task_m010_84_stage7.md`
+- `mydocs/working/task_m010_84_stage8.md`
 - `mydocs/report/task_m010_84_report.md`
 - `mydocs/orders/20260429.md`
 
@@ -243,9 +287,9 @@ Task #84 Stage 6: Viewer redraw 보강 범위 정리
 ### 커밋 메시지
 
 ```text
-Task #84 Stage 7 + 최종 보고서: Viewer 첫 페이지 로드 수정 완료
+Task #84 Stage 8 + 최종 보고서: Viewer 첫 페이지 로드 수정 완료
 ```
 
 ## 승인 요청 사항
 
-Stage 5 실제 UI 성공을 반영해 Stage 6~7을 보강했다. Stage 6은 원인 해결에 필수적이지 않은 `DocumentPageNSView` window attach redraw 제거로 진행한다.
+Stage 6 이후 렌더 회귀를 반영해 Stage 7~8을 보강했다. Stage 7은 Viewer page bounds clipping 보정으로 진행한다.

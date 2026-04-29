@@ -49,21 +49,11 @@ final class DocumentPageNSView: NSView {
 
     private func configureLayer() {
         wantsLayer = true
-        layerContentsRedrawPolicy = .onSetNeedsDisplay
         layer?.backgroundColor = NSColor.white.cgColor
-    }
-
-    override func setFrameSize(_ newSize: NSSize) {
-        let oldSize = frame.size
-        super.setFrameSize(newSize)
-        if oldSize != newSize {
-            invalidateDrawing()
-        }
     }
 
     private func invalidateDrawing() {
         needsDisplay = true
-        layer?.setNeedsDisplay()
     }
 
     override func draw(_ dirtyRect: NSRect) {
@@ -76,6 +66,7 @@ final class DocumentPageNSView: NSView {
         }
 
         context.saveGState()
+        context.clip(to: bounds)
         context.setFillColor(CGColor(gray: 1, alpha: 1))
         context.fill(bounds)
         context.scaleBy(x: zoomScale, y: zoomScale)
