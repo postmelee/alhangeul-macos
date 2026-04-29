@@ -67,7 +67,7 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func loadPage(_ page: Int) {
-        guard pageTrees[page] == nil, let document else {
+        guard page >= 0, page < pageCount, pageTrees[page] == nil, let document else {
             return
         }
         pageTrees[page] = document.renderPageTree(at: page)
@@ -105,6 +105,18 @@ final class DocumentViewerStore: ObservableObject {
         self.filename = filename
         currentPage = 0
         zoomScale = 0.8
+        preloadInitialPages()
+    }
+
+    private func preloadInitialPages() {
+        let preloadCount = min(2, pageCount)
+        guard preloadCount > 0 else {
+            return
+        }
+
+        for page in 0..<preloadCount {
+            loadPage(page)
+        }
     }
 }
 

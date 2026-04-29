@@ -138,6 +138,25 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 ./scripts/validate-stage3-render.sh
 ```
 
+역할:
+
+- 기본 샘플에서 `RhwpDocument` open, page count, render tree 생성, page size 조회가 가능한지 확인한다.
+- render tree에 text run과 한글 text run이 있는지 확인한다.
+- CoreText glyph lookup에서 한글 glyph가 빠지지 않는지 확인한다.
+- `CGTreeRenderer`로 첫 페이지 native PNG를 만들고, 완전히 빈 bitmap이 아닌지 확인한다.
+
+기본 출력 위치는 `output/stage3-render/`다. 첫 번째 인자로 출력 디렉터리를 바꾸고, 그 뒤에 샘플 파일을 나열하면 특정 파일만 smoke 확인할 수 있다.
+
+```bash
+./scripts/validate-stage3-render.sh output/stage3-render-custom path/to/sample.hwp
+```
+
+사용법만 확인할 때는 Rust bridge 산출물 없이도 다음 명령을 사용할 수 있다.
+
+```bash
+./scripts/validate-stage3-render.sh --help
+```
+
 기본 샘플:
 
 - `samples/basic/KTX.hwp`
@@ -145,6 +164,8 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 - `samples/exam_kor.hwp`
 
 기본 render smoke fixture는 앱 저장소 루트의 `samples/`가 소유한다. core 저장소 내부 샘플 경로는 기본 검증 경로로 사용하지 않는다.
+
+이 smoke test는 최소 회귀 관문이다. 통과해도 한컴 viewer 또는 rhwp core SVG와의 시각 정합성을 보장하지 않는다. 특정 문서에서 본문, 표, 도형, 이미지가 빠지거나 위치가 어긋나 보이면 다음의 core/native 렌더 비교 디버깅으로 넘어간다.
 
 ## core/native 렌더 비교 디버깅
 
@@ -156,7 +177,14 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 
 이 스크립트는 render tree JSON, rhwp core SVG, native renderer PNG, summary를 생성한다. `qlmanage`가 동작하는 환경에서는 core SVG raster PNG와 pixel diff PNG도 선택적으로 생성한다.
 
-상세 절차와 판단 기준은 [`render_core_native_compare.md`](../troubleshootings/render_core_native_compare.md)를 따른다.
+사용 시점:
+
+- `validate-stage3-render.sh`는 통과했지만 특정 문서의 시각 결과가 이상할 때
+- rhwp core SVG에는 보이는 내용이 native PNG에는 빠질 때
+- render tree JSON에 필요한 node, transform, clipping, image id, text style이 있는지 확인해야 할 때
+- renderer 수정 전후 같은 문서에서 차이가 줄었는지 비교 자료를 남겨야 할 때
+
+상세 절차와 판단 기준은 [`render_core_native_compare_guide.md`](render_core_native_compare_guide.md)를 따른다.
 
 ## Shared Swift bridge 검사
 
