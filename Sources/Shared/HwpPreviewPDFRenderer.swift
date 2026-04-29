@@ -7,8 +7,15 @@ struct HwpRenderedPreviewPDF {
     let pageCount: Int
 }
 
+struct HwpPreviewDocumentInfo {
+    let data: Data
+    let filename: String
+    let contentSize: CGSize
+    let pageCount: Int
+}
+
 enum HwpPreviewPDFRenderer {
-    static func render(fileURL: URL) throws -> HwpRenderedPreviewPDF {
+    static func inspect(fileURL: URL) throws -> HwpPreviewDocumentInfo {
         let values = try fileURL.resourceValues(forKeys: [.fileSizeKey])
         if let fileSize = values.fileSize, fileSize > hwpQuickLookMaxFileSize {
             throw HwpRenderError.fileTooLarge
@@ -26,6 +33,35 @@ enum HwpPreviewPDFRenderer {
             throw HwpRenderError.invalidPageSize
         }
 
+        return HwpPreviewDocumentInfo(
+            data: data,
+            filename: fileURL.lastPathComponent,
+            contentSize: CGSize(width: firstPageSize.width, height: firstPageSize.height),
+            pageCount: pageCount
+        )
+    }
+
+    static func render(fileURL: URL) throws -> HwpRenderedPreviewPDF {
+        try render(previewInfo: inspect(fileURL: fileURL))
+    }
+
+    static func render(previewInfo: HwpPreviewDocumentInfo) throws -> HwpRenderedPreviewPDF {
+        let document = try RhwpDocument(
+            data: previewInfo.data,
+            filename: previewInfo.filename
+        )
+        return try render(
+            document: document,
+            pageCount: previewInfo.pageCount,
+            contentSize: previewInfo.contentSize
+        )
+    }
+
+    private static func render(
+        document: RhwpDocument,
+        pageCount: Int,
+        contentSize: CGSize
+    ) throws -> HwpRenderedPreviewPDF {
         let pdfData = NSMutableData()
         guard let consumer = CGDataConsumer(data: pdfData as CFMutableData) else {
             throw HwpRenderError.pdfEncodingFailed
@@ -33,7 +69,7 @@ enum HwpPreviewPDFRenderer {
 
         var mediaBox = CGRect(
             origin: .zero,
-            size: CGSize(width: firstPageSize.width, height: firstPageSize.height)
+            size: contentSize
         )
         guard let context = CGContext(consumer: consumer, mediaBox: &mediaBox, nil) else {
             throw HwpRenderError.pdfEncodingFailed
@@ -54,7 +90,7 @@ enum HwpPreviewPDFRenderer {
 
         return HwpRenderedPreviewPDF(
             data: pdfData as Data,
-            contentSize: mediaBox.size,
+            contentSize: contentSize,
             pageCount: pageCount
         )
     }

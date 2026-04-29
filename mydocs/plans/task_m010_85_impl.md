@@ -242,9 +242,70 @@ qlmanage -r cache
 Task #85 Stage 4 + 최종 보고서: Quick Look 전체 페이지 검증과 보고
 ```
 
+## Stage 5. Quick Look preview 응답 지연 보정
+
+### 배경
+
+Stage 4 완료 후 작업지시자가 제공한 Finder Quick Look 영상에서, 목록을 빠르게 전환하는 동안 preview가 즉시 갱신되지 않고 선택 전환을 멈춘 뒤 로딩이 시작되는 현상이 확인됐다. Stage 3 구현은 `providePreview` 안에서 전체 페이지 PDF data를 먼저 만든 뒤 `QLPreviewReply`를 반환하므로, 긴 문서일수록 Quick Look 응답 생성 자체가 늦어질 수 있다.
+
+### 목표
+
+- Quick Look provider가 reply를 반환하기 전에 수행하는 작업을 최소화한다.
+- 단일 페이지 문서는 PDF container가 아니라 PNG reply로 처리해 기존 PNG 기반 preview의 빠른 경로를 복원한다.
+- 다중 페이지 문서는 전체 페이지 PDF 생성을 유지하되, 생성 시점을 `QLPreviewReply` data creation block으로 옮긴다.
+- 현재 data reply 구조에서 true lazy pagination이 어려운 이유를 최종 보고서에 남긴다.
+
+### 작업
+
+- `HwpPreviewPDFRenderer.inspect(fileURL:)`를 추가해 파일 크기, 원본 data, filename, page count, 첫 페이지 크기만 먼저 수집한다.
+- `HwpPreviewProvider.providePreview`의 `MainActor.run` 경계를 제거해 Quick Look 요청 처리 중 무거운 렌더링이 main actor에 묶이지 않게 한다.
+- page count가 1이면 `.png` data reply를 반환하고, data block 안에서 첫 페이지 PNG를 생성한다.
+- page count가 2 이상이면 `.pdf` data reply를 반환하고, data block 안에서 `HwpPreviewPDFRenderer.render(previewInfo:)`를 호출한다.
+- 기존 50 MB 초과 plain text fallback은 유지한다.
+
+### 완료 기준
+
+- `providePreview`는 전체 페이지 PDF data 생성을 완료하지 않고 reply를 반환한다.
+- 단일 페이지 문서는 PNG reply 경로를 사용한다.
+- 다중 페이지 문서의 전체 페이지 preview 산출은 유지된다.
+- `Sources/RhwpCoreBridge`에는 변경이 없다.
+- Stage 4 최종 보고서가 Stage 5 결과와 제한 사항까지 포함하도록 갱신된다.
+
+### 검증
+
+```bash
+git diff --check
+./scripts/check-no-appkit.sh
+xcodebuild -project AlhangeulMac.xcodeproj \
+  -scheme HostApp \
+  -configuration Debug \
+  -derivedDataPath build.noindex/DerivedData \
+  CODE_SIGNING_ALLOWED=NO \
+  build
+./scripts/validate-stage3-render.sh
+build.noindex/preview_pdf_check \
+  samples/basic/KTX.hwp \
+  samples/hwp-multi-001.hwp \
+  samples/hwpx/hwpx-01.hwpx
+./scripts/package-release.sh 0.1.0
+qlmanage -p samples/basic/KTX.hwp
+qlmanage -p samples/hwp-multi-001.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql-task85-stage5-thumbnail \
+  samples/basic/KTX.hwp \
+  samples/hwp-multi-001.hwp \
+  samples/hwpx/hwpx-01.hwpx
+```
+
+### 커밋 메시지
+
+```text
+Task #85 Stage 5 + 최종 보고서: Quick Look preview 응답 지연 보정
+```
+
 ## 승인 요청 사항
 
-1. 본 구현계획서의 4단계 분해와 단계별 변경 범위
+1. 본 구현계획서의 초기 4단계 분해와 추가 Stage 5 변경 범위
 2. Stage 3의 1차 구현 방식을 “페이지별 bitmap을 PDF page에 삽입하는 Quick Look 표시용 PDF”로 고정하는 결정
 3. 기본 목표는 모든 페이지 표시로 두고, page cap은 Stage 1 또는 Stage 3에서 실제 안정성 문제가 확인될 때만 재승인받는 결정
-4. 본 구현계획서 승인 후 Stage 1 설계 확인부터 순차 진행
+4. Stage 4 이후 확인된 preview 응답 지연은 Stage 5에서 PR 전 보정하는 결정
+5. 본 구현계획서 승인 후 Stage 1 설계 확인부터 순차 진행

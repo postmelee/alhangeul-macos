@@ -18,7 +18,7 @@ Sources/
 | `HostApp/` | 파일 열기, 보안 범위 접근, viewer 상태, page cache, zoom, SwiftUI/AppKit viewer UI | `HostApp` |
 | `QLExtension/` | Finder Quick Look preview provider | `QLExtension` |
 | `ThumbnailExtension/` | Finder thumbnail provider와 thumbnail render cache | `ThumbnailExtension` |
-| `Shared/` | page bitmap 렌더링과 Quick Look 표시용 PDF preview 등 HostApp/extension 공통 macOS helper | `HostApp`, `QLExtension`, `ThumbnailExtension` |
+| `Shared/` | page bitmap 렌더링과 Quick Look 표시용 PNG/PDF preview 등 HostApp/extension 공통 macOS helper | `HostApp`, `QLExtension`, `ThumbnailExtension` |
 | `RhwpCoreBridge/` | `Rhwp` C module 호출, 문서 핸들 수명, render tree 디코딩, CoreGraphics/CoreText renderer | `HostApp`, `QLExtension`, `ThumbnailExtension` |
 
 ## 경계 규칙
