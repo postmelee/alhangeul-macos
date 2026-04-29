@@ -17,6 +17,7 @@
 		34FB4A934C2B659E514A5949 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 801780F983F003C6DFC80985 /* Assets.xcassets */; };
 		3983B75CF83B8AEE507E8E1C /* AboutWindowPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6D138713B5F823A5DBB04D /* AboutWindowPresenter.swift */; };
 		3B375686F959A430270401B2 /* ThumbnailExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 840B8833500367957AD264C8 /* ThumbnailExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3E077BB5DB9902710D60897D /* HwpPreviewPDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4D838A2F8FB4DCE68BAA997 /* HwpPreviewPDFRenderer.swift */; };
 		3E493DF69BC4FDC843C07693 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FB9505A870E7B20DEBD9A3 /* HwpPageImageRenderer.swift */; };
 		3FD0D49E5FCDCB09A8E4823B /* CGTreeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4C7377B231BA12026CD0A8 /* CGTreeRenderer.swift */; };
 		5222F18B40FB3ABEAEA82A7D /* HwpThumbnailProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3EBDA3B97538A87F0EFE88 /* HwpThumbnailProvider.swift */; };
@@ -31,6 +32,7 @@
 		97E1ACD2F018F402DB260CAF /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1779E2E87C0FA74DC44AF3 /* AboutView.swift */; };
 		991B52CE3A28EB6FAE5F9CF8 /* HwpPreviewProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6336DDBE52EE036D340608FB /* HwpPreviewProvider.swift */; };
 		A1BFACD9027F1E1DA79D4BB9 /* HwpThumbnailRenderCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D0A8A87C7F8BC532D06B42 /* HwpThumbnailRenderCache.swift */; };
+		A527CC8CABE3059B8D1CD683 /* HwpPreviewPDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4D838A2F8FB4DCE68BAA997 /* HwpPreviewPDFRenderer.swift */; };
 		AEE20A63B40F7FFC431D8951 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D96E5B8871F5D53AF7C9737 /* ContentView.swift */; };
 		B03E4C2EB35F596C18732916 /* RenderTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE58FDA2BFE00D5055F6ECCD /* RenderTree.swift */; };
 		B3F79EC93AADB1CA8D0FC270 /* RenderTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE58FDA2BFE00D5055F6ECCD /* RenderTree.swift */; };
@@ -40,6 +42,7 @@
 		CAF06139B7E075DB501E30CA /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FB9505A870E7B20DEBD9A3 /* HwpPageImageRenderer.swift */; };
 		CE5A8FEBAA0993534910C8FD /* QLExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 89902FCF2BE44AEF39BCB0F1 /* QLExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CFFF9F1BE5247CCBA08920C6 /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA8BCDFCBEAD6115FFE3554A /* Rhwp.xcframework */; };
+		E2DACE22C6C9BD17E367BD50 /* HwpPreviewPDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4D838A2F8FB4DCE68BAA997 /* HwpPreviewPDFRenderer.swift */; };
 		E6DA1AE00C56FA4ACAC605A4 /* DocumentPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB237499FC34A454309F367 /* DocumentPageView.swift */; };
 		EEC6A9F2ACF281D9D33B6504 /* sample.hwpx in Resources */ = {isa = PBXBuildFile; fileRef = C752144C36555537BC4E0BF6 /* sample.hwpx */; };
 		F1B85EC992E13A931CB0FD71 /* BuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF411BE8917A5D11B30729A /* BuildInfo.swift */; };
@@ -102,6 +105,7 @@
 		92C494752765F206E7932946 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		9D3EBDA3B97538A87F0EFE88 /* HwpThumbnailProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpThumbnailProvider.swift; sourceTree = "<group>"; };
 		9D96E5B8871F5D53AF7C9737 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A4D838A2F8FB4DCE68BAA997 /* HwpPreviewPDFRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewPDFRenderer.swift; sourceTree = "<group>"; };
 		AC6D138713B5F823A5DBB04D /* AboutWindowPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutWindowPresenter.swift; sourceTree = "<group>"; };
 		AE58FDA2BFE00D5055F6ECCD /* RenderTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderTree.swift; sourceTree = "<group>"; };
 		B22508A024E2FE008BFAF33F /* QLExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QLExtension.entitlements; sourceTree = "<group>"; };
@@ -272,6 +276,7 @@
 			isa = PBXGroup;
 			children = (
 				B2FB9505A870E7B20DEBD9A3 /* HwpPageImageRenderer.swift */,
+				A4D838A2F8FB4DCE68BAA997 /* HwpPreviewPDFRenderer.swift */,
 			);
 			name = Shared;
 			path = Sources/Shared;
@@ -451,6 +456,7 @@
 				FF184117F80D4AEA69EDF5F6 /* CGTreeRenderer.swift in Sources */,
 				79668181738E40F261D667EC /* FontFallback.swift in Sources */,
 				19F30C2E288F6D6DA3183F40 /* HwpPageImageRenderer.swift in Sources */,
+				A527CC8CABE3059B8D1CD683 /* HwpPreviewPDFRenderer.swift in Sources */,
 				991B52CE3A28EB6FAE5F9CF8 /* HwpPreviewProvider.swift in Sources */,
 				B3F79EC93AADB1CA8D0FC270 /* RenderTree.swift in Sources */,
 				BBFAE4053610E4709017492E /* RhwpDocument.swift in Sources */,
@@ -464,6 +470,7 @@
 				3FD0D49E5FCDCB09A8E4823B /* CGTreeRenderer.swift in Sources */,
 				FBB2FF90A8C4EE910CC0CA57 /* FontFallback.swift in Sources */,
 				3E493DF69BC4FDC843C07693 /* HwpPageImageRenderer.swift in Sources */,
+				E2DACE22C6C9BD17E367BD50 /* HwpPreviewPDFRenderer.swift in Sources */,
 				5222F18B40FB3ABEAEA82A7D /* HwpThumbnailProvider.swift in Sources */,
 				A1BFACD9027F1E1DA79D4BB9 /* HwpThumbnailRenderCache.swift in Sources */,
 				B03E4C2EB35F596C18732916 /* RenderTree.swift in Sources */,
@@ -489,6 +496,7 @@
 				C120563EEF525AA2614D4105 /* FontFallback.swift in Sources */,
 				F55755A509DB49ADC3406419 /* HostApp.swift in Sources */,
 				CAF06139B7E075DB501E30CA /* HwpPageImageRenderer.swift in Sources */,
+				3E077BB5DB9902710D60897D /* HwpPreviewPDFRenderer.swift in Sources */,
 				10D474457FFCF2C2E5B1C3AE /* RenderTree.swift in Sources */,
 				13A6BD7074F74333D229983E /* RhwpDocument.swift in Sources */,
 			);
