@@ -153,6 +153,8 @@ Stage 5는 실제 다중 페이지 PDF 생성 비용을 없애지는 않는다. 
 - true lazy pagination은 후속 이슈로 분리했다.
   - [#87 PDFKit 기반 Quick Look lazy PDF preview 가능성 검증](https://github.com/postmelee/alhangeul-macos/issues/87)
   - [#88 View-based Quick Look preview visible-page lazy rendering 전환](https://github.com/postmelee/alhangeul-macos/issues/88)
+- `복학원서.hwp`의 page bbox 밖 layout overflow 렌더 품질 문제는 이번 #85에서 새로 만든 회귀가 아니므로 별도 후속 이슈로 분리했다.
+  - [#90 복학원서.hwp page bbox 밖 layout overflow 렌더 품질 조사](https://github.com/postmelee/alhangeul-macos/issues/90)
 
 ## 작업지시자 승인 요청
 

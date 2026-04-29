@@ -254,6 +254,7 @@ Done producing thumbnails
 - 단일 페이지 PNG preview smoke에서 ImageKit 로그가 출력됐다. 표시 crash는 없었지만 설치본 실사용 중 같은 로그가 반복되는지 관찰 대상이다.
 - `qlmanage -p -o` 출력 파일 모드는 Stage 4에서 ExtensionFoundation 예외가 확인됐다. 사용자-facing 일반 preview와 thumbnail 경로는 통과했다.
 - true lazy pagination은 [#87](https://github.com/postmelee/alhangeul-macos/issues/87), [#88](https://github.com/postmelee/alhangeul-macos/issues/88) 후속 이슈로 분리했다.
+- `복학원서.hwp`의 page bbox 밖 layout overflow 렌더 품질 문제는 이번 #85에서 새로 만든 회귀가 아니므로 [#90](https://github.com/postmelee/alhangeul-macos/issues/90) 후속 이슈로 분리했다.
 
 ## 다음 단계 영향
 
