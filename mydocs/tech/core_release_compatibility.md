@@ -10,7 +10,7 @@
 
 앱 저장소의 Stable core 안정 기준은 다음 둘을 함께 고정하는 것이다.
 
-- `release tag`: GitHub release tag 이름. 예: `v0.7.7`
+- `release tag`: GitHub release tag 이름. 예: `v0.7.8`
 - `resolved commit`: tag가 가리키는 실제 commit SHA. annotated tag인 경우 tag object가 아니라 `^{commit}`으로 해석한 commit이다.
 
 Stable release tag 전환 이후 `rhwp-core.lock`은 최소한 다음 의미를 가져야 한다.
@@ -58,42 +58,52 @@ ffi_symbols_file = "rhwp-ffi-symbols.txt"
 
 Demo/Preview도 branch dependency는 사용하지 않는다. 반드시 commit SHA를 `rev`로 고정하고, `Cargo.lock`, `rhwp-core.lock`, 산출물 hash/size를 함께 남긴다.
 
-현재 Demo/Preview 후보 dependency 형식:
+현재 Stable dependency 형식:
 
 ```toml
-rhwp = { git = "https://github.com/edwardkim/rhwp.git", rev = "e91ecea3174a0da0ad7a1ea495cacc4f8772c31d" }
+rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "v0.7.8" }
 ```
 
 ## 현재 release 상태
 
-2026-04-29 확인 기준 최신 release는 다음이다.
+2026-04-30 확인 기준 최신 release는 다음이다.
 
 ```text
-release tag: v0.7.7
+release tag: v0.7.8
 target branch: main
-publishedAt: 2026-04-27T04:21:36Z
-resolved commit: 033617e23847982135c02091a62f55031a3817b5
+publishedAt: 2026-04-29T03:09:48Z
+resolved commit: 42cf91b6ba7b50fa1c853c01158a52ef68b45442
 ```
 
-`v0.7.7` 확인 명령은 다음 누락을 보고한다.
+`v0.7.8` 확인 명령은 required API gate를 통과한다.
 
 ```text
-ERROR: missing core API: build_page_render_tree
-ERROR: missing core API: target 033617e23847982135c02091a62f55031a3817b5 does not satisfy RustBridge requirements
+Checked rhwp core target:
+  channel: stable
+  tag:     v0.7.8
+  commit:  42cf91b6ba7b50fa1c853c01158a52ef68b45442
 ```
 
-따라서 현재 `v0.7.7`은 native render tree 경로를 유지하는 앱 기준을 충족하지 못한다. 실패 유형은 `missing core API`다.
+따라서 현재 앱 저장소는 `v0.7.8` Stable release tag pin으로 전환되어 있다.
 
-현재 lock commit `e91ecea3174a0da0ad7a1ea495cacc4f8772c31d`에는 RustBridge가 요구하는 core API가 포함되어 있으므로 Demo/Preview용 commit-pinned git dependency로 사용한다. 이 commit은 upstream PR #385 merge commit이며, release tag 안정 기준이 아니므로 Stable 배포 기준으로 승격하지 않는다.
+현재 lock 기준:
 
-2026-04-29 기준 alhangeul-macos use case 검증 결과는 다음이다.
+```text
+rhwp_release_tag: v0.7.8
+rhwp_commit: 42cf91b6ba7b50fa1c853c01158a52ef68b45442
+RustBridge/Cargo.lock source: git+https://github.com/edwardkim/rhwp.git?tag=v0.7.8#42cf91b6ba7b50fa1c853c01158a52ef68b45442
+```
+
+`v0.7.8`에는 PR #385의 PageRenderTree API와 PR #419의 PageLayerTree API가 포함되어 있다. alhangeul-macos는 이번 전환에서 기존 PageRenderTree 기반 C ABI와 Swift renderer를 유지하며, PageLayerTree 기반 Swift renderer 전환과 신규 ABI 추가는 후속 작업으로 분리한다.
+
+2026-04-30 기준 alhangeul-macos use case 검증 결과는 다음이다.
 
 - RustBridge lock verify, FFI symbol diff, no-AppKit 검증 통과
 - HostApp Debug build 통과
 - 기본 render smoke 통과: `KTX.hwp`, `request.hwp`, `exam_kor.hwp`
 - 이미지 포함 샘플의 `bin_data_id` 기반 `rhwp_image_data` 조회 smoke 통과
-- Release package 산출물을 표준 설치 경로에 설치한 뒤 Quick Look preview와 Finder thumbnail 직접 확인 완료
-- `qlmanage -t` thumbnail smoke 통과: `KTX.hwp`, `request.hwp`, `KTX-003.hwp`, `exam_kor.hwp`, 이미지 포함 샘플 4개
+- 작업지시자 수동 smoke: HostApp, Quick Look Preview, Finder Thumbnail 체크리스트 통과
+- `qlmanage -t` thumbnail smoke 통과: `hwp-multi-001.hwp`, `20250130-hongbo.hwp`
 
 ## RustBridge core API contract
 
