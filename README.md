@@ -253,6 +253,7 @@ open build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app
 - Core dependency - [core dependency 운영 가이드](mydocs/manual/core_dependency_operation_guide.md)
 - release packaging, signing, notarization - [릴리스/배포 가이드](mydocs/manual/release_distribution_guide.md)
 - Finder extension 등록 검증 - [빌드 및 실행 가이드](mydocs/manual/build_run_guide.md)
+- renderer 비교 디버깅 - [core/native 렌더 비교 가이드](mydocs/manual/render_core_native_compare_guide.md)
 
 ## Project Structure
 
@@ -367,11 +368,19 @@ local/task{N}  ──커밋──커밋──┐
 
 ### 디버깅 프로토콜
 
-1. `validate-stage3-render.sh` → 기본 샘플 렌더링 확인
-2. `pluginkit -m` → Quick Look/Thumbnail extension 등록 확인
-3. `qlmanage -p` → Finder preview 경로 확인
-4. `render-debug-compare.sh` → 특정 파일의 render tree JSON, core SVG, native PNG, pixel diff 산출
-5. 필요 시 별도 `edwardkim/rhwp` clone 또는 Cargo checkout에서 core rendering data 확인
+렌더링 문제:
+
+1. `validate-stage3-render.sh` → 기본 샘플의 native render pipeline smoke 확인
+2. `render-debug-compare.sh` → 특정 파일의 render tree JSON, core SVG, native PNG, pixel diff 산출
+3. core SVG와 native PNG가 다르면 [core/native 렌더 비교 가이드](mydocs/manual/render_core_native_compare_guide.md)에 따라 Swift renderer 문제와 core 문제를 분리
+4. 필요 시 별도 `edwardkim/rhwp` clone 또는 Cargo checkout에서 core rendering data 확인
+
+Finder/Quick Look 통합 문제:
+
+1. `pluginkit -mAvvv | grep com.postmelee.alhangeulmac` → extension 등록 후보 확인
+2. `qlmanage -p` → Finder preview 경로 확인
+3. `qlmanage -t -x` → thumbnail 생성 경로 확인
+4. 반복 시행착오는 [Finder 통합 검증 시행착오 방지 가이드](mydocs/troubleshootings/finder_integration_validation_pitfalls.md)를 확인
 
 ### 문서 생성 규칙
 
