@@ -8,5 +8,5 @@ license = "MIT"
 crate-type = ["staticlib"]
 
 [dependencies]
-rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "v0.7.8" }
+rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "v0.7.9" }
 serde_json = "1"
