@@ -10,7 +10,7 @@
 
 앱 저장소의 Stable core 안정 기준은 다음 둘을 함께 고정하는 것이다.
 
-- `release tag`: GitHub release tag 이름. 예: `v0.7.8`
+- `release tag`: GitHub release tag 이름. 예: `v0.7.9`
 - `resolved commit`: tag가 가리키는 실제 commit SHA. annotated tag인 경우 tag object가 아니라 `^{commit}`으로 해석한 commit이다.
 
 Stable release tag 전환 이후 `rhwp-core.lock`은 최소한 다음 의미를 가져야 한다.
@@ -61,49 +61,65 @@ Demo/Preview도 branch dependency는 사용하지 않는다. 반드시 commit SH
 현재 Stable dependency 형식:
 
 ```toml
-rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "v0.7.8" }
+rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "v0.7.9" }
 ```
 
 ## 현재 release 상태
 
-2026-04-30 확인 기준 최신 release는 다음이다.
+2026-05-01 확인 기준 현재 Stable release pin은 다음이다.
 
 ```text
-release tag: v0.7.8
+release tag: v0.7.9
 target branch: main
-publishedAt: 2026-04-29T03:09:48Z
-resolved commit: 42cf91b6ba7b50fa1c853c01158a52ef68b45442
+publishedAt: 2026-04-30T23:44:59Z
+resolved commit: 0fb3e6758b8ad11d2f3c3849c83b914684e83863
 ```
 
-`v0.7.8` 확인 명령은 required API gate를 통과한다.
+`v0.7.9` 확인 명령은 required API gate를 통과한다.
 
 ```text
 Checked rhwp core target:
   channel: stable
-  tag:     v0.7.8
-  commit:  42cf91b6ba7b50fa1c853c01158a52ef68b45442
+  tag:     v0.7.9
+  commit:  0fb3e6758b8ad11d2f3c3849c83b914684e83863
 ```
 
-따라서 현재 앱 저장소는 `v0.7.8` Stable release tag pin으로 전환되어 있다.
+따라서 현재 앱 저장소는 `v0.7.9` Stable release tag pin으로 전환되어 있다.
 
 현재 lock 기준:
 
 ```text
-rhwp_release_tag: v0.7.8
-rhwp_commit: 42cf91b6ba7b50fa1c853c01158a52ef68b45442
-RustBridge/Cargo.lock source: git+https://github.com/edwardkim/rhwp.git?tag=v0.7.8#42cf91b6ba7b50fa1c853c01158a52ef68b45442
+rhwp_release_tag: v0.7.9
+rhwp_commit: 0fb3e6758b8ad11d2f3c3849c83b914684e83863
+RustBridge/Cargo.lock source: git+https://github.com/edwardkim/rhwp.git?tag=v0.7.9#0fb3e6758b8ad11d2f3c3849c83b914684e83863
 ```
 
-`v0.7.8`에는 PR #385의 PageRenderTree API와 PR #419의 PageLayerTree API가 포함되어 있다. alhangeul-macos는 이번 전환에서 기존 PageRenderTree 기반 C ABI와 Swift renderer를 유지하며, PageLayerTree 기반 Swift renderer 전환과 신규 ABI 추가는 후속 작업으로 분리한다.
+현재 artifact 기준:
 
-2026-04-30 기준 alhangeul-macos use case 검증 결과는 다음이다.
+```text
+Frameworks/universal/librhwp.a
+sha256: 4fc34a8cb7b6489d18705ee342fab13a79df5bd559893c10c163a0787c04e619
+size: 104179008
+
+Frameworks/generated_rhwp.h
+sha256: 69aeca5047bf743286d1b2260f8fc9a091ce4f1d7fd61c80084fab81c3a95ac5
+size: 1349
+```
+
+`v0.7.9`에는 현재 RustBridge가 요구하는 PageRenderTree API와 PageLayerTree API가 포함되어 있다. alhangeul-macos는 이번 전환에서 기존 PageRenderTree 기반 C ABI와 Swift renderer를 유지하며, PageLayerTree 기반 Swift renderer 전환과 신규 ABI 추가는 후속 작업으로 분리한다.
+
+`v0.7.9` release note 기준 앱 영향 범위는 비정상 큰 `cell.padding` 방어 로직 보정과 그림/레이아웃 관련 외부 PR cherry-pick이다. 앱 저장소는 core source를 수정하지 않고 release tag pin, Rust bridge 산출물 provenance, macOS viewer/extension smoke 검증으로 전환을 완료했다.
+
+2026-05-01 기준 alhangeul-macos use case 검증 결과는 다음이다.
 
 - RustBridge lock verify, FFI symbol diff, no-AppKit 검증 통과
 - HostApp Debug build 통과
 - 기본 render smoke 통과: `KTX.hwp`, `request.hwp`, `exam_kor.hwp`
-- 이미지 포함 샘플의 `bin_data_id` 기반 `rhwp_image_data` 조회 smoke 통과
-- 작업지시자 수동 smoke: HostApp, Quick Look Preview, Finder Thumbnail 체크리스트 통과
-- `qlmanage -t` thumbnail smoke 통과: `hwp-multi-001.hwp`, `20250130-hongbo.hwp`
+- Release package 생성과 `$HOME/Applications/AlhangeulMac.app` 설치/등록 완료
+- PlugInKit에서 Preview/Thumbnail extension이 설치본 경로로 등록됨
+- `qlmanage -t` thumbnail smoke 통과: `samples/basic/KTX.hwp`
+- Release 앱 viewer smoke 통과: `samples/basic/KTX.hwp` open과 viewer window 생성 확인
+- `qlmanage -p` preview 자동 smoke는 `README.md` 대조군에서도 같은 ExtensionFoundation 예외가 발생해 환경 이슈로 분리. Preview extension 등록 자체는 PlugInKit 기준으로 확인됨.
 
 ## RustBridge core API contract
 
