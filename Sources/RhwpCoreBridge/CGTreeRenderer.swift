@@ -78,18 +78,23 @@ class CGTreeRenderer {
 
         case .rectangle(let rect):
             renderRectangle(rect, bbox: node.bbox, in: ctx)
+            renderChildren(node, in: ctx)
 
         case .line(let line):
             renderLine(line, bbox: node.bbox, in: ctx)
+            renderChildren(node, in: ctx)
 
         case .ellipse(let ell):
             renderEllipse(ell, bbox: node.bbox, in: ctx)
+            renderChildren(node, in: ctx)
 
         case .path(let path):
             renderPath(path, bbox: node.bbox, in: ctx)
+            renderChildren(node, in: ctx)
 
         case .image(let img):
             renderImage(img, bbox: node.bbox, in: ctx)
+            renderChildren(node, in: ctx)
 
         case .group:
             renderGroup(node, in: ctx)
