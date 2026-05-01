@@ -8,6 +8,8 @@ import Foundation
 import ImageIO
 
 class CGTreeRenderer {
+    private let imageCropUnitsPerPixel = 75.0
+
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
 
@@ -263,16 +265,35 @@ class CGTreeRenderer {
         ctx.saveGState()
         applyTransform(img.transform, bbox: bbox, in: ctx)
 
+        let drawImage = croppedImage(for: cgImage, crop: img.crop)
         let r = cgRect(bbox)
         // CG draw(image:) 는 이미지를 rect에 맞춰 그리지만 상하 반전으로 그린다.
         // 이미지 영역에서만 Y축 반전하여 올바르게 표시한다.
         ctx.saveGState()
         ctx.translateBy(x: r.minX, y: r.minY + r.height)
         ctx.scaleBy(x: 1, y: -1)
-        ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: r.width, height: r.height))
+        ctx.draw(drawImage, in: CGRect(x: 0, y: 0, width: r.width, height: r.height))
         ctx.restoreGState()
 
         ctx.restoreGState()
+    }
+
+    private func croppedImage(for image: CGImage, crop: [Int32]?) -> CGImage {
+        guard let crop, crop.count == 4 else { return image }
+
+        let imageWidth = Double(image.width)
+        let imageHeight = Double(image.height)
+        guard imageWidth > 0, imageHeight > 0 else { return image }
+
+        let left = max(0, floor(Double(crop[0]) / imageCropUnitsPerPixel))
+        let top = max(0, floor(Double(crop[1]) / imageCropUnitsPerPixel))
+        let right = min(imageWidth, ceil(Double(crop[2]) / imageCropUnitsPerPixel))
+        let bottom = min(imageHeight, ceil(Double(crop[3]) / imageCropUnitsPerPixel))
+
+        guard right > left, bottom > top else { return image }
+
+        let sourceRect = CGRect(x: left, y: top, width: right - left, height: bottom - top)
+        return image.cropping(to: sourceRect) ?? image
     }
 
     // MARK: - 그룹
