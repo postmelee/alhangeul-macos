@@ -20,8 +20,8 @@
 ## core 기준
 
 - Stable 안정 기준은 release tag + resolved commit. Demo/Preview는 필요한 API가 포함된 resolved commit을 `rev`로 고정.
-- 현재 `rhwp-core.lock`은 `v0.7.8` Stable release tag pin 상태다. `RustBridge/Cargo.toml`은 `tag = "v0.7.8"`을 사용하고, `RustBridge/Cargo.lock`과 `rhwp-core.lock`은 resolved commit `42cf91b6ba7b50fa1c853c01158a52ef68b45442`를 기록한다.
-- `v0.7.8`에는 현재 bridge가 요구하는 `build_page_render_tree`, `get_bin_data`, `render_page_svg_native`, `get_page_info_native`, `extract_thumbnail_only` API가 포함되어 있다.
+- 현재 `rhwp-core.lock`은 `v0.7.9` Stable release tag pin 상태다. `RustBridge/Cargo.toml`은 `tag = "v0.7.9"`를 사용하고, `RustBridge/Cargo.lock`과 `rhwp-core.lock`은 resolved commit `0fb3e6758b8ad11d2f3c3849c83b914684e83863`을 기록한다.
+- `v0.7.9`에는 현재 bridge가 요구하는 `build_page_render_tree`, `get_bin_data`, `render_page_svg_native`, `get_page_info_native`, `extract_thumbnail_only` API가 포함되어 있다.
 - `main`, `devel` 같은 branch는 필요한 API가 포함된 과도기 commit을 찾는 참고 출처일 뿐, 안정 기준으로 사용하지 않는다.
 - 채널별 dependency/lock 필드와 compatibility gate 상세는 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
 
