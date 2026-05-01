@@ -34,9 +34,21 @@ draw order는 core PageLayerTree builder와 맞춰 own node draw 후 children dr
 - `mydocs/working/task_m015_108_stage3.md`
 - `mydocs/working/task_m015_108_stage4.md`
 - `mydocs/report/task_m015_108_report.md`
+- `mydocs/report/assets/task_m015_108/bookreview-before-native.png`
+- `mydocs/report/assets/task_m015_108/bookreview-after-native.png`
 - `mydocs/orders/20260501.md`
 
 ## 검증 요약
+
+### 렌더 전후 스크린샷
+
+변경 전 Swift native renderer는 도형만 그리고 도형 children 아래 텍스트를 방문하지 못했다.
+
+![BookReview 변경 전 native render](assets/task_m015_108/bookreview-before-native.png)
+
+변경 후 Swift native renderer는 도형 children 아래 `TextLine`/`TextRun`까지 렌더한다.
+
+![BookReview 변경 후 native render](assets/task_m015_108/bookreview-after-native.png)
 
 ### Stage 1 기준 재현
 
