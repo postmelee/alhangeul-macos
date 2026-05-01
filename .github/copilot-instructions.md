@@ -20,7 +20,7 @@ Rendering and extension checks:
 
 Workflow and verification:
 - PRs normally target `devel`, come from `publish/taskN`, and are backed by a GitHub Issue and Korean task documents under `mydocs/`.
-- PR descriptions should use `.github/pull_request_template.md` and list only verification that was actually run.
+- PR descriptions should use `.github/pull_request_template.md`, separate the direct target task from contextual related issues, link each Stage summary to its report and commit, and list only verification that was actually run.
 - When a change touches RustBridge, core dependency, FFI, or generated bridge artifacts, expect `./scripts/build-rust-macos.sh` or `--verify-lock`, `./scripts/check-no-appkit.sh`, `xcodegen generate`, and HostApp `xcodebuild` as applicable.
 - When rendering behavior changes, expect `./scripts/validate-stage3-render.sh`; for visual differences or renderer bug fixes, expect `./scripts/render-debug-compare.sh` on relevant samples.
 - Do not request release, signing, notarization, or Homebrew Cask work unless the PR is explicitly about distribution.

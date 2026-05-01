@@ -54,14 +54,19 @@ allow_implicit_invocation: false
 7. devel 대상 draft PR 생성
    ```bash
    HEAD_SHA=$(git rev-parse HEAD)
+   PR_BODY=/tmp/task{N}-pr-body.md
+   # .github/pull_request_template.md를 출발점으로 삼아 최종 보고서와 단계 보고서 기준으로 "$PR_BODY" 작성
    gh pr create --base devel --head publish/task{N} --draft \
      --title "Task #{N}: {제목}" \
-     --template .github/pull_request_template.md
+     --body-file "$PR_BODY"
    ```
-   - PR 본문에 최종 보고서 핵심 발췌, 검증 결과, 수용 기준 충족 여부를 포함
-   - `문서` 섹션의 모든 문서는 `HEAD_SHA` 기준 `https://github.com/postmelee/alhangeul-macos/blob/{HEAD_SHA}/mydocs/...` URL로 연결
+   - PR 본문은 최대 4개 요약 bullet, Stage별 1줄 요약, 검증 결과, 남은 리스크를 포함
+   - Stage 제목은 단계 보고서 URL로, 옆의 짧은 commit SHA는 commit URL로 링크
+   - 작업 문서는 `HEAD_SHA` 기준 `https://github.com/postmelee/alhangeul-macos/blob/{HEAD_SHA}/mydocs/...` URL로 연결
    - 링크 표시는 raw URL이 아니라 `[파일명](URL)` 형식으로 작성
    - 상대 링크(`mydocs/...`)나 `blob/publish/task{N}/...` 링크는 사용하지 않음
+   - 시각적 변경사항이 있을 때만 Before/After 표를 유지
+   - 관련 이슈에는 대상 타스크가 아니라 선행, 후속, Epic, upstream, 참고 PR/issue만 작성
 8. 작업지시자에게 PR URL 전달과 리뷰·merge 승인 요청
 
 ## 검증
@@ -69,8 +74,10 @@ allow_implicit_invocation: false
 - 모든 단계 보고서 + 최종 보고서 존재
 - `git status --short` 결과 빈 출력
 - `gh pr view` 결과에 draft 상태 PR이 정확한 base/head로 등록
-- `gh pr view` 결과의 `문서` 섹션이 commit SHA 고정 URL과 `[파일명](URL)` 표시 형식을 사용
-- PR 본문 `문서` 섹션에 raw GitHub blob URL, 상대 링크, `blob/publish/task{N}` 링크 없음
+- PR 본문 `변경 내역`의 Stage별 요약이 단계 보고서 링크와 짧은 commit SHA 링크를 함께 사용
+- PR 본문 `변경 내역`의 작업 문서 항목이 commit SHA 고정 URL과 `[파일명](URL)` 표시 형식을 사용
+- PR 본문 작업 문서 항목에 raw GitHub blob URL, 상대 링크, `blob/publish/task{N}` 링크 없음
+- PR 본문에 실행하지 않은 검증 체크리스트가 남아 있지 않음
 - 오늘할일 #{N} 상태 `완료` + `완료: HH:mm`
 
 ## 절대 하지 말 것
