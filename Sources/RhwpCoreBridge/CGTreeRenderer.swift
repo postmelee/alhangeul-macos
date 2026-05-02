@@ -104,9 +104,8 @@ class CGTreeRenderer {
         case .textRun(let run):
             renderTextRun(run, bbox: node.bbox, in: ctx)
 
-        case .equation:
-            // M3에서 네이티브 수식 렌더링 예정
-            break
+        case .equation(let equation):
+            renderEquation(equation, bbox: node.bbox, in: ctx)
 
         case .formObject:
             // 양식 개체는 M3 이후
@@ -277,6 +276,258 @@ class CGTreeRenderer {
         ctx.restoreGState()
 
         ctx.restoreGState()
+    }
+
+    // MARK: - 수식 SVG fragment
+
+    private func parseEquationSVG(_ svgContent: String) -> [EquationSVGDrawItem] {
+        EquationSVGFragmentParser.parse(svgContent)
+    }
+
+    private func renderEquation(_ equation: EquationNode, bbox: BBox, in ctx: CGContext) {
+        let items = parseEquationSVG(equation.svgContent)
+        guard !items.isEmpty else { return }
+
+        let localBounds = equationLocalBounds(equation: equation, items: items)
+        guard localBounds.width > 0, localBounds.height > 0 else { return }
+
+        let scaleX = bbox.width / Double(localBounds.width)
+        let scaleY = bbox.height / Double(localBounds.height)
+        guard scaleX.isFinite, scaleY.isFinite, scaleX > 0, scaleY > 0 else { return }
+
+        let defaultColor = colorRefToCGColor(equation.color)
+
+        ctx.saveGState()
+        ctx.translateBy(x: CGFloat(bbox.x), y: CGFloat(bbox.y))
+        ctx.scaleBy(x: CGFloat(scaleX), y: CGFloat(scaleY))
+        ctx.translateBy(x: -localBounds.minX, y: -localBounds.minY)
+
+        for item in items {
+            renderEquationItem(item, defaultColor: defaultColor, in: ctx)
+        }
+
+        ctx.restoreGState()
+    }
+
+    private func equationLocalBounds(equation: EquationNode, items: [EquationSVGDrawItem]) -> CGRect {
+        if let layoutBox = equation.layoutBox, layoutBox.width > 0, layoutBox.height > 0 {
+            return CGRect(
+                x: layoutBox.x,
+                y: layoutBox.y,
+                width: layoutBox.width,
+                height: layoutBox.height
+            )
+        }
+
+        return equationItemBounds(items)
+    }
+
+    private func renderEquationItem(_ item: EquationSVGDrawItem, defaultColor: CGColor, in ctx: CGContext) {
+        switch item {
+        case .text(let text):
+            renderEquationText(text, defaultColor: defaultColor, in: ctx)
+        case .line(let line):
+            renderEquationLine(line, defaultColor: defaultColor, in: ctx)
+        case .path(let path):
+            renderEquationPath(path, defaultColor: defaultColor, in: ctx)
+        }
+    }
+
+    private func renderEquationText(_ text: EquationSVGText, defaultColor: CGColor, in ctx: CGContext) {
+        guard !text.text.isEmpty, text.fontSize > 0,
+              let color = cgColor(for: text.fill, defaultColor: defaultColor) else { return }
+
+        let fontSize = CGFloat(text.fontSize)
+        let fontName = equationFontName(for: text.text, familyList: text.fontFamily)
+        var font = CTFontCreateWithName(fontName as CFString, fontSize, nil)
+
+        if text.fontStyle?.lowercased() == "italic",
+           let italicFont = CTFontCreateCopyWithSymbolicTraits(
+            font,
+            fontSize,
+            nil,
+            .italicTrait,
+            .italicTrait
+           ) {
+            font = italicFont
+        }
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            coreTextFontKey: font,
+            coreTextForegroundColorKey: color,
+        ]
+        let attrStr = NSAttributedString(string: text.text, attributes: attributes)
+        let line = CTLineCreateWithAttributedString(attrStr)
+
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        var leading: CGFloat = 0
+        let width = CGFloat(CTLineGetTypographicBounds(line, &ascent, &descent, &leading))
+
+        var x = CGFloat(text.x)
+        switch text.textAnchor {
+        case .start:
+            break
+        case .middle:
+            x -= width / 2
+        case .end:
+            x -= width
+        }
+
+        ctx.saveGState()
+        ctx.translateBy(x: x, y: CGFloat(text.y))
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.textPosition = .zero
+        CTLineDraw(line, ctx)
+        ctx.restoreGState()
+    }
+
+    private func renderEquationLine(_ line: EquationSVGLine, defaultColor: CGColor, in ctx: CGContext) {
+        guard line.strokeWidth > 0,
+              let strokeColor = cgColor(for: line.stroke, defaultColor: defaultColor) else { return }
+
+        ctx.saveGState()
+        ctx.setStrokeColor(strokeColor)
+        ctx.setLineWidth(CGFloat(line.strokeWidth))
+        ctx.move(to: CGPoint(x: line.x1, y: line.y1))
+        ctx.addLine(to: CGPoint(x: line.x2, y: line.y2))
+        ctx.strokePath()
+        ctx.restoreGState()
+    }
+
+    private func renderEquationPath(_ path: EquationSVGPath, defaultColor: CGColor, in ctx: CGContext) {
+        let cgPath = buildEquationCGPath(path.commands)
+        let fillColor = cgColor(for: path.fill, defaultColor: defaultColor)
+        let strokeColor = cgColor(for: path.stroke, defaultColor: defaultColor)
+
+        ctx.saveGState()
+        if let fillColor {
+            ctx.addPath(cgPath)
+            ctx.setFillColor(fillColor)
+            ctx.fillPath()
+        }
+        if let strokeColor, path.strokeWidth > 0 {
+            ctx.addPath(cgPath)
+            ctx.setStrokeColor(strokeColor)
+            ctx.setLineWidth(CGFloat(path.strokeWidth))
+            ctx.strokePath()
+        }
+        ctx.restoreGState()
+    }
+
+    private func buildEquationCGPath(_ commands: [EquationSVGPathCommand]) -> CGPath {
+        let path = CGMutablePath()
+        for command in commands {
+            switch command {
+            case .moveTo(let x, let y):
+                path.move(to: CGPoint(x: x, y: y))
+            case .lineTo(let x, let y):
+                path.addLine(to: CGPoint(x: x, y: y))
+            case .quadCurveTo(let cx, let cy, let x, let y):
+                path.addQuadCurve(to: CGPoint(x: x, y: y), control: CGPoint(x: cx, y: cy))
+            case .closePath:
+                path.closeSubpath()
+            }
+        }
+        return path
+    }
+
+    private func equationItemBounds(_ items: [EquationSVGDrawItem]) -> CGRect {
+        var bounds = CGRect.null
+
+        for item in items {
+            switch item {
+            case .text(let text):
+                let width = max(CGFloat(text.text.count) * CGFloat(text.fontSize) * 0.65, 1)
+                let rect = CGRect(
+                    x: CGFloat(text.x),
+                    y: CGFloat(text.y - text.fontSize),
+                    width: width,
+                    height: CGFloat(text.fontSize)
+                )
+                bounds = bounds.union(rect)
+            case .line(let line):
+                bounds = bounds.union(CGRect(
+                    x: min(line.x1, line.x2),
+                    y: min(line.y1, line.y2),
+                    width: abs(line.x2 - line.x1),
+                    height: abs(line.y2 - line.y1)
+                ).insetBy(dx: -CGFloat(line.strokeWidth), dy: -CGFloat(line.strokeWidth)))
+            case .path(let path):
+                for point in equationPathPoints(path.commands) {
+                    bounds = bounds.union(CGRect(x: point.x, y: point.y, width: 1, height: 1))
+                }
+            }
+        }
+
+        return bounds.isNull ? .zero : bounds
+    }
+
+    private func equationPathPoints(_ commands: [EquationSVGPathCommand]) -> [CGPoint] {
+        var points: [CGPoint] = []
+        for command in commands {
+            switch command {
+            case .moveTo(let x, let y), .lineTo(let x, let y):
+                points.append(CGPoint(x: x, y: y))
+            case .quadCurveTo(let cx, let cy, let x, let y):
+                points.append(CGPoint(x: cx, y: cy))
+                points.append(CGPoint(x: x, y: y))
+            case .closePath:
+                break
+            }
+        }
+        return points
+    }
+
+    private func equationFontName(for text: String, familyList: String?) -> String {
+        if text.contains(where: { character in
+            character.unicodeScalars.contains { scalar in
+                scalar.value >= 0xAC00 && scalar.value <= 0xD7A3
+            }
+        }) {
+            return "AppleMyungjo"
+        }
+
+        let candidates = familyList.map(equationFontCandidates) ?? []
+        for candidate in candidates {
+            switch candidate.lowercased() {
+            case "times new roman":
+                return "TimesNewRomanPSMT"
+            case "times", "serif":
+                return "Times-Roman"
+            case "stix two text":
+                return "STIXTwoText"
+            case "stix two math":
+                return "STIXTwoMath"
+            case "latin modern math":
+                continue
+            default:
+                if !candidate.isEmpty {
+                    return candidate
+                }
+            }
+        }
+        return "TimesNewRomanPSMT"
+    }
+
+    private func equationFontCandidates(_ familyList: String) -> [String] {
+        familyList
+            .split(separator: ",")
+            .map {
+                $0.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "'\"")))
+            }
+            .filter { !$0.isEmpty }
+    }
+
+    private func cgColor(for paint: EquationSVGPaint?, defaultColor: CGColor) -> CGColor? {
+        switch paint {
+        case nil:
+            return defaultColor
+        case .some(.none):
+            return nil
+        case .some(.color(let color)):
+            return CGColor(red: color.red, green: color.green, blue: color.blue, alpha: color.alpha)
+        }
     }
 
     private func preparedImage(for image: CGImage, node: ImageNode) -> CGImage {
@@ -722,5 +973,347 @@ class CGTreeRenderer {
 
     private func cgRect(_ bbox: BBox) -> CGRect {
         CGRect(x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height)
+    }
+}
+
+private enum EquationSVGDrawItem {
+    case text(EquationSVGText)
+    case line(EquationSVGLine)
+    case path(EquationSVGPath)
+}
+
+private struct EquationSVGText {
+    let text: String
+    let x: Double
+    let y: Double
+    let fontSize: Double
+    let fill: EquationSVGPaint?
+    let fontFamily: String?
+    let fontStyle: String?
+    let textAnchor: EquationSVGTextAnchor
+}
+
+private struct EquationSVGLine {
+    let x1: Double
+    let y1: Double
+    let x2: Double
+    let y2: Double
+    let stroke: EquationSVGPaint?
+    let strokeWidth: Double
+}
+
+private struct EquationSVGPath {
+    let commands: [EquationSVGPathCommand]
+    let fill: EquationSVGPaint?
+    let stroke: EquationSVGPaint?
+    let strokeWidth: Double
+}
+
+private enum EquationSVGPathCommand {
+    case moveTo(Double, Double)
+    case lineTo(Double, Double)
+    case quadCurveTo(Double, Double, Double, Double)
+    case closePath
+}
+
+private enum EquationSVGPaint: Equatable {
+    case none
+    case color(EquationSVGColor)
+}
+
+private struct EquationSVGColor: Equatable {
+    let red: CGFloat
+    let green: CGFloat
+    let blue: CGFloat
+    let alpha: CGFloat
+}
+
+private enum EquationSVGTextAnchor {
+    case start
+    case middle
+    case end
+}
+
+private final class EquationSVGFragmentParser: NSObject, XMLParserDelegate {
+    private struct PendingText {
+        let x: Double
+        let y: Double
+        let fontSize: Double
+        let fill: EquationSVGPaint?
+        let fontFamily: String?
+        let fontStyle: String?
+        let textAnchor: EquationSVGTextAnchor
+        var content: String
+    }
+
+    private var items: [EquationSVGDrawItem] = []
+    private var pendingText: PendingText?
+
+    static func parse(_ fragment: String) -> [EquationSVGDrawItem] {
+        guard let data = "<root>\(fragment)</root>".data(using: .utf8) else {
+            return []
+        }
+        let delegate = EquationSVGFragmentParser()
+        let parser = XMLParser(data: data)
+        parser.delegate = delegate
+        parser.shouldProcessNamespaces = false
+        parser.shouldReportNamespacePrefixes = false
+        parser.shouldResolveExternalEntities = false
+        _ = parser.parse()
+        return delegate.items
+    }
+
+    func parser(
+        _ parser: XMLParser,
+        didStartElement elementName: String,
+        namespaceURI: String?,
+        qualifiedName qName: String?,
+        attributes attributeDict: [String: String]
+    ) {
+        switch elementName.lowercased() {
+        case "text":
+            pendingText = PendingText(
+                x: Self.doubleAttribute("x", in: attributeDict) ?? 0,
+                y: Self.doubleAttribute("y", in: attributeDict) ?? 0,
+                fontSize: Self.doubleAttribute("font-size", in: attributeDict) ?? 0,
+                fill: Self.paintAttribute("fill", in: attributeDict),
+                fontFamily: attributeDict["font-family"],
+                fontStyle: attributeDict["font-style"],
+                textAnchor: Self.textAnchorAttribute("text-anchor", in: attributeDict),
+                content: ""
+            )
+        case "line":
+            guard let x1 = Self.doubleAttribute("x1", in: attributeDict),
+                  let y1 = Self.doubleAttribute("y1", in: attributeDict),
+                  let x2 = Self.doubleAttribute("x2", in: attributeDict),
+                  let y2 = Self.doubleAttribute("y2", in: attributeDict) else { return }
+            items.append(.line(EquationSVGLine(
+                x1: x1,
+                y1: y1,
+                x2: x2,
+                y2: y2,
+                stroke: Self.paintAttribute("stroke", in: attributeDict),
+                strokeWidth: Self.doubleAttribute("stroke-width", in: attributeDict) ?? 1
+            )))
+        case "path":
+            guard let pathData = attributeDict["d"] else { return }
+            let commands = Self.pathCommands(from: pathData)
+            guard !commands.isEmpty else { return }
+            items.append(.path(EquationSVGPath(
+                commands: commands,
+                fill: Self.paintAttribute("fill", in: attributeDict),
+                stroke: Self.paintAttribute("stroke", in: attributeDict),
+                strokeWidth: Self.doubleAttribute("stroke-width", in: attributeDict) ?? 1
+            )))
+        default:
+            break
+        }
+    }
+
+    func parser(_ parser: XMLParser, foundCharacters string: String) {
+        pendingText?.content += string
+    }
+
+    func parser(
+        _ parser: XMLParser,
+        didEndElement elementName: String,
+        namespaceURI: String?,
+        qualifiedName qName: String?
+    ) {
+        guard elementName.lowercased() == "text", let text = pendingText else { return }
+        items.append(.text(EquationSVGText(
+            text: text.content,
+            x: text.x,
+            y: text.y,
+            fontSize: text.fontSize,
+            fill: text.fill,
+            fontFamily: text.fontFamily,
+            fontStyle: text.fontStyle,
+            textAnchor: text.textAnchor
+        )))
+        pendingText = nil
+    }
+
+    private static func doubleAttribute(_ name: String, in attributes: [String: String]) -> Double? {
+        guard let value = attributes[name]?.trimmingCharacters(in: .whitespacesAndNewlines) else {
+            return nil
+        }
+        return Double(value)
+    }
+
+    private static func paintAttribute(_ name: String, in attributes: [String: String]) -> EquationSVGPaint? {
+        guard let value = attributes[name]?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !value.isEmpty else {
+            return nil
+        }
+        if value.lowercased() == "none" {
+            return EquationSVGPaint.none
+        }
+        guard value.hasPrefix("#") else {
+            return nil
+        }
+        let hex = String(value.dropFirst())
+        guard hex.count == 6, let rgb = UInt32(hex, radix: 16) else {
+            return nil
+        }
+        return .color(EquationSVGColor(
+            red: CGFloat((rgb >> 16) & 0xFF) / 255.0,
+            green: CGFloat((rgb >> 8) & 0xFF) / 255.0,
+            blue: CGFloat(rgb & 0xFF) / 255.0,
+            alpha: 1.0
+        ))
+    }
+
+    private static func textAnchorAttribute(
+        _ name: String,
+        in attributes: [String: String]
+    ) -> EquationSVGTextAnchor {
+        switch attributes[name]?.lowercased() {
+        case "middle":
+            return .middle
+        case "end":
+            return .end
+        default:
+            return .start
+        }
+    }
+
+    private static func pathCommands(from data: String) -> [EquationSVGPathCommand] {
+        let tokens = pathTokens(from: data)
+        var commands: [EquationSVGPathCommand] = []
+        var index = 0
+        var currentCommand: String?
+        var currentPoint = (x: 0.0, y: 0.0)
+
+        while index < tokens.count {
+            let token = tokens[index]
+            if isPathCommand(token) {
+                currentCommand = token
+                index += 1
+                if token.uppercased() == "Z" {
+                    commands.append(.closePath)
+                }
+                continue
+            }
+
+            guard let command = currentCommand?.uppercased() else {
+                index += 1
+                continue
+            }
+            let isRelative = currentCommand?.first?.isLowercase == true
+
+            switch command {
+            case "M", "L":
+                guard index + 1 < tokens.count,
+                      var x = Double(tokens[index]),
+                      var y = Double(tokens[index + 1]) else {
+                    index += 1
+                    continue
+                }
+                if isRelative {
+                    x += currentPoint.x
+                    y += currentPoint.y
+                }
+                if command == "M" {
+                    commands.append(.moveTo(x, y))
+                    currentCommand = isRelative ? "l" : "L"
+                } else {
+                    commands.append(.lineTo(x, y))
+                }
+                currentPoint = (x, y)
+                index += 2
+            case "H":
+                guard var x = Double(token) else {
+                    index += 1
+                    continue
+                }
+                if isRelative {
+                    x += currentPoint.x
+                }
+                currentPoint.x = x
+                commands.append(.lineTo(currentPoint.x, currentPoint.y))
+                index += 1
+            case "V":
+                guard var y = Double(token) else {
+                    index += 1
+                    continue
+                }
+                if isRelative {
+                    y += currentPoint.y
+                }
+                currentPoint.y = y
+                commands.append(.lineTo(currentPoint.x, currentPoint.y))
+                index += 1
+            case "Q":
+                guard index + 3 < tokens.count,
+                      var cx = Double(tokens[index]),
+                      var cy = Double(tokens[index + 1]),
+                      var x = Double(tokens[index + 2]),
+                      var y = Double(tokens[index + 3]) else {
+                    index += 1
+                    continue
+                }
+                if isRelative {
+                    cx += currentPoint.x
+                    cy += currentPoint.y
+                    x += currentPoint.x
+                    y += currentPoint.y
+                }
+                commands.append(.quadCurveTo(cx, cy, x, y))
+                currentPoint = (x, y)
+                index += 4
+            default:
+                index += 1
+            }
+        }
+
+        return commands
+    }
+
+    private static func pathTokens(from data: String) -> [String] {
+        var tokens: [String] = []
+        var current = ""
+
+        func flushCurrent() {
+            if !current.isEmpty {
+                tokens.append(current)
+                current = ""
+            }
+        }
+
+        for scalar in data.unicodeScalars {
+            if isPathCommand(scalar) {
+                flushCurrent()
+                tokens.append(String(scalar))
+            } else if isPathNumberScalar(scalar) {
+                current.unicodeScalars.append(scalar)
+            } else {
+                flushCurrent()
+            }
+        }
+        flushCurrent()
+        return tokens
+    }
+
+    private static func isPathCommand(_ token: String) -> Bool {
+        token.count == 1 && token.unicodeScalars.first.map(isPathCommand) == true
+    }
+
+    private static func isPathCommand(_ scalar: Unicode.Scalar) -> Bool {
+        switch scalar {
+        case "M", "m", "L", "l", "H", "h", "V", "v", "Q", "q", "Z", "z":
+            return true
+        default:
+            return false
+        }
+    }
+
+    private static func isPathNumberScalar(_ scalar: Unicode.Scalar) -> Bool {
+        switch scalar {
+        case "0"..."9", ".", "-", "+", "e", "E":
+            return true
+        default:
+            return false
+        }
     }
 }
