@@ -50,10 +50,12 @@
 다음은 dry-run 보고 후, 작업지시자가 명시 승인하면 삭제 가능한 후보로 분류한다.
 
 - `build.noindex/DerivedData*`
-- `output/stage3-render`, `output/task*-*`, `output/*-smoke`, `output/*-debug`
+- `output/stage3-render*`, `output/task*-*`, `output/*-smoke`, `output/*-debug`
 - `/private/tmp/rhwp-task*-stage*`, `/private/tmp/rhwp-task*-final*`, `/private/tmp/rhwp-task*-smoke`
+- `/private/tmp/rhwp-task*-render`, `/private/tmp/rhwp-task*-bookreview`, `/private/tmp/rhwp-task*-bokhak` 같은 render-debug 출력
 - `/private/tmp/rhwp-*-analysis`, `/private/tmp/rhwp-*-render-debug`
-- `/private/tmp/rhwp-*-swift-cache`, `/private/tmp/rhwp-*-clang-module-cache`
+- `/private/tmp/rhwp-*-swift-cache`, `/private/tmp/rhwp-*-swift-module-cache`
+- `/private/tmp/rhwp-*-clang-cache`, `/private/tmp/rhwp-*-clang-module-cache`
 - `/private/tmp/task*-pr-body.md`, `/private/tmp/rhwp-*-issue-body.md`
 - `/private/tmp/alhangeul-*` Quick Look/thumbnail 임시 출력
 

@@ -53,6 +53,16 @@ find /private/tmp -maxdepth 1 -type f \( -name 'task*-pr-body.md' -o -name 'rhwp
   -exec du -sh {} + 2>/dev/null | sort -h
 ```
 
+이전 이름 설치본 충돌 후보를 다루는 경우에만 LaunchServices와 Spotlight 후보를 확인한다.
+
+```bash
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+if [ -x "$LSREGISTER" ]; then
+  "$LSREGISTER" -dump | grep -E "(RhwpMac|알한글)[.]app" || true
+fi
+mdfind "kMDItemContentType == 'com.apple.application-bundle'" | grep -E "(RhwpMac|알한글)[.]app" || true
+```
+
 `/private/tmp` 후보는 git 보호 여부를 추가 확인한다.
 
 ```bash

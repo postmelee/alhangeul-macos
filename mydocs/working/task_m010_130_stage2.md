@@ -55,16 +55,16 @@ rg -n "allow_implicit_invocation: false|명시 호출|dry-run|safe|approval-requ
 결과: 통과. frontmatter, 명시 호출, dry-run, 세 분류명, worktree 보호, PlugInKit/Quick Look 기준이 모두 확인됐다.
 
 ```text
-git diff --check -- mydocs/skills/project-artifact-cleanup/SKILL.md
+git diff --check -- mydocs/skills/project-artifact-cleanup/SKILL.md mydocs/working/task_m010_130_stage2.md
 ```
 
-결과: 통과.
+결과: 통과. Skill 본문과 Stage 2 보고서가 모두 검사 범위에 포함됐다.
 
 ```text
 wc -l mydocs/skills/project-artifact-cleanup/SKILL.md
 ```
 
-결과: 173 lines. Skill 본문은 500줄 이하로 유지했다.
+결과: 185 lines. Skill 본문은 500줄 이하로 유지했다.
 
 ## 잔여 위험
 
