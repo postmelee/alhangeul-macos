@@ -301,17 +301,22 @@ struct ImageNode: Decodable {
     let controlIndex: Int?
     let fillMode: String?
     let originalSize: [Double]?
+    let originalSizeHU: [Double]?
+    let effect: String?
+    let brightness: Int?
+    let contrast: Int?
     let transform: ShapeTransform
     let crop: [Int32]?
 
     enum CodingKeys: String, CodingKey {
-        case transform, crop
+        case transform, crop, effect, brightness, contrast
         case binDataId = "bin_data_id"
         case sectionIndex = "section_index"
         case paraIndex = "para_index"
         case controlIndex = "control_index"
         case fillMode = "fill_mode"
         case originalSize = "original_size"
+        case originalSizeHU = "original_size_hu"
     }
 }
 
