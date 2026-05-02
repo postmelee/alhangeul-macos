@@ -220,6 +220,28 @@ Finder 통합 검증은 세 계층을 분리한다.
 open build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app
 ```
 
+## HostApp WKWebView viewer smoke test
+
+WKWebView 기반 HostApp viewer 경로를 바꾼 경우에는 Debug build 후 다음 항목을 확인한다.
+
+1. app bundle에 `rhwp-studio` 정적 asset이 포함되어 있어야 한다.
+2. HWP 샘플을 Debug app으로 열었을 때 `AlhangeulMacHost` 프로세스와 앱 창이 유지되어야 한다.
+3. HWPX 샘플을 같은 Debug app으로 열었을 때 프로세스와 앱 창이 유지되어야 한다.
+
+기본 확인 명령:
+
+```bash
+test -f build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app/Contents/Resources/rhwp-studio/index.html
+test -f build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app/Contents/Resources/rhwp-studio/assets/rhwp_bg-DtQ01XFR.wasm
+scripts/verify-rhwp-studio-assets.sh
+/usr/bin/open -n -a /absolute/path/to/AlhangeulMac.app /absolute/path/to/samples/basic/KTX.hwp
+/usr/bin/open -a /absolute/path/to/AlhangeulMac.app /absolute/path/to/samples/hwpx/hwpx-01.hwpx
+pgrep -x AlhangeulMacHost
+/usr/bin/osascript -e 'tell application "System Events" to tell process "AlhangeulMacHost" to get name of windows'
+```
+
+`/absolute/path/to/AlhangeulMac.app`은 현재 worktree의 `build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app`로 바꾼다. 이 smoke는 local launch, document open handoff, WKWebView bundle resource 연결의 최소 확인이다. 실제 문서 내용의 시각 정합성은 foreground 앱에서 수동 확인하거나 별도 UI 자동화로 보강한다.
+
 ### 표준 smoke test 흐름
 
 Finder 통합은 signed/sealed된 단일 설치본 기준으로 확인한다. 반복 삭제/재설치를 피하기 위해 표준 경로는 `$HOME/Applications/AlhangeulMac.app` 하나만 사용한다.
