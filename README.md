@@ -1,11 +1,12 @@
 <p align="center">
   <img src="assets/logo-256@2x.png" alt="rhwp logo" width="128" />
 </p>
-<h1 align="center">Alhangeul</h1>
+
+# <div align="center">Alhangeul</div>
 
 <p align="center">
   <strong>알한글 for macOS</strong><br/>
-  <em>Mac-native HWP/HWPX file utility</em>
+  <em>오픈소스 HWP/HWPX 유틸리티 앱 </em>
 </p>
 
 <p align="center">
@@ -15,26 +16,30 @@
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
 </p>
 
----
-
-**Mac에서 한글 파일은 더 이상 이방인이 아닙니다.**<br/>
-<i>스페이스바로 미리보고, Finder에서 썸네일로 찾고, PDF/HWPX/Markdown으로 변환하세요.</i>
+<h3 align="center">Mac에서 한글 파일은 더 이상 이방인이 아닙니다.</h3>
 
 ![home_banner](assets/home_banner.png)
 
-**알한글**은 Mac에서 HWP/HWPX 파일을 Finder, Quick Look, Spotlight, PDF 변환까지 자연스럽게 다루는 오픈소스 문서 유틸리티입니다. 파일을 업로드하지 않고 로컬에서 **열고**, **검색**하고, **변환**하세요.
+<p align="center">스페이스바로 미리보고, Finder에서 썸네일로 찾고, PDF/HWPX/Markdown으로 변환하세요.</p>
 
-Rust 기반 [`rhwp`](https://github.com/edwardkim/rhwp) 코어를 macOS 앱, Quick Look preview, Finder thumbnail, Swift bridge로 연결합니다. MVP viewer는 `rhwp-studio`를 WKWebView로 품고, 이후 Mac 고유 통합과 native renderer를 단계적으로 확장합니다.
+---
+
+## 알한글 for macOS
+
+<strong>알한글(alhangeul-macos)</strong>은 HWP/HWPX 파일의 Finder, Quick Look, Spotlight 내용 검색, PDF 변환까지 다루는 오픈소스 macOS 데스크톱 앱입니다. 파일을 업로드하지 않고 로컬에서 **열고**, **검색**하고, **변환**하세요.
+> Rust 기반 [`rhwp`](https://github.com/edwardkim/rhwp) 코어를 macOS 앱, Quick Look preview, Finder thumbnail, Swift bridge로 연결합니다. MVP viewer는 `rhwp-studio`를 WKWebView로 품고, 이후 Mac 고유 통합과 native renderer를 단계적으로 확장합니다.
+> "닫힌 HWP/HWPX 문서를 더 많은 환경에서 다룰 수 있게 한다"</em>는 [`rhwp`](https://github.com/edwardkim/rhwp)의 방향을 **Mac 네이티브** 경험으로 확장합니다. 
+
 
 ## 이정표
 
 ```
-v0.1(WKWebView로 먼저 열린다) → v0.2(찾고 내보낸다) → v0.3(변환하고 자동화한다) → v0.4(믿고 설치한다) → v0.5(Mac답게 본다) → v1.0(작게 고친다) → v2.0(AI가 다룬다)
+v0.1(앱에서 바로 열린다) → v0.2(찾고 내보낸다) → v0.3(변환하고 자동화한다) → v0.4(믿고 설치한다) → v0.5(Mac답게 본다) → v1.0(작게 고친다) → v2.0(AI가 다룬다)
 ```
 
 | 버전 | 단계 | 사용자에게 보이는 변화 | 주요 범위 |
 |------|------|------------------------|-----------|
-| `v0.1` | WKWebView로 먼저 열린다 | Finder와 Quick Look에서 HWP/HWPX가 보이고, 앱에서는 `rhwp-studio` 기반 viewer로 문서를 열 수 있습니다. | Quick Look preview, Finder thumbnail, WKWebView HostApp viewer, `rhwp-studio` bundle, 첫 배포 |
+| `v0.1` | 앱에서 바로 열린다 | Finder와 Quick Look에서 HWP/HWPX가 보이고, 앱에서는 `rhwp-studio` 기반 viewer로 문서를 열 수 있습니다. | Quick Look preview, Finder thumbnail, WKWebView HostApp viewer, `rhwp-studio` bundle, 첫 배포 |
 | `v0.2` | 찾고 내보낸다 | 한글 프로그램 없이도 문서를 찾고, 복사하고, PDF로 보낼 수 있습니다. | 문서 정보/본문 추출, Spotlight 인덱싱, PDF export/print, 텍스트 복사 |
 | `v0.3` | 변환하고 자동화한다 | 여러 HWP/HWPX 문서를 Finder, CLI, Shortcuts 흐름에서 변환할 수 있습니다. | Text/Markdown/HWPX 변환, batch 변환, Quick Action, CLI, Shortcuts |
 | `v0.4` | 믿고 설치한다 | 일반 사용자가 설치해도 되는 안정적인 Mac 앱으로 배포합니다. | signed/notarized 배포, 업데이트, crash-safe opening, 접근성, 호환성 리포트 |
