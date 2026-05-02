@@ -28,7 +28,7 @@
 
 내부 task PR은 `local/task{번호}`에서 작업한 내용을 `publish/task{번호}`로 push한 뒤 `devel` 대상으로 생성한다.
 
-PR 본문은 `.github/pull_request_template.md`를 기준으로 작성한다. 템플릿은 `edwardkim/rhwp`의 기본 PR 템플릿을 참고하되, 이 저장소의 하이퍼-워터폴 산출물과 연결되도록 확장한 형식이다.
+PR 본문은 `.github/pull_request_template.md`를 기준으로 작성한다.
 
 ### 섹션 구성
 

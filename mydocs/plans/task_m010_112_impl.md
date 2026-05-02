@@ -220,15 +220,20 @@ Task #112 Stage 3: PR 작성 가이드와 final-report 절차 보정
 
 ```bash
 git diff --check
-rg -n "대상 타스크|관련 이슈|후속 이슈 제안|핵심 리뷰 포인트|작업 문서|커밋 링크|단계 보고서|Before|After" \
-  .github/pull_request_template.md \
-  mydocs/manual/pr_process_guide.md \
-  mydocs/skills/task-final-report/SKILL.md
+for pattern in "대상 타스크" "관련 이슈" "후속 이슈 제안" "핵심 리뷰 포인트" "작업 문서" "단계 보고서" "Before" "After"; do
+  rg -n "$pattern" .github/pull_request_template.md
+done
+for pattern in "대상 타스크" "관련 이슈" "후속 이슈 제안" "최대 4" "최대 5행" "20줄 이하" "작업 문서" "단계 보고서" "Before/After"; do
+  rg -n "$pattern" mydocs/manual/pr_process_guide.md
+done
+for pattern in "Open PR" "body-file" "핵심 리뷰 포인트" "후속 이슈 제안" "작업 문서" "단계 보고서" "Before/After"; do
+  rg -n "$pattern" mydocs/skills/task-final-report/SKILL.md
+done
 rg -n "## 문서|Closes #" \
   .github/pull_request_template.md \
   mydocs/manual/pr_process_guide.md \
   mydocs/skills/task-final-report/SKILL.md
-rg -n "#112|완료:" mydocs/orders/20260501.md
+rg -n "^\| #112 \|.*\| 완료 \|.*완료: [0-9]{2}:[0-9]{2}" mydocs/orders/20260501.md
 test -f mydocs/report/task_m010_112_report.md
 git status --short
 ```

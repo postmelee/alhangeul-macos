@@ -40,7 +40,7 @@
 - Stage별 요약은 `**[Stage 1](stage-url)** ([0cdbae0](commit-url)): 요약`처럼 단계 보고서와 commit 링크를 함께 쓴다.
 - 주요 파일/영역 표는 최대 5행, 핵심 리뷰 포인트는 최대 3개, 코드 블록은 각 20줄 이하로 둔다.
 - 검증은 실제 실행한 명령만 남기고, 시각적 변경사항이 있을 때만 Before/After 표를 사용한다.
-- 최상위 `## 문서` 섹션은 쓰지 않고, 수행/구현/최종/단계 보고서는 `변경 내역`의 작업 문서 항목으로 묶는다.
+- 최상위 `## 문서` 섹션은 쓰지 않는다. 단계 보고서는 Stage별 요약에서 링크하고, 수행/구현/최종 보고서는 `변경 내역`의 작업 문서 항목으로 묶는다.
 - 하이퍼-워터폴 최종 PR은 기본적으로 `devel` 대상 Open PR로 생성한다. Draft PR은 작업지시자가 명시 지시한 경우에만 예외로 사용한다.
 
 ## 검증 결과
@@ -49,10 +49,15 @@
 
 ```bash
 git diff --check
-rg -n "대상 타스크|관련 이슈|후속 이슈 제안|핵심 리뷰 포인트|작업 문서|커밋 링크|단계 보고서|Before|After" \
-  .github/pull_request_template.md \
-  mydocs/manual/pr_process_guide.md \
-  mydocs/skills/task-final-report/SKILL.md
+for pattern in "대상 타스크" "관련 이슈" "후속 이슈 제안" "핵심 리뷰 포인트" "작업 문서" "단계 보고서" "Before" "After"; do
+  rg -n "$pattern" .github/pull_request_template.md
+done
+for pattern in "대상 타스크" "관련 이슈" "후속 이슈 제안" "최대 4" "최대 5행" "20줄 이하" "작업 문서" "단계 보고서" "Before/After"; do
+  rg -n "$pattern" mydocs/manual/pr_process_guide.md
+done
+for pattern in "Open PR" "body-file" "핵심 리뷰 포인트" "후속 이슈 제안" "작업 문서" "단계 보고서" "Before/After"; do
+  rg -n "$pattern" mydocs/skills/task-final-report/SKILL.md
+done
 rg -n "## 문서|Closes #" \
   .github/pull_request_template.md \
   mydocs/manual/pr_process_guide.md \
@@ -64,17 +69,17 @@ rg -n "devel 대상 draft|draft PR 생성|--draft|ready for review" \
   mydocs/manual/pr_process_guide.md \
   mydocs/skills/task-final-report/SKILL.md \
   mydocs/plans/task_m010_112_impl.md
-rg -n "#112|완료:" mydocs/orders/20260501.md
+rg -n "^\| #112 \|.*\| 완료 \|.*완료: [0-9]{2}:[0-9]{2}" mydocs/orders/20260501.md
 test -f mydocs/report/task_m010_112_report.md
 ```
 
 결과:
 
 - `git diff --check` 통과
-- PR 템플릿, PR 처리 가이드, `task-final-report`에서 대상 타스크, 관련 이슈, 후속 이슈 제안, 핵심 리뷰 포인트, 작업 문서, Stage report+commit 링크, Before/After 기준 확인
+- PR 템플릿, PR 처리 가이드, `task-final-report` 각각에서 담당하는 대상 타스크, 관련 이슈, 후속 이슈 제안, 핵심 리뷰 포인트, 작업 문서, Stage report+commit 링크, Before/After 기준 확인
 - 제거 대상인 `## 문서`, `Closes #`는 지정 파일에서 출력 없음
 - Draft 기본 생성 문구와 `--draft` 옵션은 활성 운영 문서에서 출력 없음
-- 오늘할일 #112 완료 처리 확인
+- 오늘할일 #112 행의 `완료` 상태와 `완료: HH:mm` 형식 확인
 - 최종 보고서 파일 존재 확인
 
 문서/운영 규격 변경만 수행했으므로 Swift, Rust, Xcode 빌드 검증은 수행하지 않았다.

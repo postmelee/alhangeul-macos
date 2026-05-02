@@ -60,7 +60,7 @@ allow_implicit_invocation: false
      --title "Task #{N}: {제목}" \
      --body-file "$PR_BODY"
    ```
-   - PR 본문은 최대 4개 요약 bullet, Stage별 1줄 요약, 검증 결과, 남은 리스크를 포함
+   - PR 본문은 최대 4개 요약 bullet, Stage별 1줄 요약, 핵심 리뷰 포인트, 검증 결과, 관련 이슈, 후속 이슈 제안, 남은 리스크를 포함
    - Stage 제목은 단계 보고서 URL로, 옆의 짧은 commit SHA는 commit URL로 링크
    - 작업 문서는 `HEAD_SHA` 기준 `https://github.com/postmelee/alhangeul-macos/blob/{HEAD_SHA}/mydocs/...` URL로 연결
    - 링크 표시는 raw URL이 아니라 `[파일명](URL)` 형식으로 작성
@@ -77,6 +77,7 @@ allow_implicit_invocation: false
 - PR 본문 `변경 내역`의 Stage별 요약이 단계 보고서 링크와 짧은 commit SHA 링크를 함께 사용
 - PR 본문 `변경 내역`의 작업 문서 항목이 commit SHA 고정 URL과 `[파일명](URL)` 표시 형식을 사용
 - PR 본문 작업 문서 항목에 raw GitHub blob URL, 상대 링크, `blob/publish/task{N}` 링크 없음
+- PR 본문에 `핵심 리뷰 포인트`와 `후속 이슈 제안`을 필요한 경우 유지하고, 해당 없으면 삭제하거나 `없음`으로 정리
 - PR 본문에 실행하지 않은 검증 체크리스트가 남아 있지 않음
 - 오늘할일 #{N} 상태 `완료` + `완료: HH:mm`
 

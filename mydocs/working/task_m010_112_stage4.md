@@ -25,13 +25,18 @@ git diff --check
 ### 핵심 기준 검색
 
 ```bash
-rg -n "대상 타스크|관련 이슈|후속 이슈 제안|핵심 리뷰 포인트|작업 문서|커밋 링크|단계 보고서|Before|After" \
-  .github/pull_request_template.md \
-  mydocs/manual/pr_process_guide.md \
-  mydocs/skills/task-final-report/SKILL.md
+for pattern in "대상 타스크" "관련 이슈" "후속 이슈 제안" "핵심 리뷰 포인트" "작업 문서" "단계 보고서" "Before" "After"; do
+  rg -n "$pattern" .github/pull_request_template.md
+done
+for pattern in "대상 타스크" "관련 이슈" "후속 이슈 제안" "최대 4" "최대 5행" "20줄 이하" "작업 문서" "단계 보고서" "Before/After"; do
+  rg -n "$pattern" mydocs/manual/pr_process_guide.md
+done
+for pattern in "Open PR" "body-file" "핵심 리뷰 포인트" "후속 이슈 제안" "작업 문서" "단계 보고서" "Before/After"; do
+  rg -n "$pattern" mydocs/skills/task-final-report/SKILL.md
+done
 ```
 
-결과: 통과. PR 템플릿, PR 처리 가이드, `task-final-report`에 같은 기준이 남아 있음을 확인했다.
+결과: 통과. PR 템플릿, PR 처리 가이드, `task-final-report` 각각의 필수 패턴을 개별 확인했다.
 
 확인한 기준:
 
@@ -69,11 +74,11 @@ rg -n "devel 대상 draft|draft PR 생성|--draft|ready for review" \
 ### 최종 보고서와 오늘할일 확인
 
 ```bash
-rg -n "#112|완료:" mydocs/orders/20260501.md
+rg -n "^\| #112 \|.*\| 완료 \|.*완료: [0-9]{2}:[0-9]{2}" mydocs/orders/20260501.md
 test -f mydocs/report/task_m010_112_report.md
 ```
 
-결과: 통과. 오늘할일 #112 완료 처리와 최종 보고서 파일 존재를 확인했다.
+결과: 통과. 오늘할일 #112 행의 완료 상태, `완료: HH:mm` 형식, 최종 보고서 파일 존재를 확인했다.
 
 ## 변경하지 않은 범위
 
