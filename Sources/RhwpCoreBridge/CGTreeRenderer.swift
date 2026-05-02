@@ -265,17 +265,23 @@ class CGTreeRenderer {
         ctx.saveGState()
         applyTransform(img.transform, bbox: bbox, in: ctx)
 
-        let drawImage = croppedImage(for: cgImage, crop: img.crop)
+        let drawImage = preparedImage(for: cgImage, node: img)
         let r = cgRect(bbox)
+        let drawRect = imageDestinationRect(for: img, size: r.size)
         // CG draw(image:) 는 이미지를 rect에 맞춰 그리지만 상하 반전으로 그린다.
         // 이미지 영역에서만 Y축 반전하여 올바르게 표시한다.
         ctx.saveGState()
         ctx.translateBy(x: r.minX, y: r.minY + r.height)
         ctx.scaleBy(x: 1, y: -1)
-        ctx.draw(drawImage, in: CGRect(x: 0, y: 0, width: r.width, height: r.height))
+        ctx.draw(drawImage, in: drawRect)
         ctx.restoreGState()
 
         ctx.restoreGState()
+    }
+
+    private func preparedImage(for image: CGImage, node: ImageNode) -> CGImage {
+        let cropped = croppedImage(for: image, crop: node.crop)
+        return adjustedImage(for: cropped, node: node)
     }
 
     private func croppedImage(for image: CGImage, crop: [Int32]?) -> CGImage {
@@ -294,6 +300,138 @@ class CGTreeRenderer {
 
         let sourceRect = CGRect(x: left, y: top, width: right - left, height: bottom - top)
         return image.cropping(to: sourceRect) ?? image
+    }
+
+    private func adjustedImage(for image: CGImage, node: ImageNode) -> CGImage {
+        let effect = normalizedImageEffect(node.effect)
+        let brightness = node.brightness ?? 0
+        let contrast = node.contrast ?? 0
+        guard effect != nil || brightness != 0 || contrast != 0 else { return image }
+
+        let width = image.width
+        let height = image.height
+        guard width > 0, height > 0 else { return image }
+
+        let bytesPerPixel = 4
+        let bitsPerComponent = 8
+        let bytesPerRow = width * bytesPerPixel
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+            .union(.byteOrder32Big)
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        var pixels = [UInt8](repeating: 0, count: height * bytesPerRow)
+
+        return pixels.withUnsafeMutableBytes { rawBuffer in
+            guard let baseAddress = rawBuffer.baseAddress,
+                  let bitmapContext = CGContext(
+                    data: baseAddress,
+                    width: width,
+                    height: height,
+                    bitsPerComponent: bitsPerComponent,
+                    bytesPerRow: bytesPerRow,
+                    space: colorSpace,
+                    bitmapInfo: bitmapInfo.rawValue
+                  ) else {
+                return image
+            }
+
+            bitmapContext.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+            applyImageAdjustments(
+                to: rawBuffer,
+                width: width,
+                height: height,
+                bytesPerRow: bytesPerRow,
+                effect: effect,
+                brightness: brightness,
+                contrast: contrast
+            )
+            return bitmapContext.makeImage() ?? image
+        }
+    }
+
+    private func applyImageAdjustments(
+        to rawBuffer: UnsafeMutableRawBufferPointer,
+        width: Int,
+        height: Int,
+        bytesPerRow: Int,
+        effect: ImageEffect?,
+        brightness: Int,
+        contrast: Int
+    ) {
+        let slope = max(0, 1.0 + Double(contrast) / 100.0)
+        let intercept = Double(brightness) / 100.0 * slope
+        let bytes = rawBuffer.bindMemory(to: UInt8.self)
+
+        for y in 0..<height {
+            let rowOffset = y * bytesPerRow
+            for x in 0..<width {
+                let offset = rowOffset + x * 4
+                var red = Double(bytes[offset]) / 255.0
+                var green = Double(bytes[offset + 1]) / 255.0
+                var blue = Double(bytes[offset + 2]) / 255.0
+
+                if effect == .grayscale || effect == .blackWhite {
+                    let gray = red * 0.299 + green * 0.587 + blue * 0.114
+                    red = gray
+                    green = gray
+                    blue = gray
+                }
+
+                if brightness != 0 || contrast != 0 {
+                    red = red * slope + intercept
+                    green = green * slope + intercept
+                    blue = blue * slope + intercept
+                }
+
+                bytes[offset] = normalizedColorByte(red)
+                bytes[offset + 1] = normalizedColorByte(green)
+                bytes[offset + 2] = normalizedColorByte(blue)
+            }
+        }
+    }
+
+    private func normalizedColorByte(_ value: Double) -> UInt8 {
+        UInt8(max(0, min(255, Int((value * 255.0).rounded()))))
+    }
+
+    private enum ImageEffect {
+        case grayscale
+        case blackWhite
+    }
+
+    private func normalizedImageEffect(_ effect: String?) -> ImageEffect? {
+        guard let effect else { return nil }
+        let normalized = effect
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: "_", with: "")
+            .lowercased()
+
+        switch normalized {
+        case "", "realpic", "none":
+            return nil
+        case "grayscale", "gray", "greyscale", "grey":
+            return .grayscale
+        case "blackwhite", "blackandwhite", "monochrome":
+            // Render as grayscale for now; threshold parity needs a dedicated sample.
+            return .blackWhite
+        default:
+            return nil
+        }
+    }
+
+    private func imageDestinationRect(for img: ImageNode, size: CGSize) -> CGRect {
+        let fullRect = CGRect(origin: .zero, size: size)
+        guard let fillMode = img.fillMode?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !fillMode.isEmpty else {
+            return fullRect
+        }
+
+        switch fillMode.replacingOccurrences(of: "_", with: "").lowercased() {
+        case "fittosize", "stretch", "stretchtofit":
+            return fullRect
+        default:
+            return fullRect
+        }
     }
 
     // MARK: - 그룹
