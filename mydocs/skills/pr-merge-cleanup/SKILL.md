@@ -3,7 +3,7 @@ name: pr-merge-cleanup
 description: |
   PR merge 확인 후 부산물을 정리하는 절차를 적용한다. 명시 호출 시에만 사용한다.
   GitHub 이슈 close, publish/task{N} 원격 브랜치 삭제,
-  로컬 local/task{N} 브랜치와 분리 worktree 정리, devel 복귀를 수행한다.
+  로컬 local/task{N} 브랜치와 분리 worktree 정리, 대상 통합 브랜치 복귀를 수행한다.
   PR이 실제로 merge된 직후에만 호출.
 allow_implicit_invocation: false
 ---
@@ -32,10 +32,11 @@ allow_implicit_invocation: false
    ```bash
    gh issue close {N}
    ```
-3. devel 최신화
+3. 대상 통합 브랜치 최신화
    ```bash
    git fetch origin --prune
-   git checkout devel
+   BASE_BRANCH=$(gh pr view {번호} --json baseRefName --jq .baseRefName)
+   git checkout "$BASE_BRANCH"
    git pull --ff-only
    ```
 4. 원격 publish 브랜치 삭제 (이미 PR merge 시 `--delete-branch`로 삭제된 경우 skip)
@@ -61,7 +62,7 @@ allow_implicit_invocation: false
 - `git branch -vv | grep local/task{N}` 출력 없음 (삭제된 경우)
 - `git ls-remote origin publish/task{N}` 빈 출력 (원격 삭제 확인)
 - `git worktree list` 출력에 정리 대상 worktree 미존재
-- `git branch --show-current`가 `devel`
+- `git branch --show-current`가 대상 PR의 `baseRefName`
 
 ## 절대 하지 말 것
 

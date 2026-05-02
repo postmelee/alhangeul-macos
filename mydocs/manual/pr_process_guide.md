@@ -26,7 +26,7 @@
 
 ## 내부 task PR 작성 규칙
 
-내부 task PR은 `local/task{번호}`에서 작업한 내용을 `publish/task{번호}`로 push한 뒤 `devel` 대상으로 생성한다.
+내부 task PR은 `local/task{번호}`에서 작업한 내용을 `publish/task{번호}`로 push한 뒤 작업 범위에 맞는 통합 브랜치 대상으로 생성한다. WKWebView MVP, Finder/Quick Look, Spotlight, 변환, 배포, 문서는 `devel-webview`, native viewer renderer는 `devel`을 쓴다.
 
 PR 본문은 `.github/pull_request_template.md`를 기준으로 작성한다.
 
@@ -151,9 +151,10 @@ PR 본문은 `.github/pull_request_template.md`를 기준으로 작성한다.
 
 ```bash
 git checkout local/task24
+BASE_BRANCH=devel-webview # native viewer renderer 작업이면 devel
 git push origin local/task24:publish/task24
 gh pr create \
-  --base devel \
+  --base "$BASE_BRANCH" \
   --head publish/task24 \
   --title "Task #24: PR 템플릿과 PR 생성 규격 표준화" \
   --template .github/pull_request_template.md
@@ -164,8 +165,9 @@ gh pr create \
 최종 보고서와 단계 보고서를 바탕으로 PR 본문을 완성한 경우에는 `--body-file`을 우선 사용한다.
 
 ```bash
+BASE_BRANCH=devel-webview # native viewer renderer 작업이면 devel
 gh pr create \
-  --base devel \
+  --base "$BASE_BRANCH" \
   --head publish/task24 \
   --title "Task #24: PR 템플릿과 PR 생성 규격 표준화" \
   --body-file /tmp/task24-pr-body.md

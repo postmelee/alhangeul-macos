@@ -3,7 +3,7 @@ name: task-final-report
 description: |
   하이퍼-워터폴 타스크의 최종 보고와 PR 게시 절차를 적용한다. 명시 호출 시에만 사용한다.
   최종 결과 보고서(`_report.md`) 작성, 오늘할일 완료 처리, 최종 커밋,
-  publish/task{N} 원격 push, devel 대상 Open PR 생성을 수행한다.
+  publish/task{N} 원격 push, 통합 브랜치 대상 Open PR 생성을 수행한다.
   모든 단계 완료 후 PR 직전에만 호출.
 allow_implicit_invocation: false
 ---
@@ -41,7 +41,8 @@ allow_implicit_invocation: false
    ```bash
    git status --short
    git diff --check
-   git log --oneline devel..local/task{N}
+   BASE_BRANCH=devel-webview # native viewer renderer 작업이면 devel
+   git log --oneline "$BASE_BRANCH"..local/task{N}
    ```
 5. 최종 커밋 (Stage 마지막 + 최종 보고서를 묶을 수도, 보고서만 단일 커밋도 가능)
    ```bash
@@ -54,12 +55,13 @@ allow_implicit_invocation: false
    ```bash
    git push origin local/task{N}:publish/task{N}
    ```
-7. devel 대상 Open PR 생성
+7. 통합 브랜치 대상 Open PR 생성
    ```bash
+   BASE_BRANCH=devel-webview # native viewer renderer 작업이면 devel
    HEAD_SHA=$(git rev-parse HEAD)
    PR_BODY=/tmp/task{N}-pr-body.md
    # .github/pull_request_template.md를 출발점으로 삼아 최종 보고서와 단계 보고서 기준으로 "$PR_BODY" 작성
-   gh pr create --base devel --head publish/task{N} \
+   gh pr create --base "$BASE_BRANCH" --head publish/task{N} \
      --title "Task #{N}: {제목}" \
      --body-file "$PR_BODY"
    ```

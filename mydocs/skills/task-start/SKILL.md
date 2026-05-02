@@ -2,7 +2,7 @@
 name: task-start
 description: |
   하이퍼-워터폴 타스크 시작 절차를 적용한다. 명시 호출 시에만 사용한다.
-  GitHub 이슈 등록 확인, devel 최신화, local/task{N} 브랜치 생성,
+  GitHub 이슈 등록 확인, 통합 브랜치 최신화, local/task{N} 브랜치 생성,
   오늘할일 항목 추가, 수행계획서 템플릿 생성을 수행한다.
   새 코드/문서 변경을 시작하기 전 진행 단계 정렬 용도.
 allow_implicit_invocation: false
@@ -27,10 +27,14 @@ allow_implicit_invocation: false
    ```bash
    gh issue view {N} --json number,title,milestone,state,body
    ```
-2. devel 최신화
+2. 기준 통합 브랜치 결정 후 최신화
+   - WKWebView MVP, Finder/Quick Look, Spotlight, 변환, 배포, 문서는 `devel-webview`
+   - native viewer renderer 작업은 `devel`
+   - 작업지시자가 명시한 base가 있으면 그 지시를 우선
    ```bash
+   BASE_BRANCH=devel-webview # native viewer renderer 작업이면 devel
    git fetch origin
-   git checkout devel
+   git checkout "$BASE_BRANCH"
    git pull --ff-only
    ```
 3. 작업 브랜치 생성. 다른 작업자가 메인 worktree를 점유 중이면 분리 worktree 사용:
@@ -39,7 +43,7 @@ allow_implicit_invocation: false
    git checkout -b local/task{N}
 
    # 분리 worktree (권장: 다른 에이전트 비간섭)
-   git worktree add ../{repo}-task{N} -b local/task{N} origin/devel
+   git worktree add ../{repo}-task{N} -b local/task{N} origin/"$BASE_BRANCH"
    ```
 4. 오늘할일 갱신: `mydocs/orders/{yyyymmdd}.md`에 행 추가
    - 형식: `| #{N} | {타스크 제목} | 진행중 | M{milestone}, 수행계획서 작성 후 승인 대기 |`

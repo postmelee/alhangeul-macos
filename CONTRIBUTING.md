@@ -2,7 +2,18 @@
 
 alhangeul-macos에 관심을 가져주셔서 감사합니다!
 
-알한글 for macOS는 macOS 환경에서 HWP/HWPX 문서를 읽고, 미리보고, 나아가 편집할 수 있게 만드는 프로젝트입니다. macOS 코드, Swift bridge, 패키징, 문서, HWP 샘플 — 어떤 형태의 기여든 환영합니다. core 엔진 기여는 [`edwardkim/rhwp`](https://github.com/edwardkim/rhwp) 저장소에서 받습니다.
+알한글 for macOS는 macOS 환경에서 HWP/HWPX 문서를 읽고, 미리보고, 나아가 편집할 수 있게 만드는 프로젝트입니다. MVP viewer는 [`edwardkim/rhwp`](https://github.com/edwardkim/rhwp)의 `rhwp-studio`를 WKWebView로 통합하는 방향으로 진행합니다. macOS 코드, Swift bridge, 패키징, 문서, HWP 샘플 — 어떤 형태의 기여든 환영합니다. core 엔진 기여는 `edwardkim/rhwp` 저장소에서 받습니다.
+
+## PR 대상 브랜치 먼저 고르기
+
+GitHub 기본 브랜치가 `main`이어도 기여 PR은 `main`으로 보내지 않습니다. 작업 범위에 따라 아래 base branch를 선택해 주세요.
+
+| PR base | 대상 작업 |
+|---------|-----------|
+| `devel-webview` | 기본 대상. WKWebView MVP viewer, `rhwp-studio` 통합, Finder/Quick Look/Thumbnail, Spotlight, PDF/export/변환, 배포, 문서 |
+| `devel` | native viewer renderer, CoreGraphics/CoreText rendering, render tree 기반 viewer UI, native zoom/cache/page interaction |
+
+범위가 애매하면 PR을 만들기 전에 이슈나 Discussion에서 먼저 확인해 주세요.
 
 ## 처음 참여하시나요?
 
@@ -71,7 +82,8 @@ HWP/HWPX 파일이 한컴 또는 rhwp core와 다르게 렌더링되거나, Find
    - 한컴 또는 rhwp core 결과 스크린샷
    - 알한글에서 본 결과 스크린샷
    - 가능하면 HWP/HWPX 파일 첨부 (개인정보 제거 후)
-   - 가능하면 `render-debug-compare.sh`가 만든 summary, core PNG, native PNG, diff PNG 첨부
+   - native renderer 문제라면 가능하면 `render-debug-compare.sh`가 만든 summary, core PNG, native PNG, diff PNG 첨부
+   - WKWebView viewer 문제라면 가능하면 `rhwp-studio` 단독 실행 결과와 알한글 WKWebView 결과 스크린샷 첨부
 3. Quick Look/Thumbnail 등록 문제는 `pluginkit -mAvvv | grep com.postmelee.alhangeulmac` 결과를 함께 첨부
 
 ### 코드 기여 — Fork & PR 워크플로우
@@ -95,18 +107,22 @@ HWP/HWPX 파일이 한컴 또는 rhwp core와 다르게 렌더링되거나, Find
 4. Push (본인 Fork에)
    git push origin feature/my-task
 
-5. PR 생성 (GitHub UI)                   ──→ devel 브랜치로 PR
+5. PR 생성 (GitHub UI)                   ──→ 작업 범위에 맞는 base branch로 PR
                                               메인테이너 코드 리뷰
                                               승인 후 merge
 ```
 
 **중요:**
 
-- PR 대상 브랜치는 **`devel`** 입니다 (`main` 아님)
+- PR 대상 브랜치는 **`devel-webview`** 또는 **`devel`** 입니다 (`main` 아님)
+- WKWebView MVP, Finder/Quick Look, Spotlight, 변환, 배포, 문서 작업은 기본적으로 `devel-webview`로 보냅니다
+- native viewer renderer 관련 기여는 `devel`로 보냅니다
 - 메인테이너의 코드 리뷰 승인 후 merge됩니다
 - 메인테이너 워크플로우(`local/task{N}`, `publish/task{N}`)는 [`git_workflow_guide.md`](mydocs/manual/git_workflow_guide.md) 참고
 
 ### PR 전 체크리스트
+
+공통 체크:
 
 ```bash
 ./scripts/build-rust-macos.sh           # Rust bridge 빌드 + lock 검증
@@ -116,10 +132,15 @@ xcodebuild -project AlhangeulMac.xcodeproj \
   -scheme HostApp -configuration Debug \
   -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO build
-./scripts/validate-stage3-render.sh     # 렌더링 smoke test
 ```
 
-renderer 동작을 바꾸는 PR이면 문제 샘플에 대해 `./scripts/render-debug-compare.sh output/render-debug path/to/sample.hwp`를 추가로 실행하고, PR 본문에 summary와 core/native PNG 비교 결과를 적어주세요.
+native renderer 동작을 바꾸는 `devel` 대상 PR이면 추가로 아래를 실행합니다.
+
+```bash
+./scripts/validate-stage3-render.sh     # native rendering smoke test
+```
+
+native renderer 문제 샘플이 있다면 `./scripts/render-debug-compare.sh output/render-debug path/to/sample.hwp`를 추가로 실행하고, PR 본문에 summary와 core/native PNG 비교 결과를 적어주세요. WKWebView viewer PR은 가능한 경우 `rhwp-studio` 단독 실행 결과와 앱 내 WKWebView 결과를 함께 비교해 주세요.
 
 위 명령이 모두 통과하는지 확인한 후 PR을 생성해주세요. PR 본문은 [`.github/pull_request_template.md`](.github/pull_request_template.md) 양식을 사용합니다.
 
@@ -132,17 +153,18 @@ renderer 동작을 바꾸는 PR이면 문제 샘플에 대해 `./scripts/render-
 | 브랜치 | 용도 | 보호 규칙 |
 |--------|------|----------|
 | `main` | 릴리즈 (안정 버전) | PR 필수 + 리뷰 승인 |
-| `devel` | 개발 통합 (PR 대상) | PR 필수 |
+| `devel-webview` | WKWebView MVP와 출시 우선 작업 통합 | PR 필수 |
+| `devel` | native viewer renderer와 장기 native viewer 개발 통합 | PR 필수 |
 
-- 외부 기여자 PR → `devel`
-- 메인테이너 작업 PR → `publish/task{N}` → `devel`
-- 릴리즈 시 `devel` → `main` + 태그
+- 외부 기여자 PR → 작업 범위에 따라 `devel-webview` 또는 `devel`
+- 메인테이너 작업 PR → `publish/task{N}` → 작업 범위에 맞는 통합 브랜치
+- 릴리즈 시 출시 대상 통합 브랜치 → `main` + 태그
 
 상세는 [`git_workflow_guide.md`](mydocs/manual/git_workflow_guide.md)를 참고하세요.
 
 ## 디버깅 가이드
 
-렌더링 차이를 조사할 때 코드 수정 없이 사용할 수 있는 도구:
+native renderer 렌더링 차이를 조사할 때 코드 수정 없이 사용할 수 있는 도구:
 
 ```bash
 # 1. 기본 샘플 렌더링 smoke
@@ -153,6 +175,8 @@ renderer 동작을 바꾸는 PR이면 문제 샘플에 대해 `./scripts/render-
 ```
 
 `validate-stage3-render.sh`는 기본 샘플에서 native render pipeline이 깨지지 않았는지 빠르게 확인하는 smoke test입니다. `render-debug-compare.sh`는 특정 문서에서 core SVG, render tree JSON, native PNG, summary, 선택적 pixel diff를 만들어 원인을 좁히는 진단 도구입니다.
+
+WKWebView viewer 문제는 같은 문서를 `rhwp-studio` 단독 실행 환경과 알한글 앱 안의 WKWebView에서 각각 열어 비교해 주세요. 차이가 앱 안에서만 발생하면 WKWebView bridge, 파일 전달, sandbox, asset loading 경로를 먼저 확인합니다.
 
 Finder/Quick Look 동작을 조사할 때:
 
