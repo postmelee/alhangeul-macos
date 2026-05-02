@@ -92,8 +92,10 @@ Debug build 산출물은 compile/link 확인용이므로 `build.noindex/DerivedD
 1. `./scripts/package-release.sh <version>`으로 Release package 산출물을 만든다.
 2. `$HOME/Applications/AlhangeulMac.app` 단일 설치본을 갱신한다.
 3. `lsregister -f -R -trusted "$APP"`와 `pluginkit -a "$APP"`를 수행한다.
-4. `pluginkit -mAvvv | grep com.postmelee.alhangeulmac`로 extension 등록 후보를 확인한다.
-5. `qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp`로 thumbnail smoke를 확인한다.
+4. `qlmanage -r`와 `qlmanage -r cache`를 수행해 이전 Quick Look 캐시 영향을 제거한다.
+5. `mkdir -p /tmp/alhangeul-ql`로 thumbnail 출력 디렉터리를 준비한다.
+6. `pluginkit -mAvvv | grep com.postmelee.alhangeulmac`로 extension 등록 후보를 확인한다.
+7. `qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp`로 thumbnail smoke를 확인한다.
 
 이 조건을 만족한 뒤에는 Debug `DerivedData`를 삭제해도 Quick Look/Thumbnail/Viewer 테스트 기준 설치본은 유지된다.
 
