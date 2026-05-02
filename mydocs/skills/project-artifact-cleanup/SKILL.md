@@ -73,7 +73,7 @@ done
 dry-run 보고 후 승인받으면 삭제 가능한 후보. 자동 삭제는 하지 않는다.
 
 - `build.noindex/DerivedData*`
-- `output/stage3-render`, `output/task*-*`, `output/*-smoke`, `output/*-debug`
+- `output/stage3-render*`, `output/task*-*`, `output/*-smoke`, `output/*-debug`
 - `/private/tmp/rhwp-task*-stage*`, `/private/tmp/rhwp-task*-final*`, `/private/tmp/rhwp-task*-smoke`
 - `/private/tmp/rhwp-*-analysis`, `/private/tmp/rhwp-*-render-debug`
 - `/private/tmp/rhwp-*-swift-cache`, `/private/tmp/rhwp-*-clang-module-cache`
