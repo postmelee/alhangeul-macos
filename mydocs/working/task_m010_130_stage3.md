@@ -36,11 +36,11 @@ readlink .claude/skills
 ## Skill 내용 검증
 
 ```text
-rg -n "project-artifact-cleanup|dry-run|never-delete|approval-required" \
+rg -n "project-artifact-cleanup|dry-run|never-delete|approval-required|호출 방법|Codex:|Claude Code:" \
   mydocs/skills/project-artifact-cleanup/SKILL.md
 ```
 
-결과: `name`, description의 `dry-run`, `approval-required`, `never-delete`, 호출 방법이 확인됐다.
+결과: `name`, description의 `dry-run`, `approval-required`, `never-delete`, `호출 방법`, `Codex:`, `Claude Code:`가 확인됐다.
 
 ## 통합 결과
 
@@ -57,7 +57,7 @@ rg -n "project-artifact-cleanup|dry-run|never-delete|approval-required" \
 test -f mydocs/skills/project-artifact-cleanup/SKILL.md
 test -f .agents/skills/project-artifact-cleanup/SKILL.md
 test -f .claude/skills/project-artifact-cleanup/SKILL.md
-rg -n "project-artifact-cleanup|dry-run|never-delete|approval-required" \
+rg -n "project-artifact-cleanup|dry-run|never-delete|approval-required|호출 방법|Codex:|Claude Code:" \
   mydocs/skills/project-artifact-cleanup/SKILL.md
 git diff --check
 git status --short
