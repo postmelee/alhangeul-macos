@@ -5,15 +5,18 @@ struct RhwpStudioWebView: NSViewRepresentable {
     let document: RhwpStudioDocumentPayload?
     let onLoadStateChange: (Bool) -> Void
     let onError: (String?) -> Void
+    let onOpenDocument: () -> Void
 
     init(
         document: RhwpStudioDocumentPayload?,
         onLoadStateChange: @escaping (Bool) -> Void = { _ in },
-        onError: @escaping (String?) -> Void = { _ in }
+        onError: @escaping (String?) -> Void = { _ in },
+        onOpenDocument: @escaping () -> Void = {}
     ) {
         self.document = document
         self.onLoadStateChange = onLoadStateChange
         self.onError = onError
+        self.onOpenDocument = onOpenDocument
     }
 
     func makeCoordinator() -> Coordinator {
@@ -27,14 +30,16 @@ struct RhwpStudioWebView: NSViewRepresentable {
     func updateNSView(_ webView: WKWebView, context: Context) {
         context.coordinator.onLoadStateChange = onLoadStateChange
         context.coordinator.onError = onError
+        context.coordinator.onOpenDocument = onOpenDocument
         context.coordinator.update(document: document, in: webView)
     }
 }
 
 extension RhwpStudioWebView {
-    final class Coordinator: NSObject, WKNavigationDelegate {
+    final class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
         var onLoadStateChange: (Bool) -> Void = { _ in }
         var onError: (String?) -> Void = { _ in }
+        var onOpenDocument: () -> Void = {}
 
         private enum LoadIdentity: Equatable {
             case empty
@@ -47,9 +52,22 @@ extension RhwpStudioWebView {
             documentProvider: documentProvider
         )
         private var loadedIdentity: LoadIdentity?
+        private var currentDocument: RhwpStudioDocumentPayload?
+        private var printController: RhwpStudioPrintController?
 
         func makeWebView() -> WKWebView {
             let configuration = WKWebViewConfiguration()
+            configuration.userContentController.addUserScript(
+                WKUserScript(
+                    source: RhwpStudioHostBridgeScript.source,
+                    injectionTime: .atDocumentEnd,
+                    forMainFrameOnly: true
+                )
+            )
+            configuration.userContentController.add(
+                self,
+                name: RhwpStudioHostBridgeScript.messageHandlerName
+            )
             configuration.setURLSchemeHandler(
                 documentSchemeHandler,
                 forURLScheme: RhwpStudioDocumentRoute.scheme
@@ -71,6 +89,7 @@ extension RhwpStudioWebView {
         }
 
         func update(document: RhwpStudioDocumentPayload?, in webView: WKWebView) {
+            currentDocument = document
             documentProvider.setDocument(document)
 
             let nextIdentity: LoadIdentity = if let document {
@@ -150,6 +169,95 @@ extension RhwpStudioWebView {
             default:
                 return false
             }
+        }
+
+        func userContentController(
+            _ userContentController: WKUserContentController,
+            didReceive message: WKScriptMessage
+        ) {
+            guard message.name == RhwpStudioHostBridgeScript.messageHandlerName,
+                  let body = message.body as? [String: Any],
+                  let type = body["type"] as? String
+            else {
+                return
+            }
+
+            switch type {
+            case "command":
+                handleHostCommand(body)
+            case "save-document":
+                saveDocument(body)
+            case "print-document":
+                printDocument(body)
+            case "error":
+                onError(body["message"] as? String)
+            default:
+                break
+            }
+        }
+
+        private func handleHostCommand(_ body: [String: Any]) {
+            guard let command = body["command"] as? String else {
+                return
+            }
+
+            switch command {
+            case "file:open":
+                onOpenDocument()
+            default:
+                break
+            }
+        }
+
+        private func saveDocument(_ body: [String: Any]) {
+            guard let values = body["bytes"] as? [NSNumber] else {
+                onError("문서를 내보낼 수 없습니다: 저장 bytes가 없습니다.")
+                return
+            }
+
+            let data = Data(values.map { UInt8(truncating: $0) })
+            let suggestedFilename = body["fileName"] as? String
+                ?? currentDocument?.filename
+                ?? "document.hwp"
+
+            do {
+                _ = try DocumentSavePanel.save(data: data, suggestedFilename: suggestedFilename)
+            } catch {
+                onError("문서를 저장할 수 없습니다: \(error.localizedDescription)")
+            }
+        }
+
+        private func printDocument(_ body: [String: Any]) {
+            guard let pageCount = intValue(body["pageCount"]),
+                  let pages = body["pages"] as? [String],
+                  pageCount > 0,
+                  pages.count == pageCount
+            else {
+                onError("인쇄 데이터를 만들 수 없습니다: 페이지 데이터가 없습니다.")
+                return
+            }
+
+            let fileName = body["fileName"] as? String
+                ?? currentDocument?.filename
+                ?? "document.hwp"
+            let controller = RhwpStudioPrintController()
+            printController = controller
+            controller.print(
+                payload: RhwpStudioPrintPayload(fileName: fileName, pages: pages),
+                completion: { [weak self] in
+                    self?.printController = nil
+                }
+            )
+        }
+
+        private func intValue(_ value: Any?) -> Int? {
+            if let int = value as? Int {
+                return int
+            }
+            if let number = value as? NSNumber {
+                return number.intValue
+            }
+            return nil
         }
     }
 }

@@ -39,6 +39,11 @@ private struct RhwpStudioContainerView: View {
                     Task { @MainActor in
                         store.setWebViewError(message)
                     }
+                },
+                onOpenDocument: {
+                    Task { @MainActor in
+                        store.openDocument()
+                    }
                 }
             )
 
