@@ -161,6 +161,7 @@ struct TextRunNode: Decodable {
     let rotation: Double?
     let isVertical: Bool
     let charOverlap: CharOverlapInfo?
+    let charPositions: [Double]?
     let borderFillId: UInt16
     let baseline: Double
     let fieldMarker: FieldMarkerType
@@ -177,6 +178,7 @@ struct TextRunNode: Decodable {
         case isLineBreakEnd = "is_line_break_end"
         case isVertical = "is_vertical"
         case charOverlap = "char_overlap"
+        case charPositions = "char_positions"
         case borderFillId = "border_fill_id"
         case fieldMarker = "field_marker"
     }

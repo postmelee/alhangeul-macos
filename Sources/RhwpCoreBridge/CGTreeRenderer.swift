@@ -766,7 +766,8 @@ class CGTreeRenderer {
             style: style,
             bbox: bbox,
             line: line,
-            attributes: attributes
+            attributes: attributes,
+            charPositions: run.charPositions
         )
 
         // Core Text 좌하단 좌표계에서 베이스라인 위치
@@ -838,7 +839,8 @@ class CGTreeRenderer {
         style: TextStyle,
         bbox: BBox,
         line: CTLine,
-        attributes: [NSAttributedString.Key: Any]
+        attributes: [NSAttributedString.Key: Any],
+        charPositions: [Double]?
     ) -> TextRunLayoutPlan {
         var ascent: CGFloat = 0
         var descent: CGFloat = 0
@@ -851,7 +853,8 @@ class CGTreeRenderer {
             text: text,
             style: style,
             targetWidth: targetWidth,
-            attributes: attributes
+            attributes: attributes,
+            charPositions: charPositions
         )
         let strategy = chooseTextRunDrawStrategy(
             measuredWidth: measuredWidth,
@@ -959,37 +962,42 @@ class CGTreeRenderer {
         text: String,
         style: TextStyle,
         targetWidth: CGFloat,
-        attributes: [NSAttributedString.Key: Any]
+        attributes: [NSAttributedString.Key: Any],
+        charPositions: [Double]?
     ) -> TextRunClusterPlan? {
-        let clusterTexts = splitTextRunClusters(text)
-        guard clusterTexts.count > 1 else { return nil }
+        let clusterSpans = splitTextRunClusters(text)
+        guard clusterSpans.count > 1 else { return nil }
 
-        let metrics = clusterTexts.map { clusterText in
+        let metrics = clusterSpans.map { cluster in
             TextRunClusterMetric(
-                text: clusterText,
-                advance: textRunClusterAdvance(clusterText, style: style, attributes: attributes)
+                text: cluster.text,
+                advance: textRunClusterAdvance(cluster.text, style: style, attributes: attributes)
             )
         }
-        let rawPositions = textRunClusterPositions(metrics: metrics, style: style)
-        guard rawPositions.count == clusterTexts.count + 1,
+        let explicitPositions = explicitTextRunClusterPositions(
+            clusterSpans: clusterSpans,
+            charPositions: charPositions
+        )
+        let rawPositions = explicitPositions ?? textRunClusterPositions(metrics: metrics, style: style)
+        guard rawPositions.count == clusterSpans.count + 1,
               let rawWidth = rawPositions.last,
               rawWidth.isFinite,
               rawWidth > 0 else {
             return nil
         }
 
-        let scale = targetWidth > 0 ? targetWidth / rawWidth : 1
+        let scale = explicitPositions == nil && targetWidth > 0 ? targetWidth / rawWidth : 1
         guard scale.isFinite, scale >= 0.40, scale <= 2.50 else {
             return nil
         }
 
         var clusters: [TextRunCluster] = []
-        clusters.reserveCapacity(clusterTexts.count)
-        for index in clusterTexts.indices {
+        clusters.reserveCapacity(clusterSpans.count)
+        for index in clusterSpans.indices {
             let startX = rawPositions[index] * scale
             let endX = rawPositions[index + 1] * scale
             clusters.append(TextRunCluster(
-                text: clusterTexts[index],
+                text: clusterSpans[index].text,
                 x: startX,
                 advance: max(0, endX - startX)
             ))
@@ -1002,8 +1010,53 @@ class CGTreeRenderer {
         )
     }
 
-    private func splitTextRunClusters(_ text: String) -> [String] {
-        text.map { String($0) }
+    private func splitTextRunClusters(_ text: String) -> [TextRunClusterSpan] {
+        var spans: [TextRunClusterSpan] = []
+        spans.reserveCapacity(text.count)
+
+        var scalarOffset = 0
+        for character in text {
+            let clusterText = String(character)
+            let scalarCount = clusterText.unicodeScalars.count
+            spans.append(TextRunClusterSpan(
+                text: clusterText,
+                scalarStart: scalarOffset,
+                scalarEnd: scalarOffset + scalarCount
+            ))
+            scalarOffset += scalarCount
+        }
+
+        return spans
+    }
+
+    private func explicitTextRunClusterPositions(
+        clusterSpans: [TextRunClusterSpan],
+        charPositions: [Double]?
+    ) -> [CGFloat]? {
+        guard let charPositions,
+              let lastCluster = clusterSpans.last,
+              charPositions.count > lastCluster.scalarEnd else {
+            return nil
+        }
+
+        var positions: [CGFloat] = []
+        positions.reserveCapacity(clusterSpans.count + 1)
+        for cluster in clusterSpans {
+            let value = CGFloat(charPositions[cluster.scalarStart])
+            guard value.isFinite else { return nil }
+            if let previous = positions.last, value < previous {
+                return nil
+            }
+            positions.append(value)
+        }
+
+        let endValue = CGFloat(charPositions[lastCluster.scalarEnd])
+        guard endValue.isFinite,
+              positions.last.map({ endValue >= $0 }) ?? true else {
+            return nil
+        }
+        positions.append(endValue)
+        return positions
     }
 
     private func textRunClusterPositions(metrics: [TextRunClusterMetric], style: TextStyle) -> [CGFloat] {
@@ -1491,6 +1544,12 @@ private struct TextRunCluster {
 private struct TextRunClusterMetric {
     let text: String
     let advance: CGFloat
+}
+
+private struct TextRunClusterSpan {
+    let text: String
+    let scalarStart: Int
+    let scalarEnd: Int
 }
 
 private struct TextRunTabStop {
