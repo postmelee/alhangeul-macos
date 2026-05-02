@@ -756,46 +756,18 @@ class CGTreeRenderer {
         ctx.translateBy(x: CGFloat(bbox.x), y: CGFloat(bbox.y + bbox.height))
         ctx.scaleBy(x: 1, y: -1)
 
-        // 폰트 생성 (폴백 매핑 적용)
-        let appleName = mapHWPFontToApple(style.fontFamily)
-        var font = CTFontCreateWithName(appleName as CFString, fontSize, nil)
-
-        // Bold/Italic traits
-        var traits = CTFontSymbolicTraits()
-        if style.bold { traits.insert(.boldTrait) }
-        if style.italic { traits.insert(.italicTrait) }
-        if !traits.isEmpty {
-            if let traitFont = CTFontCreateCopyWithSymbolicTraits(font, fontSize, nil, traits, [.boldTrait, .italicTrait]) {
-                font = traitFont
-            }
-        }
-
-        // 장평(ratio) 적용: 가로 스케일링
-        if style.ratio != 1.0 && style.ratio > 0 {
-            var matrix = CGAffineTransform(scaleX: CGFloat(style.ratio), y: 1.0)
-            font = CTFontCreateCopyWithAttributes(font, fontSize, &matrix, nil)
-        }
-
-        // 속성 구성
-        var attributes: [NSAttributedString.Key: Any] = [
-            coreTextFontKey: font,
-            coreTextForegroundColorKey: colorRefToCGColor(style.color),
-        ]
-
-        // 자간 (letter_spacing)
-        if style.letterSpacing != 0 {
-            attributes[coreTextKernKey] = CGFloat(style.letterSpacing)
-        }
+        let font = makeTextRunFont(style: style, fontSize: fontSize)
+        let attributes = makeTextRunAttributes(style: style, font: font)
 
         let attrStr = NSAttributedString(string: run.text, attributes: attributes)
         let line = CTLineCreateWithAttributedString(attrStr)
+        let layout = makeTextRunLayoutPlan(text: run.text, style: style, bbox: bbox, line: line)
 
         // Core Text 좌하단 좌표계에서 베이스라인 위치
         // bbox 내부 좌표: baseline은 bbox.y 상단으로부터의 거리
         // Core Text Y: bbox 하단(0)으로부터 위로 = bbox.height - baseline
         let textY = CGFloat(bbox.height) - CGFloat(run.baseline)
-        ctx.textPosition = CGPoint(x: 0, y: textY)
-        CTLineDraw(line, ctx)
+        drawTextLine(line, layout: layout, y: textY, in: ctx)
 
         ctx.restoreGState()
 
@@ -820,6 +792,134 @@ class CGTreeRenderer {
         }
 
         ctx.restoreGState()
+    }
+
+    private func makeTextRunFont(style: TextStyle, fontSize: CGFloat) -> CTFont {
+        let appleName = mapHWPFontToApple(style.fontFamily)
+        var font = CTFontCreateWithName(appleName as CFString, fontSize, nil)
+
+        var traits = CTFontSymbolicTraits()
+        if style.bold { traits.insert(.boldTrait) }
+        if style.italic { traits.insert(.italicTrait) }
+        if !traits.isEmpty,
+           let traitFont = CTFontCreateCopyWithSymbolicTraits(font, fontSize, nil, traits, [.boldTrait, .italicTrait]) {
+            font = traitFont
+        }
+
+        if style.ratio != 1.0 && style.ratio > 0 {
+            var matrix = CGAffineTransform(scaleX: CGFloat(style.ratio), y: 1.0)
+            font = CTFontCreateCopyWithAttributes(font, fontSize, &matrix, nil)
+        }
+
+        return font
+    }
+
+    private func makeTextRunAttributes(style: TextStyle, font: CTFont) -> [NSAttributedString.Key: Any] {
+        var attributes: [NSAttributedString.Key: Any] = [
+            coreTextFontKey: font,
+            coreTextForegroundColorKey: colorRefToCGColor(style.color),
+        ]
+
+        if style.letterSpacing != 0 {
+            attributes[coreTextKernKey] = CGFloat(style.letterSpacing)
+        }
+
+        return attributes
+    }
+
+    private func makeTextRunLayoutPlan(
+        text: String,
+        style: TextStyle,
+        bbox: BBox,
+        line: CTLine
+    ) -> TextRunLayoutPlan {
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        var leading: CGFloat = 0
+        let measuredWidth = max(0, CGFloat(CTLineGetTypographicBounds(line, &ascent, &descent, &leading)))
+        let glyphBounds = CTLineGetBoundsWithOptions(line, [.useGlyphPathBounds])
+        let targetWidth = max(0, CGFloat(bbox.width))
+        let spacing = estimateTextRunSpacing(text: text, style: style)
+        let strategy = chooseTextRunDrawStrategy(
+            measuredWidth: measuredWidth,
+            targetWidth: targetWidth,
+            spacing: spacing
+        )
+
+        return TextRunLayoutPlan(
+            measuredWidth: measuredWidth,
+            glyphBoundsWidth: max(0, glyphBounds.width),
+            targetWidth: targetWidth,
+            ascent: ascent,
+            descent: descent,
+            leading: leading,
+            spacing: spacing,
+            strategy: strategy
+        )
+    }
+
+    private func estimateTextRunSpacing(text: String, style: TextStyle) -> TextRunSpacingEstimate {
+        var spaceCount = 0
+        var tabCount = 0
+
+        for character in text {
+            if character == "\t" {
+                tabCount += 1
+            } else if character.unicodeScalars.allSatisfy({ CharacterSet.whitespaces.contains($0) }) {
+                spaceCount += 1
+            }
+        }
+
+        let clusterCount = text.count
+        let extraCharGapCount = max(clusterCount - 1, 0)
+        let extraCharWidth = CGFloat(style.extraCharSpacing) * CGFloat(extraCharGapCount)
+        let extraWordWidth = CGFloat(style.extraWordSpacing) * CGFloat(spaceCount)
+        let tabWidth = CGFloat(style.defaultTabWidth) * CGFloat(tabCount)
+
+        return TextRunSpacingEstimate(
+            clusterCount: clusterCount,
+            spaceCount: spaceCount,
+            tabCount: tabCount,
+            extraCharWidth: extraCharWidth,
+            extraWordWidth: extraWordWidth,
+            tabWidth: tabWidth
+        )
+    }
+
+    private func chooseTextRunDrawStrategy(
+        measuredWidth: CGFloat,
+        targetWidth: CGFloat,
+        spacing: TextRunSpacingEstimate
+    ) -> TextRunDrawStrategy {
+        guard measuredWidth > 0, targetWidth > 0 else {
+            return .line
+        }
+
+        let scale = targetWidth / measuredWidth
+        if abs(scale - 1) < 0.005 {
+            return .line
+        }
+
+        if scale >= 0.70 && scale <= 1.35 {
+            return .scaledLine(scale)
+        }
+
+        let estimatedWidth = measuredWidth + spacing.additionalWidth
+        return .clusterRequired(estimatedWidth: estimatedWidth)
+    }
+
+    private func drawTextLine(_ line: CTLine, layout: TextRunLayoutPlan, y: CGFloat, in ctx: CGContext) {
+        switch layout.strategy {
+        case .line, .clusterRequired:
+            ctx.textPosition = CGPoint(x: 0, y: y)
+            CTLineDraw(line, ctx)
+        case .scaledLine(let scale):
+            ctx.saveGState()
+            ctx.scaleBy(x: scale, y: 1)
+            ctx.textPosition = CGPoint(x: 0, y: y)
+            CTLineDraw(line, ctx)
+            ctx.restoreGState()
+        }
     }
 
     /// 각주/미주 마커 (위첨자)
@@ -974,6 +1074,36 @@ class CGTreeRenderer {
     private func cgRect(_ bbox: BBox) -> CGRect {
         CGRect(x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height)
     }
+}
+
+private struct TextRunLayoutPlan {
+    let measuredWidth: CGFloat
+    let glyphBoundsWidth: CGFloat
+    let targetWidth: CGFloat
+    let ascent: CGFloat
+    let descent: CGFloat
+    let leading: CGFloat
+    let spacing: TextRunSpacingEstimate
+    let strategy: TextRunDrawStrategy
+}
+
+private struct TextRunSpacingEstimate {
+    let clusterCount: Int
+    let spaceCount: Int
+    let tabCount: Int
+    let extraCharWidth: CGFloat
+    let extraWordWidth: CGFloat
+    let tabWidth: CGFloat
+
+    var additionalWidth: CGFloat {
+        extraCharWidth + extraWordWidth + tabWidth
+    }
+}
+
+private enum TextRunDrawStrategy {
+    case line
+    case scaledLine(CGFloat)
+    case clusterRequired(estimatedWidth: CGFloat)
 }
 
 private enum EquationSVGDrawItem {
