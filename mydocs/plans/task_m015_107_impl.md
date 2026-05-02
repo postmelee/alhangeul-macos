@@ -70,37 +70,41 @@ Task #107 Stage 1: 렌더 smoke 샘플 기준 조사
 
 ### 목표
 
-- M015 필수 smoke 샘플과 기능별 대표 샘플 세트를 manual에 명시한다.
-- 단계 보고서에 남길 core/native 비교 산출물 기록 기준을 정리한다.
+- M015 필수 smoke 샘플과 기능별 대표 샘플 세트를 task 범위 tech 문서에 명시한다.
+- manual에는 작업별 대표 샘플 세트 선정 원칙과 단계 보고서에 남길 core/native 비교 산출물 기록 기준을 일반화해 정리한다.
 
 ### 작업
 
-- `render_core_native_compare_guide.md`에 M015 샘플 smoke/diff 세트 섹션을 추가한다.
-- `BookReview.hwp`, `복학원서.hwp`를 필수 smoke 대상으로 명시하고 각각 확인해야 할 대표 렌더 계층을 설명한다.
-- 도형 children, 이미지 effect/crop, placeholder/form, 스타일 보강별 대표 후보 샘플 표를 추가한다.
-- summary 필수 기록 항목을 `NativeNonWhitePixels`, `TextRuns`, `HangulRuns`, `MissingHangulGlyphs`, `CoreSVGBytes`, `Diff` 상태 중심으로 정리한다.
-- 산출물 보관 규칙을 로컬 출력 경로, 보고서 메타데이터, PR 첨부 여부 기준으로 정리한다.
-- `build_run_guide.md`의 렌더링 smoke test 섹션에서 M015 필수 샘플 검증으로 넘어가는 경로를 연결한다.
+- `mydocs/tech/task_m015_107_render_sample_set.md`에 M015 샘플 smoke/diff 세트 섹션을 추가한다.
+- `BookReview.hwp`, `복학원서.hwp`를 task 범위 필수 smoke 대상으로 명시하고 각각 확인해야 할 대표 렌더 계층을 설명한다.
+- 도형 children, 이미지 effect/crop, placeholder/form, 스타일 보강별 대표 후보 샘플 표를 task 범위 tech 문서에 추가한다.
+- `render_core_native_compare_guide.md`에는 작업별 대표 샘플 세트 선정 원칙과 summary 필수 기록 항목을 `NativeNonWhitePixels`, `TextRuns`, `HangulRuns`, `MissingHangulGlyphs`, `CoreSVGBytes`, `Diff` 상태 중심으로 일반화해 정리한다.
+- 산출물 보관 규칙을 로컬 출력 경로, 보고서 메타데이터, PR 첨부 여부 기준으로 manual에 정리한다.
+- `build_run_guide.md`의 렌더링 smoke test 섹션에서 task 문서의 대표 샘플 검증으로 넘어가는 경로를 연결한다.
 - Stage 2 보고서에 변경된 문서 위치와 문서화된 기준을 요약한다.
 
 ### 예상 변경 파일
 
 - `mydocs/manual/render_core_native_compare_guide.md`
 - `mydocs/manual/build_run_guide.md`
+- `mydocs/tech/task_m015_107_render_sample_set.md`
 - `mydocs/working/task_m015_107_stage2.md`
 
 ### 검증
 
 ```bash
 git status --short --branch
-rg -n "M015|BookReview|복학원서|NativeNonWhitePixels|CoreSVGBytes|DiffReason|산출물 보관" mydocs/manual/render_core_native_compare_guide.md mydocs/manual/build_run_guide.md
-git diff --check -- mydocs/manual/render_core_native_compare_guide.md mydocs/manual/build_run_guide.md mydocs/working/task_m015_107_stage2.md
+rg -n "M015|BookReview|복학원서|NativeNonWhitePixels|CoreSVGBytes|DiffReason" mydocs/tech/task_m015_107_render_sample_set.md
+rg -n "작업별 대표 샘플|NativeNonWhitePixels|CoreSVGBytes|DiffReason|산출물 보관" mydocs/manual/render_core_native_compare_guide.md mydocs/manual/build_run_guide.md
+rg -n "M015|BookReview|복학원서" mydocs/manual && exit 1 || true
+git diff --check -- mydocs/manual/render_core_native_compare_guide.md mydocs/manual/build_run_guide.md mydocs/tech/task_m015_107_render_sample_set.md mydocs/working/task_m015_107_stage2.md
 ```
 
 ### 완료 기준
 
-- M015 필수 smoke 샘플 2개가 manual에서 명확히 검색된다.
-- 기능 범주별 대표 샘플 후보와 제외 기준이 문서화된다.
+- M015 필수 smoke 샘플 2개가 task 범위 tech 문서에서 명확히 검색된다.
+- manual에는 특정 마일스톤 샘플명 없이 작업별 대표 샘플 선정 원칙이 문서화된다.
+- 기능 범주별 대표 샘플 후보와 제외 기준이 task 범위 tech 문서에 문서화된다.
 - 생성 산출물은 커밋하지 않고 summary 핵심값을 보고서에 남기는 규칙이 문서화된다.
 
 ### 커밋 메시지
@@ -120,7 +124,7 @@ Task #107 Stage 2: M015 렌더 검증 세트 문서화
 
 - `validate-stage3-render.sh --help`와 `render-debug-compare.sh --help`가 manual의 기본 설명과 충돌하지 않는지 확인한다.
 - 필요 시 `validate-stage3-render.sh` help에 기본 smoke와 M015 필수 smoke의 차이를 짧게 보강한다.
-- 필요 시 `README.md` 디버깅 프로토콜에서 M015 샘플 세트 manual로 연결한다.
+- 필요 시 `README.md` 디버깅 프로토콜에서 M015 샘플 세트 tech 문서로 연결한다.
 - `BookReview.hwp`, `복학원서.hwp`에 대해 native smoke와 core/native debug compare를 실행한다.
 - summary 값을 보고서 표로 기록하고, `qlmanage` diff 실패 여부를 선택 산출물 상태로 분리해 기록한다.
 - Stage 3 보고서에 실제 출력 경로와 핵심 값을 남긴다.

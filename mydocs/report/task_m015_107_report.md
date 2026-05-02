@@ -30,11 +30,12 @@
 | Stage 2 | `272e33c` | 최초 문서화 |
 | Stage 2.1 | `b57afd4` | M015 전용 샘플 세트를 task-scoped tech 문서로 이동 |
 | Stage 3 | `aa6f6c2` | 필수 샘플 native smoke/core-native compare 실행 |
-| Stage 4 | 본 커밋 | 통합 검증, 최종 보고서, 오늘할일 완료 처리 |
+| Stage 4 | `88078b4` | 통합 검증, 최종 보고서, 오늘할일 완료 처리 |
+| PR 리뷰 반영 | 본 커밋 | Copilot 리뷰 지적에 따라 구현계획서 문서 범위와 최종 보고서 표준 컬럼 보정 |
 
 ## 변경 파일 목록과 영향 범위
 
-| 파일 | 영향 범위 |
+| 파일 | 내용 |
 |------|----------|
 | `mydocs/plans/task_m015_107.md` | Task #107 수행 계획서 |
 | `mydocs/plans/task_m015_107_impl.md` | 단계별 구현 계획서 |
