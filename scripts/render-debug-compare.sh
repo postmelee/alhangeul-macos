@@ -14,6 +14,11 @@ Page numbers are 1-based. The default page is 1.
 EOF
 }
 
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  usage
+  exit 0
+fi
+
 if [ "$#" -lt 2 ]; then
   usage
   exit 1

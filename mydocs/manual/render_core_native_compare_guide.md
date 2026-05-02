@@ -66,6 +66,19 @@ macOS viewer가 그린 결과와 rhwp core가 그린 결과를 같은 입력 파
 
 페이지 번호는 1-based다.
 
+## 작업별 대표 샘플 세트
+
+renderer 변경은 기본 smoke test만으로 충분하지 않을 수 있다. node type, transform, clipping, image, text style처럼 시각 결과를 바꾸는 작업은 해당 task의 수행계획서, 구현계획서, tech 문서, 단계 보고서 중 하나에 대표 샘플 세트를 명시한다.
+
+대표 샘플은 작업 범위와 직접 관련 있는 저장소 `samples/` 파일을 우선 사용한다. 마일스톤 또는 특정 이슈에만 해당하는 샘플 목록은 이 manual에 누적하지 않고 task-scoped 문서에 둔다.
+
+샘플 세트를 정할 때는 다음 기준을 사용한다.
+
+- 변경한 렌더 계층을 실제로 exercise하는 샘플을 포함한다.
+- 알려진 회귀 또는 책임 경계 분리 샘플이 있으면 core SVG, render tree JSON, native PNG를 함께 확인한다.
+- 모든 후보를 매번 full diff하지 않는다. 변경 범위와 직접 관련 있는 샘플만 추가 실행한다.
+- 외부 개인 경로 샘플은 장기 기준으로 삼지 않는다. 필요하면 저장소 `samples/` 편입 여부를 별도 task에서 판단한다.
+
 ## 산출물
 
 입력 파일명이 `table-in-tbox.hwp`, 페이지가 1이면 다음 파일이 생성된다.
@@ -128,6 +141,31 @@ DiffMaxChannelDelta: 255
 - `DiffCompareSize`: 두 PNG 크기가 다를 때 공통 영역 기준 비교 크기다.
 - `DiffDifferentPixelRatio`: 공통 영역 중 다른 픽셀 비율이다.
 - `DiffMaxChannelDelta`: 채널 차이의 최대값이다.
+
+## 보고서 기록 기준과 산출물 보관
+
+renderer 보강 단계 보고서에는 적어도 다음 값을 표나 짧은 summary로 남긴다.
+
+| 항목 | 필수 여부 | 기록 이유 |
+|------|----------|----------|
+| `PageCount` | 필수 | 입력 page 범위와 다중 page 여부 확인 |
+| `PageSizePt`, `NativePNGSize` | 필수 | page size와 bitmap 반올림 차이 확인 |
+| `RenderTreeJSONBytes` | 필수 | render tree 생성과 규모 변화 확인 |
+| `CoreSVGBytes` | 필수 | core SVG 생성과 규모 변화 확인 |
+| `NativeNonWhitePixels` | 필수 | native PNG blank 회귀 확인 |
+| `TextRuns`, `HangulRuns`, `HangulScalars` | 필수 | 텍스트와 한글 run 존재 확인 |
+| `MissingHangulGlyphs` | 필수 | font fallback 또는 glyph lookup 문제 분리 |
+| `Diff`, `DiffReason` | 필수 | 선택 산출물 생성 여부와 실패 사유 기록 |
+| `DiffDifferentPixels`, `DiffDifferentPixelRatio`, `DiffMaxChannelDelta` | 선택 | `Diff: generated`일 때만 pixel diff 규모 기록 |
+
+산출물 보관 규칙:
+
+- `render-tree.json`, `core.svg`, `native.png`, `summary.txt`, `core.png`, `diff.png` 같은 생성 산출물은 기본적으로 저장소에 커밋하지 않는다.
+- 단계 보고서에는 출력 디렉터리와 파일 경로, 핵심 summary 값을 남긴다.
+- PR 본문에는 모든 산출물 경로를 길게 나열하지 말고, 샘플별 핵심 결과와 필요한 보고서 링크를 남긴다.
+- 시각 차이를 리뷰에서 직접 봐야 하는 경우에만 native PNG, core PNG, diff PNG를 별도 첨부하거나 `mydocs/report/assets/` 추가 여부를 작업지시자와 확인한다.
+- `/private/tmp`, `/tmp`, `output/` 아래 산출물은 재현 가능한 임시 산출물로 취급한다. 장기 보존이 필요하면 최종 보고서에 명시한다.
+- `qlmanage` 실패로 `DiffReason`만 기록된 경우에도 필수 산출물 4종이 생성됐다면 core/native 비교 진단은 완료로 볼 수 있다.
 
 ## 판단 흐름
 
