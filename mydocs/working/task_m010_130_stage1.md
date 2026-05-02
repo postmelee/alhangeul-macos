@@ -97,6 +97,8 @@ Debug build 산출물은 compile/link 확인용이므로 `build.noindex/DerivedD
 6. `pluginkit -mAvvv | grep com.postmelee.alhangeulmac`로 extension 등록 후보를 확인한다.
 7. `qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp`로 thumbnail smoke를 확인한다.
 
+`qlmanage -r`와 `qlmanage -r cache`는 stale Quick Look/thumbnail cache false positive를 막기 위한 필수 단계이므로 `qlmanage -t`만으로 대체하지 않는다.
+
 이 조건을 만족한 뒤에는 Debug `DerivedData`를 삭제해도 Quick Look/Thumbnail/Viewer 테스트 기준 설치본은 유지된다.
 
 ## 검증 결과

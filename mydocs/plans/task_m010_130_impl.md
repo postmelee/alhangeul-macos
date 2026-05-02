@@ -30,7 +30,7 @@
    - `/private/tmp/rhwp*`
    - `/private/tmp/alhangeul*`
 3. `git worktree list --porcelain`과 `.git` 존재 여부로 삭제 금지 경로 판정 기준을 정리한다.
-4. Debug build cleanup 전 Release 설치본 갱신과 `lsregister`, `pluginkit`, `qlmanage -t` 확인 기준을 정리한다.
+4. Debug build cleanup 전 Release 설치본 갱신과 `lsregister`, `pluginkit`, `qlmanage -r`, `qlmanage -r cache`, `/tmp/alhangeul-ql` 생성, `qlmanage -t` 확인 기준을 정리한다.
 5. Stage 1 단계 보고서 `mydocs/working/task_m010_130_stage1.md`를 작성한다.
 
 ### 수정·생성 파일

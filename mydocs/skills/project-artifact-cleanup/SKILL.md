@@ -151,6 +151,7 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
 - 위 절차에서 제거하는 앱 경로는 표준 설치본 `$HOME/Applications/AlhangeulMac.app` 하나로 제한한다.
 - 이 설치본 교체를 일반 cleanup 후보 삭제와 혼동하지 않는다.
 - `CODE_SIGNING_ALLOWED=NO` Debug 산출물로 PlugInKit 등록 성공 여부를 판정하지 않는다.
+- `qlmanage -r`, `qlmanage -r cache`, `/tmp/alhangeul-ql` 생성은 thumbnail smoke의 필수 전제이며 생략하지 않는다.
 - Release 설치본 갱신과 smoke 확인이 끝난 뒤에만 Debug `DerivedData` 삭제를 제안한다.
 
 ## 승인 요청 형식
@@ -167,6 +168,17 @@ dry-run 결과:
 - 삭제 대상: {개별 절대 경로 목록}
 - 예상 회수 용량: {합계}
 - 복구 방법: {재생성 명령 또는 보존 불가 설명}
+```
+
+Release 설치본 갱신은 삭제 승인과 별도로 다음 형식으로 보고하고 멈춘다.
+
+```text
+Release 설치본 갱신 승인 요청:
+- 교체 대상: $HOME/Applications/AlhangeulMac.app
+- 새 bundle: build.noindex/release/AlhangeulMac.app 존재 확인 결과
+- 목적: Quick Look/Thumbnail/Viewer smoke 기준 설치본 갱신
+- 실행 예정: 기존 설치본 unregister, 표준 설치본 교체, LaunchServices/PlugInKit 등록, Quick Look cache reset, thumbnail smoke
+- 이후 cleanup 제안: Release smoke 확인 후 Debug DerivedData 삭제 후보 제안
 ```
 
 작업지시자가 승인하면 개별 경로만 인자로 넘겨 삭제한다. glob이나 상위 디렉터리 전체 삭제는 사용하지 않는다.
