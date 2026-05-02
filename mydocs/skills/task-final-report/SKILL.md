@@ -3,7 +3,7 @@ name: task-final-report
 description: |
   하이퍼-워터폴 타스크의 최종 보고와 PR 게시 절차를 적용한다. 명시 호출 시에만 사용한다.
   최종 결과 보고서(`_report.md`) 작성, 오늘할일 완료 처리, 최종 커밋,
-  publish/task{N} 원격 push, devel 대상 draft PR 생성을 수행한다.
+  publish/task{N} 원격 push, devel 대상 Open PR 생성을 수행한다.
   모든 단계 완료 후 PR 직전에만 호출.
 allow_implicit_invocation: false
 ---
@@ -51,12 +51,12 @@ allow_implicit_invocation: false
    ```bash
    git push origin local/task{N}:publish/task{N}
    ```
-7. devel 대상 draft PR 생성
+7. devel 대상 Open PR 생성
    ```bash
    HEAD_SHA=$(git rev-parse HEAD)
    PR_BODY=/tmp/task{N}-pr-body.md
    # .github/pull_request_template.md를 출발점으로 삼아 최종 보고서와 단계 보고서 기준으로 "$PR_BODY" 작성
-   gh pr create --base devel --head publish/task{N} --draft \
+   gh pr create --base devel --head publish/task{N} \
      --title "Task #{N}: {제목}" \
      --body-file "$PR_BODY"
    ```
@@ -73,7 +73,7 @@ allow_implicit_invocation: false
 
 - 모든 단계 보고서 + 최종 보고서 존재
 - `git status --short` 결과 빈 출력
-- `gh pr view` 결과에 draft 상태 PR이 정확한 base/head로 등록
+- `gh pr view` 결과에 draft가 아닌 PR이 정확한 base/head로 등록
 - PR 본문 `변경 내역`의 Stage별 요약이 단계 보고서 링크와 짧은 commit SHA 링크를 함께 사용
 - PR 본문 `변경 내역`의 작업 문서 항목이 commit SHA 고정 URL과 `[파일명](URL)` 표시 형식을 사용
 - PR 본문 작업 문서 항목에 raw GitHub blob URL, 상대 링크, `blob/publish/task{N}` 링크 없음
@@ -85,7 +85,7 @@ allow_implicit_invocation: false
 - 통합 검증 실패 상태에서 PR 생성
 - `local/task{N}` 브랜치를 원격에 직접 push (반드시 `publish/task{N}`로 명명)
 - squash merge 강제 옵션 사용 (단계 커밋 의미 보존)
-- 작업지시자 승인 없이 PR을 ready for review 전환 또는 self-merge
+- 작업지시자 명시 지시 없이 Draft PR로 생성하거나 self-merge
 
 ## 호출 방법
 

@@ -6,16 +6,28 @@ Stage 2에서 개편한 PR 템플릿 구조에 맞춰 `pr_process_guide.md`, `ta
 
 이번 단계에서는 내부 task PR 작성 규칙을 새 템플릿 용어로 맞추되, 외부 기여 PR 검토 절차는 유지했다.
 
+## 추가 보정
+
+작업지시자 요청에 따라 Draft PR 진행 공유판 도입안은 적용하지 않고, 최종 보고 후 생성하는 `devel` 대상 PR의 기본 상태만 Open PR로 바꿨다.
+
+- `task-final-report`의 `gh pr create` 예시에서 `--draft`를 제거
+- Git workflow, task workflow, README의 기본 PR 생성 문구를 Open PR 기준으로 보정
+- `pr_process_guide.md`의 PR 생성 예시에서 `--draft`를 제거하고 `--template`은 본문 작성 출발점으로만 설명
+- #112 구현계획서 후속 작업 문구를 Open PR 생성 기준으로 정정
+
 ## 산출물
 
 | 파일 | 변경 요약 |
 |------|-----------|
 | `mydocs/manual/pr_process_guide.md` | 내부 task PR 작성 기준을 `대상 타스크`, `변경 내역 > 작업 문서`, 맥락용 `관련 이슈`, `후속 이슈 제안` 구조로 재작성 |
-| `mydocs/skills/task-final-report/SKILL.md` | PR 생성 절차를 `--body-file` 우선으로 바꾸고 Stage 보고서 링크+commit 링크, 작업 문서 링크 검증 기준 반영 |
-| `mydocs/manual/git_workflow_guide.md` | PR 생성 예시를 `--body-file` 기준으로 보정하고 작업 문서/Stage commit 링크 예시 추가 |
+| `mydocs/skills/task-final-report/SKILL.md` | PR 생성 절차를 `--body-file` 우선, Open PR 기본값으로 바꾸고 Stage 보고서 링크+commit 링크, 작업 문서 링크 검증 기준 반영 |
+| `mydocs/manual/git_workflow_guide.md` | PR 생성 예시를 `--body-file`와 Open PR 기준으로 보정하고 작업 문서/Stage commit 링크 예시 추가 |
+| `mydocs/manual/task_workflow_guide.md` | 타스크 진행 절차의 PR 생성 단계를 Open PR 기준으로 보정 |
+| `README.md` | Git 워크플로우 다이어그램의 `devel` PR 기본 상태를 Open PR로 보정 |
 | `.github/copilot-instructions.md` | PR 설명 검토 기준에 대상 타스크/관련 이슈 분리와 Stage report+commit 링크 확인 추가 |
+| `mydocs/plans/task_m010_112_impl.md` | 후속 작업 문구를 Open PR 생성 기준으로 정정 |
 
-Diff stat:
+Stage 3 최초 Diff stat:
 
 ```text
 .github/copilot-instructions.md          |  2 +-
@@ -91,6 +103,28 @@ git diff --check -- \
 ```
 
 결과: 통과.
+
+### Open PR 기본값 보정 확인
+
+```bash
+rg -n "Open PR|draft가 아닌|Draft PR|--draft|draft PR" \
+  README.md \
+  mydocs/manual/git_workflow_guide.md \
+  mydocs/manual/task_workflow_guide.md \
+  mydocs/manual/pr_process_guide.md \
+  mydocs/skills/task-final-report/SKILL.md \
+  mydocs/plans/task_m010_112_impl.md
+
+rg -n -- "--draft" \
+  README.md \
+  mydocs/manual/git_workflow_guide.md \
+  mydocs/manual/task_workflow_guide.md \
+  mydocs/manual/pr_process_guide.md \
+  mydocs/skills/task-final-report/SKILL.md \
+  mydocs/plans/task_m010_112_impl.md
+```
+
+결과: 통과. 기본 PR 생성 문구는 Open PR 기준으로 확인됐고, `--draft` 옵션은 출력 없음. `Draft PR` 언급은 작업지시자 명시 지시 없이 Draft로 생성하지 말라는 금지 문구만 남았다.
 
 ## 잔여 위험
 

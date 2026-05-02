@@ -38,7 +38,7 @@
 8. 승인 후 다음 단계 진행
 9. 모든 단계 완료 시 최종 결과 보고서 작성 → 승인 요청
 10. **최종 결과보고서(`_report.md`)와 오늘할일(`orders/`) 갱신도 타스크 브랜치에서 커밋한다. PR 생성 전 반드시 `git status`로 미커밋 파일이 없는지 확인한다.**
-11. `publish/task{issue번호}`로 원격 push 후 `devel` 대상 draft PR 생성
+11. `publish/task{issue번호}`로 원격 push 후 `devel` 대상 Open PR 생성
 12. 승인 요청 시 작업지시자가 피드백 문서를 `mydocs/feedback/`에 등록
 13. 모든 테스트 통과 시 피드백 없음
 14. PR merge 확인 후 이슈 close 및 오늘할일 상태 최종 정리

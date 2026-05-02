@@ -155,12 +155,11 @@ git push origin local/task24:publish/task24
 gh pr create \
   --base devel \
   --head publish/task24 \
-  --draft \
   --title "Task #24: PR 템플릿과 PR 생성 규격 표준화" \
   --template .github/pull_request_template.md
 ```
 
-`--template`은 초안 본문의 출발점으로만 사용한다.
+`--template`은 PR 본문 작성의 출발점으로만 사용한다.
 
 최종 보고서와 단계 보고서를 바탕으로 PR 본문을 완성한 경우에는 `--body-file`을 우선 사용한다.
 
@@ -168,14 +167,13 @@ gh pr create \
 gh pr create \
   --base devel \
   --head publish/task24 \
-  --draft \
   --title "Task #24: PR 템플릿과 PR 생성 규격 표준화" \
   --body-file /tmp/task24-pr-body.md
 ```
 
 운영 기준은 다음과 같다.
 
-- 초안 PR을 빠르게 만들 때: `--template .github/pull_request_template.md`
+- 템플릿에서 본문을 시작할 때: `--template .github/pull_request_template.md`
 - 최종 보고서 기반으로 본문을 확정했을 때: `--body-file <작성한 PR 본문 파일>` 우선
 - `--fill`은 커밋 메시지만으로 본문을 만들기 때문에 이 저장소의 기본 방식으로 쓰지 않는다.
 - `--body`에 긴 본문을 직접 넣는 방식은 재사용과 검토가 어렵기 때문에 피한다.

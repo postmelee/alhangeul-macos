@@ -258,7 +258,7 @@ Task #112 Stage 4 + 최종 보고서: PR 본문 규칙 강화 결과 정리
 
 ## 후속 작업
 
-- Stage 4 완료 후 작업지시자 승인 시 `task-final-report` 절차로 `publish/task112` push와 draft PR 생성을 진행한다.
+- Stage 4 완료 후 작업지시자 승인 시 `task-final-report` 절차로 `publish/task112` push와 Open PR 생성을 진행한다.
 - PR merge 후 정리는 `pr-merge-cleanup` 절차로 수행한다.
 - PR body lint 스크립트는 이번 범위에서 제외하며, 같은 실수가 반복될 때 별도 이슈로 검토한다.
 

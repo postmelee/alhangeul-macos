@@ -7,7 +7,7 @@
 - **`devel`**: 모든 작업 PR이 모이는 개발 통합 브랜치. 새 작업 브랜치는 최신 `origin/devel` 기준으로 만든다.
 - **`local/taskN`**: 이슈 번호 N의 로컬 작업 브랜치. 단계 커밋과 보고서 커밋은 이 브랜치에 쌓는다.
 - **`publish/taskN`**: `local/taskN`을 원격에 게시하기 위한 PR용 브랜치. PR merge 후 삭제한다.
-- **draft PR**: 검토 준비 전 상태의 PR. 하이퍼-워터폴 최종 보고 후 `devel` 대상으로 만든다.
+- **Open PR**: 검토 가능한 상태의 PR. 하이퍼-워터폴 최종 보고 후 `devel` 대상으로 만든다.
 - **분리 worktree**: 메인 worktree가 다른 작업에 쓰이고 있을 때 별도 디렉터리에서 같은 저장소의 다른 브랜치를 작업하는 방식.
 
 ## 브랜치 관리
@@ -36,17 +36,17 @@ local/task{N} ── 커밋 · 커밋 · 커밋 ──→ publish/task{N} push
 - **타스크 브랜치**: `local/task{N}`에서 잘게 커밋. 작업 단위마다 커밋.
 - **원격 게시 브랜치**: `local/task{N}` 작업이 리뷰 가능한 상태가 되면 `publish/task{N}` 이름으로 원격에 push하고 `devel` 대상 PR을 생성한다.
 - **원격 push**: `local/task` 브랜치는 **로컬 유지 (원격 push 금지)**를 원칙으로 한다. 원격에는 `publish/task{N}`와 merge 결과 브랜치만 유지한다.
-- **devel 대상 PR**: 작업 단위 PR은 기본적으로 draft로 생성하고, 최종 보고와 검증 결과를 PR 본문에 반영한 뒤 review/merge 한다.
+- **devel 대상 PR**: 작업 단위 PR은 기본적으로 Open PR로 생성하고, 최종 보고와 검증 결과를 PR 본문에 반영한 상태에서 review/merge 한다.
 - **merge 전략**: `devel` 대상 PR은 merge commit 유지 또는 `--no-ff` 원칙을 기본으로 한다. squash merge는 단계별 커밋 의미가 사라질 수 있으므로 기본값으로 두지 않는다.
 - **main merge (PR 기반)**: 릴리즈 시점에 `devel` → `main` PR 생성 → 리뷰(approve) → merge 후 태그 생성.
 
 ## 메인테이너 워크플로우
 
 ```bash
-# 1. local/taskN → publish/taskN push + devel 대상 draft PR
+# 1. local/taskN → publish/taskN push + devel 대상 Open PR
 git checkout local/task17
 git push origin local/task17:publish/task17
-gh pr create --base devel --head publish/task17 --draft --title "Task #17: 제목" --body-file /tmp/task17-pr-body.md
+gh pr create --base devel --head publish/task17 --title "Task #17: 제목" --body-file /tmp/task17-pr-body.md
 
 # 2. devel 대상 PR 리뷰 + merge
 gh pr review --approve
