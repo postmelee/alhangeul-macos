@@ -4,6 +4,7 @@ import Foundation
 @MainActor
 final class DocumentViewerStore: ObservableObject {
     @Published var document: RhwpDocument?
+    @Published private(set) var rhwpStudioDocument: RhwpStudioDocumentPayload?
     @Published var filename: String = ""
     @Published var currentPage: Int = 0
     @Published var errorMessage: String?
@@ -55,10 +56,12 @@ final class DocumentViewerStore: ObservableObject {
         } catch let error as RhwpError {
             errorMessage = error.errorDescription
             document = nil
+            rhwpStudioDocument = nil
             filename = ""
         } catch {
             errorMessage = "문서를 열 수 없습니다: \(error.localizedDescription)"
             document = nil
+            rhwpStudioDocument = nil
             filename = ""
         }
 
@@ -137,6 +140,11 @@ final class DocumentViewerStore: ObservableObject {
         currentPage = 0
         zoomScale = 0.8
         documentRevision += 1
+        rhwpStudioDocument = RhwpStudioDocumentPayload(
+            data: data,
+            filename: filename,
+            revision: documentRevision
+        )
         preloadInitialPages()
     }
 
