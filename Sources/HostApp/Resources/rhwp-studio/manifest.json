@@ -1,0 +1,33 @@
+{
+  "name": "rhwp-studio",
+  "source_repository": "https://github.com/edwardkim/rhwp.git",
+  "source_ref_kind": "release-tag",
+  "source_release_tag": "v0.7.9",
+  "source_resolved_commit": "0fb3e6758b8ad11d2f3c3849c83b914684e83863",
+  "wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
+  "studio_build_command": "npx tsc && npx vite build --base ./",
+  "copied_from": "rhwp-studio/dist",
+  "excluded_paths": [
+    "samples/"
+  ],
+  "copied_file_count": 50,
+  "copied_total_bytes": 27704113,
+  "entrypoints": {
+    "index_html": {
+      "path": "index.html",
+      "sha256": "10d10f4ae25f797d18f7de31812041574cde2e121e00d2c3caffb5361343acb0"
+    },
+    "main_js": {
+      "path": "assets/index-CCXookfl.js",
+      "sha256": "3bb81abc018113c808253d75a62aa8ce19545bbccd4ece16d1b4c4df2f465986"
+    },
+    "main_css": {
+      "path": "assets/index-ro3nVBB2.css",
+      "sha256": "d669a5f84fd2945f4d6be9a5471d6d2782ff629f77658a73f6f5d0f1133d7179"
+    },
+    "wasm": {
+      "path": "assets/rhwp_bg-DtQ01XFR.wasm",
+      "sha256": "bfcf7632d7f4877b69abe3a95e52fa23636f5253c149de877d1975fdac608b41"
+    }
+  }
+}

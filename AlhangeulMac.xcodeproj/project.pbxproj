@@ -13,6 +13,7 @@
 		0C786955298FBD298FD5D3BE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 054AB0DF09AD7A7CEBF8003B /* InfoPlist.strings */; };
 		10D474457FFCF2C2E5B1C3AE /* RenderTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE58FDA2BFE00D5055F6ECCD /* RenderTree.swift */; };
 		13A6BD7074F74333D229983E /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264820B28D93821B34BC8369 /* RhwpDocument.swift */; };
+		176461802DE945B641CF381A /* rhwp-studio in Resources */ = {isa = PBXBuildFile; fileRef = 2CE584C9E92DE49822B0BF59 /* rhwp-studio */; };
 		19F30C2E288F6D6DA3183F40 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FB9505A870E7B20DEBD9A3 /* HwpPageImageRenderer.swift */; };
 		34FB4A934C2B659E514A5949 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 801780F983F003C6DFC80985 /* Assets.xcassets */; };
 		3983B75CF83B8AEE507E8E1C /* AboutWindowPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6D138713B5F823A5DBB04D /* AboutWindowPresenter.swift */; };
@@ -90,6 +91,7 @@
 		1A0774AFA1AAF33840B28C7A /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		1E11DF5DAE3681D87012640D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		264820B28D93821B34BC8369 /* RhwpDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpDocument.swift; sourceTree = "<group>"; };
+		2CE584C9E92DE49822B0BF59 /* rhwp-studio */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "rhwp-studio"; path = "Sources/HostApp/Resources/rhwp-studio"; sourceTree = SOURCE_ROOT; };
 		2F334BFE86C869C93D352B47 /* HostApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HostApp.entitlements; sourceTree = "<group>"; };
 		47927CA6F14A54D1BCB55CC7 /* HostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostApp.swift; sourceTree = "<group>"; };
 		5C1779E2E87C0FA74DC44AF3 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
@@ -285,6 +287,7 @@
 		F33818F296F01F068C71F64D = {
 			isa = PBXGroup;
 			children = (
+				2CE584C9E92DE49822B0BF59 /* rhwp-studio */,
 				D4260A1C5B1A4BFFF33DF2B3 /* HostApp */,
 				B82E92173D2707CEB4FA26B2 /* QLExtension */,
 				2ADF061D0DEFFD804113F11C /* RhwpCoreBridge */,
@@ -434,6 +437,7 @@
 			files = (
 				34FB4A934C2B659E514A5949 /* Assets.xcassets in Resources */,
 				035C763D1AFA0DA46909BBDB /* InfoPlist.strings in Resources */,
+				176461802DE945B641CF381A /* rhwp-studio in Resources */,
 				EEC6A9F2ACF281D9D33B6504 /* sample.hwpx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
