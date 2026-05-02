@@ -8,14 +8,14 @@
       name="description"
       content="알한글은 Mac에서 HWP/HWPX 문서를 Quick Look, Finder 썸네일, WKWebView 기반 뷰어로 다루는 오픈소스 macOS 앱입니다."
     />
-    <meta property="og:title" content="Alhangeul - Mac에서 한글 파일은 더 이상 이방인이 아닙니다." />
+    <meta property="og:title" content="알한글 - Mac에서 한글 파일은 더 이상 이방인이 아닙니다." />
     <meta
       property="og:description"
       content="스페이스바로 미리보고, Finder에서 썸네일로 찾고, HWP파일을 보고 편집하세요."
     />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="./assets/logo-256@2x.png" />
-    <title>Alhangeul - Mac용 HWP/HWPX 뷰어</title>
+    <title>알한글 - Mac용 HWP/HWPX 뷰어</title>
     <link rel="icon" href="./assets/logo-256@2x.png" />
     <link rel="apple-touch-icon" href="./assets/logo-256@2x.png" />
     <link rel="stylesheet" href="./styles.css" />
@@ -23,33 +23,38 @@
   <body>
     <a class="skip-link" href="#main">본문으로 이동</a>
     <header class="site-header" aria-label="주요 탐색">
-      <a class="brand-link" href="./" aria-label="Alhangeul 홈">
-        <img src="./assets/logo-256@2x.png" width="32" height="32" alt="" />
-        <span>Alhangeul</span>
-      </a>
-      <a
-        class="github-link"
-        href="https://github.com/postmelee/alhangeul-macos"
-        rel="noreferrer"
-        aria-label="GitHub 저장소로 이동"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M12 .7a11.5 11.5 0 0 0-3.6 22.4c.58.1.78-.25.78-.55v-2.05c-3.18.7-3.85-1.36-3.85-1.36-.52-1.32-1.27-1.67-1.27-1.67-1.04-.7.08-.69.08-.69 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.25 3.34.95.1-.74.4-1.25.72-1.54-2.54-.29-5.2-1.27-5.2-5.66 0-1.25.44-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.03 0 0 .97-.31 3.16 1.17A10.9 10.9 0 0 1 12 6.1c.98 0 1.96.13 2.88.39 2.19-1.48 3.15-1.17 3.15-1.17.63 1.57.24 2.74.12 3.03.74.8 1.18 1.82 1.18 3.07 0 4.4-2.67 5.36-5.22 5.65.42.36.78 1.06.78 2.15v3.33c0 .3.2.66.79.55A11.5 11.5 0 0 0 12 .7Z"
-            fill="currentColor"
-          />
-        </svg>
-        GitHub
-        <svg class="external-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M7 17 17 7m0 0H8m9 0v9" fill="none" stroke="currentColor" stroke-width="2" />
-        </svg>
-      </a>
+      <div class="site-header-inner">
+        <a class="brand-link" href="./" aria-label="알한글 홈">
+          <img src="./assets/logo-256@2x.png" width="28" height="28" alt="" />
+          <span>알한글</span>
+        </a>
+        <nav class="header-actions" aria-label="주요 링크">
+          <a
+            class="github-link"
+            href="https://github.com/postmelee/alhangeul-macos"
+            rel="noreferrer"
+            aria-label="GitHub 저장소로 이동"
+          >
+            GitHub
+          </a>
+          <a
+            class="header-download-button"
+            href="https://github.com/postmelee/alhangeul-macos/releases/latest"
+            aria-label="GitHub Releases에서 Mac용 알한글 다운로드"
+          >
+            다운로드
+          </a>
+        </nav>
+      </div>
     </header>
 
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <h1 id="hero-title">Mac에서 한글 파일은 더 이상 이방인이 아닙니다.</h1>
+          <h1 id="hero-title">
+            Mac에서 한글 파일은<br />
+            더 이상 <span class="hero-highlight">이방인</span>이 아닙니다.
+          </h1>
           <p>스페이스바로 미리보고, Finder에서 썸네일로 찾고, HWP파일을 보고 편집하세요.</p>
           <a
             class="download-button"
@@ -63,8 +68,6 @@
       </section>
 
       <section class="demo-section" aria-label="앱 실행 영상">
-        <div class="frame-corner top-left" aria-hidden="true"></div>
-        <div class="frame-corner top-right" aria-hidden="true"></div>
         <div class="media-frame">
           <video
             src="./assets/thumbnail2.mov"
@@ -83,56 +86,33 @@
       </section>
 
       <section class="features-section" aria-labelledby="features-title">
-        <div class="section-heading">
-          <h2 id="features-title">미리보기부터 뷰어까지, Mac 방식으로</h2>
-          <p>Finder에서 찾고, 스페이스바로 확인하고, 필요할 때 앱에서 바로 엽니다.</p>
-        </div>
-        <div class="feature-layout">
-          <div class="feature-visual">
-            <img src="./assets/group-1-4x.png" alt="알한글의 Quick Look 미리보기와 Finder 썸네일 예시" />
+        <div class="features-inner">
+          <div class="section-heading">
+            <h2 id="features-title">미리보기부터 뷰어까지, Mac 방식으로</h2>
+            <p>Finder에서 찾고, 스페이스바로 확인하고, 필요할 때 앱에서 바로 엽니다.</p>
           </div>
-          <div class="feature-list" aria-label="주요 기능">
-            <article>
-              <span class="feature-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M2.8 12s3.2-6 9.2-6 9.2 6 9.2 6-3.2 6-9.2 6-9.2-6-9.2-6Z" />
-                  <circle cx="12" cy="12" r="3.2" />
-                </svg>
-              </span>
-              <h3>스페이스바 미리보기</h3>
-              <p>Quick Look 확장으로 HWP/HWPX 문서를 빠르게 확인합니다.</p>
-            </article>
-            <article>
-              <span class="feature-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z" />
-                </svg>
-              </span>
-              <h3>Finder 썸네일</h3>
-              <p>Finder에서 문서 첫 페이지를 썸네일로 확인합니다.</p>
-            </article>
-            <article>
-              <span class="feature-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M6 2.8h8l4 4V21H6V2.8Z" />
-                  <path d="M14 3v4h4" />
-                  <path d="M8.8 12h6.4M8.8 15.5h4.5" />
-                </svg>
-              </span>
-              <h3>HWP/HWPX 뷰어</h3>
-              <p>WKWebView 기반 viewer로 문서를 열고 탐색합니다.</p>
-            </article>
-            <article>
-              <span class="feature-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M7.2 10V7.8a4.8 4.8 0 0 1 9.6 0V10" />
-                  <path d="M5.2 10h13.6v10H5.2V10Z" />
-                  <path d="M12 14v2.5" />
-                </svg>
-              </span>
-              <h3>로컬 처리</h3>
-              <p>문서를 업로드하지 않고 Mac 안에서 처리합니다.</p>
-            </article>
+          <div class="feature-layout">
+            <figure class="feature-visual">
+              <img src="./assets/group-1-4x.png" alt="알한글의 Quick Look 미리보기와 Finder 썸네일 예시" />
+            </figure>
+            <div class="feature-list" aria-label="주요 기능">
+              <article>
+                <h3>스페이스바 미리보기</h3>
+                <p>Quick Look 확장으로 HWP/HWPX 문서를 빠르게 확인합니다.</p>
+              </article>
+              <article>
+                <h3>Finder 썸네일</h3>
+                <p>Finder에서 문서 첫 페이지를 썸네일로 확인합니다.</p>
+              </article>
+              <article>
+                <h3>HWP/HWPX 뷰어</h3>
+                <p>WKWebView 기반 viewer로 문서를 열고 탐색합니다.</p>
+              </article>
+              <article>
+                <h3>로컬 처리</h3>
+                <p>문서를 업로드하지 않고 Mac 안에서 처리합니다.</p>
+              </article>
+            </div>
           </div>
         </div>
       </section>
@@ -178,7 +158,7 @@
     <footer class="site-footer">
       <div class="footer-brand">
         <img src="./assets/logo-256@2x.png" width="32" height="32" alt="" />
-        <span>Alhangeul</span>
+        <span>알한글</span>
       </div>
       <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 뷰어 앱입니다. 한글 파일이 더 이상 낯선 파일로 남지 않도록 만듭니다.</p>
       <nav aria-label="푸터 링크">
