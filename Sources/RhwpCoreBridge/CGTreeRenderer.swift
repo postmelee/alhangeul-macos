@@ -8,6 +8,8 @@ import Foundation
 import ImageIO
 
 class CGTreeRenderer {
+    private let imageCropUnitsPerPixel = 75.0
+
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
 
@@ -263,16 +265,186 @@ class CGTreeRenderer {
         ctx.saveGState()
         applyTransform(img.transform, bbox: bbox, in: ctx)
 
+        let drawImage = preparedImage(for: cgImage, node: img)
         let r = cgRect(bbox)
+        let drawRect = imageDestinationRect(for: img, size: r.size)
         // CG draw(image:) 는 이미지를 rect에 맞춰 그리지만 상하 반전으로 그린다.
         // 이미지 영역에서만 Y축 반전하여 올바르게 표시한다.
         ctx.saveGState()
         ctx.translateBy(x: r.minX, y: r.minY + r.height)
         ctx.scaleBy(x: 1, y: -1)
-        ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: r.width, height: r.height))
+        ctx.draw(drawImage, in: drawRect)
         ctx.restoreGState()
 
         ctx.restoreGState()
+    }
+
+    private func preparedImage(for image: CGImage, node: ImageNode) -> CGImage {
+        let cropped = croppedImage(for: image, crop: node.crop)
+        return adjustedImage(for: cropped, node: node)
+    }
+
+    private func croppedImage(for image: CGImage, crop: [Int32]?) -> CGImage {
+        guard let crop, crop.count == 4 else { return image }
+
+        let imageWidth = Double(image.width)
+        let imageHeight = Double(image.height)
+        guard imageWidth > 0, imageHeight > 0 else { return image }
+
+        let left = max(0, floor(Double(crop[0]) / imageCropUnitsPerPixel))
+        let top = max(0, floor(Double(crop[1]) / imageCropUnitsPerPixel))
+        let right = min(imageWidth, ceil(Double(crop[2]) / imageCropUnitsPerPixel))
+        let bottom = min(imageHeight, ceil(Double(crop[3]) / imageCropUnitsPerPixel))
+
+        guard right > left, bottom > top else { return image }
+
+        let sourceRect = CGRect(x: left, y: top, width: right - left, height: bottom - top)
+        return image.cropping(to: sourceRect) ?? image
+    }
+
+    private func adjustedImage(for image: CGImage, node: ImageNode) -> CGImage {
+        let effect = normalizedImageEffect(node.effect)
+        let brightness = node.brightness ?? 0
+        let contrast = node.contrast ?? 0
+        guard effect != nil || brightness != 0 || contrast != 0 else { return image }
+
+        let width = image.width
+        let height = image.height
+        guard width > 0, height > 0 else { return image }
+
+        let bytesPerPixel = 4
+        let bitsPerComponent = 8
+        let bytesPerRow = width * bytesPerPixel
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+            .union(.byteOrder32Big)
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        var pixels = [UInt8](repeating: 0, count: height * bytesPerRow)
+
+        return pixels.withUnsafeMutableBytes { rawBuffer in
+            guard let baseAddress = rawBuffer.baseAddress,
+                  let bitmapContext = CGContext(
+                    data: baseAddress,
+                    width: width,
+                    height: height,
+                    bitsPerComponent: bitsPerComponent,
+                    bytesPerRow: bytesPerRow,
+                    space: colorSpace,
+                    bitmapInfo: bitmapInfo.rawValue
+                  ) else {
+                return image
+            }
+
+            bitmapContext.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+            applyImageAdjustments(
+                to: rawBuffer,
+                width: width,
+                height: height,
+                bytesPerRow: bytesPerRow,
+                effect: effect,
+                brightness: brightness,
+                contrast: contrast
+            )
+            return bitmapContext.makeImage() ?? image
+        }
+    }
+
+    private func applyImageAdjustments(
+        to rawBuffer: UnsafeMutableRawBufferPointer,
+        width: Int,
+        height: Int,
+        bytesPerRow: Int,
+        effect: ImageEffect?,
+        brightness: Int,
+        contrast: Int
+    ) {
+        let slope = max(0, 1.0 + Double(contrast) / 100.0)
+        let intercept = Double(brightness) / 100.0 * slope
+        let bytes = rawBuffer.bindMemory(to: UInt8.self)
+
+        for y in 0..<height {
+            let rowOffset = y * bytesPerRow
+            for x in 0..<width {
+                let offset = rowOffset + x * 4
+                let alpha = Double(bytes[offset + 3]) / 255.0
+                guard alpha > 0 else {
+                    bytes[offset] = 0
+                    bytes[offset + 1] = 0
+                    bytes[offset + 2] = 0
+                    continue
+                }
+
+                // CGContext stores premultiplied RGBA. Apply filters in straight color space.
+                var red = clampedUnit((Double(bytes[offset]) / 255.0) / alpha)
+                var green = clampedUnit((Double(bytes[offset + 1]) / 255.0) / alpha)
+                var blue = clampedUnit((Double(bytes[offset + 2]) / 255.0) / alpha)
+
+                if effect == .grayscale || effect == .blackWhite {
+                    let gray = red * 0.299 + green * 0.587 + blue * 0.114
+                    red = gray
+                    green = gray
+                    blue = gray
+                }
+
+                if brightness != 0 || contrast != 0 {
+                    red = red * slope + intercept
+                    green = green * slope + intercept
+                    blue = blue * slope + intercept
+                }
+
+                bytes[offset] = normalizedColorByte(clampedUnit(red) * alpha)
+                bytes[offset + 1] = normalizedColorByte(clampedUnit(green) * alpha)
+                bytes[offset + 2] = normalizedColorByte(clampedUnit(blue) * alpha)
+            }
+        }
+    }
+
+    private func clampedUnit(_ value: Double) -> Double {
+        max(0, min(1, value))
+    }
+
+    private func normalizedColorByte(_ value: Double) -> UInt8 {
+        UInt8(max(0, min(255, Int((value * 255.0).rounded()))))
+    }
+
+    private enum ImageEffect {
+        case grayscale
+        case blackWhite
+    }
+
+    private func normalizedImageEffect(_ effect: String?) -> ImageEffect? {
+        guard let effect else { return nil }
+        let normalized = effect
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: "_", with: "")
+            .lowercased()
+
+        switch normalized {
+        case "", "realpic", "none":
+            return nil
+        case "grayscale", "gray", "greyscale", "grey":
+            return .grayscale
+        case "blackwhite", "blackandwhite", "monochrome":
+            // Render as grayscale for now; threshold parity needs a dedicated sample.
+            return .blackWhite
+        default:
+            return nil
+        }
+    }
+
+    private func imageDestinationRect(for img: ImageNode, size: CGSize) -> CGRect {
+        let fullRect = CGRect(origin: .zero, size: size)
+        guard let fillMode = img.fillMode?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !fillMode.isEmpty else {
+            return fullRect
+        }
+
+        switch fillMode.replacingOccurrences(of: "_", with: "").lowercased() {
+        case "fittosize", "stretch", "stretchtofit":
+            return fullRect
+        default:
+            return fullRect
+        }
     }
 
     // MARK: - 그룹
