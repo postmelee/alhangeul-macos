@@ -126,6 +126,12 @@ du -sh build.noindex output RustBridge/target Frameworks
 
 결과: `build.noindex` 554M, `output` 230M, `RustBridge/target` 892M, `Frameworks` 199M 확인.
 
+```text
+git diff --check
+```
+
+결과: 통과.
+
 ## 잔여 위험
 
 - `/private/tmp` 파일명은 작업자가 임의로 만들 수 있으므로 패턴 기반 분류만으로 완전한 안전성을 보장할 수 없다.
