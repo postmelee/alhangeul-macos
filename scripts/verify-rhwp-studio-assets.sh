@@ -30,6 +30,10 @@ fi
 grep -q 'src="./assets/index-' "$RESOURCE_DIR/index.html" || fail "index.html does not use relative JS asset path"
 grep -q 'href="./assets/index-' "$RESOURCE_DIR/index.html" || fail "index.html does not use relative CSS asset path"
 
+if grep -q 'crossorigin' "$RESOURCE_DIR/index.html"; then
+  fail "index.html contains crossorigin attributes that break WKWebView file URL asset loading"
+fi
+
 if grep -Eq ' (src|href)="/' "$RESOURCE_DIR/index.html"; then
   fail "index.html contains root-relative src/href paths"
 fi

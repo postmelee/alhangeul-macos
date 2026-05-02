@@ -35,6 +35,11 @@ fi
 mkdir -p "$TARGET"
 rsync -a --delete --exclude 'samples/' "$DIST/" "$TARGET/"
 
+# WKWebView file URL loading treats explicit crossorigin subresource requests
+# conservatively. Keep bundled same-directory JS/CSS as normal same-origin
+# file resources so the studio UI is styled and bootstrapped in HostApp.
+/usr/bin/perl -0pi -e 's/\s+crossorigin(?=\s|>)/g' "$TARGET/index.html"
+
 main_js="$(basename "$(find "$TARGET/assets" -maxdepth 1 -name 'index-*.js' -type f | head -1)")"
 main_css="$(basename "$(find "$TARGET/assets" -maxdepth 1 -name 'index-*.css' -type f | head -1)")"
 main_wasm="$(basename "$(find "$TARGET/assets" -maxdepth 1 -name 'rhwp_bg-*.wasm' -type f | head -1)")"

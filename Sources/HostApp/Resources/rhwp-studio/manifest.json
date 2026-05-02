@@ -11,11 +11,11 @@
     "samples/"
   ],
   "copied_file_count": 50,
-  "copied_total_bytes": 27704113,
+  "copied_total_bytes": 27704089,
   "entrypoints": {
     "index_html": {
       "path": "index.html",
-      "sha256": "10d10f4ae25f797d18f7de31812041574cde2e121e00d2c3caffb5361343acb0"
+      "sha256": "4bcec64910b0fdfcacb8bae593b614c4af76c3c4d3f1d2252372a3d1a4202a29"
     },
     "main_js": {
       "path": "assets/index-CCXookfl.js",
