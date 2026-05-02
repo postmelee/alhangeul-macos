@@ -24,19 +24,21 @@ render tree의 watermark image node에는 `crop`, `original_size_hu`, `effect`, 
 
 `복학원서.hwp`의 watermark는 Stage 3 이후 native PNG에서도 grayscale 및 brightness/contrast 적용 상태로 렌더된다.
 
-## 변경 파일
+## 변경 파일 목록과 영향 범위
 
-- `Sources/RhwpCoreBridge/RenderTree.swift`
-- `Sources/RhwpCoreBridge/CGTreeRenderer.swift`
-- `mydocs/plans/task_m015_106.md`
-- `mydocs/plans/task_m015_106_impl.md`
-- `mydocs/working/task_m015_106_stage1.md`
-- `mydocs/working/task_m015_106_stage2.md`
-- `mydocs/working/task_m015_106_stage3.md`
-- `mydocs/working/task_m015_106_stage4.md`
-- `mydocs/working/task_m015_106_stage5.md`
-- `mydocs/report/task_m015_106_report.md`
-- `mydocs/orders/20260501.md`
+| 파일 | 변경 내용 | 영향 범위 |
+|------|-----------|-----------|
+| `Sources/RhwpCoreBridge/RenderTree.swift` | `ImageNode`에 `original_size_hu`, `effect`, `brightness`, `contrast`, `crop` decode 필드 추가 | HostApp, Quick Look, Thumbnail이 공유하는 render tree image 모델 |
+| `Sources/RhwpCoreBridge/CGTreeRenderer.swift` | 이미지 source crop, grayscale, brightness/contrast 보정, fill mode fallback 보강 | Swift native renderer 이미지 출력 품질 |
+| `mydocs/plans/task_m015_106.md` | 수행 계획서 작성 | Task #106 진행 기준과 승인 기록 |
+| `mydocs/plans/task_m015_106_impl.md` | 단계별 구현 계획 작성 | 구현 범위, 검증 절차, 단계 구분 |
+| `mydocs/working/task_m015_106_stage1.md` | 이미지 렌더 기준과 필드 의미 확정 보고 | 기준 샘플, core SVG 비교, crop 단위 판단 |
+| `mydocs/working/task_m015_106_stage2.md` | crop source rect 적용 보고 | Stage 2 변경과 검증 기록 |
+| `mydocs/working/task_m015_106_stage3.md` | 이미지 효과와 fill mode fallback 보강 보고 | Stage 3 변경과 검증 기록 |
+| `mydocs/working/task_m015_106_stage4.md` | 대표 샘플 smoke 검증 보고 | 샘플별 native render 결과와 잔여 위험 |
+| `mydocs/working/task_m015_106_stage5.md` | 통합 검증 보고 | 최종 수용 기준 검증 결과 |
+| `mydocs/report/task_m015_106_report.md` | 최종 보고서 작성 | 작업 요약, 검증 결과, 잔여 위험 정리 |
+| `mydocs/orders/20260501.md` | 오늘할일 #106 완료 처리 | 작업 진행 상태 추적 |
 
 ## 단계별 결과
 

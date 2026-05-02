@@ -365,9 +365,18 @@ class CGTreeRenderer {
             let rowOffset = y * bytesPerRow
             for x in 0..<width {
                 let offset = rowOffset + x * 4
-                var red = Double(bytes[offset]) / 255.0
-                var green = Double(bytes[offset + 1]) / 255.0
-                var blue = Double(bytes[offset + 2]) / 255.0
+                let alpha = Double(bytes[offset + 3]) / 255.0
+                guard alpha > 0 else {
+                    bytes[offset] = 0
+                    bytes[offset + 1] = 0
+                    bytes[offset + 2] = 0
+                    continue
+                }
+
+                // CGContext stores premultiplied RGBA. Apply filters in straight color space.
+                var red = clampedUnit((Double(bytes[offset]) / 255.0) / alpha)
+                var green = clampedUnit((Double(bytes[offset + 1]) / 255.0) / alpha)
+                var blue = clampedUnit((Double(bytes[offset + 2]) / 255.0) / alpha)
 
                 if effect == .grayscale || effect == .blackWhite {
                     let gray = red * 0.299 + green * 0.587 + blue * 0.114
@@ -382,11 +391,15 @@ class CGTreeRenderer {
                     blue = blue * slope + intercept
                 }
 
-                bytes[offset] = normalizedColorByte(red)
-                bytes[offset + 1] = normalizedColorByte(green)
-                bytes[offset + 2] = normalizedColorByte(blue)
+                bytes[offset] = normalizedColorByte(clampedUnit(red) * alpha)
+                bytes[offset + 1] = normalizedColorByte(clampedUnit(green) * alpha)
+                bytes[offset + 2] = normalizedColorByte(clampedUnit(blue) * alpha)
             }
         }
+    }
+
+    private func clampedUnit(_ value: Double) -> Double {
+        max(0, min(1, value))
     }
 
     private func normalizedColorByte(_ value: Double) -> UInt8 {
