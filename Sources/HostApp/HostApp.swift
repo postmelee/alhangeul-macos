@@ -28,23 +28,6 @@ struct AlHangeulMacApp: App {
                 }
                 .keyboardShortcut("o", modifiers: [.command])
             }
-
-            CommandMenu("보기") {
-                Button("확대") {
-                    viewerStore.zoomIn()
-                }
-                .keyboardShortcut("+", modifiers: [.command])
-
-                Button("축소") {
-                    viewerStore.zoomOut()
-                }
-                .keyboardShortcut("-", modifiers: [.command])
-
-                Button("실제 크기") {
-                    viewerStore.resetZoom()
-                }
-                .keyboardShortcut("0", modifiers: [.command])
-            }
         }
     }
 }

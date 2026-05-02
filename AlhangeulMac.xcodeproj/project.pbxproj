@@ -48,7 +48,6 @@
 		CE5A8FEBAA0993534910C8FD /* QLExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 89902FCF2BE44AEF39BCB0F1 /* QLExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CFFF9F1BE5247CCBA08920C6 /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA8BCDFCBEAD6115FFE3554A /* Rhwp.xcframework */; };
 		E2DACE22C6C9BD17E367BD50 /* HwpPreviewPDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4D838A2F8FB4DCE68BAA997 /* HwpPreviewPDFRenderer.swift */; };
-		E6DA1AE00C56FA4ACAC605A4 /* DocumentPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB237499FC34A454309F367 /* DocumentPageView.swift */; };
 		EEC6A9F2ACF281D9D33B6504 /* sample.hwpx in Resources */ = {isa = PBXBuildFile; fileRef = C752144C36555537BC4E0BF6 /* sample.hwpx */; };
 		F1B85EC992E13A931CB0FD71 /* BuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDF411BE8917A5D11B30729A /* BuildInfo.swift */; };
 		F55755A509DB49ADC3406419 /* HostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47927CA6F14A54D1BCB55CC7 /* HostApp.swift */; };
@@ -122,7 +121,6 @@
 		B537B1B59BDD4F9B4E52C905 /* DocumentOpenPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentOpenPanel.swift; sourceTree = "<group>"; };
 		BB67506A6831C276C185D1BB /* HostApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HostApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDD8FBF2A6F1FBF857E25264 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		BFB237499FC34A454309F367 /* DocumentPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPageView.swift; sourceTree = "<group>"; };
 		C752144C36555537BC4E0BF6 /* sample.hwpx */ = {isa = PBXFileReference; path = sample.hwpx; sourceTree = "<group>"; };
 		CB5619DA72A40986D792DB77 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		CF67920811C5DFDDA906CE59 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -322,7 +320,6 @@
 			children = (
 				5C1779E2E87C0FA74DC44AF3 /* AboutView.swift */,
 				9D96E5B8871F5D53AF7C9737 /* ContentView.swift */,
-				BFB237499FC34A454309F367 /* DocumentPageView.swift */,
 				0059FA2411515C760DF22DAC /* DocumentViewerView.swift */,
 				5453593D0BEEC9C6897BD817 /* RhwpStudioWebView.swift */,
 			);
@@ -505,7 +502,6 @@
 				AEE20A63B40F7FFC431D8951 /* ContentView.swift in Sources */,
 				7D8B059E64BF3E1AFFC79B3E /* DocumentOpenPanel.swift in Sources */,
 				973F7ADF9618ED137FEEB16F /* DocumentOpenRouter.swift in Sources */,
-				E6DA1AE00C56FA4ACAC605A4 /* DocumentPageView.swift in Sources */,
 				C2FFAE30F4E5DC8848ADEDE5 /* DocumentViewerStore.swift in Sources */,
 				5D8A5308E8D18507D1AF717D /* DocumentViewerView.swift in Sources */,
 				04826A6D082A7BA271809E2E /* ExtensionStatusModel.swift in Sources */,

@@ -5,12 +5,12 @@ struct DocumentViewerView: View {
 
     var body: some View {
         ZStack {
-            if store.isLoading {
-                ProgressView("불러오는 중...")
+            if let document = store.rhwpStudioDocument {
+                RhwpStudioContainerView(store: store, document: document)
             } else if let error = store.errorMessage {
                 ErrorStateView(message: error)
-            } else if store.hasDocument {
-                DocumentPagesView(store: store)
+            } else if store.isLoading {
+                LoadingStateView(message: "불러오는 중...")
             } else {
                 EmptyDocumentView(store: store)
             }
@@ -22,60 +22,38 @@ struct DocumentViewerView: View {
     }
 }
 
-private struct DocumentPagesView: View {
+private struct RhwpStudioContainerView: View {
     @ObservedObject var store: DocumentViewerStore
+    let document: RhwpStudioDocumentPayload
 
     var body: some View {
-        ScrollView([.vertical, .horizontal]) {
-            LazyVStack(spacing: 18) {
-                ForEach(0..<store.pageCount, id: \.self) { page in
-                    DocumentPageContainer(store: store, page: page)
+        ZStack {
+            RhwpStudioWebView(
+                document: document,
+                onLoadStateChange: { isLoading in
+                    Task { @MainActor in
+                        store.setWebViewLoading(isLoading)
+                    }
+                },
+                onError: { message in
+                    Task { @MainActor in
+                        store.setWebViewError(message)
+                    }
                 }
+            )
+
+            if store.isLoading || store.isWebViewLoading {
+                LoadingOverlayView(message: store.isLoading ? "불러오는 중..." : "웹 viewer 로딩 중...")
             }
-            .padding(28)
-            .frame(maxWidth: .infinity)
-        }
-        .id(store.documentRevision)
-        .background(Color(nsColor: .underPageBackgroundColor))
-    }
-}
 
-private struct DocumentPageContainer: View {
-    @ObservedObject var store: DocumentViewerStore
-    let page: Int
-
-    var body: some View {
-        let pageSize = store.pageSize(at: page)
-        let zoom = CGFloat(store.zoomScale)
-        let displaySize = CGSize(width: pageSize.width * zoom, height: pageSize.height * zoom)
-
-        Group {
-            if let tree = store.pageTrees[page], let document = store.document {
-                DocumentPageView(
-                    tree: tree,
-                    pageSize: pageSize,
-                    zoomScale: zoom,
-                    document: document
-                )
-                .frame(width: displaySize.width, height: displaySize.height)
-                .background(Color.white)
-                .shadow(color: .black.opacity(0.16), radius: 5, x: 0, y: 2)
-            } else {
-                ProgressView()
-                    .frame(width: max(160, displaySize.width), height: max(120, displaySize.height))
-                    .background(Color.white)
-                    .shadow(color: .black.opacity(0.10), radius: 4, x: 0, y: 1)
+            if let message = store.webViewErrorMessage {
+                WebViewerErrorBanner(message: message)
+                    .padding(.top, 12)
+                    .frame(maxHeight: .infinity, alignment: .top)
             }
         }
-        .id(page)
-        .onAppear {
-            store.markPageVisible(page)
-            store.setCurrentPage(page)
-            store.loadPage(page)
-        }
-        .onDisappear {
-            store.markPageNotVisible(page)
-        }
+        .id(document.revision)
+        .background(Color(nsColor: .windowBackgroundColor))
     }
 }
 
@@ -98,6 +76,27 @@ private struct EmptyDocumentView: View {
     }
 }
 
+private struct LoadingStateView: View {
+    let message: String
+
+    var body: some View {
+        ProgressView(message)
+            .padding(24)
+    }
+}
+
+private struct LoadingOverlayView: View {
+    let message: String
+
+    var body: some View {
+        ProgressView(message)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 12)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+            .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 3)
+    }
+}
+
 private struct ErrorStateView: View {
     let message: String
 
@@ -114,6 +113,24 @@ private struct ErrorStateView: View {
     }
 }
 
+private struct WebViewerErrorBanner: View {
+    let message: String
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.triangle")
+                .foregroundStyle(.orange)
+            Text(message)
+                .lineLimit(2)
+                .font(.caption)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .shadow(color: .black.opacity(0.10), radius: 6, x: 0, y: 2)
+    }
+}
+
 private struct StatusBarView: View {
     @ObservedObject var store: DocumentViewerStore
 
@@ -122,9 +139,8 @@ private struct StatusBarView: View {
             Text(store.filename.isEmpty ? "문서 없음" : store.filename)
                 .lineLimit(1)
             Spacer()
-            if store.pageCount > 0 {
-                Text("\(store.currentPage + 1)/\(store.pageCount)쪽")
-                Text("\(Int(store.zoomScale * 100))%")
+            if store.hasDocument {
+                Text(store.isWebViewLoading ? "웹 viewer 로딩 중" : "rhwp-studio")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
