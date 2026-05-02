@@ -70,7 +70,7 @@
 - `Frameworks`
 - 현재 진행 중이거나 상태가 불분명한 task 번호가 붙은 `/private/tmp/rhwp-task{N}-*`
 - `/private/tmp/rhwp-core-*`처럼 core 분석 또는 dump 성격이 있는 대용량 산출물
-- 이전 이름 설치본(`RhwpMac.app`, `알한글.app`) 발견 시 제거
+- 이전 이름 설치본(`RhwpMac.app`, `알한글.app`)이 충돌 후보로 확인되거나 충돌이 의심될 때만 작업지시자 승인 후 제거
 
 ### never-delete
 
