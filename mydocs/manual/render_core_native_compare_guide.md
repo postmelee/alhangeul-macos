@@ -66,6 +66,36 @@ macOS viewer가 그린 결과와 rhwp core가 그린 결과를 같은 입력 파
 
 페이지 번호는 1-based다.
 
+## M015 렌더 보강 샘플 smoke/diff 세트
+
+M015(`첫 출시 전 Swift 렌더 보강`) renderer 작업은 기본 smoke test와 별도로 다음 두 샘플을 필수 smoke 대상으로 확인한다.
+
+| 샘플 | 확인 목적 | 주요 확인 계층 |
+|------|----------|----------------|
+| `samples/basic/BookReview.hwp` | 도형 children 아래 텍스트가 native renderer에 반영되는지 확인 | render tree children 순회, core SVG text, native PNG text |
+| `samples/복학원서.hwp` | page/body 경계, layout overflow diagnostic, 제품 공통 렌더 경로 회귀 확인 | render tree geometry, core SVG/native PNG 책임 경계, HostApp/Quick Look/Thumbnail 공통 renderer |
+
+기본 명령:
+
+```bash
+./scripts/validate-stage3-render.sh /private/tmp/rhwp-m015-smoke samples/basic/BookReview.hwp samples/복학원서.hwp
+./scripts/render-debug-compare.sh /private/tmp/rhwp-m015-bookreview samples/basic/BookReview.hwp
+./scripts/render-debug-compare.sh /private/tmp/rhwp-m015-bokhak samples/복학원서.hwp
+```
+
+`복학원서.hwp`는 core layout 한계가 섞인 책임 경계 분리 샘플이다. 이 샘플에서 차이가 보이면 바로 Swift renderer 회귀로 단정하지 말고 core SVG, render tree geometry, native PNG가 같은 방향으로 어긋나는지 먼저 확인한다.
+
+기능 범주별 대표 후보는 다음과 같이 둔다. 후보 샘플은 작업 범위와 직접 관련 있을 때만 추가 실행하고, 모든 후보를 매번 full diff하지 않는다.
+
+| 범주 | 후보 샘플 | 사용 기준 |
+|------|----------|----------|
+| 도형 children | `samples/basic/BookReview.hwp` | 도형 아래 텍스트 순회 회귀 확인 |
+| 도형/group/transform | `samples/group-drawing-02.hwp`, `samples/group-box.hwp`, `samples/draw-group.hwp`, `samples/shape-group-02.hwp` | group, line transform, nested shape 처리 변경 시 |
+| 이미지 기본 조회 | `samples/hwp-img-001.hwp`, `samples/pic-in-head-02.hwp`, `samples/pic-in-table-01.hwp`, `samples/tac-img-02.hwp` | `bin_data_id` 이미지 조회나 image cache 변경 시 |
+| 이미지 crop/effect | `samples/pic-crop-01.hwp`, `samples/복학원서.hwp`, `samples/20250130-hongbo.hwp`, `samples/aift.hwp` | crop, transparency, brightness, contrast, watermark/effect 변경 시 |
+| placeholder/form/field | `samples/form-01.hwp`, `samples/hwpx/form-002.hwpx`, `samples/field-01.hwp`, `samples/field-01-memo.hwp` | FormObject, placeholder, field, memo 정적 프리뷰 변경 시. 실제 render tree node 존재를 먼저 확인한다. |
+| 텍스트 스타일/font | `samples/re-font-*.hwp`, `samples/re-align-*.hwp`, `samples/lseg-02-mixed.hwp`, `samples/lseg-03-spacing.hwp`, `samples/lseg-04-indent.hwp`, `samples/lseg-05-tab.hwp`, `samples/lseg-06-multisize.hwp` | font, align, spacing, indent, tab, multisize style 변경 시 |
+
 ## 산출물
 
 입력 파일명이 `table-in-tbox.hwp`, 페이지가 1이면 다음 파일이 생성된다.
@@ -128,6 +158,31 @@ DiffMaxChannelDelta: 255
 - `DiffCompareSize`: 두 PNG 크기가 다를 때 공통 영역 기준 비교 크기다.
 - `DiffDifferentPixelRatio`: 공통 영역 중 다른 픽셀 비율이다.
 - `DiffMaxChannelDelta`: 채널 차이의 최대값이다.
+
+## 보고서 기록 기준과 산출물 보관
+
+renderer 보강 단계 보고서에는 적어도 다음 값을 표나 짧은 summary로 남긴다.
+
+| 항목 | 필수 여부 | 기록 이유 |
+|------|----------|----------|
+| `PageCount` | 필수 | 입력 page 범위와 다중 page 여부 확인 |
+| `PageSizePt`, `NativePNGSize` | 필수 | page size와 bitmap 반올림 차이 확인 |
+| `RenderTreeJSONBytes` | 필수 | render tree 생성과 규모 변화 확인 |
+| `CoreSVGBytes` | 필수 | core SVG 생성과 규모 변화 확인 |
+| `NativeNonWhitePixels` | 필수 | native PNG blank 회귀 확인 |
+| `TextRuns`, `HangulRuns`, `HangulScalars` | 필수 | 텍스트와 한글 run 존재 확인 |
+| `MissingHangulGlyphs` | 필수 | font fallback 또는 glyph lookup 문제 분리 |
+| `Diff`, `DiffReason` | 필수 | 선택 산출물 생성 여부와 실패 사유 기록 |
+| `DiffDifferentPixels`, `DiffDifferentPixelRatio`, `DiffMaxChannelDelta` | 선택 | `Diff: generated`일 때만 pixel diff 규모 기록 |
+
+산출물 보관 규칙:
+
+- `render-tree.json`, `core.svg`, `native.png`, `summary.txt`, `core.png`, `diff.png` 같은 생성 산출물은 기본적으로 저장소에 커밋하지 않는다.
+- 단계 보고서에는 출력 디렉터리와 파일 경로, 핵심 summary 값을 남긴다.
+- PR 본문에는 모든 산출물 경로를 길게 나열하지 말고, 샘플별 핵심 결과와 필요한 보고서 링크를 남긴다.
+- 시각 차이를 리뷰에서 직접 봐야 하는 경우에만 native PNG, core PNG, diff PNG를 별도 첨부하거나 `mydocs/report/assets/` 추가 여부를 작업지시자와 확인한다.
+- `/private/tmp`, `/tmp`, `output/` 아래 산출물은 재현 가능한 임시 산출물로 취급한다. 장기 보존이 필요하면 최종 보고서에 명시한다.
+- `qlmanage` 실패로 `DiffReason`만 기록된 경우에도 필수 산출물 4종이 생성됐다면 core/native 비교 진단은 완료로 볼 수 있다.
 
 ## 판단 흐름
 
