@@ -7,7 +7,7 @@
 - **`devel`**: 모든 작업 PR이 모이는 개발 통합 브랜치. 새 작업 브랜치는 최신 `origin/devel` 기준으로 만든다.
 - **`local/taskN`**: 이슈 번호 N의 로컬 작업 브랜치. 단계 커밋과 보고서 커밋은 이 브랜치에 쌓는다.
 - **`publish/taskN`**: `local/taskN`을 원격에 게시하기 위한 PR용 브랜치. PR merge 후 삭제한다.
-- **draft PR**: 검토 준비 전 상태의 PR. 하이퍼-워터폴 최종 보고 후 `devel` 대상으로 만든다.
+- **Open PR**: 검토 가능한 상태의 PR. 하이퍼-워터폴 최종 보고 후 `devel` 대상으로 만든다.
 - **분리 worktree**: 메인 worktree가 다른 작업에 쓰이고 있을 때 별도 디렉터리에서 같은 저장소의 다른 브랜치를 작업하는 방식.
 
 ## 브랜치 관리
@@ -36,17 +36,17 @@ local/task{N} ── 커밋 · 커밋 · 커밋 ──→ publish/task{N} push
 - **타스크 브랜치**: `local/task{N}`에서 잘게 커밋. 작업 단위마다 커밋.
 - **원격 게시 브랜치**: `local/task{N}` 작업이 리뷰 가능한 상태가 되면 `publish/task{N}` 이름으로 원격에 push하고 `devel` 대상 PR을 생성한다.
 - **원격 push**: `local/task` 브랜치는 **로컬 유지 (원격 push 금지)**를 원칙으로 한다. 원격에는 `publish/task{N}`와 merge 결과 브랜치만 유지한다.
-- **devel 대상 PR**: 작업 단위 PR은 기본적으로 draft로 생성하고, 최종 보고와 검증 결과를 PR 본문에 반영한 뒤 review/merge 한다.
+- **devel 대상 PR**: 작업 단위 PR은 기본적으로 Open PR로 생성하고, 최종 보고와 검증 결과를 PR 본문에 반영한 상태에서 review/merge 한다.
 - **merge 전략**: `devel` 대상 PR은 merge commit 유지 또는 `--no-ff` 원칙을 기본으로 한다. squash merge는 단계별 커밋 의미가 사라질 수 있으므로 기본값으로 두지 않는다.
 - **main merge (PR 기반)**: 릴리즈 시점에 `devel` → `main` PR 생성 → 리뷰(approve) → merge 후 태그 생성.
 
 ## 메인테이너 워크플로우
 
 ```bash
-# 1. local/taskN → publish/taskN push + devel 대상 draft PR
+# 1. local/taskN → publish/taskN push + devel 대상 Open PR
 git checkout local/task17
 git push origin local/task17:publish/task17
-gh pr create --base devel --head publish/task17 --draft --title "Task #17: 제목" --template .github/pull_request_template.md
+gh pr create --base devel --head publish/task17 --title "Task #17: 제목" --body-file /tmp/task17-pr-body.md
 
 # 2. devel 대상 PR 리뷰 + merge
 gh pr review --approve
@@ -90,15 +90,20 @@ gh pr create --repo postmelee/alhangeul-macos --base devel --head {contributor}:
 
 ### PR 본문에 문서 링크를 넣을 때
 
-PR 본문에서 계획서, 단계 보고서, 최종 보고서, troubleshooting 문서를 링크할 때는 merge 후에도 열리는 commit SHA 고정 GitHub blob URL을 우선 사용한다. PR 생성 직전 `git rev-parse HEAD`로 얻은 PR head commit SHA를 기준으로 `https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/...` 형식을 사용하면 `publish/taskN` 브랜치 삭제 후에도 링크가 유지된다.
+PR 본문에서 계획서, 최종 보고서, troubleshooting 문서를 링크할 때는 merge 후에도 열리는 commit SHA 고정 GitHub blob URL을 우선 사용한다. PR 생성 직전 `git rev-parse HEAD`로 얻은 PR head commit SHA를 기준으로 `https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/...` 형식을 사용하면 `publish/taskN` 브랜치 삭제 후에도 링크가 유지된다. 단계 보고서는 `작업 문서` 목록에 중복으로 넣지 않고 Stage별 요약의 Stage 제목에서 링크한다.
 
-문서 섹션의 표시 텍스트는 raw URL이 아니라 `[파일명](URL)` 형식으로 작성한다. 예시는 다음과 같다.
+변경 내역의 작업 문서 항목은 raw URL이 아니라 `[파일명](URL)` 형식으로 작성한다. 예시는 다음과 같다.
 
 ```md
 - 수행 계획서: [task_m010_61.md](https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/plans/task_m010_61.md)
 - 구현 계획서: [task_m010_61_impl.md](https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/plans/task_m010_61_impl.md)
-- 단계 보고서: [task_m010_61_stage1.md](https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/working/task_m010_61_stage1.md)
 - 최종 보고서: [task_m010_61_report.md](https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/report/task_m010_61_report.md)
+```
+
+Stage별 요약에서는 Stage 제목을 단계 보고서로 링크하고, 옆의 짧은 commit SHA를 commit URL로 링크한다. 예시는 다음과 같다.
+
+```md
+- **[Stage 1](https://github.com/postmelee/alhangeul-macos/blob/{sha}/mydocs/working/task_m010_61_stage1.md)** ([abc1234](https://github.com/postmelee/alhangeul-macos/commit/{stage1_sha})): PR 본문 문서 링크 조사
 ```
 
 PR 본문 상대 링크, `blob/publish/taskN/...` 링크, URL만 그대로 노출하는 문서 링크는 merge 후 탐색성과 가독성을 떨어뜨리므로 사용하지 않는다.
