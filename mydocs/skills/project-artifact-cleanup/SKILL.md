@@ -183,7 +183,7 @@ Release 설치본 갱신 승인 요청:
 
 작업지시자가 승인하면 개별 경로만 인자로 넘겨 삭제한다. glob이나 상위 디렉터리 전체 삭제는 사용하지 않는다.
 
-이전 이름 설치본(`RhwpMac.app`, `알한글.app`) 삭제가 승인된 경우에는 LaunchServices 등록을 먼저 해제한 뒤 해당 bundle 경로만 삭제한다.
+이전 이름 설치본(`RhwpMac.app`, `알한글.app`) 삭제가 승인된 경우에는 일반 부산물 삭제 예시를 사용하지 않는다. LaunchServices 등록을 먼저 해제한 뒤 해당 bundle 경로만 삭제한다.
 
 ```bash
 LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
@@ -193,7 +193,7 @@ rm -rf "$APP"
 ```
 
 ```bash
-rm -rf "/absolute/path/to/approved-artifact"
+rm -rf "/absolute/path/to/approved-non-app-artifact"
 ```
 
 삭제 후에는 같은 후보 수집 명령으로 남은 항목과 회수 용량을 확인해 보고한다.
