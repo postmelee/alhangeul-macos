@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="알한글은 Mac에서 HWP/HWPX 문서를 Quick Look, Finder 썸네일, WKWebView 기반 뷰어로 다루는 오픈소스 macOS 앱입니다."
+    />
+    <meta property="og:title" content="Alhangeul - Mac에서 한글 파일은 더 이상 이방인이 아닙니다." />
+    <meta
+      property="og:description"
+      content="스페이스바로 미리보고, Finder에서 썸네일로 찾고, HWP파일을 보고 편집하세요."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./assets/logo-256@2x.png" />
+    <title>Alhangeul - Mac용 HWP/HWPX 뷰어</title>
+    <link rel="icon" href="./assets/logo-256@2x.png" />
+    <link rel="apple-touch-icon" href="./assets/logo-256@2x.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">본문으로 이동</a>
+    <header class="site-header" aria-label="주요 탐색">
+      <a class="brand-link" href="./" aria-label="Alhangeul 홈">
+        <img src="./assets/logo-256@2x.png" width="32" height="32" alt="" />
+        <span>Alhangeul</span>
+      </a>
+      <a class="github-link" href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer">
+        GitHub
+      </a>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <h1 id="hero-title">Mac에서 한글 파일은 더 이상 이방인이 아닙니다.</h1>
+          <p>스페이스바로 미리보고, Finder에서 썸네일로 찾고, HWP파일을 보고 편집하세요.</p>
+          <a class="download-button" href="https://github.com/postmelee/alhangeul-macos/releases/latest">
+            <span aria-hidden="true"></span>
+            Mac 다운로드
+          </a>
+        </div>
+      </section>
+
+      <section class="demo-section" aria-label="앱 실행 영상">
+        <div class="media-frame">
+          <video
+            src="./assets/thumbnail2.mov"
+            poster="./assets/group-1-4x.png"
+            muted
+            loop
+            playsinline
+            controls
+            preload="metadata"
+          >
+            브라우저가 영상을 지원하지 않습니다.
+          </video>
+        </div>
+        <p class="media-caption">알한글 앱 실행 영상은 `thumbnail2.mov` 자산으로 교체되어 표시됩니다.</p>
+      </section>
+
+      <section class="features-section" aria-labelledby="features-title">
+        <div class="section-heading">
+          <h2 id="features-title">Mac 안에서 자연스럽게 열리는 HWP/HWPX</h2>
+          <p>README의 v0.1 MVP 범위를 기준으로 Finder, Quick Look, 앱 뷰어 흐름을 소개합니다.</p>
+        </div>
+        <div class="feature-layout">
+          <img src="./assets/group-1-4x.png" alt="알한글의 Quick Look 미리보기와 Finder 썸네일 예시" />
+          <div class="feature-list" aria-label="주요 기능">
+            <article>
+              <h3>스페이스바 미리보기</h3>
+              <p>Quick Look 확장으로 HWP/HWPX 문서를 빠르게 확인합니다.</p>
+            </article>
+            <article>
+              <h3>Finder 썸네일</h3>
+              <p>Finder에서 문서 첫 페이지를 썸네일로 확인합니다.</p>
+            </article>
+            <article>
+              <h3>HWP/HWPX 뷰어</h3>
+              <p>WKWebView 기반 viewer로 문서를 열고 탐색합니다.</p>
+            </article>
+            <article>
+              <h3>로컬 처리</h3>
+              <p>문서를 업로드하지 않고 Mac 안에서 처리합니다.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="faq-section" aria-labelledby="faq-title">
+        <h2 id="faq-title">FAQ</h2>
+        <div class="faq-list">
+          <details>
+            <summary>무료로 사용할 수 있나요?</summary>
+            <p>알한글은 MIT License로 공개되는 오픈소스 프로젝트입니다.</p>
+          </details>
+          <details>
+            <summary>어떤 파일 형식을 지원하나요?</summary>
+            <p>v0.1 MVP는 HWP/HWPX 문서의 Finder 미리보기, 썸네일, 앱 열기 흐름을 중심으로 합니다.</p>
+          </details>
+          <details>
+            <summary>Mac 다운로드는 어디로 연결되나요?</summary>
+            <p>현재 버튼은 GitHub Releases 최신 페이지로 연결됩니다. 실제 배포 산출물 구성은 별도 작업 범위입니다.</p>
+          </details>
+          <details>
+            <summary>개인정보와 문서는 안전한가요?</summary>
+            <p>알한글은 문서를 외부 서비스에 업로드하지 않고 로컬 처리를 우선합니다.</p>
+          </details>
+          <details>
+            <summary>편집 기능은 어디까지 지원되나요?</summary>
+            <p>안전한 작은 수정은 v1.0 로드맵 범위입니다. 현재 랜딩페이지는 MVP viewer 흐름을 중심으로 소개합니다.</p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-brand">
+        <img src="./assets/logo-256@2x.png" width="32" height="32" alt="" />
+        <span>Alhangeul</span>
+      </div>
+      <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 뷰어 앱입니다.</p>
+      <nav aria-label="푸터 링크">
+        <a href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer">GitHub</a>
+        <a href="https://github.com/postmelee/alhangeul-macos/blob/main/LICENSE" rel="noreferrer">MIT License</a>
+      </nav>
+    </footer>
+
+    <noscript>FAQ 아코디언은 JavaScript 없이도 브라우저 기본 동작으로 열고 닫을 수 있습니다.</noscript>
+    <script src="./script.js"></script>
+  </body>
+</html>
