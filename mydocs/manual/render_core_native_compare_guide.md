@@ -66,35 +66,18 @@ macOS viewer가 그린 결과와 rhwp core가 그린 결과를 같은 입력 파
 
 페이지 번호는 1-based다.
 
-## M015 렌더 보강 샘플 smoke/diff 세트
+## 작업별 대표 샘플 세트
 
-M015(`첫 출시 전 Swift 렌더 보강`) renderer 작업은 기본 smoke test와 별도로 다음 두 샘플을 필수 smoke 대상으로 확인한다.
+renderer 변경은 기본 smoke test만으로 충분하지 않을 수 있다. node type, transform, clipping, image, text style처럼 시각 결과를 바꾸는 작업은 해당 task의 수행계획서, 구현계획서, tech 문서, 단계 보고서 중 하나에 대표 샘플 세트를 명시한다.
 
-| 샘플 | 확인 목적 | 주요 확인 계층 |
-|------|----------|----------------|
-| `samples/basic/BookReview.hwp` | 도형 children 아래 텍스트가 native renderer에 반영되는지 확인 | render tree children 순회, core SVG text, native PNG text |
-| `samples/복학원서.hwp` | page/body 경계, layout overflow diagnostic, 제품 공통 렌더 경로 회귀 확인 | render tree geometry, core SVG/native PNG 책임 경계, HostApp/Quick Look/Thumbnail 공통 renderer |
+대표 샘플은 작업 범위와 직접 관련 있는 저장소 `samples/` 파일을 우선 사용한다. 마일스톤 또는 특정 이슈에만 해당하는 샘플 목록은 이 manual에 누적하지 않고 task-scoped 문서에 둔다.
 
-기본 명령:
+샘플 세트를 정할 때는 다음 기준을 사용한다.
 
-```bash
-./scripts/validate-stage3-render.sh /private/tmp/rhwp-m015-smoke samples/basic/BookReview.hwp samples/복학원서.hwp
-./scripts/render-debug-compare.sh /private/tmp/rhwp-m015-bookreview samples/basic/BookReview.hwp
-./scripts/render-debug-compare.sh /private/tmp/rhwp-m015-bokhak samples/복학원서.hwp
-```
-
-`복학원서.hwp`는 core layout 한계가 섞인 책임 경계 분리 샘플이다. 이 샘플에서 차이가 보이면 바로 Swift renderer 회귀로 단정하지 말고 core SVG, render tree geometry, native PNG가 같은 방향으로 어긋나는지 먼저 확인한다.
-
-기능 범주별 대표 후보는 다음과 같이 둔다. 후보 샘플은 작업 범위와 직접 관련 있을 때만 추가 실행하고, 모든 후보를 매번 full diff하지 않는다.
-
-| 범주 | 후보 샘플 | 사용 기준 |
-|------|----------|----------|
-| 도형 children | `samples/basic/BookReview.hwp` | 도형 아래 텍스트 순회 회귀 확인 |
-| 도형/group/transform | `samples/group-drawing-02.hwp`, `samples/group-box.hwp`, `samples/draw-group.hwp`, `samples/shape-group-02.hwp` | group, line transform, nested shape 처리 변경 시 |
-| 이미지 기본 조회 | `samples/hwp-img-001.hwp`, `samples/pic-in-head-02.hwp`, `samples/pic-in-table-01.hwp`, `samples/tac-img-02.hwp` | `bin_data_id` 이미지 조회나 image cache 변경 시 |
-| 이미지 crop/effect | `samples/pic-crop-01.hwp`, `samples/복학원서.hwp`, `samples/20250130-hongbo.hwp`, `samples/aift.hwp` | crop, transparency, brightness, contrast, watermark/effect 변경 시 |
-| placeholder/form/field | `samples/form-01.hwp`, `samples/hwpx/form-002.hwpx`, `samples/field-01.hwp`, `samples/field-01-memo.hwp` | FormObject, placeholder, field, memo 정적 프리뷰 변경 시. 실제 render tree node 존재를 먼저 확인한다. |
-| 텍스트 스타일/font | `samples/re-font-*.hwp`, `samples/re-align-*.hwp`, `samples/lseg-02-mixed.hwp`, `samples/lseg-03-spacing.hwp`, `samples/lseg-04-indent.hwp`, `samples/lseg-05-tab.hwp`, `samples/lseg-06-multisize.hwp` | font, align, spacing, indent, tab, multisize style 변경 시 |
+- 변경한 렌더 계층을 실제로 exercise하는 샘플을 포함한다.
+- 알려진 회귀 또는 책임 경계 분리 샘플이 있으면 core SVG, render tree JSON, native PNG를 함께 확인한다.
+- 모든 후보를 매번 full diff하지 않는다. 변경 범위와 직접 관련 있는 샘플만 추가 실행한다.
+- 외부 개인 경로 샘플은 장기 기준으로 삼지 않는다. 필요하면 저장소 `samples/` 편입 여부를 별도 task에서 판단한다.
 
 ## 산출물
 

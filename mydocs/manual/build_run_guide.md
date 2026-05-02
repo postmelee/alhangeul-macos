@@ -167,13 +167,13 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 
 이 smoke test는 최소 회귀 관문이다. 통과해도 한컴 viewer 또는 rhwp core SVG와의 시각 정합성을 보장하지 않는다. 특정 문서에서 본문, 표, 도형, 이미지가 빠지거나 위치가 어긋나 보이면 다음의 core/native 렌더 비교 디버깅으로 넘어간다.
 
-M015 renderer 보강 작업에서는 기본 smoke test에 더해 `samples/basic/BookReview.hwp`와 `samples/복학원서.hwp`를 필수 smoke 대상으로 확인한다.
+renderer 변경 작업에서는 기본 smoke test에 더해 해당 task 문서에서 정한 대표 샘플 smoke/diff를 추가 수행한다.
 
 ```bash
-./scripts/validate-stage3-render.sh /private/tmp/rhwp-m015-smoke samples/basic/BookReview.hwp samples/복학원서.hwp
+./scripts/validate-stage3-render.sh /private/tmp/rhwp-task-smoke path/to/representative-sample.hwp
 ```
 
-기능별 대표 샘플, `NativeNonWhitePixels`, `CoreSVGBytes`, `DiffReason` 같은 summary 기록 기준, 산출물 보관 규칙은 [`render_core_native_compare_guide.md`](render_core_native_compare_guide.md)의 "M015 렌더 보강 샘플 smoke/diff 세트"를 따른다.
+기능별 대표 샘플은 수행계획서, 구현계획서, tech 문서, 단계 보고서 중 하나에 task 범위로 남긴다. `NativeNonWhitePixels`, `CoreSVGBytes`, `DiffReason` 같은 summary 기록 기준과 산출물 보관 규칙은 [`render_core_native_compare_guide.md`](render_core_native_compare_guide.md)를 따른다.
 
 ## core/native 렌더 비교 디버깅
 
