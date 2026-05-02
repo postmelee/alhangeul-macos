@@ -26,6 +26,7 @@
 		5222F18B40FB3ABEAEA82A7D /* HwpThumbnailProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D3EBDA3B97538A87F0EFE88 /* HwpThumbnailProvider.swift */; };
 		559AF16A52577F78660A386F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 142B296A597FCC2F7282325E /* InfoPlist.strings */; };
 		5D8A5308E8D18507D1AF717D /* DocumentViewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0059FA2411515C760DF22DAC /* DocumentViewerView.swift */; };
+		640802493861BF645B0D1987 /* RhwpStudioResourceSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F900761CB49E5905114DA64 /* RhwpStudioResourceSchemeHandler.swift */; };
 		75243835C9BE6F6C44F5F20E /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA8BCDFCBEAD6115FFE3554A /* Rhwp.xcframework */; };
 		76DC3E1FDFDB73BB6FC97F04 /* RhwpStudioWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5453593D0BEEC9C6897BD817 /* RhwpStudioWebView.swift */; };
 		79668181738E40F261D667EC /* FontFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED414CA9E748617ED5AC5770 /* FontFallback.swift */; };
@@ -101,6 +102,7 @@
 		5453593D0BEEC9C6897BD817 /* RhwpStudioWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioWebView.swift; sourceTree = "<group>"; };
 		5C1779E2E87C0FA74DC44AF3 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		5E039FB3B00187086CB917B3 /* ThumbnailExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ThumbnailExtension.entitlements; sourceTree = "<group>"; };
+		5F900761CB49E5905114DA64 /* RhwpStudioResourceSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioResourceSchemeHandler.swift; sourceTree = "<group>"; };
 		6336DDBE52EE036D340608FB /* HwpPreviewProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewProvider.swift; sourceTree = "<group>"; };
 		6557EB0999822D4A503FFACC /* ExtensionStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionStatusModel.swift; sourceTree = "<group>"; };
 		77B0F8AD1D4E830F2B914ADB /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -232,6 +234,7 @@
 				EBE8CA0E74394C2FF7312FF6 /* RhwpStudioDocumentPayload.swift */,
 				DD55FB2B4CD3CAAAC997C9FA /* RhwpStudioDocumentSchemeHandler.swift */,
 				188A76805DCDE7996434316C /* RhwpStudioResourceLocator.swift */,
+				5F900761CB49E5905114DA64 /* RhwpStudioResourceSchemeHandler.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -514,6 +517,7 @@
 				28CC039CA9F6A18606E30F33 /* RhwpStudioDocumentPayload.swift in Sources */,
 				84D3E024728DA61B05C89E3C /* RhwpStudioDocumentSchemeHandler.swift in Sources */,
 				358E79AA56E04C7E0DEA91E1 /* RhwpStudioResourceLocator.swift in Sources */,
+				640802493861BF645B0D1987 /* RhwpStudioResourceSchemeHandler.swift in Sources */,
 				76DC3E1FDFDB73BB6FC97F04 /* RhwpStudioWebView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

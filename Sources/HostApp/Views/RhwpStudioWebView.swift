@@ -42,6 +42,7 @@ extension RhwpStudioWebView {
         }
 
         private let documentProvider = RhwpStudioDocumentProvider()
+        private let resourceSchemeHandler = RhwpStudioResourceSchemeHandler()
         private lazy var documentSchemeHandler = RhwpStudioDocumentSchemeHandler(
             documentProvider: documentProvider
         )
@@ -52,6 +53,10 @@ extension RhwpStudioWebView {
             configuration.setURLSchemeHandler(
                 documentSchemeHandler,
                 forURLScheme: RhwpStudioDocumentRoute.scheme
+            )
+            configuration.setURLSchemeHandler(
+                resourceSchemeHandler,
+                forURLScheme: RhwpStudioResourceRoute.scheme
             )
             configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
 
@@ -80,11 +85,10 @@ extension RhwpStudioWebView {
 
             do {
                 let loadURL = try RhwpStudioResourceLocator.loadURL(for: document)
-                let readAccessURL = try RhwpStudioResourceLocator.resourceDirectoryURL()
                 loadedIdentity = nextIdentity
                 onError(nil)
                 onLoadStateChange(true)
-                webView.loadFileURL(loadURL, allowingReadAccessTo: readAccessURL)
+                webView.load(URLRequest(url: loadURL))
             } catch {
                 loadedIdentity = nil
                 onLoadStateChange(false)
@@ -137,8 +141,8 @@ extension RhwpStudioWebView {
 
         private func isAllowedNavigation(to url: URL) -> Bool {
             switch url.scheme?.lowercased() {
-            case "file":
-                return RhwpStudioResourceLocator.isBundledResourceURL(url)
+            case RhwpStudioResourceRoute.scheme:
+                return RhwpStudioResourceRoute.isStudioResourceURL(url)
             case "about", "blob", "data":
                 return true
             case RhwpStudioDocumentRoute.scheme:

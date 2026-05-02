@@ -22,11 +22,12 @@ enum RhwpStudioResourceLocator {
     }
 
     static func loadURL(for document: RhwpStudioDocumentPayload?, bundle: Bundle = .main) throws -> URL {
-        let indexURL = try indexHTMLURL(bundle: bundle)
+        _ = try indexHTMLURL(bundle: bundle)
 
-        guard var components = URLComponents(url: indexURL, resolvingAgainstBaseURL: false) else {
-            throw RhwpStudioResourceLocatorError.invalidIndexURL(indexURL.absoluteString)
-        }
+        var components = URLComponents()
+        components.scheme = RhwpStudioResourceRoute.scheme
+        components.host = RhwpStudioResourceRoute.host
+        components.path = "/index.html"
 
         if let document {
             components.queryItems = [
@@ -41,7 +42,7 @@ enum RhwpStudioResourceLocator {
         }
 
         guard let url = components.url else {
-            throw RhwpStudioResourceLocatorError.invalidIndexURL(indexURL.absoluteString)
+            throw RhwpStudioResourceLocatorError.invalidIndexURL(RhwpStudioResourceRoute.scheme)
         }
         return url
     }

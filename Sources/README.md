@@ -15,7 +15,7 @@ Sources/
 
 | 디렉터리 | 역할 | 포함 target |
 |------|------|------|
-| `HostApp/` | 파일 열기, 보안 범위 접근, `rhwp-studio` WKWebView viewer 상태, 내부 document scheme bridge | `HostApp` |
+| `HostApp/` | 파일 열기, 보안 범위 접근, `rhwp-studio` WKWebView viewer 상태, 내부 resource/document scheme bridge | `HostApp` |
 | `QLExtension/` | Finder Quick Look preview provider | `QLExtension` |
 | `ThumbnailExtension/` | Finder thumbnail provider와 thumbnail render cache | `ThumbnailExtension` |
 | `Shared/` | page bitmap 렌더링과 Quick Look 표시용 PNG/PDF preview 등 HostApp/extension 공통 macOS helper | `HostApp`, `QLExtension`, `ThumbnailExtension` |
