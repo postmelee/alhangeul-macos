@@ -329,16 +329,26 @@ struct GroupNode: Decodable {
 
 struct EquationNode: Decodable {
     let svgContent: String
+    let layoutBox: EquationLayoutBox?
     let colorStr: String
     let color: UInt32
     let fontSize: Double
 
     enum CodingKeys: String, CodingKey {
         case svgContent = "svg_content"
+        case layoutBox = "layout_box"
         case colorStr = "color_str"
         case color
         case fontSize = "font_size"
     }
+}
+
+struct EquationLayoutBox: Decodable {
+    let x: Double
+    let y: Double
+    let width: Double
+    let height: Double
+    let baseline: Double
 }
 
 struct FormObjectNode: Decodable {
