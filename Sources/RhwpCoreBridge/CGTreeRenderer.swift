@@ -16,6 +16,8 @@ class CGTreeRenderer {
     private var pageHeight: Double = 0
 
     func render(tree: RenderNode, in context: CGContext, pageHeight: Double, document: RhwpDocument?) {
+        HwpBundledFontRegistry.ensureRegistered()
+
         // 이미지 binDataId는 문서 내부 식별자이므로 문서가 바뀌면 캐시를 이어 쓰면 안 된다.
         if !isRenderingSameDocument(document) {
             clearCache()
@@ -802,16 +804,12 @@ class CGTreeRenderer {
     }
 
     private func makeTextRunFont(style: TextStyle, fontSize: CGFloat) -> CTFont {
-        let appleName = mapHWPFontToApple(style.fontFamily)
-        var font = CTFontCreateWithName(appleName as CFString, fontSize, nil)
-
-        var traits = CTFontSymbolicTraits()
-        if style.bold { traits.insert(.boldTrait) }
-        if style.italic { traits.insert(.italicTrait) }
-        if !traits.isEmpty,
-           let traitFont = CTFontCreateCopyWithSymbolicTraits(font, fontSize, nil, traits, [.boldTrait, .italicTrait]) {
-            font = traitFont
-        }
+        var font = resolveAppleFont(
+            hwpFontFamily: style.fontFamily,
+            bold: style.bold,
+            italic: style.italic,
+            size: fontSize
+        )
 
         if style.ratio != 1.0 && style.ratio > 0 {
             var matrix = CGAffineTransform(scaleX: CGFloat(style.ratio), y: 1.0)
@@ -1427,8 +1425,12 @@ class CGTreeRenderer {
         ctx.translateBy(x: CGFloat(bbox.x), y: CGFloat(bbox.y + bbox.height))
         ctx.scaleBy(x: 1, y: -1)
 
-        let appleName = mapHWPFontToApple(marker.fontFamily)
-        let font = CTFontCreateWithName(appleName as CFString, fontSize, nil)
+        let font = resolveAppleFont(
+            hwpFontFamily: marker.fontFamily,
+            bold: false,
+            italic: false,
+            size: fontSize
+        )
         let attributes: [NSAttributedString.Key: Any] = [
             coreTextFontKey: font,
             coreTextForegroundColorKey: colorRefToCGColor(marker.color),

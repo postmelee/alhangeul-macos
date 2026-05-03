@@ -14,6 +14,10 @@ targets:
     platform: macOS
     sources:
       - path: Sources/HostApp
+        excludes:
+          - Resources/rhwp-studio
+      - path: Sources/HostApp/Resources/rhwp-studio
+        type: folder
       - path: Sources/Shared
       - path: Sources/RhwpCoreBridge
     dependencies:
