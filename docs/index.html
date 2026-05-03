@@ -18,6 +18,9 @@
     <title>알한글 - Mac용 HWP/HWPX 뷰어</title>
     <link rel="icon" href="./assets/logo-256@2x.png" />
     <link rel="apple-touch-icon" href="./assets/logo-256@2x.png" />
+    <script>
+      document.documentElement.classList.add("reveal-ready");
+    </script>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -49,55 +52,61 @@
     </header>
 
     <main id="main">
-      <section class="hero" aria-labelledby="hero-title">
+      <section class="hero" aria-labelledby="hero-title" data-reveal-group>
         <div class="hero-copy">
-          <h1 id="hero-title">
+          <h1 id="hero-title" data-reveal-item>
             Mac에서 한글 파일은<br />
             더 이상 <span class="hero-highlight">이방인</span>이 아닙니다.
           </h1>
-          <p>스페이스바로 미리보고, Finder에서 썸네일로 찾고, HWP파일을 보고 편집하세요.</p>
-          <a
-            class="download-button"
-            href="https://github.com/postmelee/alhangeul-macos/releases/latest"
-            aria-label="GitHub Releases에서 Mac용 알한글 다운로드"
-          >
-            <span aria-hidden="true"></span>
-            Mac 다운로드
-          </a>
+          <p data-reveal-item>스페이스바로 미리보고, Finder에서 썸네일로 찾고, HWP파일을 보고 편집하세요.</p>
+          <div class="hero-action" data-reveal-item>
+            <a
+              class="download-button"
+              href="https://github.com/postmelee/alhangeul-macos/releases/latest"
+              aria-label="GitHub Releases에서 Mac용 알한글 다운로드"
+            >
+              <span aria-hidden="true"></span>
+              Mac 다운로드
+            </a>
+          </div>
         </div>
       </section>
 
-      <section class="demo-section" aria-label="앱 실행 영상">
-        <div class="macbook-showcase">
-          <img class="macbook-frame" src="./assets/mac_mock.png" alt="" aria-hidden="true" />
-          <div class="macbook-screen">
-            <video
-              src="./assets/thumbnail2.mov"
-              poster="./assets/group-1-4x.png"
-              autoplay
-              muted
-              loop
-              playsinline
-              preload="metadata"
-              aria-label="알한글 앱 실행 영상"
-            >
-              브라우저가 영상을 지원하지 않습니다.
-            </video>
+      <section class="demo-section" aria-label="앱 실행 영상" data-reveal-group>
+        <div class="macbook-reveal" data-reveal-item>
+          <div class="macbook-showcase">
+            <img class="macbook-frame" src="./assets/mac_mock.png" alt="" aria-hidden="true" />
+            <div class="macbook-screen">
+              <video
+                src="./assets/thumbnail2.mov"
+                poster="./assets/group-1-4x.png"
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                aria-label="알한글 앱 실행 영상"
+              >
+                브라우저가 영상을 지원하지 않습니다.
+              </video>
+            </div>
           </div>
         </div>
-        <p class="media-caption">Quick Look과 Finder, 앱 뷰어가 하나의 Mac 흐름으로 이어집니다.</p>
+        <p class="media-caption" data-reveal-item>Quick Look과 Finder, 앱 뷰어가 하나의 Mac 흐름으로 이어집니다.</p>
       </section>
 
       <section class="features-section" aria-labelledby="features-title">
-        <div class="features-sticky">
+        <div class="features-sticky" data-reveal-group>
           <div class="section-heading">
-            <h2 id="features-title">미리보기부터 뷰어까지, <br class="feature-mobile-break" />Mac 방식으로</h2>
-            <p>
+            <h2 id="features-title" data-reveal-item>
+              미리보기부터 뷰어까지, <br class="feature-mobile-break" />Mac 방식으로
+            </h2>
+            <p data-reveal-item>
               Finder와 Quick Look, 앱 뷰어까지 HWP/HWPX 문서를
               <br class="feature-mobile-break" />Mac 안에서 자연스럽게 열고 확인합니다.
             </p>
           </div>
-          <div class="features-copy">
+          <div class="features-copy" data-reveal-item>
             <div class="feature-list" aria-label="주요 기능">
               <article class="feature-step is-active" data-feature-step="0">
                 <h3>Finder에서 <span class="feature-highlight">썸네일로 찾기</span></h3>
@@ -117,7 +126,7 @@
               </article>
             </div>
           </div>
-          <figure class="feature-visual" aria-label="알한글의 Quick Look 미리보기와 Finder 썸네일 예시">
+          <figure class="feature-visual" aria-label="알한글의 Quick Look 미리보기와 Finder 썸네일 예시" data-reveal-item>
             <div class="finder-visual">
               <div class="finder-progress" aria-label="Finder 썸네일 설치 흐름">
                 <div class="progress-track" aria-hidden="true">

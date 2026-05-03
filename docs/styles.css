@@ -207,11 +207,23 @@ video {
   background: var(--accent-hover);
 }
 
+.hero-action {
+  margin-top: 24px;
+}
+
+.hero-action .download-button {
+  margin-top: 0;
+}
+
 .demo-section {
   width: 100%;
   padding: 0 20px 72px;
   background: #ffffff;
   color: var(--text);
+}
+
+.macbook-reveal {
+  width: 100%;
 }
 
 .macbook-showcase {
@@ -255,6 +267,21 @@ video {
   text-align: center;
   font-size: 14px;
   color: var(--muted);
+}
+
+.reveal-ready [data-reveal-item] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 720ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 720ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--reveal-index, 0) * 90ms);
+  will-change: opacity, transform;
+}
+
+.reveal-ready [data-reveal-group].is-revealed [data-reveal-item] {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .features-section {
@@ -1060,6 +1087,10 @@ video {
     margin-top: 14px;
   }
 
+  .reveal-ready [data-reveal-item] {
+    transform: translateY(18px);
+  }
+
   .feature-step {
     padding: 11px 20px;
   }
@@ -1096,5 +1127,11 @@ video {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .reveal-ready [data-reveal-item] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

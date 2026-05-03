@@ -1,6 +1,7 @@
 const faqItems = document.querySelectorAll(".faq-list details");
 const featureSection = document.querySelector(".features-section");
 const featureSteps = Array.from(document.querySelectorAll("[data-feature-step]"));
+const revealGroups = Array.from(document.querySelectorAll("[data-reveal-group]"));
 const stageLabelNodes = {
   start: document.querySelector('[data-stage-label="start"]'),
   middle: document.querySelector('[data-stage-label="middle"]'),
@@ -52,6 +53,43 @@ faqItems.forEach((item) => {
     });
   });
 });
+
+const setupRevealAnimations = () => {
+  revealGroups.forEach((group) => {
+    Array.from(group.querySelectorAll("[data-reveal-item]")).forEach((item, index) => {
+      item.style.setProperty("--reveal-index", index);
+    });
+  });
+
+  if (revealGroups.length === 0) return;
+
+  const revealAll = () => {
+    revealGroups.forEach((group) => group.classList.add("is-revealed"));
+  };
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+    revealAll();
+    return;
+  }
+
+  const revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        entry.target.classList.add("is-revealed");
+        observer.unobserve(entry.target);
+      });
+    },
+    {
+      threshold: 0.18,
+      rootMargin: "0px 0px -12% 0px",
+    },
+  );
+
+  revealGroups.forEach((group) => revealObserver.observe(group));
+};
 
 const getFeatureScrollState = () => {
   const sectionRect = featureSection.getBoundingClientRect();
@@ -166,6 +204,7 @@ const requestFeatureScrollUpdate = () => {
   });
 };
 
+setupRevealAnimations();
 updateFeatureScroll();
 window.addEventListener("scroll", requestFeatureScrollUpdate, { passive: true });
 window.addEventListener("resize", requestFeatureScrollUpdate);
