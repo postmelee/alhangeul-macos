@@ -127,6 +127,8 @@ Mac에서 한글 파일은
 - 좁은 화면에서는 Feature visual 묶음의 absolute bottom 배치를 제거하고 일반 flex 흐름으로 되돌려, 기능 설명 카드 바로 아래에 progress bar box가 오도록 간격을 좁혔다.
 - 좁은 화면에서 Finder 이미지 stage 폭을 viewport 높이 기반으로 제한하고 중앙 정렬해, progress bar 아래 이미지가 왼쪽으로 치우치지 않게 보정했다.
 - 좁은 화면에서 Feature 설명 카드와 progress bar box가 같은 외곽 폭을 쓰도록 Feature copy/list/active card 폭을 100%로 맞췄다.
+- 좁은 화면에서는 Feature 설명 카드 다음에 이미지를 먼저 보여주고 progress bar box를 이미지 아래로 내려, 이미지와 설명의 연결감을 우선했다.
+- 좁은 화면에서 Feature heading은 `미리보기부터 뷰어까지,` 뒤, supporting copy는 `HWP/HWPX 문서를` 뒤에서 줄바꿈되도록 모바일 전용 break를 추가했다.
 - Apple 공식 MacBook Pro 페이지의 highlights/closer-look product storytelling과 MacBook Air/Pro 환경 섹션의 큰 카드형 수치 강조를 참고했다.
   - `https://www.apple.com/macbook-pro/`
   - `https://www.apple.com/macbook-air/`

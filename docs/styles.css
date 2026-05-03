@@ -301,6 +301,10 @@ video {
   text-align: center;
 }
 
+.feature-mobile-break {
+  display: none;
+}
+
 .features-sticky {
   position: sticky;
   top: 52px;
@@ -866,7 +870,12 @@ video {
     justify-items: center;
   }
 
+  .finder-progress {
+    order: 2;
+  }
+
   .finder-image-stage {
+    order: 1;
     width: min(100%, 66.5vh);
     margin-inline: auto;
     max-height: 38vh;
@@ -881,7 +890,7 @@ video {
     display: none;
     width: 100%;
     border-radius: 15px;
-    padding: 14px 16px;
+    padding: 14px 28px;
     transform: translateY(8px);
   }
 
@@ -919,6 +928,10 @@ video {
   .checkpoint-marker {
     width: 22px;
     height: 22px;
+  }
+
+  .feature-mobile-break {
+    display: block;
   }
 
   .finder-install-orb {
@@ -1043,7 +1056,7 @@ video {
   }
 
   .feature-step {
-    padding: 12px 14px;
+    padding: 12px 24px;
   }
 
   .feature-step h3 {
