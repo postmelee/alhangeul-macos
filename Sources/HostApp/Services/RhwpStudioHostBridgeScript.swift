@@ -58,6 +58,32 @@ enum RhwpStudioHostBridgeScript {
         });
       }
 
+      function encodeBytesToBase64(bytes) {
+        const chunkSize = 0x8000;
+        const chunks = [];
+        for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+          chunks.push(String.fromCharCode(...bytes.slice(offset, offset + chunkSize)));
+        }
+        return btoa(chunks.join(""));
+      }
+
+      async function requestHwpExportPayload() {
+        try {
+          const payload = await requestRhwp("exportHwpBase64");
+          if (payload && typeof payload.base64 === "string") {
+            return payload;
+          }
+        } catch {
+          // Older rhwp-studio bundles do not expose exportHwpBase64.
+        }
+
+        const bytes = await requestRhwp("exportHwp");
+        return {
+          base64: encodeBytesToBase64(bytes),
+          byteCount: bytes.length
+        };
+      }
+
       function waitForAnimationFrame() {
         return new Promise((resolve) => {
           requestAnimationFrame(() => resolve());
@@ -78,6 +104,16 @@ enum RhwpStudioHostBridgeScript {
       function closeMenus() {
         document.querySelectorAll("#menu-bar .menu-item.open").forEach((menu) => {
           menu.classList.remove("open");
+        });
+      }
+
+      function enableNativeCommandItems() {
+        document.querySelectorAll(".md-item[data-cmd]").forEach((item) => {
+          const command = item.dataset.cmd;
+          if (nativeCommands.has(command)) {
+            item.classList.remove("disabled");
+            item.removeAttribute("aria-disabled");
+          }
         });
       }
 
@@ -116,85 +152,93 @@ enum RhwpStudioHostBridgeScript {
         return { pageCount, pages };
       }
 
+      async function exportHwpDocument(messageType, errorPrefix) {
+        try {
+          await settleEditorState();
+          const payload = await requestHwpExportPayload();
+          postNative({
+            type: messageType,
+            fileName: currentFileName(),
+            base64: payload.base64,
+            byteCount: payload.byteCount
+          });
+        } catch (error) {
+          postNative({
+            type: "error",
+            message: `${errorPrefix}: ${error?.message || String(error)}`
+          });
+        }
+      }
+
+      async function exportPDFDocument() {
+        try {
+          await settleEditorState();
+          const payload = await requestHwpExportPayload();
+          postNative({
+            type: "export-pdf-document",
+            fileName: currentFileName(),
+            base64: payload.base64,
+            byteCount: payload.byteCount
+          });
+        } catch (error) {
+          postNative({
+            type: "error",
+            message: `PDF 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
+          });
+        }
+      }
+
+      async function printDocument() {
+        try {
+          const { pageCount, pages } = await documentPages();
+          postNative({
+            type: "print-document",
+            fileName: currentFileName(),
+            pageCount,
+            pages
+          });
+        } catch (error) {
+          postNative({
+            type: "error",
+            message: `인쇄 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
+          });
+        }
+      }
+
       async function handleNativeCommand(command) {
-        if (command === "file:open") {
+        if (command === "file:open" || command === "file:save" || command === "file:export-pdf") {
           postNative({
             type: "command",
-            command
+            command,
+            fileName: currentFileName()
           });
           return;
         }
 
-        if (command === "file:save") {
-          try {
-            await settleEditorState();
-            const bytes = await requestRhwp("exportHwp");
-            postNative({
-              type: "save-document",
-              fileName: currentFileName(),
-              bytes
-            });
-          } catch (error) {
-            postNative({
-              type: "error",
-              message: `문서를 내보낼 수 없습니다: ${error?.message || String(error)}`
-            });
-          }
-          return;
-        }
-
         if (command === "file:share") {
-          try {
-            await settleEditorState();
-            const bytes = await requestRhwp("exportHwp");
-            postNative({
-              type: "share-document",
-              fileName: currentFileName(),
-              bytes
-            });
-          } catch (error) {
-            postNative({
-              type: "error",
-              message: `공유 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
-            });
-          }
+          exportHwpDocument("share-document", "공유 데이터를 만들 수 없습니다");
           return;
         }
 
         if (command === "file:print") {
-          try {
-            const { pageCount, pages } = await documentPages();
-            postNative({
-              type: "print-document",
-              fileName: currentFileName(),
-              pageCount,
-              pages
-            });
-          } catch (error) {
-            postNative({
-              type: "error",
-              message: `인쇄 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
-            });
-          }
-        }
-
-        if (command === "file:export-pdf") {
-          try {
-            const { pageCount, pages } = await documentPages();
-            postNative({
-              type: "export-pdf-document",
-              fileName: currentFileName(),
-              pageCount,
-              pages
-            });
-          } catch (error) {
-            postNative({
-              type: "error",
-              message: `PDF 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
-            });
-          }
+          printDocument();
+          return;
         }
       }
+
+      window.__alhangeulHostBridgeExportHwpDocument = (messageType) => {
+        if (messageType !== "save-document" && messageType !== "share-document") {
+          return false;
+        }
+
+        exportHwpDocument(messageType, "문서를 내보낼 수 없습니다");
+        return true;
+      };
+
+      window.__alhangeulHostBridgeExportPDFDocument = () => {
+        exportPDFDocument();
+        return true;
+      };
 
       window.__alhangeulHostBridgeRunNativeCommand = (command) => {
         if (!nativeCommands.has(command)) {
@@ -206,6 +250,16 @@ enum RhwpStudioHostBridgeScript {
         return true;
       };
 
+      enableNativeCommandItems();
+
+      const nativeCommandObserver = new MutationObserver(() => {
+        enableNativeCommandItems();
+      });
+      nativeCommandObserver.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+      });
+
       document.addEventListener("click", (event) => {
         const target = event.target;
         if (!(target instanceof Element)) {
@@ -213,7 +267,7 @@ enum RhwpStudioHostBridgeScript {
         }
 
         const item = target.closest(".md-item[data-cmd]");
-        if (!item || item.classList.contains("disabled")) {
+        if (!item) {
           return;
         }
 

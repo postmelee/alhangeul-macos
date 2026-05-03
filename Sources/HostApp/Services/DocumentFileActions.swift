@@ -9,8 +9,16 @@ enum DocumentFileActions {
 
     @MainActor
     static func share(data: Data, filename: String) throws {
-        let fileURL = try writeTemporaryShareFile(data: data, filename: filename)
+        let fileURL = try prepareShareFile(data: data, filename: filename)
+        try showSharePicker(fileURL: fileURL)
+    }
 
+    static func prepareShareFile(data: Data, filename: String) throws -> URL {
+        try writeTemporaryShareFile(data: data, filename: filename)
+    }
+
+    @MainActor
+    static func showSharePicker(fileURL: URL) throws {
         if let anchorView = SharePresentationAnchor.presentationView {
             let picker = NSSharingServicePicker(items: [fileURL])
             picker.show(

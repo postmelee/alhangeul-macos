@@ -42,6 +42,8 @@ extension RhwpStudioWebView {
         var onError: (String?) -> Void = { _ in }
         var onOpenDocument: () -> Void = {}
 
+        private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
+
         private enum LoadIdentity: Equatable {
             case empty
             case document(Int)
@@ -54,8 +56,19 @@ extension RhwpStudioWebView {
         )
         private var loadedIdentity: LoadIdentity?
         private var currentDocument: RhwpStudioDocumentPayload?
+        private weak var commandWebView: WKWebView?
         private var printController: RhwpStudioPrintController?
         private var pdfExportController: RhwpStudioPDFExportController?
+        private var pendingSaveDestinationURL: URL?
+        private var pendingPDFDestinationURL: URL?
+        private var isChoosingSaveDestination = false
+        private var isChoosingPDFDestination = false
+        private var activeLoadID = 0
+        private var loadTimeoutTask: Task<Void, Never>?
+
+        deinit {
+            loadTimeoutTask?.cancel()
+        }
 
         func makeWebView() -> WKWebView {
             let configuration = WKWebViewConfiguration()
@@ -85,6 +98,7 @@ extension RhwpStudioWebView {
             }
 
             let webView = RhwpStudioNativeCommandWebView(frame: .zero, configuration: configuration)
+            commandWebView = webView
             webView.nativeCommandHandler = { [weak self, weak webView] command in
                 guard let self, let webView else {
                     return false
@@ -92,6 +106,7 @@ extension RhwpStudioWebView {
                 self.runNativeCommand(command, in: webView)
                 return true
             }
+            RhwpStudioNativeCommandDispatcher.register(webView)
             webView.navigationDelegate = self
             webView.allowsBackForwardNavigationGestures = false
             return webView
@@ -116,16 +131,18 @@ extension RhwpStudioWebView {
                 loadedIdentity = nextIdentity
                 onError(nil)
                 onLoadStateChange(true)
+                activeLoadID += 1
+                startLoadTimeout(activeLoadID, webView: webView)
                 webView.load(URLRequest(url: loadURL))
             } catch {
                 loadedIdentity = nil
-                onLoadStateChange(false)
+                finishLoading()
                 onError(error.localizedDescription)
             }
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            onLoadStateChange(false)
+            finishLoading()
         }
 
         func webView(
@@ -134,6 +151,11 @@ extension RhwpStudioWebView {
             withError error: Error
         ) {
             handleNavigationError(error)
+        }
+
+        func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+            finishLoading()
+            onError("웹 viewer 프로세스가 종료되었습니다. 문서를 다시 열어 주세요.")
         }
 
         func webView(
@@ -163,11 +185,34 @@ extension RhwpStudioWebView {
         }
 
         private func handleNavigationError(_ error: Error) {
-            onLoadStateChange(false)
+            finishLoading()
             guard !isIgnorableNavigationError(error) else {
                 return
             }
             onError(error.localizedDescription)
+        }
+
+        private func startLoadTimeout(_ loadID: Int, webView: WKWebView) {
+            loadTimeoutTask?.cancel()
+            loadTimeoutTask = Task { @MainActor [weak self, weak webView] in
+                try? await Task.sleep(nanoseconds: Self.loadTimeoutNanoseconds)
+                guard !Task.isCancelled,
+                      let self,
+                      self.activeLoadID == loadID
+                else {
+                    return
+                }
+
+                let loadingURL = webView?.url?.absoluteString ?? "unknown URL"
+                self.finishLoading()
+                self.onError("웹 viewer 로딩이 시간 초과되었습니다: \(loadingURL)")
+            }
+        }
+
+        private func finishLoading() {
+            loadTimeoutTask?.cancel()
+            loadTimeoutTask = nil
+            onLoadStateChange(false)
         }
 
         private func isIgnorableNavigationError(_ error: Error) -> Bool {
@@ -217,6 +262,8 @@ extension RhwpStudioWebView {
             case "export-pdf-document":
                 exportPDFDocument(body)
             case "error":
+                pendingSaveDestinationURL = nil
+                pendingPDFDestinationURL = nil
                 onError(body["message"] as? String)
             default:
                 break
@@ -231,12 +278,33 @@ extension RhwpStudioWebView {
             switch command {
             case "file:open":
                 onOpenDocument()
+            case "file:save":
+                guard let webView = commandWebView else {
+                    onError("저장할 viewer를 찾을 수 없습니다.")
+                    return
+                }
+                requestSaveDocument(
+                    in: webView,
+                    suggestedFilename: body["fileName"] as? String
+                )
+            case "file:export-pdf":
+                guard let webView = commandWebView else {
+                    onError("PDF로 내보낼 viewer를 찾을 수 없습니다.")
+                    return
+                }
+                requestPDFExport(
+                    in: webView,
+                    suggestedFilename: body["fileName"] as? String
+                )
             default:
                 break
             }
         }
 
         private func saveDocument(_ body: [String: Any]) {
+            let destinationURL = pendingSaveDestinationURL
+            pendingSaveDestinationURL = nil
+
             guard let payload = exportedDocumentPayload(
                 from: body,
                 missingMessage: "문서를 내보낼 수 없습니다"
@@ -245,10 +313,14 @@ extension RhwpStudioWebView {
             }
 
             do {
-                _ = try DocumentSavePanel.save(
-                    data: payload.data,
-                    suggestedFilename: payload.fileName
-                )
+                if let destinationURL {
+                    try DocumentSavePanel.write(data: payload.data, to: destinationURL)
+                } else {
+                    _ = try DocumentSavePanel.save(
+                        data: payload.data,
+                        suggestedFilename: payload.fileName
+                    )
+                }
             } catch {
                 onError("문서를 저장할 수 없습니다: \(error.localizedDescription)")
             }
@@ -276,12 +348,31 @@ extension RhwpStudioWebView {
             from body: [String: Any],
             missingMessage: String
         ) -> (data: Data, fileName: String)? {
-            guard let values = body["bytes"] as? [NSNumber] else {
+            let data: Data
+            if let base64 = body["base64"] as? String {
+                guard let decodedData = Data(base64Encoded: base64) else {
+                    onError("\(missingMessage): base64 데이터를 해석할 수 없습니다.")
+                    return nil
+                }
+                data = decodedData
+            } else if let values = body["bytes"] as? [NSNumber] {
+                var decodedData = Data()
+                decodedData.reserveCapacity(values.count)
+                for value in values {
+                    decodedData.append(UInt8(truncating: value))
+                }
+                data = decodedData
+            } else {
                 onError("\(missingMessage): bytes가 없습니다.")
                 return nil
             }
 
-            let data = Data(values.map { UInt8(truncating: $0) })
+            if let expectedByteCount = intValue(body["byteCount"]),
+               expectedByteCount != data.count {
+                onError("\(missingMessage): 데이터 크기가 일치하지 않습니다.")
+                return nil
+            }
+
             let fileName = body["fileName"] as? String
                 ?? currentDocument?.filename
                 ?? "document.hwp"
@@ -304,13 +395,19 @@ extension RhwpStudioWebView {
         }
 
         private func exportPDFDocument(_ body: [String: Any]) {
-            guard let payload = printPayload(from: body, missingMessage: "PDF 데이터를 만들 수 없습니다") else {
+            let destinationURL = pendingPDFDestinationURL
+            pendingPDFDestinationURL = nil
+
+            guard let payload = exportedDocumentPayload(
+                from: body,
+                missingMessage: "PDF 데이터를 만들 수 없습니다"
+            ) else {
                 return
             }
 
             let controller = RhwpStudioPDFExportController()
             pdfExportController = controller
-            controller.export(payload: payload) { [weak self] result in
+            let completion: (Result<URL?, Error>) -> Void = { [weak self] result in
                 guard let self else {
                     return
                 }
@@ -323,6 +420,21 @@ extension RhwpStudioWebView {
                 case .failure(let error):
                     self.onError("PDF를 내보낼 수 없습니다: \(error.localizedDescription)")
                 }
+            }
+
+            if let destinationURL {
+                controller.export(
+                    data: payload.data,
+                    filename: payload.fileName,
+                    destinationURL: destinationURL,
+                    completion: completion
+                )
+            } else {
+                controller.export(
+                    data: payload.data,
+                    filename: payload.fileName,
+                    completion: completion
+                )
             }
         }
 
@@ -361,13 +473,15 @@ extension RhwpStudioWebView {
             case "file:open":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:open')"
             case "file:save":
-                script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:save')"
+                requestSaveDocument(in: webView)
+                return
             case "file:print":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:print')"
             case "file:share":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:share')"
             case "file:export-pdf":
-                script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:export-pdf')"
+                requestPDFExport(in: webView)
+                return
             default:
                 return
             }
@@ -375,6 +489,121 @@ extension RhwpStudioWebView {
                 if let error {
                     self?.onError("단축키 명령을 실행할 수 없습니다: \(error.localizedDescription)")
                 }
+            }
+        }
+
+        private func requestSaveDocument(
+            in webView: WKWebView,
+            suggestedFilename: String? = nil
+        ) {
+            guard !isChoosingSaveDestination,
+                  pendingSaveDestinationURL == nil
+            else {
+                return
+            }
+
+            let filename = suggestedFilename ?? currentDocument?.filename ?? "document.hwp"
+            let presentingWindow = webView.window
+            isChoosingSaveDestination = true
+
+            Task { @MainActor [weak self, weak webView, weak presentingWindow] in
+                guard let self else {
+                    return
+                }
+                defer {
+                    self.isChoosingSaveDestination = false
+                }
+
+                guard let webView else {
+                    return
+                }
+
+                let destinationURL = await DocumentSavePanel.chooseDestinationURL(
+                    suggestedFilename: filename,
+                    presentingWindow: presentingWindow ?? webView.window
+                )
+                guard let destinationURL else {
+                    return
+                }
+
+                self.pendingSaveDestinationURL = destinationURL
+                self.evaluateHostBridgeAction(
+                    "window.__alhangeulHostBridgeExportHwpDocument?.('save-document')",
+                    in: webView,
+                    failureMessage: "문서를 내보낼 수 없습니다"
+                ) { [weak self] in
+                    self?.pendingSaveDestinationURL = nil
+                }
+            }
+        }
+
+        private func requestPDFExport(
+            in webView: WKWebView,
+            suggestedFilename: String? = nil
+        ) {
+            guard !isChoosingPDFDestination,
+                  pendingPDFDestinationURL == nil
+            else {
+                return
+            }
+
+            let filename = suggestedFilename ?? currentDocument?.filename ?? "document.hwp"
+            let presentingWindow = webView.window
+            isChoosingPDFDestination = true
+
+            Task { @MainActor [weak self, weak webView, weak presentingWindow] in
+                guard let self else {
+                    return
+                }
+                defer {
+                    self.isChoosingPDFDestination = false
+                }
+
+                guard let webView else {
+                    return
+                }
+
+                let destinationURL = await DocumentPDFExportPanel.chooseDestinationURL(
+                    suggestedFilename: filename,
+                    presentingWindow: presentingWindow ?? webView.window
+                )
+                guard let destinationURL else {
+                    return
+                }
+
+                self.pendingPDFDestinationURL = destinationURL
+                self.evaluateHostBridgeAction(
+                    "window.__alhangeulHostBridgeExportPDFDocument?.()",
+                    in: webView,
+                    failureMessage: "PDF 데이터를 만들 수 없습니다"
+                ) { [weak self] in
+                    self?.pendingPDFDestinationURL = nil
+                }
+            }
+        }
+
+        private func evaluateHostBridgeAction(
+            _ script: String,
+            in webView: WKWebView,
+            failureMessage: String,
+            onFailure: @escaping () -> Void
+        ) {
+            webView.evaluateJavaScript(script) { [weak self] result, error in
+                if let error {
+                    onFailure()
+                    self?.onError("\(failureMessage): \(error.localizedDescription)")
+                    return
+                }
+
+                if let didStart = result as? Bool, didStart {
+                    return
+                }
+                if let didStart = result as? NSNumber, didStart.boolValue {
+                    return
+                }
+
+                onFailure()
+                self?.onError("\(failureMessage): viewer export bridge를 실행할 수 없습니다.")
             }
         }
     }
@@ -436,10 +665,27 @@ private final class RhwpStudioNativeCommandWebView: WKWebView {
 
 @MainActor
 enum RhwpStudioNativeCommandDispatcher {
+    private static var registeredWebViews: [WeakNativeCommandWebView] = []
+
+    fileprivate static func register(_ webView: RhwpStudioNativeCommandWebView) {
+        cleanupRegisteredWebViews()
+        guard !registeredWebViews.contains(where: { $0.webView === webView }) else {
+            return
+        }
+        registeredWebViews.append(WeakNativeCommandWebView(webView))
+    }
+
     @discardableResult
     static func run(_ command: String) -> Bool {
+        run(command, in: nil)
+    }
+
+    @discardableResult
+    static func run(_ command: String, in preferredWindow: NSWindow?) -> Bool {
+        let preferredWindows = [preferredWindow].compactMap { $0 }
+        let activeWindows = [NSApp.keyWindow, NSApp.mainWindow].compactMap { $0 }
+        let candidateWindows = preferredWindows + activeWindows + NSApp.windows
         var seenWindowIDs = Set<ObjectIdentifier>()
-        let candidateWindows = [NSApp.keyWindow, NSApp.mainWindow].compactMap { $0 } + NSApp.windows
 
         for window in candidateWindows {
             let windowID = ObjectIdentifier(window)
@@ -450,7 +696,7 @@ enum RhwpStudioNativeCommandDispatcher {
 
             guard let webView = window.contentView?.firstDescendant(
                 ofType: RhwpStudioNativeCommandWebView.self
-            ) else {
+            ) ?? registeredWebView(in: window) else {
                 continue
             }
 
@@ -459,7 +705,32 @@ enum RhwpStudioNativeCommandDispatcher {
             }
         }
 
+        for webView in registeredWebViews.compactMap(\.webView) where webView.window?.isVisible == true {
+            if webView.runNativeCommand(command) {
+                return true
+            }
+        }
+
         return false
+    }
+
+    private static func registeredWebView(in window: NSWindow) -> RhwpStudioNativeCommandWebView? {
+        cleanupRegisteredWebViews()
+        return registeredWebViews
+            .compactMap(\.webView)
+            .first { $0.window === window }
+    }
+
+    private static func cleanupRegisteredWebViews() {
+        registeredWebViews.removeAll { $0.webView == nil }
+    }
+}
+
+private final class WeakNativeCommandWebView {
+    weak var webView: RhwpStudioNativeCommandWebView?
+
+    init(_ webView: RhwpStudioNativeCommandWebView) {
+        self.webView = webView
     }
 }
 
