@@ -14,6 +14,19 @@ Quick Look preview와 Finder thumbnail의 Swift native renderer가 HWP 문서의
 - 등록 실패, resource 누락, 후보 font 미설치 상태는 crash가 아니라 다음 후보 또는 시스템 fallback으로 처리한다.
 - 후보 이름은 가능하면 CoreText PostScript name을 사용한다.
 
+## 자산 출처와 사용 범위
+
+기준 자산 목록과 라이선스 설명은 `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`가 소유한다. #119에서는 새 TTF/OTF/font 파일을 추가하지 않고, 이미 WebView viewer bundle에 포함된 WOFF2 34개를 native renderer에서도 재사용한다.
+
+| 계열 | 주요 bundled font | native renderer 사용처 |
+|------|-------------------|-------------------------|
+| Serif | Noto Serif KR, Nanum Myeongjo, Gowun Batang | 바탕/명조/궁서 계열 fallback |
+| Sans-serif | Pretendard, Noto Sans KR, Nanum Gothic, Gowun Dodum, Spoqa Han Sans | 돋움/고딕/맑은 고딕/HY고딕 계열 fallback |
+| Monospace | D2Coding, Nanum Gothic Coding | 돋움체/굴림체/바탕체/Courier 계열 fallback |
+| Math/special | Latin Modern Math, Cafe24, Happiness Sans | 수식 보조 및 장식 계열 fallback |
+
+HostApp bundle에는 `rhwp-studio/fonts`가 포함되지만, QLExtension/ThumbnailExtension bundle에는 font resource를 중복 포함하지 않는다. extension process는 parent app의 `Contents/Resources/rhwp-studio/fonts`를 찾아 process-local로 등록한다.
+
 ## WOFF2 PostScript name 주의점
 
 일부 파일명과 CoreText PostScript name이 다르다. Swift native mapping은 파일명을 직접 쓰지 않는다.
