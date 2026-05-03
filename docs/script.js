@@ -112,7 +112,7 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   const finderAfterOpacity = isFinder ? smoothstep(0.64, checkpointProgress.end, timelineProgress) : 0;
   const finderLockOpacity = isFinder
     ? timelineProgress <= checkpointProgress.start
-      ? smoothstep(0, checkpointProgress.start, timelineProgress)
+      ? 1
       : 1 - smoothstep(
           checkpointProgress.start,
           checkpointProgress.start + 0.055,

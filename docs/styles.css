@@ -271,8 +271,8 @@ video {
   --fallback-opacity: 0;
   --before-scale: 1;
   --after-scale: 1.018;
-  --lock-opacity: 0;
-  --lock-scale: 0.92;
+  --lock-opacity: 1;
+  --lock-scale: 1;
   --lock-rotate: 0deg;
   width: 100%;
   min-height: 640vh;
