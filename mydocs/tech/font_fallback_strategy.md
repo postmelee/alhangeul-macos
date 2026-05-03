@@ -38,6 +38,7 @@ Quick Look preview와 Finder thumbnail의 Swift native renderer가 HWP 문서의
 | `돋움체`, `굴림체`, `바탕체`, `Courier New`, `Consolas` | D2Coding -> Nanum Gothic Coding -> Courier New -> Apple SD Gothic Neo |
 | `NanumGothic` | Nanum Gothic -> Noto Sans KR -> Pretendard -> Apple SD Gothic Neo |
 | `D2Coding` | D2Coding -> Nanum Gothic Coding -> Courier New -> Apple SD Gothic Neo |
+| `HY바다L`, `한컴 소망 B`, `한컴 쿨재즈 B` | Cafe24/Happiness Sans 장식체 -> Pretendard -> Apple SD Gothic Neo |
 
 알 수 없는 font family는 먼저 원래 이름을 CoreText에서 찾고, 실패하면 Apple SD Gothic Neo, Pretendard, Helvetica Neue 순서로 내려간다.
 
