@@ -122,6 +122,8 @@ Mac에서 한글 파일은
 - Feature section heading과 supporting copy를 중앙 정렬하고, supporting copy를 README의 Finder/Quick Look/앱 뷰어 중심 설명에 맞춰 `Finder와 Quick Look, 앱 뷰어까지 HWP/HWPX 문서를 Mac 안에서 자연스럽게 열고 확인합니다.`로 변경했다.
 - 큰 화면에서도 Feature section heading block을 왼쪽 copy 컬럼 밖으로 분리해 두 컬럼 전체를 span하는 상단 중앙 영역에 배치했다. 그 아래에는 기존처럼 왼쪽 기능 텍스트와 오른쪽 이미지가 나란히 배치된다.
 - 큰 화면에서 오른쪽 progress bar/Finder 이미지 묶음의 상단 기준을 왼쪽 활성 Feature 카드 상단과 맞추도록 grid item 정렬을 보정했다.
+- Hero catchphrase와 Feature section heading block의 상단 여백을 다시 늘려, 이전처럼 화면 안에서 조금 더 아래에 놓이도록 보정했다.
+- 좁은 화면에서는 Feature 설명 카드의 padding, type scale, min-height를 줄이고 Finder visual 높이를 조정해 설명 박스가 progress bar box를 가리는 현상을 완화했다.
 - Apple 공식 MacBook Pro 페이지의 highlights/closer-look product storytelling과 MacBook Air/Pro 환경 섹션의 큰 카드형 수치 강조를 참고했다.
   - `https://www.apple.com/macbook-pro/`
   - `https://www.apple.com/macbook-air/`

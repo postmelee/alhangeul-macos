@@ -153,7 +153,7 @@ video {
   min-height: auto;
   display: grid;
   place-items: center;
-  padding: 60px 20px 24px;
+  padding: 92px 20px 24px;
   text-align: center;
 }
 
@@ -304,9 +304,11 @@ video {
 .features-sticky {
   position: sticky;
   top: 52px;
+  box-sizing: border-box;
   min-height: calc(100vh - 52px);
   width: min(var(--wide-width), 100%);
   margin: 0 auto;
+  padding: 48px 0 16px;
   display: grid;
   grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
   column-gap: 56px;
@@ -799,7 +801,7 @@ video {
   }
 
   .hero {
-    padding-top: 44px;
+    padding-top: 64px;
   }
 
   .hero h1 {
@@ -832,7 +834,7 @@ video {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 18px;
+    gap: 14px;
     min-height: calc(100vh - 52px);
     padding-top: 48px;
     padding-bottom: 24px;
@@ -842,7 +844,9 @@ video {
     position: relative;
     z-index: 2;
     order: 1;
-    gap: 14px;
+    width: min(100%, 560px);
+    margin: 0 auto;
+    gap: 10px;
   }
 
   .feature-visual {
@@ -860,16 +864,17 @@ video {
   }
 
   .finder-image-stage {
-    max-height: 42vh;
+    max-height: 38vh;
   }
 
   .feature-list {
-    min-height: 214px;
+    min-height: 0;
   }
 
   .feature-step {
     display: none;
-    padding: 18px 20px;
+    border-radius: 15px;
+    padding: 14px 16px;
     transform: translateY(8px);
   }
 
@@ -877,6 +882,36 @@ video {
     display: block;
     transform: translateY(0);
     animation: feature-text-in 260ms ease both;
+  }
+
+  .feature-step h3 {
+    font-size: 18px;
+  }
+
+  .feature-step p {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .finder-progress {
+    padding: 16px 18px 13px;
+  }
+
+  .progress-track {
+    left: 28px;
+    right: 28px;
+    top: 27px;
+  }
+
+  .checkpoint {
+    gap: 8px;
+    font-size: 12px;
+  }
+
+  .checkpoint-marker {
+    width: 22px;
+    height: 22px;
   }
 
   .finder-install-orb {
@@ -932,7 +967,7 @@ video {
 
   .hero {
     min-height: auto;
-    padding-top: 36px;
+    padding-top: 52px;
     padding-bottom: 18px;
     padding-left: 18px;
     padding-right: 18px;
@@ -983,13 +1018,46 @@ video {
     padding-top: 0;
   }
 
+  .features-sticky {
+    gap: 12px;
+    padding-top: 44px;
+    padding-bottom: 18px;
+  }
+
   .section-heading h2,
   .faq-section h2 {
     font-size: 32px;
   }
 
+  .features-sticky > .section-heading p {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.42;
+  }
+
+  .feature-step {
+    padding: 12px 14px;
+  }
+
+  .feature-step h3 {
+    font-size: 17px;
+  }
+
+  .feature-step p {
+    font-size: 13px;
+  }
+
   .feature-visual {
+    bottom: 16px;
     padding: 0;
+  }
+
+  .finder-progress {
+    padding: 14px 12px 11px;
+  }
+
+  .finder-image-stage {
+    max-height: 34vh;
   }
 
   .site-footer nav {
