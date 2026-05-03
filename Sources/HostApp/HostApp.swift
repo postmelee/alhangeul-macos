@@ -22,12 +22,7 @@ struct AlHangeulMacApp: App {
                 }
             }
 
-            CommandGroup(replacing: .newItem) {
-                Button("문서 열기...") {
-                    viewerStore.openDocument()
-                }
-                .keyboardShortcut("o", modifiers: [.command])
-            }
+            CommandGroup(replacing: .newItem) {}
 
             CommandGroup(replacing: .saveItem) {
                 Button("저장") {
