@@ -258,9 +258,19 @@ video {
 }
 
 .features-section {
-  --feature-offset: 0%;
+  --finder-progress: 0%;
+  --install-progress: 0;
+  --install-orb-opacity: 0;
+  --install-scale: 0.78;
+  --install-clip: 100%;
+  --after-opacity: 0;
+  --before-scale: 1;
+  --after-scale: 1.018;
+  --lock-opacity: 1;
+  --lock-scale: 1;
+  --lock-rotate: 0deg;
   width: 100%;
-  min-height: 420vh;
+  min-height: 640vh;
   padding: 0 20px;
   background: var(--parchment);
 }
@@ -301,22 +311,184 @@ video {
   margin: 0;
 }
 
-.feature-image-viewport {
-  width: min(760px, 100%);
+.finder-visual {
+  width: min(820px, 100%);
   margin-left: auto;
-  aspect-ratio: 1.18;
+}
+
+.finder-image-stage {
+  position: relative;
+  aspect-ratio: 2032 / 1162;
   overflow: hidden;
+  border-radius: 18px;
+  background: #151820;
+  box-shadow: var(--product-shadow);
+}
+
+.finder-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    opacity 240ms linear,
+    transform 240ms ease;
+}
+
+.finder-image-before {
+  transform: scale(var(--before-scale));
+}
+
+.finder-image-after {
+  opacity: var(--after-opacity);
+  transform: scale(var(--after-scale));
+}
+
+.finder-lock {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.48);
+  color: #ffffff;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: var(--lock-opacity);
+  transform: translate(-50%, -50%) scale(var(--lock-scale));
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  transition: opacity 180ms linear;
+}
+
+.finder-lock svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
+}
+
+.lock-shackle {
+  transform-origin: 22px 14px;
+  transform: rotate(var(--lock-rotate));
+}
+
+.finder-install-orb {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  display: grid;
+  width: 112px;
+  height: 112px;
+  place-items: center;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.88);
+  opacity: var(--install-orb-opacity);
+  transform: translate(-50%, -50%) scale(var(--install-scale));
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+
+.orb-ring,
+.install-ring {
+  position: absolute;
+  inset: -5px;
+  border-radius: inherit;
+  background: conic-gradient(#34c759 var(--finder-progress), rgba(52, 199, 89, 0.12) 0);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 3px;
+}
+
+.orb-logo-stack,
+.install-logo-stack {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.orb-logo,
+.install-logo {
+  grid-area: 1 / 1;
+  display: block;
   border-radius: 18px;
 }
 
-.feature-panorama {
-  width: 112%;
-  height: 132%;
-  object-fit: cover;
-  object-position: center top;
-  box-shadow: var(--product-shadow);
-  transform: translate3d(-6%, var(--feature-offset), 0);
-  will-change: transform;
+.orb-logo {
+  width: 66px;
+  height: 66px;
+}
+
+.install-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+}
+
+.orb-logo-muted,
+.install-logo-muted {
+  filter: grayscale(1);
+  opacity: 0.42;
+}
+
+.orb-logo-color,
+.install-logo-color {
+  clip-path: inset(var(--install-clip) 0 0 0);
+}
+
+.orb-check,
+.install-check {
+  position: absolute;
+  opacity: 0;
+  fill: none;
+  stroke: #ffffff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.4;
+  transform: scale(0.72);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.orb-check {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #34c759;
+  padding: 9px;
+}
+
+.install-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #34c759;
+  padding: 4px;
+}
+
+.features-section.is-install-complete .orb-check,
+.features-section.is-install-complete .install-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.features-section.is-install-complete .orb-logo-stack {
+  opacity: 0;
 }
 
 .feature-list {
@@ -357,6 +529,104 @@ video {
   margin: 8px 0 0;
   color: var(--muted);
   line-height: 1.55;
+}
+
+.finder-progress {
+  position: relative;
+  margin-top: 22px;
+  padding-top: 18px;
+}
+
+.progress-track {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 29px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(52, 199, 89, 0.16);
+}
+
+.progress-fill {
+  display: block;
+  width: var(--finder-progress);
+  height: 100%;
+  border-radius: inherit;
+  background: #34c759;
+}
+
+.progress-checkpoints {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkpoint {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.checkpoint-marker {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 2px solid rgba(52, 199, 89, 0.28);
+  border-radius: 50%;
+  background: #ffffff;
+  color: #34c759;
+}
+
+.checkpoint-marker::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.features-section.is-finder-before .checkpoint-before,
+.features-section.is-finder-install .checkpoint-before,
+.features-section.is-finder-install .checkpoint-install,
+.features-section.is-finder-after .checkpoint-before,
+.features-section.is-finder-after .checkpoint-install,
+.features-section.is-finder-after .checkpoint-after {
+  color: var(--text);
+}
+
+.features-section.is-finder-before .checkpoint-before .checkpoint-marker::after,
+.features-section.is-finder-install .checkpoint-before .checkpoint-marker::after,
+.features-section.is-finder-after .checkpoint-before .checkpoint-marker::after,
+.features-section.is-finder-after .checkpoint-after .checkpoint-marker::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.install-marker {
+  position: relative;
+  overflow: visible;
+  border: 0;
+  border-radius: 9px;
+}
+
+.install-marker::after {
+  display: none;
 }
 
 .feature-highlight {
@@ -530,34 +800,49 @@ video {
   }
 
   .features-sticky {
+    position: sticky;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 22px;
+    justify-content: flex-start;
+    gap: 18px;
     min-height: calc(100vh - 52px);
+    padding-top: 48px;
+    padding-bottom: 24px;
   }
 
   .features-copy {
+    position: relative;
+    z-index: 2;
     order: 1;
-    gap: 18px;
+    gap: 14px;
   }
 
   .feature-visual {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 24px;
+    z-index: 1;
     order: 2;
   }
 
-  .feature-image-viewport {
+  .finder-visual {
     width: 100%;
-    aspect-ratio: 1.28;
+    margin-left: 0;
+  }
+
+  .finder-image-stage {
+    max-height: 42vh;
   }
 
   .feature-list {
-    min-height: 140px;
+    min-height: 214px;
   }
 
   .feature-step {
     display: none;
-    padding: 20px;
+    padding: 18px 20px;
     transform: translateY(8px);
   }
 
@@ -565,6 +850,17 @@ video {
     display: block;
     transform: translateY(0);
     animation: feature-text-in 260ms ease both;
+  }
+
+  .finder-install-orb {
+    width: 88px;
+    height: 88px;
+    border-radius: 26px;
+  }
+
+  .orb-logo {
+    width: 52px;
+    height: 52px;
   }
 
   .faq-list {
@@ -666,7 +962,7 @@ video {
   }
 
   .feature-visual {
-    padding: 14px;
+    padding: 0;
   }
 
   .site-footer nav {

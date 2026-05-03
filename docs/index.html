@@ -97,12 +97,40 @@
             </div>
             <div class="feature-list" aria-label="주요 기능">
               <article class="feature-step is-active" data-feature-step="0">
-                <h3>스페이스바로 <span class="feature-highlight">즉시 미리보기</span></h3>
-                <p>Quick Look 확장으로 HWP/HWPX 문서를 열기 전에 빠르게 확인합니다.</p>
+                <h3>Finder에서 <span class="feature-highlight">썸네일로 찾기</span></h3>
+                <p>꽁꽁 숨겨진 .hwp 파일이 알한글 설치 후 첫 페이지 썸네일과 함께 드러납니다.</p>
+                <div class="finder-progress" aria-label="Finder 썸네일 설치 흐름">
+                  <div class="progress-track" aria-hidden="true">
+                    <span class="progress-fill"></span>
+                  </div>
+                  <ol class="progress-checkpoints">
+                    <li class="checkpoint checkpoint-before is-active">
+                      <span class="checkpoint-marker"></span>
+                      <span>기존 Mac</span>
+                    </li>
+                    <li class="checkpoint checkpoint-install">
+                      <span class="checkpoint-marker install-marker">
+                        <span class="install-ring" aria-hidden="true"></span>
+                        <span class="install-logo-stack">
+                          <img class="install-logo install-logo-muted" src="./assets/logo-256@2x.png" alt="" />
+                          <img class="install-logo install-logo-color" src="./assets/logo-256@2x.png" alt="" />
+                        </span>
+                        <svg class="install-check" viewBox="0 0 20 20" aria-hidden="true">
+                          <path d="m5.2 10.2 3.1 3.1 6.5-7" />
+                        </svg>
+                      </span>
+                      <span>알한글 설치</span>
+                    </li>
+                    <li class="checkpoint checkpoint-after">
+                      <span class="checkpoint-marker"></span>
+                      <span>Finder 썸네일</span>
+                    </li>
+                  </ol>
+                </div>
               </article>
               <article class="feature-step" data-feature-step="1">
-                <h3>Finder에서 <span class="feature-highlight">썸네일로 찾기</span></h3>
-                <p>문서 첫 페이지를 Finder 썸네일로 보여줘 파일 목록에서도 내용을 구분할 수 있습니다.</p>
+                <h3>스페이스바로 <span class="feature-highlight">즉시 미리보기</span></h3>
+                <p>Quick Look 확장으로 HWP/HWPX 문서를 열기 전에 빠르게 확인합니다.</p>
               </article>
               <article class="feature-step" data-feature-step="2">
                 <h3>앱에서 <span class="feature-highlight">HWP/HWPX 보기</span></h3>
@@ -115,8 +143,29 @@
             </div>
           </div>
           <figure class="feature-visual" aria-label="알한글의 Quick Look 미리보기와 Finder 썸네일 예시">
-            <div class="feature-image-viewport">
-              <img class="feature-panorama" src="./assets/group-1-4x.png" alt="" />
+            <div class="finder-visual">
+              <div class="finder-image-stage">
+                <img class="finder-image finder-image-before" src="./assets/finder-before.png" alt="" />
+                <img class="finder-image finder-image-after" src="./assets/finder-after.png" alt="" />
+                <div class="finder-lock" aria-hidden="true">
+                  <svg viewBox="0 0 32 32">
+                    <path class="lock-shackle" d="M10 14V10a6 6 0 0 1 12 0v4" />
+                    <path d="M8 14h16v13H8z" />
+                    <path d="M16 19v4" />
+                  </svg>
+                  <span>.hwp 정보 잠김</span>
+                </div>
+                <div class="finder-install-orb" aria-hidden="true">
+                  <span class="orb-ring"></span>
+                  <span class="orb-logo-stack">
+                    <img class="orb-logo orb-logo-muted" src="./assets/logo-256@2x.png" alt="" />
+                    <img class="orb-logo orb-logo-color" src="./assets/logo-256@2x.png" alt="" />
+                  </span>
+                  <svg class="orb-check" viewBox="0 0 24 24">
+                    <path d="m6.2 12.3 4 4 7.6-8.1" />
+                  </svg>
+                </div>
+              </div>
             </div>
           </figure>
         </div>

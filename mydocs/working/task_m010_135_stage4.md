@@ -23,6 +23,8 @@
 - `docs/styles.css`
 - `docs/script.js`
 - `docs/assets/mac_mock.png`
+- `docs/assets/finder-before.png`
+- `docs/assets/finder-after.png`
 - `mydocs/orders/20260503.md`
 - `mydocs/working/task_m010_135_stage4.md`
 - `mydocs/working/assets/task_m010_135_stage4_browser.png`
@@ -32,6 +34,9 @@
 - `mydocs/working/assets/task_m010_135_stage4_feature_sticky_mid.png`
 - `mydocs/working/assets/task_m010_135_stage4_feature_sticky_second.png`
 - `mydocs/working/assets/task_m010_135_stage4_faq_footer.png`
+- `mydocs/working/assets/task_m010_135_stage4_finder_start.png`
+- `mydocs/working/assets/task_m010_135_stage4_finder_install.png`
+- `mydocs/working/assets/task_m010_135_stage4_finder_after.png`
 
 ## 디자인 반영 내용
 
@@ -83,6 +88,22 @@ Mac에서 한글 파일은
 - FAQ heading/list의 좌측 기준을 같은 content width로 맞췄다.
 - Footer content width를 `1260px` 기준으로 넓혀 양끝 배치를 강화했다.
 
+### Finder 썸네일 스토리 보정
+
+추가 피드백에 따라 Feature 첫 번째 순서를 `Finder에서 썸네일로 찾기`로 변경하고, `스페이스바로 즉시 미리보기`를 두 번째 순서로 이동했다.
+
+- `before.png`를 `docs/assets/finder-before.png`로 추가했다.
+- `after.png`를 `docs/assets/finder-after.png`로 추가했다.
+- 첫 번째 Feature의 이미지 전환을 `기존 Mac -> 알한글 설치 -> Finder 썸네일` 순서로 구성했다.
+- 초록색 progress bar와 3개 checkpoint를 텍스트 박스 아래에 배치했다.
+- `알한글 설치` 구간에서는 앱 로고가 grayscale 상태에서 원래 색으로 차오르고, 원형 progress ring이 진행되며, 설치 완료 시 초록 check가 표시되게 했다.
+- Finder 화면은 scroll progress에 맞춰 before image에서 after image로 crossfade된다.
+- before 상태에서는 `.hwp 정보 잠김` pill과 lock icon을 표시하고, 설치 진행에 따라 lock shackle이 열리고 사라지게 했다.
+- 첫 번째 Finder 스토리 구간을 전체 Feature scroll의 대부분으로 늘려 before/install/after 변화를 더 세밀하게 볼 수 있게 했다.
+- Apple 공식 MacBook Pro 페이지의 highlights/closer-look product storytelling과 MacBook Air/Pro 환경 섹션의 큰 카드형 수치 강조를 참고했다.
+  - `https://www.apple.com/macbook-pro/`
+  - `https://www.apple.com/macbook-air/`
+
 ## Browser Use 확인
 
 로컬 서버:
@@ -100,6 +121,9 @@ http://127.0.0.1:8080/
 - `mydocs/working/assets/task_m010_135_stage4_feature_sticky_mid.png`
 - `mydocs/working/assets/task_m010_135_stage4_feature_sticky_second.png`
 - `mydocs/working/assets/task_m010_135_stage4_faq_footer.png`
+- `mydocs/working/assets/task_m010_135_stage4_finder_start.png`
+- `mydocs/working/assets/task_m010_135_stage4_finder_install.png`
+- `mydocs/working/assets/task_m010_135_stage4_finder_after.png`
 
 확인한 항목:
 
@@ -112,6 +136,10 @@ http://127.0.0.1:8080/
 - 추가 보정 후 영상은 MacBook mock 화면 안에 표시된다.
 - 추가 보정 후 Feature sticky 구간에서 스크롤에 따라 active 문구와 이미지 위치가 변경된다.
 - FAQ 리스트와 footer는 현재 Browser Use viewport에서 정렬 기준이 어긋나지 않는다.
+- Finder 썸네일 Feature가 첫 번째 순서로 표시된다.
+- `기존 Mac -> 알한글 설치 -> Finder 썸네일` checkpoint와 progress bar가 표시된다.
+- 설치 구간에서 앱 로고 color fill, progress ring, check 완료 상태가 표시된다.
+- Finder 이미지는 `finder-before.png`에서 `finder-after.png`로 crossfade된다.
 
 Browser Use DOM/log 확인 결과:
 
@@ -133,6 +161,7 @@ Browser Use DOM/log 확인 결과:
 node --check docs/script.js
 rg -n "Alhangeul|frame-corner|accent-strong|--max-width|letter-spacing|box-shadow" docs
 rg -n "mac_mock|data-feature-step|feature-highlight|requestAnimationFrame|faq-title" docs
+rg -n "Finder에서|스페이스바로|finder-before|finder-after|기존 Mac|알한글 설치|Finder 썸네일" docs
 git diff --check
 ```
 
@@ -143,6 +172,7 @@ git diff --check
 - `box-shadow`는 media/product image에만 남겼다.
 - `letter-spacing`은 0으로 유지했다.
 - MacBook mock asset, Feature step markup, Feature highlight, scroll animation JS, FAQ anchor가 존재함을 확인했다.
+- Finder 썸네일 Feature의 순서, before/after asset 참조, progress checkpoint 문구가 존재함을 확인했다.
 - `git diff --check`는 통과했다.
 
 ## 리스크와 후속 조치
