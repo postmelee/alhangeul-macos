@@ -275,7 +275,7 @@ video {
   --lock-scale: 1;
   --lock-rotate: 0deg;
   width: 100%;
-  min-height: 910vh;
+  min-height: 1720vh;
   padding: 0 20px;
   background: var(--parchment);
 }
@@ -810,7 +810,7 @@ video {
   }
 
   .features-section {
-    min-height: 520vh;
+    min-height: 940vh;
     padding-left: 16px;
     padding-right: 16px;
   }

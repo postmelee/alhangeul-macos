@@ -118,7 +118,7 @@ Mac에서 한글 파일은
 - 빠르게 스크롤해도 `알한글 설치` checkpoint에서 check가 자체 애니메이션 시간 때문에 누락되지 않는다.
 - `알한글 설치` checkpoint 이후에는 알한글 로고가 다시 나타나지 않고, check를 유지한 상태로 설치 오브가 더 길게 fade out되도록 변경했다.
 - `.hwp 정보 잠김` pill은 초기 상태부터 완전히 보이고, `기존 Mac` checkpoint를 지나면 빠르게 사라지며 설치 오브와 알한글 아이콘 색상 채움이 바로 시작된다.
-- 추가 피드백에 따라 Feature stage와 middle 단계 사이 스크롤 거리를 약 1.5배 늘렸다. desktop sticky section은 `640vh -> 910vh`, 좁은 화면 override는 `380vh -> 520vh`로 변경해 `section height - viewport` 기준 스크롤 range가 1.5배에 가깝게 증가한다.
+- 추가 피드백에 따라 Feature stage와 middle 단계 사이 스크롤 거리를 약 1.5배 늘린 뒤, 현재 상태에서 다시 2배 확장했다. desktop sticky section은 `910vh -> 1720vh`, 좁은 화면 override는 `520vh -> 940vh`로 변경해 `section height - viewport` 기준 스크롤 range가 기존 현재값 대비 2배에 가깝게 증가한다.
 - Apple 공식 MacBook Pro 페이지의 highlights/closer-look product storytelling과 MacBook Air/Pro 환경 섹션의 큰 카드형 수치 강조를 참고했다.
   - `https://www.apple.com/macbook-pro/`
   - `https://www.apple.com/macbook-air/`
@@ -171,7 +171,7 @@ http://127.0.0.1:8080/
 - 기존에 `Finder 썸네일` 이미지로 넘어가지 않던 현상은 Finder 전용 stage 상태 관리 대신 전체 Feature 공통 checkpoint timeline과 `finder-after.png` crossfade 구간을 분리해 보정했다.
 - Firefox 로컬 탭에서 `알한글 설치` 지점의 check 표시와 `Finder 썸네일`으로 넘어가는 긴 check fade out을 확인했다.
 - 계산식 검증으로 timeline `0`부터 `기존 Mac` checkpoint까지 lock opacity가 1이고, checkpoint 직후 install opacity와 install progress가 증가하는 것을 확인했다.
-- Feature sticky section의 scroll range가 증가해 stage/middle 전환이 더 완만해진 것을 CSS 값과 diff로 확인했다.
+- Feature sticky section의 scroll range가 현재값 대비 2배로 증가해 stage/middle 전환이 더 완만해진 것을 CSS 값과 diff로 확인했다.
 
 브라우저 DOM/log 확인 결과:
 
@@ -197,7 +197,7 @@ rg -n "Finder에서|스페이스바로|finder-before|finder-after|기존 Mac|알
 rg -n "featureStages|checkpointsPerFeature|feature-progress|data-stage-label|feature-fallback-image" docs
 rg -n "install-check-opacity|install-check-scale|install-check-dash|install-logo-opacity|pathLength" docs
 rg -n "checkpointProgress|finderLockOpacity|installEntry|--lock-opacity" docs
-rg -n "min-height: (910|520)vh" docs/styles.css
+rg -n "min-height: (1720|940)vh" docs/styles.css
 git diff --check
 ```
 
