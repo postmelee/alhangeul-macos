@@ -5,6 +5,8 @@ import CoreText
 
 /// HWP 폰트명을 Apple 플랫폼에서 사용 가능한 폰트명으로 변환한다.
 func resolveAppleFont(hwpFontFamily: String, bold: Bool, italic: Bool) -> CTFont {
+    HwpBundledFontRegistry.ensureRegistered()
+
     let appleName = mapHWPFontToApple(hwpFontFamily)
     let size: CGFloat = 1.0 // 크기는 호출 측에서 설정
     var traits = CTFontSymbolicTraits()
