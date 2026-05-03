@@ -80,7 +80,7 @@ OK: shared Swift code has no AppKit/UIKit dependencies
 ```
 
 ```text
-./scripts/validate-stage3-render.sh
+./scripts/validate-stage3-render.sh /private/tmp/rhwp-task119-devel-default-smoke
 OK KTX.hwp: page=1 size=1123x794 textRuns=436 hangulRuns=76 hangulScalars=209 nonWhitePixels=452089
 OK request.hwp: page=1 size=567x794 textRuns=104 hangulRuns=36 hangulScalars=309 nonWhitePixels=67667
 OK exam_kor.hwp: page=1 size=1123x1588 textRuns=133 hangulRuns=86 hangulScalars=1368 nonWhitePixels=182000
@@ -89,7 +89,7 @@ OK exam_kor.hwp: page=1 size=1123x1588 textRuns=133 hangulRuns=86 hangulScalars=
 ### 대표 샘플 smoke
 
 ```text
-./scripts/validate-stage3-render.sh /private/tmp/rhwp-task119-final-smoke samples/basic/BookReview.hwp samples/복학원서.hwp samples/20250130-hongbo.hwp
+./scripts/validate-stage3-render.sh /private/tmp/rhwp-task119-devel-smoke samples/basic/BookReview.hwp samples/복학원서.hwp samples/20250130-hongbo.hwp
 OK BookReview.hwp: page=1 size=794x1123 textRuns=66 hangulRuns=28 hangulScalars=209 nonWhitePixels=386919
 OK 복학원서.hwp: page=1 size=794x1123 textRuns=102 hangulRuns=25 hangulScalars=143 nonWhitePixels=261878
 OK 20250130-hongbo.hwp: page=1 size=794x1123 textRuns=60 hangulRuns=35 hangulScalars=535 nonWhitePixels=91412
@@ -99,17 +99,31 @@ OK 20250130-hongbo.hwp: page=1 size=794x1123 textRuns=60 hangulRuns=35 hangulSca
 
 ```text
 xcodegen generate
-Created project at /tmp/rhwp-mac-task119/AlhangeulMac.xcodeproj
+Created project at /tmp/rhwp-mac-task119-devel/AlhangeulMac.xcodeproj
 ```
 
 ```text
 xcodebuild -project AlhangeulMac.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build
-** BUILD SUCCEEDED ** [6.009 sec]
+** BUILD SUCCEEDED ** [11.952 sec]
+```
+
+`devel` worktree는 ignored `Frameworks` 산출물을 커밋하지 않으므로, 검증 시에는 기존 #119 worktree의 `Frameworks` 산출물을 로컬로 복사해 사용했다.
+
+### Resource bundle 확인
+
+```text
+find build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app/Contents/Resources/rhwp-studio/fonts -name '*.woff2' -type f | wc -l
+34
+```
+
+```text
+test ! -d build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app/Contents/PlugIns/AlhangeulMacPreview.appex/Contents/Resources/rhwp-studio/fonts
+test ! -d build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app/Contents/PlugIns/AlhangeulMacThumbnail.appex/Contents/Resources/rhwp-studio/fonts
 ```
 
 ### Release / Finder integration smoke
 
-Stage 4에서 Release package 산출물을 생성해 설치본 기준으로 검증했다.
+원 `devel-webview` 작업의 Stage 4에서 Release package 산출물을 생성해 설치본 기준으로 검증했다.
 
 ```text
 ALHANGEUL_BUILD_ROOT=/private/tmp/rhwp-mac-task119/build.noindex ./scripts/package-release.sh 0.1.0-task119-stage4
