@@ -311,17 +311,20 @@ video {
   grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
   column-gap: 56px;
   row-gap: 48px;
-  align-items: center;
+  align-content: center;
+  align-items: start;
 }
 
 .features-copy {
   display: grid;
   gap: 24px;
+  align-self: start;
   align-content: center;
 }
 
 .feature-visual {
   margin: 0;
+  align-self: start;
 }
 
 .finder-visual {
