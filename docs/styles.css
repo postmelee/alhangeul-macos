@@ -848,8 +848,8 @@ video {
     position: relative;
     z-index: 2;
     order: 1;
-    width: 100%;
-    margin: 0 auto;
+    width: min(100%, 66.5vh);
+    margin: 12px auto 0;
     gap: 10px;
   }
 
@@ -1055,16 +1055,23 @@ video {
     line-height: 1.42;
   }
 
+  .features-copy {
+    width: min(100%, 59.5vh);
+    margin-top: 14px;
+  }
+
   .feature-step {
-    padding: 12px 24px;
+    padding: 11px 20px;
   }
 
   .feature-step h3 {
-    font-size: 17px;
+    font-size: 16px;
+    line-height: 1.25;
   }
 
   .feature-step p {
-    font-size: 13px;
+    font-size: 12px;
+    line-height: 1.42;
   }
 
   .feature-visual {
