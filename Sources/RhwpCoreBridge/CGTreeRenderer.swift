@@ -756,46 +756,25 @@ class CGTreeRenderer {
         ctx.translateBy(x: CGFloat(bbox.x), y: CGFloat(bbox.y + bbox.height))
         ctx.scaleBy(x: 1, y: -1)
 
-        // 폰트 생성 (폴백 매핑 적용)
-        let appleName = mapHWPFontToApple(style.fontFamily)
-        var font = CTFontCreateWithName(appleName as CFString, fontSize, nil)
-
-        // Bold/Italic traits
-        var traits = CTFontSymbolicTraits()
-        if style.bold { traits.insert(.boldTrait) }
-        if style.italic { traits.insert(.italicTrait) }
-        if !traits.isEmpty {
-            if let traitFont = CTFontCreateCopyWithSymbolicTraits(font, fontSize, nil, traits, [.boldTrait, .italicTrait]) {
-                font = traitFont
-            }
-        }
-
-        // 장평(ratio) 적용: 가로 스케일링
-        if style.ratio != 1.0 && style.ratio > 0 {
-            var matrix = CGAffineTransform(scaleX: CGFloat(style.ratio), y: 1.0)
-            font = CTFontCreateCopyWithAttributes(font, fontSize, &matrix, nil)
-        }
-
-        // 속성 구성
-        var attributes: [NSAttributedString.Key: Any] = [
-            coreTextFontKey: font,
-            coreTextForegroundColorKey: colorRefToCGColor(style.color),
-        ]
-
-        // 자간 (letter_spacing)
-        if style.letterSpacing != 0 {
-            attributes[coreTextKernKey] = CGFloat(style.letterSpacing)
-        }
+        let font = makeTextRunFont(style: style, fontSize: fontSize)
+        let attributes = makeTextRunAttributes(style: style, font: font)
 
         let attrStr = NSAttributedString(string: run.text, attributes: attributes)
         let line = CTLineCreateWithAttributedString(attrStr)
+        let layout = makeTextRunLayoutPlan(
+            text: run.text,
+            style: style,
+            bbox: bbox,
+            line: line,
+            attributes: attributes,
+            charPositions: run.charPositions
+        )
 
         // Core Text 좌하단 좌표계에서 베이스라인 위치
         // bbox 내부 좌표: baseline은 bbox.y 상단으로부터의 거리
         // Core Text Y: bbox 하단(0)으로부터 위로 = bbox.height - baseline
         let textY = CGFloat(bbox.height) - CGFloat(run.baseline)
-        ctx.textPosition = CGPoint(x: 0, y: textY)
-        CTLineDraw(line, ctx)
+        drawTextLine(line, layout: layout, style: style, attributes: attributes, y: textY, in: ctx)
 
         ctx.restoreGState()
 
@@ -820,6 +799,623 @@ class CGTreeRenderer {
         }
 
         ctx.restoreGState()
+    }
+
+    private func makeTextRunFont(style: TextStyle, fontSize: CGFloat) -> CTFont {
+        let appleName = mapHWPFontToApple(style.fontFamily)
+        var font = CTFontCreateWithName(appleName as CFString, fontSize, nil)
+
+        var traits = CTFontSymbolicTraits()
+        if style.bold { traits.insert(.boldTrait) }
+        if style.italic { traits.insert(.italicTrait) }
+        if !traits.isEmpty,
+           let traitFont = CTFontCreateCopyWithSymbolicTraits(font, fontSize, nil, traits, [.boldTrait, .italicTrait]) {
+            font = traitFont
+        }
+
+        if style.ratio != 1.0 && style.ratio > 0 {
+            var matrix = CGAffineTransform(scaleX: CGFloat(style.ratio), y: 1.0)
+            font = CTFontCreateCopyWithAttributes(font, fontSize, &matrix, nil)
+        }
+
+        return font
+    }
+
+    private func makeTextRunAttributes(style: TextStyle, font: CTFont) -> [NSAttributedString.Key: Any] {
+        var attributes: [NSAttributedString.Key: Any] = [
+            coreTextFontKey: font,
+            coreTextForegroundColorKey: colorRefToCGColor(style.color),
+        ]
+
+        if style.letterSpacing != 0 {
+            attributes[coreTextKernKey] = CGFloat(style.letterSpacing)
+        }
+
+        return attributes
+    }
+
+    private func makeTextRunLayoutPlan(
+        text: String,
+        style: TextStyle,
+        bbox: BBox,
+        line: CTLine,
+        attributes: [NSAttributedString.Key: Any],
+        charPositions: [Double]?
+    ) -> TextRunLayoutPlan {
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        var leading: CGFloat = 0
+        let measuredWidth = max(0, CGFloat(CTLineGetTypographicBounds(line, &ascent, &descent, &leading)))
+        let targetWidth = max(0, CGFloat(bbox.width))
+        let clusterSpans = splitTextRunClusters(text)
+        let spacing = estimateTextRunSpacing(clusterSpans: clusterSpans, style: style)
+        let explicitPositions = explicitTextRunClusterPositions(
+            clusterSpans: clusterSpans,
+            charPositions: charPositions
+        )
+        let clusterPlan = shouldUseTextRunClusterDrawing(
+            clusterSpans: clusterSpans,
+            style: style,
+            measuredWidth: measuredWidth,
+            targetWidth: targetWidth,
+            spacing: spacing,
+            explicitPositions: explicitPositions
+        ) ? makeTextRunClusterPlan(
+            clusterSpans: clusterSpans,
+            style: style,
+            targetWidth: targetWidth,
+            attributes: attributes,
+            explicitPositions: explicitPositions
+        ) : nil
+        let strategy = chooseTextRunDrawStrategy(
+            measuredWidth: measuredWidth,
+            targetWidth: targetWidth,
+            clusterPlan: clusterPlan
+        )
+
+        return TextRunLayoutPlan(
+            clusterPlan: clusterPlan,
+            strategy: strategy
+        )
+    }
+
+    private func estimateTextRunSpacing(
+        clusterSpans: [TextRunClusterSpan],
+        style: TextStyle
+    ) -> TextRunSpacingEstimate {
+        var clusterSpacingGapCount = 0
+        var wordSpaceGapCount = 0
+        var tabCount = 0
+
+        for index in clusterSpans.indices {
+            let character = clusterSpans[index].text
+            let nextIndex = clusterSpans.index(after: index)
+            let nextCharacter = nextIndex < clusterSpans.endIndex ? clusterSpans[nextIndex].text : nil
+            if character == "\t" {
+                tabCount += 1
+            } else if nextCharacter != nil && nextCharacter != "\t" {
+                clusterSpacingGapCount += 1
+            }
+            if isTextRunWordSpace(character), nextCharacter != nil, nextCharacter != "\t" {
+                wordSpaceGapCount += 1
+            }
+        }
+
+        let extraCharWidth = CGFloat(style.extraCharSpacing) * CGFloat(clusterSpacingGapCount)
+        let extraWordWidth = CGFloat(style.extraWordSpacing) * CGFloat(wordSpaceGapCount)
+
+        return TextRunSpacingEstimate(
+            tabCount: tabCount,
+            extraCharWidth: extraCharWidth,
+            extraWordWidth: extraWordWidth
+        )
+    }
+
+    private func shouldUseTextRunClusterDrawing(
+        clusterSpans: [TextRunClusterSpan],
+        style: TextStyle,
+        measuredWidth: CGFloat,
+        targetWidth: CGFloat,
+        spacing: TextRunSpacingEstimate,
+        explicitPositions: [CGFloat]?
+    ) -> Bool {
+        if explicitPositions != nil {
+            return true
+        }
+        if spacing.requiresClusterDrawing {
+            return true
+        }
+        if clusterSpans.contains(where: { needsHalfwidthPunctuationScale($0.text, style: style) }) {
+            return true
+        }
+        guard measuredWidth > 0, targetWidth > 0 else {
+            return false
+        }
+        return abs(targetWidth / measuredWidth - 1) >= 0.02
+    }
+
+    private func chooseTextRunDrawStrategy(
+        measuredWidth: CGFloat,
+        targetWidth: CGFloat,
+        clusterPlan: TextRunClusterPlan?
+    ) -> TextRunDrawStrategy {
+        if clusterPlan != nil {
+            return .clusters
+        }
+
+        guard measuredWidth > 0, targetWidth > 0 else {
+            return .line
+        }
+
+        let scale = targetWidth / measuredWidth
+        if abs(scale - 1) < 0.005 {
+            return .line
+        }
+
+        if scale >= 0.90 && scale <= 1.10 {
+            return .scaledLine(scale)
+        }
+
+        return .line
+    }
+
+    private func drawTextLine(
+        _ line: CTLine,
+        layout: TextRunLayoutPlan,
+        style: TextStyle,
+        attributes: [NSAttributedString.Key: Any],
+        y: CGFloat,
+        in ctx: CGContext
+    ) {
+        switch layout.strategy {
+        case .line:
+            ctx.textPosition = CGPoint(x: 0, y: y)
+            CTLineDraw(line, ctx)
+        case .clusters:
+            guard let clusterPlan = layout.clusterPlan else {
+                ctx.textPosition = CGPoint(x: 0, y: y)
+                CTLineDraw(line, ctx)
+                return
+            }
+            drawTextClusters(clusterPlan.clusters, style: style, attributes: attributes, y: y, in: ctx)
+        case .scaledLine(let scale):
+            ctx.saveGState()
+            ctx.scaleBy(x: scale, y: 1)
+            ctx.textPosition = CGPoint(x: 0, y: y)
+            CTLineDraw(line, ctx)
+            ctx.restoreGState()
+        }
+    }
+
+    private func makeTextRunClusterPlan(
+        clusterSpans: [TextRunClusterSpan],
+        style: TextStyle,
+        targetWidth: CGFloat,
+        attributes: [NSAttributedString.Key: Any],
+        explicitPositions: [CGFloat]?
+    ) -> TextRunClusterPlan? {
+        let allowsSingleClusterPlan = clusterSpans.count == 1 &&
+            clusterSpans.first.map({ needsHalfwidthPunctuationScale($0.text, style: style) }) == true
+        guard clusterSpans.count > 1 || allowsSingleClusterPlan else { return nil }
+
+        let rawPositions: [CGFloat]
+        let metrics: [TextRunClusterMetric]?
+        if let explicitPositions {
+            rawPositions = explicitPositions
+            metrics = nil
+        } else {
+            let measuredMetrics = clusterSpans.map { cluster in
+                makeTextRunClusterMetric(cluster.text, style: style, attributes: attributes)
+            }
+            rawPositions = textRunClusterPositions(metrics: measuredMetrics, style: style)
+            metrics = measuredMetrics
+        }
+        guard rawPositions.count == clusterSpans.count + 1,
+              let rawWidth = rawPositions.last,
+              rawWidth.isFinite,
+              rawWidth > 0 else {
+            return nil
+        }
+
+        let scale = explicitPositions == nil && targetWidth > 0 ? targetWidth / rawWidth : 1
+        guard scale.isFinite, scale >= 0.40, scale <= 2.50 else {
+            return nil
+        }
+
+        var clusters: [TextRunCluster] = []
+        clusters.reserveCapacity(clusterSpans.count)
+        for index in clusterSpans.indices {
+            let clusterText = clusterSpans[index].text
+            let startX = rawPositions[index] * scale
+            clusters.append(TextRunCluster(
+                text: clusterText,
+                x: startX,
+                line: metrics?[index].line ?? makeDrawableTextClusterLine(clusterText, attributes: attributes)
+            ))
+        }
+
+        return TextRunClusterPlan(clusters: clusters)
+    }
+
+    private func splitTextRunClusters(_ text: String) -> [TextRunClusterSpan] {
+        var spans: [TextRunClusterSpan] = []
+        spans.reserveCapacity(text.count)
+
+        var scalarOffset = 0
+        for character in text {
+            let clusterText = String(character)
+            let scalarCount = clusterText.unicodeScalars.count
+            spans.append(TextRunClusterSpan(
+                text: clusterText,
+                scalarStart: scalarOffset,
+                scalarEnd: scalarOffset + scalarCount
+            ))
+            scalarOffset += scalarCount
+        }
+
+        return spans
+    }
+
+    private func explicitTextRunClusterPositions(
+        clusterSpans: [TextRunClusterSpan],
+        charPositions: [Double]?
+    ) -> [CGFloat]? {
+        guard let charPositions,
+              let lastCluster = clusterSpans.last else {
+            return nil
+        }
+
+        let expectedCount = lastCluster.scalarEnd + 1
+        guard charPositions.count == expectedCount else {
+            return nil
+        }
+
+        var positions: [CGFloat] = []
+        positions.reserveCapacity(clusterSpans.count + 1)
+        for cluster in clusterSpans {
+            let value = CGFloat(charPositions[cluster.scalarStart])
+            guard value.isFinite else { return nil }
+            if let previous = positions.last, value < previous {
+                return nil
+            }
+            positions.append(value)
+        }
+
+        let endValue = CGFloat(charPositions[lastCluster.scalarEnd])
+        guard endValue.isFinite,
+              positions.last.map({ endValue >= $0 }) ?? true else {
+            return nil
+        }
+        positions.append(endValue)
+        return positions
+    }
+
+    private func textRunClusterPositions(metrics: [TextRunClusterMetric], style: TextStyle) -> [CGFloat] {
+        let fontSize = CGFloat(style.fontSize > 0 ? style.fontSize : 12)
+        let defaultTabWidth = CGFloat(style.defaultTabWidth > 0 ? style.defaultTabWidth : Double(fontSize * 4))
+        let hasCustomTabs = !style.tabStops.isEmpty || style.autoTabRight
+        let lineXOffset = CGFloat(style.lineXOffset)
+
+        var positions: [CGFloat] = [0]
+        positions.reserveCapacity(metrics.count + 1)
+
+        var x: CGFloat = 0
+        var tabIndex = 0
+        for index in metrics.indices {
+            let metric = metrics[index]
+            if metric.text == "\t" {
+                if tabIndex < style.inlineTabs.count {
+                    let inlineTab = style.inlineTabs[tabIndex]
+                    let tabWidth = inlineTab.isEmpty ? defaultTabWidth : CGFloat(inlineTab[0]) * 96 / 7200
+                    let tabType = inlineTab.count > 2 ? inlineTab[2] : 0
+                    let tabTarget = x + tabWidth
+                    x = resolvedTabX(
+                        currentX: x,
+                        tabTarget: tabTarget,
+                        tabType: tabType,
+                        metrics: metrics,
+                        nextIndex: index + 1,
+                        style: style
+                    )
+                } else if hasCustomTabs {
+                    let tabStop = findNextTextRunTabStop(
+                        absX: lineXOffset + x,
+                        style: style,
+                        defaultTabWidth: defaultTabWidth
+                    )
+                    let tabTarget = tabStop.position - lineXOffset
+                    x = resolvedTabX(
+                        currentX: x,
+                        tabTarget: tabTarget,
+                        tabType: tabStop.tabType,
+                        metrics: metrics,
+                        nextIndex: index + 1,
+                        style: style
+                    )
+                } else {
+                    let absX = lineXOffset + x
+                    let tabWidth = defaultTabWidth > 0 ? defaultTabWidth : 48
+                    let nextAbs = (floor(absX / tabWidth) + 1) * tabWidth
+                    x = max(x, nextAbs - lineXOffset)
+                }
+                tabIndex += 1
+            } else {
+                x += textRunClusterAdvance(at: index, metrics: metrics, style: style)
+            }
+            positions.append(x)
+        }
+
+        return positions
+    }
+
+    private func resolvedTabX(
+        currentX: CGFloat,
+        tabTarget: CGFloat,
+        tabType: UInt16,
+        metrics: [TextRunClusterMetric],
+        nextIndex: Int,
+        style: TextStyle
+    ) -> CGFloat {
+        switch tabType {
+        case 1:
+            let segmentWidth = measureTextRunSegment(metrics: metrics, start: nextIndex, style: style)
+            return max(currentX, tabTarget - segmentWidth)
+        case 2:
+            let segmentWidth = measureTextRunSegment(metrics: metrics, start: nextIndex, style: style)
+            return max(currentX, tabTarget - segmentWidth / 2)
+        default:
+            return max(currentX, tabTarget)
+        }
+    }
+
+    private func measureTextRunSegment(metrics: [TextRunClusterMetric], start: Int, style: TextStyle) -> CGFloat {
+        guard start < metrics.count else { return 0 }
+
+        var width: CGFloat = 0
+        for index in start..<metrics.count {
+            let metric = metrics[index]
+            if metric.text == "\t" { break }
+            width += textRunClusterAdvance(at: index, metrics: metrics, style: style)
+        }
+        return width
+    }
+
+    private func textRunClusterAdvance(
+        at index: Int,
+        metrics: [TextRunClusterMetric],
+        style: TextStyle
+    ) -> CGFloat {
+        max(0, metrics[index].baseAdvance + textRunInterClusterSpacing(after: index, metrics: metrics, style: style))
+    }
+
+    private func textRunInterClusterSpacing(
+        after index: Int,
+        metrics: [TextRunClusterMetric],
+        style: TextStyle
+    ) -> CGFloat {
+        let nextIndex = metrics.index(after: index)
+        guard nextIndex < metrics.endIndex else { return 0 }
+
+        let metric = metrics[index]
+        let nextMetric = metrics[nextIndex]
+        guard metric.text != "\t", nextMetric.text != "\t" else { return 0 }
+
+        let styleSpacing = CGFloat(style.letterSpacing + style.extraCharSpacing)
+        let wordSpacing = isTextRunWordSpace(metric.text) ? CGFloat(style.extraWordSpacing) : 0
+        return styleSpacing + wordSpacing
+    }
+
+    private func findNextTextRunTabStop(
+        absX: CGFloat,
+        style: TextStyle,
+        defaultTabWidth: CGFloat
+    ) -> TextRunTabStop {
+        let availableWidth = CGFloat(style.availableWidth)
+        for tabStop in style.tabStops {
+            let rawPosition = CGFloat(tabStop.position)
+            let position = rawPosition > availableWidth && availableWidth > 0 ? availableWidth : rawPosition
+            if position > absX + 0.5 {
+                return TextRunTabStop(
+                    position: position,
+                    tabType: UInt16(tabStop.tabType),
+                    fillType: tabStop.fillType
+                )
+            }
+        }
+
+        if style.autoTabRight && availableWidth > absX + 0.5 {
+            return TextRunTabStop(position: availableWidth, tabType: 1, fillType: 0)
+        }
+
+        let tabWidth = defaultTabWidth > 0 ? defaultTabWidth : 48
+        let next = (floor(absX / tabWidth) + 1) * tabWidth
+        return TextRunTabStop(position: next, tabType: 0, fillType: 0)
+    }
+
+    private func makeTextRunClusterMetric(
+        _ cluster: String,
+        style: TextStyle,
+        attributes: [NSAttributedString.Key: Any]
+    ) -> TextRunClusterMetric {
+        if cluster == "\t" {
+            return TextRunClusterMetric(text: cluster, baseAdvance: 0, line: nil)
+        }
+
+        let line = makeTextRunClusterLine(cluster, attributes: attributes)
+        let measuredWidth = measureTextRunClusterWidth(line)
+        return TextRunClusterMetric(
+            text: cluster,
+            baseAdvance: textRunClusterBaseWidth(cluster, measuredWidth: measuredWidth, style: style),
+            line: isDrawableTextCluster(cluster) ? line : nil
+        )
+    }
+
+    private func isTextRunWordSpace(_ cluster: String) -> Bool {
+        cluster != "\t" && cluster.unicodeScalars.allSatisfy { CharacterSet.whitespaces.contains($0) }
+    }
+
+    private func makeDrawableTextClusterLine(
+        _ cluster: String,
+        attributes: [NSAttributedString.Key: Any]
+    ) -> CTLine? {
+        guard isDrawableTextCluster(cluster) else { return nil }
+        return makeTextRunClusterLine(cluster, attributes: attributes)
+    }
+
+    private func makeTextRunClusterLine(
+        _ cluster: String,
+        attributes: [NSAttributedString.Key: Any]
+    ) -> CTLine {
+        let attrStr = NSAttributedString(string: cluster, attributes: attributes)
+        return CTLineCreateWithAttributedString(attrStr)
+    }
+
+    private func measureTextRunClusterWidth(
+        _ line: CTLine
+    ) -> CGFloat {
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        var leading: CGFloat = 0
+        let width = CGFloat(CTLineGetTypographicBounds(line, &ascent, &descent, &leading))
+        return width.isFinite ? max(0, width) : 0
+    }
+
+    private func textRunClusterBaseWidth(
+        _ cluster: String,
+        measuredWidth: CGFloat,
+        style: TextStyle
+    ) -> CGFloat {
+        let fontSize = CGFloat(style.fontSize > 0 ? style.fontSize : 12)
+        let ratio = CGFloat(style.ratio > 0 ? style.ratio : 1)
+        let halfWidth = fontSize * 0.5 * ratio
+
+        if cluster == "\u{2007}" {
+            return halfWidth
+        }
+        if isReferenceWideCluster(cluster) {
+            return fontSize * ratio
+        }
+        if measuredWidth > 0 {
+            return max(measuredWidth, halfWidth)
+        }
+        return halfWidth
+    }
+
+    private func isReferenceWideCluster(_ cluster: String) -> Bool {
+        if isHangulJamoCluster(cluster) {
+            return true
+        }
+        guard cluster.unicodeScalars.count == 1,
+              let scalar = cluster.unicodeScalars.first else {
+            return false
+        }
+        return isCJKScalar(scalar) || isFullwidthSymbolScalar(scalar)
+    }
+
+    private func isHangulJamoCluster(_ cluster: String) -> Bool {
+        let scalars = Array(cluster.unicodeScalars)
+        guard scalars.count > 1, let first = scalars.first, isHangulChoseong(first) else {
+            return false
+        }
+        guard scalars.count > 1, isHangulJungseong(scalars[1]) else {
+            return false
+        }
+        return scalars.count == 2 || (scalars.count == 3 && isHangulJongseong(scalars[2]))
+    }
+
+    private func isHangulChoseong(_ scalar: Unicode.Scalar) -> Bool {
+        (0x1100...0x115F).contains(Int(scalar.value)) || (0xA960...0xA97F).contains(Int(scalar.value))
+    }
+
+    private func isHangulJungseong(_ scalar: Unicode.Scalar) -> Bool {
+        (0x1160...0x11A7).contains(Int(scalar.value)) || (0xD7B0...0xD7C6).contains(Int(scalar.value))
+    }
+
+    private func isHangulJongseong(_ scalar: Unicode.Scalar) -> Bool {
+        (0x11A8...0x11FF).contains(Int(scalar.value)) || (0xD7CB...0xD7FB).contains(Int(scalar.value))
+    }
+
+    private func isCJKScalar(_ scalar: Unicode.Scalar) -> Bool {
+        let value = Int(scalar.value)
+        return (0x1100...0x11FF).contains(value)
+            || (0x3130...0x318F).contains(value)
+            || (0xAC00...0xD7AF).contains(value)
+            || (0xA960...0xA97F).contains(value)
+            || (0xD7B0...0xD7FF).contains(value)
+            || (0x4E00...0x9FFF).contains(value)
+            || (0x3400...0x4DBF).contains(value)
+            || (0xF900...0xFAFF).contains(value)
+            || (0x3040...0x30FF).contains(value)
+            || (0xFF00...0xFFEF).contains(value)
+    }
+
+    private func isFullwidthSymbolScalar(_ scalar: Unicode.Scalar) -> Bool {
+        switch scalar.value {
+        case 0x20A9, 0x20AC, 0x00A3, 0x00A5, 0x00A7, 0x00B6,
+             0x203B, 0x3003, 0x3012, 0x301C, 0x3030, 0x303B:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func drawTextClusters(
+        _ clusters: [TextRunCluster],
+        style: TextStyle,
+        attributes: [NSAttributedString.Key: Any],
+        y: CGFloat,
+        in ctx: CGContext
+    ) {
+        for cluster in clusters where isDrawableTextCluster(cluster.text) {
+            drawTextCluster(cluster, style: style, attributes: attributes, y: y, in: ctx)
+        }
+    }
+
+    private func drawTextCluster(
+        _ cluster: TextRunCluster,
+        style: TextStyle,
+        attributes: [NSAttributedString.Key: Any],
+        y: CGFloat,
+        in ctx: CGContext
+    ) {
+        let line = cluster.line ?? makeTextRunClusterLine(cluster.text, attributes: attributes)
+
+        if needsHalfwidthPunctuationScale(cluster.text, style: style) {
+            ctx.saveGState()
+            ctx.translateBy(x: cluster.x, y: y)
+            ctx.scaleBy(x: 0.5, y: 1)
+            ctx.textPosition = .zero
+            CTLineDraw(line, ctx)
+            ctx.restoreGState()
+        } else {
+            ctx.textPosition = CGPoint(x: cluster.x, y: y)
+            CTLineDraw(line, ctx)
+        }
+    }
+
+    private func isDrawableTextCluster(_ cluster: String) -> Bool {
+        if cluster == " " || cluster == "\t" || cluster == "\u{2007}" {
+            return false
+        }
+        guard let first = cluster.unicodeScalars.first else {
+            return false
+        }
+        if first.value < 0x20 && first.value != 0x09 && first.value != 0x0A && first.value != 0x0D {
+            return false
+        }
+        return true
+    }
+
+    private func needsHalfwidthPunctuationScale(_ cluster: String, style: TextStyle) -> Bool {
+        let ratio = style.ratio > 0 ? style.ratio : 1
+        guard abs(ratio - 1) <= 0.01 else {
+            return false
+        }
+        guard cluster.unicodeScalars.count == 1,
+              let scalar = cluster.unicodeScalars.first else {
+            return false
+        }
+        return (0x2018...0x2027).contains(Int(scalar.value)) || scalar.value == 0x00B7
     }
 
     /// 각주/미주 마커 (위첨자)
@@ -974,6 +1570,55 @@ class CGTreeRenderer {
     private func cgRect(_ bbox: BBox) -> CGRect {
         CGRect(x: bbox.x, y: bbox.y, width: bbox.width, height: bbox.height)
     }
+}
+
+private struct TextRunLayoutPlan {
+    let clusterPlan: TextRunClusterPlan?
+    let strategy: TextRunDrawStrategy
+}
+
+private struct TextRunSpacingEstimate {
+    let tabCount: Int
+    let extraCharWidth: CGFloat
+    let extraWordWidth: CGFloat
+
+    var requiresClusterDrawing: Bool {
+        tabCount > 0 || abs(extraCharWidth) > 0.001 || abs(extraWordWidth) > 0.001
+    }
+}
+
+private enum TextRunDrawStrategy {
+    case line
+    case scaledLine(CGFloat)
+    case clusters
+}
+
+private struct TextRunClusterPlan {
+    let clusters: [TextRunCluster]
+}
+
+private struct TextRunCluster {
+    let text: String
+    let x: CGFloat
+    let line: CTLine?
+}
+
+private struct TextRunClusterMetric {
+    let text: String
+    let baseAdvance: CGFloat
+    let line: CTLine?
+}
+
+private struct TextRunClusterSpan {
+    let text: String
+    let scalarStart: Int
+    let scalarEnd: Int
+}
+
+private struct TextRunTabStop {
+    let position: CGFloat
+    let tabType: UInt16
+    let fillType: UInt8
 }
 
 private enum EquationSVGDrawItem {
