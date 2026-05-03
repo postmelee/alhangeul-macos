@@ -221,6 +221,12 @@ private struct HwpFontFallbackPolicy {
 
         case "latinmodernmath", "latinmodernmathregular":
             return HwpFontFallbackPolicy(faces: [latinModernMath, timesNewRoman, defaultSerif])
+        case "hy바다", "hy바다l", "hybadal":
+            return HwpFontFallbackPolicy(faces: [cafe24Ssurround, happinessSans, pretendard, defaultSans])
+        case "한컴소망", "한컴소망b", "hancomsomang", "hancomsomangb":
+            return HwpFontFallbackPolicy(faces: [cafe24Supermagic, happinessSans, pretendard, defaultSans])
+        case "한컴쿨재즈", "한컴쿨재즈b", "hancomcooljazz", "hancomcooljazzb":
+            return HwpFontFallbackPolicy(faces: [cafe24Ssurround, cafe24Supermagic, happinessSans, pretendard, defaultSans])
         case "cafe24ssurround", "카페24써라운드":
             return HwpFontFallbackPolicy(faces: [cafe24Ssurround, pretendard, defaultSans])
         case "cafe24supermagic", "카페24슈퍼매직":
