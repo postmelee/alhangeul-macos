@@ -55,10 +55,22 @@ faqItems.forEach((item) => {
 });
 
 const setupRevealAnimations = () => {
+  const sequenceIndexes = new Map();
+
   revealGroups.forEach((group) => {
+    const sequenceKey = group.dataset.revealSequence;
+    const revealGap = Number(group.dataset.revealGap) || 90;
+    let sequenceIndex = sequenceKey ? sequenceIndexes.get(sequenceKey) || 0 : 0;
+
     Array.from(group.querySelectorAll("[data-reveal-item]")).forEach((item, index) => {
-      item.style.setProperty("--reveal-index", index);
+      const revealIndex = sequenceKey ? sequenceIndex : index;
+      item.style.setProperty("--reveal-delay", `${revealIndex * revealGap}ms`);
+      sequenceIndex += 1;
     });
+
+    if (sequenceKey) {
+      sequenceIndexes.set(sequenceKey, sequenceIndex);
+    }
   });
 
   if (revealGroups.length === 0) return;
