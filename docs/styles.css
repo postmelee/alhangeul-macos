@@ -271,8 +271,8 @@ video {
   --fallback-opacity: 0;
   --before-scale: 1;
   --after-scale: 1.018;
-  --lock-opacity: 1;
-  --lock-scale: 1;
+  --lock-opacity: 0;
+  --lock-scale: 0.92;
   --lock-rotate: 0deg;
   width: 100%;
   min-height: 640vh;
@@ -389,10 +389,6 @@ video {
   transition:
     opacity 100ms linear,
     transform 100ms ease;
-}
-
-.features-section.is-feature-finder.is-stage-start .finder-lock {
-  animation: lock-pop 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .finder-lock svg {
@@ -668,18 +664,6 @@ video {
   background: rgba(0, 102, 204, 0.14);
   transform: scaleX(0);
   transform-origin: left center;
-}
-
-@keyframes lock-pop {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -46%) scale(0.92);
-  }
-
-  to {
-    opacity: var(--lock-opacity);
-    transform: translate(-50%, -50%) scale(var(--lock-scale));
-  }
 }
 
 .feature-step.is-active .feature-highlight {

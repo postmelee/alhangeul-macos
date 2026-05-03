@@ -28,6 +28,11 @@ const featureStages = [
 
 const checkpointsPerFeature = 3;
 const finalCheckpointIndex = featureStages.length * checkpointsPerFeature - 1;
+const checkpointProgress = {
+  start: 1 / 6,
+  middle: 1 / 2,
+  end: 5 / 6,
+};
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
@@ -67,9 +72,10 @@ const getFeatureScrollState = () => {
   return { activeIndex, localCheckpoint };
 };
 
-const getFeaturePhase = (localCheckpoint) => {
-  if (localCheckpoint >= 1.98) return "end";
-  if (localCheckpoint >= 0.08) return "middle";
+const getFeaturePhase = (timelineProgress) => {
+  if (timelineProgress < checkpointProgress.start) return "entry";
+  if (timelineProgress >= checkpointProgress.end) return "end";
+  if (timelineProgress >= checkpointProgress.middle) return "middle";
   return "start";
 };
 
@@ -88,20 +94,35 @@ const updateFeatureCards = (activeIndex) => {
 const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   const feature = featureStages[activeIndex];
   const isFinder = feature.key === "finder";
-  const phase = getFeaturePhase(localCheckpoint);
-  const featureProgress = clamp(localCheckpoint / (checkpointsPerFeature - 1));
-  const installProgress = clamp(localCheckpoint / 0.92);
-  const installEntry = smoothstep(0.04, 0.16, localCheckpoint);
-  const installExit = 1 - smoothstep(1.18, 1.56, localCheckpoint);
+  const timelineProgress = clamp(localCheckpoint / (checkpointsPerFeature - 1));
+  const phase = getFeaturePhase(timelineProgress);
+  const installProgress = clamp(
+    (timelineProgress - checkpointProgress.start) /
+      (checkpointProgress.middle - checkpointProgress.start),
+  );
+  const installEntry = smoothstep(
+    checkpointProgress.start,
+    checkpointProgress.start + 0.035,
+    timelineProgress,
+  );
+  const installExit = 1 - smoothstep(0.58, 0.78, timelineProgress);
   const installOrbOpacity = installEntry * installExit;
-  const installCheckProgress = smoothstep(0.92, 1, localCheckpoint);
-  const installLogoOpacity = 1 - smoothstep(0.86, 0.96, localCheckpoint);
-  const finderAfterOpacity = isFinder ? smoothstep(1.28, 1.9, localCheckpoint) : 0;
-  const finderLockOpacity = isFinder ? 1 - smoothstep(0.04, 0.2, localCheckpoint) : 0;
+  const installCheckProgress = smoothstep(0.88, 1, installProgress);
+  const installLogoOpacity = 1 - smoothstep(0.68, 0.94, installProgress);
+  const finderAfterOpacity = isFinder ? smoothstep(0.64, checkpointProgress.end, timelineProgress) : 0;
+  const finderLockOpacity = isFinder
+    ? timelineProgress <= checkpointProgress.start
+      ? smoothstep(0, checkpointProgress.start, timelineProgress)
+      : 1 - smoothstep(
+          checkpointProgress.start,
+          checkpointProgress.start + 0.055,
+          timelineProgress,
+        )
+    : 0;
 
   setStageLabels(feature.labels);
 
-  featureSection.style.setProperty("--feature-progress", `${(featureProgress * 100).toFixed(2)}%`);
+  featureSection.style.setProperty("--feature-progress", `${(timelineProgress * 100).toFixed(2)}%`);
   featureSection.style.setProperty("--install-ring-progress", `${(installProgress * 100).toFixed(2)}%`);
   featureSection.style.setProperty("--install-orb-opacity", installOrbOpacity.toFixed(3));
   featureSection.style.setProperty("--install-scale", (0.84 + installProgress * 0.16).toFixed(3));
