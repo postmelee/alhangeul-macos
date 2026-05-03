@@ -844,7 +844,7 @@ video {
     position: relative;
     z-index: 2;
     order: 1;
-    width: min(100%, 560px);
+    width: 100%;
     margin: 0 auto;
     gap: 10px;
   }
@@ -873,11 +873,13 @@ video {
   }
 
   .feature-list {
+    width: 100%;
     min-height: 0;
   }
 
   .feature-step {
     display: none;
+    width: 100%;
     border-radius: 15px;
     padding: 14px 16px;
     transform: translateY(8px);
