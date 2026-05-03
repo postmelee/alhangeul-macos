@@ -4,8 +4,8 @@
 
 - 이슈: #119 오픈 라이선스 한글 폰트 번들 및 폰트 대체 정책 도입
 - 마일스톤: M015 (`첫 출시 전 Swift 렌더 보강`)
-- 브랜치: `local/task119`
-- 기준 브랜치: `devel-webview`
+- 브랜치: `publish/task119-devel`
+- 기준 브랜치: `devel`
 - 핵심 변경: `rhwp-studio/fonts` WOFF2 34개를 Swift native renderer에서 process-local CoreText font로 등록하고, HWP font family alias를 bundled open-license font 우선 fallback chain으로 정리
 - 주 사용자 영향: Quick Look preview / Finder thumbnail 공통 native bitmap renderer
 
@@ -13,7 +13,7 @@
 
 기존 Swift native renderer는 HWP font family를 대부분 Apple 기본 폰트로 단순 치환했다. Glyph는 나오지만 원문 문서의 font metric과 분위기가 크게 달라져 #120의 text advance 보정 이후에도 Quick Look/Thumbnail 시각 결과가 흔들릴 수 있었다.
 
-이번 작업에서는 `devel-webview`에 이미 포함된 `rhwp-studio/fonts` WOFF2를 새 resource 중복 없이 재사용했다.
+원 작업은 `devel-webview`에 이미 포함된 `rhwp-studio/fonts` WOFF2를 새 resource 중복 없이 재사용했다. 이 `devel` 대상 PR은 WebView bundle 전체를 가져오지 않고, Quick Look/Thumbnail native renderer에 필요한 동일 `rhwp-studio/fonts` 디렉터리만 HostApp resource로 포함한다.
 
 - CoreText WOFF2 process-local registration 가능성 확인
 - `HwpBundledFontRegistry` 추가
@@ -30,6 +30,8 @@
 | `Sources/RhwpCoreBridge/FontResourceRegistry.swift` | WOFF2 allowlist, font directory lookup, CoreText process-local registration helper |
 | `Sources/RhwpCoreBridge/FontFallback.swift` | HWP font family normalization, bundled/system fallback chain, bold/italic face 선택 정책 |
 | `Sources/RhwpCoreBridge/CGTreeRenderer.swift` | render 시작 시 font registration 보장, TextRun/marker font 선택을 공통 resolver로 통합 |
+| `Sources/HostApp/Resources/rhwp-studio/fonts` | `devel` 대상에서 native renderer가 사용할 WOFF2 34개와 `FONTS.md`만 최소 resource로 추가 |
+| `project.yml` | HostApp resource에 `rhwp-studio` folder reference 추가, `Sources/HostApp` 중복 포함 방지 |
 | `scripts/check-no-appkit.sh` | 새 shared Swift 파일을 AppKit/UIKit 금지 검증 대상에 포함 |
 | `scripts/validate-stage3-render.sh` | smoke compile source list에 `FontResourceRegistry.swift` 포함 |
 | `scripts/render-debug-compare.sh` | debug compare compile source list에 `FontResourceRegistry.swift` 포함 |
@@ -49,7 +51,7 @@
 
 ## Font 정책
 
-새 font 파일은 추가하지 않았다. `Sources/HostApp/Resources/rhwp-studio/fonts`에 이미 포함된 WOFF2 34개를 native renderer에서도 재사용한다.
+`devel-webview`에서는 새 font 파일을 추가하지 않고 이미 포함된 `Sources/HostApp/Resources/rhwp-studio/fonts` WOFF2 34개를 native renderer에서도 재사용한다. `devel` 대상 PR에서는 같은 폰트 디렉터리와 `FONTS.md`만 최소 HostApp resource로 추가한다.
 
 대표 fallback chain:
 
