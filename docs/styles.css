@@ -263,6 +263,10 @@ video {
   --install-orb-opacity: 0;
   --install-scale: 0.78;
   --install-clip: 100%;
+  --install-logo-opacity: 1;
+  --install-check-opacity: 0;
+  --install-check-scale: 0.72;
+  --install-check-dash: 1;
   --after-opacity: 0;
   --fallback-opacity: 0;
   --before-scale: 1;
@@ -444,6 +448,7 @@ video {
 .install-logo-stack {
   position: relative;
   display: grid;
+  opacity: var(--install-logo-opacity);
   place-items: center;
 }
 
@@ -479,17 +484,20 @@ video {
 .orb-check,
 .install-check {
   position: absolute;
-  opacity: 0;
+  opacity: var(--install-check-opacity);
   fill: none;
   stroke: #ffffff;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2.4;
-  transform: scale(0.72);
-  transition:
-    opacity 180ms ease,
-    transform 180ms ease;
-  transition-delay: 0ms;
+  transform: scale(var(--install-check-scale));
+  transition: none;
+}
+
+.orb-check path,
+.install-check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: var(--install-check-dash);
 }
 
 .orb-check {
@@ -506,17 +514,6 @@ video {
   border-radius: 50%;
   background: #34c759;
   padding: 4px;
-}
-
-.features-section.is-install-complete .orb-check,
-.features-section.is-install-complete .install-check {
-  opacity: 1;
-  transform: scale(1);
-  transition-delay: 0ms;
-}
-
-.features-section.is-install-complete .orb-logo-stack {
-  opacity: 0;
 }
 
 .feature-list {

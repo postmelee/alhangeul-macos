@@ -92,10 +92,11 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   const featureProgress = clamp(localCheckpoint / (checkpointsPerFeature - 1));
   const installProgress = clamp(localCheckpoint / 0.92);
   const installEntry = smoothstep(0.04, 0.16, localCheckpoint);
-  const installExit = 1 - smoothstep(1.02, 1.16, localCheckpoint);
+  const installExit = 1 - smoothstep(1.18, 1.56, localCheckpoint);
   const installOrbOpacity = installEntry * installExit;
-  const installCheckVisible = localCheckpoint >= 0.92 && localCheckpoint <= 1.02;
-  const finderAfterOpacity = isFinder ? smoothstep(1.16, 1.9, localCheckpoint) : 0;
+  const installCheckProgress = smoothstep(0.92, 1, localCheckpoint);
+  const installLogoOpacity = 1 - smoothstep(0.86, 0.96, localCheckpoint);
+  const finderAfterOpacity = isFinder ? smoothstep(1.28, 1.9, localCheckpoint) : 0;
   const finderLockOpacity = isFinder ? 1 - smoothstep(0.04, 0.2, localCheckpoint) : 0;
 
   setStageLabels(feature.labels);
@@ -105,6 +106,10 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   featureSection.style.setProperty("--install-orb-opacity", installOrbOpacity.toFixed(3));
   featureSection.style.setProperty("--install-scale", (0.84 + installProgress * 0.16).toFixed(3));
   featureSection.style.setProperty("--install-clip", `${((1 - installProgress) * 100).toFixed(2)}%`);
+  featureSection.style.setProperty("--install-logo-opacity", installLogoOpacity.toFixed(3));
+  featureSection.style.setProperty("--install-check-opacity", installCheckProgress.toFixed(3));
+  featureSection.style.setProperty("--install-check-scale", (0.72 + installCheckProgress * 0.28).toFixed(3));
+  featureSection.style.setProperty("--install-check-dash", (1 - installCheckProgress).toFixed(3));
   featureSection.style.setProperty("--after-opacity", finderAfterOpacity.toFixed(3));
   featureSection.style.setProperty("--fallback-opacity", isFinder ? "0" : "1");
   featureSection.style.setProperty("--before-scale", (1 + finderAfterOpacity * 0.018).toFixed(3));
@@ -118,7 +123,6 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   featureSection.classList.toggle("is-stage-start", phase === "start");
   featureSection.classList.toggle("is-stage-middle", phase === "middle");
   featureSection.classList.toggle("is-stage-end", phase === "end");
-  featureSection.classList.toggle("is-install-complete", installCheckVisible);
 };
 
 const updateFeatureScroll = () => {

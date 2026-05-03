@@ -114,6 +114,9 @@ Mac에서 한글 파일은
 - `기존 Mac -> 알한글 설치` 구간에서는 `.hwp 정보 잠김` pill이 빠르게 사라지고, 알한글 아이콘이 등장하며 로고 색과 초록 ring이 차오른다.
 - 알한글 ring이 전부 찬 시점부터 초록 check가 즉시 표시된다.
 - `알한글 설치 -> Finder 썸네일` 구간에서는 check와 설치 오브가 먼저 빠지고, 이후 `finder-after.png`가 crossfade로 나타난다.
+- 추가 보정으로 check 표시의 opacity, scale, stroke draw를 CSS transition이 아닌 scroll progress 변수로 직접 제어하게 변경했다.
+- 빠르게 스크롤해도 `알한글 설치` checkpoint에서 check가 자체 애니메이션 시간 때문에 누락되지 않는다.
+- `알한글 설치` checkpoint 이후에는 알한글 로고가 다시 나타나지 않고, check를 유지한 상태로 설치 오브가 더 길게 fade out되도록 변경했다.
 - Apple 공식 MacBook Pro 페이지의 highlights/closer-look product storytelling과 MacBook Air/Pro 환경 섹션의 큰 카드형 수치 강조를 참고했다.
   - `https://www.apple.com/macbook-pro/`
   - `https://www.apple.com/macbook-air/`
@@ -164,6 +167,7 @@ http://127.0.0.1:8080/
 - 추가 보정 후 progress/checkpoint UI가 두 번째 Feature인 `스페이스바로 즉시 미리보기`에서도 `파일 선택`, `알한글 설치`, `스페이스바 미리보기` label로 재사용되는 것을 확인했다.
 - Finder 최종 stage에서는 설치 check와 오브가 사라진 뒤 `finder-after.png`만 표시되는 것을 확인했다.
 - 기존에 `Finder 썸네일` 이미지로 넘어가지 않던 현상은 Finder 전용 stage 상태 관리 대신 전체 Feature 공통 checkpoint timeline과 `finder-after.png` crossfade 구간을 분리해 보정했다.
+- Firefox 로컬 탭에서 `알한글 설치` 지점의 check 표시와 `Finder 썸네일`으로 넘어가는 긴 check fade out을 확인했다.
 
 브라우저 DOM/log 확인 결과:
 
@@ -187,6 +191,7 @@ rg -n "Alhangeul|frame-corner|accent-strong|--max-width|letter-spacing|box-shado
 rg -n "mac_mock|data-feature-step|feature-highlight|requestAnimationFrame|faq-title" docs
 rg -n "Finder에서|스페이스바로|finder-before|finder-after|기존 Mac|알한글 설치|Finder 썸네일" docs
 rg -n "featureStages|checkpointsPerFeature|feature-progress|data-stage-label|feature-fallback-image" docs
+rg -n "install-check-opacity|install-check-scale|install-check-dash|install-logo-opacity|pathLength" docs
 git diff --check
 ```
 
@@ -199,6 +204,7 @@ git diff --check
 - MacBook mock asset, Feature step markup, Feature highlight, scroll animation JS, FAQ anchor가 존재함을 확인했다.
 - Finder 썸네일 Feature의 순서, before/after asset 참조, progress checkpoint 문구가 존재함을 확인했다.
 - 전체 Feature 공통 stage label, progress variable, fallback visual hook이 존재함을 확인했다.
+- 설치 check scroll-linked 변수와 SVG path draw 설정이 존재함을 확인했다.
 - `git diff --check`는 통과했다.
 
 ## 리스크와 후속 조치
