@@ -863,9 +863,12 @@ video {
   .finder-visual {
     width: 100%;
     margin-left: 0;
+    justify-items: center;
   }
 
   .finder-image-stage {
+    width: min(100%, 66.5vh);
+    margin-inline: auto;
     max-height: 38vh;
   }
 
@@ -1059,6 +1062,7 @@ video {
   }
 
   .finder-image-stage {
+    width: min(100%, 59.5vh);
     max-height: 34vh;
   }
 

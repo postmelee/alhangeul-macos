@@ -125,6 +125,7 @@ Mac에서 한글 파일은
 - Hero catchphrase와 Feature section heading block의 상단 여백을 다시 늘려, 이전처럼 화면 안에서 조금 더 아래에 놓이도록 보정했다.
 - 좁은 화면에서는 Feature 설명 카드의 padding, type scale, min-height를 줄이고 Finder visual 높이를 조정해 설명 박스가 progress bar box를 가리는 현상을 완화했다.
 - 좁은 화면에서는 Feature visual 묶음의 absolute bottom 배치를 제거하고 일반 flex 흐름으로 되돌려, 기능 설명 카드 바로 아래에 progress bar box가 오도록 간격을 좁혔다.
+- 좁은 화면에서 Finder 이미지 stage 폭을 viewport 높이 기반으로 제한하고 중앙 정렬해, progress bar 아래 이미지가 왼쪽으로 치우치지 않게 보정했다.
 - Apple 공식 MacBook Pro 페이지의 highlights/closer-look product storytelling과 MacBook Air/Pro 환경 섹션의 큰 카드형 수치 강조를 참고했다.
   - `https://www.apple.com/macbook-pro/`
   - `https://www.apple.com/macbook-air/`
