@@ -121,11 +121,11 @@
                   <span class="progress-fill"></span>
                 </div>
                 <ol class="progress-checkpoints">
-                  <li class="checkpoint checkpoint-before is-active">
+                  <li class="checkpoint checkpoint-start is-active">
                     <span class="checkpoint-marker"></span>
-                    <span>기존 mac</span>
+                    <span data-stage-label="start">기존 Mac</span>
                   </li>
-                  <li class="checkpoint checkpoint-install">
+                  <li class="checkpoint checkpoint-middle">
                     <span class="checkpoint-marker install-marker">
                       <span class="install-ring" aria-hidden="true"></span>
                       <span class="install-logo-stack">
@@ -136,17 +136,18 @@
                         <path d="m5.2 10.2 3.1 3.1 6.5-7" />
                       </svg>
                     </span>
-                    <span>알한글 설치</span>
+                    <span data-stage-label="middle">알한글 설치</span>
                   </li>
-                  <li class="checkpoint checkpoint-after">
+                  <li class="checkpoint checkpoint-end">
                     <span class="checkpoint-marker"></span>
-                    <span>Finder 썸네일</span>
+                    <span data-stage-label="end">Finder 썸네일</span>
                   </li>
                 </ol>
               </div>
               <div class="finder-image-stage">
                 <img class="finder-image finder-image-before" src="./assets/finder-before.png" alt="" />
                 <img class="finder-image finder-image-after" src="./assets/finder-after.png" alt="" />
+                <img class="finder-image feature-fallback-image" src="./assets/group-1-4x.png" alt="" />
                 <div class="finder-lock" aria-hidden="true">
                   <svg viewBox="0 0 32 32">
                     <path class="lock-shackle" d="M10 14V10a6 6 0 0 1 12 0v4" />

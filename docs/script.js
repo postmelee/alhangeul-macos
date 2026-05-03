@@ -1,21 +1,40 @@
 const faqItems = document.querySelectorAll(".faq-list details");
 const featureSection = document.querySelector(".features-section");
 const featureSteps = Array.from(document.querySelectorAll("[data-feature-step]"));
-const featureSegments = [
-  { start: 0, end: 0.78 },
-  { start: 0.78, end: 0.86 },
-  { start: 0.86, end: 0.94 },
-  { start: 0.94, end: 1 },
-];
-const finderSnapThresholds = {
-  installEnter: 0.08,
-  beforeReturn: 0.025,
-  afterEnter: 0.5,
-  installReturn: 0.42,
+const stageLabelNodes = {
+  start: document.querySelector('[data-stage-label="start"]'),
+  middle: document.querySelector('[data-stage-label="middle"]'),
+  end: document.querySelector('[data-stage-label="end"]'),
 };
-const finderSnapSettleMs = 120;
+
+const featureStages = [
+  {
+    key: "finder",
+    labels: ["기존 Mac", "알한글 설치", "Finder 썸네일"],
+  },
+  {
+    key: "quicklook",
+    labels: ["파일 선택", "알한글 설치", "스페이스바 미리보기"],
+  },
+  {
+    key: "viewer",
+    labels: ["HWP/HWPX 파일", "알한글 열기", "앱에서 보기"],
+  },
+  {
+    key: "local",
+    labels: ["문서 선택", "Mac에서 처리", "로컬 완료"],
+  },
+];
+
+const checkpointsPerFeature = 3;
+const finalCheckpointIndex = featureStages.length * checkpointsPerFeature - 1;
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+const smoothstep = (edgeStart, edgeEnd, value) => {
+  const progress = clamp((value - edgeStart) / (edgeEnd - edgeStart || 1));
+  return progress * progress * (3 - 2 * progress);
+};
 
 faqItems.forEach((item) => {
   item.addEventListener("toggle", () => {
@@ -29,103 +48,85 @@ faqItems.forEach((item) => {
   });
 });
 
-let currentFinderStage = "before";
-let pendingFinderStage = "before";
-let finderSnapTimer = 0;
+const getFeatureScrollState = () => {
+  const sectionRect = featureSection.getBoundingClientRect();
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;
+  const scrollRange = Math.max(1, sectionRect.height - viewportHeight);
+  const progress = clamp(-sectionRect.top / scrollRange);
+  const globalCheckpoint = progress * finalCheckpointIndex;
+  const activeIndex = Math.min(
+    featureStages.length - 1,
+    Math.floor(globalCheckpoint / checkpointsPerFeature),
+  );
+  const localCheckpoint = clamp(
+    globalCheckpoint - activeIndex * checkpointsPerFeature,
+    0,
+    checkpointsPerFeature - 1,
+  );
 
-const getFinderStage = (progress, currentStage = currentFinderStage) => {
-  if (currentStage === "after") {
-    if (progress <= finderSnapThresholds.beforeReturn) return "before";
-    if (progress <= finderSnapThresholds.installReturn) return "install";
-    return "after";
-  }
-
-  if (currentStage === "install") {
-    if (progress <= finderSnapThresholds.beforeReturn) return "before";
-    if (progress >= finderSnapThresholds.afterEnter) return "after";
-    return "install";
-  }
-
-  if (progress >= finderSnapThresholds.afterEnter) return "after";
-  if (progress >= finderSnapThresholds.installEnter) return "install";
-  return "before";
+  return { activeIndex, localCheckpoint };
 };
 
-const applyFinderStage = (phase) => {
-  const isBefore = phase === "before";
-  const isInstall = phase === "install";
-  const isAfter = phase === "after";
-
-  featureSection.style.setProperty("--finder-progress", isBefore ? "0%" : "100%");
-  featureSection.style.setProperty("--install-ring-progress", isBefore ? "0%" : "100%");
-  featureSection.style.setProperty("--install-orb-opacity", isInstall ? "1" : "0");
-  featureSection.style.setProperty("--install-scale", isInstall ? "1" : "0.84");
-  featureSection.style.setProperty("--install-clip", isBefore ? "100%" : "0%");
-  featureSection.style.setProperty("--after-opacity", isAfter ? "1" : "0");
-  featureSection.style.setProperty("--before-scale", isAfter ? "1.018" : "1");
-  featureSection.style.setProperty("--after-scale", isAfter ? "1" : "1.018");
-  featureSection.style.setProperty("--lock-opacity", isBefore ? "1" : "0");
-  featureSection.style.setProperty("--lock-scale", isBefore ? "1" : "0.92");
-  featureSection.style.setProperty("--lock-rotate", isBefore ? "0deg" : "-32deg");
-
-  featureSection.classList.toggle("is-finder-before", isBefore);
-  featureSection.classList.toggle("is-finder-install", isInstall);
-  featureSection.classList.toggle("is-finder-after", isAfter);
-  featureSection.classList.toggle("is-install-complete", !isBefore);
+const getFeaturePhase = (localCheckpoint) => {
+  if (localCheckpoint >= 1.98) return "end";
+  if (localCheckpoint >= 0.08) return "middle";
+  return "start";
 };
 
-const commitFinderStage = (phase) => {
-  currentFinderStage = phase;
-  pendingFinderStage = phase;
-  applyFinderStage(phase);
+const setStageLabels = (labels) => {
+  stageLabelNodes.start.textContent = labels[0];
+  stageLabelNodes.middle.textContent = labels[1];
+  stageLabelNodes.end.textContent = labels[2];
 };
 
-const requestFinderStage = (phase) => {
-  if (!featureSection) return;
-
-  if (phase === currentFinderStage) {
-    pendingFinderStage = phase;
-    window.clearTimeout(finderSnapTimer);
-    return;
-  }
-
-  if (phase !== pendingFinderStage) {
-    pendingFinderStage = phase;
-  }
-
-  window.clearTimeout(finderSnapTimer);
-  finderSnapTimer = window.setTimeout(() => {
-    commitFinderStage(pendingFinderStage);
-  }, finderSnapSettleMs);
+const updateFeatureCards = (activeIndex) => {
+  featureSteps.forEach((step, index) => {
+    step.classList.toggle("is-active", index === activeIndex);
+  });
 };
 
-const settleFinderStage = (progress) => {
-  const phase = getFinderStage(progress);
-  window.clearTimeout(finderSnapTimer);
-  commitFinderStage(phase);
+const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
+  const feature = featureStages[activeIndex];
+  const isFinder = feature.key === "finder";
+  const phase = getFeaturePhase(localCheckpoint);
+  const featureProgress = clamp(localCheckpoint / (checkpointsPerFeature - 1));
+  const installProgress = clamp(localCheckpoint / 0.92);
+  const installEntry = smoothstep(0.04, 0.16, localCheckpoint);
+  const installExit = 1 - smoothstep(1.02, 1.16, localCheckpoint);
+  const installOrbOpacity = installEntry * installExit;
+  const installCheckVisible = localCheckpoint >= 0.92 && localCheckpoint <= 1.02;
+  const finderAfterOpacity = isFinder ? smoothstep(1.16, 1.9, localCheckpoint) : 0;
+  const finderLockOpacity = isFinder ? 1 - smoothstep(0.04, 0.2, localCheckpoint) : 0;
+
+  setStageLabels(feature.labels);
+
+  featureSection.style.setProperty("--feature-progress", `${(featureProgress * 100).toFixed(2)}%`);
+  featureSection.style.setProperty("--install-ring-progress", `${(installProgress * 100).toFixed(2)}%`);
+  featureSection.style.setProperty("--install-orb-opacity", installOrbOpacity.toFixed(3));
+  featureSection.style.setProperty("--install-scale", (0.84 + installProgress * 0.16).toFixed(3));
+  featureSection.style.setProperty("--install-clip", `${((1 - installProgress) * 100).toFixed(2)}%`);
+  featureSection.style.setProperty("--after-opacity", finderAfterOpacity.toFixed(3));
+  featureSection.style.setProperty("--fallback-opacity", isFinder ? "0" : "1");
+  featureSection.style.setProperty("--before-scale", (1 + finderAfterOpacity * 0.018).toFixed(3));
+  featureSection.style.setProperty("--after-scale", (1.018 - finderAfterOpacity * 0.018).toFixed(3));
+  featureSection.style.setProperty("--lock-opacity", finderLockOpacity.toFixed(3));
+  featureSection.style.setProperty("--lock-scale", (0.92 + finderLockOpacity * 0.08).toFixed(3));
+  featureSection.style.setProperty("--lock-rotate", `${(-32 * (1 - finderLockOpacity)).toFixed(2)}deg`);
+
+  featureSection.classList.toggle("is-feature-finder", isFinder);
+  featureSection.classList.toggle("is-feature-fallback", !isFinder);
+  featureSection.classList.toggle("is-stage-start", phase === "start");
+  featureSection.classList.toggle("is-stage-middle", phase === "middle");
+  featureSection.classList.toggle("is-stage-end", phase === "end");
+  featureSection.classList.toggle("is-install-complete", installCheckVisible);
 };
 
 const updateFeatureScroll = () => {
   if (!featureSection || featureSteps.length === 0) return;
 
-  const sectionRect = featureSection.getBoundingClientRect();
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;
-  const scrollRange = Math.max(1, sectionRect.height - viewportHeight);
-  const progress = Math.min(1, Math.max(0, -sectionRect.top / scrollRange));
-  const activeIndex = featureSegments.findIndex((segment, index) => {
-    const isLast = index === featureSegments.length - 1;
-    return progress >= segment.start && (isLast ? progress <= segment.end : progress < segment.end);
-  });
-  const safeActiveIndex = activeIndex === -1 ? featureSteps.length - 1 : activeIndex;
-  const finderSegment = featureSegments[0];
-  const finderProgress = progress > finderSegment.end ? 1 : clamp((progress - finderSegment.start) / (finderSegment.end - finderSegment.start));
-  const phase = getFinderStage(finderProgress);
-
-  featureSteps.forEach((step, index) => {
-    step.classList.toggle("is-active", index === safeActiveIndex);
-  });
-
-  requestFinderStage(phase);
+  const { activeIndex, localCheckpoint } = getFeatureScrollState();
+  updateFeatureCards(activeIndex);
+  applyFeatureVisualState(activeIndex, localCheckpoint);
 };
 
 let featureScrollTicking = false;
@@ -140,22 +141,6 @@ const requestFeatureScrollUpdate = () => {
   });
 };
 
-if (featureSection) {
-  commitFinderStage("before");
-}
-
 updateFeatureScroll();
 window.addEventListener("scroll", requestFeatureScrollUpdate, { passive: true });
-window.addEventListener("scrollend", () => {
-  if (!featureSection) return;
-
-  const sectionRect = featureSection.getBoundingClientRect();
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 1;
-  const scrollRange = Math.max(1, sectionRect.height - viewportHeight);
-  const progress = Math.min(1, Math.max(0, -sectionRect.top / scrollRange));
-  const finderSegment = featureSegments[0];
-  const finderProgress = progress > finderSegment.end ? 1 : clamp((progress - finderSegment.start) / (finderSegment.end - finderSegment.start));
-
-  settleFinderStage(finderProgress);
-});
 window.addEventListener("resize", requestFeatureScrollUpdate);

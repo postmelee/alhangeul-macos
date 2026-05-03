@@ -258,12 +258,13 @@ video {
 }
 
 .features-section {
-  --finder-progress: 0%;
+  --feature-progress: 0%;
   --install-ring-progress: 0%;
   --install-orb-opacity: 0;
   --install-scale: 0.78;
   --install-clip: 100%;
   --after-opacity: 0;
+  --fallback-opacity: 0;
   --before-scale: 1;
   --after-scale: 1.018;
   --lock-opacity: 1;
@@ -356,6 +357,11 @@ video {
   transform: scale(var(--after-scale));
 }
 
+.feature-fallback-image {
+  opacity: var(--fallback-opacity);
+  transform: scale(1.012);
+}
+
 .finder-lock {
   position: absolute;
   left: 50%;
@@ -379,6 +385,10 @@ video {
   transition:
     opacity 100ms linear,
     transform 100ms ease;
+}
+
+.features-section.is-feature-finder.is-stage-start .finder-lock {
+  animation: lock-pop 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .finder-lock svg {
@@ -502,7 +512,7 @@ video {
 .features-section.is-install-complete .install-check {
   opacity: 1;
   transform: scale(1);
-  transition-delay: 300ms;
+  transition-delay: 0ms;
 }
 
 .features-section.is-install-complete .orb-logo-stack {
@@ -562,7 +572,7 @@ video {
 
 .progress-fill {
   display: block;
-  width: var(--finder-progress);
+  width: var(--feature-progress);
   height: 100%;
   border-radius: inherit;
   background: #34c759;
@@ -614,19 +624,19 @@ video {
     transform 180ms ease;
 }
 
-.features-section.is-finder-before .checkpoint-before,
-.features-section.is-finder-install .checkpoint-before,
-.features-section.is-finder-install .checkpoint-install,
-.features-section.is-finder-after .checkpoint-before,
-.features-section.is-finder-after .checkpoint-install,
-.features-section.is-finder-after .checkpoint-after {
+.features-section.is-stage-start .checkpoint-start,
+.features-section.is-stage-middle .checkpoint-start,
+.features-section.is-stage-middle .checkpoint-middle,
+.features-section.is-stage-end .checkpoint-start,
+.features-section.is-stage-end .checkpoint-middle,
+.features-section.is-stage-end .checkpoint-end {
   color: var(--text);
 }
 
-.features-section.is-finder-before .checkpoint-before .checkpoint-marker::after,
-.features-section.is-finder-install .checkpoint-before .checkpoint-marker::after,
-.features-section.is-finder-after .checkpoint-before .checkpoint-marker::after,
-.features-section.is-finder-after .checkpoint-after .checkpoint-marker::after {
+.features-section.is-stage-start .checkpoint-start .checkpoint-marker::after,
+.features-section.is-stage-middle .checkpoint-start .checkpoint-marker::after,
+.features-section.is-stage-end .checkpoint-start .checkpoint-marker::after,
+.features-section.is-stage-end .checkpoint-end .checkpoint-marker::after {
   opacity: 1;
   transform: scale(1);
 }
@@ -661,6 +671,18 @@ video {
   background: rgba(0, 102, 204, 0.14);
   transform: scaleX(0);
   transform-origin: left center;
+}
+
+@keyframes lock-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.92);
+  }
+
+  to {
+    opacity: var(--lock-opacity);
+    transform: translate(-50%, -50%) scale(var(--lock-scale));
+  }
 }
 
 .feature-step.is-active .feature-highlight {
