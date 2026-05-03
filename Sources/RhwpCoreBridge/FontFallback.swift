@@ -169,16 +169,16 @@ private struct HwpFontFallbackPolicy {
 
         switch key {
         case "함초롬바탕", "한컴바탕", "hbatang", "hbatangb", "바탕", "batang":
-            return HwpFontFallbackPolicy(faces: [notoSerifKR, nanumMyeongjo, gowunBatang, defaultSerif, timesNewRoman])
+            return HwpFontFallbackPolicy(faces: [defaultSerif, notoSerifKR, nanumMyeongjo, gowunBatang, timesNewRoman])
         case "바탕체", "batangche", "새바탕체":
-            return HwpFontFallbackPolicy(faces: [d2Coding, nanumGothicCoding, defaultMono, notoSerifKR, defaultSerif])
+            return HwpFontFallbackPolicy(faces: [defaultSerif, d2Coding, nanumGothicCoding, defaultMono, notoSerifKR])
         case "새바탕":
-            return HwpFontFallbackPolicy(faces: [notoSerifKR, nanumMyeongjo, defaultSerif, timesNewRoman])
+            return HwpFontFallbackPolicy(faces: [defaultSerif, notoSerifKR, nanumMyeongjo, timesNewRoman])
         case "궁서", "궁서체", "gungsuh", "gungsuhche":
-            return HwpFontFallbackPolicy(faces: [gowunBatang, nanumMyeongjo, notoSerifKR, defaultSerif])
+            return HwpFontFallbackPolicy(faces: [defaultSerif, gowunBatang, nanumMyeongjo, notoSerifKR])
         case "hy신명조", "hysinmyeongjo", "hysinmyeongjomedium", "hy견명조", "hygyeonmyeongjo",
              "hy명조", "hymyeongjo", "hymjre", "휴먼명조", "humanmyeongjo", "나눔명조", "nanummyeongjo":
-            return HwpFontFallbackPolicy(faces: [nanumMyeongjo, notoSerifKR, defaultSerif, timesNewRoman])
+            return HwpFontFallbackPolicy(faces: [defaultSerif, nanumMyeongjo, notoSerifKR, timesNewRoman])
         case "notoserifkr", "notoserifkorean", "notoserif":
             return HwpFontFallbackPolicy(faces: [notoSerifKR, nanumMyeongjo, defaultSerif])
         case "gowunbatang", "고운바탕":
@@ -186,18 +186,18 @@ private struct HwpFontFallbackPolicy {
 
         case "함초롬돋움", "hamchoromdotum", "hamchoromdodum", "맑은고딕", "malgungothic",
              "calibri", "tahoma":
-            return HwpFontFallbackPolicy(faces: [pretendard, defaultSans, helveticaNeue])
+            return HwpFontFallbackPolicy(faces: [defaultSans, pretendard, helveticaNeue])
         case "verdana":
-            return HwpFontFallbackPolicy(faces: [pretendard, verdana, defaultSans, helveticaNeue])
+            return HwpFontFallbackPolicy(faces: [verdana, defaultSans, pretendard, helveticaNeue])
         case "한컴돋움", "hdotum", "hdotumb", "돋움", "dotum", "굴림", "gulim",
              "새돋움", "새굴림":
-            return HwpFontFallbackPolicy(faces: [notoSansKR, pretendard, nanumGothic, defaultSans, helveticaNeue])
+            return HwpFontFallbackPolicy(faces: [defaultSans, notoSansKR, pretendard, nanumGothic, helveticaNeue])
         case "돋움체", "dotumche", "굴림체", "gulimche", "새돋움체":
-            return HwpFontFallbackPolicy(faces: [d2Coding, nanumGothicCoding, defaultMono, notoSansKR, defaultSans])
+            return HwpFontFallbackPolicy(faces: [defaultSans, d2Coding, nanumGothicCoding, defaultMono, notoSansKR])
         case "hy고딕", "hygothic", "hy중고딕", "hyjunggothic", "hyjunggothicmedium",
              "hy견고딕", "hygyeongothic", "hy그래픽", "hygraphic", "hygraphicmedium",
              "hy헤드라인m", "hyheadlinem", "hyheadlinemedium":
-            return HwpFontFallbackPolicy(faces: [pretendard, gowunDodum, notoSansKR, defaultSans])
+            return HwpFontFallbackPolicy(faces: [defaultSans, pretendard, gowunDodum, notoSansKR])
         case "나눔고딕", "nanumgothic":
             return HwpFontFallbackPolicy(faces: [nanumGothic, notoSansKR, pretendard, defaultSans])
         case "notosanskr", "notosanskorean", "notosans":

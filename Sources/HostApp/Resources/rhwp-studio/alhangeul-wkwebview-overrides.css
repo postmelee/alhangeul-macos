@@ -11,7 +11,8 @@
     align-items: center;
   }
 
-  select.sb-combo {
+  select.sb-combo,
+  select.sb-ls-select {
     -webkit-appearance: none;
     appearance: none;
     height: 24px;
@@ -31,7 +32,8 @@
     vertical-align: middle;
   }
 
-  select.sb-combo:disabled {
+  select.sb-combo:disabled,
+  select.sb-ls-select:disabled {
     color: var(--color-text-disabled);
     background-color: #f4f4f4;
   }
@@ -69,6 +71,26 @@
   }
 
   .sb-size-arrows {
+    height: 24px;
+  }
+
+  .sb-ls-group {
+    height: 24px;
+    min-height: 24px;
+    align-items: stretch;
+  }
+
+  select.sb-ls-select {
+    width: 62px;
+    font-size: var(--font-size-base);
+    text-align: left;
+    padding-right: 18px;
+    background-position:
+      calc(100% - 10px) 10px,
+      calc(100% - 5px) 10px;
+  }
+
+  .sb-ls-arrows {
     height: 24px;
   }
 

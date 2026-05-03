@@ -5,14 +5,10 @@ struct DocumentViewerView: View {
 
     var body: some View {
         ZStack {
-            if let document = store.rhwpStudioDocument {
-                RhwpStudioContainerView(store: store, document: document)
-            } else if let error = store.errorMessage {
+            if let error = store.errorMessage {
                 ErrorStateView(message: error)
-            } else if store.isLoading {
-                LoadingStateView(message: "불러오는 중...")
             } else {
-                EmptyDocumentView(store: store)
+                RhwpStudioContainerView(store: store, document: store.rhwpStudioDocument)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -21,7 +17,7 @@ struct DocumentViewerView: View {
 
 private struct RhwpStudioContainerView: View {
     @ObservedObject var store: DocumentViewerStore
-    let document: RhwpStudioDocumentPayload
+    let document: RhwpStudioDocumentPayload?
 
     var body: some View {
         ZStack {
@@ -54,36 +50,8 @@ private struct RhwpStudioContainerView: View {
                     .frame(maxHeight: .infinity, alignment: .top)
             }
         }
-        .id(document.revision)
+        .id(document?.revision ?? 0)
         .background(Color(nsColor: .windowBackgroundColor))
-    }
-}
-
-private struct EmptyDocumentView: View {
-    @ObservedObject var store: DocumentViewerStore
-
-    var body: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "doc.richtext")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text("HWP 또는 HWPX 문서를 열어 주세요.")
-                .font(.title3)
-            HStack {
-                Button("문서 열기") {
-                    store.openDocument()
-                }
-            }
-        }
-    }
-}
-
-private struct LoadingStateView: View {
-    let message: String
-
-    var body: some View {
-        ProgressView(message)
-            .padding(24)
     }
 }
 
