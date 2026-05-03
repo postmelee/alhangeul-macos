@@ -846,31 +846,29 @@ class CGTreeRenderer {
         var descent: CGFloat = 0
         var leading: CGFloat = 0
         let measuredWidth = max(0, CGFloat(CTLineGetTypographicBounds(line, &ascent, &descent, &leading)))
-        let glyphBounds = CTLineGetBoundsWithOptions(line, [.useGlyphPathBounds])
         let targetWidth = max(0, CGFloat(bbox.width))
         let spacing = estimateTextRunSpacing(text: text, style: style)
-        let clusterPlan = makeTextRunClusterPlan(
+        let clusterPlan = shouldUseTextRunClusterDrawing(
+            text: text,
+            style: style,
+            measuredWidth: measuredWidth,
+            targetWidth: targetWidth,
+            spacing: spacing,
+            charPositions: charPositions
+        ) ? makeTextRunClusterPlan(
             text: text,
             style: style,
             targetWidth: targetWidth,
             attributes: attributes,
             charPositions: charPositions
-        )
+        ) : nil
         let strategy = chooseTextRunDrawStrategy(
             measuredWidth: measuredWidth,
             targetWidth: targetWidth,
-            spacing: spacing,
             clusterPlan: clusterPlan
         )
 
         return TextRunLayoutPlan(
-            measuredWidth: measuredWidth,
-            glyphBoundsWidth: max(0, glyphBounds.width),
-            targetWidth: targetWidth,
-            ascent: ascent,
-            descent: descent,
-            leading: leading,
-            spacing: spacing,
             clusterPlan: clusterPlan,
             strategy: strategy
         )
@@ -888,26 +886,43 @@ class CGTreeRenderer {
             }
         }
 
-        let clusterCount = text.count
-        let extraCharGapCount = max(clusterCount - 1, 0)
+        let extraCharGapCount = max(text.count - 1, 0)
         let extraCharWidth = CGFloat(style.extraCharSpacing) * CGFloat(extraCharGapCount)
         let extraWordWidth = CGFloat(style.extraWordSpacing) * CGFloat(spaceCount)
-        let tabWidth = CGFloat(style.defaultTabWidth) * CGFloat(tabCount)
 
         return TextRunSpacingEstimate(
-            clusterCount: clusterCount,
-            spaceCount: spaceCount,
             tabCount: tabCount,
             extraCharWidth: extraCharWidth,
-            extraWordWidth: extraWordWidth,
-            tabWidth: tabWidth
+            extraWordWidth: extraWordWidth
         )
+    }
+
+    private func shouldUseTextRunClusterDrawing(
+        text: String,
+        style: TextStyle,
+        measuredWidth: CGFloat,
+        targetWidth: CGFloat,
+        spacing: TextRunSpacingEstimate,
+        charPositions: [Double]?
+    ) -> Bool {
+        if charPositions != nil {
+            return true
+        }
+        if spacing.requiresClusterDrawing {
+            return true
+        }
+        if text.contains(where: { needsHalfwidthPunctuationScale(String($0), style: style) }) {
+            return true
+        }
+        guard measuredWidth > 0, targetWidth > 0 else {
+            return false
+        }
+        return abs(targetWidth / measuredWidth - 1) >= 0.02
     }
 
     private func chooseTextRunDrawStrategy(
         measuredWidth: CGFloat,
         targetWidth: CGFloat,
-        spacing _: TextRunSpacingEstimate,
         clusterPlan: TextRunClusterPlan?
     ) -> TextRunDrawStrategy {
         if clusterPlan != nil {
@@ -968,17 +983,22 @@ class CGTreeRenderer {
         let clusterSpans = splitTextRunClusters(text)
         guard clusterSpans.count > 1 else { return nil }
 
-        let metrics = clusterSpans.map { cluster in
-            TextRunClusterMetric(
-                text: cluster.text,
-                advance: textRunClusterAdvance(cluster.text, style: style, attributes: attributes)
-            )
-        }
         let explicitPositions = explicitTextRunClusterPositions(
             clusterSpans: clusterSpans,
             charPositions: charPositions
         )
-        let rawPositions = explicitPositions ?? textRunClusterPositions(metrics: metrics, style: style)
+        let rawPositions: [CGFloat]
+        if let explicitPositions {
+            rawPositions = explicitPositions
+        } else {
+            let metrics = clusterSpans.map { cluster in
+                TextRunClusterMetric(
+                    text: cluster.text,
+                    advance: textRunClusterAdvance(cluster.text, style: style, attributes: attributes)
+                )
+            }
+            rawPositions = textRunClusterPositions(metrics: metrics, style: style)
+        }
         guard rawPositions.count == clusterSpans.count + 1,
               let rawWidth = rawPositions.last,
               rawWidth.isFinite,
@@ -995,19 +1015,13 @@ class CGTreeRenderer {
         clusters.reserveCapacity(clusterSpans.count)
         for index in clusterSpans.indices {
             let startX = rawPositions[index] * scale
-            let endX = rawPositions[index + 1] * scale
             clusters.append(TextRunCluster(
                 text: clusterSpans[index].text,
-                x: startX,
-                advance: max(0, endX - startX)
+                x: startX
             ))
         }
 
-        return TextRunClusterPlan(
-            clusters: clusters,
-            rawWidth: rawWidth,
-            positionScale: scale
-        )
+        return TextRunClusterPlan(clusters: clusters)
     }
 
     private func splitTextRunClusters(_ text: String) -> [TextRunClusterSpan] {
@@ -1499,27 +1513,17 @@ class CGTreeRenderer {
 }
 
 private struct TextRunLayoutPlan {
-    let measuredWidth: CGFloat
-    let glyphBoundsWidth: CGFloat
-    let targetWidth: CGFloat
-    let ascent: CGFloat
-    let descent: CGFloat
-    let leading: CGFloat
-    let spacing: TextRunSpacingEstimate
     let clusterPlan: TextRunClusterPlan?
     let strategy: TextRunDrawStrategy
 }
 
 private struct TextRunSpacingEstimate {
-    let clusterCount: Int
-    let spaceCount: Int
     let tabCount: Int
     let extraCharWidth: CGFloat
     let extraWordWidth: CGFloat
-    let tabWidth: CGFloat
 
-    var additionalWidth: CGFloat {
-        extraCharWidth + extraWordWidth + tabWidth
+    var requiresClusterDrawing: Bool {
+        tabCount > 0 || abs(extraCharWidth) > 0.001 || abs(extraWordWidth) > 0.001
     }
 }
 
@@ -1531,14 +1535,11 @@ private enum TextRunDrawStrategy {
 
 private struct TextRunClusterPlan {
     let clusters: [TextRunCluster]
-    let rawWidth: CGFloat
-    let positionScale: CGFloat
 }
 
 private struct TextRunCluster {
     let text: String
     let x: CGFloat
-    let advance: CGFloat
 }
 
 private struct TextRunClusterMetric {
