@@ -86,19 +86,6 @@ final class DocumentViewerStore: ObservableObject {
         DocumentFileActions.revealInFinder(sourceDocument.url)
     }
 
-    func shareCurrentDocument() {
-        guard let document = rhwpStudioDocument else {
-            webViewErrorMessage = "공유할 문서가 없습니다."
-            return
-        }
-
-        do {
-            try DocumentFileActions.share(data: document.data, filename: document.filename)
-        } catch {
-            webViewErrorMessage = "공유할 수 없습니다: \(error.localizedDescription)"
-        }
-    }
-
     func setWebViewLoading(_ isLoading: Bool) {
         isWebViewLoading = isLoading
     }

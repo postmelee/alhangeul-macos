@@ -210,6 +210,8 @@ extension RhwpStudioWebView {
                 handleHostCommand(body)
             case "save-document":
                 saveDocument(body)
+            case "share-document":
+                shareDocument(body)
             case "print-document":
                 printDocument(body)
             case "export-pdf-document":
@@ -235,21 +237,55 @@ extension RhwpStudioWebView {
         }
 
         private func saveDocument(_ body: [String: Any]) {
-            guard let values = body["bytes"] as? [NSNumber] else {
-                onError("문서를 내보낼 수 없습니다: 저장 bytes가 없습니다.")
+            guard let payload = exportedDocumentPayload(
+                from: body,
+                missingMessage: "문서를 내보낼 수 없습니다"
+            ) else {
                 return
             }
 
-            let data = Data(values.map { UInt8(truncating: $0) })
-            let suggestedFilename = body["fileName"] as? String
-                ?? currentDocument?.filename
-                ?? "document.hwp"
-
             do {
-                _ = try DocumentSavePanel.save(data: data, suggestedFilename: suggestedFilename)
+                _ = try DocumentSavePanel.save(
+                    data: payload.data,
+                    suggestedFilename: payload.fileName
+                )
             } catch {
                 onError("문서를 저장할 수 없습니다: \(error.localizedDescription)")
             }
+        }
+
+        private func shareDocument(_ body: [String: Any]) {
+            guard let payload = exportedDocumentPayload(
+                from: body,
+                missingMessage: "공유 데이터를 만들 수 없습니다"
+            ) else {
+                return
+            }
+
+            do {
+                try DocumentFileActions.share(
+                    data: payload.data,
+                    filename: payload.fileName
+                )
+            } catch {
+                onError("공유할 수 없습니다: \(error.localizedDescription)")
+            }
+        }
+
+        private func exportedDocumentPayload(
+            from body: [String: Any],
+            missingMessage: String
+        ) -> (data: Data, fileName: String)? {
+            guard let values = body["bytes"] as? [NSNumber] else {
+                onError("\(missingMessage): bytes가 없습니다.")
+                return nil
+            }
+
+            let data = Data(values.map { UInt8(truncating: $0) })
+            let fileName = body["fileName"] as? String
+                ?? currentDocument?.filename
+                ?? "document.hwp"
+            return (data, fileName)
         }
 
         private func printDocument(_ body: [String: Any]) {
@@ -328,6 +364,8 @@ extension RhwpStudioWebView {
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:save')"
             case "file:print":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:print')"
+            case "file:share":
+                script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:share')"
             case "file:export-pdf":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:export-pdf')"
             default:

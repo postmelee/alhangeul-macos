@@ -8,11 +8,11 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItemGroup {
                     Button {
-                        store.shareCurrentDocument()
+                        shareDocument()
                     } label: {
                         Label("공유", systemImage: "square.and.arrow.up")
                     }
-                    .disabled(!store.hasDocument)
+                    .disabled(!store.hasDocument || store.isWebViewLoading)
                     .help("공유")
 
                     Button {
@@ -34,6 +34,13 @@ struct ContentView: View {
                     RecentDocumentsMenu(store: store)
                 }
             }
+    }
+
+    private func shareDocument() {
+        guard RhwpStudioNativeCommandDispatcher.run("file:share") else {
+            store.setWebViewError("공유할 viewer를 찾을 수 없습니다.")
+            return
+        }
     }
 
     private func exportPDF() {

@@ -10,7 +10,7 @@ enum RhwpStudioHostBridgeScript {
       }
       window.__alhangeulHostBridgeInstalled = true;
 
-      const nativeCommands = new Set(["file:open", "file:save", "file:print", "file:export-pdf"]);
+      const nativeCommands = new Set(["file:open", "file:save", "file:print", "file:share", "file:export-pdf"]);
 
       function postNative(message) {
         window.webkit?.messageHandlers?.alhangeulHost?.postMessage(message);
@@ -58,6 +58,23 @@ enum RhwpStudioHostBridgeScript {
         });
       }
 
+      function waitForAnimationFrame() {
+        return new Promise((resolve) => {
+          requestAnimationFrame(() => resolve());
+        });
+      }
+
+      async function settleEditorState() {
+        const activeElement = document.activeElement;
+        if (activeElement instanceof HTMLElement && activeElement !== document.body) {
+          activeElement.dispatchEvent(new Event("change", { bubbles: true }));
+          activeElement.blur();
+        }
+
+        await waitForAnimationFrame();
+        await waitForAnimationFrame();
+      }
+
       function closeMenus() {
         document.querySelectorAll("#menu-bar .menu-item.open").forEach((menu) => {
           menu.classList.remove("open");
@@ -90,6 +107,7 @@ enum RhwpStudioHostBridgeScript {
       }
 
       async function documentPages() {
+        await settleEditorState();
         const pageCount = await requestRhwp("pageCount");
         const pages = [];
         for (let page = 0; page < pageCount; page += 1) {
@@ -109,6 +127,7 @@ enum RhwpStudioHostBridgeScript {
 
         if (command === "file:save") {
           try {
+            await settleEditorState();
             const bytes = await requestRhwp("exportHwp");
             postNative({
               type: "save-document",
@@ -119,6 +138,24 @@ enum RhwpStudioHostBridgeScript {
             postNative({
               type: "error",
               message: `문서를 내보낼 수 없습니다: ${error?.message || String(error)}`
+            });
+          }
+          return;
+        }
+
+        if (command === "file:share") {
+          try {
+            await settleEditorState();
+            const bytes = await requestRhwp("exportHwp");
+            postNative({
+              type: "share-document",
+              fileName: currentFileName(),
+              bytes
+            });
+          } catch (error) {
+            postNative({
+              type: "error",
+              message: `공유 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
             });
           }
           return;
