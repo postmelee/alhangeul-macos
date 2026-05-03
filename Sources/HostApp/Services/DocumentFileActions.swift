@@ -10,6 +10,17 @@ enum DocumentFileActions {
     @MainActor
     static func share(data: Data, filename: String) throws {
         let fileURL = try writeTemporaryShareFile(data: data, filename: filename)
+
+        if let anchorView = SharePresentationAnchor.presentationView {
+            let picker = NSSharingServicePicker(items: [fileURL])
+            picker.show(
+                relativeTo: anchorView.bounds,
+                of: anchorView,
+                preferredEdge: .minY
+            )
+            return
+        }
+
         guard let contentView = NSApp.keyWindow?.contentView else {
             throw DocumentFileActionError.missingWindow
         }

@@ -11,6 +11,10 @@ struct ContentView: View {
                         shareDocument()
                     } label: {
                         Label("공유", systemImage: "square.and.arrow.up")
+                            .background(
+                                SharePresentationAnchorView()
+                                    .allowsHitTesting(false)
+                            )
                     }
                     .disabled(!store.hasDocument || store.isWebViewLoading)
                     .help("공유")
