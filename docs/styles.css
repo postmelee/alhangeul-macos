@@ -294,8 +294,10 @@ video {
   font-weight: 600;
 }
 
-.features-copy > .section-heading {
+.features-sticky > .section-heading {
+  grid-column: 1 / -1;
   justify-self: center;
+  margin: 0 auto;
   text-align: center;
 }
 
@@ -307,7 +309,8 @@ video {
   margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
-  gap: 56px;
+  column-gap: 56px;
+  row-gap: 48px;
   align-items: center;
 }
 

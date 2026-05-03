@@ -120,6 +120,7 @@ Mac에서 한글 파일은
 - `.hwp 정보 잠김` pill은 초기 상태부터 완전히 보이고, `기존 Mac` checkpoint를 지나면 빠르게 사라지며 설치 오브와 알한글 아이콘 색상 채움이 바로 시작된다.
 - 추가 피드백에 따라 Feature stage와 middle 단계 사이 스크롤 거리를 약 1.5배 늘린 뒤, 현재 상태에서 다시 2배 확장했다. desktop sticky section은 `910vh -> 1720vh`, 좁은 화면 override는 `520vh -> 940vh`로 변경해 `section height - viewport` 기준 스크롤 range가 기존 현재값 대비 2배에 가깝게 증가한다.
 - Feature section heading과 supporting copy를 중앙 정렬하고, supporting copy를 README의 Finder/Quick Look/앱 뷰어 중심 설명에 맞춰 `Finder와 Quick Look, 앱 뷰어까지 HWP/HWPX 문서를 Mac 안에서 자연스럽게 열고 확인합니다.`로 변경했다.
+- 큰 화면에서도 Feature section heading block을 왼쪽 copy 컬럼 밖으로 분리해 두 컬럼 전체를 span하는 상단 중앙 영역에 배치했다. 그 아래에는 기존처럼 왼쪽 기능 텍스트와 오른쪽 이미지가 나란히 배치된다.
 - Apple 공식 MacBook Pro 페이지의 highlights/closer-look product storytelling과 MacBook Air/Pro 환경 섹션의 큰 카드형 수치 강조를 참고했다.
   - `https://www.apple.com/macbook-pro/`
   - `https://www.apple.com/macbook-air/`
@@ -174,6 +175,7 @@ http://127.0.0.1:8080/
 - 계산식 검증으로 timeline `0`부터 `기존 Mac` checkpoint까지 lock opacity가 1이고, checkpoint 직후 install opacity와 install progress가 증가하는 것을 확인했다.
 - Feature sticky section의 scroll range가 현재값 대비 2배로 증가해 stage/middle 전환이 더 완만해진 것을 CSS 값과 diff로 확인했다.
 - Feature section heading block이 중앙 정렬되고 README 기반 supporting copy로 교체된 것을 확인했다.
+- 큰 화면에서 Feature heading block이 grid 전체 폭의 첫 행을 차지하고, 기능 텍스트와 이미지가 그 아래 행에 유지되는 구조를 확인했다.
 
 브라우저 DOM/log 확인 결과:
 
@@ -200,7 +202,7 @@ rg -n "featureStages|checkpointsPerFeature|feature-progress|data-stage-label|fea
 rg -n "install-check-opacity|install-check-scale|install-check-dash|install-logo-opacity|pathLength" docs
 rg -n "checkpointProgress|finderLockOpacity|installEntry|--lock-opacity" docs
 rg -n "min-height: (1720|940)vh" docs/styles.css
-rg -n "Finder와 Quick Look|features-copy > .section-heading" docs
+rg -n "Finder와 Quick Look|features-sticky > .section-heading|grid-column: 1 / -1" docs
 git diff --check
 ```
 
@@ -217,6 +219,7 @@ git diff --check
 - `기존 Mac` checkpoint 이전 lock fade in과 checkpoint 직후 install 시작 계산식이 존재함을 확인했다.
 - Feature sticky section의 desktop/mobile scroll height가 증가한 것을 확인했다.
 - README 기반 Feature intro copy와 중앙 정렬 selector가 존재함을 확인했다.
+- Feature heading block이 기능 텍스트 컬럼 밖에서 grid 전체 폭을 span하는 selector와 markup을 확인했다.
 - `git diff --check`는 통과했다.
 
 ## 리스크와 후속 조치
