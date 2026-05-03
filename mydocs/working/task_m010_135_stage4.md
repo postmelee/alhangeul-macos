@@ -103,6 +103,15 @@ Mac에서 한글 파일은
 - Apple 공식 MacBook Pro 페이지의 highlights/closer-look product storytelling과 MacBook Air/Pro 환경 섹션의 큰 카드형 수치 강조를 참고했다.
   - `https://www.apple.com/macbook-pro/`
   - `https://www.apple.com/macbook-air/`
+- 추가 조사 결과 Apple 제품 페이지는 section/storytelling 구조는 확인 가능하지만, snap threshold나 timeout 숫자는 공개 문서로 노출하지 않는다.
+- Apple 산하 WebKit의 CSS Scroll Snap 설명은 active scrolling operation이 없을 때 snap point에 도달하는 모델과, JS가 trackpad scroll phase를 정확히 알기 어렵다는 점을 설명한다.
+  - `https://webkit.org/blog/4017/scroll-snapping-with-css-snap-points/`
+- 이를 기준으로 Finder stage 전환은 per-frame 즉시 전환 대신 hysteresis와 settle timeout을 적용했다.
+  - `installEnter`: 8%
+  - `beforeReturn`: 2.5%
+  - `afterEnter`: 50%
+  - `installReturn`: 42%
+  - `settle timeout`: 120ms
 
 ## Browser Use 확인
 
@@ -143,6 +152,7 @@ http://127.0.0.1:8080/
 - 설치 stage에서 `.hwp 정보 잠김` pill은 빠르게 사라진다.
 - Finder 이미지는 `알한글 설치`에서 `Finder 썸네일`로 넘어갈 때 `finder-before.png`에서 `finder-after.png`로 crossfade된다.
 - Firefox 로컬 탭에서 새로고침 후 `기존 mac`, `알한글 설치`, `Finder 썸네일` stage 전환을 확인했다.
+- 기존에 `Finder 썸네일` 이미지로 넘어가지 않던 현상은 first Feature scroll segment를 78%로 넓히고, `afterEnter` threshold를 50%로 둔 hysteresis stage 전환으로 보정했다.
 
 Browser Use DOM/log 확인 결과:
 
