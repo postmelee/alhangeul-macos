@@ -2,18 +2,13 @@ const faqItems = document.querySelectorAll(".faq-list details");
 const featureSection = document.querySelector(".features-section");
 const featureSteps = Array.from(document.querySelectorAll("[data-feature-step]"));
 const featureSegments = [
-  { start: 0, end: 0.82 },
-  { start: 0.82, end: 0.9 },
-  { start: 0.9, end: 0.96 },
-  { start: 0.96, end: 1 },
+  { start: 0, end: 0.72 },
+  { start: 0.72, end: 0.82 },
+  { start: 0.82, end: 0.92 },
+  { start: 0.92, end: 1 },
 ];
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
-
-const smoothstep = (edgeStart, edgeEnd, value) => {
-  const progress = clamp((value - edgeStart) / (edgeEnd - edgeStart || 1));
-  return progress * progress * (3 - 2 * progress);
-};
 
 faqItems.forEach((item) => {
   item.addEventListener("toggle", () => {
@@ -26,6 +21,12 @@ faqItems.forEach((item) => {
     });
   });
 });
+
+const getFinderStage = (progress) => {
+  if (progress <= 0.012) return "before";
+  if (progress < 0.34) return "install";
+  return "after";
+};
 
 const updateFeatureScroll = () => {
   if (!featureSection || featureSteps.length === 0) return;
@@ -41,23 +42,22 @@ const updateFeatureScroll = () => {
   const safeActiveIndex = activeIndex === -1 ? featureSteps.length - 1 : activeIndex;
   const finderSegment = featureSegments[0];
   const finderProgress = progress > finderSegment.end ? 1 : clamp((progress - finderSegment.start) / (finderSegment.end - finderSegment.start));
-  const installProgress = smoothstep(0.2, 0.7, finderProgress);
-  const afterOpacity = smoothstep(0.68, 0.96, finderProgress);
-  const lockOpacity = 1 - smoothstep(0.42, 0.72, finderProgress);
-  const installOrbOpacity = smoothstep(0.16, 0.42, finderProgress) * (1 - smoothstep(0.9, 1, finderProgress) * 0.18);
-  const phase = finderProgress < 0.28 ? "before" : finderProgress < 0.82 ? "install" : "after";
+  const phase = getFinderStage(finderProgress);
+  const isBefore = phase === "before";
+  const isInstall = phase === "install";
+  const isAfter = phase === "after";
 
-  featureSection.style.setProperty("--finder-progress", `${(finderProgress * 100).toFixed(2)}%`);
-  featureSection.style.setProperty("--install-progress", installProgress.toFixed(3));
-  featureSection.style.setProperty("--install-orb-opacity", installOrbOpacity.toFixed(3));
-  featureSection.style.setProperty("--install-scale", (0.78 + installProgress * 0.22).toFixed(3));
-  featureSection.style.setProperty("--install-clip", `${((1 - installProgress) * 100).toFixed(2)}%`);
-  featureSection.style.setProperty("--after-opacity", afterOpacity.toFixed(3));
-  featureSection.style.setProperty("--before-scale", (1 + afterOpacity * 0.018).toFixed(3));
-  featureSection.style.setProperty("--after-scale", (1.018 - afterOpacity * 0.018).toFixed(3));
-  featureSection.style.setProperty("--lock-opacity", lockOpacity.toFixed(3));
-  featureSection.style.setProperty("--lock-scale", (1 - installProgress * 0.08).toFixed(3));
-  featureSection.style.setProperty("--lock-rotate", `${(-32 * installProgress).toFixed(2)}deg`);
+  featureSection.style.setProperty("--finder-progress", isBefore ? "0%" : "100%");
+  featureSection.style.setProperty("--install-ring-progress", isBefore ? "0%" : "100%");
+  featureSection.style.setProperty("--install-orb-opacity", isInstall ? "1" : "0");
+  featureSection.style.setProperty("--install-scale", isInstall ? "1" : "0.84");
+  featureSection.style.setProperty("--install-clip", isBefore ? "100%" : "0%");
+  featureSection.style.setProperty("--after-opacity", isAfter ? "1" : "0");
+  featureSection.style.setProperty("--before-scale", isAfter ? "1.018" : "1");
+  featureSection.style.setProperty("--after-scale", isAfter ? "1" : "1.018");
+  featureSection.style.setProperty("--lock-opacity", isBefore ? "1" : "0");
+  featureSection.style.setProperty("--lock-scale", isBefore ? "1" : "0.92");
+  featureSection.style.setProperty("--lock-rotate", isBefore ? "0deg" : "-32deg");
 
   featureSteps.forEach((step, index) => {
     step.classList.toggle("is-active", index === safeActiveIndex);
@@ -66,7 +66,7 @@ const updateFeatureScroll = () => {
   featureSection.classList.toggle("is-finder-before", phase === "before");
   featureSection.classList.toggle("is-finder-install", phase === "install");
   featureSection.classList.toggle("is-finder-after", phase === "after");
-  featureSection.classList.toggle("is-install-complete", installProgress > 0.96);
+  featureSection.classList.toggle("is-install-complete", !isBefore);
 };
 
 let featureScrollTicking = false;

@@ -259,7 +259,7 @@ video {
 
 .features-section {
   --finder-progress: 0%;
-  --install-progress: 0;
+  --install-ring-progress: 0%;
   --install-orb-opacity: 0;
   --install-scale: 0.78;
   --install-clip: 100%;
@@ -314,6 +314,17 @@ video {
 .finder-visual {
   width: min(820px, 100%);
   margin-left: auto;
+  display: grid;
+  gap: 16px;
+}
+
+.finder-progress {
+  position: relative;
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 20px 22px 16px;
 }
 
 .finder-image-stage {
@@ -332,8 +343,8 @@ video {
   height: 100%;
   object-fit: cover;
   transition:
-    opacity 240ms linear,
-    transform 240ms ease;
+    opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .finder-image-before {
@@ -365,7 +376,9 @@ video {
   transform: translate(-50%, -50%) scale(var(--lock-scale));
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
-  transition: opacity 180ms linear;
+  transition:
+    opacity 100ms linear,
+    transform 100ms ease;
 }
 
 .finder-lock svg {
@@ -398,6 +411,9 @@ video {
   transform: translate(-50%, -50%) scale(var(--install-scale));
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
+  transition:
+    opacity 220ms ease,
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .orb-ring,
@@ -405,7 +421,7 @@ video {
   position: absolute;
   inset: -5px;
   border-radius: inherit;
-  background: conic-gradient(#34c759 var(--finder-progress), rgba(52, 199, 89, 0.12) 0);
+  background: conic-gradient(#34c759 var(--install-ring-progress), rgba(52, 199, 89, 0.12) 0);
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -463,6 +479,7 @@ video {
   transition:
     opacity 180ms ease,
     transform 180ms ease;
+  transition-delay: 0ms;
 }
 
 .orb-check {
@@ -485,6 +502,7 @@ video {
 .features-section.is-install-complete .install-check {
   opacity: 1;
   transform: scale(1);
+  transition-delay: 300ms;
 }
 
 .features-section.is-install-complete .orb-logo-stack {
@@ -531,17 +549,11 @@ video {
   line-height: 1.55;
 }
 
-.finder-progress {
-  position: relative;
-  margin-top: 22px;
-  padding-top: 18px;
-}
-
 .progress-track {
   position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 29px;
+  left: 34px;
+  right: 34px;
+  top: 31px;
   height: 4px;
   overflow: hidden;
   border-radius: 999px;
@@ -554,6 +566,7 @@ video {
   height: 100%;
   border-radius: inherit;
   background: #34c759;
+  transition: width 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .progress-checkpoints {
