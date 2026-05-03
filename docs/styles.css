@@ -308,7 +308,7 @@ video {
   min-height: calc(100vh - 52px);
   width: min(var(--wide-width), 100%);
   margin: 0 auto;
-  padding: 48px 0 16px;
+  padding: 0px 0 16px;
   display: grid;
   grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
   column-gap: 56px;
@@ -836,7 +836,7 @@ video {
     justify-content: flex-start;
     gap: 14px;
     min-height: calc(100vh - 52px);
-    padding-top: 48px;
+    padding-top: 68px;
     padding-bottom: 24px;
   }
 
@@ -850,12 +850,14 @@ video {
   }
 
   .feature-visual {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 24px;
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
     z-index: 1;
     order: 2;
+    width: 100%;
+    margin: 0 auto;
   }
 
   .finder-visual {
@@ -1048,7 +1050,7 @@ video {
   }
 
   .feature-visual {
-    bottom: 16px;
+    bottom: auto;
     padding: 0;
   }
 
