@@ -16,9 +16,6 @@ struct DocumentViewerView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .safeAreaInset(edge: .bottom) {
-            StatusBarView(store: store)
-        }
     }
 }
 
@@ -133,26 +130,5 @@ private struct WebViewerErrorBanner: View {
         .padding(.vertical, 8)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
         .shadow(color: .black.opacity(0.10), radius: 6, x: 0, y: 2)
-    }
-}
-
-private struct StatusBarView: View {
-    @ObservedObject var store: DocumentViewerStore
-
-    var body: some View {
-        HStack(spacing: 16) {
-            Text(store.filename.isEmpty ? "문서 없음" : store.filename)
-                .lineLimit(1)
-            Spacer()
-            if store.hasDocument {
-                Text(store.isWebViewLoading ? "웹 viewer 로딩 중" : "rhwp-studio")
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .font(.caption)
-        .foregroundStyle(.secondary)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 6)
-        .background(.bar)
     }
 }
