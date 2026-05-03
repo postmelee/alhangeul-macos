@@ -16,6 +16,8 @@ class CGTreeRenderer {
     private var pageHeight: Double = 0
 
     func render(tree: RenderNode, in context: CGContext, pageHeight: Double, document: RhwpDocument?) {
+        HwpBundledFontRegistry.ensureRegistered()
+
         // 이미지 binDataId는 문서 내부 식별자이므로 문서가 바뀌면 캐시를 이어 쓰면 안 된다.
         if !isRenderingSameDocument(document) {
             clearCache()

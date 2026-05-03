@@ -71,6 +71,7 @@ swiftc -parse-as-library \
   "$ROOT/Sources/RhwpCoreBridge/RhwpDocument.swift" \
   "$ROOT/Sources/RhwpCoreBridge/RenderTree.swift" \
   "$ROOT/Sources/RhwpCoreBridge/FontFallback.swift" \
+  "$ROOT/Sources/RhwpCoreBridge/FontResourceRegistry.swift" \
   "$ROOT/Sources/RhwpCoreBridge/CGTreeRenderer.swift" \
   "$ROOT/scripts/stage3_render_check.swift" \
   "$LIB" \
