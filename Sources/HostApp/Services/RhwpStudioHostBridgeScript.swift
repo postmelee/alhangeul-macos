@@ -64,6 +64,31 @@ enum RhwpStudioHostBridgeScript {
         });
       }
 
+      function nativeCommandForShortcut(event) {
+        if (event.repeat || event.isComposing || event.altKey || event.shiftKey) {
+          return null;
+        }
+
+        const hasCommandModifier = event.metaKey || event.ctrlKey;
+        if (!hasCommandModifier) {
+          return null;
+        }
+
+        const key = event.key.toLowerCase();
+        const code = event.code;
+        if (code === "KeyO" || key === "o" || key === "ㅐ") {
+          return "file:open";
+        }
+        if (code === "KeyS" || key === "s" || key === "ㄴ") {
+          return "file:save";
+        }
+        if (code === "KeyP" || key === "p" || key === "ㅔ") {
+          return "file:print";
+        }
+
+        return null;
+      }
+
       async function handleNativeCommand(command) {
         if (command === "file:open") {
           postNative({
@@ -112,6 +137,16 @@ enum RhwpStudioHostBridgeScript {
         }
       }
 
+      window.__alhangeulHostBridgeRunNativeCommand = (command) => {
+        if (!nativeCommands.has(command)) {
+          return false;
+        }
+
+        closeMenus();
+        handleNativeCommand(command);
+        return true;
+      };
+
       document.addEventListener("click", (event) => {
         const target = event.target;
         if (!(target instanceof Element)) {
@@ -131,9 +166,19 @@ enum RhwpStudioHostBridgeScript {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        closeMenus();
+        window.__alhangeulHostBridgeRunNativeCommand(command);
+      }, true);
 
-        handleNativeCommand(command);
+      document.addEventListener("keydown", (event) => {
+        const command = nativeCommandForShortcut(event);
+        if (!command) {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        window.__alhangeulHostBridgeRunNativeCommand(command);
       }, true);
     })();
     """

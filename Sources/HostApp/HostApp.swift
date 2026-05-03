@@ -28,6 +28,22 @@ struct AlHangeulMacApp: App {
                 }
                 .keyboardShortcut("o", modifiers: [.command])
             }
+
+            CommandGroup(replacing: .saveItem) {
+                Button("저장") {
+                    RhwpStudioNativeCommandDispatcher.run("file:save")
+                }
+                .keyboardShortcut("s", modifiers: [.command])
+                .disabled(!viewerStore.hasDocument)
+            }
+
+            CommandGroup(replacing: .printItem) {
+                Button("인쇄...") {
+                    RhwpStudioNativeCommandDispatcher.run("file:print")
+                }
+                .keyboardShortcut("p", modifiers: [.command])
+                .disabled(!viewerStore.hasDocument)
+            }
         }
     }
 }

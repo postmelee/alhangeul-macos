@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import WebKit
 
@@ -82,7 +83,14 @@ extension RhwpStudioWebView {
                 configuration.defaultWebpagePreferences.allowsContentJavaScript = true
             }
 
-            let webView = WKWebView(frame: .zero, configuration: configuration)
+            let webView = RhwpStudioNativeCommandWebView(frame: .zero, configuration: configuration)
+            webView.nativeCommandHandler = { [weak self, weak webView] command in
+                guard let self, let webView else {
+                    return false
+                }
+                self.runNativeCommand(command, in: webView)
+                return true
+            }
             webView.navigationDelegate = self
             webView.allowsBackForwardNavigationGestures = false
             return webView
@@ -155,7 +163,21 @@ extension RhwpStudioWebView {
 
         private func handleNavigationError(_ error: Error) {
             onLoadStateChange(false)
+            guard !isIgnorableNavigationError(error) else {
+                return
+            }
             onError(error.localizedDescription)
+        }
+
+        private func isIgnorableNavigationError(_ error: Error) -> Bool {
+            let nsError = error as NSError
+            if nsError.domain == NSURLErrorDomain, nsError.code == NSURLErrorCancelled {
+                return true
+            }
+            if nsError.domain == "WebKitErrorDomain", nsError.code == 102 {
+                return true
+            }
+            return false
         }
 
         private func isAllowedNavigation(to url: URL) -> Bool {
@@ -259,5 +281,123 @@ extension RhwpStudioWebView {
             }
             return nil
         }
+
+        private func runNativeCommand(_ command: String, in webView: WKWebView) {
+            let script: String
+            switch command {
+            case "file:open":
+                script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:open')"
+            case "file:save":
+                script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:save')"
+            case "file:print":
+                script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:print')"
+            default:
+                return
+            }
+            webView.evaluateJavaScript(script) { [weak self] _, error in
+                if let error {
+                    self?.onError("단축키 명령을 실행할 수 없습니다: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+}
+
+private final class RhwpStudioNativeCommandWebView: WKWebView {
+    var nativeCommandHandler: ((String) -> Bool)?
+
+    @discardableResult
+    func runNativeCommand(_ command: String) -> Bool {
+        nativeCommandHandler?(command) ?? false
+    }
+
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if handleNativeCommandShortcut(event) {
+            return true
+        }
+        return super.performKeyEquivalent(with: event)
+    }
+
+    override func keyDown(with event: NSEvent) {
+        if handleNativeCommandShortcut(event) {
+            return
+        }
+        super.keyDown(with: event)
+    }
+
+    private func handleNativeCommandShortcut(_ event: NSEvent) -> Bool {
+        guard !event.isARepeat,
+              let command = nativeCommand(for: event)
+        else {
+            return false
+        }
+        return runNativeCommand(command)
+    }
+
+    private func nativeCommand(for event: NSEvent) -> String? {
+        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        let hasCommandModifier = flags.contains(.command) || flags.contains(.control)
+        guard hasCommandModifier,
+              !flags.contains(.option),
+              !flags.contains(.shift)
+        else {
+            return nil
+        }
+
+        switch event.keyCode {
+        case 31:
+            return "file:open"
+        case 1:
+            return "file:save"
+        case 35:
+            return "file:print"
+        default:
+            return nil
+        }
+    }
+}
+
+@MainActor
+enum RhwpStudioNativeCommandDispatcher {
+    @discardableResult
+    static func run(_ command: String) -> Bool {
+        var seenWindowIDs = Set<ObjectIdentifier>()
+        let candidateWindows = [NSApp.keyWindow, NSApp.mainWindow].compactMap { $0 } + NSApp.windows
+
+        for window in candidateWindows {
+            let windowID = ObjectIdentifier(window)
+            guard !seenWindowIDs.contains(windowID) else {
+                continue
+            }
+            seenWindowIDs.insert(windowID)
+
+            guard let webView = window.contentView?.firstDescendant(
+                ofType: RhwpStudioNativeCommandWebView.self
+            ) else {
+                continue
+            }
+
+            if webView.runNativeCommand(command) {
+                return true
+            }
+        }
+
+        return false
+    }
+}
+
+private extension NSView {
+    func firstDescendant<T: NSView>(ofType type: T.Type) -> T? {
+        if let view = self as? T {
+            return view
+        }
+
+        for subview in subviews {
+            if let view = subview.firstDescendant(ofType: type) {
+                return view
+            }
+        }
+
+        return nil
     }
 }
