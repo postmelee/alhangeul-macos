@@ -12,6 +12,7 @@
   --tile-dark: #272729;
   --product-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px;
   --content-width: 980px;
+  --wide-width: 1260px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
     "Apple SD Gothic Neo", sans-serif;
 }
@@ -149,10 +150,10 @@ video {
 }
 
 .hero {
-  min-height: 500px;
+  min-height: auto;
   display: grid;
   place-items: center;
-  padding: 92px 20px 64px;
+  padding: 60px 20px 24px;
   text-align: center;
 }
 
@@ -190,7 +191,7 @@ video {
 }
 
 .download-button {
-  margin-top: 30px;
+  margin-top: 24px;
   min-height: 44px;
   border-radius: 999px;
   background: var(--accent);
@@ -208,23 +209,44 @@ video {
 
 .demo-section {
   width: 100%;
-  padding: 80px 20px 72px;
-  background: var(--tile-dark);
-  color: #ffffff;
+  padding: 0 20px 72px;
+  background: #ffffff;
+  color: var(--text);
 }
 
-.media-frame {
-  width: min(var(--content-width), 100%);
+.macbook-showcase {
+  position: relative;
+  width: min(960px, 100%);
+  aspect-ratio: 1053 / 679;
   margin: 0 auto;
+}
+
+.macbook-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.macbook-screen {
+  position: absolute;
+  left: 12.05%;
+  top: 7.95%;
+  z-index: 2;
+  width: 75.9%;
+  height: 76.1%;
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: 10px;
   background: var(--black);
   box-shadow: var(--product-shadow);
 }
 
-.media-frame video {
+.macbook-screen video {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -232,12 +254,14 @@ video {
   margin: 14px 0 0;
   text-align: center;
   font-size: 14px;
-  color: #d2d2d7;
+  color: var(--muted);
 }
 
 .features-section {
+  --feature-offset: 0%;
   width: 100%;
-  padding: 80px 20px;
+  min-height: 420vh;
+  padding: 0 20px;
   background: var(--parchment);
 }
 
@@ -255,60 +279,123 @@ video {
   font-weight: 600;
 }
 
-.features-inner {
-  width: min(var(--content-width), 100%);
+.features-sticky {
+  position: sticky;
+  top: 52px;
+  min-height: calc(100vh - 52px);
+  width: min(var(--wide-width), 100%);
   margin: 0 auto;
-}
-
-.feature-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
-  gap: 44px;
+  grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
+  gap: 56px;
   align-items: center;
 }
 
-.feature-visual {
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: #ffffff;
-  padding: 24px;
+.features-copy {
+  display: grid;
+  gap: 24px;
+  align-content: center;
 }
 
-.feature-visual img {
-  width: 100%;
-  height: 100%;
+.feature-visual {
+  margin: 0;
+}
+
+.feature-image-viewport {
+  width: min(760px, 100%);
+  margin-left: auto;
+  aspect-ratio: 1.18;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.feature-panorama {
+  width: 112%;
+  height: 132%;
   object-fit: cover;
-  border-radius: 8px;
+  object-position: center top;
   box-shadow: var(--product-shadow);
+  transform: translate3d(-6%, var(--feature-offset), 0);
+  will-change: transform;
 }
 
 .feature-list {
   display: grid;
-  gap: 0;
+  gap: 12px;
 }
 
-.feature-list article {
+.feature-step {
   position: relative;
-  border-top: 1px solid var(--border);
-  padding: 24px 0;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 18px;
+  padding: 22px 24px;
+  opacity: 0.42;
+  transition:
+    opacity 240ms ease,
+    transform 240ms ease,
+    background-color 240ms ease,
+    border-color 240ms ease;
 }
 
-.feature-list article:last-child {
-  border-bottom: 1px solid var(--border);
+.feature-step.is-active {
+  border-color: rgba(255, 255, 255, 0.72);
+  background: #ffffff;
+  opacity: 1;
+  transform: translateX(4px);
 }
 
-.feature-list h3 {
+.feature-step h3 {
   margin: 0;
   font-size: 21px;
   line-height: 1.2;
   font-weight: 600;
+  color: var(--text);
 }
 
-.feature-list p {
+.feature-step p {
   margin: 8px 0 0;
   color: var(--muted);
   line-height: 1.55;
+}
+
+.feature-highlight {
+  position: relative;
+  z-index: 0;
+  color: var(--muted);
+  transition: color 240ms ease;
+}
+
+.feature-highlight::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.06em;
+  z-index: -1;
+  height: 0.34em;
+  border-radius: 999px;
+  background: rgba(0, 102, 204, 0.14);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.feature-step.is-active .feature-highlight {
+  color: var(--accent);
+}
+
+.feature-step.is-active .feature-highlight::after {
+  animation: highlight-sweep 460ms ease both;
+}
+
+@keyframes highlight-sweep {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
 }
 
 .faq-section {
@@ -318,6 +405,7 @@ video {
 }
 
 .faq-section > .section-heading {
+  max-width: min(var(--content-width), 100%);
   width: min(var(--content-width), 100%);
   margin: 0 auto 34px;
 }
@@ -387,7 +475,7 @@ video {
   justify-content: space-between;
   gap: 24px;
   margin-top: 80px;
-  padding: 48px max(20px, calc((100% - var(--content-width)) / 2));
+  padding: 48px max(40px, calc((100% - var(--wide-width)) / 2));
   background: var(--parchment);
 }
 
@@ -414,8 +502,7 @@ video {
   }
 
   .hero {
-    padding-top: 80px;
-    min-height: 400px;
+    padding-top: 44px;
   }
 
   .hero h1 {
@@ -431,14 +518,69 @@ video {
     font-size: 38px;
   }
 
-  .feature-layout,
   .site-footer {
     grid-template-columns: 1fr;
     display: grid;
   }
 
+  .features-section {
+    min-height: 380vh;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .features-sticky {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 22px;
+    min-height: calc(100vh - 52px);
+  }
+
+  .features-copy {
+    order: 1;
+    gap: 18px;
+  }
+
+  .feature-visual {
+    order: 2;
+  }
+
+  .feature-image-viewport {
+    width: 100%;
+    aspect-ratio: 1.28;
+  }
+
+  .feature-list {
+    min-height: 140px;
+  }
+
+  .feature-step {
+    display: none;
+    padding: 20px;
+    transform: translateY(8px);
+  }
+
+  .feature-step.is-active {
+    display: block;
+    transform: translateY(0);
+    animation: feature-text-in 260ms ease both;
+  }
+
   .faq-list {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes feature-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -466,7 +608,9 @@ video {
   }
 
   .hero {
-    min-height: 390px;
+    min-height: auto;
+    padding-top: 36px;
+    padding-bottom: 18px;
     padding-left: 18px;
     padding-right: 18px;
   }
@@ -495,6 +639,25 @@ video {
   .features-section,
   .faq-section {
     padding-top: 72px;
+  }
+
+  .demo-section {
+    padding-top: 0;
+    padding-bottom: 56px;
+  }
+
+  .macbook-showcase {
+    width: min(112%, 620px);
+    margin-left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .macbook-screen {
+    border-radius: 6px;
+  }
+
+  .features-section {
+    padding-top: 0;
   }
 
   .section-heading h2,

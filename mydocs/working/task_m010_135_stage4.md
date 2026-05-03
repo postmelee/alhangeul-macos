@@ -21,10 +21,17 @@
 
 - `docs/index.html`
 - `docs/styles.css`
+- `docs/script.js`
+- `docs/assets/mac_mock.png`
 - `mydocs/orders/20260503.md`
 - `mydocs/working/task_m010_135_stage4.md`
 - `mydocs/working/assets/task_m010_135_stage4_browser.png`
 - `mydocs/working/assets/task_m010_135_stage4_feature.png`
+- `mydocs/working/assets/task_m010_135_stage4_hero_macbook.png`
+- `mydocs/working/assets/task_m010_135_stage4_feature_sticky_start.png`
+- `mydocs/working/assets/task_m010_135_stage4_feature_sticky_mid.png`
+- `mydocs/working/assets/task_m010_135_stage4_feature_sticky_second.png`
+- `mydocs/working/assets/task_m010_135_stage4_faq_footer.png`
 
 ## 디자인 반영 내용
 
@@ -56,10 +63,25 @@ Mac에서 한글 파일은
 
 ### Feature 이미지
 
-- Feature 섹션을 full-width parchment band로 변경했다.
-- `group-1-4x.png`는 흰색 18px product frame 안에 배치했다.
-- decorative icon list를 제거하고, 이미지와 선형 feature list 중심으로 단순화했다.
-- 그림자는 product asset에만 제한했다.
+- Feature 섹션을 full-width parchment band와 sticky viewport 구조로 변경했다.
+- `group-1-4x.png`는 별도 박스에 담지 않고 큰 이미지 viewport 안에서 확대 표시했다.
+- decorative icon list를 제거하고, 현재 단계의 핵심 문구와 큰 제품 이미지 중심으로 단순화했다.
+- 그림자는 product 이미지 표현에만 제한했다.
+
+### 추가 디자인 보정
+
+작업지시자의 추가 피드백을 반영해 Stage 4 안에서 다음 보정을 추가로 수행했다.
+
+- 상단 캐치프레이즈의 top padding을 줄여 첫 화면에서 더 위로 배치했다.
+- `mac_mock.png`를 `docs/assets/mac_mock.png`로 추가하고, `thumbnail2.mov`를 MacBook 화면 영역 위에 overlay했다.
+- 영상 섹션의 dark/gray 배경을 제거하고 hero CTA 바로 아래에 붙여 첫 viewport에서 영상이 더 크게 보이게 했다.
+- Feature 이미지를 white box 안에 넣는 표현을 제거하고, sticky viewport 안에서 더 크게 보이도록 확대했다.
+- Feature 섹션을 scroll-driven sticky section으로 변경했다.
+- 스크롤 진행도에 따라 이미지가 세로로 이동하고, 현재 단계의 핵심 문구가 `text_highlight.png` 레퍼런스처럼 blue highlight와 sweep animation으로 강조되게 했다.
+- 비활성 Feature 문구는 opacity와 typography hierarchy를 낮췄다.
+- 좁은 화면에서는 Feature 설명이 이미지 위에 배치되고, active 설명만 애니메이션으로 교체되게 했다.
+- FAQ heading/list의 좌측 기준을 같은 content width로 맞췄다.
+- Footer content width를 `1260px` 기준으로 넓혀 양끝 배치를 강화했다.
 
 ## Browser Use 확인
 
@@ -73,15 +95,23 @@ http://127.0.0.1:8080/
 
 - `mydocs/working/assets/task_m010_135_stage4_browser.png`
 - `mydocs/working/assets/task_m010_135_stage4_feature.png`
+- `mydocs/working/assets/task_m010_135_stage4_hero_macbook.png`
+- `mydocs/working/assets/task_m010_135_stage4_feature_sticky_start.png`
+- `mydocs/working/assets/task_m010_135_stage4_feature_sticky_mid.png`
+- `mydocs/working/assets/task_m010_135_stage4_feature_sticky_second.png`
+- `mydocs/working/assets/task_m010_135_stage4_faq_footer.png`
 
 확인한 항목:
 
 - 상단 header에 로고, `알한글`, `GitHub`, `다운로드`가 보인다.
 - hero H1이 `Mac에서 한글 파일은` / `더 이상 이방인이 아닙니다.` 두 줄로 표시된다.
 - `이방인` highlight가 blue accent로 적용되어 있다.
-- 영상 프리뷰가 dark tile 위에서 정상 표시된다.
-- Feature 섹션이 parchment 배경과 white product frame으로 표시된다.
+- 영상 프리뷰가 MacBook mock 화면 안에서 정상 표시된다.
+- Feature 섹션이 parchment 배경 위 sticky viewport와 active text card로 표시된다.
 - Browser console error가 없다.
+- 추가 보정 후 영상은 MacBook mock 화면 안에 표시된다.
+- 추가 보정 후 Feature sticky 구간에서 스크롤에 따라 active 문구와 이미지 위치가 변경된다.
+- FAQ 리스트와 footer는 현재 Browser Use viewport에서 정렬 기준이 어긋나지 않는다.
 
 Browser Use DOM/log 확인 결과:
 
@@ -102,6 +132,7 @@ Browser Use DOM/log 확인 결과:
 ```bash
 node --check docs/script.js
 rg -n "Alhangeul|frame-corner|accent-strong|--max-width|letter-spacing|box-shadow" docs
+rg -n "mac_mock|data-feature-step|feature-highlight|requestAnimationFrame|faq-title" docs
 git diff --check
 ```
 
@@ -111,6 +142,7 @@ git diff --check
 - 이전 floating/header 장식 잔여 클래스와 old accent token이 제거된 것을 확인했다.
 - `box-shadow`는 media/product image에만 남겼다.
 - `letter-spacing`은 0으로 유지했다.
+- MacBook mock asset, Feature step markup, Feature highlight, scroll animation JS, FAQ anchor가 존재함을 확인했다.
 - `git diff --check`는 통과했다.
 
 ## 리스크와 후속 조치

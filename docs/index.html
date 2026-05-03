@@ -68,52 +68,57 @@
       </section>
 
       <section class="demo-section" aria-label="앱 실행 영상">
-        <div class="media-frame">
-          <video
-            src="./assets/thumbnail2.mov"
-            poster="./assets/group-1-4x.png"
-            autoplay
-            muted
-            loop
-            playsinline
-            controls
-            preload="metadata"
-          >
-            브라우저가 영상을 지원하지 않습니다.
-          </video>
+        <div class="macbook-showcase">
+          <img class="macbook-frame" src="./assets/mac_mock.png" alt="" aria-hidden="true" />
+          <div class="macbook-screen">
+            <video
+              src="./assets/thumbnail2.mov"
+              poster="./assets/group-1-4x.png"
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              aria-label="알한글 앱 실행 영상"
+            >
+              브라우저가 영상을 지원하지 않습니다.
+            </video>
+          </div>
         </div>
         <p class="media-caption">Quick Look과 Finder, 앱 뷰어가 하나의 Mac 흐름으로 이어집니다.</p>
       </section>
 
       <section class="features-section" aria-labelledby="features-title">
-        <div class="features-inner">
-          <div class="section-heading">
-            <h2 id="features-title">미리보기부터 뷰어까지, Mac 방식으로</h2>
-            <p>Finder에서 찾고, 스페이스바로 확인하고, 필요할 때 앱에서 바로 엽니다.</p>
-          </div>
-          <div class="feature-layout">
-            <figure class="feature-visual">
-              <img src="./assets/group-1-4x.png" alt="알한글의 Quick Look 미리보기와 Finder 썸네일 예시" />
-            </figure>
+        <div class="features-sticky">
+          <div class="features-copy">
+            <div class="section-heading">
+              <h2 id="features-title">미리보기부터 뷰어까지, Mac 방식으로</h2>
+              <p>스크롤하면 화면은 고정되고, 알한글이 해결하는 작업 흐름이 차례로 드러납니다.</p>
+            </div>
             <div class="feature-list" aria-label="주요 기능">
-              <article>
-                <h3>스페이스바 미리보기</h3>
-                <p>Quick Look 확장으로 HWP/HWPX 문서를 빠르게 확인합니다.</p>
+              <article class="feature-step is-active" data-feature-step="0">
+                <h3>스페이스바로 <span class="feature-highlight">즉시 미리보기</span></h3>
+                <p>Quick Look 확장으로 HWP/HWPX 문서를 열기 전에 빠르게 확인합니다.</p>
               </article>
-              <article>
-                <h3>Finder 썸네일</h3>
-                <p>Finder에서 문서 첫 페이지를 썸네일로 확인합니다.</p>
+              <article class="feature-step" data-feature-step="1">
+                <h3>Finder에서 <span class="feature-highlight">썸네일로 찾기</span></h3>
+                <p>문서 첫 페이지를 Finder 썸네일로 보여줘 파일 목록에서도 내용을 구분할 수 있습니다.</p>
               </article>
-              <article>
-                <h3>HWP/HWPX 뷰어</h3>
-                <p>WKWebView 기반 viewer로 문서를 열고 탐색합니다.</p>
+              <article class="feature-step" data-feature-step="2">
+                <h3>앱에서 <span class="feature-highlight">HWP/HWPX 보기</span></h3>
+                <p>WKWebView 기반 viewer로 문서를 열고, 필요한 내용을 바로 탐색합니다.</p>
               </article>
-              <article>
-                <h3>로컬 처리</h3>
-                <p>문서를 업로드하지 않고 Mac 안에서 처리합니다.</p>
+              <article class="feature-step" data-feature-step="3">
+                <h3>문서는 Mac 안에서 <span class="feature-highlight">로컬 처리</span></h3>
+                <p>파일을 외부 서비스에 올리지 않고 Mac에서 처리하는 흐름을 우선합니다.</p>
               </article>
             </div>
           </div>
+          <figure class="feature-visual" aria-label="알한글의 Quick Look 미리보기와 Finder 썸네일 예시">
+            <div class="feature-image-viewport">
+              <img class="feature-panorama" src="./assets/group-1-4x.png" alt="" />
+            </div>
+          </figure>
         </div>
       </section>
 
