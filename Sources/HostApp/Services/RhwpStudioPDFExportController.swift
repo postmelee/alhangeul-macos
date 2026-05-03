@@ -1,91 +1,73 @@
 import AppKit
-import WebKit
+import Foundation
 
-final class RhwpStudioPDFExportController: NSObject, WKNavigationDelegate {
-    private var webView: WKWebView?
-    private var destinationURL: URL?
-    private var completion: ((Result<URL?, Error>) -> Void)?
+final class RhwpStudioPDFExportController {
+    @MainActor
+    func export(
+        data: Data,
+        filename: String,
+        destinationURL: URL,
+        completion: @escaping (Result<URL?, Error>) -> Void
+    ) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            let result: Result<URL?, Error>
+            do {
+                let pdfData = try Self.renderPDFData(data: data, filename: filename)
+                try pdfData.write(to: destinationURL, options: .atomic)
+                result = .success(destinationURL)
+            } catch {
+                result = .failure(error)
+            }
+
+            DispatchQueue.main.async {
+                completion(result)
+            }
+        }
+    }
 
     @MainActor
     func export(
-        payload: RhwpStudioPrintPayload,
+        data: Data,
+        filename: String,
         completion: @escaping (Result<URL?, Error>) -> Void
     ) {
         guard let destinationURL = DocumentPDFExportPanel.chooseDestinationURL(
-            suggestedFilename: payload.fileName
+            suggestedFilename: filename
         ) else {
             completion(.success(nil))
             return
         }
 
-        self.destinationURL = destinationURL
-        self.completion = completion
-
-        let webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 800, height: 1100))
-        webView.navigationDelegate = self
-        self.webView = webView
-        webView.loadHTMLString(RhwpStudioPrintHTML.documentHTML(for: payload), baseURL: nil)
+        export(
+            data: data,
+            filename: filename,
+            destinationURL: destinationURL,
+            completion: completion
+        )
     }
 
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        guard let destinationURL else {
-            finish(.failure(RhwpStudioPDFExportError.missingDestination))
-            return
+    private static func renderPDFData(data: Data, filename: String) throws -> Data {
+        let document = try RhwpDocument(data: data, filename: filename)
+        let pageCount = document.pageCount
+        guard pageCount > 0 else {
+            throw HwpRenderError.emptyDocument
         }
 
-        let printInfo = NSPrintInfo.shared.copy() as? NSPrintInfo ?? NSPrintInfo()
-        printInfo.jobDisposition = .save
-        printInfo.horizontalPagination = .fit
-        printInfo.verticalPagination = .automatic
-        printInfo.dictionary()[NSPrintInfo.AttributeKey.jobSavingURL] = destinationURL
-
-        let operation = webView.printOperation(with: printInfo)
-        operation.showsPrintPanel = false
-        operation.showsProgressPanel = true
-
-        guard operation.run() else {
-            finish(.failure(RhwpStudioPDFExportError.exportFailed))
-            return
+        let firstPageSize = document.pageSize(at: 0)
+        guard firstPageSize.width > 0, firstPageSize.height > 0 else {
+            throw HwpRenderError.invalidPageSize
         }
 
-        finish(.success(destinationURL))
-    }
-
-    func webView(
-        _ webView: WKWebView,
-        didFail navigation: WKNavigation!,
-        withError error: Error
-    ) {
-        finish(.failure(error))
-    }
-
-    func webView(
-        _ webView: WKWebView,
-        didFailProvisionalNavigation navigation: WKNavigation!,
-        withError error: Error
-    ) {
-        finish(.failure(error))
-    }
-
-    private func finish(_ result: Result<URL?, Error>) {
-        webView?.navigationDelegate = nil
-        webView = nil
-        destinationURL = nil
-        completion?(result)
-        completion = nil
-    }
-}
-
-private enum RhwpStudioPDFExportError: LocalizedError {
-    case missingDestination
-    case exportFailed
-
-    var errorDescription: String? {
-        switch self {
-        case .missingDestination:
-            return "PDF 저장 위치를 찾을 수 없습니다."
-        case .exportFailed:
-            return "PDF를 저장할 수 없습니다."
+        let previewInfo = HwpPreviewDocumentInfo(
+            data: data,
+            filename: filename,
+            contentSize: CGSize(width: firstPageSize.width, height: firstPageSize.height),
+            pageCount: pageCount
+        )
+        let renderedPDF = try HwpPreviewPDFRenderer.render(previewInfo: previewInfo)
+        guard !renderedPDF.data.isEmpty else {
+            throw HwpRenderError.pdfEncodingFailed
         }
+        return renderedPDF.data
     }
 }
