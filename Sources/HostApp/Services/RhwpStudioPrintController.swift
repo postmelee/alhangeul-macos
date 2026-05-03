@@ -17,7 +17,7 @@ final class RhwpStudioPrintController: NSObject, WKNavigationDelegate {
         let webView = WKWebView(frame: NSRect(x: 0, y: 0, width: 800, height: 1100))
         webView.navigationDelegate = self
         self.webView = webView
-        webView.loadHTMLString(printHTML(for: payload), baseURL: nil)
+        webView.loadHTMLString(RhwpStudioPrintHTML.documentHTML(for: payload), baseURL: nil)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -56,8 +56,10 @@ final class RhwpStudioPrintController: NSObject, WKNavigationDelegate {
         completion?()
         completion = nil
     }
+}
 
-    private func printHTML(for payload: RhwpStudioPrintPayload) -> String {
+enum RhwpStudioPrintHTML {
+    static func documentHTML(for payload: RhwpStudioPrintPayload) -> String {
         let escapedTitle = escapeHTML(payload.fileName)
         let pages = payload.pages.map { svg in
             "<section class=\"page\">\(svg)</section>"
@@ -96,7 +98,7 @@ final class RhwpStudioPrintController: NSObject, WKNavigationDelegate {
         """
     }
 
-    private func escapeHTML(_ value: String) -> String {
+    private static func escapeHTML(_ value: String) -> String {
         value
             .replacingOccurrences(of: "&", with: "&amp;")
             .replacingOccurrences(of: "<", with: "&lt;")

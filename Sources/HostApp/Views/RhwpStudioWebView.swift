@@ -55,6 +55,7 @@ extension RhwpStudioWebView {
         private var loadedIdentity: LoadIdentity?
         private var currentDocument: RhwpStudioDocumentPayload?
         private var printController: RhwpStudioPrintController?
+        private var pdfExportController: RhwpStudioPDFExportController?
 
         func makeWebView() -> WKWebView {
             let configuration = WKWebViewConfiguration()
@@ -211,6 +212,8 @@ extension RhwpStudioWebView {
                 saveDocument(body)
             case "print-document":
                 printDocument(body)
+            case "export-pdf-document":
+                exportPDFDocument(body)
             case "error":
                 onError(body["message"] as? String)
             default:
@@ -250,26 +253,60 @@ extension RhwpStudioWebView {
         }
 
         private func printDocument(_ body: [String: Any]) {
+            guard let payload = printPayload(from: body, missingMessage: "인쇄 데이터를 만들 수 없습니다") else {
+                return
+            }
+
+            let controller = RhwpStudioPrintController()
+            printController = controller
+            controller.print(
+                payload: payload,
+                completion: { [weak self] in
+                    self?.printController = nil
+                }
+            )
+        }
+
+        private func exportPDFDocument(_ body: [String: Any]) {
+            guard let payload = printPayload(from: body, missingMessage: "PDF 데이터를 만들 수 없습니다") else {
+                return
+            }
+
+            let controller = RhwpStudioPDFExportController()
+            pdfExportController = controller
+            controller.export(payload: payload) { [weak self] result in
+                guard let self else {
+                    return
+                }
+                self.pdfExportController = nil
+                switch result {
+                case .success(let url):
+                    if let url {
+                        DocumentFileActions.revealInFinder(url)
+                    }
+                case .failure(let error):
+                    self.onError("PDF를 내보낼 수 없습니다: \(error.localizedDescription)")
+                }
+            }
+        }
+
+        private func printPayload(
+            from body: [String: Any],
+            missingMessage: String
+        ) -> RhwpStudioPrintPayload? {
             guard let pageCount = intValue(body["pageCount"]),
                   let pages = body["pages"] as? [String],
                   pageCount > 0,
                   pages.count == pageCount
             else {
-                onError("인쇄 데이터를 만들 수 없습니다: 페이지 데이터가 없습니다.")
-                return
+                onError("\(missingMessage): 페이지 데이터가 없습니다.")
+                return nil
             }
 
             let fileName = body["fileName"] as? String
                 ?? currentDocument?.filename
                 ?? "document.hwp"
-            let controller = RhwpStudioPrintController()
-            printController = controller
-            controller.print(
-                payload: RhwpStudioPrintPayload(fileName: fileName, pages: pages),
-                completion: { [weak self] in
-                    self?.printController = nil
-                }
-            )
+            return RhwpStudioPrintPayload(fileName: fileName, pages: pages)
         }
 
         private func intValue(_ value: Any?) -> Int? {
@@ -291,6 +328,8 @@ extension RhwpStudioWebView {
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:save')"
             case "file:print":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:print')"
+            case "file:export-pdf":
+                script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:export-pdf')"
             default:
                 return
             }

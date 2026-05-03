@@ -3,6 +3,8 @@ import Foundation
 @MainActor
 final class DocumentViewerStore: ObservableObject {
     @Published private(set) var rhwpStudioDocument: RhwpStudioDocumentPayload?
+    @Published private(set) var sourceDocument: RecentDocumentItem?
+    @Published private(set) var recentDocuments: [RecentDocumentItem] = RecentDocumentStore.load()
     @Published var filename: String = ""
     @Published var errorMessage: String?
     @Published var isLoading = false
@@ -12,6 +14,10 @@ final class DocumentViewerStore: ObservableObject {
 
     var hasDocument: Bool {
         rhwpStudioDocument != nil
+    }
+
+    var canRevealInFinder: Bool {
+        sourceDocument != nil
     }
 
     func openDocument() {
@@ -35,15 +41,62 @@ final class DocumentViewerStore: ObservableObject {
         }
 
         do {
+            let sourceDocument = RecentDocumentItem.make(for: url)
             let data = try Data(contentsOf: url)
-            try loadDocument(data: data, filename: url.lastPathComponent)
+            try loadDocument(
+                data: data,
+                filename: url.lastPathComponent,
+                sourceDocument: sourceDocument
+            )
         } catch {
             errorMessage = "문서를 열 수 없습니다: \(error.localizedDescription)"
             rhwpStudioDocument = nil
+            sourceDocument = nil
             filename = ""
         }
 
         isLoading = false
+    }
+
+    func openRecentDocument(_ document: RecentDocumentItem) {
+        do {
+            let url = try document.resolvedURL()
+            let didStartSecurityScope = url.startAccessingSecurityScopedResource()
+            defer {
+                if didStartSecurityScope {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+            loadDocument(from: url)
+        } catch {
+            webViewErrorMessage = "최근 문서를 열 수 없습니다: \(error.localizedDescription)"
+        }
+    }
+
+    func clearRecentDocuments() {
+        RecentDocumentStore.clear()
+        recentDocuments = []
+    }
+
+    func revealCurrentDocumentInFinder() {
+        guard let sourceDocument else {
+            webViewErrorMessage = "Finder에서 표시할 원본 문서가 없습니다."
+            return
+        }
+        DocumentFileActions.revealInFinder(sourceDocument.url)
+    }
+
+    func shareCurrentDocument() {
+        guard let document = rhwpStudioDocument else {
+            webViewErrorMessage = "공유할 문서가 없습니다."
+            return
+        }
+
+        do {
+            try DocumentFileActions.share(data: document.data, filename: document.filename)
+        } catch {
+            webViewErrorMessage = "공유할 수 없습니다: \(error.localizedDescription)"
+        }
     }
 
     func setWebViewLoading(_ isLoading: Bool) {
@@ -54,12 +107,17 @@ final class DocumentViewerStore: ObservableObject {
         webViewErrorMessage = message
     }
 
-    private func loadDocument(data: Data, filename: String) throws {
+    private func loadDocument(
+        data: Data,
+        filename: String,
+        sourceDocument: RecentDocumentItem?
+    ) throws {
         guard !data.isEmpty else {
             throw DocumentViewerStoreError.emptyDocument
         }
 
         self.filename = filename
+        self.sourceDocument = sourceDocument
         documentRevision += 1
         rhwpStudioDocument = RhwpStudioDocumentPayload(
             data: data,
@@ -68,6 +126,10 @@ final class DocumentViewerStore: ObservableObject {
         )
         webViewErrorMessage = nil
         isWebViewLoading = false
+
+        if let sourceDocument {
+            recentDocuments = RecentDocumentStore.record(sourceDocument)
+        }
     }
 }
 

@@ -10,7 +10,7 @@ enum RhwpStudioHostBridgeScript {
       }
       window.__alhangeulHostBridgeInstalled = true;
 
-      const nativeCommands = new Set(["file:open", "file:save", "file:print"]);
+      const nativeCommands = new Set(["file:open", "file:save", "file:print", "file:export-pdf"]);
 
       function postNative(message) {
         window.webkit?.messageHandlers?.alhangeulHost?.postMessage(message);
@@ -89,6 +89,15 @@ enum RhwpStudioHostBridgeScript {
         return null;
       }
 
+      async function documentPages() {
+        const pageCount = await requestRhwp("pageCount");
+        const pages = [];
+        for (let page = 0; page < pageCount; page += 1) {
+          pages.push(await requestRhwp("getPageSvg", { page }, 30000));
+        }
+        return { pageCount, pages };
+      }
+
       async function handleNativeCommand(command) {
         if (command === "file:open") {
           postNative({
@@ -117,11 +126,7 @@ enum RhwpStudioHostBridgeScript {
 
         if (command === "file:print") {
           try {
-            const pageCount = await requestRhwp("pageCount");
-            const pages = [];
-            for (let page = 0; page < pageCount; page += 1) {
-              pages.push(await requestRhwp("getPageSvg", { page }, 30000));
-            }
+            const { pageCount, pages } = await documentPages();
             postNative({
               type: "print-document",
               fileName: currentFileName(),
@@ -132,6 +137,23 @@ enum RhwpStudioHostBridgeScript {
             postNative({
               type: "error",
               message: `인쇄 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
+            });
+          }
+        }
+
+        if (command === "file:export-pdf") {
+          try {
+            const { pageCount, pages } = await documentPages();
+            postNative({
+              type: "export-pdf-document",
+              fileName: currentFileName(),
+              pageCount,
+              pages
+            });
+          } catch (error) {
+            postNative({
+              type: "error",
+              message: `PDF 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
             });
           }
         }
