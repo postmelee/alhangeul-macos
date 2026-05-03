@@ -2,6 +2,7 @@ const faqItems = document.querySelectorAll(".faq-list details");
 const featureSection = document.querySelector(".features-section");
 const featureSteps = Array.from(document.querySelectorAll("[data-feature-step]"));
 const revealGroups = Array.from(document.querySelectorAll("[data-reveal-group]"));
+const quicklookVideo = document.querySelector(".quicklook-scroll-video");
 const stageLabelNodes = {
   start: document.querySelector('[data-stage-label="start"]'),
   middle: document.querySelector('[data-stage-label="middle"]'),
@@ -15,7 +16,7 @@ const featureStages = [
   },
   {
     key: "quicklook",
-    labels: ["파일 선택", "알한글 설치", "스페이스바 미리보기"],
+    labels: ["파일 선택", "스페이스바 미리보기", "확대 및 복사"],
   },
   {
     key: "viewer",
@@ -41,6 +42,27 @@ const smoothstep = (edgeStart, edgeEnd, value) => {
   const progress = clamp((value - edgeStart) / (edgeEnd - edgeStart || 1));
   return progress * progress * (3 - 2 * progress);
 };
+
+let quicklookVideoDuration = 0;
+
+const syncQuickLookVideo = (progress) => {
+  if (!quicklookVideo || quicklookVideoDuration <= 0) return;
+
+  const safeDuration = Math.max(0, quicklookVideoDuration - 0.03);
+  const targetTime = safeDuration * clamp(progress);
+
+  if (Math.abs(quicklookVideo.currentTime - targetTime) > 0.025) {
+    quicklookVideo.currentTime = targetTime;
+  }
+};
+
+if (quicklookVideo) {
+  quicklookVideo.pause();
+  quicklookVideo.addEventListener("loadedmetadata", () => {
+    quicklookVideoDuration = Number.isFinite(quicklookVideo.duration) ? quicklookVideo.duration : 0;
+    updateFeatureScroll();
+  });
+}
 
 faqItems.forEach((item) => {
   item.addEventListener("toggle", () => {
@@ -144,6 +166,7 @@ const updateFeatureCards = (activeIndex) => {
 const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   const feature = featureStages[activeIndex];
   const isFinder = feature.key === "finder";
+  const isQuickLook = feature.key === "quicklook";
   const timelineProgress = clamp(localCheckpoint / (checkpointsPerFeature - 1));
   const phase = getFeaturePhase(timelineProgress);
   const installProgress = clamp(
@@ -156,10 +179,14 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
     timelineProgress,
   );
   const installExit = 1 - smoothstep(0.58, 0.78, timelineProgress);
-  const installOrbOpacity = installEntry * installExit;
+  const installOrbOpacity = isQuickLook ? 0 : installEntry * installExit;
   const installCheckProgress = smoothstep(0.88, 1, installProgress);
   const installLogoOpacity = 1 - smoothstep(0.68, 0.94, installProgress);
-  const finderAfterOpacity = isFinder ? smoothstep(0.64, checkpointProgress.end, timelineProgress) : 0;
+  const finderAfterOpacity = isFinder
+    ? smoothstep(0.64, checkpointProgress.end, timelineProgress)
+    : isQuickLook
+      ? 1
+      : 0;
   const finderLockOpacity = isFinder
     ? timelineProgress <= checkpointProgress.start
       ? 1
@@ -169,6 +196,30 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
           timelineProgress,
         )
     : 0;
+  const quicklookClickedOpacity = isQuickLook
+    ? smoothstep(0.025, checkpointProgress.start, timelineProgress)
+    : 0;
+  const quicklookPreviewEntry = isQuickLook
+    ? smoothstep(checkpointProgress.start + 0.12, checkpointProgress.middle, timelineProgress)
+    : 0;
+  const quicklookPreviewExit = isQuickLook
+    ? 1 - smoothstep(checkpointProgress.middle + 0.035, checkpointProgress.middle + 0.16, timelineProgress)
+    : 0;
+  const quicklookPreviewOpacity = quicklookPreviewEntry * quicklookPreviewExit;
+  const quicklookVideoProgress = isQuickLook
+    ? clamp(
+        (timelineProgress - checkpointProgress.middle) /
+          (checkpointProgress.end - checkpointProgress.middle),
+      )
+    : 0;
+  const quicklookVideoOpacity = isQuickLook
+    ? smoothstep(checkpointProgress.middle + 0.02, checkpointProgress.middle + 0.12, timelineProgress)
+    : 0;
+  const quicklookDimOpacity = isQuickLook
+    ? Math.max(quicklookPreviewEntry * 0.38, quicklookVideoOpacity * 0.34)
+    : 0;
+
+  syncQuickLookVideo(quicklookVideoProgress);
 
   setStageLabels(feature.labels);
 
@@ -182,7 +233,12 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   featureSection.style.setProperty("--install-check-scale", (0.72 + installCheckProgress * 0.28).toFixed(3));
   featureSection.style.setProperty("--install-check-dash", (1 - installCheckProgress).toFixed(3));
   featureSection.style.setProperty("--after-opacity", finderAfterOpacity.toFixed(3));
-  featureSection.style.setProperty("--fallback-opacity", isFinder ? "0" : "1");
+  featureSection.style.setProperty("--fallback-opacity", isFinder || isQuickLook ? "0" : "1");
+  featureSection.style.setProperty("--quicklook-clicked-opacity", quicklookClickedOpacity.toFixed(3));
+  featureSection.style.setProperty("--quicklook-dim-opacity", quicklookDimOpacity.toFixed(3));
+  featureSection.style.setProperty("--quicklook-preview-opacity", quicklookPreviewOpacity.toFixed(3));
+  featureSection.style.setProperty("--quicklook-video-opacity", quicklookVideoOpacity.toFixed(3));
+  featureSection.style.setProperty("--quicklook-video-scale", (0.985 + quicklookVideoProgress * 0.015).toFixed(3));
   featureSection.style.setProperty("--before-scale", (1 + finderAfterOpacity * 0.018).toFixed(3));
   featureSection.style.setProperty("--after-scale", (1.018 - finderAfterOpacity * 0.018).toFixed(3));
   featureSection.style.setProperty("--lock-opacity", finderLockOpacity.toFixed(3));
@@ -190,7 +246,8 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   featureSection.style.setProperty("--lock-rotate", `${(-32 * (1 - finderLockOpacity)).toFixed(2)}deg`);
 
   featureSection.classList.toggle("is-feature-finder", isFinder);
-  featureSection.classList.toggle("is-feature-fallback", !isFinder);
+  featureSection.classList.toggle("is-feature-quicklook", isQuickLook);
+  featureSection.classList.toggle("is-feature-fallback", !isFinder && !isQuickLook);
   featureSection.classList.toggle("is-stage-start", phase === "start");
   featureSection.classList.toggle("is-stage-middle", phase === "middle");
   featureSection.classList.toggle("is-stage-end", phase === "end");

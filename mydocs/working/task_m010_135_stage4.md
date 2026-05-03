@@ -132,6 +132,7 @@ Mac에서 한글 파일은
 - 좁은 화면에서 Feature 설명 카드 폭을 Finder 이미지 stage 폭과 같은 기준으로 맞추고, 카드 상단 여백과 가장 좁은 화면의 카드 제목/본문 type scale을 낮춰 섹션 heading과 위계를 맞췄다.
 - hero, 영상, Feature 화면 진입 시 위에서 아래 순서로 `fade in + slide up` reveal animation이 실행되도록 공통 `data-reveal` 구조와 IntersectionObserver를 추가했다. 동영상 로딩이 지연되어도 headline, supporting copy, CTA, product mockup, Feature heading이 먼저 자연스럽게 나타난다.
 - 첫 화면의 hero와 영상 섹션은 `intro` reveal sequence로 묶어 `제목 -> 설명 -> Mac 다운로드 -> 노트북 mockup/영상` 순서가 분명하게 보이도록 delay index를 공유하게 했다. Feature 섹션의 reveal timing은 기존대로 유지했다.
+- `스페이스바로 즉시 미리보기` Feature의 stage visual을 추가했다. Finder 최종 썸네일 화면에서 시작해 `파일 선택` checkpoint에서 `preview-clicked.png`로 전환하고, `스페이스바 미리보기` checkpoint에서는 `preview-after.png` Quick Look overlay와 dim 처리를 적용한다. `확대 및 복사` 구간은 `zoom-and-copy.mov`의 `currentTime`을 스크롤 진행률에 매핑해 stage 완료와 영상 마지막 프레임이 맞도록 했다.
 - Apple 공식 MacBook Pro 페이지의 highlights/closer-look product storytelling과 MacBook Air/Pro 환경 섹션의 큰 카드형 수치 강조를 참고했다.
   - `https://www.apple.com/macbook-pro/`
   - `https://www.apple.com/macbook-air/`

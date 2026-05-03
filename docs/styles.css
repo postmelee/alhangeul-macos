@@ -296,6 +296,11 @@ video {
   --install-check-dash: 1;
   --after-opacity: 0;
   --fallback-opacity: 0;
+  --quicklook-clicked-opacity: 0;
+  --quicklook-dim-opacity: 0;
+  --quicklook-preview-opacity: 0;
+  --quicklook-video-opacity: 0;
+  --quicklook-video-scale: 1;
   --before-scale: 1;
   --after-scale: 1.018;
   --lock-opacity: 1;
@@ -408,6 +413,48 @@ video {
 .feature-fallback-image {
   opacity: var(--fallback-opacity);
   transform: scale(1.012);
+}
+
+.quicklook-clicked-image {
+  opacity: var(--quicklook-clicked-opacity);
+  transform: scale(1.004);
+}
+
+.quicklook-stage-dim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #000000;
+  opacity: var(--quicklook-dim-opacity);
+  pointer-events: none;
+  transition: opacity 320ms ease;
+}
+
+.quicklook-preview-overlay,
+.quicklook-scroll-video {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  width: auto;
+  height: 92%;
+  max-width: 74%;
+  object-fit: contain;
+  border-radius: 12px;
+  filter: drop-shadow(0 26px 48px rgba(0, 0, 0, 0.36));
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(var(--quicklook-video-scale));
+  transition:
+    opacity 260ms ease,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.quicklook-preview-overlay {
+  opacity: var(--quicklook-preview-opacity);
+}
+
+.quicklook-scroll-video {
+  opacity: var(--quicklook-video-opacity);
 }
 
 .finder-lock {
@@ -687,6 +734,29 @@ video {
 
 .install-marker::after {
   display: none;
+}
+
+.features-section.is-feature-quicklook .install-marker {
+  overflow: hidden;
+  border: 2px solid rgba(52, 199, 89, 0.28);
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.features-section.is-feature-quicklook .install-marker::after {
+  display: block;
+}
+
+.features-section.is-feature-quicklook .install-ring,
+.features-section.is-feature-quicklook .install-logo-stack,
+.features-section.is-feature-quicklook .install-check {
+  display: none;
+}
+
+.features-section.is-feature-quicklook.is-stage-middle .checkpoint-middle .install-marker::after,
+.features-section.is-feature-quicklook.is-stage-end .checkpoint-middle .install-marker::after {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .feature-highlight {
