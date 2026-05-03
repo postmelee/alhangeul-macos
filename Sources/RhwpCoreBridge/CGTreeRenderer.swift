@@ -981,23 +981,24 @@ class CGTreeRenderer {
         charPositions: [Double]?
     ) -> TextRunClusterPlan? {
         let clusterSpans = splitTextRunClusters(text)
-        guard clusterSpans.count > 1 else { return nil }
+        let allowsSingleClusterPlan = clusterSpans.count == 1 && needsHalfwidthPunctuationScale(text, style: style)
+        guard clusterSpans.count > 1 || allowsSingleClusterPlan else { return nil }
 
         let explicitPositions = explicitTextRunClusterPositions(
             clusterSpans: clusterSpans,
             charPositions: charPositions
         )
         let rawPositions: [CGFloat]
+        let metrics: [TextRunClusterMetric]?
         if let explicitPositions {
             rawPositions = explicitPositions
+            metrics = nil
         } else {
-            let metrics = clusterSpans.map { cluster in
-                TextRunClusterMetric(
-                    text: cluster.text,
-                    advance: textRunClusterAdvance(cluster.text, style: style, attributes: attributes)
-                )
+            let measuredMetrics = clusterSpans.map { cluster in
+                makeTextRunClusterMetric(cluster.text, style: style, attributes: attributes)
             }
-            rawPositions = textRunClusterPositions(metrics: metrics, style: style)
+            rawPositions = textRunClusterPositions(metrics: measuredMetrics, style: style)
+            metrics = measuredMetrics
         }
         guard rawPositions.count == clusterSpans.count + 1,
               let rawWidth = rawPositions.last,
@@ -1014,10 +1015,12 @@ class CGTreeRenderer {
         var clusters: [TextRunCluster] = []
         clusters.reserveCapacity(clusterSpans.count)
         for index in clusterSpans.indices {
+            let clusterText = clusterSpans[index].text
             let startX = rawPositions[index] * scale
             clusters.append(TextRunCluster(
-                text: clusterSpans[index].text,
-                x: startX
+                text: clusterText,
+                x: startX,
+                line: metrics?[index].line ?? makeDrawableTextClusterLine(clusterText, attributes: attributes)
             ))
         }
 
@@ -1187,31 +1190,49 @@ class CGTreeRenderer {
         return TextRunTabStop(position: next, tabType: 0, fillType: 0)
     }
 
-    private func textRunClusterAdvance(
+    private func makeTextRunClusterMetric(
         _ cluster: String,
         style: TextStyle,
         attributes: [NSAttributedString.Key: Any]
-    ) -> CGFloat {
-        if cluster == "\t" { return 0 }
+    ) -> TextRunClusterMetric {
+        if cluster == "\t" {
+            return TextRunClusterMetric(text: cluster, advance: 0, line: nil)
+        }
 
-        let measuredWidth = measureTextRunClusterWidth(cluster, attributes: attributes)
+        let line = makeTextRunClusterLine(cluster, attributes: attributes)
+        let measuredWidth = measureTextRunClusterWidth(line)
         let baseWidth = textRunClusterBaseWidth(cluster, measuredWidth: measuredWidth, style: style)
         let styleSpacing = CGFloat(style.letterSpacing + style.extraCharSpacing)
         var width = baseWidth + styleSpacing
         if cluster == " " {
             width += CGFloat(style.extraWordSpacing)
         }
-        return max(0, width)
+        return TextRunClusterMetric(
+            text: cluster,
+            advance: max(0, width),
+            line: isDrawableTextCluster(cluster) ? line : nil
+        )
+    }
+
+    private func makeDrawableTextClusterLine(
+        _ cluster: String,
+        attributes: [NSAttributedString.Key: Any]
+    ) -> CTLine? {
+        guard isDrawableTextCluster(cluster) else { return nil }
+        return makeTextRunClusterLine(cluster, attributes: attributes)
+    }
+
+    private func makeTextRunClusterLine(
+        _ cluster: String,
+        attributes: [NSAttributedString.Key: Any]
+    ) -> CTLine {
+        let attrStr = NSAttributedString(string: cluster, attributes: attributes)
+        return CTLineCreateWithAttributedString(attrStr)
     }
 
     private func measureTextRunClusterWidth(
-        _ cluster: String,
-        attributes: [NSAttributedString.Key: Any]
+        _ line: CTLine
     ) -> CGFloat {
-        guard !cluster.isEmpty else { return 0 }
-
-        let attrStr = NSAttributedString(string: cluster, attributes: attributes)
-        let line = CTLineCreateWithAttributedString(attrStr)
         var ascent: CGFloat = 0
         var descent: CGFloat = 0
         var leading: CGFloat = 0
@@ -1317,8 +1338,7 @@ class CGTreeRenderer {
         y: CGFloat,
         in ctx: CGContext
     ) {
-        let attrStr = NSAttributedString(string: cluster.text, attributes: attributes)
-        let line = CTLineCreateWithAttributedString(attrStr)
+        let line = cluster.line ?? makeTextRunClusterLine(cluster.text, attributes: attributes)
 
         if needsHalfwidthPunctuationScale(cluster.text, style: style) {
             ctx.saveGState()
@@ -1540,11 +1560,13 @@ private struct TextRunClusterPlan {
 private struct TextRunCluster {
     let text: String
     let x: CGFloat
+    let line: CTLine?
 }
 
 private struct TextRunClusterMetric {
     let text: String
     let advance: CGFloat
+    let line: CTLine?
 }
 
 private struct TextRunClusterSpan {
