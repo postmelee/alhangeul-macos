@@ -294,6 +294,11 @@ video {
   font-weight: 600;
 }
 
+.features-copy > .section-heading {
+  justify-self: center;
+  text-align: center;
+}
+
 .features-sticky {
   position: sticky;
   top: 52px;
