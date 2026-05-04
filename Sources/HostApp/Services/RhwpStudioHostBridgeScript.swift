@@ -16,8 +16,76 @@ enum RhwpStudioHostBridgeScript {
         window.webkit?.messageHandlers?.alhangeulHost?.postMessage(message);
       }
 
+      const statusMessageRestoreDelayMs = 3000;
+      let statusMessageRestoreTimer = null;
+
+      function statusMessageElement() {
+        return document.getElementById("sb-message");
+      }
+
+      function fileNameFromStatusText(text) {
+        if (!text?.includes(" — ")) {
+          return null;
+        }
+
+        const fileName = text?.split(" — ")[0]?.trim();
+        if (!fileName || fileName.startsWith("저장 완료")) {
+          return null;
+        }
+        return fileName;
+      }
+
+      function statusTextWithFileName(statusText, fileName) {
+        if (!statusText || !fileName || !statusText.includes(" — ")) {
+          return statusText;
+        }
+
+        const [, ...suffixParts] = statusText.split(" — ");
+        return `${fileName} — ${suffixParts.join(" — ")}`;
+      }
+
+      function rememberCurrentFileName(fileName = null) {
+        const element = statusMessageElement();
+        if (!element) {
+          return fileName;
+        }
+
+        const nextFileName = fileName || fileNameFromStatusText(element.textContent) || element.dataset.alhangeulCurrentFileName;
+        if (nextFileName) {
+          element.dataset.alhangeulCurrentFileName = nextFileName;
+        }
+        return nextFileName;
+      }
+
       function currentFileName() {
-        return document.getElementById("sb-message")?.textContent?.split(" — ")[0] || "document.hwp";
+        return rememberCurrentFileName() || "document.hwp";
+      }
+
+      function showTemporaryStatusMessage(message, fileName = null, durationMs = statusMessageRestoreDelayMs) {
+        const element = statusMessageElement();
+        if (!element) {
+          return false;
+        }
+
+        const rememberedFileName = rememberCurrentFileName(fileName);
+        const restoreStatus = element.dataset.alhangeulRestoreStatus || element.textContent || "";
+        element.dataset.alhangeulRestoreStatus = statusTextWithFileName(restoreStatus, rememberedFileName);
+
+        if (statusMessageRestoreTimer) {
+          clearTimeout(statusMessageRestoreTimer);
+        }
+
+        element.textContent = message;
+        statusMessageRestoreTimer = setTimeout(() => {
+          if (element.textContent === message) {
+            element.textContent = element.dataset.alhangeulRestoreStatus || "";
+          }
+
+          delete element.dataset.alhangeulRestoreStatus;
+          statusMessageRestoreTimer = null;
+        }, durationMs);
+
+        return true;
       }
 
       function requestRhwp(method, params = {}, timeoutMs = 15000) {
@@ -306,6 +374,10 @@ enum RhwpStudioHostBridgeScript {
       window.__alhangeulHostBridgeExportPDFDocument = () => {
         exportPDFDocument();
         return true;
+      };
+
+      window.__alhangeulHostBridgeShowSaveCompletedStatus = (timeText, fileName) => {
+        return showTemporaryStatusMessage(`저장 완료 ${timeText}`, fileName);
       };
 
       window.__alhangeulHostBridgeRunNativeCommand = (command) => {

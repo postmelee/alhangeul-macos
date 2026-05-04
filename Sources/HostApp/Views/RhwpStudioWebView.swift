@@ -393,6 +393,39 @@ extension RhwpStudioWebView {
         private func recordSavedDocument(at url: URL) {
             currentSourceDocument = RecentDocumentItem.make(for: url)
             onDocumentSaved(url)
+            showSaveCompletedStatus(for: url)
+        }
+
+        private func showSaveCompletedStatus(for url: URL) {
+            guard let webView = commandWebView else {
+                return
+            }
+
+            let timeText = Self.saveStatusTimeText()
+            let script = """
+            window.__alhangeulHostBridgeShowSaveCompletedStatus?.(
+              \(Self.javaScriptStringLiteral(timeText)),
+              \(Self.javaScriptStringLiteral(url.lastPathComponent))
+            )
+            """
+            webView.evaluateJavaScript(script)
+        }
+
+        private static func saveStatusTimeText() -> String {
+            let components = Calendar.current.dateComponents([.hour, .minute], from: Date())
+            return String(format: "%02d:%02d", components.hour ?? 0, components.minute ?? 0)
+        }
+
+        private static func javaScriptStringLiteral(_ value: String) -> String {
+            guard let data = try? JSONSerialization.data(withJSONObject: [value]),
+                  let arrayLiteral = String(data: data, encoding: .utf8),
+                  arrayLiteral.hasPrefix("["),
+                  arrayLiteral.hasSuffix("]")
+            else {
+                return "\"\""
+            }
+
+            return String(arrayLiteral.dropFirst().dropLast())
         }
 
         private func shareDocument(_ body: [String: Any]) {
