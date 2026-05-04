@@ -124,7 +124,7 @@ enum RhwpStudioHostBridgeScript {
         }
 
         const item = document.createElement("div");
-        item.className = saveItem.className;
+        item.className = "md-item";
         item.dataset.cmd = "file:save-as";
         item.innerHTML = '<span class="md-icon"></span><span class="md-label">다른 이름으로 저장...</span><span class="md-shortcut">Command+Shift+S</span>';
         saveItem.after(item);
@@ -160,6 +160,20 @@ enum RhwpStudioHostBridgeScript {
         ensureSaveAsMenuItem();
         enableNativeCommandItems();
         rewriteShortcutLabelsForMac();
+      }
+
+      let pendingHostOverridesRefresh = false;
+
+      function scheduleHostOverridesRefresh() {
+        if (pendingHostOverridesRefresh) {
+          return;
+        }
+
+        pendingHostOverridesRefresh = true;
+        requestAnimationFrame(() => {
+          pendingHostOverridesRefresh = false;
+          refreshHostOverrides();
+        });
       }
 
       function nativeCommandForShortcut(event) {
@@ -314,7 +328,7 @@ enum RhwpStudioHostBridgeScript {
         subtree: true
       });
 
-      document.addEventListener("click", (event) => {
+      function handleNativeCommandElementEvent(event) {
         const target = event.target;
         if (!(target instanceof Element)) {
           return;
@@ -334,7 +348,11 @@ enum RhwpStudioHostBridgeScript {
         event.stopPropagation();
         event.stopImmediatePropagation();
         window.__alhangeulHostBridgeRunNativeCommand(command);
-      }, true);
+      }
+
+      document.addEventListener("mousedown", scheduleHostOverridesRefresh, true);
+      document.addEventListener("mousedown", handleNativeCommandElementEvent, true);
+      document.addEventListener("click", handleNativeCommandElementEvent, true);
 
       document.addEventListener("keydown", (event) => {
         const command = nativeCommandForShortcut(event);
