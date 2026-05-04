@@ -86,6 +86,13 @@ final class DocumentViewerStore: ObservableObject {
         DocumentFileActions.revealInFinder(sourceDocument.url)
     }
 
+    func recordSavedDocument(at url: URL) {
+        let sourceDocument = RecentDocumentItem.make(for: url)
+        filename = url.lastPathComponent
+        self.sourceDocument = sourceDocument
+        recentDocuments = RecentDocumentStore.record(sourceDocument)
+    }
+
     func setWebViewLoading(_ isLoading: Bool) {
         isWebViewLoading = isLoading
     }

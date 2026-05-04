@@ -141,6 +141,11 @@ private struct HostAppCommands: Commands {
                 RhwpStudioNativeCommandDispatcher.run("file:save")
             }
             .keyboardShortcut("s", modifiers: [.command])
+
+            Button("다른 이름으로 저장...") {
+                RhwpStudioNativeCommandDispatcher.run("file:save-as")
+            }
+            .keyboardShortcut("s", modifiers: [.command, .shift])
         }
 
         CommandGroup(replacing: .printItem) {
