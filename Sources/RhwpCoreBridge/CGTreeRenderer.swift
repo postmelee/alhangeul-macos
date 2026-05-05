@@ -13,6 +13,7 @@ class CGTreeRenderer {
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
 
+    private var pageBounds: BBox?
     private var pageHeight: Double = 0
 
     func render(tree: RenderNode, in context: CGContext, pageHeight: Double, document: RhwpDocument?) {
@@ -23,6 +24,7 @@ class CGTreeRenderer {
             clearCache()
         }
         self.document = document
+        self.pageBounds = tree.bbox
         self.pageHeight = pageHeight
         // 호출 측은 좌상단 원점 좌표계로 CGContext를 전달한다.
         // 렌더 트리의 좌표(좌상단 원점)를 그대로 사용할 수 있다.
@@ -61,14 +63,7 @@ class CGTreeRenderer {
             renderPageBackground(bg, bbox: node.bbox, in: ctx)
 
         case .body(let body):
-            if let clip = body.clipRect {
-                ctx.saveGState()
-                ctx.clip(to: cgRect(clip))
-                renderChildren(node, in: ctx)
-                ctx.restoreGState()
-            } else {
-                renderChildren(node, in: ctx)
-            }
+            renderBody(body, node: node, in: ctx)
 
         case .tableCell(let cell):
             if cell.clip {
@@ -126,6 +121,107 @@ class CGTreeRenderer {
         for child in node.children {
             renderNode(child, in: ctx)
         }
+    }
+
+    private func renderBody(_ body: BodyNode, node: RenderNode, in ctx: CGContext) {
+        guard let clip = body.clipRect else {
+            renderChildren(node, in: ctx)
+            return
+        }
+
+        ctx.saveGState()
+        ctx.clip(to: cgRect(clip))
+        renderChildren(node, in: ctx)
+        ctx.restoreGState()
+
+        renderBodyOverflowControls(node, bodyClip: clip, in: ctx)
+    }
+
+    private func renderBodyOverflowControls(_ bodyNode: RenderNode, bodyClip: BBox, in ctx: CGContext) {
+        let candidates = bodyOverflowReplayCandidates(in: bodyNode, bodyClip: bodyClip)
+        guard !candidates.isEmpty else { return }
+
+        ctx.saveGState()
+        ctx.clip(to: bodyOverflowReplayClipRect(bodyClip))
+        for candidate in candidates {
+            renderNode(candidate, in: ctx)
+        }
+        ctx.restoreGState()
+    }
+
+    private func bodyOverflowReplayCandidates(in bodyNode: RenderNode, bodyClip: BBox) -> [RenderNode] {
+        let bodyLeft = bodyClip.x
+        let bodyRight = bodyClip.x + bodyClip.width
+        var candidates: [RenderNode] = []
+
+        for child in bodyNode.children {
+            if case .column(_) = child.nodeType {
+                candidates.append(
+                    contentsOf: child.children.filter {
+                        isBodyOverflowReplayCandidate($0, bodyLeft: bodyLeft, bodyRight: bodyRight)
+                    }
+                )
+            } else if isBodyOverflowReplayCandidate(child, bodyLeft: bodyLeft, bodyRight: bodyRight) {
+                candidates.append(child)
+            }
+        }
+
+        return candidates
+    }
+
+    private func isBodyOverflowReplayCandidate(
+        _ node: RenderNode,
+        bodyLeft: Double,
+        bodyRight: Double
+    ) -> Bool {
+        guard node.visible, !isTextClipBoundNode(node) else {
+            return false
+        }
+        return horizontallyOverflows(node.bbox, left: bodyLeft, right: bodyRight)
+    }
+
+    private func isTextClipBoundNode(_ node: RenderNode) -> Bool {
+        switch node.nodeType {
+        case .page(_),
+             .pageBackground(_),
+             .masterPage,
+             .header,
+             .footer,
+             .body(_),
+             .column(_),
+             .footnoteArea,
+             .textLine(_),
+             .textRun(_),
+             .footnoteMarker(_),
+             .unknown:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func horizontallyOverflows(_ bbox: BBox, left: Double, right: Double) -> Bool {
+        bbox.x < left || bbox.x + bbox.width > right
+    }
+
+    private func bodyOverflowReplayClipRect(_ bodyClip: BBox) -> CGRect {
+        let pageRect: CGRect
+        if let pageBounds {
+            pageRect = cgRect(pageBounds)
+        } else {
+            pageRect = CGRect(
+                x: 0,
+                y: 0,
+                width: CGFloat(max(bodyClip.x + bodyClip.width, 0)),
+                height: CGFloat(max(pageHeight, bodyClip.y + bodyClip.height))
+            )
+        }
+        return CGRect(
+            x: pageRect.minX,
+            y: CGFloat(bodyClip.y),
+            width: pageRect.width,
+            height: CGFloat(bodyClip.height)
+        )
     }
 
     // MARK: - 사각형
