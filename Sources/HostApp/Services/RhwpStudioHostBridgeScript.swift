@@ -459,6 +459,10 @@ enum RhwpStudioHostBridgeScript {
           return;
         }
 
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        document.getElementById("scroll-container")?.classList.remove("drag-over");
         postDroppedDocument(file);
       }, true);
 
