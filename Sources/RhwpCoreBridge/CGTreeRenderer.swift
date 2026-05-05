@@ -9,6 +9,7 @@ import ImageIO
 
 class CGTreeRenderer {
     private let imageCropUnitsPerPixel = 75.0
+    private let tableCellClipRightSlack = 4.0
 
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
@@ -66,14 +67,7 @@ class CGTreeRenderer {
             renderBody(body, node: node, in: ctx)
 
         case .tableCell(let cell):
-            if cell.clip {
-                ctx.saveGState()
-                ctx.clip(to: cgRect(node.bbox))
-                renderChildren(node, in: ctx)
-                ctx.restoreGState()
-            } else {
-                renderChildren(node, in: ctx)
-            }
+            renderTableCell(cell, node: node, in: ctx)
 
         case .rectangle(let rect):
             renderRectangle(rect, bbox: node.bbox, in: ctx)
@@ -115,6 +109,27 @@ class CGTreeRenderer {
             // 구조 노드(header, footer, column 등): 자식만 순회
             renderChildren(node, in: ctx)
         }
+    }
+
+    private func renderTableCell(_ cell: TableCellNode, node: RenderNode, in ctx: CGContext) {
+        guard cell.clip else {
+            renderChildren(node, in: ctx)
+            return
+        }
+
+        ctx.saveGState()
+        ctx.clip(to: tableCellClipRect(for: node.bbox))
+        renderChildren(node, in: ctx)
+        ctx.restoreGState()
+    }
+
+    private func tableCellClipRect(for bbox: BBox) -> CGRect {
+        CGRect(
+            x: bbox.x,
+            y: bbox.y,
+            width: max(0, bbox.width + tableCellClipRightSlack),
+            height: bbox.height
+        )
     }
 
     private func renderChildren(_ node: RenderNode, in ctx: CGContext) {
