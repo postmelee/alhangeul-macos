@@ -814,10 +814,53 @@ extension RhwpStudioWebView {
 
 private final class RhwpStudioNativeCommandWebView: WKWebView {
     var nativeCommandHandler: ((String) -> Bool)?
+    var droppedFileURLHandler: ((URL) -> Void)?
+
+    override init(frame: NSRect, configuration: WKWebViewConfiguration) {
+        super.init(frame: frame, configuration: configuration)
+        registerForDraggedTypes([.fileURL])
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     @discardableResult
     func runNativeCommand(_ command: String) -> Bool {
         nativeCommandHandler?(command) ?? false
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        guard canHandleDocumentDrop(from: sender) else {
+            return super.draggingEntered(sender)
+        }
+        return acceptedDropOperation(for: sender)
+    }
+
+    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        guard canHandleDocumentDrop(from: sender) else {
+            return super.draggingUpdated(sender)
+        }
+        return acceptedDropOperation(for: sender)
+    }
+
+    override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard canHandleDocumentDrop(from: sender) else {
+            return super.prepareForDragOperation(sender)
+        }
+        return droppedFileURLHandler != nil
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let droppedFileURLHandler,
+              let fileURL = supportedDocumentFileURL(from: sender)
+        else {
+            return super.performDragOperation(sender)
+        }
+
+        droppedFileURLHandler(fileURL)
+        return true
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
@@ -869,6 +912,54 @@ private final class RhwpStudioNativeCommandWebView: WKWebView {
         default:
             return nil
         }
+    }
+
+    private func canHandleDocumentDrop(from sender: NSDraggingInfo) -> Bool {
+        droppedFileURLHandler != nil && supportedDocumentFileURL(from: sender) != nil
+    }
+
+    private func acceptedDropOperation(for sender: NSDraggingInfo) -> NSDragOperation {
+        let sourceMask = sender.draggingSourceOperationMask
+        if sourceMask.contains(.copy) {
+            return .copy
+        }
+        if sourceMask.contains(.generic) {
+            return .generic
+        }
+        return []
+    }
+
+    private func supportedDocumentFileURL(from sender: NSDraggingInfo) -> URL? {
+        supportedDocumentFileURLs(from: sender.draggingPasteboard).first
+    }
+
+    private func supportedDocumentFileURLs(from pasteboard: NSPasteboard) -> [URL] {
+        let objects = pasteboard.readObjects(
+            forClasses: [NSURL.self],
+            options: [.urlReadingFileURLsOnly: true]
+        )
+
+        return objects?
+            .compactMap { object -> URL? in
+                if let url = object as? URL {
+                    return url
+                }
+                if let url = object as? NSURL {
+                    return url as URL
+                }
+                return nil
+            }
+            .map(\.standardizedFileURL)
+            .filter(Self.isSupportedDocumentFileURL) ?? []
+    }
+
+    private static func isSupportedDocumentFileURL(_ url: URL) -> Bool {
+        guard url.isFileURL else {
+            return false
+        }
+
+        let pathExtension = url.pathExtension.lowercased()
+        return pathExtension == "hwp" || pathExtension == "hwpx"
     }
 }
 
