@@ -23,7 +23,7 @@
 > 스페이스바로 미리보고, Finder에서 썸네일로 찾고, PDF/HWPX/Markdown으로 변환하세요.
 
 
-![home_banner](assets/home_banner.png)
+![home_banner](assets/alhanguel_readme.png)
 
 ## 알한글 for macOS
 
