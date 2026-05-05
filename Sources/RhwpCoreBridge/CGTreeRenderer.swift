@@ -174,26 +174,24 @@ class CGTreeRenderer {
         bodyLeft: Double,
         bodyRight: Double
     ) -> Bool {
-        guard node.visible, !isTextClipBoundNode(node) else {
+        guard node.visible, isBodyOverflowControlNode(node) else {
             return false
         }
         return horizontallyOverflows(node.bbox, left: bodyLeft, right: bodyRight)
     }
 
-    private func isTextClipBoundNode(_ node: RenderNode) -> Bool {
+    private func isBodyOverflowControlNode(_ node: RenderNode) -> Bool {
         switch node.nodeType {
-        case .page(_),
-             .pageBackground(_),
-             .masterPage,
-             .header,
-             .footer,
-             .body(_),
-             .column(_),
-             .footnoteArea,
-             .textLine(_),
-             .textRun(_),
-             .footnoteMarker(_),
-             .unknown:
+        case .table(_),
+             .line(_),
+             .rectangle(_),
+             .ellipse(_),
+             .path(_),
+             .image(_),
+             .group(_),
+             .textBox,
+             .equation(_),
+             .formObject(_):
             return true
         default:
             return false
