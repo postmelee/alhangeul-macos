@@ -68,6 +68,44 @@
 - DMG `sha256` 교체: Cask 초안의 `sha256 :no_check`를 public DMG 생성 후 실제 digest로 교체할 시점
 - Developer ID 서명/notarization 실행 시점: credential은 준비됐지만 실제 public release 실행은 작업지시자가 버전과 release commit을 확정하고 명시 지시한 시점에만 수행
 
+## v0.1 배포 수준 결정
+
+v0.1 public release의 기본 배포 수준은 **Developer ID signed + notarized DMG**로 둔다. Apple Developer Program과 Developer ID Application identity, `notarytool` keychain profile이 준비되어 있으므로 unsigned 또는 ad-hoc signed artifact를 일반 사용자 배포 기준으로 삼지 않는다.
+
+| 배포 수준 | v0.1 판단 | 사용자 영향 | 사용 범위 |
+|-----------|-----------|-------------|-----------|
+| unsigned app/DMG | public 배포 기준 아님 | Gatekeeper 차단과 수동 우회 안내가 필요하고 신뢰도가 낮다 | 로컬 빌드 실패 분석 등 제한적 개발 확인 |
+| ad-hoc signed app/DMG | public 배포 기준 아님 | notarization이 없고 외부 사용자 설치 신뢰 기준을 충족하지 못한다 | CI/로컬 bundle 구조 확인 |
+| Developer ID signed, not notarized | public 배포 기준 아님 | 최신 macOS Gatekeeper에서 quarantine 경로 실행이 막힐 수 있다 | notarization 실패 원인 분리 시 임시 확인 |
+| Developer ID signed + notarized DMG | v0.1 public 기본값 | 다운로드 후 일반적인 Gatekeeper 흐름에서 실행 가능해야 한다 | GitHub Release asset, Homebrew Cask 기준 산출물 |
+| Mac App Store | v0.1 범위 밖 | App Store signing/export, review, metadata, privacy 준비가 별도로 필요하다 | 후속 배포 lane |
+
+운영 기준:
+
+- public 사용자가 받는 artifact는 `scripts/release.sh <version>` public mode로 생성한 `alhangeul-macos-<version>.dmg`여야 한다.
+- `--skip-notarize` rehearsal DMG, 개발용 zip, unsigned/ad-hoc 산출물은 GitHub Release public asset 또는 Homebrew Cask URL에 사용하지 않는다.
+- public DMG의 `.sha256` 파일을 GitHub Release와 release note에 함께 공개하고, Homebrew Cask `sha256`은 이 digest로 고정한다.
+- public release 실행, GitHub Release 게시, Homebrew Cask 반영은 각각 작업지시자의 명시 승인 후 수행한다.
+
+## 사용자 설치 안내 기준
+
+public release note, README, Homebrew caveats에는 다음 기준을 일관되게 적용한다.
+
+- 설치 파일: `alhangeul-macos-<version>.dmg`
+- 설치 방식: DMG를 열고 `AlhangeulMac.app`을 `/Applications`로 복사
+- 첫 실행: 설치 후 앱을 한 번 실행해 macOS가 Quick Look/Thumbnail extension을 발견하고 등록할 수 있게 안내
+- Finder 확인: `.hwp` 또는 `.hwpx` 파일을 Finder에서 선택한 뒤 Space로 Quick Look preview를 확인하고, Finder icon view에서 thumbnail 갱신을 확인
+- Gatekeeper: notarized DMG 기준으로 일반 실행이 가능해야 하며, 사용자가 임의로 quarantine을 해제하는 안내를 기본 설치 경로로 쓰지 않는다
+- checksum: GitHub Release의 `.sha256` 값과 다운로드한 DMG의 SHA256을 비교할 수 있게 안내
+- Homebrew: Cask는 GitHub Release에 notarized public DMG가 업로드되고 sha256이 고정된 뒤에만 설치 안내에 포함
+
+Gatekeeper나 quarantine 문제가 보고되면 먼저 다음을 확인한다.
+
+- 사용자가 rehearsal DMG 또는 개발용 zip을 받은 것은 아닌가
+- DMG가 GitHub Release의 public asset과 같은 파일명, 같은 sha256인가
+- `xcrun stapler validate`와 `spctl` 검증이 release machine에서 통과했는가
+- 앱을 `/Applications`에 복사한 뒤 한 번 실행했는가
+
 ## 릴리스 전 확인
 
 릴리스 후보를 만들기 전에 다음을 확인한다.
