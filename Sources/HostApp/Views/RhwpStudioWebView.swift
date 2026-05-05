@@ -2,12 +2,18 @@ import AppKit
 import SwiftUI
 import WebKit
 
+struct RhwpStudioDroppedDocument {
+    let data: Data
+    let fileName: String
+}
+
 struct RhwpStudioWebView: NSViewRepresentable {
     let document: RhwpStudioDocumentPayload?
     let sourceDocument: RecentDocumentItem?
     let onLoadStateChange: (Bool) -> Void
     let onError: (String?) -> Void
     let onOpenDocument: () -> Void
+    let onDroppedDocument: (RhwpStudioDroppedDocument) -> Void
     let onDocumentSaved: (URL) -> Void
 
     init(
@@ -16,6 +22,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         onLoadStateChange: @escaping (Bool) -> Void = { _ in },
         onError: @escaping (String?) -> Void = { _ in },
         onOpenDocument: @escaping () -> Void = {},
+        onDroppedDocument: @escaping (RhwpStudioDroppedDocument) -> Void = { _ in },
         onDocumentSaved: @escaping (URL) -> Void = { _ in }
     ) {
         self.document = document
@@ -23,6 +30,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         self.onLoadStateChange = onLoadStateChange
         self.onError = onError
         self.onOpenDocument = onOpenDocument
+        self.onDroppedDocument = onDroppedDocument
         self.onDocumentSaved = onDocumentSaved
     }
 
@@ -38,6 +46,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         context.coordinator.onLoadStateChange = onLoadStateChange
         context.coordinator.onError = onError
         context.coordinator.onOpenDocument = onOpenDocument
+        context.coordinator.onDroppedDocument = onDroppedDocument
         context.coordinator.onDocumentSaved = onDocumentSaved
         context.coordinator.update(document: document, sourceDocument: sourceDocument, in: webView)
     }
@@ -48,6 +57,7 @@ extension RhwpStudioWebView {
         var onLoadStateChange: (Bool) -> Void = { _ in }
         var onError: (String?) -> Void = { _ in }
         var onOpenDocument: () -> Void = {}
+        var onDroppedDocument: (RhwpStudioDroppedDocument) -> Void = { _ in }
         var onDocumentSaved: (URL) -> Void = { _ in }
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
@@ -272,6 +282,8 @@ extension RhwpStudioWebView {
             switch type {
             case "command":
                 handleHostCommand(body)
+            case "dropped-document":
+                handleDroppedDocument(body)
             case "save-document":
                 saveDocument(body)
             case "share-document":
@@ -287,6 +299,29 @@ extension RhwpStudioWebView {
             default:
                 break
             }
+        }
+
+        private func handleDroppedDocument(_ body: [String: Any]) {
+            guard let fileName = body["fileName"] as? String,
+                  Self.isSupportedDocumentFilename(fileName)
+            else {
+                onError("끌어놓은 문서를 열 수 없습니다: HWP/HWPX 파일만 지원합니다.")
+                return
+            }
+
+            guard let data = decodedData(
+                from: body,
+                missingMessage: "끌어놓은 문서를 읽을 수 없습니다"
+            ) else {
+                return
+            }
+
+            onDroppedDocument(
+                RhwpStudioDroppedDocument(
+                    data: data,
+                    fileName: fileName
+                )
+            )
         }
 
         private func handleHostCommand(_ body: [String: Any]) {
@@ -450,6 +485,23 @@ extension RhwpStudioWebView {
             from body: [String: Any],
             missingMessage: String
         ) -> (data: Data, fileName: String)? {
+            guard let data = decodedData(
+                from: body,
+                missingMessage: missingMessage
+            ) else {
+                return nil
+            }
+
+            let fileName = body["fileName"] as? String
+                ?? currentDocument?.filename
+                ?? "document.hwp"
+            return (data, fileName)
+        }
+
+        private func decodedData(
+            from body: [String: Any],
+            missingMessage: String
+        ) -> Data? {
             let data: Data
             if let base64 = body["base64"] as? String {
                 guard let decodedData = Data(base64Encoded: base64) else {
@@ -475,10 +527,7 @@ extension RhwpStudioWebView {
                 return nil
             }
 
-            let fileName = body["fileName"] as? String
-                ?? currentDocument?.filename
-                ?? "document.hwp"
-            return (data, fileName)
+            return data
         }
 
         private func printDocument(_ body: [String: Any]) {
@@ -567,6 +616,11 @@ extension RhwpStudioWebView {
                 return number.intValue
             }
             return nil
+        }
+
+        private static func isSupportedDocumentFilename(_ fileName: String) -> Bool {
+            let pathExtension = URL(fileURLWithPath: fileName).pathExtension.lowercased()
+            return pathExtension == "hwp" || pathExtension == "hwpx"
         }
 
         private func runNativeCommand(_ command: String, in webView: WKWebView) {

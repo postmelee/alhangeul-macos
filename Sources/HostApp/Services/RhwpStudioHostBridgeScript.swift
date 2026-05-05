@@ -135,6 +135,33 @@ enum RhwpStudioHostBridgeScript {
         return btoa(chunks.join(""));
       }
 
+      function isSupportedDocumentFile(file) {
+        const fileName = file?.name?.toLowerCase() || "";
+        return fileName.endsWith(".hwp") || fileName.endsWith(".hwpx");
+      }
+
+      async function postDroppedDocument(file) {
+        if (!isSupportedDocumentFile(file)) {
+          return;
+        }
+
+        try {
+          const bytes = new Uint8Array(await file.arrayBuffer());
+          rememberCurrentFileName(file.name);
+          postNative({
+            type: "dropped-document",
+            fileName: file.name || "document.hwp",
+            base64: encodeBytesToBase64(bytes),
+            byteCount: bytes.length
+          });
+        } catch (error) {
+          postNative({
+            type: "error",
+            message: `끌어놓은 문서를 읽을 수 없습니다: ${error?.message || String(error)}`
+          });
+        }
+      }
+
       async function requestHwpExportPayload() {
         try {
           const payload = await requestRhwp("exportHwpBase64");
@@ -425,6 +452,15 @@ enum RhwpStudioHostBridgeScript {
       document.addEventListener("mousedown", scheduleHostOverridesRefresh, true);
       document.addEventListener("mousedown", handleNativeCommandElementEvent, true);
       document.addEventListener("click", handleNativeCommandElementEvent, true);
+
+      document.addEventListener("drop", (event) => {
+        const file = event.dataTransfer?.files?.[0];
+        if (!isSupportedDocumentFile(file)) {
+          return;
+        }
+
+        postDroppedDocument(file);
+      }, true);
 
       document.addEventListener("keydown", (event) => {
         const command = nativeCommandForShortcut(event);
