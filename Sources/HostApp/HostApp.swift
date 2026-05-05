@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 
 @main
@@ -295,10 +296,17 @@ private final class DocumentWindowToolbarController: NSObject, NSToolbarDelegate
 
     private let store: DocumentViewerStore
     private weak var window: NSWindow?
+    private var storeObservation: AnyCancellable?
 
     init(store: DocumentViewerStore, window: NSWindow) {
         self.store = store
         self.window = window
+        super.init()
+        storeObservation = store.objectWillChange.sink { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.window?.toolbar?.validateVisibleItems()
+            }
+        }
     }
 
     func makeToolbar() -> NSToolbar {

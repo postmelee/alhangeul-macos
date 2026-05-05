@@ -39,6 +39,14 @@ private struct RhwpStudioContainerView: View {
                         store.openDocument()
                     }
                 },
+                onDroppedDocument: { document in
+                    Task { @MainActor in
+                        store.loadDroppedDocument(
+                            data: document.data,
+                            filename: document.fileName
+                        )
+                    }
+                },
                 onDocumentSaved: { url in
                     Task { @MainActor in
                         store.recordSavedDocument(at: url)

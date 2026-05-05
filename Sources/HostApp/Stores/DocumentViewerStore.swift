@@ -58,6 +58,28 @@ final class DocumentViewerStore: ObservableObject {
         isLoading = false
     }
 
+    func loadDroppedDocument(data: Data, filename: String) {
+        isLoading = true
+        errorMessage = nil
+        webViewErrorMessage = nil
+        isWebViewLoading = false
+
+        do {
+            try loadDocument(
+                data: data,
+                filename: Self.sanitizedFilename(filename),
+                sourceDocument: nil
+            )
+        } catch {
+            webViewErrorMessage = "끌어놓은 문서를 열 수 없습니다: \(error.localizedDescription)"
+            rhwpStudioDocument = nil
+            sourceDocument = nil
+            self.filename = ""
+        }
+
+        isLoading = false
+    }
+
     func openRecentDocument(_ document: RecentDocumentItem) {
         do {
             let url = try document.resolvedURL()
@@ -124,6 +146,12 @@ final class DocumentViewerStore: ObservableObject {
         if let sourceDocument {
             recentDocuments = RecentDocumentStore.record(sourceDocument)
         }
+    }
+
+    private static func sanitizedFilename(_ filename: String) -> String {
+        let trimmedFilename = filename.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lastPathComponent = URL(fileURLWithPath: trimmedFilename).lastPathComponent
+        return lastPathComponent.isEmpty ? "document.hwp" : lastPathComponent
     }
 }
 
