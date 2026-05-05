@@ -10,14 +10,82 @@ enum RhwpStudioHostBridgeScript {
       }
       window.__alhangeulHostBridgeInstalled = true;
 
-      const nativeCommands = new Set(["file:open", "file:save", "file:print", "file:share", "file:export-pdf"]);
+      const nativeCommands = new Set(["file:open", "file:save", "file:save-as", "file:print", "file:share", "file:export-pdf"]);
 
       function postNative(message) {
         window.webkit?.messageHandlers?.alhangeulHost?.postMessage(message);
       }
 
+      const statusMessageRestoreDelayMs = 3000;
+      let statusMessageRestoreTimer = null;
+
+      function statusMessageElement() {
+        return document.getElementById("sb-message");
+      }
+
+      function fileNameFromStatusText(text) {
+        if (!text?.includes(" — ")) {
+          return null;
+        }
+
+        const fileName = text?.split(" — ")[0]?.trim();
+        if (!fileName || fileName.startsWith("저장 완료")) {
+          return null;
+        }
+        return fileName;
+      }
+
+      function statusTextWithFileName(statusText, fileName) {
+        if (!statusText || !fileName || !statusText.includes(" — ")) {
+          return statusText;
+        }
+
+        const [, ...suffixParts] = statusText.split(" — ");
+        return `${fileName} — ${suffixParts.join(" — ")}`;
+      }
+
+      function rememberCurrentFileName(fileName = null) {
+        const element = statusMessageElement();
+        if (!element) {
+          return fileName;
+        }
+
+        const nextFileName = fileName || fileNameFromStatusText(element.textContent) || element.dataset.alhangeulCurrentFileName;
+        if (nextFileName) {
+          element.dataset.alhangeulCurrentFileName = nextFileName;
+        }
+        return nextFileName;
+      }
+
       function currentFileName() {
-        return document.getElementById("sb-message")?.textContent?.split(" — ")[0] || "document.hwp";
+        return rememberCurrentFileName() || "document.hwp";
+      }
+
+      function showTemporaryStatusMessage(message, fileName = null, durationMs = statusMessageRestoreDelayMs) {
+        const element = statusMessageElement();
+        if (!element) {
+          return false;
+        }
+
+        const rememberedFileName = rememberCurrentFileName(fileName);
+        const restoreStatus = element.dataset.alhangeulRestoreStatus || element.textContent || "";
+        element.dataset.alhangeulRestoreStatus = statusTextWithFileName(restoreStatus, rememberedFileName);
+
+        if (statusMessageRestoreTimer) {
+          clearTimeout(statusMessageRestoreTimer);
+        }
+
+        element.textContent = message;
+        statusMessageRestoreTimer = setTimeout(() => {
+          if (element.textContent === message) {
+            element.textContent = element.dataset.alhangeulRestoreStatus || "";
+          }
+
+          delete element.dataset.alhangeulRestoreStatus;
+          statusMessageRestoreTimer = null;
+        }, durationMs);
+
+        return true;
       }
 
       function requestRhwp(method, params = {}, timeoutMs = 15000) {
@@ -117,8 +185,67 @@ enum RhwpStudioHostBridgeScript {
         });
       }
 
+      function ensureSaveAsMenuItem() {
+        const saveItem = document.querySelector('.md-item[data-cmd="file:save"]');
+        if (!saveItem || document.querySelector('.md-item[data-cmd="file:save-as"]')) {
+          return;
+        }
+
+        const item = document.createElement("div");
+        item.className = "md-item";
+        item.dataset.cmd = "file:save-as";
+        item.innerHTML = '<span class="md-icon"></span><span class="md-label">다른 이름으로 저장...</span><span class="md-shortcut">Command+Shift+S</span>';
+        saveItem.after(item);
+      }
+
+      function macShortcutLabel(value) {
+        return value
+          .replace(/\\bCtrl\\+/g, "Command+")
+          .replace(/\\bAlt\\+/g, "Option+");
+      }
+
+      function rewriteShortcutLabelsForMac() {
+        document.querySelectorAll(".md-shortcut, .tb-split-shortcut").forEach((label) => {
+          const nextText = macShortcutLabel(label.textContent || "");
+          if (label.textContent !== nextText) {
+            label.textContent = nextText;
+          }
+        });
+
+        document.querySelectorAll('[title*="Ctrl+"], [title*="Alt+"]').forEach((element) => {
+          const title = element.getAttribute("title");
+          if (!title) {
+            return;
+          }
+          const nextTitle = macShortcutLabel(title);
+          if (title !== nextTitle) {
+            element.setAttribute("title", nextTitle);
+          }
+        });
+      }
+
+      function refreshHostOverrides() {
+        ensureSaveAsMenuItem();
+        enableNativeCommandItems();
+        rewriteShortcutLabelsForMac();
+      }
+
+      let pendingHostOverridesRefresh = false;
+
+      function scheduleHostOverridesRefresh() {
+        if (pendingHostOverridesRefresh) {
+          return;
+        }
+
+        pendingHostOverridesRefresh = true;
+        requestAnimationFrame(() => {
+          pendingHostOverridesRefresh = false;
+          refreshHostOverrides();
+        });
+      }
+
       function nativeCommandForShortcut(event) {
-        if (event.repeat || event.isComposing || event.altKey || event.shiftKey) {
+        if (event.repeat || event.isComposing || event.altKey) {
           return null;
         }
 
@@ -130,12 +257,21 @@ enum RhwpStudioHostBridgeScript {
         const key = event.key.toLowerCase();
         const code = event.code;
         if (code === "KeyO" || key === "o" || key === "ㅐ") {
+          if (event.shiftKey) {
+            return null;
+          }
           return "file:open";
         }
         if (code === "KeyS" || key === "s" || key === "ㄴ") {
+          if (event.shiftKey) {
+            return "file:save-as";
+          }
           return "file:save";
         }
         if (code === "KeyP" || key === "p" || key === "ㅔ") {
+          if (event.shiftKey) {
+            return null;
+          }
           return "file:print";
         }
 
@@ -206,7 +342,7 @@ enum RhwpStudioHostBridgeScript {
       }
 
       async function handleNativeCommand(command) {
-        if (command === "file:open" || command === "file:save" || command === "file:export-pdf") {
+        if (command === "file:open" || command === "file:save" || command === "file:save-as" || command === "file:export-pdf") {
           postNative({
             type: "command",
             command,
@@ -240,6 +376,10 @@ enum RhwpStudioHostBridgeScript {
         return true;
       };
 
+      window.__alhangeulHostBridgeShowSaveCompletedStatus = (timeText, fileName) => {
+        return showTemporaryStatusMessage(`저장 완료 ${timeText}`, fileName);
+      };
+
       window.__alhangeulHostBridgeRunNativeCommand = (command) => {
         if (!nativeCommands.has(command)) {
           return false;
@@ -250,17 +390,17 @@ enum RhwpStudioHostBridgeScript {
         return true;
       };
 
-      enableNativeCommandItems();
+      refreshHostOverrides();
 
       const nativeCommandObserver = new MutationObserver(() => {
-        enableNativeCommandItems();
+        refreshHostOverrides();
       });
       nativeCommandObserver.observe(document.documentElement, {
         childList: true,
         subtree: true
       });
 
-      document.addEventListener("click", (event) => {
+      function handleNativeCommandElementEvent(event) {
         const target = event.target;
         if (!(target instanceof Element)) {
           return;
@@ -280,7 +420,11 @@ enum RhwpStudioHostBridgeScript {
         event.stopPropagation();
         event.stopImmediatePropagation();
         window.__alhangeulHostBridgeRunNativeCommand(command);
-      }, true);
+      }
+
+      document.addEventListener("mousedown", scheduleHostOverridesRefresh, true);
+      document.addEventListener("mousedown", handleNativeCommandElementEvent, true);
+      document.addEventListener("click", handleNativeCommandElementEvent, true);
 
       document.addEventListener("keydown", (event) => {
         const command = nativeCommandForShortcut(event);

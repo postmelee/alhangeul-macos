@@ -23,6 +23,7 @@ private struct RhwpStudioContainerView: View {
         ZStack {
             RhwpStudioWebView(
                 document: document,
+                sourceDocument: store.sourceDocument,
                 onLoadStateChange: { isLoading in
                     Task { @MainActor in
                         store.setWebViewLoading(isLoading)
@@ -36,6 +37,11 @@ private struct RhwpStudioContainerView: View {
                 onOpenDocument: {
                     Task { @MainActor in
                         store.openDocument()
+                    }
+                },
+                onDocumentSaved: { url in
+                    Task { @MainActor in
+                        store.recordSavedDocument(at: url)
                     }
                 }
             )

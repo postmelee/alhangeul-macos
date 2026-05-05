@@ -4,20 +4,26 @@ import WebKit
 
 struct RhwpStudioWebView: NSViewRepresentable {
     let document: RhwpStudioDocumentPayload?
+    let sourceDocument: RecentDocumentItem?
     let onLoadStateChange: (Bool) -> Void
     let onError: (String?) -> Void
     let onOpenDocument: () -> Void
+    let onDocumentSaved: (URL) -> Void
 
     init(
         document: RhwpStudioDocumentPayload?,
+        sourceDocument: RecentDocumentItem? = nil,
         onLoadStateChange: @escaping (Bool) -> Void = { _ in },
         onError: @escaping (String?) -> Void = { _ in },
-        onOpenDocument: @escaping () -> Void = {}
+        onOpenDocument: @escaping () -> Void = {},
+        onDocumentSaved: @escaping (URL) -> Void = { _ in }
     ) {
         self.document = document
+        self.sourceDocument = sourceDocument
         self.onLoadStateChange = onLoadStateChange
         self.onError = onError
         self.onOpenDocument = onOpenDocument
+        self.onDocumentSaved = onDocumentSaved
     }
 
     func makeCoordinator() -> Coordinator {
@@ -32,7 +38,8 @@ struct RhwpStudioWebView: NSViewRepresentable {
         context.coordinator.onLoadStateChange = onLoadStateChange
         context.coordinator.onError = onError
         context.coordinator.onOpenDocument = onOpenDocument
-        context.coordinator.update(document: document, in: webView)
+        context.coordinator.onDocumentSaved = onDocumentSaved
+        context.coordinator.update(document: document, sourceDocument: sourceDocument, in: webView)
     }
 }
 
@@ -41,12 +48,18 @@ extension RhwpStudioWebView {
         var onLoadStateChange: (Bool) -> Void = { _ in }
         var onError: (String?) -> Void = { _ in }
         var onOpenDocument: () -> Void = {}
+        var onDocumentSaved: (URL) -> Void = { _ in }
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
 
         private enum LoadIdentity: Equatable {
             case empty
             case document(Int)
+        }
+
+        private enum SaveDestination {
+            case source(RecentDocumentItem)
+            case selected(URL)
         }
 
         private let documentProvider = RhwpStudioDocumentProvider()
@@ -56,10 +69,11 @@ extension RhwpStudioWebView {
         )
         private var loadedIdentity: LoadIdentity?
         private var currentDocument: RhwpStudioDocumentPayload?
+        private var currentSourceDocument: RecentDocumentItem?
         private weak var commandWebView: WKWebView?
         private var printController: RhwpStudioPrintController?
         private var pdfExportController: RhwpStudioPDFExportController?
-        private var pendingSaveDestinationURL: URL?
+        private var pendingSaveDestination: SaveDestination?
         private var pendingPDFDestinationURL: URL?
         private var isChoosingSaveDestination = false
         private var isChoosingPDFDestination = false
@@ -112,8 +126,13 @@ extension RhwpStudioWebView {
             return webView
         }
 
-        func update(document: RhwpStudioDocumentPayload?, in webView: WKWebView) {
+        func update(
+            document: RhwpStudioDocumentPayload?,
+            sourceDocument: RecentDocumentItem?,
+            in webView: WKWebView
+        ) {
             currentDocument = document
+            currentSourceDocument = sourceDocument
             documentProvider.setDocument(document)
 
             let nextIdentity: LoadIdentity = if let document {
@@ -262,7 +281,7 @@ extension RhwpStudioWebView {
             case "export-pdf-document":
                 exportPDFDocument(body)
             case "error":
-                pendingSaveDestinationURL = nil
+                pendingSaveDestination = nil
                 pendingPDFDestinationURL = nil
                 onError(body["message"] as? String)
             default:
@@ -287,6 +306,15 @@ extension RhwpStudioWebView {
                     in: webView,
                     suggestedFilename: body["fileName"] as? String
                 )
+            case "file:save-as":
+                guard let webView = commandWebView else {
+                    onError("저장할 viewer를 찾을 수 없습니다.")
+                    return
+                }
+                requestSaveAsDocument(
+                    in: webView,
+                    suggestedFilename: body["fileName"] as? String
+                )
             case "file:export-pdf":
                 guard let webView = commandWebView else {
                     onError("PDF로 내보낼 viewer를 찾을 수 없습니다.")
@@ -302,8 +330,8 @@ extension RhwpStudioWebView {
         }
 
         private func saveDocument(_ body: [String: Any]) {
-            let destinationURL = pendingSaveDestinationURL
-            pendingSaveDestinationURL = nil
+            let destination = pendingSaveDestination
+            pendingSaveDestination = nil
 
             guard let payload = exportedDocumentPayload(
                 from: body,
@@ -313,17 +341,91 @@ extension RhwpStudioWebView {
             }
 
             do {
-                if let destinationURL {
+                switch destination {
+                case .some(.source(let sourceDocument)):
+                    let savedURL = try writePayload(payload, to: sourceDocument)
+                    recordSavedDocument(at: savedURL)
+                case .some(.selected(let destinationURL)):
                     try DocumentSavePanel.write(data: payload.data, to: destinationURL)
-                } else {
-                    _ = try DocumentSavePanel.save(
-                        data: payload.data,
-                        suggestedFilename: payload.fileName
-                    )
+                    recordSavedDocument(at: destinationURL)
+                case .none:
+                    try savePayloadWithPanel(payload)
                 }
             } catch {
-                onError("문서를 저장할 수 없습니다: \(error.localizedDescription)")
+                switch destination {
+                case .some(.source):
+                    do {
+                        try savePayloadWithPanel(payload)
+                    } catch {
+                        onError("문서를 저장할 수 없습니다: \(error.localizedDescription)")
+                    }
+                default:
+                    onError("문서를 저장할 수 없습니다: \(error.localizedDescription)")
+                }
             }
+        }
+
+        private func writePayload(
+            _ payload: (data: Data, fileName: String),
+            to sourceDocument: RecentDocumentItem
+        ) throws -> URL {
+            let url = try sourceDocument.resolvedURL()
+            let didStartSecurityScope = url.startAccessingSecurityScopedResource()
+            defer {
+                if didStartSecurityScope {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+
+            try DocumentSavePanel.write(data: payload.data, to: url)
+            return url
+        }
+
+        private func savePayloadWithPanel(_ payload: (data: Data, fileName: String)) throws {
+            if let savedURL = try DocumentSavePanel.save(
+                data: payload.data,
+                suggestedFilename: payload.fileName
+            ) {
+                recordSavedDocument(at: savedURL)
+            }
+        }
+
+        private func recordSavedDocument(at url: URL) {
+            currentSourceDocument = RecentDocumentItem.make(for: url)
+            onDocumentSaved(url)
+            showSaveCompletedStatus(for: url)
+        }
+
+        private func showSaveCompletedStatus(for url: URL) {
+            guard let webView = commandWebView else {
+                return
+            }
+
+            let timeText = Self.saveStatusTimeText()
+            let script = """
+            window.__alhangeulHostBridgeShowSaveCompletedStatus?.(
+              \(Self.javaScriptStringLiteral(timeText)),
+              \(Self.javaScriptStringLiteral(url.lastPathComponent))
+            )
+            """
+            webView.evaluateJavaScript(script)
+        }
+
+        private static func saveStatusTimeText() -> String {
+            let components = Calendar.current.dateComponents([.hour, .minute], from: Date())
+            return String(format: "%02d:%02d", components.hour ?? 0, components.minute ?? 0)
+        }
+
+        private static func javaScriptStringLiteral(_ value: String) -> String {
+            guard let data = try? JSONSerialization.data(withJSONObject: [value]),
+                  let arrayLiteral = String(data: data, encoding: .utf8),
+                  arrayLiteral.hasPrefix("["),
+                  arrayLiteral.hasSuffix("]")
+            else {
+                return "\"\""
+            }
+
+            return String(arrayLiteral.dropFirst().dropLast())
         }
 
         private func shareDocument(_ body: [String: Any]) {
@@ -475,6 +577,9 @@ extension RhwpStudioWebView {
             case "file:save":
                 requestSaveDocument(in: webView)
                 return
+            case "file:save-as":
+                requestSaveAsDocument(in: webView)
+                return
             case "file:print":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:print')"
             case "file:share":
@@ -496,13 +601,53 @@ extension RhwpStudioWebView {
             in webView: WKWebView,
             suggestedFilename: String? = nil
         ) {
+            guard currentDocument != nil else {
+                onError("저장할 문서가 없습니다.")
+                return
+            }
+
             guard !isChoosingSaveDestination,
-                  pendingSaveDestinationURL == nil
+                  pendingSaveDestination == nil
             else {
                 return
             }
 
-            let filename = suggestedFilename ?? currentDocument?.filename ?? "document.hwp"
+            guard let sourceDocument = currentSourceDocument,
+                  canSaveInPlace(sourceDocument)
+            else {
+                requestSaveAsDocument(in: webView, suggestedFilename: suggestedFilename)
+                return
+            }
+
+            pendingSaveDestination = .source(sourceDocument)
+            evaluateHostBridgeAction(
+                "window.__alhangeulHostBridgeExportHwpDocument?.('save-document')",
+                in: webView,
+                failureMessage: "문서를 내보낼 수 없습니다"
+            ) { [weak self] in
+                self?.pendingSaveDestination = nil
+            }
+        }
+
+        private func requestSaveAsDocument(
+            in webView: WKWebView,
+            suggestedFilename: String? = nil
+        ) {
+            guard currentDocument != nil else {
+                onError("저장할 문서가 없습니다.")
+                return
+            }
+
+            guard !isChoosingSaveDestination,
+                  pendingSaveDestination == nil
+            else {
+                return
+            }
+
+            let filename = suggestedFilename
+                ?? currentSourceDocument?.displayName
+                ?? currentDocument?.filename
+                ?? "document.hwp"
             let presentingWindow = webView.window
             isChoosingSaveDestination = true
 
@@ -526,15 +671,19 @@ extension RhwpStudioWebView {
                     return
                 }
 
-                self.pendingSaveDestinationURL = destinationURL
+                self.pendingSaveDestination = .selected(destinationURL)
                 self.evaluateHostBridgeAction(
                     "window.__alhangeulHostBridgeExportHwpDocument?.('save-document')",
                     in: webView,
                     failureMessage: "문서를 내보낼 수 없습니다"
                 ) { [weak self] in
-                    self?.pendingSaveDestinationURL = nil
+                    self?.pendingSaveDestination = nil
                 }
             }
+        }
+
+        private func canSaveInPlace(_ sourceDocument: RecentDocumentItem) -> Bool {
+            sourceDocument.url.pathExtension.lowercased() == "hwp"
         }
 
         private func requestPDFExport(
@@ -643,19 +792,25 @@ private final class RhwpStudioNativeCommandWebView: WKWebView {
     private func nativeCommand(for event: NSEvent) -> String? {
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
         let hasCommandModifier = flags.contains(.command) || flags.contains(.control)
+        let hasShiftModifier = flags.contains(.shift)
         guard hasCommandModifier,
-              !flags.contains(.option),
-              !flags.contains(.shift)
+              !flags.contains(.option)
         else {
             return nil
         }
 
         switch event.keyCode {
         case 31:
+            guard !hasShiftModifier else {
+                return nil
+            }
             return "file:open"
         case 1:
-            return "file:save"
+            return hasShiftModifier ? "file:save-as" : "file:save"
         case 35:
+            guard !hasShiftModifier else {
+                return nil
+            }
             return "file:print"
         default:
             return nil
