@@ -47,6 +47,11 @@ private struct RhwpStudioContainerView: View {
                         )
                     }
                 },
+                onDroppedFileURL: { url in
+                    Task { @MainActor in
+                        store.loadDocument(from: url)
+                    }
+                },
                 onDocumentSaved: { url in
                     Task { @MainActor in
                         store.recordSavedDocument(at: url)
