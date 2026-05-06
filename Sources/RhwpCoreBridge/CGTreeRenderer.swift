@@ -2105,14 +2105,18 @@ class CGTreeRenderer {
     }
 
     private func applyPatternFill(_ pattern: PatternFillInfo, style: ShapeStyle, path: CGPath, in ctx: CGContext) {
+        let alpha = clampedAlpha(style.opacity)
+
         ctx.saveGState()
         applyShadow(style.shadow, in: ctx)
         ctx.addPath(path)
+        ctx.setAlpha(alpha)
         ctx.setFillColor(colorRefToCGColor(pattern.backgroundColor))
         ctx.fillPath()
         ctx.restoreGState()
 
         ctx.saveGState()
+        ctx.setAlpha(alpha)
         ctx.addPath(path)
         ctx.clip()
         drawPatternLines(pattern, bounds: path.boundingBoxOfPath, in: ctx)
