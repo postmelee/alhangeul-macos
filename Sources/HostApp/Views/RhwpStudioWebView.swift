@@ -14,6 +14,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
     let onError: (String?) -> Void
     let onOpenDocument: () -> Void
     let onDroppedDocument: (RhwpStudioDroppedDocument) -> Void
+    let onDroppedFileURL: (URL) -> Void
     let onDocumentSaved: (URL) -> Void
 
     init(
@@ -23,6 +24,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         onError: @escaping (String?) -> Void = { _ in },
         onOpenDocument: @escaping () -> Void = {},
         onDroppedDocument: @escaping (RhwpStudioDroppedDocument) -> Void = { _ in },
+        onDroppedFileURL: @escaping (URL) -> Void = { _ in },
         onDocumentSaved: @escaping (URL) -> Void = { _ in }
     ) {
         self.document = document
@@ -31,6 +33,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         self.onError = onError
         self.onOpenDocument = onOpenDocument
         self.onDroppedDocument = onDroppedDocument
+        self.onDroppedFileURL = onDroppedFileURL
         self.onDocumentSaved = onDocumentSaved
     }
 
@@ -47,6 +50,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         context.coordinator.onError = onError
         context.coordinator.onOpenDocument = onOpenDocument
         context.coordinator.onDroppedDocument = onDroppedDocument
+        context.coordinator.onDroppedFileURL = onDroppedFileURL
         context.coordinator.onDocumentSaved = onDocumentSaved
         context.coordinator.update(document: document, sourceDocument: sourceDocument, in: webView)
     }
@@ -58,9 +62,11 @@ extension RhwpStudioWebView {
         var onError: (String?) -> Void = { _ in }
         var onOpenDocument: () -> Void = {}
         var onDroppedDocument: (RhwpStudioDroppedDocument) -> Void = { _ in }
+        var onDroppedFileURL: (URL) -> Void = { _ in }
         var onDocumentSaved: (URL) -> Void = { _ in }
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
+        private static let nativeDropSuppressionInterval: TimeInterval = 2
 
         private enum LoadIdentity: Equatable {
             case empty
@@ -70,6 +76,11 @@ extension RhwpStudioWebView {
         private enum SaveDestination {
             case source(RecentDocumentItem)
             case selected(URL)
+        }
+
+        private struct NativeDropMarker {
+            let fileName: String
+            let handledAt: Date
         }
 
         private let documentProvider = RhwpStudioDocumentProvider()
@@ -89,6 +100,7 @@ extension RhwpStudioWebView {
         private var isChoosingPDFDestination = false
         private var activeLoadID = 0
         private var loadTimeoutTask: Task<Void, Never>?
+        private var recentNativeDrop: NativeDropMarker?
 
         deinit {
             loadTimeoutTask?.cancel()
@@ -129,6 +141,9 @@ extension RhwpStudioWebView {
                 }
                 self.runNativeCommand(command, in: webView)
                 return true
+            }
+            webView.droppedFileURLHandler = { [weak self] fileURL in
+                self?.handleDroppedFileURL(fileURL)
             }
             RhwpStudioNativeCommandDispatcher.register(webView)
             webView.navigationDelegate = self
@@ -309,6 +324,10 @@ extension RhwpStudioWebView {
                 return
             }
 
+            if shouldSuppressDroppedDocument(fileName: fileName) {
+                return
+            }
+
             guard let data = decodedData(
                 from: body,
                 missingMessage: "끌어놓은 문서를 읽을 수 없습니다"
@@ -322,6 +341,32 @@ extension RhwpStudioWebView {
                     fileName: fileName
                 )
             )
+        }
+
+        private func handleDroppedFileURL(_ fileURL: URL) {
+            recentNativeDrop = NativeDropMarker(
+                fileName: Self.normalizedFilename(fileURL.lastPathComponent),
+                handledAt: Date()
+            )
+            onDroppedFileURL(fileURL)
+        }
+
+        private func shouldSuppressDroppedDocument(fileName: String) -> Bool {
+            guard let recentNativeDrop else {
+                return false
+            }
+
+            guard Date().timeIntervalSince(recentNativeDrop.handledAt) <= Self.nativeDropSuppressionInterval else {
+                self.recentNativeDrop = nil
+                return false
+            }
+
+            guard recentNativeDrop.fileName == Self.normalizedFilename(fileName) else {
+                return false
+            }
+
+            self.recentNativeDrop = nil
+            return true
         }
 
         private func handleHostCommand(_ body: [String: Any]) {
@@ -623,6 +668,10 @@ extension RhwpStudioWebView {
             return pathExtension == "hwp" || pathExtension == "hwpx"
         }
 
+        private static func normalizedFilename(_ fileName: String) -> String {
+            URL(fileURLWithPath: fileName).lastPathComponent.lowercased()
+        }
+
         private func runNativeCommand(_ command: String, in webView: WKWebView) {
             let script: String
             switch command {
@@ -814,10 +863,53 @@ extension RhwpStudioWebView {
 
 private final class RhwpStudioNativeCommandWebView: WKWebView {
     var nativeCommandHandler: ((String) -> Bool)?
+    var droppedFileURLHandler: ((URL) -> Void)?
+
+    override init(frame: NSRect, configuration: WKWebViewConfiguration) {
+        super.init(frame: frame, configuration: configuration)
+        registerForDraggedTypes([.fileURL])
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     @discardableResult
     func runNativeCommand(_ command: String) -> Bool {
         nativeCommandHandler?(command) ?? false
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        guard canHandleDocumentDrop(from: sender) else {
+            return super.draggingEntered(sender)
+        }
+        return acceptedDropOperation(for: sender)
+    }
+
+    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        guard canHandleDocumentDrop(from: sender) else {
+            return super.draggingUpdated(sender)
+        }
+        return acceptedDropOperation(for: sender)
+    }
+
+    override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard canHandleDocumentDrop(from: sender) else {
+            return super.prepareForDragOperation(sender)
+        }
+        return droppedFileURLHandler != nil
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let droppedFileURLHandler,
+              let fileURL = supportedDocumentFileURL(from: sender)
+        else {
+            return super.performDragOperation(sender)
+        }
+
+        droppedFileURLHandler(fileURL)
+        return true
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
@@ -869,6 +961,54 @@ private final class RhwpStudioNativeCommandWebView: WKWebView {
         default:
             return nil
         }
+    }
+
+    private func canHandleDocumentDrop(from sender: NSDraggingInfo) -> Bool {
+        droppedFileURLHandler != nil && supportedDocumentFileURL(from: sender) != nil
+    }
+
+    private func acceptedDropOperation(for sender: NSDraggingInfo) -> NSDragOperation {
+        let sourceMask = sender.draggingSourceOperationMask
+        if sourceMask.contains(.copy) {
+            return .copy
+        }
+        if sourceMask.contains(.generic) {
+            return .generic
+        }
+        return []
+    }
+
+    private func supportedDocumentFileURL(from sender: NSDraggingInfo) -> URL? {
+        supportedDocumentFileURLs(from: sender.draggingPasteboard).first
+    }
+
+    private func supportedDocumentFileURLs(from pasteboard: NSPasteboard) -> [URL] {
+        let objects = pasteboard.readObjects(
+            forClasses: [NSURL.self],
+            options: [.urlReadingFileURLsOnly: true]
+        )
+
+        return objects?
+            .compactMap { object -> URL? in
+                if let url = object as? URL {
+                    return url
+                }
+                if let url = object as? NSURL {
+                    return url as URL
+                }
+                return nil
+            }
+            .map(\.standardizedFileURL)
+            .filter(Self.isSupportedDocumentFileURL) ?? []
+    }
+
+    private static func isSupportedDocumentFileURL(_ url: URL) -> Bool {
+        guard url.isFileURL else {
+            return false
+        }
+
+        let pathExtension = url.pathExtension.lowercased()
+        return pathExtension == "hwp" || pathExtension == "hwpx"
     }
 }
 
