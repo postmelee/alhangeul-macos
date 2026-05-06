@@ -9,7 +9,7 @@ cask "alhangeul-macos" do
 
   depends_on macos: ">= :monterey"
 
-  app "AlhangeulMac.app"
+  app "Alhangeul.app"
 
   caveats "앱을 한 번 실행하면 Quick Look 및 Thumbnail 확장이 등록됩니다."
 end

@@ -232,7 +232,7 @@ brew install xcodegen
 ```bash
 ./scripts/build-rust-macos.sh
 xcodegen generate
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build.noindex/DerivedData \
@@ -243,7 +243,7 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 ### Run
 
 ```bash
-open build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app
+open build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app
 ```
 
 ### Checks
@@ -291,7 +291,7 @@ scripts/                      # build, lock verify, render smoke, package helper
 mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴얼
 ```
 
-`project.yml`은 `AlhangeulMac.xcodeproj`의 원본입니다. target, source 포함 범위, bundle identifier, extension embedding을 바꿀 때는 `project.yml`을 수정한 뒤 `xcodegen generate`를 실행합니다.
+`project.yml`은 `Alhangeul.xcodeproj`의 원본입니다. target, source 포함 범위, bundle identifier, extension embedding을 바꿀 때는 `project.yml`을 수정한 뒤 `xcodegen generate`를 실행합니다.
 
 타깃 간 소유 경계, 공통 Swift 계층, Rust bridge, 런타임 데이터 흐름은 [아키텍처 문서](mydocs/tech/project_architecture.md)를 참조하세요.
 
@@ -384,7 +384,7 @@ local/task{N}  ──커밋──커밋──┐
 
 Finder/Quick Look 통합 문제:
 
-1. `pluginkit -mAvvv | grep com.postmelee.alhangeulmac` → extension 등록 후보 확인
+1. `pluginkit -mAvvv | grep com.postmelee.alhangeul` → extension 등록 후보 확인
 2. `qlmanage -p` → Finder preview 경로 확인
 3. `qlmanage -t -x` → thumbnail 생성 경로 확인
 4. 반복 시행착오는 [Finder 통합 검증 시행착오 방지 가이드](mydocs/troubleshootings/finder_integration_validation_pitfalls.md)를 확인

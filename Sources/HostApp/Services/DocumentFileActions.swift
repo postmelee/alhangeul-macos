@@ -45,7 +45,7 @@ enum DocumentFileActions {
 
     private static func writeTemporaryShareFile(data: Data, filename: String) throws -> URL {
         let directoryURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("AlhangeulMacShare", isDirectory: true)
+            .appendingPathComponent("AlhangeulShare", isDirectory: true)
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(
             at: directoryURL,

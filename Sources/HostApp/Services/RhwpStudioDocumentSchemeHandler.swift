@@ -91,7 +91,7 @@ final class RhwpStudioDocumentSchemeHandler: NSObject, WKURLSchemeHandler {
         }
 
         let error = NSError(
-            domain: "com.postmelee.alhangeulmac.rhwp-studio.document-scheme",
+            domain: "com.postmelee.alhangeul.rhwp-studio.document-scheme",
             code: 1,
             userInfo: userInfo
         )

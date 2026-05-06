@@ -105,7 +105,7 @@ final class RhwpStudioResourceSchemeHandler: NSObject, WKURLSchemeHandler {
 
     private func resourceError(_ message: String) -> NSError {
         NSError(
-            domain: "com.postmelee.alhangeulmac.rhwp-studio.resource-scheme",
+            domain: "com.postmelee.alhangeul.rhwp-studio.resource-scheme",
             code: 1,
             userInfo: [NSLocalizedDescriptionKey: message]
         )

@@ -115,7 +115,7 @@ size: 1349
 - RustBridge lock verify, FFI symbol diff, no-AppKit 검증 통과
 - HostApp Debug build 통과
 - 기본 render smoke 통과: `KTX.hwp`, `request.hwp`, `exam_kor.hwp`
-- Release package 생성과 `$HOME/Applications/AlhangeulMac.app` 설치/등록 완료
+- Release package 생성과 `$HOME/Applications/Alhangeul.app` 설치/등록 완료
 - PlugInKit에서 Preview/Thumbnail extension이 설치본 경로로 등록됨
 - `qlmanage -t` thumbnail smoke 통과: `samples/basic/KTX.hwp`
 - Release 앱 viewer smoke 통과: `samples/basic/KTX.hwp` open과 viewer window 생성 확인

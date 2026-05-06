@@ -19,7 +19,7 @@
 
 현재 저장소에는 다음 릴리스 관련 자산이 있다.
 
-- `scripts/package-release.sh`: Release configuration으로 내부 산출물 `AlhangeulMac.app`을 빌드한 뒤 ASCII filesystem bundle name인 `AlhangeulMac.app`으로 zip 파일을 생성한다.
+- `scripts/package-release.sh`: Release configuration으로 내부 산출물 `Alhangeul.app`을 빌드한 뒤 ASCII filesystem bundle name인 `Alhangeul.app`으로 zip 파일을 생성한다.
 - `scripts/release.sh`: 공개 배포용 DMG release pipeline이다. Developer ID 서명, app/DMG notarization, staple, Gatekeeper 검증, sha256 산출 경로를 포함한다.
 - `Casks/alhangeul-macos.rb`: Homebrew Cask 초안이다.
 - `Sources/HostApp/Info.plist`, `Sources/QLExtension/Info.plist`, `Sources/ThumbnailExtension/Info.plist`: 앱과 extension 버전 정보가 들어 있다.
@@ -31,11 +31,17 @@
 
 - GitHub 저장소: `postmelee/alhangeul-macos`
 - 산출물 파일명/Homebrew Cask token: `alhangeul-macos`
-- 앱 filesystem bundle name: `AlhangeulMac.app` (Quick Look/Thumbnail ExtensionKit lookup 안정성을 위해 ASCII 유지)
-- 내부 Xcode product name: `AlhangeulMac`
-- bundle identifier: `com.postmelee.alhangeulmac` 계열
-- 사용자 표시명: 한국어 `알한글` (`ko.lproj/InfoPlist.strings`), 영어 `AlhangeulMac` (`en.lproj/InfoPlist.strings`). 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 ASCII filesystem name과 동일
+- 앱 filesystem bundle name: `Alhangeul.app` (Quick Look/Thumbnail ExtensionKit lookup 안정성을 위해 ASCII 유지)
+- 내부 Xcode product name: `Alhangeul`
+- bundle identifier: `com.postmelee.alhangeul` 계열
+- 사용자 표시명: 한국어 `알한글` (`ko.lproj/InfoPlist.strings`), 영어 `Alhangeul` (`en.lproj/InfoPlist.strings`). 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 ASCII filesystem name과 동일
 - 공개 배포 산출물명: `alhangeul-macos-<version>.dmg`
+
+### 배포 브랜치 기준
+
+v0.1.x public release는 `devel-webview`를 배포 준비 기준 브랜치로 사용한다. 릴리스 후보가 확정되면 `devel-webview`의 검증된 commit을 `main`에 반영하고, Git tag와 GitHub Release는 `main` 기준으로 생성한다.
+
+`devel`은 native viewer renderer와 장기 개발 통합 브랜치이므로 배포 직전 기준 브랜치로 사용하지 않는다. `devel-webview`에 merge된 release-critical 변경은 별도 PR 또는 cherry-pick으로 `devel`에 후속 동기화한다.
 
 ### Apple Developer Program 준비 상태
 
@@ -95,7 +101,7 @@ cat rhwp-core.lock
 ./scripts/build-rust-macos.sh --verify-lock
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build.noindex/DerivedData \
@@ -107,7 +113,7 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 Release configuration 검증:
 
 ```bash
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Release \
   -derivedDataPath build.noindex/DerivedDataRelease \
@@ -204,7 +210,7 @@ build.noindex/release/alhangeul-macos-0.1.0.zip
 - Rust bridge와 `Rhwp.xcframework` 재생성 후 `rhwp-core.lock` 검증
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
-- 내부 산출물 `AlhangeulMac.app`을 release staging으로 복사한 뒤 `AlhangeulMac.app` 이름으로 zip 압축
+- 내부 산출물 `Alhangeul.app`을 release staging으로 복사한 뒤 `Alhangeul.app` 이름으로 zip 압축
 - Release staging app은 local signing과 sealed resources가 적용되어 Finder 통합 smoke test의 기준 산출물로 사용할 수 있음
 - SHA256 출력
 
@@ -237,7 +243,7 @@ ALHANGEUL_BUILD_ROOT
 public mode 산출물:
 
 ```text
-build.noindex/release/AlhangeulMac.app
+build.noindex/release/Alhangeul.app
 build.noindex/release/alhangeul-macos-0.1.0.dmg
 build.noindex/release/alhangeul-macos-0.1.0.dmg.sha256
 ```
@@ -279,7 +285,7 @@ public release 전 layout, DMG 생성, checksum 생성만 확인할 때 rehearsa
 rehearsal mode 산출물:
 
 ```text
-build.noindex/release/AlhangeulMac.app
+build.noindex/release/Alhangeul.app
 build.noindex/release/alhangeul-macos-0.1.0-rehearsal.dmg
 build.noindex/release/alhangeul-macos-0.1.0-rehearsal.dmg.sha256
 ```
@@ -320,10 +326,10 @@ public mode에서 확인할 항목:
 대표 확인 명령:
 
 ```bash
-codesign --verify --deep --strict --verbose=2 build.noindex/release/AlhangeulMac.app
-xcrun stapler validate build.noindex/release/AlhangeulMac.app
+codesign --verify --deep --strict --verbose=2 build.noindex/release/Alhangeul.app
+xcrun stapler validate build.noindex/release/Alhangeul.app
 xcrun stapler validate build.noindex/release/alhangeul-macos-0.1.0.dmg
-spctl --assess --type execute --verbose build.noindex/release/AlhangeulMac.app
+spctl --assess --type execute --verbose build.noindex/release/Alhangeul.app
 spctl --assess --type open --context context:primary-signature --verbose build.noindex/release/alhangeul-macos-0.1.0.dmg
 ```
 
@@ -360,7 +366,7 @@ Release note에 포함할 내용:
 - `sha256`이 public DMG의 실제 digest와 일치하는가
 - cask token이 `alhangeul-macos`인가
 - `homepage`이 현재 저장소를 가리키는가
-- `app "AlhangeulMac.app"`이 산출물과 일치하는가
+- `app "Alhangeul.app"`이 산출물과 일치하는가
 - caveats 문구가 현재 extension 등록 흐름과 일치하는가
 
 운영 기준:

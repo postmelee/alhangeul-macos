@@ -1,4 +1,4 @@
-name: AlhangeulMac
+name: Alhangeul
 options:
   bundleIdPrefix: com.postmelee
   deploymentTarget:
@@ -29,9 +29,9 @@ targets:
         embed: false
     settings:
       base:
-        PRODUCT_NAME: AlhangeulMac
-        EXECUTABLE_NAME: AlhangeulMacHost
-        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeulmac
+        PRODUCT_NAME: Alhangeul
+        EXECUTABLE_NAME: Alhangeul
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul
         INFOPLIST_FILE: Sources/HostApp/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/HostApp/HostApp.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -49,9 +49,9 @@ targets:
         embed: false
     settings:
       base:
-        PRODUCT_NAME: AlhangeulMacPreview
-        EXECUTABLE_NAME: AlhangeulMacPreview
-        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeulmac.QLExtension
+        PRODUCT_NAME: AlhangeulPreview
+        EXECUTABLE_NAME: AlhangeulPreview
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.QLExtension
         INFOPLIST_FILE: Sources/QLExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/QLExtension/QLExtension.entitlements
         CODE_SIGN_STYLE: Automatic
@@ -68,9 +68,9 @@ targets:
         embed: false
     settings:
       base:
-        PRODUCT_NAME: AlhangeulMacThumbnail
-        EXECUTABLE_NAME: AlhangeulMacThumbnail
-        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeulmac.ThumbnailExtension
+        PRODUCT_NAME: AlhangeulThumbnail
+        EXECUTABLE_NAME: AlhangeulThumbnail
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.ThumbnailExtension
         INFOPLIST_FILE: Sources/ThumbnailExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/ThumbnailExtension/ThumbnailExtension.entitlements
         CODE_SIGN_STYLE: Automatic

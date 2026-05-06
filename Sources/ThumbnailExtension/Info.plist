@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>ko</string>
 	<key>CFBundleDisplayName</key>
-	<string>AlhangeulMacThumbnail</string>
+	<string>AlhangeulThumbnail</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>AlhangeulMacThumbnail</string>
+	<string>AlhangeulThumbnail</string>
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
@@ -30,8 +30,8 @@
 		<dict>
 			<key>QLSupportedContentTypes</key>
 			<array>
-				<string>com.postmelee.alhangeulmac.hwp</string>
-				<string>com.postmelee.alhangeulmac.hwpx</string>
+				<string>com.postmelee.alhangeul.hwp</string>
+				<string>com.postmelee.alhangeul.hwpx</string>
 				<string>com.hancom.hwp</string>
 				<string>com.hancom.hwpx</string>
 				<string>com.haansoft.hancomofficeviewer.mac.hwp</string>
