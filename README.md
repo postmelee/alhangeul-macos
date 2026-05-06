@@ -351,10 +351,12 @@ local/task{N}  ──커밋──커밋──┐
 | 브랜치 | 용도 |
 |--------|------|
 | `main` | 릴리즈 |
-| `devel-webview` | WKWebView MVP, Finder/Quick Look, Spotlight, 변환, 배포 작업의 기본 통합 |
+| `devel-webview` | v0.1.x WKWebView MVP, Finder/Quick Look, Spotlight, 변환, 배포 작업의 기본 통합 |
 | `devel` | native viewer renderer와 장기 native viewer 개발 통합 |
 | `local/task{N}` | GitHub Issue 번호 기반 타스크 브랜치 |
 | `publish/task{N}` | `devel-webview` 또는 `devel` 대상 PR 생성을 위한 원격 게시 브랜치 |
+
+첫 출시 전후 브랜치 역할과 rename 후보는 [WKWebView/native 브랜치 전략](mydocs/tech/branch_strategy_webview_native.md)을 기준으로 유지합니다.
 
 ### 타스크 관리
 
@@ -438,7 +440,8 @@ graph TB
 - 이슈 먼저 확인: 동일 영역에 진행 중인 작업이 있는지 [열린 이슈](https://github.com/postmelee/alhangeul-macos/issues) 와 [열린 PR](https://github.com/postmelee/alhangeul-macos/pulls) 을 먼저 확인해 주세요. 중복 작업을 방지합니다.
 - 이슈 close 는 메인테이너: 작업 완료 후 PR 만 제출해 주세요. 이슈는 PR 머지 시 메인테이너가 close 합니다.
 
-상세한 기여 절차 (Fork → 브랜치 → 커밋 → PR) 는 [CONTRIBUTING.md](CONTRIBUTING.md) 를 참고하세요.
+상세한 기여 절차 (Fork → 브랜치 → 커밋 → PR) 는 [CONTRIBUTING.md](CONTRIBUTING.md) 를, 브랜치 전략의 판단 근거는 [WKWebView/native 브랜치 전략](mydocs/tech/branch_strategy_webview_native.md)을 참고하세요.
+
 ## Notice
 
 본 제품은 한글과컴퓨터의 한글 문서 파일(`.hwp`, `.hwpx`) 공개 문서를 참고하여 개발하였습니다.

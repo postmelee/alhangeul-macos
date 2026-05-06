@@ -2,6 +2,8 @@
 
 본 매뉴얼은 본 저장소의 브랜치 정책, Git 워크플로우 다이어그램, 메인테이너/컨트리뷰터 워크플로우 스크립트를 정의한다. 새 타스크 브랜치를 만들거나 PR 게시·merge·정리를 수행하기 전에 읽는다. 문서 파일 위치와 타스크 승인 절차는 각각 `document_structure_guide.md`, `task_workflow_guide.md`에서 다룬다.
 
+첫 출시 전후 브랜치 역할과 rename 후보의 판단 근거는 [`branch_strategy_webview_native.md`](../tech/branch_strategy_webview_native.md)를 기준으로 한다.
+
 ## 핵심 용어
 
 - **통합 브랜치**: 작업 범위에 따라 PR이 모이는 기준 브랜치. WKWebView MVP, Finder/Quick Look, Spotlight, 변환, 배포, 문서는 `devel-webview`를 기본으로 쓰고, native viewer renderer 작업은 `devel`을 쓴다.
@@ -123,3 +125,4 @@ PR이 `MERGED` 상태인지 먼저 확인한다. merge 확인 후 대상 통합 
 - [`task_workflow_guide.md`](task_workflow_guide.md): 이슈 기반 타스크 시작, 단계 승인, 최종 보고, PR 게시 순서.
 - [`document_structure_guide.md`](document_structure_guide.md): 계획서, 단계 보고서, 최종 보고서의 문서 위치와 파일명.
 - [`pr_process_guide.md`](pr_process_guide.md): 외부 기여자 PR 검토 절차.
+- [`branch_strategy_webview_native.md`](../tech/branch_strategy_webview_native.md): WKWebView 출시 라인과 native renderer 실험 라인의 브랜치 역할.
