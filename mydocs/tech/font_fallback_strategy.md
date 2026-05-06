@@ -16,7 +16,7 @@ Quick Look preview와 Finder thumbnail의 Swift native renderer가 HWP 문서의
 
 ## 자산 출처와 사용 범위
 
-기준 자산 목록과 라이선스 설명은 `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`가 소유한다. #119에서는 새 TTF/OTF/font 파일을 추가하지 않고, 이미 WebView viewer bundle에 포함된 WOFF2 34개를 native renderer에서도 재사용한다.
+기준 자산 목록과 라이선스 설명은 `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`가 소유한다. 사용자용 third-party 고지는 `THIRD_PARTY_LICENSES.md`에서 연결한다. #119에서는 새 TTF/OTF/font 파일을 추가하지 않고, 이미 WebView viewer bundle에 포함된 WOFF2 34개를 native renderer에서도 재사용한다.
 
 | 계열 | 주요 bundled font | native renderer 사용처 |
 |------|-------------------|-------------------------|

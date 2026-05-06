@@ -1,11 +1,11 @@
 # 웹 폰트 목록
 
-웹 배포에 사용하는 woff2 폰트 파일 목록이다.
-저작권 보호가 필요한 폰트는 Git에 포함하지 않으며, 별도로 준비해야 한다.
+Alhangeul macOS v0.1 bundle의 `rhwp-studio/fonts`에 포함되는 WOFF2 폰트 파일 목록이다.
+저작권 보호가 필요한 proprietary 폰트는 Git과 release artifact에 포함하지 않으며, 아래 fallback 후보로 대체한다.
 
-## 저작권 폰트 (Git 미포함)
+## Proprietary 폰트 (Git/release artifact 미포함)
 
-로컬에 직접 배치해야 한다. 웹 배포 시 대응되는 폰트 폴백으로 대체 가능하다.
+한컴/HY/HCR/Microsoft 계열 proprietary 폰트 파일은 저장소와 release artifact에 포함하지 않는다. 문서 표시 시 대응되는 bundled WOFF2 또는 시스템 폰트 fallback으로 대체한다.
 
 ### 한컴 폰트
 
@@ -32,7 +32,7 @@
 | WebdingsW95-Regular.woff2 | Webdings | — |
 | WingdingsW95-3.woff2 | Wingdings 3 | — |
 
-## 오픈 라이선스 폰트 (Git 포함)
+## 오픈 라이선스/무료 배포 폰트 (Git 포함)
 
 ### Serif (명조체 계열)
 
@@ -72,6 +72,10 @@
 
 | 파일명 | 폰트명 | 라이선스 | 출처 |
 |--------|--------|---------|------|
+| LatinModernMath-Regular.woff2 | Latin Modern Math Regular | GUST Font License (GFL) | CTAN/GUST |
 | Cafe24Ssurround-v2.0.woff2 | 카페24 써라운드 | 무료 배포 | Cafe24 |
 | Cafe24Supermagic-Regular-v1.0.woff2 | 카페24 슈퍼매직 | 무료 배포 | Cafe24 |
-| Happiness-Sans-*.woff2 (4종) | 행복고딕 | 무료 배포 | 행복나눔 |
+| Happiness-Sans-Regular.woff2 | 행복고딕 Regular | 무료 배포 | 행복나눔 |
+| Happiness-Sans-Bold.woff2 | 행복고딕 Bold | 무료 배포 | 행복나눔 |
+| Happiness-Sans-Title.woff2 | 행복고딕 Title | 무료 배포 | 행복나눔 |
+| HappinessSansVF.woff2 | 행복고딕 Variable | 무료 배포 | 행복나눔 |
