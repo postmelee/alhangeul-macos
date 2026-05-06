@@ -984,8 +984,10 @@ class CGTreeRenderer {
         guard !run.text.isEmpty else { return }
 
         let style = run.style
-        let fontSize = CGFloat(style.fontSize)
-        guard fontSize > 0 else { return }
+        let baseFontSize = CGFloat(style.fontSize)
+        guard baseFontSize > 0 else { return }
+        let fontSize = effectiveTextRunFontSize(style: style, baseFontSize: baseFontSize)
+        let baselineShift = textRunBaselineShift(style: style, baseFontSize: baseFontSize)
 
         ctx.saveGState()
 
@@ -1021,14 +1023,46 @@ class CGTreeRenderer {
         // Core Text 좌하단 좌표계에서 베이스라인 위치
         // bbox 내부 좌표: baseline은 bbox.y 상단으로부터의 거리
         // Core Text Y: bbox 하단(0)으로부터 위로 = bbox.height - baseline
-        let textY = CGFloat(bbox.height) - CGFloat(run.baseline)
+        let textY = CGFloat(bbox.height) - CGFloat(run.baseline) + baselineShift
+
+        if style.shadowType > 0 {
+            let shadowAttributes = makeTextRunAttributes(
+                style: style,
+                font: font,
+                colorOverride: style.shadowColor
+            )
+            let shadowLine = CTLineCreateWithAttributedString(
+                NSAttributedString(string: run.text, attributes: shadowAttributes)
+            )
+            let shadowLayout = makeTextRunLayoutPlan(
+                text: run.text,
+                style: style,
+                bbox: bbox,
+                line: shadowLine,
+                attributes: shadowAttributes,
+                charPositions: run.charPositions
+            )
+            drawTextLine(
+                shadowLine,
+                layout: shadowLayout,
+                style: style,
+                attributes: shadowAttributes,
+                x: CGFloat(style.shadowOffsetX),
+                y: textY - CGFloat(style.shadowOffsetY),
+                in: ctx
+            )
+        }
+
+        drawTextTabLeaders(style: style, fontSize: fontSize, y: textY, in: ctx)
         drawTextLine(line, layout: layout, style: style, attributes: attributes, y: textY, in: ctx)
+        drawTextEmphasisDots(text: run.text, line: line, layout: layout, style: style, fontSize: fontSize, y: textY, in: ctx)
 
         ctx.restoreGState()
 
         // 밑줄 (페이지 좌표계, 전체 Y반전 상태)
         if style.underline != "None" {
-            let ulY = CGFloat(bbox.y) + CGFloat(run.baseline) + fontSize * 0.15
+            let baselineY = CGFloat(bbox.y) + CGFloat(run.baseline) - baselineShift
+            let ulY = baselineY + fontSize * 0.15
             drawTextDecoration(
                 in: ctx, x: CGFloat(bbox.x), y: ulY, width: CGFloat(bbox.width),
                 shape: style.underlineShape,
@@ -1038,7 +1072,13 @@ class CGTreeRenderer {
 
         // 취소선
         if style.strikethrough {
-            let stY = CGFloat(bbox.y) + CGFloat(bbox.height) / 2
+            let stY: CGFloat
+            if style.superscript || style.subscript {
+                let baselineY = CGFloat(bbox.y) + CGFloat(run.baseline) - baselineShift
+                stY = baselineY - fontSize * 0.3
+            } else {
+                stY = CGFloat(bbox.y) + CGFloat(bbox.height) / 2
+            }
             drawTextDecoration(
                 in: ctx, x: CGFloat(bbox.x), y: stY, width: CGFloat(bbox.width),
                 shape: style.strikeShape,
@@ -1065,10 +1105,31 @@ class CGTreeRenderer {
         return font
     }
 
-    private func makeTextRunAttributes(style: TextStyle, font: CTFont) -> [NSAttributedString.Key: Any] {
+    private func effectiveTextRunFontSize(style: TextStyle, baseFontSize: CGFloat) -> CGFloat {
+        if style.superscript || style.subscript {
+            return baseFontSize * 0.7
+        }
+        return baseFontSize
+    }
+
+    private func textRunBaselineShift(style: TextStyle, baseFontSize: CGFloat) -> CGFloat {
+        if style.superscript {
+            return baseFontSize * 0.3
+        }
+        if style.subscript {
+            return -baseFontSize * 0.15
+        }
+        return 0
+    }
+
+    private func makeTextRunAttributes(
+        style: TextStyle,
+        font: CTFont,
+        colorOverride: UInt32? = nil
+    ) -> [NSAttributedString.Key: Any] {
         var attributes: [NSAttributedString.Key: Any] = [
             coreTextFontKey: font,
-            coreTextForegroundColorKey: colorRefToCGColor(style.color),
+            coreTextForegroundColorKey: colorRefToCGColor(colorOverride ?? style.color),
         ]
 
         if style.letterSpacing != 0 {
@@ -1208,24 +1269,25 @@ class CGTreeRenderer {
         layout: TextRunLayoutPlan,
         style: TextStyle,
         attributes: [NSAttributedString.Key: Any],
+        x: CGFloat = 0,
         y: CGFloat,
         in ctx: CGContext
     ) {
         switch layout.strategy {
         case .line:
-            ctx.textPosition = CGPoint(x: 0, y: y)
+            ctx.textPosition = CGPoint(x: x, y: y)
             CTLineDraw(line, ctx)
         case .clusters:
             guard let clusterPlan = layout.clusterPlan else {
-                ctx.textPosition = CGPoint(x: 0, y: y)
+                ctx.textPosition = CGPoint(x: x, y: y)
                 CTLineDraw(line, ctx)
                 return
             }
-            drawTextClusters(clusterPlan.clusters, style: style, attributes: attributes, y: y, in: ctx)
+            drawTextClusters(clusterPlan.clusters, style: style, attributes: attributes, xOffset: x, y: y, in: ctx)
         case .scaledLine(let scale):
             ctx.saveGState()
             ctx.scaleBy(x: scale, y: 1)
-            ctx.textPosition = CGPoint(x: 0, y: y)
+            ctx.textPosition = CGPoint(x: x / scale, y: y)
             CTLineDraw(line, ctx)
             ctx.restoreGState()
         }
@@ -1286,15 +1348,20 @@ class CGTreeRenderer {
         spans.reserveCapacity(text.count)
 
         var scalarOffset = 0
+        var utf16Offset = 0
         for character in text {
             let clusterText = String(character)
             let scalarCount = clusterText.unicodeScalars.count
+            let utf16Count = clusterText.utf16.count
             spans.append(TextRunClusterSpan(
                 text: clusterText,
                 scalarStart: scalarOffset,
-                scalarEnd: scalarOffset + scalarCount
+                scalarEnd: scalarOffset + scalarCount,
+                utf16Start: utf16Offset,
+                utf16End: utf16Offset + utf16Count
             ))
             scalarOffset += scalarCount
+            utf16Offset += utf16Count
         }
 
         return spans
@@ -1607,11 +1674,12 @@ class CGTreeRenderer {
         _ clusters: [TextRunCluster],
         style: TextStyle,
         attributes: [NSAttributedString.Key: Any],
+        xOffset: CGFloat = 0,
         y: CGFloat,
         in ctx: CGContext
     ) {
         for cluster in clusters where isDrawableTextCluster(cluster.text) {
-            drawTextCluster(cluster, style: style, attributes: attributes, y: y, in: ctx)
+            drawTextCluster(cluster, style: style, attributes: attributes, xOffset: xOffset, y: y, in: ctx)
         }
     }
 
@@ -1619,22 +1687,174 @@ class CGTreeRenderer {
         _ cluster: TextRunCluster,
         style: TextStyle,
         attributes: [NSAttributedString.Key: Any],
+        xOffset: CGFloat = 0,
         y: CGFloat,
         in ctx: CGContext
     ) {
         let line = cluster.line ?? makeTextRunClusterLine(cluster.text, attributes: attributes)
+        let x = cluster.x + xOffset
 
         if needsHalfwidthPunctuationScale(cluster.text, style: style) {
             ctx.saveGState()
-            ctx.translateBy(x: cluster.x, y: y)
+            ctx.translateBy(x: x, y: y)
             ctx.scaleBy(x: 0.5, y: 1)
             ctx.textPosition = .zero
             CTLineDraw(line, ctx)
             ctx.restoreGState()
         } else {
-            ctx.textPosition = CGPoint(x: cluster.x, y: y)
+            ctx.textPosition = CGPoint(x: x, y: y)
             CTLineDraw(line, ctx)
         }
+    }
+
+    private func drawTextEmphasisDots(
+        text: String,
+        line: CTLine,
+        layout: TextRunLayoutPlan,
+        style: TextStyle,
+        fontSize: CGFloat,
+        y: CGFloat,
+        in ctx: CGContext
+    ) {
+        guard let dot = emphasisDotText(style.emphasisDot) else { return }
+
+        let dotSize = max(fontSize * 0.3, 1)
+        let dotFont = resolveAppleFont(
+            hwpFontFamily: style.fontFamily,
+            bold: false,
+            italic: false,
+            size: dotSize
+        )
+        let attributes: [NSAttributedString.Key: Any] = [
+            coreTextFontKey: dotFont,
+            coreTextForegroundColorKey: colorRefToCGColor(style.color),
+        ]
+        let dotLine = CTLineCreateWithAttributedString(NSAttributedString(string: dot, attributes: attributes))
+        let dotWidth = CGFloat(CTLineGetTypographicBounds(dotLine, nil, nil, nil))
+        let dotY = y + fontSize * 1.05
+        let ratio = CGFloat(style.ratio > 0 ? style.ratio : 1)
+
+        for position in textRunVisualClusterPositions(text: text, line: line, layout: layout) {
+            guard isDrawableTextCluster(position.text) else { continue }
+            let dotX = position.x + fontSize * ratio * 0.5 - dotWidth / 2
+            ctx.textPosition = CGPoint(x: dotX, y: dotY)
+            CTLineDraw(dotLine, ctx)
+        }
+    }
+
+    private func emphasisDotText(_ value: UInt8) -> String? {
+        switch value {
+        case 1:
+            return "●"
+        case 2:
+            return "○"
+        case 3:
+            return "ˇ"
+        case 4:
+            return "˜"
+        case 5:
+            return "･"
+        case 6:
+            return "˸"
+        default:
+            return nil
+        }
+    }
+
+    private func textRunVisualClusterPositions(
+        text: String,
+        line: CTLine,
+        layout: TextRunLayoutPlan
+    ) -> [(text: String, x: CGFloat)] {
+        let spans = splitTextRunClusters(text)
+        if let clusterPlan = layout.clusterPlan,
+           clusterPlan.clusters.count == spans.count {
+            return zip(spans, clusterPlan.clusters).map { ($0.text, $1.x) }
+        }
+
+        return spans.map { span in
+            let rawX = CGFloat(CTLineGetOffsetForStringIndex(line, span.utf16Start, nil))
+            switch layout.strategy {
+            case .scaledLine(let scale):
+                return (span.text, rawX * scale)
+            case .line, .clusters:
+                return (span.text, rawX)
+            }
+        }
+    }
+
+    private func drawTextTabLeaders(style: TextStyle, fontSize: CGFloat, y: CGFloat, in ctx: CGContext) {
+        guard !style.tabLeaders.isEmpty else { return }
+
+        let leaderY = y + fontSize * 0.35
+        let color = colorRefToCGColor(style.color)
+
+        ctx.saveGState()
+        ctx.setStrokeColor(color)
+        for leader in style.tabLeaders {
+            guard leader.fillType != 0 else { continue }
+            let x1 = CGFloat(leader.startX)
+            let x2 = CGFloat(leader.endX)
+            guard x2 > x1 else { continue }
+            drawTextTabLeader(fillType: leader.fillType, x1: x1, x2: x2, y: leaderY, in: ctx)
+        }
+        ctx.restoreGState()
+    }
+
+    private func drawTextTabLeader(fillType: UInt8, x1: CGFloat, x2: CGFloat, y: CGFloat, in ctx: CGContext) {
+        switch fillType {
+        case 1:
+            drawTextLeaderLine(x1: x1, x2: x2, y: y, width: 0.5, dash: [], in: ctx)
+        case 2:
+            drawTextLeaderLine(x1: x1, x2: x2, y: y, width: 0.5, dash: [3, 3], in: ctx)
+        case 3:
+            ctx.setLineCap(.round)
+            drawTextLeaderLine(x1: x1, x2: x2, y: y, width: 1.0, dash: [0.1, 3.0], in: ctx)
+            ctx.setLineCap(.butt)
+        case 4:
+            drawTextLeaderLine(x1: x1, x2: x2, y: y, width: 0.5, dash: [6, 2, 1, 2], in: ctx)
+        case 5:
+            drawTextLeaderLine(x1: x1, x2: x2, y: y, width: 0.5, dash: [6, 2, 1, 2, 1, 2], in: ctx)
+        case 6:
+            drawTextLeaderLine(x1: x1, x2: x2, y: y, width: 0.5, dash: [8, 4], in: ctx)
+        case 7:
+            ctx.setLineCap(.round)
+            drawTextLeaderLine(x1: x1, x2: x2, y: y, width: 0.7, dash: [0.1, 2.5], in: ctx)
+            ctx.setLineCap(.butt)
+        case 8:
+            drawTextLeaderLine(x1: x1, x2: x2, y: y - 1.0, width: 0.3, dash: [], in: ctx)
+            drawTextLeaderLine(x1: x1, x2: x2, y: y + 1.0, width: 0.3, dash: [], in: ctx)
+        case 9:
+            drawTextLeaderLine(x1: x1, x2: x2, y: y - 1.2, width: 0.3, dash: [], in: ctx)
+            drawTextLeaderLine(x1: x1, x2: x2, y: y + 0.8, width: 0.8, dash: [], in: ctx)
+        case 10:
+            drawTextLeaderLine(x1: x1, x2: x2, y: y - 0.8, width: 0.8, dash: [], in: ctx)
+            drawTextLeaderLine(x1: x1, x2: x2, y: y + 1.2, width: 0.3, dash: [], in: ctx)
+        case 11:
+            drawTextLeaderLine(x1: x1, x2: x2, y: y - 2.0, width: 0.3, dash: [], in: ctx)
+            drawTextLeaderLine(x1: x1, x2: x2, y: y, width: 0.8, dash: [], in: ctx)
+            drawTextLeaderLine(x1: x1, x2: x2, y: y + 2.0, width: 0.3, dash: [], in: ctx)
+        default:
+            drawTextLeaderLine(x1: x1, x2: x2, y: y, width: 0.5, dash: [1, 2], in: ctx)
+        }
+    }
+
+    private func drawTextLeaderLine(
+        x1: CGFloat,
+        x2: CGFloat,
+        y: CGFloat,
+        width: CGFloat,
+        dash: [CGFloat],
+        in ctx: CGContext
+    ) {
+        ctx.saveGState()
+        ctx.setLineWidth(width)
+        ctx.setLineDash(phase: 0, lengths: dash)
+        ctx.beginPath()
+        ctx.move(to: CGPoint(x: x1, y: y))
+        ctx.addLine(to: CGPoint(x: x2, y: y))
+        ctx.strokePath()
+        ctx.restoreGState()
     }
 
     private func isDrawableTextCluster(_ cluster: String) -> Bool {
@@ -2477,6 +2697,8 @@ private struct TextRunClusterSpan {
     let text: String
     let scalarStart: Int
     let scalarEnd: Int
+    let utf16Start: Int
+    let utf16End: Int
 }
 
 private struct TextRunTabStop {
