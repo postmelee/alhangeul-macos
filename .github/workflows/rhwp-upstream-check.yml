@@ -1,0 +1,58 @@
+name: rhwp Upstream Release Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_tag:
+        description: Optional rhwp release tag to check. Empty uses upstream latest release.
+        required: false
+        default: ""
+      run_compatibility_check:
+        description: Run update-rhwp-core.sh --check when the target differs from rhwp-core.lock.
+        required: true
+        type: boolean
+        default: true
+  schedule:
+    - cron: "17 0 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rhwp-upstream-check
+  cancel-in-progress: false
+
+jobs:
+  check-upstream-release:
+    name: Compare rhwp-core.lock with upstream release
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TARGET_TAG: ${{ github.event.inputs.target_tag }}
+      RUN_COMPATIBILITY_CHECK: ${{ github.event.inputs.run_compatibility_check }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify helper syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/ci/check-rhwp-upstream-release.sh
+          bash scripts/ci/check-rhwp-upstream-release.sh --help
+
+      - name: Check upstream rhwp release
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_check="${RUN_COMPATIBILITY_CHECK:-true}"
+
+          args=(--run-compatibility-check "$run_check")
+          if [ -n "${TARGET_TAG:-}" ]; then
+            args+=(--target-tag "$TARGET_TAG")
+          fi
+
+          bash scripts/ci/check-rhwp-upstream-release.sh "${args[@]}"
