@@ -1,251 +1,266 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#ffffff" />
-    <meta
-      name="description"
-      content="알한글은 Mac에서 HWP/HWPX 문서를 Quick Look, Finder 썸네일, WKWebView 기반 뷰어로 다루는 오픈소스 macOS 앱입니다."
-    />
-    <meta property="og:title" content="알한글 - Mac에서 한글 파일은 더 이상 이방인이 아닙니다." />
-    <meta
-      property="og:description"
-      content="스페이스바로 미리보고, Finder에서 썸네일로 찾고, HWP파일을 보고 편집하세요."
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="./assets/logo-256@2x.png" />
-    <title>알한글 - Mac용 HWP/HWPX 뷰어</title>
-    <link rel="icon" href="./assets/logo-256@2x.png" />
-    <link rel="apple-touch-icon" href="./assets/logo-256@2x.png" />
-    <script>
-      document.documentElement.classList.add("reveal-ready");
-    </script>
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <a class="skip-link" href="#main">본문으로 이동</a>
-    <header class="site-header" aria-label="주요 탐색">
-      <div class="site-header-inner">
-        <a class="brand-link" href="./" aria-label="알한글 홈">
-          <img src="./assets/logo-256@2x.png" width="28" height="28" alt="" />
-          <span>알한글</span>
-        </a>
-        <nav class="header-actions" aria-label="주요 링크">
-          <a
-            class="github-link"
-            href="https://github.com/postmelee/alhangeul-macos"
-            rel="noreferrer"
-            aria-label="GitHub 저장소로 이동"
-          >
-            GitHub
-          </a>
-          <a
-            class="header-download-button"
-            href="https://github.com/postmelee/alhangeul-macos/releases/latest"
-            aria-label="GitHub Releases에서 Mac용 알한글 다운로드"
-          >
-            다운로드
-          </a>
-        </nav>
-      </div>
-    </header>
 
-    <main id="main">
-      <section class="hero" aria-labelledby="hero-title" data-reveal-group data-reveal-sequence="intro" data-reveal-gap="180">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description"
+    content="알한글은 Mac에서 HWP/HWPX 문서를 Quick Look, Finder 썸네일, WKWebView 기반 뷰어로 다루는 오픈소스 macOS 앱입니다." />
+  <meta property="og:title" content="알한글 - Mac에서 한글 파일은 더 이상 이방인이 아닙니다." />
+  <meta property="og:description" content="스페이스바로 미리보고, Finder에서 썸네일로 찾고, HWP파일을 보고 편집하세요." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="./assets/logo-256@2x.png" />
+  <title>알한글 - Mac용 HWP/HWPX 뷰어</title>
+  <link rel="icon" href="./assets/logo-256@2x.png" />
+  <link rel="apple-touch-icon" href="./assets/logo-256@2x.png" />
+  <script>
+    document.documentElement.classList.add("reveal-ready");
+  </script>
+  <link rel="stylesheet" href="./styles.css?v=20260506-responsive" />
+</head>
+
+<body>
+  <a class="skip-link" href="#main">본문으로 이동</a>
+  <header class="site-header" aria-label="주요 탐색">
+    <div class="site-header-inner">
+      <a class="brand-link" href="./" aria-label="알한글 홈">
+        <img src="./assets/logo-256@2x.png" width="28" height="28" alt="" />
+        <span>알한글</span>
+      </a>
+      <nav class="header-actions" aria-label="주요 링크">
+        <a class="github-link" href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer"
+          aria-label="GitHub 저장소로 이동">
+          GitHub
+        </a>
+        <a class="header-download-button" href="https://github.com/postmelee/alhangeul-macos/releases/latest"
+          aria-label="GitHub Releases에서 Mac용 알한글 다운로드">
+          다운로드
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="intro-screen">
+      <section class="hero" aria-labelledby="hero-title" data-reveal-group data-reveal-sequence="intro"
+        data-reveal-gap="180">
         <div class="hero-copy">
           <h1 id="hero-title" data-reveal-item>
             Mac에서 한글 파일은<br />
             더 이상 <span class="hero-highlight">이방인</span>이 아닙니다.
           </h1>
           <p data-reveal-item>스페이스바로 미리보고, Finder에서 썸네일로 찾고, HWP파일을 보고 편집하세요.</p>
-          <div class="hero-action" data-reveal-item>
-            <a
-              class="download-button"
-              href="https://github.com/postmelee/alhangeul-macos/releases/latest"
-              aria-label="GitHub Releases에서 Mac용 알한글 다운로드"
-            >
-              <span aria-hidden="true"></span>
-              Mac 다운로드
-            </a>
-          </div>
         </div>
       </section>
 
-      <section class="demo-section" aria-label="앱 실행 영상" data-reveal-group data-reveal-sequence="intro" data-reveal-gap="180">
+      <section class="demo-section" aria-label="앱 실행 영상" data-reveal-group data-reveal-sequence="intro"
+        data-reveal-gap="180">
         <div class="macbook-reveal" data-reveal-item>
           <div class="macbook-showcase">
-            <img class="macbook-frame" src="./assets/mac_mock.png" alt="" aria-hidden="true" />
+            <img class="macbook-frame" src="./assets/macbook-pro-frame-transparent.png" alt="" aria-hidden="true" />
             <div class="macbook-screen">
-              <video
-                src="./assets/thumbnail2.mov"
-                poster="./assets/group-1-4x.png"
-                autoplay
-                muted
-                loop
-                playsinline
-                preload="metadata"
-                aria-label="알한글 앱 실행 영상"
-              >
+              <video src="./assets/alhanguel-main.mov" poster="./assets/alhanguel-main-poster.jpg" autoplay muted loop
+                playsinline preload="metadata" aria-label="알한글 앱 실행 영상">
                 브라우저가 영상을 지원하지 않습니다.
               </video>
             </div>
           </div>
         </div>
-        <p class="media-caption" data-reveal-item>Quick Look과 Finder, 앱 뷰어가 하나의 Mac 흐름으로 이어집니다.</p>
       </section>
+    </div>
 
-      <section class="features-section" aria-labelledby="features-title">
-        <div class="features-sticky" data-reveal-group>
-          <div class="section-heading">
-            <h2 id="features-title" data-reveal-item>
-              미리보기부터 뷰어까지, <br class="feature-mobile-break" />Mac 방식으로
-            </h2>
-            <p data-reveal-item>
-              Finder와 Quick Look, 앱 뷰어까지 HWP/HWPX 문서를
-              <br class="feature-mobile-break" />Mac 안에서 자연스럽게 열고 확인합니다.
-            </p>
-          </div>
-          <div class="features-copy" data-reveal-item>
-            <div class="feature-list" aria-label="주요 기능">
-              <article class="feature-step is-active" data-feature-step="0">
-                <h3>Finder에서 <span class="feature-highlight">썸네일로 찾기</span></h3>
-                <p>꽁꽁 숨겨진 .hwp 파일이 알한글 설치 후 첫 페이지 썸네일과 함께 드러납니다.</p>
-              </article>
-              <article class="feature-step" data-feature-step="1">
-                <h3>스페이스바로 <span class="feature-highlight">즉시 미리보기</span></h3>
-                <p>Quick Look 확장으로 HWP/HWPX 문서를 열기 전에 빠르게 확인합니다.</p>
-              </article>
-              <article class="feature-step" data-feature-step="2">
-                <h3>앱에서 <span class="feature-highlight">HWP/HWPX 보기</span></h3>
-                <p>WKWebView 기반 viewer로 문서를 열고, 필요한 내용을 바로 탐색합니다.</p>
-              </article>
-              <article class="feature-step" data-feature-step="3">
-                <h3>문서는 Mac 안에서 <span class="feature-highlight">로컬 처리</span></h3>
-                <p>파일을 외부 서비스에 올리지 않고 Mac에서 처리하는 흐름을 우선합니다.</p>
-              </article>
-            </div>
-          </div>
-          <figure class="feature-visual" aria-label="알한글의 Quick Look 미리보기와 Finder 썸네일 예시" data-reveal-item>
-            <div class="finder-visual">
-              <div class="finder-progress" aria-label="Finder 썸네일 설치 흐름">
-                <div class="progress-track" aria-hidden="true">
-                  <span class="progress-fill"></span>
-                </div>
-                <ol class="progress-checkpoints">
-                  <li class="checkpoint checkpoint-start is-active">
-                    <span class="checkpoint-marker"></span>
-                    <span data-stage-label="start">기존 Mac</span>
-                  </li>
-                  <li class="checkpoint checkpoint-middle">
-                    <span class="checkpoint-marker install-marker">
-                      <span class="install-ring" aria-hidden="true"></span>
-                      <span class="install-logo-stack">
-                        <img class="install-logo install-logo-muted" src="./assets/logo-256@2x.png" alt="" />
-                        <img class="install-logo install-logo-color" src="./assets/logo-256@2x.png" alt="" />
-                      </span>
-                      <svg class="install-check" viewBox="0 0 20 20" aria-hidden="true">
-                        <path pathLength="1" d="m5.2 10.2 3.1 3.1 6.5-7" />
-                      </svg>
-                    </span>
-                    <span data-stage-label="middle">알한글 설치</span>
-                  </li>
-                  <li class="checkpoint checkpoint-end">
-                    <span class="checkpoint-marker"></span>
-                    <span data-stage-label="end">Finder 썸네일</span>
-                  </li>
-                </ol>
-              </div>
-              <div class="finder-image-stage">
-                <img class="finder-image finder-image-before" src="./assets/finder-before.png" alt="" />
-                <img class="finder-image finder-image-after" src="./assets/finder-after.png" alt="" />
-                <img class="finder-image quicklook-clicked-image" src="./assets/preview-clicked.png" alt="" />
-                <img class="finder-image feature-fallback-image" src="./assets/group-1-4x.png" alt="" />
-                <div class="quicklook-stage-dim" aria-hidden="true"></div>
-                <img class="quicklook-preview-overlay" src="./assets/preview-after.png" alt="" aria-hidden="true" />
-                <video
-                  class="quicklook-scroll-video"
-                  src="./assets/zoom-and-copy.mov"
-                  muted
-                  playsinline
-                  preload="auto"
-                  aria-label="Quick Look에서 확대하고 텍스트를 복사하는 흐름"
-                ></video>
-                <div class="finder-lock" aria-hidden="true">
-                  <svg viewBox="0 0 32 32">
-                    <path class="lock-shackle" d="M10 14V10a6 6 0 0 1 12 0v4" />
-                    <path d="M8 14h16v13H8z" />
-                    <path d="M16 19v4" />
-                  </svg>
-                  <span>.hwp 정보 잠김</span>
-                </div>
-                <div class="finder-install-orb" aria-hidden="true">
-                  <span class="orb-ring"></span>
-                  <span class="orb-logo-stack">
-                    <img class="orb-logo orb-logo-muted" src="./assets/logo-256@2x.png" alt="" />
-                    <img class="orb-logo orb-logo-color" src="./assets/logo-256@2x.png" alt="" />
-                  </span>
-                  <svg class="orb-check" viewBox="0 0 24 24">
-                    <path pathLength="1" d="m6.2 12.3 4 4 7.6-8.1" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </figure>
-        </div>
-      </section>
-
-      <section class="faq-section" aria-labelledby="faq-title">
+    <section class="features-section" aria-labelledby="features-title">
+      <div class="features-sticky" data-reveal-group>
         <div class="section-heading">
-          <h2 id="faq-title">FAQ</h2>
-          <p>설치와 지원 범위, 개인정보 처리에 대해 자주 묻는 내용을 정리했습니다.</p>
+          <h2 id="features-title" data-reveal-item>
+            미리보기부터 뷰어까지, <br class="feature-mobile-break" />Mac 방식으로
+          </h2>
+          <p data-reveal-item>
+            Finder와 Quick Look, 앱 뷰어까지 HWP/HWPX 문서를
+            <br class="feature-mobile-break" />Mac 안에서 자연스럽게 열고 공유합니다.
+          </p>
         </div>
-        <div class="faq-list">
-          <details>
-            <summary>무료로 사용할 수 있나요?</summary>
-            <p>알한글은 MIT License로 공개되는 오픈소스 프로젝트입니다.</p>
-          </details>
-          <details>
-            <summary>어떤 파일 형식을 지원하나요?</summary>
-            <p>v0.1 MVP는 HWP/HWPX 문서의 Finder 미리보기, 썸네일, 앱 열기 흐름을 중심으로 합니다.</p>
-          </details>
-          <details>
-            <summary>Mac 다운로드는 어디로 연결되나요?</summary>
-            <p>현재 버튼은 GitHub Releases 최신 페이지로 연결됩니다. 실제 배포 산출물 구성은 별도 작업 범위입니다.</p>
-          </details>
-          <details>
-            <summary>개인정보와 문서는 안전한가요?</summary>
-            <p>알한글은 문서를 외부 서비스에 업로드하지 않고 로컬 처리를 우선합니다.</p>
-          </details>
-          <details>
-            <summary>편집 기능은 어디까지 지원되나요?</summary>
-            <p>안전한 작은 수정은 v1.0 로드맵 범위입니다. 현재 랜딩페이지는 MVP viewer 흐름을 중심으로 소개합니다.</p>
-          </details>
-          <details>
-            <summary>macOS에서 앱이 손상되었다고 나오면 어떻게 하나요?</summary>
-            <p>서명과 공증을 포함한 안정 배포는 별도 배포 작업 범위입니다. 현재는 GitHub Releases 안내를 우선 확인합니다.</p>
-          </details>
-          <details>
-            <summary>업데이트는 계속 제공되나요?</summary>
-            <p>v0.1 이후 검색, 내보내기, 변환, 자동화, native viewer 개선을 로드맵으로 추적합니다.</p>
-          </details>
+        <div class="features-copy" data-reveal-item>
+          <div class="feature-list" aria-label="주요 기능">
+            <article class="feature-step is-active" data-feature-step="0">
+              <h3>Finder에서 <span class="feature-highlight">썸네일로 찾기</span></h3>
+              <p>꽁꽁 숨겨진 .hwp 파일이 알한글 설치 후 첫 페이지 썸네일과 함께 드러납니다.</p>
+            </article>
+            <article class="feature-step" data-feature-step="1">
+              <h3>스페이스바로 <span class="feature-highlight">즉시 미리보기</span></h3>
+              <p>Quick Look 확장으로 HWP/HWPX 문서를 열기 전에 빠르게 확인합니다.</p>
+            </article>
+            <article class="feature-step" data-feature-step="2">
+              <h3>앱에서 <span class="feature-highlight">한글 파일 수정하기.</span></h3>
+              <p>HWP/HWPX 파일을 열고, 필요한 내용을 수정한 뒤 저장합니다.</p>
+            </article>
+            <article class="feature-step" data-feature-step="3">
+              <h3>문서를 <span class="feature-highlight">Mac 방식으로 공유하기</span></h3>
+              <p>PDF로 내보내고, AirDrop과 Mail 공유, Finder 보기까지 macOS 기본 흐름으로 이어집니다.</p>
+            </article>
+          </div>
         </div>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <div class="footer-brand">
-        <img src="./assets/logo-256@2x.png" width="32" height="32" alt="" />
-        <span>알한글</span>
+        <figure class="feature-visual" aria-label="알한글의 Quick Look 미리보기와 Finder 썸네일 예시" data-reveal-item>
+          <div class="finder-visual">
+            <div class="finder-progress" aria-label="기능 단계 진행 흐름">
+              <div class="progress-track" aria-hidden="true">
+                <span class="progress-fill"></span>
+              </div>
+              <ol class="progress-checkpoints">
+                <li class="checkpoint checkpoint-start is-active">
+                  <span class="checkpoint-marker"></span>
+                  <span data-stage-label="start">기존 Mac</span>
+                </li>
+                <li class="checkpoint checkpoint-middle">
+                  <span class="checkpoint-marker install-marker">
+                    <span class="install-ring" aria-hidden="true"></span>
+                    <span class="install-logo-stack">
+                      <img class="install-logo install-logo-muted" src="./assets/logo-256@2x.png" alt="" />
+                      <img class="install-logo install-logo-color" src="./assets/logo-256@2x.png" alt="" />
+                    </span>
+                    <svg class="install-check" viewBox="0 0 20 20" aria-hidden="true">
+                      <path pathLength="1" d="m5.2 10.2 3.1 3.1 6.5-7" />
+                    </svg>
+                  </span>
+                  <span data-stage-label="middle">알한글 설치</span>
+                </li>
+                <li class="checkpoint checkpoint-end">
+                  <span class="checkpoint-marker"></span>
+                  <span data-stage-label="end">Finder 썸네일</span>
+                </li>
+              </ol>
+            </div>
+            <div class="finder-image-stage">
+              <img class="finder-image finder-image-before" src="./assets/finder-before.png" alt="" />
+              <img class="finder-image finder-image-after" src="./assets/finder-after.png" alt="" />
+              <img class="finder-image quicklook-clicked-image" src="./assets/preview-clicked.png" alt="" />
+              <img class="finder-image feature-fallback-image" src="./assets/group-1-4x.png" alt="" />
+              <div class="quicklook-stage-dim" aria-hidden="true"></div>
+              <img class="quicklook-preview-overlay" src="./assets/preview-after.png" alt="" aria-hidden="true" />
+              <img class="quicklook-scroll-frame quicklook-scroll-frame-1" src="./assets/quicklook-scroll-1.png" alt=""
+                aria-hidden="true" />
+              <img class="quicklook-scroll-frame quicklook-scroll-frame-2" src="./assets/quicklook-scroll-2.png" alt=""
+                aria-hidden="true" />
+              <img class="quicklook-scroll-frame quicklook-scroll-frame-3" src="./assets/quicklook-scroll-3.png" alt=""
+                aria-hidden="true" />
+              <img class="quicklook-scroll-frame quicklook-scroll-frame-4" src="./assets/quicklook-scroll-4.png" alt=""
+                aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-0" src="./assets/editor-typing-0.png" alt="" aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-1" src="./assets/editor-typing-1.png" alt="" aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-2" src="./assets/editor-typing-2.png" alt="" aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-3" src="./assets/editor-typing-3.png" alt="" aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-4" src="./assets/editor-typing-4.png" alt="" aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-5" src="./assets/editor-typing-5.png" alt="" aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-6" src="./assets/editor-typing-6.png" alt="" aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-7" src="./assets/editor-typing-7.png" alt="" aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-8" src="./assets/editor-typing-8.png" alt="" aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-9" src="./assets/editor-typing-9.png" alt="" aria-hidden="true" />
+              <img class="viewer-frame viewer-frame-10" src="./assets/editor-typing-10.png" alt="" aria-hidden="true" />
+              <img class="viewer-save-frame viewer-save-ask" src="./assets/editor-save-ask.png" alt=""
+                aria-hidden="true" />
+              <img class="viewer-save-frame viewer-save-complete" src="./assets/editor-save-complete.png" alt=""
+                aria-hidden="true" />
+              <div class="viewer-command-bubble" aria-hidden="true">
+                <span class="viewer-command-key">⌘S</span>
+                <span>command + s</span>
+              </div>
+              <div class="viewer-save-badge" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path pathLength="1" d="m6.2 12.3 4 4 7.6-8.1" />
+                </svg>
+                <span>저장 완료</span>
+              </div>
+              <img class="mac-share-frame mac-share-pdf-before" src="./assets/share-pdf-before.png" alt=""
+                aria-hidden="true" />
+              <img class="mac-share-frame mac-share-pdf-after" src="./assets/share-pdf-after.png" alt=""
+                aria-hidden="true" />
+              <img class="mac-share-frame mac-share-before" src="./assets/share-before.png" alt="" aria-hidden="true" />
+              <img class="mac-share-frame mac-share-after" src="./assets/share-after.png" alt="" aria-hidden="true" />
+              <img class="mac-share-frame mac-share-finder-before" src="./assets/share-finder-before.png" alt=""
+                aria-hidden="true" />
+              <img class="mac-share-popup mac-share-pdf-popup" src="./assets/share-pdf-popup.png" alt=""
+                aria-hidden="true" />
+              <img class="mac-share-popup mac-share-email-popup" src="./assets/share-email.png" alt=""
+                aria-hidden="true" />
+              <img class="mac-share-popup mac-share-finder-popup" src="./assets/share-finder-after-popup.png" alt=""
+                aria-hidden="true" />
+              <div class="finder-lock" aria-hidden="true">
+                <svg viewBox="0 0 32 32">
+                  <path class="lock-shackle" d="M10 14V10a6 6 0 0 1 12 0v4" />
+                  <path d="M8 14h16v13H8z" />
+                  <path d="M16 19v4" />
+                </svg>
+                <span>.hwp 정보 잠김</span>
+              </div>
+              <div class="finder-install-orb" aria-hidden="true">
+                <span class="orb-ring"></span>
+                <span class="orb-logo-stack">
+                  <img class="orb-logo orb-logo-muted" src="./assets/logo-256@2x.png" alt="" />
+                  <img class="orb-logo orb-logo-color" src="./assets/logo-256@2x.png" alt="" />
+                </span>
+                <svg class="orb-check" viewBox="0 0 24 24">
+                  <path pathLength="1" d="m6.2 12.3 4 4 7.6-8.1" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </figure>
       </div>
-      <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 뷰어 앱입니다. 한글 파일이 더 이상 낯선 파일로 남지 않도록 만듭니다.</p>
-      <nav aria-label="푸터 링크">
-        <a href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer">GitHub</a>
-        <a href="https://github.com/postmelee/alhangeul-macos/blob/main/LICENSE" rel="noreferrer">MIT License</a>
-      </nav>
-    </footer>
+    </section>
 
-    <noscript>FAQ 아코디언은 JavaScript 없이도 브라우저 기본 동작으로 열고 닫을 수 있습니다.</noscript>
-    <script src="./script.js"></script>
-  </body>
+    <section class="faq-section" aria-labelledby="faq-title">
+      <div class="section-heading">
+        <h2 id="faq-title">FAQ</h2>
+        <p>설치와 지원 범위, 개인정보 처리에 대해 자주 묻는 내용을 정리했습니다.</p>
+      </div>
+      <div class="faq-list">
+        <details>
+          <summary>무료로 사용할 수 있나요?</summary>
+          <p>알한글은 MIT License로 공개되는 오픈소스 프로젝트입니다.</p>
+        </details>
+        <details>
+          <summary>어떤 파일 형식을 지원하나요?</summary>
+          <p>v0.1 MVP는 HWP/HWPX 문서의 Finder 미리보기, 썸네일, 앱 열기 흐름을 중심으로 합니다.</p>
+        </details>
+        <details>
+          <summary>Mac 다운로드는 어디로 연결되나요?</summary>
+          <p>현재 버튼은 GitHub Releases 최신 페이지로 연결됩니다. 실제 배포 산출물 구성은 별도 작업 범위입니다.</p>
+        </details>
+        <details>
+          <summary>개인정보와 문서는 안전한가요?</summary>
+          <p>알한글은 문서를 외부 서비스에 업로드하지 않고 로컬 처리를 우선합니다.</p>
+        </details>
+        <details>
+          <summary>편집 기능은 어디까지 지원되나요?</summary>
+          <p>안전한 작은 수정은 v1.0 로드맵 범위입니다. 현재 랜딩페이지는 MVP viewer 흐름을 중심으로 소개합니다.</p>
+        </details>
+        <details>
+          <summary>macOS에서 앱이 손상되었다고 나오면 어떻게 하나요?</summary>
+          <p>서명과 공증을 포함한 안정 배포는 별도 배포 작업 범위입니다. 현재는 GitHub Releases 안내를 우선 확인합니다.</p>
+        </details>
+        <details>
+          <summary>업데이트는 계속 제공되나요?</summary>
+          <p>v0.1 이후 검색, 내보내기, 변환, 자동화, native viewer 개선을 로드맵으로 추적합니다.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <img src="./assets/logo-256@2x.png" width="32" height="32" alt="" />
+      <span>알한글</span>
+    </div>
+    <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 뷰어 앱입니다. 한글 파일이 더 이상 낯선 파일로 남지 않도록 만듭니다.</p>
+    <nav aria-label="푸터 링크">
+      <a href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer">GitHub</a>
+      <a href="https://github.com/postmelee/alhangeul-macos/blob/main/LICENSE" rel="noreferrer">MIT License</a>
+    </nav>
+  </footer>
+
+  <noscript>FAQ 아코디언은 JavaScript 없이도 브라우저 기본 동작으로 열고 닫을 수 있습니다.</noscript>
+  <script src="./script.js"></script>
+</body>
+
 </html>

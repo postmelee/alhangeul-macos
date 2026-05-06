@@ -2,7 +2,6 @@ const faqItems = document.querySelectorAll(".faq-list details");
 const featureSection = document.querySelector(".features-section");
 const featureSteps = Array.from(document.querySelectorAll("[data-feature-step]"));
 const revealGroups = Array.from(document.querySelectorAll("[data-reveal-group]"));
-const quicklookVideo = document.querySelector(".quicklook-scroll-video");
 const stageLabelNodes = {
   start: document.querySelector('[data-stage-label="start"]'),
   middle: document.querySelector('[data-stage-label="middle"]'),
@@ -20,21 +19,36 @@ const featureStages = [
   },
   {
     key: "viewer",
-    labels: ["HWP/HWPX 파일", "알한글 열기", "앱에서 보기"],
+    labels: ["HWP/HWPX 파일 열기", "편집하기", "저장하기"],
   },
   {
     key: "local",
-    labels: ["문서 선택", "Mac에서 처리", "로컬 완료"],
+    labels: ["PDF 내보내기", "공유하기", "Finder에서 보기"],
   },
 ];
 
 const checkpointsPerFeature = 3;
-const finalCheckpointIndex = featureStages.length * checkpointsPerFeature - 1;
+const featureScrollSpan = checkpointsPerFeature;
+const finalCheckpointIndex = featureStages.length * featureScrollSpan;
 const checkpointProgress = {
   start: 1 / 6,
   middle: 1 / 2,
   end: 5 / 6,
 };
+const progressMap = [
+  [0, 0],
+  [0.25, checkpointProgress.start],
+  [0.5, checkpointProgress.middle],
+  [0.75, checkpointProgress.end],
+  [1, 1],
+];
+const quicklookPopupShadowOpacity = 0.28;
+const quicklookScrollSteps = [
+  { key: "scroll1", start: 0.25, end: 0.31 },
+  { key: "scroll2", start: 0.5, end: 0.56 },
+  { key: "scroll3", start: 0.75, end: 0.81 },
+  { key: "scroll4", start: 0.94, end: 1 },
+];
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 
@@ -43,26 +57,29 @@ const smoothstep = (edgeStart, edgeEnd, value) => {
   return progress * progress * (3 - 2 * progress);
 };
 
-let quicklookVideoDuration = 0;
-
-const syncQuickLookVideo = (progress) => {
-  if (!quicklookVideo || quicklookVideoDuration <= 0) return;
-
-  const safeDuration = Math.max(0, quicklookVideoDuration - 0.03);
-  const targetTime = safeDuration * clamp(progress);
-
-  if (Math.abs(quicklookVideo.currentTime - targetTime) > 0.025) {
-    quicklookVideo.currentTime = targetTime;
-  }
+const easeOutFast = (edgeStart, edgeEnd, value) => {
+  const progress = clamp((value - edgeStart) / (edgeEnd - edgeStart || 1));
+  return 1 - Math.pow(1 - progress, 3);
 };
 
-if (quicklookVideo) {
-  quicklookVideo.pause();
-  quicklookVideo.addEventListener("loadedmetadata", () => {
-    quicklookVideoDuration = Number.isFinite(quicklookVideo.duration) ? quicklookVideo.duration : 0;
-    updateFeatureScroll();
-  });
-}
+const mapScrollProgressToVisualProgress = (progress) => {
+  const clampedProgress = clamp(progress);
+
+  for (let index = 1; index < progressMap.length; index += 1) {
+    const [previousScroll, previousVisual] = progressMap[index - 1];
+    const [nextScroll, nextVisual] = progressMap[index];
+
+    if (clampedProgress <= nextScroll) {
+      const segmentProgress = clamp(
+        (clampedProgress - previousScroll) / (nextScroll - previousScroll),
+      );
+
+      return previousVisual + (nextVisual - previousVisual) * segmentProgress;
+    }
+  }
+
+  return 1;
+};
 
 faqItems.forEach((item) => {
   item.addEventListener("toggle", () => {
@@ -123,6 +140,7 @@ const setupRevealAnimations = () => {
   );
 
   revealGroups.forEach((group) => revealObserver.observe(group));
+  window.setTimeout(revealAll, 900);
 };
 
 const getFeatureScrollState = () => {
@@ -133,12 +151,12 @@ const getFeatureScrollState = () => {
   const globalCheckpoint = progress * finalCheckpointIndex;
   const activeIndex = Math.min(
     featureStages.length - 1,
-    Math.floor(globalCheckpoint / checkpointsPerFeature),
+    Math.floor(globalCheckpoint / featureScrollSpan),
   );
   const localCheckpoint = clamp(
-    globalCheckpoint - activeIndex * checkpointsPerFeature,
+    globalCheckpoint - activeIndex * featureScrollSpan,
     0,
-    checkpointsPerFeature - 1,
+    featureScrollSpan,
   );
 
   return { activeIndex, localCheckpoint };
@@ -167,7 +185,10 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   const feature = featureStages[activeIndex];
   const isFinder = feature.key === "finder";
   const isQuickLook = feature.key === "quicklook";
-  const timelineProgress = clamp(localCheckpoint / (checkpointsPerFeature - 1));
+  const isViewer = feature.key === "viewer";
+  const isMacShare = feature.key === "local";
+  const scrollProgress = clamp(localCheckpoint / featureScrollSpan);
+  const timelineProgress = mapScrollProgressToVisualProgress(scrollProgress);
   const phase = getFeaturePhase(timelineProgress);
   const installProgress = clamp(
     (timelineProgress - checkpointProgress.start) /
@@ -179,7 +200,7 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
     timelineProgress,
   );
   const installExit = 1 - smoothstep(0.58, 0.78, timelineProgress);
-  const installOrbOpacity = isQuickLook ? 0 : installEntry * installExit;
+  const installOrbOpacity = isFinder ? installEntry * installExit : 0;
   const installCheckProgress = smoothstep(0.88, 1, installProgress);
   const installLogoOpacity = 1 - smoothstep(0.68, 0.94, installProgress);
   const finderAfterOpacity = isFinder
@@ -198,28 +219,125 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
     : 0;
   const quicklookClickedOpacity = isQuickLook
     ? smoothstep(0.025, checkpointProgress.start, timelineProgress)
-    : 0;
+    : isViewer
+      ? 1
+      : 0;
   const quicklookPreviewEntry = isQuickLook
-    ? smoothstep(checkpointProgress.start + 0.12, checkpointProgress.middle, timelineProgress)
+    ? easeOutFast(checkpointProgress.middle - 0.045, checkpointProgress.middle - 0.006, timelineProgress)
     : 0;
-  const quicklookPreviewExit = isQuickLook
-    ? 1 - smoothstep(checkpointProgress.middle + 0.035, checkpointProgress.middle + 0.16, timelineProgress)
-    : 0;
-  const quicklookPreviewOpacity = quicklookPreviewEntry * quicklookPreviewExit;
-  const quicklookVideoProgress = isQuickLook
+  const quicklookPreviewOpacity = quicklookPreviewEntry;
+  const quicklookScrollProgress = isQuickLook
     ? clamp(
         (timelineProgress - checkpointProgress.middle) /
           (checkpointProgress.end - checkpointProgress.middle),
       )
     : 0;
-  const quicklookVideoOpacity = isQuickLook
-    ? smoothstep(checkpointProgress.middle + 0.02, checkpointProgress.middle + 0.12, timelineProgress)
-    : 0;
+  const quicklookScrollOpacities = quicklookScrollSteps.map(({ start, end }) =>
+    easeOutFast(start, end, quicklookScrollProgress),
+  );
   const quicklookDimOpacity = isQuickLook
-    ? Math.max(quicklookPreviewEntry * 0.38, quicklookVideoOpacity * 0.34)
+    ? Math.max(quicklookPreviewEntry * 0.38, Math.max(...quicklookScrollOpacities) * 0.34)
+    : 0;
+  const quicklookShadowOpacities = {
+    preview: 0,
+    scroll1: 0,
+    scroll2: 0,
+    scroll3: 0,
+    scroll4: 0,
+  };
+
+  if (isQuickLook && quicklookPreviewOpacity > 0) {
+    let activeShadowKey = "preview";
+
+    quicklookScrollSteps.forEach(({ key, start }) => {
+      if (quicklookScrollProgress >= start) {
+        activeShadowKey = key;
+      }
+    });
+
+    quicklookShadowOpacities[activeShadowKey] = quicklookPopupShadowOpacity;
+  }
+
+  const viewerFrameOpacities = Array.from({ length: 11 }, () => 0);
+  const viewerOpenProgress = isViewer
+    ? easeOutFast(checkpointProgress.start - 0.025, checkpointProgress.start + 0.055, timelineProgress)
+    : 0;
+  const viewerTypingStart = checkpointProgress.start +
+    (checkpointProgress.middle - checkpointProgress.start) * 0.2;
+  const viewerTypingProgress = isViewer
+    ? clamp(
+        (timelineProgress - viewerTypingStart) /
+          (checkpointProgress.middle - viewerTypingStart),
+      )
+    : 0;
+  const viewerTypingFrame = viewerTypingProgress > 0
+    ? Math.max(1, Math.min(10, Math.ceil(viewerTypingProgress * 10)))
+    : 0;
+  const viewerCommandEntry = isViewer
+    ? easeOutFast(checkpointProgress.middle + 0.015, checkpointProgress.middle + 0.075, timelineProgress)
+    : 0;
+  const viewerCommandOpacity = isViewer
+    ? viewerCommandEntry *
+      (1 - smoothstep(checkpointProgress.middle + 0.14, checkpointProgress.middle + 0.22, timelineProgress))
+    : 0;
+  const viewerSaveProgress = isViewer
+    ? clamp(
+        (timelineProgress - checkpointProgress.middle) /
+          (checkpointProgress.end - checkpointProgress.middle),
+      )
+    : 0;
+  const viewerSaveAskOpacity = isViewer
+    ? easeOutFast(0.36, 0.52, viewerSaveProgress) *
+      (1 - smoothstep(0.72, 0.88, viewerSaveProgress))
+    : 0;
+  const viewerSaveCompleteOpacity = isViewer
+    ? easeOutFast(0.86, 1, viewerSaveProgress)
+    : 0;
+  const viewerSaveBadgeProgress = isViewer
+    ? easeOutFast(0.9, 1, viewerSaveProgress)
     : 0;
 
-  syncQuickLookVideo(quicklookVideoProgress);
+  if (isViewer && viewerOpenProgress > 0) {
+    viewerFrameOpacities[viewerTypingFrame] = viewerOpenProgress;
+  }
+
+  const shareStageProgress = isMacShare ? timelineProgress : 0;
+  const sharePdfSegment = checkpointProgress.start;
+  const shareExportSegment = checkpointProgress.middle - checkpointProgress.start;
+  const shareFinderSegment = checkpointProgress.end - checkpointProgress.middle;
+  const sharePdfAfterComplete = sharePdfSegment / 3;
+  const sharePdfPopupStart = sharePdfSegment * 2 / 3;
+  const sharePdfPopupHoldEnd = checkpointProgress.start + shareExportSegment * 0.1;
+  const sharePdfPopupExitComplete = checkpointProgress.start + shareExportSegment / 3;
+  const shareAfterStart = sharePdfPopupExitComplete + shareExportSegment * 0.02;
+  const shareAfterComplete = shareAfterStart + shareExportSegment * 0.22;
+  const sharePopupStart = checkpointProgress.start + shareExportSegment * 2 / 3;
+  const sharePopupHoldEnd = checkpointProgress.middle + shareFinderSegment * 0.1;
+  const sharePopupExitComplete = checkpointProgress.middle + shareFinderSegment / 3;
+  const sharePdfAfterOpacity = isMacShare
+    ? smoothstep(0, sharePdfAfterComplete, shareStageProgress)
+    : 0;
+  const sharePdfBeforeOpacity = isMacShare ? 1 : 0;
+  const sharePdfPopupOpacity = isMacShare
+    ? easeOutFast(sharePdfPopupStart, checkpointProgress.start, shareStageProgress) *
+      (1 - smoothstep(sharePdfPopupHoldEnd, sharePdfPopupExitComplete, shareStageProgress))
+    : 0;
+  const shareBeforeOpacity = isMacShare
+    ? easeOutFast(checkpointProgress.start + 0.045, checkpointProgress.start + 0.11, shareStageProgress)
+    : 0;
+  const shareAfterOpacity = isMacShare
+    ? easeOutFast(shareAfterStart, shareAfterComplete, shareStageProgress)
+    : 0;
+  const shareEmailPopupOpacity = isMacShare
+    ? easeOutFast(sharePopupStart, checkpointProgress.middle, shareStageProgress) *
+      (1 - smoothstep(sharePopupHoldEnd, sharePopupExitComplete, shareStageProgress))
+    : 0;
+  const shareFinderBeforeOpacity = isMacShare
+    ? easeOutFast(checkpointProgress.middle + 0.045, checkpointProgress.middle + 0.11, shareStageProgress)
+    : 0;
+  const shareFinderPopupOpacity = isMacShare
+    ? easeOutFast(checkpointProgress.end - 0.05, checkpointProgress.end - 0.006, shareStageProgress)
+    : 0;
 
   setStageLabels(feature.labels);
 
@@ -233,12 +351,39 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   featureSection.style.setProperty("--install-check-scale", (0.72 + installCheckProgress * 0.28).toFixed(3));
   featureSection.style.setProperty("--install-check-dash", (1 - installCheckProgress).toFixed(3));
   featureSection.style.setProperty("--after-opacity", finderAfterOpacity.toFixed(3));
-  featureSection.style.setProperty("--fallback-opacity", isFinder || isQuickLook ? "0" : "1");
+  featureSection.style.setProperty("--fallback-opacity", isFinder || isQuickLook || isViewer || isMacShare ? "0" : "1");
   featureSection.style.setProperty("--quicklook-clicked-opacity", quicklookClickedOpacity.toFixed(3));
   featureSection.style.setProperty("--quicklook-dim-opacity", quicklookDimOpacity.toFixed(3));
   featureSection.style.setProperty("--quicklook-preview-opacity", quicklookPreviewOpacity.toFixed(3));
-  featureSection.style.setProperty("--quicklook-video-opacity", quicklookVideoOpacity.toFixed(3));
-  featureSection.style.setProperty("--quicklook-video-scale", (0.985 + quicklookVideoProgress * 0.015).toFixed(3));
+  featureSection.style.setProperty("--quicklook-preview-shadow", quicklookShadowOpacities.preview.toFixed(3));
+  quicklookScrollOpacities.forEach((opacity, index) => {
+    featureSection.style.setProperty(`--quicklook-scroll-${index + 1}-opacity`, opacity.toFixed(3));
+  });
+  featureSection.style.setProperty("--quicklook-scroll-1-shadow", quicklookShadowOpacities.scroll1.toFixed(3));
+  featureSection.style.setProperty("--quicklook-scroll-2-shadow", quicklookShadowOpacities.scroll2.toFixed(3));
+  featureSection.style.setProperty("--quicklook-scroll-3-shadow", quicklookShadowOpacities.scroll3.toFixed(3));
+  featureSection.style.setProperty("--quicklook-scroll-4-shadow", quicklookShadowOpacities.scroll4.toFixed(3));
+  viewerFrameOpacities.forEach((opacity, index) => {
+    featureSection.style.setProperty(`--viewer-frame-${index}-opacity`, opacity.toFixed(3));
+  });
+  featureSection.style.setProperty("--viewer-frame-y", "0px");
+  featureSection.style.setProperty("--viewer-frame-scale", "1");
+  featureSection.style.setProperty("--viewer-command-opacity", viewerCommandOpacity.toFixed(3));
+  featureSection.style.setProperty("--viewer-command-scale", (0.94 + viewerCommandEntry * 0.06).toFixed(3));
+  featureSection.style.setProperty("--viewer-save-ask-opacity", viewerSaveAskOpacity.toFixed(3));
+  featureSection.style.setProperty("--viewer-save-complete-opacity", viewerSaveCompleteOpacity.toFixed(3));
+  featureSection.style.setProperty("--viewer-save-badge-opacity", viewerSaveBadgeProgress.toFixed(3));
+  featureSection.style.setProperty("--viewer-save-badge-scale", (0.86 + viewerSaveBadgeProgress * 0.14).toFixed(3));
+  featureSection.style.setProperty("--viewer-save-check-dash", (1 - viewerSaveBadgeProgress).toFixed(3));
+  featureSection.style.setProperty("--before-opacity", isFinder ? "1" : "0");
+  featureSection.style.setProperty("--share-pdf-before-opacity", sharePdfBeforeOpacity.toFixed(3));
+  featureSection.style.setProperty("--share-pdf-after-opacity", sharePdfAfterOpacity.toFixed(3));
+  featureSection.style.setProperty("--share-pdf-popup-opacity", sharePdfPopupOpacity.toFixed(3));
+  featureSection.style.setProperty("--share-before-opacity", shareBeforeOpacity.toFixed(3));
+  featureSection.style.setProperty("--share-after-opacity", shareAfterOpacity.toFixed(3));
+  featureSection.style.setProperty("--share-email-popup-opacity", shareEmailPopupOpacity.toFixed(3));
+  featureSection.style.setProperty("--share-finder-before-opacity", shareFinderBeforeOpacity.toFixed(3));
+  featureSection.style.setProperty("--share-finder-popup-opacity", shareFinderPopupOpacity.toFixed(3));
   featureSection.style.setProperty("--before-scale", (1 + finderAfterOpacity * 0.018).toFixed(3));
   featureSection.style.setProperty("--after-scale", (1.018 - finderAfterOpacity * 0.018).toFixed(3));
   featureSection.style.setProperty("--lock-opacity", finderLockOpacity.toFixed(3));
@@ -247,7 +392,9 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
 
   featureSection.classList.toggle("is-feature-finder", isFinder);
   featureSection.classList.toggle("is-feature-quicklook", isQuickLook);
-  featureSection.classList.toggle("is-feature-fallback", !isFinder && !isQuickLook);
+  featureSection.classList.toggle("is-feature-viewer", isViewer);
+  featureSection.classList.toggle("is-feature-share", isMacShare);
+  featureSection.classList.toggle("is-feature-fallback", !isFinder && !isQuickLook && !isViewer && !isMacShare);
   featureSection.classList.toggle("is-stage-start", phase === "start");
   featureSection.classList.toggle("is-stage-middle", phase === "middle");
   featureSection.classList.toggle("is-stage-end", phase === "end");
