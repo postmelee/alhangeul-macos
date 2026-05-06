@@ -45,6 +45,7 @@ Alhangeul macOS v0.1 bundle의 `rhwp-studio/fonts`에 포함되는 WOFF2 폰트 
 | NanumMyeongjo-ExtraBold.woff2 | 나눔명조 ExtraBold | SIL OFL 1.1 | Google Fonts | HY명조 ExtraBold |
 | GowunBatang-Regular.woff2 | 고운바탕 Regular | SIL OFL 1.1 | Google Fonts | 궁서 대체 |
 | GowunBatang-Bold.woff2 | 고운바탕 Bold | SIL OFL 1.1 | Google Fonts | 궁서 Bold |
+| SourceHanSerifK-OldHangul-subset.woff2 | Source Han Serif K Old Hangul subset | SIL OFL 1.1 | Adobe Source Han Serif | 옛한글/세리프 보조 |
 
 ### Sans-serif (고딕체 계열)
 
