@@ -988,6 +988,20 @@ class CGTreeRenderer {
         guard baseFontSize > 0 else { return }
         let fontSize = effectiveTextRunFontSize(style: style, baseFontSize: baseFontSize)
         let baselineShift = textRunBaselineShift(style: style, baseFontSize: baseFontSize)
+        let rotation = normalizedTextRunRotation(run)
+
+        if abs(rotation) > pathEpsilon || run.isVertical {
+            renderCenteredTextRun(
+                run,
+                bbox: bbox,
+                style: style,
+                fontSize: fontSize,
+                baselineShift: baselineShift,
+                rotation: rotation,
+                in: ctx
+            )
+            return
+        }
 
         ctx.saveGState()
 
@@ -1089,6 +1103,81 @@ class CGTreeRenderer {
         ctx.restoreGState()
     }
 
+    private func renderCenteredTextRun(
+        _ run: TextRunNode,
+        bbox: BBox,
+        style: TextStyle,
+        fontSize: CGFloat,
+        baselineShift: CGFloat,
+        rotation: Double,
+        in ctx: CGContext
+    ) {
+        ctx.saveGState()
+
+        if style.shadeColor != 0x00FFFFFF && style.shadeColor != 0 {
+            ctx.setFillColor(colorRefToCGColor(style.shadeColor).copy(alpha: 0.3)!)
+            ctx.fill(cgRect(bbox))
+        }
+
+        if abs(rotation) > pathEpsilon {
+            applyTextRunRotation(rotation, bbox: bbox, in: ctx)
+        }
+
+        ctx.saveGState()
+        ctx.translateBy(x: CGFloat(bbox.x), y: CGFloat(bbox.y + bbox.height))
+        ctx.scaleBy(x: 1, y: -1)
+
+        let font = makeTextRunFont(style: style, fontSize: fontSize)
+        let attributes = makeTextRunAttributes(style: style, font: font)
+        let line = CTLineCreateWithAttributedString(NSAttributedString(string: run.text, attributes: attributes))
+        let layout = makeTextRunLayoutPlan(
+            text: run.text,
+            style: style,
+            bbox: bbox,
+            line: line,
+            attributes: attributes,
+            charPositions: run.charPositions
+        )
+        let metrics = textRunTypographicMetrics(line)
+        let visualWidth = textRunVisualWidth(line, layout: layout, attributes: attributes)
+        let textX = (CGFloat(bbox.width) - visualWidth) / 2
+        let textY = CGFloat(bbox.height) / 2 - (metrics.ascent - metrics.descent) / 2 + baselineShift
+
+        if style.shadowType > 0 {
+            let shadowAttributes = makeTextRunAttributes(
+                style: style,
+                font: font,
+                colorOverride: style.shadowColor
+            )
+            let shadowLine = CTLineCreateWithAttributedString(
+                NSAttributedString(string: run.text, attributes: shadowAttributes)
+            )
+            let shadowLayout = makeTextRunLayoutPlan(
+                text: run.text,
+                style: style,
+                bbox: bbox,
+                line: shadowLine,
+                attributes: shadowAttributes,
+                charPositions: run.charPositions
+            )
+            drawTextLine(
+                shadowLine,
+                layout: shadowLayout,
+                style: style,
+                attributes: shadowAttributes,
+                x: textX + CGFloat(style.shadowOffsetX),
+                y: textY - CGFloat(style.shadowOffsetY),
+                in: ctx
+            )
+        }
+
+        drawTextLine(line, layout: layout, style: style, attributes: attributes, x: textX, y: textY, in: ctx)
+        drawTextEmphasisDots(text: run.text, line: line, layout: layout, style: style, fontSize: fontSize, y: textY, in: ctx)
+
+        ctx.restoreGState()
+        ctx.restoreGState()
+    }
+
     private func makeTextRunFont(style: TextStyle, fontSize: CGFloat) -> CTFont {
         var font = resolveAppleFont(
             hwpFontFamily: style.fontFamily,
@@ -1103,6 +1192,19 @@ class CGTreeRenderer {
         }
 
         return font
+    }
+
+    private func normalizedTextRunRotation(_ run: TextRunNode) -> Double {
+        guard let rotation = run.rotation, rotation.isFinite else { return 0 }
+        return rotation.truncatingRemainder(dividingBy: 360)
+    }
+
+    private func applyTextRunRotation(_ rotation: Double, bbox: BBox, in ctx: CGContext) {
+        let cx = CGFloat(bbox.x + bbox.width / 2)
+        let cy = CGFloat(bbox.y + bbox.height / 2)
+        ctx.translateBy(x: cx, y: cy)
+        ctx.rotate(by: CGFloat(rotation * .pi / 180))
+        ctx.translateBy(x: -cx, y: -cy)
     }
 
     private func effectiveTextRunFontSize(style: TextStyle, baseFontSize: CGFloat) -> CGFloat {
@@ -1290,6 +1392,39 @@ class CGTreeRenderer {
             ctx.textPosition = CGPoint(x: x / scale, y: y)
             CTLineDraw(line, ctx)
             ctx.restoreGState()
+        }
+    }
+
+    private func textRunTypographicMetrics(_ line: CTLine) -> TextRunTypographicMetrics {
+        var ascent: CGFloat = 0
+        var descent: CGFloat = 0
+        var leading: CGFloat = 0
+        let width = CGFloat(CTLineGetTypographicBounds(line, &ascent, &descent, &leading))
+        return TextRunTypographicMetrics(width: width, ascent: ascent, descent: descent, leading: leading)
+    }
+
+    private func textRunVisualWidth(
+        _ line: CTLine,
+        layout: TextRunLayoutPlan,
+        attributes: [NSAttributedString.Key: Any]
+    ) -> CGFloat {
+        let lineWidth = textRunTypographicMetrics(line).width
+        switch layout.strategy {
+        case .line:
+            return lineWidth
+        case .scaledLine(let scale):
+            return lineWidth * scale
+        case .clusters:
+            guard let clusters = layout.clusterPlan?.clusters else {
+                return lineWidth
+            }
+
+            var maxX: CGFloat = 0
+            for cluster in clusters where isDrawableTextCluster(cluster.text) {
+                let clusterLine = cluster.line ?? makeTextRunClusterLine(cluster.text, attributes: attributes)
+                maxX = max(maxX, cluster.x + measureTextRunClusterWidth(clusterLine))
+            }
+            return maxX > 0 ? maxX : lineWidth
         }
     }
 
@@ -2669,6 +2804,13 @@ private struct TextRunSpacingEstimate {
     var requiresClusterDrawing: Bool {
         tabCount > 0 || abs(extraCharWidth) > 0.001 || abs(extraWordWidth) > 0.001
     }
+}
+
+private struct TextRunTypographicMetrics {
+    let width: CGFloat
+    let ascent: CGFloat
+    let descent: CGFloat
+    let leading: CGFloat
 }
 
 private enum TextRunDrawStrategy {
