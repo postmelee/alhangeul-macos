@@ -10,12 +10,26 @@ import ImageIO
 class CGTreeRenderer {
     private let imageCropUnitsPerPixel = 75.0
     private let tableCellClipRightSlack = 4.0
+    private let pathEpsilon = 0.000001
 
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
 
     private var pageBounds: BBox?
     private var pageHeight: Double = 0
+
+    private struct BuiltPath {
+        let path: CGPath
+        let firstPoint: CGPoint?
+        let lastPoint: CGPoint?
+        let firstTangent: CGVector?
+        let lastTangent: CGVector?
+    }
+
+    private enum ArcSegment {
+        case line(CGPoint)
+        case curve(CGPoint, CGPoint, CGPoint)
+    }
 
     func render(tree: RenderNode, in context: CGContext, pageHeight: Double, document: RhwpDocument?) {
         HwpBundledFontRegistry.ensureRegistered()
@@ -272,14 +286,18 @@ class CGTreeRenderer {
         applyTransform(line.transform, bbox: bbox, in: ctx)
 
         let style = line.style
+        let start = CGPoint(x: line.x1, y: line.y1)
+        let end = CGPoint(x: line.x2, y: line.y2)
+        let strokeLine = adjustedLineForArrows(start: start, end: end, style: style)
 
         ctx.setStrokeColor(colorRefToCGColor(style.color))
         ctx.setLineWidth(CGFloat(max(style.width, 0.5)))
         applyDash(style.dash, in: ctx)
 
-        ctx.move(to: CGPoint(x: line.x1, y: line.y1))
-        ctx.addLine(to: CGPoint(x: line.x2, y: line.y2))
+        ctx.move(to: strokeLine.start)
+        ctx.addLine(to: strokeLine.end)
         ctx.strokePath()
+        drawLineArrows(start: start, end: end, style: style, in: ctx)
 
         ctx.restoreGState()
     }
@@ -311,7 +329,8 @@ class CGTreeRenderer {
         ctx.saveGState()
         applyTransform(pathNode.transform, bbox: bbox, in: ctx)
 
-        let cgPath = buildCGPath(pathNode.commands)
+        let builtPath = buildCGPath(pathNode.commands)
+        let cgPath = builtPath.path
 
         if let grad = pathNode.gradient {
             ctx.addPath(cgPath)
@@ -332,28 +351,139 @@ class CGTreeRenderer {
             applyShapeStyleStroke(pathNode.style, path: cgPath, in: ctx)
         }
 
+        drawConnectorArrows(for: pathNode, builtPath: builtPath, in: ctx)
+
         ctx.restoreGState()
     }
 
-    private func buildCGPath(_ commands: [PathCommand]) -> CGPath {
+    private func buildCGPath(_ commands: [PathCommand]) -> BuiltPath {
         let path = CGMutablePath()
+        var currentPoint: CGPoint?
+        var subpathStart: CGPoint?
+        var firstPoint: CGPoint?
+        var lastPoint: CGPoint?
+        var firstTangent: CGVector?
+        var lastTangent: CGVector?
+
+        func notePoint(_ point: CGPoint) {
+            if firstPoint == nil {
+                firstPoint = point
+            }
+            lastPoint = point
+        }
+
+        func noteSegment(from start: CGPoint, to end: CGPoint, startControl: CGPoint? = nil, endControl: CGPoint? = nil) {
+            if firstPoint == nil {
+                firstPoint = start
+            }
+
+            if firstTangent == nil {
+                let target = startControl ?? end
+                let tangent = vector(from: start, to: target)
+                if !isZeroVector(tangent) {
+                    firstTangent = tangent
+                }
+            }
+
+            let tangentSource = endControl ?? start
+            let tangent = vector(from: tangentSource, to: end)
+            if !isZeroVector(tangent) {
+                lastTangent = tangent
+            }
+
+            lastPoint = end
+        }
+
         for cmd in commands {
             switch cmd {
             case .moveTo(let x, let y):
-                path.move(to: CGPoint(x: x, y: y))
+                let point = CGPoint(x: x, y: y)
+                path.move(to: point)
+                currentPoint = point
+                subpathStart = point
+                notePoint(point)
             case .lineTo(let x, let y):
-                path.addLine(to: CGPoint(x: x, y: y))
+                let end = CGPoint(x: x, y: y)
+                guard let start = currentPoint else {
+                    path.move(to: end)
+                    currentPoint = end
+                    subpathStart = end
+                    notePoint(end)
+                    continue
+                }
+                path.addLine(to: end)
+                noteSegment(from: start, to: end)
+                currentPoint = end
             case .curveTo(let x1, let y1, let x2, let y2, let x, let y):
+                let end = CGPoint(x: x, y: y)
+                guard let start = currentPoint else {
+                    path.move(to: end)
+                    currentPoint = end
+                    subpathStart = end
+                    notePoint(end)
+                    continue
+                }
+                let control1 = CGPoint(x: x1, y: y1)
+                let control2 = CGPoint(x: x2, y: y2)
                 path.addCurve(to: CGPoint(x: x, y: y),
-                              control1: CGPoint(x: x1, y: y1),
-                              control2: CGPoint(x: x2, y: y2))
-            case .arcTo(_, _, _, _, _, let x, let y):
-                path.addLine(to: CGPoint(x: x, y: y))
+                              control1: control1,
+                              control2: control2)
+                noteSegment(from: start, to: end, startControl: control1, endControl: control2)
+                currentPoint = end
+            case .arcTo(let rx, let ry, let xRotation, let largeArc, let sweep, let x, let y):
+                let end = CGPoint(x: x, y: y)
+                guard let start = currentPoint else {
+                    path.move(to: end)
+                    currentPoint = end
+                    subpathStart = end
+                    notePoint(end)
+                    continue
+                }
+                let segments = arcSegments(
+                    from: start,
+                    rx: rx,
+                    ry: ry,
+                    xRotation: xRotation,
+                    largeArc: largeArc,
+                    sweep: sweep,
+                    to: end
+                )
+                if segments.isEmpty {
+                    currentPoint = end
+                    continue
+                }
+                for segment in segments {
+                    switch segment {
+                    case .line(let lineEnd):
+                        path.addLine(to: lineEnd)
+                        noteSegment(from: currentPoint ?? start, to: lineEnd)
+                        currentPoint = lineEnd
+                    case .curve(let control1, let control2, let curveEnd):
+                        path.addCurve(to: curveEnd, control1: control1, control2: control2)
+                        noteSegment(
+                            from: currentPoint ?? start,
+                            to: curveEnd,
+                            startControl: control1,
+                            endControl: control2
+                        )
+                        currentPoint = curveEnd
+                    }
+                }
             case .closePath:
                 path.closeSubpath()
+                if let start = currentPoint, let end = subpathStart {
+                    noteSegment(from: start, to: end)
+                    currentPoint = end
+                }
             }
         }
-        return path
+        return BuiltPath(
+            path: path,
+            firstPoint: firstPoint,
+            lastPoint: lastPoint,
+            firstTangent: firstTangent,
+            lastTangent: lastTangent
+        )
     }
 
     // MARK: - 이미지
@@ -1594,7 +1724,7 @@ class CGTreeRenderer {
     }
 
     private func applyDash(_ dash: String, in ctx: CGContext) {
-        switch dash {
+        switch normalizedDashName(dash) {
         case "Dash":
             ctx.setLineDash(phase: 0, lengths: [6, 3])
         case "Dot":
@@ -1606,6 +1736,501 @@ class CGTreeRenderer {
         default: // Solid
             ctx.setLineDash(phase: 0, lengths: [])
         }
+    }
+
+    private func normalizedDashName(_ dash: String) -> String {
+        switch normalizedStyleKey(dash) {
+        case "dash", "dashed":
+            return "Dash"
+        case "dot", "dotted":
+            return "Dot"
+        case "dashdot", "dashdotted":
+            return "DashDot"
+        case "dashdotdot", "dashdotdotted":
+            return "DashDotDot"
+        default:
+            return "Solid"
+        }
+    }
+
+    private func adjustedLineForArrows(start: CGPoint, end: CGPoint, style: LineStyle) -> (start: CGPoint, end: CGPoint) {
+        guard let metrics = lineMetrics(from: start, to: end) else {
+            return (start, end)
+        }
+
+        let strokeWidth = CGFloat(max(style.width, 0.5))
+        var adjustedStart = start
+        var adjustedEnd = end
+
+        if hasRenderableArrow(style.startArrow) {
+            let size = arrowDimensions(
+                strokeWidth: strokeWidth,
+                lineLength: metrics.length,
+                arrowSize: style.startArrowSize
+            )
+            adjustedStart = offset(start, by: metrics.unit, scale: size.width)
+        }
+
+        if hasRenderableArrow(style.endArrow) {
+            let size = arrowDimensions(
+                strokeWidth: strokeWidth,
+                lineLength: metrics.length,
+                arrowSize: style.endArrowSize
+            )
+            adjustedEnd = offset(end, by: metrics.unit, scale: -size.width)
+        }
+
+        return (adjustedStart, adjustedEnd)
+    }
+
+    private func drawLineArrows(start: CGPoint, end: CGPoint, style: LineStyle, in ctx: CGContext) {
+        guard let metrics = lineMetrics(from: start, to: end) else { return }
+
+        let strokeWidth = CGFloat(max(style.width, 0.5))
+        let color = colorRefToCGColor(style.color)
+
+        if hasRenderableArrow(style.startArrow) {
+            let size = arrowDimensions(
+                strokeWidth: strokeWidth,
+                lineLength: metrics.length,
+                arrowSize: style.startArrowSize
+            )
+            drawArrowHead(
+                tip: start,
+                direction: reversed(metrics.unit),
+                size: size,
+                arrowStyle: style.startArrow,
+                color: color,
+                strokeWidth: strokeWidth,
+                in: ctx
+            )
+        }
+
+        if hasRenderableArrow(style.endArrow) {
+            let size = arrowDimensions(
+                strokeWidth: strokeWidth,
+                lineLength: metrics.length,
+                arrowSize: style.endArrowSize
+            )
+            drawArrowHead(
+                tip: end,
+                direction: metrics.unit,
+                size: size,
+                arrowStyle: style.endArrow,
+                color: color,
+                strokeWidth: strokeWidth,
+                in: ctx
+            )
+        }
+    }
+
+    private func drawConnectorArrows(for pathNode: PathNode, builtPath: BuiltPath, in ctx: CGContext) {
+        guard
+            let style = pathNode.lineStyle,
+            hasRenderableArrow(style.startArrow) || hasRenderableArrow(style.endArrow),
+            let endpoints = connectorEndpoints(pathNode.connectorEndpoints),
+            let metrics = lineMetrics(from: endpoints.start, to: endpoints.end)
+        else {
+            return
+        }
+
+        let strokeWidth = CGFloat(max(style.width, 0.5))
+        let color = colorRefToCGColor(style.color)
+
+        if hasRenderableArrow(style.startArrow) {
+            let direction = normalizedVector(reversed(builtPath.firstTangent ?? metrics.unit))
+                ?? reversed(metrics.unit)
+            let size = arrowDimensions(
+                strokeWidth: strokeWidth,
+                lineLength: metrics.length,
+                arrowSize: style.startArrowSize
+            )
+            drawArrowHead(
+                tip: endpoints.start,
+                direction: direction,
+                size: size,
+                arrowStyle: style.startArrow,
+                color: color,
+                strokeWidth: strokeWidth,
+                in: ctx
+            )
+        }
+
+        if hasRenderableArrow(style.endArrow) {
+            let direction = normalizedVector(builtPath.lastTangent ?? metrics.unit) ?? metrics.unit
+            let size = arrowDimensions(
+                strokeWidth: strokeWidth,
+                lineLength: metrics.length,
+                arrowSize: style.endArrowSize
+            )
+            drawArrowHead(
+                tip: endpoints.end,
+                direction: direction,
+                size: size,
+                arrowStyle: style.endArrow,
+                color: color,
+                strokeWidth: strokeWidth,
+                in: ctx
+            )
+        }
+    }
+
+    private func connectorEndpoints(_ raw: [[Double]]?) -> (start: CGPoint, end: CGPoint)? {
+        guard let raw else { return nil }
+        if raw.count >= 2, raw[0].count >= 2, raw[1].count >= 2 {
+            return (
+                CGPoint(x: raw[0][0], y: raw[0][1]),
+                CGPoint(x: raw[1][0], y: raw[1][1])
+            )
+        }
+        if raw.count == 1, raw[0].count >= 4 {
+            return (
+                CGPoint(x: raw[0][0], y: raw[0][1]),
+                CGPoint(x: raw[0][2], y: raw[0][3])
+            )
+        }
+        return nil
+    }
+
+    private func drawArrowHead(
+        tip: CGPoint,
+        direction: CGVector,
+        size: CGSize,
+        arrowStyle: String,
+        color: CGColor,
+        strokeWidth: CGFloat,
+        in ctx: CGContext
+    ) {
+        guard
+            let style = normalizedArrowStyle(arrowStyle),
+            let direction = normalizedVector(direction),
+            size.width > 0,
+            size.height > 0
+        else {
+            return
+        }
+
+        let along = reversed(direction)
+        let perp = CGVector(dx: direction.dy, dy: -direction.dx)
+        let halfHeight = size.height / 2
+
+        func point(along alongDistance: CGFloat, perp perpDistance: CGFloat) -> CGPoint {
+            CGPoint(
+                x: tip.x + along.dx * alongDistance + perp.dx * perpDistance,
+                y: tip.y + along.dy * alongDistance + perp.dy * perpDistance
+            )
+        }
+
+        func addPolygon(_ points: [CGPoint]) -> CGPath {
+            let path = CGMutablePath()
+            guard let first = points.first else { return path }
+            path.move(to: first)
+            for point in points.dropFirst() {
+                path.addLine(to: point)
+            }
+            path.closeSubpath()
+            return path
+        }
+
+        ctx.saveGState()
+        ctx.setLineDash(phase: 0, lengths: [])
+        ctx.setFillColor(color)
+        ctx.setStrokeColor(color)
+
+        switch style {
+        case "Arrow":
+            let path = addPolygon([
+                tip,
+                point(along: size.width, perp: -halfHeight),
+                point(along: size.width, perp: halfHeight)
+            ])
+            ctx.addPath(path)
+            ctx.fillPath()
+
+        case "ConcaveArrow":
+            let path = addPolygon([
+                tip,
+                point(along: size.width, perp: -halfHeight),
+                point(along: size.width * 0.7, perp: 0),
+                point(along: size.width, perp: halfHeight)
+            ])
+            ctx.addPath(path)
+            ctx.fillPath()
+
+        case "Diamond", "OpenDiamond":
+            let path = addPolygon([
+                point(along: 0, perp: 0),
+                point(along: size.width / 2, perp: -halfHeight),
+                point(along: size.width, perp: 0),
+                point(along: size.width / 2, perp: halfHeight)
+            ])
+            drawArrowPath(path, style: style, color: color, strokeWidth: strokeWidth, in: ctx)
+
+        case "Circle", "OpenCircle":
+            let center = point(along: size.width / 2, perp: 0)
+            let rx = size.width * 0.4
+            let ry = halfHeight * 0.8
+            let rect = CGRect(x: center.x - rx, y: center.y - ry, width: rx * 2, height: ry * 2)
+            drawArrowEllipse(rect, style: style, color: color, strokeWidth: strokeWidth, in: ctx)
+
+        case "Square", "OpenSquare":
+            let path = addPolygon([
+                point(along: 0, perp: -halfHeight),
+                point(along: size.width, perp: -halfHeight),
+                point(along: size.width, perp: halfHeight),
+                point(along: 0, perp: halfHeight)
+            ])
+            drawArrowPath(path, style: style, color: color, strokeWidth: strokeWidth, in: ctx)
+
+        default:
+            break
+        }
+
+        ctx.restoreGState()
+    }
+
+    private func drawArrowPath(
+        _ path: CGPath,
+        style: String,
+        color: CGColor,
+        strokeWidth: CGFloat,
+        in ctx: CGContext
+    ) {
+        if style.hasPrefix("Open") {
+            ctx.addPath(path)
+            ctx.setFillColor(CGColor(gray: 1, alpha: 1))
+            ctx.fillPath()
+            ctx.addPath(path)
+            ctx.setStrokeColor(color)
+            ctx.setLineWidth(max(strokeWidth * 0.3, 0.5))
+            ctx.strokePath()
+        } else {
+            ctx.addPath(path)
+            ctx.setFillColor(color)
+            ctx.fillPath()
+        }
+    }
+
+    private func drawArrowEllipse(
+        _ rect: CGRect,
+        style: String,
+        color: CGColor,
+        strokeWidth: CGFloat,
+        in ctx: CGContext
+    ) {
+        if style.hasPrefix("Open") {
+            ctx.addEllipse(in: rect)
+            ctx.setFillColor(CGColor(gray: 1, alpha: 1))
+            ctx.fillPath()
+            ctx.addEllipse(in: rect)
+            ctx.setStrokeColor(color)
+            ctx.setLineWidth(max(strokeWidth * 0.3, 0.5))
+            ctx.strokePath()
+        } else {
+            ctx.addEllipse(in: rect)
+            ctx.setFillColor(color)
+            ctx.fillPath()
+        }
+    }
+
+    private func normalizedArrowStyle(_ arrowStyle: String) -> String? {
+        switch normalizedStyleKey(arrowStyle) {
+        case "", "none":
+            return nil
+        case "arrow":
+            return "Arrow"
+        case "concavearrow", "concave":
+            return "ConcaveArrow"
+        case "opendiamond":
+            return "OpenDiamond"
+        case "opencircle":
+            return "OpenCircle"
+        case "opensquare":
+            return "OpenSquare"
+        case "diamond":
+            return "Diamond"
+        case "circle":
+            return "Circle"
+        case "square":
+            return "Square"
+        default:
+            return nil
+        }
+    }
+
+    private func hasRenderableArrow(_ arrowStyle: String) -> Bool {
+        normalizedArrowStyle(arrowStyle) != nil
+    }
+
+    private func arrowDimensions(strokeWidth: CGFloat, lineLength: CGFloat, arrowSize: UInt8) -> CGSize {
+        let widthLevel = Int(arrowSize / 3)
+        let lengthLevel = Int(arrowSize % 3)
+        let widthMultiplier: CGFloat
+        switch widthLevel {
+        case 0:
+            widthMultiplier = 1.5
+        case 1:
+            widthMultiplier = 2.5
+        default:
+            widthMultiplier = 3.5
+        }
+
+        let lengthMultiplier: CGFloat
+        switch lengthLevel {
+        case 0:
+            lengthMultiplier = 1.0
+        case 1:
+            lengthMultiplier = 1.5
+        default:
+            lengthMultiplier = 2.0
+        }
+
+        let height = max(strokeWidth * widthMultiplier, 3.0)
+        let width = min(height * lengthMultiplier, lineLength * 0.3)
+        return CGSize(width: width, height: height)
+    }
+
+    private func lineMetrics(from start: CGPoint, to end: CGPoint) -> (length: CGFloat, unit: CGVector)? {
+        let vector = vector(from: start, to: end)
+        let length = sqrt(vector.dx * vector.dx + vector.dy * vector.dy)
+        guard length > CGFloat(pathEpsilon) else { return nil }
+        return (length, CGVector(dx: vector.dx / length, dy: vector.dy / length))
+    }
+
+    private func vector(from start: CGPoint, to end: CGPoint) -> CGVector {
+        CGVector(dx: end.x - start.x, dy: end.y - start.y)
+    }
+
+    private func reversed(_ vector: CGVector) -> CGVector {
+        CGVector(dx: -vector.dx, dy: -vector.dy)
+    }
+
+    private func offset(_ point: CGPoint, by vector: CGVector, scale: CGFloat) -> CGPoint {
+        CGPoint(x: point.x + vector.dx * scale, y: point.y + vector.dy * scale)
+    }
+
+    private func normalizedVector(_ vector: CGVector) -> CGVector? {
+        let length = sqrt(vector.dx * vector.dx + vector.dy * vector.dy)
+        guard length > CGFloat(pathEpsilon) else { return nil }
+        return CGVector(dx: vector.dx / length, dy: vector.dy / length)
+    }
+
+    private func isZeroVector(_ vector: CGVector) -> Bool {
+        abs(vector.dx) <= CGFloat(pathEpsilon) && abs(vector.dy) <= CGFloat(pathEpsilon)
+    }
+
+    private func normalizedStyleKey(_ value: String) -> String {
+        value
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "_", with: "")
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "\t", with: "")
+    }
+
+    private func arcSegments(
+        from start: CGPoint,
+        rx initialRx: Double,
+        ry initialRy: Double,
+        xRotation: Double,
+        largeArc: Bool,
+        sweep: Bool,
+        to end: CGPoint
+    ) -> [ArcSegment] {
+        let x1 = Double(start.x)
+        let y1 = Double(start.y)
+        let x2 = Double(end.x)
+        let y2 = Double(end.y)
+
+        if abs(x1 - x2) < pathEpsilon && abs(y1 - y2) < pathEpsilon {
+            return []
+        }
+
+        var rx = abs(initialRx)
+        var ry = abs(initialRy)
+        if rx < pathEpsilon || ry < pathEpsilon {
+            return [.line(end)]
+        }
+
+        let phi = xRotation * Double.pi / 180
+        let cosPhi = cos(phi)
+        let sinPhi = sin(phi)
+
+        let dx = (x1 - x2) / 2
+        let dy = (y1 - y2) / 2
+        let x1Prime = cosPhi * dx + sinPhi * dy
+        let y1Prime = -sinPhi * dx + cosPhi * dy
+
+        let x1PrimeSquared = x1Prime * x1Prime
+        let y1PrimeSquared = y1Prime * y1Prime
+        let lambda = x1PrimeSquared / (rx * rx) + y1PrimeSquared / (ry * ry)
+        if lambda > 1 {
+            let scale = sqrt(lambda)
+            rx *= scale
+            ry *= scale
+        }
+
+        let rxSquared = rx * rx
+        let rySquared = ry * ry
+        let numerator = max(0.0, rxSquared * rySquared - rxSquared * y1PrimeSquared - rySquared * x1PrimeSquared)
+        let denominator = rxSquared * y1PrimeSquared + rySquared * x1PrimeSquared
+        let squareRoot = denominator > 1e-10 ? sqrt(numerator / denominator) : 0
+        let sign = largeArc == sweep ? -1.0 : 1.0
+        let cxPrime = sign * squareRoot * rx * y1Prime / ry
+        let cyPrime = sign * squareRoot * (-ry * x1Prime) / rx
+
+        let cx = cosPhi * cxPrime - sinPhi * cyPrime + (x1 + x2) / 2
+        let cy = sinPhi * cxPrime + cosPhi * cyPrime + (y1 + y2) / 2
+
+        let theta1 = atan2((y1Prime - cyPrime) / ry, (x1Prime - cxPrime) / rx)
+        let theta2 = atan2((-y1Prime - cyPrime) / ry, (-x1Prime - cxPrime) / rx)
+        var deltaTheta = theta2 - theta1
+
+        if !sweep && deltaTheta > 0 {
+            deltaTheta -= 2 * Double.pi
+        }
+        if sweep && deltaTheta < 0 {
+            deltaTheta += 2 * Double.pi
+        }
+
+        let segmentCount = max(1, Int(ceil(abs(deltaTheta) / (Double.pi / 2 + 0.001))))
+        let segmentAngle = deltaTheta / Double(segmentCount)
+        var segments: [ArcSegment] = []
+
+        for index in 0..<segmentCount {
+            let t1 = theta1 + segmentAngle * Double(index)
+            let t2 = theta1 + segmentAngle * Double(index + 1)
+            let alpha = 4.0 / 3.0 * tan(segmentAngle / 4.0)
+
+            let cosT1 = cos(t1)
+            let sinT1 = sin(t1)
+            let cosT2 = cos(t2)
+            let sinT2 = sin(t2)
+
+            let ep1x = cosT1 - alpha * sinT1
+            let ep1y = sinT1 + alpha * cosT1
+            let ep2x = cosT2 + alpha * sinT2
+            let ep2y = sinT2 - alpha * cosT2
+
+            let cp1x = rx * ep1x
+            let cp1y = ry * ep1y
+            let cp2x = rx * ep2x
+            let cp2y = ry * ep2y
+            let endX = rx * cosT2
+            let endY = ry * sinT2
+
+            segments.append(.curve(
+                CGPoint(x: cosPhi * cp1x - sinPhi * cp1y + cx,
+                        y: sinPhi * cp1x + cosPhi * cp1y + cy),
+                CGPoint(x: cosPhi * cp2x - sinPhi * cp2y + cx,
+                        y: sinPhi * cp2x + cosPhi * cp2y + cy),
+                CGPoint(x: cosPhi * endX - sinPhi * endY + cx,
+                        y: sinPhi * endX + cosPhi * endY + cy)
+            ))
+        }
+
+        return segments
     }
 
     private func applyTransform(_ transform: ShapeTransform, bbox: BBox, in ctx: CGContext) {
