@@ -439,6 +439,7 @@ graph TB
 - 이슈 close 는 메인테이너: 작업 완료 후 PR 만 제출해 주세요. 이슈는 PR 머지 시 메인테이너가 close 합니다.
 
 상세한 기여 절차 (Fork → 브랜치 → 커밋 → PR) 는 [CONTRIBUTING.md](CONTRIBUTING.md) 를 참고하세요.
+
 ## Notice
 
 본 제품은 한글과컴퓨터의 한글 문서 파일(`.hwp`, `.hwpx`) 공개 문서를 참고하여 개발하였습니다.
@@ -452,3 +453,5 @@ graph TB
 ## License
 
 [MIT License](LICENSE)
+
+Third Party notices for bundled `rhwp`, `rhwp-studio`, and WOFF2 fonts are in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). Provenance details are recorded in [rhwp-core.lock](rhwp-core.lock), [rhwp-studio manifest](Sources/HostApp/Resources/rhwp-studio/manifest.json), and [FONTS.md](Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md).
