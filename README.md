@@ -455,3 +455,5 @@ graph TB
 ## License
 
 [MIT License](LICENSE)
+
+Third Party notices for bundled `rhwp`, `rhwp-studio`, and WOFF2 fonts are in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). Provenance details are recorded in [rhwp-core.lock](rhwp-core.lock), [rhwp-studio manifest](Sources/HostApp/Resources/rhwp-studio/manifest.json), and [FONTS.md](Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md).
