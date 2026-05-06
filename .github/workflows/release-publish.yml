@@ -1,0 +1,278 @@
+name: Release Publish DMG
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: App version to publish. The workflow must be run from tag v<version>.
+        required: true
+        default: "0.1.0"
+      expected_rhwp_tag:
+        description: rhwp release tag that must match rhwp-core.lock before publishing.
+        required: true
+        default: "v0.7.10"
+      require_latest_rhwp:
+        description: Fail if rhwp-core.lock is not pinned to upstream latest release.
+        required: true
+        type: boolean
+        default: true
+      draft:
+        description: Create a draft GitHub Release when the release does not exist yet.
+        required: true
+        type: boolean
+        default: true
+      prerelease:
+        description: Mark a newly created GitHub Release as prerelease.
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-publish-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  publish-dmg:
+    name: Build signed/notarized DMG and publish release asset
+    runs-on: macos-15
+    timeout-minutes: 180
+    environment: release
+
+    env:
+      VERSION: ${{ inputs.version }}
+      EXPECTED_RHWP_TAG: ${{ inputs.expected_rhwp_tag }}
+      REQUIRE_LATEST_RHWP: ${{ inputs.require_latest_rhwp }}
+      DRAFT_RELEASE: ${{ inputs.draft }}
+      PRERELEASE: ${{ inputs.prerelease }}
+      GH_TOKEN: ${{ github.token }}
+      ALHANGEUL_BUILD_ROOT: ${{ github.workspace }}/build.noindex
+      ALHANGEUL_DEVELOPER_ID_APPLICATION: ${{ vars.ALHANGEUL_DEVELOPER_ID_APPLICATION }}
+      ALHANGEUL_DEVELOPER_ID_DMG: ${{ vars.ALHANGEUL_DEVELOPER_ID_DMG }}
+      ALHANGEUL_NOTARY_PROFILE: ${{ vars.ALHANGEUL_NOTARY_PROFILE }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID || secrets.APPLE_TEAM_ID }}
+      DEVELOPER_ID_APPLICATION_P12_BASE64: ${{ secrets.DEVELOPER_ID_APPLICATION_P12_BASE64 }}
+      DEVELOPER_ID_APPLICATION_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_P12_PASSWORD }}
+      NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+      NOTARY_APP_SPECIFIC_PASSWORD: ${{ secrets.NOTARY_APP_SPECIFIC_PASSWORD }}
+      RELEASE_KEYCHAIN_PASSWORD: ${{ secrets.RELEASE_KEYCHAIN_PASSWORD }}
+
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Validate release inputs and tag ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$VERSION" =~ ^[0-9]+[.][0-9]+[.][0-9]+([-+][0-9A-Za-z.-]+)?$ ]]; then
+            echo "ERROR: version must look like semantic version, got: $VERSION" >&2
+            exit 1
+          fi
+
+          tag_name="v$VERSION"
+          if [ "$GITHUB_REF_TYPE" != "tag" ] || [ "$GITHUB_REF_NAME" != "$tag_name" ]; then
+            echo "ERROR: release publish must run from tag $tag_name; got $GITHUB_REF" >&2
+            exit 1
+          fi
+
+          tag_commit="$(git rev-list -n 1 "$tag_name")"
+          head_commit="$(git rev-parse HEAD)"
+          if [ "$tag_commit" != "$head_commit" ]; then
+            echo "ERROR: checked out HEAD $head_commit does not match $tag_name $tag_commit" >&2
+            exit 1
+          fi
+
+          {
+            echo "## Release ref"
+            echo
+            echo "- version: \`$VERSION\`"
+            echo "- tag: \`$tag_name\`"
+            echo "- commit: \`$head_commit\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Read and validate core lock
+        id: core
+        shell: bash
+        run: |
+          set -euo pipefail
+          rhwp_tag="$(bash scripts/ci/read-rhwp-core-lock.sh rhwp_release_tag)"
+          rhwp_commit="$(bash scripts/ci/read-rhwp-core-lock.sh rhwp_commit)"
+
+          {
+            echo "rhwp_tag=$rhwp_tag"
+            echo "rhwp_commit=$rhwp_commit"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ "$rhwp_tag" != "$EXPECTED_RHWP_TAG" ]; then
+            echo "ERROR: expected rhwp tag $EXPECTED_RHWP_TAG but rhwp-core.lock has $rhwp_tag" >&2
+            exit 1
+          fi
+
+          {
+            echo "## rhwp core"
+            echo
+            echo "- lock tag: \`$rhwp_tag\`"
+            echo "- lock commit: \`$rhwp_commit\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify upstream latest rhwp release
+        if: ${{ inputs.require_latest_rhwp }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_tag="$(env -u GH_TOKEN -u GITHUB_TOKEN gh release view -R edwardkim/rhwp --json tagName --jq .tagName)"
+          lock_tag="${{ steps.core.outputs.rhwp_tag }}"
+
+          if [ "$lock_tag" != "$latest_tag" ]; then
+            echo "ERROR: rhwp-core.lock has $lock_tag but upstream latest is $latest_tag" >&2
+            echo "Update rhwp core compatibility before publishing, or rerun with require_latest_rhwp=false for an explicit exception." >&2
+            exit 1
+          fi
+
+          {
+            echo
+            echo "- upstream latest rhwp release: \`$latest_tag\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - name: Import Developer ID certificate
+        id: keychain
+        shell: bash
+        run: |
+          set -euo pipefail
+          keychain_path="$(bash scripts/ci/import-developer-id-certificate.sh)"
+          echo "keychain_path=$keychain_path" >> "$GITHUB_OUTPUT"
+
+      - name: Store notarization credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          for required in ALHANGEUL_NOTARY_PROFILE APPLE_TEAM_ID NOTARY_APPLE_ID NOTARY_APP_SPECIFIC_PASSWORD; do
+            if [ -z "${!required:-}" ]; then
+              echo "ERROR: $required is required for release notarization" >&2
+              exit 1
+            fi
+          done
+
+          xcrun notarytool store-credentials "$ALHANGEUL_NOTARY_PROFILE" \
+            --apple-id "$NOTARY_APPLE_ID" \
+            --team-id "$APPLE_TEAM_ID" \
+            --password "$NOTARY_APP_SPECIFIC_PASSWORD" \
+            --keychain "${{ steps.keychain.outputs.keychain_path }}"
+
+      - name: Verify release script interface
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/release.sh --help
+
+      - name: Verify rhwp lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/build-rust-macos.sh --verify-lock
+
+      - name: Build signed and notarized DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/release.sh "$VERSION"
+
+      - name: Verify public release artifact
+        id: artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          dmg_name="alhangeul-macos-$VERSION.dmg"
+          release_dir="$PWD/build.noindex/release"
+          dmg_path="$release_dir/$dmg_name"
+          checksum_path="$dmg_path.sha256"
+
+          test -f "$dmg_path"
+          test -f "$checksum_path"
+          (cd "$release_dir" && shasum -a 256 -c "$dmg_name.sha256")
+
+          digest="$(awk '{print $1}' "$checksum_path")"
+          {
+            echo "dmg_path=$dmg_path"
+            echo "checksum_path=$checksum_path"
+            echo "digest=$digest"
+            echo "notes_path=$release_dir/release-notes-$VERSION.md"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Public release artifact"
+            echo
+            echo "- DMG: \`$dmg_name\`"
+            echo "- SHA256: \`$digest\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Write release notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/ci/write-release-notes.sh \
+            "$VERSION" \
+            "${{ steps.artifact.outputs.digest }}" \
+            "${{ steps.artifact.outputs.notes_path }}"
+
+      - name: Publish GitHub Release asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_name="v$VERSION"
+          dmg_path="${{ steps.artifact.outputs.dmg_path }}"
+          checksum_path="${{ steps.artifact.outputs.checksum_path }}"
+          notes_path="${{ steps.artifact.outputs.notes_path }}"
+
+          if gh release view "$tag_name" >/dev/null 2>&1; then
+            gh release upload "$tag_name" "$dmg_path" "$checksum_path" --clobber
+          else
+            args=(
+              release create "$tag_name"
+              "$dmg_path"
+              "$checksum_path"
+              --title "Alhangeul $tag_name"
+              --notes-file "$notes_path"
+              --verify-tag
+            )
+            if [ "$DRAFT_RELEASE" = "true" ]; then
+              args+=(--draft)
+            fi
+            if [ "$PRERELEASE" = "true" ]; then
+              args+=(--prerelease)
+            fi
+            gh "${args[@]}"
+          fi
+
+      - name: Upload signed DMG artifact copy
+        uses: actions/upload-artifact@v4
+        with:
+          name: alhangeul-macos-${{ inputs.version }}-public-dmg
+          path: |
+            ${{ steps.artifact.outputs.dmg_path }}
+            ${{ steps.artifact.outputs.checksum_path }}
+            ${{ steps.artifact.outputs.notes_path }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Delete temporary release keychain
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          security delete-keychain "$RUNNER_TEMP/alhangeul-release.keychain-db" || true
