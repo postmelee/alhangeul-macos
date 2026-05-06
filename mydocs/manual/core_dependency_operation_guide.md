@@ -44,7 +44,7 @@ Demo/Preview commit pin:
 ./scripts/build-rust-macos.sh --verify-lock
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build.noindex/DerivedData \
@@ -61,7 +61,7 @@ Stable release tag:
 ./scripts/build-rust-macos.sh --verify-lock
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build.noindex/DerivedData \

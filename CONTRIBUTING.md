@@ -50,7 +50,7 @@ brew install xcodegen
 xcodegen generate
 
 # HostApp Debug 빌드
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build.noindex/DerivedData \
@@ -58,7 +58,7 @@ xcodebuild -project AlhangeulMac.xcodeproj \
   build
 
 # 실행
-open build.noindex/DerivedData/Build/Products/Debug/AlhangeulMac.app
+open build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app
 ```
 
 자세한 빌드/실행 절차는 [`build_run_guide.md`](mydocs/manual/build_run_guide.md)를 참고하세요.
@@ -84,7 +84,7 @@ HWP/HWPX 파일이 한컴 또는 rhwp core와 다르게 렌더링되거나, Find
    - 가능하면 HWP/HWPX 파일 첨부 (개인정보 제거 후)
    - native renderer 문제라면 가능하면 `render-debug-compare.sh`가 만든 summary, core PNG, native PNG, diff PNG 첨부
    - WKWebView viewer 문제라면 가능하면 `rhwp-studio` 단독 실행 결과와 알한글 WKWebView 결과 스크린샷 첨부
-3. Quick Look/Thumbnail 등록 문제는 `pluginkit -mAvvv | grep com.postmelee.alhangeulmac` 결과를 함께 첨부
+3. Quick Look/Thumbnail 등록 문제는 `pluginkit -mAvvv | grep com.postmelee.alhangeul` 결과를 함께 첨부
 
 ### 코드 기여 — Fork & PR 워크플로우
 
@@ -128,7 +128,7 @@ HWP/HWPX 파일이 한컴 또는 rhwp core와 다르게 렌더링되거나, Find
 ./scripts/build-rust-macos.sh           # Rust bridge 빌드 + lock 검증
 ./scripts/check-no-appkit.sh            # 공통 계층 AppKit 의존성 검사
 xcodegen generate
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp -configuration Debug \
   -derivedDataPath build.noindex/DerivedData \
   CODE_SIGNING_ALLOWED=NO build
@@ -217,7 +217,7 @@ mydocs/                       ← 작업 문서와 운영 매뉴얼
 
 - `Sources/RhwpCoreBridge`에는 AppKit/UIKit 직접 의존을 넣지 않는다 (`./scripts/check-no-appkit.sh`로 강제)
 - Rust FFI 경계의 포인터/길이/수명 해제 규칙을 명확히 유지 (자세히는 [`swift_macos_code_rules_guide.md`](mydocs/manual/swift_macos_code_rules_guide.md))
-- `project.yml`이 Xcode project 원본. `AlhangeulMac.xcodeproj`는 직접 수정하지 않는다
+- `project.yml`이 Xcode project 원본. `Alhangeul.xcodeproj`는 직접 수정하지 않는다
 - 모든 문서는 한국어로 작성
 
 ## 문서 작성 규칙

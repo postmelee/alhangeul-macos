@@ -4,7 +4,7 @@ Write pull request review comments in Korean. Prioritize correctness, runtime re
 
 Repository context:
 - This repository builds a macOS HWP/HWPX preview and viewer app. It owns HostApp viewer, Quick Look preview extension, Finder Thumbnail extension, Swift bridge code, RustBridge C ABI, packaging policy, and related documentation.
-- `project.yml` is the source of truth for Xcode configuration. Flag direct manual edits to `AlhangeulMac.xcodeproj` unless the PR clearly regenerates it from `xcodegen generate`.
+- `project.yml` is the source of truth for Xcode configuration. Flag direct manual edits to `Alhangeul.xcodeproj` unless the PR clearly regenerates it from `xcodegen generate`.
 - `Frameworks/Rhwp.xcframework`, `Frameworks/generated_rhwp.h`, `Frameworks/module.modulemap`, and `Frameworks/universal/librhwp.a` are generated from `RustBridge/` and scripts. If generated artifacts, `rhwp-core.lock`, `RustBridge/Cargo.lock`, or `rhwp-ffi-symbols.txt` change, check provenance, ABI symbols, and artifact hash consistency.
 
 Architecture rules:
