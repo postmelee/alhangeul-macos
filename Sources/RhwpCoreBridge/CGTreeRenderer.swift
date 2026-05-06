@@ -266,8 +266,8 @@ class CGTreeRenderer {
             path = CGPath(rect: r, transform: nil)
         }
 
-        // 그라데이션 채우기
         if let grad = rect.gradient {
+            applyShapeShadowSilhouette(rect.style, path: path, fallbackColor: grad.colors.first, in: ctx)
             ctx.addPath(path)
             ctx.clip()
             drawGradient(grad, in: r, ctx: ctx)
@@ -275,7 +275,7 @@ class CGTreeRenderer {
             applyShapeStyleFill(rect.style, path: path, in: ctx)
         }
 
-        applyShapeStyleStroke(rect.style, path: path, in: ctx)
+        applyShapeStyleStroke(rect.style, path: path, includeShadow: rect.gradient == nil && !hasShapeFill(rect.style), in: ctx)
         ctx.restoreGState()
     }
 
@@ -290,6 +290,8 @@ class CGTreeRenderer {
         let end = CGPoint(x: line.x2, y: line.y2)
         let strokeLine = adjustedLineForArrows(start: start, end: end, style: style)
 
+        ctx.saveGState()
+        applyShadow(style.shadow, in: ctx)
         ctx.setStrokeColor(colorRefToCGColor(style.color))
         ctx.setLineWidth(CGFloat(max(style.width, 0.5)))
         applyDash(style.dash, in: ctx)
@@ -298,6 +300,7 @@ class CGTreeRenderer {
         ctx.addLine(to: strokeLine.end)
         ctx.strokePath()
         drawLineArrows(start: start, end: end, style: style, in: ctx)
+        ctx.restoreGState()
 
         ctx.restoreGState()
     }
@@ -312,6 +315,7 @@ class CGTreeRenderer {
         let path = CGPath(ellipseIn: r, transform: nil)
 
         if let grad = ell.gradient {
+            applyShapeShadowSilhouette(ell.style, path: path, fallbackColor: grad.colors.first, in: ctx)
             ctx.addPath(path)
             ctx.clip()
             drawGradient(grad, in: r, ctx: ctx)
@@ -319,7 +323,7 @@ class CGTreeRenderer {
             applyShapeStyleFill(ell.style, path: path, in: ctx)
         }
 
-        applyShapeStyleStroke(ell.style, path: path, in: ctx)
+        applyShapeStyleStroke(ell.style, path: path, includeShadow: ell.gradient == nil && !hasShapeFill(ell.style), in: ctx)
         ctx.restoreGState()
     }
 
@@ -333,6 +337,7 @@ class CGTreeRenderer {
         let cgPath = builtPath.path
 
         if let grad = pathNode.gradient {
+            applyShapeShadowSilhouette(pathNode.style, path: cgPath, fallbackColor: grad.colors.first, in: ctx)
             ctx.addPath(cgPath)
             ctx.clip()
             drawGradient(grad, in: cgRect(bbox), ctx: ctx)
@@ -342,16 +347,18 @@ class CGTreeRenderer {
 
         // 패스 노드는 lineStyle이 있으면 그것을 사용
         if let ls = pathNode.lineStyle {
+            ctx.saveGState()
+            applyShadow(ls.shadow, in: ctx)
             ctx.addPath(cgPath)
             ctx.setStrokeColor(colorRefToCGColor(ls.color))
             ctx.setLineWidth(CGFloat(max(ls.width, 0.5)))
             applyDash(ls.dash, in: ctx)
             ctx.strokePath()
+            drawConnectorArrows(for: pathNode, builtPath: builtPath, in: ctx)
+            ctx.restoreGState()
         } else {
-            applyShapeStyleStroke(pathNode.style, path: cgPath, in: ctx)
+            applyShapeStyleStroke(pathNode.style, path: cgPath, includeShadow: pathNode.gradient == nil && !hasShapeFill(pathNode.style), in: ctx)
         }
-
-        drawConnectorArrows(for: pathNode, builtPath: builtPath, in: ctx)
 
         ctx.restoreGState()
     }
@@ -1698,29 +1705,146 @@ class CGTreeRenderer {
 
     private func applyShapeStyleFill(_ style: ShapeStyle, path: CGPath, in ctx: CGContext) {
         if let pattern = style.pattern {
-            // 패턴 채우기 (M3에서 정확한 패턴 구현)
-            if let bgColor = UInt32(exactly: pattern.backgroundColor) {
-                ctx.addPath(path)
-                ctx.setFillColor(colorRefToCGColor(bgColor))
-                ctx.fillPath()
-            }
+            applyPatternFill(pattern, style: style, path: path, in: ctx)
         } else if let fillColor = style.fillColor {
+            ctx.saveGState()
+            applyShadow(style.shadow, in: ctx)
             ctx.addPath(path)
-            ctx.setAlpha(CGFloat(style.opacity))
+            ctx.setAlpha(clampedAlpha(style.opacity))
             ctx.setFillColor(colorRefToCGColor(fillColor))
             ctx.fillPath()
-            ctx.setAlpha(1.0)
+            ctx.restoreGState()
         }
     }
 
-    private func applyShapeStyleStroke(_ style: ShapeStyle, path: CGPath, in ctx: CGContext) {
+    private func applyShapeStyleStroke(_ style: ShapeStyle, path: CGPath, includeShadow: Bool = true, in ctx: CGContext) {
         if let strokeColor = style.strokeColor, style.strokeWidth > 0 {
+            ctx.saveGState()
+            if includeShadow {
+                applyShadow(style.shadow, in: ctx)
+            }
             ctx.addPath(path)
             ctx.setStrokeColor(colorRefToCGColor(strokeColor))
             ctx.setLineWidth(CGFloat(max(style.strokeWidth, 0.5)))
             applyDash(style.strokeDash, in: ctx)
             ctx.strokePath()
+            ctx.restoreGState()
         }
+    }
+
+    private func hasShapeFill(_ style: ShapeStyle) -> Bool {
+        style.pattern != nil || style.fillColor != nil
+    }
+
+    private func applyShapeShadowSilhouette(_ style: ShapeStyle, path: CGPath, fallbackColor: UInt32?, in ctx: CGContext) {
+        guard style.shadow != nil else { return }
+        let color = style.fillColor ?? fallbackColor ?? style.strokeColor ?? 0
+
+        ctx.saveGState()
+        applyShadow(style.shadow, in: ctx)
+        ctx.addPath(path)
+        ctx.setAlpha(clampedAlpha(style.opacity))
+        ctx.setFillColor(colorRefToCGColor(color))
+        ctx.fillPath()
+        ctx.restoreGState()
+    }
+
+    private func applyPatternFill(_ pattern: PatternFillInfo, style: ShapeStyle, path: CGPath, in ctx: CGContext) {
+        ctx.saveGState()
+        applyShadow(style.shadow, in: ctx)
+        ctx.addPath(path)
+        ctx.setFillColor(colorRefToCGColor(pattern.backgroundColor))
+        ctx.fillPath()
+        ctx.restoreGState()
+
+        ctx.saveGState()
+        ctx.addPath(path)
+        ctx.clip()
+        drawPatternLines(pattern, bounds: path.boundingBoxOfPath, in: ctx)
+        ctx.restoreGState()
+    }
+
+    private func drawPatternLines(_ pattern: PatternFillInfo, bounds: CGRect, in ctx: CGContext) {
+        guard !bounds.isNull, !bounds.isInfinite, bounds.width > 0, bounds.height > 0 else { return }
+
+        let tile: CGFloat = 6
+        let minX = floor(bounds.minX / tile) * tile - tile
+        let maxX = ceil(bounds.maxX / tile) * tile + tile
+        let minY = floor(bounds.minY / tile) * tile - tile
+        let maxY = ceil(bounds.maxY / tile) * tile + tile
+
+        ctx.saveGState()
+        ctx.setStrokeColor(colorRefToCGColor(pattern.patternColor))
+        ctx.setLineWidth(1.0)
+        ctx.setLineDash(phase: 0, lengths: [])
+
+        switch pattern.patternType {
+        case 0:
+            strideValues(from: minY + tile / 2, through: maxY, by: tile) { y in
+                drawLine(from: CGPoint(x: minX, y: y), to: CGPoint(x: maxX, y: y), in: ctx)
+            }
+        case 1:
+            strideValues(from: minX + tile / 2, through: maxX, by: tile) { x in
+                drawLine(from: CGPoint(x: x, y: minY), to: CGPoint(x: x, y: maxY), in: ctx)
+            }
+        case 2:
+            strideValues(from: minX - (maxY - minY), through: maxX + tile, by: tile) { x in
+                drawLine(from: CGPoint(x: x + tile, y: minY), to: CGPoint(x: x, y: minY + tile), in: ctx)
+                drawLine(from: CGPoint(x: x + maxY - minY, y: minY), to: CGPoint(x: x, y: maxY), in: ctx)
+            }
+        case 3:
+            strideValues(from: minX - tile, through: maxX + (maxY - minY), by: tile) { x in
+                drawLine(from: CGPoint(x: x, y: minY), to: CGPoint(x: x + maxY - minY, y: maxY), in: ctx)
+            }
+        case 4:
+            strideValues(from: minY + tile / 2, through: maxY, by: tile) { y in
+                drawLine(from: CGPoint(x: minX, y: y), to: CGPoint(x: maxX, y: y), in: ctx)
+            }
+            strideValues(from: minX + tile / 2, through: maxX, by: tile) { x in
+                drawLine(from: CGPoint(x: x, y: minY), to: CGPoint(x: x, y: maxY), in: ctx)
+            }
+        case 5:
+            strideValues(from: minX - tile, through: maxX + (maxY - minY), by: tile) { x in
+                drawLine(from: CGPoint(x: x, y: minY), to: CGPoint(x: x + maxY - minY, y: maxY), in: ctx)
+            }
+            strideValues(from: minX - (maxY - minY), through: maxX + tile, by: tile) { x in
+                drawLine(from: CGPoint(x: x + maxY - minY, y: minY), to: CGPoint(x: x, y: maxY), in: ctx)
+            }
+        default:
+            break
+        }
+
+        ctx.restoreGState()
+    }
+
+    private func strideValues(from start: CGFloat, through end: CGFloat, by step: CGFloat, _ body: (CGFloat) -> Void) {
+        guard step > 0 else { return }
+        var value = start
+        while value <= end {
+            body(value)
+            value += step
+        }
+    }
+
+    private func drawLine(from start: CGPoint, to end: CGPoint, in ctx: CGContext) {
+        ctx.beginPath()
+        ctx.move(to: start)
+        ctx.addLine(to: end)
+        ctx.strokePath()
+    }
+
+    private func applyShadow(_ shadow: ShadowStyleInfo?, in ctx: CGContext) {
+        guard let shadow else { return }
+        let opacity = shadow.alpha > 0 ? 1.0 - CGFloat(shadow.alpha) / 255.0 : 1.0
+        ctx.setShadow(
+            offset: CGSize(width: CGFloat(shadow.offsetX), height: CGFloat(shadow.offsetY)),
+            blur: 2.0,
+            color: colorRefToCGColor(shadow.color, alpha: opacity)
+        )
+    }
+
+    private func clampedAlpha(_ value: Double) -> CGFloat {
+        min(1.0, max(0.0, CGFloat(value)))
     }
 
     private func applyDash(_ dash: String, in ctx: CGContext) {
@@ -2285,10 +2409,14 @@ class CGTreeRenderer {
 
     /// HWP ColorRef (0x00BBGGRR) → CGColor
     private func colorRefToCGColor(_ ref: UInt32) -> CGColor {
+        colorRefToCGColor(ref, alpha: 1.0)
+    }
+
+    private func colorRefToCGColor(_ ref: UInt32, alpha: CGFloat) -> CGColor {
         let r = CGFloat(ref & 0xFF) / 255.0
         let g = CGFloat((ref >> 8) & 0xFF) / 255.0
         let b = CGFloat((ref >> 16) & 0xFF) / 255.0
-        return CGColor(red: r, green: g, blue: b, alpha: 1.0)
+        return CGColor(red: r, green: g, blue: b, alpha: clampedAlpha(Double(alpha)))
     }
 
     private var coreTextForegroundColorKey: NSAttributedString.Key {
