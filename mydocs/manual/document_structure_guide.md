@@ -79,5 +79,5 @@
 ## 관련 매뉴얼
 
 - [`task_workflow_guide.md`](task_workflow_guide.md): 내부 타스크의 수행계획서, 구현계획서, 단계 보고서, 최종 보고서 진행 순서.
-- [`git_workflow_guide.md`](git_workflow_guide.md): `local/taskN`, `publish/taskN`, `devel` 브랜치 운용.
+- [`git_workflow_guide.md`](git_workflow_guide.md): `local/taskN`, `publish/taskN`, `devel-webview`/`devel` 통합 브랜치 운용.
 - [`pr_process_guide.md`](pr_process_guide.md): 외부 기여자 PR 검토 절차.
