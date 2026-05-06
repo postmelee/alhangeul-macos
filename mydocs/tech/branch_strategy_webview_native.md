@@ -1,10 +1,10 @@
-# WKWebView 첫 출시와 native renderer 브랜치 전략
+# WKWebView 첫 출시와 native 전환 브랜치 전략
 
 작성일: 2026-05-06
 
 ## 목적
 
-이 문서는 `alhangeul-macos` 저장소의 첫 public release 전후 브랜치 전략을 정리한다. HostApp viewer 첫 출시는 native renderer 대신 `rhwp-studio`를 WKWebView로 로드하는 방식으로 결정되었으므로, 출시 우선 작업과 native renderer 실험 작업을 서로 다른 통합 브랜치로 운영한다.
+이 문서는 `alhangeul-macos` 저장소의 첫 public release 전후 브랜치 전략을 정리한다. HostApp viewer/editor 첫 출시는 native renderer/editor 대신 `rhwp-studio`를 WKWebView로 로드하는 방식으로 결정되었으므로, 출시 우선 작업과 Swift native viewer/editor 전환 작업을 서로 다른 통합 브랜치로 운영한다.
 
 이 문서는 브랜치 역할과 문서/자동화 기준의 진실 원천이다. README와 CONTRIBUTING은 외부 독자가 필요한 요약만 제공하고, 상세 판단 근거와 후속 rename 후보는 이 문서를 기준으로 유지한다.
 
@@ -12,7 +12,7 @@
 
 - `main`은 release/tag 기준 브랜치다.
 - `devel-webview`는 v0.1.x 첫 public release 준비 기준 브랜치다.
-- `devel`은 native viewer renderer와 장기 native viewer 실험/통합 브랜치다.
+- `devel`은 Swift native viewer/editor와 장기 native 전환 작업 통합 브랜치다.
 - 첫 출시 전에는 브랜치 rename을 하지 않는다.
 - `devel-webview -> main` 반영은 release PR로 수행하고, merge 후 tag/GitHub Release를 `main` 기준으로 만든다.
 - 외부 기여 PR은 `main`으로 보내지 않는다. 작업 범위에 따라 `devel-webview` 또는 `devel`을 base로 고른다.
@@ -28,7 +28,7 @@
 
 `origin/main` 전용 commit은 README/banner 계열 변경을 포함한다. 따라서 `devel-webview -> main` release PR에서는 `main` 전용 README/banner 변경을 보존할지, `devel-webview`의 최신 README로 대체할지 명시적으로 확인해야 한다.
 
-`origin/devel` 전용 commit은 Task #119 font fallback과 Task #123 native renderer/body overflow replay/clip 정책 중심이다. 이 내용은 native renderer 실험/장기 개발 브랜치 성격과 맞다.
+`origin/devel` 전용 commit은 Task #119 font fallback과 Task #123 native renderer/body overflow replay/clip 정책 중심이다. 이 내용은 Swift native viewer/editor 전환 브랜치 성격과 맞다.
 
 `origin/devel-webview` 전용 commit은 Task #134 WKWebView viewer MVP, Task #142/#144/#153 HostApp viewer 문서 동작과 drag/drop, Task #154 Alhangeul identity 정리 중심이다. 이 내용은 v0.1.x 출시 우선 브랜치 성격과 맞다.
 
@@ -37,8 +37,8 @@
 | 브랜치 | 역할 | PR 기준 |
 |--------|------|---------|
 | `main` | release/tag 기준. public GitHub Release와 Homebrew Cask가 참조할 안정 기준 | release PR만 merge |
-| `devel-webview` | v0.1.x WKWebView MVP, Finder/Quick Look/Thumbnail, Spotlight, 변환, 배포, 문서 작업의 기본 통합 브랜치 | 일반 작업 PR의 기본 base |
-| `devel` | native viewer renderer, CoreGraphics/CoreText rendering, render tree 기반 viewer UI, native page interaction 실험/장기 개발 통합 브랜치 | native renderer 작업 PR base |
+| `devel-webview` | v0.1.x 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look/Thumbnail, PDF/공유/저장, v0.2 Mac 통합, v0.3 변환/자동화, 배포, 문서 작업의 기본 통합 브랜치 | 일반 작업 PR의 기본 base |
+| `devel` | Swift native viewer/editor, CoreGraphics/CoreText rendering, render tree 기반 viewer UI, native page interaction과 editor foundation 장기 개발 통합 브랜치 | native viewer/editor 작업 PR base |
 | `local/task{N}` | 하이퍼-워터폴 내부 작업 브랜치. 원격 push 금지 | `publish/task{N}`로 게시 |
 | `publish/task{N}` | 원격 PR 게시용 브랜치. PR merge 후 삭제 | 작업 범위에 맞는 통합 브랜치 대상 |
 
@@ -56,7 +56,7 @@
 단기 운영 기준:
 
 1. v0.1.x 작업은 기본적으로 `devel-webview`를 기준으로 시작한다.
-2. native renderer 동작을 직접 바꾸는 작업만 `devel`을 기준으로 시작한다.
+2. Swift native viewer/editor 동작을 직접 바꾸는 작업만 `devel`을 기준으로 시작한다.
 3. release-critical 수정은 먼저 `devel-webview`로 반영한다.
 4. 같은 수정이 native renderer 장기 브랜치에도 필요하면 별도 PR 또는 cherry-pick으로 `devel`에 후속 반영한다.
 5. `main`에는 release PR 외의 일반 작업 PR을 보내지 않는다.
@@ -72,7 +72,7 @@ v0.1.x 첫 출시 이후에는 다음 선택지를 다시 판단한다.
 장점:
 
 - 현재 문서와 브랜치 보호 설정을 크게 바꾸지 않아도 된다.
-- WKWebView 기반 출시 라인과 native renderer 실험 라인이 계속 분리된다.
+- WKWebView 기반 출시 라인과 Swift native 전환 라인이 계속 분리된다.
 - v0.1.x patch release 운영이 단순하다.
 
 단점:
@@ -82,12 +82,12 @@ v0.1.x 첫 출시 이후에는 다음 선택지를 다시 판단한다.
 
 ### 선택지 B: 출시 라인을 주 개발 브랜치로 승격
 
-`devel-webview`를 `devel` 또는 `develop`으로 승격하고, 기존 `devel`은 `native-renderer`, `native-devel`, `experiment/native-renderer` 같은 이름으로 변경한다.
+`devel-webview`를 `devel` 또는 `develop`으로 승격하고, 기존 `devel`은 `native-viewer-editor`, `native-devel`, `experiment/native` 같은 이름으로 변경한다.
 
 장점:
 
 - 주 개발 브랜치 이름이 일반 관례와 더 잘 맞는다.
-- native renderer 실험 브랜치의 성격이 이름에서 드러난다.
+- Swift native 전환 브랜치의 성격이 이름에서 드러난다.
 - 외부 기여자가 PR base를 잘못 고를 가능성이 줄어든다.
 
 단점:
@@ -99,7 +99,7 @@ v0.1.x 첫 출시 이후에는 다음 선택지를 다시 판단한다.
 
 - 첫 public release와 긴급 patch release 가능성이 안정된 뒤
 - 열린 PR 수와 branch protection 변경 부담이 낮을 때
-- native renderer 실험 라인을 독립 이름으로 유지할 필요가 명확할 때
+- Swift native viewer/editor 전환 라인을 독립 이름으로 유지할 필요가 명확할 때
 
 ## `devel-webview -> main` 승격 체크리스트
 
@@ -109,7 +109,7 @@ release PR 생성 전에 확인한다.
 - [ ] `git rev-list --left-right --count origin/main...origin/devel-webview` 결과를 확인했다.
 - [ ] `origin/main` 전용 README/banner 변경을 보존할지 대체할지 결정했다.
 - [ ] release-critical PR이 모두 `devel-webview`에 merge되었다.
-- [ ] `devel` 전용 native renderer 실험 commit을 release PR에 포함하지 않는다는 점을 확인했다.
+- [ ] `devel` 전용 Swift native viewer/editor 전환 commit을 release PR에 포함하지 않는다는 점을 확인했다.
 - [ ] `rhwp-core.lock`, `RustBridge/Cargo.lock`, release artifact provenance가 release 기준과 일치한다.
 - [ ] release guide의 필수 검증을 실행했다.
 - [ ] release PR은 `devel-webview` head에서 `main` base로 만든다.
@@ -120,12 +120,13 @@ release PR 생성 전에 확인한다.
 
 | 작업 유형 | PR base |
 |-----------|---------|
-| WKWebView MVP viewer, `rhwp-studio` 통합 | `devel-webview` |
+| WKWebView-backed viewer/editor, `rhwp-studio` 통합 | `devel-webview` |
 | Finder Quick Look / Thumbnail | `devel-webview` |
-| Spotlight, PDF/export/print, 변환, 배포, 문서 | `devel-webview` |
+| PDF/export/print/share/save, Spotlight/mdimporter, 변환, 배포, 문서 | `devel-webview` |
 | release automation, packaging, Cask | `devel-webview` |
-| native viewer renderer, CoreGraphics/CoreText renderer | `devel` |
+| Swift native viewer renderer, CoreGraphics/CoreText renderer | `devel` |
 | render tree 기반 native viewer UI, native zoom/cache/page interaction | `devel` |
+| Swift native editor foundation, caret/selection/IME/overlay | `devel` |
 
 범위가 애매하면 PR을 만들기 전에 이슈 또는 Discussion에서 확인한다. GitHub 기본 브랜치가 `main`이어도 기여 PR은 `main`으로 보내지 않는다.
 
@@ -135,7 +136,7 @@ release PR 생성 전에 확인한다.
 
 - `main` 보호 규칙: release PR과 review approval을 요구한다.
 - `devel-webview` 보호 규칙: 작업 PR과 review/검증을 요구한다.
-- `devel` 보호 규칙: native renderer 실험 PR이 일반 출시 라인으로 섞이지 않게 한다.
+- `devel` 보호 규칙: Swift native viewer/editor 전환 PR이 일반 출시 라인으로 섞이지 않게 한다.
 - CI branch filter: `main`, `devel-webview`, `devel`, `publish/task*` 중 필요한 대상을 명시한다.
 - release workflow: public artifact와 GitHub Release publish는 `main` tag 기준으로만 수행한다.
 - release rehearsal: 필요하면 `devel-webview`에서 artifact rehearsal은 허용하되 public publish와 구분한다.
