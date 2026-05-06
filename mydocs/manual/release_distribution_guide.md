@@ -37,6 +37,12 @@
 - 사용자 표시명: 한국어 `알한글` (`ko.lproj/InfoPlist.strings`), 영어 `Alhangeul` (`en.lproj/InfoPlist.strings`). 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 ASCII filesystem name과 동일
 - 공개 배포 산출물명: `alhangeul-macos-<version>.dmg`
 
+### 배포 브랜치 기준
+
+v0.1.x public release는 `devel-webview`를 배포 준비 기준 브랜치로 사용한다. 릴리스 후보가 확정되면 `devel-webview`의 검증된 commit을 `main`에 반영하고, Git tag와 GitHub Release는 `main` 기준으로 생성한다.
+
+`devel`은 native viewer renderer와 장기 개발 통합 브랜치이므로 배포 직전 기준 브랜치로 사용하지 않는다. `devel-webview`에 merge된 release-critical 변경은 별도 PR 또는 cherry-pick으로 `devel`에 후속 동기화한다.
+
 ### Apple Developer Program 준비 상태
 
 2026-04-29 기준 Apple Developer Program 가입과 public release에 필요한 로컬 credential 준비가 완료된 상태다.
