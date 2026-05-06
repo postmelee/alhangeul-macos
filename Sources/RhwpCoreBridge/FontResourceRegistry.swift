@@ -50,6 +50,7 @@ enum HwpBundledFontRegistry {
         "Pretendard-Regular.woff2",
         "Pretendard-SemiBold.woff2",
         "Pretendard-Thin.woff2",
+        "SourceHanSerifK-OldHangul-subset.woff2",
         "SpoqaHanSans-Regular.woff2",
     ]
 

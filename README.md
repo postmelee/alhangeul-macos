@@ -66,7 +66,7 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 - [x] HostApp에서 HWP/HWPX 열기
 - [x] 50 MB 초과 preview fallback
 - [x] Quick Look/Thumbnail extension 상태 진단
-- [x] `edwardkim/rhwp` `v0.7.9` snapshot의 `rhwp-studio`를 WKWebView viewer로 로드
+- [x] `edwardkim/rhwp` `v0.7.10` snapshot의 `rhwp-studio`를 WKWebView viewer로 로드
 - [x] 앱 sandbox 안에서 로컬 HWP/HWPX 파일을 WKWebView viewer에 안전하게 전달
 - [x] WKWebView 기반 viewer의 기본 스크롤, 확대/축소, 페이지 이동, 오류 상태 처리
 - [x] WebView 내부 찾기, 다시 찾기, 찾아가기, 선택/복사, 기본 편집 UI 제공
@@ -191,7 +191,7 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 ### WKWebView Viewer (MVP 뷰어)
 
 - macOS SwiftUI 기반 HostApp shell과 WKWebView
-- `edwardkim/rhwp` `v0.7.9` snapshot의 `rhwp-studio` viewer 통합
+- `edwardkim/rhwp` `v0.7.10` snapshot의 `rhwp-studio` viewer 통합
 - HWP/HWPX 파일 열기
 - WebView 내부 찾기, 복사, 기본 편집 UI
 - Finder 또는 다른 앱에서 파일 열기 요청 수신

@@ -6,7 +6,7 @@
 
 현재 release artifact 고지는 실제 bundle과 lock 파일에 고정된 항목만 기준으로 한다.
 
-- Rust core와 Web/WASM viewer asset은 `edwardkim/rhwp` `v0.7.9` release-tag snapshot 기준이다.
+- Rust core와 Web/WASM viewer asset은 `edwardkim/rhwp` `v0.7.10` release-tag snapshot 기준이다.
 - `rhwp` upstream의 별도 GitHub Release 바이너리 asset은 Alhangeul app bundle에 포함하지 않는다.
 - 한컴/HY/HCR/Microsoft proprietary font 파일은 저장소와 release artifact에 포함하지 않는다.
 
@@ -17,8 +17,8 @@
 - Repository: https://github.com/edwardkim/rhwp
 - License: MIT
 - Ref kind: release-tag
-- Release tag: `v0.7.9`
-- Resolved commit: `0fb3e6758b8ad11d2f3c3849c83b914684e83863`
+- Release tag: `v0.7.10`
+- Resolved commit: `62a458aa317e962cd3d0eec6096728c172d57110`
 - Provenance: `rhwp-core.lock`, `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`
 
 `Sources/RhwpCoreBridge`의 일부 Swift bridge 코드는 upstream iOS viewer 구현에서 출발했으며, 현재 macOS bridge와 renderer 정책은 이 저장소에서 유지보수한다.
@@ -38,8 +38,8 @@ HostApp WKWebView viewer는 app bundle의 `Sources/HostApp/Resources/rhwp-studio
 
 - Source repository: https://github.com/edwardkim/rhwp.git
 - Ref kind: release-tag
-- Release tag: `v0.7.9`
-- Resolved commit: `0fb3e6758b8ad11d2f3c3849c83b914684e83863`
+- Release tag: `v0.7.10`
+- Resolved commit: `62a458aa317e962cd3d0eec6096728c172d57110`
 - Source path: `rhwp-studio/dist`
 - Excluded path: `samples/`
 - Provenance manifest: `Sources/HostApp/Resources/rhwp-studio/manifest.json`
@@ -48,7 +48,7 @@ HostApp WKWebView viewer는 app bundle의 `Sources/HostApp/Resources/rhwp-studio
 
 ## Bundled fonts
 
-HostApp bundle에는 `Sources/HostApp/Resources/rhwp-studio/fonts` 아래 WOFF2 font 34개가 포함된다. WebView viewer는 이 font를 CSS/WebFont로 사용하고, Swift native renderer는 같은 WOFF2를 CoreText process-local font로 등록해 fallback 후보로 재사용한다.
+HostApp bundle에는 `Sources/HostApp/Resources/rhwp-studio/fonts` 아래 WOFF2 font 35개가 포함된다. WebView viewer는 이 font를 CSS/WebFont로 사용하고, Swift native renderer는 같은 WOFF2를 CoreText process-local font로 등록해 fallback 후보로 재사용한다.
 
 font별 또는 font family별 파일명, license, source, 대체 대상은 `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`가 소유한다.
 
