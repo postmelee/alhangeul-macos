@@ -35,6 +35,19 @@ fi
 
 RHWP_TAG="$(bash "$ROOT/scripts/ci/read-rhwp-core-lock.sh" rhwp_release_tag)"
 RHWP_COMMIT="$(bash "$ROOT/scripts/ci/read-rhwp-core-lock.sh" rhwp_commit)"
+STUDIO_MANIFEST="Sources/HostApp/Resources/rhwp-studio/manifest.json"
+THIRD_PARTY_NOTICES="THIRD_PARTY_LICENSES.md"
+FONT_NOTICES="Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md"
+
+for required_file in "$ROOT/$STUDIO_MANIFEST" "$ROOT/$THIRD_PARTY_NOTICES" "$ROOT/$FONT_NOTICES"; do
+  if [ ! -f "$required_file" ]; then
+    echo "ERROR: required release provenance file is missing: ${required_file#$ROOT/}" >&2
+    exit 1
+  fi
+done
+
+STUDIO_TAG="$(plutil -extract source_release_tag raw -o - "$ROOT/$STUDIO_MANIFEST")"
+STUDIO_COMMIT="$(plutil -extract source_resolved_commit raw -o - "$ROOT/$STUDIO_MANIFEST")"
 
 mkdir -p "$(dirname "$OUTPUT_FILE")"
 cat > "$OUTPUT_FILE" <<EOF
@@ -54,6 +67,17 @@ cat > "$OUTPUT_FILE" <<EOF
 
 - release tag: \`$RHWP_TAG\`
 - commit: \`$RHWP_COMMIT\`
+
+## 포함된 viewer asset provenance
+
+- rhwp-studio release tag: \`$STUDIO_TAG\`
+- rhwp-studio commit: \`$STUDIO_COMMIT\`
+- manifest: \`$STUDIO_MANIFEST\`
+
+## Third Party notices
+
+- \`$THIRD_PARTY_NOTICES\`
+- \`$FONT_NOTICES\`
 
 ## 검증
 
