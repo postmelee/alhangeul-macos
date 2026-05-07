@@ -10,8 +10,10 @@ struct RhwpStudioDroppedDocument {
 struct RhwpStudioWebView: NSViewRepresentable {
     let document: RhwpStudioDocumentPayload?
     let sourceDocument: RecentDocumentItem?
+    let reloadToken: Int
     let onLoadStateChange: (Bool) -> Void
     let onError: (String?) -> Void
+    let onFailure: (RhwpStudioWebViewFailure) -> Void
     let onOpenDocument: () -> Void
     let onDroppedDocument: (RhwpStudioDroppedDocument) -> Void
     let onDroppedFileURL: (URL) -> Void
@@ -20,8 +22,10 @@ struct RhwpStudioWebView: NSViewRepresentable {
     init(
         document: RhwpStudioDocumentPayload?,
         sourceDocument: RecentDocumentItem? = nil,
+        reloadToken: Int = 0,
         onLoadStateChange: @escaping (Bool) -> Void = { _ in },
         onError: @escaping (String?) -> Void = { _ in },
+        onFailure: @escaping (RhwpStudioWebViewFailure) -> Void = { _ in },
         onOpenDocument: @escaping () -> Void = {},
         onDroppedDocument: @escaping (RhwpStudioDroppedDocument) -> Void = { _ in },
         onDroppedFileURL: @escaping (URL) -> Void = { _ in },
@@ -29,8 +33,10 @@ struct RhwpStudioWebView: NSViewRepresentable {
     ) {
         self.document = document
         self.sourceDocument = sourceDocument
+        self.reloadToken = reloadToken
         self.onLoadStateChange = onLoadStateChange
         self.onError = onError
+        self.onFailure = onFailure
         self.onOpenDocument = onOpenDocument
         self.onDroppedDocument = onDroppedDocument
         self.onDroppedFileURL = onDroppedFileURL
@@ -48,11 +54,17 @@ struct RhwpStudioWebView: NSViewRepresentable {
     func updateNSView(_ webView: WKWebView, context: Context) {
         context.coordinator.onLoadStateChange = onLoadStateChange
         context.coordinator.onError = onError
+        context.coordinator.onFailure = onFailure
         context.coordinator.onOpenDocument = onOpenDocument
         context.coordinator.onDroppedDocument = onDroppedDocument
         context.coordinator.onDroppedFileURL = onDroppedFileURL
         context.coordinator.onDocumentSaved = onDocumentSaved
-        context.coordinator.update(document: document, sourceDocument: sourceDocument, in: webView)
+        context.coordinator.update(
+            document: document,
+            sourceDocument: sourceDocument,
+            reloadToken: reloadToken,
+            in: webView
+        )
     }
 }
 
@@ -60,6 +72,7 @@ extension RhwpStudioWebView {
     final class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
         var onLoadStateChange: (Bool) -> Void = { _ in }
         var onError: (String?) -> Void = { _ in }
+        var onFailure: (RhwpStudioWebViewFailure) -> Void = { _ in }
         var onOpenDocument: () -> Void = {}
         var onDroppedDocument: (RhwpStudioDroppedDocument) -> Void = { _ in }
         var onDroppedFileURL: (URL) -> Void = { _ in }
@@ -69,8 +82,8 @@ extension RhwpStudioWebView {
         private static let nativeDropSuppressionInterval: TimeInterval = 2
 
         private enum LoadIdentity: Equatable {
-            case empty
-            case document(Int)
+            case empty(reloadToken: Int)
+            case document(revision: Int, reloadToken: Int)
         }
 
         private enum SaveDestination {
@@ -101,6 +114,7 @@ extension RhwpStudioWebView {
         private var activeLoadID = 0
         private var loadTimeoutTask: Task<Void, Never>?
         private var recentNativeDrop: NativeDropMarker?
+        private var currentReloadToken = 0
 
         deinit {
             loadTimeoutTask?.cancel()
@@ -108,6 +122,13 @@ extension RhwpStudioWebView {
 
         func makeWebView() -> WKWebView {
             let configuration = WKWebViewConfiguration()
+            configuration.userContentController.addUserScript(
+                WKUserScript(
+                    source: RhwpStudioHostBridgeScript.runtimeErrorSource,
+                    injectionTime: .atDocumentStart,
+                    forMainFrameOnly: true
+                )
+            )
             configuration.userContentController.addUserScript(
                 WKUserScript(
                     source: RhwpStudioHostBridgeScript.source,
@@ -154,16 +175,18 @@ extension RhwpStudioWebView {
         func update(
             document: RhwpStudioDocumentPayload?,
             sourceDocument: RecentDocumentItem?,
+            reloadToken: Int,
             in webView: WKWebView
         ) {
             currentDocument = document
             currentSourceDocument = sourceDocument
+            currentReloadToken = reloadToken
             documentProvider.setDocument(document)
 
             let nextIdentity: LoadIdentity = if let document {
-                .document(document.revision)
+                .document(revision: document.revision, reloadToken: reloadToken)
             } else {
-                .empty
+                .empty(reloadToken: reloadToken)
             }
 
             guard nextIdentity != loadedIdentity else {
@@ -178,10 +201,18 @@ extension RhwpStudioWebView {
                 activeLoadID += 1
                 startLoadTimeout(activeLoadID, webView: webView)
                 webView.load(URLRequest(url: loadURL))
+            } catch let error as RhwpStudioResourceLocatorError {
+                loadedIdentity = nil
+                finishLoading()
+                onFailure(.resourcePreflight(error))
+            } catch let failure as RhwpStudioWebViewFailure {
+                loadedIdentity = nil
+                finishLoading()
+                onFailure(failure)
             } catch {
                 loadedIdentity = nil
                 finishLoading()
-                onError(error.localizedDescription)
+                onFailure(.navigation(error: error, fallbackURL: webView.url))
             }
         }
 
@@ -194,12 +225,18 @@ extension RhwpStudioWebView {
             didFail navigation: WKNavigation!,
             withError error: Error
         ) {
-            handleNavigationError(error)
+            handleNavigationError(error, webView: webView)
         }
 
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
             finishLoading()
-            onError("웹 viewer 프로세스가 종료되었습니다. 문서를 다시 열어 주세요.")
+            onFailure(
+                .processTerminated(
+                    lastURL: webView.url,
+                    document: currentDocument,
+                    reloadToken: currentReloadToken
+                )
+            )
         }
 
         func webView(
@@ -207,7 +244,7 @@ extension RhwpStudioWebView {
             didFailProvisionalNavigation navigation: WKNavigation!,
             withError error: Error
         ) {
-            handleNavigationError(error)
+            handleNavigationError(error, webView: webView)
         }
 
         func webView(
@@ -224,16 +261,17 @@ extension RhwpStudioWebView {
                 decisionHandler(.allow)
             } else {
                 decisionHandler(.cancel)
-                onError("허용되지 않은 rhwp-studio 탐색입니다: \(url.absoluteString)")
+                finishLoading()
+                onFailure(.blockedNavigation(to: url))
             }
         }
 
-        private func handleNavigationError(_ error: Error) {
+        private func handleNavigationError(_ error: Error, webView: WKWebView? = nil) {
             finishLoading()
             guard !isIgnorableNavigationError(error) else {
                 return
             }
-            onError(error.localizedDescription)
+            onFailure(.from(error: error, fallbackURL: webView?.url))
         }
 
         private func startLoadTimeout(_ loadID: Int, webView: WKWebView) {
@@ -247,9 +285,16 @@ extension RhwpStudioWebView {
                     return
                 }
 
-                let loadingURL = webView?.url?.absoluteString ?? "unknown URL"
+                let loadingURL = webView?.url
                 self.finishLoading()
-                self.onError("웹 viewer 로딩이 시간 초과되었습니다: \(loadingURL)")
+                self.onFailure(
+                    .timeout(
+                        loadingURL: loadingURL,
+                        document: self.currentDocument,
+                        reloadToken: self.currentReloadToken,
+                        timeoutSeconds: Int(Self.loadTimeoutNanoseconds / 1_000_000_000)
+                    )
+                )
             }
         }
 
@@ -311,9 +356,24 @@ extension RhwpStudioWebView {
                 pendingSaveDestination = nil
                 pendingPDFDestinationURL = nil
                 onError(body["message"] as? String)
+            case "runtime-error":
+                handleRuntimeError(body)
             default:
                 break
             }
+        }
+
+        private func handleRuntimeError(_ body: [String: Any]) {
+            finishLoading()
+            onFailure(
+                .runtime(
+                    message: body["message"] as? String,
+                    sourceURL: body["sourceURL"] as? String,
+                    line: intValue(body["line"]),
+                    column: intValue(body["column"]),
+                    reason: body["reason"] as? String
+                )
+            )
         }
 
         private func handleDroppedDocument(_ body: [String: Any]) {

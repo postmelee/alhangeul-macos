@@ -23,19 +23,35 @@ final class RhwpStudioResourceSchemeHandler: NSObject, WKURLSchemeHandler {
         guard let url = urlSchemeTask.request.url,
               RhwpStudioResourceRoute.isStudioResourceURL(url)
         else {
-            urlSchemeTask.didFailWithError(resourceError("Invalid rhwp-studio resource URL"))
+            urlSchemeTask.didFailWithError(
+                resourceError(
+                    "Invalid rhwp-studio resource URL",
+                    url: urlSchemeTask.request.url
+                )
+            )
             return
         }
 
         do {
-            let fileURL = try resolveResourceURL(for: url)
-            let data = try Data(contentsOf: fileURL)
+            let resource = try resolveResource(for: url)
+            let data: Data
+            do {
+                data = try Data(contentsOf: resource.fileURL)
+            } catch {
+                throw resourceError(
+                    "Cannot read rhwp-studio resource: \(resource.relativePath)",
+                    url: url,
+                    relativePath: resource.relativePath,
+                    resolvedFileURL: resource.fileURL,
+                    underlyingError: error
+                )
+            }
             let response = HTTPURLResponse(
                 url: url,
                 statusCode: 200,
                 httpVersion: "HTTP/1.1",
                 headerFields: [
-                    "Content-Type": contentType(for: fileURL),
+                    "Content-Type": contentType(for: resource.fileURL),
                     "Access-Control-Allow-Origin": "*",
                     "Cache-Control": "no-store"
                 ]
@@ -53,7 +69,12 @@ final class RhwpStudioResourceSchemeHandler: NSObject, WKURLSchemeHandler {
 
     func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {}
 
-    private func resolveResourceURL(for url: URL) throws -> URL {
+    private struct ResolvedResource {
+        let fileURL: URL
+        let relativePath: String
+    }
+
+    private func resolveResource(for url: URL) throws -> ResolvedResource {
         let directoryURL = try RhwpStudioResourceLocator.resourceDirectoryURL(bundle: bundle)
         let relativePath = normalizedRelativePath(from: url)
         let fileURL = directoryURL.appendingPathComponent(relativePath, isDirectory: false).standardizedFileURL
@@ -61,10 +82,15 @@ final class RhwpStudioResourceSchemeHandler: NSObject, WKURLSchemeHandler {
         guard RhwpStudioResourceLocator.isBundledResourceURL(fileURL, bundle: bundle),
               fileManager.fileExists(atPath: fileURL.path)
         else {
-            throw resourceError("Missing rhwp-studio resource: \(relativePath)")
+            throw resourceError(
+                "Missing rhwp-studio resource: \(relativePath)",
+                url: url,
+                relativePath: relativePath,
+                resolvedFileURL: fileURL
+            )
         }
 
-        return fileURL
+        return ResolvedResource(fileURL: fileURL, relativePath: relativePath)
     }
 
     private func normalizedRelativePath(from url: URL) -> String {
@@ -103,11 +129,37 @@ final class RhwpStudioResourceSchemeHandler: NSObject, WKURLSchemeHandler {
         }
     }
 
-    private func resourceError(_ message: String) -> NSError {
-        NSError(
-            domain: "com.postmelee.alhangeul.rhwp-studio.resource-scheme",
+    private func resourceError(
+        _ message: String,
+        url: URL? = nil,
+        relativePath: String? = nil,
+        resolvedFileURL: URL? = nil,
+        underlyingError: Error? = nil
+    ) -> NSError {
+        var userInfo: [String: Any] = [
+            NSLocalizedDescriptionKey: message
+        ]
+        if let url {
+            userInfo[NSURLErrorFailingURLErrorKey] = url
+            userInfo[NSURLErrorFailingURLStringErrorKey] = url.absoluteString
+        }
+        if let relativePath {
+            userInfo[RhwpStudioWebViewDiagnosticKeys.relativePath] = relativePath
+        }
+        if let resolvedFileURL {
+            userInfo[RhwpStudioWebViewDiagnosticKeys.resolvedFilePath] = resolvedFileURL.path
+        }
+        if let resourceDirectoryURL = try? RhwpStudioResourceLocator.resourceDirectoryURL(bundle: bundle) {
+            userInfo[RhwpStudioWebViewDiagnosticKeys.resourceDirectoryPath] = resourceDirectoryURL.path
+        }
+        if let underlyingError {
+            userInfo[NSUnderlyingErrorKey] = underlyingError
+        }
+
+        return NSError(
+            domain: RhwpStudioWebViewDiagnosticKeys.resourceSchemeErrorDomain,
             code: 1,
-            userInfo: [NSLocalizedDescriptionKey: message]
+            userInfo: userInfo
         )
     }
 }

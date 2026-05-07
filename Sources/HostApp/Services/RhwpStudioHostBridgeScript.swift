@@ -3,6 +3,81 @@ import Foundation
 enum RhwpStudioHostBridgeScript {
     static let messageHandlerName = "alhangeulHost"
 
+    static let runtimeErrorSource = """
+    (() => {
+      if (window.__alhangeulRuntimeErrorBridgeInstalled) {
+        return;
+      }
+      window.__alhangeulRuntimeErrorBridgeInstalled = true;
+
+      function postNative(message) {
+        window.webkit?.messageHandlers?.alhangeulHost?.postMessage(message);
+      }
+
+      function describeReason(reason) {
+        if (reason === null || reason === undefined) {
+          return "";
+        }
+        if (reason instanceof Error) {
+          return reason.stack || reason.message || String(reason);
+        }
+        if (typeof reason === "string") {
+          return reason;
+        }
+        try {
+          return JSON.stringify(reason) || String(reason);
+        } catch {
+          return String(reason);
+        }
+      }
+
+      function isBenignRuntimeIssue(sourceURL, reason) {
+        const source = sourceURL || "";
+        const detail = reason || "";
+        return source.includes("/registerSW.js") || detail.includes("/registerSW.js");
+      }
+
+      window.addEventListener("error", (event) => {
+        const message = event.message || event.error?.message;
+        if (!message && !event.error) {
+          return;
+        }
+
+        const sourceURL = event.filename || window.location.href;
+        const reason = event.error ? describeReason(event.error) : null;
+        if (isBenignRuntimeIssue(sourceURL, reason)) {
+          return;
+        }
+
+        postNative({
+          type: "runtime-error",
+          message: message || "JavaScript error",
+          sourceURL,
+          line: event.lineno || 0,
+          column: event.colno || 0,
+          reason
+        });
+      });
+
+      window.addEventListener("unhandledrejection", (event) => {
+        const reason = describeReason(event.reason);
+        const sourceURL = window.location.href;
+        if (isBenignRuntimeIssue(sourceURL, reason)) {
+          return;
+        }
+
+        postNative({
+          type: "runtime-error",
+          message: "Unhandled promise rejection",
+          sourceURL,
+          line: 0,
+          column: 0,
+          reason
+        });
+      });
+    })();
+    """
+
     static let source = """
     (() => {
       if (window.__alhangeulHostBridgeInstalled) {
