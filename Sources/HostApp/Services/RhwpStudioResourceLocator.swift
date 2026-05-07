@@ -194,6 +194,7 @@ enum RhwpStudioWebViewFailureCategory: String, Equatable {
     case resourcePreflight
     case resourceScheme
     case documentScheme
+    case documentLoad
     case navigation
     case processTerminated
     case timeout
@@ -207,6 +208,8 @@ enum RhwpStudioWebViewFailureCategory: String, Equatable {
             return "웹 viewer 자산을 읽을 수 없습니다"
         case .documentScheme:
             return "문서 데이터를 viewer에 전달할 수 없습니다"
+        case .documentLoad:
+            return "문서를 열 수 없습니다"
         case .navigation:
             return "웹 viewer 탐색에 실패했습니다"
         case .processTerminated:
@@ -226,6 +229,8 @@ enum RhwpStudioWebViewFailureCategory: String, Equatable {
             return "viewer asset 요청을 처리하지 못했습니다."
         case .documentScheme:
             return "현재 문서 데이터를 WKWebView viewer에 전달하지 못했습니다."
+        case .documentLoad:
+            return "HWP/HWPX 형식이 아니거나 파일이 손상되어 문서를 표시할 수 없습니다."
         case .navigation:
             return "WKWebView가 viewer 진입 URL 또는 내부 탐색을 완료하지 못했습니다."
         case .processTerminated:
@@ -356,6 +361,28 @@ struct RhwpStudioWebViewFailure: Error, Identifiable, Equatable {
 
         return RhwpStudioWebViewFailure(
             category: .runtime,
+            diagnosticDetail: lines.joined(separator: "\n")
+        )
+    }
+
+    static func documentLoadError(
+        message: String?,
+        document: RhwpStudioDocumentPayload?,
+        reloadToken: Int
+    ) -> RhwpStudioWebViewFailure {
+        var lines = labeledLines([
+            ("message", message)
+        ])
+        lines.append(
+            contentsOf: loadDiagnosticDetail(
+                lastURL: nil,
+                document: document,
+                reloadToken: reloadToken
+            ).components(separatedBy: "\n")
+        )
+
+        return RhwpStudioWebViewFailure(
+            category: .documentLoad,
             diagnosticDetail: lines.joined(separator: "\n")
         )
     }

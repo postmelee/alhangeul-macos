@@ -93,6 +93,9 @@ enum RhwpStudioHostBridgeScript {
 
       const statusMessageRestoreDelayMs = 3000;
       let statusMessageRestoreTimer = null;
+      let documentLoadErrorPrefix = "파일 로드 실패:";
+      let documentLoadErrorObserverFlag = "alhangeulDocumentLoadErrorObserverInstalled";
+      let lastDocumentLoadErrorKey = "alhangeulLastDocumentLoadError";
 
       function statusMessageElement() {
         return document.getElementById("sb-message");
@@ -161,6 +164,40 @@ enum RhwpStudioHostBridgeScript {
         }, durationMs);
 
         return true;
+      }
+
+      function reportDocumentLoadErrorIfNeeded() {
+        const element = statusMessageElement();
+        const message = element?.textContent || "";
+        if (!message.startsWith(documentLoadErrorPrefix)) {
+          return;
+        }
+        if (element.dataset[lastDocumentLoadErrorKey] === message) {
+          return;
+        }
+
+        element.dataset[lastDocumentLoadErrorKey] = message;
+        postNative({
+          type: "document-load-error",
+          message,
+          fileName: currentFileName()
+        });
+      }
+
+      function installDocumentLoadErrorObserver() {
+        const element = statusMessageElement();
+        if (!element || element.dataset[documentLoadErrorObserverFlag] === "true") {
+          return;
+        }
+
+        element.dataset[documentLoadErrorObserverFlag] = "true";
+        const observer = new MutationObserver(reportDocumentLoadErrorIfNeeded);
+        observer.observe(element, {
+          childList: true,
+          characterData: true,
+          subtree: true
+        });
+        reportDocumentLoadErrorIfNeeded();
       }
 
       function requestRhwp(method, params = {}, timeoutMs = 15000) {
@@ -493,9 +530,11 @@ enum RhwpStudioHostBridgeScript {
       };
 
       refreshHostOverrides();
+      installDocumentLoadErrorObserver();
 
       const nativeCommandObserver = new MutationObserver(() => {
         refreshHostOverrides();
+        installDocumentLoadErrorObserver();
       });
       nativeCommandObserver.observe(document.documentElement, {
         childList: true,
