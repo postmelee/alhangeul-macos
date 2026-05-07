@@ -31,28 +31,45 @@ enum RhwpStudioHostBridgeScript {
         }
       }
 
+      function isBenignRuntimeIssue(sourceURL, reason) {
+        const source = sourceURL || "";
+        const detail = reason || "";
+        return source.includes("/registerSW.js") || detail.includes("/registerSW.js");
+      }
+
       window.addEventListener("error", (event) => {
         const message = event.message || event.error?.message;
         if (!message && !event.error) {
           return;
         }
 
+        const sourceURL = event.filename || window.location.href;
+        const reason = event.error ? describeReason(event.error) : null;
+        if (isBenignRuntimeIssue(sourceURL, reason)) {
+          return;
+        }
+
         postNative({
           type: "runtime-error",
           message: message || "JavaScript error",
-          sourceURL: event.filename || window.location.href,
+          sourceURL,
           line: event.lineno || 0,
           column: event.colno || 0,
-          reason: event.error ? describeReason(event.error) : null
+          reason
         });
       });
 
       window.addEventListener("unhandledrejection", (event) => {
         const reason = describeReason(event.reason);
+        const sourceURL = window.location.href;
+        if (isBenignRuntimeIssue(sourceURL, reason)) {
+          return;
+        }
+
         postNative({
           type: "runtime-error",
           message: "Unhandled promise rejection",
-          sourceURL: window.location.href,
+          sourceURL,
           line: 0,
           column: 0,
           reason
