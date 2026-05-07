@@ -9,8 +9,10 @@ final class DocumentViewerStore: ObservableObject {
     @Published var errorMessage: String?
     @Published var isLoading = false
     @Published var webViewErrorMessage: String?
+    @Published var webViewFailure: RhwpStudioWebViewFailure?
     @Published var isWebViewLoading = false
     @Published private(set) var documentRevision: Int = 0
+    @Published private(set) var webViewReloadToken: Int = 0
 
     var hasDocument: Bool {
         rhwpStudioDocument != nil
@@ -18,6 +20,10 @@ final class DocumentViewerStore: ObservableObject {
 
     var canRevealInFinder: Bool {
         sourceDocument != nil
+    }
+
+    var canRunWebViewCommands: Bool {
+        hasDocument && !isWebViewLoading && webViewFailure == nil
     }
 
     func openDocument() {
@@ -31,6 +37,7 @@ final class DocumentViewerStore: ObservableObject {
         isLoading = true
         errorMessage = nil
         webViewErrorMessage = nil
+        webViewFailure = nil
         isWebViewLoading = false
 
         let didStartSecurityScope = url.startAccessingSecurityScopedResource()
@@ -62,6 +69,7 @@ final class DocumentViewerStore: ObservableObject {
         isLoading = true
         errorMessage = nil
         webViewErrorMessage = nil
+        webViewFailure = nil
         isWebViewLoading = false
 
         do {
@@ -123,6 +131,21 @@ final class DocumentViewerStore: ObservableObject {
         webViewErrorMessage = message
     }
 
+    func setWebViewFailure(_ failure: RhwpStudioWebViewFailure?) {
+        webViewFailure = failure
+        if failure != nil {
+            webViewErrorMessage = nil
+            isWebViewLoading = false
+        }
+    }
+
+    func retryWebViewLoad() {
+        webViewFailure = nil
+        webViewErrorMessage = nil
+        isWebViewLoading = false
+        webViewReloadToken += 1
+    }
+
     private func loadDocument(
         data: Data,
         filename: String,
@@ -141,6 +164,7 @@ final class DocumentViewerStore: ObservableObject {
             revision: documentRevision
         )
         webViewErrorMessage = nil
+        webViewFailure = nil
         isWebViewLoading = false
 
         if let sourceDocument {

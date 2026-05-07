@@ -375,7 +375,7 @@ private final class DocumentWindowToolbarController: NSObject, NSToolbarDelegate
     func validateToolbarItem(_ item: NSToolbarItem) -> Bool {
         switch item.itemIdentifier {
         case ItemID.share, ItemID.exportPDF:
-            return store.hasDocument && !store.isWebViewLoading
+            return store.canRunWebViewCommands
         case ItemID.reveal:
             return store.canRevealInFinder
         case ItemID.recent:

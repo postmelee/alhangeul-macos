@@ -16,7 +16,7 @@ struct ContentView: View {
                                     .allowsHitTesting(false)
                             )
                     }
-                    .disabled(!store.hasDocument || store.isWebViewLoading)
+                    .disabled(!store.canRunWebViewCommands)
                     .help("공유")
 
                     Button {
@@ -32,7 +32,7 @@ struct ContentView: View {
                     } label: {
                         Label("PDF로 내보내기", systemImage: "doc.richtext")
                     }
-                    .disabled(!store.hasDocument || store.isWebViewLoading)
+                    .disabled(!store.canRunWebViewCommands)
                     .help("PDF로 내보내기")
 
                     RecentDocumentsMenu(store: store)
