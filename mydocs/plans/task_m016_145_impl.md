@@ -214,7 +214,7 @@ test -f build.noindex/release/alhangeul-macos-0.1.0.zip
 shasum -a 256 build.noindex/release/alhangeul-macos-0.1.0.zip
 test -f build.noindex/release/Alhangeul.app/Contents/Resources/rhwp-studio/index.html
 test -f build.noindex/release/Alhangeul.app/Contents/Resources/rhwp-studio/assets/rhwp_bg-BZNodj2e.wasm
-test -d build.noindex/release/Alhangeul.app/Contents/PlugIns/AlhangeulQuickLook.appex
+test -d build.noindex/release/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex
 test -d build.noindex/release/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex
 plutil -extract CFBundleIdentifier raw -o - build.noindex/release/Alhangeul.app/Contents/Info.plist
 plutil -extract CFBundleShortVersionString raw -o - build.noindex/release/Alhangeul.app/Contents/Info.plist
