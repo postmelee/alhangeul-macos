@@ -20,8 +20,8 @@
 - public 사용자 배포 기준은 signed/notarized DMG로 둔다.
 - `scripts/package-release.sh` zip은 설치본 smoke와 개발 검증용 Release package로 분리한다.
 - `scripts/release.sh --skip-notarize` rehearsal DMG는 layout/checksum rehearsal로만 사용하고 public release, Homebrew Cask, GitHub Release asset 기준으로 쓰지 않는다.
-- 이번 작업에서는 `rhwp-core.lock`의 `v0.7.9` pin, Rust bridge ABI, generated framework/header를 변경하지 않는다.
-- 현재 publish workflow 기본 `expected_rhwp_tag: v0.7.10`과 current lock `v0.7.9`의 충돌은 문서와 보고서에 명확히 기록한다. 실제 core update는 별도 이슈로 분리한다.
+- 이번 작업에서는 #167이 갱신한 `rhwp-core.lock`의 `v0.7.10` pin, Rust bridge ABI, generated framework/header를 변경하지 않는다.
+- 현재 publish workflow 기본 `expected_rhwp_tag: v0.7.10`과 current lock `v0.7.10`은 일치한다. Stage 1-2의 `v0.7.9` 불일치 판단은 #167 merge 이전 이력으로 보존하고, Stage 3 이후 기준 문서에는 현재 정합 상태를 반영한다.
 - release note와 checksum 공개 항목은 실제 public DMG digest를 기준으로 한다. zip checksum은 smoke/rehearsal 보고용으로만 취급한다.
 - signing/notarization credential, Git tag, GitHub Release 생성, Homebrew Cask checksum 교체는 작업지시자 별도 지시 없이는 수행하지 않는다.
 - 문서 변경은 한국어로 작성하고, 공개 README에는 운영 절차 전체를 중복하지 않는다.
@@ -40,7 +40,7 @@
 - `rhwp-core.lock`의 repository/ref kind/tag/commit/artifact hash/size를 확인한다.
 - `Sources/HostApp/Resources/rhwp-studio/manifest.json`의 tag/commit/entrypoint hash를 확인한다.
 - `rhwp-ffi-symbols.txt`의 current ABI symbol snapshot을 확인한다.
-- publish workflow 기본 `expected_rhwp_tag`, `require_latest_rhwp`와 current lock의 차이를 기록한다.
+- publish workflow 기본 `expected_rhwp_tag`, `require_latest_rhwp`와 current lock의 정합성을 기록한다.
 - 필요하면 `gh release view -R edwardkim/rhwp --json tagName`으로 upstream latest release를 확인하되, 네트워크 실패 시 latest 확인 실패를 별도 리스크로 기록한다.
 - Stage 1 보고서에 inventory 표와 Stage 2 설계 입력을 남긴다.
 
@@ -68,7 +68,7 @@ git diff --check
 ### 완료 기준
 
 - artifact 생성 경로별 파일명, 산출 위치, checksum 처리, 사용 범위가 보고서에 정리된다.
-- current lock/studio provenance와 release workflow 기대값 차이가 분리된다.
+- current lock/studio provenance와 release workflow 기대값 정합성이 분리된다.
 - Stage 2에서 설계할 항목과 Stage 3에서 수정할 후보 파일이 확정된다.
 
 ### 커밋 메시지
@@ -102,7 +102,7 @@ Task #145 Stage 1: release artifact inventory 정리
   - smoke/known limitations 후속 보고서 연결
 - checksum 공개 기준을 public DMG `.sha256` 파일과 GitHub Release note의 digest로 분리한다.
 - `package-release` zip checksum은 Stage 보고서나 smoke report용으로만 남길지 결정한다.
-- workflow 기본값과 current lock 불일치를 문서로 남길지, workflow default를 current artifact 기준으로 조정할지 판단한다.
+- workflow 기본값과 current lock 정합성을 문서에 남기고, workflow default 조정이 필요한지 판단한다.
 - Stage 2 보고서에 Stage 3 실제 변경안을 남긴다.
 
 ### 예상 변경 파일
@@ -142,7 +142,7 @@ Task #145 Stage 2: artifact 공개 항목 설계
 - `mydocs/manual/release_distribution_guide.md`의 artifact 종류, checksum, provenance, release note 기준을 보강한다.
 - 필요 시 `scripts/ci/write-release-notes.sh`가 `rhwp-core.lock` 외에 `rhwp-studio` manifest/third-party notice/known limitations 연결을 포함하도록 보강한다.
 - 필요 시 `.github/workflows/release-rehearsal.yml` summary에 rehearsal artifact의 비공개/비공증 성격과 core provenance를 더 명확히 남긴다.
-- 필요 시 `.github/workflows/release-publish.yml`의 기본 `expected_rhwp_tag` 또는 summary 문구를 current artifact 기준과 충돌하지 않게 조정한다. 단, core pin 자체는 변경하지 않는다.
+- 필요 시 `.github/workflows/release-publish.yml` summary 문구를 current artifact 기준과 충돌하지 않게 조정한다. 단, core pin 자체는 변경하지 않는다.
 - 필요 시 `scripts/package-release.sh`나 `scripts/release.sh`의 출력 문구 또는 checksum 파일 처리만 최소 보강한다.
 - README는 public 사용자가 provenance 위치를 찾기 어렵다고 판단될 때만 짧은 진입점 문구를 추가한다.
 - Stage 3 보고서에 변경 파일, 변경하지 않은 파일, public release 전 남은 조건을 기록한다.
@@ -174,7 +174,7 @@ git diff --check
 
 - public DMG, rehearsal DMG, zip의 책임 경계가 운영 문서 또는 script/workflow 출력과 일치한다.
 - release note skeleton이 checksum과 provenance 공개 항목을 포함한다.
-- current lock과 publish workflow 기대값 차이가 숨겨지지 않고 명확히 처리된다.
+- current lock과 publish workflow 기대값 정합성이 숨겨지지 않고 명확히 처리된다.
 
 ### 커밋 메시지
 
@@ -213,7 +213,7 @@ test -d build.noindex/release/Alhangeul.app
 test -f build.noindex/release/alhangeul-macos-0.1.0.zip
 shasum -a 256 build.noindex/release/alhangeul-macos-0.1.0.zip
 test -f build.noindex/release/Alhangeul.app/Contents/Resources/rhwp-studio/index.html
-test -f build.noindex/release/Alhangeul.app/Contents/Resources/rhwp-studio/assets/rhwp_bg-DtQ01XFR.wasm
+test -f build.noindex/release/Alhangeul.app/Contents/Resources/rhwp-studio/assets/rhwp_bg-BZNodj2e.wasm
 test -d build.noindex/release/Alhangeul.app/Contents/PlugIns/AlhangeulQuickLook.appex
 test -d build.noindex/release/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex
 plutil -extract CFBundleIdentifier raw -o - build.noindex/release/Alhangeul.app/Contents/Info.plist
@@ -258,7 +258,7 @@ Task #145 Stage 4: release artifact 리허설 검증
   - #149 손상/대용량 opening fallback
   - #151 설치본 smoke gate
   - #146 렌더 경로 한계 문서화
-  - core `v0.7.10` 갱신 또는 publish workflow 입력 조정 판단
+  - current `v0.7.10` 기준이 release 시점에도 upstream latest인지 확인
 - `mydocs/orders/20260506.md`의 #145 상태를 완료로 갱신한다.
 - PR 게시 전 working tree 상태와 최종 검증을 확인한다.
 
