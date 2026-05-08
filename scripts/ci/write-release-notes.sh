@@ -79,8 +79,17 @@ cat > "$OUTPUT_FILE" <<EOF
 - \`$THIRD_PARTY_NOTICES\`
 - \`$FONT_NOTICES\`
 
+## 렌더링 경로와 알려진 제한 사항
+
+- 앱 viewer/editor 화면은 bundled \`rhwp-studio\`를 WKWebView에서 실행합니다.
+- PDF 내보내기, Quick Look preview, Finder thumbnail은 Rust bridge와 Swift native renderer 계열 경로를 사용하므로 앱 화면과 표시가 다를 수 있습니다.
+- 인쇄는 \`rhwp-studio\` page payload를 별도 WKWebView/PDFKit/AppKit 출력 경로로 처리합니다.
+- Quick Look/Thumbnail smoke 통과는 extension 등록과 기본 렌더 성공 확인이며, 모든 문서가 앱 화면과 같은 시각 결과로 보인다는 보장은 아닙니다.
+- 손상·대용량·미지원 문서 fallback은 복구가 아니라 앱과 extension이 raw error, hang, crash로 끝나지 않게 하는 안전장치입니다.
+- native renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity 개선은 v0.5 이후 Swift native viewer 범위에서 계속 다룹니다.
+
 ## 검증
 
 - 이 DMG는 release publish workflow에서 서명, 공증, staple, Gatekeeper assessment, checksum 검증을 통과한 산출물입니다.
-- 상세 smoke test 결과와 알려진 제한 사항은 해당 릴리스의 최종 보고서를 기준으로 확인합니다.
+- 상세 smoke test 결과, preview 수동 확인 여부, 알려진 제한 사항은 해당 릴리스의 최종 보고서를 기준으로 확인합니다.
 EOF
