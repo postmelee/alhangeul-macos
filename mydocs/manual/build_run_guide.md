@@ -255,6 +255,32 @@ mv "$WASM_ASSET" "$WASM_ASSET.missing"
 
 기대 결과는 문서 영역의 `웹 viewer 자산을 찾을 수 없습니다` fallback이다. 진단 정보에는 `assetPattern=assets/rhwp_bg-*.wasm`, `count=0`, 훼손한 복사본의 `directoryPath`가 보여야 한다. 다시 시도 recovery를 확인하려면 같은 복사본에서 `.missing` 파일명을 원래대로 되돌린 뒤 fallback의 `다시 시도`를 누른다.
 
+## 손상/대용량 문서 opening fallback smoke test
+
+문서 입력 fallback 경로를 바꾼 경우에는 사용자 원본 파일을 수정하지 않고 `build.noindex/` 아래 synthetic 파일만 사용한다. HostApp의 파일 열기 fallback은 Debug app으로 smoke할 수 있다.
+
+```bash
+mkdir -p build.noindex/task149-negative /tmp/alhangeul-ql
+printf '' > build.noindex/task149-negative/empty.hwp
+printf 'not hwp' > build.noindex/task149-negative/corrupt.hwp
+mkfile 51m build.noindex/task149-negative/large.hwp
+/usr/bin/open -n -a "$PWD/build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app" "$PWD/build.noindex/task149-negative/empty.hwp"
+/usr/bin/open -a "$PWD/build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app" "$PWD/build.noindex/task149-negative/corrupt.hwp"
+pgrep -x Alhangeul
+```
+
+기대 결과는 앱 프로세스와 창이 유지되고, 빈 문서와 손상/미지원 문서에 대해 사용자 문구가 표시되는 것이다. HostApp에는 50 MB hard block을 두지 않는다. 50 MB 제한은 Quick Look preview와 Finder thumbnail fallback 정책이다.
+
+Quick Look/Thumbnail smoke는 현재 시스템에 등록된 extension 산출물 기준으로 동작한다. Debug build는 compile/link 검증에는 유효하지만 Finder/Quick Look 등록 검증의 진실 원천으로 쓰지 않는다. 설치본 기준 검증에서는 표준 smoke test 흐름으로 signed/sealed package를 `$HOME/Applications/Alhangeul.app`에 설치한 뒤 다음을 실행한다.
+
+```bash
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql build.noindex/task149-negative/corrupt.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql build.noindex/task149-negative/large.hwp
+```
+
+기대 결과는 정상 sample, 50 MB 초과 파일, 손상/미지원 입력에서 모두 thumbnail이 생성되는 것이다. 손상/미지원 입력은 원본 render 결과가 아니라 fallback tile이어야 한다. 설치본 smoke에서 빈/손상 synthetic 파일이 thumbnail을 만들지 못하면 extension 등록 대상, Quick Look cache, content type routing, fallback classifier 순서로 분리한다.
+
 ### 표준 smoke test 흐름
 
 Finder 통합은 signed/sealed된 단일 설치본 기준으로 확인한다. 반복 삭제/재설치를 피하기 위해 표준 경로는 `$HOME/Applications/Alhangeul.app` 하나만 사용한다.
