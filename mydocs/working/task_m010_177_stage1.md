@@ -73,10 +73,12 @@ Sparkle 2 기반 업데이트 확인과 GitHub Pages appcast 준비를 구현하
 
 - 최신 release asset 직접 다운로드 URL은 `/releases/latest/download/{asset-name}` 형식이 지원된다.
 - GitHub의 latest release는 non-prerelease, non-draft release 기준이다.
-- 현재 `.github/workflows/release-publish.yml` 기본값은 `draft=true`, `prerelease=true`이므로, v0.1을 기본값 그대로 게시하면 `releases/latest/download/...`가 첫 배포 DMG를 가리키지 않을 수 있다.
-- 따라서 첫 v0.1 다운로드 버튼과 Sparkle appcast enclosure는 tag 고정 URL을 사용한다.
+- 현재 `.github/workflows/release-publish.yml` 기본값은 `draft=true`, `prerelease=true`이므로, v0.1을 공식 release로 배포하려면 #166에서 `prerelease=false`로 override해야 한다.
+- Pages 다운로드 버튼은 공식 release publish 후 `/releases/latest/download/{asset-name}` 형식을 사용할 수 있다.
+- Sparkle appcast enclosure는 특정 버전 검증 재현성을 위해 tag 고정 URL을 사용한다.
 
 ```text
+https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.1.0.dmg
 https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.0/alhangeul-macos-0.1.0.dmg
 ```
 
@@ -115,7 +117,7 @@ draft=true
 prerelease=true
 ```
 
-이 기본값 때문에 `latest/download` 대신 tag 고정 URL을 v0.1 기준으로 선택한다.
+Stage 1 후속 결정으로 v0.1은 prerelease가 아닌 공식 release로 게시한다. 따라서 #166에서는 workflow 기본값을 그대로 쓰지 않고 `prerelease=false`를 명시하며, draft 검수 후 non-draft release로 publish해야 한다. Pages 다운로드 버튼은 `latest/download`를 사용하고, Sparkle appcast enclosure만 tag 고정 URL을 사용한다.
 
 ### HostApp 설정
 
@@ -155,7 +157,7 @@ Stage 2에서는 XcodeGen `packages`에 Sparkle `exactVersion: 2.9.1`을 우선 
 https://postmelee.github.io/alhangeul-macos/appcast.xml
 ```
 
-`appcast-prerelease.xml`은 Stage 3에서 skeleton을 만들 수 있지만, v0.1 앱 기본 feed로 사용하지 않는다. 별도 beta channel UI가 없으므로 첫 배포 앱이 prerelease feed를 직접 바라보게 만들지 않는다.
+별도 beta channel UI가 없으므로 이번 범위에서는 `appcast-prerelease.xml`을 만들지 않는다. 첫 배포 앱은 stable feed만 바라본다.
 
 ### 2. appcast item URL
 
@@ -172,18 +174,27 @@ https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.0/alhangeul-
 Stage 3에서 header 다운로드 버튼을 GitHub Release 목록이 아니라 DMG 직접 다운로드 URL로 변경한다.
 
 ```text
-https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.0/alhangeul-macos-0.1.0.dmg
+https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.1.0.dmg
 ```
 
 FAQ에는 다음 기준을 반영한다.
 
 - 다운로드 버튼은 DMG 직접 다운로드로 연결된다.
-- 릴리스 전에는 파일이 아직 없을 수 있다.
+- 공식 release publish 전에는 파일이 아직 없을 수 있다.
 - 문제가 있으면 GitHub Releases 목록에서 수동으로 확인할 수 있다.
 
-`/releases/latest/download/...`는 v0.1을 full release로 게시하기로 결정될 때만 재검토한다.
+`/releases/latest/download/...`가 안정적으로 동작하려면 #166에서 v0.1을 non-prerelease, non-draft 공식 release로 publish해야 한다.
 
-### 4. Sparkle dependency
+### 4. #166 공식 release 기준
+
+#166에는 다음 release 실행 기준을 반영한다.
+
+- `Release Publish DMG` workflow 실행 시 `prerelease=false`를 명시한다.
+- `draft=true`는 검수 단계로 유지할 수 있지만, 완료 기준은 non-draft 공식 release publish다.
+- release publish 후 `https://github.com/postmelee/alhangeul-macos/releases/latest`가 `v0.1.0`을 가리키는지 확인한다.
+- Pages 다운로드 버튼이 사용하는 `https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.1.0.dmg`가 실제 DMG를 내려주는지 확인한다.
+
+### 5. Sparkle dependency
 
 Stage 2에서 XcodeGen 설정은 다음 형태를 후보로 둔다.
 
@@ -205,7 +216,7 @@ dependencies:
 
 XcodeGen 문서상 Swift Package는 top-level `packages`에 정의하고 target dependency에서 `package`/`product`로 참조한다.
 
-### 5. HostApp updater 구조
+### 6. HostApp updater 구조
 
 Stage 2에서는 새 service를 추가한다.
 
@@ -221,7 +232,7 @@ Sources/HostApp/Services/UpdateController.swift
 
 기존 `HostAppCommands`에 “업데이트 확인...” 항목을 추가한다.
 
-### 6. Sparkle key 운영
+### 7. Sparkle key 운영
 
 `SUPublicEDKey`는 앱에 들어가야 하므로 Stage 2 전에 실제 public key가 필요하다.
 
@@ -292,7 +303,7 @@ gh release view --repo sparkle-project/Sparkle --json tagName,name,publishedAt,u
 - Stage 2는 Sparkle package fetch가 필요하므로 네트워크 또는 Xcode package resolution 실패 가능성이 있다.
 - Sparkle public key가 없으면 Stage 2에서 올바른 `SUPublicEDKey`를 넣을 수 없다.
 - `CODE_SIGNING_ALLOWED=NO` Debug build는 Sparkle install flow를 실제로 검증하지 못한다. Stage 2에서는 compile/config 검증까지 수행하고, public signed/notarized install update 검증은 #166 또는 후속 release smoke에서 분리한다.
-- v0.1 release가 full release로 바뀌면 Pages 다운로드 버튼을 `releases/latest/download/...`로 바꿀 수 있지만, 현재 workflow 기본값은 prerelease라 tag 고정 URL이 더 안전하다.
+- v0.1 공식 release 기준으로 Pages 다운로드 버튼은 `releases/latest/download/...`를 사용한다. #166에서 `prerelease=false`와 non-draft publish 검증을 누락하면 이 URL이 의도한 DMG를 가리키지 않을 수 있다.
 
 ## 다음 단계 승인 요청
 
