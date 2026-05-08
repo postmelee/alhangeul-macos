@@ -22,6 +22,30 @@ Stage 1에서 보강한 두 번째 섹션을 로컬 정적 서버와 Browser/IAB
 
 ## 검증 결과
 
+### 추가 요청 반영: 첫 화면 MacBook 섹션과 같은 높이
+
+작업지시자의 추가 요청에 따라 두 번째 섹션도 첫 진입 MacBook 목업 섹션과 같은 높이 모델을 사용하도록 보정했다.
+
+- `.app-intro-section` 높이를 `calc(100svh - var(--header-height))`로 맞추고, 최소 높이는 첫 섹션과 같은 `var(--intro-min-height)`를 사용하게 했다.
+- 큰 화면에서 한 viewport 안에 `알한글` 제목, 리드 문구, 철학 설명, 스크린샷, 기능 요약 4개가 모두 들어오도록 padding/gap을 줄였다.
+- 스크린샷은 `fit-content` 컨테이너와 `max-height: min(58svh, 660px)`로 제어해, 넓은 화면에서는 크게 보이되 viewport 밖으로 밀리지 않게 했다.
+- 960px 이하 화면에서는 기존처럼 `height: auto`와 `overflow: visible`로 되돌려 모바일 스크롤 흐름을 유지했다.
+
+Browser/IAB 현재 viewport에서도 두 번째 섹션의 모든 주요 요소가 한 화면에 표시되는 것을 확인했다.
+
+```json
+{
+  "introVisible": {
+    "title": true,
+    "lead": true,
+    "principle": true,
+    "shot": true,
+    "capabilities": true
+  },
+  "logs": []
+}
+```
+
 ### 페이지 로드와 콘솔
 
 Browser/IAB에서 다음 값을 확인했다.
