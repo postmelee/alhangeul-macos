@@ -5,6 +5,7 @@ VERSION="0.1.0"
 SKIP_PACKAGE=0
 APP_PATH=""
 OUTPUT_ROOT="/tmp/alhangeul-ql"
+UNREGISTER_LEGACY=0
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ORIGINAL_CWD="$(pwd)"
@@ -32,10 +33,16 @@ Options:
                          Default: samples/basic/KTX.hwp
   --sample-hwpx PATH     HWPX sample for thumbnail smoke.
                          Default: samples/hwpx/hwpx-01.hwpx
+  --unregister-legacy-candidates
+                         Unregister RhwpMac/AlhangeulMac/알한글 app and
+                         appex candidates from LaunchServices/PlugInKit
+                         before thumbnail smoke. This does not delete files.
   -h, --help             Show this help.
 
 This smoke installs the app to $HOME/Applications/Alhangeul.app and only
-replaces that exact path. Legacy app names are reported but not removed.
+replaces that exact path. Legacy app names are never deleted. By default,
+legacy candidates fail the gate because they can make qlmanage use an older
+provider and create a false positive.
 USAGE
 }
 
@@ -100,10 +107,12 @@ collect_diagnostics() {
     "$LSREGISTER" -dump 2>/dev/null \
       | grep -E "$OLD_INSTALL_PATTERN" >> "$DIAG_DIR/old-install-candidates.txt"
   fi
+  list_legacy_app_paths > "$DIAG_DIR/old-install-apps.txt"
+  list_legacy_plugin_paths > "$DIAG_DIR/old-install-plugins.txt"
 
   if command -v log >/dev/null 2>&1; then
     log show --style compact --last 10m \
-      --predicate 'process == "quicklookd" OR process == "QuickLookUIService" OR eventMessage CONTAINS "com.postmelee.alhangeul"' \
+      --predicate 'process == "quicklookd" OR process == "QuickLookUIService" OR process == "AlhangeulPreview" OR process == "AlhangeulThumbnail" OR eventMessage CONTAINS "com.postmelee.alhangeul."' \
       > "$DIAG_DIR/quicklook-last10m.log" 2>&1
   fi
   set -e
@@ -206,6 +215,10 @@ parse_args() {
         SAMPLE_HWPX="$(abs_path "$2")"
         shift 2
         ;;
+      --unregister-legacy-candidates)
+        UNREGISTER_LEGACY=1
+        shift
+        ;;
       -h|--help)
         usage
         exit 0
@@ -298,22 +311,76 @@ install_and_register() {
   pluginkit -a "$INSTALL_APP" || fail 20 "pluginkit add failed for $INSTALL_APP"
 }
 
-warn_old_install_candidates() {
-  set +e
+list_legacy_app_paths() {
+  {
+    if command -v mdfind >/dev/null 2>&1; then
+      mdfind "kMDItemContentType == 'com.apple.application-bundle'" || true
+    fi
+    if [ -n "${LSREGISTER:-}" ] && [ -x "$LSREGISTER" ]; then
+      "$LSREGISTER" -dump 2>/dev/null || true
+    fi
+  } | awk 'match($0, /\/[^"]*(RhwpMac|AlhangeulMac|알한글)\.app/) { print substr($0, RSTART, RLENGTH) }' \
+    | sort -u
+}
+
+list_legacy_plugin_paths() {
+  {
+    if [ -n "${LSREGISTER:-}" ] && [ -x "$LSREGISTER" ]; then
+      "$LSREGISTER" -dump 2>/dev/null || true
+    fi
+    list_legacy_app_paths | while IFS= read -r legacy_app; do
+      if [ -d "$legacy_app/Contents/PlugIns" ]; then
+        find "$legacy_app/Contents/PlugIns" -maxdepth 1 -type d -name "*.appex" 2>/dev/null || true
+      fi
+    done
+  } | awk 'match($0, /\/[^"]*(RhwpMac|AlhangeulMac|알한글)\.app\/Contents\/PlugIns\/[^" )]+\.appex/) { print substr($0, RSTART, RLENGTH) }' \
+    | sort -u
+}
+
+write_legacy_diagnostics() {
   : > "$DIAG_DIR/old-install-candidates.txt"
   if command -v mdfind >/dev/null 2>&1; then
     mdfind "kMDItemContentType == 'com.apple.application-bundle'" \
-      | grep -E "$OLD_INSTALL_PATTERN" >> "$DIAG_DIR/old-install-candidates.txt"
+      | grep -E "$OLD_INSTALL_PATTERN" >> "$DIAG_DIR/old-install-candidates.txt" || true
   fi
   if [ -n "${LSREGISTER:-}" ] && [ -x "$LSREGISTER" ]; then
     "$LSREGISTER" -dump 2>/dev/null \
-      | grep -E "$OLD_INSTALL_PATTERN" >> "$DIAG_DIR/old-install-candidates.txt"
+      | grep -E "$OLD_INSTALL_PATTERN" >> "$DIAG_DIR/old-install-candidates.txt" || true
   fi
-  set -e
+  list_legacy_app_paths > "$DIAG_DIR/old-install-apps.txt"
+  list_legacy_plugin_paths > "$DIAG_DIR/old-install-plugins.txt"
+}
 
-  if [ -s "$DIAG_DIR/old-install-candidates.txt" ]; then
-    echo "WARNING: legacy app install candidates were found. They were not removed." >&2
-    echo "See: $DIAG_DIR/old-install-candidates.txt" >&2
+handle_legacy_install_candidates() {
+  write_legacy_diagnostics
+
+  if [ ! -s "$DIAG_DIR/old-install-apps.txt" ] && [ ! -s "$DIAG_DIR/old-install-plugins.txt" ]; then
+    return 0
+  fi
+
+  if [ "$UNREGISTER_LEGACY" -eq 0 ]; then
+    echo "ERROR: legacy app install candidates were found." >&2
+    echo "They were not removed. See: $DIAG_DIR/old-install-candidates.txt" >&2
+    fail 30 "legacy candidates can make qlmanage use an older Quick Look provider; rerun with --unregister-legacy-candidates after approval"
+  fi
+
+  echo "WARNING: unregistering legacy app install candidates for smoke isolation." >&2
+  echo "Files are not deleted. See: $DIAG_DIR/old-install-candidates.txt" >&2
+
+  : > "$DIAG_DIR/unregister-legacy.log"
+  while IFS= read -r legacy_plugin; do
+    [ -n "$legacy_plugin" ] || continue
+    pluginkit -r "$legacy_plugin" >> "$DIAG_DIR/unregister-legacy.log" 2>&1 || true
+  done < "$DIAG_DIR/old-install-plugins.txt"
+
+  while IFS= read -r legacy_app; do
+    [ -n "$legacy_app" ] || continue
+    "$LSREGISTER" -u "$legacy_app" >> "$DIAG_DIR/unregister-legacy.log" 2>&1 || true
+  done < "$DIAG_DIR/old-install-apps.txt"
+
+  pluginkit -mAvvv > "$DIAG_DIR/pluginkit.txt" 2>&1 || true
+  if grep -E "com\.postmelee\.alhangeulmac\.(QLExtension|ThumbnailExtension)" "$DIAG_DIR/pluginkit.txt" >/dev/null 2>&1; then
+    fail 30 "legacy Quick Look extensions are still registered after unregister attempt"
   fi
 }
 
@@ -362,13 +429,15 @@ main() {
   require_tool plutil
   require_tool pluginkit
   require_tool qlmanage
+  require_tool sort
+  require_tool awk
 
   LSREGISTER="$(find_lsregister)" || fail 2 "missing lsregister"
 
   run_package_if_needed
   check_bundle_integrity "$APP_PATH"
   install_and_register
-  warn_old_install_candidates
+  handle_legacy_install_candidates
   verify_plugin_registration
 
   qlmanage -r > "$DIAG_DIR/qlmanage-reset.log" 2>&1 || true

@@ -283,6 +283,12 @@ scripts/smoke-finder-integration.sh --version 0.1.0
 scripts/smoke-finder-integration.sh --skip-package --app build.noindex/release/Alhangeul.app
 ```
 
+이전 이름 설치본(`RhwpMac.app`, `AlhangeulMac.app`, `알한글.app`)이 남아 있으면 `qlmanage`가 현재 설치본이 아닌 예전 provider로 thumbnail을 만들 수 있다. helper는 이런 false positive를 막기 위해 기본값에서는 레거시 후보 발견 시 실패한다. 파일 삭제 없이 smoke 격리를 위해 LaunchServices/PlugInKit 등록만 정리하려면 작업지시자 승인 후 다음 옵션을 붙인다.
+
+```bash
+scripts/smoke-finder-integration.sh --skip-package --app build.noindex/release/Alhangeul.app --unregister-legacy-candidates
+```
+
 기대 결과는 `samples/basic/KTX.hwp`와 `samples/hwpx/hwpx-01.hwpx` 모두에서 thumbnail output이 생성되는 것이다. helper는 실행별 output directory와 diagnostics directory를 출력한다. 손상/대용량 fallback 입력은 #149 성격의 선택 smoke로 분리한다.
 
 ```bash
@@ -304,6 +310,7 @@ helper가 자동으로 수행하는 항목:
 - `scripts/package-release.sh <version>`으로 Release package 생성 (`--skip-package` 또는 `--app` 지정 시 생략)
 - `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` bundle 정합성 확인
 - `$HOME/Applications/Alhangeul.app` 설치와 `lsregister`/`pluginkit` 등록
+- 이전 이름 설치본 후보 발견 시 기본 실패. `--unregister-legacy-candidates` 지정 시 파일은 삭제하지 않고 LaunchServices/PlugInKit 등록만 정리
 - `pluginkit -mAvvv`에서 Preview/Thumbnail extension 확인
 - `qlmanage -r`, `qlmanage -r cache`
 - `qlmanage -t -x`로 HWP/HWPX thumbnail output 생성
