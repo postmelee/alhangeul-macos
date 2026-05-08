@@ -1,6 +1,5 @@
 const faqItems = document.querySelectorAll(".faq-list details");
 const featureSection = document.querySelector(".features-section");
-const finderThumbnailVideo = document.querySelector("[data-finder-thumbnail-video]");
 const featureSteps = Array.from(document.querySelectorAll("[data-feature-step]"));
 const revealGroups = Array.from(document.querySelectorAll("[data-reveal-group]"));
 const stageLabelNodes = {
@@ -63,27 +62,6 @@ const easeOutFast = (edgeStart, edgeEnd, value) => {
   const progress = clamp((value - edgeStart) / (edgeEnd - edgeStart || 1));
   return 1 - Math.pow(1 - progress, 3);
 };
-
-let latestFinderVideoProgress = 0;
-
-const syncFinderThumbnailVideo = (progress) => {
-  if (!finderThumbnailVideo) return;
-
-  latestFinderVideoProgress = clamp(progress);
-
-  if (!Number.isFinite(finderThumbnailVideo.duration) || finderThumbnailVideo.duration <= 0) {
-    return;
-  }
-
-  const targetTime = latestFinderVideoProgress * finderThumbnailVideo.duration;
-  if (Math.abs(finderThumbnailVideo.currentTime - targetTime) > 0.035) {
-    finderThumbnailVideo.currentTime = targetTime;
-  }
-};
-
-finderThumbnailVideo?.addEventListener("loadedmetadata", () => {
-  syncFinderThumbnailVideo(latestFinderVideoProgress);
-});
 
 const mapScrollProgressToVisualProgress = (progress) => {
   const clampedProgress = clamp(progress);
@@ -377,8 +355,6 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   const shareBaseShadowOpacity = isMacShare
     ? Math.max(sharePdfAfterEntry, shareBeforeOpacity, shareAfterOpacity, shareFinalBaseOpacity)
     : 0;
-
-  syncFinderThumbnailVideo(isFinder ? scrollProgress : 0);
 
   setStageLabels(feature.labels);
 

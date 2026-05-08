@@ -541,22 +541,6 @@ video {
   box-shadow: var(--product-shadow);
 }
 
-.finder-thumbnail-video {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  object-fit: cover;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.features-section.is-feature-finder .finder-thumbnail-video {
-  opacity: 1;
-}
-
 .finder-image {
   position: absolute;
   inset: 0;
