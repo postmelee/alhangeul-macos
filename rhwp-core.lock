@@ -8,8 +8,15 @@ ffi_symbols_file = "rhwp-ffi-symbols.txt"
 
 [[artifacts]]
 path = "Frameworks/universal/librhwp.a"
+profile = "local-macos-26-xcode-26.4"
 sha256 = "fefa08d741cfdd6645081ca838601f677f6da064d95308555e29629f7609f7a2"
 size = 107120120
+
+[[artifacts]]
+path = "Frameworks/universal/librhwp.a"
+profile = "github-actions-macos-15-arm64-rust-1.94.1"
+sha256 = "9e33a128008f00610dff2894c3168fbe3bd2fb3939827f9ec618b1c3f15da4c3"
+size = 107099072
 
 [[artifacts]]
 path = "Frameworks/generated_rhwp.h"

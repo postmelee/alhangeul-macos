@@ -149,6 +149,94 @@ lock_artifact_value() {
   ' "$LOCK_FILE"
 }
 
+lock_artifact_values() {
+  local artifact_path="$1"
+  awk -F' = ' -v artifact_path="$artifact_path" '
+    function clean(value) {
+      gsub(/^"/, "", value)
+      gsub(/"$/, "", value)
+      return value
+    }
+    function flush() {
+      if (in_artifact && path == artifact_path && sha256 != "" && size != "") {
+        print "  - sha256: " sha256 ", size: " size
+      }
+    }
+    /^\[\[artifacts\]\]/ {
+      flush()
+      in_artifact = 1
+      path = ""
+      sha256 = ""
+      size = ""
+      next
+    }
+    in_artifact && $1 == "path" {
+      path = clean($2)
+      next
+    }
+    in_artifact && $1 == "sha256" {
+      sha256 = clean($2)
+      next
+    }
+    in_artifact && $1 == "size" {
+      size = $2
+      gsub(/^[ \t]+/, "", size)
+      gsub(/[ \t]+$/, "", size)
+      next
+    }
+    END {
+      flush()
+    }
+  ' "$LOCK_FILE"
+}
+
+lock_artifact_matches() {
+  local artifact_path="$1"
+  local actual_sha256="$2"
+  local actual_size="$3"
+  awk -F' = ' \
+    -v artifact_path="$artifact_path" \
+    -v actual_sha256="$actual_sha256" \
+    -v actual_size="$actual_size" '
+    function clean(value) {
+      gsub(/^"/, "", value)
+      gsub(/"$/, "", value)
+      return value
+    }
+    function flush() {
+      if (in_artifact && path == artifact_path && sha256 == actual_sha256 && size == actual_size) {
+        found = 1
+      }
+    }
+    /^\[\[artifacts\]\]/ {
+      flush()
+      in_artifact = 1
+      path = ""
+      sha256 = ""
+      size = ""
+      next
+    }
+    in_artifact && $1 == "path" {
+      path = clean($2)
+      next
+    }
+    in_artifact && $1 == "sha256" {
+      sha256 = clean($2)
+      next
+    }
+    in_artifact && $1 == "size" {
+      size = $2
+      gsub(/^[ \t]+/, "", size)
+      gsub(/[ \t]+$/, "", size)
+      next
+    }
+    END {
+      flush()
+      exit found ? 0 : 1
+    }
+  ' "$LOCK_FILE"
+}
+
 normalize_repo() {
   local repo="$1"
   repo="${repo%/}"
@@ -496,29 +584,27 @@ verify_lock_file() {
     require_artifact "$artifact_path"
 
     local abs_path
-    local expected_sha256
     local actual_sha256
-    local expected_size
     local actual_size
+    local expected_artifacts
 
     abs_path="$(artifact_abs_path "$artifact_path")"
-    expected_sha256="$(lock_artifact_value "$artifact_path" sha256)"
-    expected_size="$(lock_artifact_value "$artifact_path" size)"
     actual_sha256="$(artifact_sha256 "$abs_path")"
     actual_size="$(artifact_size "$abs_path")"
+    expected_artifacts="$(lock_artifact_values "$artifact_path")"
 
-    if [ -z "$expected_sha256" ] || [ -z "$expected_size" ]; then
+    if [ -z "$expected_artifacts" ]; then
       echo "ERROR: missing lock metadata for artifact: $artifact_path" >&2
       echo "Run: ./scripts/build-rust-macos.sh --update-lock" >&2
       exit 1
     fi
 
-    if [ "$expected_sha256" != "$actual_sha256" ] || [ "$expected_size" != "$actual_size" ]; then
+    if ! lock_artifact_matches "$artifact_path" "$actual_sha256" "$actual_size"; then
       echo "ERROR: artifact hash mismatch: artifact differs from $LOCK_FILE" >&2
       echo "Artifact: $artifact_path" >&2
-      echo "Expected sha256: $expected_sha256" >&2
+      echo "Expected variants:" >&2
+      echo "$expected_artifacts" >&2
       echo "Actual sha256:   $actual_sha256" >&2
-      echo "Expected size:   $expected_size" >&2
       echo "Actual size:     $actual_size" >&2
       echo "Run: ./scripts/build-rust-macos.sh --update-lock if this artifact is intentional." >&2
       exit 1
