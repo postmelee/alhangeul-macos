@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Task 182 Finder Thumbnail Composition</title>
+  <style>
+    :root {
+      --install-ring-progress: 0%;
+      --install-orb-opacity: 0;
+      --install-scale: 0.84;
+      --install-clip: 100%;
+      --install-logo-opacity: 1;
+      --install-check-opacity: 0;
+      --install-check-scale: 0.72;
+      --install-check-dash: 1;
+      --before-opacity: 1;
+      --before-scale: 1;
+      --after-opacity: 0;
+      --after-scale: 1.018;
+      --lock-opacity: 1;
+      --lock-scale: 1;
+      --lock-rotate: 0deg;
+      --lock-sheen-opacity: 0;
+      --lock-sheen-x: 0%;
+      --lock-glow-opacity: 0;
+      --install: #34c759;
+      --stage: #151820;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: var(--stage);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    }
+
+    [data-composition-id="task-182-finder"] {
+      width: 1440px;
+      height: 810px;
+      background: var(--stage);
+    }
+
+    .scene {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .finder-visual {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .finder-image-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 0;
+      background: var(--stage);
+    }
+
+    .finder-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: inherit;
+    }
+
+    .finder-image-before {
+      opacity: var(--before-opacity);
+      transform: scale(var(--before-scale));
+    }
+
+    .finder-image-after {
+      opacity: var(--after-opacity);
+      transform: scale(var(--after-scale));
+    }
+
+    .finder-lock {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 3;
+      display: inline-flex;
+      min-height: 124px;
+      align-items: center;
+      gap: 28px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.48);
+      color: #ffffff;
+      padding: 0 52px;
+      font-size: 38px;
+      font-weight: 600;
+      opacity: var(--lock-opacity);
+      transform: translate(-50%, -50%) scale(var(--lock-scale));
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+      box-shadow:
+        0 18px 44px rgba(0, 0, 0, 0.32),
+        0 0 44px rgba(255, 255, 255, var(--lock-glow-opacity));
+    }
+
+    .finder-lock::before {
+      content: "";
+      position: absolute;
+      top: -35%;
+      bottom: -35%;
+      left: -38%;
+      width: 34%;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.5) 48%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      opacity: var(--lock-sheen-opacity);
+      transform: translateX(var(--lock-sheen-x)) skewX(-18deg);
+      pointer-events: none;
+    }
+
+    .finder-lock svg {
+      position: relative;
+      z-index: 1;
+      width: 62px;
+      height: 62px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.2;
+    }
+
+    .finder-lock span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .lock-shackle {
+      transform: rotate(var(--lock-rotate));
+      transform-origin: 22px 14px;
+    }
+
+    .finder-install-orb {
+      position: relative;
+      display: grid;
+      width: 285px;
+      height: 285px;
+      place-items: center;
+      border-radius: 78px;
+      background: rgba(255, 255, 255, 0.88);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+    }
+
+    .finder-install-overlay {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 4;
+      display: grid;
+      justify-items: center;
+      gap: 30px;
+      opacity: var(--install-orb-opacity);
+      transform: translate(-50%, -50%) scale(var(--install-scale));
+      pointer-events: none;
+    }
+
+    .finder-install-label {
+      min-height: 84px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.52);
+      color: #ffffff;
+      padding: 18px 42px 20px;
+      font-size: 45px;
+      font-weight: 700;
+      line-height: 1;
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+    }
+
+    .orb-ring,
+    .install-ring {
+      position: absolute;
+      inset: -8px;
+      border-radius: inherit;
+      background: conic-gradient(var(--install) var(--install-ring-progress), rgba(52, 199, 89, 0.12) 0);
+      padding: 5px;
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    .orb-logo-stack,
+    .install-logo-stack {
+      position: relative;
+      display: grid;
+      opacity: var(--install-logo-opacity);
+      place-items: center;
+    }
+
+    .orb-logo,
+    .install-logo {
+      grid-area: 1 / 1;
+      display: block;
+    }
+
+    .orb-logo {
+      width: 201px;
+      height: 201px;
+      border-radius: 51px;
+    }
+
+    .install-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+    }
+
+    .orb-logo-muted,
+    .install-logo-muted {
+      filter: grayscale(1);
+      opacity: 0.42;
+    }
+
+    .orb-logo-color,
+    .install-logo-color {
+      clip-path: inset(var(--install-clip) 0 0 0);
+    }
+
+    .orb-check,
+    .install-check {
+      position: absolute;
+      fill: none;
+      stroke: #ffffff;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.4;
+      opacity: var(--install-check-opacity);
+      transform: scale(var(--install-check-scale));
+    }
+
+    .orb-check path,
+    .install-check path {
+      stroke-dasharray: 1;
+      stroke-dashoffset: var(--install-check-dash);
+    }
+
+    .orb-check {
+      width: 108px;
+      height: 108px;
+      border-radius: 50%;
+      background: var(--install);
+      padding: 23px;
+    }
+
+    .install-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--install);
+      padding: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div data-composition-id="task-182-finder" data-width="1440" data-height="810">
+    <main class="scene">
+      <div class="finder-visual">
+        <div class="finder-image-stage">
+          <img class="finder-image finder-image-before" src="../../../../docs/assets/finder-before.png" alt="" />
+          <img class="finder-image finder-image-after" src="../../../../docs/assets/finder-after.png" alt="" />
+          <div class="finder-lock" aria-hidden="true">
+            <svg viewBox="0 0 32 32">
+              <path class="lock-shackle" d="M10 14V10a6 6 0 0 1 12 0v4" />
+              <path d="M8 14h16v13H8z" />
+              <path d="M16 19v4" />
+            </svg>
+            <span>.hwp 정보 잠김</span>
+          </div>
+          <div class="finder-install-overlay" aria-hidden="true">
+            <div class="finder-install-orb">
+              <span class="orb-ring"></span>
+              <span class="orb-logo-stack">
+                <img class="orb-logo orb-logo-muted" src="../../../../docs/assets/logo-256@2x.png" alt="" />
+                <img class="orb-logo orb-logo-color" src="../../../../docs/assets/logo-256@2x.png" alt="" />
+              </span>
+              <svg class="orb-check" viewBox="0 0 24 24">
+                <path pathLength="1" d="m6.2 12.3 4 4 7.6-8.1" />
+              </svg>
+            </div>
+            <span class="finder-install-label">알한글 설치</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const checkpointProgress = {
+      start: 1 / 6,
+      middle: 1 / 2,
+      end: 5 / 6,
+    };
+    const progressMap = [
+      [0, 0],
+      [0.25, checkpointProgress.start],
+      [0.5, checkpointProgress.middle],
+      [0.75, checkpointProgress.end],
+      [1, 1],
+    ];
+
+    const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+    const smoothstep = (edgeStart, edgeEnd, value) => {
+      const progress = clamp((value - edgeStart) / (edgeEnd - edgeStart || 1));
+      return progress * progress * (3 - 2 * progress);
+    };
+
+    const easeOutCubic = (value) => {
+      const progress = clamp(value);
+      return 1 - Math.pow(1 - progress, 3);
+    };
+
+    const mapScrollProgressToVisualProgress = (progress) => {
+      const clampedProgress = clamp(progress);
+
+      for (let index = 1; index < progressMap.length; index += 1) {
+        const [previousScroll, previousVisual] = progressMap[index - 1];
+        const [nextScroll, nextVisual] = progressMap[index];
+
+        if (clampedProgress <= nextScroll) {
+          const segmentProgress = clamp(
+            (clampedProgress - previousScroll) / (nextScroll - previousScroll),
+          );
+
+          return previousVisual + (nextVisual - previousVisual) * segmentProgress;
+        }
+      }
+
+      return 1;
+    };
+
+    window.setProgress = (rawProgress) => {
+      const scrollProgress = clamp(rawProgress);
+      const timelineProgress = mapScrollProgressToVisualProgress(scrollProgress);
+      const installProgress = clamp(
+        (timelineProgress - checkpointProgress.start) /
+          (checkpointProgress.middle - checkpointProgress.start),
+      );
+      const installEase = easeOutCubic(installProgress);
+      const installEntry = easeOutCubic(
+        (timelineProgress - checkpointProgress.start) / 0.035,
+      );
+      const installExit = 1 - smoothstep(0.58, 0.78, timelineProgress);
+      const installOrbOpacity = installEntry * installExit;
+      const installCheckProgress = smoothstep(0.88, 1, installEase);
+      const installLogoOpacity = 1 - smoothstep(0.68, 0.94, installEase);
+      const finderAfterOpacity = smoothstep(0.64, checkpointProgress.end, timelineProgress);
+      const lockStageProgress = clamp(timelineProgress / checkpointProgress.start);
+      const lockStageEase = easeOutCubic(lockStageProgress);
+      const lockPulse = Math.sin(lockStageProgress * Math.PI * 2) * 0.025;
+      const lockAttention = 1 - smoothstep(0.78, 1, lockStageProgress);
+      const finderLockOpacity = timelineProgress <= checkpointProgress.start
+        ? 1
+        : 1 - smoothstep(
+          checkpointProgress.start,
+          checkpointProgress.start + 0.055,
+          timelineProgress,
+        );
+
+      document.documentElement.style.setProperty("--install-ring-progress", `${(installEase * 100).toFixed(2)}%`);
+      document.documentElement.style.setProperty("--install-orb-opacity", installOrbOpacity.toFixed(3));
+      document.documentElement.style.setProperty("--install-scale", (0.84 + installEase * 0.16).toFixed(3));
+      document.documentElement.style.setProperty("--install-clip", `${((1 - installEase) * 100).toFixed(2)}%`);
+      document.documentElement.style.setProperty("--install-logo-opacity", installLogoOpacity.toFixed(3));
+      document.documentElement.style.setProperty("--install-check-opacity", installCheckProgress.toFixed(3));
+      document.documentElement.style.setProperty("--install-check-scale", (0.72 + installCheckProgress * 0.28).toFixed(3));
+      document.documentElement.style.setProperty("--install-check-dash", (1 - installCheckProgress).toFixed(3));
+      document.documentElement.style.setProperty("--before-opacity", "1");
+      document.documentElement.style.setProperty("--after-opacity", finderAfterOpacity.toFixed(3));
+      document.documentElement.style.setProperty("--before-scale", (1 + finderAfterOpacity * 0.018).toFixed(3));
+      document.documentElement.style.setProperty("--after-scale", (1.018 - finderAfterOpacity * 0.018).toFixed(3));
+      document.documentElement.style.setProperty("--lock-opacity", finderLockOpacity.toFixed(3));
+      document.documentElement.style.setProperty("--lock-scale", (
+        timelineProgress <= checkpointProgress.start
+          ? 0.88 + lockStageEase * 0.12 + lockPulse * lockAttention
+          : 0.92 + finderLockOpacity * 0.08
+      ).toFixed(3));
+      document.documentElement.style.setProperty("--lock-rotate", `${(-32 * (1 - finderLockOpacity)).toFixed(2)}deg`);
+      document.documentElement.style.setProperty("--lock-sheen-opacity", (0.72 * lockAttention * finderLockOpacity).toFixed(3));
+      document.documentElement.style.setProperty("--lock-sheen-x", `${(lockStageProgress * 430).toFixed(2)}%`);
+      document.documentElement.style.setProperty("--lock-glow-opacity", (0.28 * lockAttention * finderLockOpacity).toFixed(3));
+
+    };
+
+    const initialProgress = Number(new URLSearchParams(window.location.search).get("progress")) || 0;
+    window.setProgress(initialProgress);
+  </script>
+</body>
+</html>
