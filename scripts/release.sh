@@ -7,6 +7,9 @@ PROJECT_NAME="Alhangeul"
 SCHEME_NAME="HostApp"
 BUILD_APP_NAME="Alhangeul.app"
 APP_NAME="Alhangeul.app"
+HOST_BUNDLE_IDENTIFIER="com.postmelee.alhangeul"
+QL_BUNDLE_IDENTIFIER="com.postmelee.alhangeul.QLExtension"
+THUMBNAIL_BUNDLE_IDENTIFIER="com.postmelee.alhangeul.ThumbnailExtension"
 BUILD_ROOT_INPUT="${ALHANGEUL_BUILD_ROOT:-$ROOT/build.noindex}"
 OUTPUT_DIR_INPUT=""
 VERSION=""
@@ -188,6 +191,7 @@ prepare_paths() {
   DMG_STAGING_DIR="$STAGING_DIR/dmg-root"
   APP_OUTPUT="$OUTPUT_DIR/$APP_NAME"
   APP_NOTARY_ZIP="$STAGING_DIR/alhangeul-macos-$VERSION-app-notary.zip"
+  ENTITLEMENTS_DIR="$STAGING_DIR/entitlements"
 
   if [ "$SKIP_NOTARIZE" -eq 1 ]; then
     DMG_NAME="alhangeul-macos-$VERSION-rehearsal.dmg"
@@ -281,7 +285,9 @@ build_app() {
       CONFIGURATION_BUILD_DIR="$XCODE_BUILD_DIR" \
       CODE_SIGN_STYLE=Manual \
       CODE_SIGN_IDENTITY="$DEVELOPER_ID_APPLICATION" \
+      CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO \
       ENABLE_HARDENED_RUNTIME=YES \
+      OTHER_CODE_SIGN_FLAGS="--timestamp" \
       build
   else
     xcodebuild -project "$ROOT/$PROJECT_NAME.xcodeproj" \
@@ -302,6 +308,116 @@ build_app() {
   ditto "$XCODE_BUILD_DIR/$BUILD_APP_NAME" "$APP_OUTPUT"
 }
 
+prepare_entitlements() {
+  local source="$1"
+  local output="$2"
+  local bundle_identifier="$3"
+  mkdir -p "$(dirname "$output")"
+  sed "s|\$(PRODUCT_BUNDLE_IDENTIFIER)|$bundle_identifier|g" "$source" > "$output"
+}
+
+codesign_release_path() {
+  local path="$1"
+  shift
+  if [ ! -e "$path" ]; then
+    return
+  fi
+
+  codesign --force \
+    --timestamp \
+    --options runtime \
+    --generate-entitlement-der \
+    --sign "$DEVELOPER_ID_APPLICATION" \
+    "$@" \
+    "$path"
+}
+
+resign_sparkle_framework() {
+  local sparkle_framework="$APP_OUTPUT/Contents/Frameworks/Sparkle.framework"
+  local sparkle_version="$sparkle_framework/Versions/B"
+  if [ ! -d "$sparkle_framework" ]; then
+    return
+  fi
+
+  codesign_release_path "$sparkle_version/XPCServices/Downloader.xpc"
+  codesign_release_path "$sparkle_version/XPCServices/Installer.xpc"
+  codesign_release_path "$sparkle_version/Updater.app"
+  codesign_release_path "$sparkle_version/Autoupdate"
+  codesign_release_path "$sparkle_framework"
+}
+
+resign_release_bundle() {
+  if [ -z "$DEVELOPER_ID_APPLICATION" ]; then
+    return
+  fi
+
+  local host_entitlements="$ENTITLEMENTS_DIR/HostApp.entitlements"
+  local ql_entitlements="$ENTITLEMENTS_DIR/QLExtension.entitlements"
+  local thumbnail_entitlements="$ENTITLEMENTS_DIR/ThumbnailExtension.entitlements"
+
+  info "Re-signing embedded release bundle"
+  prepare_entitlements "$ROOT/Sources/HostApp/HostApp.entitlements" \
+    "$host_entitlements" "$HOST_BUNDLE_IDENTIFIER"
+  prepare_entitlements "$ROOT/Sources/QLExtension/QLExtension.entitlements" \
+    "$ql_entitlements" "$QL_BUNDLE_IDENTIFIER"
+  prepare_entitlements "$ROOT/Sources/ThumbnailExtension/ThumbnailExtension.entitlements" \
+    "$thumbnail_entitlements" "$THUMBNAIL_BUNDLE_IDENTIFIER"
+
+  resign_sparkle_framework
+  codesign_release_path "$APP_OUTPUT/Contents/PlugIns/AlhangeulPreview.appex" \
+    --entitlements "$ql_entitlements"
+  codesign_release_path "$APP_OUTPUT/Contents/PlugIns/AlhangeulThumbnail.appex" \
+    --entitlements "$thumbnail_entitlements"
+  codesign_release_path "$APP_OUTPUT" --entitlements "$host_entitlements"
+}
+
+assert_no_get_task_allow() {
+  local bundle_path="$1"
+  local entitlements
+  entitlements="$(codesign -d --entitlements :- "$bundle_path" 2>&1 || true)"
+  if echo "$entitlements" | grep -q "invalid entitlements blob"; then
+    fail "release signature has an invalid entitlements blob: $bundle_path"
+  fi
+  if echo "$entitlements" | grep -q "com.apple.security.get-task-allow"; then
+    fail "release signature must not request get-task-allow: $bundle_path"
+  fi
+}
+
+assert_developer_id_signature() {
+  local path="$1"
+  local signature
+  signature="$(codesign -dv --verbose=4 "$path" 2>&1)"
+  if ! echo "$signature" | grep -Fq "Authority=$DEVELOPER_ID_APPLICATION"; then
+    fail "release signature must use Developer ID Application identity: $path"
+  fi
+  if ! echo "$signature" | grep -q "^Timestamp="; then
+    fail "release signature must include a secure timestamp: $path"
+  fi
+}
+
+verify_sparkle_signature() {
+  local sparkle_framework="$APP_OUTPUT/Contents/Frameworks/Sparkle.framework"
+  local sparkle_version="$sparkle_framework/Versions/B"
+  local signed_path
+  if [ ! -d "$sparkle_framework" ]; then
+    return
+  fi
+
+  codesign --verify --deep --strict --verbose=2 "$sparkle_framework"
+  for signed_path in \
+    "$sparkle_framework" \
+    "$sparkle_version/Autoupdate" \
+    "$sparkle_version/Updater.app" \
+    "$sparkle_version/XPCServices/Downloader.xpc" \
+    "$sparkle_version/XPCServices/Installer.xpc"
+  do
+    if [ -e "$signed_path" ]; then
+      codesign --verify --strict --verbose=2 "$signed_path"
+      assert_developer_id_signature "$signed_path"
+    fi
+  done
+}
+
 verify_app_signature() {
   if [ -z "$DEVELOPER_ID_APPLICATION" ]; then
     warn "Skipping codesign verification because this rehearsal build is unsigned."
@@ -311,11 +427,55 @@ verify_app_signature() {
   info "Verifying app code signature"
   codesign --verify --deep --strict --verbose=2 "$APP_OUTPUT"
   codesign --display --verbose=4 "$APP_OUTPUT" >/dev/null
+  assert_developer_id_signature "$APP_OUTPUT"
+  verify_sparkle_signature
 
   if [ -d "$APP_OUTPUT/Contents/PlugIns" ]; then
     while IFS= read -r appex; do
       codesign --verify --strict --verbose=2 "$appex"
+      assert_developer_id_signature "$appex"
+      assert_no_get_task_allow "$appex"
     done < <(find "$APP_OUTPUT/Contents/PlugIns" -maxdepth 1 -type d -name "*.appex" -print)
+  fi
+  assert_no_get_task_allow "$APP_OUTPUT"
+}
+
+notary_result_value() {
+  local result_path="$1"
+  local key="$2"
+  plutil -extract "$key" raw -o - "$result_path" 2>/dev/null || true
+}
+
+submit_for_notarization() {
+  local label="$1"
+  local artifact_path="$2"
+  local result_path="$STAGING_DIR/notary-$label-submit.json"
+  local log_path="$STAGING_DIR/notary-$label-log.json"
+  local submit_status=0
+  local submission_id
+  local notarization_status
+
+  xcrun notarytool submit "$artifact_path" \
+    --wait \
+    --keychain-profile "$NOTARY_PROFILE" \
+    --output-format json > "$result_path" || submit_status=$?
+
+  submission_id="$(notary_result_value "$result_path" id)"
+  notarization_status="$(notary_result_value "$result_path" status)"
+
+  if [ "$submit_status" -ne 0 ] || [ "$notarization_status" != "Accepted" ]; then
+    warn "$label notarization status: ${notarization_status:-unknown}"
+    if [ -n "$submission_id" ]; then
+      xcrun notarytool log "$submission_id" \
+        --keychain-profile "$NOTARY_PROFILE" \
+        "$log_path" || true
+      if [ -f "$log_path" ]; then
+        cat "$log_path" >&2
+      fi
+    elif [ -f "$result_path" ]; then
+      cat "$result_path" >&2
+    fi
+    fail "$label notarization failed"
   fi
 }
 
@@ -326,9 +486,7 @@ notarize_and_staple_app() {
 
   info "Submitting app bundle for notarization"
   ditto -c -k --keepParent "$APP_OUTPUT" "$APP_NOTARY_ZIP"
-  xcrun notarytool submit "$APP_NOTARY_ZIP" \
-    --wait \
-    --keychain-profile "$NOTARY_PROFILE"
+  submit_for_notarization app "$APP_NOTARY_ZIP"
 
   info "Stapling app bundle"
   xcrun stapler staple "$APP_OUTPUT"
@@ -356,7 +514,7 @@ sign_dmg() {
   fi
 
   info "Signing DMG"
-  codesign --force --sign "$DEVELOPER_ID_DMG" "$DMG_OUTPUT"
+  codesign --force --timestamp --sign "$DEVELOPER_ID_DMG" "$DMG_OUTPUT"
   codesign --verify --verbose=2 "$DMG_OUTPUT"
 }
 
@@ -366,9 +524,7 @@ notarize_and_staple_dmg() {
   fi
 
   info "Submitting DMG for notarization"
-  xcrun notarytool submit "$DMG_OUTPUT" \
-    --wait \
-    --keychain-profile "$NOTARY_PROFILE"
+  submit_for_notarization dmg "$DMG_OUTPUT"
 
   info "Stapling DMG"
   xcrun stapler staple "$DMG_OUTPUT"
@@ -404,6 +560,7 @@ main() {
   check_shared_code
   generate_project
   build_app
+  resign_release_bundle
   verify_app_signature
   notarize_and_staple_app
   create_dmg
