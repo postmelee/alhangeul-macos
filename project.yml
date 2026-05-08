@@ -8,6 +8,10 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "12.0"
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.9.1
 targets:
   HostApp:
     type: application
@@ -27,6 +31,8 @@ targets:
         embed: true
       - framework: Frameworks/Rhwp.xcframework
         embed: false
+      - package: Sparkle
+        product: Sparkle
     settings:
       base:
         PRODUCT_NAME: Alhangeul
