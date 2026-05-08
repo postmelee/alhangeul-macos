@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="알한글 v0.1.0 첫 공식 릴리즈 노트입니다." />
+  <meta property="og:title" content="알한글 v0.1.0 릴리즈 노트" />
+  <meta property="og:description" content="Mac에서 HWP/HWPX 문서를 미리보고 열어보는 알한글 첫 공식 릴리즈입니다." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://postmelee.github.io/alhangeul-macos/updates/v0.1.0.html" />
+  <meta property="og:image" content="https://postmelee.github.io/alhangeul-macos/assets/og-main.png" />
+  <title>알한글 v0.1.0 릴리즈 노트</title>
+  <link rel="icon" href="../assets/logo-256@2x.png" />
+  <link rel="apple-touch-icon" href="../assets/logo-256@2x.png" />
+  <link rel="stylesheet" href="../styles.css?v=20260508-updates" />
+</head>
+
+<body>
+  <a class="skip-link" href="#main">본문으로 이동</a>
+  <header class="site-header" aria-label="주요 탐색">
+    <div class="site-header-inner">
+      <a class="brand-link" href="../" aria-label="알한글 홈">
+        <img src="../assets/logo-256@2x.png" width="28" height="28" alt="" />
+        <span>알한글</span>
+      </a>
+      <nav class="header-actions" aria-label="주요 링크">
+        <a class="github-link" href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer"
+          aria-label="GitHub 저장소로 이동">
+          GitHub
+        </a>
+        <a class="header-download-button"
+          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.1.0.dmg"
+          aria-label="Mac용 알한글 DMG 다운로드">
+          다운로드
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="updates-page">
+    <section class="updates-hero" aria-labelledby="release-title">
+      <h1 id="release-title">알한글 v0.1.0</h1>
+      <p>Mac에서 HWP/HWPX 문서를 미리보고, 찾고, 열어보는 첫 공식 릴리즈입니다.</p>
+      <div class="updates-actions" aria-label="릴리즈 주요 링크">
+        <a class="page-action-button"
+          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.1.0.dmg">
+          DMG 다운로드
+        </a>
+        <a class="page-secondary-link" href="./">업데이트 목록</a>
+      </div>
+    </section>
+
+    <div class="updates-content">
+      <section class="updates-section" aria-labelledby="release-features-title">
+        <h2 id="release-features-title">주요 기능</h2>
+        <ul>
+          <li>Finder Quick Look에서 HWP/HWPX 문서 첫 페이지를 빠르게 확인합니다.</li>
+          <li>Finder 썸네일로 문서를 열기 전에 첫 페이지를 구분합니다.</li>
+          <li>앱에서 HWP/HWPX 문서를 열고 텍스트 중심의 기본 편집 흐름을 사용합니다.</li>
+          <li>PDF 내보내기, macOS 공유, 인쇄 흐름을 제공합니다.</li>
+          <li>앱 메뉴에서 <code>업데이트 확인...</code>을 실행해 새 버전 안내를 받을 수 있습니다.</li>
+        </ul>
+      </section>
+
+      <section class="updates-section" aria-labelledby="release-limits-title">
+        <h2 id="release-limits-title">알려진 한계</h2>
+        <ul>
+          <li>Quick Look과 Finder 썸네일은 native 렌더 경로를 사용하고, 앱 화면은 WKWebView 기반 <code>rhwp-studio</code> 경로를 사용합니다.</li>
+          <li>일부 문서에서는 글꼴, 배치, 페이지 표현이 원본 한글 프로그램과 다르게 보일 수 있습니다.</li>
+          <li>HWPX 문서는 직접 저장이 제한되어 HWP 내보내기 경로를 사용합니다.</li>
+        </ul>
+      </section>
+
+      <section class="updates-section" aria-labelledby="release-install-title">
+        <h2 id="release-install-title">설치와 업데이트</h2>
+        <p>DMG 파일을 내려받아 앱을 Applications 폴더로 옮겨 설치합니다. 이후 버전은 앱 메뉴의 <code>알한글 &gt; 업데이트 확인...</code>에서 확인할 수 있습니다.</p>
+        <p>첫 공식 릴리즈가 GitHub에 게시되기 전에는 다운로드 파일이 아직 준비되지 않았을 수 있습니다.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <img src="../assets/logo-256@2x.png" width="32" height="32" alt="" />
+      <span>알한글</span>
+    </div>
+    <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 뷰어 앱입니다. 한글 파일이 더 이상 낯선 파일로 남지 않도록 만듭니다.</p>
+    <nav aria-label="푸터 링크">
+      <a href="../">홈</a>
+      <a href="./">업데이트</a>
+      <a href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer">GitHub</a>
+    </nav>
+  </footer>
+</body>
+
+</html>

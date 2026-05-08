@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>알한글 업데이트</title>
+    <link>https://postmelee.github.io/alhangeul-macos/updates/</link>
+    <description>알한글 macOS 앱 업데이트 feed</description>
+    <language>ko</language>
+  </channel>
+</rss>

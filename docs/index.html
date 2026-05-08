@@ -26,7 +26,7 @@
   <script>
     document.documentElement.classList.add("reveal-ready");
   </script>
-  <link rel="stylesheet" href="./styles.css?v=20260508-finder-video" />
+  <link rel="stylesheet" href="./styles.css?v=20260508-updates" />
 </head>
 
 <body>
@@ -42,8 +42,9 @@
           aria-label="GitHub 저장소로 이동">
           GitHub
         </a>
-        <a class="header-download-button" href="https://github.com/postmelee/alhangeul-macos/releases/latest"
-          aria-label="GitHub Releases에서 Mac용 알한글 다운로드">
+        <a class="header-download-button"
+          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.1.0.dmg"
+          aria-label="Mac용 알한글 DMG 다운로드">
           다운로드
         </a>
       </nav>
@@ -290,7 +291,14 @@
         </details>
         <details>
           <summary>다운로드 파일은 어디에서 받을 수 있나요?</summary>
-          <p>상단 다운로드 버튼은 GitHub Releases로 연결됩니다. 정식 배포 파일이 준비되면 해당 릴리즈에서 macOS용 설치 파일을 받을 수 있게 연결할 예정입니다.</p>
+          <p>상단 다운로드 버튼은 최신 공식 릴리즈의 DMG 파일을 바로 내려받도록 연결됩니다. 첫 공식 릴리즈가 게시되기 전에는 파일이 준비되지 않을 수 있으며, 이때는 <a
+              href="https://github.com/postmelee/alhangeul-macos/releases/latest" target="_blank"
+              rel="noreferrer">GitHub Releases</a>에서 배포 상태를 확인할 수 있습니다.</p>
+        </details>
+        <details>
+          <summary>앱 업데이트는 어떻게 확인하나요?</summary>
+          <p>알한글은 Sparkle appcast를 사용해 새 버전을 확인합니다. 앱 메뉴의 <code>알한글 &gt; 업데이트 확인...</code>에서 수동으로 확인할 수 있고, appcast 고정 URL과
+            릴리즈 노트는 <a href="./updates/">업데이트 안내</a> 페이지에서 확인할 수 있습니다.</p>
         </details>
         <details>
           <summary>썸네일/Quick Look과 앱에서 보이는 화면이 다를 수 있나요?</summary>
@@ -322,13 +330,14 @@
     </div>
     <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 뷰어 앱입니다. 한글 파일이 더 이상 낯선 파일로 남지 않도록 만듭니다.</p>
     <nav aria-label="푸터 링크">
+      <a href="./updates/">업데이트</a>
       <a href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer">GitHub</a>
       <a href="https://github.com/postmelee/alhangeul-macos/blob/main/LICENSE" rel="noreferrer">MIT License</a>
     </nav>
   </footer>
 
   <noscript>FAQ 아코디언은 JavaScript 없이도 브라우저 기본 동작으로 열고 닫을 수 있습니다.</noscript>
-  <script src="./script.js?v=20260508-finder-video"></script>
+  <script src="./script.js?v=20260508-updates"></script>
 </body>
 
 </html>
