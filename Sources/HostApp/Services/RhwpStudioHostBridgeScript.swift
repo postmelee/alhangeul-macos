@@ -3,6 +3,81 @@ import Foundation
 enum RhwpStudioHostBridgeScript {
     static let messageHandlerName = "alhangeulHost"
 
+    static let runtimeErrorSource = """
+    (() => {
+      if (window.__alhangeulRuntimeErrorBridgeInstalled) {
+        return;
+      }
+      window.__alhangeulRuntimeErrorBridgeInstalled = true;
+
+      function postNative(message) {
+        window.webkit?.messageHandlers?.alhangeulHost?.postMessage(message);
+      }
+
+      function describeReason(reason) {
+        if (reason === null || reason === undefined) {
+          return "";
+        }
+        if (reason instanceof Error) {
+          return reason.stack || reason.message || String(reason);
+        }
+        if (typeof reason === "string") {
+          return reason;
+        }
+        try {
+          return JSON.stringify(reason) || String(reason);
+        } catch {
+          return String(reason);
+        }
+      }
+
+      function isBenignRuntimeIssue(sourceURL, reason) {
+        const source = sourceURL || "";
+        const detail = reason || "";
+        return source.includes("/registerSW.js") || detail.includes("/registerSW.js");
+      }
+
+      window.addEventListener("error", (event) => {
+        const message = event.message || event.error?.message;
+        if (!message && !event.error) {
+          return;
+        }
+
+        const sourceURL = event.filename || window.location.href;
+        const reason = event.error ? describeReason(event.error) : null;
+        if (isBenignRuntimeIssue(sourceURL, reason)) {
+          return;
+        }
+
+        postNative({
+          type: "runtime-error",
+          message: message || "JavaScript error",
+          sourceURL,
+          line: event.lineno || 0,
+          column: event.colno || 0,
+          reason
+        });
+      });
+
+      window.addEventListener("unhandledrejection", (event) => {
+        const reason = describeReason(event.reason);
+        const sourceURL = window.location.href;
+        if (isBenignRuntimeIssue(sourceURL, reason)) {
+          return;
+        }
+
+        postNative({
+          type: "runtime-error",
+          message: "Unhandled promise rejection",
+          sourceURL,
+          line: 0,
+          column: 0,
+          reason
+        });
+      });
+    })();
+    """
+
     static let source = """
     (() => {
       if (window.__alhangeulHostBridgeInstalled) {
@@ -133,6 +208,33 @@ enum RhwpStudioHostBridgeScript {
           chunks.push(String.fromCharCode(...bytes.slice(offset, offset + chunkSize)));
         }
         return btoa(chunks.join(""));
+      }
+
+      function isSupportedDocumentFile(file) {
+        const fileName = file?.name?.toLowerCase() || "";
+        return fileName.endsWith(".hwp") || fileName.endsWith(".hwpx");
+      }
+
+      async function postDroppedDocument(file) {
+        if (!isSupportedDocumentFile(file)) {
+          return;
+        }
+
+        try {
+          const bytes = new Uint8Array(await file.arrayBuffer());
+          rememberCurrentFileName(file.name);
+          postNative({
+            type: "dropped-document",
+            fileName: file.name || "document.hwp",
+            base64: encodeBytesToBase64(bytes),
+            byteCount: bytes.length
+          });
+        } catch (error) {
+          postNative({
+            type: "error",
+            message: `끌어놓은 문서를 읽을 수 없습니다: ${error?.message || String(error)}`
+          });
+        }
       }
 
       async function requestHwpExportPayload() {
@@ -425,6 +527,19 @@ enum RhwpStudioHostBridgeScript {
       document.addEventListener("mousedown", scheduleHostOverridesRefresh, true);
       document.addEventListener("mousedown", handleNativeCommandElementEvent, true);
       document.addEventListener("click", handleNativeCommandElementEvent, true);
+
+      document.addEventListener("drop", (event) => {
+        const file = event.dataTransfer?.files?.[0];
+        if (!isSupportedDocumentFile(file)) {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        document.getElementById("scroll-container")?.classList.remove("drag-over");
+        postDroppedDocument(file);
+      }, true);
 
       document.addEventListener("keydown", (event) => {
         const command = nativeCommandForShortcut(event);

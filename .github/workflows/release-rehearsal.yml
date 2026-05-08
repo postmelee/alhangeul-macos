@@ -1,0 +1,138 @@
+name: Release Rehearsal DMG
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: App version to build as a rehearsal DMG.
+        required: true
+        default: "0.1.0"
+      expected_rhwp_tag:
+        description: Optional rhwp release tag that must match rhwp-core.lock.
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-rehearsal-${{ github.ref }}-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  build-rehearsal-dmg:
+    name: Build rehearsal DMG
+    runs-on: macos-15
+    timeout-minutes: 120
+
+    env:
+      VERSION: ${{ inputs.version }}
+      EXPECTED_RHWP_TAG: ${{ inputs.expected_rhwp_tag }}
+      ALHANGEUL_BUILD_ROOT: ${{ github.workspace }}/build.noindex
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate version input
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$VERSION" =~ ^[0-9]+[.][0-9]+[.][0-9]+([-+][0-9A-Za-z.-]+)?$ ]]; then
+            echo "ERROR: version must look like semantic version, got: $VERSION" >&2
+            exit 1
+          fi
+
+      - name: Read core lock
+        id: core
+        shell: bash
+        run: |
+          set -euo pipefail
+          rhwp_tag="$(bash scripts/ci/read-rhwp-core-lock.sh rhwp_release_tag)"
+          rhwp_commit="$(bash scripts/ci/read-rhwp-core-lock.sh rhwp_commit)"
+
+          {
+            echo "rhwp_tag=$rhwp_tag"
+            echo "rhwp_commit=$rhwp_commit"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ -n "$EXPECTED_RHWP_TAG" ] && [ "$rhwp_tag" != "$EXPECTED_RHWP_TAG" ]; then
+            echo "ERROR: expected rhwp tag $EXPECTED_RHWP_TAG but rhwp-core.lock has $rhwp_tag" >&2
+            exit 1
+          fi
+
+          {
+            echo "## rhwp core"
+            echo
+            echo "- lock tag: \`$rhwp_tag\`"
+            echo "- lock commit: \`$rhwp_commit\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - name: Verify release script interface
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/release.sh --help
+
+      - name: Verify rhwp lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/build-rust-macos.sh --verify-lock
+
+      - name: Build rehearsal DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/release.sh --skip-notarize "$VERSION"
+
+      - name: Verify rehearsal artifact
+        id: artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          dmg_name="alhangeul-macos-$VERSION-rehearsal.dmg"
+          release_dir="$PWD/build.noindex/release"
+          dmg_path="$release_dir/$dmg_name"
+          checksum_path="$dmg_path.sha256"
+
+          test -f "$dmg_path"
+          test -f "$checksum_path"
+          (cd "$release_dir" && shasum -a 256 -c "$dmg_name.sha256")
+
+          digest="$(awk '{print $1}' "$checksum_path")"
+          {
+            echo "dmg_path=$dmg_path"
+            echo "checksum_path=$checksum_path"
+            echo "digest=$digest"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Rehearsal artifact"
+            echo
+            echo "- DMG: \`$dmg_name\`"
+            echo "- SHA256: \`$digest\`"
+            echo
+            echo "This artifact is not signed/notarized for public release."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload rehearsal artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alhangeul-macos-${{ inputs.version }}-rehearsal
+          path: |
+            ${{ steps.artifact.outputs.dmg_path }}
+            ${{ steps.artifact.outputs.checksum_path }}
+          if-no-files-found: error
+          retention-days: 14

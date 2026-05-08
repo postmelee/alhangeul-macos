@@ -2,27 +2,44 @@ import AppKit
 import SwiftUI
 import WebKit
 
+struct RhwpStudioDroppedDocument {
+    let data: Data
+    let fileName: String
+}
+
 struct RhwpStudioWebView: NSViewRepresentable {
     let document: RhwpStudioDocumentPayload?
     let sourceDocument: RecentDocumentItem?
+    let reloadToken: Int
     let onLoadStateChange: (Bool) -> Void
     let onError: (String?) -> Void
+    let onFailure: (RhwpStudioWebViewFailure) -> Void
     let onOpenDocument: () -> Void
+    let onDroppedDocument: (RhwpStudioDroppedDocument) -> Void
+    let onDroppedFileURL: (URL) -> Void
     let onDocumentSaved: (URL) -> Void
 
     init(
         document: RhwpStudioDocumentPayload?,
         sourceDocument: RecentDocumentItem? = nil,
+        reloadToken: Int = 0,
         onLoadStateChange: @escaping (Bool) -> Void = { _ in },
         onError: @escaping (String?) -> Void = { _ in },
+        onFailure: @escaping (RhwpStudioWebViewFailure) -> Void = { _ in },
         onOpenDocument: @escaping () -> Void = {},
+        onDroppedDocument: @escaping (RhwpStudioDroppedDocument) -> Void = { _ in },
+        onDroppedFileURL: @escaping (URL) -> Void = { _ in },
         onDocumentSaved: @escaping (URL) -> Void = { _ in }
     ) {
         self.document = document
         self.sourceDocument = sourceDocument
+        self.reloadToken = reloadToken
         self.onLoadStateChange = onLoadStateChange
         self.onError = onError
+        self.onFailure = onFailure
         self.onOpenDocument = onOpenDocument
+        self.onDroppedDocument = onDroppedDocument
+        self.onDroppedFileURL = onDroppedFileURL
         self.onDocumentSaved = onDocumentSaved
     }
 
@@ -37,9 +54,17 @@ struct RhwpStudioWebView: NSViewRepresentable {
     func updateNSView(_ webView: WKWebView, context: Context) {
         context.coordinator.onLoadStateChange = onLoadStateChange
         context.coordinator.onError = onError
+        context.coordinator.onFailure = onFailure
         context.coordinator.onOpenDocument = onOpenDocument
+        context.coordinator.onDroppedDocument = onDroppedDocument
+        context.coordinator.onDroppedFileURL = onDroppedFileURL
         context.coordinator.onDocumentSaved = onDocumentSaved
-        context.coordinator.update(document: document, sourceDocument: sourceDocument, in: webView)
+        context.coordinator.update(
+            document: document,
+            sourceDocument: sourceDocument,
+            reloadToken: reloadToken,
+            in: webView
+        )
     }
 }
 
@@ -47,19 +72,28 @@ extension RhwpStudioWebView {
     final class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
         var onLoadStateChange: (Bool) -> Void = { _ in }
         var onError: (String?) -> Void = { _ in }
+        var onFailure: (RhwpStudioWebViewFailure) -> Void = { _ in }
         var onOpenDocument: () -> Void = {}
+        var onDroppedDocument: (RhwpStudioDroppedDocument) -> Void = { _ in }
+        var onDroppedFileURL: (URL) -> Void = { _ in }
         var onDocumentSaved: (URL) -> Void = { _ in }
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
+        private static let nativeDropSuppressionInterval: TimeInterval = 2
 
         private enum LoadIdentity: Equatable {
-            case empty
-            case document(Int)
+            case empty(reloadToken: Int)
+            case document(revision: Int, reloadToken: Int)
         }
 
         private enum SaveDestination {
             case source(RecentDocumentItem)
             case selected(URL)
+        }
+
+        private struct NativeDropMarker {
+            let fileName: String
+            let handledAt: Date
         }
 
         private let documentProvider = RhwpStudioDocumentProvider()
@@ -79,6 +113,8 @@ extension RhwpStudioWebView {
         private var isChoosingPDFDestination = false
         private var activeLoadID = 0
         private var loadTimeoutTask: Task<Void, Never>?
+        private var recentNativeDrop: NativeDropMarker?
+        private var currentReloadToken = 0
 
         deinit {
             loadTimeoutTask?.cancel()
@@ -86,6 +122,13 @@ extension RhwpStudioWebView {
 
         func makeWebView() -> WKWebView {
             let configuration = WKWebViewConfiguration()
+            configuration.userContentController.addUserScript(
+                WKUserScript(
+                    source: RhwpStudioHostBridgeScript.runtimeErrorSource,
+                    injectionTime: .atDocumentStart,
+                    forMainFrameOnly: true
+                )
+            )
             configuration.userContentController.addUserScript(
                 WKUserScript(
                     source: RhwpStudioHostBridgeScript.source,
@@ -120,6 +163,9 @@ extension RhwpStudioWebView {
                 self.runNativeCommand(command, in: webView)
                 return true
             }
+            webView.droppedFileURLHandler = { [weak self] fileURL in
+                self?.handleDroppedFileURL(fileURL)
+            }
             RhwpStudioNativeCommandDispatcher.register(webView)
             webView.navigationDelegate = self
             webView.allowsBackForwardNavigationGestures = false
@@ -129,16 +175,18 @@ extension RhwpStudioWebView {
         func update(
             document: RhwpStudioDocumentPayload?,
             sourceDocument: RecentDocumentItem?,
+            reloadToken: Int,
             in webView: WKWebView
         ) {
             currentDocument = document
             currentSourceDocument = sourceDocument
+            currentReloadToken = reloadToken
             documentProvider.setDocument(document)
 
             let nextIdentity: LoadIdentity = if let document {
-                .document(document.revision)
+                .document(revision: document.revision, reloadToken: reloadToken)
             } else {
-                .empty
+                .empty(reloadToken: reloadToken)
             }
 
             guard nextIdentity != loadedIdentity else {
@@ -153,10 +201,18 @@ extension RhwpStudioWebView {
                 activeLoadID += 1
                 startLoadTimeout(activeLoadID, webView: webView)
                 webView.load(URLRequest(url: loadURL))
+            } catch let error as RhwpStudioResourceLocatorError {
+                loadedIdentity = nil
+                finishLoading()
+                onFailure(.resourcePreflight(error))
+            } catch let failure as RhwpStudioWebViewFailure {
+                loadedIdentity = nil
+                finishLoading()
+                onFailure(failure)
             } catch {
                 loadedIdentity = nil
                 finishLoading()
-                onError(error.localizedDescription)
+                onFailure(.navigation(error: error, fallbackURL: webView.url))
             }
         }
 
@@ -169,12 +225,18 @@ extension RhwpStudioWebView {
             didFail navigation: WKNavigation!,
             withError error: Error
         ) {
-            handleNavigationError(error)
+            handleNavigationError(error, webView: webView)
         }
 
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
             finishLoading()
-            onError("웹 viewer 프로세스가 종료되었습니다. 문서를 다시 열어 주세요.")
+            onFailure(
+                .processTerminated(
+                    lastURL: webView.url,
+                    document: currentDocument,
+                    reloadToken: currentReloadToken
+                )
+            )
         }
 
         func webView(
@@ -182,7 +244,7 @@ extension RhwpStudioWebView {
             didFailProvisionalNavigation navigation: WKNavigation!,
             withError error: Error
         ) {
-            handleNavigationError(error)
+            handleNavigationError(error, webView: webView)
         }
 
         func webView(
@@ -199,16 +261,17 @@ extension RhwpStudioWebView {
                 decisionHandler(.allow)
             } else {
                 decisionHandler(.cancel)
-                onError("허용되지 않은 rhwp-studio 탐색입니다: \(url.absoluteString)")
+                finishLoading()
+                onFailure(.blockedNavigation(to: url))
             }
         }
 
-        private func handleNavigationError(_ error: Error) {
+        private func handleNavigationError(_ error: Error, webView: WKWebView? = nil) {
             finishLoading()
             guard !isIgnorableNavigationError(error) else {
                 return
             }
-            onError(error.localizedDescription)
+            onFailure(.from(error: error, fallbackURL: webView?.url))
         }
 
         private func startLoadTimeout(_ loadID: Int, webView: WKWebView) {
@@ -222,9 +285,16 @@ extension RhwpStudioWebView {
                     return
                 }
 
-                let loadingURL = webView?.url?.absoluteString ?? "unknown URL"
+                let loadingURL = webView?.url
                 self.finishLoading()
-                self.onError("웹 viewer 로딩이 시간 초과되었습니다: \(loadingURL)")
+                self.onFailure(
+                    .timeout(
+                        loadingURL: loadingURL,
+                        document: self.currentDocument,
+                        reloadToken: self.currentReloadToken,
+                        timeoutSeconds: Int(Self.loadTimeoutNanoseconds / 1_000_000_000)
+                    )
+                )
             }
         }
 
@@ -272,6 +342,8 @@ extension RhwpStudioWebView {
             switch type {
             case "command":
                 handleHostCommand(body)
+            case "dropped-document":
+                handleDroppedDocument(body)
             case "save-document":
                 saveDocument(body)
             case "share-document":
@@ -284,9 +356,77 @@ extension RhwpStudioWebView {
                 pendingSaveDestination = nil
                 pendingPDFDestinationURL = nil
                 onError(body["message"] as? String)
+            case "runtime-error":
+                handleRuntimeError(body)
             default:
                 break
             }
+        }
+
+        private func handleRuntimeError(_ body: [String: Any]) {
+            finishLoading()
+            onFailure(
+                .runtime(
+                    message: body["message"] as? String,
+                    sourceURL: body["sourceURL"] as? String,
+                    line: intValue(body["line"]),
+                    column: intValue(body["column"]),
+                    reason: body["reason"] as? String
+                )
+            )
+        }
+
+        private func handleDroppedDocument(_ body: [String: Any]) {
+            guard let fileName = body["fileName"] as? String,
+                  Self.isSupportedDocumentFilename(fileName)
+            else {
+                onError("끌어놓은 문서를 열 수 없습니다: HWP/HWPX 파일만 지원합니다.")
+                return
+            }
+
+            if shouldSuppressDroppedDocument(fileName: fileName) {
+                return
+            }
+
+            guard let data = decodedData(
+                from: body,
+                missingMessage: "끌어놓은 문서를 읽을 수 없습니다"
+            ) else {
+                return
+            }
+
+            onDroppedDocument(
+                RhwpStudioDroppedDocument(
+                    data: data,
+                    fileName: fileName
+                )
+            )
+        }
+
+        private func handleDroppedFileURL(_ fileURL: URL) {
+            recentNativeDrop = NativeDropMarker(
+                fileName: Self.normalizedFilename(fileURL.lastPathComponent),
+                handledAt: Date()
+            )
+            onDroppedFileURL(fileURL)
+        }
+
+        private func shouldSuppressDroppedDocument(fileName: String) -> Bool {
+            guard let recentNativeDrop else {
+                return false
+            }
+
+            guard Date().timeIntervalSince(recentNativeDrop.handledAt) <= Self.nativeDropSuppressionInterval else {
+                self.recentNativeDrop = nil
+                return false
+            }
+
+            guard recentNativeDrop.fileName == Self.normalizedFilename(fileName) else {
+                return false
+            }
+
+            self.recentNativeDrop = nil
+            return true
         }
 
         private func handleHostCommand(_ body: [String: Any]) {
@@ -450,6 +590,23 @@ extension RhwpStudioWebView {
             from body: [String: Any],
             missingMessage: String
         ) -> (data: Data, fileName: String)? {
+            guard let data = decodedData(
+                from: body,
+                missingMessage: missingMessage
+            ) else {
+                return nil
+            }
+
+            let fileName = body["fileName"] as? String
+                ?? currentDocument?.filename
+                ?? "document.hwp"
+            return (data, fileName)
+        }
+
+        private func decodedData(
+            from body: [String: Any],
+            missingMessage: String
+        ) -> Data? {
             let data: Data
             if let base64 = body["base64"] as? String {
                 guard let decodedData = Data(base64Encoded: base64) else {
@@ -475,10 +632,7 @@ extension RhwpStudioWebView {
                 return nil
             }
 
-            let fileName = body["fileName"] as? String
-                ?? currentDocument?.filename
-                ?? "document.hwp"
-            return (data, fileName)
+            return data
         }
 
         private func printDocument(_ body: [String: Any]) {
@@ -567,6 +721,15 @@ extension RhwpStudioWebView {
                 return number.intValue
             }
             return nil
+        }
+
+        private static func isSupportedDocumentFilename(_ fileName: String) -> Bool {
+            let pathExtension = URL(fileURLWithPath: fileName).pathExtension.lowercased()
+            return pathExtension == "hwp" || pathExtension == "hwpx"
+        }
+
+        private static func normalizedFilename(_ fileName: String) -> String {
+            URL(fileURLWithPath: fileName).lastPathComponent.lowercased()
         }
 
         private func runNativeCommand(_ command: String, in webView: WKWebView) {
@@ -760,10 +923,53 @@ extension RhwpStudioWebView {
 
 private final class RhwpStudioNativeCommandWebView: WKWebView {
     var nativeCommandHandler: ((String) -> Bool)?
+    var droppedFileURLHandler: ((URL) -> Void)?
+
+    override init(frame: NSRect, configuration: WKWebViewConfiguration) {
+        super.init(frame: frame, configuration: configuration)
+        registerForDraggedTypes([.fileURL])
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     @discardableResult
     func runNativeCommand(_ command: String) -> Bool {
         nativeCommandHandler?(command) ?? false
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        guard canHandleDocumentDrop(from: sender) else {
+            return super.draggingEntered(sender)
+        }
+        return acceptedDropOperation(for: sender)
+    }
+
+    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        guard canHandleDocumentDrop(from: sender) else {
+            return super.draggingUpdated(sender)
+        }
+        return acceptedDropOperation(for: sender)
+    }
+
+    override func prepareForDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard canHandleDocumentDrop(from: sender) else {
+            return super.prepareForDragOperation(sender)
+        }
+        return droppedFileURLHandler != nil
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let droppedFileURLHandler,
+              let fileURL = supportedDocumentFileURL(from: sender)
+        else {
+            return super.performDragOperation(sender)
+        }
+
+        droppedFileURLHandler(fileURL)
+        return true
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
@@ -815,6 +1021,54 @@ private final class RhwpStudioNativeCommandWebView: WKWebView {
         default:
             return nil
         }
+    }
+
+    private func canHandleDocumentDrop(from sender: NSDraggingInfo) -> Bool {
+        droppedFileURLHandler != nil && supportedDocumentFileURL(from: sender) != nil
+    }
+
+    private func acceptedDropOperation(for sender: NSDraggingInfo) -> NSDragOperation {
+        let sourceMask = sender.draggingSourceOperationMask
+        if sourceMask.contains(.copy) {
+            return .copy
+        }
+        if sourceMask.contains(.generic) {
+            return .generic
+        }
+        return []
+    }
+
+    private func supportedDocumentFileURL(from sender: NSDraggingInfo) -> URL? {
+        supportedDocumentFileURLs(from: sender.draggingPasteboard).first
+    }
+
+    private func supportedDocumentFileURLs(from pasteboard: NSPasteboard) -> [URL] {
+        let objects = pasteboard.readObjects(
+            forClasses: [NSURL.self],
+            options: [.urlReadingFileURLsOnly: true]
+        )
+
+        return objects?
+            .compactMap { object -> URL? in
+                if let url = object as? URL {
+                    return url
+                }
+                if let url = object as? NSURL {
+                    return url as URL
+                }
+                return nil
+            }
+            .map(\.standardizedFileURL)
+            .filter(Self.isSupportedDocumentFileURL) ?? []
+    }
+
+    private static func isSupportedDocumentFileURL(_ url: URL) -> Bool {
+        guard url.isFileURL else {
+            return false
+        }
+
+        let pathExtension = url.pathExtension.lowercased()
+        return pathExtension == "hwp" || pathExtension == "hwpx"
     }
 }
 

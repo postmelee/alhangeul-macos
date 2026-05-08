@@ -2,32 +2,36 @@
   "name": "rhwp-studio",
   "source_repository": "https://github.com/edwardkim/rhwp.git",
   "source_ref_kind": "release-tag",
-  "source_release_tag": "v0.7.9",
-  "source_resolved_commit": "0fb3e6758b8ad11d2f3c3849c83b914684e83863",
+  "source_release_tag": "v0.7.10",
+  "source_resolved_commit": "62a458aa317e962cd3d0eec6096728c172d57110",
   "wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "studio_build_command": "npx tsc && npx vite build --base ./",
   "copied_from": "rhwp-studio/dist",
   "excluded_paths": [
     "samples/"
   ],
-  "copied_file_count": 50,
-  "copied_total_bytes": 27704089,
+  "local_overlay_paths": [
+    "alhangeul-wkwebview-overrides.css",
+    "fonts/FONTS.md"
+  ],
+  "copied_file_count": 54,
+  "copied_total_bytes": 28412739,
   "entrypoints": {
     "index_html": {
       "path": "index.html",
-      "sha256": "4bcec64910b0fdfcacb8bae593b614c4af76c3c4d3f1d2252372a3d1a4202a29"
+      "sha256": "6f6de3327714df769695875cdcada550b49532c3e8950494eb2bb048f954e32b"
     },
     "main_js": {
-      "path": "assets/index-CCXookfl.js",
-      "sha256": "3bb81abc018113c808253d75a62aa8ce19545bbccd4ece16d1b4c4df2f465986"
+      "path": "assets/index-BN69C-Lp.js",
+      "sha256": "594133fe7dbe7464af580f573dbddf71c8c251cf0e27311694256c3050a7ecd6"
     },
     "main_css": {
       "path": "assets/index-ro3nVBB2.css",
       "sha256": "d669a5f84fd2945f4d6be9a5471d6d2782ff629f77658a73f6f5d0f1133d7179"
     },
     "wasm": {
-      "path": "assets/rhwp_bg-DtQ01XFR.wasm",
-      "sha256": "bfcf7632d7f4877b69abe3a95e52fa23636f5253c149de877d1975fdac608b41"
+      "path": "assets/rhwp_bg-BZNodj2e.wasm",
+      "sha256": "bdfbd391aa8f4204ff517938fc5b1ad83bb810c80de59f97a72e2be95b9e56fe"
     }
   }
 }

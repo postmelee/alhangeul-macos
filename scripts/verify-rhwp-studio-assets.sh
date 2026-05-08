@@ -3,6 +3,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RESOURCE_DIR="${1:-"$ROOT/Sources/HostApp/Resources/rhwp-studio"}"
+EXPECTED_RELEASE_TAG="v0.7.10"
+EXPECTED_COMMIT="62a458aa317e962cd3d0eec6096728c172d57110"
 
 fail() {
   echo "FAIL: $*" >&2
@@ -14,6 +16,7 @@ fail() {
 [ -f "$RESOURCE_DIR/manifest.json" ] || fail "missing manifest.json"
 [ -f "$RESOURCE_DIR/registerSW.js" ] || fail "missing registerSW.js"
 [ -f "$RESOURCE_DIR/manifest.webmanifest" ] || fail "missing manifest.webmanifest"
+[ -f "$RESOURCE_DIR/alhangeul-wkwebview-overrides.css" ] || fail "missing Alhangeul WKWebView override stylesheet"
 
 js_count="$(find "$RESOURCE_DIR/assets" -maxdepth 1 -name 'index-*.js' -type f | wc -l | tr -d ' ')"
 css_count="$(find "$RESOURCE_DIR/assets" -maxdepth 1 -name 'index-*.css' -type f | wc -l | tr -d ' ')"
@@ -29,6 +32,7 @@ fi
 
 grep -q 'src="./assets/index-' "$RESOURCE_DIR/index.html" || fail "index.html does not use relative JS asset path"
 grep -q 'href="./assets/index-' "$RESOURCE_DIR/index.html" || fail "index.html does not use relative CSS asset path"
+grep -q 'href="./alhangeul-wkwebview-overrides.css"' "$RESOURCE_DIR/index.html" || fail "index.html does not load Alhangeul WKWebView override stylesheet"
 
 if grep -q 'crossorigin' "$RESOURCE_DIR/index.html"; then
   fail "index.html contains crossorigin attributes that break WKWebView file URL asset loading"
@@ -38,7 +42,8 @@ if grep -Eq ' (src|href)="/' "$RESOURCE_DIR/index.html"; then
   fail "index.html contains root-relative src/href paths"
 fi
 
-grep -q '"source_resolved_commit": "0fb3e6758b8ad11d2f3c3849c83b914684e83863"' "$RESOURCE_DIR/manifest.json" || fail "manifest commit does not match v0.7.9 resolved commit"
+grep -q "\"source_release_tag\": \"$EXPECTED_RELEASE_TAG\"" "$RESOURCE_DIR/manifest.json" || fail "manifest release tag does not match $EXPECTED_RELEASE_TAG"
+grep -q "\"source_resolved_commit\": \"$EXPECTED_COMMIT\"" "$RESOURCE_DIR/manifest.json" || fail "manifest commit does not match $EXPECTED_RELEASE_TAG resolved commit"
 grep -q '"studio_build_command": "npx tsc && npx vite build --base ./"' "$RESOURCE_DIR/manifest.json" || fail "manifest does not record relative-base build command"
 
 echo "OK: rhwp-studio assets verified at $RESOURCE_DIR"

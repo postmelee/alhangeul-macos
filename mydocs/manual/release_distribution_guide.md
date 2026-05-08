@@ -19,11 +19,12 @@
 
 현재 저장소에는 다음 릴리스 관련 자산이 있다.
 
-- `scripts/package-release.sh`: Release configuration으로 내부 산출물 `AlhangeulMac.app`을 빌드한 뒤 ASCII filesystem bundle name인 `AlhangeulMac.app`으로 zip 파일을 생성한다.
+- `scripts/package-release.sh`: Release configuration으로 내부 산출물 `Alhangeul.app`을 빌드한 뒤 ASCII filesystem bundle name인 `Alhangeul.app`으로 zip 파일을 생성한다.
 - `scripts/release.sh`: 공개 배포용 DMG release pipeline이다. Developer ID 서명, app/DMG notarization, staple, Gatekeeper 검증, sha256 산출 경로를 포함한다.
 - `Casks/alhangeul-macos.rb`: Homebrew Cask 초안이다.
 - `Sources/HostApp/Info.plist`, `Sources/QLExtension/Info.plist`, `Sources/ThumbnailExtension/Info.plist`: 앱과 extension 버전 정보가 들어 있다.
 - `rhwp-core.lock`: 릴리스에 포함되는 `edwardkim/rhwp` core commit과 Rust bridge 산출물 provenance를 기록한다.
+- `Sources/HostApp/Resources/rhwp-studio/manifest.json`: 릴리스에 포함되는 bundled `rhwp-studio` static asset provenance와 entrypoint hash를 기록한다.
 
 ### 확정된 기준
 
@@ -31,11 +32,19 @@
 
 - GitHub 저장소: `postmelee/alhangeul-macos`
 - 산출물 파일명/Homebrew Cask token: `alhangeul-macos`
-- 앱 filesystem bundle name: `AlhangeulMac.app` (Quick Look/Thumbnail ExtensionKit lookup 안정성을 위해 ASCII 유지)
-- 내부 Xcode product name: `AlhangeulMac`
-- bundle identifier: `com.postmelee.alhangeulmac` 계열
-- 사용자 표시명: 한국어 `알한글` (`ko.lproj/InfoPlist.strings`), 영어 `AlhangeulMac` (`en.lproj/InfoPlist.strings`). 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 ASCII filesystem name과 동일
+- 앱 filesystem bundle name: `Alhangeul.app` (Quick Look/Thumbnail ExtensionKit lookup 안정성을 위해 ASCII 유지)
+- 내부 Xcode product name: `Alhangeul`
+- bundle identifier: `com.postmelee.alhangeul` 계열
+- 사용자 표시명: 한국어 `알한글` (`ko.lproj/InfoPlist.strings`), 영어 `Alhangeul` (`en.lproj/InfoPlist.strings`). 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 ASCII filesystem name과 동일
 - 공개 배포 산출물명: `alhangeul-macos-<version>.dmg`
+
+### 배포 브랜치 기준
+
+v0.1.x public release는 `devel-webview`를 배포 준비 기준 브랜치로 사용한다. 릴리스 후보가 확정되면 `devel-webview`의 검증된 commit을 `main`에 반영하고, Git tag와 GitHub Release는 `main` 기준으로 생성한다.
+
+`devel`은 native viewer renderer와 장기 개발 통합 브랜치이므로 배포 직전 기준 브랜치로 사용하지 않는다. `devel-webview`에 merge된 release-critical 변경은 별도 PR 또는 cherry-pick으로 `devel`에 후속 동기화한다.
+
+브랜치 역할과 출시 후 rename 후보는 [`branch_strategy_webview_native.md`](../tech/branch_strategy_webview_native.md)를 기준으로 판단한다.
 
 ### Apple Developer Program 준비 상태
 
@@ -114,6 +123,7 @@ Gatekeeper나 quarantine 문제가 보고되면 먼저 다음을 확인한다.
 git status --short --branch
 cat rhwp-core.lock
 ./scripts/build-rust-macos.sh --verify-lock
+scripts/verify-rhwp-studio-assets.sh
 ```
 
 확인 기준:
@@ -121,9 +131,38 @@ cat rhwp-core.lock
 - 작업 브랜치와 릴리스 기준 브랜치가 명확해야 한다.
 - `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`의 repo/ref/commit 기준이 일치해야 한다.
 - `Frameworks/universal/librhwp.a`, `Frameworks/generated_rhwp.h`의 hash/size가 `rhwp-core.lock`과 일치해야 한다.
+- `Sources/HostApp/Resources/rhwp-studio/manifest.json`의 release tag/commit과 bundled entrypoint hash가 현재 resource tree와 일치해야 한다.
 - 의도하지 않은 미커밋 변경이 없어야 한다.
 - 릴리스에 포함할 PR이 모두 merge되어 있어야 한다.
 - public release 산출물을 만들 때는 Apple Developer Program, Developer ID Application 인증서, notarytool keychain profile이 준비되어 있어야 한다.
+
+## v0.1 artifact 구성 기준
+
+v0.1 release artifact는 사용 목적을 기준으로 세 계층으로 분리한다.
+
+| 계층 | 기준 산출물 | 목적 | public 사용 |
+|------|-------------|------|-------------|
+| 개발/설치본 smoke | `build.noindex/release/Alhangeul.app`, `alhangeul-macos-<version>.zip` | Release configuration bundle 구성과 Finder/Quick Look/Thumbnail 설치본 smoke 입력 | 아니오 |
+| public release rehearsal | `alhangeul-macos-<version>-rehearsal.dmg`, `.sha256` | DMG layout, checksum 생성, release script path 확인 | 아니오 |
+| public release | `alhangeul-macos-<version>.dmg`, `.sha256` | GitHub Release asset, 사용자 배포, Homebrew Cask digest 기준 | 예 |
+
+checksum 공개 기준:
+
+| checksum | 공개 범위 | 기준 |
+|----------|-----------|------|
+| zip stdout checksum | 단계 보고서, 설치본 smoke report | 개발/검증용 식별자. GitHub Release asset이나 Cask digest로 쓰지 않는다. |
+| rehearsal DMG `.sha256` | rehearsal workflow artifact와 단계 보고서 | public release checksum으로 쓰지 않는다. |
+| public DMG `.sha256` | GitHub Release asset, release note, Homebrew Cask 교체 입력 | 사용자 배포 기준 checksum이다. |
+
+provenance 진실 원천:
+
+| 대상 | 진실 원천 | 공개/검증 방식 |
+|------|-----------|---------------|
+| `rhwp` core release tag/commit | `rhwp-core.lock` | release note에 tag/commit을 직접 표시하고 lock 파일을 검증 기준으로 둔다. |
+| Rust bridge artifact hash/size | `rhwp-core.lock` | release 전 `./scripts/build-rust-macos.sh --verify-lock`으로 검증한다. |
+| FFI ABI surface | `rhwp-ffi-symbols.txt` | 최종 보고서와 PR에서 변경 여부를 기록한다. |
+| bundled `rhwp-studio` asset | `Sources/HostApp/Resources/rhwp-studio/manifest.json` | release note에 manifest 위치와 tag/commit을 표시하고 `scripts/verify-rhwp-studio-assets.sh`로 검증한다. |
+| Third Party notices | `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md` | release note에서 문서 위치를 안내한다. |
 
 ## 필수 검증
 
@@ -133,7 +172,7 @@ cat rhwp-core.lock
 ./scripts/build-rust-macos.sh --verify-lock
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build.noindex/DerivedData \
@@ -145,7 +184,7 @@ xcodebuild -project AlhangeulMac.xcodeproj \
 Release configuration 검증:
 
 ```bash
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Release \
   -derivedDataPath build.noindex/DerivedDataRelease \
@@ -242,7 +281,7 @@ build.noindex/release/alhangeul-macos-0.1.0.zip
 - Rust bridge와 `Rhwp.xcframework` 재생성 후 `rhwp-core.lock` 검증
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
-- 내부 산출물 `AlhangeulMac.app`을 release staging으로 복사한 뒤 `AlhangeulMac.app` 이름으로 zip 압축
+- 내부 산출물 `Alhangeul.app`을 release staging으로 복사한 뒤 `Alhangeul.app` 이름으로 zip 압축
 - Release staging app은 local signing과 sealed resources가 적용되어 Finder 통합 smoke test의 기준 산출물로 사용할 수 있음
 - SHA256 출력
 
@@ -275,7 +314,7 @@ ALHANGEUL_BUILD_ROOT
 public mode 산출물:
 
 ```text
-build.noindex/release/AlhangeulMac.app
+build.noindex/release/Alhangeul.app
 build.noindex/release/alhangeul-macos-0.1.0.dmg
 build.noindex/release/alhangeul-macos-0.1.0.dmg.sha256
 ```
@@ -317,7 +356,7 @@ public release 전 layout, DMG 생성, checksum 생성만 확인할 때 rehearsa
 rehearsal mode 산출물:
 
 ```text
-build.noindex/release/AlhangeulMac.app
+build.noindex/release/Alhangeul.app
 build.noindex/release/alhangeul-macos-0.1.0-rehearsal.dmg
 build.noindex/release/alhangeul-macos-0.1.0-rehearsal.dmg.sha256
 ```
@@ -358,10 +397,10 @@ public mode에서 확인할 항목:
 대표 확인 명령:
 
 ```bash
-codesign --verify --deep --strict --verbose=2 build.noindex/release/AlhangeulMac.app
-xcrun stapler validate build.noindex/release/AlhangeulMac.app
+codesign --verify --deep --strict --verbose=2 build.noindex/release/Alhangeul.app
+xcrun stapler validate build.noindex/release/Alhangeul.app
 xcrun stapler validate build.noindex/release/alhangeul-macos-0.1.0.dmg
-spctl --assess --type execute --verbose build.noindex/release/AlhangeulMac.app
+spctl --assess --type execute --verbose build.noindex/release/Alhangeul.app
 spctl --assess --type open --context context:primary-signature --verbose build.noindex/release/alhangeul-macos-0.1.0.dmg
 ```
 
@@ -373,6 +412,8 @@ GitHub Release 생성 전 확인:
 
 - release branch 또는 tag 기준 commit이 정확한가
 - `rhwp-core.lock`의 core repository와 commit이 release note에 기록되었는가
+- `rhwp-studio` manifest의 release tag와 commit이 release note에 기록되었는가
+- third-party notices 위치가 release note에 기록되었는가
 - `validate-stage3-render.sh` 결과가 release report에 기록되었는가
 - DMG 파일 SHA256이 기록되었는가
 - 알려진 한계와 수동 확인 항목이 기록되었는가
@@ -382,6 +423,8 @@ Release note에 포함할 내용:
 - 주요 변경 사항
 - 지원 macOS 버전
 - 포함된 `edwardkim/rhwp` core commit
+- 포함된 `rhwp-studio` asset manifest와 commit
+- Third Party notices와 bundled font notice 위치
 - 설치/실행 주의사항
 - Quick Look/Thumbnail extension 등록 확인 방법
 - 알려진 문제
@@ -405,7 +448,7 @@ Release note에 포함할 내용:
 - `sha256`이 public DMG의 실제 digest와 일치하는가
 - cask token이 `alhangeul-macos`인가
 - `homepage`이 현재 저장소를 가리키는가
-- `app "AlhangeulMac.app"`이 산출물과 일치하는가
+- `app "Alhangeul.app"`이 산출물과 일치하는가
 - caveats 문구가 현재 extension 등록 흐름과 일치하는가
 
 운영 기준:
@@ -455,7 +498,7 @@ raw path 검증은 Homebrew가 tap context를 요구할 수 있으므로, 최종
 2. Homebrew Cask가 공개된 경우 해당 버전 설치 경로를 중단하거나 새 patch release를 만든다.
 3. 문제를 GitHub Issue로 등록한다.
 4. 원인, 영향 범위, 재발 방지책을 `mydocs/troubleshootings/`에 기록한다.
-5. 수정 PR을 `devel`로 merge한 뒤 새 릴리스 후보를 만든다.
+5. 수정 PR을 출시 대상 통합 브랜치로 merge한 뒤 새 릴리스 후보를 만든다. v0.1.x 기준은 `devel-webview`이며, native renderer 장기 브랜치에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `devel`에 후속 반영한다.
 
 ## 릴리스 체크리스트
 
@@ -463,6 +506,7 @@ raw path 검증은 Homebrew가 tap context를 요구할 수 있으므로, 최종
 - [ ] 릴리스 기준 branch/commit 확정
 - [ ] `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock` 정합성 확인
 - [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과
+- [ ] `scripts/verify-rhwp-studio-assets.sh` 통과
 - [ ] Debug build 통과
 - [ ] Release build 통과
 - [ ] `validate-stage3-render.sh` 통과
@@ -471,6 +515,7 @@ raw path 검증은 Homebrew가 tap context를 요구할 수 있으므로, 최종
 - [ ] 개발용 zip 산출물 생성
 - [ ] public DMG 산출물 생성
 - [ ] public DMG SHA256 기록
+- [ ] release note에 `rhwp-core.lock`, `rhwp-studio` manifest, third-party notices 기준 기록
 - [ ] 서명/공증 검증 완료
 - [ ] GitHub Release note 작성
 - [ ] `scripts/update-cask-sha256.sh`로 Cask version/sha256 갱신

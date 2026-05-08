@@ -17,18 +17,18 @@ enum ExtensionStatus: CaseIterable, Hashable {
     var bundleIdentifier: String {
         switch self {
         case .preview:
-            "com.postmelee.alhangeulmac.QLExtension"
+            "com.postmelee.alhangeul.QLExtension"
         case .thumbnail:
-            "com.postmelee.alhangeulmac.ThumbnailExtension"
+            "com.postmelee.alhangeul.ThumbnailExtension"
         }
     }
 
     var appexBundleName: String {
         switch self {
         case .preview:
-            "AlhangeulMacPreview.appex"
+            "AlhangeulPreview.appex"
         case .thumbnail:
-            "AlhangeulMacThumbnail.appex"
+            "AlhangeulThumbnail.appex"
         }
     }
 }

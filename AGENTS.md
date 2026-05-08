@@ -44,7 +44,7 @@
 
 - `Sources/RhwpCoreBridge`에 AppKit/UIKit 직접 의존 금지 — 상세: [`swift_macos_code_rules_guide.md`](mydocs/manual/swift_macos_code_rules_guide.md)
 - Rust FFI 경계의 포인터/길이/수명 규칙 준수 — 상세: 동일 매뉴얼
-- `project.yml`이 Xcode project 원본. `AlhangeulMac.xcodeproj` 직접 수정 금지 — 상세: [`build_run_guide.md`](mydocs/manual/build_run_guide.md)
+- `project.yml`이 Xcode project 원본. `Alhangeul.xcodeproj` 직접 수정 금지 — 상세: [`build_run_guide.md`](mydocs/manual/build_run_guide.md)
 - 변경 유형별 최소 검증 필수 — 상세: 동일 매뉴얼
 - `build.noindex/` 아래에 `.app`/`.appex` 산출물 배치 (Spotlight 검색 혼선 방지) — 상세: 동일 매뉴얼
 - core 안정 기준은 Stable의 경우 release tag + resolved commit, Demo/Preview의 경우 resolved commit `rev` pin. branch/floating ref는 안정 기준으로 취급하지 않음 — 상세: [`core_dependency_operation_guide.md`](mydocs/manual/core_dependency_operation_guide.md)

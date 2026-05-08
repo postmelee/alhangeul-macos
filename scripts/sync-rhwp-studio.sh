@@ -3,7 +3,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 UPSTREAM_DIR="${1:-"$ROOT/build.noindex/rhwp-upstream-task134"}"
-EXPECTED_COMMIT="0fb3e6758b8ad11d2f3c3849c83b914684e83863"
+EXPECTED_RELEASE_TAG="v0.7.10"
+EXPECTED_COMMIT="62a458aa317e962cd3d0eec6096728c172d57110"
 TARGET="$ROOT/Sources/HostApp/Resources/rhwp-studio"
 DIST="$UPSTREAM_DIR/rhwp-studio/dist"
 
@@ -33,12 +34,23 @@ if [ ! -f "$DIST/index.html" ]; then
 fi
 
 mkdir -p "$TARGET"
-rsync -a --delete --exclude 'samples/' "$DIST/" "$TARGET/"
+rsync -a --delete \
+  --exclude 'samples/' \
+  --exclude 'alhangeul-wkwebview-overrides.css' \
+  --exclude 'fonts/FONTS.md' \
+  "$DIST/" "$TARGET/"
+find "$TARGET" -type f -exec chmod 0644 {} +
 
 # WKWebView file URL loading treats explicit crossorigin subresource requests
 # conservatively. Keep bundled same-directory JS/CSS as normal same-origin
 # file resources so the studio UI is styled and bootstrapped in HostApp.
-/usr/bin/perl -0pi -e 's/\s+crossorigin(?=\s|>)/g' "$TARGET/index.html"
+/usr/bin/perl -0pi -e 's/\s+crossorigin(?=\s|>)//g' "$TARGET/index.html"
+if [ -f "$TARGET/alhangeul-wkwebview-overrides.css" ] \
+  && ! grep -q 'alhangeul-wkwebview-overrides.css' "$TARGET/index.html"; then
+  /usr/bin/perl -0pi -e \
+    's#(<link rel="stylesheet" href="\./assets/index-[^"]+\.css">\n?)#$1  <link rel="stylesheet" href="./alhangeul-wkwebview-overrides.css">\n#' \
+    "$TARGET/index.html"
+fi
 
 main_js="$(basename "$(find "$TARGET/assets" -maxdepth 1 -name 'index-*.js' -type f | head -1)")"
 main_css="$(basename "$(find "$TARGET/assets" -maxdepth 1 -name 'index-*.css' -type f | head -1)")"
@@ -56,13 +68,17 @@ cat > "$TARGET/manifest.json" <<JSON
   "name": "rhwp-studio",
   "source_repository": "https://github.com/edwardkim/rhwp.git",
   "source_ref_kind": "release-tag",
-  "source_release_tag": "v0.7.9",
+  "source_release_tag": "$EXPECTED_RELEASE_TAG",
   "source_resolved_commit": "$EXPECTED_COMMIT",
   "wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "studio_build_command": "npx tsc && npx vite build --base ./",
   "copied_from": "rhwp-studio/dist",
   "excluded_paths": [
     "samples/"
+  ],
+  "local_overlay_paths": [
+    "alhangeul-wkwebview-overrides.css",
+    "fonts/FONTS.md"
   ],
   "copied_file_count": $copied_file_count,
   "copied_total_bytes": $copied_total_bytes,
