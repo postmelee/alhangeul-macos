@@ -164,6 +164,21 @@ provenance 진실 원천:
 | bundled `rhwp-studio` asset | `Sources/HostApp/Resources/rhwp-studio/manifest.json` | release note에 manifest 위치와 tag/commit을 표시하고 `scripts/verify-rhwp-studio-assets.sh`로 검증한다. |
 | Third Party notices | `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md` | release note에서 문서 위치를 안내한다. |
 
+## v0.1 렌더링 경로와 알려진 한계 공개 기준
+
+public release note에는 artifact/provenance/checksum뿐 아니라 v0.1의 렌더링 경로와 알려진 한계를 함께 기록한다.
+
+포함 기준:
+
+- HostApp viewer/editor 화면은 bundled `rhwp-studio`를 WKWebView에서 실행한다.
+- PDF 내보내기, Quick Look preview, Finder thumbnail은 Rust bridge와 Swift native render tree 계열 경로를 사용하므로 앱 화면과 표시가 다를 수 있다.
+- 인쇄는 `rhwp-studio` page payload를 별도 WKWebView/PDFKit/AppKit 출력 경로로 처리한다.
+- Quick Look/Thumbnail 설치본 smoke는 extension 등록과 HWP/HWPX thumbnail 생성 확인이며, preview 수동 확인과 native renderer visual parity를 대체하지 않는다.
+- 손상·대용량·미지원 문서 fallback은 파일 복구가 아니라 앱과 extension이 raw error, hang, crash로 끝나지 않게 하는 안전장치다.
+- native renderer style, image effect/fill, text layout, RawSvg/OLE 등 parity 개선은 v0.5 이후 Swift native viewer 범위로 남긴다.
+
+release note와 release report에서 smoke 결과를 쓸 때는 실제 실행한 항목만 성공으로 기록한다. 실행하지 않은 `qlmanage -p`, Finder Space preview, public DMG Gatekeeper 검증은 수동 확인 또는 후속 확인으로 분리한다.
+
 ## 필수 검증
 
 기본 검증:
@@ -435,7 +450,7 @@ GitHub Release 생성 전 확인:
 - third-party notices 위치가 release note에 기록되었는가
 - `validate-stage3-render.sh` 결과가 release report에 기록되었는가
 - DMG 파일 SHA256이 기록되었는가
-- 알려진 한계와 수동 확인 항목이 기록되었는가
+- 렌더링 경로, 알려진 한계, 수동 확인 항목이 기록되었는가
 
 Release note에 포함할 내용:
 
@@ -443,6 +458,8 @@ Release note에 포함할 내용:
 - 지원 macOS 버전
 - 포함된 `edwardkim/rhwp` core commit
 - 포함된 `rhwp-studio` asset manifest와 commit
+- HostApp viewer, PDF 내보내기, 인쇄, Quick Look, Thumbnail의 렌더링 경로와 알려진 한계
+- 설치본 smoke 결과와 수동 확인 항목
 - Third Party notices와 bundled font notice 위치
 - 설치/실행 주의사항
 - Quick Look/Thumbnail extension 등록 확인 방법
@@ -535,6 +552,7 @@ raw path 검증은 Homebrew가 tap context를 요구할 수 있으므로, 최종
 - [ ] public DMG 산출물 생성
 - [ ] public DMG SHA256 기록
 - [ ] release note에 `rhwp-core.lock`, `rhwp-studio` manifest, third-party notices 기준 기록
+- [ ] release note에 렌더링 경로, 알려진 한계, 수동 확인 항목 기록
 - [ ] 서명/공증 검증 완료
 - [ ] GitHub Release note 작성
 - [ ] `scripts/update-cask-sha256.sh`로 Cask version/sha256 갱신

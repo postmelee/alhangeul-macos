@@ -211,12 +211,22 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 
 ### Rendering Paths (렌더링 경로)
 
-- HostApp 화면 렌더링은 `rhwp-studio`의 Web/WASM rendering을 WKWebView에서 사용
-- HostApp PDF 내보내기, Quick Look preview, Finder thumbnail은 Rust bridge와 Swift 공통 계층을 통해 page image/PDF를 생성
-- 인쇄는 `rhwp-studio`의 page SVG를 별도 WKWebView/PDFKit/AppKit print operation으로 전달
-- native renderer는 Swift native viewer/editor 전환을 위한 장기 기본 경로로 계속 개선
-- native rendering 경로는 Rust core render tree JSON, CoreGraphics, CoreText, 이미지 bin data를 사용
-- WKWebView 경로는 native parity가 충분해질 때까지 fallback과 비교 기준선으로 유지
+| 표면 | v0.1 렌더링 경로 | 기준 |
+|------|------------------|------|
+| HostApp viewer/editor 화면 | `rhwp-studio` Web/WASM rendering in WKWebView | 첫 공개 배포의 기본 viewer/editor 경로 |
+| PDF 내보내기 | Rust bridge + Swift native render tree PDF 경로 | 앱 화면과 같은 renderer를 쓰지는 않음 |
+| 인쇄 | `rhwp-studio` page payload + 별도 WKWebView/PDFKit/AppKit print operation | PDF 내보내기와 다른 출력 경로 |
+| Quick Look preview | Rust bridge + Swift native render tree bitmap/PDF | Finder preview용 경로 |
+| Finder thumbnail | Rust bridge + Swift native first-page bitmap/cache | Finder icon/thumbnail용 경로 |
+
+WKWebView 경로는 native parity가 충분해질 때까지 fallback과 비교 기준선으로 유지합니다. native renderer는 Swift native viewer/editor 전환을 위한 장기 기본 경로로 계속 개선하며, Rust core render tree JSON, CoreGraphics, CoreText, 이미지 bin data를 사용합니다.
+
+### v0.1 Known Limitations (알려진 제한 사항)
+
+- 앱 화면의 viewer/editor와 Finder Quick Look/thumbnail, PDF 내보내기, 인쇄는 서로 다른 렌더링 경로를 사용할 수 있습니다.
+- Quick Look/Thumbnail smoke 통과는 extension 등록과 기본 렌더 성공을 뜻하며, 모든 문서가 앱 화면과 같은 시각 결과로 보인다는 보장은 아닙니다.
+- 손상·대용량·미지원 문서 fallback은 앱과 extension이 멈추지 않도록 하는 안전장치이며, 파일 복구나 부분 렌더링을 보장하지 않습니다.
+- native renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity 개선은 v0.5 이후 Swift native viewer 범위에서 계속 다룹니다.
 
 ### Core Bridge (코어 브리지)
 
