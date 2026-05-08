@@ -101,7 +101,7 @@ v0.1 public release의 기본 배포 수준은 **Developer ID signed + notarized
 public release note, README, Homebrew caveats에는 다음 기준을 일관되게 적용한다.
 
 - 설치 파일: `alhangeul-macos-<version>.dmg`
-- 설치 방식: DMG를 열고 `AlhangeulMac.app`을 `/Applications`로 복사
+- 설치 방식: DMG를 열고 `Alhangeul.app`을 `/Applications`로 복사
 - 첫 실행: 설치 후 앱을 한 번 실행해 macOS가 Quick Look/Thumbnail extension을 발견하고 등록할 수 있게 안내
 - Finder 확인: `.hwp` 또는 `.hwpx` 파일을 Finder에서 선택한 뒤 Space로 Quick Look preview를 확인하고, Finder icon view에서 thumbnail 갱신을 확인
 - Gatekeeper: notarized DMG 기준으로 일반 실행이 가능해야 하며, 사용자가 임의로 quarantine을 해제하는 안내를 기본 설치 경로로 쓰지 않는다

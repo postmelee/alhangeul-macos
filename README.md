@@ -242,7 +242,7 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 
 v0.1 public 배포 기준은 Developer ID로 서명하고 Apple notarization을 통과한 DMG입니다. GitHub Release가 게시되면 `alhangeul-macos-<version>.dmg`와 checksum을 함께 공개하고, Homebrew Cask는 같은 notarized DMG와 고정 `sha256`을 기준으로 제공합니다.
 
-설치 후에는 `AlhangeulMac.app`을 한 번 실행하세요. macOS가 Quick Look 및 Thumbnail extension을 발견하고 등록한 뒤 Finder에서 `.hwp`, `.hwpx` preview와 thumbnail을 사용할 수 있습니다.
+설치 후에는 `Alhangeul.app`을 한 번 실행하세요. macOS가 Quick Look 및 Thumbnail extension을 발견하고 등록한 뒤 Finder에서 `.hwp`, `.hwpx` preview와 thumbnail을 사용할 수 있습니다.
 
 릴리스가 게시되기 전에는 아래 소스 빌드 절차를 사용하세요. unsigned, ad-hoc signed, rehearsal DMG는 일반 사용자 배포 산출물이 아닙니다.
 
