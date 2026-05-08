@@ -297,18 +297,23 @@ video {
 }
 
 .app-intro-section {
-  min-height: calc(100svh - var(--header-height));
+  height: calc(100svh - var(--header-height));
+  min-height: var(--intro-min-height);
   display: flex;
-  align-items: center;
-  padding: clamp(30px, 4.2vh, 46px) 20px clamp(30px, 4.2vh, 46px);
+  align-items: flex-start;
+  padding: clamp(18px, 2.4vh, 30px) 20px clamp(24px, 3vh, 40px);
   background: #ffffff;
+  overflow: hidden;
 }
 
 .app-intro-inner {
   width: min(var(--wide-width), 100%);
+  height: 100%;
   margin: 0 auto;
   display: grid;
-  gap: clamp(14px, 2vw, 22px);
+  grid-template-rows: auto auto auto;
+  align-content: start;
+  gap: clamp(30px, 3.2vh, 38px);
 }
 
 .app-intro-copy {
@@ -328,30 +333,24 @@ video {
 .app-intro-lead {
   max-width: 820px;
   margin: 12px auto 0;
-  color: var(--text);
+  color: var(--muted);
   font-size: clamp(18px, 1.8vw, 21px);
   line-height: 1.28;
-  font-weight: 600;
-  word-break: keep-all;
-}
-
-.app-intro-philosophy {
-  max-width: 780px;
-  margin: 10px auto 0;
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.48;
   word-break: keep-all;
 }
 
 .app-intro-media {
-  width: min(960px, 100%, 82svh);
+  width: fit-content;
+  max-width: min(1180px, 100%);
   margin: 0 auto;
+  align-self: start;
 }
 
 .app-intro-shot {
+  width: fit-content;
+  max-width: 100%;
   margin: 0;
-  border-radius: 18px;
+  border-radius: 10px;
   background: #050505;
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.16);
   overflow: hidden;
@@ -359,18 +358,20 @@ video {
 
 .app-intro-shot img {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
+  max-height: min(61svh, 700px);
   height: auto;
 }
 
 .app-intro-capabilities {
-  width: min(980px, 100%);
+  width: min(1120px, 100%);
   margin: 0 auto;
   padding: 0;
   list-style: none;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(18px, 3vw, 34px);
+  gap: clamp(20px, 3.2vw, 42px);
 }
 
 .app-intro-capabilities li {
@@ -1491,25 +1492,32 @@ video {
 
 .site-footer {
   width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(0, 760px) minmax(140px, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-top: 80px;
-  padding: 48px max(40px, calc((100% - var(--wide-width)) / 2));
+  column-gap: 32px;
+  margin-top: 56px;
+  padding: 30px max(32px, calc((100% - var(--wide-width)) / 2));
   background: var(--parchment);
 }
 
+.site-footer .footer-brand {
+  justify-self: start;
+  white-space: nowrap;
+}
+
 .site-footer p {
-  max-width: 560px;
+  width: 100%;
   margin: 0;
   line-height: 1.55;
 }
 
 .site-footer nav {
   display: inline-flex;
+  justify-self: end;
   gap: 18px;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 :focus-visible {
@@ -1542,14 +1550,31 @@ video {
   }
 
   .app-intro-section {
+    height: auto;
     min-height: auto;
-    padding-top: 62px;
-    padding-bottom: 66px;
+    overflow: visible;
+    padding-top: 46px;
+    padding-bottom: 58px;
+  }
+
+  .app-intro-inner {
+    height: auto;
+    grid-template-rows: none;
   }
 
   .app-intro-media {
-    width: min(760px, 100%, 82svh);
+    width: min(860px, 100%);
+    max-width: 100%;
     margin: 0 auto;
+  }
+
+  .app-intro-shot {
+    width: 100%;
+  }
+
+  .app-intro-shot img {
+    width: 100%;
+    max-height: none;
   }
 }
 
@@ -1599,7 +1624,12 @@ video {
 
   .site-footer {
     grid-template-columns: 1fr;
-    display: grid;
+    justify-items: start;
+    gap: 16px;
+  }
+
+  .site-footer nav {
+    justify-self: start;
   }
 
   .features-section {
@@ -1798,12 +1828,12 @@ video {
   }
 
   .app-intro-section {
-    padding-top: 56px;
-    padding-bottom: 60px;
+    padding-top: 44px;
+    padding-bottom: 56px;
   }
 
   .app-intro-inner {
-    gap: 22px;
+    gap: 18px;
   }
 
   .app-intro-copy h2 {
@@ -1816,14 +1846,8 @@ video {
     line-height: 1.32;
   }
 
-  .app-intro-philosophy {
-    margin-top: 10px;
-    font-size: 14px;
-    line-height: 1.52;
-  }
-
   .app-intro-shot {
-    border-radius: 14px;
+    border-radius: 6px;
   }
 
   .app-intro-capabilities {
