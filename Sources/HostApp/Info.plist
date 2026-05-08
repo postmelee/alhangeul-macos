@@ -26,6 +26,16 @@
 	<true/>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://postmelee.github.io/alhangeul-macos/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>5bIatnE362KFmrf9NneeE7gVvkKfTnWK7c26MwfFLSs=</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
