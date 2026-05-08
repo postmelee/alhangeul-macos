@@ -149,6 +149,9 @@ jobs:
           if ! command -v xcodegen >/dev/null 2>&1; then
             brew install xcodegen
           fi
+          if ! command -v cbindgen >/dev/null 2>&1; then
+            brew install cbindgen
+          fi
           rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
       - name: Import Developer ID certificate
