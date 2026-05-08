@@ -297,10 +297,10 @@ video {
 }
 
 .app-intro-section {
-  min-height: calc(100svh - var(--header-height));
+  min-height: auto;
   display: flex;
-  align-items: center;
-  padding: clamp(30px, 4.2vh, 46px) 20px clamp(30px, 4.2vh, 46px);
+  align-items: flex-start;
+  padding: clamp(56px, 7vh, 72px) 20px clamp(52px, 7vh, 76px);
   background: #ffffff;
 }
 
@@ -308,7 +308,7 @@ video {
   width: min(var(--wide-width), 100%);
   margin: 0 auto;
   display: grid;
-  gap: clamp(14px, 2vw, 22px);
+  gap: clamp(18px, 2.4vw, 30px);
 }
 
 .app-intro-copy {
@@ -336,16 +336,34 @@ video {
 }
 
 .app-intro-philosophy {
-  max-width: 780px;
-  margin: 10px auto 0;
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.48;
+  max-width: 880px;
+  margin: 18px auto 0;
+  padding: 14px 0 15px;
+  border-top: 1px solid rgba(29, 29, 31, 0.14);
+  border-bottom: 1px solid rgba(29, 29, 31, 0.14);
   word-break: keep-all;
 }
 
+.app-intro-philosophy p {
+  margin: 0;
+}
+
+.app-intro-principle {
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.42;
+  font-weight: 600;
+}
+
+.app-intro-philosophy p + p {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.52;
+}
+
 .app-intro-media {
-  width: min(960px, 100%, 82svh);
+  width: min(1160px, 100%);
   margin: 0 auto;
 }
 
@@ -364,13 +382,13 @@ video {
 }
 
 .app-intro-capabilities {
-  width: min(980px, 100%);
+  width: min(1120px, 100%);
   margin: 0 auto;
   padding: 0;
   list-style: none;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: clamp(18px, 3vw, 34px);
+  gap: clamp(20px, 3.2vw, 42px);
 }
 
 .app-intro-capabilities li {
@@ -1375,12 +1393,12 @@ video {
 
   .app-intro-section {
     min-height: auto;
-    padding-top: 62px;
+    padding-top: 58px;
     padding-bottom: 66px;
   }
 
   .app-intro-media {
-    width: min(760px, 100%, 82svh);
+    width: min(860px, 100%);
     margin: 0 auto;
   }
 }
@@ -1640,9 +1658,20 @@ video {
   }
 
   .app-intro-philosophy {
-    margin-top: 10px;
-    font-size: 14px;
-    line-height: 1.52;
+    max-width: 100%;
+    margin-top: 14px;
+    padding: 13px 0 14px;
+  }
+
+  .app-intro-principle {
+    font-size: 15px;
+    line-height: 1.48;
+  }
+
+  .app-intro-philosophy p + p {
+    margin-top: 7px;
+    font-size: 13px;
+    line-height: 1.56;
   }
 
   .app-intro-shot {
