@@ -313,7 +313,7 @@ video {
   display: grid;
   grid-template-rows: auto auto auto;
   align-content: start;
-  gap: clamp(12px, 1.4vh, 18px);
+  gap: clamp(30px, 3.2vh, 38px);
 }
 
 .app-intro-copy {
@@ -336,7 +336,6 @@ video {
   color: var(--muted);
   font-size: clamp(18px, 1.8vw, 21px);
   line-height: 1.28;
-  font-weight: 600;
   word-break: keep-all;
 }
 
@@ -351,7 +350,7 @@ video {
   width: fit-content;
   max-width: 100%;
   margin: 0;
-  border-radius: 18px;
+  border-radius: 10px;
   background: #050505;
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.16);
   overflow: hidden;
@@ -1493,25 +1492,32 @@ video {
 
 .site-footer {
   width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(0, 760px) minmax(140px, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-top: 80px;
-  padding: 48px max(40px, calc((100% - var(--wide-width)) / 2));
+  column-gap: 32px;
+  margin-top: 56px;
+  padding: 30px max(32px, calc((100% - var(--wide-width)) / 2));
   background: var(--parchment);
 }
 
+.site-footer .footer-brand {
+  justify-self: start;
+  white-space: nowrap;
+}
+
 .site-footer p {
-  max-width: 560px;
+  width: 100%;
   margin: 0;
   line-height: 1.55;
 }
 
 .site-footer nav {
   display: inline-flex;
+  justify-self: end;
   gap: 18px;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 :focus-visible {
@@ -1618,7 +1624,12 @@ video {
 
   .site-footer {
     grid-template-columns: 1fr;
-    display: grid;
+    justify-items: start;
+    gap: 16px;
+  }
+
+  .site-footer nav {
+    justify-self: start;
   }
 
   .features-section {
@@ -1836,7 +1847,7 @@ video {
   }
 
   .app-intro-shot {
-    border-radius: 14px;
+    border-radius: 6px;
   }
 
   .app-intro-capabilities {

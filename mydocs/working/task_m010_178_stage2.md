@@ -86,6 +86,34 @@ curl -I http://127.0.0.1:8080/
 
 Browser/IAB는 이번 환경에서 viewport resize API를 제공하지 않아 실제 390px 브라우저 viewport 자동 캡처는 수행하지 못했다. 대신 `960px` 이하와 좁은 화면 override에서 app intro padding/gap이 함께 보정된 것을 확인했다.
 
+## 최종 추가 피드백 반영
+
+작업지시자의 마지막 시각 피드백에 따라 섹션 2와 footer를 추가 보정했다.
+
+- 섹션 2 내부 grid gap을 `clamp(30px, 3.2vh, 38px)`로 정리해 직접 조정한 30px 기준을 유지했다.
+- 리드 문구의 굵기를 낮춰 제목 아래 보조 문구로 읽히게 했다.
+- 스크린샷 radius를 데스크톱 `10px`, 모바일 `6px`로 낮춰 이미지 모서리를 덜 둥글게 했다.
+- footer 설명을 기존 `뷰어 앱` 설명에서 삭제했던 철학 문구 기반의 오픈소스 도구 설명으로 교체했다.
+- footer 높이를 줄이고, 가운데 설명을 FAQ와 같은 `760px` 중앙 칼럼에 맞추도록 3열 grid로 재정렬했다.
+- 최신 `origin/devel-webview`를 병합해 Task #177 변경이 PR에서 되돌려지지 않도록 정리했다.
+
+추가 검증:
+
+```bash
+node --check docs/script.js
+rg -n "app-intro|og-main|site-footer|문서 접근은 특정 프로그램|grid-template-columns: minmax\\(140px" docs/index.html docs/styles.css docs/script.js
+git diff --check -- docs mydocs
+curl -I http://127.0.0.1:8080/
+```
+
+결과:
+
+- `node --check docs/script.js` 통과
+- 섹션 2, 스크린샷, footer, 철학 문구 반영 확인
+- `git diff --check` 통과
+- 로컬 서버 응답 `HTTP/1.0 200 OK` 확인
+- Browser/IAB에서 footer 문구, 브랜드 줄바꿈 해소, console error/warn 없음 확인
+
 ## 다음 단계 영향
 
 Stage 3에서는 최종 보고서 작성, 오늘할일 완료 처리, PR 준비 절차로 넘어간다. 추가 디자인 피드백이 없으면 현재 소스 상태를 기준으로 최종 정리할 수 있다.
