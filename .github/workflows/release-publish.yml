@@ -153,6 +153,9 @@ jobs:
             brew install cbindgen
           fi
           rustup target add aarch64-apple-darwin x86_64-apple-darwin
+          rustup show active-toolchain
+          rustc --version
+          cargo --version
 
       - name: Import Developer ID certificate
         id: keychain
