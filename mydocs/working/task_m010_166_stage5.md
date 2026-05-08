@@ -117,6 +117,8 @@ source=Notarized Developer ID
 
 앱 메뉴의 `업데이트 확인...` GUI smoke는 실행하지 않았다. 이유는 사용자 세션에 앱을 foreground 실행하고 Sparkle UI를 확인해야 하므로 자동 release gate로 고정하지 않았기 때문이다. 대신 public appcast XML, EdDSA signature, release notes link, notarized app/DMG Gatekeeper assessment를 검증했다.
 
+사후 수동 확인으로 사용자가 public DMG 설치본에서 `알한글 > 업데이트 확인...`을 직접 클릭했고, `최신 버전입니다` 창이 표시됨을 확인했다. 첫 실행 직후 자동으로 최신 버전 창이 뜨지 않는 것은 실패로 보지 않는다.
+
 ## Homebrew Cask
 
 public DMG checksum으로 Cask digest를 고정했다.
@@ -182,6 +184,7 @@ xmllint --html --noout docs/updates/v0.1.0.html
 - app/DMG Gatekeeper assessment 통과
 - Cask Ruby syntax 통과
 - Cask SHA256 dry-run 통과
+- 사후 수동 Sparkle `업데이트 확인...` smoke 통과
 - HTML parser는 HTML5 tag 경고를 출력했지만 exit code 0으로 종료했다. 기존 문서 구조 문제이며 이번 문구 보정으로 새로 만든 오류는 확인되지 않았다.
 
 ## 완료 판단
@@ -189,8 +192,8 @@ xmllint --html --noout docs/updates/v0.1.0.html
 Stage 5 완료 기준을 충족했다.
 
 - Sparkle appcast 공개 URL이 official `v0.1.0` item과 EdDSA signature를 포함한다.
+- public DMG 설치본에서 Sparkle 수동 업데이트 확인 UI가 표시된다.
 - Pages source가 `main` `/docs`로 전환됐고 deployment가 성공했다.
 - public DMG와 내부 app이 notarized Developer ID로 Gatekeeper assessment를 통과했다.
 - public DMG SHA256이 Cask에 고정됐다.
 - 최종 보고서와 오늘할일 완료 처리 준비가 끝났다.
-

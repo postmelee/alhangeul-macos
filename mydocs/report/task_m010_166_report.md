@@ -165,9 +165,10 @@ ruby -c Casks/alhangeul-macos.rb
 
 | 항목 | 상태 |
 |------|------|
-| Sparkle GUI `업데이트 확인...` smoke | 미실행. foreground 앱 실행과 UI 확인이 필요해 자동 release gate에서 제외했다. appcast XML과 notarized artifact는 검증 완료 |
+| Sparkle GUI `업데이트 확인...` smoke | 통과. 사용자가 public DMG 설치본에서 메뉴를 직접 클릭했고 `최신 버전입니다` 창 표시 확인 |
 | Homebrew tap 배포 | 미실행. repository 내 Cask digest 고정까지만 수행 |
 | GitHub Actions Node.js 20 deprecation 대응 | 후속. 이번 release 성공에는 영향 없음 |
+| 창 확대 시 WebView runtime error | 후속 이슈 #183으로 분리. `v0.1.1` patch release 후보에서 재검증 |
 
 ## 완료 판단
 
@@ -177,7 +178,19 @@ ruby -c Casks/alhangeul-macos.rb
 - signed/notarized/stapled DMG와 checksum이 release asset으로 존재한다.
 - public DMG checksum과 Gatekeeper assessment가 검증됐다.
 - Sparkle stable appcast가 public Pages URL에서 `v0.1.0` item을 제공한다.
+- public DMG 설치본에서 Sparkle 수동 업데이트 확인 UI가 표시된다.
 - GitHub Pages source가 앞으로의 운영 기준인 `main` `/docs`로 전환됐다.
 - Homebrew Cask는 public DMG SHA256으로 고정됐다.
 - release note의 다운로드 안내 문구가 게시 후 상태와 일치한다.
 
+## 배포 회고와 재발 방지
+
+이번 첫 public release에서 확인한 운영 교훈은 [`release_distribution_guide.md`](../manual/release_distribution_guide.md)의 `v0.1.0 public release 회고`와 릴리스 체크리스트에 반영했다.
+
+핵심 반영 사항:
+
+- `ALHANGEUL_PAGES_BRANCH`와 GitHub Pages source branch/path가 일치해야 public appcast가 실제로 갱신된다.
+- public appcast는 저장소 파일이 아니라 `https://postmelee.github.io/alhangeul-macos/appcast.xml` 응답을 직접 검증한다.
+- release tag는 appcast bot commit 이전 release source commit을 가리킬 수 있으며, 공개 후 같은 version/tag를 덮어쓰지 않는다.
+- Sparkle 수동 smoke는 첫 실행 자동 창이 아니라 메뉴의 `업데이트 확인...` 직접 실행으로 판정한다.
+- public DMG 설치본 smoke에는 창 확대/resize 동작을 포함한다.
