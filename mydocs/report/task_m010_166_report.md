@@ -187,6 +187,11 @@ ruby -c Casks/alhangeul-macos.rb
 
 이번 첫 public release에서 확인한 운영 교훈은 [`release_distribution_guide.md`](../manual/release_distribution_guide.md)의 `v0.1.0 public release 회고`와 릴리스 체크리스트에 반영했다.
 
+사건 단위 troubleshooting 기록:
+
+- [`release_v010_pages_appcast_source_mismatch.md`](../troubleshootings/release_v010_pages_appcast_source_mismatch.md)
+- [`release_v010_installed_app_smoke_findings.md`](../troubleshootings/release_v010_installed_app_smoke_findings.md)
+
 핵심 반영 사항:
 
 - `ALHANGEUL_PAGES_BRANCH`와 GitHub Pages source branch/path가 일치해야 public appcast가 실제로 갱신된다.

@@ -592,6 +592,11 @@ raw path 검증은 Homebrew가 tap context를 요구할 수 있으므로, 최종
 
 첫 public release에서 확인한 재발 방지 항목이다. 다음 v0.1.x release에서는 이 절을 먼저 확인한다.
 
+상세 사건 기록:
+
+- [`release_v010_pages_appcast_source_mismatch.md`](../troubleshootings/release_v010_pages_appcast_source_mismatch.md)
+- [`release_v010_installed_app_smoke_findings.md`](../troubleshootings/release_v010_installed_app_smoke_findings.md)
+
 ### CI와 산출물 재현성
 
 - release workflow는 로컬 개발 머신과 다른 toolchain 환경에서 실행된다. Rust staticlib size/hash가 달라질 수 있으므로 `rust-toolchain.toml`과 `rhwp-core.lock`의 artifact variant 기준을 먼저 확인한다.
