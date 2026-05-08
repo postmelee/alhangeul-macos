@@ -227,11 +227,24 @@ public release 전 DMG layout과 checksum 생성만 확인할 때:
 
 Finder 통합 smoke test:
 
-전체 명령 시퀀스(`lsregister` 갱신, `ditto` 설치, `pluginkit` 등록 확인, `qlmanage` 캐시/렌더 검증)와 반복 시행착오 방지 규칙은 [`build_run_guide.md`](build_run_guide.md)의 "Finder 통합 확인" 섹션을 따른다. release pipeline 검증 시 추가로 다음을 적용한다.
+전체 명령 시퀀스(`lsregister` 갱신, `ditto` 설치, `pluginkit` 등록 확인, `qlmanage` 캐시/렌더 검증)와 반복 시행착오 방지 규칙은 [`build_run_guide.md`](build_run_guide.md)의 "Finder 통합 확인" 섹션을 따른다. 기본 명령은 다음과 같다.
+
+```bash
+scripts/smoke-finder-integration.sh --version 0.1.0
+```
+
+이미 생성된 Release package staging app을 재사용할 때:
+
+```bash
+scripts/smoke-finder-integration.sh --skip-package --app build.noindex/release/Alhangeul.app
+```
+
+release pipeline 검증 시 추가로 다음을 적용한다.
 
 - 입력 산출물은 반드시 `./scripts/package-release.sh <version>`이 만든 signed/sealed Release package를 사용한다 (Debug 산출물 금지).
-- 자동화 환경에서는 `qlmanage -p`(GUI preview)를 사용하지 않고 `qlmanage -t -x`(headless thumbnail) 기준으로 판정한다.
-- 기본 샘플은 앱 저장소 루트의 `samples/basic/KTX.hwp`를 사용하고, 사용자 파일 검증이 필요하면 대상 경로를 명시한다.
+- 자동화 환경에서는 `qlmanage -p`(GUI preview)를 사용하지 않고 `qlmanage -t -x`(headless thumbnail) 기준으로 판정한다. Preview 확인은 수동 확인 결과로 별도 기록한다.
+- 기본 샘플은 앱 저장소 루트의 `samples/basic/KTX.hwp`와 `samples/hwpx/hwpx-01.hwpx`를 사용하고, 사용자 파일 검증이 필요하면 대상 경로를 명시한다.
+- helper script가 출력하는 diagnostics directory를 단계 보고서 또는 release smoke report에 기록한다.
 
 주의:
 
@@ -239,7 +252,7 @@ Finder 통합 smoke test:
 - Debug/Release 중간 산출물과 package staging 산출물은 Spotlight 앱 검색 결과에 섞이지 않도록 `build.noindex/` 아래에 둔다.
 - Release package 산출물은 `Sign to Run Locally` 경로로 signing과 sealed resources가 적용되므로 LaunchServices/PlugInKit 등록 검증에 더 적합하다.
 - Dock/Finder/Spotlight 표시명 검증 시 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`이 실제 bundle filesystem name과 맞고, `ko.lproj/InfoPlist.strings`와 `LSHasLocalizedDisplayName`이 release bundle 안에 포함됐는지 먼저 확인한다.
-- 이전 이름의 설치본(`RhwpMac.app`, `알한글.app`)은 discovery 충돌이 확인되거나 의심될 때만 작업지시자 승인 후 제거한다.
+- 이전 이름의 설치본(`RhwpMac.app`, `AlhangeulMac.app`, `알한글.app`)은 discovery 충돌이 확인되거나 의심될 때만 작업지시자 승인 후 제거한다.
 - `qlmanage -m plugins` 미노출은 app extension 실행 실패의 직접 증거가 아니므로, 등록은 `pluginkit -mAvvv`, 실제 렌더링은 `qlmanage -t -x`로 판정한다.
 
 ## 버전 갱신
