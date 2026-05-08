@@ -24,6 +24,25 @@ final class RhwpStudioDocumentProvider {
         }
         return payload
     }
+
+    func diagnosticSnapshot() -> RhwpStudioDocumentProviderSnapshot {
+        lock.lock()
+        defer { lock.unlock() }
+
+        return RhwpStudioDocumentProviderSnapshot(payload: payload)
+    }
+}
+
+struct RhwpStudioDocumentProviderSnapshot {
+    let revision: Int?
+    let filename: String?
+    let byteCount: Int?
+
+    init(payload: RhwpStudioDocumentPayload?) {
+        revision = payload?.revision
+        filename = payload?.filename
+        byteCount = payload?.data.count
+    }
 }
 
 final class RhwpStudioDocumentSchemeHandler: NSObject, WKURLSchemeHandler {
@@ -44,8 +63,18 @@ final class RhwpStudioDocumentSchemeHandler: NSObject, WKURLSchemeHandler {
             return
         }
 
-        guard let document = documentProvider.document(matching: RhwpStudioDocumentRoute.revision(from: url)) else {
-            sendFailure("요청한 문서 revision을 찾을 수 없습니다.", url: url, to: urlSchemeTask)
+        guard let requestedRevision = RhwpStudioDocumentRoute.revision(from: url) else {
+            sendFailure("문서 요청 revision이 없습니다.", url: url, to: urlSchemeTask)
+            return
+        }
+
+        guard let document = documentProvider.document(matching: requestedRevision) else {
+            sendFailure(
+                "요청한 문서 revision을 찾을 수 없습니다.",
+                url: url,
+                requestedRevision: requestedRevision,
+                to: urlSchemeTask
+            )
             return
         }
 
@@ -73,7 +102,12 @@ final class RhwpStudioDocumentSchemeHandler: NSObject, WKURLSchemeHandler {
             httpVersion: "HTTP/1.1",
             headerFields: headers
         ) else {
-            sendFailure("문서 응답을 만들 수 없습니다.", url: url, to: urlSchemeTask)
+            sendFailure(
+                "문서 응답을 만들 수 없습니다.",
+                url: url,
+                requestedRevision: document.revision,
+                to: urlSchemeTask
+            )
             return
         }
 
@@ -82,16 +116,35 @@ final class RhwpStudioDocumentSchemeHandler: NSObject, WKURLSchemeHandler {
         urlSchemeTask.didFinish()
     }
 
-    private func sendFailure(_ message: String, url: URL? = nil, to urlSchemeTask: WKURLSchemeTask) {
+    private func sendFailure(
+        _ message: String,
+        url: URL? = nil,
+        requestedRevision: Int? = nil,
+        to urlSchemeTask: WKURLSchemeTask
+    ) {
+        let snapshot = documentProvider.diagnosticSnapshot()
         var userInfo: [String: Any] = [
             NSLocalizedDescriptionKey: message
         ]
         if let url {
             userInfo[NSURLErrorFailingURLErrorKey] = url
+            userInfo[NSURLErrorFailingURLStringErrorKey] = url.absoluteString
+        }
+        if let requestedRevision {
+            userInfo[RhwpStudioWebViewDiagnosticKeys.requestedRevision] = requestedRevision
+        }
+        if let revision = snapshot.revision {
+            userInfo[RhwpStudioWebViewDiagnosticKeys.currentRevision] = revision
+        }
+        if let byteCount = snapshot.byteCount {
+            userInfo[RhwpStudioWebViewDiagnosticKeys.payloadByteCount] = byteCount
+        }
+        if let filename = snapshot.filename {
+            userInfo[RhwpStudioWebViewDiagnosticKeys.payloadFilename] = filename
         }
 
         let error = NSError(
-            domain: "com.postmelee.alhangeulmac.rhwp-studio.document-scheme",
+            domain: RhwpStudioWebViewDiagnosticKeys.documentSchemeErrorDomain,
             code: 1,
             userInfo: userInfo
         )

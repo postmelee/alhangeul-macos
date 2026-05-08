@@ -38,6 +38,13 @@ enum HwpPageImageRenderer {
         embeddedThumbnailPolicy: HwpEmbeddedThumbnailPolicy = .never
     ) throws -> HwpRenderedPage {
         let values = try fileURL.resourceValues(forKeys: [.fileSizeKey])
+        if shouldRejectBeforeReadingData(
+            fileSize: values.fileSize,
+            policy: embeddedThumbnailPolicy
+        ) {
+            throw HwpRenderError.fileTooLarge
+        }
+
         let data = try Data(contentsOf: fileURL, options: [.mappedIfSafe])
         if let embedded = decodeEmbeddedThumbnail(
             from: data,
@@ -194,6 +201,22 @@ enum HwpPageImageRenderer {
                 return false
             }
             return requestedMaxDimension <= maxPixelDimension
+        }
+    }
+
+    private static func shouldRejectBeforeReadingData(
+        fileSize: Int?,
+        policy: HwpEmbeddedThumbnailPolicy
+    ) -> Bool {
+        guard let fileSize, fileSize > hwpQuickLookMaxFileSize else {
+            return false
+        }
+
+        switch policy {
+        case .never:
+            return true
+        case .smallFinderThumbnail:
+            return false
         }
     }
 
