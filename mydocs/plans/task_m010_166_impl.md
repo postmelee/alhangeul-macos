@@ -252,7 +252,7 @@ Stage 3 보고서 커밋은 `local/task166`에서 수행한다. `main` 반영과
 - `gh workflow run`으로 release workflow를 tag ref에서 실행한다.
 - `gh run watch` 또는 `gh run view --log-failed`로 workflow 완료 상태를 확인한다.
 - workflow summary에서 rhwp lock, notarization, DMG SHA256, GitHub Release state, appcast 생성 결과를 확인한다.
-- `gh release view v0.1.0`으로 draft/prerelease/latest 상태와 URL을 확인한다.
+- `gh release view v0.1.0`으로 draft/prerelease 상태와 URL을 확인하고, latest release는 별도 `gh release view` 호출로 확인한다.
 - release asset을 내려받아 `.sha256` 검증을 실행한다.
 - `releases/latest`와 `latest/download/alhangeul-macos-0.1.0.dmg` HTTP 응답을 확인한다.
 - Stage 4 보고서에 workflow run URL, release URL, digest, asset size, 실패 시 로그 요약을 기록한다.
@@ -279,7 +279,8 @@ gh workflow run "Release Publish DMG" \
 
 ```bash
 gh run list --repo postmelee/alhangeul-macos --workflow "Release Publish DMG" --limit 5
-gh release view v0.1.0 --repo postmelee/alhangeul-macos --json tagName,isDraft,isPrerelease,isLatest,url,assets
+gh release view v0.1.0 --repo postmelee/alhangeul-macos --json tagName,isDraft,isPrerelease,url,assets
+gh release view --repo postmelee/alhangeul-macos --json tagName,url
 rm -rf build.noindex/release-check
 mkdir -p build.noindex/release-check
 gh release download v0.1.0 \
