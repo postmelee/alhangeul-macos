@@ -1,5 +1,6 @@
 const faqItems = document.querySelectorAll(".faq-list details");
 const featureSection = document.querySelector(".features-section");
+const finderThumbnailVideo = document.querySelector("[data-finder-thumbnail-video]");
 const featureSteps = Array.from(document.querySelectorAll("[data-feature-step]"));
 const revealGroups = Array.from(document.querySelectorAll("[data-reveal-group]"));
 const stageLabelNodes = {
@@ -23,7 +24,7 @@ const featureStages = [
   },
   {
     key: "local",
-    labels: ["PDF 내보내기", "공유하기", "Finder에서 보기"],
+    labels: ["PDF 내보내기", "공유하기", "인쇄하기"],
   },
 ];
 
@@ -42,7 +43,7 @@ const progressMap = [
   [0.75, checkpointProgress.end],
   [1, 1],
 ];
-const quicklookPopupShadowOpacity = 0.28;
+const quicklookPopupShadowOpacity = 0.18;
 const quicklookScrollSteps = [
   { key: "scroll1", start: 0.25, end: 0.31 },
   { key: "scroll2", start: 0.5, end: 0.56 },
@@ -51,6 +52,7 @@ const quicklookScrollSteps = [
 ];
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+const step = (edge, value) => (value >= edge ? 1 : 0);
 
 const smoothstep = (edgeStart, edgeEnd, value) => {
   const progress = clamp((value - edgeStart) / (edgeEnd - edgeStart || 1));
@@ -61,6 +63,27 @@ const easeOutFast = (edgeStart, edgeEnd, value) => {
   const progress = clamp((value - edgeStart) / (edgeEnd - edgeStart || 1));
   return 1 - Math.pow(1 - progress, 3);
 };
+
+let latestFinderVideoProgress = 0;
+
+const syncFinderThumbnailVideo = (progress) => {
+  if (!finderThumbnailVideo) return;
+
+  latestFinderVideoProgress = clamp(progress);
+
+  if (!Number.isFinite(finderThumbnailVideo.duration) || finderThumbnailVideo.duration <= 0) {
+    return;
+  }
+
+  const targetTime = latestFinderVideoProgress * finderThumbnailVideo.duration;
+  if (Math.abs(finderThumbnailVideo.currentTime - targetTime) > 0.035) {
+    finderThumbnailVideo.currentTime = targetTime;
+  }
+};
+
+finderThumbnailVideo?.addEventListener("loadedmetadata", () => {
+  syncFinderThumbnailVideo(latestFinderVideoProgress);
+});
 
 const mapScrollProgressToVisualProgress = (progress) => {
   const clampedProgress = clamp(progress);
@@ -304,40 +327,58 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   const shareStageProgress = isMacShare ? timelineProgress : 0;
   const sharePdfSegment = checkpointProgress.start;
   const shareExportSegment = checkpointProgress.middle - checkpointProgress.start;
-  const shareFinderSegment = checkpointProgress.end - checkpointProgress.middle;
+  const shareFinalSegment = checkpointProgress.end - checkpointProgress.middle;
   const sharePdfAfterComplete = sharePdfSegment / 3;
   const sharePdfPopupStart = sharePdfSegment * 2 / 3;
-  const sharePdfPopupHoldEnd = checkpointProgress.start + shareExportSegment * 0.1;
+  const sharePdfPopupHoldEnd = checkpointProgress.start + shareExportSegment * 0.22;
   const sharePdfPopupExitComplete = checkpointProgress.start + shareExportSegment / 3;
-  const shareAfterStart = sharePdfPopupExitComplete + shareExportSegment * 0.02;
-  const shareAfterComplete = shareAfterStart + shareExportSegment * 0.22;
-  const sharePopupStart = checkpointProgress.start + shareExportSegment * 2 / 3;
-  const sharePopupHoldEnd = checkpointProgress.middle + shareFinderSegment * 0.1;
-  const sharePopupExitComplete = checkpointProgress.middle + shareFinderSegment / 3;
-  const sharePdfAfterOpacity = isMacShare
+  const shareBackgroundFadeStart = checkpointProgress.start + shareExportSegment * 0.04;
+  const shareBackgroundFadeComplete = checkpointProgress.start + shareExportSegment * 0.2;
+  const sharePdfExitProgress = isMacShare
+    ? smoothstep(shareBackgroundFadeStart, shareBackgroundFadeComplete, shareStageProgress)
+    : 0;
+  const shareAfterSwitchAt = sharePdfPopupExitComplete + shareExportSegment * 0.16;
+  const sharePopupStart = shareAfterSwitchAt + shareExportSegment * 0.12;
+  const sharePopupHoldEnd = checkpointProgress.middle + shareFinalSegment * 0.1;
+  const sharePopupExitComplete = checkpointProgress.middle + shareFinalSegment / 3;
+  const shareFinalSwitchAt = sharePopupExitComplete;
+  const sharePdfAfterEntry = isMacShare
     ? smoothstep(0, sharePdfAfterComplete, shareStageProgress)
     : 0;
-  const sharePdfBeforeOpacity = isMacShare ? 1 : 0;
+  const shareBeforeEntry = isMacShare
+    ? smoothstep(shareBackgroundFadeStart, shareBackgroundFadeComplete, shareStageProgress)
+    : 0;
+  const sharePdfBeforeOpacity = isMacShare ? 1 - sharePdfAfterEntry : 0;
+  const sharePdfAfterOpacity = isMacShare
+    ? sharePdfAfterEntry * (1 - sharePdfExitProgress)
+    : 0;
   const sharePdfPopupOpacity = isMacShare
     ? easeOutFast(sharePdfPopupStart, checkpointProgress.start, shareStageProgress) *
       (1 - smoothstep(sharePdfPopupHoldEnd, sharePdfPopupExitComplete, shareStageProgress))
     : 0;
   const shareBeforeOpacity = isMacShare
-    ? easeOutFast(checkpointProgress.start + 0.045, checkpointProgress.start + 0.11, shareStageProgress)
+    ? shareBeforeEntry *
+      (1 - step(shareAfterSwitchAt, shareStageProgress))
     : 0;
   const shareAfterOpacity = isMacShare
-    ? easeOutFast(shareAfterStart, shareAfterComplete, shareStageProgress)
+    ? step(shareAfterSwitchAt, shareStageProgress) *
+      (1 - step(shareFinalSwitchAt, shareStageProgress))
     : 0;
   const shareEmailPopupOpacity = isMacShare
     ? easeOutFast(sharePopupStart, checkpointProgress.middle, shareStageProgress) *
       (1 - smoothstep(sharePopupHoldEnd, sharePopupExitComplete, shareStageProgress))
     : 0;
-  const shareFinderBeforeOpacity = isMacShare
-    ? easeOutFast(checkpointProgress.middle + 0.045, checkpointProgress.middle + 0.11, shareStageProgress)
+  const shareFinalBaseOpacity = isMacShare
+    ? step(shareFinalSwitchAt, shareStageProgress)
     : 0;
-  const shareFinderPopupOpacity = isMacShare
+  const sharePrintPopupOpacity = isMacShare
     ? easeOutFast(checkpointProgress.end - 0.05, checkpointProgress.end - 0.006, shareStageProgress)
     : 0;
+  const shareBaseShadowOpacity = isMacShare
+    ? Math.max(sharePdfAfterEntry, shareBeforeOpacity, shareAfterOpacity, shareFinalBaseOpacity)
+    : 0;
+
+  syncFinderThumbnailVideo(isFinder ? scrollProgress : 0);
 
   setStageLabels(feature.labels);
 
@@ -379,11 +420,12 @@ const applyFeatureVisualState = (activeIndex, localCheckpoint) => {
   featureSection.style.setProperty("--share-pdf-before-opacity", sharePdfBeforeOpacity.toFixed(3));
   featureSection.style.setProperty("--share-pdf-after-opacity", sharePdfAfterOpacity.toFixed(3));
   featureSection.style.setProperty("--share-pdf-popup-opacity", sharePdfPopupOpacity.toFixed(3));
+  featureSection.style.setProperty("--share-base-shadow-opacity", shareBaseShadowOpacity.toFixed(3));
   featureSection.style.setProperty("--share-before-opacity", shareBeforeOpacity.toFixed(3));
   featureSection.style.setProperty("--share-after-opacity", shareAfterOpacity.toFixed(3));
   featureSection.style.setProperty("--share-email-popup-opacity", shareEmailPopupOpacity.toFixed(3));
-  featureSection.style.setProperty("--share-finder-before-opacity", shareFinderBeforeOpacity.toFixed(3));
-  featureSection.style.setProperty("--share-finder-popup-opacity", shareFinderPopupOpacity.toFixed(3));
+  featureSection.style.setProperty("--share-final-base-opacity", shareFinalBaseOpacity.toFixed(3));
+  featureSection.style.setProperty("--share-print-popup-opacity", sharePrintPopupOpacity.toFixed(3));
   featureSection.style.setProperty("--before-scale", (1 + finderAfterOpacity * 0.018).toFixed(3));
   featureSection.style.setProperty("--after-scale", (1.018 - finderAfterOpacity * 0.018).toFixed(3));
   featureSection.style.setProperty("--lock-opacity", finderLockOpacity.toFixed(3));
