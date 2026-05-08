@@ -24,21 +24,29 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
                     reply.extensionBadge = request.fileURL.pathExtension.uppercased()
                     handler(reply, nil)
 
-                case .failure(HwpRenderError.fileTooLarge):
-                    let reply = QLThumbnailReply(contextSize: request.maximumSize) { context in
-                        Self.drawFallback(in: context, size: request.maximumSize)
-                        return true
-                    }
-                    reply.extensionBadge = request.fileURL.pathExtension.uppercased()
-                    handler(reply, nil)
+                case .failure(let error) where HwpDocumentFallbackClassifier.shouldUseThumbnailFallback(for: error):
+                    handler(Self.fallbackReply(for: request), nil)
 
                 case .failure(let error):
                     handler(nil, error)
                 }
             }
         } catch {
-            handler(nil, error)
+            if HwpDocumentFallbackClassifier.shouldUseThumbnailFallback(for: error) {
+                handler(Self.fallbackReply(for: request), nil)
+            } else {
+                handler(nil, error)
+            }
         }
+    }
+
+    private static func fallbackReply(for request: QLFileThumbnailRequest) -> QLThumbnailReply {
+        let reply = QLThumbnailReply(contextSize: request.maximumSize) { context in
+            Self.drawFallback(in: context, size: request.maximumSize)
+            return true
+        }
+        reply.extensionBadge = request.fileURL.pathExtension.uppercased()
+        return reply
     }
 
     private static func aspectFit(_ source: CGSize, within maximumSize: CGSize) -> CGSize {
