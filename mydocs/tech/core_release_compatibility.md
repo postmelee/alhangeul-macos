@@ -10,7 +10,7 @@
 
 앱 저장소의 Stable core 안정 기준은 다음 둘을 함께 고정하는 것이다.
 
-- `release tag`: GitHub release tag 이름. 예: `v0.7.6`
+- `release tag`: GitHub release tag 이름. 예: `v0.7.10`
 - `resolved commit`: tag가 가리키는 실제 commit SHA. annotated tag인 경우 tag object가 아니라 `^{commit}`으로 해석한 commit이다.
 
 Stable release tag 전환 이후 `rhwp-core.lock`은 최소한 다음 의미를 가져야 한다.
@@ -58,37 +58,69 @@ ffi_symbols_file = "rhwp-ffi-symbols.txt"
 
 Demo/Preview도 branch dependency는 사용하지 않는다. 반드시 commit SHA를 `rev`로 고정하고, `Cargo.lock`, `rhwp-core.lock`, 산출물 hash/size를 함께 남긴다.
 
-현재 Demo/Preview 후보 dependency 형식:
+현재 Stable dependency 형식:
 
 ```toml
-rhwp = { git = "https://github.com/edwardkim/rhwp.git", rev = "1e9d78a1d40c71779d81c6ec6870cd301d912626" }
+rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "v0.7.10" }
 ```
 
 ## 현재 release 상태
 
-2026-04-27 확인 기준 최신 release는 다음이다.
+2026-05-06 확인 기준 현재 Stable release pin은 다음이다.
 
 ```text
-release tag: v0.7.6
-target branch: main
-publishedAt: 2026-04-26T09:35:00Z
-resolved commit: 92c5b6b79d22f6c784b3b317551c66466b3b63a5
+release tag: v0.7.10
+publishedAt: 2026-05-05T17:56:40Z
+tag object: 2a6f59f1f64958ace5181f04cdf40cf77fa709b5
+resolved commit: 62a458aa317e962cd3d0eec6096728c172d57110
 ```
 
-`v0.7.6`에는 다음 API가 있다.
+`v0.7.10` 확인 명령은 required API gate를 통과한다.
 
-- `DocumentCore::render_page_svg_native`
-- `DocumentCore::get_page_info_native`
-- `rhwp::parser::extract_thumbnail_only`
+```text
+Checked rhwp core target:
+  channel: stable
+  tag:     v0.7.10
+  commit:  62a458aa317e962cd3d0eec6096728c172d57110
+```
 
-`v0.7.6`에는 다음 API가 없다.
+따라서 현재 앱 저장소는 `v0.7.10` Stable release tag pin으로 전환되어 있다.
 
-- `DocumentCore::build_page_render_tree`
-- `DocumentCore::get_bin_data`
+현재 lock 기준:
 
-따라서 현재 `v0.7.6`은 native render tree 경로를 유지하는 앱 기준을 충족하지 못한다. 실패 유형은 `missing core API`다.
+```text
+rhwp_release_tag: v0.7.10
+rhwp_commit: 62a458aa317e962cd3d0eec6096728c172d57110
+RustBridge/Cargo.lock source: git+https://github.com/edwardkim/rhwp.git?tag=v0.7.10#62a458aa317e962cd3d0eec6096728c172d57110
+```
 
-현재 lock commit `1e9d78a1d40c71779d81c6ec6870cd301d912626`에는 `DocumentCore::build_page_render_tree`와 `DocumentCore::get_bin_data`가 포함되어 있으므로 Demo/Preview용 commit-pinned git dependency 후보가 될 수 있다. 이 commit은 release tag 안정 기준이 아니므로 Stable 배포 기준으로 승격하지 않는다.
+현재 artifact 기준:
+
+```text
+Frameworks/universal/librhwp.a
+sha256: fefa08d741cfdd6645081ca838601f677f6da064d95308555e29629f7609f7a2
+size: 107120120
+
+Frameworks/generated_rhwp.h
+sha256: 69aeca5047bf743286d1b2260f8fc9a091ce4f1d7fd61c80084fab81c3a95ac5
+size: 1349
+```
+
+`v0.7.10`에는 현재 RustBridge가 요구하는 PageRenderTree API와 PageLayerTree API가 포함되어 있다. alhangeul-macos는 이번 전환에서 기존 PageRenderTree 기반 C ABI와 Swift renderer를 유지하며, PageLayerTree 기반 Swift renderer 전환과 신규 ABI 추가는 후속 작업으로 분리한다.
+
+앱 저장소는 core source를 수정하지 않고 release tag pin, Rust bridge 산출물 provenance, bundled `rhwp-studio` asset, macOS build/render smoke 기준을 `v0.7.10`으로 전환했다.
+
+2026-05-06 기준 alhangeul-macos use case 검증 결과는 다음이다.
+
+- `./scripts/update-rhwp-core.sh --check --channel stable --tag v0.7.10` 통과
+- `./scripts/build-rust-macos.sh --update-lock`와 `--verify-lock` 통과
+- `scripts/verify-rhwp-studio-assets.sh` 통과
+- `./scripts/check-no-appkit.sh` 통과
+- HostApp Debug build 통과
+- HostApp Release build 통과
+- 기본 native render smoke 통과: `KTX.hwp`, `request.hwp`, `exam_kor.hwp`
+
+Release package 생성, 설치본 LaunchServices/PlugInKit 등록, `qlmanage` smoke는 M16의 Quick Look/Thumbnail 설치본 smoke gate 작업에서 별도로 판정한다.
 
 ## RustBridge core API contract
 

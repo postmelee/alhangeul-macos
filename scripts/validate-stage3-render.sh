@@ -3,6 +3,31 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+usage() {
+  cat >&2 <<EOF
+Usage: $0 [output-dir] [hwp-or-hwpx ...]
+
+Builds and runs a native renderer smoke check for the first page of each input.
+When no output directory is provided, output is written to:
+  $ROOT/output/stage3-render
+
+When no input documents are provided, the default repository samples are used:
+  samples/basic/KTX.hwp
+  samples/basic/request.hwp
+  samples/exam_kor.hwp
+
+The check verifies document open, render tree, Hangul text/glyphs, page size,
+native PNG generation, and non-blank bitmap output. It is a smoke test, not a
+pixel equivalence test against rhwp core SVG or Hancom viewer output.
+EOF
+}
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  usage
+  exit 0
+fi
+
 OUT_DIR="${1:-$ROOT/output/stage3-render}"
 
 if [ "$#" -gt 0 ]; then
@@ -46,6 +71,7 @@ swiftc -parse-as-library \
   "$ROOT/Sources/RhwpCoreBridge/RhwpDocument.swift" \
   "$ROOT/Sources/RhwpCoreBridge/RenderTree.swift" \
   "$ROOT/Sources/RhwpCoreBridge/FontFallback.swift" \
+  "$ROOT/Sources/RhwpCoreBridge/FontResourceRegistry.swift" \
   "$ROOT/Sources/RhwpCoreBridge/CGTreeRenderer.swift" \
   "$ROOT/scripts/stage3_render_check.swift" \
   "$LIB" \

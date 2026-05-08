@@ -161,6 +161,7 @@ struct TextRunNode: Decodable {
     let rotation: Double?
     let isVertical: Bool
     let charOverlap: CharOverlapInfo?
+    let charPositions: [Double]?
     let borderFillId: UInt16
     let baseline: Double
     let fieldMarker: FieldMarkerType
@@ -177,6 +178,7 @@ struct TextRunNode: Decodable {
         case isLineBreakEnd = "is_line_break_end"
         case isVertical = "is_vertical"
         case charOverlap = "char_overlap"
+        case charPositions = "char_positions"
         case borderFillId = "border_fill_id"
         case fieldMarker = "field_marker"
     }
@@ -301,17 +303,22 @@ struct ImageNode: Decodable {
     let controlIndex: Int?
     let fillMode: String?
     let originalSize: [Double]?
+    let originalSizeHU: [Double]?
+    let effect: String?
+    let brightness: Int?
+    let contrast: Int?
     let transform: ShapeTransform
     let crop: [Int32]?
 
     enum CodingKeys: String, CodingKey {
-        case transform, crop
+        case transform, crop, effect, brightness, contrast
         case binDataId = "bin_data_id"
         case sectionIndex = "section_index"
         case paraIndex = "para_index"
         case controlIndex = "control_index"
         case fillMode = "fill_mode"
         case originalSize = "original_size"
+        case originalSizeHU = "original_size_hu"
     }
 }
 
@@ -329,16 +336,26 @@ struct GroupNode: Decodable {
 
 struct EquationNode: Decodable {
     let svgContent: String
+    let layoutBox: EquationLayoutBox?
     let colorStr: String
     let color: UInt32
     let fontSize: Double
 
     enum CodingKeys: String, CodingKey {
         case svgContent = "svg_content"
+        case layoutBox = "layout_box"
         case colorStr = "color_str"
         case color
         case fontSize = "font_size"
     }
+}
+
+struct EquationLayoutBox: Decodable {
+    let x: Double
+    let y: Double
+    let width: Double
+    let height: Double
+    let baseline: Double
 }
 
 struct FormObjectNode: Decodable {

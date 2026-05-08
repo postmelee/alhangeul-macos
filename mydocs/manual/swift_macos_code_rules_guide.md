@@ -37,7 +37,9 @@
 - render tree JSON 구조 변경 시 `RenderTree.swift` 디코더를 먼저 점검한다.
 - 이미지 렌더링은 `bin_data_id` 인덱스 규칙(1-indexed)을 유지한다.
 - 텍스트 렌더링은 CoreText 좌표계 변환을 문서화하고 임의 변경하지 않는다.
-- 변경 후 `validate-stage3-render.sh`를 최소 검증으로 실행한다.
+- 변경 후 `validate-stage3-render.sh`를 최소 smoke 검증으로 실행한다.
+- node type, transform, clipping, image, text style 해석을 바꿨다면 문제 샘플에서 `render-debug-compare.sh`를 실행해 core SVG와 native PNG 차이를 확인한다.
+- core SVG와 native PNG가 다르면 [`render_core_native_compare_guide.md`](render_core_native_compare_guide.md)의 판단 흐름에 따라 Swift renderer 문제와 core 문제를 분리한다.
 
 ## extension 특화 규칙
 
@@ -52,3 +54,4 @@
 - `xcodegen generate`
 - `xcodebuild ... HostApp ...`
 - `./scripts/validate-stage3-render.sh`
+- renderer 시각 결과 변경 시 `./scripts/render-debug-compare.sh output/render-debug path/to/sample.hwp`

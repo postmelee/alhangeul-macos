@@ -5,94 +5,106 @@ struct DocumentViewerView: View {
 
     var body: some View {
         ZStack {
-            if store.isLoading {
-                ProgressView("불러오는 중...")
-            } else if let error = store.errorMessage {
+            if let error = store.errorMessage {
                 ErrorStateView(message: error)
-            } else if store.hasDocument {
-                DocumentPagesView(store: store)
             } else {
-                EmptyDocumentView(store: store)
+                RhwpStudioContainerView(store: store, document: store.rhwpStudioDocument)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .safeAreaInset(edge: .bottom) {
-            StatusBarView(store: store)
-        }
     }
 }
 
-private struct DocumentPagesView: View {
+private struct RhwpStudioContainerView: View {
     @ObservedObject var store: DocumentViewerStore
+    let document: RhwpStudioDocumentPayload?
 
     var body: some View {
-        ScrollView([.vertical, .horizontal]) {
-            LazyVStack(spacing: 18) {
-                ForEach(0..<store.pageCount, id: \.self) { page in
-                    DocumentPageContainer(store: store, page: page)
-                }
-            }
-            .padding(28)
-            .frame(maxWidth: .infinity)
-        }
-        .background(Color(nsColor: .underPageBackgroundColor))
-    }
-}
-
-private struct DocumentPageContainer: View {
-    @ObservedObject var store: DocumentViewerStore
-    let page: Int
-
-    var body: some View {
-        let pageSize = store.pageSize(at: page)
-        let zoom = CGFloat(store.zoomScale)
-        let displaySize = CGSize(width: pageSize.width * zoom, height: pageSize.height * zoom)
-
-        Group {
-            if let tree = store.pageTrees[page], let document = store.document {
-                DocumentPageView(
-                    tree: tree,
-                    pageSize: pageSize,
-                    zoomScale: zoom,
-                    document: document
+        ZStack {
+            if let failure = store.webViewFailure {
+                WebViewerFallbackView(
+                    failure: failure,
+                    canRevealInFinder: store.canRevealInFinder,
+                    onRetry: {
+                        store.retryWebViewLoad()
+                    },
+                    onOpenDocument: {
+                        store.openDocument()
+                    },
+                    onRevealInFinder: {
+                        store.revealCurrentDocumentInFinder()
+                    }
                 )
-                .frame(width: displaySize.width, height: displaySize.height)
-                .background(Color.white)
-                .shadow(color: .black.opacity(0.16), radius: 5, x: 0, y: 2)
             } else {
-                ProgressView()
-                    .frame(width: max(160, displaySize.width), height: max(120, displaySize.height))
-                    .background(Color.white)
-                    .shadow(color: .black.opacity(0.10), radius: 4, x: 0, y: 1)
-            }
-        }
-        .id(page)
-        .onAppear {
-            store.setCurrentPage(page)
-            store.loadPage(page)
-        }
-        .onDisappear {
-            store.unloadPage(page)
-        }
-    }
-}
+                RhwpStudioWebView(
+                    document: document,
+                    sourceDocument: store.sourceDocument,
+                    reloadToken: store.webViewReloadToken,
+                    onLoadStateChange: { isLoading in
+                        Task { @MainActor in
+                            store.setWebViewLoading(isLoading)
+                        }
+                    },
+                    onError: { message in
+                        Task { @MainActor in
+                            store.setWebViewError(message)
+                        }
+                    },
+                    onFailure: { failure in
+                        Task { @MainActor in
+                            store.setWebViewFailure(failure)
+                        }
+                    },
+                    onOpenDocument: {
+                        Task { @MainActor in
+                            store.openDocument()
+                        }
+                    },
+                    onDroppedDocument: { document in
+                        Task { @MainActor in
+                            store.loadDroppedDocument(
+                                data: document.data,
+                                filename: document.fileName
+                            )
+                        }
+                    },
+                    onDroppedFileURL: { url in
+                        Task { @MainActor in
+                            store.loadDocument(from: url)
+                        }
+                    },
+                    onDocumentSaved: { url in
+                        Task { @MainActor in
+                            store.recordSavedDocument(at: url)
+                        }
+                    }
+                )
 
-private struct EmptyDocumentView: View {
-    @ObservedObject var store: DocumentViewerStore
+                if store.isLoading || store.isWebViewLoading {
+                    LoadingOverlayView(message: store.isLoading ? "불러오는 중..." : "웹 viewer 로딩 중...")
+                }
 
-    var body: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "doc.richtext")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
-            Text("HWP 또는 HWPX 문서를 열어 주세요.")
-                .font(.title3)
-            HStack {
-                Button("문서 열기") {
-                    store.openDocument()
+                if let message = store.webViewErrorMessage {
+                    WebViewerErrorBanner(message: message)
+                        .padding(.top, 12)
+                        .frame(maxHeight: .infinity, alignment: .top)
                 }
             }
         }
+        .id(document?.revision ?? 0)
+        .background(Color(nsColor: .windowBackgroundColor))
+    }
+}
+
+private struct LoadingOverlayView: View {
+    let message: String
+
+    var body: some View {
+        ProgressView(message)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 12)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+            .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 3)
     }
 }
 
@@ -112,24 +124,81 @@ private struct ErrorStateView: View {
     }
 }
 
-private struct StatusBarView: View {
-    @ObservedObject var store: DocumentViewerStore
+private struct WebViewerErrorBanner: View {
+    let message: String
 
     var body: some View {
-        HStack(spacing: 16) {
-            Text(store.filename.isEmpty ? "문서 없음" : store.filename)
-                .lineLimit(1)
-            Spacer()
-            if store.pageCount > 0 {
-                Text("\(store.currentPage + 1)/\(store.pageCount)쪽")
-                Text("\(Int(store.zoomScale * 100))%")
-            }
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.triangle")
+                .foregroundStyle(.orange)
+            Text(message)
+                .lineLimit(2)
+                .font(.caption)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .font(.caption)
-        .foregroundStyle(.secondary)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 6)
-        .background(.bar)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .shadow(color: .black.opacity(0.10), radius: 6, x: 0, y: 2)
+    }
+}
+
+private struct WebViewerFallbackView: View {
+    let failure: RhwpStudioWebViewFailure
+    let canRevealInFinder: Bool
+    let onRetry: () -> Void
+    let onOpenDocument: () -> Void
+    let onRevealInFinder: () -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 40))
+                .foregroundStyle(.orange)
+
+            VStack(spacing: 8) {
+                Text(failure.title)
+                    .font(.headline)
+                Text(failure.message)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            HStack(spacing: 8) {
+                Button {
+                    onRetry()
+                } label: {
+                    Label("다시 시도", systemImage: "arrow.clockwise")
+                }
+
+                Button {
+                    onOpenDocument()
+                } label: {
+                    Label("다른 파일 열기", systemImage: "doc.badge.plus")
+                }
+
+                if canRevealInFinder {
+                    Button {
+                        onRevealInFinder()
+                    } label: {
+                        Label("Finder에서 보기", systemImage: "folder")
+                    }
+                }
+            }
+
+            DisclosureGroup("진단 정보") {
+                ScrollView {
+                    Text(failure.diagnosticDetail)
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
+                }
+                .frame(maxHeight: 140)
+            }
+            .frame(maxWidth: 560)
+        }
+        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

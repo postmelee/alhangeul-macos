@@ -4,7 +4,7 @@
 
 ```text
 Sources/
-├── HostApp/                  # 사용자가 직접 여는 macOS viewer app
+├── HostApp/                  # 사용자가 직접 여는 macOS WKWebView viewer app
 ├── QLExtension/              # Finder Quick Look preview extension
 ├── ThumbnailExtension/       # Finder thumbnail extension
 ├── Shared/                   # HostApp/extension 공통 macOS helper
@@ -15,16 +15,18 @@ Sources/
 
 | 디렉터리 | 역할 | 포함 target |
 |------|------|------|
-| `HostApp/` | 파일 열기, 보안 범위 접근, viewer 상태, page cache, zoom, SwiftUI/AppKit viewer UI | `HostApp` |
+| `HostApp/` | 파일 열기, 보안 범위 접근, `rhwp-studio` WKWebView viewer 상태, 내부 resource/document scheme bridge, 파일 메뉴 native open/save/print bridge | `HostApp` |
 | `QLExtension/` | Finder Quick Look preview provider | `QLExtension` |
 | `ThumbnailExtension/` | Finder thumbnail provider와 thumbnail render cache | `ThumbnailExtension` |
-| `Shared/` | 첫 페이지 bitmap 렌더링 등 HostApp/extension 공통 macOS helper | `HostApp`, `QLExtension`, `ThumbnailExtension` |
+| `Shared/` | page bitmap 렌더링과 Quick Look 표시용 PNG/PDF preview 등 HostApp/extension 공통 macOS helper | `HostApp`, `QLExtension`, `ThumbnailExtension` |
 | `RhwpCoreBridge/` | `Rhwp` C module 호출, 문서 핸들 수명, render tree 디코딩, CoreGraphics/CoreText renderer | `HostApp`, `QLExtension`, `ThumbnailExtension` |
 
 ## 경계 규칙
 
 - `Sources/RhwpCoreBridge`에는 AppKit/UIKit 직접 의존을 넣지 않는다.
-- AppKit drawing과 SwiftUI viewer 상태는 `Sources/HostApp`이 소유한다.
+- WKWebView/AppKit bridge와 SwiftUI viewer 상태는 `Sources/HostApp`이 소유한다.
+- `rhwp-studio` 파일 메뉴처럼 브라우저 API를 macOS 앱 기능으로 연결해야 하는 코드는 `Sources/HostApp/Services`에 둔다.
+- native render tree 기반 bitmap 렌더링은 Quick Look/Thumbnail 경로에 필요한 범위에서 `Sources/Shared`와 `Sources/RhwpCoreBridge`가 소유한다.
 - Finder/Quick Look entrypoint는 각 extension 디렉터리가 소유한다.
 - 여러 타깃이 공유하지만 macOS/Finder 호출 방식에 가까운 helper는 `Sources/Shared`에 둔다.
 - source 포함 범위, bundle identifier, extension embedding을 바꿀 때는 `project.yml`을 수정하고 `xcodegen generate`를 실행한다.

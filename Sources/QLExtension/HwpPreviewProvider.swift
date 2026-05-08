@@ -4,36 +4,67 @@ import UniformTypeIdentifiers
 
 final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
     func providePreview(for request: QLFilePreviewRequest) async throws -> QLPreviewReply {
-        try await MainActor.run {
-            try Self.createPreview(for: request)
-        }
+        try Self.createPreview(for: request)
     }
 
-    @MainActor
     private static func createPreview(for request: QLFilePreviewRequest) throws -> QLPreviewReply {
         do {
-            let result = try HwpPageImageRenderer.renderFirstPage(fileURL: request.fileURL)
-            let pngData = try HwpPageImageRenderer.encodePNG(result.image)
-            return QLPreviewReply(
-                dataOfContentType: .png,
-                contentSize: result.size
-            ) { reply in
-                reply.title = request.fileURL.lastPathComponent
-                return pngData
+            let previewInfo = try HwpPreviewPDFRenderer.inspect(fileURL: request.fileURL)
+            if previewInfo.pageCount == 1 {
+                return try Self.pngReply(previewInfo)
+            } else {
+                return try Self.pdfReply(previewInfo)
             }
-        } catch HwpRenderError.fileTooLarge {
-            return Self.textReply("The file is larger than 50 MB.")
         } catch {
+            if let reason = HwpDocumentFallbackClassifier.reason(for: error) {
+                return Self.textReply(
+                    HwpDocumentFallbackClassifier.quickLookMessage(for: reason),
+                    title: request.fileURL.lastPathComponent
+                )
+            }
             throw error
         }
     }
 
-    private static func textReply(_ text: String) -> QLPreviewReply {
+    private static func pngReply(_ previewInfo: HwpPreviewDocumentInfo) throws -> QLPreviewReply {
+        let document = try RhwpDocument(
+            data: previewInfo.data,
+            filename: previewInfo.filename
+        )
+        let page = try HwpPageImageRenderer.renderPage(
+            document: document,
+            pageIndex: 0
+        )
+        let data = try HwpPageImageRenderer.encodePNG(page.image)
+
+        return QLPreviewReply(
+            dataOfContentType: .png,
+            contentSize: previewInfo.contentSize
+        ) { reply in
+            reply.title = previewInfo.filename
+            return data
+        }
+    }
+
+    private static func pdfReply(_ previewInfo: HwpPreviewDocumentInfo) throws -> QLPreviewReply {
+        let result = try HwpPreviewPDFRenderer.render(previewInfo: previewInfo)
+
+        return QLPreviewReply(
+            dataOfContentType: .pdf,
+            contentSize: previewInfo.contentSize
+        ) { reply in
+            reply.title = previewInfo.filename
+            return result.data
+        }
+    }
+
+    private static func textReply(_ text: String, title: String) -> QLPreviewReply {
         QLPreviewReply(
             dataOfContentType: .plainText,
             contentSize: CGSize(width: 520, height: 120)
-        ) { _ in
-            Data(text.utf8)
+        ) { reply in
+            reply.title = title
+            return Data(text.utf8)
         }
     }
 }

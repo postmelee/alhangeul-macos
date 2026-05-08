@@ -1,0 +1,101 @@
+/*
+ * macOS WKWebView renders native select controls with taller internal text
+ * metrics than desktop Safari. Keep this override separate from the upstream
+ * rhwp-studio bundle so the fix survives asset refreshes.
+ */
+@media (pointer: fine) {
+  #style-bar {
+    height: 32px;
+    min-height: 32px;
+    padding: 3px 8px;
+    align-items: center;
+  }
+
+  select.sb-combo,
+  select.sb-ls-select {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 24px;
+    min-height: 24px;
+    line-height: 20px;
+    padding: 1px 22px 1px 7px;
+    font-family: var(--font-family-ui);
+    background-color: var(--color-surface);
+    background-image:
+      linear-gradient(45deg, transparent 50%, #555 50%),
+      linear-gradient(135deg, #555 50%, transparent 50%);
+    background-position:
+      calc(100% - 11px) 10px,
+      calc(100% - 6px) 10px;
+    background-repeat: no-repeat;
+    background-size: 5px 5px, 5px 5px;
+    vertical-align: middle;
+  }
+
+  select.sb-combo:disabled,
+  select.sb-ls-select:disabled {
+    color: var(--color-text-disabled);
+    background-color: #f4f4f4;
+  }
+
+  #style-name {
+    width: 72px;
+  }
+
+  .sb-font-lang {
+    width: 52px;
+    font-size: var(--font-size-base);
+  }
+
+  .sb-font {
+    width: 132px;
+  }
+
+  .sb-size-group {
+    min-height: 24px;
+    align-items: stretch;
+  }
+
+  .sb-size {
+    height: 24px;
+    min-height: 24px;
+    line-height: 20px;
+    padding: 1px 4px;
+    font-family: var(--font-family-ui);
+  }
+
+  .sb-size-unit {
+    height: 24px;
+    line-height: 22px;
+    padding: 0 4px;
+  }
+
+  .sb-size-arrows {
+    height: 24px;
+  }
+
+  .sb-ls-group {
+    height: 24px;
+    min-height: 24px;
+    align-items: stretch;
+  }
+
+  select.sb-ls-select {
+    width: 62px;
+    font-size: var(--font-size-base);
+    text-align: left;
+    padding-right: 18px;
+    background-position:
+      calc(100% - 10px) 10px,
+      calc(100% - 5px) 10px;
+  }
+
+  .sb-ls-arrows {
+    height: 24px;
+  }
+
+  .sb-arrow {
+    height: 12px;
+    line-height: 10px;
+  }
+}

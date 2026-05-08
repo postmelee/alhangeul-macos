@@ -20,7 +20,8 @@
 ## core 기준
 
 - Stable 안정 기준은 release tag + resolved commit. Demo/Preview는 필요한 API가 포함된 resolved commit을 `rev`로 고정.
-- 현재 `rhwp-core.lock`은 Demo/Preview commit pin 상태이며, 2026-04-27 확인 기준 최신 release `v0.7.6`에도 `build_page_render_tree`, `get_bin_data`가 없어 Stable 전환은 blocked다.
+- 현재 `rhwp-core.lock`은 `v0.7.10` Stable release tag pin 상태다. `RustBridge/Cargo.toml`은 `tag = "v0.7.10"`을 사용하고, `RustBridge/Cargo.lock`과 `rhwp-core.lock`은 resolved commit `62a458aa317e962cd3d0eec6096728c172d57110`을 기록한다.
+- `v0.7.10`에는 현재 bridge가 요구하는 `build_page_render_tree`, `get_bin_data`, `render_page_svg_native`, `get_page_info_native`, `extract_thumbnail_only` API가 포함되어 있다.
 - `main`, `devel` 같은 branch는 필요한 API가 포함된 과도기 commit을 찾는 참고 출처일 뿐, 안정 기준으로 사용하지 않는다.
 - 채널별 dependency/lock 필드와 compatibility gate 상세는 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
 
@@ -43,7 +44,7 @@ Demo/Preview commit pin:
 ./scripts/build-rust-macos.sh --verify-lock
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build.noindex/DerivedData \
@@ -60,7 +61,7 @@ Stable release tag:
 ./scripts/build-rust-macos.sh --verify-lock
 ./scripts/check-no-appkit.sh
 xcodegen generate
-xcodebuild -project AlhangeulMac.xcodeproj \
+xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
   -derivedDataPath build.noindex/DerivedData \

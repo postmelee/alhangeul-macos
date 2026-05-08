@@ -14,6 +14,11 @@ Page numbers are 1-based. The default page is 1.
 EOF
 }
 
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  usage
+  exit 0
+fi
+
 if [ "$#" -lt 2 ]; then
   usage
   exit 1
@@ -84,6 +89,7 @@ swiftc -parse-as-library \
   "$ROOT/Sources/RhwpCoreBridge/RhwpDocument.swift" \
   "$ROOT/Sources/RhwpCoreBridge/RenderTree.swift" \
   "$ROOT/Sources/RhwpCoreBridge/FontFallback.swift" \
+  "$ROOT/Sources/RhwpCoreBridge/FontResourceRegistry.swift" \
   "$ROOT/Sources/RhwpCoreBridge/CGTreeRenderer.swift" \
   "$ROOT/scripts/render_debug_compare.swift" \
   "$LIB" \

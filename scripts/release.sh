@@ -3,10 +3,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PROJECT_NAME="AlhangeulMac"
+PROJECT_NAME="Alhangeul"
 SCHEME_NAME="HostApp"
-BUILD_APP_NAME="AlhangeulMac.app"
-APP_NAME="AlhangeulMac.app"
+BUILD_APP_NAME="Alhangeul.app"
+APP_NAME="Alhangeul.app"
 BUILD_ROOT_INPUT="${ALHANGEUL_BUILD_ROOT:-$ROOT/build.noindex}"
 OUTPUT_DIR_INPUT=""
 VERSION=""
@@ -342,7 +342,7 @@ create_dmg() {
   ln -s /Applications "$DMG_STAGING_DIR/Applications"
 
   hdiutil create \
-    -volname "AlhangeulMac $VERSION" \
+    -volname "Alhangeul $VERSION" \
     -srcfolder "$DMG_STAGING_DIR" \
     -format UDZO \
     -ov \
