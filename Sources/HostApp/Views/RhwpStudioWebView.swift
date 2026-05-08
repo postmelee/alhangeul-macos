@@ -358,9 +358,22 @@ extension RhwpStudioWebView {
                 onError(body["message"] as? String)
             case "runtime-error":
                 handleRuntimeError(body)
+            case "document-load-error":
+                handleDocumentLoadError(body)
             default:
                 break
             }
+        }
+
+        private func handleDocumentLoadError(_ body: [String: Any]) {
+            finishLoading()
+            onFailure(
+                .documentLoadError(
+                    message: body["message"] as? String,
+                    document: currentDocument,
+                    reloadToken: currentReloadToken
+                )
+            )
         }
 
         private func handleRuntimeError(_ body: [String: Any]) {

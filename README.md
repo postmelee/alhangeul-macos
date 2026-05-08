@@ -118,7 +118,7 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 - [ ] Homebrew Cask
 - [ ] 자동 업데이트 또는 업데이트 확인
 - [ ] crash-safe file opening
-- [ ] corrupt file fallback
+- [x] corrupt file fallback
 - [ ] WKWebView asset loading 실패 fallback
 - [ ] release artifact provenance와 checksum 공개
 - [ ] 문서 호환성/렌더링 한계 리포트

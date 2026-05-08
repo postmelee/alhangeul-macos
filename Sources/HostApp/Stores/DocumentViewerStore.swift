@@ -56,10 +56,8 @@ final class DocumentViewerStore: ObservableObject {
                 sourceDocument: sourceDocument
             )
         } catch {
-            errorMessage = "문서를 열 수 없습니다: \(error.localizedDescription)"
-            rhwpStudioDocument = nil
-            sourceDocument = nil
-            filename = ""
+            errorMessage = Self.openingErrorMessage(for: error)
+            clearCurrentDocument()
         }
 
         isLoading = false
@@ -79,10 +77,8 @@ final class DocumentViewerStore: ObservableObject {
                 sourceDocument: nil
             )
         } catch {
-            webViewErrorMessage = "끌어놓은 문서를 열 수 없습니다: \(error.localizedDescription)"
-            rhwpStudioDocument = nil
-            sourceDocument = nil
-            self.filename = ""
+            webViewErrorMessage = "끌어놓은 문서를 열 수 없습니다: \(Self.openingErrorMessage(for: error))"
+            clearCurrentDocument()
         }
 
         isLoading = false
@@ -99,7 +95,7 @@ final class DocumentViewerStore: ObservableObject {
             }
             loadDocument(from: url)
         } catch {
-            webViewErrorMessage = "최근 문서를 열 수 없습니다: \(error.localizedDescription)"
+            webViewErrorMessage = "최근 문서를 읽을 수 없습니다. 파일 접근 권한 또는 위치를 확인한 뒤 다시 열어 주세요."
         }
     }
 
@@ -151,9 +147,7 @@ final class DocumentViewerStore: ObservableObject {
         filename: String,
         sourceDocument: RecentDocumentItem?
     ) throws {
-        guard !data.isEmpty else {
-            throw DocumentViewerStoreError.emptyDocument
-        }
+        try HwpDocumentInputValidator.validateOpeningData(data)
 
         self.filename = filename
         self.sourceDocument = sourceDocument
@@ -172,20 +166,24 @@ final class DocumentViewerStore: ObservableObject {
         }
     }
 
+    private func clearCurrentDocument() {
+        rhwpStudioDocument = nil
+        sourceDocument = nil
+        filename = ""
+        isWebViewLoading = false
+        webViewFailure = nil
+    }
+
     private static func sanitizedFilename(_ filename: String) -> String {
         let trimmedFilename = filename.trimmingCharacters(in: .whitespacesAndNewlines)
         let lastPathComponent = URL(fileURLWithPath: trimmedFilename).lastPathComponent
         return lastPathComponent.isEmpty ? "document.hwp" : lastPathComponent
     }
-}
 
-private enum DocumentViewerStoreError: LocalizedError {
-    case emptyDocument
-
-    var errorDescription: String? {
-        switch self {
-        case .emptyDocument:
-            return "비어 있는 문서는 열 수 없습니다."
+    private static func openingErrorMessage(for error: Error) -> String {
+        if let inputError = error as? HwpDocumentInputError {
+            return inputError.localizedDescription
         }
+        return "문서를 읽을 수 없습니다. 파일 접근 권한 또는 위치를 확인한 뒤 다시 열어 주세요."
     }
 }
