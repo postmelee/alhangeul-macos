@@ -17,15 +17,15 @@ on:
         type: boolean
         default: true
       draft:
-        description: Create a draft GitHub Release when the release does not exist yet.
+        description: Create a draft GitHub Release. Stable Sparkle appcast is updated only when this is false.
         required: true
         type: boolean
-        default: true
+        default: false
       prerelease:
-        description: Mark a newly created GitHub Release as prerelease.
+        description: Mark the GitHub Release as prerelease. Stable Sparkle appcast is updated only when this is false.
         required: true
         type: boolean
-        default: true
+        default: false
 
 permissions:
   contents: write
@@ -58,6 +58,8 @@ jobs:
       NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
       NOTARY_APP_SPECIFIC_PASSWORD: ${{ secrets.NOTARY_APP_SPECIFIC_PASSWORD }}
       RELEASE_KEYCHAIN_PASSWORD: ${{ secrets.RELEASE_KEYCHAIN_PASSWORD }}
+      SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+      ALHANGEUL_PAGES_BRANCH: ${{ vars.ALHANGEUL_PAGES_BRANCH || 'devel-webview' }}
 
     steps:
       - name: Check out release tag
@@ -258,6 +260,186 @@ jobs:
             fi
             gh "${args[@]}"
           fi
+
+          edit_args=(
+            release edit "$tag_name"
+            --title "Alhangeul $tag_name"
+            --notes-file "$notes_path"
+            --verify-tag
+          )
+          if [ "$DRAFT_RELEASE" = "true" ]; then
+            edit_args+=(--draft=true)
+          else
+            edit_args+=(--draft=false)
+          fi
+          if [ "$PRERELEASE" = "true" ]; then
+            edit_args+=(--prerelease=true)
+          else
+            edit_args+=(--prerelease=false)
+          fi
+          if [ "$DRAFT_RELEASE" = "false" ] && [ "$PRERELEASE" = "false" ]; then
+            edit_args+=(--latest)
+          fi
+          gh "${edit_args[@]}"
+
+      - name: Validate published release state
+        id: release_state
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_name="v$VERSION"
+          is_draft="$(gh release view "$tag_name" --json isDraft --jq .isDraft)"
+          is_prerelease="$(gh release view "$tag_name" --json isPrerelease --jq .isPrerelease)"
+          release_url="$(gh release view "$tag_name" --json url --jq .url)"
+
+          {
+            echo "is_draft=$is_draft"
+            echo "is_prerelease=$is_prerelease"
+            echo "release_url=$release_url"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ "$DRAFT_RELEASE" = "false" ] && [ "$PRERELEASE" = "false" ]; then
+            if [ "$is_draft" != "false" ] || [ "$is_prerelease" != "false" ]; then
+              echo "ERROR: stable appcast requires non-draft, non-prerelease release; got draft=$is_draft prerelease=$is_prerelease" >&2
+              exit 1
+            fi
+          fi
+
+          {
+            echo
+            echo "## GitHub Release state"
+            echo
+            echo "- URL: $release_url"
+            echo "- draft: \`$is_draft\`"
+            echo "- prerelease: \`$is_prerelease\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Resolve Sparkle CLI tools
+        id: sparkle_tools
+        if: ${{ !inputs.draft && !inputs.prerelease }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          derived_data="$ALHANGEUL_BUILD_ROOT/SparkleToolsDerivedData"
+          xcodebuild -resolvePackageDependencies \
+            -project Alhangeul.xcodeproj \
+            -scheme HostApp \
+            -derivedDataPath "$derived_data"
+
+          sign_update_path="$derived_data/SourcePackages/artifacts/sparkle/Sparkle/bin/sign_update"
+          if [ ! -x "$sign_update_path" ]; then
+            echo "ERROR: Sparkle sign_update was not found at $sign_update_path" >&2
+            find "$derived_data/SourcePackages/artifacts" -maxdepth 6 -type f -name sign_update -print >&2 || true
+            exit 1
+          fi
+
+          echo "sign_update_path=$sign_update_path" >> "$GITHUB_OUTPUT"
+
+      - name: Write Sparkle appcast
+        id: appcast
+        if: ${{ !inputs.draft && !inputs.prerelease }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${SPARKLE_ED_PRIVATE_KEY:-}" ]; then
+            echo "ERROR: SPARKLE_ED_PRIVATE_KEY secret is required for stable appcast signing" >&2
+            exit 1
+          fi
+
+          dmg_path="${{ steps.artifact.outputs.dmg_path }}"
+          sign_update_path="${{ steps.sparkle_tools.outputs.sign_update_path }}"
+          length="$(stat -f%z "$dmg_path")"
+          ed_signature="$(printf '%s' "$SPARKLE_ED_PRIVATE_KEY" | "$sign_update_path" --ed-key-file - -p "$dmg_path")"
+          if [ -z "$ed_signature" ]; then
+            echo "ERROR: Sparkle sign_update did not produce an EdDSA signature" >&2
+            exit 1
+          fi
+
+          build_number="$(plutil -extract CFBundleVersion raw -o - Sources/HostApp/Info.plist)"
+          minimum_system="$(plutil -extract LSMinimumSystemVersion raw -o - Sources/HostApp/Info.plist)"
+          dmg_url="https://github.com/$GITHUB_REPOSITORY/releases/download/v$VERSION/alhangeul-macos-$VERSION.dmg"
+          release_notes_url="https://postmelee.github.io/alhangeul-macos/updates/v$VERSION.html"
+          pub_date="$(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S +0000')"
+          appcast_path="$ALHANGEUL_BUILD_ROOT/release/appcast.xml"
+
+          bash scripts/ci/write-sparkle-appcast.sh \
+            --version "$VERSION" \
+            --build "$build_number" \
+            --dmg-url "$dmg_url" \
+            --length "$length" \
+            --ed-signature "$ed_signature" \
+            --release-notes-url "$release_notes_url" \
+            --pub-date "$pub_date" \
+            --minimum-system-version "$minimum_system" \
+            --output "$appcast_path"
+
+          xmllint --noout "$appcast_path"
+          echo "appcast_path=$appcast_path" >> "$GITHUB_OUTPUT"
+
+          {
+            echo
+            echo "## Sparkle appcast"
+            echo
+            echo "- feed path: \`docs/appcast.xml\`"
+            echo "- DMG URL: \`$dmg_url\`"
+            echo "- release notes: \`$release_notes_url\`"
+            echo "- CFBundleVersion: \`$build_number\`"
+            echo "- minimum system: \`$minimum_system\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish Sparkle appcast to Pages branch
+        if: ${{ !inputs.draft && !inputs.prerelease }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          pages_branch="${ALHANGEUL_PAGES_BRANCH:-devel-webview}"
+          appcast_path="${{ steps.appcast.outputs.appcast_path }}"
+          pages_worktree="$RUNNER_TEMP/alhangeul-pages"
+
+          if [ -z "$pages_branch" ]; then
+            echo "ERROR: ALHANGEUL_PAGES_BRANCH must not be empty" >&2
+            exit 1
+          fi
+
+          git clone \
+            --branch "$pages_branch" \
+            --single-branch \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "$pages_worktree"
+
+          cp "$appcast_path" "$pages_worktree/docs/appcast.xml"
+
+          if git -C "$pages_worktree" diff --quiet -- docs/appcast.xml; then
+            echo "Sparkle appcast is already up to date on $pages_branch"
+            exit 0
+          fi
+
+          git -C "$pages_worktree" config user.name "github-actions[bot]"
+          git -C "$pages_worktree" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "$pages_worktree" add docs/appcast.xml
+          git -C "$pages_worktree" commit -m "Task #177: Update Sparkle appcast for v$VERSION"
+          git -C "$pages_worktree" push origin "HEAD:$pages_branch"
+
+      - name: Record skipped stable appcast update
+        if: ${{ inputs.draft || inputs.prerelease }}
+        shell: bash
+        run: |
+          {
+            echo
+            echo "## Sparkle appcast"
+            echo
+            echo "Stable appcast update was skipped because draft=${{ inputs.draft }} and prerelease=${{ inputs.prerelease }}."
+            echo "Run the workflow with draft=false and prerelease=false for the official stable feed."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Sparkle appcast artifact copy
+        if: ${{ !inputs.draft && !inputs.prerelease }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: alhangeul-macos-${{ inputs.version }}-appcast
+          path: ${{ steps.appcast.outputs.appcast_path }}
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Upload signed DMG artifact copy
         uses: actions/upload-artifact@v4

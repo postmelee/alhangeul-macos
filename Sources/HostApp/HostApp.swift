@@ -5,13 +5,14 @@ import SwiftUI
 @main
 struct AlHangeulMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @StateObject private var updateController = UpdateController()
 
     var body: some Scene {
         WindowGroup {
             DocumentWindowRootView()
         }
         .commands {
-            HostAppCommands()
+            HostAppCommands(updateController: updateController)
         }
     }
 }
@@ -128,11 +129,15 @@ private struct WindowAccessor: NSViewRepresentable {
 }
 
 private struct HostAppCommands: Commands {
+    @ObservedObject var updateController: UpdateController
+
     var body: some Commands {
         CommandGroup(replacing: .appInfo) {
             Button("알한글에 관하여") {
                 AboutWindowPresenter.shared.show()
             }
+
+            CheckForUpdatesCommand(updateController: updateController)
         }
 
         CommandGroup(replacing: .newItem) {}

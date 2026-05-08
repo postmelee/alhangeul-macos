@@ -46,9 +46,11 @@
 		9BFD17415060EB3D21AA11BB /* RhwpStudioPrintController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0E726A1E03A5D6891045C8 /* RhwpStudioPrintController.swift */; };
 		A155D58D6F716FCFDAC1675C /* DocumentOpenRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F4546426B7A9CF2CC1B9D5 /* DocumentOpenRouter.swift */; };
 		ACA5EC231EB0D299AC1CD286 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D60B1C83682555AB978A8F1C /* InfoPlist.strings */; };
+		B15B6B22B2AF932D35690B5C /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = B1F8E64A61A87C41A3680C56 /* Sparkle */; };
 		B20E66185823D980E1A1DC3B /* DocumentFileActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5D4F52776B873F6AB20372 /* DocumentFileActions.swift */; };
 		B98567E2BF18CDD24BB51F5B /* FontFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF11065A3E3439B4C5B8DD7 /* FontFallback.swift */; };
 		BCE95338397154D9AC1C61C6 /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */; };
+		C04DE5FC8DF17E71B0AE24A8 /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D19355F771E9D7C6E9E068F /* UpdateController.swift */; };
 		C2FE57F60D5817A705C6B411 /* HwpDocumentInputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 317B028E5037D11892BC394D /* HwpDocumentInputValidator.swift */; };
 		C6D9F1B3F18FF56C0FAA0D14 /* DocumentViewerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D472AE322872D733515F8A /* DocumentViewerView.swift */; };
 		C898F0CA6BE3F209145CAC28 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C316C5FBCECA08C309CF9 /* HwpPageImageRenderer.swift */; };
@@ -128,6 +130,7 @@
 		3F33B7AA294D0DC689399E16 /* ThumbnailExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ThumbnailExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpDocument.swift; sourceTree = "<group>"; };
 		4B5C316C5FBCECA08C309CF9 /* HwpPageImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPageImageRenderer.swift; sourceTree = "<group>"; };
+		4D19355F771E9D7C6E9E068F /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
 		5D6D965AEFE52537281289A1 /* RhwpStudioResourceSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioResourceSchemeHandler.swift; sourceTree = "<group>"; };
 		5E97EA87050B083B9FA29249 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		612627C44A23C2ADDA48A054 /* ThumbnailExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ThumbnailExtension.entitlements; sourceTree = "<group>"; };
@@ -182,6 +185,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				040CCB72B17712A8C122529A /* Rhwp.xcframework in Frameworks */,
+				B15B6B22B2AF932D35690B5C /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -351,6 +355,7 @@
 				FEAC07979C76F049103FFFDF /* RhwpStudioResourceLocator.swift */,
 				5D6D965AEFE52537281289A1 /* RhwpStudioResourceSchemeHandler.swift */,
 				2C9543624DAA07DE76E6E954 /* SharePresentationAnchor.swift */,
+				4D19355F771E9D7C6E9E068F /* UpdateController.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -383,6 +388,7 @@
 			);
 			name = HostApp;
 			packageProductDependencies = (
+				B1F8E64A61A87C41A3680C56 /* Sparkle */,
 			);
 			productName = HostApp;
 			productReference = A1BA85C7A51A97F8EDF455E7 /* HostApp.app */;
@@ -456,6 +462,9 @@
 			);
 			mainGroup = B6AD0FD0EAF0394F4938875E;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				ACA305A648FC2B06AC7477E2 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C24CBDF0BFEE32AF9862183E /* Products */;
 			projectDirPath = "";
@@ -534,6 +543,7 @@
 				7A30B489C04C957C050AB78F /* RhwpStudioResourceSchemeHandler.swift in Sources */,
 				07E0FE00AA4A4A61F8B36B7A /* RhwpStudioWebView.swift in Sources */,
 				8B2A1E6744CC44217E4F1EE8 /* SharePresentationAnchor.swift in Sources */,
+				C04DE5FC8DF17E71B0AE24A8 /* UpdateController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -913,6 +923,25 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		ACA305A648FC2B06AC7477E2 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.9.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B1F8E64A61A87C41A3680C56 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ACA305A648FC2B06AC7477E2 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9215C478290BB2C2951D2CE7 /* Project object */;
 }
