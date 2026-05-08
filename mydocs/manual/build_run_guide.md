@@ -271,24 +271,57 @@ pgrep -x Alhangeul
 
 기대 결과는 앱 프로세스와 창이 유지되고, 빈 문서와 손상/미지원 문서에 대해 사용자 문구가 표시되는 것이다. HostApp에는 50 MB hard block을 두지 않는다. 50 MB 제한은 Quick Look preview와 Finder thumbnail fallback 정책이다.
 
-Quick Look/Thumbnail smoke는 현재 시스템에 등록된 extension 산출물 기준으로 동작한다. Debug build는 compile/link 검증에는 유효하지만 Finder/Quick Look 등록 검증의 진실 원천으로 쓰지 않는다. 설치본 기준 검증에서는 표준 smoke test 흐름으로 signed/sealed package를 `$HOME/Applications/Alhangeul.app`에 설치한 뒤 다음을 실행한다.
+Quick Look/Thumbnail smoke는 현재 시스템에 등록된 extension 산출물 기준으로 동작한다. Debug build는 compile/link 검증에는 유효하지만 Finder/Quick Look 등록 검증의 진실 원천으로 쓰지 않는다. 설치본 기준 검증에서는 표준 smoke helper가 Release package 산출물을 `$HOME/Applications/Alhangeul.app`에 설치한 뒤 bundle 정합성, PlugInKit 등록, HWP/HWPX thumbnail 생성을 확인한다.
 
 ```bash
-qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
-qlmanage -t -x -s 512 -o /tmp/alhangeul-ql build.noindex/task149-negative/corrupt.hwp
-qlmanage -t -x -s 512 -o /tmp/alhangeul-ql build.noindex/task149-negative/large.hwp
+scripts/smoke-finder-integration.sh --version 0.1.0
 ```
 
-기대 결과는 정상 sample, 50 MB 초과 파일, 손상/미지원 입력에서 모두 thumbnail이 생성되는 것이다. 손상/미지원 입력은 원본 render 결과가 아니라 fallback tile이어야 한다. 설치본 smoke에서 빈/손상 synthetic 파일이 thumbnail을 만들지 못하면 extension 등록 대상, Quick Look cache, content type routing, fallback classifier 순서로 분리한다.
+이미 만든 Release package staging app을 재사용할 때는 package 생성을 생략한다.
 
-### 표준 smoke test 흐름
+```bash
+scripts/smoke-finder-integration.sh --skip-package --app build.noindex/release/Alhangeul.app
+```
+
+이전 이름 설치본(`RhwpMac.app`, `AlhangeulMac.app`, `알한글.app`)이 남아 있으면 `qlmanage`가 현재 설치본이 아닌 예전 provider로 thumbnail을 만들 수 있다. helper는 이런 false positive를 막기 위해 기본값에서는 레거시 후보 발견 시 실패한다. 파일 삭제 없이 smoke 격리를 위해 LaunchServices/PlugInKit 등록만 정리하려면 작업지시자 승인 후 다음 옵션을 붙인다.
+
+```bash
+scripts/smoke-finder-integration.sh --skip-package --app build.noindex/release/Alhangeul.app --unregister-legacy-candidates
+```
+
+기대 결과는 `samples/basic/KTX.hwp`와 `samples/hwpx/hwpx-01.hwpx` 모두에서 thumbnail output이 생성되는 것이다. helper는 실행별 output directory와 diagnostics directory를 출력한다. 손상/대용량 fallback 입력은 #149 성격의 선택 smoke로 분리한다.
+
+```bash
+mkdir -p build.noindex/task149-negative /tmp/alhangeul-ql/fallback
+printf 'not hwp' > build.noindex/task149-negative/corrupt.hwp
+mkfile 51m build.noindex/task149-negative/large.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql/fallback build.noindex/task149-negative/corrupt.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql/fallback build.noindex/task149-negative/large.hwp
+```
+
+손상/미지원 입력은 원본 render 결과가 아니라 fallback tile이어야 한다. 설치본 smoke에서 thumbnail을 만들지 못하면 extension 등록 대상, Quick Look cache, content type routing, fallback classifier 순서로 분리한다.
+
+### 표준 smoke helper
 
 Finder 통합은 signed/sealed된 단일 설치본 기준으로 확인한다. 반복 삭제/재설치를 피하기 위해 표준 경로는 `$HOME/Applications/Alhangeul.app` 하나만 사용한다.
+
+helper가 자동으로 수행하는 항목:
+
+- `scripts/package-release.sh <version>`으로 Release package 생성 (`--skip-package` 또는 `--app` 지정 시 생략)
+- `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` bundle 정합성 확인
+- `$HOME/Applications/Alhangeul.app` 설치와 `lsregister`/`pluginkit` 등록
+- 이전 이름 설치본 후보 발견 시 기본 실패. `--unregister-legacy-candidates` 지정 시 파일은 삭제하지 않고 LaunchServices/PlugInKit 등록만 정리
+- `pluginkit -mAvvv`에서 Preview/Thumbnail extension 확인
+- `qlmanage -r`, `qlmanage -r cache`
+- `qlmanage -t -x`로 HWP/HWPX thumbnail output 생성
+- 실패 시 `pluginkit`, `lsregister`, `codesign`, `plutil`, `qlmanage` 로그를 diagnostics directory에 저장
+
+수동 흐름이 필요한 경우 다음 명령을 기준으로 분리 확인한다.
 
 ```bash
 ./scripts/package-release.sh 0.1.0
 
-LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister"
 APP="$HOME/Applications/Alhangeul.app"
 mkdir -p "$HOME/Applications"
 "$LSREGISTER" -u "$APP" >/dev/null 2>&1 || true
@@ -321,17 +354,19 @@ qlmanage -r
 qlmanage -r cache
 ```
 
-preview 확인:
+preview 수동 확인:
 
 ```bash
 qlmanage -p samples/basic/KTX.hwp
+qlmanage -p samples/hwpx/hwpx-01.hwpx
 ```
 
-thumbnail 확인:
+thumbnail 수동 확인:
 
 ```bash
 mkdir -p /tmp/alhangeul-ql
 qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
+qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/hwpx/hwpx-01.hwpx
 ```
 
 ### 반복 시행착오 방지 규칙
@@ -342,4 +377,4 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
 - Debug/Release 중간 산출물은 `build.noindex/` 아래에 둔다. Spotlight 검색 결과에 `build/DerivedData/.../Alhangeul.app` 같은 개발 앱이 보이면 오래된 산출물이 남은 상태로 보고 제거하거나 Spotlight 인덱스를 갱신한다.
 - 동일 검증 중에는 설치 후보를 `$HOME/Applications/Alhangeul.app` 하나로 고정한다.
 
-`qlmanage -m plugins` 미노출 처리, `pluginkit -mAvvv` 미노출 시 진단 순서, 이전 이름(`RhwpMac.app`, `알한글.app`) 설치본 처리, 표시명 문제와 extension 실패 혼동 방지 등 추가 진단 기준은 [`finder_integration_validation_pitfalls.md`](../troubleshootings/finder_integration_validation_pitfalls.md)를 따른다.
+`qlmanage -m plugins` 미노출 처리, `pluginkit -mAvvv` 미노출 시 진단 순서, 이전 이름(`RhwpMac.app`, `AlhangeulMac.app`, `알한글.app`) 설치본 처리, 표시명 문제와 extension 실패 혼동 방지 등 추가 진단 기준은 [`finder_integration_validation_pitfalls.md`](../troubleshootings/finder_integration_validation_pitfalls.md)를 따른다.
