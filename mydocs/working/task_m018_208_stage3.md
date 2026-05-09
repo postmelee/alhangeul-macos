@@ -48,6 +48,10 @@
 | `gh issue view 208 --repo postmelee/alhangeul-macos --json title,body` | 제목과 본문 갱신 확인 |
 | `gh api repos/postmelee/alhangeul-macos/milestones/18 -X PATCH ...` | milestone 설명 갱신 완료 |
 
+## main 기준 보정
+
+작업지시자 시각 검증 중 로컬 `docs/`가 GitHub Pages live source인 `main/docs`보다 이전 화면 기준이라는 점을 확인했다. `docs/`를 `origin/main` 기준으로 다시 맞춘 뒤, #208 범위의 v0.1.1 direct DMG 링크와 단일 universal DMG 안내만 재적용했다. 따라서 로컬 서버는 main Pages 화면 구조와 영상/스타일 자산을 유지하면서 #208 변경분만 포함한다.
+
 ## 남은 작업
 
 Stage 4에서는 README, GitHub Release body template, v0.1.1 release record, release manuals에 Intel Mac + Apple Silicon 지원과 단일 universal DMG 검증 기준을 반영한다. 이번 Stage 3에서는 Pages direct download 구조와 GitHub issue/milestone 범위 정정을 우선 완료했다.
