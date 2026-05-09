@@ -1,0 +1,216 @@
+name: PR CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - devel-webview
+      - devel
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  classify-changes:
+    name: Classify changed files
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    outputs:
+      docs_only: ${{ steps.classify.outputs.docs_only }}
+      run_macos_build: ${{ steps.classify.outputs.run_macos_build }}
+      run_rust_verify: ${{ steps.classify.outputs.run_rust_verify }}
+      run_render_smoke: ${{ steps.classify.outputs.run_render_smoke }}
+      run_release_checks: ${{ steps.classify.outputs.run_release_checks }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Classify changed files
+        id: classify
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/ci/classify-pr-changes.sh \
+            "${{ github.event.pull_request.base.sha }}" \
+            HEAD
+
+  script-checks:
+    name: Script syntax checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: classify-changes
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check shell script syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          for script in scripts/*.sh scripts/ci/*.sh; do
+            bash -n "$script"
+          done
+
+      - name: Check helper interfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/ci/classify-pr-changes.sh --help
+          bash scripts/ci/check-rhwp-upstream-release.sh --help
+          bash scripts/ci/write-sparkle-appcast.sh --help
+
+      - name: Record classification summary
+        shell: bash
+        run: |
+          {
+            echo "## PR CI scope"
+            echo
+            echo "| Flag | Value |"
+            echo "|------|-------|"
+            echo "| docs_only | \`${{ needs.classify-changes.outputs.docs_only }}\` |"
+            echo "| run_macos_build | \`${{ needs.classify-changes.outputs.run_macos_build }}\` |"
+            echo "| run_rust_verify | \`${{ needs.classify-changes.outputs.run_rust_verify }}\` |"
+            echo "| run_render_smoke | \`${{ needs.classify-changes.outputs.run_render_smoke }}\` |"
+            echo "| run_release_checks | \`${{ needs.classify-changes.outputs.run_release_checks }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  macos-validation:
+    name: macOS validation
+    runs-on: macos-15
+    timeout-minutes: 120
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.run_macos_build == 'true' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+
+      - name: Verify Rust bridge lock
+        if: ${{ needs.classify-changes.outputs.run_rust_verify == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+          ./scripts/build-rust-macos.sh --verify-lock
+
+      - name: Check shared Swift boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/check-no-appkit.sh
+
+      - name: Generate Xcode project
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodegen generate
+
+      - name: Build HostApp Debug
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -project Alhangeul.xcodeproj \
+            -scheme HostApp \
+            -configuration Debug \
+            -derivedDataPath build.noindex/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Run native renderer smoke
+        if: ${{ needs.classify-changes.outputs.run_render_smoke == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/validate-stage3-render.sh
+
+  release-checks:
+    name: Release helper checks
+    runs-on: macos-15
+    timeout-minutes: 45
+    needs: classify-changes
+    if: ${{ needs.classify-changes.outputs.run_release_checks == 'true' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch release tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+
+      - name: Verify release script interface
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/release.sh --help
+
+      - name: Verify release note template
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/write-release-notes.sh \
+            0.1.1 \
+            0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
+            build.noindex/release/release-notes-0.1.1.md
+          scripts/ci/check-release-notes-template.sh \
+            build.noindex/release/release-notes-0.1.1.md
+
+      - name: Verify release delta checklist
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/write-release-delta-checklist.sh \
+            v0.1.0 \
+            HEAD \
+            build.noindex/release/delta-checklist-0.1.1.md
+
+      - name: Verify Sparkle appcast helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/write-sparkle-appcast.sh \
+            --version 0.1.1 \
+            --build 2 \
+            --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.1/alhangeul-macos-0.1.1.dmg \
+            --length 1 \
+            --ed-signature dummy-ed-signature \
+            --release-notes-url https://postmelee.github.io/alhangeul-macos/updates/v0.1.1.html \
+            --pub-date "Fri, 08 May 2026 09:00:00 +0000" \
+            --minimum-system-version 12.0 \
+            --output build.noindex/release/appcast.xml
+          xmllint --noout build.noindex/release/appcast.xml
+
+      - name: Record release check summary
+        shell: bash
+        run: |
+          {
+            echo "## Release helper checks"
+            echo
+            echo "- release script help: OK"
+            echo "- release notes dry-run/template check: OK"
+            echo "- release delta checklist dry-run: OK"
+            echo "- Sparkle appcast helper dry-run: OK"
+          } >> "$GITHUB_STEP_SUMMARY"
