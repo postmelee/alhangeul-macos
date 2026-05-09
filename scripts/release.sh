@@ -379,9 +379,11 @@ on run argv
   set volumePath to item 1 of argv
   set appName to item 2 of argv
   set noteName to item 3 of argv
+  set backgroundPath to volumePath & "/.background/alhangeul-dmg-background.png"
 
   tell application "Finder"
     set volumeFolder to POSIX file volumePath as alias
+    set backgroundImage to POSIX file backgroundPath as alias
     open volumeFolder
 
     set volumeWindow to container window of volumeFolder
@@ -393,7 +395,7 @@ on run argv
     set viewOptions to icon view options of volumeWindow
     set arrangement of viewOptions to not arranged
     set icon size of viewOptions to 96
-    set background picture of viewOptions to file "alhangeul-dmg-background.png" of folder ".background" of volumeFolder
+    set background picture of viewOptions to backgroundImage
 
     set position of item appName of volumeFolder to {178, 268}
     set position of item "Applications" of volumeFolder to {542, 268}
