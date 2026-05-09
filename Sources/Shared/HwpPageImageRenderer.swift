@@ -106,7 +106,7 @@ enum HwpPageImageRenderer {
             throw HwpRenderError.bitmapContextUnavailable
         }
 
-        context.setFillColor(CGColor(gray: 1, alpha: 1))
+        context.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
         context.fill(CGRect(x: 0, y: 0, width: width, height: height))
         context.translateBy(x: 0, y: CGFloat(height))
         context.scaleBy(x: renderScale, y: -renderScale)

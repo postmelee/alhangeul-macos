@@ -54,8 +54,7 @@ final class HwpThumbnailRenderCache {
     private let stateQueue = DispatchQueue(label: "com.postmelee.alhangeul.thumbnail-cache")
     private let workerQueue = DispatchQueue(
         label: "com.postmelee.alhangeul.thumbnail-render",
-        qos: .utility,
-        attributes: .concurrent
+        qos: .utility
     )
     private let maxEntryCount = 96
 
