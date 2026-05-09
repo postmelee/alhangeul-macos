@@ -23,6 +23,9 @@
 - GitHub Release 본문은 운영 정보가 누락되지 않도록 더 상세하게 만들되, Pages 페이지는 공개 사용자 안내용으로 간결하게 유지한다.
 - `README.md`는 제품 개요와 현재 작업 축, 최신 공개 릴리즈 1개 요약으로 좁히고 과거 릴리즈 상세는 `mydocs/release/`로 넘긴다.
 - `mydocs/release/v<version>.md`는 장기 기록 문서로 두며, PR별 검증과 release candidate 검증의 경계를 명확히 기록한다.
+- `release_distribution_guide.md`는 버전 중립적인 절차와 현재도 유효한 배포 정책만 남긴다. `v0.1`, `v0.1.0`, 특정 날짜, 특정 release cycle 결정은 릴리즈별 기록 또는 기술 문서로 분리한다.
+- Team ID, signing identity 표시명, notary profile name처럼 비밀은 아니지만 환경 의존적인 운영 식별자는 매뉴얼 본문이 아니라 `mydocs/tech/release_environment.md` 같은 환경 스냅샷 문서로 분리한다.
+- `troubleshootings/`는 실패 사례, 검증 함정, 재발 방지 절차처럼 문제 해결 성격이 분명한 내용에만 사용한다. 일반 release policy나 버전별 release decision record를 troubleshooting으로 옮기지 않는다.
 - release delta 자동화는 public release 승인 장치가 아니라 초안 생성/검증 보조 도구로 취급한다.
 - 실제 `v0.1.1` public DMG SHA256은 #188에서 확정되므로 이번 단계의 후보 문서에는 placeholder 또는 #188 handoff 표시를 명확히 둔다.
 - 새 스크립트는 shell 기반 기존 `scripts/ci/` 스타일을 우선하고, 외부 패키지 의존성을 추가하지 않는다.
@@ -179,7 +182,7 @@ Task #185 Stage 3: Pages와 README 릴리즈 기준 정리
 
 ### 목표
 
-릴리즈별 장기 기록 문서 구조를 만들고, 이전 공개 릴리즈 대비 변경 delta를 release candidate 검증 입력으로 넘기는 기준을 마련한다.
+릴리즈별 장기 기록 문서 구조를 만들고, 이전 공개 릴리즈 대비 변경 delta를 release candidate 검증 입력으로 넘기는 기준을 마련한다. 동시에 `release_distribution_guide.md`에서 버전별 release decision record로 분리해야 할 정보를 식별한다.
 
 ### 작업
 
@@ -193,16 +196,23 @@ Task #185 Stage 3: Pages와 README 릴리즈 기준 정리
   - 알려진 제한 사항과 후속 이슈
   - `rhwp` core와 viewer asset provenance
   - GitHub Release/Pages/Sparkle appcast 링크
+- `release_distribution_guide.md` 안의 `v0.1`, `v0.1.0`, 특정 날짜/credential 준비 상태, 특정 cycle 브랜치 기준, 특정 버전 명령 예시를 분류한다.
+- 버전별 결정과 release 당시 판단은 `mydocs/release/v0.1.0.md` 또는 `mydocs/release/v0.1.1.md`로 옮긴다.
+- Team ID, signing identity 표시명, keychain profile name처럼 현재 환경 식별자는 필요 시 `mydocs/tech/release_environment.md`로 옮긴다.
+- Gatekeeper, notarization, Finder integration, appcast push 실패처럼 재발 방지 성격이 강한 내용만 `mydocs/troubleshootings/` 분리 후보로 판단한다. 현재 단계에서 실제 실패 사례가 없으면 새 troubleshooting 문서는 만들지 않는다.
 - `mydocs/manual/document_structure_guide.md`에 `release/` 폴더 역할과 파일명 기준을 추가한다.
+- `document_structure_guide.md`에 release environment 문서와 troubleshooting 분리 기준을 필요한 범위에서 보강한다.
 - `previous public release tag -> current release candidate commit` 범위의 commit/file delta 수집 명령을 문서화한다.
 - 필요하면 `scripts/ci/write-release-delta-checklist.sh` 같은 최소 helper를 추가해 file path 기반 영향 영역 초안을 만든다.
 - 영향 영역은 최소 HostApp viewer, Quick Look preview, Finder thumbnail, 저장/다른 이름 저장, PDF/인쇄/공유, Sparkle/appcast/Pages, DMG/signing/notarization, Homebrew Cask, `rhwp` core/viewer provenance, 문서 전용 변경으로 분류한다.
-- Stage 4 보고서에 자동 분류 한계와 release owner 보정 지점을 기록한다.
+- Stage 4 보고서에 자동 분류 한계, release owner 보정 지점, manual에서 분리할 정보 목록을 기록한다.
 
 ### 예상 변경 파일
 
 - `mydocs/release/index.md`
+- `mydocs/release/v0.1.0.md` (기존 v0.1.0 release decision record 분리가 필요하다고 판단될 때)
 - `mydocs/release/v0.1.1.md`
+- `mydocs/tech/release_environment.md` (비밀이 아닌 운영 환경 식별자를 분리할 때)
 - `mydocs/manual/document_structure_guide.md`
 - `scripts/ci/write-release-delta-checklist.sh` (필요 시)
 - `mydocs/working/task_m018_185_stage4.md`
@@ -213,7 +223,7 @@ Task #185 Stage 3: Pages와 README 릴리즈 기준 정리
 git status --short --branch
 git log --oneline v0.1.0..HEAD
 git diff --name-only v0.1.0..HEAD
-rg -n "release/|릴리즈|v0\\.1\\.1|검증|provenance|GitHub Release|Pages|appcast" mydocs/release mydocs/manual/document_structure_guide.md
+rg -n "release/|릴리즈|v0\\.1\\.0|v0\\.1\\.1|검증|provenance|GitHub Release|Pages|appcast|release_environment|troubleshootings" mydocs/release mydocs/tech mydocs/manual/document_structure_guide.md
 git diff --check
 ```
 
@@ -228,7 +238,10 @@ rg -n "HostApp|Quick Look|Thumbnail|Sparkle|DMG|Homebrew|문서" build.noindex/r
 ### 완료 기준
 
 - `mydocs/release/`의 역할과 파일명 기준이 매뉴얼에 반영된다.
+- `release_distribution_guide.md`에서 분리할 버전별/환경별 정보 목록이 Stage 4 보고서에 정리된다.
 - `v0.1.1` 릴리즈 상세 문서 초안이 존재한다.
+- 필요 시 `v0.1.0` 릴리즈 기록 또는 release environment 문서가 생성된다.
+- troubleshooting 분리가 필요한 정보와 그렇지 않은 정보의 기준이 기록된다.
 - delta 기반 검증 체크리스트 작성 기준 또는 helper가 준비된다.
 - PR별 검증과 release candidate 검증의 경계가 명확하다.
 
@@ -247,6 +260,8 @@ Task #185 Stage 4: 릴리즈 기록과 delta 검증 기준 추가
 ### 작업
 
 - `release_distribution_guide.md`의 GitHub Release, Pages 업데이트, Sparkle appcast, 릴리스 체크리스트 항목을 Stage 2~4 기준에 맞게 갱신한다.
+- `release_distribution_guide.md`의 예시 명령과 산출물 경로는 가능한 한 `<version>` 기반으로 일반화한다.
+- `release_distribution_guide.md`에 남기는 현재 정책과, `mydocs/release/` 또는 `mydocs/tech/release_environment.md`로 넘기는 역사/환경 정보의 경계를 최종 반영한다.
 - `write-release-notes.sh` dry-run 결과, Pages 후보, README 최신 릴리즈 블록, `mydocs/release/v0.1.1.md`의 version/DMG URL/SHA256/provenance 표현을 대조한다.
 - placeholder가 남는 항목은 #188에서 확정할 값인지 명확히 표시한다.
 - 공개 URL 최종 확인 항목을 #188 handoff로 정리한다.
@@ -259,6 +274,8 @@ Task #185 Stage 4: 릴리즈 기록과 delta 검증 기준 추가
 ### 예상 변경 파일
 
 - `mydocs/manual/release_distribution_guide.md`
+- `mydocs/tech/release_environment.md` (Stage 4에서 만들지 않았지만 Stage 5 일반화 중 필요하다고 판단될 때)
+- `mydocs/troubleshootings/*.md` (실패 사례/재발 방지 성격의 분리 대상이 실제로 있을 때만)
 - `mydocs/orders/20260510.md`
 - `mydocs/report/task_m018_185_report.md`
 
@@ -268,7 +285,8 @@ Task #185 Stage 4: 릴리즈 기록과 delta 검증 기준 추가
 git status --short --branch
 bash -n scripts/ci/write-release-notes.sh
 scripts/ci/write-release-notes.sh 0.1.1 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef build.noindex/release/release-notes-0.1.1.md
-rg -n "v0\\.1\\.1|alhangeul-macos-0\\.1\\.1\\.dmg|SHA256|Quick Look|Thumbnail|Sparkle|provenance" build.noindex/release/release-notes-0.1.1.md docs/updates README.md mydocs/release mydocs/manual/release_distribution_guide.md
+rg -n "v0\\.1\\.1|alhangeul-macos-0\\.1\\.1\\.dmg|SHA256|Quick Look|Thumbnail|Sparkle|provenance" build.noindex/release/release-notes-0.1.1.md docs/updates README.md mydocs/release mydocs/tech mydocs/manual/release_distribution_guide.md
+rg -n "v0\\.1|0\\.1\\.0|Developer ID Application:|XH6JHKYXV8|alhangeul-notary" mydocs/manual/release_distribution_guide.md
 git diff --check
 ```
 
@@ -281,6 +299,9 @@ scripts/ci/write-release-delta-checklist.sh v0.1.0 HEAD build.noindex/release/de
 ### 완료 기준
 
 - release note generator, Pages 후보, README 최신 릴리즈 블록, `mydocs/release/v0.1.1.md`, 배포 매뉴얼이 같은 기준을 따른다.
+- `release_distribution_guide.md`가 버전 중립적인 절차와 현재 정책 중심으로 정리된다.
+- 버전별 결정, 과거 release 판단, 환경 식별자는 `mydocs/release/` 또는 `mydocs/tech/`로 분리된다.
+- troubleshooting 문서는 실제 실패 사례 또는 재발 방지 성격이 분명할 때만 생성된다.
 - 현재 Pages 디자인 유지 조건이 지켜진다.
 - #188에서 실제 public SHA256, GitHub Release 게시, Pages URL, appcast 공개 상태를 확인할 handoff가 정리된다.
 - 최종 보고서와 오늘할일 갱신이 완료된다.
