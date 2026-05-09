@@ -52,7 +52,7 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 
 ## 로드맵
 
-체크된 항목은 현재 저장소 기준으로 구현된 기능입니다. 체크되지 않은 항목은 제품 방향입니다.
+체크된 항목은 현재 저장소 기준으로 구현된 기능입니다. 체크되지 않은 항목은 제품 방향입니다. 현재 진행 중인 단계는 기본으로 표시하고, 이후 단계는 접어 둡니다.
 
 ### v0.1 — "WebView로 먼저 배포한다" First Public Release
 
@@ -80,7 +80,8 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 - [x] 최근 문서 목록과 security-scoped bookmark 기반 재열기
 - [ ] 첫 MVP 배포 산출물 구성
 
-### v0.2 — "Mac 통합을 넓힌다" Mac Integration
+<details>
+<summary><strong>v0.2 — "Mac 통합을 넓힌다" Mac Integration</strong></summary>
 
 > v0.1의 WebView 화면 안 기능과 별개로, 앱 화면 밖의 macOS 문서 흐름에서 HWP/HWPX 정보를 다룰 수 있게 만듭니다.
 
@@ -93,7 +94,10 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 - [ ] Spotlight 본문/메타데이터 인덱싱 설계와 검증
 - [ ] Finder/서비스/공유 extension에서 재사용 가능한 문서 요약 API
 
-### v0.3 — "변환하고 자동화한다" Convert & Automate
+</details>
+
+<details>
+<summary><strong>v0.3 — "변환하고 자동화한다" Convert & Automate</strong></summary>
 
 > 다운로드 폴더의 HWP 공문을 한 번에 PDF/HWPX/Markdown으로 정리할 수 있게 만듭니다.
 
@@ -109,7 +113,10 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 - [ ] CLI 제공
 - [ ] Shortcuts 자동화
 
-### v0.4 — "믿고 설치한다" Consumer Stable
+</details>
+
+<details>
+<summary><strong>v0.4 — "믿고 설치한다" Consumer Stable</strong></summary>
 
 > 첫 공개 배포 이후, 오픈소스 실험 앱이 아니라 일반 사용자가 설치해도 되는 신뢰 가능한 Mac 앱으로 다듬습니다.
 
@@ -125,7 +132,10 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 - [ ] VoiceOver, 키보드 탐색, 고대비
 - [ ] 로컬 처리 우선 privacy 정책
 
-### v0.5 — "Swift native viewer를 만든다" Native Viewer
+</details>
+
+<details>
+<summary><strong>v0.5 — "Swift native viewer를 만든다" Native Viewer</strong></summary>
 
 > WKWebView는 첫 배포와 fallback 기준선으로 유지하되, 장기 기본 경로는 Swift native viewer로 전환합니다.
 
@@ -139,7 +149,10 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 - [ ] 큰 문서 page cache와 progressive rendering
 - [ ] 렌더링 visual diff와 fixture corpus 확장
 
-### v0.6 — "Swift native editor 기반을 만든다" Native Editor Foundation
+</details>
+
+<details>
+<summary><strong>v0.6 — "Swift native editor 기반을 만든다" Native Editor Foundation</strong></summary>
 
 > native viewer 위에 편집 가능한 상호작용 계층을 올립니다. 이 단계의 목표는 안정적인 편집 기반이며, 저장 안정성은 v1.0에서 닫습니다.
 
@@ -150,7 +163,10 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 - [ ] undo/redo 기반
 - [ ] WebView editor와 native editor의 역할/fallback 경계 정리
 
-### v1.0 — "native로 안전하게 고친다" Safe Native Editing
+</details>
+
+<details>
+<summary><strong>v1.0 — "native로 안전하게 고친다" Safe Native Editing</strong></summary>
 
 > 전체 워드프로세서를 바로 대체하기보다, 자주 필요한 작은 수정을 Swift native editor에서 안전하게 지원합니다.
 
@@ -164,7 +180,10 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 - [ ] HWPX 저장 지원
 - [ ] 저장 호환성 경고와 안전한 편집 제한 정책
 
-### v2.0 — "AI가 다룬다" Agent-ready Docs
+</details>
+
+<details>
+<summary><strong>v2.0 — "AI가 다룬다" Agent-ready Docs</strong></summary>
 
 > 에이전트가 HWP/HWPX 문서를 열고, 수정하고, 렌더링 결과로 검증하는 루프를 제공합니다.
 
@@ -176,6 +195,8 @@ v0.1(WebView로 먼저 배포한다) → v0.2(Mac 통합을 넓힌다) → v0.3(
 - [ ] 변경 전후 diff
 - [ ] screenshot/render output 기반 재검증
 - [ ] Codex/Claude 연동 plugin 또는 tool packaging
+
+</details>
 
 ## Features
 
