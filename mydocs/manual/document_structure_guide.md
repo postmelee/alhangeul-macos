@@ -44,6 +44,33 @@
 | `pr/archives/` | 처리 완료된 PR 검토 기록 보관 | |
 | `skills/` | Agent Skills SKILL.md 진실 원천 | `.agents/skills`와 `.claude/skills` 심볼릭 링크가 이 폴더를 가리킨다 |
 
+## Manual 문서 중립성 정책
+
+`mydocs/manual/` 문서는 장기적으로 반복 적용되는 원칙, 절차, 판단 기준을 기록한다. 특정 릴리즈, 특정 이슈, 특정 deprecation 사건, 일회성 검증 결과는 manual 본문에 누적하지 않는다.
+
+manual 본문에 둘 수 있는 내용:
+
+- 반복 적용 가능한 정책과 guardrail
+- 작업자가 직접 재사용할 수 있는 절차와 확인 명령
+- 현재 운영 기준값 중, 바뀌면 문서 자체를 갱신해야 하는 기준 branch, source path, workflow 역할
+- 하위 문서를 찾기 위한 짧은 entrypoint와 링크
+
+manual 본문에서 분리해야 하는 내용:
+
+- 특정 버전에서만 유효한 release decision, SHA256, 검증 결과
+- 특정 GitHub Issue, PR, stage의 분석과 판단 근거
+- 특정 deprecation warning, CI 실패, notarization 실패 같은 사건의 증상과 해결 기록
+- 일회성 migration 검토와 후속 이슈 handoff
+
+분리 위치:
+
+- 특정 릴리즈 기록은 `mydocs/release/`에 둔다.
+- 특정 내부 타스크의 분석, 단계 결과, 최종 결과는 `mydocs/working/` 또는 `mydocs/report/`에 둔다.
+- 실제 실패 증상, 재현 조건, 원인, 재발 방지 절차가 있는 내용은 `mydocs/troubleshootings/`에 둔다.
+- 큰 주제의 반복 절차가 길어지는 경우에는 `release_distribution_guide.md`처럼 neutral entrypoint와 주제별 하위 manual로 소분화한다.
+
+manual에서 특정 사건 문서를 참조해야 할 때는 본문에 사건 내용을 복제하지 않고, 일반화된 판단 기준과 짧은 링크만 둔다.
+
 ## 릴리즈 기록 폴더 정책
 
 `mydocs/release/`는 public release별 장기 기록을 보관한다. GitHub Release 본문은 public 배포 안내, Pages는 사용자용 짧은 릴리즈 노트, README는 최신 공개 릴리즈 1개 요약을 맡고, 내부 검증과 release decision record는 `release/`에 남긴다.

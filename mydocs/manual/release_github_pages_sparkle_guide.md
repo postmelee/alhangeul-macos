@@ -103,6 +103,12 @@ Pages 다운로드 버튼은 사용자를 위한 latest DMG URL을 사용한다.
 https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-<version>.dmg
 ```
 
+### Pages 배포 모델
+
+현재 Pages/appcast 갱신은 `main` 브랜치의 `docs/`를 Pages source로 쓰는 branch publishing 기준이다. `Release Publish DMG` workflow는 stable release일 때 `docs/appcast.xml`을 Pages source branch에 push한다.
+
+Actions 기반 Pages deployment workflow로 전환하려면 branch publishing, release appcast push, required permissions, Pages source 설정을 별도 작업에서 함께 재검토한다.
+
 ## Sparkle appcast
 
 알한글 앱은 stable feed 하나만 사용한다.

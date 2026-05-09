@@ -68,7 +68,7 @@ jobs:
 
     steps:
       - name: Check out release tag
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
@@ -134,7 +134,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload release delta checklist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: alhangeul-macos-${{ inputs.version }}-release-delta-checklist
           path: ${{ steps.delta.outputs.checklist_path }}
@@ -477,7 +477,7 @@ jobs:
 
       - name: Upload Sparkle appcast artifact copy
         if: ${{ !inputs.draft && !inputs.prerelease }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: alhangeul-macos-${{ inputs.version }}-appcast
           path: ${{ steps.appcast.outputs.appcast_path }}
@@ -485,7 +485,7 @@ jobs:
           retention-days: 14
 
       - name: Upload signed DMG artifact copy
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: alhangeul-macos-${{ inputs.version }}-public-dmg
           path: |
