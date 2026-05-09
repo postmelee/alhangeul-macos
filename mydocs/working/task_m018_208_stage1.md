@@ -2,7 +2,7 @@
 
 ## 단계 목적
 
-Intel Mac 지원과 다운로드 선택 UI 구현 전에 현재 release/package build 동작, 산출물 architecture, GitHub runner 제약, Pages direct download 구조를 재검증한다. 이 단계에서는 구현 파일을 수정하지 않고 다음 단계 구현 방향을 확정한다.
+Intel Mac 지원과 다운로드 안내 보강 전에 현재 release/package build 동작, 산출물 architecture, GitHub runner 제약, Pages direct download 구조를 재검증한다. 이 단계에서는 구현 파일을 수정하지 않고 다음 단계 구현 방향을 확정한다.
 
 ## 확인한 환경
 
@@ -127,11 +127,11 @@ Stage 2에서는 다음 방향으로 구현한다.
 4. 검증 명령은 `lipo <binary> -verify_arch arm64 x86_64`를 사용한다.
 5. release rehearsal/publish workflow는 script 자체 gate를 기본 신뢰하되, workflow summary나 별도 step에서 architecture 결과를 보여주는 보강을 검토한다.
 
-Stage 3에서는 Pages 선택 UI를 구현한다.
+Stage 3에서는 Pages direct download 안내를 보강한다.
 
-- Intel Mac / Apple Silicon 선택은 같은 universal DMG URL로 이어진다.
+- Intel Mac과 Apple Silicon Mac은 같은 universal DMG URL을 사용한다.
+- 다운로드 버튼은 현재처럼 direct DMG 다운로드로 유지한다.
 - UI 문구는 “두 Mac 모두 같은 universal DMG를 받는다”는 점을 명확히 한다.
-- direct DMG 다운로드 버튼은 최신 다운로드 선택 UI를 우회하지 않도록 변경한다.
 
 ## Stage 2 승인 요청
 

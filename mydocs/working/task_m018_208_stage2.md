@@ -2,7 +2,7 @@
 
 ## 단계 목적
 
-release/package 산출물이 Intel Mac과 Apple Silicon Mac에서 실행 가능한 universal app bundle 기준을 만족하도록 빌드 인자와 검증 gate를 보강한다. 이 단계는 Pages 다운로드 선택 UI와 사용자 문서 보정 전에, 실제 배포 산출물의 architecture 보장을 먼저 고정하는 작업이다.
+release/package 산출물이 Intel Mac과 Apple Silicon Mac에서 실행 가능한 universal app bundle 기준을 만족하도록 빌드 인자와 검증 gate를 보강한다. 이 단계는 Pages 다운로드 안내와 사용자 문서 보정 전에, 실제 배포 산출물의 architecture 보장을 먼저 고정하는 작업이다.
 
 ## 변경 요약
 
@@ -56,8 +56,8 @@ af43d7f25ccd5b3673337a87c7603637c8ba6f10c66de91c64dbe289d090bd47  alhangeul-maco
 
 ## 다음 단계
 
-Stage 3에서는 GitHub Pages 다운로드 진입점을 Intel Mac / Apple Silicon 선택 UI로 바꾼다. 선택 UI는 단일 universal DMG 정책을 유지하되, 사용자가 자신의 Mac에 맞는 안내를 확인한 뒤 같은 DMG를 받는 흐름으로 구현한다.
+Stage 3에서는 GitHub Pages 다운로드 버튼을 direct DMG 다운로드로 유지하고, 단일 universal DMG가 Intel Mac과 Apple Silicon Mac을 모두 지원한다는 안내를 보강한다. Stage 2 이후 작업지시자 판단에 따라 별도 아키텍처 선택 화면은 만들지 않는 것으로 범위를 조정했다.
 
 ## Stage 3 승인 요청
 
-Stage 3에서 `docs/index.html`, `docs/updates/index.html`, `docs/updates/v0.1.1.html`, `docs/styles.css` 중심으로 다운로드 선택 UI를 구현한다. 과거 릴리즈 페이지인 `docs/updates/v0.1.0.html`은 v0.1.1 universal 지원을 소급하지 않는 방향으로 검토한다.
+Stage 3에서 `docs/index.html`, `docs/updates/index.html`, `docs/updates/v0.1.1.html` 중심으로 direct DMG 다운로드 안내를 보강한다. 과거 릴리즈 페이지인 `docs/updates/v0.1.0.html`은 v0.1.1 universal 지원을 소급하지 않는 방향으로 검토한다.
