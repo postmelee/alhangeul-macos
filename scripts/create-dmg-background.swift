@@ -15,7 +15,8 @@ private func drawText(
     font: NSFont,
     color: NSColor,
     alignment: NSTextAlignment = .center,
-    lineHeight: CGFloat? = nil
+    lineHeight: CGFloat? = nil,
+    verticallyCentered: Bool = false
 ) {
     let paragraph = NSMutableParagraphStyle()
     paragraph.alignment = alignment
@@ -29,7 +30,20 @@ private func drawText(
         .foregroundColor: color,
         .paragraphStyle: paragraph
     ]
-    text.draw(in: rect, withAttributes: attributes)
+
+    var drawRect = rect
+    if verticallyCentered {
+        let attributed = NSAttributedString(string: text, attributes: attributes)
+        let measured = attributed.boundingRect(
+            with: rect.size,
+            options: [.usesLineFragmentOrigin, .usesFontLeading]
+        )
+        let measuredHeight = ceil(measured.height)
+        drawRect.origin.y = rect.origin.y + floor((rect.height - measuredHeight) / 2)
+        drawRect.size.height = measuredHeight
+    }
+
+    text.draw(in: drawRect, withAttributes: attributes)
 }
 
 private func roundedRect(_ rect: NSRect, radius: CGFloat, fill: NSColor, stroke: NSColor? = nil) {
@@ -43,25 +57,80 @@ private func roundedRect(_ rect: NSRect, radius: CGFloat, fill: NSColor, stroke:
     }
 }
 
-private func drawArrow(from start: NSPoint, to end: NSPoint) {
+private func drawArrow(from start: NSPoint, to tip: NSPoint) {
+    let controlPoint1 = NSPoint(x: 320, y: 255)
+    let controlPoint2 = NSPoint(x: 400, y: 255)
+    let tangent = NSPoint(x: tip.x - controlPoint2.x, y: tip.y - controlPoint2.y)
+    let tangentLength = hypot(tangent.x, tangent.y)
+    let unit = NSPoint(x: tangent.x / tangentLength, y: tangent.y / tangentLength)
+    let normal = NSPoint(x: -unit.y, y: unit.x)
+    let headLength: CGFloat = 24
+    let headWidth: CGFloat = 20
+    let baseCenter = NSPoint(
+        x: tip.x - (unit.x * headLength),
+        y: tip.y - (unit.y * headLength)
+    )
+
     let line = NSBezierPath()
     line.move(to: start)
-    line.curve(to: end, controlPoint1: NSPoint(x: 320, y: 255), controlPoint2: NSPoint(x: 400, y: 255))
+    line.curve(to: baseCenter, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
     color(38, 116, 204).setStroke()
     line.lineWidth = 4
     line.lineCapStyle = .round
     line.stroke()
 
     let head = NSBezierPath()
-    head.move(to: end)
-    head.line(to: NSPoint(x: end.x - 18, y: end.y + 11))
-    head.line(to: NSPoint(x: end.x - 18, y: end.y - 11))
+    head.move(to: tip)
+    head.line(to: NSPoint(
+        x: baseCenter.x + (normal.x * headWidth / 2),
+        y: baseCenter.y + (normal.y * headWidth / 2)
+    ))
+    head.line(to: NSPoint(
+        x: baseCenter.x - (normal.x * headWidth / 2),
+        y: baseCenter.y - (normal.y * headWidth / 2)
+    ))
     head.close()
     color(38, 116, 204).setFill()
     head.fill()
 }
 
-private func drawBackground(to outputURL: URL) throws {
+private func drawScene() {
+    color(247, 249, 252).setFill()
+    NSBezierPath(rect: NSRect(origin: .zero, size: canvasSize)).fill()
+
+    roundedRect(
+        NSRect(x: 34, y: 374, width: 652, height: 58),
+        radius: 16,
+        fill: .white,
+        stroke: color(222, 228, 238)
+    )
+
+    drawText(
+        "알한글.app을 Applications로 드래그해 설치하세요.",
+        in: NSRect(x: 74, y: 374, width: 572, height: 58),
+        font: .boldSystemFont(ofSize: 21),
+        color: color(22, 29, 43),
+        verticallyCentered: true
+    )
+
+    drawArrow(from: NSPoint(x: 258, y: 214), to: NSPoint(x: 462, y: 214))
+
+    roundedRect(
+        NSRect(x: 48, y: 52, width: 624, height: 54),
+        radius: 14,
+        fill: color(232, 241, 252),
+        stroke: color(196, 216, 242)
+    )
+    drawText(
+        "설치 후 앱을 한 번 실행해야 Quick Look/Thumbnail이 활성화됩니다.",
+        in: NSRect(x: 72, y: 52, width: 576, height: 54),
+        font: .systemFont(ofSize: 15, weight: .semibold),
+        color: color(37, 70, 112),
+        verticallyCentered: true
+    )
+}
+
+private func renderBitmap() throws -> NSBitmapImageRep {
     guard let bitmap = NSBitmapImageRep(
         bitmapDataPlanes: nil,
         pixelsWide: Int(canvasSize.width),
@@ -89,42 +158,18 @@ private func drawBackground(to outputURL: URL) throws {
     NSGraphicsContext.current = context
     context.cgContext.setAllowsAntialiasing(true)
     context.cgContext.setShouldAntialias(true)
+    context.cgContext.interpolationQuality = .high
 
-    color(247, 249, 252).setFill()
-    NSBezierPath(rect: NSRect(origin: .zero, size: canvasSize)).fill()
-
-    roundedRect(
-        NSRect(x: 34, y: 374, width: 652, height: 58),
-        radius: 16,
-        fill: .white,
-        stroke: color(222, 228, 238)
-    )
-
-    drawText(
-        "Alhangeul.app을 Applications로 드래그해 설치하세요.",
-        in: NSRect(x: 74, y: 392, width: 572, height: 28),
-        font: .boldSystemFont(ofSize: 21),
-        color: color(22, 29, 43)
-    )
-
-    drawArrow(from: NSPoint(x: 258, y: 214), to: NSPoint(x: 462, y: 214))
-
-    roundedRect(
-        NSRect(x: 48, y: 52, width: 624, height: 54),
-        radius: 14,
-        fill: color(232, 241, 252),
-        stroke: color(196, 216, 242)
-    )
-    drawText(
-        "설치 후 앱을 한 번 실행해야 Quick Look/Thumbnail이 활성화됩니다.",
-        in: NSRect(x: 72, y: 70, width: 576, height: 22),
-        font: .systemFont(ofSize: 15, weight: .semibold),
-        color: color(37, 70, 112)
-    )
+    drawScene()
 
     context.flushGraphics()
     NSGraphicsContext.restoreGraphicsState()
 
+    return bitmap
+}
+
+private func drawBackground(to outputURL: URL) throws {
+    let bitmap = try renderBitmap()
     guard let png = bitmap.representation(using: .png, properties: [:]) else {
         throw NSError(domain: "CreateDmgBackground", code: 1, userInfo: [
             NSLocalizedDescriptionKey: "failed to render DMG background PNG"
