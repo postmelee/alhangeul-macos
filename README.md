@@ -47,7 +47,7 @@
 - 업데이트 페이지: [알한글 v0.1.0](https://postmelee.github.io/alhangeul-macos/updates/v0.1.0.html)
 - 최신 패치 준비: `v0.1.1`은 설치본 smoke 결함 수정과 배포 안내 보강을 위한 patch release 후보입니다.
 
-과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 GitHub Release에 누적합니다. README에는 최신 공개 릴리즈 1개만 요약합니다.
+과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약합니다.
 
 ## 이정표
 
