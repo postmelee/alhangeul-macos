@@ -289,8 +289,11 @@ build_app() {
     xcodebuild -project "$ROOT/$PROJECT_NAME.xcodeproj" \
       -scheme "$SCHEME_NAME" \
       -configuration Release \
+      -destination "generic/platform=macOS" \
       -derivedDataPath "$DERIVED_DATA_DIR" \
       CONFIGURATION_BUILD_DIR="$XCODE_BUILD_DIR" \
+      ARCHS="arm64 x86_64" \
+      ONLY_ACTIVE_ARCH=NO \
       CODE_SIGN_STYLE=Manual \
       CODE_SIGN_IDENTITY="$DEVELOPER_ID_APPLICATION" \
       ENABLE_HARDENED_RUNTIME=YES \
@@ -299,8 +302,11 @@ build_app() {
     xcodebuild -project "$ROOT/$PROJECT_NAME.xcodeproj" \
       -scheme "$SCHEME_NAME" \
       -configuration Release \
+      -destination "generic/platform=macOS" \
       -derivedDataPath "$DERIVED_DATA_DIR" \
       CONFIGURATION_BUILD_DIR="$XCODE_BUILD_DIR" \
+      ARCHS="arm64 x86_64" \
+      ONLY_ACTIVE_ARCH=NO \
       CODE_SIGNING_ALLOWED=NO \
       build
   fi
@@ -312,6 +318,11 @@ build_app() {
   # Keep the filesystem bundle name ASCII. Localized user-facing names are
   # provided by Info.plist; a non-ASCII .app path can break ExtensionKit lookup.
   ditto "$XCODE_BUILD_DIR/$BUILD_APP_NAME" "$APP_OUTPUT"
+}
+
+verify_universal_app() {
+  info "Verifying universal app architectures"
+  "$ROOT/scripts/ci/verify-universal-macos-app.sh" "$APP_OUTPUT"
 }
 
 verify_app_signature() {
@@ -479,6 +490,7 @@ main() {
   check_shared_code
   generate_project
   build_app
+  verify_universal_app
   verify_app_signature
   notarize_and_staple_app
   create_dmg
