@@ -63,6 +63,7 @@ cat > "$OUTPUT_FILE" <<EOF
 ## 사용자용 요약
 
 - macOS 12 이상에서 HWP/HWPX 문서를 Finder Quick Look, Finder thumbnail, 알한글 앱으로 확인할 수 있습니다.
+- 공식 DMG는 Intel Mac과 Apple Silicon Mac을 모두 지원하는 단일 universal DMG입니다.
 - 이번 릴리스의 상세 변경과 검증 기록은 \`$RELEASE_DETAIL_DOC\`와 release delta checklist를 기준으로 관리합니다.
 - 설치, 첫 실행, 업데이트 확인, 알려진 제한 사항을 먼저 확인한 뒤 DMG를 내려받으세요.
 
@@ -70,8 +71,17 @@ cat > "$OUTPUT_FILE" <<EOF
 
 - DMG: [\`$DMG_NAME\`]($DMG_URL)
 - macOS 12 이상을 지원합니다.
+- Intel Mac과 Apple Silicon Mac 모두 같은 DMG 파일을 사용합니다.
 - DMG를 열고 \`Alhangeul.app\`을 \`Applications\` 폴더로 드래그해 설치합니다.
 - GitHub Release에 게시된 signed/notarized public DMG만 사용자 배포 산출물로 사용합니다.
+
+## 지원 환경과 아키텍처
+
+- 지원 OS: macOS 12 Monterey 이상
+- 지원 Mac: Intel Mac, Apple Silicon Mac
+- 배포 방식: 아키텍처별 DMG를 나누지 않고 \`$DMG_NAME\` 단일 파일을 제공합니다.
+- release build는 앱 본체와 Quick Look/Thumbnail extension 실행 파일의 \`arm64 + x86_64\` slice를 검증해야 합니다.
+- 실제 Intel Mac 실기기 smoke는 실행한 경우에만 성공으로 기록하고, 미실행 시에는 release detail doc에 이유를 남깁니다.
 
 ## 설치 후 첫 실행과 Quick Look/Thumbnail 활성화 안내
 
@@ -96,6 +106,7 @@ cat > "$OUTPUT_FILE" <<EOF
 - GitHub Release: $RELEASE_URL
 - DMG: \`$DMG_NAME\`
 - DMG URL: $DMG_URL
+- 지원 아키텍처: \`arm64 + x86_64\` universal app/extension bundle
 - SHA256 file: \`$SHA256_NAME\`
 - SHA256: \`$DMG_SHA256\`
 
@@ -103,6 +114,7 @@ cat > "$OUTPUT_FILE" <<EOF
 
 - Homebrew Cask는 public DMG URL/SHA256과 tap context 검증이 끝난 뒤 안내합니다.
 - 검증 전 공식 설치 경로는 위 GitHub Release DMG입니다.
+- Homebrew Cask도 아키텍처별 URL을 나누지 않고 같은 public universal DMG URL과 SHA256을 사용합니다.
 - 공개 완료 후 설치 명령은 \`brew install --cask postmelee/tap/alhangeul-macos\` 기준으로 README, Pages, GitHub Release/릴리즈 노트에 반영합니다.
 
 ## 포함된 rhwp core와 viewer asset provenance
@@ -118,6 +130,7 @@ cat > "$OUTPUT_FILE" <<EOF
 
 - release publish workflow에서 서명, 공증, staple, Gatekeeper assessment, checksum 검증을 통과한 public DMG만 배포합니다.
 - \`hdiutil verify\`, SHA256 대조, app bundle signing/notarization/staple 검증 결과를 최종 확인합니다.
+- \`Alhangeul.app\`, \`AlhangeulPreview.appex\`, \`AlhangeulThumbnail.appex\`의 실행 파일이 \`arm64 + x86_64\` universal인지 확인합니다.
 - Finder Quick Look preview, Finder thumbnail, 앱 실행, 문서 열기, 창 resize/확대, Sparkle 수동 업데이트 확인 smoke 결과는 \`$RELEASE_DETAIL_DOC\`에 기록합니다.
 - 실행하지 않은 수동 확인 항목은 성공으로 쓰지 않고 #188 final smoke 또는 후속 확인으로 분리합니다.
 

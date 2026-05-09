@@ -64,10 +64,10 @@ Release note에 포함할 내용:
 
 - 사용자용 요약
 - 설치 방법
+- 지원 macOS 버전과 지원 아키텍처
 - 설치 후 첫 실행과 Quick Look/Thumbnail 활성화 안내
 - 업데이트 확인 방법
 - 주요 변경 사항
-- 지원 macOS 버전
 - 다운로드 산출물과 SHA256
 - Homebrew Cask 공개 상태
 - 포함된 `edwardkim/rhwp` core commit
@@ -84,6 +84,7 @@ Homebrew Cask 안내 기준:
 
 - #209의 tap context 검증이 끝나기 전에는 Homebrew 설치 명령을 public 안내에 확정 문구로 쓰지 않는다.
 - 검증 전 공식 설치 경로는 GitHub Release DMG와 Pages 다운로드 버튼이다.
+- Cask URL은 Sparkle enclosure와 마찬가지로 tag 고정 public universal DMG URL을 사용하고, Intel Mac/Apple Silicon Mac용 URL을 나누지 않는다.
 - #209 완료 후 공개할 명령은 `brew install --cask postmelee/tap/alhangeul-macos`를 기준으로 하며, README, GitHub Release 본문, Pages 문구가 같은 명령을 써야 한다.
 
 본문 후보 생성:
@@ -101,7 +102,9 @@ Pages는 사용자용 릴리즈 안내 표면이다. GitHub Release body의 긴 
 
 - `docs/updates/v<version>.html`이 현재 사이트의 header, hero, action button, content section, footer 구조를 유지하는가
 - `docs/updates/index.html`의 최신 항목과 latest DMG link가 최신 public release 파일명을 가리키는가
+- Pages 다운로드 버튼이 아키텍처 선택 UI 없이 단일 universal DMG latest URL을 직접 가리키는가
 - 사용자가 필요한 설치 방법, 첫 실행 안내, 업데이트 확인, 알려진 한계를 간결하게 확인할 수 있는가
+- Intel Mac과 Apple Silicon Mac이 같은 DMG를 사용한다는 안내가 최신 다운로드 주변 또는 FAQ/릴리즈 노트에 있는가
 - 실제 public DMG SHA256이 아직 확정되지 않은 문서는 release candidate 또는 #188 handoff 상태를 명확히 표시하는가
 
 Pages 다운로드 버튼은 사용자를 위한 latest DMG URL을 사용한다.
@@ -149,6 +152,8 @@ appcast enclosure URL은 latest URL이 아니라 tag 고정 URL을 사용한다.
 ```text
 https://github.com/postmelee/alhangeul-macos/releases/download/v<version>/alhangeul-macos-<version>.dmg
 ```
+
+이 URL은 단일 universal DMG를 가리킨다. Sparkle appcast는 아키텍처별 enclosure를 나누지 않고, `scripts/release.sh`/workflow가 검증한 `arm64 + x86_64` app/extension bundle을 포함한 public DMG만 stable item으로 사용한다.
 
 따라서 공식 release 완료 후에는 다음을 확인한다.
 

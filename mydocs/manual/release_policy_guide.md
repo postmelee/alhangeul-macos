@@ -46,6 +46,8 @@ Public release의 기본 배포 수준은 **Developer ID signed + notarized DMG*
 운영 기준:
 
 - public 사용자가 받는 artifact는 `scripts/release.sh <version>` public mode로 생성한 `alhangeul-macos-<version>.dmg`여야 한다.
+- `v0.1.1`부터 public DMG는 앱 본체와 Quick Look/Thumbnail extension 실행 파일이 `arm64 + x86_64` slice를 포함하는 단일 universal DMG여야 한다.
+- Intel Mac과 Apple Silicon Mac용 DMG를 따로 나누지 않는다. Pages, Sparkle appcast, Homebrew Cask는 같은 public DMG URL을 기준으로 안내한다.
 - `--skip-notarize` rehearsal DMG, 개발용 zip, unsigned/ad-hoc 산출물은 GitHub Release public asset 또는 Homebrew Cask URL에 사용하지 않는다.
 - public DMG의 `.sha256` 파일을 GitHub Release와 release note에 함께 공개하고, Homebrew Cask `sha256`은 이 digest로 고정한다.
 
@@ -54,6 +56,7 @@ Public release의 기본 배포 수준은 **Developer ID signed + notarized DMG*
 public release note, README, Homebrew caveats에는 다음 기준을 일관되게 적용한다.
 
 - 설치 파일: `alhangeul-macos-<version>.dmg`
+- 지원 아키텍처: `arm64 + x86_64` universal app/extension bundle. Intel Mac과 Apple Silicon Mac 모두 같은 DMG를 사용
 - 설치 방식: DMG를 열고 `Alhangeul.app`을 `/Applications`로 복사
 - DMG 설치 창: root에는 `Alhangeul.app`과 `Applications` symlink만 노출하고, background 안내로 `알한글.app`을 Applications로 드래그해 설치하는 흐름을 보여준다
 - 첫 실행: `설치 후 앱을 한 번 실행해야 Quick Look/Thumbnail이 활성화됩니다.` 기준 문구로 안내한다
@@ -78,6 +81,8 @@ Release artifact는 사용 목적을 기준으로 세 계층으로 분리한다.
 | 개발/설치본 smoke | `build.noindex/release/Alhangeul.app`, `alhangeul-macos-<version>.zip` | Release configuration bundle 구성과 Finder/Quick Look/Thumbnail 설치본 smoke 입력 | 아니오 |
 | public release rehearsal | `alhangeul-macos-<version>-rehearsal.dmg`, `.sha256` | DMG layout, checksum 생성, release script path 확인 | 아니오 |
 | public release | `alhangeul-macos-<version>.dmg`, `.sha256` | GitHub Release asset, 사용자 배포, Homebrew Cask digest 기준 | 예 |
+
+public release 계층의 DMG는 단일 universal DMG다. 아키텍처별 asset을 추가하지 않는 한 GitHub Release, Pages latest 다운로드, Sparkle enclosure, Homebrew Cask `url`은 같은 DMG 파일명과 SHA256을 기준으로 맞춘다.
 
 checksum 공개 기준:
 

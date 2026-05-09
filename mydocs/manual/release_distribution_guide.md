@@ -34,6 +34,7 @@
 - `scripts/release.sh`: public DMG 생성, Developer ID 서명, notarization, staple, Gatekeeper 검증, sha256 생성
 - `scripts/ci/write-release-notes.sh`: GitHub Release 본문 후보 생성
 - `scripts/ci/check-release-notes-template.sh`: release note 필수 heading 검증
+- `scripts/ci/verify-universal-macos-app.sh`: app bundle 내부 앱/extension 실행 파일의 `arm64 + x86_64` slice 검증
 - `scripts/ci/write-release-delta-checklist.sh`: 직전 public release 대비 영향 영역 checklist 초안 생성
 - `scripts/ci/write-sparkle-appcast.sh`: stable Sparkle appcast 생성
 - `scripts/ci/classify-pr-changes.sh`: PR CI 변경 범위 flag 생성
@@ -53,7 +54,7 @@
 5. 필요한 경우 `Release Rehearsal DMG` workflow를 실행하고 DMG/checksum과 delta checklist artifact를 확인한다.
 6. [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md)의 credential 확인을 수행한다.
 7. `Release Publish DMG` workflow 또는 `scripts/release.sh <version>` public mode로 signed/notarized DMG를 생성한다.
-8. public DMG SHA256을 기록하고 DMG layout, Finder Quick Look, Finder thumbnail smoke를 반복한다.
+8. public DMG SHA256을 기록하고 app/extension universal slice, DMG layout, Finder Quick Look, Finder thumbnail smoke를 반복한다.
 9. [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 release note와 delta checklist를 실제 SHA256/provenance로 보정한다.
 10. GitHub Release를 공식 release 기준으로 게시하고 `Release Publish DMG` workflow 결과를 확인한다.
 11. Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 확인한다.
@@ -88,6 +89,8 @@
 - [ ] Finder thumbnail smoke test 완료
 - [ ] 개발용 zip 산출물 생성
 - [ ] public DMG 산출물 생성
+- [ ] public DMG 안의 app/extension 실행 파일 `arm64 + x86_64` universal 검증
+- [ ] Intel Mac 실기기 smoke 실행 여부와 결과 또는 미실행 사유 기록
 - [ ] public DMG SHA256 기록
 - [ ] public DMG layout smoke 완료
 - [ ] DMG root에 `설치 안내.txt` 같은 보조 안내 파일이 노출되지 않는지 확인
@@ -103,6 +106,7 @@
 - [ ] `Release Publish DMG` workflow를 공식 release 기준 `draft=false`, `prerelease=false`로 실행
 - [ ] `docs/appcast.xml`이 Pages branch에 갱신되었는지 확인
 - [ ] Pages 다운로드 버튼과 appcast URL이 public DMG asset을 가리키는지 확인
+- [ ] Pages, Sparkle appcast, Homebrew Cask가 아키텍처별 DMG 분기 없이 같은 public universal DMG URL을 기준으로 안내되는지 확인
 - [ ] Homebrew 배포 시 `scripts/update-cask-sha256.sh`로 Cask version/sha256 갱신
 - [ ] Homebrew tap 대상이 `postmelee/homebrew-tap`인지 확인
 - [ ] #209에서 tap 반영 후 `brew style`/`brew audit`/install smoke 검증
