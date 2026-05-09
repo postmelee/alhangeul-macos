@@ -185,9 +185,14 @@ prepare_paths() {
   STAGING_DIR="$OUTPUT_DIR/staging"
   XCODE_BUILD_DIR="$STAGING_DIR/xcodebuild"
   DERIVED_DATA_DIR="$STAGING_DIR/DerivedData"
+  SWIFT_MODULE_CACHE_DIR="$STAGING_DIR/SwiftModuleCache"
   DMG_STAGING_DIR="$STAGING_DIR/dmg-root"
+  DMG_MOUNT_DIR="$STAGING_DIR/dmg-mount"
+  DMG_BACKGROUND_DIR="$DMG_STAGING_DIR/.background"
+  DMG_BACKGROUND_IMAGE="$DMG_BACKGROUND_DIR/alhangeul-dmg-background.png"
   APP_OUTPUT="$OUTPUT_DIR/$APP_NAME"
   APP_NOTARY_ZIP="$STAGING_DIR/alhangeul-macos-$VERSION-app-notary.zip"
+  DMG_RW_OUTPUT="$STAGING_DIR/alhangeul-macos-$VERSION-layout.dmg"
 
   if [ "$SKIP_NOTARIZE" -eq 1 ]; then
     DMG_NAME="alhangeul-macos-$VERSION-rehearsal.dmg"
@@ -199,6 +204,10 @@ prepare_paths() {
 }
 
 cleanup() {
+  if [ -n "${DMG_DEVICE:-}" ]; then
+    hdiutil detach "$DMG_DEVICE" -quiet >/dev/null 2>&1 || true
+    DMG_DEVICE=""
+  fi
   if [ "${KEEP_STAGING:-0}" -eq 0 ] && [ -n "${STAGING_DIR:-}" ]; then
     rm -rf "$STAGING_DIR"
   fi
@@ -213,11 +222,13 @@ run_preflight() {
     xcrun
     ditto
     hdiutil
+    osascript
     codesign
     spctl
     shasum
     plutil
     security
+    swift
   )
 
   local tool
@@ -253,7 +264,8 @@ reset_output() {
   rm -rf "$APP_OUTPUT" "$APP_OUTPUT.dSYM"
   rm -f "$DMG_OUTPUT" "$CHECKSUM_OUTPUT"
   rm -f "$APP_NOTARY_ZIP"
-  mkdir -p "$STAGING_DIR" "$XCODE_BUILD_DIR" "$DERIVED_DATA_DIR" "$DMG_STAGING_DIR"
+  rm -f "$DMG_RW_OUTPUT"
+  mkdir -p "$STAGING_DIR" "$XCODE_BUILD_DIR" "$DERIVED_DATA_DIR" "$SWIFT_MODULE_CACHE_DIR" "$DMG_STAGING_DIR" "$DMG_MOUNT_DIR"
 }
 
 build_rust_bridge() {
@@ -334,19 +346,82 @@ notarize_and_staple_app() {
   xcrun stapler staple "$APP_OUTPUT"
 }
 
-create_dmg() {
-  info "Creating DMG"
+prepare_dmg_staging() {
   rm -rf "$DMG_STAGING_DIR"
-  mkdir -p "$DMG_STAGING_DIR"
+  mkdir -p "$DMG_STAGING_DIR" "$DMG_BACKGROUND_DIR"
   ditto "$APP_OUTPUT" "$DMG_STAGING_DIR/$APP_NAME"
   ln -s /Applications "$DMG_STAGING_DIR/Applications"
+  swift -module-cache-path "$SWIFT_MODULE_CACHE_DIR" \
+    "$ROOT/scripts/create-dmg-background.swift" \
+    "$DMG_BACKGROUND_IMAGE"
+}
+
+apply_dmg_finder_layout() {
+  local mounted_volume="$1"
+
+  osascript - "$mounted_volume" "$APP_NAME" <<'APPLESCRIPT'
+on run argv
+  set volumePath to item 1 of argv
+  set appName to item 2 of argv
+  set backgroundPath to volumePath & "/.background/alhangeul-dmg-background.png"
+
+  tell application "Finder"
+    set volumeFolder to POSIX file volumePath as alias
+    set backgroundImage to POSIX file backgroundPath as alias
+    open volumeFolder
+
+    set volumeWindow to container window of volumeFolder
+    set current view of volumeWindow to icon view
+    set toolbar visible of volumeWindow to false
+    set statusbar visible of volumeWindow to false
+    set bounds of volumeWindow to {120, 120, 840, 680}
+
+    set viewOptions to icon view options of volumeWindow
+    set arrangement of viewOptions to not arranged
+    set icon size of viewOptions to 96
+    set background picture of viewOptions to backgroundImage
+
+    set position of item appName of volumeFolder to {178, 268}
+    set position of item "Applications" of volumeFolder to {542, 268}
+
+    update volumeFolder without registering applications
+    delay 2
+    close volumeWindow
+  end tell
+end run
+APPLESCRIPT
+}
+
+create_dmg() {
+  info "Creating DMG"
+  prepare_dmg_staging
 
   hdiutil create \
     -volname "Alhangeul $VERSION" \
     -srcfolder "$DMG_STAGING_DIR" \
-    -format UDZO \
+    -format UDRW \
+    -fs HFS+ \
     -ov \
-    "$DMG_OUTPUT"
+    "$DMG_RW_OUTPUT"
+
+  rm -rf "$DMG_MOUNT_DIR"
+  mkdir -p "$DMG_MOUNT_DIR"
+  DMG_DEVICE="$(hdiutil attach "$DMG_RW_OUTPUT" \
+    -mountpoint "$DMG_MOUNT_DIR" \
+    -readwrite \
+    -noverify \
+    -noautoopen \
+    -nobrowse | awk 'END {print $1}')"
+
+  apply_dmg_finder_layout "$DMG_MOUNT_DIR"
+  sync
+  hdiutil detach "$DMG_DEVICE" -quiet
+  DMG_DEVICE=""
+
+  hdiutil convert "$DMG_RW_OUTPUT" \
+    -format UDZO \
+    -imagekey zlib-level=9 \
+    -o "$DMG_OUTPUT"
 }
 
 sign_dmg() {
