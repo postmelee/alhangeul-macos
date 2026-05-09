@@ -30,6 +30,19 @@ delta checklist 초안 생성:
 scripts/ci/write-release-delta-checklist.sh <previous-release-tag> <candidate-ref> build.noindex/release/delta-checklist-<version>.md
 ```
 
+GitHub Actions workflow에서 생성되는 경우:
+
+- `Release Rehearsal DMG`
+  - input: `previous_release_ref`
+  - candidate ref: workflow checkout commit인 `$GITHUB_SHA`
+  - artifact: `alhangeul-macos-<version>-rehearsal-delta-checklist`
+- `Release Publish DMG`
+  - input: `previous_release_ref`
+  - candidate ref: `v<version>`
+  - artifact: `alhangeul-macos-<version>-release-delta-checklist`
+
+두 workflow 모두 `GITHUB_STEP_SUMMARY`에 previous ref, candidate ref, checklist path를 남긴다. workflow artifact 또는 로컬 helper 출력 중 하나를 release owner가 검토하고 보정한다.
+
 이 helper는 변경 파일 path 기반 초안만 만든다. release owner는 누락, 과잉, 실제 사용자 영향, 수동 smoke 필요 여부를 보정해야 한다.
 
 영향 영역 후보:

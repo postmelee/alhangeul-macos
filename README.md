@@ -219,6 +219,7 @@ scripts/verify-rhwp-studio-assets.sh
 - WKWebView viewer 경로를 바꾼 경우: [빌드 및 실행 가이드](mydocs/manual/build_run_guide.md)의 HostApp WKWebView viewer smoke test
 - native renderer 경로를 바꾼 경우: `./scripts/validate-stage3-render.sh`
 - Core dependency - [core dependency 운영 가이드](mydocs/manual/core_dependency_operation_guide.md)
+- CI workflow 역할과 로컬 재현 - [CI workflow 가이드](mydocs/manual/ci_workflow_guide.md)
 - release packaging, signing, notarization - [릴리스/배포 가이드](mydocs/manual/release_distribution_guide.md)
 - Finder extension 등록 검증 - [빌드 및 실행 가이드](mydocs/manual/build_run_guide.md)
 - renderer 비교 디버깅 - [core/native 렌더 비교 가이드](mydocs/manual/render_core_native_compare_guide.md)

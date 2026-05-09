@@ -194,6 +194,22 @@ rehearsal mode가 수행하지 않는 일:
 - signed/notarized public DMG 검증은 rehearsal 결과로 대체하지 않는다.
 - rehearsal DMG에서 background와 icon 위치가 정상이어도 public DMG signing/notarization/staple 후 최종 layout smoke를 반복한다.
 
+GitHub Actions `Release Rehearsal DMG` workflow를 사용할 때도 같은 산출물 계층을 따른다.
+
+workflow 입력:
+
+- `version`
+- `previous_release_ref`
+- `expected_rhwp_tag`
+
+workflow 결과:
+
+- rehearsal DMG/checksum artifact
+- release delta checklist artifact
+- workflow summary의 `rhwp core`, `Release delta checklist`, `Rehearsal artifact` 섹션
+
+`previous_release_ref`는 직전 public release tag 또는 commit을 넣는다. 이 입력이 잘못되면 delta checklist가 잘못 생성되므로, workflow summary와 artifact의 previous/candidate ref를 release owner가 확인한다.
+
 ## DMG layout smoke
 
 - mounted volume root에는 `Alhangeul.app`과 `Applications` symlink만 사용자에게 노출되어야 한다.
