@@ -94,52 +94,32 @@ private func drawBackground(to outputURL: URL) throws {
     NSBezierPath(rect: NSRect(origin: .zero, size: canvasSize)).fill()
 
     roundedRect(
-        NSRect(x: 34, y: 304, width: 652, height: 108),
-        radius: 18,
+        NSRect(x: 34, y: 374, width: 652, height: 58),
+        radius: 16,
         fill: .white,
         stroke: color(222, 228, 238)
     )
 
     drawText(
         "Alhangeul.app을 Applications로 드래그해 설치하세요.",
-        in: NSRect(x: 74, y: 362, width: 572, height: 34),
-        font: .boldSystemFont(ofSize: 23),
+        in: NSRect(x: 74, y: 392, width: 572, height: 28),
+        font: .boldSystemFont(ofSize: 21),
         color: color(22, 29, 43)
-    )
-    drawText(
-        "Drag Alhangeul.app to Applications.",
-        in: NSRect(x: 74, y: 330, width: 572, height: 24),
-        font: .systemFont(ofSize: 16, weight: .medium),
-        color: color(82, 93, 112)
     )
 
     drawArrow(from: NSPoint(x: 258, y: 214), to: NSPoint(x: 462, y: 214))
 
-    drawText(
-        "Alhangeul.app",
-        in: NSRect(x: 94, y: 118, width: 172, height: 24),
-        font: .systemFont(ofSize: 15, weight: .semibold),
-        color: color(45, 55, 72)
-    )
-    drawText(
-        "Applications",
-        in: NSRect(x: 456, y: 118, width: 172, height: 24),
-        font: .systemFont(ofSize: 15, weight: .semibold),
-        color: color(45, 55, 72)
-    )
-
     roundedRect(
-        NSRect(x: 48, y: 36, width: 624, height: 72),
+        NSRect(x: 48, y: 52, width: 624, height: 54),
         radius: 14,
         fill: color(232, 241, 252),
         stroke: color(196, 216, 242)
     )
     drawText(
-        "설치 후 앱을 한 번 실행하면 Quick Look/Thumbnail이 활성화됩니다.\nLaunch once after installing to enable Quick Look and thumbnails.",
-        in: NSRect(x: 72, y: 54, width: 576, height: 42),
-        font: .systemFont(ofSize: 14, weight: .medium),
-        color: color(37, 70, 112),
-        lineHeight: 20
+        "설치 후 앱을 한 번 실행해야 Quick Look/Thumbnail이 활성화됩니다.",
+        in: NSRect(x: 72, y: 70, width: 576, height: 22),
+        font: .systemFont(ofSize: 15, weight: .semibold),
+        color: color(37, 70, 112)
     )
 
     context.flushGraphics()

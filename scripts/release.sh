@@ -190,8 +190,6 @@ prepare_paths() {
   DMG_MOUNT_DIR="$STAGING_DIR/dmg-mount"
   DMG_BACKGROUND_DIR="$DMG_STAGING_DIR/.background"
   DMG_BACKGROUND_IMAGE="$DMG_BACKGROUND_DIR/alhangeul-dmg-background.png"
-  DMG_INSTALL_NOTE_NAME="설치 안내.txt"
-  DMG_INSTALL_NOTE_PATH="$DMG_STAGING_DIR/$DMG_INSTALL_NOTE_NAME"
   APP_OUTPUT="$OUTPUT_DIR/$APP_NAME"
   APP_NOTARY_ZIP="$STAGING_DIR/alhangeul-macos-$VERSION-app-notary.zip"
   DMG_RW_OUTPUT="$STAGING_DIR/alhangeul-macos-$VERSION-layout.dmg"
@@ -348,24 +346,11 @@ notarize_and_staple_app() {
   xcrun stapler staple "$APP_OUTPUT"
 }
 
-write_dmg_install_note() {
-  cat > "$DMG_INSTALL_NOTE_PATH" <<'EOF'
-Alhangeul.app을 Applications로 드래그해 설치하세요.
-
-설치 후 Alhangeul.app을 한 번 실행하면 macOS가 Quick Look 및 Thumbnail 확장을 등록합니다.
-등록 후 Finder에서 .hwp 또는 .hwpx 파일을 선택하고 Space를 눌러 미리보기를 확인할 수 있습니다.
-
-Drag Alhangeul.app to Applications.
-Launch once after installing to enable Quick Look and thumbnails.
-EOF
-}
-
 prepare_dmg_staging() {
   rm -rf "$DMG_STAGING_DIR"
   mkdir -p "$DMG_STAGING_DIR" "$DMG_BACKGROUND_DIR"
   ditto "$APP_OUTPUT" "$DMG_STAGING_DIR/$APP_NAME"
   ln -s /Applications "$DMG_STAGING_DIR/Applications"
-  write_dmg_install_note
   swift -module-cache-path "$SWIFT_MODULE_CACHE_DIR" \
     "$ROOT/scripts/create-dmg-background.swift" \
     "$DMG_BACKGROUND_IMAGE"
@@ -374,11 +359,10 @@ prepare_dmg_staging() {
 apply_dmg_finder_layout() {
   local mounted_volume="$1"
 
-  osascript - "$mounted_volume" "$APP_NAME" "$DMG_INSTALL_NOTE_NAME" <<'APPLESCRIPT'
+  osascript - "$mounted_volume" "$APP_NAME" <<'APPLESCRIPT'
 on run argv
   set volumePath to item 1 of argv
   set appName to item 2 of argv
-  set noteName to item 3 of argv
   set backgroundPath to volumePath & "/.background/alhangeul-dmg-background.png"
 
   tell application "Finder"
@@ -390,7 +374,7 @@ on run argv
     set current view of volumeWindow to icon view
     set toolbar visible of volumeWindow to false
     set statusbar visible of volumeWindow to false
-    set bounds of volumeWindow to {120, 120, 840, 580}
+    set bounds of volumeWindow to {120, 120, 840, 680}
 
     set viewOptions to icon view options of volumeWindow
     set arrangement of viewOptions to not arranged
@@ -399,7 +383,6 @@ on run argv
 
     set position of item appName of volumeFolder to {178, 268}
     set position of item "Applications" of volumeFolder to {542, 268}
-    set position of item noteName of volumeFolder to {360, 392}
 
     update volumeFolder without registering applications
     delay 2
