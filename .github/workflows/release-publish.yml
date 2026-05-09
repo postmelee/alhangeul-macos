@@ -7,6 +7,10 @@ on:
         description: App version to publish. The workflow must be run from tag v<version>.
         required: true
         default: "0.1.0"
+      previous_release_ref:
+        description: Git ref for the previous public release used to draft the release delta checklist.
+        required: true
+        default: "v0.1.0"
       expected_rhwp_tag:
         description: rhwp release tag that must match rhwp-core.lock before publishing.
         required: true
@@ -43,6 +47,7 @@ jobs:
 
     env:
       VERSION: ${{ inputs.version }}
+      PREVIOUS_RELEASE_REF: ${{ inputs.previous_release_ref }}
       EXPECTED_RHWP_TAG: ${{ inputs.expected_rhwp_tag }}
       REQUIRE_LATEST_RHWP: ${{ inputs.require_latest_rhwp }}
       DRAFT_RELEASE: ${{ inputs.draft }}
@@ -97,6 +102,44 @@ jobs:
             echo "- tag: \`$tag_name\`"
             echo "- commit: \`$head_commit\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Write release delta checklist
+        id: delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_ref="v$VERSION"
+          checklist_path="$ALHANGEUL_BUILD_ROOT/release/delta-checklist-$VERSION.md"
+
+          scripts/ci/write-release-delta-checklist.sh \
+            "$PREVIOUS_RELEASE_REF" \
+            "$candidate_ref" \
+            "$checklist_path"
+
+          {
+            echo "checklist_path=$checklist_path"
+            echo "previous_release_ref=$PREVIOUS_RELEASE_REF"
+            echo "candidate_ref=$candidate_ref"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo
+            echo "## Release delta checklist"
+            echo
+            echo "- previous release ref: \`$PREVIOUS_RELEASE_REF\`"
+            echo "- candidate ref: \`$candidate_ref\`"
+            echo "- checklist path: \`$checklist_path\`"
+            echo
+            echo "This path-based draft must be reviewed and corrected before publishing release notes."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload release delta checklist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: alhangeul-macos-${{ inputs.version }}-release-delta-checklist
+          path: ${{ steps.delta.outputs.checklist_path }}
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Read and validate core lock
         id: core
