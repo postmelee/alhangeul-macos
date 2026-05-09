@@ -66,6 +66,7 @@ jobs:
           set -euo pipefail
           bash scripts/ci/classify-pr-changes.sh --help
           bash scripts/ci/check-rhwp-upstream-release.sh --help
+          bash scripts/ci/prepare-pages-artifact.sh --help
           bash scripts/ci/write-sparkle-appcast.sh --help
 
       - name: Record classification summary
@@ -203,6 +204,18 @@ jobs:
             --output build.noindex/release/appcast.xml
           xmllint --noout build.noindex/release/appcast.xml
 
+      - name: Verify Pages artifact helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/prepare-pages-artifact.sh \
+            --docs-dir docs \
+            --appcast build.noindex/release/appcast.xml \
+            --output-dir build.noindex/release/pages-artifact
+          xmllint --noout build.noindex/release/pages-artifact/appcast.xml
+          test -f build.noindex/release/pages-artifact/index.html
+          test -f build.noindex/release/pages-artifact/updates/index.html
+
       - name: Record release check summary
         shell: bash
         run: |
@@ -213,4 +226,5 @@ jobs:
             echo "- release notes dry-run/template check: OK"
             echo "- release delta checklist dry-run: OK"
             echo "- Sparkle appcast helper dry-run: OK"
+            echo "- Pages artifact helper dry-run: OK"
           } >> "$GITHUB_STEP_SUMMARY"
