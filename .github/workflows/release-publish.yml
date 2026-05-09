@@ -59,7 +59,7 @@ jobs:
       NOTARY_APP_SPECIFIC_PASSWORD: ${{ secrets.NOTARY_APP_SPECIFIC_PASSWORD }}
       RELEASE_KEYCHAIN_PASSWORD: ${{ secrets.RELEASE_KEYCHAIN_PASSWORD }}
       SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
-      ALHANGEUL_PAGES_BRANCH: ${{ vars.ALHANGEUL_PAGES_BRANCH || 'devel-webview' }}
+      ALHANGEUL_PAGES_BRANCH: ${{ vars.ALHANGEUL_PAGES_BRANCH || 'main' }}
 
     steps:
       - name: Check out release tag
@@ -392,7 +392,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          pages_branch="${ALHANGEUL_PAGES_BRANCH:-devel-webview}"
+          pages_branch="${ALHANGEUL_PAGES_BRANCH:-main}"
           appcast_path="${{ steps.appcast.outputs.appcast_path }}"
           pages_worktree="$RUNNER_TEMP/alhangeul-pages"
 
