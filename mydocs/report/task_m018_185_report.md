@@ -6,9 +6,9 @@
 - 마일스톤: M018 / `v0.1.1`
 - 통합 대상: `devel-webview`
 - 작업 브랜치: `local/task185`
-- 단계: Stage 1~4 완료, Stage 4.1 Pages branch 기준 보정, Stage 5 매뉴얼 통합과 최종 dry-run 완료
+- 단계: Stage 1~4 완료, Stage 4.1 Pages branch 기준 보정, Stage 5 매뉴얼 통합과 최종 dry-run 완료, Stage 6 릴리즈 배포 매뉴얼 컨텍스트 분리 완료
 
-GitHub Release 본문, Pages 업데이트 페이지, README 최신 릴리즈 블록, `mydocs/release/` 장기 기록, 배포 매뉴얼이 같은 버전/DMG/SHA256/provenance 기준을 쓰도록 정리했다. 이번 작업은 release communication과 검증 기준 마련이 범위이며, public DMG 생성, GitHub Release 게시, Sparkle appcast 게시, Homebrew tap 배포는 수행하지 않았다.
+GitHub Release 본문, Pages 업데이트 페이지, README 최신 릴리즈 블록, `mydocs/release/` 장기 기록, 배포 매뉴얼이 같은 버전/DMG/SHA256/provenance 기준을 쓰도록 정리했다. 이후 `release_distribution_guide.md`를 entrypoint로 줄이고 주제별 하위 매뉴얼을 분리해 AI agent가 필요한 컨텍스트만 읽을 수 있게 했다. 이번 작업은 release communication과 검증 기준 마련이 범위이며, public DMG 생성, GitHub Release 게시, Sparkle appcast 게시, Homebrew tap 배포는 수행하지 않았다.
 
 `docs/updates/v0.1.0.html`의 현재 양식과 디자인은 유지했다. `v0.1.1` Pages 후보는 같은 header, hero, action button, content section, footer 구조를 재사용하고, 운영 상세는 GitHub Release 본문과 `mydocs/release/v0.1.1.md`로 분리했다.
 
@@ -27,8 +27,13 @@ GitHub Release 본문, Pages 업데이트 페이지, README 최신 릴리즈 블
 | `mydocs/release/v0.1.0.md` | 실제 공개 `v0.1.0` release decision record와 SHA256/provenance 기록 |
 | `mydocs/release/v0.1.1.md` | `v0.1.1` release candidate 기록 초안과 #188 public smoke handoff 작성 |
 | `mydocs/tech/release_environment.md` | Team ID, signing identity 표시명, notary profile name, GitHub Actions 변수/secret 이름 같은 환경 식별자 분리 |
-| `mydocs/manual/document_structure_guide.md` | `mydocs/release/`, release environment, troubleshooting 분리 기준 추가 |
-| `mydocs/manual/release_distribution_guide.md` | 버전 특화 표현을 일반 public release 절차로 정리하고 release/detail/delta/template 검증 기준 통합 |
+| `mydocs/manual/document_structure_guide.md` | `mydocs/release/`, release environment, troubleshooting, 릴리즈 매뉴얼 분리 기준 추가 |
+| `mydocs/manual/release_distribution_guide.md` | 릴리즈 작업 entrypoint, 안전 게이트, 하위 문서 맵, 전체 flow, 최종 체크리스트로 축소 |
+| `mydocs/manual/release_policy_guide.md` | 운영 기준, 배포 브랜치, public 배포 수준, artifact/provenance, 알려진 한계 분리 |
+| `mydocs/manual/release_packaging_dmg_guide.md` | build 검증, 개발용 zip, public/rehearsal DMG, DMG layout, Finder smoke 분리 |
+| `mydocs/manual/release_signing_notarization_guide.md` | Developer ID, notarytool, credential 기록 금지, signing/notarization 검증 분리 |
+| `mydocs/manual/release_github_pages_sparkle_guide.md` | GitHub Release body, delta checklist, Pages, Sparkle appcast 분리 |
+| `mydocs/manual/release_homebrew_cask_guide.md` | Homebrew Cask source, SHA256 교체, tap 반영, audit 분리 |
 | `.github/workflows/release-publish.yml` | 실제 GitHub Pages source와 맞게 `ALHANGEUL_PAGES_BRANCH` fallback을 `main`으로 보정 |
 | `mydocs/plans/task_m018_185.md` | 수행계획서 작성 |
 | `mydocs/plans/task_m018_185_impl.md` | 5단계 구현계획서 작성과 Stage 4.1 보정 반영 |
@@ -36,6 +41,7 @@ GitHub Release 본문, Pages 업데이트 페이지, README 최신 릴리즈 블
 | `mydocs/working/task_m018_185_stage2.md` | GitHub Release template 보강 보고 |
 | `mydocs/working/task_m018_185_stage3.md` | Pages/README 기준 정리 보고 |
 | `mydocs/working/task_m018_185_stage4.md` | release 기록과 delta checklist 기준 보고 |
+| `mydocs/working/task_m018_185_stage6.md` | 릴리즈 배포 매뉴얼 컨텍스트 분리 보고 |
 | `mydocs/orders/20260510.md` | 오늘할일 완료 처리 |
 
 제품 runtime source, Rust bridge, `rhwp-core.lock`, bundled `rhwp-studio` asset은 수정하지 않았다.
@@ -48,7 +54,7 @@ GitHub Release 본문, Pages 업데이트 페이지, README 최신 릴리즈 블
 | Pages 업데이트 페이지 | 사용자용 요약, 설치/업데이트 안내, 주요 변경, 알려진 제한 사항을 간결하게 제공한다 |
 | README | 최신 공개 릴리즈 1개와 현재 구현 범위만 요약하고, 과거 릴리즈 상세는 `mydocs/release/`와 GitHub Release로 넘긴다 |
 | `mydocs/release/` | 릴리즈별 decision record, 검증 기록, Pages/GitHub Release/appcast 링크를 누적한다 |
-| 배포 매뉴얼 | 반복 가능한 절차와 현재 정책만 유지하고, 버전별 결정과 환경 식별자는 release/tech 문서로 분리한다 |
+| 배포 매뉴얼 | entrypoint와 주제별 하위 매뉴얼로 나누고, 버전별 결정과 환경 식별자는 release/tech 문서로 분리한다 |
 | troubleshooting | 실패 증상, 재현 조건, 원인, 예방 절차가 있는 문제 해결 문서에만 사용한다 |
 
 ## 검증 결과
@@ -65,6 +71,9 @@ GitHub Release 본문, Pages 업데이트 페이지, README 최신 릴리즈 블
 | Pages 후보 브라우저 확인 | OK | Stage 3에서 로컬 정적 서버로 `docs/updates/index.html`, `docs/updates/v0.1.0.html`, `docs/updates/v0.1.1.html` 확인 |
 | GitHub Pages branch 기준 | OK | GitHub Pages source가 `main`/`docs`, release environment `ALHANGEUL_PAGES_BRANCH=main`임을 확인하고 workflow fallback 보정 |
 | release guide 버전 중립화 | OK | `release_distribution_guide.md`에서 `v0.1`, `0.1.0`, 특정 Team ID/signing identity/notary profile hard-code 검색 결과 없음 |
+| release guide 컨텍스트 분리 | OK | entrypoint 113줄, 하위 매뉴얼 72~240줄로 분리 |
+| release guide 하위 링크 | OK | `release_distribution_guide.md`와 `document_structure_guide.md`에서 하위 매뉴얼 링크 확인 |
+| 하위 매뉴얼 guardrail | OK | 명시 승인, 민감 정보 기록 금지, public release guardrail 키워드 확인 |
 | whitespace 검사 | OK | `git diff --check` 통과 |
 
 Stage 5의 version/provenance 대조 명령은 release note 후보, Pages, README, `mydocs/release/`, `mydocs/tech/`, 배포 매뉴얼에서 `v0.1.1`, `alhangeul-macos-0.1.1.dmg`, `SHA256`, `Quick Look`, `Thumbnail`, `Sparkle`, `provenance` 표현을 확인했다.
@@ -103,7 +112,7 @@ Stage 5의 version/provenance 대조 명령은 release note 후보, Pages, READM
 
 ## PR 게시 전 상태
 
-- `local/task185`에는 Stage 1~5 산출물이 커밋 대상이다.
+- `local/task185`에는 Stage 1~6 산출물이 포함된다.
 - 이번 작업은 public release 실행 권한이 필요한 작업을 수행하지 않았다.
 - 최종 보고 승인 후 `publish/task185` 브랜치를 게시하고 `devel-webview` 대상으로 PR을 생성한다.
 

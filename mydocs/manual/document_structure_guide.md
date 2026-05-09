@@ -67,6 +67,19 @@
 
 `mydocs/troubleshootings/`는 실제 실패 사례와 재발 방지 절차가 있는 경우에만 사용한다. 일반 release policy, 버전별 release decision record, 단순 체크리스트는 troubleshooting으로 옮기지 않는다. Gatekeeper, notarization, Finder integration, appcast push 같은 주제라도 실제 실패 증상, 재현 조건, 원인, 예방 절차가 함께 있을 때만 troubleshooting 문서로 분리한다.
 
+## 릴리즈 매뉴얼 분리 정책
+
+릴리즈/배포 매뉴얼은 AI agent가 필요한 컨텍스트만 읽을 수 있도록 entrypoint와 주제별 하위 문서로 나눈다.
+
+- [`release_distribution_guide.md`](release_distribution_guide.md): 릴리즈 작업 진입점, 권한 원칙, 하위 문서 맵, 전체 flow, 최종 체크리스트
+- [`release_policy_guide.md`](release_policy_guide.md): 운영 기준, 배포 브랜치, public 배포 수준, 사용자 안내, artifact/checksum/provenance, 렌더링 경로와 알려진 한계
+- [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md): build 검증, 개발용 zip, public/rehearsal DMG, DMG layout, Finder 통합 smoke
+- [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md): Developer ID, notarytool, credential 기록 금지, signing/notarization 검증
+- [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md): GitHub Release body, delta checklist, Pages 업데이트 문서, Sparkle appcast
+- [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md): Homebrew Cask source, public DMG SHA256, tap 반영과 audit
+
+고위험 guardrail은 의도적으로 중복할 수 있다. 예를 들어 public release 실행, GitHub Release 게시, appcast 갱신, Cask 반영은 entrypoint와 관련 하위 문서 모두에 "작업지시자 명시 승인 후 수행" 원칙을 남긴다.
+
 ## 외부 기여자 PR 처리 (`mydocs/pr/`)
 
 외부 기여 PR 검토 상세 절차는 [`pr_process_guide.md`](pr_process_guide.md)를 따른다.

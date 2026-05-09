@@ -312,3 +312,73 @@ scripts/ci/write-release-delta-checklist.sh v0.1.0 HEAD build.noindex/release/de
 ```text
 Task #185 Stage 5: 릴리즈 template 최종 검증과 handoff 정리
 ```
+
+## Stage 6. 릴리즈 배포 매뉴얼 컨텍스트 분리
+
+### 배경
+
+Stage 5까지 진행한 뒤 `release_distribution_guide.md`가 600줄을 넘어섰다. 단일 진실 원천이라는 장점은 있지만, AI agent가 특정 release 작업을 수행할 때 불필요한 signing, DMG, Homebrew, appcast 문맥까지 한꺼번에 읽게 되는 문제가 있다.
+
+### 목표
+
+`release_distribution_guide.md`를 안전 게이트와 문서 라우터 역할로 줄이고, 실행 주제별 하위 매뉴얼을 만들어 필요한 컨텍스트만 읽게 한다.
+
+### 작업
+
+- `release_distribution_guide.md`에는 다음만 남긴다.
+  - 목적과 권한 원칙
+  - 고위험 작업 승인 원칙
+  - 하위 문서 맵
+  - 전체 release flow
+  - public release 전 확정 항목
+  - 최종 체크리스트
+  - rollback 요약
+- 기존 본문을 주제별 하위 매뉴얼로 분리한다.
+  - `release_policy_guide.md`: 운영 기준, 배포 브랜치, public 배포 수준, 사용자 설치 안내, artifact 계층, 렌더링 경로/알려진 한계, 버전 갱신 기준
+  - `release_packaging_dmg_guide.md`: 릴리스 전 확인, 기본 build 검증, 개발용 패키징, public/rehearsal DMG, DMG layout smoke, Finder 통합 smoke
+  - `release_signing_notarization_guide.md`: Apple Developer credential 원칙, 비밀 기록 금지, signing/notary 확인, codesign/stapler/spctl 검증
+  - `release_github_pages_sparkle_guide.md`: GitHub Release body, release note/delta helper, Pages 업데이트 페이지, Sparkle appcast
+  - `release_homebrew_cask_guide.md`: Cask source, sha256 교체, tap 반영, brew style/audit
+- 각 하위 문서에도 관련 고위험 guardrail을 짧게 반복한다.
+- `document_structure_guide.md`에는 릴리즈 매뉴얼 entrypoint와 하위 매뉴얼의 역할을 추가한다.
+- Stage 6 보고서와 최종 보고서를 보정한다.
+
+### 예상 변경 파일
+
+- `mydocs/manual/release_distribution_guide.md`
+- `mydocs/manual/release_policy_guide.md`
+- `mydocs/manual/release_packaging_dmg_guide.md`
+- `mydocs/manual/release_signing_notarization_guide.md`
+- `mydocs/manual/release_github_pages_sparkle_guide.md`
+- `mydocs/manual/release_homebrew_cask_guide.md`
+- `mydocs/manual/document_structure_guide.md`
+- `mydocs/working/task_m018_185_stage6.md`
+- `mydocs/report/task_m018_185_report.md`
+
+### 검증
+
+```bash
+git status --short --branch
+wc -l mydocs/manual/release_distribution_guide.md mydocs/manual/release_policy_guide.md mydocs/manual/release_packaging_dmg_guide.md mydocs/manual/release_signing_notarization_guide.md mydocs/manual/release_github_pages_sparkle_guide.md mydocs/manual/release_homebrew_cask_guide.md
+rg -n "명시 지시|승인|private key|password|token|public release" mydocs/manual/release_distribution_guide.md mydocs/manual/release_policy_guide.md mydocs/manual/release_packaging_dmg_guide.md mydocs/manual/release_signing_notarization_guide.md mydocs/manual/release_github_pages_sparkle_guide.md mydocs/manual/release_homebrew_cask_guide.md
+rg -n "release_policy_guide|release_packaging_dmg_guide|release_signing_notarization_guide|release_github_pages_sparkle_guide|release_homebrew_cask_guide" mydocs/manual/release_distribution_guide.md mydocs/manual/document_structure_guide.md
+rg -n "scripts/ci/write-release-notes.sh|scripts/ci/write-release-delta-checklist.sh|ALHANGEUL_PAGES_BRANCH|SPARKLE_ED_PRIVATE_KEY" mydocs/manual/release_github_pages_sparkle_guide.md
+rg -n "scripts/release.sh|scripts/package-release.sh|smoke-finder-integration|alhangeul-macos-<version>" mydocs/manual/release_packaging_dmg_guide.md
+rg -n "Developer ID|notarytool|codesign|stapler|spctl" mydocs/manual/release_signing_notarization_guide.md
+rg -n "Homebrew|Cask|update-cask-sha256|brew style|brew audit" mydocs/manual/release_homebrew_cask_guide.md
+git diff --check
+```
+
+### 완료 기준
+
+- `release_distribution_guide.md`가 entrypoint와 안전 게이트로 축소된다.
+- 하위 매뉴얼이 실행 주제별로 독립적으로 읽을 수 있다.
+- signing/notarization/GitHub Release/appcast/Homebrew 같은 고위험 작업은 entrypoint와 관련 하위 문서 모두에서 명시 지시 원칙을 확인할 수 있다.
+- 기존 Stage 5 내용의 핵심 절차가 하위 문서로 빠짐없이 이동한다.
+- #188 handoff 문서 체계가 더 작은 컨텍스트 단위로 정리된다.
+
+### 커밋 메시지
+
+```text
+Task #185 Stage 6: 릴리즈 배포 매뉴얼 컨텍스트 분리
+```
