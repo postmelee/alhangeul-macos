@@ -19,6 +19,7 @@
 
 | 문서 | 읽는 시점 | 내용 |
 |------|-----------|------|
+| [`ci_workflow_guide.md`](ci_workflow_guide.md) | PR CI, release rehearsal/publish workflow, upstream check의 역할과 재현 명령을 확인할 때 | workflow trigger, 권한, 변경 범위 flag, docs-only skip, release delta checklist summary/artifact |
 | [`release_policy_guide.md`](release_policy_guide.md) | 릴리스 정책, 산출물 계층, 사용자 안내 기준을 판단할 때 | 운영 기준, 배포 브랜치, public 배포 수준, artifact/checksum/provenance, 렌더링 경로와 알려진 한계 |
 | [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md) | package/release script, DMG, Finder smoke를 다룰 때 | 릴리스 전 확인, build 검증, zip, public/rehearsal DMG, DMG layout, Finder 통합 smoke |
 | [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md) | Developer ID, notarytool, Gatekeeper 검증을 다룰 때 | credential 원칙, 기록 금지 정보, signing/notarization 확인, `codesign`/`stapler`/`spctl` |
@@ -35,6 +36,10 @@
 - `scripts/ci/check-release-notes-template.sh`: release note 필수 heading 검증
 - `scripts/ci/write-release-delta-checklist.sh`: 직전 public release 대비 영향 영역 checklist 초안 생성
 - `scripts/ci/write-sparkle-appcast.sh`: stable Sparkle appcast 생성
+- `scripts/ci/classify-pr-changes.sh`: PR CI 변경 범위 flag 생성
+- `.github/workflows/pr-ci.yml`: PR 생성/갱신 시 기본 gate와 조건부 macOS/release helper 검증
+- `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum과 release delta checklist artifact 생성
+- `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, release delta checklist artifact 생성
 - `docs/appcast.xml`, `docs/updates/`: Sparkle feed와 사용자용 업데이트 페이지
 - `Casks/alhangeul-macos.rb`: Homebrew Cask source 초안
 - `rhwp-core.lock`, `Sources/HostApp/Resources/rhwp-studio/manifest.json`: core/viewer asset provenance
@@ -43,15 +48,17 @@
 
 1. release version, release candidate commit, 포함 PR 범위를 확정한다.
 2. [`release_policy_guide.md`](release_policy_guide.md)의 branch, artifact, 사용자 안내 기준을 확인한다.
-3. [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md)의 릴리스 전 확인과 build 검증을 수행한다.
-4. [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md)의 credential 확인을 수행한다.
-5. `scripts/release.sh <version>` public mode로 signed/notarized DMG를 생성한다.
-6. public DMG SHA256을 기록하고 DMG layout, Finder Quick Look, Finder thumbnail smoke를 반복한다.
-7. [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 release note와 delta checklist를 실제 SHA256/provenance로 보정한다.
-8. GitHub Release를 공식 release 기준으로 게시하고 `Release Publish DMG` workflow 결과를 확인한다.
-9. Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 확인한다.
-10. Homebrew 배포를 진행할 경우 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 SHA256을 고정하고 tap 검증을 수행한다.
-11. [`mydocs/release/v<version>.md`](../release/)와 최종 release report에 실제 결과와 잔여 위험을 기록한다.
+3. [`ci_workflow_guide.md`](ci_workflow_guide.md)의 PR CI와 release workflow 역할을 확인한다.
+4. [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md)의 릴리스 전 확인과 build 검증을 수행한다.
+5. 필요한 경우 `Release Rehearsal DMG` workflow를 실행하고 DMG/checksum과 delta checklist artifact를 확인한다.
+6. [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md)의 credential 확인을 수행한다.
+7. `Release Publish DMG` workflow 또는 `scripts/release.sh <version>` public mode로 signed/notarized DMG를 생성한다.
+8. public DMG SHA256을 기록하고 DMG layout, Finder Quick Look, Finder thumbnail smoke를 반복한다.
+9. [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 release note와 delta checklist를 실제 SHA256/provenance로 보정한다.
+10. GitHub Release를 공식 release 기준으로 게시하고 `Release Publish DMG` workflow 결과를 확인한다.
+11. Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 확인한다.
+12. Homebrew 배포를 진행할 경우 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 SHA256을 고정하고 tap 검증을 수행한다.
+13. [`mydocs/release/v<version>.md`](../release/)와 최종 release report에 실제 결과와 잔여 위험을 기록한다.
 
 ## public release 전 확정 항목
 
@@ -67,7 +74,9 @@
 - [ ] 릴리스 버전 확정
 - [ ] 릴리스 기준 branch/commit 확정
 - [ ] `mydocs/release/v<version>.md` 릴리즈 상세 기록 초안 작성
+- [ ] PR CI 또는 동등한 로컬 검증 결과 확인
 - [ ] `scripts/ci/write-release-delta-checklist.sh`로 직전 public release 대비 delta checklist 생성
+- [ ] workflow 사용 시 `previous_release_ref` 입력과 delta checklist summary/artifact 확인
 - [ ] release owner가 delta checklist 누락/과잉 항목 보정
 - [ ] `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock` 정합성 확인
 - [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과

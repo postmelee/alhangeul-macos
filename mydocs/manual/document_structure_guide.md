@@ -72,6 +72,7 @@
 릴리즈/배포 매뉴얼은 AI agent가 필요한 컨텍스트만 읽을 수 있도록 entrypoint와 주제별 하위 문서로 나눈다.
 
 - [`release_distribution_guide.md`](release_distribution_guide.md): 릴리즈 작업 진입점, 권한 원칙, 하위 문서 맵, 전체 flow, 최종 체크리스트
+- [`ci_workflow_guide.md`](ci_workflow_guide.md): PR CI, release workflow, upstream check의 trigger, 권한, 변경 범위, 로컬 재현 명령
 - [`release_policy_guide.md`](release_policy_guide.md): 운영 기준, 배포 브랜치, public 배포 수준, 사용자 안내, artifact/checksum/provenance, 렌더링 경로와 알려진 한계
 - [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md): build 검증, 개발용 zip, public/rehearsal DMG, DMG layout, Finder 통합 smoke
 - [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md): Developer ID, notarytool, credential 기록 금지, signing/notarization 검증
