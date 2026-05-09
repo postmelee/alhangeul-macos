@@ -31,10 +31,22 @@ enum RhwpStudioHostBridgeScript {
         }
       }
 
-      function isBenignRuntimeIssue(sourceURL, reason) {
+      function isResizeObserverLoopNotification(message, reason, line, column) {
+        const text = message || "";
+        const detail = reason || "";
+        const isResizeObserverMessage =
+          text === "ResizeObserver loop completed with undelivered notifications." ||
+          text === "ResizeObserver loop limit exceeded";
+
+        return isResizeObserverMessage && !detail && line === 0 && column === 0;
+      }
+
+      function isBenignRuntimeIssue(message, sourceURL, reason, line, column) {
         const source = sourceURL || "";
         const detail = reason || "";
-        return source.includes("/registerSW.js") || detail.includes("/registerSW.js");
+        return source.includes("/registerSW.js") ||
+          detail.includes("/registerSW.js") ||
+          isResizeObserverLoopNotification(message, detail, line, column);
       }
 
       window.addEventListener("error", (event) => {
@@ -45,7 +57,9 @@ enum RhwpStudioHostBridgeScript {
 
         const sourceURL = event.filename || window.location.href;
         const reason = event.error ? describeReason(event.error) : null;
-        if (isBenignRuntimeIssue(sourceURL, reason)) {
+        const line = event.lineno || 0;
+        const column = event.colno || 0;
+        if (isBenignRuntimeIssue(message, sourceURL, reason, line, column)) {
           return;
         }
 
@@ -53,8 +67,8 @@ enum RhwpStudioHostBridgeScript {
           type: "runtime-error",
           message: message || "JavaScript error",
           sourceURL,
-          line: event.lineno || 0,
-          column: event.colno || 0,
+          line,
+          column,
           reason
         });
       });
@@ -62,7 +76,7 @@ enum RhwpStudioHostBridgeScript {
       window.addEventListener("unhandledrejection", (event) => {
         const reason = describeReason(event.reason);
         const sourceURL = window.location.href;
-        if (isBenignRuntimeIssue(sourceURL, reason)) {
+        if (isBenignRuntimeIssue("Unhandled promise rejection", sourceURL, reason, 0, 0)) {
           return;
         }
 
