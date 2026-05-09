@@ -13,6 +13,37 @@
 | `Release Publish DMG` | `workflow_dispatch` | `contents: write`, `environment: release` | macOS | tag 검증, signed/notarized DMG, GitHub Release asset, stable Sparkle appcast, release delta checklist artifact 생성 |
 | `rhwp Upstream Release Check` | `workflow_dispatch`, schedule | `contents: read` | Ubuntu | upstream `rhwp` release와 `rhwp-core.lock` 비교 |
 
+## JavaScript action runtime 기준
+
+GitHub Actions에서 JavaScript action runtime deprecation annotation이 발생하면, 먼저 repository workflow의 `uses:` action과 해당 action의 `action.yml` runtime을 확인한다. 기본 대응은 official action의 지원 runtime major로 갱신하는 것이며, runner 환경변수로 runtime을 강제하거나 deprecated runtime을 허용하는 방식은 임시 진단 외 기본 대응책으로 쓰지 않는다.
+
+workflow action reference 점검 예시:
+
+```bash
+rg -n "uses:" .github/workflows
+```
+
+official action runtime 확인 예시:
+
+```bash
+gh api repos/<owner>/<action>/contents/action.yml --method GET -f ref=<major-or-tag> --jq '.content' | base64 --decode | rg -n "runs:|using:|node"
+```
+
+확인 기준:
+
+- official action의 release note와 README에서 major 변경의 breaking change를 확인한다.
+- `action.yml`의 `runs.using`이 GitHub-hosted runner의 지원 runtime인지 확인한다.
+- workflow에서 쓰는 input, output, credential 동작이 새 major에서 유지되는지 확인한다.
+- runner/runtime 강제 또는 deprecated runtime 허용 환경변수를 workflow의 상시 대응으로 두지 않는다.
+- official action major 갱신 대신 third-party fork나 임시 wrapper로 대체하지 않는다.
+
+PR에서 확인할 항목:
+
+- `.github/workflows/**` 변경은 `scripts/ci/classify-pr-changes.sh <base-ref> <head-ref>` 결과 `run_release_checks=true`가 되어야 한다.
+- PR CI annotation에 JavaScript action runtime deprecation warning이 남는지 확인한다.
+- warning이 남으면 `rg -n "uses:" .github/workflows`로 남은 JavaScript action을 다시 찾고, 해당 action의 official `action.yml` `runs.using` 값을 확인한다.
+- 특정 deprecation 사건의 증상, 원인, 대응 버전, 검증 기록은 `mydocs/troubleshootings/`에 남기고 이 문서에는 반복 적용 가능한 점검 기준만 둔다.
+
 ## PR CI
 
 PR CI는 외부 PR에서도 안전하게 실행할 수 있는 검증만 수행한다.
