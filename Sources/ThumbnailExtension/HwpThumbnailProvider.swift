@@ -60,7 +60,7 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
     private static func drawPageImage(_ image: CGImage, in context: CGContext, size: CGSize) {
         let rect = drawingBounds(in: context, fallbackSize: size)
         context.saveGState()
-        context.setFillColor(CGColor(gray: 1, alpha: 1))
+        context.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
         context.fill(rect)
         context.draw(image, in: rect)
         context.restoreGState()
@@ -69,9 +69,9 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
     private static func drawFallback(in context: CGContext, size: CGSize) {
         let rect = drawingBounds(in: context, fallbackSize: size)
         context.saveGState()
-        context.setFillColor(CGColor(gray: 0.93, alpha: 1))
+        context.setFillColor(red: 0.93, green: 0.93, blue: 0.93, alpha: 1)
         context.fill(rect)
-        context.setStrokeColor(CGColor(gray: 0.55, alpha: 1))
+        context.setStrokeColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 1)
         context.setLineWidth(max(1, min(size.width, size.height) * 0.04))
         context.stroke(rect.insetBy(dx: 2, dy: 2))
         context.restoreGState()
