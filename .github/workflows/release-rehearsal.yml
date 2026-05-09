@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -106,7 +106,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload release delta checklist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: alhangeul-macos-${{ inputs.version }}-rehearsal-delta-checklist
           path: ${{ steps.delta.outputs.checklist_path }}
@@ -171,7 +171,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload rehearsal artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: alhangeul-macos-${{ inputs.version }}-rehearsal
           path: |
