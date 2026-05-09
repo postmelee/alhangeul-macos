@@ -897,7 +897,7 @@ video {
 .site-footer {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) minmax(0, 760px) max-content;
+  grid-template-columns: minmax(max-content, 1fr) minmax(0, 760px) minmax(max-content, 1fr);
   align-items: center;
   column-gap: 32px;
   margin-top: 0;
@@ -917,8 +917,11 @@ video {
 
 .site-footer p {
   width: 100%;
+  max-width: 760px;
   margin: 0;
+  justify-self: center;
   line-height: 1.55;
+  word-break: keep-all;
 }
 
 .site-footer nav {
@@ -936,14 +939,15 @@ video {
 
 @media (max-width: 1180px) {
   .site-footer {
-    grid-template-columns: max-content minmax(0, 1fr);
-    align-items: start;
-    row-gap: 10px;
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    align-items: center;
+    column-gap: 24px;
+    padding-inline: 28px;
   }
 
   .site-footer nav {
-    grid-column: 2;
-    justify-self: start;
+    grid-column: auto;
+    justify-self: end;
   }
 }
 
