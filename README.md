@@ -51,6 +51,10 @@
 
 ## 이정표
 
+```text
+v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동화) -> v0.5+(Swift native viewer/editor) -> v2.0(Agent-ready 문서 환경)
+```
+
 | 버전 | 단계 | 사용자에게 보이는 변화 | 주요 범위 |
 |------|------|------------------------|-----------|
 | `v0.1.x` | WebView-backed public release | Finder와 Quick Look에서 HWP/HWPX가 보이고, 앱에서는 `rhwp-studio` 기반 viewer/editor로 문서를 열고 내보냅니다. | Quick Look, thumbnail, WKWebView HostApp, 저장/공유/PDF, signed/notarized DMG, Sparkle |
@@ -58,6 +62,38 @@
 | `v0.3` | 변환과 자동화 | 여러 HWP/HWPX 문서를 Finder, CLI, Shortcuts 흐름에서 변환합니다. | Text/Markdown/blocks JSON/HWPX 변환, batch 변환, Quick Action, CLI |
 | `v0.5+` | Swift native viewer/editor | WebView 의존도를 낮추고 native 문서 보기와 편집 기반을 키웁니다. | native rendering parity, native search/copy, editor interaction, safe editing |
 | `v2.0` | Agent-ready Docs | 에이전트가 문서를 열고 수정하고 렌더링 결과로 검증하는 루프를 제공합니다. | structured patch API, page anchor, document diff, render verification |
+
+미래 기능 후보와 장기 제품 방향은 [제품 로드맵 메모](mydocs/tech/product_roadmap_notes.md)에서 관리합니다. README에는 아직 확정되지 않은 버전별 지원 기능 체크리스트를 나열하지 않습니다.
+
+## v0.1.x 구현 범위
+
+현재 공개 릴리즈 라인에서 제공하는 기능과 알려진 제약입니다.
+
+### 제공 기능
+
+- [x] `.hwp`, `.hwpx` Quick Look preview
+- [x] 첫 페이지 기반 Finder thumbnail
+- [x] WKWebView 기반 HWP/HWPX viewer/editor
+- [x] WebView 내부 찾기, 선택, 복사, 기본 편집 UI
+- [x] Finder 또는 다른 앱에서 HWP/HWPX 파일 열기
+- [x] Finder에서 viewer 영역으로 끌어와서 열기
+- [x] 최근 문서 목록과 security-scoped bookmark 기반 재열기
+- [x] HWP 저장과 다른 이름으로 저장
+- [x] PDF 내보내기
+- [x] native 인쇄 flow 연결
+- [x] macOS 공유 sheet
+- [x] 원본 URL이 있는 문서를 Finder에서 보기
+- [x] Quick Look/Thumbnail extension 상태 진단
+- [x] signed/notarized DMG 배포 기준
+- [x] Sparkle 업데이트 확인 경로
+
+### 현재 제한 사항
+
+- 앱 화면의 viewer/editor와 Finder Quick Look/thumbnail, PDF 내보내기, 인쇄는 서로 다른 렌더링 경로를 사용할 수 있습니다.
+- Quick Look/Thumbnail smoke 통과는 extension 등록과 기본 렌더 성공을 뜻하며, 모든 문서가 앱 화면과 같은 시각 결과로 보인다는 보장은 아닙니다.
+- HWPX 문서는 현재 직접 저장이 제한되어 HWP export 경로를 사용합니다.
+- 손상, 대용량, 미지원 문서 fallback은 앱과 extension이 멈추지 않도록 하는 안전장치이며, 파일 복구나 부분 렌더링을 보장하지 않습니다.
+- native renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity 개선은 Swift native viewer 방향에서 계속 다룹니다.
 
 ## Features
 
@@ -102,13 +138,6 @@
 | Finder thumbnail | Rust bridge + Swift native first-page bitmap/cache | Finder icon/thumbnail용 경로 |
 
 WKWebView 경로는 native parity가 충분해질 때까지 fallback과 비교 기준선으로 유지합니다. native renderer는 Swift native viewer/editor 전환을 위한 장기 기본 경로로 계속 개선하며, Rust core render tree JSON, CoreGraphics, CoreText, 이미지 bin data를 사용합니다.
-
-### v0.1 Known Limitations (알려진 제한 사항)
-
-- 앱 화면의 viewer/editor와 Finder Quick Look/thumbnail, PDF 내보내기, 인쇄는 서로 다른 렌더링 경로를 사용할 수 있습니다.
-- Quick Look/Thumbnail smoke 통과는 extension 등록과 기본 렌더 성공을 뜻하며, 모든 문서가 앱 화면과 같은 시각 결과로 보인다는 보장은 아닙니다.
-- 손상·대용량·미지원 문서 fallback은 앱과 extension이 멈추지 않도록 하는 안전장치이며, 파일 복구나 부분 렌더링을 보장하지 않습니다.
-- native renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity 개선은 v0.5 이후 Swift native viewer 범위에서 계속 다룹니다.
 
 ### Core Bridge (코어 브리지)
 
