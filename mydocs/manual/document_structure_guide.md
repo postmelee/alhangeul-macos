@@ -37,11 +37,35 @@
 | `report/` | 최종 결과보고서 (`_report.md`) + 장기 보관 보고서 | 최종 보고서는 반드시 이 폴더 |
 | `feedback/` | 작업지시자 피드백, 코드 리뷰 의견 | |
 | `tech/` | 기술 조사, 구조/스펙 분석 | |
+| `release/` | 릴리즈별 장기 기록 | `v<version>.md` 형식. GitHub Release/Pages/appcast/검증/provenance 기록 |
 | `manual/` | 매뉴얼, 가이드 | 사용자/개발자 문서 |
 | `troubleshootings/` | 트러블슈팅, 재발 방지 기록 | |
 | `pr/` | 외부 기여자 PR 검토 기록 | 내부 타스크와 분리 |
 | `pr/archives/` | 처리 완료된 PR 검토 기록 보관 | |
 | `skills/` | Agent Skills SKILL.md 진실 원천 | `.agents/skills`와 `.claude/skills` 심볼릭 링크가 이 폴더를 가리킨다 |
+
+## 릴리즈 기록 폴더 정책
+
+`mydocs/release/`는 public release별 장기 기록을 보관한다. GitHub Release 본문은 public 배포 안내, Pages는 사용자용 짧은 릴리즈 노트, README는 최신 공개 릴리즈 1개 요약을 맡고, 내부 검증과 release decision record는 `release/`에 남긴다.
+
+파일명 규칙:
+
+- 릴리즈 인덱스: `mydocs/release/index.md`
+- 릴리즈별 기록: `mydocs/release/v<version>.md` (예: `v0.1.1.md`)
+
+릴리즈별 기록에는 다음을 포함한다.
+
+- 사용자용 요약
+- 직전 공개 릴리즈 대비 변경점
+- 연결된 Issue/PR과 기여자
+- 검증 결과와 public release에서 반복할 smoke 항목
+- 알려진 제한 사항과 후속 이슈
+- `rhwp` core와 viewer asset provenance
+- GitHub Release, Pages 릴리즈 노트, Sparkle appcast 링크
+
+`mydocs/tech/release_environment.md`는 비밀이 아닌 운영 환경 식별자만 기록한다. Team ID, signing identity 표시명, notary profile name처럼 절차 실행에 필요한 이름은 이 문서로 분리할 수 있지만, password, private key, exported signing identity, token은 어떤 문서에도 기록하지 않는다.
+
+`mydocs/troubleshootings/`는 실제 실패 사례와 재발 방지 절차가 있는 경우에만 사용한다. 일반 release policy, 버전별 release decision record, 단순 체크리스트는 troubleshooting으로 옮기지 않는다. Gatekeeper, notarization, Finder integration, appcast push 같은 주제라도 실제 실패 증상, 재현 조건, 원인, 예방 절차가 함께 있을 때만 troubleshooting 문서로 분리한다.
 
 ## 외부 기여자 PR 처리 (`mydocs/pr/`)
 
