@@ -12,10 +12,15 @@
   - 실제 공개된 `v0.1.0` GitHub Release 상태, asset, SHA256, 배포 결정, 제공 기능, known limitations, provenance 기록
 - `mydocs/release/v0.1.1.md`: 95 lines
   - `v0.1.1` release candidate 기록 초안, `v0.1.0` 대비 변경점, 연결 Issue/PR, #188 public smoke handoff 작성
-- `mydocs/tech/release_environment.md`: 68 lines
+- `mydocs/tech/release_environment.md`: 75 lines
   - Team ID, signing identity 표시명, notary profile name, GitHub Actions 변수/secret 이름 등 비밀이 아닌 운영 환경 식별자 분리
+  - GitHub Pages source가 `main` / `docs`이고, release environment variable `ALHANGEUL_PAGES_BRANCH` 값과 workflow fallback이 `main`이어야 함을 기록
 - `mydocs/manual/document_structure_guide.md`: 107 lines
   - `release/` 폴더 역할, `v<version>.md` 파일명 기준, release environment 문서, troubleshooting 분리 기준 추가
+- `.github/workflows/release-publish.yml`
+  - 실제 GitHub Pages source와 맞도록 `ALHANGEUL_PAGES_BRANCH` fallback을 `main`으로 보정
+- `mydocs/manual/release_distribution_guide.md`
+  - appcast publish target 설명에서 Pages branch fallback을 `main`으로 보정
 - `scripts/ci/write-release-delta-checklist.sh`: 190 lines
   - `previous-release-ref`, `candidate-ref`, `output-file`을 받아 변경 파일 path 기반 영향 영역 초안을 생성
   - 한 파일이 여러 영향 영역에 걸칠 수 있으므로 중복 표시를 허용
@@ -25,7 +30,7 @@
 
 ## 본문 변경 정도 / 본문 무손실 여부
 
-- 이번 단계에서는 `release_distribution_guide.md` 본문을 아직 직접 일반화하지 않았다. Stage 4의 목적은 분리 대상 문서와 기준을 먼저 만들고, Stage 5에서 매뉴얼 본문을 이 기준으로 통합하는 것이다.
+- 이번 단계에서는 `release_distribution_guide.md` 본문을 아직 전면 일반화하지 않았다. Stage 4의 목적은 분리 대상 문서와 기준을 먼저 만들고, Stage 5에서 매뉴얼 본문을 이 기준으로 통합하는 것이다. 단, 실제 GitHub Pages source와 충돌하던 appcast Pages branch fallback 설명은 `main`으로 바로 보정했다.
 - `v0.1.0`의 실제 공개 asset과 SHA256은 GitHub Release API에서 확인해 `mydocs/release/v0.1.0.md`에 기록했다.
 - Team ID, signing identity 표시명, notary profile name은 `mydocs/tech/release_environment.md`로 분리했다. password, app-specific password, `.p8`, `.p12`, Sparkle EdDSA private key, GitHub token은 기록 금지 항목으로 명시했다.
 - `troubleshootings/` 새 문서는 만들지 않았다. 현재 분리 대상은 release policy, release decision record, 환경 스냅샷 성격이 강하다. Gatekeeper/quarantine, appcast push 실패 같은 주제는 실제 실패 증상, 재현 조건, 원인, 예방 절차가 모였을 때 별도 troubleshooting 문서로 분리하는 기준만 남겼다.
@@ -108,6 +113,18 @@ rg -n "release/|릴리즈|v0\\.1\\.0|v0\\.1\\.1|검증|provenance|GitHub Release
 - `mydocs/release/v0.1.0.md`에 실제 `v0.1.0` GitHub Release, Pages, SHA256, provenance, 후속 patch 입력이 기록됨
 - `mydocs/release/v0.1.1.md`에 `v0.1.1` 후보 변경점, 연결 Issue/PR, #188 smoke, provenance, release communication checklist가 기록됨
 - `mydocs/tech/release_environment.md`에 release environment 식별자와 기록 금지 항목이 반영됨
+- GitHub Pages source가 `main` / `docs`이고 `ALHANGEUL_PAGES_BRANCH`가 `main`인 것을 확인해 환경 문서와 workflow fallback을 보정함
+
+```bash
+gh api repos/postmelee/alhangeul-macos/pages --jq '{source:.source, html_url:.html_url, status:.status}'
+gh variable list --env release --repo postmelee/alhangeul-macos
+```
+
+결과 요약:
+
+- GitHub Pages source는 `main` branch의 `/docs` 경로이며 status는 `built`
+- `release` environment variable `ALHANGEUL_PAGES_BRANCH` 값은 `main`
+- workflow fallback도 `main`으로 보정
 
 ```bash
 git diff --check

@@ -17,8 +17,10 @@
 | notarytool keychain profile | `alhangeul-notary` |
 | GitHub repository | `postmelee/alhangeul-macos` |
 | Release environment | `release` |
+| GitHub Pages source | `main` / `docs` |
 | Pages branch variable | `ALHANGEUL_PAGES_BRANCH` |
-| Pages branch default | `devel-webview` |
+| Pages branch current value | `main` |
+| Pages branch workflow fallback | `main` |
 
 ## GitHub Actions 변수와 secret
 
@@ -50,6 +52,11 @@ secret:
 - `security find-identity -v -p codesigning`에서 Developer ID Application signing identity를 확인했다.
 - `xcrun notarytool store-credentials "alhangeul-notary" --apple-id <Apple ID> --team-id "XH6JHKYXV8"`로 credential을 Keychain에 저장했다.
 - `xcrun notarytool history --keychain-profile "alhangeul-notary"`가 credential validation을 통과했고, 당시 notarization submission history는 없었다.
+
+2026-05-10 기준 다음이 확인되었다.
+
+- GitHub Pages source는 `main` branch의 `/docs` 경로다.
+- `release` environment variable `ALHANGEUL_PAGES_BRANCH` 값은 `main`이다.
 
 ## 기록 금지 항목
 
