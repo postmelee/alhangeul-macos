@@ -28,7 +28,7 @@
 | Pages `docs/updates/` | 사용자용 짧은 릴리즈 노트와 최신 다운로드 진입점 |
 | `docs/appcast.xml` | Sparkle client가 읽는 update feed |
 | README | 프로젝트 소개, 현재 작업 축, 최신 공개 릴리즈 1개 요약 |
-| `mydocs/release/` | 릴리즈별 내부 decision record, delta, 검증, provenance, #188 handoff |
+| `mydocs/release/` | 릴리즈별 내부 decision record, delta, 검증, provenance, #188/#209 handoff |
 | `mydocs/tech/release_environment.md` | Team ID, signing identity 표시명, notary profile name 같은 비밀이 아닌 운영 환경 식별자 |
 | `mydocs/troubleshootings/` | 실제 실패 사례, 재현 조건, 원인, 재발 방지 절차 |
 

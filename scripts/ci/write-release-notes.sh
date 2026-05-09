@@ -99,6 +99,12 @@ cat > "$OUTPUT_FILE" <<EOF
 - SHA256 file: \`$SHA256_NAME\`
 - SHA256: \`$DMG_SHA256\`
 
+## Homebrew Cask
+
+- Homebrew Cask는 public DMG URL/SHA256과 tap context 검증이 끝난 뒤 안내합니다.
+- 검증 전 공식 설치 경로는 위 GitHub Release DMG입니다.
+- 공개 완료 후 설치 명령은 \`brew install --cask postmelee/tap/alhangeul-macos\` 기준으로 README, Pages, GitHub Release/릴리즈 노트에 반영합니다.
+
 ## 포함된 rhwp core와 viewer asset provenance
 
 - rhwp core release tag: \`$RHWP_TAG\`

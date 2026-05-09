@@ -28,6 +28,7 @@ required_headings=(
   "## 업데이트 확인 방법"
   "## 이번 버전의 주요 변경 사항"
   "## 다운로드 산출물과 SHA256"
+  "## Homebrew Cask"
   "## 포함된 rhwp core와 viewer asset provenance"
   "## 검증 결과"
   "## 릴리즈 delta 기반 추가 확인 항목"

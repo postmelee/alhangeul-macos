@@ -69,6 +69,7 @@ Release note에 포함할 내용:
 - 주요 변경 사항
 - 지원 macOS 버전
 - 다운로드 산출물과 SHA256
+- Homebrew Cask 공개 상태
 - 포함된 `edwardkim/rhwp` core commit
 - 포함된 `rhwp-studio` asset manifest와 commit
 - HostApp viewer, PDF 내보내기, 인쇄, Quick Look, Thumbnail의 렌더링 경로와 알려진 한계
@@ -78,6 +79,12 @@ Release note에 포함할 내용:
 - 설치/실행 주의사항
 - Quick Look/Thumbnail extension 등록 확인 방법
 - 알려진 문제
+
+Homebrew Cask 안내 기준:
+
+- #209의 tap context 검증이 끝나기 전에는 Homebrew 설치 명령을 public 안내에 확정 문구로 쓰지 않는다.
+- 검증 전 공식 설치 경로는 GitHub Release DMG와 Pages 다운로드 버튼이다.
+- #209 완료 후 공개할 명령은 `brew install --cask postmelee/tap/alhangeul-macos`를 기준으로 하며, README, GitHub Release 본문, Pages 문구가 같은 명령을 써야 한다.
 
 본문 후보 생성:
 

@@ -57,7 +57,7 @@
 9. [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 release note와 delta checklist를 실제 SHA256/provenance로 보정한다.
 10. GitHub Release를 공식 release 기준으로 게시하고 `Release Publish DMG` workflow 결과를 확인한다.
 11. Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 확인한다.
-12. Homebrew 배포를 진행할 경우 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 SHA256을 고정하고 tap 검증을 수행한다.
+12. Homebrew 배포를 진행할 경우 #209에서 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 `postmelee/homebrew-tap`에 Cask를 반영하고 tap context 검증을 수행한다.
 13. [`mydocs/release/v<version>.md`](../release/)와 최종 release report에 실제 결과와 잔여 위험을 기록한다.
 
 ## public release 전 확정 항목
@@ -67,7 +67,7 @@
 - Developer ID 서명/notarization 실행 시점
 - GitHub Release를 draft/prerelease가 아닌 public release로 게시할 시점
 - Cask 초안의 `sha256 :no_check`를 public DMG 생성 후 실제 digest로 교체할 시점
-- Homebrew tap 공개 여부
+- `postmelee/homebrew-tap` 공개 배포를 #209에서 진행할 시점
 
 ## 최종 체크리스트
 
@@ -104,9 +104,9 @@
 - [ ] `docs/appcast.xml`이 Pages branch에 갱신되었는지 확인
 - [ ] Pages 다운로드 버튼과 appcast URL이 public DMG asset을 가리키는지 확인
 - [ ] Homebrew 배포 시 `scripts/update-cask-sha256.sh`로 Cask version/sha256 갱신
-- [ ] Homebrew tap 대상 확정
-- [ ] tap 반영 후 `brew style`/`brew audit` 검증
-- [ ] Homebrew Cask 갱신 여부 결정
+- [ ] Homebrew tap 대상이 `postmelee/homebrew-tap`인지 확인
+- [ ] #209에서 tap 반영 후 `brew style`/`brew audit`/install smoke 검증
+- [ ] README, Pages, GitHub Release/릴리즈 노트의 Homebrew 설치 안내가 검증된 명령과 일치하는지 확인
 - [ ] 릴리스 최종 보고서 작성
 
 ## Rollback
@@ -114,7 +114,7 @@
 릴리스에 문제가 있으면 다음 순서로 대응한다.
 
 1. GitHub Release asset을 숨기거나 삭제한다.
-2. Homebrew Cask가 공개된 경우 해당 버전 설치 경로를 중단하거나 새 patch release를 만든다.
+2. Homebrew Cask가 `postmelee/homebrew-tap`에 공개된 경우 해당 버전 설치 경로를 중단하거나 새 patch release를 만든다.
 3. 문제를 GitHub Issue로 등록한다.
 4. 원인, 영향 범위, 재발 방지책을 `mydocs/troubleshootings/`에 기록한다.
 5. 수정 PR을 출시 대상 통합 브랜치로 merge한 뒤 새 릴리스 후보를 만든다.
