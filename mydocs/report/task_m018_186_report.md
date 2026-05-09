@@ -60,19 +60,20 @@
 | release note helper dry-run 통과 | OK | `write-release-notes.sh`와 `check-release-notes-template.sh` exit code 0 |
 | Sparkle appcast helper dry-run 통과 | OK | `write-sparkle-appcast.sh ... --output build.noindex/release/appcast.xml`와 `xmllint --noout` exit code 0 |
 | GitHub Actions workflow lint 통과 | OK | `actionlint` exit code 0 |
+| GitHub-hosted PR CI 통과 | OK | PR #207 `Classify changed files`, `Script syntax checks`, `Release helper checks` 통과, `macOS validation` skipped |
+| Node.js deprecation log 검색 | OK | PR #207 Actions run log에서 `Node.js 20`, `deprecated`, `deprecation` 관련 warning 검색 결과 없음 |
 | whitespace/diff 검사 | OK | `git diff --check` exit code 0 |
 
 YAML parse 시 로컬 Ruby 환경에서 `ffi-1.13.1` extension warning이 출력됐지만, parse 명령은 모두 exit code 0으로 완료됐다.
 
 ## 미실행 검증
 
-- GitHub-hosted Actions 실제 PR run은 아직 실행하지 않았다. PR 생성 후 `PR CI`에서 Node.js 20 deprecation annotation이 해소됐는지 확인해야 한다.
 - `xcodegen generate`와 `xcodebuild ... HostApp ... build`는 실행하지 않았다. 이번 변경 범위는 workflow/manual 중심이고 `classify-pr-changes.sh devel-webview HEAD`가 `run_macos_build=false`로 분류했다.
 - `Release Rehearsal DMG`와 `Release Publish DMG` workflow 실제 실행은 수행하지 않았다. release workflow 실행은 macOS runner, signing/notarization, Sparkle key, GitHub Release 권한이 필요한 보호 영역이다.
 
 ## 잔여 위험과 후속 작업
 
-- PR 게시 후 실제 GitHub-hosted runner에서 `PR CI` annotation을 확인해야 한다.
+- 추가 push가 발생하면 GitHub-hosted runner에서 `PR CI` annotation을 다시 확인해야 한다.
 - #206: Pages/appcast 배포 방식을 `deploy-pages` workflow로 전환할지는 별도 작업에서 branch publishing, appcast push, permissions, Pages source 설정을 함께 검토한다.
 - #188 release 실행 시에는 PR run 결과와 release workflow summary/artifact를 release report에 다시 기록해야 한다.
 - future action major 갱신 시에는 `ci_workflow_guide.md`의 일반 점검 기준을 따르고, 특정 warning 사건의 세부값은 `mydocs/troubleshootings/`에 분리한다.
