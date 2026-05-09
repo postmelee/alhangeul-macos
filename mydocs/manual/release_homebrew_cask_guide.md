@@ -89,4 +89,11 @@ brew uninstall --cask alhangeul-macos
 
 raw path 검증은 Homebrew가 tap context를 요구할 수 있으므로, 최종 검증은 선택한 tap에 Cask를 반영한 뒤 cask token 기준으로 수행한다.
 
-`brew audit --cask --new`는 maintainer tap 운영에 필요한 최소 조건보다 엄격할 수 있다. 실패 시에는 일반 `brew audit --cask`, install smoke, 실패 사유를 함께 기록하고 공개 여부를 작업지시자가 결정한다.
+`postmelee/homebrew-tap` maintainer tap의 공개 gate는 `brew style --cask`, 일반 `brew audit --cask`, install/uninstall smoke를 기준으로 한다. `brew audit --cask --new`는 `Homebrew/homebrew-cask` 신규 제출 수준의 기준까지 적용하므로 참고 검증으로만 사용한다. 실패 시에는 일반 audit/install 결과와 실패 사유를 함께 기록한다.
+
+현재 `brew audit --cask --new alhangeul-macos`에서 확인된 제출 기준 이슈:
+
+- cask token이 platform을 포함한다.
+- GitHub repository notability가 official cask 제출 기준에 미달한다.
+
+이는 `Homebrew/homebrew-cask` 제출을 막는 요인이지만, maintainer 소유 tap인 `postmelee/homebrew-tap` 공개 자체를 막는 기준으로 취급하지 않는다.
