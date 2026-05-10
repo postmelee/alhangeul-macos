@@ -331,7 +331,7 @@ hdiutil detach build.noindex/release/mount-v0.1.1
 Task #188 Stage 4: v0.1.1 public release 게시
 ```
 
-## Stage 5. 설치본 smoke와 최종 보고
+## Stage 5. 설치본 smoke와 Finder 통합 정정
 
 ### 목표
 
@@ -360,7 +360,7 @@ Task #188 Stage 4: v0.1.1 public release 게시
 
 - `mydocs/working/task_m018_188_stage5.md`
 - `mydocs/release/v0.1.1.md`
-- `mydocs/orders/20260510.md`
+- `mydocs/orders/20260511.md`
 - `mydocs/report/task_m018_188_report.md`
 
 ### 검증
@@ -398,12 +398,71 @@ git status --short --branch
 ### 커밋 메시지
 
 ```text
-Task #188 Stage 5 + 최종 보고서: v0.1.1 public release 완료
+Task #188 Stage 5: 설치본 smoke와 Finder 통합 진단
+```
+
+## Stage 6. Quick Look/Thumbnail crash hotfix와 respin 준비
+
+### 목표
+
+public `v0.1.1` 설치본의 Quick Look/Thumbnail extension 크래시 원인을 수정하고, `v0.1.1` respin 전 signed/notarized 설치본 smoke 기준을 확정한다.
+
+### 작업
+
+- DiagnosticReports와 `qlmanage -p/-t` 재현 결과를 Stage 5 정정으로 남긴다.
+- `HwpPageImageRenderer`의 bitmap context backing memory ownership을 CoreGraphics 소유 방식으로 바꾼다.
+- Quick Look preview와 Thumbnail provider에 OSLog를 추가해 request, PNG/PDF 분기, fallback, failure를 추적할 수 있게 한다.
+- 단일 페이지 PNG reply, 다중 페이지 PDF reply 정책을 유지한다.
+- source-level Debug/Release build와 renderer smoke를 반복한다.
+- 수정본이 아직 설치본에서 실행되지 않았음을 명확히 기록하고, signed/notarized respin smoke를 다음 승인 지점으로 둔다.
+
+### 예상 변경 파일
+
+- `Sources/Shared/HwpPageImageRenderer.swift`
+- `Sources/QLExtension/HwpPreviewProvider.swift`
+- `Sources/ThumbnailExtension/HwpThumbnailProvider.swift`
+- `mydocs/working/task_m018_188_stage5.md`
+- `mydocs/working/task_m018_188_stage6.md`
+- `mydocs/release/v0.1.1.md`
+- `mydocs/orders/20260511.md`
+
+### 검증
+
+```bash
+xcodebuild -project Alhangeul.xcodeproj \
+  -scheme HostApp \
+  -configuration Debug \
+  -derivedDataPath build.noindex/DerivedData \
+  CODE_SIGNING_ALLOWED=NO \
+  build
+xcodebuild -project Alhangeul.xcodeproj \
+  -scheme HostApp \
+  -configuration Release \
+  -derivedDataPath build.noindex/DerivedDataRelease \
+  CODE_SIGNING_ALLOWED=NO \
+  build
+scripts/render-debug-compare.sh /private/tmp/alhangeul-render-debug-after-buffer-fix-all-recheck /Users/melee/Desktop/files/*.hwp
+git diff --check
+git status --short --branch
+```
+
+### 완료 기준
+
+- public `v0.1.1` 실패 원인이 등록 문제가 아니라 extension render crash였음이 문서화된다.
+- `HwpPageImageRenderer`가 Swift 배열 backing store에 의존하지 않는다.
+- extension 로그가 fallback/failure 진단에 충분한 정보를 제공한다.
+- source-level build와 renderer smoke가 통과한다.
+- signed/notarized respin 설치본 smoke가 별도 다음 단계로 남는다.
+
+### 커밋 메시지
+
+```text
+Task #188 Stage 6: Quick Look crash hotfix
 ```
 
 ## 승인 요청 사항
 
-1. 위 5단계 구현계획 승인
+1. 위 6단계 구현계획 승인
 2. Stage 1에서 release preflight와 repository setting 승인 항목 확정부터 진행 승인
 3. Pages source `workflow` 전환과 `github-pages` `v*` tag policy 추가는 Stage 1 보고 후 별도 승인 지점으로 유지하는 방식 승인
 4. 기존 `v0.1.0` 설치본은 Stage 5 Sparkle 업데이트 감지 확인 전까지 삭제하지 않는 방식 승인
