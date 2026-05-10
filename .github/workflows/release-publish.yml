@@ -172,7 +172,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          latest_tag="$(env -u GH_TOKEN -u GITHUB_TOKEN gh release view -R edwardkim/rhwp --json tagName --jq .tagName)"
+          latest_tag="$(gh release view -R edwardkim/rhwp --json tagName --jq .tagName)"
           lock_tag="${{ steps.core.outputs.rhwp_tag }}"
 
           if [ "$lock_tag" != "$latest_tag" ]; then
