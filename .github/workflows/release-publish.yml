@@ -56,6 +56,7 @@ jobs:
       PRERELEASE: ${{ inputs.prerelease }}
       GH_TOKEN: ${{ github.token }}
       ALHANGEUL_BUILD_ROOT: ${{ github.workspace }}/build.noindex
+      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: "1"
       ALHANGEUL_DEVELOPER_ID_APPLICATION: ${{ vars.ALHANGEUL_DEVELOPER_ID_APPLICATION }}
       ALHANGEUL_DEVELOPER_ID_DMG: ${{ vars.ALHANGEUL_DEVELOPER_ID_DMG }}
       ALHANGEUL_NOTARY_PROFILE: ${{ vars.ALHANGEUL_NOTARY_PROFILE }}

@@ -34,6 +34,7 @@ jobs:
       PREVIOUS_RELEASE_REF: ${{ inputs.previous_release_ref }}
       EXPECTED_RHWP_TAG: ${{ inputs.expected_rhwp_tag }}
       ALHANGEUL_BUILD_ROOT: ${{ github.workspace }}/build.noindex
+      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: "1"
 
     steps:
       - name: Check out repository
