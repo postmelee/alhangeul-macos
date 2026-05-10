@@ -89,3 +89,5 @@ HostApp에는 다음 release legal notice 기준을 추가했다.
 - `LICENSE`, `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`를 수정하면 `Sources/HostApp/Resources/Legal/*` 사본도 함께 갱신해야 한다.
 - 원본 upstream `rhwp` 아이콘/로고 자산에 별도 license 조건이 확인되면 `THIRD_PARTY_LICENSES.md`에 우선 반영해야 한다.
 - public release 전에는 signed/notarized DMG 내부에서도 `Contents/Resources/Legal/` 포함 여부를 재확인해야 한다.
+
+위 운영 기준은 후속 보강으로 `mydocs/manual/release_policy_guide.md`, `mydocs/manual/release_distribution_guide.md`, `mydocs/manual/release_packaging_dmg_guide.md`, `mydocs/release/v0.1.1.md`에 반영했다. #188 public release 실행 시 signed/notarized public DMG를 mount한 뒤 app bundle `Contents/Info.plist`의 `NSHumanReadableCopyright`와 `Contents/Resources/Legal/{LICENSE,THIRD_PARTY_LICENSES.md,FONTS.md}` 존재 및 canonical 문서 대비 동일성을 반복 검증한다.

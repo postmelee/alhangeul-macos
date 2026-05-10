@@ -224,6 +224,7 @@ workflow 결과:
 - Retina/multi-representation TIFF background는 Finder 환경에 따라 2x representation이 실제 background 크기로 선택되어 확대 표시될 수 있으므로, 별도 호환성 검증 없이는 public 기준으로 쓰지 않는다.
 - Finder window는 toolbar/statusbar hidden icon view로 열리고, app icon과 Applications symlink가 background arrow 흐름과 맞는 위치에 있어야 한다.
 - rehearsal DMG에서 확인한 layout은 public mode에서도 같은 `create_dmg` path를 쓰므로 기본 회귀 신호로 삼되, signed/notarized public DMG 생성 후 같은 smoke를 다시 반복한다.
+- License와 third-party notice는 DMG root에 별도 파일로 노출하지 않고 `Alhangeul.app/Contents/Resources/Legal/`에 포함한다. Public DMG smoke에서는 mounted app bundle 내부의 `Legal/{LICENSE,THIRD_PARTY_LICENSES.md,FONTS.md}` 존재 여부와 canonical 문서 대비 내용 동일성을 확인한다.
 
 ## Finder 통합 smoke test
 
