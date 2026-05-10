@@ -460,9 +460,65 @@ git status --short --branch
 Task #188 Stage 6: Quick Look crash hotfix
 ```
 
+## Stage 7. Clean visual smoke 설치와 직접 검증 helper
+
+### 목표
+
+Stage 6 hotfix를 작업지시자가 직접 시각 검증할 수 있도록, 기존 public 설치본, 과거 개발 app copy, PlugInKit/LaunchServices 등록, Quick Look cache가 섞이지 않는 로컬 설치 smoke 절차를 만든다.
+
+### 작업
+
+- visual smoke 전용 설치 스크립트를 추가한다.
+- `/Applications/Alhangeul.app`과 `$HOME/Applications/Alhangeul.app` 중복 provider 오염을 방지한다.
+- staging app을 ad-hoc runtime 서명으로 재서명하되 release entitlements를 사용해 `get-task-allow`가 남지 않게 한다.
+- 기존 PlugInKit/LaunchServices 등록을 해제한 뒤 새 app을 등록한다.
+- active provider path가 설치된 app 내부 `.appex`와 일치하는지 검증한다.
+- timestamp가 붙은 fresh sample folder를 만들고, forced UTI `qlmanage -t`로 thumbnail 산출물을 생성한다.
+- 작업지시자용 `VISUAL_CHECK.md`, `open-preview.command`, `check-crashes.command`를 생성한다.
+- local ad-hoc smoke와 public signed/notarized respin 검증을 문서에서 분리한다.
+
+### 예상 변경 파일
+
+- `scripts/smoke-clean-quicklook-install.sh`
+- `mydocs/working/task_m018_188_stage7.md`
+- `mydocs/release/v0.1.1.md`
+- `mydocs/orders/20260511.md`
+
+### 검증
+
+```bash
+bash -n scripts/smoke-clean-quicklook-install.sh
+scripts/smoke-clean-quicklook-install.sh \
+  --skip-package \
+  --app build.noindex/release/Alhangeul.app \
+  --replace-applications-install \
+  --remove-user-application-copy \
+  --open-finder
+pluginkit -mAvvv -i com.postmelee.alhangeul.QLExtension
+pluginkit -mAvvv -i com.postmelee.alhangeul.ThumbnailExtension
+find /private/tmp/alhangeul-visual-smoke/<timestamp>/thumbnails -type f -exec file {} \;
+/private/tmp/alhangeul-visual-smoke/<timestamp>/check-crashes.command
+git diff --check
+git status --short --branch
+```
+
+### 완료 기준
+
+- 새 설치본의 active provider가 `/Applications/Alhangeul.app` 내부 preview/thumbnail appex만 가리킨다.
+- 새 sample folder 기준으로 HWP/HWPX thumbnail PNG가 생성된다.
+- 작업지시자가 Finder와 Quick Look으로 직접 볼 수 있는 안내와 helper가 생성된다.
+- smoke 이후 새 `AlhangeulPreview`/`AlhangeulThumbnail` crash report가 없다.
+- public signed/notarized respin과 Sparkle update extension refresh 검증은 다음 단계의 별도 완료 기준으로 남는다.
+
+### 커밋 메시지
+
+```text
+Task #188 Stage 7: Quick Look visual smoke setup
+```
+
 ## 승인 요청 사항
 
-1. 위 6단계 구현계획 승인
+1. 위 7단계 구현계획 승인
 2. Stage 1에서 release preflight와 repository setting 승인 항목 확정부터 진행 승인
 3. Pages source `workflow` 전환과 `github-pages` `v*` tag policy 추가는 Stage 1 보고 후 별도 승인 지점으로 유지하는 방식 승인
 4. 기존 `v0.1.0` 설치본은 Stage 5 Sparkle 업데이트 감지 확인 전까지 삭제하지 않는 방식 승인
