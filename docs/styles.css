@@ -13,7 +13,6 @@
   --product-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
   --content-width: 980px;
   --wide-width: 1260px;
-  --footer-side-width: 260px;
   --header-height: 52px;
   --intro-min-height: 660px;
   --intro-media-gap: 42px;
@@ -100,6 +99,7 @@ video {
 }
 
 .brand-link,
+.header-link,
 .github-link,
 .header-download-button,
 .footer-brand {
@@ -127,6 +127,7 @@ video {
   flex: 0 0 auto;
 }
 
+.header-link,
 .github-link {
   color: var(--text);
   font-size: 14px;
@@ -135,6 +136,7 @@ video {
   transition: color 180ms ease;
 }
 
+.header-link:hover,
 .github-link:hover {
   color: var(--accent);
 }
@@ -898,12 +900,9 @@ video {
 .site-footer {
   width: 100%;
   display: grid;
-  grid-template-columns:
-    minmax(var(--footer-side-width), 1fr)
-    minmax(0, 760px)
-    minmax(var(--footer-side-width), 1fr);
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
   align-items: center;
-  column-gap: 32px;
+  column-gap: 34px;
   margin-top: 0;
   border-top: 1px solid rgba(29, 29, 31, 0.08);
   padding: 30px max(32px, calc((100% - var(--wide-width)) / 2));
@@ -921,9 +920,9 @@ video {
 
 .site-footer p {
   width: 100%;
-  max-width: 760px;
+  max-width: none;
   margin: 0;
-  justify-self: center;
+  justify-self: start;
   line-height: 1.55;
   word-break: keep-all;
 }
@@ -943,7 +942,7 @@ video {
 
 @media (max-width: 1180px) {
   .site-footer {
-    grid-template-columns: var(--footer-side-width) minmax(0, 1fr) var(--footer-side-width);
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
     align-items: center;
     column-gap: 24px;
     padding-inline: 28px;
@@ -1123,6 +1122,7 @@ video {
     gap: 12px;
   }
 
+  .header-link,
   .github-link {
     font-size: 13px;
   }
