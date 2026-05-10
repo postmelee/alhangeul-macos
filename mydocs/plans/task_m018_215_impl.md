@@ -12,13 +12,14 @@
 - 작업 위치: `/Users/melee/Documents/projects/rhwp-mac`
 - 기준 브랜치: `devel-webview`
 - 선행 상태: #147에서 `rhwp`, bundled `rhwp-studio`, WOFF2 font provenance 고지 구조를 만들었고, #177에서 Sparkle 2.9.1을 HostApp에 통합했다.
-- 목표: 앱 저장소 자체 저작권자, third-party/upstream 저작권 경계, Sparkle 고지, app bundle legal notice resource, 기여 문구를 release 기준으로 정합화한다.
+- 목표: 앱 저장소 자체 저작권자, third-party/upstream 저작권 경계, Sparkle 고지, 앱 아이콘/로고 provenance, app bundle legal notice resource, 기여 문구를 release 기준으로 정합화한다.
 
 ## 현재 전제와 제약
 
 - 작업지시자가 앱 저장소 주 저작권자는 Taegyu Lee라고 확인했다.
 - 대화 중 `LICENSE`의 저작권자 1줄은 이미 `Taegyu Lee`로 변경되어 있고, 현재 미커밋 상태다. 이 변경은 Stage 2 범위로 검증하고 커밋한다.
 - bundled `rhwp-studio` 내부의 `© 2026 rhwp: Edward Kim` 표기는 upstream `rhwp` 고지이므로 변경하지 않는다.
+- 앱 아이콘과 로고는 upstream `rhwp` 아이콘/로고를 기반으로 Figma에서 편집·변형한 Alhangeul 자산으로 고지한다.
 - `Alhangeul.xcodeproj`는 생성물이고, 원본은 `project.yml`이다.
 - 법률 자문 수준의 해석은 하지 않는다. 이번 작업은 저장소와 release artifact의 고지 구조를 명확히 하는 범위다.
 - public DMG 생성, signing, notarization, Homebrew 배포 실행은 하지 않는다.
@@ -27,6 +28,7 @@
 
 - 루트 `LICENSE`는 Alhangeul macOS 저장소 자체 license와 주 저작권자를 표시한다.
 - `THIRD_PARTY_LICENSES.md`는 upstream/third-party attribution과 provenance의 중심 문서로 유지한다.
+- 앱 아이콘/로고 provenance는 `THIRD_PARTY_LICENSES.md`에 함께 둔다. Figma는 편집 도구로만 기록하며, 별도 Figma community asset을 사용했다는 근거가 없으면 별도 third-party license 항목으로 만들지 않는다.
 - README는 사용자/기여자가 찾아갈 수 있는 짧은 진입점으로 두고, 세부 표를 중복하지 않는다.
 - `CONTRIBUTING.md`는 외부 기여물의 license 적용과 저작권 보유 원칙을 짧게 명시한다.
 - app bundle legal notice는 DMG root에 추가 파일을 노출하지 않고 `Contents/Resources/Legal/` 아래에서 확인 가능하게 한다.
@@ -43,6 +45,7 @@
 - 현재 변경 상태와 이미 반영된 `LICENSE` diff를 기록한다.
 - `LICENSE`, README, `THIRD_PARTY_LICENSES.md`, `FONTS.md`, `CONTRIBUTING.md`, `Info.plist`, `project.yml`의 현재 license/copyright 문구를 조사한다.
 - `project.yml`의 HostApp resource 포함 방식과 `Sources/HostApp/Resources` 구조를 확인한다.
+- 앱 아이콘/로고 자산 위치를 확인하고, 기존 task #77의 자산 교체 기록을 provenance 근거로 기록한다.
 - bundled `rhwp-studio` 내부 upstream copyright 문구가 어디에 남아 있는지 확인하고 변경 제외 대상으로 기록한다.
 - Legal resource 후보 구조를 확정한다.
   - 후보: `Sources/HostApp/Resources/Legal/LICENSE`
@@ -60,14 +63,18 @@
 git status --short --branch
 git diff -- LICENSE
 rg -n "Edward Kim|Taegyu Lee|Copyright|MIT License|THIRD_PARTY|Sparkle|NSHumanReadableCopyright|Legal|기여하신" \
-  LICENSE README.md CONTRIBUTING.md THIRD_PARTY_LICENSES.md Sources/HostApp/Info.plist project.yml Sources/HostApp/Resources/rhwp-studio
+  LICENSE README.md CONTRIBUTING.md THIRD_PARTY_LICENSES.md Sources/HostApp/Info.plist project.yml
+rg -n "아이콘|로고|Figma|AppIcon|logo-256|rhwp logo|Alhangeul logo" \
+  README.md THIRD_PARTY_LICENSES.md assets Sources/HostApp/Assets.xcassets mydocs/working/task_m010_77_stage2.md
 find Sources/HostApp/Resources -maxdepth 3 -type f | sort
+find Sources/HostApp/Assets.xcassets/AppIcon.appiconset -maxdepth 1 -type f | sort
 git diff --check
 ```
 
 ### 완료 기준
 
 - Stage 1 보고서에 현재 책임 경계와 변경 제외 항목이 기록된다.
+- 앱 아이콘/로고 provenance 고지 방식과 참조 자산 위치가 기록된다.
 - Legal resource 파일명과 배치 위치가 확정된다.
 - 아직 소스/문서 본문 변경은 Stage 1 보고서 외에는 하지 않는다.
 
@@ -91,10 +98,12 @@ Task #215 Stage 1: legal notice 현황과 배치 기준 확정
   - 앱 저장소 주 저작권자는 Taegyu Lee다.
   - `rhwp`/`rhwp-studio` upstream 저작권과 license는 third-party 고지로 분리한다.
   - Sparkle 2.9.1, MIT license, package provenance를 추가한다.
+  - 앱 아이콘/로고가 upstream `rhwp` 자산 기반의 Figma 편집·변형 자산임을 추가한다.
 - README License 섹션을 보강한다.
   - 앱 저장소 license와 주 저작권자
   - third-party notices 위치
   - upstream `rhwp`/Sparkle/font 고지 위치
+- README 상단 로고 alt text가 upstream `rhwp` 로고처럼 읽히지 않도록 Alhangeul 기준으로 정정한다.
 - `CONTRIBUTING.md` License 섹션을 보강한다.
   - 기여물은 본 저장소 MIT License로 제공된다.
   - 별도 계약이 없는 한 기여자는 자신의 기여물 저작권을 보유한다.
@@ -112,7 +121,7 @@ Task #215 Stage 1: legal notice 현황과 배치 기준 확정
 ### 검증
 
 ```bash
-rg -n "Taegyu Lee|Edward Kim|Sparkle|MIT License|THIRD_PARTY_LICENSES|FONTS.md|기여물|저작권" \
+rg -n "Taegyu Lee|Edward Kim|Sparkle|MIT License|THIRD_PARTY_LICENSES|FONTS.md|기여물|저작권|아이콘|로고|Figma|Alhangeul logo" \
   LICENSE README.md CONTRIBUTING.md THIRD_PARTY_LICENSES.md
 git diff --check -- LICENSE README.md CONTRIBUTING.md THIRD_PARTY_LICENSES.md mydocs/working/task_m018_215_stage2.md
 ```
@@ -121,6 +130,7 @@ git diff --check -- LICENSE README.md CONTRIBUTING.md THIRD_PARTY_LICENSES.md my
 
 - root `LICENSE`와 README의 앱 저장소 주 저작권자가 Taegyu Lee로 일치한다.
 - third-party notice가 `rhwp`, `rhwp-studio`, Sparkle, bundled fonts를 분리해 설명한다.
+- 앱 아이콘/로고 provenance가 upstream source와 Alhangeul용 변형 사실을 구분한다.
 - 기여 문구가 license 적용과 기여자 저작권 보유 원칙을 명확히 한다.
 - upstream `rhwp-studio` build output 내용은 변경하지 않는다.
 
@@ -222,7 +232,7 @@ xcodebuild -project Alhangeul.xcodeproj \
   CODE_SIGNING_ALLOWED=NO \
   build
 find build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/Resources/Legal -maxdepth 1 -type f | sort
-rg -n "Taegyu Lee|Edward Kim|Sparkle|THIRD_PARTY_LICENSES|NSHumanReadableCopyright|Legal|기여물|저작권" \
+rg -n "Taegyu Lee|Edward Kim|Sparkle|THIRD_PARTY_LICENSES|NSHumanReadableCopyright|Legal|기여물|저작권|아이콘|로고|Figma|AppIcon|logo-256" \
   LICENSE README.md CONTRIBUTING.md THIRD_PARTY_LICENSES.md Sources/HostApp/Info.plist project.yml Sources/HostApp/Resources/Legal mydocs
 git diff --check
 git status --short
