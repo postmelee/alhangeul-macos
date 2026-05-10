@@ -84,6 +84,8 @@ bash scripts/ci/write-sparkle-appcast.sh --help
 macOS validation 재현:
 
 ```bash
+rustup target add aarch64-apple-darwin x86_64-apple-darwin
+./scripts/build-rust-macos.sh
 ./scripts/check-no-appkit.sh
 xcodegen generate
 xcodebuild -project Alhangeul.xcodeproj \
@@ -94,10 +96,11 @@ xcodebuild -project Alhangeul.xcodeproj \
   build
 ```
 
-Rust/core 변경이 있으면 추가로 실행한다.
+`Frameworks/Rhwp.xcframework`는 git에 commit하지 않는 generated artifact이므로, GitHub Actions fresh runner의 macOS validation은 HostApp build 전에 항상 Rust bridge artifact를 재생성한다.
+
+Rust/core 변경이 있으면 `./scripts/build-rust-macos.sh` 대신 다음 lock 검증을 실행한다.
 
 ```bash
-rustup target add aarch64-apple-darwin x86_64-apple-darwin
 ./scripts/build-rust-macos.sh --verify-lock
 ```
 

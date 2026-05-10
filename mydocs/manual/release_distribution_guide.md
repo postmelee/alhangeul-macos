@@ -92,6 +92,9 @@
 - [ ] 개발용 zip 산출물 생성
 - [ ] public DMG 산출물 생성
 - [ ] public DMG 안의 app/extension 실행 파일 `arm64 + x86_64` universal 검증
+- [ ] public DMG 안의 app bundle `Contents/Info.plist`에 `NSHumanReadableCopyright`가 포함되어 있고 현재 release 저작권자 문구와 일치하는지 확인
+- [ ] public DMG 안의 app bundle `Contents/Resources/Legal/{LICENSE,THIRD_PARTY_LICENSES.md,FONTS.md}` 존재 확인
+- [ ] public DMG 안의 app bundle `Contents/Resources/Legal/*` 파일이 release candidate commit의 canonical `LICENSE`, `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`와 같은지 확인
 - [ ] Intel Mac 실기기 smoke 실행 여부와 결과 또는 미실행 사유 기록
 - [ ] public DMG SHA256 기록
 - [ ] public DMG layout smoke 완료

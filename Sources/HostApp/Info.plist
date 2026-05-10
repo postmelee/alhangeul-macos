@@ -24,6 +24,8 @@
 	<string>12.0</string>
 	<key>LSHasLocalizedDisplayName</key>
 	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2025-2026 Taegyu Lee</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>SUAutomaticallyUpdate</key>

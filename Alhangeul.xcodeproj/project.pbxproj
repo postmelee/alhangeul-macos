@@ -70,6 +70,7 @@
 		ECED3AEFEF7467CA44F2A001 /* HwpDocumentInputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 317B028E5037D11892BC394D /* HwpDocumentInputValidator.swift */; };
 		EFEF2DF2AC26BB7B5B53A1ED /* rhwp-studio in Resources */ = {isa = PBXBuildFile; fileRef = 374B3DC439891F2F5D4643AC /* rhwp-studio */; };
 		F1111861DDCA7703FC7F496C /* RhwpStudioDocumentSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB3292BAE195A15E4FDE311 /* RhwpStudioDocumentSchemeHandler.swift */; };
+		F24FA4E12F54E4B550A4788E /* Legal in Resources */ = {isa = PBXBuildFile; fileRef = C1A69E945E4D859F3B581701 /* Legal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -148,6 +149,7 @@
 		A1BA85C7A51A97F8EDF455E7 /* HostApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HostApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8E9CC5E34BCCA387A0B385E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		BED96A22509C493BF3039CEC /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		C1A69E945E4D859F3B581701 /* Legal */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Legal; path = Sources/HostApp/Resources/Legal; sourceTree = SOURCE_ROOT; };
 		C37388FB72FB052CAF01DEB2 /* RecentDocumentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentDocumentStore.swift; sourceTree = "<group>"; };
 		D0ED3A363318BCA70DEA5C4C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D8E524F7A95D1616AB85E3F2 /* ExtensionStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionStatusModel.swift; sourceTree = "<group>"; };
@@ -304,6 +306,7 @@
 		B6AD0FD0EAF0394F4938875E = {
 			isa = PBXGroup;
 			children = (
+				C1A69E945E4D859F3B581701 /* Legal */,
 				374B3DC439891F2F5D4643AC /* rhwp-studio */,
 				993BA6B898AA0368A8E651E1 /* HostApp */,
 				48A8CE361499D85C6C0EA286 /* QLExtension */,
@@ -484,6 +487,7 @@
 			files = (
 				5D0E58974DAD8BEA1E040E5A /* Assets.xcassets in Resources */,
 				0C2D44752CE924B4DE903484 /* InfoPlist.strings in Resources */,
+				F24FA4E12F54E4B550A4788E /* Legal in Resources */,
 				EFEF2DF2AC26BB7B5B53A1ED /* rhwp-studio in Resources */,
 				5E071C1C500CDB5723E42680 /* sample.hwpx in Resources */,
 			);

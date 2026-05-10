@@ -20,6 +20,9 @@ targets:
       - path: Sources/HostApp
         excludes:
           - Resources/rhwp-studio
+          - Resources/Legal
+      - path: Sources/HostApp/Resources/Legal
+        type: folder
       - path: Sources/HostApp/Resources/rhwp-studio
         type: folder
       - path: Sources/Shared

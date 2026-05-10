@@ -100,7 +100,9 @@ provenance 진실 원천:
 | Rust bridge artifact hash/size | `rhwp-core.lock` | release 전 `./scripts/build-rust-macos.sh --verify-lock`으로 검증한다. |
 | FFI ABI surface | `rhwp-ffi-symbols.txt` | 최종 보고서와 PR에서 변경 여부를 기록한다. |
 | bundled `rhwp-studio` asset | `Sources/HostApp/Resources/rhwp-studio/manifest.json` | release note에 manifest 위치와 tag/commit을 표시하고 `scripts/verify-rhwp-studio-assets.sh`로 검증한다. |
-| Third Party notices | `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md` | release note에서 문서 위치를 안내한다. |
+| Third Party notices | `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`, `Sources/HostApp/Resources/Legal/*` | release note에서 canonical 문서 위치를 안내하고, public DMG 안의 app bundle `Contents/Resources/Legal/*` 사본 포함 여부와 내용 동일성을 검증한다. |
+
+`LICENSE`, `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`를 수정하면 `Sources/HostApp/Resources/Legal/*` 사본을 같은 변경 범위에서 갱신한다. Public release 전에는 signed/notarized DMG를 mount한 뒤 app bundle의 `Contents/Resources/Legal/{LICENSE,THIRD_PARTY_LICENSES.md,FONTS.md}`와 release candidate commit의 canonical 문서가 같은지 확인한다.
 
 ## 렌더링 경로와 알려진 한계 공개 기준
 
