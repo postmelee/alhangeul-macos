@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo-256@2x.png" alt="rhwp logo" width="128" />
+  <img src="assets/logo-256@2x.png" alt="Alhangeul logo" width="128" />
 </p>
 
 # <div align="center">Alhangeul</div>
@@ -429,6 +429,6 @@ graph TB
 
 ## License
 
-[MIT License](LICENSE)
+Alhangeul macOS 저장소 자체 코드는 [MIT License](LICENSE)로 배포되며, 주 저작권자는 Taegyu Lee입니다.
 
-Third Party notices for bundled `rhwp`, `rhwp-studio`, and WOFF2 fonts are in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). Provenance details are recorded in [rhwp-core.lock](rhwp-core.lock), [rhwp-studio manifest](Sources/HostApp/Resources/rhwp-studio/manifest.json), and [FONTS.md](Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md).
+Bundled `rhwp`, `rhwp-studio`, Sparkle, WOFF2 fonts, 앱 아이콘/로고 원본 provenance는 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)를 확인하세요. Core/version provenance는 [rhwp-core.lock](rhwp-core.lock)과 [rhwp-studio manifest](Sources/HostApp/Resources/rhwp-studio/manifest.json)에, font 목록과 license는 [FONTS.md](Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md)에 기록합니다.
