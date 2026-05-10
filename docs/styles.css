@@ -900,7 +900,7 @@ video {
 .site-footer {
   width: 100%;
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  grid-template-columns: minmax(160px, 1fr) minmax(0, max-content) minmax(160px, 1fr);
   align-items: center;
   column-gap: 34px;
   margin-top: 0;
@@ -919,10 +919,11 @@ video {
 }
 
 .site-footer p {
-  width: 100%;
+  width: max-content;
   max-width: none;
   margin: 0;
-  justify-self: start;
+  justify-self: center;
+  text-align: center;
   line-height: 1.55;
   word-break: keep-all;
 }
@@ -951,6 +952,12 @@ video {
   .site-footer nav {
     grid-column: auto;
     justify-self: end;
+  }
+
+  .site-footer p {
+    width: 100%;
+    justify-self: start;
+    text-align: left;
   }
 }
 
