@@ -790,12 +790,14 @@ video {
 
 .updates-content {
   width: min(880px, calc(100% - 40px));
+  min-width: 0;
   margin: 0 auto;
   display: grid;
   gap: 18px;
 }
 
 .updates-section {
+  min-width: 0;
   padding: 28px 0;
   border-top: 1px solid var(--border);
 }
@@ -860,6 +862,7 @@ video {
 }
 
 .code-panel {
+  display: block;
   width: 100%;
   max-width: 100%;
   min-width: 0;
