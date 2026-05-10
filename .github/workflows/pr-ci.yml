@@ -104,6 +104,9 @@ jobs:
           if ! command -v xcodegen >/dev/null 2>&1; then
             brew install xcodegen
           fi
+          if ! command -v cbindgen >/dev/null 2>&1; then
+            brew install cbindgen
+          fi
 
       - name: Verify Rust bridge lock
         if: ${{ needs.classify-changes.outputs.run_rust_verify == 'true' }}

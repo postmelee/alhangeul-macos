@@ -157,6 +157,10 @@ while IFS= read -r path; do
   classify_path "$path"
 done <<< "$changed_files"
 
+if [ "$run_macos_build" = true ]; then
+  enable_rust_verify "macOS build requires generated Frameworks/Rhwp.xcframework in fresh CI worktree"
+fi
+
 write_output() {
   local name="$1"
   local value="$2"
