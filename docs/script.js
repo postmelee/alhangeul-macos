@@ -64,7 +64,18 @@ const setupRevealAnimations = () => {
   );
 
   revealGroups.forEach((group) => revealObserver.observe(group));
-  window.setTimeout(revealAll, 900);
+  window.setTimeout(() => {
+    revealGroups.forEach((group) => {
+      if (group.classList.contains("is-revealed")) return;
+
+      const rect = group.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      if (!isVisible) return;
+
+      group.classList.add("is-revealed");
+      revealObserver.unobserve(group);
+    });
+  }, 900);
 };
 
 const restartVideo = (video) => {
