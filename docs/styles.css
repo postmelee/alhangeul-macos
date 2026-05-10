@@ -665,19 +665,18 @@ video {
 }
 
 .faq-list summary::after {
-  content: "+";
-  display: grid;
+  content: "";
   width: 22px;
   height: 22px;
   flex: 0 0 22px;
-  place-items: center;
   color: var(--text);
-  font-size: 20px;
-  font-weight: 500;
+  background:
+    linear-gradient(currentColor, currentColor) center / 12px 2px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 2px 12px no-repeat;
 }
 
 .faq-list details[open] summary::after {
-  content: "-";
+  background: linear-gradient(currentColor, currentColor) center / 12px 2px no-repeat;
 }
 
 .faq-list p {
