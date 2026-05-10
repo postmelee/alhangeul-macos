@@ -37,12 +37,14 @@
 html {
   background: var(--bg);
   color: var(--text);
+  overflow-x: hidden;
   scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
   font-size: 17px;
@@ -858,14 +860,28 @@ video {
 }
 
 .code-panel {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   margin-top: 14px;
   overflow-x: auto;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #f7f8fa;
   padding: 14px 16px;
   color: var(--text);
   font: 600 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.code-panel code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  white-space: inherit;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .release-note-list {
