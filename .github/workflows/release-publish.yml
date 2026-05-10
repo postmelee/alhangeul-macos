@@ -32,7 +32,7 @@ on:
         default: false
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-publish-${{ inputs.version }}
@@ -44,6 +44,8 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 180
     environment: release
+    permissions:
+      contents: write
 
     env:
       VERSION: ${{ inputs.version }}
@@ -64,7 +66,6 @@ jobs:
       NOTARY_APP_SPECIFIC_PASSWORD: ${{ secrets.NOTARY_APP_SPECIFIC_PASSWORD }}
       RELEASE_KEYCHAIN_PASSWORD: ${{ secrets.RELEASE_KEYCHAIN_PASSWORD }}
       SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
-      ALHANGEUL_PAGES_BRANCH: ${{ vars.ALHANGEUL_PAGES_BRANCH || 'main' }}
 
     steps:
       - name: Check out release tag
@@ -430,40 +431,40 @@ jobs:
             echo "- minimum system: \`$minimum_system\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Publish Sparkle appcast to Pages branch
+      - name: Prepare Pages artifact
+        id: pages_artifact
         if: ${{ !inputs.draft && !inputs.prerelease }}
         shell: bash
         run: |
           set -euo pipefail
-          pages_branch="${ALHANGEUL_PAGES_BRANCH:-main}"
           appcast_path="${{ steps.appcast.outputs.appcast_path }}"
-          pages_worktree="$RUNNER_TEMP/alhangeul-pages"
+          pages_artifact_dir="$ALHANGEUL_BUILD_ROOT/release/pages-artifact"
 
-          if [ -z "$pages_branch" ]; then
-            echo "ERROR: ALHANGEUL_PAGES_BRANCH must not be empty" >&2
-            exit 1
-          fi
+          scripts/ci/prepare-pages-artifact.sh \
+            --docs-dir docs \
+            --appcast "$appcast_path" \
+            --output-dir "$pages_artifact_dir"
 
-          git clone \
-            --branch "$pages_branch" \
-            --single-branch \
-            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
-            "$pages_worktree"
+          xmllint --noout "$pages_artifact_dir/appcast.xml"
+          echo "pages_artifact_dir=$pages_artifact_dir" >> "$GITHUB_OUTPUT"
 
-          cp "$appcast_path" "$pages_worktree/docs/appcast.xml"
+          {
+            echo
+            echo "## Pages artifact"
+            echo
+            echo "- artifact source: \`docs/\` + generated \`appcast.xml\`"
+            echo "- artifact directory: \`$pages_artifact_dir\`"
+            echo "- publish model: \`actions/deploy-pages\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-          if git -C "$pages_worktree" diff --quiet -- docs/appcast.xml; then
-            echo "Sparkle appcast is already up to date on $pages_branch"
-            exit 0
-          fi
+      - name: Upload Pages artifact
+        if: ${{ !inputs.draft && !inputs.prerelease }}
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ${{ steps.pages_artifact.outputs.pages_artifact_dir }}
+          retention-days: 14
 
-          git -C "$pages_worktree" config user.name "github-actions[bot]"
-          git -C "$pages_worktree" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git -C "$pages_worktree" add docs/appcast.xml
-          git -C "$pages_worktree" commit -m "Task #177: Update Sparkle appcast for v$VERSION"
-          git -C "$pages_worktree" push origin "HEAD:$pages_branch"
-
-      - name: Record skipped stable appcast update
+      - name: Record skipped stable appcast and Pages deployment
         if: ${{ inputs.draft || inputs.prerelease }}
         shell: bash
         run: |
@@ -472,7 +473,8 @@ jobs:
             echo "## Sparkle appcast"
             echo
             echo "Stable appcast update was skipped because draft=${{ inputs.draft }} and prerelease=${{ inputs.prerelease }}."
-            echo "Run the workflow with draft=false and prerelease=false for the official stable feed."
+            echo "Pages deployment was skipped for the same reason."
+            echo "Run the workflow with draft=false and prerelease=false for the official stable feed and Pages deployment."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Sparkle appcast artifact copy
@@ -501,3 +503,33 @@ jobs:
         run: |
           set -euo pipefail
           security delete-keychain "$RUNNER_TEMP/alhangeul-release.keychain-db" || true
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: publish-dmg
+    if: ${{ !inputs.draft && !inputs.prerelease }}
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+      - name: Record Pages deployment summary
+        shell: bash
+        run: |
+          {
+            echo
+            echo "## GitHub Pages deployment"
+            echo
+            echo "- URL: ${{ steps.deployment.outputs.page_url }}"
+            echo "- appcast: https://postmelee.github.io/alhangeul-macos/appcast.xml"
+            echo "- release notes: https://postmelee.github.io/alhangeul-macos/updates/v${{ inputs.version }}.html"
+          } >> "$GITHUB_STEP_SUMMARY"

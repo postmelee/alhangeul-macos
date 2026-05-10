@@ -37,11 +37,13 @@
 - `scripts/ci/verify-universal-macos-app.sh`: app bundle 내부 앱/extension 실행 파일의 `arm64 + x86_64` slice 검증
 - `scripts/ci/write-release-delta-checklist.sh`: 직전 public release 대비 영향 영역 checklist 초안 생성
 - `scripts/ci/write-sparkle-appcast.sh`: stable Sparkle appcast 생성
+- `scripts/ci/prepare-pages-artifact.sh`: `docs/` 정적 파일과 generated appcast를 Pages artifact로 조립
 - `scripts/ci/classify-pr-changes.sh`: PR CI 변경 범위 flag 생성
 - `.github/workflows/pr-ci.yml`: PR 생성/갱신 시 기본 gate와 조건부 macOS/release helper 검증
 - `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum과 release delta checklist artifact 생성
-- `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, release delta checklist artifact 생성
-- `docs/appcast.xml`, `docs/updates/`: Sparkle feed와 사용자용 업데이트 페이지
+- `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, Pages deployment, release delta checklist artifact 생성
+- `docs/updates/`, `docs/index.html`: 사용자용 업데이트 페이지와 최신 다운로드 진입점
+- public `https://postmelee.github.io/alhangeul-macos/appcast.xml`: Sparkle feed URL. release workflow가 generated appcast를 Pages artifact에 포함해 배포한다.
 - `Casks/alhangeul-macos.rb`: Homebrew Cask source 초안
 - `rhwp-core.lock`, `Sources/HostApp/Resources/rhwp-studio/manifest.json`: core/viewer asset provenance
 
@@ -57,7 +59,7 @@
 8. public DMG SHA256을 기록하고 app/extension universal slice, DMG layout, Finder Quick Look, Finder thumbnail smoke를 반복한다.
 9. [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 release note와 delta checklist를 실제 SHA256/provenance로 보정한다.
 10. GitHub Release를 공식 release 기준으로 게시하고 `Release Publish DMG` workflow 결과를 확인한다.
-11. Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 확인한다.
+11. Pages deployment URL, Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 확인한다.
 12. Homebrew 배포를 진행할 경우 #209에서 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 `postmelee/homebrew-tap`에 Cask를 반영하고 tap context 검증을 수행한다.
 13. [`mydocs/release/v<version>.md`](../release/)와 최종 release report에 실제 결과와 잔여 위험을 기록한다.
 
@@ -103,8 +105,11 @@
 - [ ] Pages 릴리즈 노트와 업데이트 index의 version/DMG URL 확인
 - [ ] README 최신 공개 릴리즈 요약 갱신 여부 결정
 - [ ] `SPARKLE_ED_PRIVATE_KEY` secret 등록 확인
+- [ ] repository Pages source가 `workflow`인지 확인
+- [ ] `github-pages` environment가 release tag ref `v*`를 허용하는지 확인
 - [ ] `Release Publish DMG` workflow를 공식 release 기준 `draft=false`, `prerelease=false`로 실행
-- [ ] `docs/appcast.xml`이 Pages branch에 갱신되었는지 확인
+- [ ] `deploy-pages` job이 성공하고 `page_url`이 `https://postmelee.github.io/alhangeul-macos/`를 가리키는지 확인
+- [ ] public `https://postmelee.github.io/alhangeul-macos/appcast.xml`이 새 stable item과 Sparkle EdDSA signature를 제공하는지 확인
 - [ ] Pages 다운로드 버튼과 appcast URL이 public DMG asset을 가리키는지 확인
 - [ ] Pages, Sparkle appcast, Homebrew Cask가 아키텍처별 DMG 분기 없이 같은 public universal DMG URL을 기준으로 안내되는지 확인
 - [ ] Homebrew 배포 시 `scripts/update-cask-sha256.sh`로 Cask version/sha256 갱신
