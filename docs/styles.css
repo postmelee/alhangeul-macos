@@ -13,6 +13,7 @@
   --product-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
   --content-width: 980px;
   --wide-width: 1260px;
+  --footer-side-width: 260px;
   --header-height: 52px;
   --intro-min-height: 660px;
   --intro-media-gap: 42px;
@@ -897,7 +898,10 @@ video {
 .site-footer {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(max-content, 1fr) minmax(0, 760px) minmax(max-content, 1fr);
+  grid-template-columns:
+    minmax(var(--footer-side-width), 1fr)
+    minmax(0, 760px)
+    minmax(var(--footer-side-width), 1fr);
   align-items: center;
   column-gap: 32px;
   margin-top: 0;
@@ -939,7 +943,7 @@ video {
 
 @media (max-width: 1180px) {
   .site-footer {
-    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    grid-template-columns: var(--footer-side-width) minmax(0, 1fr) var(--footer-side-width);
     align-items: center;
     column-gap: 24px;
     padding-inline: 28px;
