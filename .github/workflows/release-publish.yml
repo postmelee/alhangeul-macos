@@ -6,7 +6,7 @@ on:
       version:
         description: App version to publish. The workflow must be run from tag v<version>.
         required: true
-        default: "0.1.0"
+        default: "0.1.1"
       previous_release_ref:
         description: Git ref for the previous public release used to draft the release delta checklist.
         required: true

@@ -36,9 +36,9 @@ Public release environment:
 Examples:
   ALHANGEUL_DEVELOPER_ID_APPLICATION="Developer ID Application: ..." \\
   ALHANGEUL_NOTARY_PROFILE="alhangeul-notary" \\
-  $0 0.1.0
+  $0 0.1.1
 
-  $0 --skip-notarize 0.1.0
+  $0 --skip-notarize 0.1.1
 EOF
 }
 
