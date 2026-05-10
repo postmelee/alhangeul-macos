@@ -108,13 +108,16 @@ jobs:
             brew install cbindgen
           fi
 
-      - name: Verify Rust bridge lock
-        if: ${{ needs.classify-changes.outputs.run_rust_verify == 'true' }}
+      - name: Prepare Rust bridge artifacts
         shell: bash
         run: |
           set -euo pipefail
           rustup target add aarch64-apple-darwin x86_64-apple-darwin
-          ./scripts/build-rust-macos.sh --verify-lock
+          if [ "${{ needs.classify-changes.outputs.run_rust_verify }}" = "true" ]; then
+            ./scripts/build-rust-macos.sh --verify-lock
+          else
+            ./scripts/build-rust-macos.sh
+          fi
 
       - name: Check shared Swift boundary
         shell: bash
