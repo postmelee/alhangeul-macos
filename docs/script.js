@@ -5,6 +5,7 @@ const revealGroups = Array.from(document.querySelectorAll("[data-reveal-group]")
 const prefersReducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 let activeFeatureIndex = 0;
+let hasStartedFeaturePlayback = false;
 
 faqItems.forEach((item) => {
   item.addEventListener("toggle", () => {
@@ -39,8 +40,18 @@ const setupRevealAnimations = () => {
 
   if (revealGroups.length === 0) return;
 
+  const revealGroup = (group, observer) => {
+    if (group.classList.contains("is-revealed")) return;
+
+    group.classList.add("is-revealed");
+    startFeaturePlaybackAfterReveal(group);
+    if (observer) {
+      observer.unobserve(group);
+    }
+  };
+
   const revealAll = () => {
-    revealGroups.forEach((group) => group.classList.add("is-revealed"));
+    revealGroups.forEach((group) => revealGroup(group));
   };
 
   if (prefersReducedMotionQuery.matches || !("IntersectionObserver" in window)) {
@@ -53,8 +64,7 @@ const setupRevealAnimations = () => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
 
-        entry.target.classList.add("is-revealed");
-        observer.unobserve(entry.target);
+        revealGroup(entry.target, observer);
       });
     },
     {
@@ -64,7 +74,70 @@ const setupRevealAnimations = () => {
   );
 
   revealGroups.forEach((group) => revealObserver.observe(group));
-  window.setTimeout(revealAll, 900);
+  window.setTimeout(() => {
+    revealGroups.forEach((group) => {
+      if (group.classList.contains("is-revealed")) return;
+
+      const rect = group.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      if (!isVisible) return;
+
+      revealGroup(group, revealObserver);
+    });
+  }, 900);
+};
+
+const timeValueToMs = (value) => {
+  const normalizedValue = value.trim();
+
+  if (normalizedValue.endsWith("ms")) {
+    return Number.parseFloat(normalizedValue) || 0;
+  }
+
+  if (normalizedValue.endsWith("s")) {
+    return (Number.parseFloat(normalizedValue) || 0) * 1000;
+  }
+
+  return Number.parseFloat(normalizedValue) || 0;
+};
+
+const getLongestTransitionMs = (element) => {
+  const style = window.getComputedStyle(element);
+  const durations = style.transitionDuration.split(",").map(timeValueToMs);
+  const delays = style.transitionDelay.split(",").map(timeValueToMs);
+  const transitionCount = Math.max(durations.length, delays.length);
+
+  return Math.max(
+    ...Array.from({ length: transitionCount }, (_, index) => {
+      const duration = durations[index % durations.length] || 0;
+      const delay = delays[index % delays.length] || 0;
+      return duration + delay;
+    }),
+  );
+};
+
+const startActiveFeaturePlayback = () => {
+  if (hasStartedFeaturePlayback) return;
+
+  hasStartedFeaturePlayback = true;
+  activateFeature(activeFeatureIndex, { replay: true, play: true });
+};
+
+const startFeaturePlaybackAfterReveal = (group) => {
+  if (!group.matches(".features-sticky") || hasStartedFeaturePlayback) return;
+
+  const showcase = group.querySelector(".feature-showcase[data-reveal-item]");
+
+  if (!showcase || prefersReducedMotionQuery.matches) {
+    startActiveFeaturePlayback();
+    return;
+  }
+
+  const fallbackDelay = getLongestTransitionMs(showcase) + 80;
+  const startPlayback = () => startActiveFeaturePlayback();
+
+  showcase.addEventListener("transitionend", startPlayback, { once: true });
+  window.setTimeout(startPlayback, fallbackDelay);
 };
 
 const restartVideo = (video) => {
@@ -84,7 +157,7 @@ const playVideo = (video) => {
 };
 
 const activateFeature = (nextIndex, options = {}) => {
-  const { replay = true } = options;
+  const { replay = true, play = true } = options;
   const nextVideo = featureVideos[nextIndex];
 
   if (!nextVideo) return;
@@ -119,7 +192,7 @@ const activateFeature = (nextIndex, options = {}) => {
       restartVideo(video);
     }
 
-    if (prefersReducedMotionQuery.matches) {
+    if (!play || prefersReducedMotionQuery.matches) {
       video.pause();
     } else {
       playVideo(video);
@@ -138,12 +211,12 @@ const setupFeatureShowcase = () => {
     step.addEventListener("click", replayFeature);
   });
 
-  activateFeature(0, { replay: false });
+  activateFeature(0, { replay: false, play: false });
 
   prefersReducedMotionQuery.addEventListener("change", () => {
-    activateFeature(activeFeatureIndex, { replay: false });
+    activateFeature(activeFeatureIndex, { replay: false, play: hasStartedFeaturePlayback });
   });
 };
 
-setupRevealAnimations();
 setupFeatureShowcase();
+setupRevealAnimations();

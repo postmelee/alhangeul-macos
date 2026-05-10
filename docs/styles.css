@@ -37,12 +37,14 @@
 html {
   background: var(--bg);
   color: var(--text);
+  overflow-x: hidden;
   scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
   font-size: 17px;
@@ -99,6 +101,7 @@ video {
 }
 
 .brand-link,
+.header-link,
 .github-link,
 .header-download-button,
 .footer-brand {
@@ -126,6 +129,7 @@ video {
   flex: 0 0 auto;
 }
 
+.header-link,
 .github-link {
   color: var(--text);
   font-size: 14px;
@@ -134,6 +138,7 @@ video {
   transition: color 180ms ease;
 }
 
+.header-link:hover,
 .github-link:hover {
   color: var(--accent);
 }
@@ -662,19 +667,18 @@ video {
 }
 
 .faq-list summary::after {
-  content: "+";
-  display: grid;
+  content: "";
   width: 22px;
   height: 22px;
   flex: 0 0 22px;
-  place-items: center;
   color: var(--text);
-  font-size: 20px;
-  font-weight: 500;
+  background:
+    linear-gradient(currentColor, currentColor) center / 12px 2px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 2px 12px no-repeat;
 }
 
 .faq-list details[open] summary::after {
-  content: "-";
+  background: linear-gradient(currentColor, currentColor) center / 12px 2px no-repeat;
 }
 
 .faq-list p {
@@ -786,12 +790,14 @@ video {
 
 .updates-content {
   width: min(880px, calc(100% - 40px));
+  min-width: 0;
   margin: 0 auto;
   display: grid;
   gap: 18px;
 }
 
 .updates-section {
+  min-width: 0;
   padding: 28px 0;
   border-top: 1px solid var(--border);
 }
@@ -856,14 +862,29 @@ video {
 }
 
 .code-panel {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   margin-top: 14px;
   overflow-x: auto;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: #f7f8fa;
   padding: 14px 16px;
   color: var(--text);
   font: 600 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.code-panel code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  white-space: inherit;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .release-note-list {
@@ -897,9 +918,9 @@ video {
 .site-footer {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) minmax(0, 760px) max-content;
+  grid-template-columns: minmax(160px, 1fr) minmax(0, max-content) minmax(160px, 1fr);
   align-items: center;
-  column-gap: 32px;
+  column-gap: 34px;
   margin-top: 0;
   border-top: 1px solid rgba(29, 29, 31, 0.08);
   padding: 30px max(32px, calc((100% - var(--wide-width)) / 2));
@@ -916,9 +937,13 @@ video {
 }
 
 .site-footer p {
-  width: 100%;
+  width: max-content;
+  max-width: none;
   margin: 0;
+  justify-self: center;
+  text-align: center;
   line-height: 1.55;
+  word-break: keep-all;
 }
 
 .site-footer nav {
@@ -936,14 +961,21 @@ video {
 
 @media (max-width: 1180px) {
   .site-footer {
-    grid-template-columns: max-content minmax(0, 1fr);
-    align-items: start;
-    row-gap: 10px;
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    align-items: center;
+    column-gap: 24px;
+    padding-inline: 28px;
   }
 
   .site-footer nav {
-    grid-column: 2;
+    grid-column: auto;
+    justify-self: end;
+  }
+
+  .site-footer p {
+    width: 100%;
     justify-self: start;
+    text-align: left;
   }
 }
 
@@ -1115,6 +1147,7 @@ video {
     gap: 12px;
   }
 
+  .header-link,
   .github-link {
     font-size: 13px;
   }
