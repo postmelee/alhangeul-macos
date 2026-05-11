@@ -63,6 +63,8 @@
 | Stage 2 | `aad60d1` | Rust lock verify 출력과 PR 분류 보강 |
 | Stage 3 | `a0d9adb` | CI와 release staticlib 검증 gate 정렬 |
 | Stage 4 | `204ffb8` | staticlib 검증 정책 문서화 |
+| Stage 5 | `8ba868f` | 최종 보고서와 오늘할일 완료 처리 |
+| PR 준비 | `554368d` | 최신 `origin/devel-webview` 병합 |
 
 ## 수용 기준별 결과
 
@@ -134,7 +136,8 @@ PR 본문에는 다음을 함께 명시한다.
 ## 잔여 관리 항목
 
 - GitHub Actions 실제 실행 결과는 PR 생성 후 확인해야 한다.
-- PR 게시 전 원격 `devel-webview`가 갱신되면 rebase/merge 충돌 여부를 다시 확인해야 한다.
+- PR 게시 전 최신 `origin/devel-webview`를 병합했으며, #223 완료 행을 포함한 `mydocs/orders/20260511.md` 상태를 보존했다.
+- PR 게시 전 원격 `devel-webview`가 다시 갱신되면 rebase/merge 충돌 여부를 다시 확인해야 한다.
 - strict staticlib byte reproducibility를 다시 목표로 삼는 경우 별도 이슈로 toolchain/runner/build path 고정 전략을 설계해야 한다.
 
 ## 작업지시자 승인 요청
