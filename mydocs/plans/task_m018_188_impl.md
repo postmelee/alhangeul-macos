@@ -516,9 +516,84 @@ git status --short --branch
 Task #188 Stage 7: Quick Look visual smoke setup
 ```
 
+## Stage 8. v0.1.1 respin build와 로컬 smoke
+
+### 목표
+
+public `0.1.1 (2)` 설치 사용자가 Sparkle로 hotfix를 받을 수 있도록 같은 short version `0.1.1`에서 build number를 `3`으로 올리고, signed/notarized public workflow 실행 전 로컬 respin 후보를 검증한다.
+
+### 작업
+
+- HostApp, Quick Look preview extension, Thumbnail extension의 `CFBundleVersion`을 `3`으로 올린다.
+- PR CI의 Sparkle appcast helper 검증 build 값을 `3`으로 맞춘다.
+- README와 `docs/updates/v0.1.1.html`에 Quick Look/Thumbnail crash hotfix와 respin build 기준을 반영한다.
+- release 기록에 original public build `2`와 respin candidate build `3`을 구분해 기록한다.
+- `scripts/package-release.sh 0.1.1`로 local Release app을 다시 만든다.
+- `scripts/smoke-clean-quicklook-install.sh`로 기존 설치/extension 등록을 정리하고 build `3` app을 `/Applications/Alhangeul.app`에 설치한다.
+- fresh sample folder에서 thumbnail 생성, active provider path, crash report 부재를 확인한다.
+
+### 예상 변경 파일
+
+- `Sources/HostApp/Info.plist`
+- `Sources/QLExtension/Info.plist`
+- `Sources/ThumbnailExtension/Info.plist`
+- `.github/workflows/pr-ci.yml`
+- `README.md`
+- `docs/updates/v0.1.1.html`
+- `mydocs/working/task_m018_188_stage8.md`
+- `mydocs/release/v0.1.1.md`
+- `mydocs/orders/20260511.md`
+
+### 검증
+
+```bash
+plutil -extract CFBundleVersion raw -o - Sources/HostApp/Info.plist
+plutil -extract CFBundleVersion raw -o - Sources/QLExtension/Info.plist
+plutil -extract CFBundleVersion raw -o - Sources/ThumbnailExtension/Info.plist
+bash -n scripts/smoke-clean-quicklook-install.sh scripts/package-release.sh scripts/ci/write-sparkle-appcast.sh
+scripts/ci/write-sparkle-appcast.sh \
+  --version 0.1.1 \
+  --build 3 \
+  --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.1/alhangeul-macos-0.1.1.dmg \
+  --length 1 \
+  --ed-signature dummy-ed-signature \
+  --release-notes-url https://postmelee.github.io/alhangeul-macos/updates/v0.1.1.html \
+  --pub-date "Mon, 11 May 2026 00:00:00 +0000" \
+  --minimum-system-version 12.0 \
+  --output build.noindex/release/appcast-stage8.xml
+xmllint --noout build.noindex/release/appcast-stage8.xml
+scripts/package-release.sh 0.1.1
+scripts/smoke-clean-quicklook-install.sh \
+  --skip-package \
+  --app build.noindex/release/Alhangeul.app \
+  --replace-applications-install \
+  --remove-user-application-copy \
+  --open-finder
+pluginkit -mAvvv -i com.postmelee.alhangeul.QLExtension
+pluginkit -mAvvv -i com.postmelee.alhangeul.ThumbnailExtension
+find /private/tmp/alhangeul-visual-smoke/<timestamp>/thumbnails -type f -exec file {} \;
+/private/tmp/alhangeul-visual-smoke/<timestamp>/check-crashes.command
+git diff --check
+git status --short --branch
+```
+
+### 완료 기준
+
+- app과 두 extension의 build가 모두 `3`으로 일치한다.
+- Sparkle appcast helper가 `sparkle:version=3`, `sparkle:shortVersionString=0.1.1` 조합을 생성한다.
+- local Release package와 clean visual smoke가 통과한다.
+- 작업지시자가 직접 확인할 fresh sample folder와 helper가 생성된다.
+- public signed/notarized respin 실행 전 필요한 tag 이동, GitHub Release asset clobber, Pages/appcast 재배포 승인이 분리되어 남는다.
+
+### 커밋 메시지
+
+```text
+Task #188 Stage 8: v0.1.1 respin build 준비
+```
+
 ## 승인 요청 사항
 
-1. 위 7단계 구현계획 승인
+1. 위 8단계 구현계획 승인
 2. Stage 1에서 release preflight와 repository setting 승인 항목 확정부터 진행 승인
 3. Pages source `workflow` 전환과 `github-pages` `v*` tag policy 추가는 Stage 1 보고 후 별도 승인 지점으로 유지하는 방식 승인
 4. 기존 `v0.1.0` 설치본은 Stage 5 Sparkle 업데이트 감지 확인 전까지 삭제하지 않는 방식 승인
