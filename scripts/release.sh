@@ -16,6 +16,7 @@ KEEP_STAGING=0
 DEVELOPER_ID_APPLICATION="${ALHANGEUL_DEVELOPER_ID_APPLICATION:-}"
 NOTARY_PROFILE="${ALHANGEUL_NOTARY_PROFILE:-}"
 DEVELOPER_ID_DMG="${ALHANGEUL_DEVELOPER_ID_DMG:-$DEVELOPER_ID_APPLICATION}"
+APPLE_TEAM_ID="${APPLE_TEAM_ID:-XH6JHKYXV8}"
 
 usage() {
   cat <<EOF
@@ -31,6 +32,7 @@ Public release environment:
   ALHANGEUL_DEVELOPER_ID_APPLICATION   Developer ID Application signing identity.
   ALHANGEUL_NOTARY_PROFILE             notarytool keychain profile name.
   ALHANGEUL_DEVELOPER_ID_DMG           Optional DMG signing identity. Defaults to app identity.
+  APPLE_TEAM_ID                        Optional expected Team ID for signing preflight. Defaults to XH6JHKYXV8.
   ALHANGEUL_BUILD_ROOT                 Optional build root. Defaults to build.noindex.
 
 Examples:
@@ -530,6 +532,113 @@ verify_app_signature() {
   fi
 }
 
+verify_bundle_identifier() {
+  local label="$1"
+  local path="$2"
+  local expected_bundle_id="$3"
+  local info_plist="$path/Contents/Info.plist"
+  local actual_bundle_id
+
+  if [ -z "$expected_bundle_id" ]; then
+    return
+  fi
+  if [ ! -f "$info_plist" ]; then
+    fail "signing preflight failed for $label: missing Info.plist at $info_plist"
+  fi
+
+  if ! actual_bundle_id="$(plutil -extract CFBundleIdentifier raw -o - "$info_plist")"; then
+    fail "signing preflight failed for $label: unable to read CFBundleIdentifier from $info_plist"
+  fi
+  if [ "$actual_bundle_id" != "$expected_bundle_id" ]; then
+    fail "signing preflight failed for $label: expected bundle id $expected_bundle_id, got $actual_bundle_id at $path"
+  fi
+}
+
+verify_no_get_task_allow() {
+  local label="$1"
+  local path="$2"
+  local entitlements
+
+  entitlements="$(codesign --display --entitlements :- "$path" 2>/dev/null || true)"
+  if printf '%s\n' "$entitlements" \
+    | grep -A1 '<key>com.apple.security.get-task-allow</key>' \
+    | grep -q '<true/>'; then
+    fail "signing preflight failed for $label: com.apple.security.get-task-allow is true at $path"
+  fi
+}
+
+verify_release_component_signature() {
+  local label="$1"
+  local path="$2"
+  local expected_bundle_id="${3:-}"
+  local display
+
+  if [ ! -e "$path" ]; then
+    fail "signing preflight failed for $label: missing component at $path"
+  fi
+
+  codesign --verify --strict --verbose=2 "$path"
+  verify_bundle_identifier "$label" "$path" "$expected_bundle_id"
+
+  if ! display="$(codesign --display --verbose=4 "$path" 2>&1)"; then
+    fail "signing preflight failed for $label: unable to read codesign metadata at $path"
+  fi
+
+  if [[ "$DEVELOPER_ID_APPLICATION" == Developer\ ID\ Application:* ]]; then
+    if ! printf '%s\n' "$display" | grep -Fxq "Authority=$DEVELOPER_ID_APPLICATION"; then
+      fail "signing preflight failed for $label: expected authority $DEVELOPER_ID_APPLICATION at $path"
+    fi
+  elif ! printf '%s\n' "$display" | grep -Fq "Authority=Developer ID Application:"; then
+    fail "signing preflight failed for $label: expected Developer ID Application authority at $path"
+  fi
+
+  if ! printf '%s\n' "$display" | grep -Fxq "TeamIdentifier=$APPLE_TEAM_ID"; then
+    fail "signing preflight failed for $label: expected TeamIdentifier=$APPLE_TEAM_ID at $path"
+  fi
+  if ! printf '%s\n' "$display" | grep -q '^Timestamp='; then
+    fail "signing preflight failed for $label: missing secure timestamp at $path"
+  fi
+  if printf '%s\n' "$display" | grep -q '^Timestamp=none'; then
+    fail "signing preflight failed for $label: timestamp is none at $path"
+  fi
+  if ! printf '%s\n' "$display" | grep -q '^Runtime Version=' \
+    && ! printf '%s\n' "$display" | grep -q 'flags=.*runtime'; then
+    fail "signing preflight failed for $label: missing hardened runtime at $path"
+  fi
+
+  verify_no_get_task_allow "$label" "$path"
+}
+
+verify_release_signing_preflight() {
+  if [ -z "$DEVELOPER_ID_APPLICATION" ]; then
+    warn "Skipping release signing preflight because this rehearsal build is unsigned."
+    return
+  fi
+
+  local sparkle_framework="$APP_OUTPUT/Contents/Frameworks/Sparkle.framework"
+  local sparkle_version_dir
+  local component_rel
+
+  info "Running release signing preflight"
+  verify_release_component_signature "Host app" "$APP_OUTPUT" "com.postmelee.alhangeul"
+  verify_release_component_signature \
+    "Quick Look extension" \
+    "$APP_OUTPUT/Contents/PlugIns/AlhangeulPreview.appex" \
+    "com.postmelee.alhangeul.QLExtension"
+  verify_release_component_signature \
+    "Thumbnail extension" \
+    "$APP_OUTPUT/Contents/PlugIns/AlhangeulThumbnail.appex" \
+    "com.postmelee.alhangeul.ThumbnailExtension"
+
+  sparkle_version_dir="$(resolve_sparkle_version_dir "$sparkle_framework")"
+  verify_release_component_signature "Sparkle framework" "$sparkle_framework"
+  while IFS= read -r component_rel; do
+    verify_release_component_signature \
+      "Sparkle $component_rel" \
+      "$sparkle_version_dir/$component_rel"
+  done < <(sparkle_required_component_paths)
+}
+
 notary_json_value() {
   local key="$1"
   local json="$2"
@@ -742,6 +851,7 @@ main() {
   sign_release_app_for_notarization
   verify_universal_app
   verify_app_signature
+  verify_release_signing_preflight
   notarize_and_staple_app
   create_dmg
   sign_dmg
