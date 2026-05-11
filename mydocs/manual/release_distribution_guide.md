@@ -82,7 +82,7 @@
 - [ ] workflow 사용 시 `previous_release_ref` 입력과 delta checklist summary/artifact 확인
 - [ ] release owner가 delta checklist 누락/과잉 항목 보정
 - [ ] `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock` 정합성 확인
-- [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과
+- [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과 (`librhwp.a` byte hash skip 여부와 남는 source/header/ABI 검증 확인)
 - [ ] `scripts/verify-rhwp-studio-assets.sh` 통과
 - [ ] Debug build 통과
 - [ ] Release build 통과
