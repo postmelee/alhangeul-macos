@@ -28,10 +28,18 @@
 
 릴리즈별 실제 결정, SHA256, 검증 기록은 [`mydocs/release/`](../release/)에 남긴다. 환경 스냅샷은 [`release_environment.md`](../tech/release_environment.md)에 둔다. 실패 증상, 재현 조건, 원인, 재발 방지 절차가 모인 경우에만 `mydocs/troubleshootings/`로 분리한다.
 
+## 문제 해결 기록
+
+반복 가능한 release workflow 실패는 매뉴얼 본문에 사례를 길게 복제하지 않고 `mydocs/troubleshootings/` 아래에 별도 문서로 둔다.
+
+| 문서 | 읽는 시점 | 내용 |
+|------|-----------|------|
+| [`release_v0_1_1_workflow_failures.md`](../troubleshootings/release_v0_1_1_workflow_failures.md) | `v0.1.1` release workflow와 같은 계열의 GitHub Actions, Developer ID, notarization, Sparkle signing, Rust staticlib 실패를 진단할 때 | `GH_TOKEN`, `$GITHUB_OUTPUT`, `cbindgen`, `librhwp.a` hash mismatch, notarization log, Sparkle nested signing, extension entitlement 실패 사례 |
+
 ## 현재 release 자산
 
 - `scripts/package-release.sh`: Release configuration 개발/검증용 zip 생성
-- `scripts/release.sh`: public DMG 생성, Developer ID 서명, notarization, staple, Gatekeeper 검증, sha256 생성
+- `scripts/release.sh`: public DMG 생성, Developer ID 서명, app notarization 전 signing preflight, notarization, staple, Gatekeeper 검증, sha256 생성
 - `scripts/ci/write-release-notes.sh`: GitHub Release 본문 후보 생성
 - `scripts/ci/check-release-notes-template.sh`: release note 필수 heading 검증
 - `scripts/ci/verify-universal-macos-app.sh`: app bundle 내부 앱/extension 실행 파일의 `arm64 + x86_64` slice 검증
@@ -82,7 +90,7 @@
 - [ ] workflow 사용 시 `previous_release_ref` 입력과 delta checklist summary/artifact 확인
 - [ ] release owner가 delta checklist 누락/과잉 항목 보정
 - [ ] `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock` 정합성 확인
-- [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과
+- [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과 (`librhwp.a` byte hash skip 여부와 남는 source/header/ABI 검증 확인)
 - [ ] `scripts/verify-rhwp-studio-assets.sh` 통과
 - [ ] Debug build 통과
 - [ ] Release build 통과
@@ -93,6 +101,7 @@
 - [ ] 개발용 zip 산출물 생성
 - [ ] public DMG 산출물 생성
 - [ ] public DMG 안의 app/extension 실행 파일 `arm64 + x86_64` universal 검증
+- [ ] app notarization submit 전 signing preflight 통과: Developer ID, Team ID, timestamp, hardened runtime, `get-task-allow` 부재, Sparkle nested component 존재 확인
 - [ ] public DMG 안의 app bundle `Contents/Info.plist`에 `NSHumanReadableCopyright`가 포함되어 있고 현재 release 저작권자 문구와 일치하는지 확인
 - [ ] public DMG 안의 app bundle `Contents/Resources/Legal/{LICENSE,THIRD_PARTY_LICENSES.md,FONTS.md}` 존재 확인
 - [ ] public DMG 안의 app bundle `Contents/Resources/Legal/*` 파일이 release candidate commit의 canonical `LICENSE`, `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`와 같은지 확인

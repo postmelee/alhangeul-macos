@@ -236,7 +236,33 @@ jobs:
           set -euo pipefail
           ./scripts/release.sh --help
 
-      - name: Verify rhwp lock
+      - name: Record Rust bridge lock policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Rust bridge lock policy"
+            echo
+            echo "- lock command: \`./scripts/build-rust-macos.sh --verify-lock\`"
+            echo "- ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: \`${ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY:-0}\`"
+            echo "- With this release workflow setting, only \`Frameworks/universal/librhwp.a\` byte hash/size comparison is skipped."
+            echo "- Source provenance, Cargo lock, generated header, and FFI symbol checks still run."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Record signing preflight policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Signing preflight policy"
+            echo
+            echo "- release command: \`./scripts/release.sh \"$VERSION\"\`"
+            echo "- Expected Team ID: \`${APPLE_TEAM_ID:-XH6JHKYXV8}\`"
+            echo "- Before app notarization submit, \`release.sh\` verifies Developer ID authority, Team ID, secure timestamp, hardened runtime, \`get-task-allow\` absence, and required Sparkle nested components."
+            echo "- Failure in this preflight blocks notarization submit."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify rhwp source, header, and ABI lock
         shell: bash
         run: |
           set -euo pipefail

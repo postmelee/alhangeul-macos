@@ -25,7 +25,9 @@ scripts/verify-rhwp-studio-assets.sh
 
 - 작업 브랜치와 릴리스 기준 브랜치가 명확해야 한다.
 - `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`의 repo/ref/commit 기준이 일치해야 한다.
-- `Frameworks/universal/librhwp.a`, `Frameworks/generated_rhwp.h`의 hash/size가 `rhwp-core.lock`과 일치해야 한다.
+- GitHub-hosted workflow에서는 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 `Frameworks/universal/librhwp.a` byte hash/size 비교만 제외할 수 있다.
+- `Frameworks/generated_rhwp.h`의 hash/size는 `rhwp-core.lock`과 일치해야 한다.
+- `rhwp-ffi-symbols.txt`와 generated FFI symbol set이 일치해야 한다.
 - `Sources/HostApp/Resources/rhwp-studio/manifest.json`의 release tag/commit과 bundled entrypoint hash가 현재 resource tree와 일치해야 한다.
 - 의도하지 않은 미커밋 변경이 없어야 한다.
 - 릴리스에 포함할 PR이 모두 merge되어 있어야 한다.
@@ -88,7 +90,7 @@ build.noindex/release/alhangeul-macos-<version>.zip
 
 스크립트가 수행하는 일:
 
-- Rust bridge와 `Rhwp.xcframework` 재생성 후 `rhwp-core.lock` 검증
+- Rust bridge와 `Rhwp.xcframework` 재생성 후 source/header/ABI 기준 `rhwp-core.lock` 검증
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
 - `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
@@ -117,10 +119,12 @@ ALHANGEUL_NOTARY_PROFILE="<notarytool keychain profile>" \
 
 ```text
 ALHANGEUL_DEVELOPER_ID_DMG
+APPLE_TEAM_ID
 ALHANGEUL_BUILD_ROOT
 ```
 
 `ALHANGEUL_DEVELOPER_ID_DMG`를 지정하지 않으면 `ALHANGEUL_DEVELOPER_ID_APPLICATION`과 같은 identity로 DMG를 서명한다.
+`APPLE_TEAM_ID`는 release signing preflight의 expected Team ID다. 지정하지 않으면 `XH6JHKYXV8`을 사용한다.
 
 public mode 산출물:
 
@@ -132,13 +136,15 @@ build.noindex/release/alhangeul-macos-<version>.dmg.sha256
 
 `scripts/release.sh`가 수행하는 일:
 
-- Rust bridge와 `Rhwp.xcframework` 재생성 후 `rhwp-core.lock` 검증
+- Rust bridge와 `Rhwp.xcframework` 재생성 후 source/header/ABI 기준 `rhwp-core.lock` 검증
 - `scripts/check-no-appkit.sh`
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
 - `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
 - Developer ID Application signing identity 확인
+- Sparkle nested component, Quick Look extension, Thumbnail extension, app bundle을 Developer ID/timestamp/hardened runtime 기준으로 재서명
 - app code signature 검증
+- app notarization submit 전 release signing preflight 실행
 - app notarization submit/wait
 - app staple
 - DMG 생성
@@ -180,6 +186,7 @@ rehearsal mode가 수행하는 일:
 - shared Swift boundary check
 - Release build
 - app/extension 실행 파일의 `arm64 + x86_64` universal 검증
+- `ALHANGEUL_DEVELOPER_ID_APPLICATION`이 제공된 signed rehearsal이면 app notarization submit 전과 같은 release signing preflight 실행
 - DMG layout 생성
 - DMG layout smoke 입력 산출물 생성
 - `hdiutil verify`
@@ -198,6 +205,7 @@ rehearsal mode가 수행하지 않는 일:
 - `*-rehearsal.dmg.sha256`은 Homebrew Cask `sha256`에 사용하지 않는다.
 - unsigned rehearsal build는 Finder Quick Look/Thumbnail 등록 보증에 쓰지 않는다.
 - signed/notarized public DMG 검증은 rehearsal 결과로 대체하지 않는다.
+- unsigned rehearsal에서 signing preflight가 skip된 경우, 결과를 public signing/notarization prerequisite 통과로 기록하지 않는다.
 - rehearsal DMG에서 background와 icon 위치가 정상이어도 public DMG signing/notarization/staple 후 최종 layout smoke를 반복한다.
 
 GitHub Actions `Release Rehearsal DMG` workflow를 사용할 때도 같은 산출물 계층을 따른다.
