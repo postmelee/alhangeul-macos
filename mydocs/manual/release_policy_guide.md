@@ -23,6 +23,55 @@
 - 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`은 ASCII filesystem name과 동일
 - 공개 배포 산출물명: `alhangeul-macos-<version>.dmg`
 
+## 릴리즈 식별자와 bundled rhwp 표기 정책
+
+공식 앱 release identity는 `Alhangeul v<app-version>` 하나로 유지한다. Bundled `rhwp` core와 `rhwp-studio` 버전은 앱 버전과 결합한 새 semver가 아니라 release metadata/provenance로 분리해 표시한다.
+
+앱 버전만 사용하는 항목:
+
+| 표면 | 기준 |
+|------|------|
+| Git tag | `v<app-version>` |
+| `CFBundleShortVersionString` / `CFBundleVersion` | 앱 버전과 앱 build number |
+| DMG filename | `alhangeul-macos-<app-version>.dmg` |
+| Sparkle appcast version/build | 앱 버전과 앱 build number |
+| Homebrew Cask version | 앱 버전 |
+| GitHub Release title 기본형 | `Alhangeul v<app-version>` |
+
+GitHub Release title은 기본적으로 `Alhangeul v<app-version>`을 사용한다. Upstream `rhwp` core 또는 bundled `rhwp-studio` 반영이 해당 release의 중심 사용자-facing 변화이고, release note에서 영향과 검증 결과를 명확히 설명할 수 있을 때만 `Alhangeul v<app-version> (rhwp v<rhwp-version>)` 병기를 허용한다.
+
+다음 경우에는 title에 `rhwp` 버전을 병기하지 않는다.
+
+- 앱 자체 버그 수정, DMG UX, CI, 문서, Sparkle/Homebrew 변경이 중심인 release
+- bundled `rhwp` 버전이 직전 공개 release와 같은 release
+- bundled `rhwp` 변경이 사용자-facing 중심 변화가 아닌 release
+
+GitHub Release body와 내부 release record에는 다음 metadata를 표준으로 노출한다.
+
+```md
+## Release metadata
+
+| 항목 | 값 |
+|------|----|
+| App version | `v<app-version>` |
+| rhwp core release tag | `v<rhwp-version>` |
+| rhwp core commit | `<commit>` |
+| bundled rhwp-studio release tag | `v<rhwp-version>` |
+| bundled rhwp-studio commit | `<commit>` |
+| core lock | `rhwp-core.lock` |
+| studio manifest | `Sources/HostApp/Resources/rhwp-studio/manifest.json` |
+```
+
+README 최신 공개 릴리즈 요약과 Pages 릴리즈 노트는 사용자용 안내 표면이다. 필요할 때 `bundled rhwp-studio v<rhwp-version>` 또는 `rhwp v<rhwp-version>` 정도의 짧은 provenance와 upstream release 링크만 표시하고, commit/manifest/checksum 등 긴 내부 기록은 GitHub Release body와 `mydocs/release/v<version>.md`에 둔다.
+
+자동 upstream sync PR 또는 release handoff는 위 기준을 따라 다음 값을 최소 기록한다.
+
+- app version 후보
+- `rhwp` core release tag와 commit
+- bundled `rhwp-studio` release tag와 commit
+- release title에 `(rhwp vX.Y.Z)` 병기가 필요한지에 대한 판단
+- `rhwp-core.lock`과 studio manifest 검증 결과
+
 ## 배포 브랜치 기준
 
 현재 WebView-backed public release line은 `devel-webview`를 배포 준비 기준 브랜치로 사용한다. 릴리스 후보가 확정되면 `devel-webview`의 검증된 commit을 `main`에 반영하고, Git tag와 GitHub Release는 `main` 기준으로 생성한다.

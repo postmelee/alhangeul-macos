@@ -20,6 +20,11 @@ on:
         required: true
         type: boolean
         default: true
+      include_rhwp_in_title:
+        description: Append (rhwp vX.Y.Z) to the GitHub Release title for upstream rhwp-centered releases.
+        required: true
+        type: boolean
+        default: false
       draft:
         description: Create a draft GitHub Release. Stable Sparkle appcast is updated only when this is false.
         required: true
@@ -52,6 +57,7 @@ jobs:
       PREVIOUS_RELEASE_REF: ${{ inputs.previous_release_ref }}
       EXPECTED_RHWP_TAG: ${{ inputs.expected_rhwp_tag }}
       REQUIRE_LATEST_RHWP: ${{ inputs.require_latest_rhwp }}
+      INCLUDE_RHWP_IN_TITLE: ${{ inputs.include_rhwp_in_title }}
       DRAFT_RELEASE: ${{ inputs.draft }}
       PRERELEASE: ${{ inputs.prerelease }}
       GH_TOKEN: ${{ github.token }}
@@ -284,6 +290,18 @@ jobs:
           dmg_path="${{ steps.artifact.outputs.dmg_path }}"
           checksum_path="${{ steps.artifact.outputs.checksum_path }}"
           notes_path="${{ steps.artifact.outputs.notes_path }}"
+          release_title="Alhangeul $tag_name"
+          if [ "$INCLUDE_RHWP_IN_TITLE" = "true" ]; then
+            release_title="$release_title (rhwp ${{ steps.core.outputs.rhwp_tag }})"
+          fi
+
+          {
+            echo
+            echo "## GitHub Release title"
+            echo
+            echo "- title: \`$release_title\`"
+            echo "- include rhwp in title: \`$INCLUDE_RHWP_IN_TITLE\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if gh release view "$tag_name" >/dev/null 2>&1; then
             gh release upload "$tag_name" "$dmg_path" "$checksum_path" --clobber
@@ -292,7 +310,7 @@ jobs:
               release create "$tag_name"
               "$dmg_path"
               "$checksum_path"
-              --title "Alhangeul $tag_name"
+              --title "$release_title"
               --notes-file "$notes_path"
               --verify-tag
             )
@@ -307,7 +325,7 @@ jobs:
 
           edit_args=(
             release edit "$tag_name"
-            --title "Alhangeul $tag_name"
+            --title "$release_title"
             --notes-file "$notes_path"
             --verify-tag
           )

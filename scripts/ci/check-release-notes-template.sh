@@ -30,7 +30,7 @@ required_headings=(
   "## 이번 버전의 주요 변경 사항"
   "## 다운로드 산출물과 SHA256"
   "## Homebrew Cask"
-  "## 포함된 rhwp core와 viewer asset provenance"
+  "## Release metadata"
   "## 검증 결과"
   "## 릴리즈 delta 기반 추가 확인 항목"
   "## 알려진 제한 사항과 후속 이슈"
