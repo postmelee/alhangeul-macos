@@ -119,10 +119,12 @@ ALHANGEUL_NOTARY_PROFILE="<notarytool keychain profile>" \
 
 ```text
 ALHANGEUL_DEVELOPER_ID_DMG
+APPLE_TEAM_ID
 ALHANGEUL_BUILD_ROOT
 ```
 
 `ALHANGEUL_DEVELOPER_ID_DMG`를 지정하지 않으면 `ALHANGEUL_DEVELOPER_ID_APPLICATION`과 같은 identity로 DMG를 서명한다.
+`APPLE_TEAM_ID`는 release signing preflight의 expected Team ID다. 지정하지 않으면 `XH6JHKYXV8`을 사용한다.
 
 public mode 산출물:
 
@@ -140,7 +142,9 @@ build.noindex/release/alhangeul-macos-<version>.dmg.sha256
 - Release configuration으로 HostApp 빌드
 - `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
 - Developer ID Application signing identity 확인
+- Sparkle nested component, Quick Look extension, Thumbnail extension, app bundle을 Developer ID/timestamp/hardened runtime 기준으로 재서명
 - app code signature 검증
+- app notarization submit 전 release signing preflight 실행
 - app notarization submit/wait
 - app staple
 - DMG 생성
@@ -182,6 +186,7 @@ rehearsal mode가 수행하는 일:
 - shared Swift boundary check
 - Release build
 - app/extension 실행 파일의 `arm64 + x86_64` universal 검증
+- `ALHANGEUL_DEVELOPER_ID_APPLICATION`이 제공된 signed rehearsal이면 app notarization submit 전과 같은 release signing preflight 실행
 - DMG layout 생성
 - DMG layout smoke 입력 산출물 생성
 - `hdiutil verify`
@@ -200,6 +205,7 @@ rehearsal mode가 수행하지 않는 일:
 - `*-rehearsal.dmg.sha256`은 Homebrew Cask `sha256`에 사용하지 않는다.
 - unsigned rehearsal build는 Finder Quick Look/Thumbnail 등록 보증에 쓰지 않는다.
 - signed/notarized public DMG 검증은 rehearsal 결과로 대체하지 않는다.
+- unsigned rehearsal에서 signing preflight가 skip된 경우, 결과를 public signing/notarization prerequisite 통과로 기록하지 않는다.
 - rehearsal DMG에서 background와 icon 위치가 정상이어도 public DMG signing/notarization/staple 후 최종 layout smoke를 반복한다.
 
 GitHub Actions `Release Rehearsal DMG` workflow를 사용할 때도 같은 산출물 계층을 따른다.

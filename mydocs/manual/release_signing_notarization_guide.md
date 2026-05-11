@@ -55,10 +55,50 @@ ALHANGEUL_NOTARY_PROFILE="<notarytool keychain profile>" \
 
 ```text
 ALHANGEUL_DEVELOPER_ID_DMG
+APPLE_TEAM_ID
 ALHANGEUL_BUILD_ROOT
 ```
 
 `ALHANGEUL_DEVELOPER_ID_DMG`를 지정하지 않으면 `ALHANGEUL_DEVELOPER_ID_APPLICATION`과 같은 identity로 DMG를 서명한다.
+`APPLE_TEAM_ID`를 지정하지 않으면 현재 운영 기준인 `XH6JHKYXV8`을 signing preflight의 expected Team ID로 사용한다.
+
+## Notarization 전 signing preflight
+
+`scripts/release.sh` public mode는 app notarization submit 전에 release signing preflight를 실행한다.
+
+검증 위치:
+
+```text
+Release build
+-> Sparkle nested component와 app/extension Developer ID 재서명
+-> universal slice 검증
+-> codesign verify
+-> release signing preflight
+-> app notarization submit
+```
+
+검증 대상:
+
+- Host app
+- Quick Look extension
+- Thumbnail extension
+- Sparkle framework
+- Sparkle `XPCServices/Downloader.xpc`
+- Sparkle `XPCServices/Installer.xpc`
+- Sparkle `Updater.app`
+- Sparkle `Autoupdate`
+
+검증 기준:
+
+- Developer ID Application authority가 `ALHANGEUL_DEVELOPER_ID_APPLICATION`과 일치
+- Team ID가 `APPLE_TEAM_ID`와 일치
+- secure timestamp 존재
+- hardened runtime 존재
+- `com.apple.security.get-task-allow`가 true가 아님
+- Host app과 app extension의 bundle identifier가 release 기준과 일치
+- Sparkle required nested component가 모두 존재
+
+`--skip-notarize` rehearsal에서 `ALHANGEUL_DEVELOPER_ID_APPLICATION`이 없으면 signing preflight는 명시 로그를 남기고 건너뛴다. Developer ID identity를 제공한 signed rehearsal에서는 notarization은 하지 않더라도 같은 signing preflight를 실행한다.
 
 ## 서명과 공증 검증 항목
 
@@ -67,6 +107,7 @@ public mode에서 확인할 항목:
 - HostApp, QLExtension, ThumbnailExtension이 모두 올바르게 서명되는가
 - extension bundle이 app bundle 안에 올바르게 embed되는가
 - sandbox entitlement가 preview/thumbnail 동작과 충돌하지 않는가
+- app notarization submit 전에 release signing preflight가 통과하는가
 - notarization 후 Gatekeeper에서 실행 가능한가
 - stapled app과 stapled DMG가 모두 검증되는가
 
