@@ -349,7 +349,8 @@ struct RhwpStudioWebViewFailure: Error, Identifiable, Equatable {
         sourceURL: String?,
         line: Int?,
         column: Int?,
-        reason: String?
+        reason: String?,
+        isFatal: Bool = true
     ) -> RhwpStudioWebViewFailure {
         let lines = labeledLines([
             ("message", message),
@@ -361,7 +362,9 @@ struct RhwpStudioWebViewFailure: Error, Identifiable, Equatable {
 
         return RhwpStudioWebViewFailure(
             category: .runtime,
-            diagnosticDetail: lines.joined(separator: "\n")
+            message: isFatal ? nil : "입력을 처리하지 못했습니다. 문서는 계속 볼 수 있습니다.",
+            diagnosticDetail: lines.joined(separator: "\n"),
+            isFatal: isFatal
         )
     }
 
