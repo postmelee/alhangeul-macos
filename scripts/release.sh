@@ -16,6 +16,7 @@ KEEP_STAGING=0
 DEVELOPER_ID_APPLICATION="${ALHANGEUL_DEVELOPER_ID_APPLICATION:-}"
 NOTARY_PROFILE="${ALHANGEUL_NOTARY_PROFILE:-}"
 DEVELOPER_ID_DMG="${ALHANGEUL_DEVELOPER_ID_DMG:-$DEVELOPER_ID_APPLICATION}"
+APPLE_TEAM_ID="${APPLE_TEAM_ID:-XH6JHKYXV8}"
 
 usage() {
   cat <<EOF
@@ -31,6 +32,7 @@ Public release environment:
   ALHANGEUL_DEVELOPER_ID_APPLICATION   Developer ID Application signing identity.
   ALHANGEUL_NOTARY_PROFILE             notarytool keychain profile name.
   ALHANGEUL_DEVELOPER_ID_DMG           Optional DMG signing identity. Defaults to app identity.
+  APPLE_TEAM_ID                        Optional expected Team ID for signing preflight. Defaults to XH6JHKYXV8.
   ALHANGEUL_BUILD_ROOT                 Optional build root. Defaults to build.noindex.
 
 Examples:
@@ -353,30 +355,116 @@ expand_entitlements() {
   sed "s|\$(PRODUCT_BUNDLE_IDENTIFIER)|$bundle_id|g" "$source" > "$output"
 }
 
+sparkle_required_component_paths() {
+  printf '%s\n' \
+    "XPCServices/Downloader.xpc" \
+    "XPCServices/Installer.xpc" \
+    "Updater.app" \
+    "Autoupdate"
+}
+
+sparkle_version_dir_has_required_components() {
+  local version_dir="$1"
+  local component_rel
+
+  while IFS= read -r component_rel; do
+    if [ ! -e "$version_dir/$component_rel" ]; then
+      return 1
+    fi
+  done < <(sparkle_required_component_paths)
+
+  return 0
+}
+
+report_missing_sparkle_components() {
+  local version_dir="$1"
+  local component_rel
+
+  while IFS= read -r component_rel; do
+    if [ ! -e "$version_dir/$component_rel" ]; then
+      warn "Missing Sparkle notarization component: $version_dir/$component_rel"
+    fi
+  done < <(sparkle_required_component_paths)
+}
+
+resolve_sparkle_current_version_dir() {
+  local versions_dir="$1"
+  local current_dir="$versions_dir/Current"
+
+  if [ -d "$current_dir" ]; then
+    (cd "$current_dir" && pwd -P)
+  fi
+}
+
+resolve_sparkle_version_dir() {
+  local sparkle_framework="$1"
+  local versions_dir="$sparkle_framework/Versions"
+  local candidate
+  local current_version_dir
+  local resolved_candidate
+
+  if [ ! -d "$sparkle_framework" ]; then
+    fail "missing Sparkle framework: $sparkle_framework"
+  fi
+  if [ ! -d "$versions_dir" ]; then
+    fail "missing Sparkle framework Versions directory: $versions_dir"
+  fi
+
+  current_version_dir="$(resolve_sparkle_current_version_dir "$versions_dir")"
+  if [ -n "$current_version_dir" ]; then
+    if sparkle_version_dir_has_required_components "$current_version_dir"; then
+      echo "$current_version_dir"
+      return
+    fi
+    warn "Sparkle Versions/Current is missing required notarization components: $current_version_dir"
+    report_missing_sparkle_components "$current_version_dir"
+  fi
+
+  for candidate in "$versions_dir"/*; do
+    if [ ! -d "$candidate" ]; then
+      continue
+    fi
+    if [ "${candidate##*/}" = "Current" ]; then
+      continue
+    fi
+
+    resolved_candidate="$(cd "$candidate" && pwd -P)"
+    if sparkle_version_dir_has_required_components "$resolved_candidate"; then
+      echo "$resolved_candidate"
+      return
+    fi
+  done
+
+  warn "Checked Sparkle framework version directories under: $versions_dir"
+  for candidate in "$versions_dir"/*; do
+    if [ ! -d "$candidate" ]; then
+      continue
+    fi
+    if [ "${candidate##*/}" = "Current" ]; then
+      continue
+    fi
+    report_missing_sparkle_components "$candidate"
+  done
+  fail "could not find a Sparkle framework version directory with all required notarization components"
+}
+
 sign_sparkle_components_for_notarization() {
   if [ -z "$DEVELOPER_ID_APPLICATION" ]; then
     return
   fi
 
   local sparkle_framework="$APP_OUTPUT/Contents/Frameworks/Sparkle.framework"
-  local sparkle_version_dir="$sparkle_framework/Versions/B"
+  local sparkle_version_dir
+  local component_rel
   local component
 
-  if [ ! -d "$sparkle_version_dir" ]; then
-    return
-  fi
+  sparkle_version_dir="$(resolve_sparkle_version_dir "$sparkle_framework")"
 
   info "Signing Sparkle nested components for notarization"
-  for component in \
-    "$sparkle_version_dir/XPCServices/Downloader.xpc" \
-    "$sparkle_version_dir/XPCServices/Installer.xpc" \
-    "$sparkle_version_dir/Updater.app" \
-    "$sparkle_version_dir/Autoupdate"
-  do
-    if [ -e "$component" ]; then
-      codesign_developer_id "$component"
-    fi
-  done
+  while IFS= read -r component_rel; do
+    component="$sparkle_version_dir/$component_rel"
+    codesign_developer_id "$component"
+  done < <(sparkle_required_component_paths)
 
   codesign_developer_id "$sparkle_framework"
 }
@@ -442,6 +530,113 @@ verify_app_signature() {
       codesign --verify --strict --verbose=2 "$appex"
     done < <(find "$APP_OUTPUT/Contents/PlugIns" -maxdepth 1 -type d -name "*.appex" -print)
   fi
+}
+
+verify_bundle_identifier() {
+  local label="$1"
+  local path="$2"
+  local expected_bundle_id="$3"
+  local info_plist="$path/Contents/Info.plist"
+  local actual_bundle_id
+
+  if [ -z "$expected_bundle_id" ]; then
+    return
+  fi
+  if [ ! -f "$info_plist" ]; then
+    fail "signing preflight failed for $label: missing Info.plist at $info_plist"
+  fi
+
+  if ! actual_bundle_id="$(plutil -extract CFBundleIdentifier raw -o - "$info_plist")"; then
+    fail "signing preflight failed for $label: unable to read CFBundleIdentifier from $info_plist"
+  fi
+  if [ "$actual_bundle_id" != "$expected_bundle_id" ]; then
+    fail "signing preflight failed for $label: expected bundle id $expected_bundle_id, got $actual_bundle_id at $path"
+  fi
+}
+
+verify_no_get_task_allow() {
+  local label="$1"
+  local path="$2"
+  local entitlements
+
+  entitlements="$(codesign --display --entitlements :- "$path" 2>/dev/null || true)"
+  if printf '%s\n' "$entitlements" \
+    | grep -A1 '<key>com.apple.security.get-task-allow</key>' \
+    | grep -q '<true/>'; then
+    fail "signing preflight failed for $label: com.apple.security.get-task-allow is true at $path"
+  fi
+}
+
+verify_release_component_signature() {
+  local label="$1"
+  local path="$2"
+  local expected_bundle_id="${3:-}"
+  local display
+
+  if [ ! -e "$path" ]; then
+    fail "signing preflight failed for $label: missing component at $path"
+  fi
+
+  codesign --verify --strict --verbose=2 "$path"
+  verify_bundle_identifier "$label" "$path" "$expected_bundle_id"
+
+  if ! display="$(codesign --display --verbose=4 "$path" 2>&1)"; then
+    fail "signing preflight failed for $label: unable to read codesign metadata at $path"
+  fi
+
+  if [[ "$DEVELOPER_ID_APPLICATION" == Developer\ ID\ Application:* ]]; then
+    if ! printf '%s\n' "$display" | grep -Fxq "Authority=$DEVELOPER_ID_APPLICATION"; then
+      fail "signing preflight failed for $label: expected authority $DEVELOPER_ID_APPLICATION at $path"
+    fi
+  elif ! printf '%s\n' "$display" | grep -Fq "Authority=Developer ID Application:"; then
+    fail "signing preflight failed for $label: expected Developer ID Application authority at $path"
+  fi
+
+  if ! printf '%s\n' "$display" | grep -Fxq "TeamIdentifier=$APPLE_TEAM_ID"; then
+    fail "signing preflight failed for $label: expected TeamIdentifier=$APPLE_TEAM_ID at $path"
+  fi
+  if ! printf '%s\n' "$display" | grep -q '^Timestamp='; then
+    fail "signing preflight failed for $label: missing secure timestamp at $path"
+  fi
+  if printf '%s\n' "$display" | grep -q '^Timestamp=none'; then
+    fail "signing preflight failed for $label: timestamp is none at $path"
+  fi
+  if ! printf '%s\n' "$display" | grep -q '^Runtime Version=' \
+    && ! printf '%s\n' "$display" | grep -q 'flags=.*runtime'; then
+    fail "signing preflight failed for $label: missing hardened runtime at $path"
+  fi
+
+  verify_no_get_task_allow "$label" "$path"
+}
+
+verify_release_signing_preflight() {
+  if [ -z "$DEVELOPER_ID_APPLICATION" ]; then
+    warn "Skipping release signing preflight because this rehearsal build is unsigned."
+    return
+  fi
+
+  local sparkle_framework="$APP_OUTPUT/Contents/Frameworks/Sparkle.framework"
+  local sparkle_version_dir
+  local component_rel
+
+  info "Running release signing preflight"
+  verify_release_component_signature "Host app" "$APP_OUTPUT" "com.postmelee.alhangeul"
+  verify_release_component_signature \
+    "Quick Look extension" \
+    "$APP_OUTPUT/Contents/PlugIns/AlhangeulPreview.appex" \
+    "com.postmelee.alhangeul.QLExtension"
+  verify_release_component_signature \
+    "Thumbnail extension" \
+    "$APP_OUTPUT/Contents/PlugIns/AlhangeulThumbnail.appex" \
+    "com.postmelee.alhangeul.ThumbnailExtension"
+
+  sparkle_version_dir="$(resolve_sparkle_version_dir "$sparkle_framework")"
+  verify_release_component_signature "Sparkle framework" "$sparkle_framework"
+  while IFS= read -r component_rel; do
+    verify_release_component_signature \
+      "Sparkle $component_rel" \
+      "$sparkle_version_dir/$component_rel"
+  done < <(sparkle_required_component_paths)
 }
 
 notary_json_value() {
@@ -656,6 +851,7 @@ main() {
   sign_release_app_for_notarization
   verify_universal_app
   verify_app_signature
+  verify_release_signing_preflight
   notarize_and_staple_app
   create_dmg
   sign_dmg

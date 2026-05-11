@@ -39,7 +39,7 @@
 ## 현재 release 자산
 
 - `scripts/package-release.sh`: Release configuration 개발/검증용 zip 생성
-- `scripts/release.sh`: public DMG 생성, Developer ID 서명, notarization, staple, Gatekeeper 검증, sha256 생성
+- `scripts/release.sh`: public DMG 생성, Developer ID 서명, app notarization 전 signing preflight, notarization, staple, Gatekeeper 검증, sha256 생성
 - `scripts/ci/write-release-notes.sh`: GitHub Release 본문 후보 생성
 - `scripts/ci/check-release-notes-template.sh`: release note 필수 heading 검증
 - `scripts/ci/verify-universal-macos-app.sh`: app bundle 내부 앱/extension 실행 파일의 `arm64 + x86_64` slice 검증
@@ -101,6 +101,7 @@
 - [ ] 개발용 zip 산출물 생성
 - [ ] public DMG 산출물 생성
 - [ ] public DMG 안의 app/extension 실행 파일 `arm64 + x86_64` universal 검증
+- [ ] app notarization submit 전 signing preflight 통과: Developer ID, Team ID, timestamp, hardened runtime, `get-task-allow` 부재, Sparkle nested component 존재 확인
 - [ ] public DMG 안의 app bundle `Contents/Info.plist`에 `NSHumanReadableCopyright`가 포함되어 있고 현재 release 저작권자 문구와 일치하는지 확인
 - [ ] public DMG 안의 app bundle `Contents/Resources/Legal/{LICENSE,THIRD_PARTY_LICENSES.md,FONTS.md}` 존재 확인
 - [ ] public DMG 안의 app bundle `Contents/Resources/Legal/*` 파일이 release candidate commit의 canonical `LICENSE`, `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`와 같은지 확인

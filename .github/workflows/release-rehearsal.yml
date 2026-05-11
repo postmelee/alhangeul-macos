@@ -145,6 +145,19 @@ jobs:
             echo "- Source provenance, Cargo lock, generated header, and FFI symbol checks still run."
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Record signing preflight policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Signing preflight policy"
+            echo
+            echo "- release command: \`./scripts/release.sh --skip-notarize \"$VERSION\"\`"
+            echo "- Default rehearsal artifacts are unsigned and skip Developer ID signing preflight."
+            echo "- If \`ALHANGEUL_DEVELOPER_ID_APPLICATION\` is provided, \`release.sh\` runs the same app/extension/Sparkle signing preflight before DMG creation."
+            echo "- Rehearsal artifacts are never public release or Homebrew Cask inputs."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Verify rhwp source, header, and ABI lock
         shell: bash
         run: |
