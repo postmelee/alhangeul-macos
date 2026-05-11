@@ -124,6 +124,15 @@ classify_path() {
   esac
 
   case "$path" in
+    RustBridge/examples/*)
+      enable_macos_build "$path affects Rust benchmark/helper sources"
+      matched=1
+      ;;
+  esac
+
+  case "$path" in
+    RustBridge/examples/*)
+      ;;
     RustBridge/*|rhwp-core.lock|Frameworks/*|Vendor/rhwp/*|rust-toolchain.toml|scripts/build-rust-macos.sh|scripts/update-rhwp-core.sh|scripts/sync-rhwp-studio.sh|scripts/verify-rhwp-studio-assets.sh)
       enable_macos_build "$path affects Rust bridge/core artifacts"
       enable_rust_verify "$path affects Rust bridge/core lock verification"
