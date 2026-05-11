@@ -4,6 +4,8 @@
 
 Stage 4 성능 비교만으로는 전환 판단이 부족했다. 이번 단계에서는 현재 native bitmap renderer와 `rhwp` core SVG PDF 후보의 시각 차이를 같은 픽셀 크기의 PNG로 비교한다.
 
+보정: 이 문서는 `SVG PDF 전환 후보` 비교 문서다. `native bitmap renderer가 rhwp-studio/core SVG 기준을 얼마나 따라잡았는지`에 대한 golden 비교는 Stage 6의 `core SVG WebKit` 비교를 기준으로 한다. Stage 5에는 SVG->PDF 변환과 PDF rasterize 차이가 섞인다.
+
 비교 대상:
 
 - 기준: 현재 Swift native renderer PNG
