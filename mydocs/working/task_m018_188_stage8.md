@@ -63,4 +63,8 @@ Stage 8은 source와 local smoke 준비 단계다. 다음 작업은 public relea
 3. 기존 GitHub Release asset을 `--clobber`로 교체하는 방식 확정
 4. stable Pages appcast를 build `3`으로 재배포하는 방식 확정
 5. Homebrew Cask SHA256을 새 public DMG checksum으로 다시 갱신하는 방식 확정
-6. Sparkle 업데이트 설치 후 active provider가 새 build `3` app 내부 `.appex`로 refresh되는지 설치본 smoke 수행
+6. Sparkle 업데이트 설치 후 `scripts/smoke-sparkle-extension-refresh.sh --expected-version 0.1.1 --expected-build 3` 기본 모드로 active provider가 새 build `3` app 내부 `.appex`를 가리키는지 확인
+
+## Stage 9 이월
+
+build `3` local smoke 이후 About window의 `시스템 등록 확인 불가` 표시가 남아 Stage 9로 분리했다. 이미 `0.1.1 (3)` 설치 사용자가 생길 수 있으므로 다음 respin 후보는 build `4`로 올린다. 상세는 `task_m018_188_stage9.md`를 따른다.

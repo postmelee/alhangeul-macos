@@ -152,6 +152,7 @@ final class ExtensionStatusModel: ObservableObject {
         snapshots = Self.checkingSnapshots()
 
         let appBundleURL = Bundle.main.bundleURL
+        ExtensionSystemRegistrationRefresher.refresh(appBundleURL: appBundleURL)
 
         Task.detached {
             let snapshots = Dictionary(
@@ -178,9 +179,10 @@ final class ExtensionStatusModel: ObservableObject {
         for status: ExtensionStatus,
         appBundleURL: URL
     ) -> ExtensionStatusSnapshot {
-        ExtensionStatusSnapshot(
-            bundle: bundleState(for: status, appBundleURL: appBundleURL),
-            registration: registrationState(for: status)
+        let bundleState = bundleState(for: status, appBundleURL: appBundleURL)
+        return ExtensionStatusSnapshot(
+            bundle: bundleState,
+            registration: registrationState(for: status, bundleState: bundleState)
         )
     }
 
@@ -192,42 +194,29 @@ final class ExtensionStatusModel: ObservableObject {
             .appendingPathComponent("Contents/PlugIns", isDirectory: true)
             .appendingPathComponent(status.appexBundleName, isDirectory: true)
 
-        return FileManager.default.fileExists(atPath: appexURL.path) ? .bundled : .missing
+        guard FileManager.default.fileExists(atPath: appexURL.path),
+              Bundle(url: appexURL)?.bundleIdentifier == status.bundleIdentifier
+        else {
+            return .missing
+        }
+
+        return .bundled
     }
 
-    nonisolated private static func registrationState(for status: ExtensionStatus) -> ExtensionRegistrationState {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/pluginkit")
-        process.arguments = ["-m", "-i", status.bundleIdentifier, "-v"]
-
-        let output = Pipe()
-        let error = Pipe()
-        process.standardOutput = output
-        process.standardError = error
-
-        do {
-            try process.run()
-            process.waitUntilExit()
-
-            let outputText = String(
-                data: output.fileHandleForReading.readDataToEndOfFile(),
-                encoding: .utf8
-            ) ?? ""
-            _ = error.fileHandleForReading.readDataToEndOfFile()
-
-            guard process.terminationStatus == 0 else {
-                return .unavailable
-            }
-
-            guard let line = outputText
-                .split(separator: "\n")
-                .first(where: { $0.contains(status.bundleIdentifier) }) else {
-                return .missing
-            }
-
-            return line.trimmingCharacters(in: .whitespaces).hasPrefix("-") ? .disabled : .registered
-        } catch {
-            return .unavailable
+    nonisolated private static func registrationState(
+        for status: ExtensionStatus,
+        bundleState: ExtensionBundleState
+    ) -> ExtensionRegistrationState {
+        switch bundleState {
+        case .checking:
+            return .checking
+        case .bundled:
+            // Sandboxed apps cannot reliably run /usr/bin/pluginkit for discovery:
+            // PlugInKit reports unauthorized discovery from sandboxed clients.
+            // The app refreshes LaunchServices with public APIs before this check.
+            return .registered
+        case .missing:
+            return .missing
         }
     }
 }

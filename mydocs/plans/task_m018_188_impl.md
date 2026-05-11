@@ -591,6 +591,56 @@ git status --short --branch
 Task #188 Stage 8: v0.1.1 respin build 준비
 ```
 
+## Stage 9. About 확장 상태 표시와 build 4 respin
+
+### 목표
+
+Stage 8 build `3` smoke 이후 About window가 실제 PlugInKit 등록 상태와 다르게 `시스템 등록 확인 불가`를 표시하는 문제를 수정한다. 이미 build `3` 설치 사용자가 생길 수 있으므로 다음 public respin 후보는 같은 short version `0.1.1`에서 build `4`로 올린다.
+
+### 작업
+
+- 제품 앱 내부의 `pluginkit` CLI 기반 상태 조회를 제거한다.
+- app launch와 About `상태 새로고침`에서 `LSRegisterURL(..., true)`와 `NSWorkspace.noteFileSystemChanged(...)` public API 기반 refresh만 수행한다.
+- About 상태는 embedded appex 존재와 bundle identifier 정합성으로 판정한다.
+- HostApp, Quick Look preview extension, Thumbnail extension의 `CFBundleVersion`을 `4`로 올린다.
+- PR CI의 Sparkle appcast helper 검증 build 값을 `4`로 맞춘다.
+- release 기록과 smoke guide의 post-Sparkle 기대 build를 `4`로 보정한다.
+
+### 검증
+
+```bash
+plutil -extract CFBundleVersion raw -o - Sources/HostApp/Info.plist
+plutil -extract CFBundleVersion raw -o - Sources/QLExtension/Info.plist
+plutil -extract CFBundleVersion raw -o - Sources/ThumbnailExtension/Info.plist
+xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build
+scripts/ci/write-sparkle-appcast.sh \
+  --version 0.1.1 \
+  --build 4 \
+  --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.1/alhangeul-macos-0.1.1.dmg \
+  --length 1 \
+  --ed-signature dummy-ed-signature \
+  --release-notes-url https://postmelee.github.io/alhangeul-macos/updates/v0.1.1.html \
+  --pub-date "Mon, 11 May 2026 00:00:00 +0000" \
+  --minimum-system-version 12.0 \
+  --output build.noindex/release/appcast-stage9.xml
+xmllint --noout build.noindex/release/appcast-stage9.xml
+git diff --check
+git status --short --branch
+```
+
+### 완료 기준
+
+- app과 두 extension의 build가 모두 `4`로 일치한다.
+- About window가 embedded extension을 `시스템 등록됨`으로 표시할 수 있는 구조가 된다.
+- 제품 앱은 `pluginkit`/`qlmanage`/`killall`을 사용자-facing 버튼에서 실행하지 않는다.
+- public signed/notarized respin 실행 전 build `4` 기준 Sparkle update smoke가 남는다.
+
+### 커밋 메시지
+
+```text
+Task #188 Stage 9: About extension status refresh 보정
+```
+
 ## 승인 요청 사항
 
 1. 위 8단계 구현계획 승인

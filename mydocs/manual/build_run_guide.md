@@ -369,6 +369,18 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
 qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/hwpx/hwpx-01.hwpx
 ```
 
+Sparkle 업데이트 후에는 직접 재설치 smoke와 별도로 post-update provider refresh를 확인한다. 기존 public 설치본에서 Sparkle 업데이트를 완료한 뒤, 별도 수동 등록 없이 다음 helper가 통과해야 한다.
+
+```bash
+scripts/smoke-sparkle-extension-refresh.sh \
+  --expected-version 0.1.1 \
+  --expected-build 4
+```
+
+이 helper는 `pluginkit` active path가 새 `/Applications/Alhangeul.app` 내부 `.appex`인지 먼저 확인한 뒤 Quick Look/thumbnail cache를 reset하고 fresh sample thumbnail을 생성한다. `--repair-registration`은 `lsregister`/`pluginkit` 수동 보정이 문제를 해결하는지 확인하는 진단 옵션이며, release gate 통과 기준으로 쓰지 않는다.
+
+제품 앱의 About window는 sandbox 제약 때문에 `pluginkit` CLI를 상태 조회 기준으로 쓰지 않는다. 앱 시작과 `상태 새로고침`은 `LSRegisterURL(..., true)`와 `NSWorkspace.noteFileSystemChanged(...)`만 실행한다. `qlmanage -r cache`, `pluginkit -a`, `pluginkit -e use`는 사용자-facing 버튼 동작이 아니라 smoke/troubleshooting 단계에서 명시적으로 실행한다.
+
 ### 반복 시행착오 방지 규칙
 
 핵심 3개:
