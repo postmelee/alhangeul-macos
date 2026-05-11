@@ -29,6 +29,7 @@ DMG_URL="https://github.com/$REPOSITORY/releases/download/$TAG_NAME/$DMG_NAME"
 PAGES_RELEASE_NOTES_URL="https://postmelee.github.io/alhangeul-macos/updates/$TAG_NAME.html"
 APPCAST_URL="https://postmelee.github.io/alhangeul-macos/appcast.xml"
 RELEASE_DETAIL_DOC="mydocs/release/$TAG_NAME.md"
+CORE_LOCK="rhwp-core.lock"
 
 if ! [[ "$VERSION" =~ ^[0-9]+[.][0-9]+[.][0-9]+([-+][0-9A-Za-z.-]+)?$ ]]; then
   echo "ERROR: version must look like semantic version, got: $VERSION" >&2
@@ -117,14 +118,17 @@ cat > "$OUTPUT_FILE" <<EOF
 - Homebrew Cask도 아키텍처별 URL을 나누지 않고 같은 public universal DMG URL과 SHA256을 사용합니다.
 - 공개 완료 후 설치 명령은 \`brew install --cask postmelee/tap/alhangeul-macos\` 기준으로 README, Pages, GitHub Release/릴리즈 노트에 반영합니다.
 
-## 포함된 rhwp core와 viewer asset provenance
+## Release metadata
 
-- rhwp core release tag: \`$RHWP_TAG\`
-- rhwp core commit: \`$RHWP_COMMIT\`
-- rhwp-studio release tag: \`$STUDIO_TAG\`
-- rhwp-studio commit: \`$STUDIO_COMMIT\`
-- manifest: \`$STUDIO_MANIFEST\`
-- release detail doc: \`$RELEASE_DETAIL_DOC\`
+| 항목 | 값 |
+|------|----|
+| App version | \`$TAG_NAME\` |
+| rhwp core release tag | \`$RHWP_TAG\` |
+| rhwp core commit | \`$RHWP_COMMIT\` |
+| bundled rhwp-studio release tag | \`$STUDIO_TAG\` |
+| bundled rhwp-studio commit | \`$STUDIO_COMMIT\` |
+| core lock | \`$CORE_LOCK\` |
+| studio manifest | \`$STUDIO_MANIFEST\` |
 
 ## 검증 결과
 

@@ -45,9 +45,10 @@
 
 - GitHub Release: [Alhangeul v0.1.1](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.1)
 - 업데이트 페이지: [알한글 v0.1.1](https://postmelee.github.io/alhangeul-macos/updates/v0.1.1.html)
-- Sparkle update 기준: short version은 `0.1.1`, respin build는 `3`입니다.
+- 포함된 `rhwp`: [`v0.7.10`](https://github.com/edwardkim/rhwp/releases/tag/v0.7.10) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
+- Sparkle update 기준: short version은 `0.1.1`, respin build는 `4`입니다.
 
-과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약합니다.
+과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약하고, bundled `rhwp` provenance는 한 줄 요약만 표시합니다.
 
 ## 이정표
 
