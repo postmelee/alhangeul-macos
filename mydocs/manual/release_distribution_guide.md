@@ -28,6 +28,14 @@
 
 릴리즈별 실제 결정, SHA256, 검증 기록은 [`mydocs/release/`](../release/)에 남긴다. 환경 스냅샷은 [`release_environment.md`](../tech/release_environment.md)에 둔다. 실패 증상, 재현 조건, 원인, 재발 방지 절차가 모인 경우에만 `mydocs/troubleshootings/`로 분리한다.
 
+## 문제 해결 기록
+
+반복 가능한 release workflow 실패는 매뉴얼 본문에 사례를 길게 복제하지 않고 `mydocs/troubleshootings/` 아래에 별도 문서로 둔다.
+
+| 문서 | 읽는 시점 | 내용 |
+|------|-----------|------|
+| [`release_v0_1_1_workflow_failures.md`](../troubleshootings/release_v0_1_1_workflow_failures.md) | `v0.1.1` release workflow와 같은 계열의 GitHub Actions, Developer ID, notarization, Sparkle signing, Rust staticlib 실패를 진단할 때 | `GH_TOKEN`, `$GITHUB_OUTPUT`, `cbindgen`, `librhwp.a` hash mismatch, notarization log, Sparkle nested signing, extension entitlement 실패 사례 |
+
 ## 현재 release 자산
 
 - `scripts/package-release.sh`: Release configuration 개발/검증용 zip 생성

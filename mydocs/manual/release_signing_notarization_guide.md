@@ -86,4 +86,5 @@ spctl --assess --type open --context context:primary-signature --verbose build.n
 
 - credential 조회 실패는 `release_environment.md`의 환경 식별자와 실제 Keychain/workflow 환경을 먼저 대조한다.
 - app/DMG staple 실패, Gatekeeper 차단, notarization rejection은 release report에 실제 command, 대상 파일, 오류 요약을 기록한다.
+- Sparkle nested component signing, app extension entitlement, notary log 부족이 의심되면 [`release_v0_1_1_workflow_failures.md`](../troubleshootings/release_v0_1_1_workflow_failures.md)의 `v0.1.1` release workflow 실패 사례를 함께 확인한다.
 - 반복 가능한 실패 증상, 재현 조건, 원인, 재발 방지 절차가 정리되면 `mydocs/troubleshootings/`에 별도 문서로 승격한다.
