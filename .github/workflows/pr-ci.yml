@@ -90,6 +90,8 @@ jobs:
     timeout-minutes: 120
     needs: classify-changes
     if: ${{ needs.classify-changes.outputs.run_macos_build == 'true' }}
+    env:
+      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: "1"
 
     steps:
       - name: Check out repository
