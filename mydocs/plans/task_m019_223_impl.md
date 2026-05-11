@@ -318,7 +318,68 @@ xcodebuild -project Alhangeul.xcodeproj \
 Task #223 Stage 5: nonfatal banner dismiss UX 추가
 ```
 
-## Stage 6. 최종 정리와 PR 준비
+## Stage 6. Enter 입력 invalid-control runtime 분류 보강
+
+### 목표
+
+Space 입력 외에 Enter 입력에서도 같은 `지정된 컨트롤이 표, 글상자 또는 그림이 아닙니다` runtime error가 발생해 전체 fallback으로 전환되는 문제를 보강한다.
+
+### 작업
+
+1. Enter 입력 fallback 진단값을 Stage 6 보고서에 기록한다.
+   - `message=렌더링 오류: 지정된 컨트롤이 표, 글상자 또는 그림이 아닙니다`
+   - `sourceURL=alhangeul-studio://app/assets/index-BN69C-Lp.js`
+   - `line=1`
+   - `column=45271`
+2. 기존 Space 경로의 `column=30942` 고정 allow-list를 제거한다.
+3. post-load 상태, 정확한 오류 문구, bundled `rhwp-studio` `index-*.js` source 조건은 유지한다.
+4. `index.html` unhandled rejection fallback도 stack이 bundled `index-*.js` line 1을 가리킬 때만 recoverable로 둔다.
+5. Stage 6 완료보고서를 작성한다.
+
+### 예상 변경 파일
+
+- `Sources/HostApp/Views/RhwpStudioWebView.swift`
+- `mydocs/orders/20260511.md`
+- `mydocs/plans/task_m019_223_impl.md`
+- `mydocs/working/task_m019_223_stage6.md`
+
+### 검증
+
+```bash
+git diff --check -- Sources/HostApp/Views/RhwpStudioWebView.swift mydocs/plans/task_m019_223_impl.md mydocs/working/task_m019_223_stage6.md
+xcodebuild -project Alhangeul.xcodeproj \
+  -scheme HostApp \
+  -configuration Debug \
+  -derivedDataPath build.noindex/DerivedDataStage6 \
+  CODE_SIGNING_ALLOWED=NO \
+  build
+scripts/verify-rhwp-studio-assets.sh
+scripts/verify-rhwp-studio-assets.sh build.noindex/DerivedDataStage6/Build/Products/Debug/Alhangeul.app/Contents/Resources/rhwp-studio
+```
+
+수동 smoke:
+
+```text
+1. Debug HostApp으로 samples/exam_science.hwp 열기
+2. Stage 1 재현 위치에서 작은 object 선택 후 Space 입력
+3. 같은 선택 상태 계열에서 Enter 입력
+4. 두 입력 모두 전체 fallback이 아니라 nonfatal banner로 남는지 확인
+5. 빈 문서 또는 WASM 누락 fatal fallback은 계속 전체 fallback으로 남는지 확인
+```
+
+### 완료 기준
+
+- Space 경로의 `column=30942`뿐 아니라 Enter 경로의 `column=45271`도 recoverable로 분류된다.
+- recoverable 분류는 문서 표시 완료 이후 bundled viewer runtime에서 발생한 정확한 invalid-control 오류에만 적용된다.
+- load/resource/document fatal failure 경로는 기존처럼 유지된다.
+
+### 커밋 메시지
+
+```text
+Task #223 Stage 6: Enter 입력 invalid-control 오류 recoverable 처리
+```
+
+## Stage 7. 최종 정리와 PR 준비
 
 ### 목표
 
@@ -326,16 +387,16 @@ Task #223 Stage 5: nonfatal banner dismiss UX 추가
 
 ### 작업
 
-1. Stage 1-5 결과를 최종 보고서에 요약한다.
+1. Stage 1-6 결과를 최종 보고서에 요약한다.
 2. `mydocs/orders/20260511.md`에서 #223 상태를 완료로 갱신한다.
 3. 최종 결과 보고서 `mydocs/report/task_m019_223_report.md`를 작성한다.
 4. 전체 whitespace와 git 상태를 확인한다.
-5. Stage 6 완료보고서를 작성한다.
+5. Stage 7 완료보고서를 작성한다.
 
 ### 예상 변경 파일
 
 - `mydocs/orders/20260511.md`
-- `mydocs/working/task_m019_223_stage6.md`
+- `mydocs/working/task_m019_223_stage7.md`
 - `mydocs/report/task_m019_223_report.md`
 
 ### 검증
@@ -365,10 +426,10 @@ git status --short
 ### 커밋 메시지
 
 ```text
-Task #223 Stage 6 + 최종 보고서: 그림 선택 Space runtime fallback 보강 완료
+Task #223 Stage 7 + 최종 보고서: 그림 선택 Space runtime fallback 보강 완료
 ```
 
 ## 승인 요청 사항
 
-1. 위 6단계 구현계획 승인
+1. 위 7단계 구현계획 승인
 2. Stage 1에서 재현 확정과 진단 경로 기록부터 진행 승인

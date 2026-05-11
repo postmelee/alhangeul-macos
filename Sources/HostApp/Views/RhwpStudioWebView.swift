@@ -81,7 +81,8 @@ extension RhwpStudioWebView {
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
         private static let nativeDropSuppressionInterval: TimeInterval = 2
         private static let recoverableInvalidControlMessage = "지정된 컨트롤이 표, 글상자 또는 그림이 아닙니다"
-        private static let recoverableInvalidControlColumn = 30942
+        private static let recoverableInvalidControlAssetPathPrefix = "/assets/index-"
+        private static let recoverableInvalidControlAssetLine = 1
 
         private enum LoadIdentity: Equatable {
             case empty(reloadToken: Int)
@@ -451,13 +452,13 @@ extension RhwpStudioWebView {
             }
 
             let path = url.path
-            if path.hasPrefix("/assets/index-") && path.hasSuffix(".js") {
-                return line == 1 && column == recoverableInvalidControlColumn
+            if path.hasPrefix(recoverableInvalidControlAssetPathPrefix) && path.hasSuffix(".js") {
+                return line == recoverableInvalidControlAssetLine
             }
 
             if path == "/index.html", line == 0, column == 0 {
-                return reason?.contains("/assets/index-") == true
-                    && reason?.contains(":1:\(recoverableInvalidControlColumn)") == true
+                return reason?.contains(recoverableInvalidControlAssetPathPrefix) == true
+                    && reason?.contains(":\(recoverableInvalidControlAssetLine):") == true
             }
 
             return false
