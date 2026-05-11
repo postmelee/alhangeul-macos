@@ -353,30 +353,116 @@ expand_entitlements() {
   sed "s|\$(PRODUCT_BUNDLE_IDENTIFIER)|$bundle_id|g" "$source" > "$output"
 }
 
+sparkle_required_component_paths() {
+  printf '%s\n' \
+    "XPCServices/Downloader.xpc" \
+    "XPCServices/Installer.xpc" \
+    "Updater.app" \
+    "Autoupdate"
+}
+
+sparkle_version_dir_has_required_components() {
+  local version_dir="$1"
+  local component_rel
+
+  while IFS= read -r component_rel; do
+    if [ ! -e "$version_dir/$component_rel" ]; then
+      return 1
+    fi
+  done < <(sparkle_required_component_paths)
+
+  return 0
+}
+
+report_missing_sparkle_components() {
+  local version_dir="$1"
+  local component_rel
+
+  while IFS= read -r component_rel; do
+    if [ ! -e "$version_dir/$component_rel" ]; then
+      warn "Missing Sparkle notarization component: $version_dir/$component_rel"
+    fi
+  done < <(sparkle_required_component_paths)
+}
+
+resolve_sparkle_current_version_dir() {
+  local versions_dir="$1"
+  local current_dir="$versions_dir/Current"
+
+  if [ -d "$current_dir" ]; then
+    (cd "$current_dir" && pwd -P)
+  fi
+}
+
+resolve_sparkle_version_dir() {
+  local sparkle_framework="$1"
+  local versions_dir="$sparkle_framework/Versions"
+  local candidate
+  local current_version_dir
+  local resolved_candidate
+
+  if [ ! -d "$sparkle_framework" ]; then
+    fail "missing Sparkle framework: $sparkle_framework"
+  fi
+  if [ ! -d "$versions_dir" ]; then
+    fail "missing Sparkle framework Versions directory: $versions_dir"
+  fi
+
+  current_version_dir="$(resolve_sparkle_current_version_dir "$versions_dir")"
+  if [ -n "$current_version_dir" ]; then
+    if sparkle_version_dir_has_required_components "$current_version_dir"; then
+      echo "$current_version_dir"
+      return
+    fi
+    warn "Sparkle Versions/Current is missing required notarization components: $current_version_dir"
+    report_missing_sparkle_components "$current_version_dir"
+  fi
+
+  for candidate in "$versions_dir"/*; do
+    if [ ! -d "$candidate" ]; then
+      continue
+    fi
+    if [ "${candidate##*/}" = "Current" ]; then
+      continue
+    fi
+
+    resolved_candidate="$(cd "$candidate" && pwd -P)"
+    if sparkle_version_dir_has_required_components "$resolved_candidate"; then
+      echo "$resolved_candidate"
+      return
+    fi
+  done
+
+  warn "Checked Sparkle framework version directories under: $versions_dir"
+  for candidate in "$versions_dir"/*; do
+    if [ ! -d "$candidate" ]; then
+      continue
+    fi
+    if [ "${candidate##*/}" = "Current" ]; then
+      continue
+    fi
+    report_missing_sparkle_components "$candidate"
+  done
+  fail "could not find a Sparkle framework version directory with all required notarization components"
+}
+
 sign_sparkle_components_for_notarization() {
   if [ -z "$DEVELOPER_ID_APPLICATION" ]; then
     return
   fi
 
   local sparkle_framework="$APP_OUTPUT/Contents/Frameworks/Sparkle.framework"
-  local sparkle_version_dir="$sparkle_framework/Versions/B"
+  local sparkle_version_dir
+  local component_rel
   local component
 
-  if [ ! -d "$sparkle_version_dir" ]; then
-    return
-  fi
+  sparkle_version_dir="$(resolve_sparkle_version_dir "$sparkle_framework")"
 
   info "Signing Sparkle nested components for notarization"
-  for component in \
-    "$sparkle_version_dir/XPCServices/Downloader.xpc" \
-    "$sparkle_version_dir/XPCServices/Installer.xpc" \
-    "$sparkle_version_dir/Updater.app" \
-    "$sparkle_version_dir/Autoupdate"
-  do
-    if [ -e "$component" ]; then
-      codesign_developer_id "$component"
-    fi
-  done
+  while IFS= read -r component_rel; do
+    component="$sparkle_version_dir/$component_rel"
+    codesign_developer_id "$component"
+  done < <(sparkle_required_component_paths)
 
   codesign_developer_id "$sparkle_framework"
 }
