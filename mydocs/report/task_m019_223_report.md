@@ -1,11 +1,13 @@
 # Task M019 #223 최종 보고서
 
-## 개요
+## 작업 요약
 
 - 이슈: #223 그림 선택 후 Space 입력 시 WKWebView viewer runtime error 발생
 - 마일스톤: M019 (`v0.1.2`)
 - 브랜치: `local/task223`
 - 작업 위치: `/private/tmp/rhwp-mac-task223`
+- 기준 브랜치: `devel-webview`
+- 단계 수: 7단계
 - 목적: 문서 표시 후 그림/개체 선택 상태에서 발생하는 recoverable viewer runtime error가 앱 전체 fallback 화면으로 전환되지 않게 하고, 실제 load/resource/document failure는 fatal fallback으로 유지
 
 ## 결과
@@ -44,20 +46,22 @@ column=45271
 
 ## 주요 변경 파일
 
-- `Sources/HostApp/Stores/DocumentViewerStore.swift`
-- `Sources/HostApp/Services/RhwpStudioResourceLocator.swift`
-- `Sources/HostApp/Views/RhwpStudioWebView.swift`
-- `Sources/HostApp/Views/DocumentViewerView.swift`
-- `mydocs/orders/20260511.md`
-- `mydocs/plans/task_m019_223.md`
-- `mydocs/plans/task_m019_223_impl.md`
-- `mydocs/working/task_m019_223_stage1.md`
-- `mydocs/working/task_m019_223_stage2.md`
-- `mydocs/working/task_m019_223_stage3.md`
-- `mydocs/working/task_m019_223_stage4.md`
-- `mydocs/working/task_m019_223_stage5.md`
-- `mydocs/working/task_m019_223_stage6.md`
-- `mydocs/working/task_m019_223_stage7.md`
+| 파일 | 내용 |
+|------|------|
+| `Sources/HostApp/Stores/DocumentViewerStore.swift` | fatal/nonfatal WebView failure 라우팅, banner dismiss task, 수동 dismiss API 추가 |
+| `Sources/HostApp/Services/RhwpStudioResourceLocator.swift` | runtime failure factory의 `isFatal` 인자 반영 |
+| `Sources/HostApp/Views/RhwpStudioWebView.swift` | post-load invalid-control runtime error recoverable 분류, Space/Enter column 의존 제거 |
+| `Sources/HostApp/Views/DocumentViewerView.swift` | nonfatal banner 자동 dismiss와 우측 `xmark` 닫기 버튼 UI 추가 |
+| `mydocs/orders/20260511.md` | #223 진행 상태와 완료 시각 갱신 |
+| `mydocs/plans/task_m019_223.md` | 수행계획서 작성 |
+| `mydocs/plans/task_m019_223_impl.md` | Stage 1-7 구현계획 작성과 Stage 5/6 범위 보강 |
+| `mydocs/working/task_m019_223_stage1.md` | 재현 경로와 Space 입력 진단 기록 |
+| `mydocs/working/task_m019_223_stage2.md` | nonfatal routing 구현 결과 기록 |
+| `mydocs/working/task_m019_223_stage3.md` | Space 입력 recoverable 분류 구현 결과 기록 |
+| `mydocs/working/task_m019_223_stage4.md` | fatal fallback 회귀 smoke 결과 기록 |
+| `mydocs/working/task_m019_223_stage5.md` | banner dismiss UX 구현 결과 기록 |
+| `mydocs/working/task_m019_223_stage6.md` | Enter 입력 recoverable 분류 보강 결과 기록 |
+| `mydocs/working/task_m019_223_stage7.md` | 최종 정리와 PR 준비 결과 기록 |
 
 ## 구현 요약
 
@@ -120,11 +124,13 @@ xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug -de
 xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedDataStage5 CODE_SIGNING_ALLOWED=NO build
 xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedDataStage6 CODE_SIGNING_ALLOWED=NO build
 xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedDataStage7 CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedDataFinal CODE_SIGNING_ALLOWED=NO build
 scripts/verify-rhwp-studio-assets.sh
 scripts/verify-rhwp-studio-assets.sh build.noindex/DerivedDataStage3/Build/Products/Debug/Alhangeul.app/Contents/Resources/rhwp-studio
 scripts/verify-rhwp-studio-assets.sh build.noindex/DerivedDataStage5/Build/Products/Debug/Alhangeul.app/Contents/Resources/rhwp-studio
 scripts/verify-rhwp-studio-assets.sh build.noindex/DerivedDataStage6/Build/Products/Debug/Alhangeul.app/Contents/Resources/rhwp-studio
 scripts/verify-rhwp-studio-assets.sh build.noindex/DerivedDataStage7/Build/Products/Debug/Alhangeul.app/Contents/Resources/rhwp-studio
+scripts/verify-rhwp-studio-assets.sh build.noindex/DerivedDataFinal/Build/Products/Debug/Alhangeul.app/Contents/Resources/rhwp-studio
 xcodebuild -list -project Alhangeul.xcodeproj
 git diff --check
 ```
@@ -142,6 +148,26 @@ git diff --check
 
 테스트 타깃은 별도로 없고, `HostApp`, `QLExtension`, `ThumbnailExtension` scheme만 존재한다.
 
+## 수용 기준별 결과
+
+| 수용 기준 | 결과 | 근거 |
+|-----------|------|------|
+| Space 입력에서 전체 runtime fallback 미표시 | OK | Stage 3 smoke와 작업지시자 확인 |
+| Enter 입력에서 전체 runtime fallback 미표시 | OK | Stage 6에서 같은 invalid-control 계열로 분류 보강 |
+| nonfatal banner 자동 dismiss | OK | Stage 5에서 5초 자동 dismiss 구현, 작업지시자 확인 |
+| nonfatal banner 수동 닫기 | OK | Stage 5에서 우측 `xmark` 버튼 구현, 작업지시자 확인 |
+| fatal load/resource/document fallback 유지 | OK | Stage 4 negative smoke, Stage 6/7 asset 검증 |
+| PR 전 미커밋 변경 없음 | OK | Stage 7 커밋 후 `local/task223` clean 확인 |
+
+## 변경 전·후 정량 비교
+
+| 항목 | 변경 전 | 변경 후 |
+|------|---------|---------|
+| recoverable invalid-control 처리 | 전체 fallback 화면 전환 | 문서 화면 유지와 nonfatal banner |
+| banner dismiss | 수동 닫기 없음, 자동 dismiss 없음 | 5초 자동 dismiss와 우측 닫기 버튼 |
+| runtime column allow-list | 없음 또는 Space `30942` 중심 | bundled `index-*.js` line 1의 정확한 invalid-control 문구 기준 |
+| 검증 빌드 | 없음 | Stage 3, 5, 6, 7, Final `HostApp` Debug build 통과 |
+
 ## 미수행 범위
 
 - upstream `edwardkim/rhwp` 또는 `rhwp-studio` source 수정
@@ -157,4 +183,4 @@ git diff --check
 
 ## 다음 절차
 
-최종 산출물 승인 후 `task-final-report` 절차로 `publish/task223` 브랜치와 PR 게시를 진행할 수 있다.
+작업지시자가 2026-05-11 12:55에 "진행해줘"로 PR 게시 절차 진행을 승인했다.
