@@ -88,9 +88,15 @@ Dry-run output은 `build.noindex/release/release-notes-0.1.2.md`이며 `.gitigno
 
 ## 원격 기준 상태
 
-현재 브랜치는 `origin/devel-webview` 대비 `ahead 6, behind 11` 상태다. 원격의 ahead commit은 #221 merge와 관련된 변경이며, 변경 파일 겹침은 `mydocs/orders/20260511.md`에서 확인됐다.
+최초 Stage 4 검증 시점의 브랜치는 `origin/devel-webview` 대비 `ahead 6, behind 11` 상태였다. 원격의 ahead commit은 #221 merge와 관련된 변경이며, 변경 파일 겹침은 `mydocs/orders/20260511.md`에서 확인됐다.
 
-Stage 4에서 `origin/devel-webview:mydocs/orders/20260511.md`의 #221 완료 행을 보존하고 #205 완료 행을 함께 반영했다. PR 전에는 최신 `devel-webview` 기준으로 rebase 또는 merge 충돌 여부를 다시 확인해야 한다.
+PR 게시 전 최신 기준 정리를 위해 `origin/devel-webview`를 병합했다. `mydocs/orders/20260511.md`에서 add/add 충돌이 발생했고, #221 완료 행과 #205 완료 행을 모두 보존하는 방식으로 해결했다.
+
+병합 완료 후 상태:
+
+- `git status --short --branch --ignored=no`: `local/task205...origin/devel-webview [ahead 8]`
+- `git diff --name-only origin/devel-webview...HEAD`: #205 변경 파일만 표시
+- `git diff --check`: 통과
 
 ## 오늘할일 갱신
 
