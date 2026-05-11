@@ -261,7 +261,64 @@ git diff --check -- mydocs/working/task_m019_223_stage4.md
 Task #223 Stage 4: WebView fallback 회귀 smoke 확인
 ```
 
-## Stage 5. 최종 정리와 PR 준비
+## Stage 5. nonfatal banner 자동 dismiss와 수동 닫기
+
+### 목표
+
+nonfatal runtime error banner가 문서 화면 위에 계속 남지 않도록 일정 시간 뒤 자동으로 사라지게 하고, 사용자가 즉시 닫을 수 있는 우측 닫기 버튼을 제공한다.
+
+### 작업
+
+1. `DocumentViewerStore`가 `webViewErrorMessage` 표시와 dismiss 예약 task를 소유하게 한다.
+2. 새 banner message가 들어오면 기존 dismiss 예약을 취소하고 새 타이머를 시작한다.
+3. fatal fallback으로 전환되거나 문서 reload/retry가 발생하면 dismiss 예약과 banner를 함께 정리한다.
+4. `WebViewerErrorBanner` 우측에 `xmark` 닫기 버튼을 추가한다.
+5. Stage 5 완료보고서를 작성한다.
+
+### 예상 변경 파일
+
+- `Sources/HostApp/Stores/DocumentViewerStore.swift`
+- `Sources/HostApp/Views/DocumentViewerView.swift`
+- `mydocs/orders/20260511.md`
+- `mydocs/plans/task_m019_223_impl.md`
+- `mydocs/working/task_m019_223_stage5.md`
+
+### 검증
+
+```bash
+git diff --check -- Sources/HostApp/Stores/DocumentViewerStore.swift Sources/HostApp/Views/DocumentViewerView.swift mydocs/plans/task_m019_223_impl.md mydocs/working/task_m019_223_stage5.md
+xcodebuild -project Alhangeul.xcodeproj \
+  -scheme HostApp \
+  -configuration Debug \
+  -derivedDataPath build.noindex/DerivedDataStage5 \
+  CODE_SIGNING_ALLOWED=NO \
+  build
+```
+
+수동 smoke:
+
+```text
+1. Debug HostApp으로 samples/exam_science.hwp 열기
+2. Stage 1 재현 동작으로 nonfatal banner 표시
+3. 우측 x 버튼으로 즉시 사라지는지 확인
+4. 다시 같은 동작으로 banner 표시 후 일정 시간 뒤 자동으로 사라지는지 확인
+5. WASM 누락 또는 빈 문서 fatal fallback에는 닫기 버튼/자동 dismiss가 적용되지 않는지 확인
+```
+
+### 완료 기준
+
+- nonfatal banner는 5초 뒤 자동으로 사라진다.
+- 같은 banner가 다시 표시되면 dismiss 타이머가 reset된다.
+- 닫기 버튼을 누르면 즉시 banner가 사라진다.
+- fatal fallback 화면은 자동 dismiss되지 않는다.
+
+### 커밋 메시지
+
+```text
+Task #223 Stage 5: nonfatal banner dismiss UX 추가
+```
+
+## Stage 6. 최종 정리와 PR 준비
 
 ### 목표
 
@@ -269,16 +326,16 @@ Task #223 Stage 4: WebView fallback 회귀 smoke 확인
 
 ### 작업
 
-1. Stage 1-4 결과를 최종 보고서에 요약한다.
+1. Stage 1-5 결과를 최종 보고서에 요약한다.
 2. `mydocs/orders/20260511.md`에서 #223 상태를 완료로 갱신한다.
 3. 최종 결과 보고서 `mydocs/report/task_m019_223_report.md`를 작성한다.
 4. 전체 whitespace와 git 상태를 확인한다.
-5. Stage 5 완료보고서를 작성한다.
+5. Stage 6 완료보고서를 작성한다.
 
 ### 예상 변경 파일
 
 - `mydocs/orders/20260511.md`
-- `mydocs/working/task_m019_223_stage5.md`
+- `mydocs/working/task_m019_223_stage6.md`
 - `mydocs/report/task_m019_223_report.md`
 
 ### 검증
@@ -308,10 +365,10 @@ git status --short
 ### 커밋 메시지
 
 ```text
-Task #223 Stage 5 + 최종 보고서: 그림 선택 Space runtime fallback 보강 완료
+Task #223 Stage 6 + 최종 보고서: 그림 선택 Space runtime fallback 보강 완료
 ```
 
 ## 승인 요청 사항
 
-1. 위 5단계 구현계획 승인
+1. 위 6단계 구현계획 승인
 2. Stage 1에서 재현 확정과 진단 경로 기록부터 진행 승인
