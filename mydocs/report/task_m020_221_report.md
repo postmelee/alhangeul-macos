@@ -20,6 +20,7 @@
 | `scripts/visual_compare_quicklook_renderers.swift` | PDF page rasterize, PNG 정규화, pixel diff, summary 작성 helper 추가 |
 | `scripts/visual-compare-core-svg-webkit.sh` | native bitmap renderer와 core SVG WebKit snapshot을 비교하는 wrapper 추가 |
 | `scripts/visual_compare_core_svg_webkit.swift` | WKWebView snapshot 기반 core SVG golden PNG 생성과 pixel diff helper 추가 |
+| `scripts/ci/classify-pr-changes.sh` | PR CI follow-up: `RustBridge/examples/*` 변경이 제품 staticlib lock byte 검증을 불필요하게 트리거하지 않도록 분류 보정 |
 | `mydocs/plans/task_m020_221.md` | SVG PDF spike 수행계획서 작성 |
 | `mydocs/plans/task_m020_221_impl.md` | 단계별 구현 계획과 검증 기준 작성 |
 | `mydocs/working/task_m020_221_stage1.md` | 현행 native bitmap PDF 경로, hwpql SVG/HTML 경로, PDF reply 유지 기준 정리 |
@@ -41,6 +42,7 @@
 | Stage 4 성능 결론 | `group-drawing-02.hwp`는 SVG PDF가 빠름. `eq-01.hwp`, `footnote-01.hwp`, `hwp-img-001.hwp`는 native bitmap PDF가 더 빠름 |
 | Stage 5 SVG PDF 후보 diff | page 1 기준 4.2595%~8.1387%, `footnote-01.hwp` page 6은 0.0085% |
 | Stage 6 core SVG WebKit golden diff | page 1 기준 4.3279%~6.7736%, `footnote-01.hwp` page 6은 0.0073% |
+| PR CI follow-up | `RustBridge/examples/svg_pdf_benchmark.rs` 추가가 `run_rust_verify=true`를 트리거해 `librhwp.a` byte hash mismatch가 발생한 것을 분류 규칙 보정으로 해결 |
 
 ## 검증 결과
 
@@ -53,6 +55,7 @@
 | native renderer와 core SVG WebKit 기준 시각 비교가 별도 helper로 재현 가능하다 | OK |
 | `git diff --check` | OK |
 | 신규 shell script syntax 검사 | OK |
+| `scripts/ci/classify-pr-changes.sh origin/devel-webview HEAD` | OK, `run_macos_build=true`, `run_rust_verify=false` |
 | 단계별 완료보고서 6개 존재 확인 | OK |
 
 ## 최종 판단
