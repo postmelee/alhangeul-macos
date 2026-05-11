@@ -128,10 +128,19 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func setWebViewFailure(_ failure: RhwpStudioWebViewFailure?) {
-        webViewFailure = failure
-        if failure != nil {
+        guard let failure else {
+            webViewFailure = nil
+            return
+        }
+
+        isWebViewLoading = false
+
+        if failure.isFatal {
+            webViewFailure = failure
             webViewErrorMessage = nil
-            isWebViewLoading = false
+        } else {
+            webViewFailure = nil
+            webViewErrorMessage = failure.message
         }
     }
 
