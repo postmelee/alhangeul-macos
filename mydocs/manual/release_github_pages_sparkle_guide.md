@@ -15,12 +15,29 @@
 - release branch 또는 tag 기준 commit이 정확한가
 - 릴리즈 상세 기록 `mydocs/release/v<version>.md`가 현재 release candidate 기준으로 갱신되었는가
 - 직전 public release 대비 delta checklist가 생성되고 release owner가 보정했는가
+- GitHub Release title이 기본형 `Alhangeul v<version>`을 쓰는가, 또는 upstream `rhwp` 반영 중심 release라서 `(rhwp vX.Y.Z)` 병기 조건을 충족하는가
 - `rhwp-core.lock`의 core repository와 commit이 release note에 기록되었는가
 - `rhwp-studio` manifest의 release tag와 commit이 release note에 기록되었는가
 - third-party notices 위치가 release note에 기록되었는가
 - `validate-stage3-render.sh` 결과가 release report에 기록되었는가
 - DMG 파일 SHA256이 기록되었는가
 - 렌더링 경로, 알려진 한계, 수동 확인 항목이 기록되었는가
+
+## GitHub Release title
+
+기본 title은 앱 버전만 사용한다.
+
+```text
+Alhangeul v<version>
+```
+
+Upstream `rhwp` core 또는 bundled `rhwp-studio` 반영이 release의 중심 사용자-facing 변화일 때만 다음 형식을 허용한다.
+
+```text
+Alhangeul v<version> (rhwp v<rhwp-version>)
+```
+
+이 예외를 쓰는 경우 release body의 `Release metadata`와 주요 변경 사항에 bundled `rhwp` 변경 영향과 검증 결과를 함께 기록한다. 앱 자체 bugfix, packaging, Pages/appcast, Homebrew, 문서 변경 중심 release는 기본 title을 유지한다.
 
 ## Delta checklist
 
@@ -70,8 +87,7 @@ Release note에 포함할 내용:
 - 주요 변경 사항
 - 다운로드 산출물과 SHA256
 - Homebrew Cask 공개 상태
-- 포함된 `edwardkim/rhwp` core commit
-- 포함된 `rhwp-studio` asset manifest와 commit
+- `Release metadata`: app version, `edwardkim/rhwp` core tag/commit, bundled `rhwp-studio` tag/commit, `rhwp-core.lock`, studio manifest
 - HostApp viewer, PDF 내보내기, 인쇄, Quick Look, Thumbnail의 렌더링 경로와 알려진 한계
 - 설치본 smoke 결과와 수동 확인 항목
 - 릴리즈 delta 기반 추가 확인 항목
@@ -94,6 +110,8 @@ scripts/ci/write-release-notes.sh <version> <public-dmg-sha256> build.noindex/re
 scripts/ci/check-release-notes-template.sh build.noindex/release/release-notes-<version>.md
 ```
 
+`Release metadata`는 `rhwp-core.lock`과 `Sources/HostApp/Resources/rhwp-studio/manifest.json`에서 읽은 값을 기준으로 생성한다. 수동 release note를 작성할 때도 같은 항목명을 사용해 내부 release record와 대조할 수 있게 한다.
+
 ## Pages 업데이트 문서
 
 Pages는 사용자용 릴리즈 안내 표면이다. GitHub Release body의 긴 provenance, delta checklist, PR별 검증 기록을 그대로 복제하지 않는다.
@@ -105,6 +123,7 @@ Pages는 사용자용 릴리즈 안내 표면이다. GitHub Release body의 긴 
 - Pages 다운로드 버튼이 아키텍처 선택 UI 없이 단일 universal DMG latest URL을 직접 가리키는가
 - 사용자가 필요한 설치 방법, 첫 실행 안내, 업데이트 확인, 알려진 한계를 간결하게 확인할 수 있는가
 - Intel Mac과 Apple Silicon Mac이 같은 DMG를 사용한다는 안내가 최신 다운로드 주변 또는 FAQ/릴리즈 노트에 있는가
+- bundled `rhwp`를 안내해야 하는 release라면 `rhwp v<version>`과 upstream release 링크를 짧게 표시하고, commit/manifest/checksum 표는 GitHub Release body와 내부 release record로 연결하는가
 - 실제 public DMG SHA256이 아직 확정되지 않은 문서는 release candidate 또는 #188 handoff 상태를 명확히 표시하는가
 
 Pages 다운로드 버튼은 사용자를 위한 latest DMG URL을 사용한다.
@@ -166,6 +185,8 @@ https://github.com/postmelee/alhangeul-macos/releases/download/v<version>/alhang
 ```
 
 이 URL은 단일 universal DMG를 가리킨다. Sparkle appcast는 아키텍처별 enclosure를 나누지 않고, `scripts/release.sh`/workflow가 검증한 `arm64 + x86_64` app/extension bundle을 포함한 public DMG만 stable item으로 사용한다.
+
+Sparkle appcast의 version/build와 enclosure filename은 앱 버전만 사용한다. Bundled `rhwp` 버전은 appcast item version에 넣지 않고, release notes URL이 가리키는 GitHub Pages/GitHub Release metadata에서 확인하게 한다.
 
 따라서 공식 release 완료 후에는 다음을 확인한다.
 

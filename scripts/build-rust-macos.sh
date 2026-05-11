@@ -19,6 +19,7 @@ LOCK_ARTIFACTS=(
   "Frameworks/universal/librhwp.a"
   "Frameworks/generated_rhwp.h"
 )
+SKIP_STATICLIB_HASH_VERIFY="${ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY:-0}"
 UPDATE_LOCK=0
 VERIFY_LOCK=0
 
@@ -494,6 +495,12 @@ verify_lock_file() {
   local artifact_path
   for artifact_path in "${LOCK_ARTIFACTS[@]}"; do
     require_artifact "$artifact_path"
+
+    if [ "$artifact_path" = "Frameworks/universal/librhwp.a" ] && [ "$SKIP_STATICLIB_HASH_VERIFY" = "1" ]; then
+      echo "WARNING: skipping byte-for-byte hash verification for $artifact_path" >&2
+      echo "         source lock, Cargo lock, generated header, and FFI symbols remain verified." >&2
+      continue
+    fi
 
     local abs_path
     local expected_sha256

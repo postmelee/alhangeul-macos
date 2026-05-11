@@ -89,6 +89,7 @@
 - [ ] `validate-stage3-render.sh` 통과
 - [ ] Finder Quick Look smoke test 완료
 - [ ] Finder thumbnail smoke test 완료
+- [ ] 기존 public 설치본에서 Sparkle 업데이트 후 `scripts/smoke-sparkle-extension-refresh.sh --expected-version <version> --expected-build <build>` 기본 모드 통과
 - [ ] 개발용 zip 산출물 생성
 - [ ] public DMG 산출물 생성
 - [ ] public DMG 안의 app/extension 실행 파일 `arm64 + x86_64` universal 검증

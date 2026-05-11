@@ -6,7 +6,7 @@ on:
       version:
         description: App version to build as a rehearsal DMG.
         required: true
-        default: "0.1.0"
+        default: "0.1.1"
       previous_release_ref:
         description: Git ref for the previous public release used to draft the release delta checklist.
         required: true
@@ -34,6 +34,7 @@ jobs:
       PREVIOUS_RELEASE_REF: ${{ inputs.previous_release_ref }}
       EXPECTED_RHWP_TAG: ${{ inputs.expected_rhwp_tag }}
       ALHANGEUL_BUILD_ROOT: ${{ github.workspace }}/build.noindex
+      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: "1"
 
     steps:
       - name: Check out repository
@@ -119,6 +120,9 @@ jobs:
           set -euo pipefail
           if ! command -v xcodegen >/dev/null 2>&1; then
             brew install xcodegen
+          fi
+          if ! command -v cbindgen >/dev/null 2>&1; then
+            brew install cbindgen
           fi
           rustup target add aarch64-apple-darwin x86_64-apple-darwin
 

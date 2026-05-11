@@ -91,15 +91,13 @@ enum HwpPageImageRenderer {
         )
         let width = max(1, Int(ceil(pageSize.width * renderScale)))
         let height = max(1, Int(ceil(pageSize.height * renderScale)))
-        let bytesPerRow = width * 4
-        var pixels = [UInt8](repeating: 255, count: height * bytesPerRow)
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         guard let context = CGContext(
-            data: &pixels,
+            data: nil,
             width: width,
             height: height,
             bitsPerComponent: 8,
-            bytesPerRow: bytesPerRow,
+            bytesPerRow: 0,
             space: colorSpace,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ) else {

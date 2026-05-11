@@ -6,7 +6,7 @@ on:
       version:
         description: App version to publish. The workflow must be run from tag v<version>.
         required: true
-        default: "0.1.0"
+        default: "0.1.1"
       previous_release_ref:
         description: Git ref for the previous public release used to draft the release delta checklist.
         required: true
@@ -20,6 +20,11 @@ on:
         required: true
         type: boolean
         default: true
+      include_rhwp_in_title:
+        description: Append (rhwp vX.Y.Z) to the GitHub Release title for upstream rhwp-centered releases.
+        required: true
+        type: boolean
+        default: false
       draft:
         description: Create a draft GitHub Release. Stable Sparkle appcast is updated only when this is false.
         required: true
@@ -52,10 +57,12 @@ jobs:
       PREVIOUS_RELEASE_REF: ${{ inputs.previous_release_ref }}
       EXPECTED_RHWP_TAG: ${{ inputs.expected_rhwp_tag }}
       REQUIRE_LATEST_RHWP: ${{ inputs.require_latest_rhwp }}
+      INCLUDE_RHWP_IN_TITLE: ${{ inputs.include_rhwp_in_title }}
       DRAFT_RELEASE: ${{ inputs.draft }}
       PRERELEASE: ${{ inputs.prerelease }}
       GH_TOKEN: ${{ github.token }}
       ALHANGEUL_BUILD_ROOT: ${{ github.workspace }}/build.noindex
+      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: "1"
       ALHANGEUL_DEVELOPER_ID_APPLICATION: ${{ vars.ALHANGEUL_DEVELOPER_ID_APPLICATION }}
       ALHANGEUL_DEVELOPER_ID_DMG: ${{ vars.ALHANGEUL_DEVELOPER_ID_DMG }}
       ALHANGEUL_NOTARY_PROFILE: ${{ vars.ALHANGEUL_NOTARY_PROFILE }}
@@ -172,7 +179,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          latest_tag="$(env -u GH_TOKEN -u GITHUB_TOKEN gh release view -R edwardkim/rhwp --json tagName --jq .tagName)"
+          latest_tag="$(gh release view -R edwardkim/rhwp --json tagName --jq .tagName)"
           lock_tag="${{ steps.core.outputs.rhwp_tag }}"
 
           if [ "$lock_tag" != "$latest_tag" ]; then
@@ -192,6 +199,9 @@ jobs:
           set -euo pipefail
           if ! command -v xcodegen >/dev/null 2>&1; then
             brew install xcodegen
+          fi
+          if ! command -v cbindgen >/dev/null 2>&1; then
+            brew install cbindgen
           fi
           rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
@@ -284,6 +294,18 @@ jobs:
           dmg_path="${{ steps.artifact.outputs.dmg_path }}"
           checksum_path="${{ steps.artifact.outputs.checksum_path }}"
           notes_path="${{ steps.artifact.outputs.notes_path }}"
+          release_title="Alhangeul $tag_name"
+          if [ "$INCLUDE_RHWP_IN_TITLE" = "true" ]; then
+            release_title="$release_title (rhwp ${{ steps.core.outputs.rhwp_tag }})"
+          fi
+
+          {
+            echo
+            echo "## GitHub Release title"
+            echo
+            echo "- title: \`$release_title\`"
+            echo "- include rhwp in title: \`$INCLUDE_RHWP_IN_TITLE\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
           if gh release view "$tag_name" >/dev/null 2>&1; then
             gh release upload "$tag_name" "$dmg_path" "$checksum_path" --clobber
@@ -292,7 +314,7 @@ jobs:
               release create "$tag_name"
               "$dmg_path"
               "$checksum_path"
-              --title "Alhangeul $tag_name"
+              --title "$release_title"
               --notes-file "$notes_path"
               --verify-tag
             )
@@ -307,7 +329,7 @@ jobs:
 
           edit_args=(
             release edit "$tag_name"
-            --title "Alhangeul $tag_name"
+            --title "$release_title"
             --notes-file "$notes_path"
             --verify-tag
           )

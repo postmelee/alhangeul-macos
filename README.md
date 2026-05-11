@@ -39,15 +39,16 @@
 
 ## 최신 공개 릴리즈
 
-### v0.1.0 (2026-05-08 UTC)
+### v0.1.1 (2026-05-10 UTC)
 
-첫 공식 공개 릴리즈입니다. Finder Quick Look preview, Finder thumbnail, WKWebView 기반 HWP/HWPX viewer/editor, HWP 저장/다른 이름 저장, PDF 내보내기, macOS 공유, Sparkle 업데이트 확인 경로를 제공합니다.
+`v0.1.0` 이후 확인된 설치본 smoke 결함을 수정한 패치 릴리즈입니다. 창 확대/resize fallback, Finder thumbnail, Quick Look/Thumbnail extension crash hotfix, release workflow 정리, Intel Mac과 Apple Silicon Mac을 같은 universal DMG로 지원하는 검증 기준을 포함합니다.
 
-- GitHub Release: [Alhangeul v0.1.0](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.0)
-- 업데이트 페이지: [알한글 v0.1.0](https://postmelee.github.io/alhangeul-macos/updates/v0.1.0.html)
-- 최신 패치 준비: `v0.1.1`은 설치본 smoke 결함 수정과 Intel Mac/Apple Silicon Mac을 같은 universal DMG로 지원하기 위한 patch release 후보입니다.
+- GitHub Release: [Alhangeul v0.1.1](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.1)
+- 업데이트 페이지: [알한글 v0.1.1](https://postmelee.github.io/alhangeul-macos/updates/v0.1.1.html)
+- 포함된 `rhwp`: [`v0.7.10`](https://github.com/edwardkim/rhwp/releases/tag/v0.7.10) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
+- Sparkle update 기준: short version은 `0.1.1`, respin build는 `4`입니다.
 
-과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약합니다.
+과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약하고, bundled `rhwp` provenance는 한 줄 요약만 표시합니다.
 
 ## 이정표
 

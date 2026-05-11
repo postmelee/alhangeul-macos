@@ -37,7 +37,7 @@ brew install xcodegen
 
 ## Core dependency 모드
 
-현재 기본 개발 흐름은 `RustBridge/Cargo.toml`의 `edwardkim/rhwp` git dependency와 `RustBridge/Cargo.lock`, `rhwp-core.lock`을 함께 검증한다. 현재 v0.1.0 목표는 Demo/Preview release이며, 기본 업데이트 경로는 `--channel demo --rev`다.
+현재 기본 개발 흐름은 `RustBridge/Cargo.toml`의 `edwardkim/rhwp` git dependency와 `RustBridge/Cargo.lock`, `rhwp-core.lock`을 함께 검증한다. 공개 릴리즈 라인은 `rhwp-core.lock`의 `release-tag`와 resolved commit 기준을 사용하며, branch나 floating ref는 안정 기준으로 취급하지 않는다.
 
 채널별 dependency/lock 기준과 compatibility gate 상세는 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
 
@@ -274,7 +274,7 @@ pgrep -x Alhangeul
 Quick Look/Thumbnail smoke는 현재 시스템에 등록된 extension 산출물 기준으로 동작한다. Debug build는 compile/link 검증에는 유효하지만 Finder/Quick Look 등록 검증의 진실 원천으로 쓰지 않는다. 설치본 기준 검증에서는 표준 smoke helper가 Release package 산출물을 `$HOME/Applications/Alhangeul.app`에 설치한 뒤 bundle 정합성, PlugInKit 등록, HWP/HWPX thumbnail 생성을 확인한다.
 
 ```bash
-scripts/smoke-finder-integration.sh --version 0.1.0
+scripts/smoke-finder-integration.sh --version 0.1.1
 ```
 
 이미 만든 Release package staging app을 재사용할 때는 package 생성을 생략한다.
@@ -319,7 +319,7 @@ helper가 자동으로 수행하는 항목:
 수동 흐름이 필요한 경우 다음 명령을 기준으로 분리 확인한다.
 
 ```bash
-./scripts/package-release.sh 0.1.0
+./scripts/package-release.sh 0.1.1
 
 LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister"
 APP="$HOME/Applications/Alhangeul.app"
@@ -368,6 +368,18 @@ mkdir -p /tmp/alhangeul-ql
 qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/basic/KTX.hwp
 qlmanage -t -x -s 512 -o /tmp/alhangeul-ql samples/hwpx/hwpx-01.hwpx
 ```
+
+Sparkle 업데이트 후에는 직접 재설치 smoke와 별도로 post-update provider refresh를 확인한다. 기존 public 설치본에서 Sparkle 업데이트를 완료한 뒤, 별도 수동 등록 없이 다음 helper가 통과해야 한다.
+
+```bash
+scripts/smoke-sparkle-extension-refresh.sh \
+  --expected-version 0.1.1 \
+  --expected-build 4
+```
+
+이 helper는 `pluginkit` active path가 새 `/Applications/Alhangeul.app` 내부 `.appex`인지 먼저 확인한 뒤 Quick Look/thumbnail cache를 reset하고 fresh sample thumbnail을 생성한다. `--repair-registration`은 `lsregister`/`pluginkit` 수동 보정이 문제를 해결하는지 확인하는 진단 옵션이며, release gate 통과 기준으로 쓰지 않는다.
+
+제품 앱의 About window는 sandbox 제약 때문에 `pluginkit` CLI를 상태 조회 기준으로 쓰지 않는다. 앱 시작과 `상태 새로고침`은 `LSRegisterURL(..., true)`와 `NSWorkspace.noteFileSystemChanged(...)`만 실행한다. `qlmanage -r cache`, `pluginkit -a`, `pluginkit -e use`는 사용자-facing 버튼 동작이 아니라 smoke/troubleshooting 단계에서 명시적으로 실행한다.
 
 ### 반복 시행착오 방지 규칙
 
