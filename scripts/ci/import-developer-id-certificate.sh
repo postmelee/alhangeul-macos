@@ -48,22 +48,22 @@ if [ -f "$KEYCHAIN_PATH" ]; then
   security delete-keychain "$KEYCHAIN_PATH"
 fi
 
-security create-keychain -p "$RELEASE_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-security unlock-keychain -p "$RELEASE_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+security create-keychain -p "$RELEASE_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >&2
+security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH" >&2
+security unlock-keychain -p "$RELEASE_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >&2
 security import "$P12_PATH" \
   -k "$KEYCHAIN_PATH" \
   -P "$DEVELOPER_ID_APPLICATION_P12_PASSWORD" \
   -T /usr/bin/codesign \
-  -T /usr/bin/security
+  -T /usr/bin/security >&2
 security set-key-partition-list \
   -S apple-tool:,apple: \
   -s \
   -k "$RELEASE_KEYCHAIN_PASSWORD" \
-  "$KEYCHAIN_PATH"
-security list-keychains -d user -s "$KEYCHAIN_PATH"
-security default-keychain -d user -s "$KEYCHAIN_PATH"
-security unlock-keychain -p "$RELEASE_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+  "$KEYCHAIN_PATH" >&2
+security list-keychains -d user -s "$KEYCHAIN_PATH" >&2
+security default-keychain -d user -s "$KEYCHAIN_PATH" >&2
+security unlock-keychain -p "$RELEASE_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >&2
 
 rm -f "$P12_PATH"
 printf '%s\n' "$KEYCHAIN_PATH"

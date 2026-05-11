@@ -261,3 +261,34 @@ release pipeline 검증 시 추가로 다음을 적용한다.
 - Dock/Finder/Spotlight 표시명 검증 시 기본 `Info.plist`의 `CFBundleDisplayName`/`CFBundleName`이 실제 bundle filesystem name과 맞고, `ko.lproj/InfoPlist.strings`와 `LSHasLocalizedDisplayName`이 release bundle 안에 포함됐는지 먼저 확인한다.
 - 이전 이름의 설치본(`RhwpMac.app`, `AlhangeulMac.app`, `알한글.app`)이 발견되면 helper는 false positive 방지를 위해 기본 실패한다. 작업지시자 승인 후 `--unregister-legacy-candidates`로 LaunchServices/PlugInKit 등록만 격리할 수 있으며, 실제 파일 삭제는 별도 승인 후에만 수행한다.
 - `qlmanage -m plugins` 미노출은 app extension 실행 실패의 직접 증거가 아니므로, 등록은 `pluginkit -mAvvv`, 실제 렌더링은 `qlmanage -t -x`로 판정한다.
+
+## Sparkle 업데이트 후 extension refresh smoke
+
+Sparkle 업데이트 검증은 새 DMG를 직접 설치하는 smoke와 분리한다. 기존 public 설치본이 Sparkle로 새 build를 받은 뒤, 사용자가 별도 수동 등록을 하지 않아도 Quick Look/Thumbnail provider가 새 `/Applications/Alhangeul.app` 안의 `.appex`를 가리켜야 한다.
+
+기본 순서:
+
+1. 직전 public 설치본을 `/Applications/Alhangeul.app`에 설치한다. `v0.1.1` respin처럼 같은 short version에서 build만 올리는 경우에는 기존 public build `2`를 설치한다.
+2. 앱 메뉴의 `알한글 > 업데이트 확인...`으로 Sparkle 업데이트를 완료하고 앱이 새 build로 다시 실행되는지 확인한다.
+3. 다음 helper를 `--repair-registration` 없이 실행한다.
+
+```bash
+scripts/smoke-sparkle-extension-refresh.sh \
+  --expected-version <version> \
+  --expected-build <build>
+```
+
+helper가 검증하는 항목:
+
+- 설치된 app/Quick Look/Thumbnail extension의 `CFBundleShortVersionString`과 `CFBundleVersion`이 기대값과 일치
+- `pluginkit -mAvvv -i com.postmelee.alhangeul.QLExtension`의 active path가 `/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex`
+- `pluginkit -mAvvv -i com.postmelee.alhangeul.ThumbnailExtension`의 active path가 `/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex`
+- legacy `com.postmelee.alhangeulmac.*` 또는 `com.postmelee.rhwpmac.*` provider가 남아 있지 않음
+- Quick Look/thumbnail cache reset 후 fresh HWP/HWPX sample에서 `qlmanage -t -x` thumbnail output 생성
+- 수동 preview 확인용 `open-preview.command`와 diagnostics directory 생성
+
+`--repair-registration` 옵션은 문제 분리용이다. 이 옵션은 `lsregister -f -R -trusted`, `pluginkit -a`, `pluginkit -e use`를 실행해 등록을 수동 보정한다. 기본 실행이 실패하고 `--repair-registration`만 통과하면, public release gate는 실패로 기록하고 업데이트 후 extension refresh 문제로 별도 이슈를 등록한다.
+
+앱은 시작 시 `LSRegisterURL(..., true)`와 `NSWorkspace.noteFileSystemChanged(...)`로 현재 app bundle과 내부 `Contents/PlugIns/*.appex` 변경을 LaunchServices/Finder에 알린다. About window의 `상태 새로고침` 버튼도 같은 public API 기반 refresh 신호를 다시 보낸 뒤 상태를 갱신한다. Sparkle이 app bundle을 같은 경로에 교체한 뒤 extension discovery가 새 bundle을 보도록 돕는 보조 신호이며, release gate에서는 helper의 기본 모드로 실제 post-update 상태를 검증한다.
+
+제품 앱 내부에서는 `pluginkit`, `qlmanage`, `killall`을 실행하지 않는다. sandboxed app에서 PlugInKit discovery CLI는 `unauthorized discovery` 계열 실패가 날 수 있고, Quick Look cache reset은 사용자 세션의 시스템 서비스를 건드리는 진단/지원 작업에 가깝다. 따라서 강제 등록과 cache reset은 release smoke 또는 troubleshooting script에서만 수행한다.

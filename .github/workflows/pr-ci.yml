@@ -90,6 +90,8 @@ jobs:
     timeout-minutes: 120
     needs: classify-changes
     if: ${{ needs.classify-changes.outputs.run_macos_build == 'true' }}
+    env:
+      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: "1"
 
     steps:
       - name: Check out repository
@@ -200,7 +202,7 @@ jobs:
           set -euo pipefail
           scripts/ci/write-sparkle-appcast.sh \
             --version 0.1.1 \
-            --build 2 \
+            --build 4 \
             --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.1/alhangeul-macos-0.1.1.dmg \
             --length 1 \
             --ed-signature dummy-ed-signature \

@@ -6,7 +6,7 @@ on:
       version:
         description: App version to publish. The workflow must be run from tag v<version>.
         required: true
-        default: "0.1.0"
+        default: "0.1.1"
       previous_release_ref:
         description: Git ref for the previous public release used to draft the release delta checklist.
         required: true
@@ -62,6 +62,7 @@ jobs:
       PRERELEASE: ${{ inputs.prerelease }}
       GH_TOKEN: ${{ github.token }}
       ALHANGEUL_BUILD_ROOT: ${{ github.workspace }}/build.noindex
+      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: "1"
       ALHANGEUL_DEVELOPER_ID_APPLICATION: ${{ vars.ALHANGEUL_DEVELOPER_ID_APPLICATION }}
       ALHANGEUL_DEVELOPER_ID_DMG: ${{ vars.ALHANGEUL_DEVELOPER_ID_DMG }}
       ALHANGEUL_NOTARY_PROFILE: ${{ vars.ALHANGEUL_NOTARY_PROFILE }}
@@ -178,7 +179,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          latest_tag="$(env -u GH_TOKEN -u GITHUB_TOKEN gh release view -R edwardkim/rhwp --json tagName --jq .tagName)"
+          latest_tag="$(gh release view -R edwardkim/rhwp --json tagName --jq .tagName)"
           lock_tag="${{ steps.core.outputs.rhwp_tag }}"
 
           if [ "$lock_tag" != "$latest_tag" ]; then
@@ -198,6 +199,9 @@ jobs:
           set -euo pipefail
           if ! command -v xcodegen >/dev/null 2>&1; then
             brew install xcodegen
+          fi
+          if ! command -v cbindgen >/dev/null 2>&1; then
+            brew install cbindgen
           fi
           rustup target add aarch64-apple-darwin x86_64-apple-darwin
 

@@ -36,9 +36,9 @@ Public release environment:
 Examples:
   ALHANGEUL_DEVELOPER_ID_APPLICATION="Developer ID Application: ..." \\
   ALHANGEUL_NOTARY_PROFILE="alhangeul-notary" \\
-  $0 0.1.0
+  $0 0.1.1
 
-  $0 --skip-notarize 0.1.0
+  $0 --skip-notarize 0.1.1
 EOF
 }
 
@@ -192,6 +192,8 @@ prepare_paths() {
   DMG_BACKGROUND_IMAGE="$DMG_BACKGROUND_DIR/alhangeul-dmg-background.png"
   APP_OUTPUT="$OUTPUT_DIR/$APP_NAME"
   APP_NOTARY_ZIP="$STAGING_DIR/alhangeul-macos-$VERSION-app-notary.zip"
+  APP_NOTARY_RESULT_JSON="$STAGING_DIR/alhangeul-macos-$VERSION-app-notary-result.json"
+  DMG_NOTARY_RESULT_JSON="$STAGING_DIR/alhangeul-macos-$VERSION-dmg-notary-result.json"
   DMG_RW_OUTPUT="$STAGING_DIR/alhangeul-macos-$VERSION-layout.dmg"
 
   if [ "$SKIP_NOTARIZE" -eq 1 ]; then
@@ -227,6 +229,7 @@ run_preflight() {
     spctl
     shasum
     plutil
+    sed
     security
     swift
   )
@@ -320,6 +323,105 @@ build_app() {
   ditto "$XCODE_BUILD_DIR/$BUILD_APP_NAME" "$APP_OUTPUT"
 }
 
+codesign_developer_id() {
+  local path="$1"
+  local entitlements="${2:-}"
+  local args
+
+  args=(
+    --force \
+    --sign "$DEVELOPER_ID_APPLICATION" \
+    --options runtime \
+    --timestamp \
+    --preserve-metadata=identifier,requirements
+  )
+
+  if [ -n "$entitlements" ]; then
+    args+=(--entitlements "$entitlements")
+  else
+    args+=(--preserve-metadata=entitlements)
+  fi
+
+  codesign "${args[@]}" "$path"
+}
+
+expand_entitlements() {
+  local source="$1"
+  local bundle_id="$2"
+  local output="$3"
+
+  sed "s|\$(PRODUCT_BUNDLE_IDENTIFIER)|$bundle_id|g" "$source" > "$output"
+}
+
+sign_sparkle_components_for_notarization() {
+  if [ -z "$DEVELOPER_ID_APPLICATION" ]; then
+    return
+  fi
+
+  local sparkle_framework="$APP_OUTPUT/Contents/Frameworks/Sparkle.framework"
+  local sparkle_version_dir="$sparkle_framework/Versions/B"
+  local component
+
+  if [ ! -d "$sparkle_version_dir" ]; then
+    return
+  fi
+
+  info "Signing Sparkle nested components for notarization"
+  for component in \
+    "$sparkle_version_dir/XPCServices/Downloader.xpc" \
+    "$sparkle_version_dir/XPCServices/Installer.xpc" \
+    "$sparkle_version_dir/Updater.app" \
+    "$sparkle_version_dir/Autoupdate"
+  do
+    if [ -e "$component" ]; then
+      codesign_developer_id "$component"
+    fi
+  done
+
+  codesign_developer_id "$sparkle_framework"
+}
+
+sign_app_extension_for_notarization() {
+  local appex_path="$1"
+  local bundle_id="$2"
+  local entitlements_source="$3"
+  local entitlements_output="$4"
+
+  if [ ! -d "$appex_path" ]; then
+    return
+  fi
+
+  expand_entitlements "$entitlements_source" "$bundle_id" "$entitlements_output"
+  codesign_developer_id "$appex_path" "$entitlements_output"
+}
+
+sign_release_app_for_notarization() {
+  if [ -z "$DEVELOPER_ID_APPLICATION" ]; then
+    return
+  fi
+
+  local host_entitlements="$STAGING_DIR/Alhangeul.entitlements"
+
+  sign_sparkle_components_for_notarization
+
+  info "Signing app extensions for notarization"
+  sign_app_extension_for_notarization \
+    "$APP_OUTPUT/Contents/PlugIns/AlhangeulPreview.appex" \
+    "com.postmelee.alhangeul.QLExtension" \
+    "$ROOT/Sources/QLExtension/QLExtension.entitlements" \
+    "$STAGING_DIR/AlhangeulPreview.entitlements"
+  sign_app_extension_for_notarization \
+    "$APP_OUTPUT/Contents/PlugIns/AlhangeulThumbnail.appex" \
+    "com.postmelee.alhangeul.ThumbnailExtension" \
+    "$ROOT/Sources/ThumbnailExtension/ThumbnailExtension.entitlements" \
+    "$STAGING_DIR/AlhangeulThumbnail.entitlements"
+
+  # Re-seal the app after changing nested framework and extension signatures.
+  info "Signing app bundle for notarization"
+  expand_entitlements "$ROOT/Sources/HostApp/HostApp.entitlements" "com.postmelee.alhangeul" "$host_entitlements"
+  codesign_developer_id "$APP_OUTPUT" "$host_entitlements"
+}
+
 verify_universal_app() {
   info "Verifying universal app architectures"
   "$ROOT/scripts/ci/verify-universal-macos-app.sh" "$APP_OUTPUT"
@@ -342,6 +444,71 @@ verify_app_signature() {
   fi
 }
 
+notary_json_value() {
+  local key="$1"
+  local json="$2"
+
+  plutil -extract "$key" raw -o - "$json" 2>/dev/null || true
+}
+
+print_notary_log() {
+  local submission_id="$1"
+
+  if [ -z "$submission_id" ]; then
+    warn "Skipping notarization log fetch because the submission id is missing."
+    return
+  fi
+
+  info "Fetching notarization log for submission $submission_id"
+  if ! xcrun notarytool log "$submission_id" \
+    --keychain-profile "$NOTARY_PROFILE" \
+    --output-format json >&2; then
+    warn "Unable to fetch notarization log for submission $submission_id."
+  fi
+}
+
+submit_for_notarization() {
+  local artifact="$1"
+  local label="$2"
+  local result_json="$3"
+  local submit_exit
+  local submission_id
+  local notary_status
+
+  rm -f "$result_json"
+
+  set +e
+  xcrun notarytool submit "$artifact" \
+    --wait \
+    --keychain-profile "$NOTARY_PROFILE" \
+    --output-format json > "$result_json"
+  submit_exit=$?
+  set -e
+
+  submission_id="$(notary_json_value id "$result_json")"
+  notary_status="$(notary_json_value status "$result_json")"
+
+  if [ "$submit_exit" -ne 0 ]; then
+    warn "$label notarization command failed with exit code $submit_exit."
+    if [ -s "$result_json" ]; then
+      cat "$result_json" >&2
+    fi
+    print_notary_log "$submission_id"
+    fail "$label notarization command failed"
+  fi
+
+  if [ "$notary_status" != "Accepted" ]; then
+    warn "$label notarization status: ${notary_status:-unknown}"
+    if [ -s "$result_json" ]; then
+      cat "$result_json" >&2
+    fi
+    print_notary_log "$submission_id"
+    fail "$label notarization was not accepted"
+  fi
+
+  info "$label notarization accepted: $submission_id"
+}
+
 notarize_and_staple_app() {
   if [ "$SKIP_NOTARIZE" -eq 1 ]; then
     return
@@ -349,9 +516,7 @@ notarize_and_staple_app() {
 
   info "Submitting app bundle for notarization"
   ditto -c -k --keepParent "$APP_OUTPUT" "$APP_NOTARY_ZIP"
-  xcrun notarytool submit "$APP_NOTARY_ZIP" \
-    --wait \
-    --keychain-profile "$NOTARY_PROFILE"
+  submit_for_notarization "$APP_NOTARY_ZIP" "App bundle" "$APP_NOTARY_RESULT_JSON"
 
   info "Stapling app bundle"
   xcrun stapler staple "$APP_OUTPUT"
@@ -452,9 +617,7 @@ notarize_and_staple_dmg() {
   fi
 
   info "Submitting DMG for notarization"
-  xcrun notarytool submit "$DMG_OUTPUT" \
-    --wait \
-    --keychain-profile "$NOTARY_PROFILE"
+  submit_for_notarization "$DMG_OUTPUT" "DMG" "$DMG_NOTARY_RESULT_JSON"
 
   info "Stapling DMG"
   xcrun stapler staple "$DMG_OUTPUT"
@@ -490,6 +653,7 @@ main() {
   check_shared_code
   generate_project
   build_app
+  sign_release_app_for_notarization
   verify_universal_app
   verify_app_signature
   notarize_and_staple_app
