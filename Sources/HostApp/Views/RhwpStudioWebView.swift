@@ -80,6 +80,8 @@ extension RhwpStudioWebView {
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
         private static let nativeDropSuppressionInterval: TimeInterval = 2
+        private static let recoverableInvalidControlMessage = "지정된 컨트롤이 표, 글상자 또는 그림이 아닙니다"
+        private static let recoverableInvalidControlColumn = 30942
 
         private enum LoadIdentity: Equatable {
             case empty(reloadToken: Int)
@@ -115,6 +117,7 @@ extension RhwpStudioWebView {
         private var loadTimeoutTask: Task<Void, Never>?
         private var recentNativeDrop: NativeDropMarker?
         private var currentReloadToken = 0
+        private var hasCompletedCurrentLoad = false
 
         deinit {
             loadTimeoutTask?.cancel()
@@ -196,6 +199,7 @@ extension RhwpStudioWebView {
             do {
                 let loadURL = try RhwpStudioResourceLocator.loadURL(for: document)
                 loadedIdentity = nextIdentity
+                hasCompletedCurrentLoad = false
                 onError(nil)
                 onLoadStateChange(true)
                 activeLoadID += 1
@@ -203,20 +207,24 @@ extension RhwpStudioWebView {
                 webView.load(URLRequest(url: loadURL))
             } catch let error as RhwpStudioResourceLocatorError {
                 loadedIdentity = nil
+                hasCompletedCurrentLoad = false
                 finishLoading()
                 onFailure(.resourcePreflight(error))
             } catch let failure as RhwpStudioWebViewFailure {
                 loadedIdentity = nil
+                hasCompletedCurrentLoad = false
                 finishLoading()
                 onFailure(failure)
             } catch {
                 loadedIdentity = nil
+                hasCompletedCurrentLoad = false
                 finishLoading()
                 onFailure(.navigation(error: error, fallbackURL: webView.url))
             }
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            hasCompletedCurrentLoad = true
             finishLoading()
         }
 
@@ -229,6 +237,7 @@ extension RhwpStudioWebView {
         }
 
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+            hasCompletedCurrentLoad = false
             finishLoading()
             onFailure(
                 .processTerminated(
@@ -261,6 +270,7 @@ extension RhwpStudioWebView {
                 decisionHandler(.allow)
             } else {
                 decisionHandler(.cancel)
+                hasCompletedCurrentLoad = false
                 finishLoading()
                 onFailure(.blockedNavigation(to: url))
             }
@@ -271,6 +281,7 @@ extension RhwpStudioWebView {
             guard !isIgnorableNavigationError(error) else {
                 return
             }
+            hasCompletedCurrentLoad = false
             onFailure(.from(error: error, fallbackURL: webView?.url))
         }
 
@@ -286,6 +297,7 @@ extension RhwpStudioWebView {
                 }
 
                 let loadingURL = webView?.url
+                self.hasCompletedCurrentLoad = false
                 self.finishLoading()
                 self.onFailure(
                     .timeout(
@@ -366,6 +378,7 @@ extension RhwpStudioWebView {
         }
 
         private func handleDocumentLoadError(_ body: [String: Any]) {
+            hasCompletedCurrentLoad = false
             finishLoading()
             onFailure(
                 .documentLoadError(
@@ -377,16 +390,77 @@ extension RhwpStudioWebView {
         }
 
         private func handleRuntimeError(_ body: [String: Any]) {
+            let message = body["message"] as? String
+            let sourceURL = body["sourceURL"] as? String
+            let line = intValue(body["line"])
+            let column = intValue(body["column"])
+            let reason = body["reason"] as? String
+            let isFatal = !isRecoverableInvalidControlRuntimeError(
+                message: message,
+                sourceURL: sourceURL,
+                line: line,
+                column: column,
+                reason: reason
+            )
+
             finishLoading()
             onFailure(
                 .runtime(
-                    message: body["message"] as? String,
-                    sourceURL: body["sourceURL"] as? String,
-                    line: intValue(body["line"]),
-                    column: intValue(body["column"]),
-                    reason: body["reason"] as? String
+                    message: message,
+                    sourceURL: sourceURL,
+                    line: line,
+                    column: column,
+                    reason: reason,
+                    isFatal: isFatal
                 )
             )
+        }
+
+        private func isRecoverableInvalidControlRuntimeError(
+            message: String?,
+            sourceURL: String?,
+            line: Int?,
+            column: Int?,
+            reason: String?
+        ) -> Bool {
+            guard currentDocument != nil,
+                  hasCompletedCurrentLoad,
+                  Self.hasRecoverableInvalidControlMessage(message) || Self.hasRecoverableInvalidControlMessage(reason),
+                  Self.isRecoverableInvalidControlSource(sourceURL: sourceURL, line: line, column: column, reason: reason)
+            else {
+                return false
+            }
+            return true
+        }
+
+        private static func hasRecoverableInvalidControlMessage(_ value: String?) -> Bool {
+            value?.contains(recoverableInvalidControlMessage) == true
+        }
+
+        private static func isRecoverableInvalidControlSource(
+            sourceURL: String?,
+            line: Int?,
+            column: Int?,
+            reason: String?
+        ) -> Bool {
+            guard let sourceURL,
+                  let url = URL(string: sourceURL),
+                  RhwpStudioResourceRoute.isStudioResourceURL(url)
+            else {
+                return false
+            }
+
+            let path = url.path
+            if path.hasPrefix("/assets/index-") && path.hasSuffix(".js") {
+                return line == 1 && column == recoverableInvalidControlColumn
+            }
+
+            if path == "/index.html", line == 0, column == 0 {
+                return reason?.contains("/assets/index-") == true
+                    && reason?.contains(":1:\(recoverableInvalidControlColumn)") == true
+            }
+
+            return false
         }
 
         private func handleDroppedDocument(_ body: [String: Any]) {
