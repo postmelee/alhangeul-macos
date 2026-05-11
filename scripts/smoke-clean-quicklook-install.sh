@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-VERSION="0.1.1"
+VERSION="0.1.2"
 APP_PATH=""
 INSTALL_APP="/Applications/Alhangeul.app"
 OUTPUT_ROOT="/private/tmp/alhangeul-visual-smoke"
@@ -28,7 +28,7 @@ Usage:
 
 Options:
   --version VERSION
-      Version passed to scripts/package-release.sh. Default: 0.1.1
+      Version passed to scripts/package-release.sh. Default: 0.1.2
   --app PATH
       Existing app bundle to install. Implies --skip-package.
   --skip-package

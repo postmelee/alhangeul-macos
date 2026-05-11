@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-VERSION="0.1.1"
+VERSION="0.1.2"
 SKIP_PACKAGE=0
 APP_PATH=""
 OUTPUT_ROOT="/tmp/alhangeul-ql"
@@ -24,7 +24,7 @@ Usage:
   scripts/smoke-finder-integration.sh --skip-package [--app PATH]
 
 Options:
-  --version VERSION       Version passed to scripts/package-release.sh. Default: 0.1.1
+  --version VERSION       Version passed to scripts/package-release.sh. Default: 0.1.2
   --app PATH             Existing Release package staging app. Implies --skip-package.
   --skip-package         Reuse --app or build.noindex/release/Alhangeul.app.
   --output-dir PATH      Output root for qlmanage thumbnails and diagnostics.
