@@ -166,7 +166,7 @@ private struct HostAppCommands: Commands {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        ExtensionSystemRegistrationRefresher.refreshCurrentBundle()
+        LaunchMaintenanceService.runIfNeeded()
 
         NotificationCenter.default.addObserver(
             self,
