@@ -25,7 +25,9 @@ scripts/verify-rhwp-studio-assets.sh
 
 - 작업 브랜치와 릴리스 기준 브랜치가 명확해야 한다.
 - `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`의 repo/ref/commit 기준이 일치해야 한다.
-- `Frameworks/universal/librhwp.a`, `Frameworks/generated_rhwp.h`의 hash/size가 `rhwp-core.lock`과 일치해야 한다.
+- GitHub-hosted workflow에서는 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 `Frameworks/universal/librhwp.a` byte hash/size 비교만 제외할 수 있다.
+- `Frameworks/generated_rhwp.h`의 hash/size는 `rhwp-core.lock`과 일치해야 한다.
+- `rhwp-ffi-symbols.txt`와 generated FFI symbol set이 일치해야 한다.
 - `Sources/HostApp/Resources/rhwp-studio/manifest.json`의 release tag/commit과 bundled entrypoint hash가 현재 resource tree와 일치해야 한다.
 - 의도하지 않은 미커밋 변경이 없어야 한다.
 - 릴리스에 포함할 PR이 모두 merge되어 있어야 한다.
@@ -88,7 +90,7 @@ build.noindex/release/alhangeul-macos-<version>.zip
 
 스크립트가 수행하는 일:
 
-- Rust bridge와 `Rhwp.xcframework` 재생성 후 `rhwp-core.lock` 검증
+- Rust bridge와 `Rhwp.xcframework` 재생성 후 source/header/ABI 기준 `rhwp-core.lock` 검증
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
 - `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
@@ -132,7 +134,7 @@ build.noindex/release/alhangeul-macos-<version>.dmg.sha256
 
 `scripts/release.sh`가 수행하는 일:
 
-- Rust bridge와 `Rhwp.xcframework` 재생성 후 `rhwp-core.lock` 검증
+- Rust bridge와 `Rhwp.xcframework` 재생성 후 source/header/ABI 기준 `rhwp-core.lock` 검증
 - `scripts/check-no-appkit.sh`
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
