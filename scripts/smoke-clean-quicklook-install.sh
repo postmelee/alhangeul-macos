@@ -161,7 +161,7 @@ prepare_app() {
   fi
 }
 
-verify_bundle() {
+verify_bundle_structure() {
   local app="$1"
   local preview="$app/Contents/PlugIns/AlhangeulPreview.appex"
   local thumbnail="$app/Contents/PlugIns/AlhangeulThumbnail.appex"
@@ -180,7 +180,11 @@ verify_bundle() {
   [ "$app_id" = "com.postmelee.alhangeul" ] || { echo "ERROR: unexpected app id: $app_id" >&2; exit 10; }
   [ "$preview_id" = "com.postmelee.alhangeul.QLExtension" ] || { echo "ERROR: unexpected preview id: $preview_id" >&2; exit 10; }
   [ "$thumbnail_id" = "com.postmelee.alhangeul.ThumbnailExtension" ] || { echo "ERROR: unexpected thumbnail id: $thumbnail_id" >&2; exit 10; }
+}
 
+verify_signed_bundle() {
+  local app="$1"
+  verify_bundle_structure "$app"
   codesign --verify --deep --strict --verbose=2 "$app" >/dev/null
 }
 
@@ -251,6 +255,9 @@ resign_smoke_app() {
   expand_entitlements \
     "$ROOT/Sources/HostApp/HostApp.entitlements" \
     "com.postmelee.alhangeul" \
+    "$host_entitlements"
+  /usr/libexec/PlistBuddy \
+    -c "Add :com.apple.security.cs.disable-library-validation bool true" \
     "$host_entitlements"
 
   codesign_adhoc "$app/Contents/PlugIns/AlhangeulPreview.appex" "$preview_entitlements"
@@ -522,9 +529,9 @@ main() {
   touch "$stamp_file"
 
   prepare_app
-  verify_bundle "$APP_PATH"
+  verify_bundle_structure "$APP_PATH"
   prepare_smoke_app_copy "$run_dir"
-  verify_bundle "$APP_PATH"
+  verify_signed_bundle "$APP_PATH"
   install_app
   reset_quicklook
   verify_active_provider_path "$run_dir"
