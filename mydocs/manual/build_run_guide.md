@@ -320,6 +320,7 @@ helper가 자동으로 수행하는 항목:
 
 - `scripts/package-release.sh <version>`으로 Release package 생성 (`--skip-package` 또는 `--app` 지정 시 생략)
 - `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` bundle 정합성 확인
+- `build.noindex/`와 Xcode DerivedData 아래에 남은 개발/테스트용 `Alhangeul.app` LaunchServices/PlugInKit 등록 해제
 - `$HOME/Applications/Alhangeul.app` 설치와 `lsregister`/`pluginkit` 등록
 - 이전 이름 설치본 후보 발견 시 기본 실패. `--unregister-legacy-candidates` 지정 시 파일은 삭제하지 않고 LaunchServices/PlugInKit 등록만 정리
 - `pluginkit -mAvvv`에서 Preview/Thumbnail extension 확인
@@ -399,5 +400,11 @@ scripts/smoke-sparkle-extension-refresh.sh \
 - `CODE_SIGNING_ALLOWED=NO` Debug 산출물로 `pluginkit` 등록 여부를 판정하지 않는다.
 - Debug/Release 중간 산출물은 `build.noindex/` 아래에 둔다. Spotlight 검색 결과에 `build/DerivedData/.../Alhangeul.app` 같은 개발 앱이 보이면 오래된 산출물이 남은 상태로 보고 제거하거나 Spotlight 인덱스를 갱신한다.
 - 동일 검증 중에는 설치 후보를 `$HOME/Applications/Alhangeul.app` 하나로 고정한다.
+
+추가 규칙:
+
+- Debug/테스트용 extension 등록은 표준 smoke helper 안에서만 수행한다. 수동 `lsregister`/`pluginkit -a` 등록을 했으면 같은 검증 안에서 `pluginkit -r`와 `lsregister -u`로 등록을 해제하고 `qlmanage -r cache`까지 수행한다.
+- Xcode build가 자동으로 `build.noindex/` 또는 `~/Library/Developer/Xcode/DerivedData/`의 `Alhangeul.app`을 LaunchServices에 등록할 수 있다. Finder/Quick Look 결과를 판정하기 전 표준 smoke helper를 다시 실행해 개발 산출물 등록을 걷어내고 설치본 하나만 active provider로 남긴다.
+- 파일 삭제가 필요한 정리는 작업지시자 승인 후에만 수행한다. 일반 smoke 격리는 파일 삭제 없이 LaunchServices/PlugInKit 등록 해제만 수행한다.
 
 `qlmanage -m plugins` 미노출 처리, `pluginkit -mAvvv` 미노출 시 진단 순서, 이전 이름(`RhwpMac.app`, `AlhangeulMac.app`, `알한글.app`) 설치본 처리, 표시명 문제와 extension 실패 혼동 방지 등 추가 진단 기준은 [`finder_integration_validation_pitfalls.md`](../troubleshootings/finder_integration_validation_pitfalls.md)를 따른다.

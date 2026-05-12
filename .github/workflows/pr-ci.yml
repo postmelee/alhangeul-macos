@@ -215,7 +215,7 @@ jobs:
           set -euo pipefail
           scripts/ci/write-sparkle-appcast.sh \
             --version 0.1.2 \
-            --build 5 \
+            --build 6 \
             --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.2/alhangeul-macos-0.1.2.dmg \
             --length 1 \
             --ed-signature dummy-ed-signature \

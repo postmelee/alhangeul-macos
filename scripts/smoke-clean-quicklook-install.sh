@@ -281,14 +281,42 @@ prepare_smoke_app_copy() {
 unregister_app_if_present() {
   local app="$1"
   if [ -d "$app" ]; then
-    if [ -d "$app/Contents/PlugIns/AlhangeulPreview.appex" ]; then
-      pluginkit -r "$app/Contents/PlugIns/AlhangeulPreview.appex" >/dev/null 2>&1 || true
-    fi
-    if [ -d "$app/Contents/PlugIns/AlhangeulThumbnail.appex" ]; then
-      pluginkit -r "$app/Contents/PlugIns/AlhangeulThumbnail.appex" >/dev/null 2>&1 || true
-    fi
-    "$LSREGISTER" -u "$app" >/dev/null 2>&1 || true
+    unregister_app_registration "$app"
   fi
+}
+
+unregister_app_registration() {
+  local app="$1"
+  if [ -d "$app/Contents/PlugIns/AlhangeulPreview.appex" ]; then
+    pluginkit -r "$app/Contents/PlugIns/AlhangeulPreview.appex" >/dev/null 2>&1 || true
+  fi
+  if [ -d "$app/Contents/PlugIns/AlhangeulThumbnail.appex" ]; then
+    pluginkit -r "$app/Contents/PlugIns/AlhangeulThumbnail.appex" >/dev/null 2>&1 || true
+  fi
+  "$LSREGISTER" -u "$app" >/dev/null 2>&1 || true
+}
+
+list_ephemeral_alhangeul_app_registrations() {
+  {
+    if [ -n "${LSREGISTER:-}" ] && [ -x "$LSREGISTER" ]; then
+      "$LSREGISTER" -dump 2>/dev/null || true
+    fi
+    find "$ROOT/build.noindex" -type d -name "Alhangeul.app" -prune 2>/dev/null || true
+  } | awk 'match($0, /\/[^"]*(Alhangeul|알한글)\.app/) { print substr($0, RSTART, RLENGTH) }' \
+    | sort -u
+}
+
+unregister_ephemeral_alhangeul_app_registrations() {
+  local app
+  while IFS= read -r app; do
+    [ -n "$app" ] || continue
+    [ "$app" = "$INSTALL_APP" ] && continue
+    case "$app" in
+      "$ROOT/build.noindex/"*|"$HOME/Library/Developer/Xcode/DerivedData/"*)
+        unregister_app_registration "$app"
+        ;;
+    esac
+  done < <(list_ephemeral_alhangeul_app_registrations)
 }
 
 install_app() {
@@ -306,6 +334,8 @@ install_app() {
       exit 20
       ;;
   esac
+
+  unregister_ephemeral_alhangeul_app_registrations
 
   local user_copy="$HOME/Applications/Alhangeul.app"
   if [ "$INSTALL_APP" != "$user_copy" ] && [ -d "$user_copy" ]; then
