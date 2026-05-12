@@ -19,7 +19,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>0.1.2</string>
 	<key>CFBundleVersion</key>
-	<string>6</string>
+	<string>7</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>12.0</string>
 	<key>LSHasLocalizedDisplayName</key>
@@ -34,10 +34,6 @@
 			<array>
 				<string>com.postmelee.alhangeul.hwp</string>
 				<string>com.postmelee.alhangeul.hwpx</string>
-				<string>com.postmelee.alhangeulmac.hwp</string>
-				<string>com.postmelee.alhangeulmac.hwpx</string>
-				<string>com.postmelee.rhwpmac.hwp</string>
-				<string>com.postmelee.rhwpmac.hwpx</string>
 				<string>com.hancom.hwp</string>
 				<string>com.hancom.hwpx</string>
 				<string>com.haansoft.hancomofficeviewer.mac.hwp</string>

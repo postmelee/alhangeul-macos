@@ -41,12 +41,12 @@
 
 ### v0.1.2 (public 배포 대기)
 
-`v0.1.2`는 기존 설치본에서 Sparkle 업데이트 후 Finder thumbnail stale cache를 줄이기 위한 첫 실행 maintenance, legacy HWP/HWPX UTI 호환, About 창의 bundled `rhwp` provenance 표시, upstream `rhwp v0.7.11` core/studio 반영을 포함하는 release candidate입니다. public 배포는 `devel-webview` 검증 commit을 `main`에 반영하고 `v0.1.2` tag를 만든 뒤 별도 승인으로 진행합니다.
+`v0.1.2`는 Sparkle 업데이트 후 Finder thumbnail stale cache를 줄이기 위한 첫 실행 maintenance, 앱 소유 UTI `com.postmelee.alhangeul.*`와 Hancom 계열 UTI 지원, About 창의 bundled `rhwp` provenance 표시, upstream `rhwp v0.7.11` core/studio 반영을 포함하는 release candidate입니다. public 배포는 `devel-webview` 검증 commit을 `main`에 반영하고 `v0.1.2` tag를 만든 뒤 별도 승인으로 진행합니다.
 
 - GitHub Release: [Alhangeul v0.1.2](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.2) (public 배포 후 활성)
 - 업데이트 페이지: [알한글 v0.1.2](https://postmelee.github.io/alhangeul-macos/updates/v0.1.2.html) (public 배포 후 활성)
 - 포함된 `rhwp`: [`v0.7.11`](https://github.com/edwardkim/rhwp/releases/tag/v0.7.11) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
-- Sparkle update 기준: short version은 `0.1.2`, build는 `6`입니다.
+- Sparkle update 기준: short version은 `0.1.2`, build는 `7`입니다.
 
 현재 최신 public release는 `v0.1.1` build `4`입니다. 과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 현재 release candidate 또는 최신 공개 릴리즈 1개만 요약하고, bundled `rhwp` provenance는 한 줄 요약만 표시합니다.
 
