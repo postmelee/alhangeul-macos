@@ -113,10 +113,9 @@ cat > "$OUTPUT_FILE" <<EOF
 
 ## Homebrew Cask
 
-- Homebrew Cask는 public DMG URL/SHA256과 tap context 검증이 끝난 뒤 안내합니다.
-- 검증 전 공식 설치 경로는 위 GitHub Release DMG입니다.
+- Homebrew Cask는 public DMG URL/SHA256과 tap context 검증을 통과했습니다.
+- 설치 명령: \`brew install --cask postmelee/tap/alhangeul\`
 - Homebrew Cask도 아키텍처별 URL을 나누지 않고 같은 public universal DMG URL과 SHA256을 사용합니다.
-- 공개 완료 후 설치 명령은 \`brew install --cask postmelee/tap/alhangeul-macos\` 기준으로 README, Pages, GitHub Release/릴리즈 노트에 반영합니다.
 
 ## Release metadata
 
