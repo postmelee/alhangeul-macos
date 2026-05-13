@@ -61,7 +61,40 @@ Xcode는 Debug/Release build 중 `RegisterWithLaunchServices` 단계에서 `buil
 
 표준 smoke helper는 `build.noindex/`와 Xcode DerivedData 아래의 개발 산출물 등록을 파일 삭제 없이 해제한 뒤 `$HOME/Applications/Alhangeul.app` 또는 `/Applications/Alhangeul.app` 중 하나만 등록한다. 수동 등록을 했다면 같은 검증 안에서 `pluginkit -r`, `lsregister -u`, `qlmanage -r cache`까지 수행한다.
 
-## 5. 표시명 문제와 extension 실패 혼동 방지
+cleanup-only 기준:
+
+- 대상은 현재 저장소의 `build.noindex/` 또는 Xcode DerivedData 아래 `Alhangeul.app`과 그 안의 `.appex`로 제한한다.
+- `pluginkit -r <appex>`와 `lsregister -u <app>`는 registration만 해제하며 app 파일을 삭제하지 않는다.
+- `qlmanage -r cache`는 Quick Look thumbnail cache 재평가를 유도하지만 Finder를 재시작하거나 전역 LaunchServices database를 삭제하지 않는다.
+- `/Applications/Alhangeul.app`, `$HOME/Applications/Alhangeul.app`, legacy app 파일 삭제는 cleanup-only가 아니며 작업지시자 승인 또는 사용자의 명시 선택이 필요하다.
+
+수동 cleanup-only 예시:
+
+```bash
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister"
+DEV_APP="$PWD/build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app"
+
+pluginkit -r "$DEV_APP/Contents/PlugIns/AlhangeulPreview.appex" 2>/dev/null || true
+pluginkit -r "$DEV_APP/Contents/PlugIns/AlhangeulThumbnail.appex" 2>/dev/null || true
+"$LSREGISTER" -u "$DEV_APP" 2>/dev/null || true
+qlmanage -r cache
+```
+
+전역 reset 주의:
+
+- `lsregister -kill -r -domain user`는 현재 사용자 LaunchServices database를 재빌드한다. 알한글뿐 아니라 사용자 계정의 app/file association 재평가에 영향을 줄 수 있으므로 일반 smoke 절차로 쓰지 않는다.
+- `lsregister -delete`와 재부팅은 더 강한 reset이다. 특정 후보 registration 해제로 해결되지 않는 경우의 마지막 진단 수단으로만 검토한다.
+- Finder 종료, `quicklookd`/`thumbnaild` kill은 사용자의 현재 Finder 작업과 Quick Look 상태를 흔들 수 있다. helper 안에서 실행하더라도 smoke/troubleshooting 목적을 명확히 기록한다.
+
+## 5. 표준 helper 선택 기준
+
+| 목적 | 권장 helper | 주의 |
+|------|-------------|------|
+| Release package를 설치하고 Finder thumbnail/preview를 새 설치본 기준으로 확인 | `scripts/smoke-clean-quicklook-install.sh` | 개발 산출물 registration 해제를 포함한다 |
+| `$HOME/Applications/Alhangeul.app` 기준 간단 Finder integration smoke | `scripts/smoke-finder-integration.sh` | legacy 후보 방어는 있지만 현재 이름 개발 산출물 cleanup 전용은 아니다 |
+| Sparkle 업데이트 후 새 설치본 provider가 자연 등록됐는지 확인 | `scripts/smoke-sparkle-extension-refresh.sh` | `--repair-registration`은 triage 전용이며 release gate가 아니다 |
+
+## 6. 표시명 문제와 extension 실패 혼동 방지
 
 Spotlight/Dock/Finder 표시명은 현재 사용자 언어와 LaunchServices/Spotlight 캐시의 영향을 받는다. 표시명이 `Alhangeul`로 보이고 `알한글`로 보이지 않더라도 extension 실행은 정상일 수 있고, 그 반대도 가능하다.
 

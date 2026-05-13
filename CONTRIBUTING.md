@@ -142,6 +142,13 @@ native renderer 동작을 바꾸는 `devel` 대상 PR이면 추가로 아래를 
 
 native renderer 문제 샘플이 있다면 `./scripts/render-debug-compare.sh output/render-debug path/to/sample.hwp`를 추가로 실행하고, PR 본문에 summary와 core/native PNG 비교 결과를 적어주세요. WKWebView viewer PR은 가능한 경우 `rhwp-studio` 단독 실행 결과와 앱 내 WKWebView 결과를 함께 비교해 주세요.
 
+Finder Quick Look/Thumbnail을 바꾸는 PR이면 추가로 아래 원칙을 지켜주세요.
+
+- Debug app은 앱 실행과 WKWebView viewer 확인용입니다. Finder Quick Look/Thumbnail extension 등록 성공 여부를 Debug app으로 판정하지 마세요.
+- Finder Quick Look/Thumbnail 검증은 Release package 산출물 또는 표준 smoke helper 설치본 기준으로 수행합니다.
+- 수동으로 `lsregister` 또는 `pluginkit` 등록을 했다면 같은 검증 안에서 `pluginkit -r`, `lsregister -u`, `qlmanage -r cache`로 등록을 정리하고 PR 본문에 적어주세요.
+- `build.noindex/` 또는 Xcode DerivedData 아래의 `Alhangeul.app`이 LaunchServices/PlugInKit에 남아 있으면 Finder routing이 흐려질 수 있습니다. smoke 전후 active provider path가 설치본 내부인지 확인해 주세요.
+
 위 명령이 모두 통과하는지 확인한 후 PR을 생성해주세요. PR 본문은 [`.github/pull_request_template.md`](.github/pull_request_template.md) 양식을 사용합니다.
 
 ### HWP/HWPX 샘플 파일 제공
@@ -187,6 +194,8 @@ qlmanage -p path/to/sample.hwp
 # 4. Finder thumbnail smoke
 qlmanage -t -x -s 512 -o /tmp/alhangeul-ql path/to/sample.hwp
 ```
+
+`qlmanage` 결과만으로 현재 PR의 extension이 실행됐다고 판단하지 마세요. 먼저 `pluginkit -mAvvv | grep com.postmelee.alhangeul`로 active provider path를 보고, 개발 산출물이나 예전 앱 이름이 남아 있으면 [`finder_integration_validation_pitfalls.md`](mydocs/troubleshootings/finder_integration_validation_pitfalls.md)를 따라 정리합니다.
 
 core/native 비교 상세 절차는 [`render_core_native_compare_guide.md`](mydocs/manual/render_core_native_compare_guide.md)를 참고하세요.
 
