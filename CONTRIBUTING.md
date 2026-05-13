@@ -146,6 +146,7 @@ Finder Quick Look/Thumbnail을 바꾸는 PR이면 추가로 아래 원칙을 지
 
 - Debug app은 앱 실행과 WKWebView viewer 확인용입니다. Finder Quick Look/Thumbnail extension 등록 성공 여부를 Debug app으로 판정하지 마세요.
 - Finder Quick Look/Thumbnail 검증은 Release package 산출물 또는 표준 smoke helper 설치본 기준으로 수행합니다.
+- smoke 전후에는 `scripts/check-extension-registration-hygiene.sh --check-only`로 active provider path와 개발 산출물 등록 잔존 여부를 확인합니다.
 - 수동으로 `lsregister` 또는 `pluginkit` 등록을 했다면 같은 검증 안에서 `pluginkit -r`, `lsregister -u`, `qlmanage -r cache`로 등록을 정리하고 PR 본문에 적어주세요.
 - `build.noindex/` 또는 Xcode DerivedData 아래의 `Alhangeul.app`이 LaunchServices/PlugInKit에 남아 있으면 Finder routing이 흐려질 수 있습니다. smoke 전후 active provider path가 설치본 내부인지 확인해 주세요.
 

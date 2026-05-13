@@ -90,6 +90,8 @@ qlmanage -r cache
 
 | 목적 | 권장 helper | 주의 |
 |------|-------------|------|
+| 현재 계정에 남은 개발 산출물 registration과 active provider path만 점검 | `scripts/check-extension-registration-hygiene.sh --check-only` | 기본값은 파일 삭제나 전역 reset을 수행하지 않는다 |
+| `build.noindex/`/DerivedData 개발 산출물 registration만 해제 | `scripts/check-extension-registration-hygiene.sh --cleanup-dev-registrations` | app bundle 삭제나 legacy app 정리는 하지 않는다 |
 | Release package를 설치하고 Finder thumbnail/preview를 새 설치본 기준으로 확인 | `scripts/smoke-clean-quicklook-install.sh` | 개발 산출물 registration 해제를 포함한다 |
 | `$HOME/Applications/Alhangeul.app` 기준 간단 Finder integration smoke | `scripts/smoke-finder-integration.sh` | legacy 후보 방어는 있지만 현재 이름 개발 산출물 cleanup 전용은 아니다 |
 | Sparkle 업데이트 후 새 설치본 provider가 자연 등록됐는지 확인 | `scripts/smoke-sparkle-extension-refresh.sh` | `--repair-registration`은 triage 전용이며 release gate가 아니다 |
