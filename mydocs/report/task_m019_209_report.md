@@ -5,6 +5,7 @@
 | 항목 | 값 |
 |------|----|
 | 이슈 | [#209 v0.1.2 Homebrew tap 초기 공개 배포](https://github.com/postmelee/alhangeul-macos/issues/209) |
+| PR | [#241 Task #209: Homebrew Cask 배포](https://github.com/postmelee/alhangeul-macos/pull/241) |
 | 마일스톤 | M019 `v0.1.2` |
 | 작업 브랜치 | `local/task209` |
 | 대상 브랜치 | `main` |
