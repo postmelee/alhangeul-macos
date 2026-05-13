@@ -6,13 +6,13 @@
 
 ## 변경 내용
 
-- `Casks/alhangeul-macos.rb`
+- `Casks/alhangeul.rb`
   - `version "0.1.2"`
   - `sha256 "37a27321f03a84b8b28749b5f839ea5c5833975d20f2479e3b79ebd665811ead"`
   - 단일 universal public DMG URL 형식 유지
 - `README.md`
   - `v0.1.2`를 최신 public release로 정리
-  - Homebrew 설치 명령 `brew install --cask postmelee/tap/alhangeul-macos` 추가
+  - Homebrew 설치 명령 `brew install --cask postmelee/tap/alhangeul` 추가
 - `docs/index.html`, `docs/updates/index.html`, `docs/updates/v0.1.2.html`
   - Homebrew Cask 설치 명령 공개 문구 추가
 - `scripts/ci/write-release-notes.sh`
@@ -24,7 +24,7 @@
 
 ```bash
 curl -fsSL https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.2/alhangeul-macos-0.1.2.dmg.sha256 -o /private/tmp/alhangeul-macos-0.1.2.dmg.sha256
-ruby -c Casks/alhangeul-macos.rb
+ruby -c Casks/alhangeul.rb
 ./scripts/update-cask-sha256.sh --dry-run 0.1.2 /private/tmp/alhangeul-macos-0.1.2.dmg.sha256
 bash -n scripts/ci/write-release-notes.sh scripts/update-cask-sha256.sh
 scripts/ci/write-release-notes.sh 0.1.2 37a27321f03a84b8b28749b5f839ea5c5833975d20f2479e3b79ebd665811ead /private/tmp/alhangeul-release-notes-0.1.2-homebrew.md

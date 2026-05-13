@@ -1,4 +1,4 @@
-cask "alhangeul-macos" do
+cask "alhangeul" do
   version "0.1.2"
   sha256 "37a27321f03a84b8b28749b5f839ea5c5833975d20f2479e3b79ebd665811ead"
 
@@ -7,7 +7,7 @@ cask "alhangeul-macos" do
   desc "Quick Look, thumbnail, and viewer app for HWP/HWPX documents"
   homepage "https://github.com/postmelee/alhangeul-macos"
 
-  depends_on macos: ">= :monterey"
+  depends_on macos: :monterey
 
   app "Alhangeul.app"
 

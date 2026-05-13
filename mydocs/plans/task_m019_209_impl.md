@@ -6,7 +6,7 @@
 
 ## 구현 순서
 
-1. `Casks/alhangeul-macos.rb` 갱신
+1. `Casks/alhangeul.rb` 갱신
    - `version "0.1.2"`
    - `sha256 "37a27321f03a84b8b28749b5f839ea5c5833975d20f2479e3b79ebd665811ead"`
    - URL은 기존 tag 고정 GitHub Release DMG 형식 유지
@@ -19,12 +19,12 @@
    - Homebrew 가이드의 #209 기준을 `v0.1.2`로 정리
 4. tap 반영
    - `postmelee/homebrew-tap`을 확인/clone/fetch
-   - tap의 `Casks/alhangeul-macos.rb`에 동일 Cask 반영
+   - tap의 `Casks/alhangeul.rb`에 동일 Cask 반영
 5. 검증
    - 본 저장소 Cask shape와 script dry-run
    - tap context `brew style`, `brew audit`
-   - `brew install --cask postmelee/tap/alhangeul-macos`
-   - `brew uninstall --cask alhangeul-macos`
+   - `brew install --cask postmelee/tap/alhangeul`
+   - `brew uninstall --cask alhangeul`
 6. 보고
    - Stage 보고서와 최종 보고서 작성
    - 본 저장소 PR 게시
@@ -34,7 +34,7 @@
 
 | 파일 | 방침 |
 |------|------|
-| `Casks/alhangeul-macos.rb` | public v0.1.2 DMG version/SHA 반영 |
+| `Casks/alhangeul.rb` | public v0.1.2 DMG version/SHA 반영 |
 | `README.md` | GitHub Release DMG와 Homebrew 설치 명령을 함께 안내 |
 | `docs/index.html`, `docs/updates/*.html` | Pages에 Homebrew 설치 명령 추가 |
 | `scripts/ci/write-release-notes.sh` | 이후 release note의 Homebrew 섹션을 검증 완료 시 공개 문구로 갱신 |
@@ -45,11 +45,11 @@
 
 ```bash
 ./scripts/update-cask-sha256.sh --dry-run 0.1.2 /private/tmp/alhangeul-macos-0.1.2.dmg.sha256
-ruby -c Casks/alhangeul-macos.rb
-brew style --cask alhangeul-macos
-brew audit --cask alhangeul-macos
-brew audit --cask --new alhangeul-macos
-brew install --cask postmelee/tap/alhangeul-macos
-brew uninstall --cask alhangeul-macos
+ruby -c Casks/alhangeul.rb
+brew style --cask alhangeul
+brew audit --cask alhangeul
+brew audit --cask --new alhangeul
+brew install --cask postmelee/tap/alhangeul
+brew uninstall --cask alhangeul
 git diff --check
 ```

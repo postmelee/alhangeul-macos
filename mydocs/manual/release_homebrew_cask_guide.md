@@ -10,16 +10,16 @@
 - rehearsal DMG 또는 개발용 zip은 Homebrew Cask URL/sha256에 사용하지 않는다.
 - public DMG가 GitHub Release asset으로 업로드되고 SHA256이 확정되기 전에는 Cask를 사용자 설치 경로로 안내하지 않는다.
 - Cask는 Intel Mac/Apple Silicon Mac용 URL을 나누지 않고 같은 public universal DMG URL과 SHA256을 사용한다.
-- `v0.1.2`의 실제 Homebrew tap 초기 공개 배포는 #209에서 수행한다. #187은 tap 경로와 검증 기준을 확정하는 작업으로 한정한다.
+- `v0.1.2`의 실제 Homebrew tap 초기 공개 배포는 #209에서 수행했다. #187은 tap 경로와 검증 기준을 확정하는 작업으로 한정한다.
 
 ## Cask source 기준
 
-현재 `Casks/alhangeul-macos.rb`는 초안이다.
+현재 `Casks/alhangeul.rb`는 release 기준 Cask source다.
 
 중요:
 
-- Homebrew는 raw path의 `Casks/alhangeul-macos.rb`를 그대로 public Cask처럼 audit하지 않는다. 실제 brew 배포에는 tap 안의 cask가 필요하다.
-- 이 저장소의 `Casks/alhangeul-macos.rb`는 release 기준 Cask source로 유지하고, public DMG가 GitHub Release에 올라간 뒤 선택한 tap으로 복사하거나 PR을 만든다.
+- Homebrew는 raw path의 `Casks/alhangeul.rb`를 그대로 public Cask처럼 audit하지 않는다. 실제 brew 배포에는 tap 안의 cask가 필요하다.
+- 이 저장소의 `Casks/alhangeul.rb`는 release 기준 Cask source로 유지하고, public DMG가 GitHub Release에 올라간 뒤 선택한 tap으로 복사하거나 PR을 만든다.
 - 초기 배포 tap은 `postmelee/homebrew-tap`을 기준으로 한다. Homebrew one-argument tap 명령은 `brew tap postmelee/tap`이고, 실제 GitHub repository는 `postmelee/homebrew-tap`이다.
 - 장기적으로 `Homebrew/homebrew-cask` 제출을 목표로 둘 수 있지만, 별도 review와 더 엄격한 audit 대응이 필요하므로 초기 public DMG 배포와 분리한다.
 
@@ -30,7 +30,7 @@
 - `url`이 public DMG 산출물 `alhangeul-macos-<version>.dmg`와 일치하는가
 - `url`이 Sparkle appcast enclosure와 같은 tag 고정 universal DMG URL 기준인가
 - `sha256`이 public DMG의 실제 digest와 일치하는가
-- cask token이 `alhangeul-macos`인가
+- cask token이 앱 이름 기준 `alhangeul`인가
 - `homepage`이 현재 저장소를 가리키는가
 - `app "Alhangeul.app"`이 산출물과 일치하는가
 - caveats 문구가 현재 extension 등록 흐름과 일치하는가
@@ -72,8 +72,8 @@
 `v0.1.2` 기준 실제 공개 절차는 #209에서 진행한다.
 
 1. #225에서 signed/notarized public DMG와 `.sha256` asset을 확정한다.
-2. `./scripts/update-cask-sha256.sh <version>`로 이 저장소의 `Casks/alhangeul-macos.rb`를 public DMG SHA256 기준으로 갱신한다.
-3. `postmelee/homebrew-tap`의 `Casks/alhangeul-macos.rb`에 같은 내용을 반영한다.
+2. `./scripts/update-cask-sha256.sh <version>`로 이 저장소의 `Casks/alhangeul.rb`를 public DMG SHA256 기준으로 갱신한다.
+3. `postmelee/homebrew-tap`의 `Casks/alhangeul.rb`에 같은 내용을 반영한다.
 4. tap repository 기준으로 Homebrew 검증을 수행한다.
 5. 검증이 통과한 뒤에만 사용자 문서와 release note에 Homebrew 설치 명령을 공개한다.
 
@@ -83,20 +83,19 @@
 
 ```bash
 brew tap postmelee/tap
-brew style --cask alhangeul-macos
-brew audit --cask alhangeul-macos
-brew audit --cask --new alhangeul-macos
-brew install --cask postmelee/tap/alhangeul-macos
-brew uninstall --cask alhangeul-macos
+brew style --cask alhangeul
+brew audit --cask alhangeul
+brew audit --cask --new alhangeul
+brew install --cask postmelee/tap/alhangeul
+brew uninstall --cask alhangeul
 ```
 
 raw path 검증은 Homebrew가 tap context를 요구할 수 있으므로, 최종 검증은 선택한 tap에 Cask를 반영한 뒤 cask token 기준으로 수행한다.
 
 `postmelee/homebrew-tap` maintainer tap의 공개 gate는 `brew style --cask`, 일반 `brew audit --cask`, install/uninstall smoke를 기준으로 한다. `brew audit --cask --new`는 `Homebrew/homebrew-cask` 신규 제출 수준의 기준까지 적용하므로 참고 검증으로만 사용한다. 실패 시에는 일반 audit/install 결과와 실패 사유를 함께 기록한다.
 
-현재 `brew audit --cask --new alhangeul-macos`에서 확인된 제출 기준 이슈:
+현재 `brew audit --cask --new alhangeul`에서 확인된 제출 기준 이슈:
 
-- cask token이 platform을 포함한다.
 - GitHub repository notability가 official cask 제출 기준에 미달한다.
 
 이는 `Homebrew/homebrew-cask` 제출을 막는 요인이지만, maintainer 소유 tap인 `postmelee/homebrew-tap` 공개 자체를 막는 기준으로 취급하지 않는다.
