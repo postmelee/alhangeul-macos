@@ -80,9 +80,12 @@ extension RhwpStudioWebView {
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
         private static let nativeDropSuppressionInterval: TimeInterval = 2
-        private static let recoverableInvalidControlMessage = "지정된 컨트롤이 표, 글상자 또는 그림이 아닙니다"
-        private static let recoverableInvalidControlAssetPathPrefix = "/assets/index-"
-        private static let recoverableInvalidControlAssetLine = 1
+        private static let recoverableRuntimeMessages = [
+            "지정된 컨트롤이 표, 글상자 또는 그림이 아닙니다",
+            "컨트롤 인덱스 0 범위 초과"
+        ]
+        private static let recoverableRuntimeAssetPathPrefix = "/assets/index-"
+        private static let recoverableRuntimeAssetLine = 1
 
         private enum LoadIdentity: Equatable {
             case empty(reloadToken: Int)
@@ -396,7 +399,7 @@ extension RhwpStudioWebView {
             let line = intValue(body["line"])
             let column = intValue(body["column"])
             let reason = body["reason"] as? String
-            let isFatal = !isRecoverableInvalidControlRuntimeError(
+            let isFatal = !isRecoverablePostLoadRuntimeError(
                 message: message,
                 sourceURL: sourceURL,
                 line: line,
@@ -417,7 +420,7 @@ extension RhwpStudioWebView {
             )
         }
 
-        private func isRecoverableInvalidControlRuntimeError(
+        private func isRecoverablePostLoadRuntimeError(
             message: String?,
             sourceURL: String?,
             line: Int?,
@@ -426,19 +429,22 @@ extension RhwpStudioWebView {
         ) -> Bool {
             guard currentDocument != nil,
                   hasCompletedCurrentLoad,
-                  Self.hasRecoverableInvalidControlMessage(message) || Self.hasRecoverableInvalidControlMessage(reason),
-                  Self.isRecoverableInvalidControlSource(sourceURL: sourceURL, line: line, column: column, reason: reason)
+                  Self.hasRecoverableRuntimeMessage(message) || Self.hasRecoverableRuntimeMessage(reason),
+                  Self.isRecoverableRuntimeSource(sourceURL: sourceURL, line: line, column: column, reason: reason)
             else {
                 return false
             }
             return true
         }
 
-        private static func hasRecoverableInvalidControlMessage(_ value: String?) -> Bool {
-            value?.contains(recoverableInvalidControlMessage) == true
+        private static func hasRecoverableRuntimeMessage(_ value: String?) -> Bool {
+            guard let value else {
+                return false
+            }
+            return recoverableRuntimeMessages.contains { value.contains($0) }
         }
 
-        private static func isRecoverableInvalidControlSource(
+        private static func isRecoverableRuntimeSource(
             sourceURL: String?,
             line: Int?,
             column: Int?,
@@ -452,13 +458,13 @@ extension RhwpStudioWebView {
             }
 
             let path = url.path
-            if path.hasPrefix(recoverableInvalidControlAssetPathPrefix) && path.hasSuffix(".js") {
-                return line == recoverableInvalidControlAssetLine
+            if path.hasPrefix(recoverableRuntimeAssetPathPrefix) && path.hasSuffix(".js") {
+                return line == recoverableRuntimeAssetLine
             }
 
             if path == "/index.html", line == 0, column == 0 {
-                return reason?.contains(recoverableInvalidControlAssetPathPrefix) == true
-                    && reason?.contains(":\(recoverableInvalidControlAssetLine):") == true
+                return reason?.contains(recoverableRuntimeAssetPathPrefix) == true
+                    && reason?.contains(":\(recoverableRuntimeAssetLine):") == true
             }
 
             return false
