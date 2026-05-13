@@ -723,6 +723,77 @@ video {
   background: #ffffff;
 }
 
+.release-version-notice {
+  width: 100%;
+  border-bottom: 1px solid rgba(174, 127, 0, 0.18);
+  background: #fff8e5;
+}
+
+.release-version-notice-inner {
+  display: flex;
+  width: min(var(--content-width), calc(100% - 40px));
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 0 auto;
+  padding: 14px 0;
+}
+
+.release-version-notice p {
+  min-width: 0;
+  margin: 0;
+  color: #5a4211;
+  font-size: 15px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.release-version-notice strong {
+  color: #2f260d;
+  font-weight: 700;
+}
+
+.release-version-notice-actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.notice-primary-link,
+.notice-secondary-link {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.notice-primary-link {
+  background: var(--text);
+  color: #ffffff;
+}
+
+.notice-primary-link:hover {
+  background: #3a3a40;
+}
+
+.notice-secondary-link {
+  border: 1px solid rgba(90, 66, 17, 0.28);
+  color: #4c380f;
+}
+
+.notice-secondary-link:hover {
+  border-color: rgba(90, 66, 17, 0.48);
+  color: #2f260d;
+}
+
 .updates-hero {
   width: min(var(--content-width), calc(100% - 40px));
   margin: 0 auto;
@@ -1053,6 +1124,16 @@ video {
     font-size: 18px;
   }
 
+  .release-version-notice-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .release-version-notice-actions {
+    width: 100%;
+  }
+
   .release-note-list a {
     flex-direction: column;
     gap: 6px;
@@ -1156,6 +1237,19 @@ video {
     min-height: 30px;
     padding: 0 12px;
     font-size: 13px;
+  }
+
+  .release-version-notice-inner {
+    width: min(100% - 24px, var(--content-width));
+  }
+
+  .release-version-notice p {
+    font-size: 14px;
+  }
+
+  .notice-primary-link,
+  .notice-secondary-link {
+    flex: 1 1 150px;
   }
 
   .intro-screen {
