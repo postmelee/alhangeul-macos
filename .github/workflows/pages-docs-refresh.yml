@@ -32,7 +32,7 @@ jobs:
           appcast_path="$RUNNER_TEMP/current-appcast.xml"
           curl -fsSL "https://postmelee.github.io/alhangeul-macos/appcast.xml" -o "$appcast_path"
           test -s "$appcast_path"
-          xmllint --noout "$appcast_path"
+          python3 -m xml.etree.ElementTree "$appcast_path" >/dev/null
 
       - name: Prepare Pages artifact
         shell: bash
@@ -42,7 +42,7 @@ jobs:
             --docs-dir docs \
             --appcast "$RUNNER_TEMP/current-appcast.xml" \
             --output-dir build.noindex/release/pages-artifact
-          xmllint --noout build.noindex/release/pages-artifact/appcast.xml
+          python3 -m xml.etree.ElementTree build.noindex/release/pages-artifact/appcast.xml >/dev/null
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
