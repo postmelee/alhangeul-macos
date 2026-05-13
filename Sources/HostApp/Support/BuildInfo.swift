@@ -22,4 +22,12 @@ enum BuildInfo {
     static var displayVersion: String {
         return "v\(version) (\(build))"
     }
+
+    static var rhwpDisplayVersion: String {
+        RhwpProvenanceLoader.load(bundle: bundle)?.displayValue ?? "확인 불가"
+    }
+
+    static var launchMaintenanceBuildIdentifier: String {
+        "\(version)-\(build)"
+    }
 }

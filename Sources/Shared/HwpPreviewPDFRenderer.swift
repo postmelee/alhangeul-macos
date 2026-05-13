@@ -104,7 +104,7 @@ enum HwpPreviewPDFRenderer {
         ] as CFDictionary
 
         context.beginPDFPage(pageInfo)
-        context.setFillColor(CGColor(gray: 1, alpha: 1))
+        context.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
         context.fill(pageRect)
         context.draw(page.image, in: pageRect)
         context.endPDFPage()
