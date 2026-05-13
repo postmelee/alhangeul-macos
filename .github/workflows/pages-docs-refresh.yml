@@ -1,0 +1,55 @@
+name: Pages Docs Refresh
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-docs-refresh
+  cancel-in-progress: true
+
+jobs:
+  deploy-pages:
+    name: Deploy docs to GitHub Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Preserve current Sparkle appcast
+        shell: bash
+        run: |
+          set -euo pipefail
+          appcast_path="$RUNNER_TEMP/current-appcast.xml"
+          curl -fsSL "https://postmelee.github.io/alhangeul-macos/appcast.xml" -o "$appcast_path"
+          test -s "$appcast_path"
+          xmllint --noout "$appcast_path"
+
+      - name: Prepare Pages artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/prepare-pages-artifact.sh \
+            --docs-dir docs \
+            --appcast "$RUNNER_TEMP/current-appcast.xml" \
+            --output-dir build.noindex/release/pages-artifact
+          xmllint --noout build.noindex/release/pages-artifact/appcast.xml
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: build.noindex/release/pages-artifact
+          retention-days: 1
+
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v5
