@@ -4,8 +4,8 @@
 
 - 이슈: #225 rhwp 최신버전 반영 및 v0.1.2 배포 준비
 - 마일스톤: M019 (`v0.1.2`)
-- 브랜치: `local/task225`
-- 기준 브랜치: `devel-webview`
+- 브랜치: `local/task225`, `publish/task225`, `publish/task225-main`
+- 기준 브랜치: `devel-webview`, `main`
 - 최종 release candidate: `0.1.2 (8)`
 - 목표 tag: `v0.1.2`
 - 목적: `rhwp v0.7.11` core/studio를 반영하고, Finder Quick Look/Thumbnail update maintenance, About provenance, current/Hancom UTI 정책, release 문서와 workflow helper를 v0.1.2 public release 후보 기준으로 정리한다.
@@ -14,7 +14,7 @@
 
 `v0.1.2` build `8` release candidate를 만들고 local/rehearsal 검증을 완료했다. #235의 Web viewer runtime 오류 banner UX가 `devel-webview`에 먼저 merge되었으므로, 해당 변경을 #225 후보에 통합한 뒤 build `8`로 respin했다.
 
-public Developer ID signing, notarization, GitHub Release 게시, stable Sparkle appcast/Pages 배포는 아직 실행하지 않았다. 이 외부 공개 작업은 `publish/task225 -> devel-webview` PR merge, `devel-webview -> main` release PR merge, `v0.1.2` tag 생성 후 `Release Publish DMG` workflow에서 수행한다.
+이후 PR #237로 `devel-webview`에 반영하고, PR #238로 `main`에 반영했다. `main` merge commit `2c199b24c784c2044dae8473538515c59bd91939`에 tag `v0.1.2`를 생성한 뒤 `Release Publish DMG` workflow run `25774125473`에서 Developer ID signing, notarization, GitHub Release 게시, stable Sparkle appcast, Pages 배포를 완료했다.
 
 ## 주요 변경 파일
 
@@ -144,21 +144,17 @@ qlmanage -t -x -s 768 -c com.haansoft.hancomofficeviewer.mac.hwpx ...
 | legacy UTI 제거와 current/Hancom UTI 지원 | OK | plist search, clean smoke, Hancom forced routing |
 | #235 runtime banner 포함 | OK | #236 merge commit 통합, build 8 respin |
 | release rehearsal DMG 생성 | OK | `--skip-notarize` DMG와 SHA256 기록 |
-| public release 게시 | Pending | main merge/tag와 Release Publish workflow 실행 전 |
+| public release 게시 | OK | PR #238 main merge, tag `v0.1.2`, Release Publish DMG run `25774125473` 성공 |
 
 ## 미수행 범위
 
-- Developer ID signing과 notarization
-- GitHub Release public 게시와 asset upload
-- stable Sparkle appcast/Pages public deployment
-- public DMG Gatekeeper 설치 테스트
 - actual Sparkle update from public v0.1.1
 - Intel Mac 실기기 smoke
 - Homebrew Cask public SHA256 반영
 
 ## release handoff
 
-다음 release 실행 순서를 따른다.
+다음 release 실행 순서를 완료했다.
 
 1. `publish/task225` PR을 `devel-webview`에 merge한다.
 2. `devel-webview`의 release candidate commit을 `main`으로 반영하는 release PR을 merge한다.
@@ -166,20 +162,23 @@ qlmanage -t -x -s 768 -c com.haansoft.hancomofficeviewer.mac.hwpx ...
 4. `Release Publish DMG` workflow를 tag `v0.1.2`에서 `draft=false`, `prerelease=false`로 실행한다.
 5. signed/notarized public DMG SHA256, GitHub Release latest 상태, stable appcast EdDSA signature, Pages deployment URL을 `mydocs/release/v0.1.2.md`에 보강한다.
 
-## PR close 전략
-
-`publish/task225 -> devel-webview` PR 본문에는 다음을 명시한다.
+public 결과:
 
 ```text
-Closes #225
+GitHub Release: https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.2
+Public DMG: alhangeul-macos-0.1.2.dmg
+SHA256: 37a27321f03a84b8b28749b5f839ea5c5833975d20f2479e3b79ebd665811ead
+Sparkle appcast: https://postmelee.github.io/alhangeul-macos/appcast.xml
+Pages release note: https://postmelee.github.io/alhangeul-macos/updates/v0.1.2.html
 ```
 
-단, 실제 이슈 close는 PR merge와 public release 실행 상태를 확인한 뒤 작업지시자 승인 기준에 맞춰 처리한다.
+## PR close 전략
+
+PR #237은 `devel-webview`에 merge했고, PR #238은 `main`에 merge했다. 실제 public release 실행 상태까지 확인했으므로 #225는 post-release 기록 commit 후 close한다.
 
 ## 잔여 위험
 
-- public signing/notarization과 Gatekeeper 검증은 아직 workflow에서 확인하지 않았다.
-- Sparkle stable feed는 public DMG EdDSA signature가 확정된 뒤에만 검증 가능하다.
 - Finder/Quick Look cache는 macOS 내부 정책이므로 targeted refresh가 모든 과거 파일 thumbnail을 강제로 갱신하지는 않는다.
 - Intel Mac 실기기 smoke는 아직 수행하지 못했다.
 - #235가 완화한 Web viewer 오류의 root cause는 upstream `edwardkim/rhwp` #850에 남아 있다.
+- Homebrew Cask public SHA256 반영은 #209 또는 별도 승인 범위에서 진행해야 한다.
