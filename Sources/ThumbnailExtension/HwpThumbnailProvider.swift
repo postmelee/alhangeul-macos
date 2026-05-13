@@ -1,22 +1,31 @@
 import CoreGraphics
+import OSLog
 import QuickLookThumbnailing
 
 final class HwpThumbnailProvider: QLThumbnailProvider {
+    private static let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "com.postmelee.alhangeul.ThumbnailExtension",
+        category: "ThumbnailProvider"
+    )
+
     override func provideThumbnail(
         for request: QLFileThumbnailRequest,
         _ handler: @escaping (QLThumbnailReply?, Error?) -> Void
     ) {
+        Self.logger.debug("Thumbnail requested file=\(request.fileURL.lastPathComponent, privacy: .public) max=\(Int(request.maximumSize.width), privacy: .public)x\(Int(request.maximumSize.height), privacy: .public) scale=\(request.scale, privacy: .public)")
         do {
             let renderRequest = try HwpThumbnailRenderRequest(
                 fileURL: request.fileURL,
                 maximumSize: request.maximumSize,
                 scale: request.scale
             )
+            Self.logger.debug("Thumbnail render enqueued file=\(request.fileURL.lastPathComponent, privacy: .public) pixels=\(Int(renderRequest.maximumPixelSize.width), privacy: .public)x\(Int(renderRequest.maximumPixelSize.height), privacy: .public)")
             HwpThumbnailRenderCache.shared.renderedPage(for: renderRequest) { result in
                 switch result {
                 case .success(let renderedPage):
                     let contextSize = Self.aspectFit(renderedPage.size, within: request.maximumSize)
                     let image = renderedPage.image
+                    Self.logger.debug("Thumbnail ready file=\(request.fileURL.lastPathComponent, privacy: .public) context=\(Int(contextSize.width), privacy: .public)x\(Int(contextSize.height), privacy: .public) page=\(Int(renderedPage.size.width), privacy: .public)x\(Int(renderedPage.size.height), privacy: .public)")
                     let reply = QLThumbnailReply(contextSize: contextSize) { context in
                         Self.drawPageImage(image, in: context, size: contextSize)
                         return true
@@ -25,16 +34,20 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
                     handler(reply, nil)
 
                 case .failure(let error) where HwpDocumentFallbackClassifier.shouldUseThumbnailFallback(for: error):
+                    Self.logger.warning("Thumbnail fallback file=\(request.fileURL.lastPathComponent, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
                     handler(Self.fallbackReply(for: request), nil)
 
                 case .failure(let error):
+                    Self.logger.error("Thumbnail failed file=\(request.fileURL.lastPathComponent, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
                     handler(nil, error)
                 }
             }
         } catch {
             if HwpDocumentFallbackClassifier.shouldUseThumbnailFallback(for: error) {
+                Self.logger.warning("Thumbnail fallback before render file=\(request.fileURL.lastPathComponent, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
                 handler(Self.fallbackReply(for: request), nil)
             } else {
+                Self.logger.error("Thumbnail failed before render file=\(request.fileURL.lastPathComponent, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
                 handler(nil, error)
             }
         }
@@ -60,7 +73,7 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
     private static func drawPageImage(_ image: CGImage, in context: CGContext, size: CGSize) {
         let rect = drawingBounds(in: context, fallbackSize: size)
         context.saveGState()
-        context.setFillColor(CGColor(gray: 1, alpha: 1))
+        context.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
         context.fill(rect)
         context.draw(image, in: rect)
         context.restoreGState()
@@ -69,9 +82,9 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
     private static func drawFallback(in context: CGContext, size: CGSize) {
         let rect = drawingBounds(in: context, fallbackSize: size)
         context.saveGState()
-        context.setFillColor(CGColor(gray: 0.93, alpha: 1))
+        context.setFillColor(red: 0.93, green: 0.93, blue: 0.93, alpha: 1)
         context.fill(rect)
-        context.setStrokeColor(CGColor(gray: 0.55, alpha: 1))
+        context.setStrokeColor(red: 0.55, green: 0.55, blue: 0.55, alpha: 1)
         context.setLineWidth(max(1, min(size.width, size.height) * 0.04))
         context.stroke(rect.insetBy(dx: 2, dy: 2))
         context.restoreGState()
@@ -90,5 +103,10 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
             return CGRect(origin: .zero, size: fallbackSize)
         }
         return clipBounds
+    }
+
+    private static func errorDescription(_ error: Error) -> String {
+        let nsError = error as NSError
+        return "\(type(of: error))(domain=\(nsError.domain), code=\(nsError.code))"
     }
 }

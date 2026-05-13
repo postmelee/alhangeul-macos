@@ -70,7 +70,7 @@ class CGTreeRenderer {
         switch node.nodeType {
         case .page:
             // 페이지 배경 (흰색)
-            ctx.setFillColor(CGColor(gray: 1.0, alpha: 1.0))
+            ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
             ctx.fill(cgRect(node.bbox))
             renderChildren(node, in: ctx)
 
@@ -2481,7 +2481,7 @@ class CGTreeRenderer {
     ) {
         if style.hasPrefix("Open") {
             ctx.addPath(path)
-            ctx.setFillColor(CGColor(gray: 1, alpha: 1))
+            ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
             ctx.fillPath()
             ctx.addPath(path)
             ctx.setStrokeColor(color)
@@ -2503,7 +2503,7 @@ class CGTreeRenderer {
     ) {
         if style.hasPrefix("Open") {
             ctx.addEllipse(in: rect)
-            ctx.setFillColor(CGColor(gray: 1, alpha: 1))
+            ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
             ctx.fillPath()
             ctx.addEllipse(in: rect)
             ctx.setStrokeColor(color)

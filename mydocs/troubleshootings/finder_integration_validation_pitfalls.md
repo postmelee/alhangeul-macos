@@ -49,7 +49,19 @@ mdfind "kMDItemContentType == 'com.apple.application-bundle'" | grep -E "(RhwpMa
 
 파일 삭제 없이 smoke gate만 격리하려면 작업지시자 승인 후 표준 helper에 `--unregister-legacy-candidates`를 붙인다. 이 옵션은 후보 app/appex를 LaunchServices/PlugInKit에서 unregister하지만 실제 파일은 삭제하지 않는다. 실제 파일 제거(`rm -rf`)는 별도 승인 후에만 수행한다.
 
-## 4. 표시명 문제와 extension 실패 혼동 방지
+## 4. 현재 이름 개발 산출물 등록 처리
+
+Xcode는 Debug/Release build 중 `RegisterWithLaunchServices` 단계에서 `build.noindex/` 또는 `~/Library/Developer/Xcode/DerivedData/` 아래의 `Alhangeul.app`을 등록할 수 있다. 이 등록은 파일을 삭제하지 않아도 System Settings의 extension 목록을 늘리거나 Finder content type routing을 흐릴 수 있다.
+
+판정 기준:
+
+- `pluginkit -mAvvv -i com.postmelee.alhangeul.ThumbnailExtension`의 `Path`가 smoke 설치본 내부인지 확인한다.
+- `lsregister -dump | grep -E "Alhangeul\.app|com\.postmelee\.alhangeul"`에서 `build.noindex/` 또는 Xcode DerivedData 경로가 보이면 개발 산출물 등록이 남은 상태로 본다.
+- `mdls -name kMDItemContentType -name kMDItemContentTypeTree <fresh-sample>`로 Finder가 어떤 UTI로 파일을 분류하는지 확인한다.
+
+표준 smoke helper는 `build.noindex/`와 Xcode DerivedData 아래의 개발 산출물 등록을 파일 삭제 없이 해제한 뒤 `$HOME/Applications/Alhangeul.app` 또는 `/Applications/Alhangeul.app` 중 하나만 등록한다. 수동 등록을 했다면 같은 검증 안에서 `pluginkit -r`, `lsregister -u`, `qlmanage -r cache`까지 수행한다.
+
+## 5. 표시명 문제와 extension 실패 혼동 방지
 
 Spotlight/Dock/Finder 표시명은 현재 사용자 언어와 LaunchServices/Spotlight 캐시의 영향을 받는다. 표시명이 `Alhangeul`로 보이고 `알한글`로 보이지 않더라도 extension 실행은 정상일 수 있고, 그 반대도 가능하다.
 

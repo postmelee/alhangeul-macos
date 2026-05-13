@@ -15,10 +15,12 @@ MODMAP_DIR="$OUT/modulemap"
 EXPECTED_SYMBOLS="$ROOT/rhwp-ffi-symbols.txt"
 GENERATED_SYMBOLS="$OUT/generated_rhwp_symbols.txt"
 UNIVERSAL_LIB="$OUT/universal/librhwp.a"
+STATICLIB_ARTIFACT="Frameworks/universal/librhwp.a"
 LOCK_ARTIFACTS=(
-  "Frameworks/universal/librhwp.a"
+  "$STATICLIB_ARTIFACT"
   "Frameworks/generated_rhwp.h"
 )
+SKIP_STATICLIB_HASH_VERIFY="${ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY:-0}"
 UPDATE_LOCK=0
 VERIFY_LOCK=0
 
@@ -29,6 +31,12 @@ Usage: $0 [--update-lock | --verify-lock]
 Options:
   --update-lock   Build artifacts, then write sha256/size to rhwp-core.lock.
   --verify-lock   Build artifacts, then compare artifacts with rhwp-core.lock.
+
+Environment:
+  ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1
+                  With --verify-lock, skip only byte-for-byte sha256/size
+                  comparison for Frameworks/universal/librhwp.a. Source lock,
+                  Cargo.lock, generated header, and FFI symbol checks still run.
 EOF
 }
 
@@ -149,92 +157,24 @@ lock_artifact_value() {
   ' "$LOCK_FILE"
 }
 
-lock_artifact_values() {
+print_staticlib_hash_skip_warning() {
   local artifact_path="$1"
-  awk -F' = ' -v artifact_path="$artifact_path" '
-    function clean(value) {
-      gsub(/^"/, "", value)
-      gsub(/"$/, "", value)
-      return value
-    }
-    function flush() {
-      if (in_artifact && path == artifact_path && sha256 != "" && size != "") {
-        print "  - sha256: " sha256 ", size: " size
-      }
-    }
-    /^\[\[artifacts\]\]/ {
-      flush()
-      in_artifact = 1
-      path = ""
-      sha256 = ""
-      size = ""
-      next
-    }
-    in_artifact && $1 == "path" {
-      path = clean($2)
-      next
-    }
-    in_artifact && $1 == "sha256" {
-      sha256 = clean($2)
-      next
-    }
-    in_artifact && $1 == "size" {
-      size = $2
-      gsub(/^[ \t]+/, "", size)
-      gsub(/[ \t]+$/, "", size)
-      next
-    }
-    END {
-      flush()
-    }
-  ' "$LOCK_FILE"
+  cat >&2 <<EOF
+WARNING: skipping byte-for-byte hash verification for $artifact_path
+         Only the Rust static archive sha256/size comparison is skipped.
+         Source provenance, Cargo.lock, generated header, and FFI symbols remain verified.
+EOF
 }
 
-lock_artifact_matches() {
-  local artifact_path="$1"
-  local actual_sha256="$2"
-  local actual_size="$3"
-  awk -F' = ' \
-    -v artifact_path="$artifact_path" \
-    -v actual_sha256="$actual_sha256" \
-    -v actual_size="$actual_size" '
-    function clean(value) {
-      gsub(/^"/, "", value)
-      gsub(/"$/, "", value)
-      return value
-    }
-    function flush() {
-      if (in_artifact && path == artifact_path && sha256 == actual_sha256 && size == actual_size) {
-        found = 1
-      }
-    }
-    /^\[\[artifacts\]\]/ {
-      flush()
-      in_artifact = 1
-      path = ""
-      sha256 = ""
-      size = ""
-      next
-    }
-    in_artifact && $1 == "path" {
-      path = clean($2)
-      next
-    }
-    in_artifact && $1 == "sha256" {
-      sha256 = clean($2)
-      next
-    }
-    in_artifact && $1 == "size" {
-      size = $2
-      gsub(/^[ \t]+/, "", size)
-      gsub(/[ \t]+$/, "", size)
-      next
-    }
-    END {
-      flush()
-      exit found ? 0 : 1
-    }
-  ' "$LOCK_FILE"
+print_staticlib_hash_mismatch_note() {
+  cat >&2 <<EOF
+Note: $STATICLIB_ARTIFACT is a Rust static archive. Its byte hash can differ
+      across Rust, Xcode, macOS runner, archive tool, or build path changes even
+      when source provenance and ABI checks still match. Do not update
+      rhwp-core.lock just to satisfy an unreviewed runner/toolchain difference.
+      GitHub-hosted CI/release workflows may set
+      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1 under the documented policy.
+EOF
 }
 
 normalize_repo() {
@@ -583,29 +523,39 @@ verify_lock_file() {
   for artifact_path in "${LOCK_ARTIFACTS[@]}"; do
     require_artifact "$artifact_path"
 
+    if [ "$artifact_path" = "$STATICLIB_ARTIFACT" ] && [ "$SKIP_STATICLIB_HASH_VERIFY" = "1" ]; then
+      print_staticlib_hash_skip_warning "$artifact_path"
+      continue
+    fi
+
     local abs_path
+    local expected_sha256
     local actual_sha256
+    local expected_size
     local actual_size
-    local expected_artifacts
 
     abs_path="$(artifact_abs_path "$artifact_path")"
+    expected_sha256="$(lock_artifact_value "$artifact_path" sha256)"
+    expected_size="$(lock_artifact_value "$artifact_path" size)"
     actual_sha256="$(artifact_sha256 "$abs_path")"
     actual_size="$(artifact_size "$abs_path")"
-    expected_artifacts="$(lock_artifact_values "$artifact_path")"
 
-    if [ -z "$expected_artifacts" ]; then
+    if [ -z "$expected_sha256" ] || [ -z "$expected_size" ]; then
       echo "ERROR: missing lock metadata for artifact: $artifact_path" >&2
       echo "Run: ./scripts/build-rust-macos.sh --update-lock" >&2
       exit 1
     fi
 
-    if ! lock_artifact_matches "$artifact_path" "$actual_sha256" "$actual_size"; then
+    if [ "$expected_sha256" != "$actual_sha256" ] || [ "$expected_size" != "$actual_size" ]; then
       echo "ERROR: artifact hash mismatch: artifact differs from $LOCK_FILE" >&2
       echo "Artifact: $artifact_path" >&2
-      echo "Expected variants:" >&2
-      echo "$expected_artifacts" >&2
+      echo "Expected sha256: $expected_sha256" >&2
       echo "Actual sha256:   $actual_sha256" >&2
+      echo "Expected size:   $expected_size" >&2
       echo "Actual size:     $actual_size" >&2
+      if [ "$artifact_path" = "$STATICLIB_ARTIFACT" ]; then
+        print_staticlib_hash_mismatch_note
+      fi
       echo "Run: ./scripts/build-rust-macos.sh --update-lock if this artifact is intentional." >&2
       exit 1
     fi

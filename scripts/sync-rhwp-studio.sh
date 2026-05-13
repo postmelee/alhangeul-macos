@@ -2,9 +2,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-UPSTREAM_DIR="${1:-"$ROOT/build.noindex/rhwp-upstream-task134"}"
-EXPECTED_RELEASE_TAG="v0.7.10"
-EXPECTED_COMMIT="62a458aa317e962cd3d0eec6096728c172d57110"
+UPSTREAM_DIR="${1:-"$ROOT/build.noindex/rhwp-upstream"}"
+EXPECTED_RELEASE_TAG="v0.7.11"
+EXPECTED_COMMIT="a9dcdee32b17a7f9a20c609a5ed547e62fb8ebae"
 TARGET="$ROOT/Sources/HostApp/Resources/rhwp-studio"
 DIST="$UPSTREAM_DIR/rhwp-studio/dist"
 

@@ -85,7 +85,12 @@ private struct RhwpStudioContainerView: View {
                 }
 
                 if let message = store.webViewErrorMessage {
-                    WebViewerErrorBanner(message: message)
+                    WebViewerErrorBanner(
+                        message: message,
+                        onDismiss: {
+                            store.dismissWebViewError()
+                        }
+                    )
                         .padding(.top, 12)
                         .frame(maxHeight: .infinity, alignment: .top)
                 }
@@ -126,14 +131,29 @@ private struct ErrorStateView: View {
 
 private struct WebViewerErrorBanner: View {
     let message: String
+    let onDismiss: () -> Void
 
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "exclamationmark.triangle")
                 .foregroundStyle(.orange)
+
             Text(message)
                 .lineLimit(2)
                 .font(.caption)
+
+            Button {
+                onDismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 18, height: 18)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("알림 닫기")
+            .accessibilityLabel("알림 닫기")
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)

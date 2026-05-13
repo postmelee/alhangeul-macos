@@ -8,11 +8,17 @@ final class DocumentViewerStore: ObservableObject {
     @Published var filename: String = ""
     @Published var errorMessage: String?
     @Published var isLoading = false
-    @Published var webViewErrorMessage: String?
+    @Published private(set) var webViewErrorMessage: String?
     @Published var webViewFailure: RhwpStudioWebViewFailure?
     @Published var isWebViewLoading = false
     @Published private(set) var documentRevision: Int = 0
     @Published private(set) var webViewReloadToken: Int = 0
+
+    private static let webViewErrorAutoDismissDelayNanoseconds: UInt64 = 5_000_000_000
+
+    private var webViewErrorDismissTask: Task<Void, Never>?
+    private var webViewErrorDismissToken = 0
+    private var webViewErrorDedupeKey: String?
 
     var hasDocument: Bool {
         rhwpStudioDocument != nil
@@ -36,7 +42,7 @@ final class DocumentViewerStore: ObservableObject {
     func loadDocument(from url: URL) {
         isLoading = true
         errorMessage = nil
-        webViewErrorMessage = nil
+        dismissWebViewError()
         webViewFailure = nil
         isWebViewLoading = false
 
@@ -66,7 +72,7 @@ final class DocumentViewerStore: ObservableObject {
     func loadDroppedDocument(data: Data, filename: String) {
         isLoading = true
         errorMessage = nil
-        webViewErrorMessage = nil
+        dismissWebViewError()
         webViewFailure = nil
         isWebViewLoading = false
 
@@ -77,8 +83,8 @@ final class DocumentViewerStore: ObservableObject {
                 sourceDocument: nil
             )
         } catch {
-            webViewErrorMessage = "끌어놓은 문서를 열 수 없습니다: \(Self.openingErrorMessage(for: error))"
             clearCurrentDocument()
+            presentWebViewError("끌어놓은 문서를 열 수 없습니다: \(Self.openingErrorMessage(for: error))")
         }
 
         isLoading = false
@@ -95,7 +101,7 @@ final class DocumentViewerStore: ObservableObject {
             }
             loadDocument(from: url)
         } catch {
-            webViewErrorMessage = "최근 문서를 읽을 수 없습니다. 파일 접근 권한 또는 위치를 확인한 뒤 다시 열어 주세요."
+            presentWebViewError("최근 문서를 읽을 수 없습니다. 파일 접근 권한 또는 위치를 확인한 뒤 다시 열어 주세요.")
         }
     }
 
@@ -106,7 +112,7 @@ final class DocumentViewerStore: ObservableObject {
 
     func revealCurrentDocumentInFinder() {
         guard let sourceDocument else {
-            webViewErrorMessage = "Finder에서 표시할 원본 문서가 없습니다."
+            presentWebViewError("Finder에서 표시할 원본 문서가 없습니다.")
             return
         }
         DocumentFileActions.revealInFinder(sourceDocument.url)
@@ -124,22 +130,46 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func setWebViewError(_ message: String?) {
-        webViewErrorMessage = message
+        if let message {
+            presentWebViewError(message)
+        } else {
+            dismissWebViewError()
+        }
     }
 
     func setWebViewFailure(_ failure: RhwpStudioWebViewFailure?) {
-        webViewFailure = failure
-        if failure != nil {
-            webViewErrorMessage = nil
-            isWebViewLoading = false
+        guard let failure else {
+            webViewFailure = nil
+            return
+        }
+
+        isWebViewLoading = false
+
+        if failure.isFatal {
+            webViewFailure = failure
+            dismissWebViewError()
+        } else {
+            webViewFailure = nil
+            presentWebViewError(
+                failure.message,
+                dedupeKey: Self.nonfatalRuntimeDedupeKey(for: failure)
+            )
         }
     }
 
     func retryWebViewLoad() {
         webViewFailure = nil
-        webViewErrorMessage = nil
+        dismissWebViewError()
         isWebViewLoading = false
         webViewReloadToken += 1
+    }
+
+    func dismissWebViewError() {
+        webViewErrorDismissToken += 1
+        webViewErrorDismissTask?.cancel()
+        webViewErrorDismissTask = nil
+        webViewErrorDedupeKey = nil
+        webViewErrorMessage = nil
     }
 
     private func loadDocument(
@@ -157,7 +187,7 @@ final class DocumentViewerStore: ObservableObject {
             filename: filename,
             revision: documentRevision
         )
-        webViewErrorMessage = nil
+        dismissWebViewError()
         webViewFailure = nil
         isWebViewLoading = false
 
@@ -172,6 +202,45 @@ final class DocumentViewerStore: ObservableObject {
         filename = ""
         isWebViewLoading = false
         webViewFailure = nil
+    }
+
+    private func presentWebViewError(_ message: String, dedupeKey: String? = nil) {
+        if let dedupeKey,
+           webViewErrorDedupeKey == dedupeKey,
+           webViewErrorMessage != nil {
+            return
+        }
+
+        webViewErrorDismissToken += 1
+        let token = webViewErrorDismissToken
+        let delay = Self.webViewErrorAutoDismissDelayNanoseconds
+
+        webViewErrorDismissTask?.cancel()
+        webViewErrorMessage = message
+        webViewErrorDedupeKey = dedupeKey
+        webViewErrorDismissTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: delay)
+            guard !Task.isCancelled else {
+                return
+            }
+
+            await MainActor.run {
+                guard let self, self.webViewErrorDismissToken == token else {
+                    return
+                }
+
+                self.webViewErrorDismissTask = nil
+                self.webViewErrorDedupeKey = nil
+                self.webViewErrorMessage = nil
+            }
+        }
+    }
+
+    private static func nonfatalRuntimeDedupeKey(for failure: RhwpStudioWebViewFailure) -> String? {
+        guard !failure.isFatal, failure.category == .runtime else {
+            return nil
+        }
+        return "\(failure.category.rawValue)\n\(failure.diagnosticDetail)"
     }
 
     private static func sanitizedFilename(_ filename: String) -> String {

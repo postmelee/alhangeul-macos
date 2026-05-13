@@ -2,11 +2,14 @@
 
 이 문서는 Alhangeul macOS v0.1 release artifact에 포함되는 third-party code와 bundled asset의 attribution/provenance 기준을 정리한다. 저장소 자체 license는 `LICENSE`가 소유한다.
 
+Alhangeul macOS 저장소 자체 코드, 문서, packaging 구성의 주 저작권자는 Taegyu Lee이며, 저장소 license는 MIT License다. Third-party code와 asset은 각 upstream 저작권자와 license 조건을 유지한다.
+
 ## 범위
 
 현재 release artifact 고지는 실제 bundle과 lock 파일에 고정된 항목만 기준으로 한다.
 
-- Rust core와 Web/WASM viewer asset은 `edwardkim/rhwp` `v0.7.10` release-tag snapshot 기준이다.
+- Rust core와 Web/WASM viewer asset은 `edwardkim/rhwp` `v0.7.11` release-tag snapshot 기준이다.
+- Sparkle은 Swift Package dependency로 `2.9.1` exact version 기준이다.
 - `rhwp` upstream의 별도 GitHub Release 바이너리 asset은 Alhangeul app bundle에 포함하지 않는다.
 - 한컴/HY/HCR/Microsoft proprietary font 파일은 저장소와 release artifact에 포함하지 않는다.
 
@@ -17,8 +20,8 @@
 - Repository: https://github.com/edwardkim/rhwp
 - License: MIT
 - Ref kind: release-tag
-- Release tag: `v0.7.10`
-- Resolved commit: `62a458aa317e962cd3d0eec6096728c172d57110`
+- Release tag: `v0.7.11`
+- Resolved commit: `a9dcdee32b17a7f9a20c609a5ed547e62fb8ebae`
 - Provenance: `rhwp-core.lock`, `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`
 
 `Sources/RhwpCoreBridge`의 일부 Swift bridge 코드는 upstream iOS viewer 구현에서 출발했으며, 현재 macOS bridge와 renderer 정책은 이 저장소에서 유지보수한다.
@@ -38,13 +41,39 @@ HostApp WKWebView viewer는 app bundle의 `Sources/HostApp/Resources/rhwp-studio
 
 - Source repository: https://github.com/edwardkim/rhwp.git
 - Ref kind: release-tag
-- Release tag: `v0.7.10`
-- Resolved commit: `62a458aa317e962cd3d0eec6096728c172d57110`
+- Release tag: `v0.7.11`
+- Resolved commit: `a9dcdee32b17a7f9a20c609a5ed547e62fb8ebae`
 - Source path: `rhwp-studio/dist`
 - Excluded path: `samples/`
 - Provenance manifest: `Sources/HostApp/Resources/rhwp-studio/manifest.json`
 
 `manifest.json`은 `index.html`, main JS/CSS, WASM entrypoint hash와 copied file count/bytes를 기록한다.
+
+## Alhangeul app icon and logo assets
+
+Alhangeul 앱 아이콘과 로고 자산은 upstream `edwardkim/rhwp`의 아이콘/로고 자산을 기반으로, Taegyu Lee가 Alhangeul macOS용으로 Figma에서 편집·변형한 자산이다.
+
+- Original source repository: https://github.com/edwardkim/rhwp
+- Edited/derived asset maintainer: Taegyu Lee / Alhangeul macOS
+- App icon assets: `Sources/HostApp/Assets.xcassets/AppIcon.appiconset/*.png`
+- README/docs logo assets: `assets/logo-256@2x.png`, `docs/assets/logo-256@2x.png`
+- Provenance notes: task #77 app icon replacement records and README/docs asset history
+
+Figma는 편집 도구로만 사용되었으며, 별도 Figma community asset을 사용했다는 근거가 없으면 Figma 자체를 third-party asset source로 취급하지 않는다. 이 고지는 upstream `rhwp` 프로젝트의 후원, 보증, 승인을 뜻하지 않는다.
+
+## Sparkle
+
+HostApp은 Sparkle을 macOS app update framework로 사용한다.
+
+- Repository: https://github.com/sparkle-project/Sparkle
+- Website: https://sparkle-project.org/
+- Upstream license: https://github.com/sparkle-project/Sparkle/blob/2.x/LICENSE
+- Package manager: Swift Package Manager
+- Version: `2.9.1`
+- Resolved revision: `066e75a8b3e99962685d6a90cdd5293ebffd9261`
+- Copyright/maintainer: Sparkle Project and upstream contributors
+- License: MIT License. Upstream `LICENSE`에는 Sparkle 자체 license와 bundled external component notice가 함께 포함된다.
+- Provenance: `project.yml`, `Alhangeul.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`
 
 ## Bundled fonts
 

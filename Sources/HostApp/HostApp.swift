@@ -166,6 +166,8 @@ private struct HostAppCommands: Commands {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        LaunchMaintenanceService.runIfNeeded()
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(windowDidBecomeMain(_:)),
