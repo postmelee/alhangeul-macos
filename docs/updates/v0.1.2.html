@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="알한글 v0.1.2 릴리즈 노트입니다." />
+  <meta property="og:title" content="알한글 v0.1.2 릴리즈 노트" />
+  <meta property="og:description" content="rhwp v0.7.11을 반영하고 업데이트 후 Finder 썸네일 refresh와 About provenance 표시를 보강한 알한글 패치 릴리즈입니다." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://postmelee.github.io/alhangeul-macos/updates/v0.1.2.html" />
+  <meta property="og:image" content="https://postmelee.github.io/alhangeul-macos/assets/og-main.png" />
+  <title>알한글 v0.1.2 릴리즈 노트</title>
+  <link rel="icon" href="../assets/logo-256@2x.png" />
+  <link rel="apple-touch-icon" href="../assets/logo-256@2x.png" />
+  <link rel="stylesheet" href="../styles.css?v=20260510-reveal" />
+</head>
+
+<body>
+  <a class="skip-link" href="#main">본문으로 이동</a>
+  <header class="site-header" aria-label="주요 탐색">
+    <div class="site-header-inner">
+      <a class="brand-link" href="../" aria-label="알한글 홈">
+        <img src="../assets/logo-256@2x.png" width="28" height="28" alt="" />
+        <span>알한글</span>
+      </a>
+      <nav class="header-actions" aria-label="주요 링크">
+        <a class="header-link" href="../" aria-label="알한글 홈으로 이동">
+          홈
+        </a>
+        <a class="header-link" href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer"
+          aria-label="GitHub 저장소로 이동">
+          GitHub
+        </a>
+        <a class="header-download-button"
+          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.1.2.dmg"
+          aria-label="Mac용 알한글 DMG 다운로드">
+          다운로드
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="updates-page">
+    <section class="updates-hero" aria-labelledby="release-title">
+      <h1 id="release-title">알한글 v0.1.2</h1>
+      <p>업스트림 <code>rhwp v0.7.11</code>을 반영하고, Sparkle 업데이트 후 기존 Finder 썸네일이 오래 남는 상황을 줄이기 위한 첫 실행 maintenance와 About 창의 bundled <code>rhwp</code> provenance 표시를 추가한 패치 릴리즈입니다.</p>
+      <div class="updates-actions" aria-label="릴리즈 주요 링크">
+        <a class="page-action-button"
+          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.1.2.dmg">
+          DMG 다운로드
+        </a>
+        <a class="page-secondary-link" href="https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.2"
+          rel="noreferrer">GitHub Release</a>
+        <a class="page-secondary-link" href="./">업데이트 목록</a>
+      </div>
+    </section>
+
+    <div class="updates-content">
+      <section class="updates-section" aria-labelledby="release-features-title">
+        <h2 id="release-features-title">주요 변경</h2>
+        <ul>
+          <li><code>rhwp</code> core와 bundled <code>rhwp-studio</code>를 <code>v0.7.11</code> 기준으로 갱신했습니다.</li>
+          <li>About 창에서 앱에 포함된 <code>rhwp</code> release tag와 commit provenance를 확인할 수 있습니다.</li>
+          <li>새 build를 처음 실행할 때 Quick Look/Thumbnail extension 등록을 갱신하고, 최근에 열었던 HWP/HWPX 문서의 Finder thumbnail refresh를 요청합니다.</li>
+          <li>업데이트 maintenance는 build별 marker를 사용하므로 같은 build를 반복 실행할 때 매번 registration refresh를 반복하지 않습니다.</li>
+          <li>앱 소유 HWP/HWPX UTI를 <code>com.postmelee.alhangeul.*</code> 기준으로 고정하고 Hancom 계열 UTI도 함께 처리합니다.</li>
+          <li>문서가 열린 뒤 발생하는 Web viewer runtime 오류는 문서를 가리는 fatal 화면 대신 상단 banner로 안내합니다.</li>
+          <li>공식 DMG는 Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용하는 signed/notarized universal DMG 기준을 유지합니다.</li>
+        </ul>
+      </section>
+
+      <section class="updates-section" aria-labelledby="release-rhwp-title">
+        <h2 id="release-rhwp-title">포함된 rhwp</h2>
+        <p>v0.1.2는 <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.7.11"
+            rel="noreferrer"><code>rhwp v0.7.11</code></a> 기준의 core와 bundled <code>rhwp-studio</code>를 사용합니다. 앱 내부 provenance 기준 commit은 <code>a9dcdee32b17a7f9a20c609a5ed547e62fb8ebae</code>입니다.</p>
+      </section>
+
+      <section class="updates-section" aria-labelledby="release-limits-title">
+        <h2 id="release-limits-title">알려진 한계</h2>
+        <ul>
+          <li>Quick Look과 Finder 썸네일은 native 렌더 경로를 사용하고, 앱 화면은 WKWebView 기반 <code>rhwp-studio</code> 경로를 사용합니다.</li>
+          <li>기존 Finder cache가 남아 있는 일부 파일은 최근 문서 후보 밖에 있거나 Finder 정책상 즉시 갱신되지 않을 수 있습니다.</li>
+          <li>일부 문서에서는 글꼴, 배치, 페이지 표현이 원본 한글 프로그램과 다르게 보일 수 있습니다.</li>
+          <li>HWPX 문서는 직접 저장이 제한되어 HWP 내보내기 경로를 사용합니다.</li>
+        </ul>
+      </section>
+
+      <section class="updates-section" aria-labelledby="release-install-title">
+        <h2 id="release-install-title">설치와 업데이트</h2>
+        <p>DMG 파일을 내려받아 앱을 Applications 폴더로 옮긴 뒤, 앱을 한 번 실행합니다. v0.1.2 공식 DMG는 Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용합니다. 첫 실행 후 Quick Look preview와 Finder thumbnail extension이 등록되고 최근 문서 thumbnail refresh가 요청될 수 있습니다.</p>
+        <p>설치한 앱에서는 메뉴 막대의 <code>알한글 &gt; 업데이트 확인...</code>을 선택해 새 버전을 확인할 수 있습니다.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <img src="../assets/logo-256@2x.png" width="32" height="32" alt="" />
+      <span>알한글</span>
+    </div>
+    <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 편집 앱입니다. 한글 파일이 더 이상 낯선 파일로 남지 않도록 만듭니다.</p>
+    <nav aria-label="푸터 링크">
+      <a href="https://github.com/postmelee/alhangeul-macos/blob/main/LICENSE" rel="noreferrer">MIT License</a>
+    </nav>
+  </footer>
+</body>
+
+</html>
