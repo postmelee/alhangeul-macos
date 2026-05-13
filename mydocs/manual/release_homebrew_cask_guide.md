@@ -10,7 +10,7 @@
 - rehearsal DMG 또는 개발용 zip은 Homebrew Cask URL/sha256에 사용하지 않는다.
 - public DMG가 GitHub Release asset으로 업로드되고 SHA256이 확정되기 전에는 Cask를 사용자 설치 경로로 안내하지 않는다.
 - Cask는 Intel Mac/Apple Silicon Mac용 URL을 나누지 않고 같은 public universal DMG URL과 SHA256을 사용한다.
-- `v0.1.1`의 실제 Homebrew tap 초기 공개 배포는 #209에서 수행한다. #187은 tap 경로와 검증 기준을 확정하는 작업으로 한정한다.
+- `v0.1.2`의 실제 Homebrew tap 초기 공개 배포는 #209에서 수행한다. #187은 tap 경로와 검증 기준을 확정하는 작업으로 한정한다.
 
 ## Cask source 기준
 
@@ -69,9 +69,9 @@
 
 ## tap 반영 절차
 
-`v0.1.1` 기준 실제 공개 절차는 #209에서 진행한다.
+`v0.1.2` 기준 실제 공개 절차는 #209에서 진행한다.
 
-1. #188에서 signed/notarized public DMG와 `.sha256` asset을 확정한다.
+1. #225에서 signed/notarized public DMG와 `.sha256` asset을 확정한다.
 2. `./scripts/update-cask-sha256.sh <version>`로 이 저장소의 `Casks/alhangeul-macos.rb`를 public DMG SHA256 기준으로 갱신한다.
 3. `postmelee/homebrew-tap`의 `Casks/alhangeul-macos.rb`에 같은 내용을 반영한다.
 4. tap repository 기준으로 Homebrew 검증을 수행한다.
