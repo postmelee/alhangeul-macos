@@ -18,6 +18,7 @@ final class DocumentViewerStore: ObservableObject {
 
     private var webViewErrorDismissTask: Task<Void, Never>?
     private var webViewErrorDismissToken = 0
+    private var webViewErrorDedupeKey: String?
 
     var hasDocument: Bool {
         rhwpStudioDocument != nil
@@ -149,7 +150,10 @@ final class DocumentViewerStore: ObservableObject {
             dismissWebViewError()
         } else {
             webViewFailure = nil
-            presentWebViewError(failure.message)
+            presentWebViewError(
+                failure.message,
+                dedupeKey: Self.nonfatalRuntimeDedupeKey(for: failure)
+            )
         }
     }
 
@@ -164,6 +168,7 @@ final class DocumentViewerStore: ObservableObject {
         webViewErrorDismissToken += 1
         webViewErrorDismissTask?.cancel()
         webViewErrorDismissTask = nil
+        webViewErrorDedupeKey = nil
         webViewErrorMessage = nil
     }
 
@@ -199,13 +204,20 @@ final class DocumentViewerStore: ObservableObject {
         webViewFailure = nil
     }
 
-    private func presentWebViewError(_ message: String) {
+    private func presentWebViewError(_ message: String, dedupeKey: String? = nil) {
+        if let dedupeKey,
+           webViewErrorDedupeKey == dedupeKey,
+           webViewErrorMessage != nil {
+            return
+        }
+
         webViewErrorDismissToken += 1
         let token = webViewErrorDismissToken
         let delay = Self.webViewErrorAutoDismissDelayNanoseconds
 
         webViewErrorDismissTask?.cancel()
         webViewErrorMessage = message
+        webViewErrorDedupeKey = dedupeKey
         webViewErrorDismissTask = Task { [weak self] in
             try? await Task.sleep(nanoseconds: delay)
             guard !Task.isCancelled else {
@@ -218,9 +230,17 @@ final class DocumentViewerStore: ObservableObject {
                 }
 
                 self.webViewErrorDismissTask = nil
+                self.webViewErrorDedupeKey = nil
                 self.webViewErrorMessage = nil
             }
         }
+    }
+
+    private static func nonfatalRuntimeDedupeKey(for failure: RhwpStudioWebViewFailure) -> String? {
+        guard !failure.isFatal, failure.category == .runtime else {
+            return nil
+        }
+        return "\(failure.category.rawValue)\n\(failure.diagnosticDetail)"
     }
 
     private static func sanitizedFilename(_ filename: String) -> String {

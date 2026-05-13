@@ -14,6 +14,7 @@ struct AboutView: View {
             VStack(alignment: .leading, spacing: 10) {
                 AboutInfoRow(title: "버전", value: BuildInfo.version)
                 AboutInfoRow(title: "빌드", value: BuildInfo.build)
+                AboutInfoRow(title: "rhwp", value: BuildInfo.rhwpDisplayVersion)
             }
 
             Divider()

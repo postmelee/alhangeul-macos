@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-VERSION="0.1.1"
+VERSION="0.1.2"
 APP_PATH=""
 INSTALL_APP="/Applications/Alhangeul.app"
 OUTPUT_ROOT="/private/tmp/alhangeul-visual-smoke"
@@ -28,7 +28,7 @@ Usage:
 
 Options:
   --version VERSION
-      Version passed to scripts/package-release.sh. Default: 0.1.1
+      Version passed to scripts/package-release.sh. Default: 0.1.2
   --app PATH
       Existing app bundle to install. Implies --skip-package.
   --skip-package
@@ -161,7 +161,7 @@ prepare_app() {
   fi
 }
 
-verify_bundle() {
+verify_bundle_structure() {
   local app="$1"
   local preview="$app/Contents/PlugIns/AlhangeulPreview.appex"
   local thumbnail="$app/Contents/PlugIns/AlhangeulThumbnail.appex"
@@ -180,7 +180,11 @@ verify_bundle() {
   [ "$app_id" = "com.postmelee.alhangeul" ] || { echo "ERROR: unexpected app id: $app_id" >&2; exit 10; }
   [ "$preview_id" = "com.postmelee.alhangeul.QLExtension" ] || { echo "ERROR: unexpected preview id: $preview_id" >&2; exit 10; }
   [ "$thumbnail_id" = "com.postmelee.alhangeul.ThumbnailExtension" ] || { echo "ERROR: unexpected thumbnail id: $thumbnail_id" >&2; exit 10; }
+}
 
+verify_signed_bundle() {
+  local app="$1"
+  verify_bundle_structure "$app"
   codesign --verify --deep --strict --verbose=2 "$app" >/dev/null
 }
 
@@ -252,6 +256,9 @@ resign_smoke_app() {
     "$ROOT/Sources/HostApp/HostApp.entitlements" \
     "com.postmelee.alhangeul" \
     "$host_entitlements"
+  /usr/libexec/PlistBuddy \
+    -c "Add :com.apple.security.cs.disable-library-validation bool true" \
+    "$host_entitlements"
 
   codesign_adhoc "$app/Contents/PlugIns/AlhangeulPreview.appex" "$preview_entitlements"
   codesign_adhoc "$app/Contents/PlugIns/AlhangeulThumbnail.appex" "$thumbnail_entitlements"
@@ -274,14 +281,42 @@ prepare_smoke_app_copy() {
 unregister_app_if_present() {
   local app="$1"
   if [ -d "$app" ]; then
-    if [ -d "$app/Contents/PlugIns/AlhangeulPreview.appex" ]; then
-      pluginkit -r "$app/Contents/PlugIns/AlhangeulPreview.appex" >/dev/null 2>&1 || true
-    fi
-    if [ -d "$app/Contents/PlugIns/AlhangeulThumbnail.appex" ]; then
-      pluginkit -r "$app/Contents/PlugIns/AlhangeulThumbnail.appex" >/dev/null 2>&1 || true
-    fi
-    "$LSREGISTER" -u "$app" >/dev/null 2>&1 || true
+    unregister_app_registration "$app"
   fi
+}
+
+unregister_app_registration() {
+  local app="$1"
+  if [ -d "$app/Contents/PlugIns/AlhangeulPreview.appex" ]; then
+    pluginkit -r "$app/Contents/PlugIns/AlhangeulPreview.appex" >/dev/null 2>&1 || true
+  fi
+  if [ -d "$app/Contents/PlugIns/AlhangeulThumbnail.appex" ]; then
+    pluginkit -r "$app/Contents/PlugIns/AlhangeulThumbnail.appex" >/dev/null 2>&1 || true
+  fi
+  "$LSREGISTER" -u "$app" >/dev/null 2>&1 || true
+}
+
+list_ephemeral_alhangeul_app_registrations() {
+  {
+    if [ -n "${LSREGISTER:-}" ] && [ -x "$LSREGISTER" ]; then
+      "$LSREGISTER" -dump 2>/dev/null || true
+    fi
+    find "$ROOT/build.noindex" -type d -name "Alhangeul.app" -prune 2>/dev/null || true
+  } | awk 'match($0, /\/[^"]*(Alhangeul|알한글)\.app/) { print substr($0, RSTART, RLENGTH) }' \
+    | sort -u
+}
+
+unregister_ephemeral_alhangeul_app_registrations() {
+  local app
+  while IFS= read -r app; do
+    [ -n "$app" ] || continue
+    [ "$app" = "$INSTALL_APP" ] && continue
+    case "$app" in
+      "$ROOT/build.noindex/"*|"$HOME/Library/Developer/Xcode/DerivedData/"*)
+        unregister_app_registration "$app"
+        ;;
+    esac
+  done < <(list_ephemeral_alhangeul_app_registrations)
 }
 
 install_app() {
@@ -299,6 +334,8 @@ install_app() {
       exit 20
       ;;
   esac
+
+  unregister_ephemeral_alhangeul_app_registrations
 
   local user_copy="$HOME/Applications/Alhangeul.app"
   if [ "$INSTALL_APP" != "$user_copy" ] && [ -d "$user_copy" ]; then
@@ -522,9 +559,9 @@ main() {
   touch "$stamp_file"
 
   prepare_app
-  verify_bundle "$APP_PATH"
+  verify_bundle_structure "$APP_PATH"
   prepare_smoke_app_copy "$run_dir"
-  verify_bundle "$APP_PATH"
+  verify_signed_bundle "$APP_PATH"
   install_app
   reset_quicklook
   verify_active_provider_path "$run_dir"
