@@ -42,7 +42,7 @@
 - `.github/workflows/pr-ci.yml`에 `native-viewer-editor` pull request trigger를 추가하고 `devel-webview`는 legacy alias 호환 trigger로 유지했다.
 - `mydocs/manual/*`의 git/task/PR/release/CI 안내를 `devel`/`native-viewer-editor` 기준으로 수정했다.
 - `mydocs/tech/branch_strategy_webview_native.md`에 Task #244 전환 정책, runbook, gate, 실행 결과 기준을 정리했다.
-- README의 `현재 작업 축` 섹션과 CONTRIBUTING에 전환 전 fork/오래된 clone 사용자는 새 fork/clone 또는 최신 `origin/devel` 기준 새 작업 브랜치를 만들라는 안내를 추가했다.
+- README의 `현재 작업 축` 내용 아래에 IMPORTANT alert와 인용문 형식으로 브랜치 전환 안내를 추가하고, CONTRIBUTING에도 전환 전 fork/오래된 clone 사용자는 새 fork/clone 또는 최신 `origin/devel` 기준 새 작업 브랜치를 만들라는 안내를 추가했다.
 - Stage 5에서 원격 branch migration을 `--atomic` push로 실행했다.
 - 원격 전환 후 #244 작업 브랜치를 새 `origin/devel` 기준으로 병합했다.
 
@@ -102,7 +102,7 @@ git push --atomic \
 | `native-viewer-editor` branch protection | 아직 unprotected. native 장기 라인 보호 규칙 적용 필요 |
 | `devel-webview` legacy alias 삭제 여부 | 유지 중. 삭제 여부와 시점은 별도 승인 필요 |
 | GitHub default branch | `main` 유지. 외부 기여 PR 기본 base를 더 강하게 유도하려면 `devel` 전환 여부 별도 판단 필요 |
-| 전환 전 fork/clone | README `현재 작업 축` 섹션과 CONTRIBUTING에 새 fork/clone 또는 최신 `origin/devel` 기준 새 작업 브랜치 생성 권장 안내 추가 |
+| 전환 전 fork/clone | README `현재 작업 축` 내용 아래에 IMPORTANT alert/인용문 안내 추가, CONTRIBUTING에 새 fork/clone 또는 최신 `origin/devel` 기준 새 작업 브랜치 생성 권장 안내 추가 |
 
 ## 미수행 범위
 

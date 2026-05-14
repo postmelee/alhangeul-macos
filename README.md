@@ -33,15 +33,16 @@
 
 ## 현재 작업 축
 
-### 기여자 브랜치 전환 안내
-
-2026-05-14에 제품 개발 기본 브랜치가 `devel-webview`에서 `devel`로 전환되었습니다. 전환 전 fork나 오래된 clone을 기준으로 새 기여를 시작하려는 경우, 브랜치 이력이 크게 바뀌었으므로 저장소를 새로 fork/clone한 뒤 최신 `devel`에서 작업 브랜치를 다시 만들어 주세요.
-
-기존 `devel`에 있던 Swift native viewer/editor 장기 작업은 `native-viewer-editor` 브랜치로 보존했습니다. `devel-webview`는 전환 기간 호환용 legacy alias이며 신규 PR 기본 대상이 아닙니다.
-
 `v0.1.x`는 WebView-backed public release 라인입니다. Finder Quick Look과 썸네일, WKWebView 기반 앱 뷰어, 저장/공유/PDF 내보내기, signed/notarized DMG 배포, Sparkle 업데이트 확인을 안정화하는 데 집중합니다.
 
 장기 방향은 WebView fallback을 유지하면서 Swift native viewer와 editor로 점진적으로 옮겨가는 것입니다. 세부 구현 제약과 날짜가 필요한 판단은 [제품 로드맵 메모](mydocs/tech/product_roadmap_notes.md)에 분리해 둡니다.
+
+### 기여자 브랜치 전환 안내
+
+> [!IMPORTANT]
+> 2026-05-14에 제품 개발 기본 브랜치가 `devel-webview`에서 `devel`로 전환되었습니다. 전환 전 fork나 오래된 clone을 기준으로 새 기여를 시작하려는 경우, 브랜치 이력이 크게 바뀌었으므로 저장소를 새로 fork/clone한 뒤 최신 `devel`에서 작업 브랜치를 다시 만들어 주세요.
+
+> 기존 `devel`에 있던 Swift native viewer/editor 장기 작업은 `native-viewer-editor` 브랜치로 보존했습니다. `devel-webview`는 전환 기간 호환용 legacy alias이며 신규 PR 기본 대상이 아닙니다.
 
 ## 최신 공개 릴리즈
 
