@@ -1,0 +1,4 @@
+[toolchain]
+channel = "1.94.1"
+components = []
+targets = ["aarch64-apple-darwin", "x86_64-apple-darwin"]

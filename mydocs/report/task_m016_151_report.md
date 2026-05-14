@@ -207,4 +207,3 @@ git diff --check
 ## 작업지시자 승인 요청
 
 Task #151의 Quick Look/Thumbnail 설치본 smoke gate 정리를 완료했다. 다음 단계는 `publish/task151` 브랜치 push와 `devel-webview` 대상 PR 생성 승인이다.
-

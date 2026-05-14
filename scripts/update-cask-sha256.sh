@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-CASK_PATH="$ROOT/Casks/alhangeul-macos.rb"
+CASK_PATH="$ROOT/Casks/alhangeul.rb"
 DRY_RUN=0
 VERSION=""
 CHECKSUM_FILE=""
@@ -12,7 +12,7 @@ usage() {
   cat <<EOF
 Usage: $0 [--dry-run] <version> [checksum-file]
 
-Updates Casks/alhangeul-macos.rb with the given version and the sha256 from
+Updates Casks/alhangeul.rb with the given version and the sha256 from
 the public DMG checksum file. If checksum-file is omitted, the script reads:
 
   build.noindex/release/alhangeul-macos-<version>.dmg.sha256
