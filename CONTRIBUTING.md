@@ -4,16 +4,22 @@ alhangeul-macos에 관심을 가져주셔서 감사합니다!
 
 알한글 for macOS는 macOS 환경에서 HWP/HWPX 문서를 읽고, 미리보고, 나아가 편집할 수 있게 만드는 프로젝트입니다. MVP viewer는 [`edwardkim/rhwp`](https://github.com/edwardkim/rhwp)의 `rhwp-studio`를 WKWebView로 통합하는 방향으로 진행합니다. macOS 코드, Swift bridge, 패키징, 문서, HWP 샘플 — 어떤 형태의 기여든 환영합니다. core 엔진 기여는 `edwardkim/rhwp` 저장소에서 받습니다.
 
+## 브랜치 전환 안내
+
+2026-05-14에 제품 개발 기본 브랜치가 `devel`로 전환되었습니다. 전환 전 fork나 오래된 clone에서 새 작업을 시작하려는 경우에는 저장소를 새로 fork/clone한 뒤 최신 `devel`에서 작업 브랜치를 만들어 주세요.
+
+이미 진행 중인 작업이 있으면 기존 커밋을 최신 `devel` 위로 무리하게 rebase하기보다, 필요한 변경만 새 브랜치에 cherry-pick하거나 PR에서 상황을 설명해 주세요. 기존 `devel` native 라인은 `native-viewer-editor`로 보존되어 있습니다.
+
 ## PR 대상 브랜치 먼저 고르기
 
 GitHub 기본 브랜치가 `main`이어도 기여 PR은 `main`으로 보내지 않습니다. 작업 범위에 따라 아래 base branch를 선택해 주세요.
 
 | PR base | 대상 작업 |
 |---------|-----------|
-| `devel-webview` | 기본 대상. WKWebView MVP viewer, `rhwp-studio` 통합, Finder/Quick Look/Thumbnail, Spotlight, PDF/export/변환, 배포, 문서 |
-| `devel` | native viewer renderer, CoreGraphics/CoreText rendering, render tree 기반 viewer UI, native zoom/cache/page interaction |
+| `devel` | 기본 대상. WKWebView MVP viewer, `rhwp-studio` 통합, Finder/Quick Look/Thumbnail, Spotlight, PDF/export/변환, 배포, 문서 |
+| `native-viewer-editor` | native viewer renderer, CoreGraphics/CoreText rendering, render tree 기반 viewer UI, native zoom/cache/page interaction |
 
-범위가 애매하면 PR을 만들기 전에 이슈나 Discussion에서 먼저 확인해 주세요. 첫 출시 전후 브랜치 역할의 세부 기준은 [`branch_strategy_webview_native.md`](mydocs/tech/branch_strategy_webview_native.md)를 따릅니다.
+범위가 애매하면 PR을 만들기 전에 이슈나 Discussion에서 먼저 확인해 주세요. 제품 브랜치와 native 전환 브랜치 역할의 세부 기준은 [`branch_strategy_webview_native.md`](mydocs/tech/branch_strategy_webview_native.md)를 따릅니다.
 
 ## 처음 참여하시나요?
 
@@ -114,9 +120,9 @@ HWP/HWPX 파일이 한컴 또는 rhwp core와 다르게 렌더링되거나, Find
 
 **중요:**
 
-- PR 대상 브랜치는 **`devel-webview`** 또는 **`devel`** 입니다 (`main` 아님)
-- WKWebView MVP, Finder/Quick Look, Spotlight, 변환, 배포, 문서 작업은 기본적으로 `devel-webview`로 보냅니다
-- native viewer renderer 관련 기여는 `devel`로 보냅니다
+- PR 대상 브랜치는 **`devel`** 또는 **`native-viewer-editor`** 입니다 (`main` 아님)
+- WKWebView MVP, Finder/Quick Look, Spotlight, 변환, 배포, 문서 작업은 기본적으로 `devel`로 보냅니다
+- native viewer renderer 관련 기여는 `native-viewer-editor`로 보냅니다
 - 메인테이너의 코드 리뷰 승인 후 merge됩니다
 - 메인테이너 워크플로우(`local/task{N}`, `publish/task{N}`)는 [`git_workflow_guide.md`](mydocs/manual/git_workflow_guide.md) 참고
 
@@ -134,7 +140,7 @@ xcodebuild -project Alhangeul.xcodeproj \
   CODE_SIGNING_ALLOWED=NO build
 ```
 
-native renderer 동작을 바꾸는 `devel` 대상 PR이면 추가로 아래를 실행합니다.
+native renderer 동작을 바꾸는 `native-viewer-editor` 대상 PR이면 추가로 아래를 실행합니다.
 
 ```bash
 ./scripts/validate-stage3-render.sh     # native rendering smoke test
@@ -161,10 +167,11 @@ Finder Quick Look/Thumbnail을 바꾸는 PR이면 추가로 아래 원칙을 지
 | 브랜치 | 용도 | 보호 규칙 |
 |--------|------|----------|
 | `main` | 릴리즈 (안정 버전) | PR 필수 + 리뷰 승인 |
-| `devel-webview` | WKWebView MVP와 출시 우선 작업 통합 | PR 필수 |
-| `devel` | native viewer renderer와 장기 native viewer 개발 통합 | PR 필수 |
+| `devel` | WKWebView MVP와 출시 우선 작업 통합 | PR 필수 |
+| `native-viewer-editor` | native viewer renderer와 장기 native viewer 개발 통합 | PR 필수 |
+| `devel-webview` | 전환 기간 호환용 legacy alias | 신규 PR 기본 대상 아님 |
 
-- 외부 기여자 PR → 작업 범위에 따라 `devel-webview` 또는 `devel`
+- 외부 기여자 PR → 작업 범위에 따라 `devel` 또는 `native-viewer-editor`
 - 메인테이너 작업 PR → `publish/task{N}` → 작업 범위에 맞는 통합 브랜치
 - 릴리즈 시 출시 대상 통합 브랜치 → `main` + 태그
 

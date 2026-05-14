@@ -118,4 +118,3 @@ hdiutil: verify: checksum of ".../alhangeul-macos-0.1.0.dmg" is VALID
 ## 다음 단계 영향
 
 Stage 5에서는 appcast 공개 URL, Pages 배포 설정, public DMG mounted app 검증, Cask SHA256 고정, 최종 보고서와 오늘할일 완료 처리를 수행한다.
-

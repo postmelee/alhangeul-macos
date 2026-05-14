@@ -8,7 +8,7 @@
 
 | workflow | trigger | 권한 | runner | 역할 |
 |----------|---------|------|--------|------|
-| `PR CI` | `pull_request` to `main`, `devel-webview`, `devel` | `contents: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax, 조건부 macOS build, 조건부 release helper dry-run |
+| `PR CI` | `pull_request` to `main`, `devel`, `native-viewer-editor`, `devel-webview` | `contents: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax, 조건부 macOS build, 조건부 release helper dry-run |
 | `Release Rehearsal DMG` | `workflow_dispatch` | `contents: read` | macOS | signed/notarized 전 universal rehearsal DMG/checksum과 release delta checklist artifact 생성 |
 | `Release Publish DMG` | `workflow_dispatch` | `contents: write` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, release delta checklist artifact 생성 |
 | `rhwp Upstream Release Check` | `workflow_dispatch`, schedule | `contents: read` | Ubuntu | upstream `rhwp` release와 `rhwp-core.lock` 비교 |
@@ -49,6 +49,8 @@ PR에서 확인할 항목:
 PR CI는 외부 PR에서도 안전하게 실행할 수 있는 검증만 수행한다.
 
 - `pull_request_target`은 사용하지 않는다.
+- 제품/배포/문서 PR은 `devel`, Swift native viewer/editor PR은 `native-viewer-editor` 대상으로 실행한다.
+- `devel-webview`는 전환 기간 legacy alias 호환을 위해 trigger에 남기되, 신규 PR 기본 base로 안내하지 않는다.
 - repository secrets가 필요한 signing, notarization, Sparkle private key, GitHub Release publish, Pages deployment는 실행하지 않는다.
 - concurrency group은 PR 번호 기준이며 새 push가 오면 이전 PR CI를 취소한다.
 - 변경 범위는 `scripts/ci/classify-pr-changes.sh`가 분류하고, 결과는 job output과 `GITHUB_STEP_SUMMARY`에 기록한다.
