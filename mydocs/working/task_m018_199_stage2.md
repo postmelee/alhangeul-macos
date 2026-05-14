@@ -49,4 +49,3 @@ rg -n "CGColor\\(gray:" Sources
 ```
 
 결과: 출력 없음.
-
