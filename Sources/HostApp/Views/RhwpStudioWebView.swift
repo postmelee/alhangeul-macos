@@ -18,6 +18,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
     let onDroppedDocument: (RhwpStudioDroppedDocument) -> Void
     let onDroppedFileURL: (URL) -> Void
     let onDocumentSaved: (URL) -> Void
+    let onDocumentEdited: () -> Void
 
     init(
         document: RhwpStudioDocumentPayload?,
@@ -29,7 +30,8 @@ struct RhwpStudioWebView: NSViewRepresentable {
         onOpenDocument: @escaping () -> Void = {},
         onDroppedDocument: @escaping (RhwpStudioDroppedDocument) -> Void = { _ in },
         onDroppedFileURL: @escaping (URL) -> Void = { _ in },
-        onDocumentSaved: @escaping (URL) -> Void = { _ in }
+        onDocumentSaved: @escaping (URL) -> Void = { _ in },
+        onDocumentEdited: @escaping () -> Void = {}
     ) {
         self.document = document
         self.sourceDocument = sourceDocument
@@ -41,6 +43,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         self.onDroppedDocument = onDroppedDocument
         self.onDroppedFileURL = onDroppedFileURL
         self.onDocumentSaved = onDocumentSaved
+        self.onDocumentEdited = onDocumentEdited
     }
 
     func makeCoordinator() -> Coordinator {
@@ -59,6 +62,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         context.coordinator.onDroppedDocument = onDroppedDocument
         context.coordinator.onDroppedFileURL = onDroppedFileURL
         context.coordinator.onDocumentSaved = onDocumentSaved
+        context.coordinator.onDocumentEdited = onDocumentEdited
         context.coordinator.update(
             document: document,
             sourceDocument: sourceDocument,
@@ -77,6 +81,7 @@ extension RhwpStudioWebView {
         var onDroppedDocument: (RhwpStudioDroppedDocument) -> Void = { _ in }
         var onDroppedFileURL: (URL) -> Void = { _ in }
         var onDocumentSaved: (URL) -> Void = { _ in }
+        var onDocumentEdited: () -> Void = {}
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
         private static let nativeDropSuppressionInterval: TimeInterval = 2
@@ -376,9 +381,18 @@ extension RhwpStudioWebView {
                 handleRuntimeError(body)
             case "document-load-error":
                 handleDocumentLoadError(body)
+            case "document-edited":
+                handleDocumentEdited()
             default:
                 break
             }
+        }
+
+        private func handleDocumentEdited() {
+            guard currentDocument != nil else {
+                return
+            }
+            onDocumentEdited()
         }
 
         private func handleDocumentLoadError(_ body: [String: Any]) {

@@ -13,6 +13,7 @@ final class DocumentViewerStore: ObservableObject {
     @Published var isWebViewLoading = false
     @Published private(set) var documentRevision: Int = 0
     @Published private(set) var webViewReloadToken: Int = 0
+    @Published private(set) var hasUnsavedChanges = false
 
     private static let webViewErrorAutoDismissDelayNanoseconds: UInt64 = 5_000_000_000
 
@@ -123,6 +124,18 @@ final class DocumentViewerStore: ObservableObject {
         filename = url.lastPathComponent
         self.sourceDocument = sourceDocument
         recentDocuments = RecentDocumentStore.record(sourceDocument)
+        clearUnsavedChanges()
+    }
+
+    func markDocumentEdited() {
+        guard hasDocument, !hasUnsavedChanges else {
+            return
+        }
+        hasUnsavedChanges = true
+    }
+
+    func clearUnsavedChanges() {
+        hasUnsavedChanges = false
     }
 
     func setWebViewLoading(_ isLoading: Bool) {
@@ -182,6 +195,7 @@ final class DocumentViewerStore: ObservableObject {
         self.filename = filename
         self.sourceDocument = sourceDocument
         documentRevision += 1
+        hasUnsavedChanges = false
         rhwpStudioDocument = RhwpStudioDocumentPayload(
             data: data,
             filename: filename,
@@ -202,6 +216,7 @@ final class DocumentViewerStore: ObservableObject {
         filename = ""
         isWebViewLoading = false
         webViewFailure = nil
+        hasUnsavedChanges = false
     }
 
     private func presentWebViewError(_ message: String, dedupeKey: String? = nil) {
