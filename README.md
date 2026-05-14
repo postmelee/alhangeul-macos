@@ -24,6 +24,12 @@
 
 ---
 
+## 기여자 브랜치 전환 안내
+
+2026-05-14에 제품 개발 기본 브랜치가 `devel-webview`에서 `devel`로 전환되었습니다. 전환 전 fork나 오래된 clone을 기준으로 새 기여를 시작하려는 경우, 브랜치 이력이 크게 바뀌었으므로 저장소를 새로 fork/clone한 뒤 최신 `devel`에서 작업 브랜치를 다시 만들어 주세요.
+
+기존 `devel`에 있던 Swift native viewer/editor 장기 작업은 `native-viewer-editor` 브랜치로 보존했습니다. `devel-webview`는 전환 기간 호환용 legacy alias이며 신규 PR 기본 대상이 아닙니다.
+
 ## 알한글 for macOS
 
 <strong>알한글(alhangeul-macos)</strong>은 HWP/HWPX 파일을 macOS에서 미리보고, 앱에서 열고, 저장하고, 공유하고, PDF로 내보낼 수 있게 하는 오픈소스 데스크톱 앱입니다. 파일을 업로드하지 않고 로컬에서 문서를 다루는 것을 기본값으로 둡니다.

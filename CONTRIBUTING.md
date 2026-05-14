@@ -4,6 +4,12 @@ alhangeul-macos에 관심을 가져주셔서 감사합니다!
 
 알한글 for macOS는 macOS 환경에서 HWP/HWPX 문서를 읽고, 미리보고, 나아가 편집할 수 있게 만드는 프로젝트입니다. MVP viewer는 [`edwardkim/rhwp`](https://github.com/edwardkim/rhwp)의 `rhwp-studio`를 WKWebView로 통합하는 방향으로 진행합니다. macOS 코드, Swift bridge, 패키징, 문서, HWP 샘플 — 어떤 형태의 기여든 환영합니다. core 엔진 기여는 `edwardkim/rhwp` 저장소에서 받습니다.
 
+## 브랜치 전환 안내
+
+2026-05-14에 제품 개발 기본 브랜치가 `devel`로 전환되었습니다. 전환 전 fork나 오래된 clone에서 새 작업을 시작하려는 경우에는 저장소를 새로 fork/clone한 뒤 최신 `devel`에서 작업 브랜치를 만들어 주세요.
+
+이미 진행 중인 작업이 있으면 기존 커밋을 최신 `devel` 위로 무리하게 rebase하기보다, 필요한 변경만 새 브랜치에 cherry-pick하거나 PR에서 상황을 설명해 주세요. 기존 `devel` native 라인은 `native-viewer-editor`로 보존되어 있습니다.
+
 ## PR 대상 브랜치 먼저 고르기
 
 GitHub 기본 브랜치가 `main`이어도 기여 PR은 `main`으로 보내지 않습니다. 작업 범위에 따라 아래 base branch를 선택해 주세요.

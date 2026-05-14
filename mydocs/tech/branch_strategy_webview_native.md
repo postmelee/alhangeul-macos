@@ -17,6 +17,7 @@
 - `devel-webview`는 전환 기간 동안 기존 링크와 자동화 호환성을 보존하는 legacy alias다.
 - `devel -> main` 반영은 release PR로 수행하고, merge 후 tag/GitHub Release를 `main` 기준으로 만든다.
 - 외부 기여 PR은 `main`으로 보내지 않는다. 작업 범위에 따라 `devel` 또는 `native-viewer-editor`를 base로 고른다.
+- 2026-05-14 전환 전 fork나 오래된 clone을 기준으로 새 기여를 시작하는 것은 권장하지 않는다. 새 fork/clone 또는 최신 `origin/devel`에서 새 작업 브랜치를 만든다.
 
 ## Task #244 devel 승격 전환 정책
 

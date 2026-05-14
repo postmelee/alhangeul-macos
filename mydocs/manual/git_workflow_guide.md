@@ -4,6 +4,12 @@
 
 제품 기본 브랜치와 native 전환 라인의 판단 근거는 [`branch_strategy_webview_native.md`](../tech/branch_strategy_webview_native.md)를 기준으로 한다.
 
+## 2026-05-14 브랜치 전환 안내
+
+2026-05-14에 제품 개발 기본 브랜치를 `devel`로 승격했다. 전환 전 fork나 오래된 clone을 기준으로 새 작업을 시작하지 말고, 새 fork/clone 또는 최신 `origin/devel`에서 새 작업 브랜치를 만든다.
+
+기존 `devel` head는 `native-viewer-editor`로 보존했다. `devel-webview`는 전환 기간 legacy alias이며 신규 PR 기본 base로 사용하지 않는다.
+
 ## 핵심 용어
 
 - **통합 브랜치**: 작업 범위에 따라 PR이 모이는 기준 브랜치. 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Spotlight/mdimporter, 변환, 배포, 문서는 `devel`을 기본으로 쓰고, Swift native viewer/editor 작업은 `native-viewer-editor`를 쓴다.
