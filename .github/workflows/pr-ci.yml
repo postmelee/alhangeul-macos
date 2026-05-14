@@ -4,8 +4,9 @@ on:
   pull_request:
     branches:
       - main
-      - devel-webview
       - devel
+      - native-viewer-editor
+      - devel-webview
 
 permissions:
   contents: read
