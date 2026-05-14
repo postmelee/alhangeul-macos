@@ -74,7 +74,7 @@
 ## public release 전 확정 항목
 
 - release version과 release candidate commit
-- `devel-webview`에서 `main`으로 반영할 release PR 범위
+- `devel`에서 `main`으로 반영할 release PR 범위
 - Developer ID 서명/notarization 실행 시점
 - GitHub Release를 draft/prerelease가 아닌 public release로 게시할 시점
 - Cask 초안의 `sha256 :no_check`를 public DMG 생성 후 실제 digest로 교체할 시점
@@ -141,4 +141,4 @@
 4. 원인, 영향 범위, 재발 방지책을 `mydocs/troubleshootings/`에 기록한다.
 5. 수정 PR을 출시 대상 통합 브랜치로 merge한 뒤 새 릴리스 후보를 만든다.
 
-현재 WebView-backed release line 기준은 `devel-webview`이며, native renderer 장기 브랜치에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `devel`에 후속 반영한다.
+현재 WebView-backed release line 기준은 `devel`이며, native renderer 장기 브랜치에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `native-viewer-editor`에 후속 반영한다.

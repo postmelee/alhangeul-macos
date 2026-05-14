@@ -7,7 +7,7 @@
 **목표**: macOS용 HWP/HWPX 문서 미리보기 및 viewer 앱 개발
 
 - Finder Quick Look preview / Thumbnail extension으로 `.hwp`, `.hwpx` 첫 페이지 미리보기·썸네일 제공
-- macOS viewer app: MVP는 `edwardkim/rhwp` `devel-webview` 브랜치의 `rhwp-studio`를 WKWebView로 표시하고, native viewer renderer는 후순위 마일스톤에서 개선
+- macOS viewer app: MVP는 bundled `rhwp-studio`를 WKWebView로 표시하고, native viewer renderer는 후순위 마일스톤에서 개선
 - Rust `rhwp` core를 `edwardkim/rhwp` 기준으로 고정, `RustBridge` C ABI와 `Rhwp.xcframework`로 Swift/macOS에서 사용
 - 앱, Quick Look/Thumbnail 확장, Swift bridge, 패키징·배포 정책은 본 저장소가 소유
 
@@ -31,7 +31,7 @@
 ## 명명 규칙
 
 - 마일스톤: `M{버전}` (예: M100=v1.0.0, M05x=v0.5.x). 문서 파일명은 `m{숫자}` 소문자 (예: `m100`)
-- 브랜치: `local/task{이슈번호}` (작업), `publish/task{이슈번호}` (`devel-webview` 또는 `devel` 대상 PR 게시용)
+- 브랜치: `local/task{이슈번호}` (작업), `publish/task{이슈번호}` (`devel` 또는 `native-viewer-editor` 대상 PR 게시용)
 - 커밋 메시지:
   - 기본형: `Task #{번호}: 내용`
   - 단계: `Task #{번호} Stage {N}: 내용`

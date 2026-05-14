@@ -8,7 +8,7 @@
 
 | workflow | trigger | 권한 | runner | 역할 |
 |----------|---------|------|--------|------|
-| `PR CI` | `pull_request` to `main`, `devel-webview`, `devel` | `contents: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax, 조건부 macOS build, 조건부 release helper dry-run |
+| `PR CI` | `pull_request` to `main`, `devel`, `native-viewer-editor`, `devel-webview` | `contents: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax, 조건부 macOS build, 조건부 release helper dry-run |
 | `Release Rehearsal DMG` | `workflow_dispatch` | `contents: read` | macOS | signed/notarized 전 universal rehearsal DMG/checksum과 release delta checklist artifact 생성 |
 | `Release Publish DMG` | `workflow_dispatch` | `contents: write` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, release delta checklist artifact 생성 |
 | `rhwp Upstream Release Check` | `workflow_dispatch`, schedule | `contents: read` | Ubuntu | upstream `rhwp` release와 `rhwp-core.lock` 비교 |
