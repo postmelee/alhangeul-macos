@@ -1,5 +1,10 @@
 import AppKit
 
+enum DocumentCloseConfirmationResult {
+    case confirmed
+    case cancelled
+}
+
 @MainActor
 final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
     private weak var window: NSWindow?
@@ -15,6 +20,7 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
                 previousDelegate = window.delegate
                 window.delegate = self
             }
+            DocumentCloseConfirmationRegistry.register(self, for: window)
             return
         }
 
@@ -23,9 +29,14 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
         self.store = store
         previousDelegate = window.delegate
         window.delegate = self
+        DocumentCloseConfirmationRegistry.register(self, for: window)
     }
 
     func detach(restorePreviousDelegate: Bool) {
+        if let window {
+            DocumentCloseConfirmationRegistry.unregister(window)
+        }
+
         if restorePreviousDelegate,
            let window,
            window.delegate === self {
@@ -46,6 +57,30 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
 
         bypassNextClose = true
         window.close()
+    }
+
+    var hasUnsavedChanges: Bool {
+        window != nil && store?.hasUnsavedChanges == true
+    }
+
+    func confirmForTermination(completion: @escaping (DocumentCloseConfirmationResult) -> Void) {
+        guard let window,
+              let store,
+              store.hasUnsavedChanges
+        else {
+            completion(.confirmed)
+            return
+        }
+
+        guard !isPresentingConfirmation else {
+            completion(.cancelled)
+            return
+        }
+
+        isPresentingConfirmation = true
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
+        presentConfirmation(for: window, store: store, completion: completion)
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
@@ -69,7 +104,15 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
         }
 
         isPresentingConfirmation = true
-        presentConfirmation(for: sender, store: store)
+        presentConfirmation(for: sender, store: store) { [weak self] result in
+            guard let self else {
+                return
+            }
+
+            if case .confirmed = result {
+                self.closeWithoutPrompt()
+            }
+        }
         return false
     }
 
@@ -89,7 +132,11 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
         return super.forwardingTarget(for: selector)
     }
 
-    private func presentConfirmation(for window: NSWindow, store: DocumentViewerStore) {
+    private func presentConfirmation(
+        for window: NSWindow,
+        store: DocumentViewerStore,
+        completion: @escaping (DocumentCloseConfirmationResult) -> Void
+    ) {
         let alert = NSAlert()
         alert.alertStyle = .warning
         alert.messageText = "변경사항을 저장할까요?"
@@ -107,7 +154,12 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
                     return
                 }
 
-                self.handleConfirmationResponse(response, window: window, store: store)
+                self.handleConfirmationResponse(
+                    response,
+                    window: window,
+                    store: store,
+                    completion: completion
+                )
             }
         }
     }
@@ -121,21 +173,27 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
     private func handleConfirmationResponse(
         _ response: NSApplication.ModalResponse,
         window: NSWindow,
-        store: DocumentViewerStore
+        store: DocumentViewerStore,
+        completion: @escaping (DocumentCloseConfirmationResult) -> Void
     ) {
         switch response {
         case .alertFirstButtonReturn:
-            saveThenClose(window: window, store: store)
+            saveForConfirmation(window: window, store: store, completion: completion)
         case .alertSecondButtonReturn:
             store.clearUnsavedChanges()
             isPresentingConfirmation = false
-            closeWithoutPrompt()
+            completion(.confirmed)
         default:
             isPresentingConfirmation = false
+            completion(.cancelled)
         }
     }
 
-    private func saveThenClose(window: NSWindow, store: DocumentViewerStore) {
+    private func saveForConfirmation(
+        window: NSWindow,
+        store: DocumentViewerStore,
+        completion: @escaping (DocumentCloseConfirmationResult) -> Void
+    ) {
         let didStartSave = RhwpStudioNativeCommandDispatcher.saveDocument(in: window) { [weak self, weak window] result in
             Task { @MainActor in
                 guard let self else {
@@ -145,12 +203,13 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
                 self.isPresentingConfirmation = false
                 switch result {
                 case .saved:
-                    self.closeWithoutPrompt()
+                    completion(.confirmed)
                 case .cancelled:
-                    break
+                    completion(.cancelled)
                 case .failed(let message):
                     store.setWebViewError(message)
                     window?.makeKeyAndOrderFront(nil)
+                    completion(.cancelled)
                 }
             }
         }
@@ -158,7 +217,52 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
         guard didStartSave else {
             store.setWebViewError("저장할 viewer를 찾을 수 없습니다.")
             isPresentingConfirmation = false
+            completion(.cancelled)
             return
         }
+    }
+}
+
+@MainActor
+enum DocumentCloseConfirmationRegistry {
+    private static var controllers: [ObjectIdentifier: WeakDocumentCloseConfirmationController] = [:]
+
+    static func register(_ controller: DocumentCloseConfirmationController, for window: NSWindow) {
+        cleanup()
+        controllers[ObjectIdentifier(window)] = WeakDocumentCloseConfirmationController(controller)
+    }
+
+    static func unregister(_ window: NSWindow) {
+        controllers.removeValue(forKey: ObjectIdentifier(window))
+        cleanup()
+    }
+
+    static func dirtyControllers() -> [DocumentCloseConfirmationController] {
+        cleanup()
+
+        let orderedControllers = NSApp.windows.compactMap { window in
+            controllers[ObjectIdentifier(window)]?.controller
+        }
+        let orderedIDs = Set(orderedControllers.map(ObjectIdentifier.init))
+        let remainingControllers = controllers.values
+            .compactMap(\.controller)
+            .filter { !orderedIDs.contains(ObjectIdentifier($0)) }
+
+        return (orderedControllers + remainingControllers)
+            .filter(\.hasUnsavedChanges)
+    }
+
+    private static func cleanup() {
+        controllers = controllers.filter { _, value in
+            value.controller != nil
+        }
+    }
+}
+
+private final class WeakDocumentCloseConfirmationController {
+    weak var controller: DocumentCloseConfirmationController?
+
+    init(_ controller: DocumentCloseConfirmationController) {
+        self.controller = controller
     }
 }

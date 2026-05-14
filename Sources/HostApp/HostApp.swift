@@ -205,6 +205,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         repositionUnreachableWindowsIfNeeded()
     }
 
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        DocumentTerminationCoordinator.shared.applicationShouldTerminate(sender)
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         NotificationCenter.default.removeObserver(self)
     }
