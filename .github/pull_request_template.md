@@ -46,7 +46,15 @@ raw URL 대신 `[파일명](https://github.com/postmelee/alhangeul-macos/blob/{h
 
 ## 검증
 
-<!-- 어떻게 검증했나요? 실제 실행한 명령과 수동 확인만 남기고, 실행하지 않은 항목은 삭제합니다. -->
+<!-- 어떻게 검증했나요? 실제 실행한 명령과 수동 확인만 남기고, 실행하지 않은 항목은 삭제합니다.
+
+Finder/Quick Look/Thumbnail extension 관련 변경이면 아래 항목을 유지하고 채웁니다.
+- Debug app이 아니라 Release package 또는 표준 smoke helper 설치본으로 Finder integration을 확인했나요?
+- `pluginkit -mAvvv`의 active provider path가 기대 설치본 내부였나요?
+- `scripts/check-extension-registration-hygiene.sh --check-only` 결과가 깨끗했나요?
+- `build.noindex/` 또는 Xcode DerivedData 아래 개발 산출물 registration이 남지 않았나요?
+- 수동 `lsregister`/`pluginkit` 등록을 했다면 같은 검증 안에서 unregister와 `qlmanage -r cache`까지 수행했나요?
+-->
 
 -
 
