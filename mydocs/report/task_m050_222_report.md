@@ -15,7 +15,7 @@
 
 ## 변경 파일 목록과 영향 범위
 
-| 파일 | 영향 |
+| 파일 | 내용 |
 |------|------|
 | `Sources/RhwpCoreBridge/RenderTree.swift` | `ImageNode.textWrap` 디코딩 추가 |
 | `Sources/RhwpCoreBridge/CGTreeRenderer.swift` | page-level/nested `BehindText` draw order 보정, PCX fallback decode 추가 |
@@ -53,6 +53,7 @@
 
 - 좌상단 로고가 render tree에서 누락된 것이 아니라 PCX bin data decode 실패로 빠지는 문제임을 확인했다.
 - `CGImageSource` decode를 우선 사용하고, 실패 시 PCX fallback decoder를 사용하도록 보정했다.
+- 손상 PCX가 extension 프로세스를 크래시시키지 않도록 row length, 지원 layout, decoded/pixel buffer 상한 검증을 추가했다.
 - `Column` 내부 nested `BehindText` 이미지는 같은 column foreground보다 먼저 그리도록 순서를 보정했다.
 - `복학원서.hwp` native PNG에서 좌상단 로고가 보이는 것을 확인했다.
 

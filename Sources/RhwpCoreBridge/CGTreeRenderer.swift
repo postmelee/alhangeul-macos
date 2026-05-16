@@ -11,6 +11,9 @@ class CGTreeRenderer {
     private let imageCropUnitsPerPixel = 75.0
     private let tableCellClipRightSlack = 4.0
     private let pathEpsilon = 0.000001
+    private let maxPCXImageDimension = 16_384
+    private let maxPCXDecodedByteCount = 64 * 1024 * 1024
+    private let maxPCXPixelByteCount = 64 * 1024 * 1024
 
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
@@ -612,18 +615,25 @@ class CGTreeRenderer {
 
         guard width > 0,
               height > 0,
-              planes > 0,
+              width <= maxPCXImageDimension,
+              height <= maxPCXImageDimension,
               bytesPerLine > 0,
-              [1, 2, 4, 8].contains(bitsPerPlane) else {
+              isSupportedPCXLayout(bitsPerPlane: bitsPerPlane, planes: planes),
+              let minimumBytesPerLine = minimumPCXBytesPerLine(width: width, bitsPerPlane: bitsPerPlane),
+              bytesPerLine >= minimumBytesPerLine,
+              let scanlineByteCount = checkedProduct(bytesPerLine, planes),
+              let decodedByteCount = checkedProduct(scanlineByteCount, height),
+              decodedByteCount <= maxPCXDecodedByteCount,
+              let pixelByteCount = checkedProduct(width, height, 4),
+              pixelByteCount <= maxPCXPixelByteCount else {
             return nil
         }
 
-        let scanlineByteCount = bytesPerLine * planes
-        guard let decoded = decodePCXRLE(data, from: 128, expectedByteCount: scanlineByteCount * height) else {
+        guard let decoded = decodePCXRLE(data, from: 128, expectedByteCount: decodedByteCount) else {
             return nil
         }
 
-        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        var pixels = [UInt8](repeating: 0, count: pixelByteCount)
         for y in 0..<height {
             let scanlineOffset = y * scanlineByteCount
             for x in 0..<width {
@@ -650,6 +660,46 @@ class CGTreeRenderer {
 
     private func pcxUInt16(_ data: Data, offset: Int) -> UInt16 {
         UInt16(data[offset]) | (UInt16(data[offset + 1]) << 8)
+    }
+
+    private func isSupportedPCXLayout(bitsPerPlane: Int, planes: Int) -> Bool {
+        if bitsPerPlane == 8 {
+            return planes == 1 || planes == 3
+        }
+
+        guard [1, 2, 4].contains(bitsPerPlane),
+              planes >= 1,
+              planes <= 4,
+              let bitsPerPixel = checkedProduct(bitsPerPlane, planes) else {
+            return false
+        }
+        return bitsPerPixel <= 8
+    }
+
+    private func minimumPCXBytesPerLine(width: Int, bitsPerPlane: Int) -> Int? {
+        guard let rowBits = checkedProduct(width, bitsPerPlane) else {
+            return nil
+        }
+        let padded = rowBits.addingReportingOverflow(7)
+        guard !padded.overflow else {
+            return nil
+        }
+        return padded.partialValue / 8
+    }
+
+    private func checkedProduct(_ lhs: Int, _ rhs: Int) -> Int? {
+        guard lhs >= 0, rhs >= 0 else {
+            return nil
+        }
+        let result = lhs.multipliedReportingOverflow(by: rhs)
+        return result.overflow ? nil : result.partialValue
+    }
+
+    private func checkedProduct(_ lhs: Int, _ rhs: Int, _ third: Int) -> Int? {
+        guard let first = checkedProduct(lhs, rhs) else {
+            return nil
+        }
+        return checkedProduct(first, third)
     }
 
     private func decodePCXRLE(_ data: Data, from offset: Int, expectedByteCount: Int) -> [UInt8]? {
@@ -685,7 +735,7 @@ class CGTreeRenderer {
         bitsPerPlane: Int,
         data: Data
     ) -> (red: UInt8, green: UInt8, blue: UInt8)? {
-        if bitsPerPlane == 8, planes >= 3 {
+        if bitsPerPlane == 8, planes == 3 {
             return (
                 decoded[scanlineOffset + x],
                 decoded[scanlineOffset + bytesPerLine + x],
