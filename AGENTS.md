@@ -7,7 +7,7 @@
 **목표**: macOS용 HWP/HWPX 문서 미리보기 및 viewer 앱 개발
 
 - Finder Quick Look preview / Thumbnail extension으로 `.hwp`, `.hwpx` 첫 페이지 미리보기·썸네일 제공
-- macOS viewer app: 다중 페이지 스크롤, 확대/축소
+- macOS viewer app: MVP는 bundled `rhwp-studio`를 WKWebView로 표시하고, native viewer renderer는 후순위 마일스톤에서 개선
 - Rust `rhwp` core를 `edwardkim/rhwp` 기준으로 고정, `RustBridge` C ABI와 `Rhwp.xcframework`로 Swift/macOS에서 사용
 - 앱, Quick Look/Thumbnail 확장, Swift bridge, 패키징·배포 정책은 본 저장소가 소유
 
@@ -24,14 +24,14 @@
 - 이슈 close는 작업지시자 승인 후 또는 PR merge 확인 후에만 수행
 - 문서 수정은 기존 내용을 먼저 읽고 필요한 부분만 수정하며, 불가피할 때만 내용을 추가
 - 작업 완료 후 다음 작업에 필요하지 않은 로컬/원격 부산물은 정리
-- PR merge와 이슈 close 후에는 `devel`로 돌아오고, 더 이상 필요 없는 `local/task{번호}` 브랜치와 임시 worktree를 정리
+- PR merge와 이슈 close 후에는 대상 통합 브랜치로 돌아오고, 더 이상 필요 없는 `local/task{번호}` 브랜치와 임시 worktree를 정리
 
 **승인 간주 조건**: 작업지시자가 같은 스레드에서 "계속 진행", "다음 단계 진행"처럼 명시 지시한 경우에만 해당 단계 승인으로 간주한다.
 
 ## 명명 규칙
 
 - 마일스톤: `M{버전}` (예: M100=v1.0.0, M05x=v0.5.x). 문서 파일명은 `m{숫자}` 소문자 (예: `m100`)
-- 브랜치: `local/task{이슈번호}` (작업), `publish/task{이슈번호}` (devel 대상 PR 게시용)
+- 브랜치: `local/task{이슈번호}` (작업), `publish/task{이슈번호}` (`devel` 또는 `native-viewer-editor` 대상 PR 게시용)
 - 커밋 메시지:
   - 기본형: `Task #{번호}: 내용`
   - 단계: `Task #{번호} Stage {N}: 내용`
@@ -44,9 +44,10 @@
 
 - `Sources/RhwpCoreBridge`에 AppKit/UIKit 직접 의존 금지 — 상세: [`swift_macos_code_rules_guide.md`](mydocs/manual/swift_macos_code_rules_guide.md)
 - Rust FFI 경계의 포인터/길이/수명 규칙 준수 — 상세: 동일 매뉴얼
-- `project.yml`이 Xcode project 원본. `AlhangeulMac.xcodeproj` 직접 수정 금지 — 상세: [`build_run_guide.md`](mydocs/manual/build_run_guide.md)
+- `project.yml`이 Xcode project 원본. `Alhangeul.xcodeproj` 직접 수정 금지 — 상세: [`build_run_guide.md`](mydocs/manual/build_run_guide.md)
 - 변경 유형별 최소 검증 필수 — 상세: 동일 매뉴얼
 - `build.noindex/` 아래에 `.app`/`.appex` 산출물 배치 (Spotlight 검색 혼선 방지) — 상세: 동일 매뉴얼
+- Debug/테스트용 Quick Look/Thumbnail 등록은 표준 smoke 절차 안에서만 수행하고, 종료 시 개발 산출물 등록을 해제한다 — 상세: 동일 매뉴얼
 - core 안정 기준은 Stable의 경우 release tag + resolved commit, Demo/Preview의 경우 resolved commit `rev` pin. branch/floating ref는 안정 기준으로 취급하지 않음 — 상세: [`core_dependency_operation_guide.md`](mydocs/manual/core_dependency_operation_guide.md)
 - 릴리스/배포/서명/공증/Homebrew Cask는 작업지시자 명시 지시 시에만 — 상세: [`release_distribution_guide.md`](mydocs/manual/release_distribution_guide.md)
 

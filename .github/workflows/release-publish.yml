@@ -1,0 +1,586 @@
+name: Release Publish DMG
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: App version to publish. The workflow must be run from tag v<version>.
+        required: true
+        default: "0.1.2"
+      previous_release_ref:
+        description: Git ref for the previous public release used to draft the release delta checklist.
+        required: true
+        default: "v0.1.1"
+      expected_rhwp_tag:
+        description: rhwp release tag that must match rhwp-core.lock before publishing.
+        required: true
+        default: "v0.7.11"
+      require_latest_rhwp:
+        description: Fail if rhwp-core.lock is not pinned to upstream latest release.
+        required: true
+        type: boolean
+        default: true
+      include_rhwp_in_title:
+        description: Append (rhwp vX.Y.Z) to the GitHub Release title for upstream rhwp-centered releases.
+        required: true
+        type: boolean
+        default: false
+      draft:
+        description: Create a draft GitHub Release. Stable Sparkle appcast is updated only when this is false.
+        required: true
+        type: boolean
+        default: false
+      prerelease:
+        description: Mark the GitHub Release as prerelease. Stable Sparkle appcast is updated only when this is false.
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-publish-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  publish-dmg:
+    name: Build signed/notarized DMG and publish release asset
+    runs-on: macos-15
+    timeout-minutes: 180
+    environment: release
+    permissions:
+      contents: write
+
+    env:
+      VERSION: ${{ inputs.version }}
+      PREVIOUS_RELEASE_REF: ${{ inputs.previous_release_ref }}
+      EXPECTED_RHWP_TAG: ${{ inputs.expected_rhwp_tag }}
+      REQUIRE_LATEST_RHWP: ${{ inputs.require_latest_rhwp }}
+      INCLUDE_RHWP_IN_TITLE: ${{ inputs.include_rhwp_in_title }}
+      DRAFT_RELEASE: ${{ inputs.draft }}
+      PRERELEASE: ${{ inputs.prerelease }}
+      GH_TOKEN: ${{ github.token }}
+      ALHANGEUL_BUILD_ROOT: ${{ github.workspace }}/build.noindex
+      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: "1"
+      ALHANGEUL_DEVELOPER_ID_APPLICATION: ${{ vars.ALHANGEUL_DEVELOPER_ID_APPLICATION }}
+      ALHANGEUL_DEVELOPER_ID_DMG: ${{ vars.ALHANGEUL_DEVELOPER_ID_DMG }}
+      ALHANGEUL_NOTARY_PROFILE: ${{ vars.ALHANGEUL_NOTARY_PROFILE }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID || secrets.APPLE_TEAM_ID }}
+      DEVELOPER_ID_APPLICATION_P12_BASE64: ${{ secrets.DEVELOPER_ID_APPLICATION_P12_BASE64 }}
+      DEVELOPER_ID_APPLICATION_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_P12_PASSWORD }}
+      NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+      NOTARY_APP_SPECIFIC_PASSWORD: ${{ secrets.NOTARY_APP_SPECIFIC_PASSWORD }}
+      RELEASE_KEYCHAIN_PASSWORD: ${{ secrets.RELEASE_KEYCHAIN_PASSWORD }}
+      SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Validate release inputs and tag ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$VERSION" =~ ^[0-9]+[.][0-9]+[.][0-9]+([-+][0-9A-Za-z.-]+)?$ ]]; then
+            echo "ERROR: version must look like semantic version, got: $VERSION" >&2
+            exit 1
+          fi
+
+          tag_name="v$VERSION"
+          if [ "$GITHUB_REF_TYPE" != "tag" ] || [ "$GITHUB_REF_NAME" != "$tag_name" ]; then
+            echo "ERROR: release publish must run from tag $tag_name; got $GITHUB_REF" >&2
+            exit 1
+          fi
+
+          tag_commit="$(git rev-list -n 1 "$tag_name")"
+          head_commit="$(git rev-parse HEAD)"
+          if [ "$tag_commit" != "$head_commit" ]; then
+            echo "ERROR: checked out HEAD $head_commit does not match $tag_name $tag_commit" >&2
+            exit 1
+          fi
+
+          {
+            echo "## Release ref"
+            echo
+            echo "- version: \`$VERSION\`"
+            echo "- tag: \`$tag_name\`"
+            echo "- commit: \`$head_commit\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Write release delta checklist
+        id: delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_ref="v$VERSION"
+          checklist_path="$ALHANGEUL_BUILD_ROOT/release/delta-checklist-$VERSION.md"
+
+          scripts/ci/write-release-delta-checklist.sh \
+            "$PREVIOUS_RELEASE_REF" \
+            "$candidate_ref" \
+            "$checklist_path"
+
+          {
+            echo "checklist_path=$checklist_path"
+            echo "previous_release_ref=$PREVIOUS_RELEASE_REF"
+            echo "candidate_ref=$candidate_ref"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo
+            echo "## Release delta checklist"
+            echo
+            echo "- previous release ref: \`$PREVIOUS_RELEASE_REF\`"
+            echo "- candidate ref: \`$candidate_ref\`"
+            echo "- checklist path: \`$checklist_path\`"
+            echo
+            echo "This path-based draft must be reviewed and corrected before publishing release notes."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload release delta checklist artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: alhangeul-macos-${{ inputs.version }}-release-delta-checklist
+          path: ${{ steps.delta.outputs.checklist_path }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Read and validate core lock
+        id: core
+        shell: bash
+        run: |
+          set -euo pipefail
+          rhwp_tag="$(bash scripts/ci/read-rhwp-core-lock.sh rhwp_release_tag)"
+          rhwp_commit="$(bash scripts/ci/read-rhwp-core-lock.sh rhwp_commit)"
+
+          {
+            echo "rhwp_tag=$rhwp_tag"
+            echo "rhwp_commit=$rhwp_commit"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ "$rhwp_tag" != "$EXPECTED_RHWP_TAG" ]; then
+            echo "ERROR: expected rhwp tag $EXPECTED_RHWP_TAG but rhwp-core.lock has $rhwp_tag" >&2
+            exit 1
+          fi
+
+          {
+            echo "## rhwp core"
+            echo
+            echo "- lock tag: \`$rhwp_tag\`"
+            echo "- lock commit: \`$rhwp_commit\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify upstream latest rhwp release
+        if: ${{ inputs.require_latest_rhwp }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_tag="$(gh release view -R edwardkim/rhwp --json tagName --jq .tagName)"
+          lock_tag="${{ steps.core.outputs.rhwp_tag }}"
+
+          if [ "$lock_tag" != "$latest_tag" ]; then
+            echo "ERROR: rhwp-core.lock has $lock_tag but upstream latest is $latest_tag" >&2
+            echo "Update rhwp core compatibility before publishing, or rerun with require_latest_rhwp=false for an explicit exception." >&2
+            exit 1
+          fi
+
+          {
+            echo
+            echo "- upstream latest rhwp release: \`$latest_tag\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+          if ! command -v cbindgen >/dev/null 2>&1; then
+            brew install cbindgen
+          fi
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+          rustup show active-toolchain
+          rustc --version
+          cargo --version
+
+      - name: Import Developer ID certificate
+        id: keychain
+        shell: bash
+        run: |
+          set -euo pipefail
+          keychain_path="$(bash scripts/ci/import-developer-id-certificate.sh)"
+          echo "keychain_path=$keychain_path" >> "$GITHUB_OUTPUT"
+
+      - name: Store notarization credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          for required in ALHANGEUL_NOTARY_PROFILE APPLE_TEAM_ID NOTARY_APPLE_ID NOTARY_APP_SPECIFIC_PASSWORD; do
+            if [ -z "${!required:-}" ]; then
+              echo "ERROR: $required is required for release notarization" >&2
+              exit 1
+            fi
+          done
+
+          xcrun notarytool store-credentials "$ALHANGEUL_NOTARY_PROFILE" \
+            --apple-id "$NOTARY_APPLE_ID" \
+            --team-id "$APPLE_TEAM_ID" \
+            --password "$NOTARY_APP_SPECIFIC_PASSWORD" \
+            --keychain "${{ steps.keychain.outputs.keychain_path }}"
+
+      - name: Verify release script interface
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/release.sh --help
+
+      - name: Record Rust bridge lock policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Rust bridge lock policy"
+            echo
+            echo "- lock command: \`./scripts/build-rust-macos.sh --verify-lock\`"
+            echo "- ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: \`${ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY:-0}\`"
+            echo "- With this release workflow setting, only \`Frameworks/universal/librhwp.a\` byte hash/size comparison is skipped."
+            echo "- Source provenance, Cargo lock, generated header, and FFI symbol checks still run."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Record signing preflight policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Signing preflight policy"
+            echo
+            echo "- release command: \`./scripts/release.sh \"$VERSION\"\`"
+            echo "- Expected Team ID: \`${APPLE_TEAM_ID:-XH6JHKYXV8}\`"
+            echo "- Before app notarization submit, \`release.sh\` verifies Developer ID authority, Team ID, secure timestamp, hardened runtime, \`get-task-allow\` absence, and required Sparkle nested components."
+            echo "- Failure in this preflight blocks notarization submit."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify rhwp source, header, and ABI lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/build-rust-macos.sh --verify-lock
+
+      - name: Build signed and notarized DMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/release.sh "$VERSION"
+
+      - name: Verify public release artifact
+        id: artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          dmg_name="alhangeul-macos-$VERSION.dmg"
+          release_dir="$PWD/build.noindex/release"
+          dmg_path="$release_dir/$dmg_name"
+          checksum_path="$dmg_path.sha256"
+
+          test -f "$dmg_path"
+          test -f "$checksum_path"
+          (cd "$release_dir" && shasum -a 256 -c "$dmg_name.sha256")
+
+          digest="$(awk '{print $1}' "$checksum_path")"
+          {
+            echo "dmg_path=$dmg_path"
+            echo "checksum_path=$checksum_path"
+            echo "digest=$digest"
+            echo "notes_path=$release_dir/release-notes-$VERSION.md"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Public release artifact"
+            echo
+            echo "- DMG: \`$dmg_name\`"
+            echo "- SHA256: \`$digest\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Write release notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/ci/write-release-notes.sh \
+            "$VERSION" \
+            "${{ steps.artifact.outputs.digest }}" \
+            "${{ steps.artifact.outputs.notes_path }}"
+
+      - name: Publish GitHub Release asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_name="v$VERSION"
+          dmg_path="${{ steps.artifact.outputs.dmg_path }}"
+          checksum_path="${{ steps.artifact.outputs.checksum_path }}"
+          notes_path="${{ steps.artifact.outputs.notes_path }}"
+          release_title="Alhangeul $tag_name"
+          if [ "$INCLUDE_RHWP_IN_TITLE" = "true" ]; then
+            release_title="$release_title (rhwp ${{ steps.core.outputs.rhwp_tag }})"
+          fi
+
+          {
+            echo
+            echo "## GitHub Release title"
+            echo
+            echo "- title: \`$release_title\`"
+            echo "- include rhwp in title: \`$INCLUDE_RHWP_IN_TITLE\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if gh release view "$tag_name" >/dev/null 2>&1; then
+            gh release upload "$tag_name" "$dmg_path" "$checksum_path" --clobber
+          else
+            args=(
+              release create "$tag_name"
+              "$dmg_path"
+              "$checksum_path"
+              --title "$release_title"
+              --notes-file "$notes_path"
+              --verify-tag
+            )
+            if [ "$DRAFT_RELEASE" = "true" ]; then
+              args+=(--draft)
+            fi
+            if [ "$PRERELEASE" = "true" ]; then
+              args+=(--prerelease)
+            fi
+            gh "${args[@]}"
+          fi
+
+          edit_args=(
+            release edit "$tag_name"
+            --title "$release_title"
+            --notes-file "$notes_path"
+            --verify-tag
+          )
+          if [ "$DRAFT_RELEASE" = "true" ]; then
+            edit_args+=(--draft=true)
+          else
+            edit_args+=(--draft=false)
+          fi
+          if [ "$PRERELEASE" = "true" ]; then
+            edit_args+=(--prerelease=true)
+          else
+            edit_args+=(--prerelease=false)
+          fi
+          if [ "$DRAFT_RELEASE" = "false" ] && [ "$PRERELEASE" = "false" ]; then
+            edit_args+=(--latest)
+          fi
+          gh "${edit_args[@]}"
+
+      - name: Validate published release state
+        id: release_state
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_name="v$VERSION"
+          is_draft="$(gh release view "$tag_name" --json isDraft --jq .isDraft)"
+          is_prerelease="$(gh release view "$tag_name" --json isPrerelease --jq .isPrerelease)"
+          release_url="$(gh release view "$tag_name" --json url --jq .url)"
+
+          {
+            echo "is_draft=$is_draft"
+            echo "is_prerelease=$is_prerelease"
+            echo "release_url=$release_url"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ "$DRAFT_RELEASE" = "false" ] && [ "$PRERELEASE" = "false" ]; then
+            if [ "$is_draft" != "false" ] || [ "$is_prerelease" != "false" ]; then
+              echo "ERROR: stable appcast requires non-draft, non-prerelease release; got draft=$is_draft prerelease=$is_prerelease" >&2
+              exit 1
+            fi
+          fi
+
+          {
+            echo
+            echo "## GitHub Release state"
+            echo
+            echo "- URL: $release_url"
+            echo "- draft: \`$is_draft\`"
+            echo "- prerelease: \`$is_prerelease\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Resolve Sparkle CLI tools
+        id: sparkle_tools
+        if: ${{ !inputs.draft && !inputs.prerelease }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          derived_data="$ALHANGEUL_BUILD_ROOT/SparkleToolsDerivedData"
+          xcodebuild -resolvePackageDependencies \
+            -project Alhangeul.xcodeproj \
+            -scheme HostApp \
+            -derivedDataPath "$derived_data"
+
+          sign_update_path="$derived_data/SourcePackages/artifacts/sparkle/Sparkle/bin/sign_update"
+          if [ ! -x "$sign_update_path" ]; then
+            echo "ERROR: Sparkle sign_update was not found at $sign_update_path" >&2
+            find "$derived_data/SourcePackages/artifacts" -maxdepth 6 -type f -name sign_update -print >&2 || true
+            exit 1
+          fi
+
+          echo "sign_update_path=$sign_update_path" >> "$GITHUB_OUTPUT"
+
+      - name: Write Sparkle appcast
+        id: appcast
+        if: ${{ !inputs.draft && !inputs.prerelease }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${SPARKLE_ED_PRIVATE_KEY:-}" ]; then
+            echo "ERROR: SPARKLE_ED_PRIVATE_KEY secret is required for stable appcast signing" >&2
+            exit 1
+          fi
+
+          dmg_path="${{ steps.artifact.outputs.dmg_path }}"
+          sign_update_path="${{ steps.sparkle_tools.outputs.sign_update_path }}"
+          length="$(stat -f%z "$dmg_path")"
+          ed_signature="$(printf '%s' "$SPARKLE_ED_PRIVATE_KEY" | "$sign_update_path" --ed-key-file - -p "$dmg_path")"
+          if [ -z "$ed_signature" ]; then
+            echo "ERROR: Sparkle sign_update did not produce an EdDSA signature" >&2
+            exit 1
+          fi
+
+          build_number="$(plutil -extract CFBundleVersion raw -o - Sources/HostApp/Info.plist)"
+          minimum_system="$(plutil -extract LSMinimumSystemVersion raw -o - Sources/HostApp/Info.plist)"
+          dmg_url="https://github.com/$GITHUB_REPOSITORY/releases/download/v$VERSION/alhangeul-macos-$VERSION.dmg"
+          release_notes_url="https://postmelee.github.io/alhangeul-macos/updates/v$VERSION.html"
+          pub_date="$(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S +0000')"
+          appcast_path="$ALHANGEUL_BUILD_ROOT/release/appcast.xml"
+
+          bash scripts/ci/write-sparkle-appcast.sh \
+            --version "$VERSION" \
+            --build "$build_number" \
+            --dmg-url "$dmg_url" \
+            --length "$length" \
+            --ed-signature "$ed_signature" \
+            --release-notes-url "$release_notes_url" \
+            --pub-date "$pub_date" \
+            --minimum-system-version "$minimum_system" \
+            --output "$appcast_path"
+
+          xmllint --noout "$appcast_path"
+          echo "appcast_path=$appcast_path" >> "$GITHUB_OUTPUT"
+
+          {
+            echo
+            echo "## Sparkle appcast"
+            echo
+            echo "- feed path: \`docs/appcast.xml\`"
+            echo "- DMG URL: \`$dmg_url\`"
+            echo "- release notes: \`$release_notes_url\`"
+            echo "- CFBundleVersion: \`$build_number\`"
+            echo "- minimum system: \`$minimum_system\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prepare Pages artifact
+        id: pages_artifact
+        if: ${{ !inputs.draft && !inputs.prerelease }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          appcast_path="${{ steps.appcast.outputs.appcast_path }}"
+          pages_artifact_dir="$ALHANGEUL_BUILD_ROOT/release/pages-artifact"
+
+          scripts/ci/prepare-pages-artifact.sh \
+            --docs-dir docs \
+            --appcast "$appcast_path" \
+            --output-dir "$pages_artifact_dir"
+
+          xmllint --noout "$pages_artifact_dir/appcast.xml"
+          echo "pages_artifact_dir=$pages_artifact_dir" >> "$GITHUB_OUTPUT"
+
+          {
+            echo
+            echo "## Pages artifact"
+            echo
+            echo "- artifact source: \`docs/\` + generated \`appcast.xml\`"
+            echo "- artifact directory: \`$pages_artifact_dir\`"
+            echo "- publish model: \`actions/deploy-pages\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Pages artifact
+        if: ${{ !inputs.draft && !inputs.prerelease }}
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ${{ steps.pages_artifact.outputs.pages_artifact_dir }}
+          retention-days: 14
+
+      - name: Record skipped stable appcast and Pages deployment
+        if: ${{ inputs.draft || inputs.prerelease }}
+        shell: bash
+        run: |
+          {
+            echo
+            echo "## Sparkle appcast"
+            echo
+            echo "Stable appcast update was skipped because draft=${{ inputs.draft }} and prerelease=${{ inputs.prerelease }}."
+            echo "Pages deployment was skipped for the same reason."
+            echo "Run the workflow with draft=false and prerelease=false for the official stable feed and Pages deployment."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Sparkle appcast artifact copy
+        if: ${{ !inputs.draft && !inputs.prerelease }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: alhangeul-macos-${{ inputs.version }}-appcast
+          path: ${{ steps.appcast.outputs.appcast_path }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload signed DMG artifact copy
+        uses: actions/upload-artifact@v7
+        with:
+          name: alhangeul-macos-${{ inputs.version }}-public-dmg
+          path: |
+            ${{ steps.artifact.outputs.dmg_path }}
+            ${{ steps.artifact.outputs.checksum_path }}
+            ${{ steps.artifact.outputs.notes_path }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Delete temporary release keychain
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          security delete-keychain "$RUNNER_TEMP/alhangeul-release.keychain-db" || true
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: publish-dmg
+    if: ${{ !inputs.draft && !inputs.prerelease }}
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+      - name: Record Pages deployment summary
+        shell: bash
+        run: |
+          {
+            echo
+            echo "## GitHub Pages deployment"
+            echo
+            echo "- URL: ${{ steps.deployment.outputs.page_url }}"
+            echo "- appcast: https://postmelee.github.io/alhangeul-macos/appcast.xml"
+            echo "- release notes: https://postmelee.github.io/alhangeul-macos/updates/v${{ inputs.version }}.html"
+          } >> "$GITHUB_STEP_SUMMARY"

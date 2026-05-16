@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>ko</string>
 	<key>CFBundleDisplayName</key>
-	<string>AlhangeulMac</string>
+	<string>Alhangeul</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,19 +13,31 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>AlhangeulMac</string>
+	<string>Alhangeul</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.0</string>
+	<string>0.1.2</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>8</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>12.0</string>
 	<key>LSHasLocalizedDisplayName</key>
 	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2025-2026 Taegyu Lee</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://postmelee.github.io/alhangeul-macos/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>5bIatnE362KFmrf9NneeE7gVvkKfTnWK7c26MwfFLSs=</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -37,8 +49,8 @@
 			<string>Alternate</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>com.postmelee.alhangeulmac.hwp</string>
-				<string>com.postmelee.alhangeulmac.hwpx</string>
+				<string>com.postmelee.alhangeul.hwp</string>
+				<string>com.postmelee.alhangeul.hwpx</string>
 				<string>com.hancom.hwp</string>
 				<string>com.hancom.hwpx</string>
 				<string>com.haansoft.hancomofficeviewer.mac.hwp</string>
@@ -50,7 +62,7 @@
 	<array>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.postmelee.alhangeulmac.hwp</string>
+			<string>com.postmelee.alhangeul.hwp</string>
 			<key>UTTypeDescription</key>
 			<string>HWP Document</string>
 			<key>UTTypeConformsTo</key>
@@ -73,7 +85,7 @@
 		</dict>
 		<dict>
 			<key>UTTypeIdentifier</key>
-			<string>com.postmelee.alhangeulmac.hwpx</string>
+			<string>com.postmelee.alhangeul.hwpx</string>
 			<key>UTTypeDescription</key>
 			<string>HWPX Document</string>
 			<key>UTTypeConformsTo</key>

@@ -4,7 +4,7 @@
 
 이 문서는 `alhangeul-macos` 저장소의 내부 task PR 생성 규칙과 외부 기여자 PR 검토 절차를 정리한다.
 
-브랜치 흐름과 merge 전략은 [`git_workflow_guide.md`](git_workflow_guide.md)를 따른다.
+브랜치 흐름과 merge 전략은 [`git_workflow_guide.md`](git_workflow_guide.md)를 따른다. 제품 `devel`과 native `native-viewer-editor`의 역할 판단은 [`branch_strategy_webview_native.md`](../tech/branch_strategy_webview_native.md)를 기준으로 한다.
 
 ## 범위
 
@@ -26,7 +26,7 @@
 
 ## 내부 task PR 작성 규칙
 
-내부 task PR은 `local/task{번호}`에서 작업한 내용을 `publish/task{번호}`로 push한 뒤 `devel` 대상으로 생성한다.
+내부 task PR은 `local/task{번호}`에서 작업한 내용을 `publish/task{번호}`로 push한 뒤 작업 범위에 맞는 통합 브랜치 대상으로 생성한다. 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Spotlight/mdimporter, 변환, 배포, 문서는 `devel`, Swift native viewer/editor는 `native-viewer-editor`를 쓴다.
 
 PR 본문은 `.github/pull_request_template.md`를 기준으로 작성한다.
 
@@ -151,9 +151,10 @@ PR 본문은 `.github/pull_request_template.md`를 기준으로 작성한다.
 
 ```bash
 git checkout local/task24
+BASE_BRANCH=devel # Swift native viewer/editor 작업이면 native-viewer-editor
 git push origin local/task24:publish/task24
 gh pr create \
-  --base devel \
+  --base "$BASE_BRANCH" \
   --head publish/task24 \
   --title "Task #24: PR 템플릿과 PR 생성 규격 표준화" \
   --template .github/pull_request_template.md
@@ -164,8 +165,9 @@ gh pr create \
 최종 보고서와 단계 보고서를 바탕으로 PR 본문을 완성한 경우에는 `--body-file`을 우선 사용한다.
 
 ```bash
+BASE_BRANCH=devel # Swift native viewer/editor 작업이면 native-viewer-editor
 gh pr create \
-  --base devel \
+  --base "$BASE_BRANCH" \
   --head publish/task24 \
   --title "Task #24: PR 템플릿과 PR 생성 규격 표준화" \
   --body-file /tmp/task24-pr-body.md
