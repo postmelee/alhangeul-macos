@@ -1,7 +1,7 @@
 # 제품 devel 승격과 native 전환 브랜치 전략
 
 작성일: 2026-05-06
-갱신일: 2026-05-14
+갱신일: 2026-05-16
 
 ## 목적
 
@@ -14,10 +14,11 @@
 - `main`은 release/tag 기준 브랜치다.
 - `devel`은 일반 제품 개발과 외부 기여 기본 브랜치다.
 - `native-viewer-editor`는 Swift native viewer/editor와 장기 native 전환 작업 통합 브랜치다.
-- `devel-webview`는 전환 기간 동안 기존 링크와 자동화 호환성을 보존하는 legacy alias다.
+- `devel-webview`는 퇴역한 legacy alias이며 신규 PR base나 자동화 기준으로 사용하지 않는다.
 - `devel -> main` 반영은 release PR로 수행하고, merge 후 tag/GitHub Release를 `main` 기준으로 만든다.
 - 외부 기여 PR은 `main`으로 보내지 않는다. 작업 범위에 따라 `devel` 또는 `native-viewer-editor`를 base로 고른다.
 - 2026-05-14 전환 전 fork나 오래된 clone을 기준으로 새 기여를 시작하는 것은 권장하지 않는다. 새 fork/clone 또는 최신 `origin/devel`에서 새 작업 브랜치를 만든다.
+- 2026-05-16에 `devel-webview`에 남아 있던 #243 변경을 `devel`에 병합했으므로, `devel-webview`는 삭제 가능한 상태다.
 
 ## Task #244 devel 승격 전환 정책
 
@@ -32,7 +33,7 @@
 | `main` | release/tag 기준 브랜치. public GitHub Release와 Homebrew Cask가 참조하는 안정 기준 | 유지 |
 | `devel` | 일반 제품 개발과 외부 기여 기본 브랜치. WKWebView-backed viewer/editor, Finder/Quick Look/Thumbnail, PDF/공유/저장, Mac 통합, 변환, 배포, 문서 작업을 받는다 | `devel-webview` 제품 라인과 `main`의 release 후속 기록을 통합한 commit으로 교체 |
 | `native-viewer-editor` | 기존 `devel` head를 보존하는 Swift native viewer/editor 장기 개발 브랜치 | 기존 `origin/devel` head에서 새 원격 브랜치로 생성 |
-| `devel-webview` | 전환 안정화 기간 동안 기존 링크와 자동화 호환성을 위한 legacy alias | 새 제품 `devel` 기준 commit으로 fast-forward한 뒤 유지하고, 삭제 여부는 별도 승인으로 판단 |
+| `devel-webview` | 퇴역한 legacy alias | #243 후속 병합 후 `devel`의 ancestor가 되었으므로 삭제 가능 |
 | `local/task{N}` | 하이퍼-워터폴 내부 작업 브랜치 | 유지 |
 | `publish/task{N}` | 원격 PR 게시용 브랜치 | 유지 |
 
@@ -294,8 +295,8 @@ GitHub 설정과 자동화는 다음 기준을 점검해야 한다.
 - `main` 보호 규칙: release PR과 review approval을 요구한다.
 - `devel` 보호 규칙: 일반 작업 PR과 review/검증을 요구한다.
 - `native-viewer-editor` 보호 규칙: Swift native viewer/editor 전환 PR이 일반 출시 라인으로 섞이지 않게 한다.
-- `devel-webview` 보호 규칙: legacy alias 유지 기간 동안 기존 자동화 호환성을 확인한다.
-- CI branch filter: `main`, `devel`, `native-viewer-editor`, `devel-webview`, `publish/task*` 중 필요한 대상을 명시한다.
+- `devel-webview` 보호 규칙: 퇴역한 legacy alias이므로 신규 보호/자동화 기준으로 사용하지 않는다.
+- CI branch filter: `main`, `devel`, `native-viewer-editor`, `publish/task*` 중 필요한 대상을 명시한다.
 - release workflow: public artifact와 GitHub Release publish는 `main` tag 기준으로만 수행한다.
 - release rehearsal: 필요하면 `devel`에서 artifact rehearsal은 허용하되 public publish와 구분한다.
 - PR template/review instruction: 일반 작업 PR target은 `devel`, native 작업 PR target은 `native-viewer-editor`로 안내한다.
@@ -307,7 +308,7 @@ GitHub 설정과 자동화는 다음 기준을 점검해야 한다.
 
 - GitHub branch protection과 default branch 설정 점검
 - CI/release automation branch filter 점검
-- `devel-webview` legacy alias 삭제 여부와 시점 결정
+- `devel-webview` 원격 브랜치 삭제 실행
 - `devel`과 `native-viewer-editor` 사이의 release-critical fix 동기화 절차 정리
 - `main` README/banner 변경 보존 정책을 release PR checklist에 반영
 

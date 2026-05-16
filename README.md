@@ -40,9 +40,9 @@
 ### 기여자 브랜치 전환 안내
 
 > [!IMPORTANT]
-> 2026-05-14에 제품 개발 기본 브랜치가 `devel-webview`에서 `devel`로 전환되었습니다. 전환 전 fork나 오래된 clone을 기준으로 새 기여를 시작하려는 경우, 브랜치 이력이 크게 바뀌었으므로 저장소를 새로 fork/clone한 뒤 최신 `devel`에서 작업 브랜치를 다시 만들어 주세요.
+> 2026-05-14에 제품 개발 기본 브랜치가 `devel-webview`에서 `devel`로 전환되었고, 2026-05-16에 `devel-webview`에 남아 있던 #243 변경까지 `devel`에 병합되었습니다. 전환 전 fork나 오래된 clone을 기준으로 새 기여를 시작하려는 경우, 브랜치 이력이 크게 바뀌었으므로 저장소를 새로 fork/clone한 뒤 최신 `devel`에서 작업 브랜치를 다시 만들어 주세요.
 
-> 기존 `devel`에 있던 Swift native viewer/editor 장기 작업은 `native-viewer-editor` 브랜치로 보존했습니다. `devel-webview`는 전환 기간 호환용 legacy alias이며 신규 PR 기본 대상이 아닙니다.
+> 기존 `devel`에 있던 Swift native viewer/editor 장기 작업은 `native-viewer-editor` 브랜치로 보존했습니다. `devel-webview`는 퇴역한 legacy alias이며 신규 PR 대상이나 자동화 기준으로 사용하지 않습니다.
 
 ## 최신 공개 릴리즈
 
@@ -334,7 +334,7 @@ local/task{N}  ──커밋──커밋──┐
 | `main` | 릴리즈 |
 | `devel` | v0.1.x 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Mac 통합/변환, 배포/문서 작업의 기본 통합 |
 | `native-viewer-editor` | Swift native viewer/editor와 장기 native 전환 작업 통합 |
-| `devel-webview` | 전환 기간 동안 기존 링크와 자동화를 보존하는 legacy alias |
+| `devel-webview` | 퇴역한 legacy alias. 신규 작업과 자동화 기준으로 사용하지 않음 |
 | `local/task{N}` | GitHub Issue 번호 기반 타스크 브랜치 |
 | `publish/task{N}` | `devel` 또는 `native-viewer-editor` 대상 PR 생성을 위한 원격 게시 브랜치 |
 

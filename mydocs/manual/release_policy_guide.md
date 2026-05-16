@@ -76,7 +76,7 @@ README 최신 공개 릴리즈 요약과 Pages 릴리즈 노트는 사용자용 
 
 현재 WebView-backed public release line은 `devel`을 배포 준비 기준 브랜치로 사용한다. 릴리스 후보가 확정되면 `devel`의 검증된 commit을 `main`에 반영하고, Git tag와 GitHub Release는 `main` 기준으로 생성한다.
 
-`native-viewer-editor`는 native viewer renderer와 장기 개발 통합 브랜치이므로 배포 직전 기준 브랜치로 사용하지 않는다. `devel`에 merge된 release-critical 변경 중 native 라인에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `native-viewer-editor`에 후속 동기화한다. `devel-webview`는 전환 기간 호환용 legacy alias로만 취급한다.
+`native-viewer-editor`는 native viewer renderer와 장기 개발 통합 브랜치이므로 배포 직전 기준 브랜치로 사용하지 않는다. `devel`에 merge된 release-critical 변경 중 native 라인에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `native-viewer-editor`에 후속 동기화한다. 퇴역한 `devel-webview`는 배포 기준이나 자동화 기준으로 사용하지 않는다.
 
 브랜치 역할과 native 라인 보존 기준은 [`branch_strategy_webview_native.md`](../tech/branch_strategy_webview_native.md)를 기준으로 판단한다.
 

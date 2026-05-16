@@ -41,7 +41,7 @@ allow_implicit_invocation: false
    ```bash
    git status --short
    git diff --check
-   BASE_BRANCH=devel-webview # Swift native viewer/editor 작업이면 devel
+   BASE_BRANCH=devel # Swift native viewer/editor 작업이면 native-viewer-editor
    git log --oneline "$BASE_BRANCH"..local/task{N}
    ```
 5. 최종 커밋 (Stage 마지막 + 최종 보고서를 묶을 수도, 보고서만 단일 커밋도 가능)
@@ -57,7 +57,7 @@ allow_implicit_invocation: false
    ```
 7. 통합 브랜치 대상 Open PR 생성
    ```bash
-   BASE_BRANCH=devel-webview # Swift native viewer/editor 작업이면 devel
+   BASE_BRANCH=devel # Swift native viewer/editor 작업이면 native-viewer-editor
    HEAD_SHA=$(git rev-parse HEAD)
    PR_BODY=/tmp/task{N}-pr-body.md
    # .github/pull_request_template.md를 출발점으로 삼아 최종 보고서와 단계 보고서 기준으로 "$PR_BODY" 작성
