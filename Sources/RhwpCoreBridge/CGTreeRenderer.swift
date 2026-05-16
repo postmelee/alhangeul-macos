@@ -69,10 +69,7 @@ class CGTreeRenderer {
 
         switch node.nodeType {
         case .page:
-            // 페이지 배경 (흰색)
-            ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
-            ctx.fill(cgRect(node.bbox))
-            renderChildren(node, in: ctx)
+            renderPage(node, in: ctx)
 
         case .pageBackground(let bg):
             renderPageBackground(bg, bbox: node.bbox, in: ctx)
@@ -150,6 +147,57 @@ class CGTreeRenderer {
         for child in node.children {
             renderNode(child, in: ctx)
         }
+    }
+
+    private func renderPage(_ node: RenderNode, in ctx: CGContext) {
+        // 페이지 기본 배경.
+        ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
+        ctx.fill(cgRect(node.bbox))
+
+        renderPageBackgroundChildren(node, in: ctx)
+        renderPageBehindTextImages(node, in: ctx)
+        renderPageForegroundChildren(node, in: ctx)
+    }
+
+    private func renderPageBackgroundChildren(_ node: RenderNode, in ctx: CGContext) {
+        for child in node.children where isPageBackgroundNode(child) {
+            renderNode(child, in: ctx)
+        }
+    }
+
+    private func renderPageBehindTextImages(_ node: RenderNode, in ctx: CGContext) {
+        for child in node.children where isBehindTextImage(child) {
+            renderNode(child, in: ctx)
+        }
+    }
+
+    private func renderPageForegroundChildren(_ node: RenderNode, in ctx: CGContext) {
+        for child in node.children {
+            guard !isPageBackgroundNode(child), !isBehindTextImage(child) else {
+                continue
+            }
+            renderNode(child, in: ctx)
+        }
+    }
+
+    private func isPageBackgroundNode(_ node: RenderNode) -> Bool {
+        if case .pageBackground = node.nodeType {
+            return true
+        }
+        return false
+    }
+
+    private func isBehindTextImage(_ node: RenderNode) -> Bool {
+        guard case .image(let image) = node.nodeType else {
+            return false
+        }
+        return isBehindTextWrap(image.textWrap)
+    }
+
+    private func isBehindTextWrap(_ value: String?) -> Bool {
+        value?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .caseInsensitiveCompare("BehindText") == .orderedSame
     }
 
     private func renderBody(_ body: BodyNode, node: RenderNode, in ctx: CGContext) {
