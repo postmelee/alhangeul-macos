@@ -100,9 +100,125 @@ enum RhwpStudioHostBridgeScript {
       window.__alhangeulHostBridgeInstalled = true;
 
       const nativeCommands = new Set(["file:open", "file:save", "file:save-as", "file:print", "file:share", "file:export-pdf"]);
+      const nonMutatingCommands = new Set([
+        "file:open",
+        "file:save",
+        "file:save-as",
+        "file:print",
+        "file:share",
+        "file:export-pdf",
+        "file:about",
+        "edit:copy",
+        "edit:select-all",
+        "edit:format-copy",
+        "edit:find",
+        "edit:find-again",
+        "edit:goto",
+        "page:headerfooter-prev",
+        "page:headerfooter-next",
+        "page:headerfooter-close",
+        "tool:options"
+      ]);
+      const mutatingCommandPrefixes = ["file:", "edit:", "insert:", "format:", "page:", "table:"];
+      const keyboardMutationKeys = new Set(["Backspace", "Delete", "Enter", "Tab"]);
 
       function postNative(message) {
         window.webkit?.messageHandlers?.alhangeulHost?.postMessage(message);
+      }
+
+      function postDocumentEdited(reason, command = null) {
+        const message = { type: "document-edited", reason };
+        if (command) {
+          message.command = command;
+        }
+        postNative(message);
+      }
+
+      function isDocumentMutatingCommand(command) {
+        if (!command || nativeCommands.has(command) || nonMutatingCommands.has(command)) {
+          return false;
+        }
+        if (command.startsWith("view:")) {
+          return false;
+        }
+        return mutatingCommandPrefixes.some((prefix) => command.startsWith(prefix));
+      }
+
+      function commandElementFromEventTarget(target) {
+        if (!(target instanceof Element)) {
+          return null;
+        }
+        return target.closest(".md-item[data-cmd], .tb-btn[data-cmd], .tb-split-item[data-cmd]");
+      }
+
+      function isDisabledCommandElement(element) {
+        return element.classList.contains("disabled") ||
+          element.getAttribute("aria-disabled") === "true" ||
+          element.hasAttribute("disabled");
+      }
+
+      function handlePotentialMutatingCommandEvent(event) {
+        const item = commandElementFromEventTarget(event.target);
+        if (!item || isDisabledCommandElement(item)) {
+          return;
+        }
+
+        const command = item.dataset.cmd;
+        if (isDocumentMutatingCommand(command)) {
+          postDocumentEdited("command", command);
+        }
+      }
+
+      function isNonMutatingKeyboardShortcut(event) {
+        const hasCommandModifier = event.metaKey || event.ctrlKey;
+        if (!hasCommandModifier || event.altKey) {
+          return false;
+        }
+        if (nativeCommandForShortcut(event)) {
+          return true;
+        }
+
+        const key = event.key.toLowerCase();
+        switch (event.code) {
+        case "KeyA":
+        case "KeyC":
+        case "KeyF":
+        case "KeyG":
+        case "KeyL":
+        case "Digit0":
+        case "Equal":
+        case "Minus":
+          return true;
+        default:
+          return key === "a" ||
+            key === "c" ||
+            key === "f" ||
+            key === "g" ||
+            key === "l" ||
+            key === "0" ||
+            key === "+" ||
+            key === "=" ||
+            key === "-";
+        }
+      }
+
+      function isDocumentEditingKeyEvent(event) {
+        if (event.repeat || event.isComposing || isNonMutatingKeyboardShortcut(event)) {
+          return false;
+        }
+        if (keyboardMutationKeys.has(event.key)) {
+          return true;
+        }
+        if ((event.metaKey || event.ctrlKey) && !event.altKey) {
+          return true;
+        }
+        return event.key.length === 1;
+      }
+
+      function handlePotentialEditingKeyEvent(event) {
+        if (isDocumentEditingKeyEvent(event)) {
+          postDocumentEdited("keyboard");
+        }
       }
 
       const statusMessageRestoreDelayMs = 3000;
@@ -578,12 +694,20 @@ enum RhwpStudioHostBridgeScript {
       }
 
       document.addEventListener("mousedown", scheduleHostOverridesRefresh, true);
+      document.addEventListener("mousedown", handlePotentialMutatingCommandEvent, true);
       document.addEventListener("mousedown", handleNativeCommandElementEvent, true);
+      document.addEventListener("click", handlePotentialMutatingCommandEvent, true);
       document.addEventListener("click", handleNativeCommandElementEvent, true);
+      document.addEventListener("beforeinput", () => postDocumentEdited("beforeinput"), true);
+      document.addEventListener("input", () => postDocumentEdited("input"), true);
+      document.addEventListener("change", () => postDocumentEdited("change"), true);
+      document.addEventListener("cut", () => postDocumentEdited("cut"), true);
+      document.addEventListener("paste", () => postDocumentEdited("paste"), true);
 
       document.addEventListener("drop", (event) => {
         const file = event.dataTransfer?.files?.[0];
         if (!isSupportedDocumentFile(file)) {
+          postDocumentEdited("drop");
           return;
         }
 
@@ -595,6 +719,8 @@ enum RhwpStudioHostBridgeScript {
       }, true);
 
       document.addEventListener("keydown", (event) => {
+        handlePotentialEditingKeyEvent(event);
+
         const command = nativeCommandForShortcut(event);
         if (!command) {
           return;
