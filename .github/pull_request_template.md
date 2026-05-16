@@ -17,7 +17,7 @@
 <!--
 제품/WKWebView/Finder/Quick Look/배포/문서 작업은 `devel`을 base로 둡니다.
 Swift native viewer/editor 작업은 `native-viewer-editor`를 base로 둡니다.
-`main`은 release PR 전용이며, `devel-webview`는 전환 기간 legacy alias입니다.
+`main`은 release PR 전용이며, 퇴역한 `devel-webview`는 PR base로 사용하지 않습니다.
 -->
 
 - base:

@@ -28,11 +28,11 @@ allow_implicit_invocation: false
    gh issue view {N} --json number,title,milestone,state,body
    ```
 2. 기준 통합 브랜치 결정 후 최신화
-   - 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Spotlight/mdimporter, 변환, 배포, 문서는 `devel-webview`
-   - Swift native viewer/editor 작업은 `devel`
+   - 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Spotlight/mdimporter, 변환, 배포, 문서는 `devel`
+   - Swift native viewer/editor 작업은 `native-viewer-editor`
    - 작업지시자가 명시한 base가 있으면 그 지시를 우선
    ```bash
-   BASE_BRANCH=devel-webview # Swift native viewer/editor 작업이면 devel
+   BASE_BRANCH=devel # Swift native viewer/editor 작업이면 native-viewer-editor
    git fetch origin
    git checkout "$BASE_BRANCH"
    git pull --ff-only

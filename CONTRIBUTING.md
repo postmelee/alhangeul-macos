@@ -169,7 +169,7 @@ Finder Quick Look/Thumbnail을 바꾸는 PR이면 추가로 아래 원칙을 지
 | `main` | 릴리즈 (안정 버전) | PR 필수 + 리뷰 승인 |
 | `devel` | WKWebView MVP와 출시 우선 작업 통합 | PR 필수 |
 | `native-viewer-editor` | native viewer renderer와 장기 native viewer 개발 통합 | PR 필수 |
-| `devel-webview` | 전환 기간 호환용 legacy alias | 신규 PR 기본 대상 아님 |
+| `devel-webview` | 퇴역한 legacy alias | 신규 PR 대상 아님 |
 
 - 외부 기여자 PR → 작업 범위에 따라 `devel` 또는 `native-viewer-editor`
 - 메인테이너 작업 PR → `publish/task{N}` → 작업 범위에 맞는 통합 브랜치

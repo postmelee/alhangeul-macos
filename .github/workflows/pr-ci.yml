@@ -6,7 +6,6 @@ on:
       - main
       - devel
       - native-viewer-editor
-      - devel-webview
 
 permissions:
   contents: read
