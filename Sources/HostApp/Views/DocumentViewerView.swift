@@ -77,6 +77,11 @@ private struct RhwpStudioContainerView: View {
                         Task { @MainActor in
                             store.recordSavedDocument(at: url)
                         }
+                    },
+                    onDocumentEdited: {
+                        Task { @MainActor in
+                            store.markDocumentEdited()
+                        }
                     }
                 )
 
