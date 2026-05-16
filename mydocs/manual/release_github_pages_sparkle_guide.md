@@ -8,6 +8,7 @@
 
 - GitHub Release 게시, release asset upload, Sparkle appcast 갱신, Pages deployment는 작업지시자의 명시 승인 후 수행한다.
 - draft 또는 prerelease가 아닌 official release에서만 stable appcast와 Pages deployment를 실행한다.
+- `main`에 merge된 `docs/**` 변경의 docs-only Pages 자동 배포는 승인된 merge 결과를 반영하는 운영 경로이며, Sparkle appcast를 새로 생성하지 않고 기존 public appcast를 보존한다.
 - GitHub token과 Sparkle EdDSA private key는 저장소에 기록하지 않는다.
 
 ## GitHub Release 생성 전 확인
@@ -140,7 +141,7 @@ Pages/appcast 배포는 GitHub Actions Pages deployment 기준이다. repository
 
 - Pages source: `workflow`
 - environment: `github-pages`
-- `github-pages` deployment branch/tag policy: release tag ref `v<version>`을 허용하는 tag rule `v*`
+- `github-pages` deployment branch/tag policy: docs-only 배포용 `main` branch와 release tag ref `v<version>`을 허용하는 tag rule `v*`
 
 workflow 기준:
 
@@ -148,7 +149,25 @@ workflow 기준:
 - `actions/upload-pages-artifact@v5`가 Pages artifact를 업로드한다.
 - `actions/deploy-pages@v5`가 `github-pages` environment로 배포하고 `page_url` output을 남긴다.
 - `deploy-pages` job은 `pages: write`, `id-token: write` 권한을 가진다.
+- release workflow와 docs-only workflow는 `pages-deploy` concurrency group을 공유하고 `cancel-in-progress: false`로 Pages deployment를 취소 없이 직렬화한다.
 - generated appcast는 Pages source branch에 commit하지 않는다. 장기 기록은 workflow artifact/deployment 기록과 `mydocs/release/v<version>.md`에 남긴다.
+
+### Docs-only Pages 배포
+
+`Docs-only Pages Deploy` workflow는 release와 무관한 `docs/**` 변경을 public Pages에 반영한다. 이 workflow는 `push` to `main` with `docs/**`와 `workflow_dispatch`에서 실행되며, 내부에서 `GITHUB_REF=refs/heads/main`을 확인한다.
+
+역할 분리:
+
+- `Release Publish DMG`: official stable release에서 signed/notarized DMG, GitHub Release asset, generated stable appcast, Pages artifact를 함께 게시한다.
+- `Docs-only Pages Deploy`: 이미 public Pages에 배포된 latest appcast를 보존하면서 `docs/` 정적 파일 변경만 배포한다.
+
+appcast 보존 기준:
+
+- docs-only workflow는 Sparkle appcast를 새로 생성하지 않는다.
+- public `https://postmelee.github.io/alhangeul-macos/appcast.xml`을 다운로드해 `test -s`와 `xmllint --noout` 검증을 통과한 파일만 Pages artifact root의 `appcast.xml`로 사용한다.
+- repository의 `docs/appcast.xml`은 stale copy일 수 있으므로 docs-only 배포 source로 사용하지 않는다.
+- public appcast 다운로드 또는 XML 검증이 실패하면 Pages deployment를 중단한다.
+- stale `docs/appcast.xml` fallback은 허용하지 않는다.
 
 ## Sparkle appcast
 

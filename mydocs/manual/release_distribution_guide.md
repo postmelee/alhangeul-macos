@@ -50,8 +50,9 @@
 - `.github/workflows/pr-ci.yml`: PR 생성/갱신 시 기본 gate와 조건부 macOS/release helper 검증
 - `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum과 release delta checklist artifact 생성
 - `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, Pages deployment, release delta checklist artifact 생성
+- `.github/workflows/pages-docs-deploy.yml`: `main`의 `docs/**` 변경을 public Pages에 배포하고 기존 public appcast를 보존
 - `docs/updates/`, `docs/index.html`: 사용자용 업데이트 페이지와 최신 다운로드 진입점
-- public `https://postmelee.github.io/alhangeul-macos/appcast.xml`: Sparkle feed URL. release workflow가 generated appcast를 Pages artifact에 포함해 배포한다.
+- public `https://postmelee.github.io/alhangeul-macos/appcast.xml`: Sparkle feed URL. release workflow는 generated appcast를 Pages artifact에 포함해 배포하고, docs-only workflow는 public appcast를 보존해 stale `docs/appcast.xml` overwrite를 막는다.
 - `Casks/alhangeul-macos.rb`: Homebrew Cask source 초안
 - `rhwp-core.lock`, `Sources/HostApp/Resources/rhwp-studio/manifest.json`: core/viewer asset provenance
 
@@ -119,10 +120,12 @@
 - [ ] README 최신 공개 릴리즈 요약 갱신 여부 결정
 - [ ] `SPARKLE_ED_PRIVATE_KEY` secret 등록 확인
 - [ ] repository Pages source가 `workflow`인지 확인
-- [ ] `github-pages` environment가 release tag ref `v*`를 허용하는지 확인
+- [ ] `github-pages` environment가 docs-only `main` branch와 release tag ref `v*`를 허용하는지 확인
+- [ ] release workflow와 docs-only workflow가 `pages-deploy` concurrency group으로 Pages deployment를 취소 없이 직렬화하는지 확인
 - [ ] `Release Publish DMG` workflow를 공식 release 기준 `draft=false`, `prerelease=false`로 실행
 - [ ] `deploy-pages` job이 성공하고 `page_url`이 `https://postmelee.github.io/alhangeul-macos/`를 가리키는지 확인
 - [ ] public `https://postmelee.github.io/alhangeul-macos/appcast.xml`이 새 stable item과 Sparkle EdDSA signature를 제공하는지 확인
+- [ ] docs-only Pages workflow가 public appcast를 보존하며 stale repository `docs/appcast.xml` fallback을 사용하지 않는지 확인
 - [ ] Pages 다운로드 버튼과 appcast URL이 public DMG asset을 가리키는지 확인
 - [ ] Pages, Sparkle appcast, Homebrew Cask가 아키텍처별 DMG 분기 없이 같은 public universal DMG URL을 기준으로 안내되는지 확인
 - [ ] Homebrew 배포 시 `scripts/update-cask-sha256.sh`로 Cask version/sha256 갱신
