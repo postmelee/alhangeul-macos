@@ -15,7 +15,8 @@
 - 흑백/GrayScale 효과 미지원은 본 작업에서 수정하지 않는다.
 - Swift native renderer의 현재 `PageRenderTree` 기반 경로를 유지하고, PageLayerTree 전면 전환은 하지 않는다.
 - `ImageNode.textWrap` 디코딩은 문자열 원본을 보존하되 renderer 판단 helper로 의미를 좁힌다.
-- `BehindText` draw order 보정은 page-level 렌더 패스에서 처리하고, 개별 이미지 drawing, crop, effect, fill mode 구현은 기존 경로를 재사용한다.
+- `BehindText` draw order 보정은 page-level과 body/column 내부 렌더 패스에서 처리하고, 개별 이미지 drawing, crop, effect, fill mode 구현은 기존 경로를 재사용한다.
+- `CGImageSource`가 직접 지원하지 않는 PCX 계열 bin data는 Swift native renderer 안에서 최소 fallback decoder로 처리한다.
 - 기존 top-level 순서에서 `PageBackground`는 가장 먼저, `BehindText` 이미지는 그 다음, body/header/footer/일반 foreground 노드는 기존 순서를 최대한 유지한다.
 - stage별로 검증 가능한 산출물을 남기고, 다음 stage로 넘어가기 전 단계 보고서를 작성한다.
 
@@ -139,7 +140,51 @@ git diff --check -- mydocs/working/task_m050_222_stage3.md
 Task #222 Stage 3: 복학원서 BehindText smoke 검증
 ```
 
-## Stage 4. 최종 정리와 보고
+## Stage 4. nested `BehindText` 로고와 PCX fallback 보정
+
+대상:
+
+- `Sources/RhwpCoreBridge/CGTreeRenderer.swift`
+- `samples/복학원서.hwp`
+
+작업:
+
+1. `Body > Column` 내부에 있는 좌상단 로고의 render tree 위치와 `text_wrap` 값을 확인한다.
+2. 로고 `bin_data_id=1`이 PCX이고 `CGImageSource` 직접 decode 대상이 아님을 확인한다.
+3. ImageIO decode 실패 시 PCX fallback decoder를 적용해 기존 `renderImage` 경로에 연결한다.
+4. nested `BehindText` 이미지는 같은 column 안에서 foreground보다 먼저 그리도록 순서를 보정한다.
+5. `복학원서.hwp` native PNG에서 좌상단 로고가 보이는지 확인한다.
+6. Stage 4 완료보고서를 작성한다.
+
+산출물:
+
+- `Sources/RhwpCoreBridge/CGTreeRenderer.swift`
+- `mydocs/working/task_m050_222_stage4.md`
+
+검증:
+
+```bash
+git diff --check -- Sources/RhwpCoreBridge/CGTreeRenderer.swift mydocs/working/task_m050_222_stage4.md
+./scripts/render-debug-compare.sh /private/tmp/rhwp-bokhak-watermark-task222-stage4 --page 1 samples/복학원서.hwp
+./scripts/render-debug-compare.sh /private/tmp/rhwp-task222-image-smoke-stage4 --page 1 samples/hwp-img-001.hwp
+./scripts/check-no-appkit.sh
+xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build
+```
+
+완료 조건:
+
+- 중앙 page-level 워터마크 pass는 유지된다.
+- 좌상단 nested `BehindText` 로고가 native PNG에 보인다.
+- 기존 JPEG/PNG 등 ImageIO 경로는 유지되고, PCX는 fallback으로만 처리된다.
+- preview와 thumbnail 공통 renderer 경로에 같은 보정이 적용된다.
+
+커밋:
+
+```text
+Task #222 Stage 4: nested BehindText 로고 렌더 보정
+```
+
+## Stage 5. 최종 정리와 보고
 
 대상:
 
@@ -148,7 +193,7 @@ Task #222 Stage 3: 복학원서 BehindText smoke 검증
 
 작업:
 
-1. Stage 1~3 결과를 최종 보고서로 요약한다.
+1. Stage 1~4 결과를 최종 보고서로 요약한다.
 2. 검증 명령과 산출물 위치를 기록한다.
 3. 남은 parity gap, 특히 GrayScale/upstream 갱신 필요성을 분리해 기록한다.
 4. 오늘할일 상태를 완료로 갱신한다.
@@ -173,5 +218,5 @@ git status --short
 커밋:
 
 ```text
-Task #222 Stage 4 + 최종 보고서: BehindText 렌더 순서 정리
+Task #222 Stage 5 + 최종 보고서: BehindText 렌더 순서 정리
 ```

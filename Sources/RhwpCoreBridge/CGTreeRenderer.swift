@@ -77,6 +77,9 @@ class CGTreeRenderer {
         case .body(let body):
             renderBody(body, node: node, in: ctx)
 
+        case .column:
+            renderColumn(node, in: ctx)
+
         case .tableCell(let cell):
             renderTableCell(cell, node: node, in: ctx)
 
@@ -176,6 +179,15 @@ class CGTreeRenderer {
             guard !isPageBackgroundNode(child), !isBehindTextImage(child) else {
                 continue
             }
+            renderNode(child, in: ctx)
+        }
+    }
+
+    private func renderColumn(_ node: RenderNode, in ctx: CGContext) {
+        for child in node.children where isBehindTextImage(child) {
+            renderNode(child, in: ctx)
+        }
+        for child in node.children where !isBehindTextImage(child) {
             renderNode(child, in: ctx)
         }
     }
@@ -551,8 +563,7 @@ class CGTreeRenderer {
             cgImage = cached
         } else {
             guard let data = doc.imageData(binDataId: img.binDataId),
-                  let source = CGImageSourceCreateWithData(data as CFData, nil),
-                  let cg = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return }
+                  let cg = decodeImage(data) else { return }
             imageCache[img.binDataId] = cg
             cgImage = cg
         }
@@ -572,6 +583,196 @@ class CGTreeRenderer {
         ctx.restoreGState()
 
         ctx.restoreGState()
+    }
+
+    private func decodeImage(_ data: Data) -> CGImage? {
+        if let source = CGImageSourceCreateWithData(data as CFData, nil),
+           let image = CGImageSourceCreateImageAtIndex(source, 0, nil) {
+            return image
+        }
+        return decodePCXImage(data)
+    }
+
+    private func decodePCXImage(_ data: Data) -> CGImage? {
+        guard data.count > 128,
+              data[0] == 0x0A,
+              data[2] == 0x01 else {
+            return nil
+        }
+
+        let bitsPerPlane = Int(data[3])
+        let xMin = Int(pcxUInt16(data, offset: 4))
+        let yMin = Int(pcxUInt16(data, offset: 6))
+        let xMax = Int(pcxUInt16(data, offset: 8))
+        let yMax = Int(pcxUInt16(data, offset: 10))
+        let planes = Int(data[65])
+        let bytesPerLine = Int(pcxUInt16(data, offset: 66))
+        let width = xMax - xMin + 1
+        let height = yMax - yMin + 1
+
+        guard width > 0,
+              height > 0,
+              planes > 0,
+              bytesPerLine > 0,
+              [1, 2, 4, 8].contains(bitsPerPlane) else {
+            return nil
+        }
+
+        let scanlineByteCount = bytesPerLine * planes
+        guard let decoded = decodePCXRLE(data, from: 128, expectedByteCount: scanlineByteCount * height) else {
+            return nil
+        }
+
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        for y in 0..<height {
+            let scanlineOffset = y * scanlineByteCount
+            for x in 0..<width {
+                let color = pcxColor(
+                    decoded,
+                    x: x,
+                    scanlineOffset: scanlineOffset,
+                    planes: planes,
+                    bytesPerLine: bytesPerLine,
+                    bitsPerPlane: bitsPerPlane,
+                    data: data
+                )
+                guard let color else { return nil }
+                let offset = (y * width + x) * 4
+                pixels[offset] = color.red
+                pixels[offset + 1] = color.green
+                pixels[offset + 2] = color.blue
+                pixels[offset + 3] = 255
+            }
+        }
+
+        return makeRGBAImage(width: width, height: height, pixels: pixels)
+    }
+
+    private func pcxUInt16(_ data: Data, offset: Int) -> UInt16 {
+        UInt16(data[offset]) | (UInt16(data[offset + 1]) << 8)
+    }
+
+    private func decodePCXRLE(_ data: Data, from offset: Int, expectedByteCount: Int) -> [UInt8]? {
+        var decoded: [UInt8] = []
+        decoded.reserveCapacity(expectedByteCount)
+        var index = offset
+
+        while index < data.count, decoded.count < expectedByteCount {
+            let marker = data[index]
+            index += 1
+
+            if (marker & 0xC0) == 0xC0 {
+                guard index < data.count else { return nil }
+                let count = Int(marker & 0x3F)
+                let value = data[index]
+                index += 1
+                let remaining = expectedByteCount - decoded.count
+                decoded.append(contentsOf: repeatElement(value, count: count).prefix(remaining))
+            } else {
+                decoded.append(marker)
+            }
+        }
+
+        return decoded.count == expectedByteCount ? decoded : nil
+    }
+
+    private func pcxColor(
+        _ decoded: [UInt8],
+        x: Int,
+        scanlineOffset: Int,
+        planes: Int,
+        bytesPerLine: Int,
+        bitsPerPlane: Int,
+        data: Data
+    ) -> (red: UInt8, green: UInt8, blue: UInt8)? {
+        if bitsPerPlane == 8, planes >= 3 {
+            return (
+                decoded[scanlineOffset + x],
+                decoded[scanlineOffset + bytesPerLine + x],
+                decoded[scanlineOffset + bytesPerLine * 2 + x]
+            )
+        }
+
+        if bitsPerPlane == 8, planes == 1 {
+            let index = Int(decoded[scanlineOffset + x])
+            return pcxPaletteColor(index, data: data)
+        }
+
+        let index = pcxPlanarPaletteIndex(
+            decoded,
+            x: x,
+            scanlineOffset: scanlineOffset,
+            planes: planes,
+            bytesPerLine: bytesPerLine,
+            bitsPerPlane: bitsPerPlane
+        )
+        return pcxPaletteColor(index, data: data)
+    }
+
+    private func pcxPlanarPaletteIndex(
+        _ decoded: [UInt8],
+        x: Int,
+        scanlineOffset: Int,
+        planes: Int,
+        bytesPerLine: Int,
+        bitsPerPlane: Int
+    ) -> Int {
+        var index = 0
+        for plane in 0..<planes {
+            let planeOffset = scanlineOffset + plane * bytesPerLine
+            let bitPosition = x * bitsPerPlane
+            let byteIndex = planeOffset + bitPosition / 8
+            let bitOffset = bitPosition % 8
+            let value = decoded[byteIndex]
+
+            if bitsPerPlane == 1 {
+                let bit = Int((value >> (7 - bitOffset)) & 0x01)
+                index |= bit << plane
+            } else {
+                let shift = 8 - bitOffset - bitsPerPlane
+                let mask = UInt8((1 << bitsPerPlane) - 1)
+                let component = Int((value >> shift) & mask)
+                index |= component << (plane * bitsPerPlane)
+            }
+        }
+        return index
+    }
+
+    private func pcxPaletteColor(_ index: Int, data: Data) -> (red: UInt8, green: UInt8, blue: UInt8)? {
+        if data.count >= 769,
+           data[data.count - 769] == 0x0C,
+           index < 256 {
+            let offset = data.count - 768 + index * 3
+            return (data[offset], data[offset + 1], data[offset + 2])
+        }
+
+        guard index < 16 else { return nil }
+        let offset = 16 + index * 3
+        return (data[offset], data[offset + 1], data[offset + 2])
+    }
+
+    private func makeRGBAImage(width: Int, height: Int, pixels: [UInt8]) -> CGImage? {
+        let bytesPerRow = width * 4
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+            .union(.byteOrder32Big)
+        let pixelData = Data(pixels)
+        guard let provider = CGDataProvider(data: pixelData as CFData) else {
+            return nil
+        }
+
+        return CGImage(
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bitsPerPixel: 32,
+            bytesPerRow: bytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: bitmapInfo,
+            provider: provider,
+            decode: nil,
+            shouldInterpolate: true,
+            intent: .defaultIntent
+        )
     }
 
     // MARK: - 수식 SVG fragment
