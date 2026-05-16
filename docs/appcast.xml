@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>알한글 업데이트</title>
+    <link>https://postmelee.github.io/alhangeul-macos/updates/</link>
+    <description>알한글 macOS 앱 업데이트 feed</description>
+    <language>ko</language>
+    <item>
+      <title>Alhangeul v0.1.0</title>
+      <link>https://postmelee.github.io/alhangeul-macos/updates/v0.1.0.html</link>
+      <sparkle:version>1</sparkle:version>
+      <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+      <sparkle:releaseNotesLink>https://postmelee.github.io/alhangeul-macos/updates/v0.1.0.html</sparkle:releaseNotesLink>
+      <pubDate>Fri, 08 May 2026 19:12:29 +0000</pubDate>
+      <enclosure url="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.0/alhangeul-macos-0.1.0.dmg" length="66111087" type="application/octet-stream" sparkle:edSignature="sPMvi7Rc8Q8MXrndfwYDE97q+jG7ShngPv59H1VwB4nCz+3f1jezWP2PHGETl7zOZO4KaUKKkWP0nHSFED92BQ==" />
+      <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
+    </item>
+  </channel>
+</rss>

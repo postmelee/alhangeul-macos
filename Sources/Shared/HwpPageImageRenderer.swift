@@ -38,6 +38,13 @@ enum HwpPageImageRenderer {
         embeddedThumbnailPolicy: HwpEmbeddedThumbnailPolicy = .never
     ) throws -> HwpRenderedPage {
         let values = try fileURL.resourceValues(forKeys: [.fileSizeKey])
+        if shouldRejectBeforeReadingData(
+            fileSize: values.fileSize,
+            policy: embeddedThumbnailPolicy
+        ) {
+            throw HwpRenderError.fileTooLarge
+        }
+
         let data = try Data(contentsOf: fileURL, options: [.mappedIfSafe])
         if let embedded = decodeEmbeddedThumbnail(
             from: data,
@@ -84,22 +91,20 @@ enum HwpPageImageRenderer {
         )
         let width = max(1, Int(ceil(pageSize.width * renderScale)))
         let height = max(1, Int(ceil(pageSize.height * renderScale)))
-        let bytesPerRow = width * 4
-        var pixels = [UInt8](repeating: 255, count: height * bytesPerRow)
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         guard let context = CGContext(
-            data: &pixels,
+            data: nil,
             width: width,
             height: height,
             bitsPerComponent: 8,
-            bytesPerRow: bytesPerRow,
+            bytesPerRow: 0,
             space: colorSpace,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         ) else {
             throw HwpRenderError.bitmapContextUnavailable
         }
 
-        context.setFillColor(CGColor(gray: 1, alpha: 1))
+        context.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
         context.fill(CGRect(x: 0, y: 0, width: width, height: height))
         context.translateBy(x: 0, y: CGFloat(height))
         context.scaleBy(x: renderScale, y: -renderScale)
@@ -194,6 +199,22 @@ enum HwpPageImageRenderer {
                 return false
             }
             return requestedMaxDimension <= maxPixelDimension
+        }
+    }
+
+    private static func shouldRejectBeforeReadingData(
+        fileSize: Int?,
+        policy: HwpEmbeddedThumbnailPolicy
+    ) -> Bool {
+        guard let fileSize, fileSize > hwpQuickLookMaxFileSize else {
+            return false
+        }
+
+        switch policy {
+        case .never:
+            return true
+        case .smallFinderThumbnail:
+            return false
         }
     }
 

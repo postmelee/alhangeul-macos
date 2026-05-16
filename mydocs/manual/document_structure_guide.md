@@ -37,11 +37,76 @@
 | `report/` | 최종 결과보고서 (`_report.md`) + 장기 보관 보고서 | 최종 보고서는 반드시 이 폴더 |
 | `feedback/` | 작업지시자 피드백, 코드 리뷰 의견 | |
 | `tech/` | 기술 조사, 구조/스펙 분석 | |
+| `release/` | 릴리즈별 장기 기록 | `v<version>.md` 형식. GitHub Release/Pages/appcast/검증/provenance 기록 |
 | `manual/` | 매뉴얼, 가이드 | 사용자/개발자 문서 |
 | `troubleshootings/` | 트러블슈팅, 재발 방지 기록 | |
 | `pr/` | 외부 기여자 PR 검토 기록 | 내부 타스크와 분리 |
 | `pr/archives/` | 처리 완료된 PR 검토 기록 보관 | |
 | `skills/` | Agent Skills SKILL.md 진실 원천 | `.agents/skills`와 `.claude/skills` 심볼릭 링크가 이 폴더를 가리킨다 |
+
+## Manual 문서 중립성 정책
+
+`mydocs/manual/` 문서는 장기적으로 반복 적용되는 원칙, 절차, 판단 기준을 기록한다. 특정 릴리즈, 특정 이슈, 특정 deprecation 사건, 일회성 검증 결과는 manual 본문에 누적하지 않는다.
+
+manual 본문에 둘 수 있는 내용:
+
+- 반복 적용 가능한 정책과 guardrail
+- 작업자가 직접 재사용할 수 있는 절차와 확인 명령
+- 현재 운영 기준값 중, 바뀌면 문서 자체를 갱신해야 하는 기준 branch, source path, workflow 역할
+- 하위 문서를 찾기 위한 짧은 entrypoint와 링크
+
+manual 본문에서 분리해야 하는 내용:
+
+- 특정 버전에서만 유효한 release decision, SHA256, 검증 결과
+- 특정 GitHub Issue, PR, stage의 분석과 판단 근거
+- 특정 deprecation warning, CI 실패, notarization 실패 같은 사건의 증상과 해결 기록
+- 일회성 migration 검토와 후속 이슈 handoff
+
+분리 위치:
+
+- 특정 릴리즈 기록은 `mydocs/release/`에 둔다.
+- 특정 내부 타스크의 분석, 단계 결과, 최종 결과는 `mydocs/working/` 또는 `mydocs/report/`에 둔다.
+- 실제 실패 증상, 재현 조건, 원인, 재발 방지 절차가 있는 내용은 `mydocs/troubleshootings/`에 둔다.
+- 큰 주제의 반복 절차가 길어지는 경우에는 `release_distribution_guide.md`처럼 neutral entrypoint와 주제별 하위 manual로 소분화한다.
+
+manual에서 특정 사건 문서를 참조해야 할 때는 본문에 사건 내용을 복제하지 않고, 일반화된 판단 기준과 짧은 링크만 둔다.
+
+## 릴리즈 기록 폴더 정책
+
+`mydocs/release/`는 public release별 장기 기록을 보관한다. GitHub Release 본문은 public 배포 안내, Pages는 사용자용 짧은 릴리즈 노트, README는 최신 공개 릴리즈 1개 요약을 맡고, 내부 검증과 release decision record는 `release/`에 남긴다.
+
+파일명 규칙:
+
+- 릴리즈 인덱스: `mydocs/release/index.md`
+- 릴리즈별 기록: `mydocs/release/v<version>.md` (예: `v0.1.1.md`)
+
+릴리즈별 기록에는 다음을 포함한다.
+
+- 사용자용 요약
+- 직전 공개 릴리즈 대비 변경점
+- 연결된 Issue/PR과 기여자
+- 검증 결과와 public release에서 반복할 smoke 항목
+- 알려진 제한 사항과 후속 이슈
+- `rhwp` core와 viewer asset provenance
+- GitHub Release, Pages 릴리즈 노트, Sparkle appcast 링크
+
+`mydocs/tech/release_environment.md`는 비밀이 아닌 운영 환경 식별자만 기록한다. Team ID, signing identity 표시명, notary profile name처럼 절차 실행에 필요한 이름은 이 문서로 분리할 수 있지만, password, private key, exported signing identity, token은 어떤 문서에도 기록하지 않는다.
+
+`mydocs/troubleshootings/`는 실제 실패 사례와 재발 방지 절차가 있는 경우에만 사용한다. 일반 release policy, 버전별 release decision record, 단순 체크리스트는 troubleshooting으로 옮기지 않는다. Gatekeeper, notarization, Finder integration, appcast push 같은 주제라도 실제 실패 증상, 재현 조건, 원인, 예방 절차가 함께 있을 때만 troubleshooting 문서로 분리한다.
+
+## 릴리즈 매뉴얼 분리 정책
+
+릴리즈/배포 매뉴얼은 AI agent가 필요한 컨텍스트만 읽을 수 있도록 entrypoint와 주제별 하위 문서로 나눈다.
+
+- [`release_distribution_guide.md`](release_distribution_guide.md): 릴리즈 작업 진입점, 권한 원칙, 하위 문서 맵, 전체 flow, 최종 체크리스트
+- [`ci_workflow_guide.md`](ci_workflow_guide.md): PR CI, release workflow, upstream check의 trigger, 권한, 변경 범위, 로컬 재현 명령
+- [`release_policy_guide.md`](release_policy_guide.md): 운영 기준, 배포 브랜치, public 배포 수준, 사용자 안내, artifact/checksum/provenance, 렌더링 경로와 알려진 한계
+- [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md): build 검증, 개발용 zip, public/rehearsal DMG, DMG layout, Finder 통합 smoke
+- [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md): Developer ID, notarytool, credential 기록 금지, signing/notarization 검증
+- [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md): GitHub Release body, delta checklist, Pages 업데이트 문서, Sparkle appcast
+- [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md): Homebrew Cask source, public DMG SHA256, tap 반영과 audit
+
+고위험 guardrail은 의도적으로 중복할 수 있다. 예를 들어 public release 실행, GitHub Release 게시, appcast 갱신, Cask 반영은 entrypoint와 관련 하위 문서 모두에 "작업지시자 명시 승인 후 수행" 원칙을 남긴다.
 
 ## 외부 기여자 PR 처리 (`mydocs/pr/`)
 
@@ -79,5 +144,5 @@
 ## 관련 매뉴얼
 
 - [`task_workflow_guide.md`](task_workflow_guide.md): 내부 타스크의 수행계획서, 구현계획서, 단계 보고서, 최종 보고서 진행 순서.
-- [`git_workflow_guide.md`](git_workflow_guide.md): `local/taskN`, `publish/taskN`, `devel` 브랜치 운용.
+- [`git_workflow_guide.md`](git_workflow_guide.md): `local/taskN`, `publish/taskN`, `devel`/`native-viewer-editor` 통합 브랜치 운용.
 - [`pr_process_guide.md`](pr_process_guide.md): 외부 기여자 PR 검토 절차.

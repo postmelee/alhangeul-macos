@@ -15,10 +15,12 @@ MODMAP_DIR="$OUT/modulemap"
 EXPECTED_SYMBOLS="$ROOT/rhwp-ffi-symbols.txt"
 GENERATED_SYMBOLS="$OUT/generated_rhwp_symbols.txt"
 UNIVERSAL_LIB="$OUT/universal/librhwp.a"
+STATICLIB_ARTIFACT="Frameworks/universal/librhwp.a"
 LOCK_ARTIFACTS=(
-  "Frameworks/universal/librhwp.a"
+  "$STATICLIB_ARTIFACT"
   "Frameworks/generated_rhwp.h"
 )
+SKIP_STATICLIB_HASH_VERIFY="${ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY:-0}"
 UPDATE_LOCK=0
 VERIFY_LOCK=0
 
@@ -29,6 +31,12 @@ Usage: $0 [--update-lock | --verify-lock]
 Options:
   --update-lock   Build artifacts, then write sha256/size to rhwp-core.lock.
   --verify-lock   Build artifacts, then compare artifacts with rhwp-core.lock.
+
+Environment:
+  ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1
+                  With --verify-lock, skip only byte-for-byte sha256/size
+                  comparison for Frameworks/universal/librhwp.a. Source lock,
+                  Cargo.lock, generated header, and FFI symbol checks still run.
 EOF
 }
 
@@ -147,6 +155,26 @@ lock_artifact_value() {
       exit
     }
   ' "$LOCK_FILE"
+}
+
+print_staticlib_hash_skip_warning() {
+  local artifact_path="$1"
+  cat >&2 <<EOF
+WARNING: skipping byte-for-byte hash verification for $artifact_path
+         Only the Rust static archive sha256/size comparison is skipped.
+         Source provenance, Cargo.lock, generated header, and FFI symbols remain verified.
+EOF
+}
+
+print_staticlib_hash_mismatch_note() {
+  cat >&2 <<EOF
+Note: $STATICLIB_ARTIFACT is a Rust static archive. Its byte hash can differ
+      across Rust, Xcode, macOS runner, archive tool, or build path changes even
+      when source provenance and ABI checks still match. Do not update
+      rhwp-core.lock just to satisfy an unreviewed runner/toolchain difference.
+      GitHub-hosted CI/release workflows may set
+      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1 under the documented policy.
+EOF
 }
 
 normalize_repo() {
@@ -495,6 +523,11 @@ verify_lock_file() {
   for artifact_path in "${LOCK_ARTIFACTS[@]}"; do
     require_artifact "$artifact_path"
 
+    if [ "$artifact_path" = "$STATICLIB_ARTIFACT" ] && [ "$SKIP_STATICLIB_HASH_VERIFY" = "1" ]; then
+      print_staticlib_hash_skip_warning "$artifact_path"
+      continue
+    fi
+
     local abs_path
     local expected_sha256
     local actual_sha256
@@ -520,6 +553,9 @@ verify_lock_file() {
       echo "Actual sha256:   $actual_sha256" >&2
       echo "Expected size:   $expected_size" >&2
       echo "Actual size:     $actual_size" >&2
+      if [ "$artifact_path" = "$STATICLIB_ARTIFACT" ]; then
+        print_staticlib_hash_mismatch_note
+      fi
       echo "Run: ./scripts/build-rust-macos.sh --update-lock if this artifact is intentional." >&2
       exit 1
     fi

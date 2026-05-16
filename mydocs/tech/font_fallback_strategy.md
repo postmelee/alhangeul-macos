@@ -16,11 +16,11 @@ Quick Look preview와 Finder thumbnail의 Swift native renderer가 HWP 문서의
 
 ## 자산 출처와 사용 범위
 
-기준 자산 목록과 라이선스 설명은 `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`가 소유한다. `devel-webview`에서는 이미 WebView viewer bundle에 포함된 WOFF2 34개를 native renderer에서도 재사용한다. WebView bundle이 없는 `devel` 대상 PR에서는 전체 `rhwp-studio` 앱 자산을 가져오지 않고, 동일 라이선스 원천의 `rhwp-studio/fonts` 디렉터리만 HostApp resource로 포함한다.
+기준 자산 목록과 라이선스 설명은 `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`가 소유한다. 사용자용 third-party 고지는 `THIRD_PARTY_LICENSES.md`에서 연결한다. #119에서는 새 TTF/OTF/font 파일을 추가하지 않고, 이미 WebView viewer bundle에 포함된 WOFF2를 native renderer에서도 재사용한다. #167에서 `rhwp-studio` v0.7.10 기준 WOFF2 35개로 갱신했다.
 
 | 계열 | 주요 bundled font | native renderer 사용처 |
 |------|-------------------|-------------------------|
-| Serif | Noto Serif KR, Nanum Myeongjo, Gowun Batang | 바탕/명조/궁서 계열 fallback |
+| Serif | Noto Serif KR, Nanum Myeongjo, Gowun Batang, Source Han Serif K | 바탕/명조/궁서/옛한글 계열 fallback |
 | Sans-serif | Pretendard, Noto Sans KR, Nanum Gothic, Gowun Dodum, Spoqa Han Sans | 돋움/고딕/맑은 고딕/HY고딕 계열 fallback |
 | Monospace | D2Coding, Nanum Gothic Coding | 돋움체/굴림체/바탕체/Courier 계열 fallback |
 | Math/special | Latin Modern Math, Cafe24, Happiness Sans | 수식 보조 및 장식 계열 fallback |
