@@ -14,6 +14,7 @@
   <a href="https://www.swift.org/"><img src="https://img.shields.io/badge/Swift-5.9-orange" alt="Swift 5.9" /></a>
   <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-native%20bridge-orange" alt="Rust native bridge" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+  <a href="https://github.com/postmelee/alhangeul-macos/releases"><img src="https://img.shields.io/github/downloads/postmelee/alhangeul-macos/total?label=downloads" alt="GitHub all releases downloads" /></a>
 </p>
 
 <h3 align="center">Mac에서 한글 파일은 더 이상 이방인이 아닙니다.</h3>
