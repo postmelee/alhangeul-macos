@@ -19,7 +19,7 @@
 
 <h3 align="center">Mac에서 한글 파일은 더 이상 이방인이 아닙니다.</h3>
 
-![banner](assets/banner.png)
+![banner](assets/banner_home.png)
 
 <p align="center">스페이스바로 미리보고, Finder에서 썸네일로 찾고, 앱에서 열어 저장·공유·PDF 내보내기까지 처리하세요.</p>
 
