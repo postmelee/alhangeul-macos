@@ -1,0 +1,136 @@
+name: Docs-only Pages Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+
+permissions:
+  contents: read
+
+# Keep the full docs-only fetch -> artifact -> deploy sequence serialized.
+# The prepared artifact contains the current public appcast, so locking only
+# deploy-pages could let an older fetched appcast deploy after a release deploy.
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  prepare-pages-artifact:
+    name: Prepare docs-only Pages artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Validate deployment ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "ERROR: docs-only Pages deployment must run from refs/heads/main; got $GITHUB_REF" >&2
+            exit 1
+          fi
+
+          {
+            echo "## Deployment ref"
+            echo
+            echo "- ref: \`$GITHUB_REF\`"
+            echo "- policy: docs-only Pages deployment is restricted to \`main\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Fetch current public appcast
+        id: appcast
+        shell: bash
+        env:
+          PUBLIC_APPCAST_URL: https://postmelee.github.io/alhangeul-macos/appcast.xml
+          PUBLIC_APPCAST_PATH: ${{ github.workspace }}/build.noindex/release/public-appcast.xml
+        run: |
+          set -euo pipefail
+          mkdir -p "$(dirname "$PUBLIC_APPCAST_PATH")"
+
+          curl -fsSL --retry 3 --retry-delay 5 \
+            "$PUBLIC_APPCAST_URL" \
+            -o "$PUBLIC_APPCAST_PATH"
+
+          test -s "$PUBLIC_APPCAST_PATH"
+          xmllint --noout "$PUBLIC_APPCAST_PATH"
+
+          echo "public_appcast_path=$PUBLIC_APPCAST_PATH" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Public appcast"
+            echo
+            echo "- source: $PUBLIC_APPCAST_URL"
+            echo "- local path: \`$PUBLIC_APPCAST_PATH\`"
+            echo "- validation: \`xmllint --noout\` passed"
+            echo "- fallback: disabled; stale repository \`docs/appcast.xml\` is not used"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prepare Pages artifact
+        id: pages_artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          pages_artifact_dir="$GITHUB_WORKSPACE/build.noindex/release/pages-artifact"
+
+          scripts/ci/prepare-pages-artifact.sh \
+            --docs-dir docs \
+            --appcast "${{ steps.appcast.outputs.public_appcast_path }}" \
+            --output-dir "$pages_artifact_dir"
+
+          test -f "$pages_artifact_dir/index.html"
+          test -f "$pages_artifact_dir/updates/index.html"
+          test -s "$pages_artifact_dir/appcast.xml"
+          xmllint --noout "$pages_artifact_dir/appcast.xml"
+
+          echo "pages_artifact_dir=$pages_artifact_dir" >> "$GITHUB_OUTPUT"
+
+          {
+            echo
+            echo "## Pages artifact"
+            echo
+            echo "- artifact source: \`docs/\` + preserved public \`appcast.xml\`"
+            echo "- artifact directory: \`$pages_artifact_dir\`"
+            echo "- required files: \`index.html\`, \`updates/index.html\`, \`appcast.xml\`"
+            echo "- publish model: \`actions/deploy-pages\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ${{ steps.pages_artifact.outputs.pages_artifact_dir }}
+          retention-days: 14
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: prepare-pages-artifact
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+      - name: Record Pages deployment summary
+        shell: bash
+        run: |
+          {
+            echo "## GitHub Pages deployment"
+            echo
+            echo "- URL: ${{ steps.deployment.outputs.page_url }}"
+            echo "- appcast: https://postmelee.github.io/alhangeul-macos/appcast.xml"
+            echo "- source: docs-only workflow with preserved public appcast"
+          } >> "$GITHUB_STEP_SUMMARY"

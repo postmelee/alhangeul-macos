@@ -561,6 +561,9 @@ jobs:
     timeout-minutes: 15
     needs: publish-dmg
     if: ${{ !inputs.draft && !inputs.prerelease }}
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     permissions:
       pages: write
       id-token: write

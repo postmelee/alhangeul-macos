@@ -60,6 +60,12 @@ jobs:
             bash -n "$script"
           done
 
+      - name: Check workflow YAML syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |path| Psych.parse_file(path); puts "Parsed #{path}" }'
+
       - name: Check helper interfaces
         shell: bash
         run: |
