@@ -72,8 +72,12 @@ jobs:
           set -euo pipefail
           bash scripts/ci/classify-pr-changes.sh --help
           bash scripts/ci/check-rhwp-upstream-release.sh --help
+          bash scripts/ci/detect-rhwp-studio-impact.sh --help
           bash scripts/ci/prepare-pages-artifact.sh --help
+          bash scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
           bash scripts/ci/write-sparkle-appcast.sh --help
+          bash scripts/sync-rhwp-studio.sh --help
+          bash scripts/verify-rhwp-studio-assets.sh --help
 
       - name: Record classification summary
         shell: bash
@@ -145,6 +149,12 @@ jobs:
         run: |
           set -euo pipefail
           ./scripts/check-no-appkit.sh
+
+      - name: Verify bundled rhwp-studio assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/verify-rhwp-studio-assets.sh
 
       - name: Generate Xcode project
         shell: bash

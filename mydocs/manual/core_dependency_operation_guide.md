@@ -20,8 +20,8 @@
 ## core 기준
 
 - Stable 안정 기준은 release tag + resolved commit. Demo/Preview는 필요한 API가 포함된 resolved commit을 `rev`로 고정.
-- 현재 `rhwp-core.lock`은 `v0.7.10` Stable release tag pin 상태다. `RustBridge/Cargo.toml`은 `tag = "v0.7.10"`을 사용하고, `RustBridge/Cargo.lock`과 `rhwp-core.lock`은 resolved commit `62a458aa317e962cd3d0eec6096728c172d57110`을 기록한다.
-- `v0.7.10`에는 현재 bridge가 요구하는 `build_page_render_tree`, `get_bin_data`, `render_page_svg_native`, `get_page_info_native`, `extract_thumbnail_only` API가 포함되어 있다.
+- 현재 `rhwp-core.lock`은 `v0.7.11` Stable release tag pin 상태다. `RustBridge/Cargo.toml`은 `tag = "v0.7.11"`을 사용하고, `RustBridge/Cargo.lock`과 `rhwp-core.lock`은 resolved commit `a9dcdee32b17a7f9a20c609a5ed547e62fb8ebae`를 기록한다.
+- `v0.7.11`에는 현재 bridge가 요구하는 `build_page_render_tree`, `get_bin_data`, `render_page_svg_native`, `get_page_info_native`, `extract_thumbnail_only` API가 포함되어 있다.
 - `main`, `devel` 같은 branch는 필요한 API가 포함된 과도기 commit을 찾는 참고 출처일 뿐, 안정 기준으로 사용하지 않는다.
 - 채널별 dependency/lock 필드와 compatibility gate 상세는 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
 
@@ -85,6 +85,16 @@ xcodebuild -project Alhangeul.xcodeproj \
 ```
 
 `validate-stage3-render.sh`의 기본 샘플은 앱 저장소 루트의 `samples/`를 사용한다. core 저장소 내부 샘플 경로는 기본 검증 경로로 사용하지 않는다.
+
+## upstream release 감지와 studio sync
+
+`rhwp-core.lock`은 Rust bridge가 링크하는 core 기준이고, `Sources/HostApp/Resources/rhwp-studio/manifest.json`은 WKWebView viewer asset의 source release와 resolved commit 기준이다. 두 provenance는 release note와 검증에서 함께 확인하지만, 자동 sync PR은 public release 결정을 대신하지 않는다.
+
+- `.github/workflows/rhwp-upstream-check.yml`은 read-only 감시 workflow로 upstream latest release와 `rhwp-core.lock`을 비교한다.
+- `.github/workflows/rhwp-upstream-sync-pr.yml`은 viewer/WASM/core 영향 변경이 있을 때 `devel` 대상 `automation/rhwp-<tag>-studio-sync` branch와 bundled `rhwp-studio` 업데이트 후보 PR을 만든다.
+- sync workflow는 PR 생성 전에 `scripts/update-rhwp-core.sh --check --channel stable --tag <tag>`로 target release compatibility를 조회하지만, `rhwp-core.lock`을 자동 수정하지 않는다.
+- bundled studio asset 변경 PR은 PR CI에서 `scripts/verify-rhwp-studio-assets.sh`, HostApp build, Rust/core provenance verify, release helper dry-run을 확인한다.
+- signed/notarized DMG, GitHub Release, Sparkle appcast, Homebrew Cask 반영은 별도 release 승인과 보호 workflow가 필요하다.
 
 ## 업데이트 후 확인 항목
 

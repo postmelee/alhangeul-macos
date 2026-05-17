@@ -47,14 +47,26 @@
 - `scripts/ci/write-sparkle-appcast.sh`: stable Sparkle appcast 생성
 - `scripts/ci/prepare-pages-artifact.sh`: `docs/` 정적 파일과 generated appcast를 Pages artifact로 조립
 - `scripts/ci/classify-pr-changes.sh`: PR CI 변경 범위 flag 생성
+- `scripts/ci/detect-rhwp-studio-impact.sh`: upstream `rhwp` current..target diff에서 bundled studio/viewer 영향 path 감지
+- `scripts/ci/write-rhwp-studio-sync-pr-body.sh`: 자동 bundled `rhwp-studio` sync PR body 생성
+- `scripts/sync-rhwp-studio.sh`: upstream `rhwp-studio/dist`와 WASM 산출물을 HostApp bundled resource로 동기화
+- `scripts/verify-rhwp-studio-assets.sh`: bundled `rhwp-studio` manifest와 entrypoint asset 검증
 - `.github/workflows/pr-ci.yml`: PR 생성/갱신 시 기본 gate와 조건부 macOS/release helper 검증
 - `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum과 release delta checklist artifact 생성
 - `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, Pages deployment, release delta checklist artifact 생성
 - `.github/workflows/pages-docs-deploy.yml`: `main`의 `docs/**` 변경을 public Pages에 배포하고 기존 public appcast를 보존
+- `.github/workflows/rhwp-upstream-check.yml`: upstream `rhwp` release와 `rhwp-core.lock` 비교
+- `.github/workflows/rhwp-upstream-sync-pr.yml`: viewer/WASM/core 영향 release를 감지해 bundled `rhwp-studio` 업데이트 후보 PR 생성
 - `docs/updates/`, `docs/index.html`: 사용자용 업데이트 페이지와 최신 다운로드 진입점
 - public `https://postmelee.github.io/alhangeul-macos/appcast.xml`: Sparkle feed URL. release workflow는 generated appcast를 Pages artifact에 포함해 배포하고, docs-only workflow는 public appcast를 보존해 stale `docs/appcast.xml` overwrite를 막는다.
 - `Casks/alhangeul-macos.rb`: Homebrew Cask source 초안
 - `rhwp-core.lock`, `Sources/HostApp/Resources/rhwp-studio/manifest.json`: core/viewer asset provenance
+
+## upstream 자동 sync PR 경계
+
+`rhwp Upstream Sync PR` workflow가 만든 PR은 bundled `rhwp-studio` 업데이트 후보일 뿐 public release가 아니다. 해당 PR은 `devel` 대상 PR CI에서 HostApp build, bundled asset 검증, Rust/core provenance verify, release helper dry-run을 통과해야 하며, 작업자는 manifest tag/commit과 upstream release 링크가 맞는지 확인한다.
+
+이 workflow는 signed/notarized DMG, GitHub Release, Sparkle stable appcast, Homebrew Cask 변경을 만들지 않는다. public release 포함 여부, release note 표기, rehearsal/publish workflow 실행은 별도 명시 승인 후 이 가이드의 release flow를 따른다.
 
 ## 전체 release flow
 
