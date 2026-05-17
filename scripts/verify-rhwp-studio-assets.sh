@@ -91,6 +91,7 @@ parse_args "$@"
 [ -f "$RESOURCE_DIR/registerSW.js" ] || fail "missing registerSW.js"
 [ -f "$RESOURCE_DIR/manifest.webmanifest" ] || fail "missing manifest.webmanifest"
 [ -f "$RESOURCE_DIR/alhangeul-wkwebview-overrides.css" ] || fail "missing Alhangeul WKWebView override stylesheet"
+[ -d "$RESOURCE_DIR/assets" ] || fail "missing assets directory: $RESOURCE_DIR/assets"
 
 if [ -z "$EXPECTED_RELEASE_TAG" ]; then
   EXPECTED_RELEASE_TAG="$(manifest_field "$RESOURCE_DIR/manifest.json" source_release_tag)" \
@@ -127,7 +128,7 @@ if grep -Eq ' (src|href)="/' "$RESOURCE_DIR/index.html"; then
 fi
 
 grep -Fq "\"source_release_tag\": \"$EXPECTED_RELEASE_TAG\"" "$RESOURCE_DIR/manifest.json" || fail "manifest release tag does not match $EXPECTED_RELEASE_TAG"
-grep -Fq "\"source_resolved_commit\": \"$EXPECTED_COMMIT\"" "$RESOURCE_DIR/manifest.json" || fail "manifest commit does not match $EXPECTED_RELEASE_TAG resolved commit"
+grep -Fq "\"source_resolved_commit\": \"$EXPECTED_COMMIT\"" "$RESOURCE_DIR/manifest.json" || fail "manifest commit does not match expected commit $EXPECTED_COMMIT"
 grep -q '"studio_build_command": "npx tsc && npx vite build --base ./"' "$RESOURCE_DIR/manifest.json" || fail "manifest does not record relative-base build command"
 
 echo "OK: rhwp-studio assets verified at $RESOURCE_DIR"
