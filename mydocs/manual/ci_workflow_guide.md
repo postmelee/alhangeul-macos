@@ -229,6 +229,7 @@ workflow가 생성하거나 게시하는 주요 산출물:
 - public appcast 다운로드, 빈 파일 검증, `xmllint --noout` 검증 중 하나라도 실패하면 Pages deployment를 중단한다.
 - stale repository appcast fallback은 사용하지 않는다.
 - release workflow의 `deploy-pages` job과 같은 `pages-deploy` concurrency group을 공유해 Pages deployment를 취소 없이 직렬화한다.
+- docs-only workflow는 workflow-level concurrency로 public appcast 다운로드, artifact 준비, Pages deploy 전체를 같은 직렬화 범위에 둔다. deploy job만 직렬화하면 release deploy 전의 오래된 public appcast로 준비한 artifact가 release deploy 후 배포될 수 있다.
 
 로컬 재현:
 

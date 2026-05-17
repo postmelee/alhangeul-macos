@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+# Keep the full docs-only fetch -> artifact -> deploy sequence serialized.
+# The prepared artifact contains the current public appcast, so locking only
+# deploy-pages could let an older fetched appcast deploy after a release deploy.
 concurrency:
   group: pages-deploy
   cancel-in-progress: false
