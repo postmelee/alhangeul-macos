@@ -2,13 +2,20 @@
 
 본 매뉴얼은 본 저장소의 브랜치 정책, Git 워크플로우 다이어그램, 메인테이너/컨트리뷰터 워크플로우 스크립트를 정의한다. 새 타스크 브랜치를 만들거나 PR 게시·merge·정리를 수행하기 전에 읽는다. 문서 파일 위치와 타스크 승인 절차는 각각 `document_structure_guide.md`, `task_workflow_guide.md`에서 다룬다.
 
-첫 출시 전후 브랜치 역할과 rename 후보의 판단 근거는 [`branch_strategy_webview_native.md`](../tech/branch_strategy_webview_native.md)를 기준으로 한다.
+제품 기본 브랜치와 native 전환 라인의 판단 근거는 [`branch_strategy_webview_native.md`](../tech/branch_strategy_webview_native.md)를 기준으로 한다.
+
+## 2026-05-14 브랜치 전환 안내
+
+2026-05-14에 제품 개발 기본 브랜치를 `devel`로 승격했다. 전환 전 fork나 오래된 clone을 기준으로 새 작업을 시작하지 말고, 새 fork/clone 또는 최신 `origin/devel`에서 새 작업 브랜치를 만든다.
+
+기존 `devel` head는 `native-viewer-editor`로 보존했다. `devel-webview`에 남아 있던 #243 변경은 2026-05-16에 `devel`로 병합했으며, `devel-webview`는 퇴역한 legacy alias로 신규 PR base나 자동화 기준으로 사용하지 않는다.
 
 ## 핵심 용어
 
-- **통합 브랜치**: 작업 범위에 따라 PR이 모이는 기준 브랜치. 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Spotlight/mdimporter, 변환, 배포, 문서는 `devel-webview`를 기본으로 쓰고, Swift native viewer/editor 작업은 `devel`을 쓴다.
-- **`devel-webview`**: 첫 공개 배포와 WebView-backed 제품 작업 통합 브랜치.
-- **`devel`**: Swift native viewer/editor와 장기 native 전환 작업 통합 브랜치.
+- **통합 브랜치**: 작업 범위에 따라 PR이 모이는 기준 브랜치. 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Spotlight/mdimporter, 변환, 배포, 문서, Skia 공통 기반은 `devel`을 기본으로 쓰고, HostApp native macOS shell, Skia viewport, Swift 편집 UI/오버레이 작업은 `native-viewer-editor`를 쓴다.
+- **`devel`**: 일반 제품 개발과 외부 기여 기본 통합 브랜치.
+- **`native-viewer-editor`**: HostApp native macOS shell, Rust/rhwp Skia renderer 연동, Swift 편집 UI/오버레이 장기 작업 통합 브랜치.
+- **`devel-webview`**: 퇴역한 legacy alias. 신규 PR base나 자동화 기준으로 쓰지 않는다.
 - **`local/taskN`**: 이슈 번호 N의 로컬 작업 브랜치. 단계 커밋과 보고서 커밋은 이 브랜치에 쌓는다.
 - **`publish/taskN`**: `local/taskN`을 원격에 게시하기 위한 PR용 브랜치. PR merge 후 삭제한다.
 - **Open PR**: 검토 가능한 상태의 PR. 하이퍼-워터폴 최종 보고 후 작업 범위에 맞는 통합 브랜치 대상으로 만든다.
@@ -19,8 +26,9 @@
 | 브랜치 | 용도 |
 |--------|------|
 | `main` | 최종 릴리즈. 태그로 안정 버전 보존 |
-| `devel-webview` | 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Spotlight/mdimporter, 변환, 배포 작업 통합 |
-| `devel` | Swift native viewer/editor와 장기 native 전환 작업 통합 |
+| `devel` | 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Spotlight/mdimporter, 변환, 배포, Skia 공통 기반 작업 통합 |
+| `native-viewer-editor` | HostApp native macOS shell, Rust/rhwp Skia renderer 연동, Swift 편집 UI/오버레이 장기 작업 통합 |
+| `devel-webview` | 퇴역한 legacy alias. 신규 작업과 자동화 기준으로 사용하지 않음 |
 | `local/task{num}` | 타스크별 작업 |
 | `publish/task{num}` | 통합 브랜치 대상 PR 생성을 위한 원격 게시 브랜치. PR merge 후 삭제 |
 
@@ -50,7 +58,7 @@ local/task{N} ── 커밋 · 커밋 · 커밋 ──→ publish/task{N} push
 ```bash
 # 1. local/taskN → publish/taskN push + 통합 브랜치 대상 Open PR
 git checkout local/task17
-BASE_BRANCH=devel-webview # Swift native viewer/editor 작업이면 devel
+BASE_BRANCH=devel # HostApp native shell/overlay 작업이면 native-viewer-editor
 git push origin local/task17:publish/task17
 gh pr create --base "$BASE_BRANCH" --head publish/task17 --title "Task #17: 제목" --body-file /tmp/task17-pr-body.md
 
@@ -75,12 +83,12 @@ git checkout -b feature/my-task
 git push origin feature/my-task
 
 # 3. 원본 저장소의 통합 브랜치로 PR 생성
-gh pr create --repo postmelee/alhangeul-macos --base devel-webview --head {contributor}:feature/my-task --title "제목"
+gh pr create --repo postmelee/alhangeul-macos --base devel --head {contributor}:feature/my-task --title "제목"
 
 # 4. 메인테이너가 리뷰 + merge
 ```
 
-컨트리뷰터 PR base도 작업 범위에 따라 고른다. 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Spotlight/mdimporter, 변환, 배포, 문서는 `devel-webview`, Swift native viewer/editor는 `devel`이다.
+컨트리뷰터 PR base도 작업 범위에 따라 고른다. 첫 공개 배포, WKWebView-backed viewer/editor, Finder/Quick Look, PDF/공유/저장, Spotlight/mdimporter, 변환, 배포, 문서, Skia 공통 기반은 `devel`, HostApp native macOS shell, Skia viewport, Swift 편집 UI/오버레이는 `native-viewer-editor`이다.
 
 ## FAQ / 흔한 실수
 

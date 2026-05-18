@@ -66,6 +66,9 @@ swiftc -parse-as-library \
   -framework UniformTypeIdentifiers \
   -framework Security \
   -framework CoreFoundation \
+  -lc++ \
+  -liconv \
+  -lz \
   -o "$BIN"
 
 "$BIN" "$OUT_DIR" "${INPUTS[@]}"

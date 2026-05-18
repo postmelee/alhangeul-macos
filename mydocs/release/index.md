@@ -17,6 +17,7 @@
 
 | 버전 | 상태 | GitHub Release | Pages 릴리즈 노트 | 내부 기록 |
 |------|------|----------------|-------------------|-----------|
+| `v0.1.3` | 후보 준비중 | [Alhangeul v0.1.3](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.3) | [v0.1.3](https://postmelee.github.io/alhangeul-macos/updates/v0.1.3.html) | [`v0.1.3.md`](v0.1.3.md) |
 | `v0.1.2` | 공개 완료 | [Alhangeul v0.1.2](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.2) | [v0.1.2](https://postmelee.github.io/alhangeul-macos/updates/v0.1.2.html) | [`v0.1.2.md`](v0.1.2.md) |
 | `v0.1.1` | 공개 완료 | [Alhangeul v0.1.1](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.1) | [v0.1.1](https://postmelee.github.io/alhangeul-macos/updates/v0.1.1.html) | [`v0.1.1.md`](v0.1.1.md) |
 | `v0.1.0` | 공개 완료 | [Alhangeul v0.1.0](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.0) | [v0.1.0](https://postmelee.github.io/alhangeul-macos/updates/v0.1.0.html) | [`v0.1.0.md`](v0.1.0.md) |
@@ -25,8 +26,8 @@
 
 | 표면 | 소유 정보 |
 |------|-----------|
-| GitHub Release | public 배포 본문, DMG asset, checksum, 사용자 설치/검증 안내 |
-| Pages `docs/updates/` | 사용자용 짧은 릴리즈 노트와 최신 다운로드 진입점 |
+| GitHub Release | public 배포 본문, DMG asset, checksum, 사용자 설치/검증 안내, `전체 요약`/`포함된 rhwp 변화`/`알한글 앱 변화` 구분 |
+| Pages `docs/updates/` | 사용자용 짧은 릴리즈 노트와 최신 다운로드 진입점. GitHub Release body의 긴 검증 기록을 복제하지 않고 `rhwp` 변화와 앱 변화만 짧게 구분 |
 | `docs/appcast.xml` | Sparkle client가 읽는 update feed |
 | README | 프로젝트 소개, 현재 작업 축, 최신 공개 릴리즈 1개 요약 |
 | `mydocs/release/` | 릴리즈별 내부 decision record, delta, 검증, provenance, #188/#209 handoff |
@@ -41,8 +42,9 @@
 2. `scripts/ci/write-release-delta-checklist.sh <previous-tag> <candidate-ref> <output>`로 영향 영역 초안을 만든다.
 3. 릴리즈 owner가 자동 분류의 누락과 과잉을 보정한다.
 4. `v<version>.md`에 사용자 요약, delta, 연결 Issue/PR, 검증 결과, known limitations, provenance, GitHub Release/Pages/appcast 링크를 기록한다.
-5. GitHub Release 본문과 Pages 릴리즈 노트가 같은 version, DMG filename, SHA256, provenance 기준을 쓰는지 대조한다.
-6. README에는 최신 공개 릴리즈 1개만 반영한다.
+5. GitHub Release body의 `전체 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`가 내부 delta와 provenance를 빠뜨리지 않고 사용자-facing 내용으로 보정되었는지 확인한다.
+6. Pages 릴리즈 노트가 GitHub Release body의 긴 검증 기록을 복제하지 않으면서 같은 `rhwp` version, DMG filename, 설치/업데이트 안내, 알려진 한계를 사용하는지 대조한다.
+7. README에는 최신 공개 릴리즈 1개만 반영한다.
 
 ## 현재 기준 링크
 

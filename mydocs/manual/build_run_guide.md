@@ -225,7 +225,7 @@ Finder 통합 검증은 세 계층을 분리한다.
 | bundle resource 포함 확인 | Debug 또는 Release build | `find`, `plutil` |
 | LaunchServices/PlugInKit/Quick Look 실행 확인 | Release package 산출물 | `lsregister`, `pluginkit`, `qlmanage -t` |
 
-앱 실행만 확인할 때는 Debug 산출물을 바로 열 수 있다.
+앱 실행만 확인할 때는 Debug 산출물을 바로 열 수 있다. 단, Debug 산출물을 열거나 Xcode로 build하는 과정에서 macOS가 `RegisterWithLaunchServices`를 통해 개발 앱을 등록할 수 있다. 이 등록은 앱 실행 smoke에는 무해할 수 있지만 Finder Quick Look/Thumbnail 판정에는 환경 오염이므로, Finder 통합 결과를 보기 전에는 설치본 active provider path와 개발 산출물 registration 잔존 여부를 따로 확인한다.
 
 ```bash
 open build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app
@@ -312,21 +312,41 @@ qlmanage -t -x -s 512 -o /tmp/alhangeul-ql/fallback build.noindex/task149-negati
 
 손상/미지원 입력은 원본 render 결과가 아니라 fallback tile이어야 한다. 설치본 smoke에서 thumbnail을 만들지 못하면 extension 등록 대상, Quick Look cache, content type routing, fallback classifier 순서로 분리한다.
 
-### 표준 smoke helper
+### 표준 smoke helper 역할
 
 Finder 통합은 signed/sealed된 단일 설치본 기준으로 확인한다. 반복 삭제/재설치를 피하기 위해 표준 경로는 `$HOME/Applications/Alhangeul.app` 하나만 사용한다.
 
-helper가 자동으로 수행하는 항목:
+등록 상태만 먼저 확인하려면 다음 helper를 사용한다. 기본값은 check-only이며 파일 삭제, 전역 LaunchServices reset, Finder/QuickLook daemon kill을 수행하지 않는다.
 
-- `scripts/package-release.sh <version>`으로 Release package 생성 (`--skip-package` 또는 `--app` 지정 시 생략)
+```bash
+scripts/check-extension-registration-hygiene.sh --check-only
+```
+
+개발/테스트 산출물 등록만 해제해야 할 때는 작업지시자 승인 후 cleanup 옵션을 사용한다. 이 옵션은 `build.noindex/`와 Xcode DerivedData 아래의 `Alhangeul.app` 등록만 대상으로 하며 app bundle을 삭제하지 않는다.
+
+```bash
+scripts/check-extension-registration-hygiene.sh --cleanup-dev-registrations
+```
+
+`scripts/smoke-clean-quicklook-install.sh`가 자동으로 수행하는 항목:
+
 - `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` bundle 정합성 확인
 - `build.noindex/`와 Xcode DerivedData 아래에 남은 개발/테스트용 `Alhangeul.app` LaunchServices/PlugInKit 등록 해제
-- `$HOME/Applications/Alhangeul.app` 설치와 `lsregister`/`pluginkit` 등록
-- 이전 이름 설치본 후보 발견 시 기본 실패. `--unregister-legacy-candidates` 지정 시 파일은 삭제하지 않고 LaunchServices/PlugInKit 등록만 정리
+- `$HOME/Applications/Alhangeul.app` 또는 승인된 `/Applications/Alhangeul.app` 설치와 `lsregister`/`pluginkit` 등록
 - `pluginkit -mAvvv`에서 Preview/Thumbnail extension 확인
 - `qlmanage -r`, `qlmanage -r cache`
 - `qlmanage -t -x`로 HWP/HWPX thumbnail output 생성
-- 실패 시 `pluginkit`, `lsregister`, `codesign`, `plutil`, `qlmanage` 로그를 diagnostics directory에 저장
+- 실패 시 `pluginkit`, `lsregister`, `codesign`, `plutil`, `qlmanage` 로그를 output directory에 저장
+
+`scripts/smoke-finder-integration.sh`가 자동으로 수행하는 항목:
+
+- `scripts/package-release.sh <version>`으로 Release package 생성 (`--skip-package` 또는 `--app` 지정 시 생략)
+- bundle 정합성 확인
+- `$HOME/Applications/Alhangeul.app` 설치와 `lsregister`/`pluginkit` 등록
+- 이전 이름 설치본 후보 발견 시 기본 실패. `--unregister-legacy-candidates` 지정 시 파일은 삭제하지 않고 LaunchServices/PlugInKit 등록만 정리
+- HWP/HWPX thumbnail output 생성과 diagnostics 저장
+
+두 helper의 목적이 다르므로, Xcode Debug/Release 중간 산출물이 등록된 상태를 정리하려면 `scripts/check-extension-registration-hygiene.sh --cleanup-dev-registrations` 또는 `scripts/smoke-clean-quicklook-install.sh`를 먼저 사용한다. `scripts/smoke-finder-integration.sh`는 legacy 후보 방어에는 강하지만 현재 이름 개발 산출물 cleanup helper로 간주하지 않는다.
 
 수동 흐름이 필요한 경우 다음 명령을 기준으로 분리 확인한다.
 
@@ -404,7 +424,9 @@ scripts/smoke-sparkle-extension-refresh.sh \
 추가 규칙:
 
 - Debug/테스트용 extension 등록은 표준 smoke helper 안에서만 수행한다. 수동 `lsregister`/`pluginkit -a` 등록을 했으면 같은 검증 안에서 `pluginkit -r`와 `lsregister -u`로 등록을 해제하고 `qlmanage -r cache`까지 수행한다.
-- Xcode build가 자동으로 `build.noindex/` 또는 `~/Library/Developer/Xcode/DerivedData/`의 `Alhangeul.app`을 LaunchServices에 등록할 수 있다. Finder/Quick Look 결과를 판정하기 전 표준 smoke helper를 다시 실행해 개발 산출물 등록을 걷어내고 설치본 하나만 active provider로 남긴다.
+- Xcode build가 자동으로 `build.noindex/` 또는 `~/Library/Developer/Xcode/DerivedData/`의 `Alhangeul.app`을 LaunchServices에 등록할 수 있다. Finder/Quick Look 결과를 판정하기 전 `scripts/check-extension-registration-hygiene.sh --check-only`로 상태를 확인하고, 필요한 경우 표준 smoke helper나 cleanup 옵션으로 개발 산출물 등록을 걷어내고 설치본 하나만 active provider로 남긴다.
 - 파일 삭제가 필요한 정리는 작업지시자 승인 후에만 수행한다. 일반 smoke 격리는 파일 삭제 없이 LaunchServices/PlugInKit 등록 해제만 수행한다.
+- System Settings의 확장 목록, Finder 아이콘 표시, `qlmanage -m plugins` 출력은 단독 판정 근거가 아니다. `pluginkit -mAvvv -i <extension-id>`의 `Path`와 실제 `qlmanage -t -x` thumbnail output을 함께 본다.
+- `lsregister -kill -r`, `lsregister -delete`, Finder/QuickLook daemon kill 같은 전역 reset은 일반 contributor 검증 절차가 아니다. 먼저 후보 app/appex 단위의 `pluginkit -r`, `lsregister -u`, `qlmanage -r cache`로 범위를 좁힌다.
 
 `qlmanage -m plugins` 미노출 처리, `pluginkit -mAvvv` 미노출 시 진단 순서, 이전 이름(`RhwpMac.app`, `AlhangeulMac.app`, `알한글.app`) 설치본 처리, 표시명 문제와 extension 실패 혼동 방지 등 추가 진단 기준은 [`finder_integration_validation_pitfalls.md`](../troubleshootings/finder_integration_validation_pitfalls.md)를 따른다.

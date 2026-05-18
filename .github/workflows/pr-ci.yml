@@ -4,8 +4,8 @@ on:
   pull_request:
     branches:
       - main
-      - devel-webview
       - devel
+      - native-viewer-editor
 
 permissions:
   contents: read
@@ -60,14 +60,24 @@ jobs:
             bash -n "$script"
           done
 
+      - name: Check workflow YAML syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |path| Psych.parse_file(path); puts "Parsed #{path}" }'
+
       - name: Check helper interfaces
         shell: bash
         run: |
           set -euo pipefail
           bash scripts/ci/classify-pr-changes.sh --help
           bash scripts/ci/check-rhwp-upstream-release.sh --help
+          bash scripts/ci/detect-rhwp-studio-impact.sh --help
           bash scripts/ci/prepare-pages-artifact.sh --help
+          bash scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
           bash scripts/ci/write-sparkle-appcast.sh --help
+          bash scripts/sync-rhwp-studio.sh --help
+          bash scripts/verify-rhwp-studio-assets.sh --help
 
       - name: Record classification summary
         shell: bash
@@ -140,6 +150,12 @@ jobs:
           set -euo pipefail
           ./scripts/check-no-appkit.sh
 
+      - name: Verify bundled rhwp-studio assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/verify-rhwp-studio-assets.sh
+
       - name: Generate Xcode project
         shell: bash
         run: |
@@ -194,32 +210,32 @@ jobs:
         run: |
           set -euo pipefail
           scripts/ci/write-release-notes.sh \
-            0.1.2 \
+            0.1.3 \
             0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
-            build.noindex/release/release-notes-0.1.2.md
+            build.noindex/release/release-notes-0.1.3.md
           scripts/ci/check-release-notes-template.sh \
-            build.noindex/release/release-notes-0.1.2.md
+            build.noindex/release/release-notes-0.1.3.md
 
       - name: Verify release delta checklist
         shell: bash
         run: |
           set -euo pipefail
           scripts/ci/write-release-delta-checklist.sh \
-            v0.1.1 \
+            v0.1.2 \
             HEAD \
-            build.noindex/release/delta-checklist-0.1.2.md
+            build.noindex/release/delta-checklist-0.1.3.md
 
       - name: Verify Sparkle appcast helper
         shell: bash
         run: |
           set -euo pipefail
           scripts/ci/write-sparkle-appcast.sh \
-            --version 0.1.2 \
-            --build 8 \
-            --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.2/alhangeul-macos-0.1.2.dmg \
+            --version 0.1.3 \
+            --build 9 \
+            --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.3/alhangeul-macos-0.1.3.dmg \
             --length 1 \
             --ed-signature dummy-ed-signature \
-            --release-notes-url https://postmelee.github.io/alhangeul-macos/updates/v0.1.2.html \
+            --release-notes-url https://postmelee.github.io/alhangeul-macos/updates/v0.1.3.html \
             --pub-date "Fri, 08 May 2026 09:00:00 +0000" \
             --minimum-system-version 12.0 \
             --output build.noindex/release/appcast.xml

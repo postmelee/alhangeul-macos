@@ -4,16 +4,22 @@ alhangeul-macos에 관심을 가져주셔서 감사합니다!
 
 알한글 for macOS는 macOS 환경에서 HWP/HWPX 문서를 읽고, 미리보고, 나아가 편집할 수 있게 만드는 프로젝트입니다. MVP viewer는 [`edwardkim/rhwp`](https://github.com/edwardkim/rhwp)의 `rhwp-studio`를 WKWebView로 통합하는 방향으로 진행합니다. macOS 코드, Swift bridge, 패키징, 문서, HWP 샘플 — 어떤 형태의 기여든 환영합니다. core 엔진 기여는 `edwardkim/rhwp` 저장소에서 받습니다.
 
+## 브랜치 전환 안내
+
+2026-05-14에 제품 개발 기본 브랜치가 `devel`로 전환되었습니다. 전환 전 fork나 오래된 clone에서 새 작업을 시작하려는 경우에는 저장소를 새로 fork/clone한 뒤 최신 `devel`에서 작업 브랜치를 만들어 주세요.
+
+이미 진행 중인 작업이 있으면 기존 커밋을 최신 `devel` 위로 무리하게 rebase하기보다, 필요한 변경만 새 브랜치에 cherry-pick하거나 PR에서 상황을 설명해 주세요. 기존 `devel` native 라인은 `native-viewer-editor`로 보존되어 있고, 현재는 HostApp native macOS shell, Rust/rhwp Skia renderer 연동, Swift 편집 UI/오버레이 장기 라인으로 다룹니다.
+
 ## PR 대상 브랜치 먼저 고르기
 
 GitHub 기본 브랜치가 `main`이어도 기여 PR은 `main`으로 보내지 않습니다. 작업 범위에 따라 아래 base branch를 선택해 주세요.
 
 | PR base | 대상 작업 |
 |---------|-----------|
-| `devel-webview` | 기본 대상. WKWebView MVP viewer, `rhwp-studio` 통합, Finder/Quick Look/Thumbnail, Spotlight, PDF/export/변환, 배포, 문서 |
-| `devel` | native viewer renderer, CoreGraphics/CoreText rendering, render tree 기반 viewer UI, native zoom/cache/page interaction |
+| `devel` | 기본 대상. WKWebView MVP viewer, `rhwp-studio` 통합, Finder/Quick Look/Thumbnail, Spotlight, PDF/export/변환, 배포, 문서, Skia 공통 기반 |
+| `native-viewer-editor` | HostApp native macOS viewer/editor shell, Rust/rhwp Skia renderer를 쓰는 page/tile viewport, native zoom/cache/sidebar/search/copy, Swift 편집 UI/오버레이 |
 
-범위가 애매하면 PR을 만들기 전에 이슈나 Discussion에서 먼저 확인해 주세요. 첫 출시 전후 브랜치 역할의 세부 기준은 [`branch_strategy_webview_native.md`](mydocs/tech/branch_strategy_webview_native.md)를 따릅니다.
+범위가 애매하면 PR을 만들기 전에 이슈나 Discussion에서 먼저 확인해 주세요. 제품 브랜치와 native 전환 브랜치 역할의 세부 기준은 [`branch_strategy_webview_native.md`](mydocs/tech/branch_strategy_webview_native.md)를 따릅니다.
 
 ## 처음 참여하시나요?
 
@@ -114,9 +120,9 @@ HWP/HWPX 파일이 한컴 또는 rhwp core와 다르게 렌더링되거나, Find
 
 **중요:**
 
-- PR 대상 브랜치는 **`devel-webview`** 또는 **`devel`** 입니다 (`main` 아님)
-- WKWebView MVP, Finder/Quick Look, Spotlight, 변환, 배포, 문서 작업은 기본적으로 `devel-webview`로 보냅니다
-- native viewer renderer 관련 기여는 `devel`로 보냅니다
+- PR 대상 브랜치는 **`devel`** 또는 **`native-viewer-editor`** 입니다 (`main` 아님)
+- WKWebView MVP, Finder/Quick Look, Spotlight, 변환, 배포, 문서 작업은 기본적으로 `devel`로 보냅니다
+- HostApp native macOS shell, Skia viewport, Swift 편집 UI/오버레이 관련 기여는 `native-viewer-editor`로 보냅니다
 - 메인테이너의 코드 리뷰 승인 후 merge됩니다
 - 메인테이너 워크플로우(`local/task{N}`, `publish/task{N}`)는 [`git_workflow_guide.md`](mydocs/manual/git_workflow_guide.md) 참고
 
@@ -134,13 +140,21 @@ xcodebuild -project Alhangeul.xcodeproj \
   CODE_SIGNING_ALLOWED=NO build
 ```
 
-native renderer 동작을 바꾸는 `devel` 대상 PR이면 추가로 아래를 실행합니다.
+현재 render tree, Quick Look/Thumbnail/PDF native bitmap 경로, 또는 렌더링 결과를 바꾸는 PR이면 추가로 아래를 실행합니다.
 
 ```bash
 ./scripts/validate-stage3-render.sh     # native rendering smoke test
 ```
 
 native renderer 문제 샘플이 있다면 `./scripts/render-debug-compare.sh output/render-debug path/to/sample.hwp`를 추가로 실행하고, PR 본문에 summary와 core/native PNG 비교 결과를 적어주세요. WKWebView viewer PR은 가능한 경우 `rhwp-studio` 단독 실행 결과와 앱 내 WKWebView 결과를 함께 비교해 주세요.
+
+Finder Quick Look/Thumbnail을 바꾸는 PR이면 추가로 아래 원칙을 지켜주세요.
+
+- Debug app은 앱 실행과 WKWebView viewer 확인용입니다. Finder Quick Look/Thumbnail extension 등록 성공 여부를 Debug app으로 판정하지 마세요.
+- Finder Quick Look/Thumbnail 검증은 Release package 산출물 또는 표준 smoke helper 설치본 기준으로 수행합니다.
+- smoke 전후에는 `scripts/check-extension-registration-hygiene.sh --check-only`로 active provider path와 개발 산출물 등록 잔존 여부를 확인합니다.
+- 수동으로 `lsregister` 또는 `pluginkit` 등록을 했다면 같은 검증 안에서 `pluginkit -r`, `lsregister -u`, `qlmanage -r cache`로 등록을 정리하고 PR 본문에 적어주세요.
+- `build.noindex/` 또는 Xcode DerivedData 아래의 `Alhangeul.app`이 LaunchServices/PlugInKit에 남아 있으면 Finder routing이 흐려질 수 있습니다. smoke 전후 active provider path가 설치본 내부인지 확인해 주세요.
 
 위 명령이 모두 통과하는지 확인한 후 PR을 생성해주세요. PR 본문은 [`.github/pull_request_template.md`](.github/pull_request_template.md) 양식을 사용합니다.
 
@@ -153,10 +167,11 @@ native renderer 문제 샘플이 있다면 `./scripts/render-debug-compare.sh ou
 | 브랜치 | 용도 | 보호 규칙 |
 |--------|------|----------|
 | `main` | 릴리즈 (안정 버전) | PR 필수 + 리뷰 승인 |
-| `devel-webview` | WKWebView MVP와 출시 우선 작업 통합 | PR 필수 |
-| `devel` | native viewer renderer와 장기 native viewer 개발 통합 | PR 필수 |
+| `devel` | WKWebView MVP, 출시 우선 작업, Skia 공통 기반 통합 | PR 필수 |
+| `native-viewer-editor` | HostApp native macOS shell, Rust/rhwp Skia renderer 연동, Swift 편집 UI/오버레이 장기 작업 통합 | PR 필수 |
+| `devel-webview` | 퇴역한 legacy alias | 신규 PR 대상 아님 |
 
-- 외부 기여자 PR → 작업 범위에 따라 `devel-webview` 또는 `devel`
+- 외부 기여자 PR → 작업 범위에 따라 `devel` 또는 `native-viewer-editor`
 - 메인테이너 작업 PR → `publish/task{N}` → 작업 범위에 맞는 통합 브랜치
 - 릴리즈 시 출시 대상 통합 브랜치 → `main` + 태그
 
@@ -187,6 +202,8 @@ qlmanage -p path/to/sample.hwp
 # 4. Finder thumbnail smoke
 qlmanage -t -x -s 512 -o /tmp/alhangeul-ql path/to/sample.hwp
 ```
+
+`qlmanage` 결과만으로 현재 PR의 extension이 실행됐다고 판단하지 마세요. 먼저 `pluginkit -mAvvv | grep com.postmelee.alhangeul`로 active provider path를 보고, 개발 산출물이나 예전 앱 이름이 남아 있으면 [`finder_integration_validation_pitfalls.md`](mydocs/troubleshootings/finder_integration_validation_pitfalls.md)를 따라 정리합니다.
 
 core/native 비교 상세 절차는 [`render_core_native_compare_guide.md`](mydocs/manual/render_core_native_compare_guide.md)를 참고하세요.
 

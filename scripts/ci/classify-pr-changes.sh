@@ -123,6 +123,15 @@ classify_path() {
   esac
 
   case "$path" in
+    Sources/HostApp/Resources/rhwp-studio/*)
+      enable_macos_build "$path affects bundled rhwp-studio assets"
+      enable_rust_verify "$path affects bundled rhwp-studio/core provenance verification"
+      enable_release_checks "$path affects bundled rhwp-studio release provenance"
+      matched=1
+      ;;
+  esac
+
+  case "$path" in
     Sources/*|project.yml|Alhangeul.xcodeproj/*)
       enable_macos_build "$path affects app or Xcode build inputs"
       matched=1

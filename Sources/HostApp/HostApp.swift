@@ -40,7 +40,7 @@ private struct DocumentWindowRootView: View {
             .frame(minWidth: 900, minHeight: 620)
             .background(
                 WindowAccessor { window in
-                    windowLifecycle.update(window)
+                    windowLifecycle.update(window, store: store)
                     closeRedundantEmptyWindowIfNeeded()
                 }
             )
@@ -52,6 +52,7 @@ private struct DocumentWindowRootView: View {
             }
             .onDisappear {
                 DocumentOpenRouter.unregister(store)
+                windowLifecycle.detach()
             }
     }
 
@@ -87,10 +88,17 @@ private struct DocumentWindowRootView: View {
 @MainActor
 private final class DocumentWindowLifecycle: ObservableObject {
     private weak var window: NSWindow?
+    private let closeConfirmationController = DocumentCloseConfirmationController()
     private var didRequestClose = false
 
-    func update(_ window: NSWindow) {
+    func update(_ window: NSWindow, store: DocumentViewerStore) {
         self.window = window
+        closeConfirmationController.attach(window: window, store: store)
+    }
+
+    func detach() {
+        closeConfirmationController.detach(restorePreviousDelegate: true)
+        window = nil
     }
 
     func closeIfNeeded(_ shouldClose: Bool) {
@@ -99,8 +107,12 @@ private final class DocumentWindowLifecycle: ObservableObject {
         }
 
         didRequestClose = true
-        DispatchQueue.main.async { [weak window] in
-            window?.close()
+        DispatchQueue.main.async { [weak self, weak window] in
+            guard let self else {
+                window?.close()
+                return
+            }
+            self.closeConfirmationController.closeWithoutPrompt()
         }
     }
 }
@@ -191,6 +203,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ notification: Notification) {
         repositionUnreachableWindowsIfNeeded()
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        DocumentTerminationCoordinator.shared.applicationShouldTerminate(sender)
     }
 
     func applicationWillTerminate(_ notification: Notification) {

@@ -11,6 +11,9 @@ class CGTreeRenderer {
     private let imageCropUnitsPerPixel = 75.0
     private let tableCellClipRightSlack = 4.0
     private let pathEpsilon = 0.000001
+    private let maxPCXImageDimension = 16_384
+    private let maxPCXDecodedByteCount = 64 * 1024 * 1024
+    private let maxPCXPixelByteCount = 64 * 1024 * 1024
 
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
@@ -69,16 +72,16 @@ class CGTreeRenderer {
 
         switch node.nodeType {
         case .page:
-            // 페이지 배경 (흰색)
-            ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
-            ctx.fill(cgRect(node.bbox))
-            renderChildren(node, in: ctx)
+            renderPage(node, in: ctx)
 
         case .pageBackground(let bg):
             renderPageBackground(bg, bbox: node.bbox, in: ctx)
 
         case .body(let body):
             renderBody(body, node: node, in: ctx)
+
+        case .column:
+            renderColumn(node, in: ctx)
 
         case .tableCell(let cell):
             renderTableCell(cell, node: node, in: ctx)
@@ -150,6 +153,66 @@ class CGTreeRenderer {
         for child in node.children {
             renderNode(child, in: ctx)
         }
+    }
+
+    private func renderPage(_ node: RenderNode, in ctx: CGContext) {
+        // 페이지 기본 배경.
+        ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
+        ctx.fill(cgRect(node.bbox))
+
+        renderPageBackgroundChildren(node, in: ctx)
+        renderPageBehindTextImages(node, in: ctx)
+        renderPageForegroundChildren(node, in: ctx)
+    }
+
+    private func renderPageBackgroundChildren(_ node: RenderNode, in ctx: CGContext) {
+        for child in node.children where isPageBackgroundNode(child) {
+            renderNode(child, in: ctx)
+        }
+    }
+
+    private func renderPageBehindTextImages(_ node: RenderNode, in ctx: CGContext) {
+        for child in node.children where isBehindTextImage(child) {
+            renderNode(child, in: ctx)
+        }
+    }
+
+    private func renderPageForegroundChildren(_ node: RenderNode, in ctx: CGContext) {
+        for child in node.children {
+            guard !isPageBackgroundNode(child), !isBehindTextImage(child) else {
+                continue
+            }
+            renderNode(child, in: ctx)
+        }
+    }
+
+    private func renderColumn(_ node: RenderNode, in ctx: CGContext) {
+        for child in node.children where isBehindTextImage(child) {
+            renderNode(child, in: ctx)
+        }
+        for child in node.children where !isBehindTextImage(child) {
+            renderNode(child, in: ctx)
+        }
+    }
+
+    private func isPageBackgroundNode(_ node: RenderNode) -> Bool {
+        if case .pageBackground = node.nodeType {
+            return true
+        }
+        return false
+    }
+
+    private func isBehindTextImage(_ node: RenderNode) -> Bool {
+        guard case .image(let image) = node.nodeType else {
+            return false
+        }
+        return isBehindTextWrap(image.textWrap)
+    }
+
+    private func isBehindTextWrap(_ value: String?) -> Bool {
+        value?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .caseInsensitiveCompare("BehindText") == .orderedSame
     }
 
     private func renderBody(_ body: BodyNode, node: RenderNode, in ctx: CGContext) {
@@ -503,8 +566,7 @@ class CGTreeRenderer {
             cgImage = cached
         } else {
             guard let data = doc.imageData(binDataId: img.binDataId),
-                  let source = CGImageSourceCreateWithData(data as CFData, nil),
-                  let cg = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return }
+                  let cg = decodeImage(data) else { return }
             imageCache[img.binDataId] = cg
             cgImage = cg
         }
@@ -524,6 +586,243 @@ class CGTreeRenderer {
         ctx.restoreGState()
 
         ctx.restoreGState()
+    }
+
+    private func decodeImage(_ data: Data) -> CGImage? {
+        if let source = CGImageSourceCreateWithData(data as CFData, nil),
+           let image = CGImageSourceCreateImageAtIndex(source, 0, nil) {
+            return image
+        }
+        return decodePCXImage(data)
+    }
+
+    private func decodePCXImage(_ data: Data) -> CGImage? {
+        guard data.count > 128,
+              data[0] == 0x0A,
+              data[2] == 0x01 else {
+            return nil
+        }
+
+        let bitsPerPlane = Int(data[3])
+        let xMin = Int(pcxUInt16(data, offset: 4))
+        let yMin = Int(pcxUInt16(data, offset: 6))
+        let xMax = Int(pcxUInt16(data, offset: 8))
+        let yMax = Int(pcxUInt16(data, offset: 10))
+        let planes = Int(data[65])
+        let bytesPerLine = Int(pcxUInt16(data, offset: 66))
+        let width = xMax - xMin + 1
+        let height = yMax - yMin + 1
+
+        guard width > 0,
+              height > 0,
+              width <= maxPCXImageDimension,
+              height <= maxPCXImageDimension,
+              bytesPerLine > 0,
+              isSupportedPCXLayout(bitsPerPlane: bitsPerPlane, planes: planes),
+              let minimumBytesPerLine = minimumPCXBytesPerLine(width: width, bitsPerPlane: bitsPerPlane),
+              bytesPerLine >= minimumBytesPerLine,
+              let scanlineByteCount = checkedProduct(bytesPerLine, planes),
+              let decodedByteCount = checkedProduct(scanlineByteCount, height),
+              decodedByteCount <= maxPCXDecodedByteCount,
+              let pixelByteCount = checkedProduct(width, height, 4),
+              pixelByteCount <= maxPCXPixelByteCount else {
+            return nil
+        }
+
+        guard let decoded = decodePCXRLE(data, from: 128, expectedByteCount: decodedByteCount) else {
+            return nil
+        }
+
+        var pixels = [UInt8](repeating: 0, count: pixelByteCount)
+        for y in 0..<height {
+            let scanlineOffset = y * scanlineByteCount
+            for x in 0..<width {
+                let color = pcxColor(
+                    decoded,
+                    x: x,
+                    scanlineOffset: scanlineOffset,
+                    planes: planes,
+                    bytesPerLine: bytesPerLine,
+                    bitsPerPlane: bitsPerPlane,
+                    data: data
+                )
+                guard let color else { return nil }
+                let offset = (y * width + x) * 4
+                pixels[offset] = color.red
+                pixels[offset + 1] = color.green
+                pixels[offset + 2] = color.blue
+                pixels[offset + 3] = 255
+            }
+        }
+
+        return makeRGBAImage(width: width, height: height, pixels: pixels)
+    }
+
+    private func pcxUInt16(_ data: Data, offset: Int) -> UInt16 {
+        UInt16(data[offset]) | (UInt16(data[offset + 1]) << 8)
+    }
+
+    private func isSupportedPCXLayout(bitsPerPlane: Int, planes: Int) -> Bool {
+        if bitsPerPlane == 8 {
+            return planes == 1 || planes == 3
+        }
+
+        guard [1, 2, 4].contains(bitsPerPlane),
+              planes >= 1,
+              planes <= 4,
+              let bitsPerPixel = checkedProduct(bitsPerPlane, planes) else {
+            return false
+        }
+        return bitsPerPixel <= 8
+    }
+
+    private func minimumPCXBytesPerLine(width: Int, bitsPerPlane: Int) -> Int? {
+        guard let rowBits = checkedProduct(width, bitsPerPlane) else {
+            return nil
+        }
+        let padded = rowBits.addingReportingOverflow(7)
+        guard !padded.overflow else {
+            return nil
+        }
+        return padded.partialValue / 8
+    }
+
+    private func checkedProduct(_ lhs: Int, _ rhs: Int) -> Int? {
+        guard lhs >= 0, rhs >= 0 else {
+            return nil
+        }
+        let result = lhs.multipliedReportingOverflow(by: rhs)
+        return result.overflow ? nil : result.partialValue
+    }
+
+    private func checkedProduct(_ lhs: Int, _ rhs: Int, _ third: Int) -> Int? {
+        guard let first = checkedProduct(lhs, rhs) else {
+            return nil
+        }
+        return checkedProduct(first, third)
+    }
+
+    private func decodePCXRLE(_ data: Data, from offset: Int, expectedByteCount: Int) -> [UInt8]? {
+        var decoded: [UInt8] = []
+        decoded.reserveCapacity(expectedByteCount)
+        var index = offset
+
+        while index < data.count, decoded.count < expectedByteCount {
+            let marker = data[index]
+            index += 1
+
+            if (marker & 0xC0) == 0xC0 {
+                guard index < data.count else { return nil }
+                let count = Int(marker & 0x3F)
+                let value = data[index]
+                index += 1
+                let remaining = expectedByteCount - decoded.count
+                decoded.append(contentsOf: repeatElement(value, count: count).prefix(remaining))
+            } else {
+                decoded.append(marker)
+            }
+        }
+
+        return decoded.count == expectedByteCount ? decoded : nil
+    }
+
+    private func pcxColor(
+        _ decoded: [UInt8],
+        x: Int,
+        scanlineOffset: Int,
+        planes: Int,
+        bytesPerLine: Int,
+        bitsPerPlane: Int,
+        data: Data
+    ) -> (red: UInt8, green: UInt8, blue: UInt8)? {
+        if bitsPerPlane == 8, planes == 3 {
+            return (
+                decoded[scanlineOffset + x],
+                decoded[scanlineOffset + bytesPerLine + x],
+                decoded[scanlineOffset + bytesPerLine * 2 + x]
+            )
+        }
+
+        if bitsPerPlane == 8, planes == 1 {
+            let index = Int(decoded[scanlineOffset + x])
+            return pcxPaletteColor(index, data: data)
+        }
+
+        let index = pcxPlanarPaletteIndex(
+            decoded,
+            x: x,
+            scanlineOffset: scanlineOffset,
+            planes: planes,
+            bytesPerLine: bytesPerLine,
+            bitsPerPlane: bitsPerPlane
+        )
+        return pcxPaletteColor(index, data: data)
+    }
+
+    private func pcxPlanarPaletteIndex(
+        _ decoded: [UInt8],
+        x: Int,
+        scanlineOffset: Int,
+        planes: Int,
+        bytesPerLine: Int,
+        bitsPerPlane: Int
+    ) -> Int {
+        var index = 0
+        for plane in 0..<planes {
+            let planeOffset = scanlineOffset + plane * bytesPerLine
+            let bitPosition = x * bitsPerPlane
+            let byteIndex = planeOffset + bitPosition / 8
+            let bitOffset = bitPosition % 8
+            let value = decoded[byteIndex]
+
+            if bitsPerPlane == 1 {
+                let bit = Int((value >> (7 - bitOffset)) & 0x01)
+                index |= bit << plane
+            } else {
+                let shift = 8 - bitOffset - bitsPerPlane
+                let mask = UInt8((1 << bitsPerPlane) - 1)
+                let component = Int((value >> shift) & mask)
+                index |= component << (plane * bitsPerPlane)
+            }
+        }
+        return index
+    }
+
+    private func pcxPaletteColor(_ index: Int, data: Data) -> (red: UInt8, green: UInt8, blue: UInt8)? {
+        if data.count >= 769,
+           data[data.count - 769] == 0x0C,
+           index < 256 {
+            let offset = data.count - 768 + index * 3
+            return (data[offset], data[offset + 1], data[offset + 2])
+        }
+
+        guard index < 16 else { return nil }
+        let offset = 16 + index * 3
+        return (data[offset], data[offset + 1], data[offset + 2])
+    }
+
+    private func makeRGBAImage(width: Int, height: Int, pixels: [UInt8]) -> CGImage? {
+        let bytesPerRow = width * 4
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+            .union(.byteOrder32Big)
+        let pixelData = Data(pixels)
+        guard let provider = CGDataProvider(data: pixelData as CFData) else {
+            return nil
+        }
+
+        return CGImage(
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bitsPerPixel: 32,
+            bytesPerRow: bytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: bitmapInfo,
+            provider: provider,
+            decode: nil,
+            shouldInterpolate: true,
+            intent: .defaultIntent
+        )
     }
 
     // MARK: - 수식 SVG fragment

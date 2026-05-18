@@ -80,6 +80,9 @@ swiftc -parse-as-library \
   -framework ImageIO \
   -framework Security \
   -framework CoreFoundation \
+  -lc++ \
+  -liconv \
+  -lz \
   -o "$BIN"
 
 "$BIN" "$OUT_DIR" "${SAMPLES[@]}"

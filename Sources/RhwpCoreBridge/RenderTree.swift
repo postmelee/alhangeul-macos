@@ -307,6 +307,7 @@ struct ImageNode: Decodable {
     let effect: String?
     let brightness: Int?
     let contrast: Int?
+    let textWrap: String?
     let transform: ShapeTransform
     let crop: [Int32]?
 
@@ -319,6 +320,7 @@ struct ImageNode: Decodable {
         case fillMode = "fill_mode"
         case originalSize = "original_size"
         case originalSizeHU = "original_size_hu"
+        case textWrap = "text_wrap"
     }
 }
 

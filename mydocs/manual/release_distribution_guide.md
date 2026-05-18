@@ -47,13 +47,26 @@
 - `scripts/ci/write-sparkle-appcast.sh`: stable Sparkle appcast 생성
 - `scripts/ci/prepare-pages-artifact.sh`: `docs/` 정적 파일과 generated appcast를 Pages artifact로 조립
 - `scripts/ci/classify-pr-changes.sh`: PR CI 변경 범위 flag 생성
+- `scripts/ci/detect-rhwp-studio-impact.sh`: upstream `rhwp` current..target diff에서 bundled studio/viewer 영향 path 감지
+- `scripts/ci/write-rhwp-studio-sync-pr-body.sh`: 자동 bundled `rhwp-studio` sync PR body 생성
+- `scripts/sync-rhwp-studio.sh`: upstream `rhwp-studio/dist`와 WASM 산출물을 HostApp bundled resource로 동기화
+- `scripts/verify-rhwp-studio-assets.sh`: bundled `rhwp-studio` manifest와 entrypoint asset 검증
 - `.github/workflows/pr-ci.yml`: PR 생성/갱신 시 기본 gate와 조건부 macOS/release helper 검증
 - `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum과 release delta checklist artifact 생성
 - `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, Pages deployment, release delta checklist artifact 생성
+- `.github/workflows/pages-docs-deploy.yml`: `main`의 `docs/**` 변경을 public Pages에 배포하고 기존 public appcast를 보존
+- `.github/workflows/rhwp-upstream-check.yml`: upstream `rhwp` release와 `rhwp-core.lock` 비교
+- `.github/workflows/rhwp-upstream-sync-pr.yml`: viewer/WASM/core 영향 release를 감지해 bundled `rhwp-studio` 업데이트 후보 PR 생성
 - `docs/updates/`, `docs/index.html`: 사용자용 업데이트 페이지와 최신 다운로드 진입점
-- public `https://postmelee.github.io/alhangeul-macos/appcast.xml`: Sparkle feed URL. release workflow가 generated appcast를 Pages artifact에 포함해 배포한다.
+- public `https://postmelee.github.io/alhangeul-macos/appcast.xml`: Sparkle feed URL. release workflow는 generated appcast를 Pages artifact에 포함해 배포하고, docs-only workflow는 public appcast를 보존해 stale `docs/appcast.xml` overwrite를 막는다.
 - `Casks/alhangeul-macos.rb`: Homebrew Cask source 초안
 - `rhwp-core.lock`, `Sources/HostApp/Resources/rhwp-studio/manifest.json`: core/viewer asset provenance
+
+## upstream 자동 sync PR 경계
+
+`rhwp Upstream Sync PR` workflow가 만든 PR은 bundled `rhwp-studio` 업데이트 후보일 뿐 public release가 아니다. 해당 PR은 `devel` 대상 PR CI에서 HostApp build, bundled asset 검증, Rust/core provenance verify, release helper dry-run을 통과해야 하며, 작업자는 manifest tag/commit과 upstream release 링크가 맞는지 확인한다.
+
+이 workflow는 signed/notarized DMG, GitHub Release, Sparkle stable appcast, Homebrew Cask 변경을 만들지 않는다. public release 포함 여부, release note 표기, rehearsal/publish workflow 실행은 별도 명시 승인 후 이 가이드의 release flow를 따른다.
 
 ## 전체 release flow
 
@@ -74,7 +87,7 @@
 ## public release 전 확정 항목
 
 - release version과 release candidate commit
-- `devel-webview`에서 `main`으로 반영할 release PR 범위
+- `devel`에서 `main`으로 반영할 release PR 범위
 - Developer ID 서명/notarization 실행 시점
 - GitHub Release를 draft/prerelease가 아닌 public release로 게시할 시점
 - Cask 초안의 `sha256 :no_check`를 public DMG 생성 후 실제 digest로 교체할 시점
@@ -112,6 +125,7 @@
 - [ ] DMG background가 720x460 PNG 기준인지 확인
 - [ ] release note에 `rhwp-core.lock`, `rhwp-studio` manifest, third-party notices 기준 기록
 - [ ] release note에 렌더링 경로, 알려진 한계, 수동 확인 항목 기록
+- [ ] release note의 주요 변경 사항이 `전체 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`로 구분되어 있고 release owner가 실제 사용자-facing 내용으로 보정했는지 확인
 - [ ] release note template 필수 섹션 검증
 - [ ] 서명/공증 검증 완료
 - [ ] GitHub Release note 작성
@@ -119,10 +133,12 @@
 - [ ] README 최신 공개 릴리즈 요약 갱신 여부 결정
 - [ ] `SPARKLE_ED_PRIVATE_KEY` secret 등록 확인
 - [ ] repository Pages source가 `workflow`인지 확인
-- [ ] `github-pages` environment가 release tag ref `v*`를 허용하는지 확인
+- [ ] `github-pages` environment가 docs-only `main` branch와 release tag ref `v*`를 허용하는지 확인
+- [ ] release workflow와 docs-only workflow가 `pages-deploy` concurrency group으로 Pages deployment를 취소 없이 직렬화하는지 확인
 - [ ] `Release Publish DMG` workflow를 공식 release 기준 `draft=false`, `prerelease=false`로 실행
 - [ ] `deploy-pages` job이 성공하고 `page_url`이 `https://postmelee.github.io/alhangeul-macos/`를 가리키는지 확인
 - [ ] public `https://postmelee.github.io/alhangeul-macos/appcast.xml`이 새 stable item과 Sparkle EdDSA signature를 제공하는지 확인
+- [ ] docs-only Pages workflow가 public appcast를 보존하며 stale repository `docs/appcast.xml` fallback을 사용하지 않는지 확인
 - [ ] Pages 다운로드 버튼과 appcast URL이 public DMG asset을 가리키는지 확인
 - [ ] Pages, Sparkle appcast, Homebrew Cask가 아키텍처별 DMG 분기 없이 같은 public universal DMG URL을 기준으로 안내되는지 확인
 - [ ] Homebrew 배포 시 `scripts/update-cask-sha256.sh`로 Cask version/sha256 갱신
@@ -141,4 +157,4 @@
 4. 원인, 영향 범위, 재발 방지책을 `mydocs/troubleshootings/`에 기록한다.
 5. 수정 PR을 출시 대상 통합 브랜치로 merge한 뒤 새 릴리스 후보를 만든다.
 
-현재 WebView-backed release line 기준은 `devel-webview`이며, native renderer 장기 브랜치에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `devel`에 후속 반영한다.
+현재 WebView-backed release line 기준은 `devel`이며, HostApp native macOS shell/Skia renderer/Swift overlay 장기 브랜치에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `native-viewer-editor`에 후속 반영한다.
