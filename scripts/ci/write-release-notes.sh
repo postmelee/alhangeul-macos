@@ -43,6 +43,7 @@ fi
 
 RHWP_TAG="$(bash "$ROOT/scripts/ci/read-rhwp-core-lock.sh" rhwp_release_tag)"
 RHWP_COMMIT="$(bash "$ROOT/scripts/ci/read-rhwp-core-lock.sh" rhwp_commit)"
+RHWP_RELEASE_URL="https://github.com/edwardkim/rhwp/releases/tag/$RHWP_TAG"
 STUDIO_MANIFEST="Sources/HostApp/Resources/rhwp-studio/manifest.json"
 THIRD_PARTY_NOTICES="THIRD_PARTY_LICENSES.md"
 FONT_NOTICES="Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md"
@@ -56,6 +57,7 @@ done
 
 STUDIO_TAG="$(plutil -extract source_release_tag raw -o - "$ROOT/$STUDIO_MANIFEST")"
 STUDIO_COMMIT="$(plutil -extract source_resolved_commit raw -o - "$ROOT/$STUDIO_MANIFEST")"
+STUDIO_RELEASE_URL="https://github.com/edwardkim/rhwp/releases/tag/$STUDIO_TAG"
 
 mkdir -p "$(dirname "$OUTPUT_FILE")"
 cat > "$OUTPUT_FILE" <<EOF
@@ -98,7 +100,22 @@ cat > "$OUTPUT_FILE" <<EOF
 
 ## 이번 버전의 주요 변경 사항
 
-- 직전 공개 릴리즈 대비 사용자-facing 변경은 release delta checklist를 기준으로 정리합니다.
+### 전체 요약
+
+- Release owner는 직전 공개 릴리즈 대비 사용자가 체감할 변경을 3~5개 bullet로 보정합니다.
+- \`rhwp\` 반영과 알한글 앱 자체 변경이 함께 만든 결과를 먼저 씁니다.
+- 자동 생성된 release delta checklist는 초안이며, 이 섹션의 사용자-facing 요약을 대체하지 않습니다.
+
+### 포함된 rhwp 변화
+
+- 포함된 \`rhwp\` core: [\`$RHWP_TAG\`]($RHWP_RELEASE_URL) (\`$RHWP_COMMIT\`)
+- bundled \`rhwp-studio\`: [\`$STUDIO_TAG\`]($STUDIO_RELEASE_URL) (\`$STUDIO_COMMIT\`)
+- Upstream \`rhwp\` 또는 bundled \`rhwp-studio\` 변경 중 문서 열기, 렌더링, HWP/HWPX 호환성, viewer/editor 동작에 영향을 주는 내용을 release owner가 보정합니다.
+- 직전 public release와 bundled \`rhwp\` 버전이 같으면 "이번 릴리즈에서 bundled \`rhwp\` core와 \`rhwp-studio\` 버전 변경은 없습니다."라고 짧게 적습니다.
+
+### 알한글 앱 변화
+
+- HostApp, Quick Look, Finder thumbnail, 저장/다른 이름 저장, PDF/인쇄/공유, 설치, 업데이트, About, DMG, Homebrew, Pages/Sparkle 변경을 release owner가 보정합니다.
 - 연결된 Issue/PR과 기여자는 \`$RELEASE_DETAIL_DOC\`의 릴리즈 상세 기록을 기준으로 확인합니다.
 - 문서 전용 변경과 설치본 smoke가 필요한 변경은 release delta checklist에서 구분합니다.
 
