@@ -2,6 +2,7 @@ use std::ffi::{c_char, CString};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::ptr;
 
+use rhwp::document_core::queries::rendering::PngExportOptions;
 use rhwp::DocumentCore;
 
 macro_rules! ffi_guard {
@@ -25,6 +26,18 @@ pub struct RhwpHandle {
 pub struct RhwpPageSize {
     pub width_pt: f64,
     pub height_pt: f64,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum RhwpRenderStatus {
+    RHWP_RENDER_OK = 0,
+    RHWP_RENDER_INVALID_HANDLE = 1,
+    RHWP_RENDER_INVALID_OUTPUT = 2,
+    RHWP_RENDER_INVALID_PAGE_INDEX = 3,
+    RHWP_RENDER_INVALID_OPTIONS = 4,
+    RHWP_RENDER_FAILURE = 5,
 }
 
 #[no_mangle]
@@ -147,6 +160,69 @@ pub extern "C" fn rhwp_render_page_tree(handle: *const RhwpHandle, page: u32) ->
             Err(_) => ptr::null_mut(),
         }
     })
+}
+
+#[no_mangle]
+pub extern "C" fn rhwp_render_page_png(
+    handle: *const RhwpHandle,
+    page: u32,
+    scale: f64,
+    max_dimension: u32,
+    out_data: *mut *mut u8,
+    out_len: *mut usize,
+) -> RhwpRenderStatus {
+    if out_data.is_null() || out_len.is_null() {
+        return RhwpRenderStatus::RHWP_RENDER_INVALID_OUTPUT;
+    }
+
+    unsafe {
+        *out_data = ptr::null_mut();
+        *out_len = 0;
+    }
+
+    if handle.is_null() {
+        return RhwpRenderStatus::RHWP_RENDER_INVALID_HANDLE;
+    }
+    if !scale.is_finite() || scale < 0.0 || max_dimension > i32::MAX as u32 {
+        return RhwpRenderStatus::RHWP_RENDER_INVALID_OPTIONS;
+    }
+
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let h = unsafe { &*handle };
+        if page >= h.doc.page_count() {
+            return RhwpRenderStatus::RHWP_RENDER_INVALID_PAGE_INDEX;
+        }
+
+        let options = PngExportOptions {
+            scale: if scale == 0.0 { None } else { Some(scale) },
+            max_dimension: if max_dimension == 0 {
+                None
+            } else {
+                Some(max_dimension as i32)
+            },
+            vlm_target: None,
+            dpi: None,
+            font_paths: Vec::new(),
+        };
+
+        match h.doc.render_page_png_native_with_export_options(page, &options) {
+            Ok(bytes) if !bytes.is_empty() => {
+                let mut owned = bytes.into_boxed_slice();
+                let owned_len = owned.len();
+                let owned_ptr = owned.as_mut_ptr();
+                std::mem::forget(owned);
+
+                unsafe {
+                    *out_data = owned_ptr;
+                    *out_len = owned_len;
+                }
+                RhwpRenderStatus::RHWP_RENDER_OK
+            }
+            Ok(_) | Err(_) => RhwpRenderStatus::RHWP_RENDER_FAILURE,
+        }
+    }));
+
+    result.unwrap_or(RhwpRenderStatus::RHWP_RENDER_FAILURE)
 }
 
 #[no_mangle]
