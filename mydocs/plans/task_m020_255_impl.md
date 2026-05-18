@@ -17,6 +17,7 @@
 - C ABI는 Swift fallback 진단이 가능한 status code를 반환한다. 실패를 단순 `false`로만 숨기지 않는다.
 - 초기 PNG option은 Quick Look/Thumbnail에 필요한 `scale`, `max_dimension`에 한정한다. `font_paths`, `dpi`, `vlm_target`은 ABI 확장 후보로 남긴다.
 - generated header, symbol lock, `Rhwp.xcframework`, staticlib, `rhwp-core.lock`은 같은 stage에서 함께 갱신한다.
+- `rhwp-core.lock`에는 release tag/commit뿐 아니라 `native-skia` feature 활성화 상태도 검증 가능한 형태로 기록한다.
 
 ## ABI 초안
 
@@ -156,15 +157,17 @@ Task #255 Stage 2: RustBridge Skia PNG FFI 구현
 - `Frameworks/Rhwp.xcframework/**`
 - `Frameworks/universal/librhwp.a`
 - `rhwp-core.lock`
+- `scripts/build-rust-macos.sh`
 
 작업:
 
 1. `rhwp-ffi-symbols.txt`에 새 symbol을 추가한다.
-2. `./scripts/build-rust-macos.sh --update-lock`을 실행한다.
-3. cbindgen header와 modulemap header에 새 enum/function이 생성됐는지 확인한다.
-4. `Frameworks/generated_rhwp_symbols.txt`와 expected symbol set이 일치하는지 확인한다.
-5. `rhwp-core.lock`의 source provenance가 기존 release tag/commit을 유지하면서 artifact hash/size만 의도대로 바뀌었는지 확인한다.
-6. staticlib와 xcframework 크기 변화를 기록한다.
+2. `scripts/build-rust-macos.sh`가 `rhwp_enabled_features = "native-skia"` 같은 feature provenance를 기록하고 verify 단계에서 `Cargo.toml`의 feature 활성화 상태를 검증하도록 보강한다.
+3. `./scripts/build-rust-macos.sh --update-lock`을 실행한다.
+4. cbindgen header와 modulemap header에 새 enum/function이 생성됐는지 확인한다.
+5. `Frameworks/generated_rhwp_symbols.txt`와 expected symbol set이 일치하는지 확인한다.
+6. `rhwp-core.lock`의 source provenance가 기존 release tag/commit을 유지하고 feature provenance와 artifact hash/size가 의도대로 바뀌었는지 확인한다.
+7. staticlib와 xcframework 크기 변화를 기록한다.
 
 검증:
 
@@ -173,13 +176,15 @@ Task #255 Stage 2: RustBridge Skia PNG FFI 구현
 ./scripts/build-rust-macos.sh --verify-lock
 rg -n "RhwpRenderStatus|rhwp_render_page_png|RHWP_RENDER_OK" \
   Frameworks/generated_rhwp.h Frameworks/modulemap/rhwp.h rhwp-ffi-symbols.txt Frameworks/generated_rhwp_symbols.txt
+rg -n "rhwp_enabled_features|native-skia" rhwp-core.lock RustBridge/Cargo.toml scripts/build-rust-macos.sh
 du -sh Frameworks/universal/librhwp.a Frameworks/Rhwp.xcframework
-git diff --check -- rhwp-core.lock rhwp-ffi-symbols.txt Frameworks/generated_rhwp.h Frameworks/generated_rhwp_symbols.txt Frameworks/modulemap/rhwp.h
+git diff --check -- rhwp-core.lock rhwp-ffi-symbols.txt Frameworks/generated_rhwp.h Frameworks/generated_rhwp_symbols.txt Frameworks/modulemap/rhwp.h scripts/build-rust-macos.sh
 ```
 
 완료 조건:
 
 - generated header와 symbol lock이 새 ABI를 반영한다.
+- `rhwp-core.lock`과 verify path가 `native-skia` feature 활성화 상태를 검증한다.
 - `Rhwp.xcframework`와 universal staticlib가 재생성된다.
 - lock verification이 통과한다.
 - size 변화가 Stage 3 보고서에 남는다.
