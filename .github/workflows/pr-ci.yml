@@ -210,32 +210,32 @@ jobs:
         run: |
           set -euo pipefail
           scripts/ci/write-release-notes.sh \
-            0.1.2 \
+            0.1.3 \
             0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
-            build.noindex/release/release-notes-0.1.2.md
+            build.noindex/release/release-notes-0.1.3.md
           scripts/ci/check-release-notes-template.sh \
-            build.noindex/release/release-notes-0.1.2.md
+            build.noindex/release/release-notes-0.1.3.md
 
       - name: Verify release delta checklist
         shell: bash
         run: |
           set -euo pipefail
           scripts/ci/write-release-delta-checklist.sh \
-            v0.1.1 \
+            v0.1.2 \
             HEAD \
-            build.noindex/release/delta-checklist-0.1.2.md
+            build.noindex/release/delta-checklist-0.1.3.md
 
       - name: Verify Sparkle appcast helper
         shell: bash
         run: |
           set -euo pipefail
           scripts/ci/write-sparkle-appcast.sh \
-            --version 0.1.2 \
-            --build 8 \
-            --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.2/alhangeul-macos-0.1.2.dmg \
+            --version 0.1.3 \
+            --build 9 \
+            --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.3/alhangeul-macos-0.1.3.dmg \
             --length 1 \
             --ed-signature dummy-ed-signature \
-            --release-notes-url https://postmelee.github.io/alhangeul-macos/updates/v0.1.2.html \
+            --release-notes-url https://postmelee.github.io/alhangeul-macos/updates/v0.1.3.html \
             --pub-date "Fri, 08 May 2026 09:00:00 +0000" \
             --minimum-system-version 12.0 \
             --output build.noindex/release/appcast.xml
