@@ -145,10 +145,7 @@ private final class HwpPDFKitLazyProbeRecorder {
     private let pageSize: CGSize
     private let sessionID = UUID().uuidString
     private let startTime = DispatchTime.now().uptimeNanoseconds
-    private let outputDirectory = URL(
-        fileURLWithPath: "/private/tmp/rhwp-task87-pdfkit-extension-probe",
-        isDirectory: true
-    )
+    private let outputDirectory: URL
     private let latestSummaryURL: URL
     private let lock = NSLock()
     private var events: [Event] = []
@@ -158,6 +155,7 @@ private final class HwpPDFKitLazyProbeRecorder {
         self.filename = filename
         self.pageCount = pageCount
         self.pageSize = pageSize
+        self.outputDirectory = Self.makeOutputDirectory()
         self.summaryURL = outputDirectory.appendingPathComponent("summary-\(sessionID).txt")
         self.latestSummaryURL = outputDirectory.appendingPathComponent("latest-summary.txt")
         try? FileManager.default.createDirectory(
@@ -165,6 +163,22 @@ private final class HwpPDFKitLazyProbeRecorder {
             withIntermediateDirectories: true
         )
         writeSummary(events: [])
+    }
+
+    private static func makeOutputDirectory() -> URL {
+        if let cachesDirectory = FileManager.default.urls(
+            for: .cachesDirectory,
+            in: .userDomainMask
+        ).first {
+            return cachesDirectory.appendingPathComponent(
+                "rhwp-task87-pdfkit-extension-probe",
+                isDirectory: true
+            )
+        }
+        return FileManager.default.temporaryDirectory.appendingPathComponent(
+            "rhwp-task87-pdfkit-extension-probe",
+            isDirectory: true
+        )
     }
 
     func record(
