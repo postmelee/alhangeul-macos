@@ -111,6 +111,9 @@ struct QuickLookPDFKitLazyProbe {
         let dataRepresentationBytes = recorder.withPhase("dataRepresentation") {
             document.dataRepresentation()?.count
         }
+        guard let dataRepresentationBytes = dataRepresentationBytes else {
+            throw ProbeError(description: "PDFDocument.dataRepresentation returned nil")
+        }
 
         try recorder.withPhase("directDraw") {
             try drawAllPages(document: document, pageSize: configuration.pageSize)
@@ -243,7 +246,7 @@ struct QuickLookPDFKitLazyProbe {
     private static func writeSummary(
         configuration: ProbeConfiguration,
         document: PDFDocument,
-        dataRepresentationBytes: Int?,
+        dataRepresentationBytes: Int,
         recorder: DrawRecorder
     ) throws {
         var lines: [String] = []
@@ -253,7 +256,7 @@ struct QuickLookPDFKitLazyProbe {
         lines.append("PagesRequested: \(configuration.pageCount)")
         lines.append("DocumentPageCount: \(document.pageCount)")
         lines.append("PageSize: \(formatSize(configuration.pageSize))")
-        lines.append("DataRepresentationBytes: \(dataRepresentationBytes.map(String.init) ?? "nil")")
+        lines.append("DataRepresentationBytes: \(dataRepresentationBytes)")
         lines.append("InsertDrawEvents: \(recorder.eventCount(phase: "insert"))")
         lines.append("DataRepresentationDrawEvents: \(recorder.eventCount(phase: "dataRepresentation"))")
         lines.append("DirectDrawEvents: \(recorder.eventCount(phase: "directDraw"))")

@@ -20,13 +20,11 @@ PDFKit document reply 경로는 Task #87의 목표인 "보이는 page 중심 laz
 
 따라서 `QLPreviewReply(forPDFWithPageSize:)`에 custom `PDFDocument`를 반환하더라도 Quick Look이 PDFDocument를 page view처럼 lazily 소비한다고 보기 어렵다. 현재 확인한 동작은 data-based PDF reply와 유사하게 최초 load 시 전체 PDF bytes를 준비하는 흐름에 가깝다.
 
-## 변경 파일과 영향 범위
+## 변경 파일 목록과 영향 범위
 
 | 파일 | 내용 |
 | --- | --- |
 | `scripts/quicklook-pdfkit-lazy-probe.swift` | standalone PDFKit draw hook 관측 helper 추가 |
-| `Sources/QLExtension/HwpPreviewProvider.swift` | Stage 3/4의 debug-only PDFKit probe 분기를 Stage 5에서 제거하고 기존 PNG/PDF data reply 흐름으로 복귀 |
-| `Alhangeul.xcodeproj/project.pbxproj` | `xcodegen generate` 결과로 제거된 probe source 참조 반영 |
 | `mydocs/plans/task_m020_87.md` | 수행계획서 |
 | `mydocs/plans/task_m020_87_impl.md` | 구현계획서 |
 | `mydocs/working/task_m020_87_stage1.md` | 현행 Quick Look PDF reply와 PDFKit 후보 inventory |
@@ -36,7 +34,7 @@ PDFKit document reply 경로는 Task #87의 목표인 "보이는 page 중심 laz
 | `mydocs/report/task_m020_87_report.md` | 최종 결론과 handoff 정리 |
 | `mydocs/orders/20260518.md` | #87 오늘할일 완료 처리 |
 
-Stage 3/4에서 제품 소스에 추가했던 `Sources/QLExtension/HwpPDFKitLazyPreviewProbe.swift`는 최종 제품 코드에 남기지 않고 제거했다. 관측 재현에는 `scripts/quicklook-pdfkit-lazy-probe.swift`와 단계 보고서를 사용한다.
+Stage 3/4에서 제품 소스에 추가했던 `Sources/QLExtension/HwpPDFKitLazyPreviewProbe.swift`, `Sources/QLExtension/HwpPreviewProvider.swift`의 debug-only 분기, `Alhangeul.xcodeproj/project.pbxproj`의 probe source 참조는 Stage 5에서 제거했다. 따라서 최종 PR net diff에는 제품 소스와 Xcode project 변경이 남지 않는다. 관측 재현에는 `scripts/quicklook-pdfkit-lazy-probe.swift`와 단계 보고서를 사용한다.
 
 ## 단계별 결과
 
