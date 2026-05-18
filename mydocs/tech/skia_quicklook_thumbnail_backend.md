@@ -141,3 +141,142 @@ extension-safe `OSLog.Logger` 필드 후보는 다음과 같다.
 - `invalidPageSize`와 `fileSizeFallback`은 renderer fallback이 아니라 입력/정책 fallback으로 취급한다.
 - Thumbnail cache key에는 backend/render signature를 포함해야 한다.
 - `Skia first`와 `Skia default`는 #259 readiness gate 통과 전에는 열지 않는다.
+
+## 후속 이슈 의존 순서
+
+Skia optional backend는 다음 순서로 진행한다.
+
+```text
+#255 ABI gate
+-> #256 Shared renderer gate
+-> #257 Quick Look integration gate
+-> #258 Thumbnail integration gate
+-> #259 release readiness gate
+```
+
+#257과 #258은 #256의 Shared renderer contract가 고정된 뒤에는 서로 독립적으로 진행할 수 있다. 다만 한 작업자가 순차 진행할 때는 Quick Look의 단일/다중 page path를 먼저 검증한 뒤 Thumbnail cache와 scale 정책을 붙이는 순서가 리뷰하기 쉽다.
+
+## #255 ABI gate
+
+#255는 RustBridge와 binary provenance가 소유한다.
+
+입력 조건:
+
+- `rhwp-core.lock`과 `RustBridge/Cargo.toml`이 `rhwp v0.7.11` release tag 기준으로 정합해야 한다.
+- Stage 2 failure taxonomy 중 `ffiUnavailable`, `skiaRenderFailure`, `invalidPageSize`를 ABI 설계 입력으로 사용한다.
+- upstream `DocumentCore::render_page_png_native_with_export_options`와 `PngExportOptions`의 `scale`, `max_dimension`, `font_paths` 대응 방식을 확인한다.
+
+완료 조건:
+
+- Swift에서 호출 가능한 Skia PNG C ABI가 존재한다.
+- null handle, page out of range, invalid page size, Skia render failure가 안전하게 실패한다.
+- Rust가 넘긴 PNG byte buffer는 기존 `rhwp_free_bytes` 규칙과 정합한다.
+- `Frameworks/generated_rhwp.h`, `Rhwp.xcframework`, `rhwp-ffi-symbols.txt`, `rhwp-core.lock`이 새 ABI와 일치한다.
+- `native-skia` feature 도입 전후 Rust staticlib 또는 `Rhwp.xcframework` 크기 변화가 기록된다.
+
+비책임:
+
+- `RhwpDocument` Swift wrapper와 `HwpPageImageRenderer` backend 선택은 #256에서 처리한다.
+- Quick Look/Thumbnail provider 정책은 #257/#258에서 처리한다.
+
+## #256 Shared renderer gate
+
+#256은 Swift bridge wrapper와 Shared renderer backend abstraction이 소유한다.
+
+입력 조건:
+
+- #255의 Skia PNG ABI, generated header, symbol lock, binary provenance가 완료되어 있어야 한다.
+- Stage 2의 backend 값 `coreGraphics`/`skiaPNG`와 policy 값 `coreGraphicsOnly`/`skiaOptIn`을 구현 입력으로 사용한다.
+- 현재 `HwpRenderedPage` 호출부가 유지되어야 한다.
+
+완료 조건:
+
+- `RhwpDocument`에 Skia PNG bytes Swift wrapper가 존재한다.
+- `HwpPageImageRenderer`가 backend를 명시적으로 선택할 수 있다.
+- `Skia opt-in`에서 Skia success는 기존 `HwpRenderedPage` 계약으로 반환된다.
+- `ffiUnavailable`, `skiaRenderFailure`, `pngDecodeFailure`, `memoryTimeoutFallback`에서 CoreGraphics fallback이 동작한다.
+- `backendUsed`, `fallbackReason`, `pageSize`, `pixelSize`, `pngBytes`, `durationMs`를 기록할 수 있다.
+- 대표 샘플 1개 이상에서 Skia와 CoreGraphics 산출 차이가 기록된다.
+
+비책임:
+
+- Quick Look reply 선택과 Thumbnail cache key 변경은 #257/#258에서 처리한다.
+- `Skia first` 또는 `Skia default` 전환 결정은 #259에서 처리한다.
+
+## #257 Quick Look integration gate
+
+#257은 Quick Look preview extension surface가 소유한다.
+
+입력 조건:
+
+- #256의 Shared renderer가 `coreGraphicsOnly`와 `skiaOptIn`을 모두 지원해야 한다.
+- `HwpPreviewPDFRenderer`가 Shared renderer contract를 통해 backend와 fallback result를 받을 수 있어야 한다.
+- file size guard, empty document, invalid page size fallback 정책은 기존과 동일하게 유지되어야 한다.
+
+완료 조건:
+
+- 단일 페이지 Quick Look PNG reply가 `Skia opt-in`에서 Skia backend로 성공할 수 있다.
+- Skia 실패 또는 PNG decode 실패 시 Quick Look text fallback으로 바로 가지 않고 CoreGraphics fallback을 먼저 사용한다.
+- 다중 페이지 Quick Look PDF는 초기에는 CoreGraphics 유지 또는 별도 opt-in flag로 검증한다.
+- 다중 페이지 PDF에 Skia page image를 넣는 경우 page별 fallback reason이 기록된다.
+- Quick Look smoke 결과와 known limitation 후보가 보고서에 남는다.
+
+비책임:
+
+- Finder Thumbnail cache, pixel bucket, scale/max-dimension 정책은 #258에서 처리한다.
+- release default 전환은 #259에서 처리한다.
+
+## #258 Thumbnail integration gate
+
+#258은 Finder Thumbnail extension surface가 소유한다.
+
+입력 조건:
+
+- #256의 Shared renderer가 `skiaPNG` backend를 `maximumPixelSize`와 함께 호출할 수 있어야 한다.
+- Stage 2의 Thumbnail policy에 따라 긴 변 `maximumPixelSize`를 `PngExportOptions.max_dimension`에 매핑할 수 있어야 한다.
+- embedded thumbnail policy와 기존 fallback tile 정책이 유지되어야 한다.
+
+완료 조건:
+
+- Finder thumbnail이 `Skia opt-in`에서 요청 크기에 맞는 Skia bitmap을 생성할 수 있다.
+- `HwpThumbnailRenderCache` key가 file identity, pixel bucket, backend 또는 render signature를 반영한다.
+- Skia 실패 또는 PNG decode 실패 시 fallback tile로 바로 가지 않고 CoreGraphics fallback을 먼저 사용한다.
+- cache hit/miss가 backend 선택과 충돌하지 않는다.
+- 대표 크기별 thumbnail smoke 결과가 보고서에 남는다.
+
+비책임:
+
+- Quick Look provider와 다중 페이지 PDF path는 #257에서 처리한다.
+- 전체 visual/performance/package readiness 판단은 #259에서 처리한다.
+
+## #259 release readiness gate
+
+#259는 default 전환 또는 release 포함 여부를 판단하는 검증 gate다.
+
+입력 조건:
+
+- #255 ABI gate, #256 Shared renderer gate, #257 Quick Look integration gate, #258 Thumbnail integration gate가 완료되어야 한다.
+- 각 이슈가 남긴 binary size, visual diff, smoke, latency, memory, known limitation 결과를 수집한다.
+
+완료 조건:
+
+- 대표 HWP/HWPX 샘플군의 Skia vs CoreGraphics vs reference 결과가 기록된다.
+- Quick Look과 Thumbnail 각각의 latency, memory, decode cost가 기록된다.
+- `native-skia` feature 전후 staticlib, `Rhwp.xcframework`, app/package size 변화가 기록된다.
+- `Skia first` 전환, `Skia opt-in` 유지, 또는 보류 판단이 근거와 함께 남는다.
+- release note known limitation 초안이 준비된다.
+
+비책임:
+
+- renderer implementation 자체를 추가하거나 수정하지 않는다.
+- signed/notarized public release 실행은 별도 명시 지시 없이는 포함하지 않는다.
+
+## GitHub issue 본문 업데이트 후보
+
+현재 #255-#259 본문은 큰 책임 경계를 이미 포함한다. 다만 후속 이슈 시작 직전에 다음 보강을 검토한다.
+
+- #255: Stage 2 failure taxonomy의 `ffiUnavailable`, `skiaRenderFailure`, `invalidPageSize` 명칭을 ABI 오류 결과 표에 반영.
+- #256: `backendUsed`, `fallbackReason`, `pngBytes`, `durationMs` 진단 필드와 Thumbnail cache key 영향이 #258로 넘어간다는 점을 명시.
+- #257: 다중 페이지 PDF의 Skia 적용은 초기 default가 아니라 별도 opt-in 검증으로 시작한다고 명시.
+- #258: cache key에 backend/render signature를 포함한다는 완료 조건을 명시.
+- #259: #255-#258 산출물을 입력으로 받는 release readiness gate임을 명시.
