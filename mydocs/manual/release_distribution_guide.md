@@ -125,6 +125,7 @@
 - [ ] DMG background가 720x460 PNG 기준인지 확인
 - [ ] release note에 `rhwp-core.lock`, `rhwp-studio` manifest, third-party notices 기준 기록
 - [ ] release note에 렌더링 경로, 알려진 한계, 수동 확인 항목 기록
+- [ ] release note의 주요 변경 사항이 `전체 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`로 구분되어 있고 release owner가 실제 사용자-facing 내용으로 보정했는지 확인
 - [ ] release note template 필수 섹션 검증
 - [ ] 서명/공증 검증 완료
 - [ ] GitHub Release note 작성
@@ -156,4 +157,4 @@
 4. 원인, 영향 범위, 재발 방지책을 `mydocs/troubleshootings/`에 기록한다.
 5. 수정 PR을 출시 대상 통합 브랜치로 merge한 뒤 새 릴리스 후보를 만든다.
 
-현재 WebView-backed release line 기준은 `devel`이며, native renderer 장기 브랜치에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `native-viewer-editor`에 후속 반영한다.
+현재 WebView-backed release line 기준은 `devel`이며, HostApp native macOS shell/Skia renderer/Swift overlay 장기 브랜치에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `native-viewer-editor`에 후속 반영한다.
