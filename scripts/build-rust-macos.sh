@@ -213,6 +213,21 @@ rhwp_dependency_mode() {
   fi
 }
 
+cargo_toml_rhwp_enabled_features() {
+  local line
+  local features
+  line="$(cargo_toml_rhwp_line)"
+  if [[ "$line" != *"features"* || "$line" != *"["* || "$line" != *"]"* ]]; then
+    echo ""
+    return
+  fi
+  features="${line#*[}"
+  features="${features%%]*}"
+  features="${features//\"/}"
+  features="${features// /}"
+  echo "$features"
+}
+
 cargo_lock_rhwp_source() {
   awk -F' = ' '
     /^\[\[package\]\]/ {
@@ -373,6 +388,10 @@ current_rhwp_release_tag() {
   esac
 }
 
+current_rhwp_enabled_features() {
+  cargo_toml_rhwp_enabled_features
+}
+
 ensure_rhwp_source_available() {
   if [ "$(rhwp_dependency_mode)" = "path" ]; then
     if [ ! -d "$RHWP_ROOT/.git" ] && [ ! -f "$RHWP_ROOT/.git" ]; then
@@ -393,11 +412,13 @@ write_lock_file() {
   local release_status
   local latest_checked_release_tag
   local latest_checked_release_commit
+  local enabled_features
   built_at="$(TZ=UTC date '+%Y-%m-%dT%H:%M:%SZ')"
   repo="$(current_rhwp_repo)"
   commit="$(current_rhwp_commit)"
   ref_kind="$(current_rhwp_ref_kind)"
   release_tag="$(current_rhwp_release_tag)"
+  enabled_features="$(current_rhwp_enabled_features)"
   release_status="$(existing_lock_scalar rhwp_release_transition_status)"
   latest_checked_release_tag="$(existing_lock_scalar rhwp_latest_checked_release_tag)"
   latest_checked_release_commit="$(existing_lock_scalar rhwp_latest_checked_release_commit)"
@@ -425,6 +446,7 @@ write_lock_file() {
       echo "rhwp_release_tag = \"$release_tag\""
     fi
     echo "rhwp_commit = \"$commit\""
+    echo "rhwp_enabled_features = \"$enabled_features\""
     if [ "$ref_kind" != "release-tag" ]; then
       echo "rhwp_release_transition_status = \"$release_status\""
       if [ -n "$latest_checked_release_tag" ]; then
@@ -516,6 +538,17 @@ verify_lock_file() {
     else
       echo "Run: cargo update --manifest-path $CARGO_TOML -p rhwp" >&2
     fi
+    exit 1
+  fi
+
+  local expected_enabled_features
+  local actual_enabled_features
+  expected_enabled_features="$(lock_scalar rhwp_enabled_features)"
+  actual_enabled_features="$(current_rhwp_enabled_features)"
+  if [ "$expected_enabled_features" != "$actual_enabled_features" ]; then
+    echo "ERROR: Cargo.toml mismatch: rhwp enabled features differ from $LOCK_FILE" >&2
+    echo "Expected rhwp_enabled_features: $expected_enabled_features" >&2
+    echo "Actual rhwp_enabled_features:   $actual_enabled_features" >&2
     exit 1
   fi
 
