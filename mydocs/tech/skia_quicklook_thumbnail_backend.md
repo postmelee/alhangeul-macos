@@ -280,3 +280,116 @@ Skia optional backend는 다음 순서로 진행한다.
 - #257: 다중 페이지 PDF의 Skia 적용은 초기 default가 아니라 별도 opt-in 검증으로 시작한다고 명시.
 - #258: cache key에 backend/render signature를 포함한다는 완료 조건을 명시.
 - #259: #255-#258 산출물을 입력으로 받는 release readiness gate임을 명시.
+
+## readiness 샘플군
+
+#259는 모든 저장소 샘플을 매번 full visual diff하지 않는다. default 전환 판단에 필요한 대표군을 먼저 고정하고, 실패가 나온 계열만 확장한다.
+
+| 그룹 | 기본 샘플 | 목적 |
+|---|---|---|
+| 단일 페이지 | `samples/basic/KTX.hwp`, `samples/basic/request.hwp` | 빠른 Quick Look PNG reply, 기본 한글 text, 표/간단 layout |
+| 다중 페이지 | `samples/hwp-multi-001.hwp`, `samples/basic/exam_math.hwp`, `samples/hwpx/hwpx-01.hwpx` | Quick Look bitmap PDF, page loop, HWPX path |
+| 이미지 포함 | `samples/hwp-img-001.hwp`, `samples/img-start-001.hwp` | Skia PNG image replay, decode cost, crop/scale 회귀 |
+| 수식/도형 | `samples/eq-01.hwp`, `samples/group-drawing-02.hwp`, `samples/draw-group.hwp` | upstream Skia equation/vector replay와 Swift CoreGraphics 차이 확인 |
+| form/raw object 후보 | `samples/form-01.hwp`, `samples/hwpx/form-002.hwpx`, `samples/group-box.hwp` | form control, placeholder, object fallback 양상 확인 |
+| text/font 민감 | `samples/footnote-01.hwp`, `samples/basic/shortcut.hwp`, `samples/exam_kor.hwp`, `samples/lseg-02-mixed.hwp` | font fallback, footnote, control mark, line segment/spacing 차이 확인 |
+| package/smoke 기본 | `samples/basic/KTX.hwp`, `samples/basic/request.hwp`, `samples/exam_kor.hwp` | `validate-stage3-render.sh` 기본 smoke와 비교 가능한 최소 회귀 세트 |
+
+외부 개인 경로 샘플은 #259 보고서에 참고로만 기록하고, release readiness 기준은 저장소 `samples/` 파일을 우선 사용한다.
+
+## visual readiness 기준
+
+visual gate는 pixel diff 숫자 하나로 통과/실패를 결정하지 않는다. Skia, CoreGraphics, core SVG/rhwp-studio 기준의 차이를 함께 보고 hard fail과 허용 가능한 raster 차이를 분리한다.
+
+Hard fail:
+
+- Skia render가 crash, hang, timeout, empty PNG, decode failure로 끝난다.
+- page size 또는 aspect ratio가 CoreGraphics 기준과 다르다.
+- 본문, 표, 이미지, 수식, form control 중 주요 구조가 통째로 누락된다.
+- 잘림, 좌우/상하 반전, page 전체 offset, 투명 배경 같은 전체 page 계열 오류가 보인다.
+- Skia 실패 뒤 CoreGraphics fallback이 동작하지 않는다.
+
+Pixel diff triage:
+
+| 구간 | 의미 | 조치 |
+|---|---|---|
+| `0-1%` changed pixels | 보통 antialias/rasterizer 차이 | summary에 기록하고 통과 후보 |
+| `1-5%` changed pixels | text edge, 1px rounding, 일부 object 차이 가능 | diff PNG와 원본 이미지를 눈검증 |
+| `5-10%` changed pixels | text-heavy 또는 수식/도형 문서에서 흔할 수 있으나 구조 확인 필요 | sample별 known difference 또는 후속 이슈로 분류 |
+| `10%+` changed pixels | 큰 구조 차이 가능성이 높음 | default 전환 차단. 원인 분리 후 재검증 |
+
+이 구간은 자동 release gate가 아니라 triage 기준이다. 예를 들어 text-heavy 문서는 antialias 차이만으로 diff가 커질 수 있으므로, 구조 누락이 없고 CoreGraphics보다 Skia가 reference에 가까운 경우에는 known difference로 분류할 수 있다. 반대로 diff 비율이 낮아도 핵심 이미지나 수식 하나가 누락되면 hard fail이다.
+
+사용 도구:
+
+- `./scripts/validate-stage3-render.sh`: 기본 native renderer smoke. Skia default 판단 전에도 CoreGraphics fallback baseline이 깨지지 않았는지 확인한다.
+- `./scripts/render-debug-compare.sh`: core SVG, render tree JSON, native PNG, optional diff PNG를 생성한다.
+- `./scripts/visual-compare-quicklook-renderers.sh`: Quick Look 관련 native bitmap과 SVG/PDF 후보를 비교하는 기존 visual summary 도구다. Skia용 입력이 준비되면 같은 summary 형식으로 확장하거나 결과 형식을 맞춘다.
+- clean Quick Look/Thumbnail smoke script: extension 등록, thumbnail 생성, 실제 Finder/Quick Look 수동 확인 항목을 기록한다.
+
+## performance/memory readiness 기준
+
+#259는 같은 machine/session에서 CoreGraphics와 Skia를 같은 샘플 순서로 측정한다. cold start와 warm cache 결과를 섞지 않고 구분한다.
+
+Quick Look 측정 항목:
+
+- `inspectMs`: file size check, data read, document open, first page size/page count 확인
+- `renderMs`: page render 또는 page별 render 합계
+- `pngEncodeOrDecodeMs`: CoreGraphics PNG encode 또는 Skia PNG decode
+- `replyDataMs`: `QLPreviewReply` data block 실행 시간
+- `pageCount`, `replyType`, `backendUsed`, `fallbackReason`
+- peak RSS 또는 `memoryHighWaterMB`
+
+Thumbnail 측정 항목:
+
+- `requestPixelSize`, `pixelBucket`, `backendUsed`
+- cache miss render duration
+- cache hit response duration
+- Skia PNG bytes 길이와 decode duration
+- fallback 발생 횟수와 fallback reason
+- peak RSS 또는 `memoryHighWaterMB`
+
+성능 판단 후보:
+
+| 판단 | 조건 |
+|---|---|
+| default 전환 후보 | hard fail이 없고, Quick Look 단일 page와 Thumbnail cache miss p50이 CoreGraphics 대비 명확히 나쁘지 않으며, p95 또는 최악값이 사용자 체감 hang으로 보이지 않는다 |
+| opt-in 유지 | visual은 개선되지만 PNG decode나 first-call latency가 문서군 일부에서 CoreGraphics보다 불안정하다 |
+| 보류 | timeout, memory pressure, decode failure, cache 충돌, extension restart가 재현된다 |
+
+정확한 수치 threshold는 #259 실행 결과로 확정한다. Stage 4 기준에서는 최소한 sample별 CoreGraphics baseline, Skia result, delta, fallback reason이 같은 표에 기록되어야 한다.
+
+## package readiness 기준
+
+`native-skia` feature는 `skia-safe`와 binary cache 의존성 때문에 staticlib와 app package 크기에 영향을 줄 수 있다. #255와 #259는 아래 항목을 같은 report에 기록한다.
+
+| 항목 | 측정 예 | 기준 |
+|---|---|---|
+| Rust staticlib size | `stat -f%z Frameworks/universal/librhwp.a` | `rhwp-core.lock` reference와 비교 |
+| `Rhwp.xcframework` size | `du -sk Frameworks/Rhwp.xcframework` | native-skia 전후 delta 기록 |
+| generated header size/hash | `rhwp-core.lock` | ABI 변경 정합성 확인 |
+| Debug app bundle size | `du -sk build.noindex/.../Alhangeul.app` | extension 포함 bundle delta 기록 |
+| release zip/DMG candidate size | release/rehearsal 산출물 | public release 판단 시에만 기록 |
+| universal slice 유지 | `scripts/ci/verify-universal-macos-app.sh` | app과 appex가 `arm64 + x86_64` 유지 |
+
+size 증가 자체가 실패는 아니다. 다만 app/extension load time, download size, notarization/release artifact 크기 설명이 필요할 정도의 증가라면 release note known limitation 또는 rollout 보류 판단에 반영한다.
+
+## rollout 판단 기준
+
+| 결정 | 조건 | 후속 조치 |
+|---|---|---|
+| `Skia first` 전환 후보 | #255-#258 완료, #259 sample hard fail 없음, fallback 정상, Quick Look/Thumbnail latency와 memory가 CoreGraphics 대비 허용 가능, package delta 설명 가능 | 별도 승인 후 default policy 변경 이슈 생성 또는 기존 후속 이슈 갱신 |
+| `Skia opt-in` 유지 | visual coverage는 유효하지만 특정 sample군의 diff, latency, package delta가 아직 release default로 설명하기 어렵다 | opt-in/debug flag 유지, known limitation 기록, targeted follow-up 생성 |
+| 보류 | crash/hang/timeout, decode failure, major visual regression, fallback failure, extension memory pressure가 남아 있다 | default 전환 금지, 원인별 #255-#258 또는 upstream issue로 되돌림 |
+
+Quick Look과 Thumbnail은 따로 판단한다. Thumbnail이 안정적이어도 Quick Look 다중 페이지 PDF가 불안정하면 Thumbnail만 opt-in 또는 first 후보로 남길 수 있고, 반대도 가능하다.
+
+## release note known limitation 후보
+
+Skia optional backend가 release에 포함될 경우 다음 항목을 known limitation 후보로 검토한다.
+
+- Skia backend는 초기에는 opt-in 또는 내부 진단 경로이며 기본 Quick Look/Thumbnail 결과는 CoreGraphics renderer일 수 있다.
+- Skia와 CoreGraphics는 text antialiasing, font fallback, 일부 수식/도형 rasterization에서 pixel-perfect하게 같지 않을 수 있다.
+- 다중 페이지 Quick Look preview는 여전히 bitmap PDF container이며 vector PDF export 개선은 별도 범위다.
+- Quick Look/Thumbnail smoke 통과는 extension 등록과 대표 샘플 렌더 성공을 의미하며, 모든 HWP/HWPX 문서의 visual parity를 보장하지 않는다.
+- `native-skia` feature로 app bundle 또는 download artifact 크기가 증가할 수 있다.
