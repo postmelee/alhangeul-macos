@@ -15,8 +15,8 @@
 ## PR base
 
 <!--
-제품/WKWebView/Finder/Quick Look/배포/문서 작업은 `devel`을 base로 둡니다.
-Swift native viewer/editor 작업은 `native-viewer-editor`를 base로 둡니다.
+제품/WKWebView/Finder/Quick Look/배포/문서/Skia 공통 기반 작업은 `devel`을 base로 둡니다.
+HostApp native macOS shell, Skia viewport, Swift 편집 UI/오버레이 작업은 `native-viewer-editor`를 base로 둡니다.
 `main`은 release PR 전용이며, 퇴역한 `devel-webview`는 PR base로 사용하지 않습니다.
 -->
 

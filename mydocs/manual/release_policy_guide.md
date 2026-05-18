@@ -76,7 +76,7 @@ README 최신 공개 릴리즈 요약과 Pages 릴리즈 노트는 사용자용 
 
 현재 WebView-backed public release line은 `devel`을 배포 준비 기준 브랜치로 사용한다. 릴리스 후보가 확정되면 `devel`의 검증된 commit을 `main`에 반영하고, Git tag와 GitHub Release는 `main` 기준으로 생성한다.
 
-`native-viewer-editor`는 native viewer renderer와 장기 개발 통합 브랜치이므로 배포 직전 기준 브랜치로 사용하지 않는다. `devel`에 merge된 release-critical 변경 중 native 라인에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `native-viewer-editor`에 후속 동기화한다. 퇴역한 `devel-webview`는 배포 기준이나 자동화 기준으로 사용하지 않는다.
+`native-viewer-editor`는 HostApp native macOS shell, Rust/rhwp Skia renderer 연동, Swift 편집 UI/오버레이 장기 개발 통합 브랜치이므로 배포 직전 기준 브랜치로 사용하지 않는다. `devel`에 merge된 release-critical 변경 중 native 라인에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `native-viewer-editor`에 후속 동기화한다. 퇴역한 `devel-webview`는 배포 기준이나 자동화 기준으로 사용하지 않는다.
 
 브랜치 역할과 native 라인 보존 기준은 [`branch_strategy_webview_native.md`](../tech/branch_strategy_webview_native.md)를 기준으로 판단한다.
 
@@ -167,7 +167,7 @@ public release note에는 artifact/provenance/checksum뿐 아니라 현재 relea
 - 인쇄는 `rhwp-studio` page payload를 별도 WKWebView/PDFKit/AppKit 출력 경로로 처리한다.
 - Quick Look/Thumbnail 설치본 smoke는 extension 등록과 HWP/HWPX thumbnail 생성 확인이며, preview 수동 확인과 native renderer visual parity를 대체하지 않는다.
 - 손상·대용량·미지원 문서 fallback은 파일 복구가 아니라 앱과 extension이 raw error, hang, crash로 끝나지 않게 하는 안전장치다.
-- native renderer style, image effect/fill, text layout, RawSvg/OLE 등 parity 개선은 Swift native viewer 방향에서 계속 다룬다.
+- CoreGraphics/CoreText renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity 개선은 현행 Quick Look/Thumbnail/PDF fallback/diagnostic 경로에서 계속 다루고, HostApp 장기 경로는 Rust/rhwp Skia renderer와 Swift overlay 결합 방향으로 분리한다.
 
 release note와 release report에서 smoke 결과를 쓸 때는 실제 실행한 항목만 성공으로 기록한다. 실행하지 않은 `qlmanage -p`, Finder Space preview, public DMG Gatekeeper 검증은 수동 확인 또는 후속 확인으로 분리한다.
 
