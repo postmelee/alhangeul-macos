@@ -20,7 +20,6 @@
 		308D4855D7022391FEF9CCD8 /* ExtensionSystemRegistrationRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E51D4DC8276BF1D36E5FEC /* ExtensionSystemRegistrationRefresher.swift */; };
 		364457423D706CF1C778334C /* ExtensionStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E524F7A95D1616AB85E3F2 /* ExtensionStatusModel.swift */; };
 		39EB4CA94F5944239BDB869F /* FontResourceRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC2D57719DF9672E7C311D7 /* FontResourceRegistry.swift */; };
-		3B5B6AE48A5603F091E7338B /* HwpPDFKitLazyPreviewProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F130CD99B676D5E8082C07B /* HwpPDFKitLazyPreviewProbe.swift */; };
 		41C5D25E1060BEF211833C8A /* HwpPreviewProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F373DBDDC753FC79292E2D /* HwpPreviewProvider.swift */; };
 		44CDAB1946DFA27A7CADCF6D /* RecentDocumentThumbnailRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4915E7318DD22D9A61F584 /* RecentDocumentThumbnailRefresher.swift */; };
 		4603821692664AB0F6480AD4 /* FontFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF11065A3E3439B4C5B8DD7 /* FontFallback.swift */; };
@@ -142,7 +141,6 @@
 		423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpDocument.swift; sourceTree = "<group>"; };
 		4B5C316C5FBCECA08C309CF9 /* HwpPageImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPageImageRenderer.swift; sourceTree = "<group>"; };
 		4D19355F771E9D7C6E9E068F /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
-		4F130CD99B676D5E8082C07B /* HwpPDFKitLazyPreviewProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPDFKitLazyPreviewProbe.swift; sourceTree = "<group>"; };
 		5D6D965AEFE52537281289A1 /* RhwpStudioResourceSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioResourceSchemeHandler.swift; sourceTree = "<group>"; };
 		5E97EA87050B083B9FA29249 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		612627C44A23C2ADDA48A054 /* ThumbnailExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ThumbnailExtension.entitlements; sourceTree = "<group>"; };
@@ -228,7 +226,6 @@
 			isa = PBXGroup;
 			children = (
 				BED96A22509C493BF3039CEC /* .gitkeep */,
-				4F130CD99B676D5E8082C07B /* HwpPDFKitLazyPreviewProbe.swift */,
 				07F373DBDDC753FC79292E2D /* HwpPreviewProvider.swift */,
 				5E97EA87050B083B9FA29249 /* Info.plist */,
 				8957BC445F1A6388BF82B28C /* QLExtension.entitlements */,
@@ -603,7 +600,6 @@
 				4603821692664AB0F6480AD4 /* FontFallback.swift in Sources */,
 				187BD036B336DB87EB4EC8C0 /* FontResourceRegistry.swift in Sources */,
 				ECED3AEFEF7467CA44F2A001 /* HwpDocumentInputValidator.swift in Sources */,
-				3B5B6AE48A5603F091E7338B /* HwpPDFKitLazyPreviewProbe.swift in Sources */,
 				DBD45292114D646A364B0B87 /* HwpPageImageRenderer.swift in Sources */,
 				D9E0E7DB88B12FDF40623328 /* HwpPreviewPDFRenderer.swift in Sources */,
 				41C5D25E1060BEF211833C8A /* HwpPreviewProvider.swift in Sources */,
