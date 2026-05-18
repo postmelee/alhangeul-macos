@@ -6,6 +6,8 @@
 
 현재 제품 기준선은 `PageRenderTree` JSON을 Swift `CGTreeRenderer`가 CoreGraphics/CoreText로 그리는 경로다. Skia 후보는 upstream `rhwp v0.7.11`의 `native-skia` feature가 제공하는 `PageLayerTree` 기반 PNG export 경로다.
 
+HostApp viewer/editor의 장기 native 전환은 이 문서의 범위가 아니다. Swift native macOS shell, Rust/rhwp Skia renderer, Swift 편집 UI/오버레이의 책임 경계는 [`native_macos_skia_editor_strategy.md`](native_macos_skia_editor_strategy.md)를 따른다.
+
 ## 범위
 
 - Quick Look preview extension의 단일 페이지 PNG reply와 다중 페이지 bitmap PDF reply
@@ -16,6 +18,7 @@
 ## 비범위
 
 - HostApp WKWebView viewer renderer 전환
+- HostApp native macOS viewer/editor shell 구현
 - browser CanvasKit renderer 도입
 - vector PDF export 품질 개선
 - Swift `PageLayerTree` renderer 완성
