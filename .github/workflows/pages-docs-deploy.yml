@@ -23,6 +23,8 @@ jobs:
     name: Prepare docs-only Pages artifact
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      deploy: ${{ steps.release_asset_gate.outputs.deploy }}
 
     steps:
       - name: Validate deployment ref
@@ -44,8 +46,64 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Check release asset availability
+        id: release_asset_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          release_link_matches="$(
+            grep -RhoE 'releases/(latest/download|download/v[0-9]+\.[0-9]+\.[0-9]+)/alhangeul-macos-[0-9]+\.[0-9]+\.[0-9]+\.dmg' docs || true
+          )"
+
+          if [ -z "$release_link_matches" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Release asset gate"
+              echo
+              echo "- deploy: allowed"
+              echo "- reason: no release DMG links found in docs"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          mapfile -t release_versions < <(
+            printf "%s\n" "$release_link_matches" \
+              | sed -E 's#.*alhangeul-macos-([0-9]+\.[0-9]+\.[0-9]+)\.dmg#\1#' \
+              | sort -u
+          )
+
+          missing_versions=()
+          for version in "${release_versions[@]}"; do
+            asset_url="https://github.com/postmelee/alhangeul-macos/releases/download/v${version}/alhangeul-macos-${version}.dmg"
+            if ! curl -fsIL --retry 3 --retry-delay 5 "$asset_url" >/dev/null; then
+              missing_versions+=("$version")
+            fi
+          done
+
+          if [ "${#missing_versions[@]}" -gt 0 ]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "## Release asset gate"
+              echo
+              echo "- deploy: skipped"
+              echo "- missing release versions: \`${missing_versions[*]}\`"
+              echo "- reason: docs-only Pages deploy waits until linked public DMG assets exist"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Release asset gate"
+            echo
+            echo "- deploy: allowed"
+            echo "- checked release versions: \`${release_versions[*]}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Fetch current public appcast
         id: appcast
+        if: steps.release_asset_gate.outputs.deploy == 'true'
         shell: bash
         env:
           PUBLIC_APPCAST_URL: https://postmelee.github.io/alhangeul-macos/appcast.xml
@@ -74,6 +132,7 @@ jobs:
 
       - name: Prepare Pages artifact
         id: pages_artifact
+        if: steps.release_asset_gate.outputs.deploy == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -102,6 +161,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Pages artifact
+        if: steps.release_asset_gate.outputs.deploy == 'true'
         uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ steps.pages_artifact.outputs.pages_artifact_dir }}
@@ -112,6 +172,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: prepare-pages-artifact
+    if: needs.prepare-pages-artifact.outputs.deploy == 'true'
     permissions:
       pages: write
       id-token: write

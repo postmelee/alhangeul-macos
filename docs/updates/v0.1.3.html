@@ -34,7 +34,7 @@
           GitHub
         </a>
         <a class="header-download-button"
-          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.1.3.dmg"
+          href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.3/alhangeul-macos-0.1.3.dmg"
           aria-label="Mac용 알한글 DMG 다운로드">
           다운로드
         </a>
@@ -48,7 +48,7 @@
       <p>업스트림 <code>rhwp v0.7.12</code>를 반영해 HWP/HWPX 문서 열기와 viewer asset 기준을 갱신한 패치 릴리즈입니다.</p>
       <div class="updates-actions" aria-label="릴리즈 주요 링크">
         <a class="page-action-button"
-          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.1.3.dmg">
+          href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.3/alhangeul-macos-0.1.3.dmg">
           DMG 다운로드
         </a>
         <a class="page-secondary-link" href="https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.3"
@@ -75,7 +75,7 @@
         <ul>
           <li>업스트림 tag 메시지 기준으로 여러 PR의 parser/viewer 결함 수정과 WMF, HWP3, LTO 관련 개선이 포함됩니다.</li>
           <li>bundled <code>rhwp-studio</code> Web/WASM asset도 같은 <code>v0.7.12</code> commit에서 다시 빌드했습니다.</li>
-          <li>Rust FFI symbol set은 이전 앱 릴리즈와 동일하며, Swift bridge API 표면은 유지됩니다.</li>
+          <li>Rust FFI에는 native PNG 렌더링용 <code>rhwp_render_page_png</code> symbol이 추가됐고, 앱 viewer와 Finder extension 경로는 새 bridge artifact 기준으로 검증했습니다.</li>
         </ul>
       </section>
 
