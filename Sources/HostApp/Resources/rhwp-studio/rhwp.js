@@ -656,6 +656,33 @@ export class HwpDocument {
         }
     }
     /**
+     * 수식 컨트롤을 문단에서 삭제한다.
+     *
+     * 반환: JSON `{"ok":true}`
+     * @param {number} section_idx
+     * @param {number} parent_para_idx
+     * @param {number} control_idx
+     * @returns {string}
+     */
+    deleteEquationControl(section_idx, parent_para_idx, control_idx) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.hwpdocument_deleteEquationControl(this.__wbg_ptr, section_idx, parent_para_idx, control_idx);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
      * 본문 각주 컨트롤을 삭제한다.
      * @param {number} section_idx
      * @param {number} para_idx
@@ -1445,6 +1472,34 @@ export class HwpDocument {
         }
     }
     /**
+     * CanvasKit direct replay/compat overlay 정책 진단을 JSON 문자열로 반환한다.
+     *
+     * `mode` 는 `"default"` 또는 `"compat"` 를 받는다. 빈 문자열은 `"default"` 로 처리한다.
+     * @param {number} page_num
+     * @param {string} mode
+     * @returns {string}
+     */
+    getCanvasKitReplayPlan(page_num, mode) {
+        let deferred3_0;
+        let deferred3_1;
+        try {
+            const ptr0 = passStringToWasm0(mode, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.hwpdocument_getCanvasKitReplayPlan(this.__wbg_ptr, page_num, ptr0, len0);
+            var ptr2 = ret[0];
+            var len2 = ret[1];
+            if (ret[3]) {
+                ptr2 = 0; len2 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred3_0 = ptr2;
+            deferred3_1 = len2;
+            return getStringFromWasm0(ptr2, len2);
+        } finally {
+            wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+        }
+    }
+    /**
      * 문서에 저장된 캐럿 위치를 반환한다 (문서 로딩 시 캐럿 자동 배치용).
      *
      * 반환: JSON `{"sectionIndex":N,"paragraphIndex":N,"charOffset":N}`
@@ -1770,6 +1825,29 @@ export class HwpDocument {
         }
     }
     /**
+     * 현재 구역의 다단 설정을 JSON으로 반환한다.
+     * @param {number} section_idx
+     * @returns {string}
+     */
+    getColumnDef(section_idx) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.hwpdocument_getColumnDef(this.__wbg_ptr, section_idx);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
      * 컨트롤의 이미지 바이너리 데이터를 반환한다 (Uint8Array).
      * @param {number} section_idx
      * @param {number} para_idx
@@ -2035,6 +2113,28 @@ export class HwpDocument {
         let deferred1_1;
         try {
             const ret = wasm.hwpdocument_getEventLog(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * [Task #741 후속] 외부 file path 그림 영역 영역 영역 영역 basename 목록 영역 반환.
+     *
+     * HWP3 파일 영역 image 영역 영역 절대 경로 영역 저장 영역. WASM 환경 영역 영역 file
+     * system access 부재 영역, JS 영역 영역 영역 영역 fetch 영역 영역 영역 file 영역 load
+     * 영역 후 `injectExternalImage` 영역 영역 영역 inject 영역.
+     *
+     * 반환: JSON 배열 `["oracle.gif", "rdb02.gif", ...]` (중복 제거)
+     * @returns {string}
+     */
+    getExternalImageBasenames() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.hwpdocument_getExternalImageBasenames(this.__wbg_ptr);
             deferred1_0 = ret[0];
             deferred1_1 = ret[1];
             return getStringFromWasm0(ret[0], ret[1]);
@@ -2411,6 +2511,35 @@ export class HwpDocument {
         }
     }
     /**
+     * [Task #825] 머리말/꼬리말 안 그림의 속성 조회.
+     * path: section[si].paragraphs[outer_para].controls[outer_ctrl] = Header/Footer
+     *       → .paragraphs[inner_para].controls[inner_ctrl] = Picture
+     * @param {number} section_idx
+     * @param {number} outer_para_idx
+     * @param {number} outer_control_idx
+     * @param {number} inner_para_idx
+     * @param {number} inner_control_idx
+     * @returns {string}
+     */
+    getHeaderFooterPictureProperties(section_idx, outer_para_idx, outer_control_idx, inner_para_idx, inner_control_idx) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.hwpdocument_getHeaderFooterPictureProperties(this.__wbg_ptr, section_idx, outer_para_idx, outer_control_idx, inner_para_idx, inner_control_idx);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
      * 문단 내 줄 정보를 반환한다 (커서 수직 이동/Home/End용).
      *
      * 반환: JSON `{"lineIndex":N,"lineCount":N,"charStart":N,"charEnd":N}`
@@ -2650,6 +2779,29 @@ export class HwpDocument {
         let deferred2_1;
         try {
             const ret = wasm.hwpdocument_getPageOfPosition(this.__wbg_ptr, section_idx, para_idx);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
+     * 페이지 overlay 이미지 정보만 JSON 문자열로 반환한다.
+     * @param {number} page_num
+     * @returns {string}
+     */
+    getPageOverlayImages(page_num) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.hwpdocument_getPageOverlayImages(this.__wbg_ptr, page_num);
             var ptr1 = ret[0];
             var len1 = ret[1];
             if (ret[3]) {
@@ -3543,6 +3695,32 @@ export class HwpDocument {
         }
     }
     /**
+     * [Task #741 후속] 외부 file path 그림 영역 영역 binary data 영역 inject.
+     *
+     * JS 영역 영역 영역 fetch 영역 영역 영역 file 영역 load 영역 후 본 메서드 영역 호출 영역
+     * IR 영역 영역 영역 image binary 영역 영역 → renderer 영역 영역 표시.
+     *
+     * `basename`: 영역 영역 file 영역 영역 (예: "oracle.gif")
+     * `data`: 영역 영역 binary 영역
+     * `display_path`: dialog 영역 영역 영역 영역 표시 영역 영역 path. 빈 문자열 ("") 영역
+     *                 영역 영역 fallback 영역 영역 `/samples/<basename>` 영역 사용. 한컴 viewer
+     *                 정합 영역 영역 OS 영역 절대 경로 영역 영역 (예: "/Users/.../samples/rdb02.gif")
+     * @param {string} basename
+     * @param {Uint8Array} data
+     * @param {string} display_path
+     * @returns {number}
+     */
+    injectExternalImage(basename, data, display_path) {
+        const ptr0 = passStringToWasm0(basename, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passArray8ToWasm0(data, wasm.__wbindgen_malloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ptr2 = passStringToWasm0(display_path, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len2 = WASM_VECTOR_LEN;
+        const ret = wasm.hwpdocument_injectExternalImage(this.__wbg_ptr, ptr0, len0, ptr1, len1, ptr2, len2);
+        return ret >>> 0;
+    }
+    /**
      * 단 나누기 삽입 (Ctrl+Shift+Enter)
      * @param {number} section_idx
      * @param {number} para_idx
@@ -3565,6 +3743,36 @@ export class HwpDocument {
             return getStringFromWasm0(ptr1, len1);
         } finally {
             wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
+     * 수식을 삽입한다.
+     * @param {number} section_idx
+     * @param {number} para_idx
+     * @param {number} char_offset
+     * @param {string} script
+     * @param {number} font_size
+     * @param {number} color
+     * @returns {string}
+     */
+    insertEquation(section_idx, para_idx, char_offset, script, font_size, color) {
+        let deferred3_0;
+        let deferred3_1;
+        try {
+            const ptr0 = passStringToWasm0(script, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.hwpdocument_insertEquation(this.__wbg_ptr, section_idx, para_idx, char_offset, ptr0, len0, font_size, color);
+            var ptr2 = ret[0];
+            var len2 = ret[1];
+            if (ret[3]) {
+                ptr2 = 0; len2 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred3_0 = ptr2;
+            deferred3_1 = len2;
+            return getStringFromWasm0(ptr2, len2);
+        } finally {
+            wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
         }
     }
     /**
@@ -3607,6 +3815,32 @@ export class HwpDocument {
         let deferred2_1;
         try {
             const ret = wasm.hwpdocument_insertFootnote(this.__wbg_ptr, section_idx, para_idx, char_offset);
+            var ptr1 = ret[0];
+            var len1 = ret[1];
+            if (ret[3]) {
+                ptr1 = 0; len1 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
+     * 새 번호 지정 컨트롤 삽입 (쪽 > 새 번호로 시작)
+     * @param {number} section_idx
+     * @param {number} para_idx
+     * @param {number} char_offset
+     * @param {number} start_num
+     * @returns {string}
+     */
+    insertNewNumber(section_idx, para_idx, char_offset, start_num) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const ret = wasm.hwpdocument_insertNewNumber(this.__wbg_ptr, section_idx, para_idx, char_offset, start_num);
             var ptr1 = ret[0];
             var len1 = ret[1];
             if (ret[3]) {
@@ -4891,6 +5125,33 @@ export class HwpDocument {
         return ret >>> 0;
     }
     /**
+     * 문서 전체 검색 (모든 매치 반환)
+     * @param {string} query
+     * @param {boolean} case_sensitive
+     * @param {boolean} include_cells
+     * @returns {string}
+     */
+    searchAllText(query, case_sensitive, include_cells) {
+        let deferred3_0;
+        let deferred3_1;
+        try {
+            const ptr0 = passStringToWasm0(query, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.hwpdocument_searchAllText(this.__wbg_ptr, ptr0, len0, case_sensitive, include_cells);
+            var ptr2 = ret[0];
+            var len2 = ret[1];
+            if (ret[3]) {
+                ptr2 = 0; len2 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred3_0 = ptr2;
+            deferred3_1 = len2;
+            return getStringFromWasm0(ptr2, len2);
+        } finally {
+            wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+        }
+    }
+    /**
      * 문서 텍스트 검색
      * @param {string} query
      * @param {number} from_sec
@@ -5199,6 +5460,36 @@ export class HwpDocument {
             const ptr0 = passStringToWasm0(value_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
             const len0 = WASM_VECTOR_LEN;
             const ret = wasm.hwpdocument_setFormValueInCell(this.__wbg_ptr, sec, table_para, table_ci, cell_idx, cell_para, form_ci, ptr0, len0);
+            var ptr2 = ret[0];
+            var len2 = ret[1];
+            if (ret[3]) {
+                ptr2 = 0; len2 = 0;
+                throw takeFromExternrefTable0(ret[2]);
+            }
+            deferred3_0 = ptr2;
+            deferred3_1 = len2;
+            return getStringFromWasm0(ptr2, len2);
+        } finally {
+            wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+        }
+    }
+    /**
+     * [Task #825] 머리말/꼬리말 안 그림 속성 변경.
+     * @param {number} section_idx
+     * @param {number} outer_para_idx
+     * @param {number} outer_control_idx
+     * @param {number} inner_para_idx
+     * @param {number} inner_control_idx
+     * @param {string} props_json
+     * @returns {string}
+     */
+    setHeaderFooterPictureProperties(section_idx, outer_para_idx, outer_control_idx, inner_para_idx, inner_control_idx, props_json) {
+        let deferred3_0;
+        let deferred3_1;
+        try {
+            const ptr0 = passStringToWasm0(props_json, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            const ret = wasm.hwpdocument_setHeaderFooterPictureProperties(this.__wbg_ptr, section_idx, outer_para_idx, outer_control_idx, inner_para_idx, inner_control_idx, ptr0, len0);
             var ptr2 = ret[0];
             var len2 = ret[1];
             if (ret[3]) {
@@ -6029,6 +6320,9 @@ function __wbg_get_imports() {
             const ret = arg0.call(arg1);
             return ret;
         }, arguments); },
+        __wbg_clearRect_1eed255045515c55: function(arg0, arg1, arg2, arg3, arg4) {
+            arg0.clearRect(arg1, arg2, arg3, arg4);
+        },
         __wbg_clip_f2700ac6171df6c4: function(arg0) {
             arg0.clip();
         },
@@ -6129,7 +6423,7 @@ function __wbg_get_imports() {
         __wbg_lineTo_c584cff6c760c4a5: function(arg0, arg1, arg2) {
             arg0.lineTo(arg1, arg2);
         },
-        __wbg_measureTextWidth_384ee9c8dcf2ded0: function(arg0, arg1, arg2, arg3) {
+        __wbg_measureTextWidth_082ea9716b5596a3: function(arg0, arg1, arg2, arg3) {
             const ret = globalThis.measureTextWidth(getStringFromWasm0(arg0, arg1), getStringFromWasm0(arg2, arg3));
             return ret;
         },
@@ -6154,6 +6448,10 @@ function __wbg_get_imports() {
         }, arguments); },
         __wbg_new_no_args_1c7c842f08d00ebb: function(arg0, arg1) {
             const ret = new Function(getStringFromWasm0(arg0, arg1));
+            return ret;
+        },
+        __wbg_of_9ab14f9d4bfb5040: function(arg0, arg1) {
+            const ret = Array.of(arg0, arg1);
             return ret;
         },
         __wbg_push_8ffdcb2063340ba5: function(arg0, arg1) {
