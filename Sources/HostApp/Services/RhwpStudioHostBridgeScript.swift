@@ -114,6 +114,8 @@ enum RhwpStudioHostBridgeScript {
         "edit:find",
         "edit:find-again",
         "edit:goto",
+        "edit:compare-documents",
+        "edit:document-history",
         "page:headerfooter-prev",
         "page:headerfooter-next",
         "page:headerfooter-close",
@@ -121,6 +123,7 @@ enum RhwpStudioHostBridgeScript {
       ]);
       const mutatingCommandPrefixes = ["file:", "edit:", "insert:", "format:", "page:", "table:"];
       const keyboardMutationKeys = new Set(["Backspace", "Delete", "Enter", "Tab"]);
+      let settlingEditorStateDepth = 0;
 
       function postNative(message) {
         window.webkit?.messageHandlers?.alhangeulHost?.postMessage(message);
@@ -430,8 +433,16 @@ enum RhwpStudioHostBridgeScript {
       async function settleEditorState() {
         const activeElement = document.activeElement;
         if (activeElement instanceof HTMLElement && activeElement !== document.body) {
-          activeElement.dispatchEvent(new Event("change", { bubbles: true }));
-          activeElement.blur();
+          settlingEditorStateDepth += 1;
+          try {
+            activeElement.dispatchEvent(new Event("change", { bubbles: true }));
+            activeElement.blur();
+            await waitForAnimationFrame();
+            await waitForAnimationFrame();
+          } finally {
+            settlingEditorStateDepth -= 1;
+          }
+          return;
         }
 
         await waitForAnimationFrame();
@@ -700,7 +711,11 @@ enum RhwpStudioHostBridgeScript {
       document.addEventListener("click", handleNativeCommandElementEvent, true);
       document.addEventListener("beforeinput", () => postDocumentEdited("beforeinput"), true);
       document.addEventListener("input", () => postDocumentEdited("input"), true);
-      document.addEventListener("change", () => postDocumentEdited("change"), true);
+      document.addEventListener("change", () => {
+        if (settlingEditorStateDepth === 0) {
+          postDocumentEdited("change");
+        }
+      }, true);
       document.addEventListener("cut", () => postDocumentEdited("cut"), true);
       document.addEventListener("paste", () => postDocumentEdited("paste"), true);
 
