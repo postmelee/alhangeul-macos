@@ -34,6 +34,21 @@ targets:
         embed: true
       - framework: Frameworks/Rhwp.xcframework
         embed: false
+      - sdk: CoreFoundation.framework
+      - sdk: CoreText.framework
+      - sdk: CoreGraphics.framework
+      - sdk: Foundation.framework
+      - sdk: ImageIO.framework
+      - sdk: CoreServices.framework
+      - sdk: ApplicationServices.framework
+      - sdk: Security.framework
+      - sdk: Metal.framework
+      - sdk: QuartzCore.framework
+      - sdk: IOSurface.framework
+      - sdk: ColorSync.framework
+      - sdk: libc++.tbd
+      - sdk: libiconv.tbd
+      - sdk: libz.tbd
       - package: Sparkle
         product: Sparkle
     settings:
@@ -56,6 +71,21 @@ targets:
     dependencies:
       - framework: Frameworks/Rhwp.xcframework
         embed: false
+      - sdk: CoreFoundation.framework
+      - sdk: CoreText.framework
+      - sdk: CoreGraphics.framework
+      - sdk: Foundation.framework
+      - sdk: ImageIO.framework
+      - sdk: CoreServices.framework
+      - sdk: ApplicationServices.framework
+      - sdk: Security.framework
+      - sdk: Metal.framework
+      - sdk: QuartzCore.framework
+      - sdk: IOSurface.framework
+      - sdk: ColorSync.framework
+      - sdk: libc++.tbd
+      - sdk: libiconv.tbd
+      - sdk: libz.tbd
     settings:
       base:
         PRODUCT_NAME: AlhangeulPreview
@@ -75,6 +105,21 @@ targets:
     dependencies:
       - framework: Frameworks/Rhwp.xcframework
         embed: false
+      - sdk: CoreFoundation.framework
+      - sdk: CoreText.framework
+      - sdk: CoreGraphics.framework
+      - sdk: Foundation.framework
+      - sdk: ImageIO.framework
+      - sdk: CoreServices.framework
+      - sdk: ApplicationServices.framework
+      - sdk: Security.framework
+      - sdk: Metal.framework
+      - sdk: QuartzCore.framework
+      - sdk: IOSurface.framework
+      - sdk: ColorSync.framework
+      - sdk: libc++.tbd
+      - sdk: libiconv.tbd
+      - sdk: libz.tbd
     settings:
       base:
         PRODUCT_NAME: AlhangeulThumbnail
