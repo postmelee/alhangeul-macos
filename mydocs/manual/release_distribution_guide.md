@@ -157,4 +157,4 @@
 4. 원인, 영향 범위, 재발 방지책을 `mydocs/troubleshootings/`에 기록한다.
 5. 수정 PR을 출시 대상 통합 브랜치로 merge한 뒤 새 릴리스 후보를 만든다.
 
-현재 WebView-backed release line 기준은 `devel`이며, native renderer 장기 브랜치에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `native-viewer-editor`에 후속 반영한다.
+현재 WebView-backed release line 기준은 `devel`이며, HostApp native macOS shell/Skia renderer/Swift overlay 장기 브랜치에도 필요한 수정은 별도 PR 또는 cherry-pick으로 `native-viewer-editor`에 후속 반영한다.

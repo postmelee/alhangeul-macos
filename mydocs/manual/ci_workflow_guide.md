@@ -51,7 +51,7 @@ PR에서 확인할 항목:
 PR CI는 외부 PR에서도 안전하게 실행할 수 있는 검증만 수행한다.
 
 - `pull_request_target`은 사용하지 않는다.
-- 제품/배포/문서 PR은 `devel`, Swift native viewer/editor PR은 `native-viewer-editor` 대상으로 실행한다.
+- 제품/배포/문서/Skia 공통 기반 PR은 `devel`, HostApp native macOS shell, Skia viewport, Swift 편집 UI/오버레이 PR은 `native-viewer-editor` 대상으로 실행한다.
 - 퇴역한 `devel-webview`는 PR CI trigger와 신규 PR base로 사용하지 않는다.
 - repository secrets가 필요한 signing, notarization, Sparkle private key, GitHub Release publish, Pages deployment는 실행하지 않는다.
 - concurrency group은 PR 번호 기준이며 새 push가 오면 이전 PR CI를 취소한다.
