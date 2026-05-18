@@ -17,6 +17,8 @@
 | `RustBridge/Cargo.lock` | `skia-safe`, `skia-bindings` 등 native-skia dependency graph 반영. |
 | `RustBridge/src/lib.rs` | `RhwpRenderStatus` enum과 `rhwp_render_page_png` FFI 추가. |
 | `RustBridge/cbindgen.toml` | `RhwpRenderStatus`를 generated header export 대상에 포함. |
+| `project.yml` | `Rhwp.xcframework`를 링크하는 HostApp/QLExtension/ThumbnailExtension에 Skia native framework/library dependency 명시. |
+| `Alhangeul.xcodeproj/project.pbxproj` | `xcodegen generate`로 `project.yml`의 link dependency 반영. |
 | `rhwp-ffi-symbols.txt` | expected FFI symbol set에 `rhwp_render_page_png` 추가. |
 | `scripts/build-rust-macos.sh` | `rhwp_enabled_features` 기록/검증 gate 추가. |
 | `rhwp-core.lock` | `native-skia` feature provenance와 새 artifact hash/size 기록. |
@@ -36,12 +38,13 @@
 | 새 PNG ABI | 없음 | `rhwp_render_page_png` |
 | render status taxonomy | 없음 | `RhwpRenderStatus` 6개 값 |
 | `rhwp_enabled_features` lock field | 없음 | `native-skia` |
-| `Frameworks/universal/librhwp.a` size | 108,417,040 bytes | 190,409,968 bytes |
+| `Frameworks/universal/librhwp.a` size | 108,417,040 bytes | 190,410,384 bytes |
 | `Frameworks/generated_rhwp.h` size | 1,349 bytes | 1,978 bytes |
 | `du -sh` staticlib / xcframework | 기존 수치 없음 | `182M` / `182M` |
-| `devel..HEAD` 변경량 | 0 | 14 files, 1464 insertions, 6 deletions |
+| 초기 Stage 1-5 변경량 | 0 | 14 files, 1464 insertions, 6 deletions |
+| PR review 보완 변경량 | 0 | 5 files, 189 insertions, 8 deletions |
 
-staticlib 크기는 81,992,928 bytes 증가했다. 이 증가는 `native-skia`와 Skia dependency 포함에 따른 것으로, #259 release readiness gate에서 package size와 배포 영향 확인이 필요하다.
+staticlib 크기는 81,993,344 bytes 증가했다. 이 증가는 `native-skia`와 Skia dependency 포함에 따른 것으로, #259 release readiness gate에서 package size와 배포 영향 확인이 필요하다.
 
 ## ABI 결과
 
@@ -88,6 +91,8 @@ Option sentinel:
 | universal staticlib에 새 symbol 포함 | OK | `_rhwp_render_page_png` symbol 확인. |
 | 정상 PNG render smoke | OK | `KTX.hwp` 62,065 bytes, `request.hwp` 50,986 bytes PNG signature 통과. |
 | 실패 status smoke | OK | null handle, null output, page out-of-range, invalid scale 확인. |
+| invalid output stale 값 방지 | OK | 한쪽 output pointer가 null이어도 null이 아닌 쪽을 null/0으로 초기화하도록 보완하고 C smoke로 확인. |
+| Xcode target link dependency | OK | HostApp/QLExtension/ThumbnailExtension에 Skia system framework/library dependency를 추가하고 HostApp Debug build 통과. |
 | lock verification | OK | `./scripts/build-rust-macos.sh --verify-lock` 통과. |
 | whitespace 검증 | OK | `git diff --check` 통과. |
 
@@ -119,6 +124,9 @@ Verified: /Users/melee/Documents/projects/rhwp-mac/rhwp-core.lock
 
 ```bash
 nm -gU Frameworks/universal/librhwp.a | rg "rhwp_render_page_png|rhwp_free_bytes|rhwp_open|rhwp_close"
+C smoke: 한쪽 output pointer null 조합에서 stale pointer/length가 남지 않음 확인
+xcodegen generate
+xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug -derivedDataPath build.noindex/DerivedDataTask255Review -clonedSourcePackagesDirPath build.noindex/SourcePackages CODE_SIGNING_ALLOWED=NO build
 git diff --check
 ```
 
@@ -129,7 +137,7 @@ git diff --check
 | 항목 | 내용 | 후속 |
 |---|---|---|
 | Swift wrapper 미적용 | Stage 4 smoke는 C ABI 직접 호출만 검증했다. Swift `UnsafeMutablePointer` 수명과 `Data` 복사는 아직 미검증이다. | #256 |
-| native link dependency | Skia static archive 직접 링크에는 CoreText/CoreGraphics/Metal/QuartzCore 등 native framework가 필요했다. Xcode target link 정합성 확인이 필요하다. | #256 |
+| native link dependency | Skia static archive에 필요한 native framework/library는 project target에 명시했다. #256에서 실제 Swift wrapper 호출 경로의 build와 runtime smoke를 이어서 확인한다. | #256 |
 | Quick Look/Thumbnail 미적용 | 제품 surface의 기본 동작은 바꾸지 않았다. | #257, #258 |
 | size 증가 | universal staticlib가 약 108 MB에서 190 MB로 증가했다. | #259 |
 | upstream diagnostic 출력 | `KTX.hwp` render smoke에서 layout overflow diagnostic이 stdout/stderr로 출력됐다. | #256, #259 |
@@ -144,7 +152,7 @@ git diff --check
 - `scale == 0.0`, `max_dimension == 0` sentinel 규칙
 - 성공 시 PNG bytes를 `rhwp_free_bytes`로 해제하는 소유권 규칙
 - C smoke 기준 정상 PNG byte length: `KTX.hwp` 62,065 bytes, `request.hwp` 50,986 bytes
-- Xcode target link에서 native framework dependency 확인 필요
+- Xcode target link에는 Skia native framework/library dependency가 반영되어 있음
 - Swift wrapper 단계에서 `backendUsed`, `fallbackReason`, `pngBytes`, `durationMs` 진단 필드 연결 필요
 
 ## 작업지시자 승인 요청

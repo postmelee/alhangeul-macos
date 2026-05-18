@@ -172,6 +172,14 @@ pub extern "C" fn rhwp_render_page_png(
     out_len: *mut usize,
 ) -> RhwpRenderStatus {
     if out_data.is_null() || out_len.is_null() {
+        unsafe {
+            if !out_data.is_null() {
+                *out_data = ptr::null_mut();
+            }
+            if !out_len.is_null() {
+                *out_len = 0;
+            }
+        }
         return RhwpRenderStatus::RHWP_RENDER_INVALID_OUTPUT;
     }
 
