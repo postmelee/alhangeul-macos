@@ -98,6 +98,62 @@ lock_scalar() {
   ' "$LOCK_FILE"
 }
 
+cargo_toml_rhwp_line() {
+  awk '
+    /^\[dependencies\]/ {
+      in_dependencies = 1
+      next
+    }
+    /^\[/ {
+      in_dependencies = 0
+    }
+    in_dependencies && $1 == "rhwp" && $2 == "=" {
+      print
+      exit
+    }
+  ' "$CARGO_TOML"
+}
+
+cargo_toml_rhwp_enabled_features() {
+  local line
+  local features
+  line="$(cargo_toml_rhwp_line)"
+  if [[ "$line" != *"features"* || "$line" != *"["* || "$line" != *"]"* ]]; then
+    echo ""
+    return
+  fi
+  features="${line#*[}"
+  features="${features%%]*}"
+  features="${features//\"/}"
+  features="${features// /}"
+  echo "$features"
+}
+
+dependency_feature_fragment() {
+  local enabled_features
+  local feature
+  local first=1
+  enabled_features="$(cargo_toml_rhwp_enabled_features)"
+  if [ -z "$enabled_features" ]; then
+    echo ""
+    return
+  fi
+
+  printf ', features = ['
+  IFS=',' read -ra feature_list <<< "$enabled_features"
+  for feature in "${feature_list[@]}"; do
+    if [ -z "$feature" ]; then
+      continue
+    fi
+    if [ "$first" -eq 0 ]; then
+      printf ', '
+    fi
+    printf '"%s"' "$feature"
+    first=0
+  done
+  printf ']'
+}
+
 cargo_lock_rhwp_source() {
   awk -F' = ' '
     /^\[\[package\]\]/ {
@@ -445,9 +501,9 @@ fi
 backup_cargo_files
 
 if [ "$CHANNEL" = "demo" ]; then
-  update_cargo_toml "rhwp = { git = \"$RHWP_REPO\", rev = \"$TARGET_COMMIT\" }"
+  update_cargo_toml "rhwp = { git = \"$RHWP_REPO\", rev = \"$TARGET_COMMIT\"$(dependency_feature_fragment) }"
 else
-  update_cargo_toml "rhwp = { git = \"$RHWP_REPO\", tag = \"$TAG\" }"
+  update_cargo_toml "rhwp = { git = \"$RHWP_REPO\", tag = \"$TAG\"$(dependency_feature_fragment) }"
 fi
 
 update_cargo_lock
