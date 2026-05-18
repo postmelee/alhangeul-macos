@@ -393,3 +393,16 @@ Skia optional backend가 release에 포함될 경우 다음 항목을 known limi
 - 다중 페이지 Quick Look preview는 여전히 bitmap PDF container이며 vector PDF export 개선은 별도 범위다.
 - Quick Look/Thumbnail smoke 통과는 extension 등록과 대표 샘플 렌더 성공을 의미하며, 모든 HWP/HWPX 문서의 visual parity를 보장하지 않는다.
 - `native-skia` feature로 app bundle 또는 download artifact 크기가 증가할 수 있다.
+
+## 최종 권장 rollout
+
+#254의 최종 권장은 보수적 단계 도입이다.
+
+1. #255에서 RustBridge `native-skia` PNG ABI와 binary provenance를 먼저 닫는다.
+2. #256에서 Shared renderer가 `coreGraphics`와 `skiaPNG`를 선택할 수 있게 만들되, 제품 기본값은 `coreGraphicsOnly`로 둔다.
+3. #257과 #258에서 Quick Look/Thumbnail surface별로 `skiaOptIn`을 검증한다. 두 surface는 같은 Shared contract를 쓰지만 rollout 판단은 분리한다.
+4. #259에서 visual/performance/package readiness를 측정한 뒤 `Skia first`, `Skia opt-in 유지`, `보류` 중 하나를 결정한다.
+
+현재 단계에서 `Skia default`는 권장하지 않는다. Skia는 upstream `v0.7.11`에 존재하지만 앱 ABI와 Swift wrapper, extension integration, package impact 검증이 아직 없기 때문이다.
+
+후속 이슈를 시작할 때는 이 문서의 gate 순서를 기준으로 삼고, GitHub issue 본문 업데이트는 각 이슈 시작 직전에 작업지시자 승인 후 반영한다.
