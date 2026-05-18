@@ -17,6 +17,10 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         logger.debug("Preview requested file=\(request.fileURL.lastPathComponent, privacy: .public)")
         do {
             let previewInfo = try HwpPreviewPDFRenderer.inspect(fileURL: request.fileURL)
+            if HwpPDFKitLazyPreviewProbe.isEnabled {
+                logger.warning("Preview selected PDFKit lazy probe file=\(previewInfo.filename, privacy: .public) pages=\(previewInfo.pageCount, privacy: .public)")
+                return HwpPDFKitLazyPreviewProbe.reply(previewInfo: previewInfo)
+            }
             if previewInfo.pageCount == 1 {
                 logger.debug("Preview selected PNG reply file=\(previewInfo.filename, privacy: .public) pages=\(previewInfo.pageCount, privacy: .public) size=\(Int(previewInfo.contentSize.width), privacy: .public)x\(Int(previewInfo.contentSize.height), privacy: .public)")
                 return try Self.pngReply(previewInfo)
