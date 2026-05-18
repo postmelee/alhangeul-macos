@@ -49,6 +49,8 @@ jobs:
       - name: Check release asset availability
         id: release_asset_gate
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
@@ -75,10 +77,41 @@ jobs:
 
           missing_versions=()
           for version in "${release_versions[@]}"; do
-            asset_url="https://github.com/postmelee/alhangeul-macos/releases/download/v${version}/alhangeul-macos-${version}.dmg"
-            if ! curl -fsIL --retry 3 --retry-delay 5 "$asset_url" >/dev/null; then
+            response_file="$(mktemp)"
+            release_api_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/v${version}"
+            http_status="$(
+              curl -sS --retry 3 --retry-delay 5 --retry-all-errors \
+                -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                -o "$response_file" \
+                -w "%{http_code}" \
+                "$release_api_url"
+            )" || {
+              curl_exit="$?"
+              echo "ERROR: failed to query release v${version} through GitHub API; curl exit ${curl_exit}" >&2
+              rm -f "$response_file"
+              exit 1
+            }
+
+            if [ "$http_status" = "404" ]; then
+              missing_versions+=("$version")
+              rm -f "$response_file"
+              continue
+            fi
+
+            if [ "$http_status" != "200" ]; then
+              echo "ERROR: GitHub API returned HTTP ${http_status} for release v${version}" >&2
+              cat "$response_file" >&2
+              rm -f "$response_file"
+              exit 1
+            fi
+
+            if ! jq -e --arg asset "alhangeul-macos-${version}.dmg" '.assets[]? | select(.name == $asset)' "$response_file" >/dev/null; then
               missing_versions+=("$version")
             fi
+
+            rm -f "$response_file"
           done
 
           if [ "${#missing_versions[@]}" -gt 0 ]; then

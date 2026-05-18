@@ -123,7 +123,7 @@ enum RhwpStudioHostBridgeScript {
       ]);
       const mutatingCommandPrefixes = ["file:", "edit:", "insert:", "format:", "page:", "table:"];
       const keyboardMutationKeys = new Set(["Backspace", "Delete", "Enter", "Tab"]);
-      let isSettlingEditorState = false;
+      let settlingEditorStateDepth = 0;
 
       function postNative(message) {
         window.webkit?.messageHandlers?.alhangeulHost?.postMessage(message);
@@ -433,14 +433,14 @@ enum RhwpStudioHostBridgeScript {
       async function settleEditorState() {
         const activeElement = document.activeElement;
         if (activeElement instanceof HTMLElement && activeElement !== document.body) {
-          isSettlingEditorState = true;
+          settlingEditorStateDepth += 1;
           try {
             activeElement.dispatchEvent(new Event("change", { bubbles: true }));
             activeElement.blur();
             await waitForAnimationFrame();
             await waitForAnimationFrame();
           } finally {
-            isSettlingEditorState = false;
+            settlingEditorStateDepth -= 1;
           }
           return;
         }
@@ -712,7 +712,7 @@ enum RhwpStudioHostBridgeScript {
       document.addEventListener("beforeinput", () => postDocumentEdited("beforeinput"), true);
       document.addEventListener("input", () => postDocumentEdited("input"), true);
       document.addEventListener("change", () => {
-        if (!isSettlingEditorState) {
+        if (settlingEditorStateDepth === 0) {
           postDocumentEdited("change");
         }
       }, true);
