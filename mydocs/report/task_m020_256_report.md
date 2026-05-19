@@ -188,7 +188,7 @@ git status --short --branch
 
 - `KTX.hwp`는 Skia와 CoreGraphics의 non-white pixel 차이가 크다. visual diff triage는 #259 범위다.
 - fallback 강제 실패 path는 runtime smoke에서 발생하지 않았다. mapping은 source와 Stage 보고서에 고정했다.
-- branch 상태는 `origin/devel` 대비 ahead 6, behind 7이다. Stage 5는 현재 `local/task256` 기준으로 완료하고, publish/PR 전 통합 브랜치 동기화 판단이 필요하다.
+- PR 게시 중 `origin/devel`의 #274 merge 이후 GitHub가 conflict를 보고해 `origin/devel`을 병합했다. 충돌은 `mydocs/orders/20260519.md` 한 곳이었고, #274 완료 기록과 #256 Stage 3 대기 기록을 모두 보존해 해결했다.
 - `Frameworks/`, `build.noindex/`, `output/`은 로컬 검증 산출물이며 commit하지 않는다.
 
 ## 결론
