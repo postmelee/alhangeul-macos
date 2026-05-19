@@ -8,6 +8,41 @@ struct RhwpEmbeddedThumbnail {
     let format: String?
 }
 
+enum RhwpPagePNGStatus: Equatable {
+    case ok
+    case invalidHandle
+    case invalidOutput
+    case invalidPageIndex
+    case invalidOptions
+    case failure
+
+    init(_ status: RhwpRenderStatus) {
+        switch status.rawValue {
+        case 0:
+            self = .ok
+        case 1:
+            self = .invalidHandle
+        case 2:
+            self = .invalidOutput
+        case 3:
+            self = .invalidPageIndex
+        case 4:
+            self = .invalidOptions
+        default:
+            self = .failure
+        }
+    }
+}
+
+struct RhwpRenderedPNG {
+    let data: Data
+    let status: RhwpPagePNGStatus
+
+    var byteCount: Int {
+        data.count
+    }
+}
+
 /// Rust FFI 호출 에러
 enum RhwpError: LocalizedError {
     case parseFailure(filename: String?)
@@ -99,6 +134,48 @@ class RhwpDocument {
         let json = String(cString: jsonPtr)
         rhwp_free_string(jsonPtr)
         return json
+    }
+
+    /// 특정 페이지를 Skia PNG bytes로 렌더링한다.
+    func renderPagePNG(
+        at page: Int,
+        scale: Double = 0,
+        maxDimension: Int = 0
+    ) -> RhwpRenderedPNG {
+        guard page >= 0 else {
+            return RhwpRenderedPNG(data: Data(), status: .invalidPageIndex)
+        }
+        guard scale.isFinite, scale >= 0, maxDimension >= 0, maxDimension <= Int(UInt32.max) else {
+            return RhwpRenderedPNG(data: Data(), status: .invalidOptions)
+        }
+
+        var outData: UnsafeMutablePointer<UInt8>?
+        var outLen: UInt = 0
+        let status = RhwpPagePNGStatus(
+            rhwp_render_page_png(
+                handle,
+                UInt32(page),
+                scale,
+                UInt32(maxDimension),
+                &outData,
+                &outLen
+            )
+        )
+
+        defer {
+            if let ptr = outData, outLen > 0 {
+                rhwp_free_bytes(ptr, outLen)
+            }
+        }
+
+        guard status == .ok, let pngPtr = outData, outLen > 0, outLen <= UInt(Int.max) else {
+            return RhwpRenderedPNG(data: Data(), status: status)
+        }
+
+        return RhwpRenderedPNG(
+            data: Data(bytes: pngPtr, count: Int(outLen)),
+            status: status
+        )
     }
 
     /// 이미지 바이너리 데이터를 반환한다 (bin_data_id는 1-indexed).
