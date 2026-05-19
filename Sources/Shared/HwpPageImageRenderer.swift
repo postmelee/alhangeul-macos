@@ -8,6 +8,7 @@ let hwpQuickLookMaxFileSize = 50 * 1024 * 1024
 enum HwpPageRenderBackend {
     case coreGraphics
     case skia
+    case embeddedThumbnail
 }
 
 enum HwpPageRenderPolicy {
@@ -119,7 +120,8 @@ enum HwpPageImageRenderer {
         if let embedded = decodeEmbeddedThumbnail(
             from: data,
             maximumPixelSize: maximumPixelSize,
-            policy: embeddedThumbnailPolicy
+            thumbnailPolicy: embeddedThumbnailPolicy,
+            renderPolicy: policy
         ) {
             return embedded
         }
@@ -211,7 +213,8 @@ enum HwpPageImageRenderer {
     private static func decodeEmbeddedThumbnail(
         from data: Data,
         maximumPixelSize: CGSize?,
-        policy: HwpEmbeddedThumbnailPolicy
+        thumbnailPolicy: HwpEmbeddedThumbnailPolicy,
+        renderPolicy: HwpPageRenderPolicy
     ) -> HwpRenderedPage? {
         guard let thumbnail = RhwpDocument.extractEmbeddedThumbnail(from: data) else {
             return nil
@@ -220,6 +223,7 @@ enum HwpPageImageRenderer {
             return nil
         }
 
+        let decodeStart = DispatchTime.now().uptimeNanoseconds
         let image: CGImage?
         if let maximumPixelSize {
             let maxDimension = Int(max(maximumPixelSize.width, maximumPixelSize.height))
@@ -237,6 +241,7 @@ enum HwpPageImageRenderer {
         } else {
             image = CGImageSourceCreateImageAtIndex(source, 0, nil)
         }
+        let decodeMs = elapsedMilliseconds(since: decodeStart)
 
         guard let image else {
             return nil
@@ -244,16 +249,28 @@ enum HwpPageImageRenderer {
 
         guard shouldUseEmbeddedThumbnail(
             requestPixelSize: maximumPixelSize,
-            policy: policy
+            policy: thumbnailPolicy
         ) else {
             return nil
         }
 
         let width = thumbnail.width > 0 ? thumbnail.width : image.width
         let height = thumbnail.height > 0 ? thumbnail.height : image.height
+        let pageSize = CGSize(width: CGFloat(width), height: CGFloat(height))
+        let pixelSize = CGSize(width: CGFloat(image.width), height: CGFloat(image.height))
+        let diagnostics = HwpPageRenderDiagnostics(
+            policy: renderPolicy,
+            backendUsed: .embeddedThumbnail,
+            fallbackReason: nil,
+            pageSize: pageSize,
+            pixelSize: pixelSize,
+            pngBytes: nil,
+            durationMs: HwpPageRenderDuration(totalMs: decodeMs)
+        )
         return HwpRenderedPage(
             image: image,
-            size: CGSize(width: CGFloat(width), height: CGFloat(height))
+            size: pageSize,
+            diagnostics: diagnostics
         )
     }
 
