@@ -98,7 +98,7 @@ is_docs_path() {
   local path="$1"
 
   case "$path" in
-    README.md|*.md|docs/*|mydocs/*)
+    README.md|*.md|docs/*|mydocs/*|.github/ISSUE_TEMPLATE/*)
       return 0
       ;;
     *)
