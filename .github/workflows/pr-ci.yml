@@ -66,6 +66,12 @@ jobs:
           set -euo pipefail
           ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |path| Psych.parse_file(path); puts "Parsed #{path}" }'
 
+      - name: Check issue template YAML syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -e 'require "psych"; Dir[".github/ISSUE_TEMPLATE/*.yml"].sort.each { |path| Psych.parse_file(path); puts "Parsed #{path}" }'
+
       - name: Check helper interfaces
         shell: bash
         run: |
