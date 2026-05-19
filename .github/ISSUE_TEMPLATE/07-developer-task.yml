@@ -1,0 +1,83 @@
+name: 개발자 타스크 제안
+description: maintainer가 하이퍼-워터폴 타스크로 등록할 수 있는 개발 작업 초안을 남깁니다.
+title: "[Task] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        이 템플릿은 개발 작업 초안을 모으기 위한 입력 양식입니다. 실제 작업 시작은 기존 하이퍼-워터폴 절차에 따라 maintainer가 이슈, 브랜치, 오늘할일, 수행계획서를 정렬하고 승인한 뒤 진행합니다.
+  - type: textarea
+    id: background
+    attributes:
+      label: 배경
+      description: 이 작업이 필요한 이유와 현재 상태를 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: 목표
+      description: 완료 후 달라져야 하는 동작이나 문서 상태를 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: 포함 범위
+      description: 이번 작업에 포함해야 할 파일, 기능, 문서, 검증 범위를 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: 제외 범위
+      description: 이번 작업에서 하지 않을 일을 명확히 적어 주세요.
+    validations:
+      required: true
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: 후보 영역
+      multiple: true
+      options:
+        - HostApp viewer
+        - Quick Look
+        - Thumbnail
+        - Rendering
+        - RustBridge 또는 FFI
+        - Core dependency
+        - CI/CD 또는 release
+        - Docs
+        - Workflow
+        - 아직 모름
+    validations:
+      required: false
+  - type: input
+    id: milestone-candidate
+    attributes:
+      label: 후보 milestone
+      placeholder: "예: v0.2, 하이퍼-워터폴 작업환경 조성"
+    validations:
+      required: false
+  - type: input
+    id: labels-candidate
+    attributes:
+      label: 후보 label
+      placeholder: "예: enhancement, area:workflow"
+    validations:
+      required: false
+  - type: textarea
+    id: validation
+    attributes:
+      label: 예상 검증
+      description: 완료 판단에 필요한 테스트, smoke, 문서 검증을 적어 주세요.
+    validations:
+      required: false
+  - type: textarea
+    id: references
+    attributes:
+      label: 참고 링크
+      description: 관련 issue, PR, 문서, 외부 참고 링크를 적어 주세요.
+    validations:
+      required: false
