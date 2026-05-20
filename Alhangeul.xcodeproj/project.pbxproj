@@ -57,6 +57,7 @@
 		721965E788F8B67D8F7851A2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1309795C091DEE3BD8E9EA7D /* CoreGraphics.framework */; };
 		7291708FE7C4B4C49E3548FB /* CGTreeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B69400B5B8A2851995C68DE /* CGTreeRenderer.swift */; };
 		72BDAE6714CD21F62B6547CB /* DocumentTerminationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27EB9FF4728E67B683789ECF /* DocumentTerminationCoordinator.swift */; };
+		74820E8884974C2D1ABDB8AF /* HwpPreviewPDFViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3912829D015FFCF0236613F /* HwpPreviewPDFViewController.swift */; };
 		748E5560ED13294F03F1B627 /* RenderTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A01160D544F0F71CA0C3501 /* RenderTree.swift */; };
 		7499FC7614680941A929F075 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4457E7F57DA695C2D4A7757 /* CoreServices.framework */; };
 		770901D3A2B2139FB9649377 /* ColorSync.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B73611C892296A43FDC8B2 /* ColorSync.framework */; };
@@ -66,6 +67,7 @@
 		7F08D9DE276A1AB65D6A53BA /* DocumentViewerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02FBEC3A120D20AC265A2C79 /* DocumentViewerStore.swift */; };
 		8348EA8DD0B313DC71B3E9C7 /* HwpThumbnailProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDDD5E15FCF571ED9D88598 /* HwpThumbnailProvider.swift */; };
 		8601FBB00A129F727E6FA20B /* RhwpStudioResourceLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEAC07979C76F049103FFFDF /* RhwpStudioResourceLocator.swift */; };
+		86167F34B3D7C63775A59568 /* PDFKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 02C775D3ABCF02F930BE957F /* PDFKit.framework */; };
 		878872C3214C4E6286DAB587 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6870F9FC321B27386359E2E /* QuartzCore.framework */; };
 		88A091EC5EABAAA20E254E2D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6870F9FC321B27386359E2E /* QuartzCore.framework */; };
 		8B2A1E6744CC44217E4F1EE8 /* SharePresentationAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C9543624DAA07DE76E6E954 /* SharePresentationAnchor.swift */; };
@@ -73,6 +75,7 @@
 		9499CFEE20DAD2F23BF05520 /* HwpDocumentInputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 317B028E5037D11892BC394D /* HwpDocumentInputValidator.swift */; };
 		979D708081AD7DEA8C3F4F67 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81391ABAF81F59C2FAE9880D /* ContentView.swift */; };
 		9BFD17415060EB3D21AA11BB /* RhwpStudioPrintController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0E726A1E03A5D6891045C8 /* RhwpStudioPrintController.swift */; };
+		9D561505D91E548BF74717C4 /* HwpPDFViewLazyProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E2BD19CEBFE59FDDA35F3C8 /* HwpPDFViewLazyProbe.swift */; };
 		9E7FC8AC6078A6BD9975CD4E /* RhwpProvenance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2953DECE3F38280938C3CE2B /* RhwpProvenance.swift */; };
 		A155D58D6F716FCFDAC1675C /* DocumentOpenRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F4546426B7A9CF2CC1B9D5 /* DocumentOpenRouter.swift */; };
 		A37A870989D1BA673D744596 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D03050B560F60198F4CBBB0 /* Metal.framework */; };
@@ -157,6 +160,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		02C775D3ABCF02F930BE957F /* PDFKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PDFKit.framework; path = System/Library/Frameworks/PDFKit.framework; sourceTree = SDKROOT; };
 		02FBEC3A120D20AC265A2C79 /* DocumentViewerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentViewerStore.swift; sourceTree = "<group>"; };
 		034A145B545356520B20598D /* RhwpStudioPDFExportController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPDFExportController.swift; sourceTree = "<group>"; };
 		07F373DBDDC753FC79292E2D /* HwpPreviewProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewProvider.swift; sourceTree = "<group>"; };
@@ -178,6 +182,7 @@
 		2953DECE3F38280938C3CE2B /* RhwpProvenance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpProvenance.swift; sourceTree = "<group>"; };
 		2B69400B5B8A2851995C68DE /* CGTreeRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGTreeRenderer.swift; sourceTree = "<group>"; };
 		2C9543624DAA07DE76E6E954 /* SharePresentationAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePresentationAnchor.swift; sourceTree = "<group>"; };
+		2E2BD19CEBFE59FDDA35F3C8 /* HwpPDFViewLazyProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPDFViewLazyProbe.swift; sourceTree = "<group>"; };
 		2E61A1530D3A8D7AF3DEE02C /* QLExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QLExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		317B028E5037D11892BC394D /* HwpDocumentInputValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpDocumentInputValidator.swift; sourceTree = "<group>"; };
 		31E6E9BA1CB73D521E17B5D0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -211,6 +216,7 @@
 		A1BA85C7A51A97F8EDF455E7 /* HostApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HostApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5315FE25D0AB65823C1D91A /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		A8E9CC5E34BCCA387A0B385E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B3912829D015FFCF0236613F /* HwpPreviewPDFViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewPDFViewController.swift; sourceTree = "<group>"; };
 		B49CA0DEC91C628C9B92B7A1 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		B74C6D69DBD1D9B163C9A247 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		B85C87F3CD3C8EFD709842FF /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
@@ -248,6 +254,7 @@
 				CA8C7485777C36EDD0DB8C52 /* CoreGraphics.framework in Frameworks */,
 				6180BA787D50DD6F44AB68AF /* Foundation.framework in Frameworks */,
 				1EA44B4963FEC6D895772CCD /* ImageIO.framework in Frameworks */,
+				86167F34B3D7C63775A59568 /* PDFKit.framework in Frameworks */,
 				37B400334D28A4A06AC40307 /* CoreServices.framework in Frameworks */,
 				302DEA2AC6D48AB95F3A7C00 /* ApplicationServices.framework in Frameworks */,
 				D7D022F79F8E944098C0B679 /* Security.framework in Frameworks */,
@@ -331,6 +338,8 @@
 			isa = PBXGroup;
 			children = (
 				BED96A22509C493BF3039CEC /* .gitkeep */,
+				2E2BD19CEBFE59FDDA35F3C8 /* HwpPDFViewLazyProbe.swift */,
+				B3912829D015FFCF0236613F /* HwpPreviewPDFViewController.swift */,
 				07F373DBDDC753FC79292E2D /* HwpPreviewProvider.swift */,
 				5E97EA87050B083B9FA29249 /* Info.plist */,
 				8957BC445F1A6388BF82B28C /* QLExtension.entitlements */,
@@ -376,6 +385,7 @@
 				F6DA732CC42A781180AA2F88 /* libiconv.tbd */,
 				A5315FE25D0AB65823C1D91A /* libz.tbd */,
 				0D03050B560F60198F4CBBB0 /* Metal.framework */,
+				02C775D3ABCF02F930BE957F /* PDFKit.framework */,
 				F6870F9FC321B27386359E2E /* QuartzCore.framework */,
 				0F5AFC8EC56882BF138E698C /* Rhwp.xcframework */,
 				B74C6D69DBD1D9B163C9A247 /* Security.framework */,
@@ -720,8 +730,10 @@
 				4603821692664AB0F6480AD4 /* FontFallback.swift in Sources */,
 				187BD036B336DB87EB4EC8C0 /* FontResourceRegistry.swift in Sources */,
 				ECED3AEFEF7467CA44F2A001 /* HwpDocumentInputValidator.swift in Sources */,
+				9D561505D91E548BF74717C4 /* HwpPDFViewLazyProbe.swift in Sources */,
 				DBD45292114D646A364B0B87 /* HwpPageImageRenderer.swift in Sources */,
 				D9E0E7DB88B12FDF40623328 /* HwpPreviewPDFRenderer.swift in Sources */,
+				74820E8884974C2D1ABDB8AF /* HwpPreviewPDFViewController.swift in Sources */,
 				41C5D25E1060BEF211833C8A /* HwpPreviewProvider.swift in Sources */,
 				748E5560ED13294F03F1B627 /* RenderTree.swift in Sources */,
 				BCE95338397154D9AC1C61C6 /* RhwpDocument.swift in Sources */,

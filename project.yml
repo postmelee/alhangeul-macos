@@ -76,6 +76,7 @@ targets:
       - sdk: CoreGraphics.framework
       - sdk: Foundation.framework
       - sdk: ImageIO.framework
+      - sdk: PDFKit.framework
       - sdk: CoreServices.framework
       - sdk: ApplicationServices.framework
       - sdk: Security.framework
