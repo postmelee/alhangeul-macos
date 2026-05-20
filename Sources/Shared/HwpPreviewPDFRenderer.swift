@@ -14,8 +14,25 @@ struct HwpPreviewDocumentInfo {
     let pageCount: Int
 }
 
+struct HwpPreviewDocumentContext {
+    let data: Data
+    let filename: String
+    let contentSize: CGSize
+    let pageCount: Int
+    let document: RhwpDocument
+
+    var documentInfo: HwpPreviewDocumentInfo {
+        HwpPreviewDocumentInfo(
+            data: data,
+            filename: filename,
+            contentSize: contentSize,
+            pageCount: pageCount
+        )
+    }
+}
+
 enum HwpPreviewPDFRenderer {
-    static func inspect(fileURL: URL) throws -> HwpPreviewDocumentInfo {
+    static func load(fileURL: URL) throws -> HwpPreviewDocumentContext {
         let values = try fileURL.resourceValues(forKeys: [.fileSizeKey])
         if let fileSize = values.fileSize, fileSize > hwpQuickLookMaxFileSize {
             throw HwpRenderError.fileTooLarge
@@ -33,16 +50,29 @@ enum HwpPreviewPDFRenderer {
             throw HwpRenderError.invalidPageSize
         }
 
-        return HwpPreviewDocumentInfo(
+        return HwpPreviewDocumentContext(
             data: data,
             filename: fileURL.lastPathComponent,
             contentSize: CGSize(width: firstPageSize.width, height: firstPageSize.height),
-            pageCount: pageCount
+            pageCount: pageCount,
+            document: document
         )
     }
 
+    static func inspect(fileURL: URL) throws -> HwpPreviewDocumentInfo {
+        try load(fileURL: fileURL).documentInfo
+    }
+
     static func render(fileURL: URL) throws -> HwpRenderedPreviewPDF {
-        try render(previewInfo: inspect(fileURL: fileURL))
+        try render(context: load(fileURL: fileURL))
+    }
+
+    static func render(context: HwpPreviewDocumentContext) throws -> HwpRenderedPreviewPDF {
+        try render(
+            document: context.document,
+            pageCount: context.pageCount,
+            contentSize: context.contentSize
+        )
     }
 
     static func render(previewInfo: HwpPreviewDocumentInfo) throws -> HwpRenderedPreviewPDF {
@@ -57,7 +87,7 @@ enum HwpPreviewPDFRenderer {
         )
     }
 
-    private static func render(
+    static func render(
         document: RhwpDocument,
         pageCount: Int,
         contentSize: CGSize

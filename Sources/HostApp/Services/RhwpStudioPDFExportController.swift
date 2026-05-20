@@ -58,13 +58,11 @@ final class RhwpStudioPDFExportController {
             throw HwpRenderError.invalidPageSize
         }
 
-        let previewInfo = HwpPreviewDocumentInfo(
-            data: data,
-            filename: filename,
-            contentSize: CGSize(width: firstPageSize.width, height: firstPageSize.height),
-            pageCount: pageCount
+        let renderedPDF = try HwpPreviewPDFRenderer.render(
+            document: document,
+            pageCount: pageCount,
+            contentSize: CGSize(width: firstPageSize.width, height: firstPageSize.height)
         )
-        let renderedPDF = try HwpPreviewPDFRenderer.render(previewInfo: previewInfo)
         guard !renderedPDF.data.isEmpty else {
             throw HwpRenderError.pdfEncodingFailed
         }

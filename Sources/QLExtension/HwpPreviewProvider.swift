@@ -16,13 +16,13 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
     private static func createPreview(for request: QLFilePreviewRequest) throws -> QLPreviewReply {
         logger.debug("Preview requested file=\(request.fileURL.lastPathComponent, privacy: .public)")
         do {
-            let previewInfo = try HwpPreviewPDFRenderer.inspect(fileURL: request.fileURL)
-            if previewInfo.pageCount == 1 {
-                logger.debug("Preview selected PNG reply file=\(previewInfo.filename, privacy: .public) pages=\(previewInfo.pageCount, privacy: .public) size=\(Int(previewInfo.contentSize.width), privacy: .public)x\(Int(previewInfo.contentSize.height), privacy: .public)")
-                return try Self.pngReply(previewInfo)
+            let documentContext = try HwpPreviewPDFRenderer.load(fileURL: request.fileURL)
+            if documentContext.pageCount == 1 {
+                logger.debug("Preview selected PNG reply file=\(documentContext.filename, privacy: .public) pages=\(documentContext.pageCount, privacy: .public) size=\(Int(documentContext.contentSize.width), privacy: .public)x\(Int(documentContext.contentSize.height), privacy: .public)")
+                return try Self.pngReply(documentContext)
             } else {
-                logger.debug("Preview selected PDF reply file=\(previewInfo.filename, privacy: .public) pages=\(previewInfo.pageCount, privacy: .public) size=\(Int(previewInfo.contentSize.width), privacy: .public)x\(Int(previewInfo.contentSize.height), privacy: .public)")
-                return try Self.pdfReply(previewInfo)
+                logger.debug("Preview selected PDF reply file=\(documentContext.filename, privacy: .public) pages=\(documentContext.pageCount, privacy: .public) size=\(Int(documentContext.contentSize.width), privacy: .public)x\(Int(documentContext.contentSize.height), privacy: .public)")
+                return try Self.pdfReply(documentContext)
             }
         } catch {
             if let reason = HwpDocumentFallbackClassifier.reason(for: error) {
@@ -37,38 +37,34 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         }
     }
 
-    private static func pngReply(_ previewInfo: HwpPreviewDocumentInfo) throws -> QLPreviewReply {
-        logger.debug("Preview rendering PNG file=\(previewInfo.filename, privacy: .public)")
-        let document = try RhwpDocument(
-            data: previewInfo.data,
-            filename: previewInfo.filename
-        )
+    private static func pngReply(_ documentContext: HwpPreviewDocumentContext) throws -> QLPreviewReply {
+        logger.debug("Preview rendering PNG file=\(documentContext.filename, privacy: .public)")
         let page = try HwpPageImageRenderer.renderPage(
-            document: document,
+            document: documentContext.document,
             pageIndex: 0
         )
         let data = try HwpPageImageRenderer.encodePNG(page.image)
-        logger.debug("Preview PNG ready file=\(previewInfo.filename, privacy: .public) bytes=\(data.count, privacy: .public)")
+        logger.debug("Preview PNG ready file=\(documentContext.filename, privacy: .public) bytes=\(data.count, privacy: .public)")
 
         return QLPreviewReply(
             dataOfContentType: .png,
-            contentSize: previewInfo.contentSize
+            contentSize: documentContext.contentSize
         ) { reply in
-            reply.title = previewInfo.filename
+            reply.title = documentContext.filename
             return data
         }
     }
 
-    private static func pdfReply(_ previewInfo: HwpPreviewDocumentInfo) throws -> QLPreviewReply {
-        logger.debug("Preview rendering PDF file=\(previewInfo.filename, privacy: .public) pages=\(previewInfo.pageCount, privacy: .public)")
-        let result = try HwpPreviewPDFRenderer.render(previewInfo: previewInfo)
-        logger.debug("Preview PDF ready file=\(previewInfo.filename, privacy: .public) pages=\(result.pageCount, privacy: .public) bytes=\(result.data.count, privacy: .public)")
+    private static func pdfReply(_ documentContext: HwpPreviewDocumentContext) throws -> QLPreviewReply {
+        logger.debug("Preview rendering PDF file=\(documentContext.filename, privacy: .public) pages=\(documentContext.pageCount, privacy: .public)")
+        let result = try HwpPreviewPDFRenderer.render(context: documentContext)
+        logger.debug("Preview PDF ready file=\(documentContext.filename, privacy: .public) pages=\(result.pageCount, privacy: .public) bytes=\(result.data.count, privacy: .public)")
 
         return QLPreviewReply(
             dataOfContentType: .pdf,
-            contentSize: previewInfo.contentSize
+            contentSize: documentContext.contentSize
         ) { reply in
-            reply.title = previewInfo.filename
+            reply.title = documentContext.filename
             return result.data
         }
     }
