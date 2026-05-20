@@ -28,6 +28,8 @@
 	<dict>
 		<key>NSExtensionAttributes</key>
 		<dict>
+			<key>QLIsDataBasedPreview</key>
+			<true/>
 			<key>QLSupportedContentTypes</key>
 			<array>
 				<string>com.postmelee.alhangeul.hwp</string>
@@ -43,7 +45,7 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.quicklook.preview</string>
 		<key>NSExtensionPrincipalClass</key>
-		<string>$(PRODUCT_MODULE_NAME).HwpPreviewPDFViewController</string>
+		<string>$(PRODUCT_MODULE_NAME).HwpPreviewProvider</string>
 	</dict>
 </dict>
 </plist>
