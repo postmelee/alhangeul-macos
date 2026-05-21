@@ -21,6 +21,16 @@
 
 ## 구현 요약
 
+### 변경 파일 목록과 영향 범위
+
+| 파일 | 내용 |
+|------|------|
+| `Sources/Shared/HwpPreviewPDFRenderer.swift` | `HwpPreviewDocumentContext`, `load(fileURL:)`, `render(context:)`를 추가해 열린 `RhwpDocument`를 재사용하도록 변경 |
+| `Sources/QLExtension/HwpPreviewProvider.swift` | Quick Look preview가 `load(fileURL:)` context를 사용해 PNG/PDF reply를 생성하도록 변경 |
+| `Sources/HostApp/Services/RhwpStudioPDFExportController.swift` | HostApp PDF export에서 이미 연 `RhwpDocument`를 PDF renderer에 직접 전달하도록 변경 |
+| `Sources/QLExtension/Info.plist`, `project.yml` | Stage 2 probe 후 data-based provider 설정과 dependency를 원상 경로로 확정 |
+| `mydocs/plans`, `mydocs/working`, `mydocs/report`, `mydocs/orders` | 수행계획, 구현계획, 단계 보고서, 최종 보고서, 오늘할일 상태 정리 |
+
 ### 유지한 동작
 
 - `Sources/QLExtension/Info.plist`
@@ -51,9 +61,11 @@
 
 중복 open 제거:
 
-- Quick Look 단일 page PNG preview: `RhwpDocument` open 2회 -> 1회
-- Quick Look 다중 page PDF preview: `RhwpDocument` open 2회 -> 1회
-- HostApp PDF export: `RhwpDocument` open 2회 -> 1회
+| 경로 | 변경 전 | 변경 후 |
+|------|---------|---------|
+| Quick Look 단일 page PNG preview | `RhwpDocument` open 2회 | `RhwpDocument` open 1회 |
+| Quick Look 다중 page PDF preview | `RhwpDocument` open 2회 | `RhwpDocument` open 1회 |
+| HostApp PDF export | `RhwpDocument` open 2회 | `RhwpDocument` open 1회 |
 
 전체 page bitmap rendering과 PDF page 작성은 기존과 같은 구조다. 따라서 true visible-page lazy rendering은 이번 최종 경로에서 제공하지 않는다.
 
@@ -148,3 +160,7 @@ HWP/HWPX thumbnail smoke 산출물도 생성됐다.
 
 - 별도 task에서 Release smoke 환경을 더 격리해 `/Applications` 설치본 충돌 없이 `qlmanage -p` path와 latency를 측정한다.
 - true lazy preview가 다시 필요하면 시스템 PDF UI 포기를 전제로 `NSScrollView` 직접 page stack 또는 별도 native viewer UX를 새 task로 다룬다.
+
+## 작업지시자 승인 요청
+
+현재 결과 기준으로 PR 게시 승인을 요청한다. PR에는 `PDFView` lazy 미채택 사유, 현재 PDF UI 유지 경로, 중복 `RhwpDocument` open 제거, LaunchServices stale registration 잔여 리스크를 명확히 포함한다.
