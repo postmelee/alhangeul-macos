@@ -72,8 +72,12 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         logger.debug("Preview rendering PDF file=\(documentContext.filename, privacy: .public) pages=\(documentContext.pageCount, privacy: .public)")
         let filename = documentContext.filename
         let contentSize = documentContext.contentSize
-        let result = try HwpPreviewPDFRenderer.render(context: documentContext)
+        let result = try HwpPreviewPDFRenderer.render(
+            context: documentContext,
+            policy: .skiaOptIn
+        )
         let data = result.data
+        logPDFDiagnostics(result, filename: filename)
         logger.debug("Preview PDF ready file=\(filename, privacy: .public) pages=\(result.pageCount, privacy: .public) bytes=\(data.count, privacy: .public)")
 
         return QLPreviewReply(
@@ -83,6 +87,34 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
             reply.title = filename
             return data
         }
+    }
+
+    private static func logPDFDiagnostics(_ result: HwpRenderedPreviewPDF, filename: String) {
+        var skiaPages = 0
+        var coreGraphicsPages = 0
+        var embeddedThumbnailPages = 0
+        var fallbackPages = 0
+        var pngBytes = 0
+        var totalRenderMs = 0.0
+
+        for page in result.pageDiagnostics {
+            switch page.diagnostics.backendUsed {
+            case .coreGraphics:
+                coreGraphicsPages += 1
+            case .skia:
+                skiaPages += 1
+            case .embeddedThumbnail:
+                embeddedThumbnailPages += 1
+            }
+
+            if page.diagnostics.fallbackReason != nil {
+                fallbackPages += 1
+            }
+            pngBytes += page.diagnostics.pngBytes ?? 0
+            totalRenderMs += page.diagnostics.durationMs.totalMs
+        }
+
+        logger.debug("Preview PDF render diagnostics file=\(filename, privacy: .public) pages=\(result.pageCount, privacy: .public) skiaPages=\(skiaPages, privacy: .public) coreGraphicsPages=\(coreGraphicsPages, privacy: .public) embeddedThumbnailPages=\(embeddedThumbnailPages, privacy: .public) fallbackPages=\(fallbackPages, privacy: .public) pngBytes=\(pngBytes, privacy: .public) totalRenderMs=\(millisecondsDescription(totalRenderMs), privacy: .public)")
     }
 
     private static func textReply(_ text: String, title: String) -> QLPreviewReply {

@@ -5,6 +5,12 @@ struct HwpRenderedPreviewPDF {
     let data: Data
     let contentSize: CGSize
     let pageCount: Int
+    let pageDiagnostics: [HwpPreviewPDFPageDiagnostics]
+}
+
+struct HwpPreviewPDFPageDiagnostics {
+    let pageIndex: Int
+    let diagnostics: HwpPageRenderDiagnostics
 }
 
 struct HwpPreviewDocumentInfo {
@@ -43,19 +49,29 @@ enum HwpPreviewPDFRenderer {
         )
     }
 
-    static func render(fileURL: URL) throws -> HwpRenderedPreviewPDF {
-        try render(context: load(fileURL: fileURL))
+    static func render(
+        fileURL: URL,
+        policy: HwpPageRenderPolicy = .coreGraphicsOnly
+    ) throws -> HwpRenderedPreviewPDF {
+        try render(context: load(fileURL: fileURL), policy: policy)
     }
 
-    static func render(context: HwpPreviewDocumentContext) throws -> HwpRenderedPreviewPDF {
+    static func render(
+        context: HwpPreviewDocumentContext,
+        policy: HwpPageRenderPolicy = .coreGraphicsOnly
+    ) throws -> HwpRenderedPreviewPDF {
         try render(
             document: context.document,
             pageCount: context.pageCount,
-            contentSize: context.contentSize
+            contentSize: context.contentSize,
+            policy: policy
         )
     }
 
-    static func render(previewInfo: HwpPreviewDocumentInfo) throws -> HwpRenderedPreviewPDF {
+    static func render(
+        previewInfo: HwpPreviewDocumentInfo,
+        policy: HwpPageRenderPolicy = .coreGraphicsOnly
+    ) throws -> HwpRenderedPreviewPDF {
         let document = try RhwpDocument(
             data: previewInfo.data,
             filename: previewInfo.filename
@@ -63,14 +79,16 @@ enum HwpPreviewPDFRenderer {
         return try render(
             document: document,
             pageCount: previewInfo.pageCount,
-            contentSize: previewInfo.contentSize
+            contentSize: previewInfo.contentSize,
+            policy: policy
         )
     }
 
     static func render(
         document: RhwpDocument,
         pageCount: Int,
-        contentSize: CGSize
+        contentSize: CGSize,
+        policy: HwpPageRenderPolicy = .coreGraphicsOnly
     ) throws -> HwpRenderedPreviewPDF {
         let pdfData = NSMutableData()
         guard let consumer = CGDataConsumer(data: pdfData as CFMutableData) else {
@@ -85,10 +103,18 @@ enum HwpPreviewPDFRenderer {
             throw HwpRenderError.pdfEncodingFailed
         }
 
+        var pageDiagnostics: [HwpPreviewPDFPageDiagnostics] = []
         for pageIndex in 0..<pageCount {
             let renderedPage = try HwpPageImageRenderer.renderPage(
                 document: document,
-                pageIndex: pageIndex
+                pageIndex: pageIndex,
+                policy: policy
+            )
+            pageDiagnostics.append(
+                HwpPreviewPDFPageDiagnostics(
+                    pageIndex: pageIndex,
+                    diagnostics: renderedPage.diagnostics
+                )
             )
             drawPDFPage(renderedPage, in: context)
         }
@@ -101,7 +127,8 @@ enum HwpPreviewPDFRenderer {
         return HwpRenderedPreviewPDF(
             data: pdfData as Data,
             contentSize: contentSize,
-            pageCount: pageCount
+            pageCount: pageCount,
+            pageDiagnostics: pageDiagnostics
         )
     }
 
