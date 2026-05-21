@@ -43,8 +43,10 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         let contentSize = documentContext.contentSize
         let page = try HwpPageImageRenderer.renderPage(
             document: documentContext.document,
-            pageIndex: 0
+            pageIndex: 0,
+            policy: .skiaOptIn
         )
+        logRenderedPageDiagnostics(page, replyType: "PNG", filename: filename)
         let data = try HwpPageImageRenderer.encodePNG(page.image)
         logger.debug("Preview PNG ready file=\(filename, privacy: .public) bytes=\(data.count, privacy: .public)")
 
@@ -55,6 +57,15 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
             reply.title = filename
             return data
         }
+    }
+
+    private static func logRenderedPageDiagnostics(
+        _ page: HwpRenderedPage,
+        replyType: String,
+        filename: String
+    ) {
+        let diagnostics = page.diagnostics
+        logger.debug("Preview \(replyType, privacy: .public) render diagnostics file=\(filename, privacy: .public) policy=\(String(describing: diagnostics.policy), privacy: .public) backend=\(String(describing: diagnostics.backendUsed), privacy: .public) fallback=\(fallbackReasonDescription(diagnostics.fallbackReason), privacy: .public) pixel=\(Int(diagnostics.pixelSize.width), privacy: .public)x\(Int(diagnostics.pixelSize.height), privacy: .public) pngBytes=\(optionalIntDescription(diagnostics.pngBytes), privacy: .public) totalMs=\(millisecondsDescription(diagnostics.durationMs.totalMs), privacy: .public) skiaMs=\(optionalMillisecondsDescription(diagnostics.durationMs.skiaRenderMs), privacy: .public) decodeMs=\(optionalMillisecondsDescription(diagnostics.durationMs.pngDecodeMs), privacy: .public) coreMs=\(optionalMillisecondsDescription(diagnostics.durationMs.coreGraphicsRenderMs), privacy: .public)")
     }
 
     private static func pdfReply(_ documentContext: HwpPreviewDocumentContext) throws -> QLPreviewReply {
@@ -87,5 +98,30 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
     private static func errorDescription(_ error: Error) -> String {
         let nsError = error as NSError
         return "\(type(of: error))(domain=\(nsError.domain), code=\(nsError.code))"
+    }
+
+    private static func fallbackReasonDescription(_ reason: HwpPageRenderFallbackReason?) -> String {
+        guard let reason else {
+            return "none"
+        }
+        return String(describing: reason)
+    }
+
+    private static func optionalIntDescription(_ value: Int?) -> String {
+        guard let value else {
+            return "none"
+        }
+        return String(value)
+    }
+
+    private static func optionalMillisecondsDescription(_ value: Double?) -> String {
+        guard let value else {
+            return "none"
+        }
+        return millisecondsDescription(value)
+    }
+
+    private static func millisecondsDescription(_ value: Double) -> String {
+        String(format: "%.3f", value)
     }
 }
