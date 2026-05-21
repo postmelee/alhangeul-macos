@@ -39,33 +39,38 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
 
     private static func pngReply(_ documentContext: HwpPreviewDocumentContext) throws -> QLPreviewReply {
         logger.debug("Preview rendering PNG file=\(documentContext.filename, privacy: .public)")
+        let filename = documentContext.filename
+        let contentSize = documentContext.contentSize
         let page = try HwpPageImageRenderer.renderPage(
             document: documentContext.document,
             pageIndex: 0
         )
         let data = try HwpPageImageRenderer.encodePNG(page.image)
-        logger.debug("Preview PNG ready file=\(documentContext.filename, privacy: .public) bytes=\(data.count, privacy: .public)")
+        logger.debug("Preview PNG ready file=\(filename, privacy: .public) bytes=\(data.count, privacy: .public)")
 
         return QLPreviewReply(
             dataOfContentType: .png,
-            contentSize: documentContext.contentSize
+            contentSize: contentSize
         ) { reply in
-            reply.title = documentContext.filename
+            reply.title = filename
             return data
         }
     }
 
     private static func pdfReply(_ documentContext: HwpPreviewDocumentContext) throws -> QLPreviewReply {
         logger.debug("Preview rendering PDF file=\(documentContext.filename, privacy: .public) pages=\(documentContext.pageCount, privacy: .public)")
+        let filename = documentContext.filename
+        let contentSize = documentContext.contentSize
         let result = try HwpPreviewPDFRenderer.render(context: documentContext)
-        logger.debug("Preview PDF ready file=\(documentContext.filename, privacy: .public) pages=\(result.pageCount, privacy: .public) bytes=\(result.data.count, privacy: .public)")
+        let data = result.data
+        logger.debug("Preview PDF ready file=\(filename, privacy: .public) pages=\(result.pageCount, privacy: .public) bytes=\(data.count, privacy: .public)")
 
         return QLPreviewReply(
             dataOfContentType: .pdf,
-            contentSize: documentContext.contentSize
+            contentSize: contentSize
         ) { reply in
-            reply.title = documentContext.filename
-            return result.data
+            reply.title = filename
+            return data
         }
     }
 

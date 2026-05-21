@@ -63,9 +63,6 @@ final class RhwpStudioPDFExportController {
             pageCount: pageCount,
             contentSize: CGSize(width: firstPageSize.width, height: firstPageSize.height)
         )
-        guard !renderedPDF.data.isEmpty else {
-            throw HwpRenderError.pdfEncodingFailed
-        }
         return renderedPDF.data
     }
 }
