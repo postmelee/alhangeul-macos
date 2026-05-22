@@ -104,6 +104,7 @@ enum HwpPreviewPDFRenderer {
         }
 
         var pageDiagnostics: [HwpPreviewPDFPageDiagnostics] = []
+        pageDiagnostics.reserveCapacity(pageCount)
         for pageIndex in 0..<pageCount {
             let renderedPage = try HwpPageImageRenderer.renderPage(
                 document: document,

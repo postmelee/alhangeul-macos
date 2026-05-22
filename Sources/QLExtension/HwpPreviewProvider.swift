@@ -65,7 +65,9 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         filename: String
     ) {
         let diagnostics = page.diagnostics
-        logger.debug("Preview \(replyType, privacy: .public) render diagnostics file=\(filename, privacy: .public) policy=\(String(describing: diagnostics.policy), privacy: .public) backend=\(String(describing: diagnostics.backendUsed), privacy: .public) fallback=\(fallbackReasonDescription(diagnostics.fallbackReason), privacy: .public) pixel=\(Int(diagnostics.pixelSize.width), privacy: .public)x\(Int(diagnostics.pixelSize.height), privacy: .public) pngBytes=\(optionalIntDescription(diagnostics.pngBytes), privacy: .public) totalMs=\(millisecondsDescription(diagnostics.durationMs.totalMs), privacy: .public) skiaMs=\(optionalMillisecondsDescription(diagnostics.durationMs.skiaRenderMs), privacy: .public) decodeMs=\(optionalMillisecondsDescription(diagnostics.durationMs.pngDecodeMs), privacy: .public) coreMs=\(optionalMillisecondsDescription(diagnostics.durationMs.coreGraphicsRenderMs), privacy: .public)")
+        logger.debug("Preview \(replyType, privacy: .public) render backend file=\(filename, privacy: .public) policy=\(String(describing: diagnostics.policy), privacy: .public) backend=\(String(describing: diagnostics.backendUsed), privacy: .public) fallback=\(fallbackReasonDescription(diagnostics.fallbackReason), privacy: .public)")
+        logger.debug("Preview \(replyType, privacy: .public) render output pixel=\(Int(diagnostics.pixelSize.width), privacy: .public)x\(Int(diagnostics.pixelSize.height), privacy: .public) pngBytes=\(optionalIntDescription(diagnostics.pngBytes), privacy: .public)")
+        logger.debug("Preview \(replyType, privacy: .public) render timing totalMs=\(millisecondsDescription(diagnostics.durationMs.totalMs), privacy: .public) skiaMs=\(optionalMillisecondsDescription(diagnostics.durationMs.skiaRenderMs), privacy: .public) decodeMs=\(optionalMillisecondsDescription(diagnostics.durationMs.pngDecodeMs), privacy: .public) coreMs=\(optionalMillisecondsDescription(diagnostics.durationMs.coreGraphicsRenderMs), privacy: .public)")
     }
 
     private static func pdfReply(_ documentContext: HwpPreviewDocumentContext) throws -> QLPreviewReply {
@@ -114,7 +116,9 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
             totalRenderMs += page.diagnostics.durationMs.totalMs
         }
 
-        logger.debug("Preview PDF render diagnostics file=\(filename, privacy: .public) pages=\(result.pageCount, privacy: .public) skiaPages=\(skiaPages, privacy: .public) coreGraphicsPages=\(coreGraphicsPages, privacy: .public) embeddedThumbnailPages=\(embeddedThumbnailPages, privacy: .public) fallbackPages=\(fallbackPages, privacy: .public) pngBytes=\(pngBytes, privacy: .public) totalRenderMs=\(millisecondsDescription(totalRenderMs), privacy: .public)")
+        logger.debug("Preview PDF render backend file=\(filename, privacy: .public) pages=\(result.pageCount, privacy: .public) skiaPages=\(skiaPages, privacy: .public) coreGraphicsPages=\(coreGraphicsPages, privacy: .public)")
+        logger.debug("Preview PDF render fallback embeddedThumbnailPages=\(embeddedThumbnailPages, privacy: .public) fallbackPages=\(fallbackPages, privacy: .public)")
+        logger.debug("Preview PDF render output pngBytes=\(pngBytes, privacy: .public) totalRenderMs=\(millisecondsDescription(totalRenderMs), privacy: .public)")
     }
 
     private static func textReply(_ text: String, title: String) -> QLPreviewReply {

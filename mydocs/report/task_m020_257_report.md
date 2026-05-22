@@ -18,9 +18,9 @@
 - Quick Look policy smoke helper를 추가해 `.coreGraphicsOnly`와 `.skiaOptIn` 결과를 같은 입력 문서에서 비교할 수 있게 했다.
 - 대표 단일/다중 샘플에서 Skia opt-in 성공과 fallback count를 기록했다.
 
-## 변경 파일
+## 변경 파일 목록과 영향 범위
 
-| 파일 | 요약 |
+| 파일 | 내용 |
 |---|---|
 | `Sources/QLExtension/HwpPreviewProvider.swift` | 단일 PNG와 다중 PDF Quick Look reply에서 `skiaOptIn` policy 명시, PNG/PDF diagnostics logging 추가 |
 | `Sources/Shared/HwpPreviewPDFRenderer.swift` | PDF render API에 `policy` 기본 인자 추가, page별 diagnostics 수집 |
