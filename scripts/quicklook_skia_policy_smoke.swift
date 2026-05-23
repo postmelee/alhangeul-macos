@@ -135,7 +135,8 @@ struct QuickLookSkiaPolicySmoke {
 
                 let pdf = try HwpPreviewPDFRenderer.render(
                     context: context,
-                    policy: policy
+                    policy: policy,
+                    collectDiagnostics: true
                 )
                 return policyResult(
                     outputBytes: pdf.data.count,

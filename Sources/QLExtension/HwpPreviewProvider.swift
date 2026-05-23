@@ -76,7 +76,8 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         let contentSize = documentContext.contentSize
         let result = try HwpPreviewPDFRenderer.render(
             context: documentContext,
-            policy: .skiaOptIn
+            policy: .skiaOptIn,
+            collectDiagnostics: true
         )
         let data = result.data
         logPDFDiagnostics(result, filename: filename)

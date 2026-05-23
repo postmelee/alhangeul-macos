@@ -13,7 +13,7 @@
 - PNG reply에 render diagnostics 로그를 추가했다.
 - 다중 페이지 Quick Look PDF renderer가 `HwpPageRenderPolicy`를 받을 수 있게 했다.
 - Quick Look PDF path에서 `policy: .skiaOptIn`을 명시하도록 변경했다.
-- PDF page별 `HwpPageRenderDiagnostics`를 `HwpRenderedPreviewPDF.pageDiagnostics`로 수집한다.
+- PDF page별 `HwpPageRenderDiagnostics`는 Quick Look/smoke path에서만 `collectDiagnostics: true`로 수집한다.
 - PDF reply에 backend별 page count, fallback count, Skia PNG bytes, render duration summary 로그를 추가했다.
 - Quick Look policy smoke helper를 추가해 `.coreGraphicsOnly`와 `.skiaOptIn` 결과를 같은 입력 문서에서 비교할 수 있게 했다.
 - 대표 단일/다중 샘플에서 Skia opt-in 성공과 fallback count를 기록했다.
@@ -23,7 +23,7 @@
 | 파일 | 내용 |
 |---|---|
 | `Sources/QLExtension/HwpPreviewProvider.swift` | 단일 PNG와 다중 PDF Quick Look reply에서 `skiaOptIn` policy 명시, PNG/PDF diagnostics logging 추가 |
-| `Sources/Shared/HwpPreviewPDFRenderer.swift` | PDF render API에 `policy` 기본 인자 추가, page별 diagnostics 수집 |
+| `Sources/Shared/HwpPreviewPDFRenderer.swift` | PDF render API에 `policy`와 `collectDiagnostics` 기본 인자 추가, page별 diagnostics opt-in 수집 |
 | `scripts/smoke-quicklook-skia-policy.sh` | Quick Look policy smoke wrapper 추가 |
 | `scripts/quicklook_skia_policy_smoke.swift` | CoreGraphics/Skia opt-in reply shape, backend, fallback, latency, byte count 측정 helper 추가 |
 | `mydocs/plans/task_m020_257_impl.md` | 구현계획서 |
@@ -59,8 +59,8 @@ Quick Look 단일 페이지 문서는 PNG reply를 유지한다. 내부 page ima
 
 Quick Look 다중 페이지 문서는 기존처럼 bitmap PDF container를 유지한다. 각 page image 생성만 `skiaOptIn` policy를 사용한다.
 
-- 모든 page는 `HwpPreviewPDFRenderer.render(..., policy: .skiaOptIn)` 내부에서 `HwpPageImageRenderer.renderPage`를 통해 생성된다.
-- page별 backend/fallback 결과는 `HwpRenderedPreviewPDF.pageDiagnostics`에 남는다.
+- 모든 page는 `HwpPreviewPDFRenderer.render(..., policy: .skiaOptIn, collectDiagnostics: true)` 내부에서 `HwpPageImageRenderer.renderPage`를 통해 생성된다.
+- Quick Look PDF path의 page별 backend/fallback 결과는 `HwpRenderedPreviewPDF.pageDiagnostics`에 남는다.
 - Quick Look provider는 PDF 전체 summary 로그를 남긴다.
 
 ## Smoke 결과
