@@ -2,6 +2,8 @@ import AppKit
 import CoreGraphics
 import Darwin
 import Foundation
+import ImageIO
+import UniformTypeIdentifiers
 import WebKit
 
 struct PreviewHarnessError: Error, CustomStringConvertible {
@@ -12,6 +14,7 @@ struct HarnessOptions {
     let outputDir: URL
     let resourceDir: URL
     let pageNumber: Int
+    let policy: HwpPageRenderPolicy
     let viewportSize: CGSize
     let settleMilliseconds: Int
     let inputURLs: [URL]
@@ -107,6 +110,69 @@ struct PNGOutput {
     let height: Int
     let sampleNonWhitePixels: Int
     let samplePixels: Int
+}
+
+struct NativeRenderMetadata: Codable {
+    let sourcePath: String
+    let filename: String
+    let page: Int
+    let pageCount: Int
+    let policy: String
+    let backendUsed: String
+    let fallbackReason: String?
+    let pageSize: SizeMetadata
+    let pixelSize: SizeMetadata
+    let pngPath: String
+    let pngBytes: Int
+    let nonWhiteSamplePixels: Int
+    let sampledPixels: Int
+    let renderMs: Double
+    let skiaRenderMs: Double?
+    let pngDecodeMs: Double?
+    let coreGraphicsRenderMs: Double?
+}
+
+struct NativeRenderResult {
+    let pngURL: URL
+    let jsonURL: URL
+    let image: CGImage
+    let pngBytes: Int
+    let pageCount: Int
+    let policy: String
+    let backendUsed: String
+    let fallbackReason: String?
+    let renderMs: Double
+    let pixelWidth: Int
+    let pixelHeight: Int
+    let nonWhiteSamplePixels: Int
+    let sampledPixels: Int
+}
+
+struct RGBAImage {
+    let width: Int
+    let height: Int
+    var pixels: [UInt8]
+}
+
+struct DiffResult {
+    let changedPixels: Int
+    let totalPixels: Int
+    let changedPercent: Double
+    let meanRGBDelta: Double
+    let maxRGBDelta: Int
+    let bounds: CGRect?
+}
+
+struct VisualDiffResult {
+    let diffURL: URL
+    let changedPixels: Int
+    let totalPixels: Int
+    let changedPercent: Double
+    let meanRGBDelta: Double
+    let maxRGBDelta: Int
+    let bounds: CGRect?
+    let compareWidth: Int
+    let compareHeight: Int
 }
 
 struct PageState {
@@ -965,6 +1031,204 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
     }
 }
 
+enum NativePreviewRenderer {
+    static func render(
+        inputURL: URL,
+        outputDir: URL,
+        pageNumber: Int,
+        policy: HwpPageRenderPolicy
+    ) throws -> NativeRenderResult {
+        let data = try Data(contentsOf: inputURL)
+        let document = try RhwpDocument(data: data, filename: inputURL.lastPathComponent)
+        guard document.pageCount > 0 else {
+            throw PreviewHarnessError(description: "page count is zero")
+        }
+        let pageIndex = pageNumber - 1
+        guard pageIndex >= 0, pageIndex < document.pageCount else {
+            throw PreviewHarnessError(description: "page \(pageNumber) is out of range: pageCount=\(document.pageCount)")
+        }
+
+        let baseName = inputURL.deletingPathExtension().lastPathComponent
+        let outputBase = "\(baseName)-page\(pageNumber)"
+        let pngURL = outputDir.appendingPathComponent("\(outputBase)-native.png", isDirectory: false)
+        let jsonURL = outputDir.appendingPathComponent("\(outputBase)-native.json", isDirectory: false)
+
+        let page = try HwpPageImageRenderer.renderPage(
+            document: document,
+            pageIndex: pageIndex,
+            policy: policy
+        )
+        let pngData = try HwpPageImageRenderer.encodePNG(page.image)
+        try pngData.write(to: pngURL, options: .atomic)
+        let sample = sampleNonWhitePixels(cgImage: page.image)
+
+        let diagnostics = page.diagnostics
+        let metadata = NativeRenderMetadata(
+            sourcePath: inputURL.path,
+            filename: inputURL.lastPathComponent,
+            page: pageNumber,
+            pageCount: document.pageCount,
+            policy: renderPolicyName(diagnostics.policy),
+            backendUsed: backendName(diagnostics.backendUsed),
+            fallbackReason: diagnostics.fallbackReason.map(fallbackReasonName),
+            pageSize: SizeMetadata(width: diagnostics.pageSize.width, height: diagnostics.pageSize.height),
+            pixelSize: SizeMetadata(width: diagnostics.pixelSize.width, height: diagnostics.pixelSize.height),
+            pngPath: pngURL.path,
+            pngBytes: pngData.count,
+            nonWhiteSamplePixels: sample.nonWhite,
+            sampledPixels: sample.total,
+            renderMs: diagnostics.durationMs.totalMs,
+            skiaRenderMs: diagnostics.durationMs.skiaRenderMs,
+            pngDecodeMs: diagnostics.durationMs.pngDecodeMs,
+            coreGraphicsRenderMs: diagnostics.durationMs.coreGraphicsRenderMs
+        )
+        try writeJSON(metadata, to: jsonURL)
+
+        return NativeRenderResult(
+            pngURL: pngURL,
+            jsonURL: jsonURL,
+            image: page.image,
+            pngBytes: pngData.count,
+            pageCount: document.pageCount,
+            policy: metadata.policy,
+            backendUsed: metadata.backendUsed,
+            fallbackReason: metadata.fallbackReason,
+            renderMs: metadata.renderMs,
+            pixelWidth: page.image.width,
+            pixelHeight: page.image.height,
+            nonWhiteSamplePixels: sample.nonWhite,
+            sampledPixels: sample.total
+        )
+    }
+}
+
+enum VisualDiffEngine {
+    static func compare(
+        studioPNG: URL,
+        nativeImage: CGImage,
+        outputDir: URL,
+        baseName: String,
+        pageNumber: Int
+    ) throws -> VisualDiffResult {
+        let studio = try loadRGBAImage(studioPNG)
+        let native = try drawCGImageToRGBA(nativeImage, width: studio.width, height: studio.height)
+        let (diff, diffImage) = makeDiffImage(reference: studio, candidate: native)
+        let diffURL = outputDir.appendingPathComponent("\(baseName)-page\(pageNumber)-diff.png", isDirectory: false)
+        try writePNG(diffImage, to: diffURL)
+        return VisualDiffResult(
+            diffURL: diffURL,
+            changedPixels: diff.changedPixels,
+            totalPixels: diff.totalPixels,
+            changedPercent: diff.changedPercent,
+            meanRGBDelta: diff.meanRGBDelta,
+            maxRGBDelta: diff.maxRGBDelta,
+            bounds: diff.bounds,
+            compareWidth: studio.width,
+            compareHeight: studio.height
+        )
+    }
+
+    private static func loadRGBAImage(_ url: URL) throws -> RGBAImage {
+        guard
+            let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+            let image = CGImageSourceCreateImageAtIndex(source, 0, nil)
+        else {
+            throw PreviewHarnessError(description: "failed to load image: \(url.path)")
+        }
+        return try drawCGImageToRGBA(image, width: image.width, height: image.height)
+    }
+
+    private static func drawCGImageToRGBA(_ image: CGImage, width: Int, height: Int) throws -> RGBAImage {
+        var rgba = blankRGBA(width: width, height: height)
+        try rgba.withBitmapContext { context in
+            context.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
+            context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+            context.interpolationQuality = .high
+            context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        }
+        return rgba
+    }
+
+    private static func blankRGBA(width: Int, height: Int) -> RGBAImage {
+        let bytesPerRow = width * 4
+        return RGBAImage(width: width, height: height, pixels: [UInt8](repeating: 255, count: height * bytesPerRow))
+    }
+
+    private static func makeDiffImage(reference: RGBAImage, candidate: RGBAImage) -> (DiffResult, RGBAImage) {
+        precondition(reference.width == candidate.width && reference.height == candidate.height)
+
+        var diffImage = blankRGBA(width: reference.width, height: reference.height)
+        var changedPixels = 0
+        var totalDelta = 0
+        var maxDelta = 0
+        var minX = reference.width
+        var minY = reference.height
+        var maxX = -1
+        var maxY = -1
+
+        for y in 0..<reference.height {
+            for x in 0..<reference.width {
+                let index = (y * reference.width + x) * 4
+                let redDelta = abs(Int(reference.pixels[index]) - Int(candidate.pixels[index]))
+                let greenDelta = abs(Int(reference.pixels[index + 1]) - Int(candidate.pixels[index + 1]))
+                let blueDelta = abs(Int(reference.pixels[index + 2]) - Int(candidate.pixels[index + 2]))
+                let pixelDelta = max(redDelta, greenDelta, blueDelta)
+                totalDelta += redDelta + greenDelta + blueDelta
+                maxDelta = max(maxDelta, pixelDelta)
+
+                if pixelDelta > 12 {
+                    changedPixels += 1
+                    minX = min(minX, x)
+                    minY = min(minY, y)
+                    maxX = max(maxX, x)
+                    maxY = max(maxY, y)
+                    diffImage.pixels[index] = 255
+                    diffImage.pixels[index + 1] = UInt8(max(0, 255 - pixelDelta))
+                    diffImage.pixels[index + 2] = UInt8(max(0, 255 - pixelDelta))
+                    diffImage.pixels[index + 3] = 255
+                } else {
+                    let gray = UInt8(240)
+                    diffImage.pixels[index] = gray
+                    diffImage.pixels[index + 1] = gray
+                    diffImage.pixels[index + 2] = gray
+                    diffImage.pixels[index + 3] = 255
+                }
+            }
+        }
+
+        let totalPixels = reference.width * reference.height
+        let bounds: CGRect?
+        if maxX >= 0 {
+            bounds = CGRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
+        } else {
+            bounds = nil
+        }
+        return (
+            DiffResult(
+                changedPixels: changedPixels,
+                totalPixels: totalPixels,
+                changedPercent: totalPixels == 0 ? 0 : Double(changedPixels) * 100.0 / Double(totalPixels),
+                meanRGBDelta: totalPixels == 0 ? 0 : Double(totalDelta) / Double(totalPixels * 3),
+                maxRGBDelta: maxDelta,
+                bounds: bounds
+            ),
+            diffImage
+        )
+    }
+
+    private static func writePNG(_ image: RGBAImage, to url: URL) throws {
+        var image = image
+        let cgImage = try image.makeCGImage()
+        guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil) else {
+            throw PreviewHarnessError(description: "failed to create PNG destination: \(url.path)")
+        }
+        CGImageDestinationAddImage(destination, cgImage, nil)
+        guard CGImageDestinationFinalize(destination) else {
+            throw PreviewHarnessError(description: "failed to write PNG: \(url.path)")
+        }
+    }
+}
+
 @main
 struct PreviewVisualDiffHarness {
     static func main() throws {
@@ -972,7 +1236,11 @@ struct PreviewVisualDiffHarness {
 
         let options = try parseOptions(Array(CommandLine.arguments.dropFirst()))
         let studioDir = options.outputDir.appendingPathComponent("studio", isDirectory: true)
+        let nativeDir = options.outputDir.appendingPathComponent("native", isDirectory: true)
+        let diffDir = options.outputDir.appendingPathComponent("diff", isDirectory: true)
         try FileManager.default.createDirectory(at: studioDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: nativeDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: diffDir, withIntermediateDirectories: true)
 
         let manifest = try StudioManifest.load(from: options.resourceDir)
         let renderer = StudioReferenceRenderer(
@@ -983,17 +1251,19 @@ struct PreviewVisualDiffHarness {
 
         var failed = false
         var summaryLines: [String] = []
-        summaryLines.append("# Preview Visual Diff Harness - Studio Reference")
+        summaryLines.append("# Preview Visual Diff Harness")
         summaryLines.append("")
         summaryLines.append("Page: \(options.pageNumber)")
+        summaryLines.append("NativePolicy: \(renderPolicyName(options.policy))")
         summaryLines.append("ResourceDir: \(options.resourceDir.path)")
         summaryLines.append("StudioReleaseTag: \(manifest.source_release_tag)")
         summaryLines.append("StudioResolvedCommit: \(manifest.source_resolved_commit)")
         summaryLines.append("Viewport: \(Int(options.viewportSize.width))x\(Int(options.viewportSize.height))")
         summaryLines.append("SettleMs: \(options.settleMilliseconds)")
+        summaryLines.append("DiffPixelThreshold: 12")
         summaryLines.append("")
-        summaryLines.append("| File | Status | Size | CanvasCount | OverlayCount | CanvasSampleNonWhite | CaptureMode | CaptureMs | StudioPNG | StudioJSON |")
-        summaryLines.append("|------|--------|------|-------------|--------------|----------------------|-------------|-----------|-----------|------------|")
+        summaryLines.append("| File | Status | StudioSize | NativeSize | CompareSize | ChangedPixels | ChangedPercent | MeanRGBDelta | MaxRGBDelta | DiffBounds | StudioCapture | NativeBackend | NativeMs | StudioPNG | NativePNG | DiffPNG |")
+        summaryLines.append("|------|--------|------------|------------|-------------|---------------|----------------|--------------|-------------|------------|---------------|---------------|----------|-----------|-----------|---------|")
 
         for inputURL in options.inputURLs {
             do {
@@ -1003,33 +1273,48 @@ struct PreviewVisualDiffHarness {
                     pageNumber: options.pageNumber,
                     manifest: manifest
                 )
+                let native = try NativePreviewRenderer.render(
+                    inputURL: inputURL,
+                    outputDir: nativeDir,
+                    pageNumber: options.pageNumber,
+                    policy: options.policy
+                )
+                let baseName = inputURL.deletingPathExtension().lastPathComponent
+                let diff = try VisualDiffEngine.compare(
+                    studioPNG: result.pngURL,
+                    nativeImage: native.image,
+                    outputDir: diffDir,
+                    baseName: baseName,
+                    pageNumber: options.pageNumber
+                )
                 summaryLines.append([
                     markdownCell(result.fileName),
                     "OK",
                     "\(result.pngWidth)x\(result.pngHeight)",
-                    "\(result.canvasCount)",
-                    "\(result.overlayCount)",
-                    "\(result.canvasSampleNonWhitePixels)/\(result.canvasSamplePixels)",
+                    "\(native.pixelWidth)x\(native.pixelHeight)",
+                    "\(diff.compareWidth)x\(diff.compareHeight)",
+                    "\(diff.changedPixels)/\(diff.totalPixels)",
+                    formatPercent(diff.changedPercent),
+                    formatDouble(diff.meanRGBDelta),
+                    "\(diff.maxRGBDelta)",
+                    boundsString(diff.bounds),
                     result.captureMode,
-                    formatMilliseconds(result.captureMs),
+                    native.backendUsed + fallbackSuffix(native.fallbackReason),
+                    formatMilliseconds(native.renderMs),
                     markdownCell(result.pngURL.path),
-                    markdownCell(result.jsonURL.path)
+                    markdownCell(native.pngURL.path),
+                    markdownCell(diff.diffURL.path)
                 ].joined(separator: " | ").wrappedTableRow)
-                print("OK \(result.fileName): studioPNG=\(result.pngURL.path) metadata=\(result.jsonURL.path)")
+                print(
+                    "OK \(result.fileName): studioPNG=\(result.pngURL.path) nativePNG=\(native.pngURL.path) diffPNG=\(diff.diffURL.path)"
+                )
             } catch {
                 failed = true
-                summaryLines.append([
+                let failureCells = [
                     markdownCell(inputURL.lastPathComponent),
-                    "FAIL: \(String(describing: error).replacingOccurrences(of: "|", with: "/"))",
-                    "-",
-                    "-",
-                    "-",
-                    "-",
-                    "-",
-                    "-",
-                    "-",
-                    "-"
-                ].joined(separator: " | ").wrappedTableRow)
+                    "FAIL: \(String(describing: error).replacingOccurrences(of: "|", with: "/"))"
+                ] + Array(repeating: "-", count: 14)
+                summaryLines.append(failureCells.joined(separator: " | ").wrappedTableRow)
                 print("FAIL \(inputURL.path): \(error)", to: &standardError)
             }
         }
@@ -1048,7 +1333,7 @@ struct PreviewVisualDiffHarness {
     private static func parseOptions(_ args: [String]) throws -> HarnessOptions {
         guard args.count >= 2 else {
             throw PreviewHarnessError(
-                description: "usage: preview_visual_diff_harness <output-dir> [--page N] [--viewport WIDTHxHEIGHT] [--settle-ms N] [--resource-dir DIR] <hwp-or-hwpx> [...]"
+                description: "usage: preview_visual_diff_harness <output-dir> [--page N] [--policy coreGraphicsOnly|skiaOptIn] [--viewport WIDTHxHEIGHT] [--settle-ms N] [--resource-dir DIR] <hwp-or-hwpx> [...]"
             )
         }
 
@@ -1056,6 +1341,7 @@ struct PreviewVisualDiffHarness {
         let outputDir = absoluteURL(remaining.removeFirst(), isDirectory: true)
         var resourceDir = absoluteURL("Sources/HostApp/Resources/rhwp-studio", isDirectory: true)
         var pageNumber = 1
+        var policy = HwpPageRenderPolicy.coreGraphicsOnly
         var viewportSize = CGSize(width: 1400, height: 1800)
         var settleMilliseconds = 120
 
@@ -1074,6 +1360,13 @@ struct PreviewVisualDiffHarness {
                     throw PreviewHarnessError(description: "--resource-dir requires a directory")
                 }
                 resourceDir = absoluteURL(value, isDirectory: true)
+                remaining.removeFirst()
+            case "--policy":
+                remaining.removeFirst()
+                guard let value = remaining.first else {
+                    throw PreviewHarnessError(description: "--policy requires coreGraphicsOnly or skiaOptIn")
+                }
+                policy = try parsePolicy(value)
                 remaining.removeFirst()
             case "--viewport":
                 remaining.removeFirst()
@@ -1102,10 +1395,22 @@ struct PreviewVisualDiffHarness {
             outputDir: outputDir,
             resourceDir: resourceDir,
             pageNumber: pageNumber,
+            policy: policy,
             viewportSize: viewportSize,
             settleMilliseconds: settleMilliseconds,
             inputURLs: remaining.map { absoluteURL($0) }
         )
+    }
+
+    private static func parsePolicy(_ value: String) throws -> HwpPageRenderPolicy {
+        switch value {
+        case "coreGraphicsOnly":
+            return .coreGraphicsOnly
+        case "skiaOptIn":
+            return .skiaOptIn
+        default:
+            throw PreviewHarnessError(description: "--policy must be coreGraphicsOnly or skiaOptIn")
+        }
     }
 
     private static func parseViewport(_ value: String) throws -> CGSize {
@@ -1258,9 +1563,110 @@ private func formatMilliseconds(_ value: Double) -> String {
     String(format: "%.1f", value)
 }
 
+private func formatPercent(_ value: Double) -> String {
+    String(format: "%.4f%%", value)
+}
+
+private func formatDouble(_ value: Double) -> String {
+    String(format: "%.4f", value)
+}
+
+private func boundsString(_ bounds: CGRect?) -> String {
+    guard let bounds else {
+        return "-"
+    }
+    return "\(Int(bounds.minX)),\(Int(bounds.minY)) \(Int(bounds.width))x\(Int(bounds.height))"
+}
+
+private func renderPolicyName(_ policy: HwpPageRenderPolicy) -> String {
+    switch policy {
+    case .coreGraphicsOnly:
+        return "coreGraphicsOnly"
+    case .skiaOptIn:
+        return "skiaOptIn"
+    }
+}
+
+private func backendName(_ backend: HwpPageRenderBackend) -> String {
+    switch backend {
+    case .coreGraphics:
+        return "coreGraphics"
+    case .skia:
+        return "skia"
+    case .embeddedThumbnail:
+        return "embeddedThumbnail"
+    }
+}
+
+private func fallbackReasonName(_ reason: HwpPageRenderFallbackReason) -> String {
+    switch reason {
+    case .ffiUnavailable:
+        return "ffiUnavailable"
+    case .invalidDocumentHandle:
+        return "invalidDocumentHandle"
+    case .invalidPageIndex:
+        return "invalidPageIndex"
+    case .invalidRenderOptions:
+        return "invalidRenderOptions"
+    case .invalidPageSize:
+        return "invalidPageSize"
+    case .skiaRenderFailure:
+        return "skiaRenderFailure"
+    case .pngDecodeFailure:
+        return "pngDecodeFailure"
+    case .memoryTimeoutFallback:
+        return "memoryTimeoutFallback"
+    }
+}
+
+private func fallbackSuffix(_ reason: String?) -> String {
+    guard let reason else {
+        return ""
+    }
+    return " fallback=\(reason)"
+}
+
 extension String {
     var wrappedTableRow: String {
         "| \(self) |"
+    }
+}
+
+private extension RGBAImage {
+    mutating func withBitmapContext(_ work: (CGContext) throws -> Void) throws {
+        let bytesPerRow = width * 4
+        try pixels.withUnsafeMutableBytes { buffer in
+            guard let context = CGContext(
+                data: buffer.baseAddress,
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: bytesPerRow,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ) else {
+                throw PreviewHarnessError(description: "failed to create bitmap context")
+            }
+            try work(context)
+        }
+    }
+
+    mutating func makeCGImage() throws -> CGImage {
+        let bytesPerRow = width * 4
+        return try pixels.withUnsafeMutableBytes { buffer in
+            guard let context = CGContext(
+                data: buffer.baseAddress,
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: bytesPerRow,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ), let image = context.makeImage() else {
+                throw PreviewHarnessError(description: "failed to create CGImage")
+            }
+            return image
+        }
     }
 }
 

@@ -7,13 +7,14 @@ RESOURCE_DIR="$ROOT/Sources/HostApp/Resources/rhwp-studio"
 PAGE_NUMBER=1
 VIEWPORT_SIZE="1400x1800"
 SETTLE_MS=120
+POLICY="coreGraphicsOnly"
 
 usage() {
   cat >&2 <<EOF
-Usage: $0 <output-dir> [--page N] [--viewport WIDTHxHEIGHT] [--settle-ms N] [--resource-dir DIR] <hwp-or-hwpx> [...]
+Usage: $0 <output-dir> [--page N] [--policy coreGraphicsOnly|skiaOptIn] [--viewport WIDTHxHEIGHT] [--settle-ms N] [--resource-dir DIR] <hwp-or-hwpx> [...]
 
-Captures bundled rhwp-studio reference PNGs and metadata JSON files for the
-selected page. Page numbers are 1-based. The default page is 1.
+Captures bundled rhwp-studio reference PNGs, native renderer PNGs, diff PNGs,
+and metadata for the selected page. Page numbers are 1-based. The default page is 1.
 EOF
 }
 
@@ -46,6 +47,14 @@ while [ "$#" -gt 0 ]; do
         exit 1
       fi
       VIEWPORT_SIZE="$2"
+      shift 2
+      ;;
+    --policy)
+      if [ "$#" -lt 2 ]; then
+        echo "ERROR: --policy requires coreGraphicsOnly or skiaOptIn" >&2
+        exit 1
+      fi
+      POLICY="$2"
       shift 2
       ;;
     --settle-ms)
@@ -112,7 +121,29 @@ case "$VIEWPORT_SIZE" in
     ;;
 esac
 
+case "$POLICY" in
+  coreGraphicsOnly|skiaOptIn)
+    ;;
+  *)
+    echo "ERROR: --policy must be coreGraphicsOnly or skiaOptIn" >&2
+    exit 1
+    ;;
+esac
+
 "$ROOT/scripts/verify-rhwp-studio-assets.sh" --resource-dir "$RESOURCE_DIR"
+
+LIB="$ROOT/Frameworks/universal/librhwp.a"
+MODULEMAP_DIR="$ROOT/Frameworks/modulemap"
+if [ ! -f "$LIB" ]; then
+  echo "ERROR: missing $LIB" >&2
+  echo "Run: $ROOT/scripts/build-rust-macos.sh" >&2
+  exit 1
+fi
+if [ ! -f "$MODULEMAP_DIR/module.modulemap" ]; then
+  echo "ERROR: missing $MODULEMAP_DIR/module.modulemap" >&2
+  echo "Run: $ROOT/scripts/build-rust-macos.sh" >&2
+  exit 1
+fi
 
 mkdir -p "$OUT_DIR"
 BIN="$OUT_DIR/preview_visual_diff_harness"
@@ -124,17 +155,33 @@ mkdir -p "$SWIFT_MODULE_CACHE" "$CLANG_MODULE_CACHE"
 swiftc -parse-as-library \
   -module-cache-path "$SWIFT_MODULE_CACHE" \
   -Xcc -fmodules-cache-path="$CLANG_MODULE_CACHE" \
+  -I "$MODULEMAP_DIR" \
+  "$ROOT/Sources/RhwpCoreBridge/RhwpDocument.swift" \
+  "$ROOT/Sources/RhwpCoreBridge/RenderTree.swift" \
+  "$ROOT/Sources/RhwpCoreBridge/FontFallback.swift" \
+  "$ROOT/Sources/RhwpCoreBridge/FontResourceRegistry.swift" \
+  "$ROOT/Sources/RhwpCoreBridge/CGTreeRenderer.swift" \
+  "$ROOT/Sources/Shared/HwpPageImageRenderer.swift" \
   "$ROOT/scripts/preview_visual_diff_harness.swift" \
+  "$LIB" \
   -framework AppKit \
   -framework CoreGraphics \
+  -framework CoreText \
   -framework Foundation \
   -framework ImageIO \
+  -framework UniformTypeIdentifiers \
+  -framework Security \
+  -framework CoreFoundation \
   -framework WebKit \
+  -lc++ \
+  -liconv \
+  -lz \
   -o "$BIN"
 
 "$BIN" "$OUT_DIR" \
   --resource-dir "$RESOURCE_DIR" \
   --page "$PAGE_NUMBER" \
+  --policy "$POLICY" \
   --viewport "$VIEWPORT_SIZE" \
   --settle-ms "$SETTLE_MS" \
   "$@"
