@@ -7,6 +7,37 @@ import CoreText
 import Foundation
 import ImageIO
 
+enum CGTreeOverlayLayer {
+    case behindText
+    case inFrontOfText
+
+    init?(textWrap: String?) {
+        guard let normalized = textWrap?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: "_", with: "")
+            .lowercased() else {
+            return nil
+        }
+
+        switch normalized {
+        case "behindtext":
+            self = .behindText
+        case "infrontoftext":
+            self = .inFrontOfText
+        default:
+            return nil
+        }
+    }
+}
+
+enum CGTreeRenderMode {
+    case complete
+    case pageBackground
+    case flowExcludingPageOverlays([CGTreeOverlayLayer])
+    case pageOverlay(CGTreeOverlayLayer)
+}
+
 class CGTreeRenderer {
     private let imageCropUnitsPerPixel = 75.0
     private let tableCellClipRightSlack = 4.0
@@ -20,6 +51,7 @@ class CGTreeRenderer {
 
     private var pageBounds: BBox?
     private var pageHeight: Double = 0
+    private var renderMode: CGTreeRenderMode = .complete
 
     private struct BuiltPath {
         let path: CGPath
@@ -34,7 +66,13 @@ class CGTreeRenderer {
         case curve(CGPoint, CGPoint, CGPoint)
     }
 
-    func render(tree: RenderNode, in context: CGContext, pageHeight: Double, document: RhwpDocument?) {
+    func render(
+        tree: RenderNode,
+        in context: CGContext,
+        pageHeight: Double,
+        document: RhwpDocument?,
+        mode: CGTreeRenderMode = .complete
+    ) {
         HwpBundledFontRegistry.ensureRegistered()
 
         // 이미지 binDataId는 문서 내부 식별자이므로 문서가 바뀌면 캐시를 이어 쓰면 안 된다.
@@ -48,6 +86,11 @@ class CGTreeRenderer {
         // 렌더 트리의 좌표(좌상단 원점)를 그대로 사용할 수 있다.
         // 단, Core Text와 CGImage는 원본 CG 좌표계(좌하단)를 기대하므로
         // 해당 요소에서만 국소적으로 좌표를 조정한다.
+        let previousMode = renderMode
+        renderMode = mode
+        defer {
+            renderMode = previousMode
+        }
         renderNode(tree, in: context)
     }
 
@@ -75,7 +118,9 @@ class CGTreeRenderer {
             renderPage(node, in: ctx)
 
         case .pageBackground(let bg):
-            renderPageBackground(bg, bbox: node.bbox, in: ctx)
+            if shouldRenderPageBackground {
+                renderPageBackground(bg, bbox: node.bbox, in: ctx)
+            }
 
         case .body(let body):
             renderBody(body, node: node, in: ctx)
@@ -87,40 +132,56 @@ class CGTreeRenderer {
             renderTableCell(cell, node: node, in: ctx)
 
         case .rectangle(let rect):
-            renderRectangle(rect, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderRectangle(rect, bbox: node.bbox, in: ctx)
+            }
             renderChildren(node, in: ctx)
 
         case .line(let line):
-            renderLine(line, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderLine(line, bbox: node.bbox, in: ctx)
+            }
             renderChildren(node, in: ctx)
 
         case .ellipse(let ell):
-            renderEllipse(ell, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderEllipse(ell, bbox: node.bbox, in: ctx)
+            }
             renderChildren(node, in: ctx)
 
         case .path(let path):
-            renderPath(path, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderPath(path, bbox: node.bbox, in: ctx)
+            }
             renderChildren(node, in: ctx)
 
         case .image(let img):
-            renderImage(img, bbox: node.bbox, in: ctx)
+            if shouldRenderImage(img) {
+                renderImage(img, bbox: node.bbox, in: ctx)
+            }
             renderChildren(node, in: ctx)
 
         case .group:
             renderGroup(node, in: ctx)
 
         case .textRun(let run):
-            renderTextRun(run, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderTextRun(run, bbox: node.bbox, in: ctx)
+            }
 
         case .equation(let equation):
-            renderEquation(equation, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderEquation(equation, bbox: node.bbox, in: ctx)
+            }
 
         case .formObject:
             // 양식 개체는 M3 이후
             break
 
         case .footnoteMarker(let marker):
-            renderFootnoteMarker(marker, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderFootnoteMarker(marker, bbox: node.bbox, in: ctx)
+            }
 
         default:
             // 구조 노드(header, footer, column 등): 자식만 순회
@@ -156,13 +217,29 @@ class CGTreeRenderer {
     }
 
     private func renderPage(_ node: RenderNode, in ctx: CGContext) {
-        // 페이지 기본 배경.
-        ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
-        ctx.fill(cgRect(node.bbox))
+        switch renderMode {
+        case .complete:
+            renderCompletePage(node, in: ctx)
+        case .pageBackground:
+            renderPageBaseAndBackground(node, in: ctx)
+        case .flowExcludingPageOverlays(let layers):
+            renderPageForegroundFlowChildren(node, excluding: layers, in: ctx)
+        case .pageOverlay:
+            renderChildren(node, in: ctx)
+        }
+    }
 
-        renderPageBackgroundChildren(node, in: ctx)
+    private func renderCompletePage(_ node: RenderNode, in ctx: CGContext) {
+        // 페이지 기본 배경.
+        renderPageBaseAndBackground(node, in: ctx)
         renderPageBehindTextImages(node, in: ctx)
         renderPageForegroundChildren(node, in: ctx)
+    }
+
+    private func renderPageBaseAndBackground(_ node: RenderNode, in ctx: CGContext) {
+        ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
+        ctx.fill(cgRect(node.bbox))
+        renderPageBackgroundChildren(node, in: ctx)
     }
 
     private func renderPageBackgroundChildren(_ node: RenderNode, in ctx: CGContext) {
@@ -186,6 +263,19 @@ class CGTreeRenderer {
         }
     }
 
+    private func renderPageForegroundFlowChildren(
+        _ node: RenderNode,
+        excluding layers: [CGTreeOverlayLayer],
+        in ctx: CGContext
+    ) {
+        for child in node.children {
+            guard !isPageBackgroundNode(child), !isPageOverlayImage(child, in: layers) else {
+                continue
+            }
+            renderNode(child, in: ctx)
+        }
+    }
+
     private func renderColumn(_ node: RenderNode, in ctx: CGContext) {
         for child in node.children where isBehindTextImage(child) {
             renderNode(child, in: ctx)
@@ -203,16 +293,56 @@ class CGTreeRenderer {
     }
 
     private func isBehindTextImage(_ node: RenderNode) -> Bool {
+        isPageOverlayImage(node, layer: .behindText)
+    }
+
+    private func isPageOverlayImage(_ node: RenderNode, layer: CGTreeOverlayLayer) -> Bool {
         guard case .image(let image) = node.nodeType else {
             return false
         }
-        return isBehindTextWrap(image.textWrap)
+        return CGTreeOverlayLayer(textWrap: image.textWrap) == layer
     }
 
-    private func isBehindTextWrap(_ value: String?) -> Bool {
-        value?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .caseInsensitiveCompare("BehindText") == .orderedSame
+    private func isPageOverlayImage(_ node: RenderNode, in layers: [CGTreeOverlayLayer]) -> Bool {
+        guard case .image(let image) = node.nodeType,
+              let layer = CGTreeOverlayLayer(textWrap: image.textWrap) else {
+            return false
+        }
+        return layers.contains(layer)
+    }
+
+    private var shouldRenderPageBackground: Bool {
+        switch renderMode {
+        case .complete, .pageBackground:
+            return true
+        case .flowExcludingPageOverlays, .pageOverlay:
+            return false
+        }
+    }
+
+    private var shouldRenderFlowContent: Bool {
+        switch renderMode {
+        case .complete, .flowExcludingPageOverlays:
+            return true
+        case .pageBackground, .pageOverlay:
+            return false
+        }
+    }
+
+    private func shouldRenderImage(_ image: ImageNode) -> Bool {
+        switch renderMode {
+        case .complete:
+            return true
+        case .pageBackground:
+            return false
+        case .flowExcludingPageOverlays(let layers):
+            guard let layer = CGTreeOverlayLayer(textWrap: image.textWrap) else {
+                return true
+            }
+            return !layers.contains(layer)
+        case .pageOverlay(let layer):
+            return CGTreeOverlayLayer(textWrap: image.textWrap) == layer
+        }
     }
 
     private func renderBody(_ body: BodyNode, node: RenderNode, in ctx: CGContext) {
