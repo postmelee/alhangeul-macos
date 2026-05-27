@@ -29,18 +29,18 @@
 
 ## 변경 파일 목록과 영향 범위
 
-| 파일 | 내용 | 영향 |
-|------|------|------|
-| `RustBridge/src/lib.rs` | `rhwp_page_overlay_images` C ABI 추가 | Swift에서 page별 compact overlay JSON을 조회할 수 있다. |
-| `rhwp-ffi-symbols.txt` | 신규 ABI symbol 추가 | FFI 표면 검증 대상에 overlay API가 포함된다. |
-| `Sources/RhwpCoreBridge/RhwpDocument.swift` | `pageOverlayImagesJSON(at:)` raw JSON accessor 추가 | AppKit 의존 없이 bridge 계층에서 metadata를 읽는다. |
-| `Sources/RhwpCoreBridge/PageOverlayImages.swift` | `RhwpPageOverlayImageSet`, layer/source/transform 모델과 merge provider 추가 | #282 compositor 입력으로 사용할 typed metadata를 제공한다. |
-| `rhwp-core.lock` | Rust artifact hash 갱신 | core pin은 `v0.7.12` 그대로 유지하고 local RustBridge 산출물만 재생성했다. |
-| `Alhangeul.xcodeproj/project.pbxproj` | `PageOverlayImages.swift` source phase 반영 | HostApp, Quick Look, Thumbnail target에서 신규 Swift 모델을 빌드한다. |
-| `scripts/overlay-metadata-smoke.sh` | smoke entrypoint 추가 | sample set의 overlay/tree image metadata를 반복 측정한다. |
-| `scripts/overlay_metadata_smoke.swift` | Swift smoke probe 추가 | embedded bytes availability, wrap style, layer count를 JSON/요약으로 출력한다. |
-| `mydocs/plans/task_m014_281*.md` | 수행/구현 계획서 작성 | 하이퍼-워터폴 추적 문서. |
-| `mydocs/working/task_m014_281_stage*.md` | Stage 1-4 보고서 작성 | 단계별 결정, 검증, handoff 기록. |
+| 파일 | 내용 |
+|------|------|
+| `RustBridge/src/lib.rs` | `rhwp_page_overlay_images` C ABI를 추가해 Swift에서 page별 compact overlay JSON을 조회할 수 있게 했다. |
+| `rhwp-ffi-symbols.txt` | 신규 ABI symbol을 FFI 표면 검증 대상에 추가했다. |
+| `Sources/RhwpCoreBridge/RhwpDocument.swift` | `pageOverlayImagesJSON(at:)` raw JSON accessor와 image bytes 존재/길이 조회 helper를 추가했다. |
+| `Sources/RhwpCoreBridge/PageOverlayImages.swift` | `RhwpPageOverlayImageSet`, layer/source/transform 모델과 merge provider를 추가해 #282 compositor 입력으로 사용할 typed metadata를 제공한다. |
+| `rhwp-core.lock` | core pin은 `v0.7.12` 그대로 유지하고 local RustBridge 산출물 hash만 재생성했다. |
+| `Alhangeul.xcodeproj/project.pbxproj` | `PageOverlayImages.swift`를 HostApp, Quick Look, Thumbnail target source phase에 포함했다. |
+| `scripts/overlay-metadata-smoke.sh` | sample set의 overlay/tree image metadata를 반복 측정하는 smoke entrypoint를 추가했다. |
+| `scripts/overlay_metadata_smoke.swift` | embedded bytes availability, wrap style, layer count를 JSON/요약으로 출력하는 Swift smoke probe를 추가했다. |
+| `mydocs/plans/task_m014_281*.md` | 하이퍼-워터폴 수행/구현 계획서를 작성했다. |
+| `mydocs/working/task_m014_281_stage*.md` | 단계별 결정, 검증, handoff를 Stage 1-4 보고서로 기록했다. |
 
 ## 핵심 관찰
 
@@ -99,6 +99,7 @@ Stage 4 visual diff는 #282 이전 baseline이다. #281에서 native renderer/co
 - `./scripts/check-no-appkit.sh`
 - `./scripts/verify-rhwp-studio-assets.sh`
 - `./scripts/overlay-metadata-smoke.sh build.noindex/task281-stage3-metadata`
+- `./scripts/overlay-metadata-smoke.sh build.noindex/task281-reviewfix-metadata`
 - `./scripts/preview-visual-diff-harness.sh build.noindex/task281-stage4-basic --page 1 ...`
 - `./scripts/preview-visual-diff-harness.sh build.noindex/task281-stage4-images --page 1 ...`
 - `xcodegen generate`

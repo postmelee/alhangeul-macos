@@ -151,7 +151,15 @@ extension RhwpDocument {
             return nil
         }
 
-        let supplements = renderPageTree(at: page).map {
+        return pageOverlayImages(at: page, renderTree: renderPageTree(at: page))
+    }
+
+    func pageOverlayImages(at page: Int, renderTree: RenderNode?) -> RhwpPageOverlayImageSet? {
+        guard page >= 0, page < pageCount else {
+            return nil
+        }
+
+        let supplements = renderTree.map {
             collectPageOverlaySupplements(from: $0, document: self)
         } ?? []
 
@@ -319,7 +327,7 @@ private func collectPageOverlaySupplements(
                     layer: layer,
                     bbox: node.bbox,
                     binDataId: image.binDataId,
-                    binDataAvailable: image.binDataId > 0 && document.imageData(binDataId: image.binDataId) != nil,
+                    binDataAvailable: image.binDataId > 0 && document.hasImageData(binDataId: image.binDataId),
                     effect: image.effect,
                     brightness: image.brightness,
                     contrast: image.contrast,
@@ -347,6 +355,8 @@ private func matchingSupplement(
     in supplements: [RhwpPageOverlayImageSupplement],
     used: inout Set<Int>
 ) -> RhwpPageOverlayImageSupplement? {
+    // Compact overlay JSON currently has no binDataId, so merge supplements by layer plus
+    // bbox from the same render pipeline.
     guard let index = supplements.indices.first(where: { index in
         !used.contains(index)
             && supplements[index].layer == layer
@@ -358,10 +368,13 @@ private func matchingSupplement(
     return supplements[index]
 }
 
+// Render tree and compact overlay bbox values are both in page coordinate units; this absorbs
+// JSON/Float rounding drift.
+private let pageOverlayBboxMatchingTolerance = 0.75
+
 private func bboxApproximatelyEqual(_ lhs: BBox, _ rhs: BBox) -> Bool {
-    let tolerance = 0.75
-    return abs(lhs.x - rhs.x) <= tolerance
-        && abs(lhs.y - rhs.y) <= tolerance
-        && abs(lhs.width - rhs.width) <= tolerance
-        && abs(lhs.height - rhs.height) <= tolerance
+    abs(lhs.x - rhs.x) <= pageOverlayBboxMatchingTolerance
+        && abs(lhs.y - rhs.y) <= pageOverlayBboxMatchingTolerance
+        && abs(lhs.width - rhs.width) <= pageOverlayBboxMatchingTolerance
+        && abs(lhs.height - rhs.height) <= pageOverlayBboxMatchingTolerance
 }

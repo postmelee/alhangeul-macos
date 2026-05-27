@@ -200,6 +200,19 @@ class RhwpDocument {
         return Data(bytes: ptr, count: len)
     }
 
+    /// 이미지 바이너리의 존재 여부와 길이만 확인한다 (bin_data_id는 1-indexed).
+    func imageDataLength(binDataId: UInt16) -> Int? {
+        var len: Int = 0
+        guard rhwp_image_data(handle, binDataId, &len) != nil, len > 0 else {
+            return nil
+        }
+        return len
+    }
+
+    func hasImageData(binDataId: UInt16) -> Bool {
+        imageDataLength(binDataId: binDataId) != nil
+    }
+
     static func extractEmbeddedThumbnail(from data: Data) -> RhwpEmbeddedThumbnail? {
         guard !data.isEmpty else {
             return nil
