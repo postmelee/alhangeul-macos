@@ -136,6 +136,19 @@ class RhwpDocument {
         return json
     }
 
+    /// 특정 페이지의 overlay image compact JSON 문자열을 반환한다.
+    func pageOverlayImagesJSON(at page: Int) -> String? {
+        guard page >= 0, page < pageCount else {
+            return nil
+        }
+        guard let jsonPtr = rhwp_page_overlay_images(handle, UInt32(page)) else {
+            return nil
+        }
+        let json = String(cString: jsonPtr)
+        rhwp_free_string(jsonPtr)
+        return json
+    }
+
     /// 특정 페이지를 Skia PNG bytes로 렌더링한다.
     func renderPagePNG(
         at page: Int,
@@ -185,6 +198,19 @@ class RhwpDocument {
             return nil
         }
         return Data(bytes: ptr, count: len)
+    }
+
+    /// 이미지 바이너리의 존재 여부와 길이만 확인한다 (bin_data_id는 1-indexed).
+    func imageDataLength(binDataId: UInt16) -> Int? {
+        var len: Int = 0
+        guard rhwp_image_data(handle, binDataId, &len) != nil, len > 0 else {
+            return nil
+        }
+        return len
+    }
+
+    func hasImageData(binDataId: UInt16) -> Bool {
+        imageDataLength(binDataId: binDataId) != nil
     }
 
     static func extractEmbeddedThumbnail(from data: Data) -> RhwpEmbeddedThumbnail? {

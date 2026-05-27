@@ -31,6 +31,7 @@
 		307CE14735FB510DD719EC5F /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F5AFC8EC56882BF138E698C /* Rhwp.xcframework */; };
 		308D4855D7022391FEF9CCD8 /* ExtensionSystemRegistrationRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E51D4DC8276BF1D36E5FEC /* ExtensionSystemRegistrationRefresher.swift */; };
 		30D861C7707532BC347522CB /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F6DA732CC42A781180AA2F88 /* libiconv.tbd */; };
+		329C78D1A7232AF2B5ABFD9E /* PageOverlayImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B27A9A00D195F9031B6311 /* PageOverlayImages.swift */; };
 		32DD5646758D0ACBF3392E38 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E931CF12C8BE40BCE94DC51 /* libc++.tbd */; };
 		364457423D706CF1C778334C /* ExtensionStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E524F7A95D1616AB85E3F2 /* ExtensionStatusModel.swift */; };
 		37B400334D28A4A06AC40307 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4457E7F57DA695C2D4A7757 /* CoreServices.framework */; };
@@ -59,6 +60,7 @@
 		72BDAE6714CD21F62B6547CB /* DocumentTerminationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27EB9FF4728E67B683789ECF /* DocumentTerminationCoordinator.swift */; };
 		748E5560ED13294F03F1B627 /* RenderTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A01160D544F0F71CA0C3501 /* RenderTree.swift */; };
 		7499FC7614680941A929F075 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4457E7F57DA695C2D4A7757 /* CoreServices.framework */; };
+		7561FA65463CDF9CC5BED398 /* PageOverlayImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B27A9A00D195F9031B6311 /* PageOverlayImages.swift */; };
 		770901D3A2B2139FB9649377 /* ColorSync.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B73611C892296A43FDC8B2 /* ColorSync.framework */; };
 		7A30B489C04C957C050AB78F /* RhwpStudioResourceSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D6D965AEFE52537281289A1 /* RhwpStudioResourceSchemeHandler.swift */; };
 		7BF16A0B1E4314FB46041152 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C316C5FBCECA08C309CF9 /* HwpPageImageRenderer.swift */; };
@@ -121,6 +123,7 @@
 		F24FA4E12F54E4B550A4788E /* Legal in Resources */ = {isa = PBXBuildFile; fileRef = C1A69E945E4D859F3B581701 /* Legal */; };
 		F302D89D0A4823F5453DF142 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D03050B560F60198F4CBBB0 /* Metal.framework */; };
 		F58AD4C2B33C40A260ACFF02 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B74C6D69DBD1D9B163C9A247 /* Security.framework */; };
+		F853A92E67C1E05F3C1C8722 /* PageOverlayImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B27A9A00D195F9031B6311 /* PageOverlayImages.swift */; };
 		FF0BB143C6C27AABD7D22C10 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D83D8D9F6BF5014474791FB1 /* ImageIO.framework */; };
 /* End PBXBuildFile section */
 
@@ -196,6 +199,7 @@
 		68061986E6786FDE9A0183BD /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		6A01160D544F0F71CA0C3501 /* RenderTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderTree.swift; sourceTree = "<group>"; };
 		6A6F3480DCEB0F0A30DF06A1 /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = System/Library/Frameworks/IOSurface.framework; sourceTree = SDKROOT; };
+		77B27A9A00D195F9031B6311 /* PageOverlayImages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageOverlayImages.swift; sourceTree = "<group>"; };
 		7B8D5D5DECBC9E6071002C34 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		81391ABAF81F59C2FAE9880D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		82B73611C892296A43FDC8B2 /* ColorSync.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ColorSync.framework; path = System/Library/Frameworks/ColorSync.framework; sourceTree = SDKROOT; };
@@ -403,6 +407,7 @@
 				2B69400B5B8A2851995C68DE /* CGTreeRenderer.swift */,
 				DCF11065A3E3439B4C5B8DD7 /* FontFallback.swift */,
 				DEC2D57719DF9672E7C311D7 /* FontResourceRegistry.swift */,
+				77B27A9A00D195F9031B6311 /* PageOverlayImages.swift */,
 				6A01160D544F0F71CA0C3501 /* RenderTree.swift */,
 				423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */,
 			);
@@ -677,6 +682,7 @@
 				7BF16A0B1E4314FB46041152 /* HwpPageImageRenderer.swift in Sources */,
 				02E1371B73A762F8E64ED8EF /* HwpPreviewPDFRenderer.swift in Sources */,
 				55993B1F9BBFFBBA62397829 /* LaunchMaintenanceService.swift in Sources */,
+				329C78D1A7232AF2B5ABFD9E /* PageOverlayImages.swift in Sources */,
 				09D138398C713C14EB0266D1 /* RecentDocumentStore.swift in Sources */,
 				44CDAB1946DFA27A7CADCF6D /* RecentDocumentThumbnailRefresher.swift in Sources */,
 				D8932BD515CBB96629CADD55 /* RenderTree.swift in Sources */,
@@ -707,6 +713,7 @@
 				D6ECD4A743DEDC3A090EEEF4 /* HwpPreviewPDFRenderer.swift in Sources */,
 				8348EA8DD0B313DC71B3E9C7 /* HwpThumbnailProvider.swift in Sources */,
 				539DFB38A0293062B5A01ED9 /* HwpThumbnailRenderCache.swift in Sources */,
+				7561FA65463CDF9CC5BED398 /* PageOverlayImages.swift in Sources */,
 				6475910A39D8217C7E004CB8 /* RenderTree.swift in Sources */,
 				477B4C8AC6A0370182751D8F /* RhwpDocument.swift in Sources */,
 			);
@@ -723,6 +730,7 @@
 				DBD45292114D646A364B0B87 /* HwpPageImageRenderer.swift in Sources */,
 				D9E0E7DB88B12FDF40623328 /* HwpPreviewPDFRenderer.swift in Sources */,
 				41C5D25E1060BEF211833C8A /* HwpPreviewProvider.swift in Sources */,
+				F853A92E67C1E05F3C1C8722 /* PageOverlayImages.swift in Sources */,
 				748E5560ED13294F03F1B627 /* RenderTree.swift in Sources */,
 				BCE95338397154D9AC1C61C6 /* RhwpDocument.swift in Sources */,
 			);

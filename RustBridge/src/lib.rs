@@ -163,6 +163,17 @@ pub extern "C" fn rhwp_render_page_tree(handle: *const RhwpHandle, page: u32) ->
 }
 
 #[no_mangle]
+pub extern "C" fn rhwp_page_overlay_images(handle: *const RhwpHandle, page: u32) -> *mut c_char {
+    ffi_guard!(handle, ptr::null_mut(), {
+        let h = unsafe { &*handle };
+        match h.doc.get_page_overlay_images_native(page) {
+            Ok(json) => string_to_c(json),
+            Err(_) => ptr::null_mut(),
+        }
+    })
+}
+
+#[no_mangle]
 pub extern "C" fn rhwp_render_page_png(
     handle: *const RhwpHandle,
     page: u32,
