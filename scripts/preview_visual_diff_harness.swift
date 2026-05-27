@@ -466,17 +466,23 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             throw PreviewHarnessError(description: "page \(pageNumber) rect is unavailable")
         }
 
-        let snapshotRect = try visibleSnapshotRect(snapshotRectMetadata.cgRect)
-        let image = try takeSnapshot(rect: snapshotRect)
-        var png = try pngData(from: image)
-        var captureMode = "webViewSnapshot"
-        var overlayIncluded = true
-        let snapshotSampleNonWhitePixels = png.sampleNonWhitePixels
-        let snapshotSamplePixels = png.samplePixels
+        var png: PNGOutput
+        var captureMode = "canvasDataURL"
+        var overlayIncluded = false
+        var snapshotSampleNonWhitePixels = 0
+        var snapshotSamplePixels = 0
         if pageState.canvasSampleNonWhitePixels > 0 {
             png = try exportCanvasPNG(pageNumber: pageNumber)
-            captureMode = "canvasDataURL"
-            overlayIncluded = false
+            if let snapshotPNG = try? captureSnapshotPNG(rect: snapshotRectMetadata.cgRect) {
+                snapshotSampleNonWhitePixels = snapshotPNG.sampleNonWhitePixels
+                snapshotSamplePixels = snapshotPNG.samplePixels
+            }
+        } else {
+            png = try captureSnapshotPNG(rect: snapshotRectMetadata.cgRect)
+            captureMode = "webViewSnapshot"
+            overlayIncluded = true
+            snapshotSampleNonWhitePixels = png.sampleNonWhitePixels
+            snapshotSamplePixels = png.samplePixels
         }
         try png.data.write(to: pngURL, options: .atomic)
 
@@ -587,23 +593,12 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         self.window = window
     }
 
-    private func waitForNavigation(timeout: TimeInterval) throws {
-        let deadline = Date().addingTimeInterval(timeout)
-        while navigationResult == nil && Date() < deadline {
-            RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
-        }
-
-        guard let navigationResult else {
-            throw PreviewHarnessError(description: "rhwp-studio navigation timed out")
-        }
-        try navigationResult.get()
-    }
-
     private func waitForPageReady(pageNumber: Int, timeout: TimeInterval) throws {
         let deadline = Date().addingTimeInterval(timeout)
         var lastState: PageState?
         var lastError: Error?
         while Date() < deadline {
+            try throwIfNavigationFailed()
             do {
                 let state = try currentPageState(pageNumber: pageNumber)
                 if state.ready {
@@ -623,6 +618,12 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         throw PreviewHarnessError(description: "rhwp-studio page \(pageNumber) readiness timed out: \(reason)")
     }
 
+    private func throwIfNavigationFailed() throws {
+        if case .failure(let error) = navigationResult {
+            throw PreviewHarnessError(description: "rhwp-studio navigation failed: \(error)")
+        }
+    }
+
     private func alignPageAndHideChrome(pageNumber: Int) throws {
         _ = try evaluateJavaScript(alignAndHideChromeScript(pageNumber: pageNumber), timeout: 5)
         _ = try evaluateJavaScript(settleFlagScript(), timeout: 5)
@@ -635,6 +636,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             }
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
         }
+        throw PreviewHarnessError(description: "rhwp-studio capture settle timed out for page \(pageNumber)")
     }
 
     private func currentPageState(pageNumber: Int) throws -> PageState {
@@ -723,6 +725,12 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             throw PreviewHarnessError(description: "WKWebView snapshot timed out")
         }
         return try result.get()
+    }
+
+    private func captureSnapshotPNG(rect: CGRect) throws -> PNGOutput {
+        let snapshotRect = try visibleSnapshotRect(rect)
+        let image = try takeSnapshot(rect: snapshotRect)
+        return try pngData(from: image)
     }
 
     private func exportCanvasPNG(pageNumber: Int) throws -> PNGOutput {
@@ -1020,11 +1028,17 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         """
         (() => {
           window.__alhangeulPreviewCaptureSettled = false;
-          requestAnimationFrame(() => {
+          const markSettled = () => {
+            window.__alhangeulPreviewCaptureSettled = true;
+          };
+          if (typeof requestAnimationFrame === 'function') {
             requestAnimationFrame(() => {
-              window.__alhangeulPreviewCaptureSettled = true;
+              requestAnimationFrame(markSettled);
             });
-          });
+            setTimeout(markSettled, 250);
+          } else {
+            setTimeout(markSettled, 0);
+          }
           return true;
         })();
         """
