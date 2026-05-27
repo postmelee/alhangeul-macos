@@ -10,6 +10,26 @@ struct PreviewHarnessError: Error, CustomStringConvertible {
     let description: String
 }
 
+enum PreviewHarnessPhase: String {
+    case navigation
+    case readiness
+    case settle
+    case canvasExport = "canvas export"
+    case snapshot
+    case nativeRender = "native render"
+    case diff
+    case unknown
+}
+
+struct PreviewHarnessPhaseError: Error, CustomStringConvertible {
+    let phase: PreviewHarnessPhase
+    let detail: String
+
+    var description: String {
+        "[phase:\(phase.rawValue)] \(detail)"
+    }
+}
+
 struct HarnessOptions {
     let outputDir: URL
     let resourceDir: URL
@@ -419,6 +439,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
     private var resourceSchemeHandler: StudioResourceSchemeHandler?
     private var documentSchemeHandler: StudioDocumentSchemeHandler?
     private var navigationResult: Result<Void, Error>?
+    private var navigationDidCommit = false
 
     init(resourceDir: URL, viewportSize: CGSize, settleMilliseconds: Int) {
         self.resourceDir = resourceDir
@@ -449,6 +470,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             resourceSchemeHandler = nil
             documentSchemeHandler = nil
             navigationResult = nil
+            navigationDidCommit = false
         }
 
         let startTime = Date()
@@ -540,6 +562,10 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         navigationResult = .success(())
     }
 
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        navigationDidCommit = true
+    }
+
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         navigationResult = .failure(error)
     }
@@ -591,14 +617,20 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         self.documentSchemeHandler = documentHandler
         self.webView = webView
         self.window = window
+        navigationDidCommit = false
     }
 
     private func waitForPageReady(pageNumber: Int, timeout: TimeInterval) throws {
         let deadline = Date().addingTimeInterval(timeout)
         var lastState: PageState?
         var lastError: Error?
+        var errorCount = 0
         while Date() < deadline {
             try throwIfNavigationFailed()
+            guard navigationDidCommit else {
+                RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.05))
+                continue
+            }
             do {
                 let state = try currentPageState(pageNumber: pageNumber)
                 if state.ready {
@@ -607,52 +639,98 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
                 lastState = state
             } catch {
                 lastError = error
+                errorCount += 1
             }
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.05))
         }
-        let reason = lastState.map {
-            "\($0.reason), canvasCount=\($0.canvasCount), status=\($0.statusText)"
-        } ?? lastError.map {
-            String(describing: $0)
-        } ?? "no page state"
-        throw PreviewHarnessError(description: "rhwp-studio page \(pageNumber) readiness timed out: \(reason)")
+        var details: [String] = []
+        if let lastState {
+            details.append("lastState={reason=\(lastState.reason), canvasCount=\(lastState.canvasCount), status=\(lastState.statusText)}")
+        }
+        if let lastError {
+            details.append("lastError={\(lastError)}")
+        }
+        details.append("navigation=\(navigationStatusDescription)")
+        if errorCount > 0 {
+            details.append("errorCount=\(errorCount)")
+        }
+        if details.isEmpty {
+            details.append("no page state")
+        }
+        throw PreviewHarnessPhaseError(
+            phase: .readiness,
+            detail: "rhwp-studio page \(pageNumber) readiness timed out: \(details.joined(separator: "; "))"
+        )
     }
 
     private func throwIfNavigationFailed() throws {
         if case .failure(let error) = navigationResult {
-            throw PreviewHarnessError(description: "rhwp-studio navigation failed: \(error)")
+            throw PreviewHarnessPhaseError(
+                phase: .navigation,
+                detail: "rhwp-studio navigation failed: \(describeError(error))"
+            )
+        }
+    }
+
+    private var navigationStatusDescription: String {
+        switch navigationResult {
+        case .none:
+            return navigationDidCommit ? "committed" : "pending"
+        case .success:
+            return "finished"
+        case .failure(let error):
+            return "failed(\(describeError(error)))"
         }
     }
 
     private func alignPageAndHideChrome(pageNumber: Int) throws {
-        _ = try evaluateJavaScript(alignAndHideChromeScript(pageNumber: pageNumber), timeout: 5)
-        _ = try evaluateJavaScript(settleFlagScript(), timeout: 5)
+        _ = try evaluateJavaScript(alignAndHideChromeScript(pageNumber: pageNumber), timeout: 5, phase: .settle)
+        _ = try evaluateJavaScript(settleFlagScript(), timeout: 5, phase: .settle)
 
         let deadline = Date().addingTimeInterval(1)
         while Date() < deadline {
-            let settled = try evaluateJavaScript("window.__alhangeulPreviewCaptureSettled === true", timeout: 2) as? Bool ?? false
+            let settled = try evaluateJavaScript(
+                "window.__alhangeulPreviewCaptureSettled === true",
+                timeout: 2,
+                phase: .settle
+            ) as? Bool ?? false
             if settled {
                 return
             }
             RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.02))
         }
-        throw PreviewHarnessError(description: "rhwp-studio capture settle timed out for page \(pageNumber)")
+        throw PreviewHarnessPhaseError(
+            phase: .settle,
+            detail: "rhwp-studio capture settle timed out for page \(pageNumber)"
+        )
     }
 
     private func currentPageState(pageNumber: Int) throws -> PageState {
-        let value = try evaluateJavaScript(pageStateScript(pageNumber: pageNumber), timeout: 5)
+        _ = try evaluateJavaScript(pageStateScript(pageNumber: pageNumber), timeout: 5, phase: .readiness)
+        let value = try evaluateJavaScript(
+            "String(window.__alhangeulPreviewPageStateJSON || '')",
+            timeout: 5,
+            phase: .readiness
+        )
         guard let json = value as? String,
               let data = json.data(using: .utf8),
               let dictionary = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         else {
-            throw PreviewHarnessError(description: "unexpected page state result: \(String(describing: value))")
+            throw PreviewHarnessPhaseError(
+                phase: .readiness,
+                detail: "unexpected page state result: \(describeJavaScriptValue(value))"
+            )
         }
         return PageState(dictionary: dictionary)
     }
 
-    private func evaluateJavaScript(_ script: String, timeout: TimeInterval) throws -> Any? {
+    private func evaluateJavaScript(
+        _ script: String,
+        timeout: TimeInterval,
+        phase: PreviewHarnessPhase
+    ) throws -> Any? {
         guard let webView else {
-            throw PreviewHarnessError(description: "WKWebView is not available")
+            throw PreviewHarnessPhaseError(phase: phase, detail: "WKWebView is not available")
         }
 
         var result: Result<Any?, Error>?
@@ -670,9 +748,16 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         }
 
         guard let result else {
-            throw PreviewHarnessError(description: "JavaScript evaluation timed out")
+            throw PreviewHarnessPhaseError(phase: phase, detail: "JavaScript evaluation timed out")
         }
-        return try result.get()
+        do {
+            return try result.get()
+        } catch {
+            throw PreviewHarnessPhaseError(
+                phase: phase,
+                detail: "JavaScript evaluation failed: \(describeError(error))"
+            )
+        }
     }
 
     private func visibleSnapshotRect(_ rect: CGRect) throws -> CGRect {
@@ -734,13 +819,16 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
     }
 
     private func exportCanvasPNG(pageNumber: Int) throws -> PNGOutput {
-        let value = try evaluateJavaScript(canvasDataURLScript(pageNumber: pageNumber), timeout: 10)
+        let value = try evaluateJavaScript(canvasDataURLScript(pageNumber: pageNumber), timeout: 10, phase: .canvasExport)
         guard let json = value as? String,
               let data = json.data(using: .utf8),
               let dictionary = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let dataURL = dictionary["dataURL"] as? String
         else {
-            throw PreviewHarnessError(description: "unexpected canvas export result: \(String(describing: value))")
+            throw PreviewHarnessPhaseError(
+                phase: .canvasExport,
+                detail: "unexpected canvas export result: \(describeJavaScriptValue(value))"
+            )
         }
 
         let marker = "base64,"
@@ -790,137 +878,157 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
 
     private func pageStateScript(pageNumber: Int) -> String {
         """
-        JSON.stringify((() => {
-          const pageNumber = \(pageNumber);
-          const content = document.querySelector('#scroll-content');
-          const canvases = content
-            ? Array.from(content.querySelectorAll('canvas')).filter((canvas) => {
-                const rect = canvas.getBoundingClientRect();
-                return rect.width > 0 && rect.height > 0 && canvas.width > 0 && canvas.height > 0;
-              })
-            : [];
-          const target = canvases[pageNumber - 1] || null;
-          const statusText = (document.querySelector('#sb-message')?.textContent || '').trim();
-          const rectObject = (rect) => ({
-            x: rect.left,
-            y: rect.top,
-            width: rect.width,
-            height: rect.height
-          });
-          const viewportSize = {
-            width: window.innerWidth,
-            height: window.innerHeight
+        (() => {
+          const writeState = (state) => {
+            window.__alhangeulPreviewPageStateJSON = JSON.stringify(state);
+            return true;
           };
-          if (!content) {
-            return {
-              ready: false,
-              reason: 'missing #scroll-content',
-              selector: '#scroll-content canvas',
-              statusText,
-              canvasCount: 0,
-              overlayCount: 0,
-              usedOverlayUnion: false,
-              canvasSampleNonWhitePixels: 0,
-              canvasSamplePixels: 0,
-              devicePixelRatio: window.devicePixelRatio || 1,
-              viewportSize
+          try {
+            const pageNumber = \(pageNumber);
+            const content = document.querySelector('#scroll-content');
+            const canvases = content
+              ? Array.from(content.querySelectorAll('canvas')).filter((canvas) => {
+                  const rect = canvas.getBoundingClientRect();
+                  return rect.width > 0 && rect.height > 0 && canvas.width > 0 && canvas.height > 0;
+                })
+              : [];
+            const target = canvases[pageNumber - 1] || null;
+            const statusText = (document.querySelector('#sb-message')?.textContent || '').trim();
+            const rectObject = (rect) => ({
+              x: Number(rect.left) || 0,
+              y: Number(rect.top) || 0,
+              width: Number(rect.width) || 0,
+              height: Number(rect.height) || 0
+            });
+            const viewportSize = {
+              width: Number(window.innerWidth) || 0,
+              height: Number(window.innerHeight) || 0
             };
-          }
-          if (!target) {
-            return {
-              ready: false,
-              reason: `page canvas not found for page ${pageNumber}`,
+            if (!content) {
+              return writeState({
+                ready: false,
+                reason: 'missing #scroll-content',
+                selector: '#scroll-content canvas',
+                statusText,
+                canvasCount: 0,
+                overlayCount: 0,
+                usedOverlayUnion: false,
+                canvasSampleNonWhitePixels: 0,
+                canvasSamplePixels: 0,
+                devicePixelRatio: Number(window.devicePixelRatio) || 1,
+                viewportSize
+              });
+            }
+            if (!target) {
+              return writeState({
+                ready: false,
+                reason: `page canvas not found for page ${pageNumber}`,
+                selector: '#scroll-content canvas',
+                statusText,
+                canvasCount: canvases.length,
+                overlayCount: 0,
+                usedOverlayUnion: false,
+                canvasSampleNonWhitePixels: 0,
+                canvasSamplePixels: 0,
+                devicePixelRatio: Number(window.devicePixelRatio) || 1,
+                viewportSize
+              });
+            }
+
+            const targetRect = target.getBoundingClientRect();
+            let unionLeft = targetRect.left;
+            let unionTop = targetRect.top;
+            let unionRight = targetRect.right;
+            let unionBottom = targetRect.bottom;
+            let overlayCount = 0;
+
+            for (const element of Array.from(content.querySelectorAll('*'))) {
+              if (element === target || element.tagName.toLowerCase() === 'canvas') {
+                continue;
+              }
+              const style = window.getComputedStyle(element);
+              if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) {
+                continue;
+              }
+              const rect = element.getBoundingClientRect();
+              if (rect.width <= 0 || rect.height <= 0) {
+                continue;
+              }
+              const intersectsVertical = rect.bottom >= targetRect.top - 1 && rect.top <= targetRect.bottom + 1;
+              const intersectsHorizontal = rect.right >= targetRect.left - 1 && rect.left <= targetRect.right + 1;
+              if (!intersectsVertical || !intersectsHorizontal) {
+                continue;
+              }
+              overlayCount += 1;
+              unionLeft = Math.min(unionLeft, rect.left);
+              unionTop = Math.min(unionTop, rect.top);
+              unionRight = Math.max(unionRight, rect.right);
+              unionBottom = Math.max(unionBottom, rect.bottom);
+            }
+
+            const snapshotRect = {
+              x: Number(unionLeft) || 0,
+              y: Number(unionTop) || 0,
+              width: Number(unionRight - unionLeft) || 0,
+              height: Number(unionBottom - unionTop) || 0
+            };
+            let canvasSampleNonWhitePixels = 0;
+            let canvasSamplePixels = 0;
+            try {
+              const context = target.getContext('2d', { willReadFrequently: true });
+              const backingWidth = target.width;
+              const backingHeight = target.height;
+              const step = Math.max(1, Math.floor(Math.min(backingWidth, backingHeight) / 160));
+              const imageData = context.getImageData(0, 0, backingWidth, backingHeight).data;
+              for (let y = 0; y < backingHeight; y += step) {
+                for (let x = 0; x < backingWidth; x += step) {
+                  const index = (y * backingWidth + x) * 4;
+                  const r = imageData[index];
+                  const g = imageData[index + 1];
+                  const b = imageData[index + 2];
+                  const a = imageData[index + 3];
+                  canvasSamplePixels += 1;
+                  if (a > 0 && (r < 245 || g < 245 || b < 245)) {
+                    canvasSampleNonWhitePixels += 1;
+                  }
+                }
+              }
+            } catch (_) {
+              canvasSampleNonWhitePixels = -1;
+              canvasSamplePixels = -1;
+            }
+
+            return writeState({
+              ready: true,
+              reason: 'ready',
               selector: '#scroll-content canvas',
               statusText,
               canvasCount: canvases.length,
+              overlayCount,
+              usedOverlayUnion: overlayCount > 0,
+              canvasSampleNonWhitePixels,
+              canvasSamplePixels,
+              devicePixelRatio: Number(window.devicePixelRatio) || 1,
+              viewportSize,
+              canvasRect: rectObject(targetRect),
+              snapshotRect
+            });
+          } catch (error) {
+            return writeState({
+              ready: false,
+              reason: `page state probe error: ${error && error.message ? error.message : String(error)}`,
+              selector: '#scroll-content canvas',
+              statusText: '',
+              canvasCount: 0,
               overlayCount: 0,
               usedOverlayUnion: false,
-              canvasSampleNonWhitePixels: 0,
-              canvasSamplePixels: 0,
-              devicePixelRatio: window.devicePixelRatio || 1,
-              viewportSize
-            };
+              canvasSampleNonWhitePixels: -1,
+              canvasSamplePixels: -1,
+              devicePixelRatio: Number(window.devicePixelRatio) || 1,
+              viewportSize: { width: Number(window.innerWidth) || 0, height: Number(window.innerHeight) || 0 }
+            });
           }
-
-          const targetRect = target.getBoundingClientRect();
-          let unionLeft = targetRect.left;
-          let unionTop = targetRect.top;
-          let unionRight = targetRect.right;
-          let unionBottom = targetRect.bottom;
-          let overlayCount = 0;
-
-          for (const element of Array.from(content.querySelectorAll('*'))) {
-            if (element === target || element.tagName.toLowerCase() === 'canvas') {
-              continue;
-            }
-            const style = window.getComputedStyle(element);
-            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) {
-              continue;
-            }
-            const rect = element.getBoundingClientRect();
-            if (rect.width <= 0 || rect.height <= 0) {
-              continue;
-            }
-            const intersectsVertical = rect.bottom >= targetRect.top - 1 && rect.top <= targetRect.bottom + 1;
-            const intersectsHorizontal = rect.right >= targetRect.left - 1 && rect.left <= targetRect.right + 1;
-            if (!intersectsVertical || !intersectsHorizontal) {
-              continue;
-            }
-            overlayCount += 1;
-            unionLeft = Math.min(unionLeft, rect.left);
-            unionTop = Math.min(unionTop, rect.top);
-            unionRight = Math.max(unionRight, rect.right);
-            unionBottom = Math.max(unionBottom, rect.bottom);
-          }
-
-          const snapshotRect = {
-            x: unionLeft,
-            y: unionTop,
-            width: unionRight - unionLeft,
-            height: unionBottom - unionTop
-          };
-          let canvasSampleNonWhitePixels = 0;
-          let canvasSamplePixels = 0;
-          try {
-            const context = target.getContext('2d', { willReadFrequently: true });
-            const backingWidth = target.width;
-            const backingHeight = target.height;
-            const step = Math.max(1, Math.floor(Math.min(backingWidth, backingHeight) / 160));
-            const imageData = context.getImageData(0, 0, backingWidth, backingHeight).data;
-            for (let y = 0; y < backingHeight; y += step) {
-              for (let x = 0; x < backingWidth; x += step) {
-                const index = (y * backingWidth + x) * 4;
-                const r = imageData[index];
-                const g = imageData[index + 1];
-                const b = imageData[index + 2];
-                const a = imageData[index + 3];
-                canvasSamplePixels += 1;
-                if (a > 0 && (r < 245 || g < 245 || b < 245)) {
-                  canvasSampleNonWhitePixels += 1;
-                }
-              }
-            }
-          } catch (_) {
-            canvasSampleNonWhitePixels = -1;
-            canvasSamplePixels = -1;
-          }
-
-          return {
-            ready: true,
-            reason: 'ready',
-            selector: '#scroll-content canvas',
-            statusText,
-            canvasCount: canvases.length,
-            overlayCount,
-            usedOverlayUnion: overlayCount > 0,
-            canvasSampleNonWhitePixels,
-            canvasSamplePixels,
-            devicePixelRatio: window.devicePixelRatio || 1,
-            viewportSize,
-            canvasRect: rectObject(targetRect),
-            snapshotRect
-          };
-        })());
+        })()
         """
     }
 
@@ -1276,8 +1384,8 @@ struct PreviewVisualDiffHarness {
         summaryLines.append("SettleMs: \(options.settleMilliseconds)")
         summaryLines.append("DiffPixelThreshold: 12")
         summaryLines.append("")
-        summaryLines.append("| File | Status | StudioSize | NativeSize | CompareSize | ChangedPixels | ChangedPercent | MeanRGBDelta | MaxRGBDelta | DiffBounds | StudioCapture | NativeBackend | NativeMs | StudioPNG | NativePNG | DiffPNG |")
-        summaryLines.append("|------|--------|------------|------------|-------------|---------------|----------------|--------------|-------------|------------|---------------|---------------|----------|-----------|-----------|---------|")
+        summaryLines.append("| File | Status | Phase | StudioSize | NativeSize | CompareSize | ChangedPixels | ChangedPercent | MeanRGBDelta | MaxRGBDelta | DiffBounds | StudioCapture | NativeBackend | NativeMs | StudioPNG | NativePNG | DiffPNG |")
+        summaryLines.append("|------|--------|-------|------------|------------|-------------|---------------|----------------|--------------|-------------|------------|---------------|---------------|----------|-----------|-----------|---------|")
 
         for inputURL in options.inputURLs {
             do {
@@ -1304,6 +1412,7 @@ struct PreviewVisualDiffHarness {
                 summaryLines.append([
                     markdownCell(result.fileName),
                     "OK",
+                    "-",
                     "\(result.pngWidth)x\(result.pngHeight)",
                     "\(native.pixelWidth)x\(native.pixelHeight)",
                     "\(diff.compareWidth)x\(diff.compareHeight)",
@@ -1326,7 +1435,8 @@ struct PreviewVisualDiffHarness {
                 failed = true
                 let failureCells = [
                     markdownCell(inputURL.lastPathComponent),
-                    "FAIL: \(String(describing: error).replacingOccurrences(of: "|", with: "/"))"
+                    "FAIL: \(String(describing: error).replacingOccurrences(of: "|", with: "/"))",
+                    failurePhase(for: error).rawValue
                 ] + Array(repeating: "-", count: 14)
                 summaryLines.append(failureCells.joined(separator: " | ").wrappedTableRow)
                 print("FAIL \(inputURL.path): \(error)", to: &standardError)
@@ -1571,6 +1681,56 @@ private func doubleValue(_ value: Any?, default defaultValue: Double = 0) -> Dou
 
 private func markdownCell(_ value: String) -> String {
     value.replacingOccurrences(of: "|", with: "/")
+}
+
+private func describeError(_ error: Error) -> String {
+    if let phaseError = error as? PreviewHarnessPhaseError {
+        return phaseError.description
+    }
+
+    let nsError = error as NSError
+    let message = nsError.localizedDescription
+    guard nsError.domain != NSCocoaErrorDomain || nsError.code != 0 else {
+        return message
+    }
+    return "\(nsError.domain) Code=\(nsError.code) \"\(message)\""
+}
+
+private func describeJavaScriptValue(_ value: Any?) -> String {
+    guard let value else {
+        return "nil"
+    }
+    return "\(type(of: value)) \(String(describing: value))"
+}
+
+private func failurePhase(for error: Error) -> PreviewHarnessPhase {
+    if let phaseError = error as? PreviewHarnessPhaseError {
+        return phaseError.phase
+    }
+
+    let description = String(describing: error).lowercased()
+    if description.contains("navigation") {
+        return .navigation
+    }
+    if description.contains("ready") || description.contains("page state") || description.contains("rect is unavailable") {
+        return .readiness
+    }
+    if description.contains("settle") {
+        return .settle
+    }
+    if description.contains("canvas") || description.contains("dataurl") {
+        return .canvasExport
+    }
+    if description.contains("snapshot") {
+        return .snapshot
+    }
+    if description.contains("native") || description.contains("render") {
+        return .nativeRender
+    }
+    if description.contains("diff") || description.contains("compare") {
+        return .diff
+    }
+    return .unknown
 }
 
 private func formatMilliseconds(_ value: Double) -> String {
