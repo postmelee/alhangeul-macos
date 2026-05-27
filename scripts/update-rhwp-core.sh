@@ -310,6 +310,7 @@ init_work_repo() {
   WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/rhwp-core.XXXXXX")"
   git -C "$WORK_DIR" init -q
   git -C "$WORK_DIR" remote add origin "$RHWP_REPO"
+  git -C "$WORK_DIR" config lfs.skipSmudge true
 }
 
 fetch_target() {
@@ -320,13 +321,13 @@ fetch_target() {
       echo "ERROR: dependency fetch failure: could not fetch demo commit $REV" >&2
       exit 1
     fi
-    git -C "$WORK_DIR" checkout -q --detach FETCH_HEAD
+    GIT_LFS_SKIP_SMUDGE=1 git -C "$WORK_DIR" checkout -q --detach FETCH_HEAD
   else
     if ! git -C "$WORK_DIR" fetch --depth 1 origin "refs/tags/$TAG:refs/tags/$TAG"; then
       echo "ERROR: release lookup failure: could not fetch release tag $TAG" >&2
       exit 1
     fi
-    git -C "$WORK_DIR" checkout -q --detach "$TAG"
+    GIT_LFS_SKIP_SMUDGE=1 git -C "$WORK_DIR" checkout -q --detach "$TAG"
   fi
 
   TARGET_COMMIT="$(git -C "$WORK_DIR" rev-parse HEAD)"
