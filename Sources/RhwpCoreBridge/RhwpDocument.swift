@@ -136,6 +136,19 @@ class RhwpDocument {
         return json
     }
 
+    /// 특정 페이지의 overlay image compact JSON 문자열을 반환한다.
+    func pageOverlayImagesJSON(at page: Int) -> String? {
+        guard page >= 0, page < pageCount else {
+            return nil
+        }
+        guard let jsonPtr = rhwp_page_overlay_images(handle, UInt32(page)) else {
+            return nil
+        }
+        let json = String(cString: jsonPtr)
+        rhwp_free_string(jsonPtr)
+        return json
+    }
+
     /// 특정 페이지를 Skia PNG bytes로 렌더링한다.
     func renderPagePNG(
         at page: Int,
