@@ -439,45 +439,75 @@ final class StudioDocumentSchemeHandler: NSObject, WKURLSchemeHandler {
 }
 
 final class StudioSchemeRequestStats {
-    private(set) var resourceRequestCount = 0
-    private(set) var documentRequestCount = 0
-    private(set) var resourcePaths: [String] = []
-    private(set) var failures: [String] = []
+    private struct Snapshot {
+        let resourceRequestCount: Int
+        let documentRequestCount: Int
+        let resourcePaths: [String]
+        let failures: [String]
+    }
+
+    private let lock = NSLock()
+    private var resourceRequestCount = 0
+    private var documentRequestCount = 0
+    private var resourcePaths: [String] = []
+    private var failures: [String] = []
 
     func recordResource(path: String) {
-        resourceRequestCount += 1
-        if resourcePaths.count < 12 {
-            resourcePaths.append(path)
+        withLock {
+            resourceRequestCount += 1
+            if resourcePaths.count < 12 {
+                resourcePaths.append(path)
+            }
         }
     }
 
     func recordDocument() {
-        documentRequestCount += 1
+        withLock {
+            documentRequestCount += 1
+        }
     }
 
     func recordFailure(message: String, url: URL?) {
-        guard failures.count < 8 else {
-            return
-        }
+        let entry: String
         if let url {
-            failures.append("\(message) url=\(url.absoluteString)")
+            entry = "\(message) url=\(url.absoluteString)"
         } else {
-            failures.append(message)
+            entry = message
+        }
+        withLock {
+            guard failures.count < 8 else {
+                return
+            }
+            failures.append(entry)
         }
     }
 
     var summary: String {
-        var parts = [
-            "resourceRequests=\(resourceRequestCount)",
-            "documentRequests=\(documentRequestCount)"
-        ]
-        if !resourcePaths.isEmpty {
-            parts.append("resourcePaths=[\(resourcePaths.joined(separator: ","))]")
+        let snapshot = withLock {
+            Snapshot(
+                resourceRequestCount: resourceRequestCount,
+                documentRequestCount: documentRequestCount,
+                resourcePaths: resourcePaths,
+                failures: failures
+            )
         }
-        if !failures.isEmpty {
-            parts.append("requestFailures=[\(failures.joined(separator: "; "))]")
+        var parts = [
+            "resourceRequests=\(snapshot.resourceRequestCount)",
+            "documentRequests=\(snapshot.documentRequestCount)"
+        ]
+        if !snapshot.resourcePaths.isEmpty {
+            parts.append("resourcePaths=[\(snapshot.resourcePaths.joined(separator: ","))]")
+        }
+        if !snapshot.failures.isEmpty {
+            parts.append("requestFailures=[\(snapshot.failures.joined(separator: "; "))]")
         }
         return parts.joined(separator: ", ")
+    }
+
+    private func withLock<T>(_ work: () -> T) -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return work()
     }
 }
 

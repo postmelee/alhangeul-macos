@@ -28,16 +28,16 @@
 3. sandbox 내부에서 `events=[]`, `scheme={resourceRequests=0, documentRequests=0}`가 나오면 `rhwp-studio` DOM readiness 또는 renderer 문제가 아니라 WebKit navigation 자체가 시작되지 않은 실행 환경 문제로 본다.
 4. 후속 #281/#282/#116/#122/#121/#110 작업은 이번 summary format을 before/after metric 기록용으로 사용할 수 있다.
 
-## 변경 파일
+## 변경 파일 목록과 영향 범위
 
-| 파일 | 변경 |
+| 파일 | 내용 |
 |------|------|
-| `scripts/preview_visual_diff_harness.swift` | phase-aware error, summary `Phase` column, readiness timeout detail, navigation event 기록, scheme request stats, `NSApplication.finishLaunching()`, offscreen window 표시 보정, output stem 충돌 방지 |
-| `mydocs/working/task_m014_286_stage1.md` | baseline 실패 재현 보고 |
-| `mydocs/working/task_m014_286_stage2.md` | readiness logging 보강 보고 |
-| `mydocs/working/task_m014_286_stage3.md` | metric smoke와 sandbox 분리 보고 |
-| `mydocs/report/task_m014_286_report.md` | 최종 보고 |
-| `mydocs/orders/20260527.md` | #286 완료 상태 반영 |
+| `scripts/preview_visual_diff_harness.swift` | `rhwp-studio` reference capture 실패가 renderer 문제인지 WebKit 실행 환경 문제인지 구분되도록 phase-aware error, summary `Phase` column, readiness timeout detail, navigation event, scheme request stats를 추가했다. command-line WebKit harness 안정화를 위해 `NSApplication.finishLaunching()`과 offscreen window 표시를 보정했고, 같은 basename의 HWP/HWPX 입력이 산출물을 덮어쓰지 않도록 output stem에 확장자를 포함했다. |
+| `mydocs/working/task_m014_286_stage1.md` | #283에서 관찰한 readiness timeout과 `WKErrorDomain Code=5` unsupported JavaScript result type을 현재 기준에서 재현하고, Stage 2 보정 범위를 정했다. |
+| `mydocs/working/task_m014_286_stage2.md` | JavaScript probe와 readiness logging 보강 후 실패 형태가 `navigation=pending`으로 분리된 사실과 남은 한계를 기록했다. |
+| `mydocs/working/task_m014_286_stage3.md` | sandbox 내부 WebKit navigation 미시작 문제와 sandbox 밖 정상 capture를 분리하고, 6개 sample visual diff metric을 기록했다. |
+| `mydocs/report/task_m014_286_report.md` | #286 최종 결론, 수치 비교 자료, 한계, #281/#285 handoff, merge 순서 리스크를 후속 작업에서 재사용할 수 있게 정리했다. |
+| `mydocs/orders/20260527.md` | 하이퍼-워터폴 추적을 위해 #286 상태를 완료로 갱신하고 완료 시각을 남겼다. |
 
 ## 단계별 결과
 
