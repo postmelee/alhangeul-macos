@@ -59,7 +59,7 @@ production Swift source, Rust bridge, bundled `rhwp-studio` asset, renderer/comp
 
 ### Studio/native visual diff harness
 
-Stage 2와 Stage 3에서 #280 harness를 재사용했지만, Studio readiness polling 오류로 visual diff metric을 얻지 못했다.
+Stage 2와 Stage 3의 최초 실행에서는 #280 harness를 재사용했지만, Studio readiness polling 오류로 visual diff metric을 얻지 못했다.
 
 | 실행 | sample | 결과 | 관찰 |
 |------|--------|------|------|
@@ -70,7 +70,35 @@ Stage 2와 Stage 3에서 #280 harness를 재사용했지만, Studio readiness po
 | Stage 3 external image smoke | `samples/hwp-img-001.hwp` | FAIL | 동일 |
 | Stage 3 external image smoke | `samples/img-start-001.hwp` | FAIL | 동일 |
 
-이번 작업에서 `ChangedPixels`, `ChangedPercent`, `MeanRGBDelta`는 생성되지 않았다. 이 실패는 open pipeline parity 결론을 무효화하지 않지만, #281 이후 PR별 수치 회귀 검증을 하려면 #280 harness readiness 문제를 먼저 안정화해야 한다.
+#286에서 harness readiness를 안정화한 뒤 같은 브랜치에서 재측정했다. 재측정은 WebKit GUI 프로세스가 정상 동작하는 sandbox 밖 권한으로 실행했고, 기본 2개와 image-heavy 4개 sample 모두 PASS했다.
+
+실행:
+
+```bash
+./scripts/preview-visual-diff-harness.sh build.noindex/task283-visual-diff-basic-final --page 1 \
+  samples/basic/request.hwp samples/hwpx/hwpx-01.hwpx
+./scripts/preview-visual-diff-harness.sh build.noindex/task283-visual-diff-images-final --page 1 \
+  samples/tac-img-02.hwp samples/tac-img-02.hwpx \
+  samples/hwp-img-001.hwp samples/img-start-001.hwp
+```
+
+기본 sample:
+
+| sample | ChangedPixels | ChangedPercent | MeanRGBDelta | MaxRGBDelta | StudioCapture | NativeBackend |
+|--------|---------------|----------------|--------------|-------------|---------------|---------------|
+| `request.hwp` | `325488/1798071` | `18.1021%` | `11.5796` | `255` | `canvasDataURL` | `coreGraphics` |
+| `hwpx-01.hwpx` | `540973/3562815` | `15.1839%` | `15.6722` | `255` | `canvasDataURL` | `coreGraphics` |
+
+image-heavy sample:
+
+| sample | ChangedPixels | ChangedPercent | MeanRGBDelta | MaxRGBDelta | StudioCapture | NativeBackend |
+|--------|---------------|----------------|--------------|-------------|---------------|---------------|
+| `tac-img-02.hwp` | `147412/3562815` | `4.1375%` | `3.7228` | `255` | `canvasDataURL` | `coreGraphics` |
+| `tac-img-02.hwpx` | `129783/3562815` | `3.6427%` | `3.3924` | `255` | `canvasDataURL` | `coreGraphics` |
+| `hwp-img-001.hwp` | `279494/3562815` | `7.8448%` | `8.2731` | `255` | `canvasDataURL` | `coreGraphics` |
+| `img-start-001.hwp` | `514115/3561228` | `14.4365%` | `15.4773` | `255` | `canvasDataURL` | `coreGraphics` |
+
+이 수치는 native/CoreGraphics preview와 `rhwp-studio` reference 사이의 현재 baseline 차이다. #283의 open pipeline 결론을 뒤집지는 않지만, #281 이후 renderer/compositor parity PR에서 before/after 비교 기준으로 재사용할 수 있다.
 
 ### native render-debug sanity
 
@@ -91,13 +119,13 @@ Studio reference 비교가 실패했기 때문에 Stage 3에서는 native 경로
 2. filename은 단순 표시용 문자열이 아니라 머리말/꼬리말 필드 치환에 쓰이는 document context다.
 3. external linked image는 PageLayerTree나 Skia 전환만으로 해결되지 않는다. renderer 입력 전에 document state에 image bytes가 들어와야 한다.
 4. app-bundled `rhwp-studio`의 `/samples/<basename>` fetch는 public app의 source directory resolution으로 보기 어렵다. 개발 서버 편의 경로와 제품 open policy를 분리해야 한다.
-5. #280 harness는 v0.1.4 품질 판단의 핵심 도구지만, 현재 readiness failure를 별도 안정화하지 않으면 정량 비교 자료를 반복 생산하기 어렵다.
+5. #280 harness는 v0.1.4 품질 판단의 핵심 도구다. #286 이후에는 sandbox 밖 WebKit 실행 조건에서 정량 비교 자료를 반복 생산할 수 있으며, sandbox 내부 `events=[]`, `scheme={resourceRequests=0, documentRequests=0}` 실패는 renderer 문제가 아니라 실행 환경 문제로 분리해야 한다.
 
 ## 후속 handoff
 
 | 대상 | 상태 | handoff |
 |------|------|---------|
-| [#280](https://github.com/postmelee/alhangeul-macos/issues/280) | CLOSED | harness 자체는 구축됐지만 readiness polling 실패가 반복됐다. 이후 PR 수치 검증 전에 JS result unsupported type 원인과 settle 조건을 재점검해야 한다. |
+| [#280](https://github.com/postmelee/alhangeul-macos/issues/280) | CLOSED | harness 자체는 구축됐고 #286에서 readiness와 sandbox 분리 진단이 안정화됐다. 이후 PR 수치 검증은 #286 summary format과 sandbox 밖 WebKit 실행 조건을 사용한다. |
 | [#281](https://github.com/postmelee/alhangeul-macos/issues/281) | OPEN | PageLayerTree overlay metadata 연결은 진행 가능하다. external linked image bytes 누락은 #281 범위로 끌어오지 않는다. |
 | [#282](https://github.com/postmelee/alhangeul-macos/issues/282) | OPEN | flow/behind/front compositor 보강은 진행 가능하다. base directory/resource injection과 별개로 overlay z-order를 다룬다. |
 | [#116](https://github.com/postmelee/alhangeul-macos/issues/116) | OPEN | watermark 효과/투명키는 embedded/resolved image와 compositor 위에서 다룬다. external linked image open contract와 분리한다. |
@@ -139,7 +167,7 @@ GitHub native Sub-issues 연결은 maintainer 권한이 필요해 현재 계정�
 | 검증 | 결과 | 비고 |
 |------|------|------|
 | `./scripts/verify-rhwp-studio-assets.sh` | OK | Stage 2에서 통과 |
-| #280 visual diff harness | FAIL | Stage 2/3 모두 readiness 오류. 비교 수치 없음 |
+| #280 visual diff harness | OK | Stage 2/3 최초 실행은 readiness 오류였으나, #286 merge 후 재측정에서 6개 sample 모두 PASS하고 visual diff metric 생성 |
 | native render-debug PNG 생성 | OK | Stage 3 후보 4개 sample 모두 native PNG 생성 |
 | `git diff --check` | OK | Stage 1-3 및 Stage 4 최종 문서 검증에서 통과 |
 
@@ -149,7 +177,7 @@ Stage 4에서는 새 production 검증을 추가하지 않았다. 이번 단계�
 
 | 항목 | 위험 | 처리 |
 |------|------|------|
-| visual diff metric 부재 | 정량 parity 판단을 못 했다. | #280 readiness 안정화 후 #281 이후 PR에서 다시 수치화한다. |
+| visual diff metric 해석 | 재측정 수치는 현재 native/CoreGraphics와 `rhwp-studio` reference의 baseline 차이며, #283 open contract 원인만을 단독으로 설명하지 않는다. | #281 이후 PR에서 같은 sample set으로 before/after 비교한다. |
 | external linked image sample 부족 | 현재 repo sample만으로 실제 sibling external image 요구를 확정하지 못했다. | upstream/resource contract 후속 또는 별도 fixture 확보 시 재검증한다. |
 | filename field sample 부족 | 파일명 필드 치환이 실제 output diff로 이어지는 sample을 이번 단계에서 확보하지 못했다. | filename field fixture 확보 후 upstream #1144 또는 downstream bridge 이슈에서 검증한다. |
 | app-bundled Studio `/samples` fetch | 실제 warning/runtime timing을 직접 캡처하지 못했다. | harness 안정화 뒤 console/log capture로 재확인한다. |
@@ -164,7 +192,7 @@ Stage 4에서는 새 production 검증을 추가하지 않았다. 이번 단계�
 | PR base | `devel` |
 | PR 제목 후보 | `Document rhwp-studio open pipeline parity findings` |
 
-PR 본문에는 source 변경이 없는 조사 PR임을 명시하고, visual diff metric 미생성 원인, native sanity 측정값, #281/#282/#116/#122/#121/#110 handoff, upstream #1141-#1144 연결을 포함하면 된다.
+PR 본문에는 source 변경이 없는 조사 PR임을 명시하고, 최초 readiness 실패와 #286 이후 재측정 수치, native sanity 측정값, #281/#282/#116/#122/#121/#110 handoff, upstream #1141-#1144 연결을 포함하면 된다.
 
 ## 작업지시자 승인 요청
 
