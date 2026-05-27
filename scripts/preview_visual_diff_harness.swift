@@ -261,10 +261,12 @@ final class StudioResourceSchemeHandler: NSObject, WKURLSchemeHandler {
 
     private let resourceDir: URL
     private let fileManager: FileManager
+    private let stats: StudioSchemeRequestStats
 
-    init(resourceDir: URL, fileManager: FileManager = .default) {
+    init(resourceDir: URL, fileManager: FileManager = .default, stats: StudioSchemeRequestStats) {
         self.resourceDir = resourceDir.standardizedFileURL
         self.fileManager = fileManager
+        self.stats = stats
     }
 
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
@@ -277,6 +279,7 @@ final class StudioResourceSchemeHandler: NSObject, WKURLSchemeHandler {
         }
 
         let relativePath = normalizedRelativePath(from: url)
+        stats.recordResource(path: relativePath)
         let fileURL = resourceDir.appendingPathComponent(relativePath, isDirectory: false).standardizedFileURL
         guard isResourceFile(fileURL) else {
             fail("missing rhwp-studio resource: \(relativePath)", url: url, task: urlSchemeTask)
@@ -357,6 +360,7 @@ final class StudioResourceSchemeHandler: NSObject, WKURLSchemeHandler {
     }
 
     private func fail(_ message: String, url: URL?, task: WKURLSchemeTask) {
+        stats.recordFailure(message: message, url: url)
         var userInfo: [String: Any] = [NSLocalizedDescriptionKey: message]
         if let url {
             userInfo[NSURLErrorFailingURLErrorKey] = url
@@ -371,10 +375,12 @@ final class StudioDocumentSchemeHandler: NSObject, WKURLSchemeHandler {
 
     private let data: Data
     private let revision: Int
+    private let stats: StudioSchemeRequestStats
 
-    init(data: Data, revision: Int) {
+    init(data: Data, revision: Int, stats: StudioSchemeRequestStats) {
         self.data = data
         self.revision = revision
+        self.stats = stats
     }
 
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
@@ -386,6 +392,7 @@ final class StudioDocumentSchemeHandler: NSObject, WKURLSchemeHandler {
             return
         }
 
+        stats.recordDocument()
         guard requestedRevision(from: url) == revision else {
             fail("requested document revision does not match", url: url, task: urlSchemeTask)
             return
@@ -422,11 +429,55 @@ final class StudioDocumentSchemeHandler: NSObject, WKURLSchemeHandler {
     }
 
     private func fail(_ message: String, url: URL?, task: WKURLSchemeTask) {
+        stats.recordFailure(message: message, url: url)
         var userInfo: [String: Any] = [NSLocalizedDescriptionKey: message]
         if let url {
             userInfo[NSURLErrorFailingURLErrorKey] = url
         }
         task.didFailWithError(NSError(domain: "PreviewVisualDiffStudioDocument", code: -1, userInfo: userInfo))
+    }
+}
+
+final class StudioSchemeRequestStats {
+    private(set) var resourceRequestCount = 0
+    private(set) var documentRequestCount = 0
+    private(set) var resourcePaths: [String] = []
+    private(set) var failures: [String] = []
+
+    func recordResource(path: String) {
+        resourceRequestCount += 1
+        if resourcePaths.count < 12 {
+            resourcePaths.append(path)
+        }
+    }
+
+    func recordDocument() {
+        documentRequestCount += 1
+    }
+
+    func recordFailure(message: String, url: URL?) {
+        guard failures.count < 8 else {
+            return
+        }
+        if let url {
+            failures.append("\(message) url=\(url.absoluteString)")
+        } else {
+            failures.append(message)
+        }
+    }
+
+    var summary: String {
+        var parts = [
+            "resourceRequests=\(resourceRequestCount)",
+            "documentRequests=\(documentRequestCount)"
+        ]
+        if !resourcePaths.isEmpty {
+            parts.append("resourcePaths=[\(resourcePaths.joined(separator: ","))]")
+        }
+        if !failures.isEmpty {
+            parts.append("requestFailures=[\(failures.joined(separator: "; "))]")
+        }
+        return parts.joined(separator: ", ")
     }
 }
 
@@ -440,6 +491,8 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
     private var documentSchemeHandler: StudioDocumentSchemeHandler?
     private var navigationResult: Result<Void, Error>?
     private var navigationDidCommit = false
+    private var navigationEvents: [String] = []
+    private var schemeStats = StudioSchemeRequestStats()
 
     init(resourceDir: URL, viewportSize: CGSize, settleMilliseconds: Int) {
         self.resourceDir = resourceDir
@@ -455,7 +508,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
     ) throws -> StudioCaptureResult {
         let data = try Data(contentsOf: inputURL)
         let loadURL = try makeLoadURL(filename: inputURL.lastPathComponent, revision: 1)
-        let baseName = inputURL.deletingPathExtension().lastPathComponent
+        let baseName = outputStem(for: inputURL)
         let outputBase = "\(baseName)-page\(pageNumber)"
         let pngURL = outputDir.appendingPathComponent("\(outputBase)-studio.png", isDirectory: false)
         let jsonURL = outputDir.appendingPathComponent("\(outputBase)-studio.json", isDirectory: false)
@@ -471,10 +524,20 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             documentSchemeHandler = nil
             navigationResult = nil
             navigationDidCommit = false
+            navigationEvents = []
+            schemeStats = StudioSchemeRequestStats()
         }
 
         let startTime = Date()
-        webView?.load(URLRequest(url: loadURL))
+        let navigation: WKNavigation?
+        if loadURL.isFileURL {
+            navigation = webView?.loadFileURL(loadURL, allowingReadAccessTo: resourceDir)
+        } else {
+            navigation = webView?.load(URLRequest(url: loadURL))
+        }
+        if navigation == nil {
+            recordNavigationEvent("loadReturnedNil:\(loadURL.scheme ?? "nil")")
+        }
         try waitForPageReady(pageNumber: pageNumber, timeout: 30)
         try alignPageAndHideChrome(pageNumber: pageNumber)
         runMainLoop(milliseconds: settleMilliseconds)
@@ -559,19 +622,34 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        recordNavigationEvent("didFinish")
         navigationResult = .success(())
     }
 
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        recordNavigationEvent("didCommit")
         navigationDidCommit = true
     }
 
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        recordNavigationEvent("didStartProvisional")
+    }
+
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        recordNavigationEvent("didFail:\(describeError(error))")
         navigationResult = .failure(error)
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        recordNavigationEvent("didFailProvisional:\(describeError(error))")
         navigationResult = .failure(error)
+    }
+
+    private func recordNavigationEvent(_ event: String) {
+        guard navigationEvents.count < 16 else {
+            return
+        }
+        navigationEvents.append(event)
     }
 
     private var chromeSelectors: [String] {
@@ -588,8 +666,10 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
 
     private func createWebView(documentData: Data, revision: Int) throws {
         navigationResult = nil
-        let resourceHandler = StudioResourceSchemeHandler(resourceDir: resourceDir)
-        let documentHandler = StudioDocumentSchemeHandler(data: documentData, revision: revision)
+        navigationEvents = []
+        schemeStats = StudioSchemeRequestStats()
+        let resourceHandler = StudioResourceSchemeHandler(resourceDir: resourceDir, stats: schemeStats)
+        let documentHandler = StudioDocumentSchemeHandler(data: documentData, revision: revision, stats: schemeStats)
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
         configuration.setURLSchemeHandler(resourceHandler, forURLScheme: StudioResourceSchemeHandler.scheme)
@@ -611,7 +691,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         window.alphaValue = 1
         window.ignoresMouseEvents = true
         window.setFrameOrigin(NSPoint(x: -20000, y: -20000))
-        window.orderBack(nil)
+        window.orderFrontRegardless()
 
         self.resourceSchemeHandler = resourceHandler
         self.documentSchemeHandler = documentHandler
@@ -651,6 +731,8 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             details.append("lastError={\(lastError)}")
         }
         details.append("navigation=\(navigationStatusDescription)")
+        details.append("events=[\(navigationEvents.joined(separator: ","))]")
+        details.append("scheme={\(schemeStats.summary)}")
         if errorCount > 0 {
             details.append("errorCount=\(errorCount)")
         }
@@ -1170,7 +1252,7 @@ enum NativePreviewRenderer {
             throw PreviewHarnessError(description: "page \(pageNumber) is out of range: pageCount=\(document.pageCount)")
         }
 
-        let baseName = inputURL.deletingPathExtension().lastPathComponent
+        let baseName = outputStem(for: inputURL)
         let outputBase = "\(baseName)-page\(pageNumber)"
         let pngURL = outputDir.appendingPathComponent("\(outputBase)-native.png", isDirectory: false)
         let jsonURL = outputDir.appendingPathComponent("\(outputBase)-native.json", isDirectory: false)
@@ -1355,6 +1437,7 @@ enum VisualDiffEngine {
 struct PreviewVisualDiffHarness {
     static func main() throws {
         NSApplication.shared.setActivationPolicy(.prohibited)
+        NSApplication.shared.finishLaunching()
 
         let options = try parseOptions(Array(CommandLine.arguments.dropFirst()))
         let studioDir = options.outputDir.appendingPathComponent("studio", isDirectory: true)
@@ -1401,7 +1484,7 @@ struct PreviewVisualDiffHarness {
                     pageNumber: options.pageNumber,
                     policy: options.policy
                 )
-                let baseName = inputURL.deletingPathExtension().lastPathComponent
+                let baseName = outputStem(for: inputURL)
                 let diff = try VisualDiffEngine.compare(
                     studioPNG: result.pngURL,
                     nativeImage: native.image,
@@ -1560,6 +1643,10 @@ private func absoluteURL(_ path: String, isDirectory: Bool = false) -> URL {
             .appendingPathComponent(path, isDirectory: isDirectory)
     }
     return url.standardizedFileURL
+}
+
+private func outputStem(for url: URL) -> String {
+    url.lastPathComponent
 }
 
 private func writeJSON<T: Encodable>(_ value: T, to url: URL) throws {
