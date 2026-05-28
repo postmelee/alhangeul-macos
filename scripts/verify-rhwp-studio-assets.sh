@@ -129,6 +129,15 @@ fi
 
 grep -Fq "\"source_release_tag\": \"$EXPECTED_RELEASE_TAG\"" "$RESOURCE_DIR/manifest.json" || fail "manifest release tag does not match $EXPECTED_RELEASE_TAG"
 grep -Fq "\"source_resolved_commit\": \"$EXPECTED_COMMIT\"" "$RESOURCE_DIR/manifest.json" || fail "manifest commit does not match expected commit $EXPECTED_COMMIT"
+wasm_build_command="$(manifest_field "$RESOURCE_DIR/manifest.json" wasm_build_command)" \
+  || fail "manifest missing wasm_build_command"
+recommended_wasm_build_command="$(manifest_field "$RESOURCE_DIR/manifest.json" recommended_wasm_build_command)" \
+  || fail "manifest missing recommended_wasm_build_command"
+actual_wasm_build_command="$(manifest_field "$RESOURCE_DIR/manifest.json" actual_wasm_build_command)" \
+  || fail "manifest missing actual_wasm_build_command"
+[ "$wasm_build_command" = "$actual_wasm_build_command" ] || fail "manifest wasm_build_command must match actual_wasm_build_command"
+[ -n "$recommended_wasm_build_command" ] || fail "manifest recommended_wasm_build_command is empty"
+[ -n "$actual_wasm_build_command" ] || fail "manifest actual_wasm_build_command is empty"
 grep -q '"studio_build_command": "npx tsc && npx vite build --base ./"' "$RESOURCE_DIR/manifest.json" || fail "manifest does not record relative-base build command"
 
 echo "OK: rhwp-studio assets verified at $RESOURCE_DIR"
