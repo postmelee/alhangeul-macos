@@ -202,7 +202,7 @@ Warnings:
 - system `qlmanage -t` thumbnail 설치본 smoke는 실행하지 않았다. Debug build와 registration hygiene, extension bundle 포함 여부까지만 확인했다.
 - visual diff는 WebView canvas capture와 native bitmap을 scale 기준으로 비교한다. changed percent는 회귀 탐지 지표로 유효하지만, 사람 눈 기준의 문서 fidelity를 완전히 대체하지 않는다.
 - `request.hwp` Skia 시간은 단일 실행에서 크게 느리게 나왔다. Skia 초기화, cache warm-up, sample 특성 분리가 필요하다.
-- Stage 3에서 기록한 것처럼 bundled `rhwp-studio` asset은 host `wasm-pack` fallback으로 생성됐다. hash와 asset manifest는 검증했지만 Docker 표준 빌드와 byte-identical 여부는 확인하지 못했다.
+- Stage 3에서 기록한 것처럼 bundled `rhwp-studio` asset은 host `wasm-pack` fallback으로 생성됐다. manifest는 실제 fallback command와 권장 Docker command를 분리해 기록하며, hash는 검증했지만 Docker 표준 빌드와 byte-identical 여부는 확인하지 못했다.
 
 ## 다음 단계 영향
 

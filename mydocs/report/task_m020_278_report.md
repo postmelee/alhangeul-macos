@@ -30,6 +30,8 @@
 | `RustBridge/Cargo.lock` | `rhwp`와 일부 transitive dependency resolved source 갱신 |
 | `rhwp-core.lock` | release tag, resolved commit, static library hash/size, build timestamp 갱신 |
 | `Sources/HostApp/Resources/rhwp-studio/**` | bundled WebView reference renderer asset을 `v0.7.13` 기준으로 교체 |
+| `scripts/sync-rhwp-studio.sh` | `recommended_wasm_build_command`와 `actual_wasm_build_command` manifest 기록 지원 |
+| `scripts/verify-rhwp-studio-assets.sh` | WASM build command provenance 필드 검증 추가 |
 | `mydocs/plans/task_m020_278.md` | 수행계획서 추가 |
 | `mydocs/plans/task_m020_278_impl.md` | 단계별 구현계획서 추가 |
 | `mydocs/working/task_m020_278_stage1.md` | release provenance와 영향 범위 조사 보고 |
@@ -42,9 +44,9 @@
 
 | 항목 | 값 |
 | --- | ---: |
-| 변경 파일 | 24 |
-| insertions | 1,500 |
-| deletions | 110 |
+| 변경 파일 | 27 |
+| insertions | 1,728 |
+| deletions | 112 |
 | 새 `rhwp-studio` copied file count | 57 |
 | 새 `rhwp-studio` copied total bytes | 36,462,802 |
 
@@ -174,7 +176,7 @@ xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug \
 | #282 handoff | #278 merge 후 #282 branch를 최신 `devel`에 재정렬해야 한다. overlay/image compositor는 compact overlay metadata뿐 아니라 PageLayerTree image node의 resolved payload와 embedded bytes availability를 같이 봐야 한다. |
 | Overlay positive fixture | 기본 sample set에서는 behind/front overlay positive case가 나오지 않았다. #282에서 positive fixture 확보가 필요하다. |
 | Thumbnail 설치본 smoke | 이번 작업은 Debug build와 renderer smoke 중심이다. signed Release package 기반 `qlmanage -t` 설치본 smoke는 실행하지 않았다. |
-| `rhwp-studio` build provenance | Docker 표준 WASM build가 로컬 컨테이너 메모리 문제로 실패해 host `wasm-pack` fallback으로 asset을 생성했다. manifest hash는 검증했지만 Docker build와 byte-identical 여부는 확인하지 못했다. |
+| `rhwp-studio` build provenance | Docker 표준 WASM build가 로컬 컨테이너 메모리 문제로 실패해 host `wasm-pack` fallback으로 asset을 생성했다. manifest는 권장 Docker command와 실제 fallback command를 분리해 기록하고 hash를 검증하지만, Docker build와 byte-identical 여부는 확인하지 못했다. |
 | npm advisory | upstream `rhwp-studio` 기준 `npm ci`가 `1 moderate severity vulnerability`를 보고했다. 이번 작업에서는 upstream release asset 동기화 목적상 dependency를 수정하지 않았다. |
 
 ## Handoff

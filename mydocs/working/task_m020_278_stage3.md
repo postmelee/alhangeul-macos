@@ -116,6 +116,9 @@ OK: rhwp-studio synced to /Users/melee/Documents/projects/rhwp-mac-task278/Sourc
 ```text
 source_release_tag = v0.7.13
 source_resolved_commit = b3e16ef212af81ef37d973ddb86d6816d3804642
+wasm_build_command = wasm-pack build --target web
+recommended_wasm_build_command = docker-compose --env-file .env.docker run --rm wasm
+actual_wasm_build_command = wasm-pack build --target web
 main_js = assets/index-DokHBifW.js
 main_css = assets/index-Dp_1IBLX.css
 wasm = assets/rhwp_bg-BPam6dJo.wasm
@@ -158,7 +161,7 @@ OK: rhwp-studio assets verified at /Users/melee/Documents/projects/rhwp-mac-task
 
 ## 잔여 위험
 
-- manifest의 `wasm_build_command`는 upstream 표준 절차인 Docker command를 기록하지만, 이번 로컬 Stage 3 산출물은 Docker 메모리 실패 때문에 host `wasm-pack` fallback으로 만들었다. 산출물 hash는 manifest에 기록됐으므로 현재 번들 자체의 정합성은 검증되지만, Docker 표준 빌드와 byte-identical 여부는 확인하지 못했다.
+- manifest는 `recommended_wasm_build_command`에 upstream 표준 Docker command를 남기고, `wasm_build_command`와 `actual_wasm_build_command`에는 이번 로컬 Stage 3 산출물 생성에 사용한 host `wasm-pack` fallback을 기록한다. 산출물 hash는 manifest에 기록됐으므로 현재 번들 자체의 정합성은 검증되지만, Docker 표준 빌드와 byte-identical 여부는 확인하지 못했다.
 - `npm ci`가 `1 moderate severity vulnerability`를 보고했다. upstream release dependency를 그대로 사용하기 위해 이번 작업에서는 수정하지 않았다.
 - Stage 3는 asset sync 검증까지만 수행했다. HostApp build, Quick Look/Thumbnail smoke, visual diff baseline은 Stage 4에서 실행한다.
 

@@ -4,7 +4,9 @@
   "source_ref_kind": "release-tag",
   "source_release_tag": "v0.7.13",
   "source_resolved_commit": "b3e16ef212af81ef37d973ddb86d6816d3804642",
-  "wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
+  "wasm_build_command": "wasm-pack build --target web",
+  "recommended_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
+  "actual_wasm_build_command": "wasm-pack build --target web",
   "studio_build_command": "npx tsc && npx vite build --base ./",
   "copied_from": "rhwp-studio/dist",
   "excluded_paths": [
