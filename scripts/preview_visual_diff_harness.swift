@@ -586,18 +586,20 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         var overlayIncluded = false
         var snapshotSampleNonWhitePixels = 0
         var snapshotSamplePixels = 0
-        if pageState.canvasSampleNonWhitePixels > 0 {
+        let hasOverlayDOM = pageState.overlayCount > 0 || pageState.usedOverlayUnion
+        let shouldCaptureSnapshot = hasOverlayDOM || pageState.canvasSampleNonWhitePixels <= 0
+        if shouldCaptureSnapshot {
+            png = try captureSnapshotPNG(rect: snapshotRectMetadata.cgRect)
+            captureMode = "webViewSnapshot"
+            overlayIncluded = hasOverlayDOM
+            snapshotSampleNonWhitePixels = png.sampleNonWhitePixels
+            snapshotSamplePixels = png.samplePixels
+        } else {
             png = try exportCanvasPNG(pageNumber: pageNumber)
             if let snapshotPNG = try? captureSnapshotPNG(rect: snapshotRectMetadata.cgRect) {
                 snapshotSampleNonWhitePixels = snapshotPNG.sampleNonWhitePixels
                 snapshotSamplePixels = snapshotPNG.samplePixels
             }
-        } else {
-            png = try captureSnapshotPNG(rect: snapshotRectMetadata.cgRect)
-            captureMode = "webViewSnapshot"
-            overlayIncluded = true
-            snapshotSampleNonWhitePixels = png.sampleNonWhitePixels
-            snapshotSamplePixels = png.samplePixels
         }
         try png.data.write(to: pngURL, options: .atomic)
 
