@@ -30,6 +30,18 @@
 - `build.noindex/task292/stage4-about-screen.png`
 - `build.noindex/task292/stage4-finder-applications-screen.png`
 - `build.noindex/task292/AppIcon-applications.iconset/`
+- `build.noindex/release/Alhangeul.app`
+- `build.noindex/release/alhangeul-macos-0.1.3.zip`
+- `build.noindex/task292/clean-install-smoke/20260529-125625/`
+- `build.noindex/task292/AppIcon-applications-clean-smoke.iconset/`
+- `build.noindex/task292/stage4-clean-install-applications-icns-metrics.csv`
+- `build.noindex/task292/stage4-clean-install-assets-car-info.json`
+- `build.noindex/task292/stage4-clean-install-assets-car-appicon-renditions.csv`
+- `build.noindex/task292/stage4-clean-install-iconservices-applications.png`
+- `build.noindex/task292/stage4-clean-install-iconservices-metrics.csv`
+- `build.noindex/task292/stage4-clean-install-running-applications-icon.png`
+- `build.noindex/task292/stage4-clean-install-running-applications-bundle-url.txt`
+- `build.noindex/task292/stage4-clean-install-running-metrics.csv`
 
 커밋 대상:
 
@@ -185,9 +197,146 @@ IconServices를 통해 file icon과 running app icon을 비교했다.
 - 그런데 Finder/IconServices는 같은 bundle id로 등록된 Debug build의 새 아이콘을 반환하고 있었다.
 - 따라서 사용자 환경에서 “어떤 Mac에서는 크게 보이고, 어떤 Mac에서는 작게 보이는” 현상은 실제 resource 차이뿐 아니라 IconServices/LaunchServices cache 상태 차이로도 발생할 수 있다.
 
+## Stage 4.1 Release 후보 clean install/update smoke
+
+캐시 단서를 실제 업데이트 경로에서 다시 확인하기 위해 Release 후보를 만든 뒤 `/Applications/Alhangeul.app`을 실제로 교체하는 smoke를 추가 수행했다.
+
+Release 후보 생성:
+
+```text
+scripts/package-release.sh
+```
+
+결과:
+
+- `rhwp-core.lock` 검증 통과
+- `xcodebuild -configuration Release` 성공
+- universal 검증 통과
+  - `Alhangeul`: `x86_64 arm64`
+  - `AlhangeulPreview.appex`: `x86_64 arm64`
+  - `AlhangeulThumbnail.appex`: `x86_64 arm64`
+- zip 산출물: `build.noindex/release/alhangeul-macos-0.1.3.zip`
+- SHA-256: `d33337e9821b616be10fae544becb36ca43cdbd504f75e4203fc9004bb5e807b`
+
+실제 `/Applications` 교체 smoke:
+
+```text
+scripts/smoke-clean-quicklook-install.sh \
+  --skip-package \
+  --app build.noindex/release/Alhangeul.app \
+  --replace-applications-install \
+  --output-dir build.noindex/task292/clean-install-smoke \
+  --sample samples/eq-01.hwp \
+  --sample samples/hwpx/hwpx-01.hwpx
+```
+
+결과:
+
+- smoke staging copy를 ad-hoc re-sign했다.
+- 기존 `/Applications/Alhangeul.app`을 Release 후보 기반 staging copy로 교체했다.
+- Quick Look Preview/Thumbnail provider를 `/Applications/Alhangeul.app` 경로로 등록했다.
+- HWP/HWPX 샘플 썸네일을 생성했다.
+- 새 extension crash report는 발생하지 않았다.
+
+주의:
+
+- 이 smoke는 배포 서명/공증 산출물을 설치한 것이 아니다.
+- 로컬 검증을 위해 Release 후보 bundle을 ad-hoc re-sign한 뒤 `/Applications`에 교체 설치한 것이다.
+- 따라서 “업데이트 후 실제 사용자 세션에서 새 icon resource가 들어간 설치본이 보이는가”를 확인하는 smoke이고, notarization 검증은 별도 릴리스 단계 범위다.
+
+교체 전후 설치본 리소스:
+
+| 항목 | 교체 전 `/Applications` | 교체 후 `/Applications` |
+|------|--------------------------|--------------------------|
+| `AppIcon.icns` | `91K` | `51K` |
+| `Assets.car` | `4.6M` | `743K` |
+
+교체 후 `/Applications/Alhangeul.app`의 `Info.plist` 주요 값:
+
+| 항목 | 값 |
+|------|----|
+| `CFBundleIdentifier` | `com.postmelee.alhangeul` |
+| `CFBundleIconFile` | `AppIcon` |
+| `CFBundleIconName` | `AppIcon` |
+| `CFBundleShortVersionString` | `0.1.3` |
+| `CFBundleVersion` | `9` |
+
+교체 후 `AppIcon.icns`를 다시 추출해 측정했다.
+
+| 설치본 `AppIcon.icns` 슬롯 | strong bbox | strong coverage | strong bbox px |
+|----------------------------|-------------|-----------------|----------------|
+| `icon_16x16.png` | `0.8125 x 0.8125` | `0.6133` | `13x13` |
+| `icon_16x16@2x.png` | `0.8125 x 0.8125` | `0.6211` | `26x26` |
+| `icon_128x128.png` | `0.8047 x 0.8047` | `0.6085` | `103x103` |
+| `icon_128x128@2x.png` | `0.8047 x 0.8047` | `0.6084` | `206x206` |
+
+`Assets.car`의 `AppIcon` renditions도 확인했다.
+
+| rendition | scale | pixel |
+|-----------|-------|-------|
+| `icon_16x16.png` | `1` | `16x16` |
+| `icon_32x32.png` | `1` | `32x32` |
+| `icon_16x16@2x.png` | `2` | `32x32` |
+| `icon_32x32@2x.png` | `2` | `64x64` |
+| `icon_128x128.png` | `1` | `128x128` |
+| `icon_256x256.png` | `1` | `256x256` |
+| `icon_128x128@2x.png` | `2` | `256x256` |
+| `icon_512x512.png` | `1` | `512x512` |
+| `icon_256x256@2x.png` | `2` | `512x512` |
+| `icon_512x512@2x.png` | `2` | `1024x1024` |
+
+교체 후 IconServices/실행 앱 경로:
+
+| 대상 | output | strong bbox | strong bbox px | 해석 |
+|------|--------|-------------|----------------|------|
+| `/Applications` file icon | `stage4-clean-install-iconservices-applications.png` | `0.8047 x 0.8047` | `824x824` | 설치본 resource와 일치 |
+| `/Applications` running icon | `stage4-clean-install-running-applications-icon.png` | `0.8047 x 0.8047` | `824x824` | 실행 중 앱 icon도 설치본 resource와 일치 |
+
+실행 중 앱의 bundle URL은 `/Applications/Alhangeul.app`으로 확인했다.
+
+Quick Look provider 등록:
+
+| extension | Path | Parent Bundle |
+|-----------|------|---------------|
+| `com.postmelee.alhangeul.QLExtension` | `/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex` | `/Applications/Alhangeul.app` |
+| `com.postmelee.alhangeul.ThumbnailExtension` | `/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex` | `/Applications/Alhangeul.app` |
+
+생성된 thumbnail:
+
+| 샘플 | 결과 |
+|------|------|
+| `alhangeul-smoke-01-20260529-125625.hwp` | `544 x 768` PNG 생성 |
+| `alhangeul-smoke-02-20260529-125625.hwpx` | `544 x 768` PNG 생성 |
+
+추가 검증:
+
+```text
+scripts/ci/verify-universal-macos-app.sh /Applications/Alhangeul.app
+```
+
+결과:
+
+- 본체와 두 extension 모두 `x86_64 arm64`
+
+```text
+codesign --verify --deep --strict --verbose=2 /Applications/Alhangeul.app
+```
+
+결과:
+
+- `valid on disk`
+- `satisfies its Designated Requirement`
+
+Stage 4.1 결론:
+
+- 새 Release 후보가 실제 `/Applications` 설치본을 교체하면 설치본 resource 자체가 새 `824 / 1024` keyline으로 바뀐다.
+- 교체 후에는 IconServices file icon과 running app icon도 설치본 resource와 같은 `0.8047 x 0.8047` bbox를 반환했다.
+- 따라서 사용자가 업데이트만 수행해도 새 bundle resource가 들어가면 변화는 체감될 수 있다.
+- 다만 기존 캐시가 남아 있는 환경에서는 표시 갱신이 즉시 일어나지 않을 수 있으므로, 릴리스 노트/사용자 안내에는 낮은 영향 순서로 앱 재실행, Finder 재실행, Dock 재시작, 필요 시 IconServices cache reset을 분리해 안내하는 것이 안전하다.
+
 ## Cache reset 수행 여부
 
-이번 단계에서는 다음 조치를 수행하지 않았다.
+Stage 4의 최초 표시 확인에서는 다음 조치를 수행하지 않았다.
 
 - `touch /Applications/Alhangeul.app`
 - `killall Dock`
@@ -198,6 +347,8 @@ IconServices를 통해 file icon과 running app icon을 비교했다.
 - Debug build running app icon과 About 표시에서는 새 아이콘이 이미 정상 반영됐다.
 - `/Applications` 설치본 resource가 아직 기존 아이콘인 상태에서 cache를 갱신하면 Finder/Dock이 오히려 기존 설치본 아이콘으로 돌아갈 수 있다.
 - 전역 IconServices cache 삭제는 사용자 세션 영향이 크므로 계획대로 별도 승인 전에는 수행하지 않는다.
+
+Stage 4.1 clean install/update smoke에서는 `smoke-clean-quicklook-install.sh`의 표준 절차로 Quick Look 관련 프로세스 종료, `qlmanage -r`, `qlmanage -r cache`, PlugInKit 재등록을 수행했다. 다만 전역 IconServices cache 삭제와 Dock 재시작은 수행하지 않았다. 실제 `/Applications` bundle resource 교체만으로도 file icon/running icon이 새 keyline을 반환하는지 확인하는 것이 목적이었고, 이 조건은 충족됐다.
 
 ## 정리 상태
 
@@ -211,6 +362,8 @@ IconServices를 통해 file icon과 running app icon을 비교했다.
 ```
 
 이들은 Stage 4 시작 전에도 떠 있던 `/Applications` 설치본 extension 프로세스다. 이번 단계에서는 Quick Look/Thumbnail 등록 초기화나 extension 종료를 수행하지 않았다.
+
+Stage 4.1 clean install/update smoke에서는 표준 smoke 절차로 Quick Look/Thumbnail extension 프로세스를 종료하고 재등록했다. 추가로 검증용으로 실행한 `/Applications/Alhangeul.app` 본체는 결과 추출 후 종료했으며, `pgrep -fl Alhangeul`에서 남은 본체/extension 프로세스는 확인되지 않았다.
 
 ## 검증 결과
 
@@ -248,9 +401,9 @@ Stage 4는 표시 검증 단계다. 소스 AppIcon PNG, `Contents.json`, `projec
 
 ## 잔여 리스크
 
-- `/Applications` 설치본은 아직 이번 브랜치의 새 bundle로 교체하지 않았다. 따라서 설치본 자체의 resource 검증은 public/release packaging 또는 별도 clean install smoke에서 수행해야 한다.
 - Debug build file icon은 `NSWorkspace.icon(forFile:)`에서 generic document icon으로 반환됐다. `.noindex` 개발 산출물과 동일 bundle id 등록 상태가 영향을 준 것으로 보이며, Finder file icon 검증에는 설치/패키징된 app copy가 더 적합하다.
-- 전역 IconServices cache 삭제는 수행하지 않았다. 사용자 제보 환경에서 계속 큰 아이콘이 보이면, 새 build 설치 후 `touch`/Dock 재시작/IconServices cache reset을 낮은 영향 순서로 안내해야 한다.
+- `/Applications` 교체 smoke는 ad-hoc re-sign 로컬 검증이다. 배포 서명/공증/Homebrew Cask 업데이트 경로는 릴리스 단계에서 별도 검증해야 한다.
+- 전역 IconServices cache 삭제는 수행하지 않았다. 사용자 제보 환경에서 계속 큰 아이콘이 보이면, 새 build 설치 후 앱 재실행, Finder 재실행, Dock 재시작, IconServices cache reset을 낮은 영향 순서로 안내해야 한다.
 
 ## 다음 단계
 
