@@ -20,12 +20,14 @@ enum HwpNativePageCompositor {
         )
 
         if overlayLayers.contains(.behindText) {
-            renderer.render(
+            renderOverlayLayer(
+                .behindText,
                 tree: tree,
-                in: context,
+                overlays: overlays?.behind ?? [],
+                renderer: renderer,
+                context: context,
                 pageHeight: pageHeight,
-                document: document,
-                mode: .pageOverlay(.behindText)
+                document: document
             )
         }
 
@@ -38,13 +40,47 @@ enum HwpNativePageCompositor {
         )
 
         if overlayLayers.contains(.inFrontOfText) {
+            renderOverlayLayer(
+                .inFrontOfText,
+                tree: tree,
+                overlays: overlays?.front ?? [],
+                renderer: renderer,
+                context: context,
+                pageHeight: pageHeight,
+                document: document
+            )
+        }
+    }
+
+    private static func renderOverlayLayer(
+        _ layer: CGTreeOverlayLayer,
+        tree: RenderNode,
+        overlays: [RhwpPageOverlayImage],
+        renderer: CGTreeRenderer,
+        context: CGContext,
+        pageHeight: Double,
+        document: RhwpDocument
+    ) {
+        let renderableOverlays = overlays.filter(\.hasRenderableData)
+        if renderableOverlays.isEmpty {
             renderer.render(
                 tree: tree,
                 in: context,
                 pageHeight: pageHeight,
                 document: document,
-                mode: .pageOverlay(.inFrontOfText)
+                mode: .pageOverlay(layer)
             )
+        } else {
+            let drawnCount = renderer.renderOverlayImages(renderableOverlays, in: context, document: document)
+            if drawnCount == 0 {
+                renderer.render(
+                    tree: tree,
+                    in: context,
+                    pageHeight: pageHeight,
+                    document: document,
+                    mode: .pageOverlay(layer)
+                )
+            }
         }
     }
 

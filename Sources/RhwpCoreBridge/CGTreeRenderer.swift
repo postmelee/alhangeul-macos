@@ -98,6 +98,26 @@ class CGTreeRenderer {
         imageCache.removeAll()
     }
 
+    @discardableResult
+    func renderOverlayImages(
+        _ images: [RhwpPageOverlayImage],
+        in context: CGContext,
+        document: RhwpDocument
+    ) -> Int {
+        if !isRenderingSameDocument(document) {
+            clearCache()
+        }
+        self.document = document
+
+        var drawnCount = 0
+        for image in images {
+            if renderOverlayImage(image, in: context, document: document) {
+                drawnCount += 1
+            }
+        }
+        return drawnCount
+    }
+
     private func isRenderingSameDocument(_ document: RhwpDocument?) -> Bool {
         guard let currentDocument = self.document else {
             return document == nil
@@ -716,6 +736,68 @@ class CGTreeRenderer {
         ctx.restoreGState()
 
         ctx.restoreGState()
+    }
+
+    private func renderOverlayImage(
+        _ image: RhwpPageOverlayImage,
+        in ctx: CGContext,
+        document: RhwpDocument
+    ) -> Bool {
+        guard let cgImage = decodedOverlayImage(image, document: document) else { return false }
+
+        let node = ImageNode(
+            binDataId: image.source.binDataId ?? 0,
+            sectionIndex: nil,
+            paraIndex: nil,
+            controlIndex: nil,
+            fillMode: image.fillMode,
+            originalSize: image.originalSize,
+            originalSizeHU: image.originalSizeHU,
+            effect: image.effect,
+            brightness: image.brightness,
+            contrast: image.contrast,
+            textWrap: image.wrap,
+            transform: ShapeTransform(image.transform),
+            crop: image.crop
+        )
+
+        ctx.saveGState()
+        applyTransform(node.transform, bbox: image.bbox, in: ctx)
+
+        let drawImage = preparedImage(for: cgImage, node: node)
+        let rect = cgRect(image.bbox)
+        let drawRect = imageDestinationRect(for: node, size: rect.size)
+        ctx.saveGState()
+        ctx.translateBy(x: rect.minX, y: rect.minY + rect.height)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(drawImage, in: drawRect)
+        ctx.restoreGState()
+
+        ctx.restoreGState()
+        return true
+    }
+
+    private func decodedOverlayImage(
+        _ image: RhwpPageOverlayImage,
+        document: RhwpDocument
+    ) -> CGImage? {
+        if let data = image.source.data,
+           let decoded = decodeImage(data) {
+            return decoded
+        }
+
+        guard let binDataId = image.source.binDataId, binDataId > 0 else {
+            return nil
+        }
+        if let cached = imageCache[binDataId] {
+            return cached
+        }
+        guard let data = document.imageData(binDataId: binDataId),
+              let decoded = decodeImage(data) else {
+            return nil
+        }
+        imageCache[binDataId] = decoded
+        return decoded
     }
 
     private func decodeImage(_ data: Data) -> CGImage? {
@@ -3621,5 +3703,15 @@ private final class EquationSVGFragmentParser: NSObject, XMLParserDelegate {
         default:
             return false
         }
+    }
+}
+
+private extension ShapeTransform {
+    init(_ transform: RhwpPageOverlayTransform) {
+        self.init(
+            rotation: transform.rotation,
+            horzFlip: transform.horzFlip,
+            vertFlip: transform.vertFlip
+        )
     }
 }

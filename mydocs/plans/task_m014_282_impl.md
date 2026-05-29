@@ -11,7 +11,7 @@
 - 브랜치: `local/task282`
 - 작업 위치: `/Users/melee/Documents/projects/rhwp-mac-task282`
 - 기준 브랜치: `devel`
-- 현재 앱 core lock: `rhwp-core.lock` `v0.7.12` (`1899ef9bc2dfd1c6c0c4d18b192d253a2d0a1fb5`)
+- 현재 앱 core lock: `rhwp-core.lock` `v0.7.13` (`b3e16ef212af81ef37d973ddb86d6816d3804642`)
 - 목표: CoreGraphics fallback renderer가 #281 overlay metadata를 사용해 `background -> BehindText overlay -> flow -> InFrontOfText overlay` 순서를 명시적으로 합성하게 만든다.
 
 ## 구현 원칙
@@ -22,6 +22,7 @@
 - `RhwpDocument.renderPageTree(at:)` 결과를 한 번만 얻고, #281의 `pageOverlayImages(at:renderTree:)` overload로 overlay metadata를 보충한다.
 - 기존 `CGTreeRenderer`의 도형/텍스트/이미지 decode/crop/effect/transform 로직을 재사용한다.
 - overlay 후보는 flow pass에서 중복 렌더링하지 않는다.
+- #278 이후 `v0.7.13` 기준에서는 compact overlay metadata뿐 아니라 PageLayerTree/render tree image node의 `resolved` payload, embedded bytes availability, `bakedWatermark` 상태를 같이 고려한다.
 - `Sources/RhwpCoreBridge`에는 AppKit/UIKit/WebKit 의존을 추가하지 않는다.
 - upstream rhwp 수정, unreleased commit pin, core dependency update는 하지 않는다.
 - watermark/effect/fill/tile 세부 parity는 안전하게 적용 가능한 최소 범위만 반영하고, 잔여 차이는 #116/#122로 넘긴다.
@@ -169,12 +170,13 @@ Task #282 Stage 2: native compositor pass 분리
 
 - `RhwpPageOverlayImage` drawing path를 추가한다.
 - image source 선택 순서를 구현한다.
-  - `source.data` 우선
-  - `source.binDataId` fallback
+  - compact/resolved `source.data` 우선
+  - render tree supplement의 `source.binDataId` fallback
   - bytes가 없으면 skip
 - overlay bbox, transform, crop/fill destination을 기존 image rendering과 맞춘다.
 - grayscale/blackWhite/brightness/contrast는 기존 image adjustment와 같은 기준을 사용한다.
 - `bakedWatermark == true`인 경우 중복 watermark 처리를 피한다.
+- `bakedWatermark == true` payload는 image bytes가 이미 watermark 처리를 포함한다고 보고 별도 watermark pass를 추가하지 않는다.
 - watermark multiply/opacity가 현재 core payload에서 관찰되지 않으면 구현 범위를 문서화하고 #116으로 넘긴다.
 
 ### 산출물
