@@ -586,18 +586,24 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         var overlayIncluded = false
         var snapshotSampleNonWhitePixels = 0
         var snapshotSamplePixels = 0
-        if pageState.canvasSampleNonWhitePixels > 0 {
+        let hasOverlayDOM = pageState.overlayCount > 0 || pageState.usedOverlayUnion
+        if hasOverlayDOM {
+            png = try exportCompositePNG(pageNumber: pageNumber)
+            captureMode = "domComposite"
+            overlayIncluded = true
+            snapshotSampleNonWhitePixels = png.sampleNonWhitePixels
+            snapshotSamplePixels = png.samplePixels
+        } else if pageState.canvasSampleNonWhitePixels <= 0 {
+            png = try captureSnapshotPNG(rect: snapshotRectMetadata.cgRect)
+            captureMode = "webViewSnapshot"
+            snapshotSampleNonWhitePixels = png.sampleNonWhitePixels
+            snapshotSamplePixels = png.samplePixels
+        } else {
             png = try exportCanvasPNG(pageNumber: pageNumber)
             if let snapshotPNG = try? captureSnapshotPNG(rect: snapshotRectMetadata.cgRect) {
                 snapshotSampleNonWhitePixels = snapshotPNG.sampleNonWhitePixels
                 snapshotSamplePixels = snapshotPNG.samplePixels
             }
-        } else {
-            png = try captureSnapshotPNG(rect: snapshotRectMetadata.cgRect)
-            captureMode = "webViewSnapshot"
-            overlayIncluded = true
-            snapshotSampleNonWhitePixels = png.sampleNonWhitePixels
-            snapshotSamplePixels = png.samplePixels
         }
         try png.data.write(to: pngURL, options: .atomic)
 
@@ -932,13 +938,22 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
 
     private func exportCanvasPNG(pageNumber: Int) throws -> PNGOutput {
         let value = try evaluateJavaScript(canvasDataURLScript(pageNumber: pageNumber), timeout: 10, phase: .canvasExport)
+        return try pngOutput(fromCanvasExportValue: value, phase: .canvasExport)
+    }
+
+    private func exportCompositePNG(pageNumber: Int) throws -> PNGOutput {
+        let value = try evaluateJavaScript(compositeDataURLScript(pageNumber: pageNumber), timeout: 10, phase: .canvasExport)
+        return try pngOutput(fromCanvasExportValue: value, phase: .canvasExport)
+    }
+
+    private func pngOutput(fromCanvasExportValue value: Any?, phase: PreviewHarnessPhase) throws -> PNGOutput {
         guard let json = value as? String,
               let data = json.data(using: .utf8),
               let dictionary = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let dataURL = dictionary["dataURL"] as? String
         else {
             throw PreviewHarnessPhaseError(
-                phase: .canvasExport,
+                phase: phase,
                 detail: "unexpected canvas export result: \(describeJavaScriptValue(value))"
             )
         }
@@ -1194,6 +1209,132 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
               exportContext.drawImage(target, 0, 0);
               return exportCanvas.toDataURL('image/png');
             })()
+          };
+        })());
+        """
+    }
+
+    // WKWebView snapshots can omit the canvas backing store in this harness, so
+    // overlay-positive references are composited from same-origin DOM drawables.
+    private func compositeDataURLScript(pageNumber: Int) -> String {
+        """
+        JSON.stringify((() => {
+          const pageNumber = \(pageNumber);
+          const content = document.querySelector('#scroll-content');
+          const canvases = content
+            ? Array.from(content.querySelectorAll('canvas')).filter((canvas) => {
+                const rect = canvas.getBoundingClientRect();
+                return rect.width > 0 && rect.height > 0 && canvas.width > 0 && canvas.height > 0;
+              })
+            : [];
+          const target = canvases[pageNumber - 1] || null;
+          if (!target) {
+            throw new Error(`page canvas not found for page ${pageNumber}`);
+          }
+
+          const targetRect = target.getBoundingClientRect();
+          let unionLeft = targetRect.left;
+          let unionTop = targetRect.top;
+          let unionRight = targetRect.right;
+          let unionBottom = targetRect.bottom;
+          const drawables = [];
+          let order = 0;
+          const addDrawable = (element, role) => {
+            const tag = element.tagName.toLowerCase();
+            if (tag !== 'canvas' && tag !== 'img') {
+              return;
+            }
+            const style = window.getComputedStyle(element);
+            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) {
+              return;
+            }
+            if (tag === 'img' && (!element.complete || element.naturalWidth <= 0 || element.naturalHeight <= 0)) {
+              return;
+            }
+            const rect = element.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) {
+              return;
+            }
+            const intersectsVertical = rect.bottom >= targetRect.top - 1 && rect.top <= targetRect.bottom + 1;
+            const intersectsHorizontal = rect.right >= targetRect.left - 1 && rect.left <= targetRect.right + 1;
+            if (!intersectsVertical || !intersectsHorizontal) {
+              return;
+            }
+            unionLeft = Math.min(unionLeft, rect.left);
+            unionTop = Math.min(unionTop, rect.top);
+            unionRight = Math.max(unionRight, rect.right);
+            unionBottom = Math.max(unionBottom, rect.bottom);
+            const z = Number.parseFloat(style.zIndex);
+            const opacity = Number.parseFloat(style.opacity);
+            drawables.push({
+              element,
+              role,
+              tag,
+              order: order++,
+              zIndex: Number.isFinite(z) ? z : 0,
+              opacity: Number.isFinite(opacity) ? opacity : 1,
+              rect
+            });
+          };
+
+          addDrawable(target, 'pageCanvas');
+          for (const element of Array.from(content.querySelectorAll('*'))) {
+            if (element === target) {
+              continue;
+            }
+            addDrawable(element, 'overlay');
+          }
+          drawables.sort((a, b) => (a.zIndex - b.zIndex) || (a.order - b.order));
+
+          const dpr = Number(window.devicePixelRatio) || 1;
+          const cssWidth = Math.max(1, unionRight - unionLeft);
+          const cssHeight = Math.max(1, unionBottom - unionTop);
+          const exportCanvas = document.createElement('canvas');
+          exportCanvas.width = Math.max(1, Math.round(cssWidth * dpr));
+          exportCanvas.height = Math.max(1, Math.round(cssHeight * dpr));
+          const exportContext = exportCanvas.getContext('2d');
+          exportContext.fillStyle = '#ffffff';
+          exportContext.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+          exportContext.setTransform(dpr, 0, 0, dpr, -unionLeft * dpr, -unionTop * dpr);
+
+          for (const item of drawables) {
+            exportContext.save();
+            exportContext.globalAlpha = Math.max(0, Math.min(1, item.opacity));
+            exportContext.drawImage(
+              item.element,
+              item.rect.left,
+              item.rect.top,
+              item.rect.width,
+              item.rect.height
+            );
+            exportContext.restore();
+          }
+
+          exportContext.setTransform(1, 0, 0, 1, 0, 0);
+          const imageData = exportContext.getImageData(0, 0, exportCanvas.width, exportCanvas.height).data;
+          const step = Math.max(1, Math.floor(Math.min(exportCanvas.width, exportCanvas.height) / 160));
+          let canvasSampleNonWhitePixels = 0;
+          let canvasSamplePixels = 0;
+          for (let y = 0; y < exportCanvas.height; y += step) {
+            for (let x = 0; x < exportCanvas.width; x += step) {
+              const index = (y * exportCanvas.width + x) * 4;
+              const r = imageData[index];
+              const g = imageData[index + 1];
+              const b = imageData[index + 2];
+              const a = imageData[index + 3];
+              canvasSamplePixels += 1;
+              if (a > 0 && (r < 245 || g < 245 || b < 245)) {
+                canvasSampleNonWhitePixels += 1;
+              }
+            }
+          }
+
+          return {
+            width: exportCanvas.width,
+            height: exportCanvas.height,
+            canvasSampleNonWhitePixels,
+            canvasSamplePixels,
+            dataURL: exportCanvas.toDataURL('image/png')
           };
         })());
         """
