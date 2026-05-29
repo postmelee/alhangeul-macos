@@ -236,6 +236,13 @@ Quick Look PNG/PDF와 Finder Thumbnail 경로가 같은 CoreGraphics compositor 
 ./scripts/preview-visual-diff-harness.sh build.noindex/task282-stage4-images --page 1 \
   samples/tac-img-02.hwp samples/tac-img-02.hwpx \
   samples/hwp-img-001.hwp samples/img-start-001.hwp
+./scripts/preview-visual-diff-harness.sh build.noindex/task282-stage4-overlay-positive --page 1 \
+  samples/복학원서.hwp
+./scripts/overlay-metadata-smoke.sh build.noindex/task282-stage4-overlay-metadata --page 1 \
+  samples/basic/request.hwp samples/hwpx/hwpx-01.hwpx \
+  samples/tac-img-02.hwp samples/tac-img-02.hwpx \
+  samples/hwp-img-001.hwp samples/img-start-001.hwp \
+  samples/복학원서.hwp
 ./scripts/smoke-quicklook-skia-policy.sh build.noindex/task282-stage4-skia-policy \
   samples/basic/request.hwp samples/hwpx/hwpx-01.hwpx
 xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug \
@@ -265,7 +272,7 @@ Task #282 Stage 4: compositor smoke와 visual diff 정리
 
 - Stage 2-4 결과를 통합해 최종 보고서 초안을 작성한다.
 - #116 watermark/effect, #122 fill/tile/placement, #121 resource object, #110 Placeholder/FormObject에 넘길 내용을 정리한다.
-- positive overlay fixture가 여전히 없으면 fixture 확보 후속을 명시한다.
+- positive overlay fixture로 확인한 `samples/복학원서.hwp` 결과와 #116/#1016 handoff를 명시한다.
 - 오늘할일 #282 상태를 단계 완료/최종 보고 대기 상태로 갱신한다.
 
 ### 산출물
