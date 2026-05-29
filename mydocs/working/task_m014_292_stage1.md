@@ -101,6 +101,8 @@
 
 Stage 2에서 사용할 축소율은 **84%**로 확정한다.
 
+후속 보정: Stage 2 진행 중 작업지시자가 Apple macOS Sequoia App Icon production template을 Figma로 import해 `512x512@2x` export group `1024 x 1024`, 내부 icon mask `824 x 824` 값을 확인했다. 따라서 Stage 2 최종 PNG는 이 보고서의 84% 후보가 아니라 Apple template의 `824 / 1024 = 80.46875%` keyline 기준으로 보정했다. 이 보고서의 84% 결정은 Apple template 수치 확인 전의 임시 후보 결정으로 남긴다.
+
 이유:
 
 - 기준 앱 strong bbox 중앙값 `0.8047`에 세 후보 중 가장 가깝다.
@@ -147,10 +149,10 @@ Stage 1에서 소스 AppIcon PNG, `Contents.json`, `project.yml`, Swift/Rust sou
 
 ## 잔여 리스크
 
-- 84% 후보는 기준 앱 중앙값보다 약간 크다. 하지만 현재 알한글 글리프 구조상 80% 수준으로 바로 줄이면 글리프가 약해질 수 있으므로 Stage 2에서 84%를 적용한 뒤 빌드 산출물과 Dock/Finder 표시로 재확인한다.
+- 84% 후보는 기준 앱 중앙값보다 약간 크다. 이 리스크는 Stage 2 진행 중 Apple production template의 `824 / 1024` keyline을 확인하면서 해소했고, 최종 PNG는 해당 keyline 기준으로 보정했다.
 - 후보 PNG는 기존 master PNG를 리샘플링한 결과다. Stage 2에서 최종 PNG 10개를 생성한 뒤 작은 슬롯의 흐림을 다시 확인해야 한다.
 - Dock/Finder 표시 판단은 캐시 영향을 받을 수 있으므로 Stage 4에서 별도로 분리해 검증한다.
 
 ## 다음 단계
 
-작업지시자가 Stage 1 결과를 승인하면 Stage 2에서 84% 기준으로 AppIcon PNG 10개를 재생성한다.
+작업지시자가 Stage 1 결과를 승인하면 Stage 2에서 84% 기준으로 AppIcon PNG 10개를 재생성할 예정이었다. 이후 Stage 2 진행 중 Apple production template 기준값이 확인되어 최종 산출물은 824 keyline 기준으로 보정했다.
