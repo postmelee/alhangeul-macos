@@ -764,7 +764,12 @@ class CGTreeRenderer {
         ctx.saveGState()
         applyTransform(node.transform, bbox: image.bbox, in: ctx)
 
-        let drawImage = preparedImage(for: cgImage, node: node)
+        let appliesAdjustments = !(image.bakedWatermark && image.source.data != nil)
+        let drawImage = preparedImage(
+            for: cgImage,
+            node: node,
+            applyingAdjustments: appliesAdjustments
+        )
         let rect = cgRect(image.bbox)
         let drawRect = imageDestinationRect(for: node, size: rect.size)
         ctx.saveGState()
@@ -1289,8 +1294,13 @@ class CGTreeRenderer {
         }
     }
 
-    private func preparedImage(for image: CGImage, node: ImageNode) -> CGImage {
+    private func preparedImage(
+        for image: CGImage,
+        node: ImageNode,
+        applyingAdjustments: Bool = true
+    ) -> CGImage {
         let cropped = croppedImage(for: image, crop: node.crop)
+        guard applyingAdjustments else { return cropped }
         return adjustedImage(for: cropped, node: node)
     }
 
