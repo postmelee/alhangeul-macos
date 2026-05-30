@@ -22,9 +22,19 @@
 강제 규칙:
 
 - 신규 작성 문서는 반드시 `task_{milestone}_{이슈번호}` 형식을 사용한다.
-- 마일스톤은 항상 `m{숫자}` 형식으로 적는다. 예: `m100`, `m200`
+- 마일스톤은 항상 `m{숫자}` 형식으로 적는다. 예: `m100`, `m200`, `m900`
 - 마일스톤 없이 `task_{이슈번호}` 형식으로 신규 문서를 만들지 않는다.
 - 기존 레거시 문서명은 유지할 수 있으나, 신규 이슈부터는 마일스톤 포함 형식을 고정한다.
+
+### 운영 milestone 문서 코드
+
+제품 버전과 직접 대응하지 않는 운영 milestone은 `M900+` 예약 영역을 사용한다. GitHub milestone title은 사람이 읽기 쉬운 이름을 유지하되, 문서 파일명에는 아래의 내부 코드를 사용한다.
+
+| GitHub milestone | 문서 코드 | 파일명 예시 | 용도 |
+|------------------|-----------|-------------|------|
+| `Release Operations` | `M900` / `m900` | `task_m900_301.md` | public release 실행, Release Rehearsal/Publish workflow, GitHub Release, Pages/Sparkle, Homebrew gate, release record, rollback |
+
+운영 milestone이 추가되면 이 표에 먼저 문서 코드를 등록한다. `M900+` 코드는 제품 버전 milestone과 섞이지 않게 유지하고, GitHub milestone number 같은 저장소 내부 자동 번호를 문서 코드로 사용하지 않는다.
 
 ## 폴더 역할 (엄격 준수)
 
@@ -136,6 +146,10 @@ manual에서 특정 사건 문서를 참조해야 할 때는 본문에 사건 �
 ### 마일스톤이 아직 확정되지 않았을 때
 
 신규 하이퍼-워터폴 타스크는 GitHub Issue의 마일스톤을 먼저 확인한다. 이슈가 아직 없으면 [`task-register`](../skills/task-register/SKILL.md) Skill로 열린 milestone을 확인하고 생성 전 작업지시자 승인을 받는다. 마일스톤이 비어 있거나 모호하면 임의로 `m000` 같은 임시명을 만들지 말고 작업지시자에게 확인한다. 기존 레거시 문서는 이름을 유지할 수 있지만, 신규 문서는 마일스톤 포함 형식을 기준으로 한다.
+
+### GitHub milestone이 버전명이 아닐 때
+
+GitHub milestone이 `Release Operations`처럼 제품 버전명이 아니면 "운영 milestone 문서 코드" 표의 내부 코드를 사용한다. 등록된 코드가 없으면 새 문서를 만들기 전에 작업지시자에게 확인하고, 필요하면 이 문서의 운영 milestone 표를 먼저 갱신한다.
 
 ### 외부 PR인지 내부 타스크인지 경계가 모호할 때
 
