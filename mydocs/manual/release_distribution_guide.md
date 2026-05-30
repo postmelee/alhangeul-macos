@@ -60,7 +60,7 @@
 - `.github/workflows/rhwp-upstream-sync-pr.yml`: viewer/WASM/core 영향 release를 감지해 bundled `rhwp-studio` 업데이트 후보 PR 생성
 - `docs/updates/`, `docs/index.html`: 사용자용 업데이트 페이지와 최신 다운로드 진입점
 - public `https://postmelee.github.io/alhangeul-macos/appcast.xml`: Sparkle feed URL. release workflow는 generated appcast를 Pages artifact에 포함해 배포하고, docs-only workflow는 public appcast를 보존해 stale `docs/appcast.xml` overwrite를 막는다.
-- `Casks/alhangeul-macos.rb`: Homebrew Cask source 초안
+- `Casks/alhangeul.rb`: Homebrew Cask source 초안
 - `rhwp-core.lock`, `Sources/HostApp/Resources/rhwp-studio/manifest.json`: core/viewer asset provenance
 
 ## upstream 자동 sync PR 경계
