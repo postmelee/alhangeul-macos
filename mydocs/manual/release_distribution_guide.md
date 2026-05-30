@@ -19,6 +19,7 @@
 
 | 문서 | 읽는 시점 | 내용 |
 |------|-----------|------|
+| [`public_release_runbook.md`](public_release_runbook.md) | public release 당일에 최신 release context 수집부터 publish, Pages/Sparkle, Homebrew gate, rollback까지 순서대로 실행할 때 | 메인테이너용 반복 실행 절차, workflow input 확정, 승인 gate, post-publish 확인 |
 | [`ci_workflow_guide.md`](ci_workflow_guide.md) | PR CI, release rehearsal/publish workflow, upstream check의 역할과 재현 명령을 확인할 때 | workflow trigger, 권한, 변경 범위 flag, docs-only skip, release delta checklist summary/artifact |
 | [`release_policy_guide.md`](release_policy_guide.md) | 릴리스 정책, 산출물 계층, 사용자 안내 기준을 판단할 때 | 운영 기준, 배포 브랜치, public 배포 수준, artifact/checksum/provenance, 렌더링 경로와 알려진 한계 |
 | [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md) | package/release script, DMG, Finder smoke를 다룰 때 | 릴리스 전 확인, build 검증, zip, public/rehearsal DMG, DMG layout, Finder 통합 smoke |
@@ -69,6 +70,8 @@
 이 workflow는 signed/notarized DMG, GitHub Release, Sparkle stable appcast, Homebrew Cask 변경을 만들지 않는다. public release 포함 여부, release note 표기, rehearsal/publish workflow 실행은 별도 명시 승인 후 이 가이드의 release flow를 따른다.
 
 ## 전체 release flow
+
+실제 public release 실행 지시를 받으면 먼저 [`public_release_runbook.md`](public_release_runbook.md)를 따라 최신 release context와 승인 gate를 확정한다. 아래 흐름과 최종 체크리스트는 정책과 누락 방지 기준이며, 배포일의 단계별 실행 순서는 runbook을 우선한다.
 
 1. release version, release candidate commit, 포함 PR 범위를 확정한다.
 2. [`release_policy_guide.md`](release_policy_guide.md)의 branch, artifact, 사용자 안내 기준을 확인한다.

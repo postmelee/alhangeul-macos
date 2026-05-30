@@ -1,4 +1,4 @@
-# Public release 실행 runbook
+# 메인테이너용 public release 실행 runbook
 
 ## 목적
 
