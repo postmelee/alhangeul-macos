@@ -54,10 +54,12 @@ swiftc -parse-as-library \
   -I "$MODULEMAP_DIR" \
   "$ROOT/Sources/RhwpCoreBridge/RhwpDocument.swift" \
   "$ROOT/Sources/RhwpCoreBridge/RenderTree.swift" \
+  "$ROOT/Sources/RhwpCoreBridge/PageOverlayImages.swift" \
   "$ROOT/Sources/RhwpCoreBridge/FontFallback.swift" \
   "$ROOT/Sources/RhwpCoreBridge/FontResourceRegistry.swift" \
   "$ROOT/Sources/RhwpCoreBridge/CGTreeRenderer.swift" \
   "$ROOT/Sources/Shared/HwpPageImageRenderer.swift" \
+  "$ROOT/Sources/Shared/HwpNativePageCompositor.swift" \
   "$ROOT/Sources/Shared/HwpPreviewPDFRenderer.swift" \
   "$ROOT/scripts/quicklook_skia_policy_smoke.swift" \
   "$LIB" \
