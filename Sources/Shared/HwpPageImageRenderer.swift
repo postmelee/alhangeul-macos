@@ -398,6 +398,7 @@ enum HwpPageImageRenderer {
         guard let tree = document.renderPageTree(at: pageIndex) else {
             throw HwpRenderError.renderTreeUnavailable
         }
+        let overlays = document.pageOverlayImages(at: pageIndex, renderTree: tree)
 
         let width = Int(pixelSize.width)
         let height = Int(pixelSize.height)
@@ -419,8 +420,13 @@ enum HwpPageImageRenderer {
         context.translateBy(x: 0, y: CGFloat(height))
         context.scaleBy(x: scale, y: -scale)
 
-        let renderer = CGTreeRenderer()
-        renderer.render(tree: tree, in: context, pageHeight: pageSize.height, document: document)
+        HwpNativePageCompositor.render(
+            tree: tree,
+            overlays: overlays,
+            in: context,
+            pageHeight: pageSize.height,
+            document: document
+        )
 
         guard let image = context.makeImage() else {
             throw HwpRenderError.imageUnavailable
