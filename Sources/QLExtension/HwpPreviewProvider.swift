@@ -44,7 +44,7 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         let page = try HwpPageImageRenderer.renderPage(
             document: documentContext.document,
             pageIndex: 0,
-            policy: .skiaOptIn
+            policy: .coreGraphicsOnly
         )
         logRenderedPageDiagnostics(page, replyType: "PNG", filename: filename)
         let data = try HwpPageImageRenderer.encodePNG(page.image)
@@ -76,7 +76,7 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         let contentSize = documentContext.contentSize
         let result = try HwpPreviewPDFRenderer.render(
             context: documentContext,
-            policy: .skiaOptIn,
+            policy: .coreGraphicsOnly,
             collectDiagnostics: true
         )
         let data = result.data
