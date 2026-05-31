@@ -1501,6 +1501,16 @@ class CGTreeRenderer {
 
     // MARK: - 텍스트 (Core Text)
 
+    private func drawTextShadeIfNeeded(style: TextStyle, bbox: BBox, in ctx: CGContext) {
+        switch style.shadeColor {
+        case 0, 0x00FFFFFF, 0xFFFFFFFF:
+            return
+        default:
+            ctx.setFillColor(colorRefToCGColor(style.shadeColor, alpha: 0.3))
+            ctx.fill(cgRect(bbox))
+        }
+    }
+
     private func renderTextRun(_ run: TextRunNode, bbox: BBox, in ctx: CGContext) {
         let displayRun = makeTextRunDisplay(run)
         guard !displayRun.text.isEmpty else { return }
@@ -1530,11 +1540,7 @@ class CGTreeRenderer {
         ctx.saveGState()
 
         // 음영 (형광펜 배경) — 텍스트 변환 전에 그리기
-        if style.shadeColor != 0x00FFFFFF && style.shadeColor != 0 {
-            let shadeRect = cgRect(bbox)
-            ctx.setFillColor(colorRefToCGColor(style.shadeColor).copy(alpha: 0.3)!)
-            ctx.fill(shadeRect)
-        }
+        drawTextShadeIfNeeded(style: style, bbox: bbox, in: ctx)
 
         // 전체 좌표계가 Y반전(좌상단 원점) 상태이지만,
         // Core Text는 Y축이 위로 증가하는 좌표계를 기대한다.
@@ -1640,10 +1646,7 @@ class CGTreeRenderer {
     ) {
         ctx.saveGState()
 
-        if style.shadeColor != 0x00FFFFFF && style.shadeColor != 0 {
-            ctx.setFillColor(colorRefToCGColor(style.shadeColor).copy(alpha: 0.3)!)
-            ctx.fill(cgRect(bbox))
-        }
+        drawTextShadeIfNeeded(style: style, bbox: bbox, in: ctx)
 
         if abs(rotation) > pathEpsilon {
             applyTextRunRotation(rotation, bbox: bbox, in: ctx)
