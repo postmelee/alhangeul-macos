@@ -46,15 +46,15 @@
 
 ## 최신 공개 릴리즈
 
-### v0.1.3
+### v0.1.4
 
-`v0.1.3`은 upstream `rhwp v0.7.12` core/studio를 반영해 HWP/HWPX parser, viewer, WMF/HWP3 처리 개선을 포함하는 patch release입니다. 앱 소유 UTI `com.postmelee.alhangeul.*`, Hancom 계열 UTI 지원, About 창의 bundled `rhwp` provenance 표시, Sparkle 업데이트 확인, signed/notarized universal DMG 배포 기준은 유지합니다.
+`v0.1.4`는 upstream `rhwp v0.7.13` core/studio를 반영해 HWPX 렌더링과 HWP 저장 호환성, 시험지와 공공기관 문서 회귀 수정, viewer/editor 상호작용 개선을 포함하는 patch release입니다. 앱 소유 UTI `com.postmelee.alhangeul.*`, Hancom 계열 UTI 지원, About 창의 bundled `rhwp` provenance 표시, Sparkle 업데이트 확인, signed/notarized universal DMG 배포 기준은 유지합니다.
 
-- GitHub Release: [Alhangeul v0.1.3](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.3)
-- 업데이트 페이지: [알한글 v0.1.3](https://postmelee.github.io/alhangeul-macos/updates/v0.1.3.html)
+- GitHub Release: [Alhangeul v0.1.4](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.4)
+- 업데이트 페이지: [알한글 v0.1.4](https://postmelee.github.io/alhangeul-macos/updates/v0.1.4.html)
 - Homebrew Cask: `brew install --cask postmelee/tap/alhangeul`
-- 포함된 `rhwp`: [`v0.7.12`](https://github.com/edwardkim/rhwp/releases/tag/v0.7.12) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
-- Sparkle update 기준: short version은 `0.1.3`, build는 `9`입니다.
+- 포함된 `rhwp`: [`v0.7.13`](https://github.com/edwardkim/rhwp/releases/tag/v0.7.13) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
+- Sparkle update 기준: short version은 `0.1.4`, build는 `10`입니다.
 
 과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약하고, bundled `rhwp` provenance는 한 줄 요약만 표시합니다.
 
@@ -119,7 +119,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 ### WKWebView Viewer (MVP 뷰어)
 
 - macOS SwiftUI 기반 HostApp shell과 WKWebView
-- `edwardkim/rhwp` `v0.7.12` snapshot의 `rhwp-studio` viewer 통합
+- `edwardkim/rhwp` `v0.7.13` snapshot의 `rhwp-studio` viewer 통합
 - HWP/HWPX 파일 열기
 - WebView 내부 찾기, 복사, 기본 편집 UI
 - Finder 또는 다른 앱에서 파일 열기 요청 수신

@@ -47,7 +47,9 @@ allow_implicit_invocation: false
    ```
 4. 오늘할일 갱신: `mydocs/orders/{yyyymmdd}.md`에 행 추가
    - 형식: `| #{N} | {타스크 제목} | 진행중 | M{milestone}, 수행계획서 작성 후 승인 대기 |`
-   - 적절한 마일스톤 섹션에 배치 (운영 작업은 "공통 — 운영 작업")
+   - 적절한 마일스톤 섹션에 배치
+   - `Release Operations` milestone은 `M900 — Release Operations` 섹션을 사용
+   - 등록된 운영 milestone 문서 코드가 없는 운영 작업은 "공통 — 운영 작업"에 임시 배치하고, 문서 코드 확정 후 옮김
 5. 수행계획서 템플릿 생성: `mydocs/plans/task_m{milestone}_{N}.md`
    - 섹션: 목적 / 배경 / 범위(포함·제외) / 설계 방향 / 예상 변경 파일 / 잠정 단계(3~6단계) / 검증 계획 / 리스크 / 승인 요청 사항
 6. 변경 검증
