@@ -16,9 +16,9 @@
 - release branch 또는 tag 기준 commit이 정확한가
 - 릴리즈 상세 기록 `mydocs/release/v<version>.md`가 현재 release candidate 기준으로 갱신되었는가
 - 직전 public release 대비 delta checklist가 생성되고 release owner가 보정했는가
-- GitHub Release body의 `이번 버전의 주요 변경 사항`에 `전체 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`가 실제 사용자-facing 내용으로 보정되었는가
+- GitHub Release body의 `이번 버전의 주요 변경 사항`에 `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`가 실제 사용자-facing 내용으로 보정되었는가
 - 마지막 release candidate 변경, bugfix PR, draft signed/notarized DMG smoke 이후 GitHub Release body와 Pages 업데이트 문서를 다시 검토했는가
-- `전체 요약`과 `알한글 앱 변화`가 특정 검증 샘플명, issue 번호, 내부 구현 용어가 아니라 사용자가 보는 증상과 개선 결과 중심으로 쓰였는가
+- `변경 요약`과 `알한글 앱 변화`가 특정 검증 샘플명, issue 번호, 내부 구현 용어가 아니라 사용자가 보는 증상과 개선 결과 중심으로 쓰였는가
 - GitHub Release title이 기본형 `Alhangeul v<version>`을 쓰는가, 또는 upstream `rhwp` 반영 중심 release라서 `(rhwp vX.Y.Z)` 병기 조건을 충족하는가
 - `rhwp-core.lock`의 core repository와 commit이 release note에 기록되었는가
 - `rhwp-studio` manifest의 release tag와 commit이 release note에 기록되었는가
@@ -88,7 +88,7 @@ Release note에 포함할 내용:
 - 지원 macOS 버전과 지원 아키텍처
 - 설치 후 첫 실행과 Quick Look/Thumbnail 활성화 안내
 - 업데이트 확인 방법
-- 주요 변경 사항: `전체 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`
+- 주요 변경 사항: `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`
 - 다운로드 산출물과 SHA256
 - Homebrew Cask 공개 상태
 - `Release metadata`: app version, `edwardkim/rhwp` core tag/commit, bundled `rhwp-studio` tag/commit, `rhwp-core.lock`, studio manifest
@@ -121,7 +121,7 @@ Release note에 포함할 내용:
 
 필수 하위 구분:
 
-- `### 전체 요약`: 이번 릴리즈를 설치해야 하는 이유를 3~5개 bullet로 쓴다. `rhwp` 반영과 앱 자체 변경을 합쳐 사용자가 체감할 결과 중심으로 요약한다.
+- `### 변경 요약`: 이번 릴리즈에서 달라진 점을 3~5개 bullet로 쓴다. `rhwp` 반영과 앱 자체 변경을 합쳐 사용자가 체감할 결과 중심으로 요약한다.
 - `### 포함된 rhwp 변화`: upstream `rhwp` core 또는 bundled `rhwp-studio` 변경 중 문서 열기, 렌더링, HWP/HWPX 호환성, viewer/editor 동작에 실제로 영향을 주는 내용을 적는다. upstream release note 전체를 복제하지 않는다.
 - `### 알한글 앱 변화`: HostApp, Quick Look, Finder thumbnail, 저장/공유/PDF/인쇄, 설치, 업데이트, About, DMG, Homebrew, Pages/Sparkle 등 앱 저장소가 소유한 변화를 적는다.
 
@@ -154,7 +154,7 @@ Pages는 사용자용 릴리즈 안내 표면이다. GitHub Release body의 긴 
 - `docs/updates/v<version>.html`이 현재 사이트의 header, hero, action button, content section, footer 구조를 유지하는가
 - `docs/updates/index.html`의 최신 항목과 latest DMG link가 최신 public release 파일명을 가리키는가
 - Pages 다운로드 버튼이 아키텍처 선택 UI 없이 단일 universal DMG latest URL을 직접 가리키는가
-- hero와 `전체 요약`이 내부 구현이나 upstream 버전명보다 이번 버전을 설치했을 때 사용자가 체감할 문서 열기, 미리보기, 설치, 업데이트 변화를 먼저 설명하는가
+- hero와 `변경 요약`이 내부 구현이나 upstream 버전명보다 이번 버전을 설치했을 때 사용자가 체감할 문서 열기, 미리보기, 설치, 업데이트 변화를 먼저 설명하는가
 - 사용자가 필요한 설치 방법, 첫 실행 안내, 업데이트 확인, 알려진 한계를 간결하게 확인할 수 있는가
 - Intel Mac과 Apple Silicon Mac이 같은 DMG를 사용한다는 안내가 최신 다운로드 주변 또는 FAQ/릴리즈 노트에 있는가
 - 최신 버전이 아닌 `docs/updates/v<version>.html`에는 최신 릴리즈 안내 banner가 있고, 최신 버전 페이지에는 해당 banner가 없는가
