@@ -396,6 +396,16 @@ release record 필수 항목:
 - Intel Mac 실기기 smoke 결과 또는 미실행 사유
 - 알려진 한계와 후속 이슈
 
+### 릴리즈 종료 정리 PR 원칙
+
+public publish 이후 release note 문구, Pages 문구, GitHub Release 본문, release record, 최종 보고서를 보정해야 하면 `릴리즈 종료 정리` 단계로 묶는다.
+
+- 같은 릴리즈의 문구 정정, 사용자-facing 표현 보정, 기술 세부 section 추가, 이전 버전 안내 banner 정규화, release record/final report 갱신은 별도 PR로 쪼개지 않고 하나의 종료 정리 PR에 모은다.
+- publish 전 candidate를 바꾸는 수정은 release 기준 통합 브랜치에서 처리하고, publish 후 public surface 정정은 public Pages와 release record를 갱신할 수 있는 `main` 대상 종료 정리 PR 하나로 처리한다.
+- GitHub Release 본문처럼 GitHub API로 직접 바꾸는 public 상태 변경은 같은 종료 정리 단계의 release record와 최종 보고서에 실제 변경 내용을 남긴다.
+- 급한 차단 오류로 public 안내를 먼저 고쳐야 하는 경우에도 후속 문서/record 정리는 같은 종료 정리 PR에 합쳐 최종 상태를 한 번에 기록한다.
+- 종료 정리 PR 본문에는 이번 릴리즈에서 실제로 생성된 PR 목록을 묶어 기록하고, PR 수가 늘어난 원인이 있으면 다음 릴리즈 운영 규칙으로 환류한다.
+
 ## Rollback
 
 문제가 확인되면 먼저 배포 표면을 줄이고, 그 다음 원인을 기록한다.
