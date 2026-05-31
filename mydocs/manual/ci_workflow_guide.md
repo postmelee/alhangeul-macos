@@ -85,10 +85,12 @@ bash scripts/ci/classify-pr-changes.sh --help
 bash scripts/ci/check-rhwp-upstream-release.sh --help
 bash scripts/ci/detect-rhwp-studio-impact.sh --help
 bash scripts/ci/prepare-pages-artifact.sh --help
+bash scripts/ci/update-release-version-notices.sh --help
 bash scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
 bash scripts/ci/write-sparkle-appcast.sh --help
 bash scripts/sync-rhwp-studio.sh --help
 bash scripts/verify-rhwp-studio-assets.sh --help
+scripts/ci/update-release-version-notices.sh --updates-dir docs/updates --check
 ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |path| Psych.parse_file(path); puts "Parsed #{path}" }'
 ```
 
@@ -132,6 +134,7 @@ release checks 재현:
 ./scripts/release.sh --help
 scripts/ci/write-release-notes.sh 0.1.1 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef build.noindex/release/release-notes-0.1.1.md
 scripts/ci/check-release-notes-template.sh build.noindex/release/release-notes-0.1.1.md
+scripts/ci/update-release-version-notices.sh --updates-dir docs/updates --check
 scripts/ci/verify-universal-macos-app.sh build.noindex/release/Alhangeul.app
 scripts/ci/write-release-delta-checklist.sh v0.1.0 HEAD build.noindex/release/delta-checklist-0.1.1.md
 scripts/ci/write-sparkle-appcast.sh \

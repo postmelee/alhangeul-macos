@@ -17,6 +17,8 @@
 - 릴리즈 상세 기록 `mydocs/release/v<version>.md`가 현재 release candidate 기준으로 갱신되었는가
 - 직전 public release 대비 delta checklist가 생성되고 release owner가 보정했는가
 - GitHub Release body의 `이번 버전의 주요 변경 사항`에 `전체 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`가 실제 사용자-facing 내용으로 보정되었는가
+- 마지막 release candidate 변경, bugfix PR, draft signed/notarized DMG smoke 이후 GitHub Release body와 Pages 업데이트 문서를 다시 검토했는가
+- `전체 요약`과 `알한글 앱 변화`가 특정 검증 샘플명, issue 번호, 내부 구현 용어가 아니라 사용자가 보는 증상과 개선 결과 중심으로 쓰였는가
 - GitHub Release title이 기본형 `Alhangeul v<version>`을 쓰는가, 또는 upstream `rhwp` 반영 중심 release라서 `(rhwp vX.Y.Z)` 병기 조건을 충족하는가
 - `rhwp-core.lock`의 core repository와 commit이 release note에 기록되었는가
 - `rhwp-studio` manifest의 release tag와 commit이 release note에 기록되었는가
@@ -102,6 +104,14 @@ Release note에 포함할 내용:
 
 `## 이번 버전의 주요 변경 사항`은 release owner가 직전 public release 대비 실제 사용자-facing 변화를 보정해 작성한다. generated template이나 delta checklist 초안을 그대로 두지 않는다.
 
+작성 원칙:
+
+- 공개 릴리즈 노트의 top-level 요약은 "영향을 받는 문서/기능 영역", "사용자가 보던 증상", "이번 버전에서 달라진 결과" 순서로 일반화해 쓴다.
+- 검증 fixture, 샘플 파일명, issue 번호, PR 번호, stage 번호는 public Pages와 GitHub Release의 주요 변경 요약에 쓰지 않는다. 해당 정보는 내부 release record, 검증 결과, changelog provenance에 둔다.
+- `PUA`, `sentinel`, `render tree`, `CoreGraphics`처럼 일반 사용자가 바로 이해하기 어려운 구현 용어는 먼저 "특수 문자/기호 표시", "텍스트 배경/음영", "Quick Look 미리보기" 같은 사용자 용어로 설명하고, 필요할 때만 괄호나 metadata에서 기술 용어를 보충한다.
+- workflow default, README 정렬, manifest/checksum/provenance 같은 운영 변경은 사용자에게 직접 영향을 주는 설치, 업데이트, 보안 검증, 배포 경로 변화가 있을 때만 주요 변경에 넣는다. 그렇지 않으면 `Release metadata`, 내부 release record, 최종 보고서로 분리한다.
+- draft signed/notarized DMG smoke 이후 bugfix PR, tag 재지정, release candidate 변경이 있으면 publish 전에 주요 변경 사항을 최종 candidate 기준으로 다시 작성한다.
+
 필수 하위 구분:
 
 - `### 전체 요약`: 이번 릴리즈를 설치해야 하는 이유를 3~5개 bullet로 쓴다. `rhwp` 반영과 앱 자체 변경을 합쳐 사용자가 체감할 결과 중심으로 요약한다.
@@ -137,10 +147,14 @@ Pages는 사용자용 릴리즈 안내 표면이다. GitHub Release body의 긴 
 - `docs/updates/v<version>.html`이 현재 사이트의 header, hero, action button, content section, footer 구조를 유지하는가
 - `docs/updates/index.html`의 최신 항목과 latest DMG link가 최신 public release 파일명을 가리키는가
 - Pages 다운로드 버튼이 아키텍처 선택 UI 없이 단일 universal DMG latest URL을 직접 가리키는가
+- hero와 `전체 요약`이 내부 구현이나 upstream 버전명보다 이번 버전을 설치했을 때 사용자가 체감할 문서 열기, 미리보기, 설치, 업데이트 변화를 먼저 설명하는가
 - 사용자가 필요한 설치 방법, 첫 실행 안내, 업데이트 확인, 알려진 한계를 간결하게 확인할 수 있는가
 - Intel Mac과 Apple Silicon Mac이 같은 DMG를 사용한다는 안내가 최신 다운로드 주변 또는 FAQ/릴리즈 노트에 있는가
+- 최신 버전이 아닌 `docs/updates/v<version>.html`에는 최신 릴리즈 안내 banner가 있고, 최신 버전 페이지에는 해당 banner가 없는가
 - bundled `rhwp`를 안내해야 하는 release라면 `rhwp v<version>`과 upstream release 링크를 짧게 표시하고, commit/manifest/checksum 표는 GitHub Release body와 내부 release record로 연결하는가
 - 앱 자체 변화는 `주요 변경` 또는 필요 시 `알한글 앱 변화` section에서 짧게 구분하고, `rhwp` provenance와 한 목록에 과도하게 섞지 않는가
+- 특정 샘플 문서명이나 검증 fixture명 대신 "일부 HWP 양식 문서", "특수 문자/기호 표시", "텍스트 배경/음영"처럼 사용자가 이해할 수 있는 증상 단위로 일반화했는가
+- `알한글 앱 변화` section이 workflow, README, release record 정렬 같은 운영 항목보다 HostApp, Quick Look preview, Finder thumbnail, 설치/업데이트 경로의 사용자-visible 변화를 우선하는가
 - 실제 public DMG SHA256이 아직 확정되지 않은 문서는 release candidate 또는 #188 handoff 상태를 명확히 표시하는가
 
 Pages 다운로드 버튼은 사용자를 위한 latest DMG URL을 사용한다.
@@ -148,6 +162,8 @@ Pages 다운로드 버튼은 사용자를 위한 latest DMG URL을 사용한다.
 ```text
 https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-<version>.dmg
 ```
+
+이전 버전 안내 banner는 수동으로 버전마다 고치지 않는다. `scripts/ci/update-release-version-notices.sh --updates-dir docs/updates`가 `docs/updates/v*.html` 중 가장 높은 semantic version을 최신 릴리즈 노트로 보고, 이전 버전 페이지의 banner를 삽입/갱신하며 최신 버전 페이지의 banner를 제거한다. PR CI는 `--check` 모드로 source가 정규화되어 있는지 확인하고, `prepare-pages-artifact.sh`는 Pages artifact를 만들 때 같은 helper를 한 번 더 실행한다.
 
 ### Pages 배포 모델
 
