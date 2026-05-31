@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#ffffff" />
   <meta name="description" content="알한글 v0.1.4 릴리즈 노트입니다." />
   <meta property="og:title" content="알한글 v0.1.4 릴리즈 노트" />
-  <meta property="og:description" content="rhwp v0.7.13을 반영해 HWPX 렌더링과 HWP 저장 호환성, 시험지와 공공기관 문서 회귀 수정을 포함한 알한글 패치 릴리즈입니다." />
+  <meta property="og:description" content="Quick Look과 Finder 썸네일에서 일부 HWP 문서의 특수 기호 깨짐과 텍스트 배경 표시를 보정하고, rhwp v0.7.13 호환성 개선을 포함한 알한글 패치 릴리즈입니다." />
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://postmelee.github.io/alhangeul-macos/updates/v0.1.4.html" />
   <meta property="og:image" content="https://postmelee.github.io/alhangeul-macos/assets/og-main.png" />
@@ -45,7 +45,7 @@
   <main id="main" class="updates-page">
     <section class="updates-hero" aria-labelledby="release-title">
       <h1 id="release-title">알한글 v0.1.4</h1>
-      <p>업스트림 <code>rhwp v0.7.13</code>을 반영해 HWPX 렌더링과 HWP 저장 호환성, 시험지와 공공기관 문서 회귀 수정을 포함한 패치 릴리즈입니다.</p>
+      <p>Quick Look과 Finder 썸네일에서 일부 HWP 문서의 특수 기호 깨짐과 텍스트 배경 표시를 보정하고, <code>rhwp v0.7.13</code>의 문서 호환성 개선을 함께 반영한 패치 릴리즈입니다.</p>
       <div class="updates-actions" aria-label="릴리즈 주요 링크">
         <a class="page-action-button"
           href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.4/alhangeul-macos-0.1.4.dmg">
@@ -61,11 +61,11 @@
       <section class="updates-section" aria-labelledby="release-summary-title">
         <h2 id="release-summary-title">전체 요약</h2>
         <ul>
-          <li><code>rhwp</code> core와 bundled <code>rhwp-studio</code>를 <code>v0.7.13</code> 기준으로 갱신했습니다.</li>
-          <li>HWPX 렌더링과 HWP 저장 호환성, 표/셀 속성, 메모와 목차 필드, 페이지 번호 처리 관련 upstream 수정이 포함됩니다.</li>
-          <li>시험지와 공공기관 문서에서 발견된 배경쪽, 머리말/꼬리말, 문단 번호, 문단 테두리, 시험 문항 상자 회귀 수정을 포함합니다.</li>
-          <li>앱 본체, Quick Look preview, Finder thumbnail extension의 release version을 <code>0.1.4 (10)</code>로 맞췄습니다.</li>
-          <li>공식 DMG는 Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용하는 signed/notarized universal DMG 기준을 유지합니다.</li>
+          <li>일부 HWP 양식 문서에서 특수 기호나 서명 표식이 깨진 네모처럼 보이던 문제를 Quick Look과 Finder 썸네일에서 보정했습니다.</li>
+          <li>일부 문서에서 글자 뒤에 의도하지 않은 배경색이나 음영 박스가 보이던 문제를 줄였습니다.</li>
+          <li>HWPX 렌더링과 HWP 저장 호환성, 표/셀 속성, 메모, 목차 필드, 페이지 번호 처리 관련 <code>rhwp v0.7.13</code> 개선을 포함했습니다.</li>
+          <li>머리말/꼬리말, 문단 번호, 문단 테두리, 시험 문항 상자처럼 양식 문서에서 자주 눈에 띄는 배치 요소의 회귀 수정을 포함했습니다.</li>
+          <li>앱 본체, Quick Look 미리보기, Finder 썸네일 extension을 <code>0.1.4 (10)</code> 기준 signed/notarized universal DMG로 배포합니다.</li>
         </ul>
       </section>
 
@@ -74,19 +74,20 @@
         <p>v0.1.4는 <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.7.13"
             rel="noreferrer"><code>rhwp v0.7.13</code></a> 기준의 core와 bundled <code>rhwp-studio</code>를 사용합니다. 앱 내부 provenance 기준 commit은 <code>b3e16ef212af81ef37d973ddb86d6816d3804642</code>입니다.</p>
         <ul>
-          <li>HWPX에서 HWP로 저장할 때 표와 셀 속성, gradient border fill, 셀 내부 여백, 셀 배경 이미지, 메모, 목차 필드, 페이지 번호 control 처리를 보강했습니다.</li>
-          <li>렌더링 경로에는 배경쪽, 머리말/꼬리말, 문단 번호, 텍스트박스 위치와 gradient/rounding, 문단 테두리, 시험 문항 상자 관련 수정이 포함됩니다.</li>
-          <li>페이지 나눔과 배치에서는 treat-as-char 표 높이, 중첩 표 page split, 이미지 pushdown/vpos, 다단 각주 vpos, 하단 overflow 측정 보정이 포함됩니다.</li>
-          <li><code>rhwp-studio</code>에는 TAC shape cursor 이동, 연속 공백 이동, Chrome <code>file://</code> 안내, 중복 다운로드 억제 개선이 포함됩니다.</li>
+          <li>HWPX 문서를 HWP로 내보낼 때 표와 셀 속성, 셀 배경, 메모, 목차 필드, 페이지 번호 같은 문서 구조가 더 안정적으로 보존됩니다.</li>
+          <li>배경쪽, 머리말/꼬리말, 문단 번호, 텍스트박스 위치, 문단 테두리, 시험 문항 상자처럼 인쇄 양식에서 눈에 띄는 배치 요소의 렌더링 수정이 포함됩니다.</li>
+          <li>페이지 나눔과 이미지/표 배치가 어긋나거나 하단 내용이 넘쳐 보이는 일부 상황을 줄이는 보정이 포함됩니다.</li>
+          <li>앱 내부 viewer asset에는 도형 커서 이동, 연속 공백 이동, 브라우저 파일 열기 안내, 중복 다운로드 억제 개선이 포함됩니다.</li>
         </ul>
       </section>
 
       <section class="updates-section" aria-labelledby="release-app-title">
         <h2 id="release-app-title">알한글 앱 변화</h2>
         <ul>
-          <li>About 창과 내부 provenance 기준이 <code>rhwp v0.7.13</code>을 표시할 수 있도록 core lock과 bundled manifest 기준을 유지합니다.</li>
-          <li>release rehearsal/publish workflow의 기본 입력을 <code>v0.1.4</code>, 직전 공개 릴리즈 <code>v0.1.3</code>, expected <code>rhwp v0.7.13</code> 기준으로 정리했습니다.</li>
-          <li>README, Pages 업데이트 목록, 릴리즈 기록을 <code>0.1.4 (10)</code>과 <code>rhwp v0.7.13</code> 기준으로 맞췄습니다.</li>
+          <li>Quick Look 미리보기와 Finder 썸네일에서 일부 HWP 문서의 특수 문자, 기호, 서명 표식이 깨진 네모로 보이지 않도록 표시를 보정했습니다.</li>
+          <li>기본 미리보기 렌더러가 텍스트 배경/음영 값을 더 정확히 해석해, 글자 뒤에 불필요한 배경 박스가 생기는 문제를 줄였습니다.</li>
+          <li>앱 본체와 Quick Look/Thumbnail extension을 <code>0.1.4 (10)</code>으로 맞추고, GitHub Release, Sparkle 업데이트, Homebrew Cask가 같은 signed/notarized universal DMG를 가리키도록 정렬했습니다.</li>
+          <li>About 창과 내부 provenance 정보는 bundled <code>rhwp v0.7.13</code> 기준을 표시합니다.</li>
         </ul>
       </section>
 
