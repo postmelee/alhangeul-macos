@@ -112,6 +112,13 @@ Release note에 포함할 내용:
 - workflow default, README 정렬, manifest/checksum/provenance 같은 운영 변경은 사용자에게 직접 영향을 주는 설치, 업데이트, 보안 검증, 배포 경로 변화가 있을 때만 주요 변경에 넣는다. 그렇지 않으면 `Release metadata`, 내부 release record, 최종 보고서로 분리한다.
 - draft signed/notarized DMG smoke 이후 bugfix PR, tag 재지정, release candidate 변경이 있으면 publish 전에 주요 변경 사항을 최종 candidate 기준으로 다시 작성한다.
 
+공개 표면별 역할:
+
+- Pages 업데이트 문서는 사용자용 안내 표면이다. 주요 변경, hero, 설치 안내에는 샘플 파일명, issue 번호, PR 번호, `PUA`, `sentinel`, `CoreGraphics` 같은 구현/검증 용어를 쓰지 않고 증상과 개선 결과로 일반화한다.
+- GitHub Release는 사용자와 개발자가 모두 보는 public 표면이다. `요약`과 `이번 버전의 주요 변경 사항`은 Pages와 같은 사용자-facing 표현을 쓰고, 샘플 파일명, 구현 용어, 관련 PR/Issue, 검증 fixture는 `기술 세부` 또는 `검증 세부` 같은 별도 section에만 둔다.
+- 내부 `mydocs/release/v<version>.md`는 release decision record다. 샘플 파일명, 재현 조건, 구현 용어, 검증 명령, workflow run, PR/Issue, SHA256, provenance를 가장 자세히 남긴다.
+- GitHub Release의 기술 세부 section은 사용자 요약보다 뒤에 둔다. 기술 세부가 없더라도 release body는 유효하지만, 앱 자체 렌더링 bugfix처럼 재현 샘플과 구현 경계가 중요한 release는 기술 세부를 두는 편을 우선한다.
+
 필수 하위 구분:
 
 - `### 전체 요약`: 이번 릴리즈를 설치해야 하는 이유를 3~5개 bullet로 쓴다. `rhwp` 반영과 앱 자체 변경을 합쳐 사용자가 체감할 결과 중심으로 요약한다.
