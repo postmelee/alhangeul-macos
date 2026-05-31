@@ -1502,7 +1502,8 @@ class CGTreeRenderer {
     // MARK: - 텍스트 (Core Text)
 
     private func renderTextRun(_ run: TextRunNode, bbox: BBox, in ctx: CGContext) {
-        guard !run.text.isEmpty else { return }
+        let displayRun = makeTextRunDisplay(run)
+        guard !displayRun.text.isEmpty else { return }
 
         let style = run.style
         let baseFontSize = CGFloat(style.fontSize)
@@ -1519,6 +1520,8 @@ class CGTreeRenderer {
                 fontSize: fontSize,
                 baselineShift: baselineShift,
                 rotation: rotation,
+                displayText: displayRun.text,
+                charPositions: displayRun.charPositions,
                 in: ctx
             )
             return
@@ -1544,15 +1547,15 @@ class CGTreeRenderer {
         let font = makeTextRunFont(style: style, fontSize: fontSize)
         let attributes = makeTextRunAttributes(style: style, font: font)
 
-        let attrStr = NSAttributedString(string: run.text, attributes: attributes)
+        let attrStr = NSAttributedString(string: displayRun.text, attributes: attributes)
         let line = CTLineCreateWithAttributedString(attrStr)
         let layout = makeTextRunLayoutPlan(
-            text: run.text,
+            text: displayRun.text,
             style: style,
             bbox: bbox,
             line: line,
             attributes: attributes,
-            charPositions: run.charPositions
+            charPositions: displayRun.charPositions
         )
 
         // Core Text 좌하단 좌표계에서 베이스라인 위치
@@ -1567,15 +1570,15 @@ class CGTreeRenderer {
                 colorOverride: style.shadowColor
             )
             let shadowLine = CTLineCreateWithAttributedString(
-                NSAttributedString(string: run.text, attributes: shadowAttributes)
+                NSAttributedString(string: displayRun.text, attributes: shadowAttributes)
             )
             let shadowLayout = makeTextRunLayoutPlan(
-                text: run.text,
+                text: displayRun.text,
                 style: style,
                 bbox: bbox,
                 line: shadowLine,
                 attributes: shadowAttributes,
-                charPositions: run.charPositions
+                charPositions: displayRun.charPositions
             )
             drawTextLine(
                 shadowLine,
@@ -1590,7 +1593,7 @@ class CGTreeRenderer {
 
         drawTextTabLeaders(style: style, fontSize: fontSize, y: textY, in: ctx)
         drawTextLine(line, layout: layout, style: style, attributes: attributes, y: textY, in: ctx)
-        drawTextEmphasisDots(text: run.text, line: line, layout: layout, style: style, fontSize: fontSize, y: textY, in: ctx)
+        drawTextEmphasisDots(text: displayRun.text, line: line, layout: layout, style: style, fontSize: fontSize, y: textY, in: ctx)
 
         ctx.restoreGState()
 
@@ -1631,6 +1634,8 @@ class CGTreeRenderer {
         fontSize: CGFloat,
         baselineShift: CGFloat,
         rotation: Double,
+        displayText: String,
+        charPositions: [Double]?,
         in ctx: CGContext
     ) {
         ctx.saveGState()
@@ -1650,14 +1655,14 @@ class CGTreeRenderer {
 
         let font = makeTextRunFont(style: style, fontSize: fontSize)
         let attributes = makeTextRunAttributes(style: style, font: font)
-        let line = CTLineCreateWithAttributedString(NSAttributedString(string: run.text, attributes: attributes))
+        let line = CTLineCreateWithAttributedString(NSAttributedString(string: displayText, attributes: attributes))
         let layout = makeTextRunLayoutPlan(
-            text: run.text,
+            text: displayText,
             style: style,
             bbox: bbox,
             line: line,
             attributes: attributes,
-            charPositions: run.charPositions
+            charPositions: charPositions
         )
         let metrics = textRunTypographicMetrics(line)
         let visualWidth = textRunVisualWidth(line, layout: layout, attributes: attributes)
@@ -1671,15 +1676,15 @@ class CGTreeRenderer {
                 colorOverride: style.shadowColor
             )
             let shadowLine = CTLineCreateWithAttributedString(
-                NSAttributedString(string: run.text, attributes: shadowAttributes)
+                NSAttributedString(string: displayText, attributes: shadowAttributes)
             )
             let shadowLayout = makeTextRunLayoutPlan(
-                text: run.text,
+                text: displayText,
                 style: style,
                 bbox: bbox,
                 line: shadowLine,
                 attributes: shadowAttributes,
-                charPositions: run.charPositions
+                charPositions: charPositions
             )
             drawTextLine(
                 shadowLine,
@@ -1693,10 +1698,40 @@ class CGTreeRenderer {
         }
 
         drawTextLine(line, layout: layout, style: style, attributes: attributes, x: textX, y: textY, in: ctx)
-        drawTextEmphasisDots(text: run.text, line: line, layout: layout, style: style, fontSize: fontSize, y: textY, in: ctx)
+        drawTextEmphasisDots(text: displayText, line: line, layout: layout, style: style, fontSize: fontSize, y: textY, in: ctx)
 
         ctx.restoreGState()
         ctx.restoreGState()
+    }
+
+    private struct TextRunDisplay {
+        let text: String
+        let charPositions: [Double]?
+    }
+
+    private func makeTextRunDisplay(_ run: TextRunNode) -> TextRunDisplay {
+        let text = coreGraphicsDisplayText(for: run.text)
+        let charPositions = text.unicodeScalars.count == run.text.unicodeScalars.count ? run.charPositions : nil
+        return TextRunDisplay(text: text, charPositions: charPositions)
+    }
+
+    private func coreGraphicsDisplayText(for source: String) -> String {
+        var output = String()
+        var changed = false
+
+        for scalar in source.unicodeScalars {
+            switch scalar.value {
+            case 0xF012B:
+                output.append("(인)")
+                changed = true
+            case 0xF081C:
+                changed = true
+            default:
+                output.unicodeScalars.append(scalar)
+            }
+        }
+
+        return changed ? output : source
     }
 
     private func makeTextRunFont(style: TextStyle, fontSize: CGFloat) -> CTFont {

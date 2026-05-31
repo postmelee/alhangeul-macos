@@ -81,6 +81,7 @@ Task #305 Stage 1: 복학원서 PUA 입력 경로 확인
 ```bash
 ./scripts/check-no-appkit.sh
 swiftc -parse-as-library \
+  -typecheck \
   -module-cache-path build.noindex/task305-compile-cache \
   -I Frameworks/modulemap \
   Sources/RhwpCoreBridge/RhwpDocument.swift \
@@ -88,10 +89,7 @@ swiftc -parse-as-library \
   Sources/RhwpCoreBridge/PageOverlayImages.swift \
   Sources/RhwpCoreBridge/FontFallback.swift \
   Sources/RhwpCoreBridge/FontResourceRegistry.swift \
-  Sources/RhwpCoreBridge/CGTreeRenderer.swift \
-  Frameworks/universal/librhwp.a \
-  -framework CoreGraphics -framework CoreText -framework ImageIO -framework Security -framework CoreFoundation \
-  -lc++ -liconv -lz -o build.noindex/task305-cg-renderer-compile-smoke
+  Sources/RhwpCoreBridge/CGTreeRenderer.swift
 git diff --check
 ```
 
@@ -170,4 +168,3 @@ git log --oneline -5
 ```text
 Task #305 Stage 4 + 최종 보고서: PUA 보정 결과 정리
 ```
-
