@@ -119,6 +119,15 @@ Release note에 포함할 내용:
 - 내부 `mydocs/release/v<version>.md`는 release decision record다. 샘플 파일명, 재현 조건, 구현 용어, 검증 명령, workflow run, PR/Issue, SHA256, provenance를 가장 자세히 남긴다.
 - GitHub Release의 기술 세부 section은 사용자 요약보다 뒤에 둔다. 기술 세부가 없더라도 release body는 유효하지만, 앱 자체 렌더링 bugfix처럼 재현 샘플과 구현 경계가 중요한 release는 기술 세부를 두는 편을 우선한다.
 
+### Post-publish 문구 정정
+
+public publish 이후 GitHub Release, Pages 업데이트 문서, release record, 최종 보고서의 표현을 다시 다듬어야 하면 같은 release closeout 묶음으로 처리한다.
+
+- 사용자-facing 문구 보정, section heading 변경, 기술 세부/검증 세부 추가, 이전 버전 안내 banner 정규화는 같은 종료 정리 단계에서 한 번에 검토한다.
+- 같은 릴리즈의 문구 정정만으로 `devel` PR과 `main` PR을 반복 생성하지 않는다. publish 후 public Pages 또는 release record 반영이 필요한 정정은 `main` 대상 종료 정리 PR 하나로 묶는다.
+- GitHub Release 본문을 `gh release edit` 등으로 직접 고친 경우, 같은 종료 정리 PR에 `mydocs/release/v<version>.md`와 최종 보고서를 함께 갱신해 public 상태와 저장소 기록이 어긋나지 않게 한다.
+- 종료 정리 PR에는 실제 생성된 PR 목록과 과도하게 쪼개진 작업이 있었다면 그 원인과 다음 릴리즈 적용 규칙을 기록한다.
+
 필수 하위 구분:
 
 - `### 변경 요약`: 이번 릴리즈에서 달라진 점을 3~5개 bullet로 쓴다. `rhwp` 반영과 앱 자체 변경을 합쳐 사용자가 체감할 결과 중심으로 요약한다.
