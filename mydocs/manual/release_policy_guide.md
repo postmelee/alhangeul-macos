@@ -62,7 +62,7 @@ GitHub Release body와 내부 release record에는 다음 metadata를 표준으�
 | studio manifest | `Sources/HostApp/Resources/rhwp-studio/manifest.json` |
 ```
 
-GitHub Release body의 사용자-facing 변경사항은 `전체 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`로 구분한다. Bundled `rhwp` 버전이 바뀌지 않은 release에서도 `포함된 rhwp 변화` 구분은 유지하고, 변경 없음 또는 영향 없음 판단을 명시한다.
+GitHub Release body의 사용자-facing 변경사항은 `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`로 구분한다. Bundled `rhwp` 버전이 바뀌지 않은 release에서도 `포함된 rhwp 변화` 구분은 유지하고, 변경 없음 또는 영향 없음 판단을 명시한다.
 
 README 최신 공개 릴리즈 요약과 Pages 릴리즈 노트는 사용자용 안내 표면이다. 필요할 때 `bundled rhwp-studio v<rhwp-version>` 또는 `rhwp v<rhwp-version>` 정도의 짧은 provenance와 upstream release 링크만 표시하고, commit/manifest/checksum 등 긴 내부 기록은 GitHub Release body와 `mydocs/release/v<version>.md`에 둔다. Pages는 GitHub Release body의 긴 검증 내용을 복제하지 않되, bundled `rhwp` 변화와 앱 자체 변화가 사용자에게 섞여 보이지 않게 짧게 구분한다.
 

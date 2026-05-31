@@ -211,7 +211,7 @@ public publish는 release owner가 tag, version, candidate commit, workflow inpu
 
 사용자-facing release note 최종 확인:
 
-- `전체 요약`은 특정 샘플 문서명이나 issue 번호가 아니라 사용자가 보는 증상과 개선 결과로 일반화되어 있다.
+- `변경 요약`은 특정 샘플 문서명이나 issue 번호가 아니라 사용자가 보는 증상과 개선 결과로 일반화되어 있다.
 - `알한글 앱 변화`는 HostApp, Quick Look preview, Finder thumbnail, 설치, 업데이트처럼 앱 저장소가 소유한 사용자-visible 변화를 먼저 설명한다.
 - 구현 용어는 사용자 용어로 번역되어 있다. 예를 들어 PUA는 특수 문자/기호 표시, shade sentinel은 텍스트 배경/음영 표시처럼 설명한다.
 - GitHub Release에 샘플 파일명, PUA, sentinel, CoreGraphics, PR/Issue 같은 개발자/검증자용 정보가 필요하면 `기술 세부` 또는 `검증 세부` section으로 분리되어 있고, 요약보다 뒤에 있다.
