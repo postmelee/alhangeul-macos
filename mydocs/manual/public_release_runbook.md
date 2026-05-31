@@ -290,6 +290,7 @@ official stable release일 때만 수행한다.
 - `Release Publish DMG` workflow의 `deploy-pages` job 성공
 - `page_url`이 `https://postmelee.github.io/alhangeul-macos/`를 가리킴
 - `https://postmelee.github.io/alhangeul-macos/updates/v<version>.html` 접근 가능
+- 최신 버전보다 낮은 `updates/v<previous>.html` 페이지에 최신 릴리즈 안내 banner가 보이고, banner가 `updates/v<version>.html`과 GitHub latest release로 연결됨
 - Pages 다운로드 버튼이 tag 고정 또는 latest 정책에 맞는 public DMG URL을 가리킴
 - `https://postmelee.github.io/alhangeul-macos/appcast.xml`이 새 stable item을 제공
 - appcast의 `sparkle:shortVersionString`이 `<version>`과 일치

@@ -150,6 +150,7 @@ Pages는 사용자용 릴리즈 안내 표면이다. GitHub Release body의 긴 
 - hero와 `전체 요약`이 내부 구현이나 upstream 버전명보다 이번 버전을 설치했을 때 사용자가 체감할 문서 열기, 미리보기, 설치, 업데이트 변화를 먼저 설명하는가
 - 사용자가 필요한 설치 방법, 첫 실행 안내, 업데이트 확인, 알려진 한계를 간결하게 확인할 수 있는가
 - Intel Mac과 Apple Silicon Mac이 같은 DMG를 사용한다는 안내가 최신 다운로드 주변 또는 FAQ/릴리즈 노트에 있는가
+- 최신 버전이 아닌 `docs/updates/v<version>.html`에는 최신 릴리즈 안내 banner가 있고, 최신 버전 페이지에는 해당 banner가 없는가
 - bundled `rhwp`를 안내해야 하는 release라면 `rhwp v<version>`과 upstream release 링크를 짧게 표시하고, commit/manifest/checksum 표는 GitHub Release body와 내부 release record로 연결하는가
 - 앱 자체 변화는 `주요 변경` 또는 필요 시 `알한글 앱 변화` section에서 짧게 구분하고, `rhwp` provenance와 한 목록에 과도하게 섞지 않는가
 - 특정 샘플 문서명이나 검증 fixture명 대신 "일부 HWP 양식 문서", "특수 문자/기호 표시", "텍스트 배경/음영"처럼 사용자가 이해할 수 있는 증상 단위로 일반화했는가
@@ -161,6 +162,8 @@ Pages 다운로드 버튼은 사용자를 위한 latest DMG URL을 사용한다.
 ```text
 https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-<version>.dmg
 ```
+
+이전 버전 안내 banner는 수동으로 버전마다 고치지 않는다. `scripts/ci/update-release-version-notices.sh --updates-dir docs/updates`가 `docs/updates/v*.html` 중 가장 높은 semantic version을 최신 릴리즈 노트로 보고, 이전 버전 페이지의 banner를 삽입/갱신하며 최신 버전 페이지의 banner를 제거한다. PR CI는 `--check` 모드로 source가 정규화되어 있는지 확인하고, `prepare-pages-artifact.sh`는 Pages artifact를 만들 때 같은 helper를 한 번 더 실행한다.
 
 ### Pages 배포 모델
 

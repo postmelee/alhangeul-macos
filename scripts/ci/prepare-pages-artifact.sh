@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 usage() {
   cat <<EOF
 Usage: $0 --docs-dir <dir> --appcast <file> --output-dir <dir>
@@ -121,6 +123,7 @@ trap cleanup EXIT
 
 cp -R "$DOCS_REAL"/. "$TMP_DIR"/
 find "$TMP_DIR" -name .DS_Store -type f -delete
+"$SCRIPT_DIR/update-release-version-notices.sh" --updates-dir "$TMP_DIR/updates"
 cp "$APPCAST_REAL" "$TMP_DIR/appcast.xml"
 
 [ -f "$TMP_DIR/index.html" ] || fail "prepared artifact is missing index.html"

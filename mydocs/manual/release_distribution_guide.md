@@ -47,6 +47,7 @@
 - `scripts/ci/write-release-delta-checklist.sh`: 직전 public release 대비 영향 영역 checklist 초안 생성
 - `scripts/ci/write-sparkle-appcast.sh`: stable Sparkle appcast 생성
 - `scripts/ci/prepare-pages-artifact.sh`: `docs/` 정적 파일과 generated appcast를 Pages artifact로 조립
+- `scripts/ci/update-release-version-notices.sh`: `docs/updates/v*.html`의 이전 버전 안내 banner를 최신 release note 기준으로 삽입/갱신
 - `scripts/ci/classify-pr-changes.sh`: PR CI 변경 범위 flag 생성
 - `scripts/ci/detect-rhwp-studio-impact.sh`: upstream `rhwp` current..target diff에서 bundled studio/viewer 영향 path 감지
 - `scripts/ci/write-rhwp-studio-sync-pr-body.sh`: 자동 bundled `rhwp-studio` sync PR body 생성
