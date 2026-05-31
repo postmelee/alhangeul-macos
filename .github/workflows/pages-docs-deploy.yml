@@ -46,6 +46,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Install XML tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y libxml2-utils
+
       - name: Check release asset availability
         id: release_asset_gate
         shell: bash
