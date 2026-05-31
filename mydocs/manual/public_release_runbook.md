@@ -203,9 +203,18 @@ public publish는 release owner가 tag, version, candidate commit, workflow inpu
 
 - release candidate commit이 `main`에 반영되어 있다.
 - `v<version>` tag가 정확한 candidate commit을 가리킨다.
+- GitHub Release body, Pages 업데이트 문서, README 최신 요약, 내부 release record가 마지막 candidate commit 기준으로 다시 검토되어 있다.
+- draft signed/notarized DMG smoke 이후 추가 bugfix, tag 재지정, candidate commit 변경이 있었다면 사용자-facing 주요 변경 사항을 다시 작성했다.
 - `release` environment의 GitHub Actions variable/secret이 준비되어 있다.
 - `github-pages` environment가 release tag deployment를 허용한다.
 - `SPARKLE_ED_PRIVATE_KEY` secret이 stable appcast signing에 사용할 수 있게 등록되어 있다.
+
+사용자-facing release note 최종 확인:
+
+- `전체 요약`은 특정 샘플 문서명이나 issue 번호가 아니라 사용자가 보는 증상과 개선 결과로 일반화되어 있다.
+- `알한글 앱 변화`는 HostApp, Quick Look preview, Finder thumbnail, 설치, 업데이트처럼 앱 저장소가 소유한 사용자-visible 변화를 먼저 설명한다.
+- 구현 용어는 사용자 용어로 번역되어 있다. 예를 들어 PUA는 특수 문자/기호 표시, shade sentinel은 텍스트 배경/음영 표시처럼 설명한다.
+- workflow default, manifest, checksum, release record 정렬 같은 운영 정보는 주요 변경 요약이 아니라 metadata, 검증 결과, 내부 release record에 둔다.
 
 GitHub Actions 예시:
 
