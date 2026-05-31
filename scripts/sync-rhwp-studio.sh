@@ -6,6 +6,8 @@ UPSTREAM_DIR="$ROOT/build.noindex/rhwp-upstream"
 TARGET="$ROOT/Sources/HostApp/Resources/rhwp-studio"
 EXPECTED_RELEASE_TAG=""
 EXPECTED_COMMIT=""
+RECOMMENDED_WASM_BUILD_COMMAND="docker-compose --env-file .env.docker run --rm wasm"
+ACTUAL_WASM_BUILD_COMMAND=""
 CHECK_MODE="false"
 CHECK_TARGET=""
 
@@ -18,6 +20,8 @@ Options:
   --upstream-dir DIR  Upstream edwardkim/rhwp checkout. Defaults to build.noindex/rhwp-upstream.
   --tag TAG           rhwp release tag to record in manifest. Defaults to current target manifest tag.
   --commit COMMIT     rhwp resolved commit to verify and record. Defaults to current target manifest commit.
+  --actual-wasm-build-command COMMAND
+                      Actual command used to create upstream pkg/. Defaults to the recommended Docker command.
   --target-dir DIR    rhwp-studio resource target. Defaults to bundled HostApp resource.
   --check             Sync into a temporary copy of target and verify without changing target-dir.
   -h, --help          Show this help.
@@ -75,6 +79,13 @@ parse_args() {
           fail "missing value for --commit"
         fi
         EXPECTED_COMMIT="$2"
+        shift
+        ;;
+      --actual-wasm-build-command)
+        if [ "$#" -lt 2 ]; then
+          fail "missing value for --actual-wasm-build-command"
+        fi
+        ACTUAL_WASM_BUILD_COMMAND="$2"
         shift
         ;;
       --target-dir)
@@ -140,6 +151,10 @@ if [ -z "$EXPECTED_COMMIT" ]; then
 fi
 
 validate_tag "$EXPECTED_RELEASE_TAG"
+
+if [ -z "$ACTUAL_WASM_BUILD_COMMAND" ]; then
+  ACTUAL_WASM_BUILD_COMMAND="$RECOMMENDED_WASM_BUILD_COMMAND"
+fi
 
 if [ ! -d "$UPSTREAM_DIR/.git" ]; then
   fail "missing upstream checkout: $UPSTREAM_DIR"
@@ -217,7 +232,9 @@ cat > "$TARGET/manifest.json" <<JSON
   "source_ref_kind": "release-tag",
   "source_release_tag": "$EXPECTED_RELEASE_TAG",
   "source_resolved_commit": "$expected_commit_resolved",
-  "wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
+  "wasm_build_command": "$ACTUAL_WASM_BUILD_COMMAND",
+  "recommended_wasm_build_command": "$RECOMMENDED_WASM_BUILD_COMMAND",
+  "actual_wasm_build_command": "$ACTUAL_WASM_BUILD_COMMAND",
   "studio_build_command": "npx tsc && npx vite build --base ./",
   "copied_from": "rhwp-studio/dist",
   "excluded_paths": [

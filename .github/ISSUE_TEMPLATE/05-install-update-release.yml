@@ -1,0 +1,75 @@
+name: 설치·업데이트 문제
+description: DMG 설치, Homebrew Cask, Sparkle 업데이트, Gatekeeper, release asset 문제를 제보합니다.
+title: "[Install] "
+labels: ["bug", "area:ci-cd"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 문제 요약
+      description: 설치 또는 업데이트 중 어떤 문제가 발생했는지 적어 주세요.
+    validations:
+      required: true
+  - type: dropdown
+    id: install-source
+    attributes:
+      label: 설치 또는 업데이트 경로
+      options:
+        - GitHub Release DMG
+        - Homebrew Cask
+        - Sparkle 앱 내 업데이트
+        - 소스 빌드
+        - 알 수 없음
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: 대상 앱 버전
+      placeholder: "예: 0.1.3 (9)"
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS 버전
+      placeholder: "예: macOS 15.5"
+    validations:
+      required: true
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Mac 아키텍처
+      options:
+        - Apple Silicon
+        - Intel
+        - Universal 여부만 확인했습니다.
+        - 알 수 없음
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: 설치 또는 업데이트 절차
+      description: 어디서 파일을 받았고 어떤 단계에서 실패했는지 순서대로 적어 주세요.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: message
+    attributes:
+      label: 오류 메시지 또는 터미널 출력
+      description: Gatekeeper, Homebrew, Sparkle, Finder, 터미널에 표시된 문구를 붙여 주세요.
+      render: shell
+    validations:
+      required: false
+  - type: upload
+    id: attachments
+    attributes:
+      label: 첨부 자료
+      description: 오류 화면, Homebrew 로그, Sparkle 창, 다운로드한 asset 정보를 첨부해 주세요.
+    validations:
+      required: false

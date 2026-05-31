@@ -1,0 +1,81 @@
+name: 앱 문제 제보
+description: 앱 실행, 파일 열기, 저장, 공유, PDF 내보내기 등 일반 사용 중 문제를 제보합니다.
+title: "[Bug] "
+labels: ["bug", "area:viewer-app"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        보안 취약점이나 공개하면 안 되는 개인정보는 public issue에 작성하지 마세요. 특정 문서 파일을 첨부해야 한다면 개인정보와 민감한 내용을 먼저 제거해 주세요.
+  - type: textarea
+    id: summary
+    attributes:
+      label: 문제 요약
+      description: 무엇이 잘못되었고, 원래는 어떻게 동작해야 했는지 적어 주세요.
+      placeholder: |
+        예: HWP 파일을 열면 앱 화면이 비어 있고, Finder에서는 같은 파일이 보입니다.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 절차
+      description: 같은 문제를 다시 확인할 수 있는 절차를 순서대로 적어 주세요.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS 버전
+      placeholder: "예: macOS 15.5"
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: 알한글 앱 버전
+      description: 앱의 About 창, GitHub Release, Homebrew 정보에서 확인한 버전과 build를 적어 주세요.
+      placeholder: "예: 0.1.3 (9)"
+    validations:
+      required: true
+  - type: dropdown
+    id: install-source
+    attributes:
+      label: 설치 경로
+      options:
+        - GitHub Release DMG
+        - Homebrew Cask
+        - 소스 빌드
+        - 알 수 없음
+    validations:
+      required: true
+  - type: dropdown
+    id: file-type
+    attributes:
+      label: 관련 파일 형식
+      options:
+        - HWP
+        - HWPX
+        - HWP3 또는 오래된 HWP
+        - 파일과 무관
+        - 알 수 없음
+    validations:
+      required: false
+  - type: upload
+    id: attachments
+    attributes:
+      label: 첨부 자료
+      description: 가능하면 스크린샷, 로그, 짧은 화면 녹화, 개인정보를 제거한 sample 파일을 첨부해 주세요.
+    validations:
+      required: false
+  - type: textarea
+    id: extra-context
+    attributes:
+      label: 추가 맥락
+      description: 문제 발생 빈도, workaround, 관련 issue/PR 링크가 있으면 적어 주세요.
+    validations:
+      required: false

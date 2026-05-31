@@ -7,6 +7,37 @@ import CoreText
 import Foundation
 import ImageIO
 
+enum CGTreeOverlayLayer {
+    case behindText
+    case inFrontOfText
+
+    init?(textWrap: String?) {
+        guard let normalized = textWrap?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: "_", with: "")
+            .lowercased() else {
+            return nil
+        }
+
+        switch normalized {
+        case "behindtext":
+            self = .behindText
+        case "infrontoftext":
+            self = .inFrontOfText
+        default:
+            return nil
+        }
+    }
+}
+
+enum CGTreeRenderMode {
+    case complete
+    case pageBackground
+    case flowExcludingPageOverlays([CGTreeOverlayLayer])
+    case pageOverlay(CGTreeOverlayLayer)
+}
+
 class CGTreeRenderer {
     private let imageCropUnitsPerPixel = 75.0
     private let tableCellClipRightSlack = 4.0
@@ -20,6 +51,7 @@ class CGTreeRenderer {
 
     private var pageBounds: BBox?
     private var pageHeight: Double = 0
+    private var renderMode: CGTreeRenderMode = .complete
 
     private struct BuiltPath {
         let path: CGPath
@@ -34,7 +66,13 @@ class CGTreeRenderer {
         case curve(CGPoint, CGPoint, CGPoint)
     }
 
-    func render(tree: RenderNode, in context: CGContext, pageHeight: Double, document: RhwpDocument?) {
+    func render(
+        tree: RenderNode,
+        in context: CGContext,
+        pageHeight: Double,
+        document: RhwpDocument?,
+        mode: CGTreeRenderMode = .complete
+    ) {
         HwpBundledFontRegistry.ensureRegistered()
 
         // 이미지 binDataId는 문서 내부 식별자이므로 문서가 바뀌면 캐시를 이어 쓰면 안 된다.
@@ -48,11 +86,36 @@ class CGTreeRenderer {
         // 렌더 트리의 좌표(좌상단 원점)를 그대로 사용할 수 있다.
         // 단, Core Text와 CGImage는 원본 CG 좌표계(좌하단)를 기대하므로
         // 해당 요소에서만 국소적으로 좌표를 조정한다.
+        let previousMode = renderMode
+        renderMode = mode
+        defer {
+            renderMode = previousMode
+        }
         renderNode(tree, in: context)
     }
 
     func clearCache() {
         imageCache.removeAll()
+    }
+
+    @discardableResult
+    func renderOverlayImages(
+        _ images: [RhwpPageOverlayImage],
+        in context: CGContext,
+        document: RhwpDocument
+    ) -> Int {
+        if !isRenderingSameDocument(document) {
+            clearCache()
+        }
+        self.document = document
+
+        var drawnCount = 0
+        for image in images {
+            if renderOverlayImage(image, in: context, document: document) {
+                drawnCount += 1
+            }
+        }
+        return drawnCount
     }
 
     private func isRenderingSameDocument(_ document: RhwpDocument?) -> Bool {
@@ -75,7 +138,9 @@ class CGTreeRenderer {
             renderPage(node, in: ctx)
 
         case .pageBackground(let bg):
-            renderPageBackground(bg, bbox: node.bbox, in: ctx)
+            if shouldRenderPageBackground {
+                renderPageBackground(bg, bbox: node.bbox, in: ctx)
+            }
 
         case .body(let body):
             renderBody(body, node: node, in: ctx)
@@ -87,40 +152,56 @@ class CGTreeRenderer {
             renderTableCell(cell, node: node, in: ctx)
 
         case .rectangle(let rect):
-            renderRectangle(rect, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderRectangle(rect, bbox: node.bbox, in: ctx)
+            }
             renderChildren(node, in: ctx)
 
         case .line(let line):
-            renderLine(line, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderLine(line, bbox: node.bbox, in: ctx)
+            }
             renderChildren(node, in: ctx)
 
         case .ellipse(let ell):
-            renderEllipse(ell, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderEllipse(ell, bbox: node.bbox, in: ctx)
+            }
             renderChildren(node, in: ctx)
 
         case .path(let path):
-            renderPath(path, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderPath(path, bbox: node.bbox, in: ctx)
+            }
             renderChildren(node, in: ctx)
 
         case .image(let img):
-            renderImage(img, bbox: node.bbox, in: ctx)
+            if shouldRenderImage(img) {
+                renderImage(img, bbox: node.bbox, in: ctx)
+            }
             renderChildren(node, in: ctx)
 
         case .group:
             renderGroup(node, in: ctx)
 
         case .textRun(let run):
-            renderTextRun(run, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderTextRun(run, bbox: node.bbox, in: ctx)
+            }
 
         case .equation(let equation):
-            renderEquation(equation, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderEquation(equation, bbox: node.bbox, in: ctx)
+            }
 
         case .formObject:
             // 양식 개체는 M3 이후
             break
 
         case .footnoteMarker(let marker):
-            renderFootnoteMarker(marker, bbox: node.bbox, in: ctx)
+            if shouldRenderFlowContent {
+                renderFootnoteMarker(marker, bbox: node.bbox, in: ctx)
+            }
 
         default:
             // 구조 노드(header, footer, column 등): 자식만 순회
@@ -156,13 +237,29 @@ class CGTreeRenderer {
     }
 
     private func renderPage(_ node: RenderNode, in ctx: CGContext) {
-        // 페이지 기본 배경.
-        ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
-        ctx.fill(cgRect(node.bbox))
+        switch renderMode {
+        case .complete:
+            renderCompletePage(node, in: ctx)
+        case .pageBackground:
+            renderPageBaseAndBackground(node, in: ctx)
+        case .flowExcludingPageOverlays(let layers):
+            renderPageForegroundFlowChildren(node, excluding: layers, in: ctx)
+        case .pageOverlay:
+            renderChildren(node, in: ctx)
+        }
+    }
 
-        renderPageBackgroundChildren(node, in: ctx)
+    private func renderCompletePage(_ node: RenderNode, in ctx: CGContext) {
+        // 페이지 기본 배경.
+        renderPageBaseAndBackground(node, in: ctx)
         renderPageBehindTextImages(node, in: ctx)
         renderPageForegroundChildren(node, in: ctx)
+    }
+
+    private func renderPageBaseAndBackground(_ node: RenderNode, in ctx: CGContext) {
+        ctx.setFillColor(red: 1, green: 1, blue: 1, alpha: 1)
+        ctx.fill(cgRect(node.bbox))
+        renderPageBackgroundChildren(node, in: ctx)
     }
 
     private func renderPageBackgroundChildren(_ node: RenderNode, in ctx: CGContext) {
@@ -186,6 +283,19 @@ class CGTreeRenderer {
         }
     }
 
+    private func renderPageForegroundFlowChildren(
+        _ node: RenderNode,
+        excluding layers: [CGTreeOverlayLayer],
+        in ctx: CGContext
+    ) {
+        for child in node.children {
+            guard !isPageBackgroundNode(child), !isPageOverlayImage(child, in: layers) else {
+                continue
+            }
+            renderNode(child, in: ctx)
+        }
+    }
+
     private func renderColumn(_ node: RenderNode, in ctx: CGContext) {
         for child in node.children where isBehindTextImage(child) {
             renderNode(child, in: ctx)
@@ -203,16 +313,56 @@ class CGTreeRenderer {
     }
 
     private func isBehindTextImage(_ node: RenderNode) -> Bool {
+        isPageOverlayImage(node, layer: .behindText)
+    }
+
+    private func isPageOverlayImage(_ node: RenderNode, layer: CGTreeOverlayLayer) -> Bool {
         guard case .image(let image) = node.nodeType else {
             return false
         }
-        return isBehindTextWrap(image.textWrap)
+        return CGTreeOverlayLayer(textWrap: image.textWrap) == layer
     }
 
-    private func isBehindTextWrap(_ value: String?) -> Bool {
-        value?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .caseInsensitiveCompare("BehindText") == .orderedSame
+    private func isPageOverlayImage(_ node: RenderNode, in layers: [CGTreeOverlayLayer]) -> Bool {
+        guard case .image(let image) = node.nodeType,
+              let layer = CGTreeOverlayLayer(textWrap: image.textWrap) else {
+            return false
+        }
+        return layers.contains(layer)
+    }
+
+    private var shouldRenderPageBackground: Bool {
+        switch renderMode {
+        case .complete, .pageBackground:
+            return true
+        case .flowExcludingPageOverlays, .pageOverlay:
+            return false
+        }
+    }
+
+    private var shouldRenderFlowContent: Bool {
+        switch renderMode {
+        case .complete, .flowExcludingPageOverlays:
+            return true
+        case .pageBackground, .pageOverlay:
+            return false
+        }
+    }
+
+    private func shouldRenderImage(_ image: ImageNode) -> Bool {
+        switch renderMode {
+        case .complete:
+            return true
+        case .pageBackground:
+            return false
+        case .flowExcludingPageOverlays(let layers):
+            guard let layer = CGTreeOverlayLayer(textWrap: image.textWrap) else {
+                return true
+            }
+            return !layers.contains(layer)
+        case .pageOverlay(let layer):
+            return CGTreeOverlayLayer(textWrap: image.textWrap) == layer
+        }
     }
 
     private func renderBody(_ body: BodyNode, node: RenderNode, in ctx: CGContext) {
@@ -586,6 +736,73 @@ class CGTreeRenderer {
         ctx.restoreGState()
 
         ctx.restoreGState()
+    }
+
+    private func renderOverlayImage(
+        _ image: RhwpPageOverlayImage,
+        in ctx: CGContext,
+        document: RhwpDocument
+    ) -> Bool {
+        guard let cgImage = decodedOverlayImage(image, document: document) else { return false }
+
+        let node = ImageNode(
+            binDataId: image.source.binDataId ?? 0,
+            sectionIndex: nil,
+            paraIndex: nil,
+            controlIndex: nil,
+            fillMode: image.fillMode,
+            originalSize: image.originalSize,
+            originalSizeHU: image.originalSizeHU,
+            effect: image.effect,
+            brightness: image.brightness,
+            contrast: image.contrast,
+            textWrap: image.wrap,
+            transform: ShapeTransform(image.transform),
+            crop: image.crop
+        )
+
+        ctx.saveGState()
+        applyTransform(node.transform, bbox: image.bbox, in: ctx)
+
+        let appliesAdjustments = !(image.bakedWatermark && image.source.data != nil)
+        let drawImage = preparedImage(
+            for: cgImage,
+            node: node,
+            applyingAdjustments: appliesAdjustments
+        )
+        let rect = cgRect(image.bbox)
+        let drawRect = imageDestinationRect(for: node, size: rect.size)
+        ctx.saveGState()
+        ctx.translateBy(x: rect.minX, y: rect.minY + rect.height)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(drawImage, in: drawRect)
+        ctx.restoreGState()
+
+        ctx.restoreGState()
+        return true
+    }
+
+    private func decodedOverlayImage(
+        _ image: RhwpPageOverlayImage,
+        document: RhwpDocument
+    ) -> CGImage? {
+        if let data = image.source.data,
+           let decoded = decodeImage(data) {
+            return decoded
+        }
+
+        guard let binDataId = image.source.binDataId, binDataId > 0 else {
+            return nil
+        }
+        if let cached = imageCache[binDataId] {
+            return cached
+        }
+        guard let data = document.imageData(binDataId: binDataId),
+              let decoded = decodeImage(data) else {
+            return nil
+        }
+        imageCache[binDataId] = decoded
+        return decoded
     }
 
     private func decodeImage(_ data: Data) -> CGImage? {
@@ -1077,8 +1294,13 @@ class CGTreeRenderer {
         }
     }
 
-    private func preparedImage(for image: CGImage, node: ImageNode) -> CGImage {
+    private func preparedImage(
+        for image: CGImage,
+        node: ImageNode,
+        applyingAdjustments: Bool = true
+    ) -> CGImage {
         let cropped = croppedImage(for: image, crop: node.crop)
+        guard applyingAdjustments else { return cropped }
         return adjustedImage(for: cropped, node: node)
     }
 
@@ -3491,5 +3713,15 @@ private final class EquationSVGFragmentParser: NSObject, XMLParserDelegate {
         default:
             return false
         }
+    }
+}
+
+private extension ShapeTransform {
+    init(_ transform: RhwpPageOverlayTransform) {
+        self.init(
+            rotation: transform.rotation,
+            horzFlip: transform.horzFlip,
+            vertFlip: transform.vertFlip
+        )
     }
 }

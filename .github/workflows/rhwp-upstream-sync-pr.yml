@@ -181,8 +181,10 @@ jobs:
           set -euo pipefail
           upstream_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream"
           rm -rf "$upstream_dir"
-          git clone "$UPSTREAM_GIT_URL" "$upstream_dir"
-          git -C "$upstream_dir" checkout --detach "${{ steps.resolve.outputs.target_commit }}"
+          mkdir -p "$(dirname "$upstream_dir")"
+          GIT_LFS_SKIP_SMUDGE=1 git clone "$UPSTREAM_GIT_URL" "$upstream_dir"
+          git -C "$upstream_dir" config lfs.skipSmudge true
+          GIT_LFS_SKIP_SMUDGE=1 git -C "$upstream_dir" checkout --detach "${{ steps.resolve.outputs.target_commit }}"
 
       - name: Detect rhwp-studio impact
         if: ${{ steps.resolve.outputs.current != 'true' }}

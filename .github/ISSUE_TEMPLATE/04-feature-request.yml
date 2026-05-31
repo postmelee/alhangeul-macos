@@ -1,0 +1,56 @@
+name: 기능 제안
+description: 새 기능, 사용 흐름 개선, macOS 통합 제안을 남깁니다.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 제안 요약
+      description: 원하는 기능이나 개선 방향을 한두 문단으로 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 해결하려는 문제
+      description: 현재 어떤 작업이 불편하거나 불가능한지 설명해 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: 원하는 동작
+      description: 사용자가 어떤 흐름으로 무엇을 할 수 있어야 하는지 적어 주세요.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 대안 또는 현재 workaround
+      description: 지금 사용하는 대체 방법이나 다른 앱의 참고 흐름이 있으면 적어 주세요.
+    validations:
+      required: false
+  - type: dropdown
+    id: affected-area
+    attributes:
+      label: 관련 영역
+      multiple: true
+      options:
+        - 앱 화면과 문서 열기
+        - Quick Look preview
+        - Finder thumbnail
+        - PDF 내보내기 또는 인쇄
+        - 저장 또는 변환
+        - 설치 또는 업데이트
+        - 개발 workflow
+        - 잘 모르겠습니다
+    validations:
+      required: false
+  - type: textarea
+    id: documents
+    attributes:
+      label: 관련 문서 유형 또는 예시
+      description: 이 기능이 필요한 문서 유형, 사용 사례, 공개 sample 링크가 있으면 적어 주세요.
+    validations:
+      required: false
