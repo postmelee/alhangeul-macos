@@ -17,6 +17,7 @@
 - Stage 2: upstream `v0.7.13` 기준 fill/tile/placement helper 설계를 문서화했다.
 - Stage 3: `CGTreeRenderer.swift`에 CoreGraphics image placement/tile helper를 구현했다.
 - Stage 4: visual diff, render-debug, overlay metadata, extension registration hygiene 회귀 검증을 수행했다.
+- PR review follow-up: `samples/basic/BookReview.hwp` page 2에서 placement 계열 non-null `fill_mode` fixture를 찾아 render-debug positive 검증을 보강했다.
 
 ## 최종 결론
 
@@ -29,7 +30,7 @@ Swift native renderer는 이제 다음 image fill 정책을 처리한다.
 
 known placement/tile mode는 bbox clip 안에서 natural size로 draw한다. natural size는 `originalSize`를 우선하고, 없으면 원본 decoded image size, prepared image size 순서로 폴백한다. `originalSizeHU`는 upstream crop 계산과 충돌하지 않도록 draw size 계산에 사용하지 않았다.
 
-현재 sample set에서는 non-null `fill_mode` fixture가 없어 placement/tile positive visual proof는 확보하지 못했다. 대신 기존 image/crop sample의 bbox fallback 결과가 Stage 1 baseline과 동일하게 유지되는 것을 확인했다.
+Stage 4 최초 regression sample set은 `fill_mode == null`만 포함했기 때문에 bbox fallback 보존 확인에 초점이 있었다. PR review follow-up에서는 `samples/basic/BookReview.hwp` page 2의 `LeftBottom`/`RightBottom` fixture로 placement positive 검증을 보강했다. tile 계열 fixture는 repository sample과 로컬 Downloads 스캔에서 찾지 못해 후속 fixture 확보 대상으로 남긴다.
 
 ## 변경 파일 목록과 영향 범위
 
@@ -96,7 +97,7 @@ Stage 4 visual diff는 Stage 1 baseline과 같은 세 sample을 같은 조건으
 해석:
 
 - ChangedPixels, ChangedPercent, MeanRGBDelta, MaxRGBDelta, DiffBounds가 Stage 1 baseline과 동일하다.
-- 현재 sample들은 `fill_mode == null`이므로 새 placement/tile branch는 직접 시각 검증되지 않았다.
+- Stage 4 visual diff sample들은 `fill_mode == null`이므로 bbox fallback 회귀 검증에 해당한다.
 - 기존 bbox fallback path의 회귀는 관찰되지 않았다.
 
 ## Render Debug / Metadata 검증
@@ -108,6 +109,7 @@ Stage 4 visual diff는 Stage 1 baseline과 같은 세 sample을 같은 조건으
 | `pic-crop-01.hwp` | `794x1123` | `39870` | `2` | `0` | `0` |
 | `tac-img-02.hwp` | `794x1123` | `38410` | `18` | `6` | `0` |
 | `tac-img-02.hwpx` | `794x1123` | `38410` | `18` | `6` | `0` |
+| `BookReview.hwp` page 2 | `794x1123` | `296408` | `117` | `81` | `0` |
 
 `overlay-metadata-smoke` 결과:
 
@@ -117,12 +119,20 @@ Stage 4 visual diff는 Stage 1 baseline과 같은 세 sample을 같은 조건으
 | `tac-img-02.hwp` | `1` | `0` | `0` | `0` | `0` | `0` | `1` | `1/1` | `TopAndBottom:1` |
 | `tac-img-02.hwpx` | `1` | `0` | `0` | `0` | `0` | `0` | `1` | `1/1` | `TopAndBottom:1` |
 
-fill mode fixture 확인:
+Stage 4 최초 sample의 fill mode fixture 확인:
 
 | 항목 | Count |
 |------|------:|
 | `fill_mode == null` | `4` |
 | non-null `fill_mode` | `0` |
+
+PR review follow-up placement positive fixture 확인:
+
+| 파일 | Page | ImageCount | `fill_mode == null` | NonNullFillModeCount | FillModeHistogram |
+|------|-----:|-----------:|--------------------:|---------------------:|-------------------|
+| `samples/basic/BookReview.hwp` | `2` | `3` | `0` | `3` | `LeftBottom=1`, `RightBottom=2` |
+
+첨부 확인 요청을 받았던 `/Users/melee/Downloads/143E433F503322BD33.hwp`는 image node 1개가 있었지만 `fill_mode == null`이라 non-null fixture가 아니었다. repository sample과 Downloads 추가 스캔에서 확인한 전체 non-null mode는 `FitToSize`, `None`, `LeftBottom`, `RightBottom`이며, tile 계열 fixture는 찾지 못했다.
 
 ## 검증 결과
 
@@ -132,6 +142,8 @@ fill mode fixture 확인:
 | `./scripts/preview-visual-diff-harness.sh build.noindex/task122-stage4-visual-escalated --page 1 ...` | OK |
 | `./scripts/render-debug-compare.sh build.noindex/task122-stage4-render-debug-hwp --page 1 ...` | OK |
 | `./scripts/render-debug-compare.sh build.noindex/task122-stage4-render-debug-hwpx --page 1 ...` | OK |
+| `./scripts/render-debug-compare.sh build.noindex/task122-review-bookreview-placement --page 2 samples/basic/BookReview.hwp` | OK |
+| `rg -o '"fill_mode":"[^"]+"' build.noindex/task122-review-bookreview-placement/BookReview-page2-render-tree.json` | OK, `LeftBottom=1`, `RightBottom=2` |
 | `./scripts/overlay-metadata-smoke.sh build.noindex/task122-stage4-overlay --page 1 ...` | OK |
 | `./scripts/check-extension-registration-hygiene.sh --check-only` | OK, Issues 없음 |
 | `git diff --check` | OK |
@@ -151,18 +163,19 @@ build.noindex/task122-stage4-visual-escalated/
 build.noindex/task122-stage4-render-debug-hwp/
 build.noindex/task122-stage4-render-debug-hwpx/
 build.noindex/task122-stage4-overlay/
+build.noindex/task122-review-bookreview-placement/
 ```
 
 ## 잔여 위험과 한계
 
-- repository sample set에서 non-null `fill_mode` fixture를 확보하지 못했다. 실제 placement/tile 문서의 visual positive proof는 후속 fixture 확보 후 보강해야 한다.
+- placement 계열은 `BookReview.hwp` page 2로 positive 검증을 보강했지만, tile 계열 fixture는 repository sample과 로컬 Downloads에서 확보하지 못했다. 실제 tile 문서의 visual positive proof는 후속 fixture 확보 후 보강해야 한다.
 - `none` 의미는 upstream CanvasKit layer replay와 WebCanvas 사이에 차이가 있을 수 있으나, 이번 구현은 WebCanvas와 기존 Swift bbox fallback 동작을 우선했다.
 - tile draw cap 도달 시 public diagnostic은 추가하지 않았다. 현재 `CGTreeRenderer`에 unsupported diagnostics surface가 없으므로 향후 필요 시 별도 이슈로 다룬다.
 - CoreGraphics image interpolation과 scale 차이에 따른 pixel-level diff는 여전히 남는다.
 
 ## 후속 제안
 
-1. non-null `fill_mode` HWP/HWPX fixture를 확보해 placement/tile positive visual test를 추가한다.
+1. tile 계열 non-null `fill_mode` HWP/HWPX fixture를 확보해 tile positive visual test를 추가한다.
 2. `render-debug-compare.sh` output naming이 같은 basename의 HWP/HWPX를 같은 directory에서 덮는 문제를 별도 보강 후보로 등록한다.
 3. #121 RawSvg/OLE/chart, #110 Placeholder/FormObject 작업에서도 이번 helper가 bbox fallback을 유지하는지 sample set으로 재확인한다.
 

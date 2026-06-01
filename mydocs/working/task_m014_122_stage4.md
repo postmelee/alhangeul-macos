@@ -109,6 +109,45 @@ rg -o '"fill_mode":"[^"]+"' build.noindex/task122-stage4-render-debug-hwp \
 
 현재 검증 sample은 Stage 3 구현의 fallback 보존과 기존 image path 회귀 방지에는 유효하지만, 실제 tile/placement mode를 시각 fixture로 직접 증명하지는 못한다.
 
+## PR Review Follow-up: Placement Positive Fixture
+
+Copilot review에서 Stage 4 검증 sample이 `fill_mode == null`만 포함해 placement/tile branch positive 검증이 부족하다는 지적이 있었다. 이후 repository sample과 Downloads의 HWP/HWPX를 추가 스캔했고, repository sample인 `samples/basic/BookReview.hwp` page 2에서 placement 계열 non-null `fill_mode`를 확인했다.
+
+첨부 확인 요청을 받았던 `/Users/melee/Downloads/143E433F503322BD33.hwp`는 image node 1개가 있었지만 `fill_mode == null`이라 positive fixture가 아니었다.
+
+추가 검증 명령:
+
+```bash
+./scripts/render-debug-compare.sh build.noindex/task122-review-bookreview-placement --page 2 \
+  samples/basic/BookReview.hwp
+
+rg -o '"fill_mode":"[^"]+"' \
+  build.noindex/task122-review-bookreview-placement/BookReview-page2-render-tree.json
+
+rg -o '"node_type":\{"Image"' \
+  build.noindex/task122-review-bookreview-placement/BookReview-page2-render-tree.json | wc -l
+
+rg -o '"fill_mode":null' \
+  build.noindex/task122-review-bookreview-placement/BookReview-page2-render-tree.json | wc -l
+```
+
+결과:
+
+| 파일 | Page | ImageCount | `fill_mode == null` | NonNullFillModeCount | FillModeHistogram | NativePNGSize | NativeNonWhitePixels | TextRuns | MissingHangulGlyphs |
+|------|-----:|-----------:|--------------------:|---------------------:|-------------------|---------------|---------------------:|---------:|--------------------:|
+| `samples/basic/BookReview.hwp` | `2` | `3` | `0` | `3` | `LeftBottom=1`, `RightBottom=2` | `794x1123` | `296408` | `117` | `0` |
+
+render-debug 산출물:
+
+```text
+build.noindex/task122-review-bookreview-placement/BookReview-page2-render-tree.json
+build.noindex/task122-review-bookreview-placement/BookReview-page2-core.svg
+build.noindex/task122-review-bookreview-placement/BookReview-page2-native.png
+build.noindex/task122-review-bookreview-placement/BookReview-page2-summary.txt
+```
+
+추가 스캔에서 확인한 전체 non-null mode는 `FitToSize`, `None`, `LeftBottom`, `RightBottom`이었다. 로컬 repository sample과 Downloads에서는 `TileAll`, `TileHorz*`, `TileVert*`, `LeftTop`, `Center*`, `RightTop` fixture를 찾지 못했다. 따라서 이번 follow-up은 placement branch positive 검증을 보강하고, tile branch visual positive fixture 부재는 남은 한계로 명시한다.
+
 ## Overlay Metadata Smoke
 
 명령:
@@ -160,7 +199,7 @@ git diff --check
 
 ## 결론
 
-Stage 3 구현 이후 기존 image/crop sample의 visual diff 수치는 Stage 1 baseline과 동일했다. render-debug, overlay metadata, extension registration hygiene도 실패 없이 통과했다. 남은 한계는 non-null `fill_mode` sample 부재이며, 실제 tile/placement positive fixture 확보는 후속 보강 후보로 남긴다.
+Stage 3 구현 이후 기존 image/crop sample의 visual diff 수치는 Stage 1 baseline과 동일했다. render-debug, overlay metadata, extension registration hygiene도 실패 없이 통과했다. PR review follow-up으로 `BookReview.hwp` page 2에서 `LeftBottom`/`RightBottom` placement positive fixture를 추가 확인했다. 남은 한계는 tile 계열 positive fixture 부재이며, 실제 tile visual proof 확보는 후속 보강 후보로 남긴다.
 
 ## 다음 단계 요청
 
