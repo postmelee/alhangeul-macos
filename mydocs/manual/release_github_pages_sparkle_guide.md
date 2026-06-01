@@ -216,6 +216,14 @@ appcast 보존 기준:
 https://postmelee.github.io/alhangeul-macos/appcast.xml
 ```
 
+### 앱 업데이트 확인 동작
+
+HostApp은 Sparkle updater를 시작한 뒤, `automaticallyChecksForUpdates`가 켜진 경우에만 `checkForUpdatesInBackground()`를 1회 요청한다. 이 경로는 앱 실행 시 새 release 안내를 더 빨리 받을 수 있게 하기 위한 백그라운드 확인이며, 최신 상태 안내 모달을 강제로 띄우는 수동 확인 경로가 아니다.
+
+앱 메뉴의 `알한글 > 업데이트 확인...`은 사용자가 직접 요청한 확인으로 유지한다. 이 메뉴는 `checkForUpdates(nil)` 경로를 사용하므로, 최신 상태 안내나 이미 진행 중인 업데이트 UI가 사용자에게 표시될 수 있다.
+
+`SUEnableAutomaticChecks`는 자동 확인 기본값을 켜지만, 사용자가 자동 확인을 끈 상태에서는 앱 실행 시 백그라운드 확인을 강제하지 않는다. `SUAutomaticallyUpdate`는 `false`로 유지하며, 새 버전이 발견되어도 설치 여부는 Sparkle 표준 UI에서 사용자가 선택한다.
+
 앱에 포함된 `SUPublicEDKey`는 Sparkle update archive 검증용 public key다. private key는 저장소에 기록하지 않고, release workflow에서는 GitHub Actions secret `SPARKLE_ED_PRIVATE_KEY`로만 전달한다.
 
 Sparkle private key를 GitHub Actions secret에 등록해야 할 때는 release 관리자 로컬 Keychain에서 다음 방식으로 export한다.
