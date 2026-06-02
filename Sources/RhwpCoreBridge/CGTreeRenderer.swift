@@ -45,6 +45,7 @@ class CGTreeRenderer {
     private let maxPCXImageDimension = 16_384
     private let maxPCXDecodedByteCount = 64 * 1024 * 1024
     private let maxPCXPixelByteCount = 64 * 1024 * 1024
+    private let maxImageTileDrawCount = 4096
 
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
@@ -64,6 +65,32 @@ class CGTreeRenderer {
     private enum ArcSegment {
         case line(CGPoint)
         case curve(CGPoint, CGPoint, CGPoint)
+    }
+
+    private enum ImageFillPolicy {
+        case fitToSize
+        case placement(ImagePlacement)
+        case tile(ImageTileMode)
+    }
+
+    private enum ImagePlacement {
+        case leftTop
+        case centerTop
+        case rightTop
+        case leftCenter
+        case center
+        case rightCenter
+        case leftBottom
+        case centerBottom
+        case rightBottom
+    }
+
+    private enum ImageTileMode {
+        case all
+        case horizontalTop
+        case horizontalBottom
+        case verticalLeft
+        case verticalRight
     }
 
     func render(
@@ -724,16 +751,14 @@ class CGTreeRenderer {
         ctx.saveGState()
         applyTransform(img.transform, bbox: bbox, in: ctx)
 
-        let drawImage = preparedImage(for: cgImage, node: img)
-        let r = cgRect(bbox)
-        let drawRect = imageDestinationRect(for: img, size: r.size)
-        // CG draw(image:) 는 이미지를 rect에 맞춰 그리지만 상하 반전으로 그린다.
-        // 이미지 영역에서만 Y축 반전하여 올바르게 표시한다.
-        ctx.saveGState()
-        ctx.translateBy(x: r.minX, y: r.minY + r.height)
-        ctx.scaleBy(x: 1, y: -1)
-        ctx.draw(drawImage, in: drawRect)
-        ctx.restoreGState()
+        let prepared = preparedImage(for: cgImage, node: img)
+        drawImage(
+            prepared,
+            node: img,
+            bbox: bbox,
+            decodedImageSize: cgSize(of: cgImage),
+            in: ctx
+        )
 
         ctx.restoreGState()
     }
@@ -765,18 +790,18 @@ class CGTreeRenderer {
         applyTransform(node.transform, bbox: image.bbox, in: ctx)
 
         let appliesAdjustments = !(image.bakedWatermark && image.source.data != nil)
-        let drawImage = preparedImage(
+        let prepared = preparedImage(
             for: cgImage,
             node: node,
             applyingAdjustments: appliesAdjustments
         )
-        let rect = cgRect(image.bbox)
-        let drawRect = imageDestinationRect(for: node, size: rect.size)
-        ctx.saveGState()
-        ctx.translateBy(x: rect.minX, y: rect.minY + rect.height)
-        ctx.scaleBy(x: 1, y: -1)
-        ctx.draw(drawImage, in: drawRect)
-        ctx.restoreGState()
+        drawImage(
+            prepared,
+            node: node,
+            bbox: image.bbox,
+            decodedImageSize: cgSize(of: cgImage),
+            in: ctx
+        )
 
         ctx.restoreGState()
         return true
@@ -1452,19 +1477,286 @@ class CGTreeRenderer {
         }
     }
 
-    private func imageDestinationRect(for img: ImageNode, size: CGSize) -> CGRect {
-        let fullRect = CGRect(origin: .zero, size: size)
-        guard let fillMode = img.fillMode?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !fillMode.isEmpty else {
-            return fullRect
+    private func normalizedImageFillPolicy(_ fillMode: String?) -> ImageFillPolicy {
+        guard let fillMode else { return .fitToSize }
+
+        switch normalizedStyleKey(fillMode) {
+        case "",
+             "fittosize",
+             "stretch",
+             "stretchtofit",
+             "none":
+            return .fitToSize
+        case "lefttop":
+            return .placement(.leftTop)
+        case "centertop":
+            return .placement(.centerTop)
+        case "righttop":
+            return .placement(.rightTop)
+        case "leftcenter":
+            return .placement(.leftCenter)
+        case "center", "centercenter":
+            return .placement(.center)
+        case "rightcenter":
+            return .placement(.rightCenter)
+        case "leftbottom":
+            return .placement(.leftBottom)
+        case "centerbottom":
+            return .placement(.centerBottom)
+        case "rightbottom":
+            return .placement(.rightBottom)
+        case "tileall":
+            return .tile(.all)
+        case "tilehorztop", "tilehoriztop", "tilehorizontaltop":
+            return .tile(.horizontalTop)
+        case "tilehorzbottom", "tilehorizbottom", "tilehorizontalbottom":
+            return .tile(.horizontalBottom)
+        case "tilevertleft", "tileverticalleft":
+            return .tile(.verticalLeft)
+        case "tilevertright", "tileverticalright":
+            return .tile(.verticalRight)
+        default:
+            return .fitToSize
+        }
+    }
+
+    private func drawImage(
+        _ image: CGImage,
+        node: ImageNode,
+        bbox: BBox,
+        decodedImageSize: CGSize,
+        in ctx: CGContext
+    ) {
+        let bboxRect = cgRect(bbox)
+        let policy = normalizedImageFillPolicy(node.fillMode)
+        switch policy {
+        case .fitToSize:
+            drawImage(image, inTopLeftRect: bboxRect, in: ctx)
+        case .placement(let placement):
+            guard let naturalSize = imageNaturalDrawSize(
+                for: node,
+                decodedImageSize: decodedImageSize,
+                drawImageSize: cgSize(of: image)
+            ) else {
+                drawImage(image, inTopLeftRect: bboxRect, in: ctx)
+                return
+            }
+            let destination = imagePlacementRect(
+                placement,
+                in: bboxRect,
+                size: naturalSize
+            )
+            ctx.saveGState()
+            ctx.clip(to: bboxRect)
+            drawImage(image, inTopLeftRect: destination, in: ctx)
+            ctx.restoreGState()
+        case .tile(let tileMode):
+            guard let tileSize = imageNaturalDrawSize(
+                for: node,
+                decodedImageSize: decodedImageSize,
+                drawImageSize: cgSize(of: image)
+            ) else {
+                drawImage(image, inTopLeftRect: bboxRect, in: ctx)
+                return
+            }
+            drawTiledImage(image, bbox: bboxRect, tileMode: tileMode, tileSize: tileSize, in: ctx)
+        }
+    }
+
+    private func imageNaturalDrawSize(
+        for node: ImageNode,
+        decodedImageSize: CGSize,
+        drawImageSize: CGSize
+    ) -> CGSize? {
+        if let originalSize = node.originalSize,
+           originalSize.count >= 2 {
+            let size = CGSize(width: CGFloat(originalSize[0]), height: CGFloat(originalSize[1]))
+            if isValidImageDrawSize(size) {
+                return size
+            }
         }
 
-        switch fillMode.replacingOccurrences(of: "_", with: "").lowercased() {
-        case "fittosize", "stretch", "stretchtofit":
-            return fullRect
-        default:
-            return fullRect
+        if isValidImageDrawSize(decodedImageSize) {
+            return decodedImageSize
         }
+        if isValidImageDrawSize(drawImageSize) {
+            return drawImageSize
+        }
+        return nil
+    }
+
+    private func imagePlacementRect(
+        _ placement: ImagePlacement,
+        in bbox: CGRect,
+        size: CGSize
+    ) -> CGRect {
+        let x: CGFloat
+        switch placement {
+        case .leftTop, .leftCenter, .leftBottom:
+            x = bbox.minX
+        case .centerTop, .center, .centerBottom:
+            x = bbox.midX - size.width / 2
+        case .rightTop, .rightCenter, .rightBottom:
+            x = bbox.maxX - size.width
+        }
+
+        let y: CGFloat
+        switch placement {
+        case .leftTop, .centerTop, .rightTop:
+            y = bbox.minY
+        case .leftCenter, .center, .rightCenter:
+            y = bbox.midY - size.height / 2
+        case .leftBottom, .centerBottom, .rightBottom:
+            y = bbox.maxY - size.height
+        }
+
+        return CGRect(origin: CGPoint(x: x, y: y), size: size)
+    }
+
+    private func drawImage(_ image: CGImage, inTopLeftRect rect: CGRect, in ctx: CGContext) {
+        guard isValidImageDrawSize(rect.size) else { return }
+
+        // CG draw(image:) 는 현재 top-left renderer 좌표계에서 상하 반전되므로,
+        // 이미지 draw call 내부에서만 국소적으로 Y축을 뒤집는다.
+        ctx.saveGState()
+        ctx.translateBy(x: rect.minX, y: rect.minY + rect.height)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(image, in: CGRect(origin: .zero, size: rect.size))
+        ctx.restoreGState()
+    }
+
+    private func drawTiledImage(
+        _ image: CGImage,
+        bbox: CGRect,
+        tileMode: ImageTileMode,
+        tileSize: CGSize,
+        in ctx: CGContext
+    ) {
+        guard isValidImageDrawSize(tileSize), isValidImageDrawSize(bbox.size) else {
+            drawImage(image, inTopLeftRect: bbox, in: ctx)
+            return
+        }
+
+        ctx.saveGState()
+        ctx.clip(to: bbox)
+        var drawCount = 0
+
+        func drawTile(at origin: CGPoint) -> Bool {
+            guard drawCount < maxImageTileDrawCount else {
+                return false
+            }
+            drawImage(
+                image,
+                inTopLeftRect: CGRect(origin: origin, size: tileSize),
+                in: ctx
+            )
+            drawCount += 1
+            return true
+        }
+
+        switch tileMode {
+        case .all:
+            var y = bbox.minY
+            while y < bbox.maxY {
+                var x = bbox.minX
+                while x < bbox.maxX {
+                    guard drawTile(at: CGPoint(x: x, y: y)) else {
+                        ctx.restoreGState()
+                        return
+                    }
+                    x += tileSize.width
+                }
+                y += tileSize.height
+            }
+        case .horizontalTop:
+            drawHorizontalTiles(
+                image,
+                y: bbox.minY,
+                bbox: bbox,
+                tileSize: tileSize,
+                in: ctx,
+                drawCount: &drawCount
+            )
+        case .horizontalBottom:
+            drawHorizontalTiles(
+                image,
+                y: bbox.maxY - tileSize.height,
+                bbox: bbox,
+                tileSize: tileSize,
+                in: ctx,
+                drawCount: &drawCount
+            )
+        case .verticalLeft:
+            drawVerticalTiles(
+                image,
+                x: bbox.minX,
+                bbox: bbox,
+                tileSize: tileSize,
+                in: ctx,
+                drawCount: &drawCount
+            )
+        case .verticalRight:
+            drawVerticalTiles(
+                image,
+                x: bbox.maxX - tileSize.width,
+                bbox: bbox,
+                tileSize: tileSize,
+                in: ctx,
+                drawCount: &drawCount
+            )
+        }
+
+        ctx.restoreGState()
+    }
+
+    private func drawHorizontalTiles(
+        _ image: CGImage,
+        y: CGFloat,
+        bbox: CGRect,
+        tileSize: CGSize,
+        in ctx: CGContext,
+        drawCount: inout Int
+    ) {
+        var x = bbox.minX
+        while x < bbox.maxX {
+            guard drawCount < maxImageTileDrawCount else { return }
+            drawImage(
+                image,
+                inTopLeftRect: CGRect(origin: CGPoint(x: x, y: y), size: tileSize),
+                in: ctx
+            )
+            drawCount += 1
+            x += tileSize.width
+        }
+    }
+
+    private func drawVerticalTiles(
+        _ image: CGImage,
+        x: CGFloat,
+        bbox: CGRect,
+        tileSize: CGSize,
+        in ctx: CGContext,
+        drawCount: inout Int
+    ) {
+        var y = bbox.minY
+        while y < bbox.maxY {
+            guard drawCount < maxImageTileDrawCount else { return }
+            drawImage(
+                image,
+                inTopLeftRect: CGRect(origin: CGPoint(x: x, y: y), size: tileSize),
+                in: ctx
+            )
+            drawCount += 1
+            y += tileSize.height
+        }
+    }
+
+    private func cgSize(of image: CGImage) -> CGSize {
+        CGSize(width: CGFloat(image.width), height: CGFloat(image.height))
+    }
+
+    private func isValidImageDrawSize(_ size: CGSize) -> Bool {
+        size.width.isFinite && size.height.isFinite && size.width > 0 && size.height > 0
     }
 
     // MARK: - 그룹
