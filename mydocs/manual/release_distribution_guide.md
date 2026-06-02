@@ -11,6 +11,7 @@
 - 릴리스/배포 작업은 저장소 소유자의 명시 지시가 있을 때만 수행한다.
 - Claude와 Codex가 임의로 버전 태그, GitHub Release, Homebrew Cask PR, 서명/공증 작업을 시작하지 않는다.
 - public release 실행, GitHub Release 게시, Sparkle appcast 갱신, Homebrew Cask 반영은 각각 작업지시자의 명시 승인 후 수행한다.
+- signed/notarized DMG 설치 smoke는 public publish 전 필수 gate다. `draft=true`, `prerelease=false` 실행으로 만든 pre-public DMG를 maintainer가 직접 확인한 뒤에만 official stable publish로 넘어간다.
 - 인증서 private key, Apple Developer 계정, notarization credential, GitHub token, Homebrew tap 권한은 작업지시자가 직접 관리한다.
 - 민감 정보는 문서, commit, PR, shell history에 남기지 않는다.
 - Team ID, signing identity 표시명, keychain profile name처럼 비밀이 아닌 운영 식별자는 [`release_environment.md`](../tech/release_environment.md)에만 기록한다.
@@ -80,11 +81,11 @@
 4. [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md)의 릴리스 전 확인과 build 검증을 수행한다.
 5. 필요한 경우 `Release Rehearsal DMG` workflow를 실행하고 DMG/checksum과 delta checklist artifact를 확인한다.
 6. [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md)의 credential 확인을 수행한다.
-7. `Release Publish DMG` workflow 또는 `scripts/release.sh <version>` public mode로 signed/notarized DMG를 생성한다.
-8. public DMG SHA256을 기록하고 app/extension universal slice, DMG layout, Finder Quick Look, Finder thumbnail smoke를 반복한다.
-9. [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 release note와 delta checklist를 실제 SHA256/provenance로 보정한다.
-10. GitHub Release를 공식 release 기준으로 게시하고 `Release Publish DMG` workflow 결과를 확인한다.
-11. Pages deployment URL, Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 확인한다.
+7. release tag 생성 후 `Release Publish DMG` workflow를 `draft=true`, `prerelease=false`로 실행해 pre-public signed/notarized DMG를 생성한다.
+8. maintainer가 draft release asset 또는 Actions artifact DMG를 내려받아 app/extension universal slice, Gatekeeper, DMG layout, Finder Quick Look, Finder thumbnail smoke를 확인한다.
+9. draft smoke 통과 후 [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 release note와 delta checklist를 실제 SHA256/provenance로 보정한다.
+10. 작업지시자 별도 승인 후 `Release Publish DMG` workflow를 `draft=false`, `prerelease=false` official stable release 기준으로 실행한다.
+11. GitHub Release asset, Pages deployment URL, Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 post-publish public surface로 확인한다.
 12. Homebrew 배포를 진행할 경우 #209에서 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 `postmelee/homebrew-tap`에 Cask를 반영하고 tap context 검증을 수행한다.
 13. [`mydocs/release/v<version>.md`](../release/)와 최종 release report에 실제 결과와 잔여 위험을 기록한다.
 
@@ -93,6 +94,7 @@
 - release version과 release candidate commit
 - `devel`에서 `main`으로 반영할 release PR 범위
 - Developer ID 서명/notarization 실행 시점
+- pre-public signed/notarized draft DMG 설치 smoke를 수행할 maintainer와 기록 위치
 - GitHub Release를 draft/prerelease가 아닌 public release로 게시할 시점
 - Cask 초안의 `sha256 :no_check`를 public DMG 생성 후 실제 digest로 교체할 시점
 - `postmelee/homebrew-tap` 공개 배포를 #209에서 진행할 시점
@@ -116,15 +118,16 @@
 - [ ] Finder thumbnail smoke test 완료
 - [ ] 기존 public 설치본에서 Sparkle 업데이트 후 `scripts/smoke-sparkle-extension-refresh.sh --expected-version <version> --expected-build <build>` 기본 모드 통과
 - [ ] 개발용 zip 산출물 생성
-- [ ] public DMG 산출물 생성
-- [ ] public DMG 안의 app/extension 실행 파일 `arm64 + x86_64` universal 검증
+- [ ] pre-public signed/notarized draft DMG 산출물 생성
+- [ ] draft DMG 안의 app/extension 실행 파일 `arm64 + x86_64` universal 검증
+- [ ] maintainer가 draft release asset 또는 Actions artifact DMG를 직접 설치 smoke 완료
 - [ ] app notarization submit 전 signing preflight 통과: Developer ID, Team ID, timestamp, hardened runtime, `get-task-allow` 부재, Sparkle nested component 존재 확인
-- [ ] public DMG 안의 app bundle `Contents/Info.plist`에 `NSHumanReadableCopyright`가 포함되어 있고 현재 release 저작권자 문구와 일치하는지 확인
-- [ ] public DMG 안의 app bundle `Contents/Resources/Legal/{LICENSE,THIRD_PARTY_LICENSES.md,FONTS.md}` 존재 확인
-- [ ] public DMG 안의 app bundle `Contents/Resources/Legal/*` 파일이 release candidate commit의 canonical `LICENSE`, `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`와 같은지 확인
+- [ ] draft DMG 안의 app bundle `Contents/Info.plist`에 `NSHumanReadableCopyright`가 포함되어 있고 현재 release 저작권자 문구와 일치하는지 확인
+- [ ] draft DMG 안의 app bundle `Contents/Resources/Legal/{LICENSE,THIRD_PARTY_LICENSES.md,FONTS.md}` 존재 확인
+- [ ] draft DMG 안의 app bundle `Contents/Resources/Legal/*` 파일이 release candidate commit의 canonical `LICENSE`, `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`와 같은지 확인
 - [ ] Intel Mac 실기기 smoke 실행 여부와 결과 또는 미실행 사유 기록
-- [ ] public DMG SHA256 기록
-- [ ] public DMG layout smoke 완료
+- [ ] draft DMG SHA256 기록
+- [ ] draft DMG layout smoke 완료
 - [ ] DMG root에 `설치 안내.txt` 같은 보조 안내 파일이 노출되지 않는지 확인
 - [ ] DMG background가 720x460 PNG 기준인지 확인
 - [ ] release note에 `rhwp-core.lock`, `rhwp-studio` manifest, third-party notices 기준 기록
@@ -139,7 +142,9 @@
 - [ ] repository Pages source가 `workflow`인지 확인
 - [ ] `github-pages` environment가 docs-only `main` branch와 release tag ref `v*`를 허용하는지 확인
 - [ ] release workflow와 docs-only workflow가 `pages-deploy` concurrency group으로 Pages deployment를 취소 없이 직렬화하는지 확인
+- [ ] draft/prerelease 실행에서 stable appcast와 Pages deployment가 skip된 것을 pre-public 검증 단계의 정상 동작으로 확인
 - [ ] `Release Publish DMG` workflow를 공식 release 기준 `draft=false`, `prerelease=false`로 실행
+- [ ] official stable public DMG 산출물과 SHA256 기록
 - [ ] `deploy-pages` job이 성공하고 `page_url`이 `https://postmelee.github.io/alhangeul-macos/`를 가리키는지 확인
 - [ ] public `https://postmelee.github.io/alhangeul-macos/appcast.xml`이 새 stable item과 Sparkle EdDSA signature를 제공하는지 확인
 - [ ] docs-only Pages workflow가 public appcast를 보존하며 stale repository `docs/appcast.xml` fallback을 사용하지 않는지 확인

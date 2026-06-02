@@ -23,6 +23,7 @@
 
 - public release 실행은 작업지시자의 명시 지시가 있을 때만 시작한다.
 - Git tag 생성, `Release Publish DMG` 실행, GitHub Release 게시, Sparkle appcast 갱신, Pages deployment, Homebrew tap 반영은 각각 별도 승인 gate로 본다.
+- signed/notarized DMG 설치 smoke는 public publish 전 필수 gate다. `draft=true`, `prerelease=false` 실행은 pre-public 검증이고, `draft=false`, `prerelease=false` 실행은 별도 승인된 official stable publish다.
 - workflow 기본값은 stale할 수 있다. `workflow_dispatch` 화면의 기본값을 그대로 사용하지 말고 항상 현재 release context와 대조한다.
 - password, app-specific password, App Store Connect API private key, exported signing identity, keychain credential payload, Sparkle private key, GitHub token은 문서, commit, PR, shell history에 남기지 않는다.
 - 실행하지 않은 수동 smoke, Intel Mac 실기기 확인, Sparkle 업데이트 확인은 성공으로 기록하지 않는다. 미실행 사유를 release record에 남긴다.
@@ -108,6 +109,7 @@ release owner가 다음 값을 명시적으로 확정해야 한다.
 
 - 앱 자체 bugfix, packaging, Pages/appcast, Homebrew, 문서 중심 release는 기본 title `Alhangeul v<version>`을 사용한다.
 - upstream `rhwp` 반영이 release의 중심 사용자-facing 변화이면 `Alhangeul v<version> (rhwp v<expected-rhwp-tag>)` 병기를 검토한다.
+- `draft=true`, `prerelease=false`는 signed/notarized DMG를 생성해 maintainer 설치 smoke를 수행하는 pre-public 검증 단계로 본다. 이 단계는 stable appcast와 Pages deployment를 성공 조건에 포함하지 않는다.
 - `draft=false`, `prerelease=false`일 때만 official stable release로 보고 Sparkle stable appcast와 Pages deployment까지 성공 조건에 포함한다.
 - `previous_release_ref`가 틀리면 delta checklist가 틀리므로 publish 전 반드시 workflow summary 또는 artifact에서 previous/candidate ref를 확인한다.
 
@@ -195,19 +197,17 @@ gh workflow run "Release Rehearsal DMG" \
 - unsigned rehearsal 결과는 signing/notarization 통과로 기록하지 않는다.
 - rehearsal에서 생성된 delta checklist는 초안이다. release owner가 누락/과잉 항목을 보정해야 한다.
 
-## Gate 4. Public publish
+## Gate 4. Pre-public signed/notarized DMG smoke
 
-public publish는 release owner가 tag, version, candidate commit, workflow input을 최종 승인한 뒤에만 실행한다.
+signed/notarized DMG smoke는 public publish 전에 통과해야 하는 blocking gate다. 이 gate는 GitHub Release를 official stable release로 공개하거나 stable appcast/Pages를 갱신하기 위한 단계가 아니다.
 
 사전 조건:
 
 - release candidate commit이 `main`에 반영되어 있다.
 - `v<version>` tag가 정확한 candidate commit을 가리킨다.
 - GitHub Release body, Pages 업데이트 문서, README 최신 요약, 내부 release record가 마지막 candidate commit 기준으로 다시 검토되어 있다.
-- draft signed/notarized DMG smoke 이후 추가 bugfix, tag 재지정, candidate commit 변경이 있었다면 사용자-facing 주요 변경 사항을 다시 작성했다.
 - `release` environment의 GitHub Actions variable/secret이 준비되어 있다.
-- `github-pages` environment가 release tag deployment를 허용한다.
-- `SPARKLE_ED_PRIVATE_KEY` secret이 stable appcast signing에 사용할 수 있게 등록되어 있다.
+- release owner가 `draft=true`, `prerelease=false` 입력으로 pre-public DMG smoke 실행을 승인했다.
 
 사용자-facing release note 최종 확인:
 
@@ -228,8 +228,8 @@ gh workflow run "Release Publish DMG" \
   -f expected_rhwp_tag=<expected-rhwp-tag> \
   -f require_latest_rhwp=<true-or-false> \
   -f include_rhwp_in_title=<true-or-false> \
-  -f draft=<true-or-false> \
-  -f prerelease=<true-or-false>
+  -f draft=true \
+  -f prerelease=false
 ```
 
 workflow가 확인해야 하는 것:
@@ -240,20 +240,86 @@ workflow가 확인해야 하는 것:
 - Developer ID certificate import
 - notarytool credential store
 - `./scripts/release.sh <version>` public mode 성공
-- public DMG와 `.sha256` 생성
-- GitHub Release asset upload
-- non-draft/non-prerelease 상태 검증
-- official stable release일 때 Sparkle appcast 생성과 Pages artifact deploy
+- signed/notarized DMG와 `.sha256` 생성
+- GitHub draft release asset 또는 Actions artifact upload
+- stable appcast 생성과 Pages artifact deploy skip
 
 중단 기준:
 
 - tag가 candidate commit과 다르다.
 - signed/notarized DMG 생성, staple, Gatekeeper 검증 중 하나라도 실패한다.
-- GitHub Release가 의도와 다르게 draft/prerelease 상태다.
-- official stable release인데 appcast signing 또는 Pages deployment가 실패한다.
-- public DMG SHA256이 release note, asset, Cask 반영 입력과 일치하지 않는다.
+- GitHub Release가 의도와 다르게 non-draft official release로 공개됐다.
+- draft/prerelease 실행인데 stable appcast 또는 Pages deployment가 갱신됐다.
+- draft DMG SHA256이 workflow summary, asset, release record 입력과 일치하지 않는다.
 
-## Gate 5. Public artifact 확인
+maintainer smoke:
+
+- draft release asset 또는 Actions artifact DMG를 release machine에 내려받는다.
+- DMG mount layout, app first launch, Finder Quick Look preview, Finder thumbnail을 확인한다.
+- 가능한 경우 다음 명령으로 Gatekeeper, universal slice, Sparkle extension refresh를 확인한다.
+
+```bash
+shasum -a 256 -c build.noindex/release/alhangeul-macos-<version>.dmg.sha256
+scripts/ci/verify-universal-macos-app.sh build.noindex/release/Alhangeul.app
+xcrun stapler validate build.noindex/release/Alhangeul.app
+xcrun stapler validate build.noindex/release/alhangeul-macos-<version>.dmg
+spctl --assess --type execute --verbose build.noindex/release/Alhangeul.app
+spctl --assess --type open --context context:primary-signature --verbose build.noindex/release/alhangeul-macos-<version>.dmg
+scripts/smoke-finder-integration.sh --version <version>
+scripts/smoke-sparkle-extension-refresh.sh \
+  --expected-version <version> \
+  --expected-build <build>
+```
+
+주의:
+
+- draft DMG는 Homebrew Cask URL/SHA256, Sparkle enclosure, public Pages 다운로드 링크로 사용하지 않는다.
+- 실행하지 못한 smoke는 성공으로 쓰지 않고 release record에 미실행 사유를 남긴다.
+- draft smoke 이후 bugfix, tag 재지정, candidate commit 변경이 있으면 Gate 2 또는 Gate 4로 돌아가 사용자-facing 주요 변경 사항과 산출물을 다시 확인한다.
+
+## Gate 5. Official stable publish
+
+official stable publish는 Gate 4의 signed/notarized draft DMG smoke가 통과한 뒤, release owner가 `draft=false`, `prerelease=false` 실행을 별도로 승인한 경우에만 진행한다.
+
+사전 조건:
+
+- Gate 4 draft signed/notarized DMG smoke가 통과했다.
+- GitHub Release body, Pages 업데이트 문서, README 최신 요약, 내부 release record가 draft smoke 이후 최종 candidate 기준으로 다시 검토되어 있다.
+- `github-pages` environment가 release tag deployment를 허용한다.
+- `SPARKLE_ED_PRIVATE_KEY` secret이 stable appcast signing에 사용할 수 있게 등록되어 있다.
+
+GitHub Actions 예시:
+
+```bash
+gh workflow run "Release Publish DMG" \
+  --ref v<version> \
+  -f version=<version> \
+  -f previous_release_ref=<previous-release-ref> \
+  -f expected_rhwp_tag=<expected-rhwp-tag> \
+  -f require_latest_rhwp=<true-or-false> \
+  -f include_rhwp_in_title=<true-or-false> \
+  -f draft=false \
+  -f prerelease=false
+```
+
+workflow가 확인해야 하는 것:
+
+- tag ref와 checkout HEAD 일치
+- `rhwp-core.lock`의 `expected_rhwp_tag` 일치
+- `require_latest_rhwp=true`인 경우 upstream latest 일치
+- signed/notarized DMG와 `.sha256` 생성
+- GitHub Release asset upload
+- non-draft/non-prerelease 상태 검증
+- Sparkle appcast 생성과 Pages artifact deploy
+
+중단 기준:
+
+- Gate 4 이후 candidate commit, tag, release body가 바뀌었는데 draft smoke를 반복하지 않았다.
+- GitHub Release가 의도와 다르게 draft/prerelease 상태다.
+- appcast signing 또는 Pages deployment가 실패한다.
+- official stable public DMG SHA256이 release note, asset, Cask 반영 입력과 일치하지 않는다.
+
+## Gate 6. Public artifact 확인
 
 workflow 완료 후 다음을 확인한다.
 
@@ -283,7 +349,7 @@ record에 남길 값:
 - signing/notarization/staple/Gatekeeper 결과
 - 실행하지 않은 수동 확인 항목과 사유
 
-## Gate 6. Pages와 Sparkle 확인
+## Gate 7. Pages와 Sparkle 확인
 
 official stable release일 때만 수행한다.
 
@@ -302,7 +368,7 @@ official stable release일 때만 수행한다.
 
 docs-only Pages workflow는 Sparkle appcast를 새로 만들지 않는다. release 직후 docs-only Pages 배포가 필요하면 public appcast 보존 기준을 확인한다.
 
-## Gate 7. 설치본과 Finder smoke
+## Gate 8. 설치본과 Finder smoke
 
 실제 설치본 기준 smoke는 release record에 실행 여부를 명확히 남긴다.
 
@@ -333,7 +399,7 @@ scripts/smoke-sparkle-extension-refresh.sh \
 - Intel Mac 실기기 smoke를 실행하지 않았으면 성공으로 쓰지 않는다.
 - 이전 설치본이나 PlugInKit 캐시로 false positive가 의심되면 [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md)의 registration hygiene 옵션을 따른다.
 
-## Gate 8. Homebrew Cask
+## Gate 9. Homebrew Cask
 
 Homebrew는 public DMG asset과 SHA256이 확정된 뒤 별도 승인으로 진행한다.
 
@@ -368,7 +434,7 @@ brew uninstall --cask alhangeul
 - `brew audit --cask --new`는 upstream Homebrew 제출 수준 참고 검증이며, maintainer tap 공개 gate와 구분한다.
 - Homebrew 안내 문구는 tap context 검증이 끝난 뒤 README, Pages, GitHub Release/릴리즈 노트에 일관되게 반영한다.
 
-## Gate 9. Release record와 최종 보고
+## Gate 10. Release record와 최종 보고
 
 릴리즈 완료 후 다음 파일을 갱신하거나 확인한다.
 
