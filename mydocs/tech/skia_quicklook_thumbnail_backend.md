@@ -247,10 +247,42 @@ Skia optional backend는 다음 순서로 진행한다.
 - cache hit/miss가 backend 선택과 충돌하지 않는다.
 - 대표 크기별 thumbnail smoke 결과가 보고서에 남는다.
 
+반복 smoke gate:
+
+- `./scripts/smoke-thumbnail-skia-policy.sh <out-dir> <samples...>`를 Thumbnail cache/signature 반복 smoke의 표준 helper로 사용한다.
+- 대표 smoke는 HWP 세로 문서, HWP 가로 문서, HWPX 문서, 다중 페이지 HWP를 포함한다.
+- 각 파일은 `coreGraphicsOnly`와 `skiaOptIn` policy를 모두 실행하고, `large`, `large-repeat`, `medium-after-large`, `small-after-large` request를 같은 순서로 측정한다.
+- 통과 기준은 모든 row `OK`, policy별 첫 요청 `miss`, 같은 bucket 반복 요청 `exactHit`, 작은 요청의 큰 bucket 재사용 `largerBucketHit`, fallback 미발생 또는 사유 문서화다.
+- `coreGraphicsOnly`와 `skiaOptIn`의 render signature가 다르므로 두 policy 사이의 cache hit는 허용하지 않는다.
+- Skia opt-in row의 backend가 `skia`가 아니면 fallback reason을 기록하고, #259 default 전환 판단에서는 별도 known limitation 또는 follow-up으로 분리한다.
+- 1px 수준의 bitmap pixel rounding 차이는 Stage 4 cache 실패로 보지 않는다. 다만 page size, aspect ratio, 잘림 여부는 #259 visual gate에서 다시 확인한다.
+
+2026-06-03 #258 Stage 4 대표 smoke 기준선:
+
+- 샘플: `samples/복학원서.hwp`, `samples/basic/KTX.hwp`, `samples/basic/request.hwp`, `samples/hwpx/hwpx-01.hwpx`, `samples/hwp-multi-001.hwp`
+- 결과: 5 files x 2 policies x 4 requests = 40 rows 모두 `OK`
+- cache event: 각 파일/정책에서 `miss -> exactHit -> largerBucketHit(1024x1024) -> largerBucketHit(1024x1024)`
+- fallback: 모든 row `-`
+- Skia opt-in backend: 모든 opt-in row `skia`
+- 산출물: `build.noindex/task258-thumbnail-policy-representative/summary.txt`
+
 비책임:
 
 - Quick Look provider와 다중 페이지 PDF path는 #257에서 처리한다.
 - 전체 visual/performance/package readiness 판단은 #259에서 처리한다.
+
+## PageLayerTree displayText 장기 판단
+
+`U+F012B -> (인)`, `U+F081C -> 숨김` 같은 표시 문자열 계약은 upstream `PageLayerTree`의 `displayText` 소비 경로에서 처리하는 것이 장기적으로 맞다. Swift/CoreGraphics `PageRenderTree` renderer에 PUA mapping을 계속 추가하면 core release마다 보정 규칙을 중복 유지해야 한다.
+
+#258은 Swift `PageLayerTree` renderer를 구현하지 않는다. 대신 Thumbnail cache에 render signature를 넣고 Skia opt-in smoke를 반복 가능하게 만들어, PageLayerTree/Skia 경로가 Quick Look 또는 Thumbnail surface별로 안전하게 검증될 수 있는 기반을 둔다.
+
+장기 gate는 다음처럼 둔다.
+
+- release-blocking 회귀처럼 좁은 범위에서는 CoreGraphics 최소 보정을 유지할 수 있다.
+- 새로운 PUA/표시 문자열 보정은 가능하면 Swift mapping 확장이 아니라 PageLayerTree `displayText` 소비 또는 Skia/PageLayerTree backend 검증으로 연결한다.
+- `복학원서.hwp` 같은 displayText 민감 샘플은 #259 visual readiness에 포함한다.
+- Skia/PageLayerTree 경로가 `displayText`를 반영하지 못하거나 CoreGraphics fallback과 다른 사용자-facing glyph를 보이면 `Skia first` 전환을 막고 원인을 upstream/downstream follow-up으로 분리한다.
 
 ## #259 release readiness gate
 
