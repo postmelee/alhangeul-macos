@@ -12,11 +12,12 @@
 - 작업 위치: `/private/tmp/rhwp-mac-task330`
 - 기준 브랜치: `devel`
 - 선행 상태: Issue #132 / PR #328 완료 코멘트 처리 중 `#328으로`처럼 GitHub 참조 토큰과 한글 조사가 붙는 표기 문제가 확인됐다.
-- 목표: GitHub 공개 body 파일을 등록하기 전에 공통 validator를 실행하고, 관련 Skill과 매뉴얼이 `--body-file` 기반 공개 본문 등록을 우선하도록 정렬한다.
+- 목표: GitHub 공개 body 파일을 등록하기 전에 공통 validator를 실행하고, 관련 Skill과 매뉴얼이 `--body-file` 기반 공개 본문 등록과 PR review 등록을 우선하도록 정렬한다.
 
 ## 구현 원칙
 
 - GitHub 공개 본문과 코멘트는 긴 inline `--body` 대신 `--body-file`을 우선한다.
+- PR review 본문도 공개 GitHub 본문으로 보고 `gh pr review --body-file` 기반 검증 대상으로 포함한다.
 - PR/Issue 참조 토큰과 한글 조사가 붙는 위험 패턴은 Skill 문장 규칙이 아니라 validator script에서 중앙 관리한다.
 - 관련 Skill은 regex를 복제하지 않고 validator 호출 절차만 포함한다.
 - GitHub 웹 UI 직접 작성은 사전 차단 대상에서 제외하고 한계로 기록한다.
@@ -38,8 +39,9 @@
 
 ### 작업
 
-- `gh issue create`, `gh issue comment`, `gh pr create`, `gh pr comment`, `gh pr edit --body-file` 사용 지점을 검색한다.
+- `gh issue create`, `gh issue comment`, `gh pr create`, `gh pr comment`, `gh pr review`, `gh pr edit --body-file` 사용 지점을 검색한다.
 - `--body-file`을 이미 쓰는 경로와 inline `--body`를 쓰는 경로를 구분한다.
+- PR review request가 남는 경로를 확인하고, review 등록과 merge 후 잔여 review request cleanup 중 어느 절차가 적합한지 구분한다.
 - 사람이 작성하는 공개 body file과 workflow가 생성하는 body file을 분리한다.
 - 기준 브랜치에 없는 `external-pr-complete`는 직접 수정 대상에서 제외하고 후속 handoff로 기록한다.
 - Stage 1 보고서에 적용 대상 표를 남긴다.
@@ -51,7 +53,7 @@
 ### 검증
 
 ```bash
-rg -n "gh (issue|pr) (create|comment|edit)|--body-file|--body " mydocs/skills mydocs/manual scripts .github
+rg -n "gh (issue|pr) (create|comment|review|edit)|reviewRequests|reviewDecision|--body-file|--body " mydocs/skills mydocs/manual scripts .github
 rg --files mydocs/skills | sort
 git diff --check
 git status --short --branch
@@ -122,7 +124,7 @@ Task #330 Stage 2: GitHub body validator 추가
 
 ### 목표
 
-공개 GitHub 본문 등록 절차를 `--body-file` + validator 통과 흐름으로 정렬한다.
+공개 GitHub 본문 등록 절차와 PR review 등록 절차를 `--body-file` + validator 통과 흐름으로 정렬한다.
 
 ### 작업
 
@@ -130,8 +132,8 @@ Task #330 Stage 2: GitHub body validator 추가
 - 필요 시 `mydocs/manual/git_workflow_guide.md`의 PR 생성 예시를 validator 호출 포함 흐름으로 보정한다.
 - `mydocs/skills/task-register/SKILL.md`의 `gh issue create` 예시를 inline `--body`에서 `--body-file` 기반으로 바꾸고 validator 호출을 추가한다.
 - `mydocs/skills/task-final-report/SKILL.md`의 PR body 등록 전 validator 호출을 추가한다.
-- `mydocs/skills/external-pr-review/SKILL.md`의 공개 코멘트 초안/등록 안내에 validator 원칙을 연결한다.
-- 기준 브랜치에 없는 `external-pr-complete`는 직접 수정하지 않고 후속 handoff로 기록한다.
+- `mydocs/skills/external-pr-review/SKILL.md`에 merge 권고 승인 후 실제 GitHub review를 등록할 수 있는 `gh pr review --body-file` 절차와 validator 원칙을 연결한다.
+- 기준 브랜치에 없는 `external-pr-complete`는 직접 수정하지 않고, merge 후 잔여 review request 확인/정리 절차를 후속 handoff로 기록한다.
 
 ### 산출물
 
@@ -145,7 +147,7 @@ Task #330 Stage 2: GitHub body validator 추가
 ### 검증
 
 ```bash
-rg -n "validate-github-body|--body-file|gh issue create|gh pr create|gh issue comment|gh pr comment" mydocs/manual mydocs/skills
+rg -n "validate-github-body|--body-file|gh issue create|gh pr create|gh issue comment|gh pr comment|gh pr review|reviewRequests" mydocs/manual mydocs/skills
 rg -n --pcre2 "(?:PR|Issue)?\\s*#\\d+\\p{Hangul}" mydocs/skills mydocs/manual
 bash -n scripts/validate-github-body.sh
 git diff --check
@@ -175,7 +177,7 @@ Task #330 Stage 3: GitHub body 검증 절차 문서화
 - 수행계획서와 구현계획서의 포함/제외 범위가 지켜졌는지 확인한다.
 - validator 샘플 검증을 다시 수행한다.
 - 관련 Skill/매뉴얼에서 `--body-file`과 validator 호출이 빠진 공개 body 경로가 남았는지 검색한다.
-- 기준 브랜치에 없는 `external-pr-complete`에 대한 후속 handoff를 최종 보고서에 기록한다.
+- 기준 브랜치에 없는 `external-pr-complete`에 대한 잔여 review request cleanup 후속 handoff를 최종 보고서에 기록한다.
 - 최종 결과보고서를 작성한다.
 - `mydocs/orders/20260603.md`의 #330 상태를 완료로 갱신한다.
 
@@ -192,7 +194,7 @@ printf 'Issue #132를 닫음\n' > /tmp/task330-bad.md
 ! scripts/validate-github-body.sh /tmp/task330-bad.md
 printf 'Issue #132 이슈를 닫음\n' > /tmp/task330-good.md
 scripts/validate-github-body.sh /tmp/task330-good.md
-rg -n "validate-github-body|--body-file|gh issue create|gh pr create|gh issue comment|gh pr comment" scripts mydocs/manual mydocs/skills mydocs/report/task_m013_330_report.md
+rg -n "validate-github-body|--body-file|gh issue create|gh pr create|gh issue comment|gh pr comment|gh pr review|reviewRequests" scripts mydocs/manual mydocs/skills mydocs/report/task_m013_330_report.md
 git diff --check
 git status --short --branch
 ```
@@ -216,7 +218,7 @@ Task #330 Stage 4 + 최종 보고서: GitHub body 검증 절차 정리
 - 게시 브랜치: `publish/task330`
 - 대상 브랜치: `devel`
 - PR 제목 후보: `Task #330: GitHub 공개 본문 body-file 검증 도입`
-- PR 본문에는 validator 도입 이유, 적용 대상, 검증 결과, GitHub UI 직접 작성 한계를 포함한다.
+- PR 본문에는 validator 도입 이유, 적용 대상, PR review 등록 경로, 검증 결과, GitHub UI 직접 작성 한계를 포함한다.
 
 ## 변경 금지 사항
 
