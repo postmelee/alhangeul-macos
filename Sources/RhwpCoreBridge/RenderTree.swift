@@ -368,10 +368,18 @@ struct FormObjectNode: Decodable {
     let formType: String
     let caption: String
     let text: String
+    let foreColor: String?
+    let backColor: String?
+    let value: Int?
+    let enabled: Bool?
+    let name: String?
 
     enum CodingKeys: String, CodingKey {
         case formType = "form_type"
         case caption, text
+        case foreColor = "fore_color"
+        case backColor = "back_color"
+        case value, enabled, name
     }
 }
 
