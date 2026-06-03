@@ -5,6 +5,7 @@ description: |
   명시 호출 시에만 사용한다. PR/Issue 완료 코멘트 초안 작성, pr_{N}_report.md 작성,
   승인 후 GitHub 코멘트 등록, 관련 Issue close, mydocs/pr/archives 이동을 처리한다.
   첫 기여자 환영, 구체적 기여 칭찬, maintainer 후속 보완 안내를 완료 메시지에 반영한다.
+  외부 PR 운영 기록만 바뀐 경우 별도 PR 없이 대상 통합 브랜치에 직접 커밋/푸시한다.
   external-pr-review 이후 merge/반영이 끝난 외부 PR 전용.
 allow_implicit_invocation: false
 ---
@@ -23,6 +24,13 @@ allow_implicit_invocation: false
 - PR이 GitHub merge 완료 상태이거나, maintainer cherry-pick/수동 반영 commit이 확인되어야 한다
 - 관련 Issue close는 작업지시자 승인 후에만 수행한다
 - `gh` CLI 인증
+
+## 직접 반영 기준
+
+- `mydocs/pr/pr_{N}_review.md`, `mydocs/pr/pr_{N}_report.md`, `mydocs/pr/archives/**` 같은 외부 PR 운영 기록만 변경하면 별도 PR을 만들지 않고 대상 통합 브랜치에 직접 커밋/푸시한다.
+- 직접 반영은 push까지 완료해야 한다. 운영 기록 커밋을 로컬 base branch에만 남기지 않는다.
+- Skill, 매뉴얼, 코드, 빌드 설정, 앱 동작, workflow 정책 변경이 함께 있으면 직접 반영하지 말고 일반 Issue/브랜치/PR 절차로 분리한다.
+- 직접 반영 전 `git pull --ff-only`가 실패하거나 대상 브랜치가 diverged 상태면 중단하고, 운영 기록 커밋만 재정렬할지 작업지시자에게 확인한다.
 
 ## 절차
 
@@ -74,10 +82,25 @@ allow_implicit_invocation: false
    git mv mydocs/pr/pr_{N}_review_impl.md mydocs/pr/archives/  # 존재 시
    git mv mydocs/pr/pr_{N}_report.md mydocs/pr/archives/
    ```
-7. 단일 커밋
+7. 직접 반영 준비
    ```bash
-   git commit -m "PR #{N} 완료 처리: {요약}"
+   BASE_BRANCH={PR base branch}
+   git fetch origin --prune
+   git checkout "$BASE_BRANCH"
+   git pull --ff-only
+   git status --short
+   git diff --name-only --cached
+   git diff --name-only
    ```
+   - 변경 파일이 `mydocs/pr/**` 운영 기록으로만 제한되는지 확인한다.
+   - 다른 파일이 섞이면 commit/push를 중단하고 일반 작업 PR로 분리한다.
+8. 단일 커밋 후 직접 push
+   ```bash
+   git add mydocs/pr/
+   git commit -m "PR #{N} 완료 처리: {요약}"
+   git push origin "$BASE_BRANCH"
+   ```
+   - push 실패 또는 non-fast-forward가 발생하면 강제 push하지 말고 작업지시자에게 보고한다.
 
 ## GitHub 참조 표기 규칙
 
@@ -156,6 +179,7 @@ PR #{N} 반영 및 {필요 시 메인테이너 후속 보완}으로 해결되었
 - 연결 이슈가 `Related`인지 `Closes`인지에 따라 자동 close 기대 여부를 구분하되, 실제 close 전 상태를 확인한다
 - cherry-pick이면 원 PR head SHA와 반영 commit SHA를 모두 보고서에 기록한다
 - 완료 코멘트 전문은 응답에만 제시하고, `pr_{N}_report.md`에는 링크와 요지만 남긴다
+- 외부 PR 운영 기록만 바뀌면 별도 PR을 만들지 않는다. 직접 커밋 후 대상 통합 브랜치에 push까지 완료한다
 
 ## 검증
 
@@ -163,6 +187,7 @@ PR #{N} 반영 및 {필요 시 메인테이너 후속 보완}으로 해결되었
 - 응답에 PR 완료 코멘트 초안과 필요한 Issue 완료 코멘트 초안이 제시됨
 - 승인 후 실제 GitHub 코멘트 URL과 issue close 상태가 확인됨
 - 처리 완료 문서가 `mydocs/pr/archives/`로 이동됨
+- 직접 반영 시 `git status --short --branch`에 대상 branch의 local-only ahead가 남지 않음
 
 ## 절대 하지 말 것
 
@@ -172,6 +197,9 @@ PR #{N} 반영 및 {필요 시 메인테이너 후속 보완}으로 해결되었
 - 해결 범위가 불명확한 issue close
 - 실행하지 않은 검증을 완료 코멘트나 보고서에 기록
 - PR/Issue 코멘트 초안 전문을 `pr_{N}_report.md`에 복제
+- 외부 PR 운영 기록 커밋을 로컬에만 남기고 push하지 않음
+- Skill, 매뉴얼, 코드, 빌드 설정 변경을 외부 PR 운영 기록 직접 반영 커밋에 섞음
+- non-fast-forward 상태에서 강제 push
 
 ## 호출 방법
 
