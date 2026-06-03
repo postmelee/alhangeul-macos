@@ -24,11 +24,11 @@ allow_implicit_invocation: false
 
 1. PR 메타 수집
    ```bash
-   gh pr view {N} --json number,title,state,baseRefName,headRefName,headRepository,mergeable,mergeStateStatus,reviewDecision,labels,body
+   gh pr view {N} --json number,title,state,baseRefName,headRefName,headRepository,mergeable,mergeStateStatus,reviewDecision,reviewRequests,reviews,labels,body
    gh pr diff {N} | head -200
    gh pr checks {N}
    ```
-   - 이슈 연결, base/head, mergeable, CI 상태 모두 확인
+   - 이슈 연결, base/head, mergeable, CI 상태, review request/review 상태 모두 확인
 2. 검토 문서 작성: `mydocs/pr/pr_{N}_review.md`
    - 표준 섹션:
      - PR 정보 (번호, 작성자, base/head, 연결 이슈)
@@ -46,7 +46,23 @@ allow_implicit_invocation: false
    - 빌드/렌더 smoke test 등은 변경 유형에 따라 `build_run_guide.md` 정책 적용
 6. 최종 보고서 작성: `mydocs/pr/pr_{N}_report.md`
    - 검토 결과, 검증 결과, 최종 권고, GitHub PR 코멘트 본문(또는 링크)
-7. 작업지시자 승인 후 GitHub PR에 코멘트/리뷰 등록 (merge 결정은 작업지시자가 수행)
+7. 작업지시자 승인 후 GitHub PR에 review 또는 코멘트 등록 (merge 결정은 작업지시자가 수행)
+   ```bash
+   REVIEW_BODY=/tmp/pr_{N}_review_body.md
+   # 승인된 공개 review/comment 본문을 "$REVIEW_BODY"에 작성한다.
+   scripts/validate-github-body.sh "$REVIEW_BODY"
+
+   # merge 권고를 실제 GitHub review로 남길 때
+   gh pr review {N} --approve --body-file "$REVIEW_BODY"
+
+   # 승인 없이 의견만 남길 때
+   gh pr review {N} --comment --body-file "$REVIEW_BODY"
+
+   # 수정 요청일 때
+   gh pr review {N} --request-changes --body-file "$REVIEW_BODY"
+   ```
+   - review request가 남아 있는 PR은 단순 PR comment보다 `gh pr review --body-file`로 실제 review를 등록해야 알림과 검토 상태가 정리된다.
+   - GitHub 공개 review/comment 본문은 inline `--body`로 넣지 않고 `--body-file`과 `scripts/validate-github-body.sh`를 사용한다.
 8. 처리 완료 시 문서 보관 이동
    ```bash
    git mv mydocs/pr/pr_{N}_review.md mydocs/pr/archives/
@@ -62,12 +78,15 @@ allow_implicit_invocation: false
 
 - `mydocs/pr/pr_{N}_review.md` 9개 표준 섹션 충족
 - 권고 결정이 명시됨 (merge / 수정 / 닫기 중 하나)
+- GitHub 공개 review/comment body file이 `scripts/validate-github-body.sh`를 통과
 - 처리 완료 후 3개 문서가 `mydocs/pr/archives/`에 존재
 
 ## 절대 하지 말 것
 
 - 내부 타스크 PR(`publish/task{N}`)에 본 SKILL 적용
 - 외부 PR을 작업지시자 승인 없이 merge 또는 close
+- 작업지시자 승인 없이 GitHub review/comment 등록
+- GitHub 공개 review/comment 본문을 inline `--body`로 등록
 - 외부 기여자 fork의 코드를 본 저장소에 직접 cherry-pick (PR 절차 생략)
 - 내부 단계 절차(`_stage{N}.md`, `_report.md`) 형식을 외부 PR 문서에 강제 적용
 

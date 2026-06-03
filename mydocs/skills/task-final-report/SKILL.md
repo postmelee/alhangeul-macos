@@ -61,6 +61,7 @@ allow_implicit_invocation: false
    HEAD_SHA=$(git rev-parse HEAD)
    PR_BODY=/tmp/task{N}-pr-body.md
    # .github/pull_request_template.md를 출발점으로 삼아 최종 보고서와 단계 보고서 기준으로 "$PR_BODY" 작성
+   scripts/validate-github-body.sh "$PR_BODY"
    gh pr create --base "$BASE_BRANCH" --head publish/task{N} \
      --title "Task #{N}: {제목}" \
      --body-file "$PR_BODY"
@@ -72,6 +73,7 @@ allow_implicit_invocation: false
    - 상대 링크(`mydocs/...`)나 `blob/publish/task{N}/...` 링크는 사용하지 않음
    - 시각적 변경사항이 있을 때만 Before/After 표를 유지
    - 관련 이슈에는 대상 타스크가 아니라 선행, 후속, Epic, upstream, 참고 PR/issue만 작성
+   - GitHub 공개 PR 본문은 inline `--body`로 넣지 않고 `--body-file`과 `scripts/validate-github-body.sh`를 사용
 8. 작업지시자에게 PR URL 전달과 리뷰·merge 승인 요청
 
 ## 검증
@@ -84,6 +86,7 @@ allow_implicit_invocation: false
 - PR 본문 작업 문서 항목에 raw GitHub blob URL, 상대 링크, `blob/publish/task{N}` 링크 없음
 - PR 본문에 `핵심 리뷰 포인트`와 `후속 이슈 제안`을 필요한 경우 유지하고, 해당 없으면 삭제하거나 `없음`으로 정리
 - PR 본문에 실행하지 않은 검증 체크리스트가 남아 있지 않음
+- PR 본문 파일이 `scripts/validate-github-body.sh`를 통과
 - 오늘할일 #{N} 상태 `완료` + `완료: HH:mm`
 
 ## 절대 하지 말 것

@@ -60,17 +60,22 @@ local/task{N} ── 커밋 · 커밋 · 커밋 ──→ publish/task{N} push
 git checkout local/task17
 BASE_BRANCH=devel # HostApp native shell/overlay 작업이면 native-viewer-editor
 git push origin local/task17:publish/task17
+scripts/validate-github-body.sh /tmp/task17-pr-body.md
 gh pr create --base "$BASE_BRANCH" --head publish/task17 --title "Task #17: 제목" --body-file /tmp/task17-pr-body.md
 
 # 2. 통합 브랜치 대상 PR 리뷰 + merge
-gh pr review --approve
+scripts/validate-github-body.sh /tmp/task17-review-body.md
+gh pr review --approve --body-file /tmp/task17-review-body.md
 gh pr merge --merge --delete-branch
 
 # 3. 출시 대상 통합 브랜치 → main PR (릴리즈 시)
-gh pr create --base main --head "$BASE_BRANCH" --title "Release: 제목"
+scripts/validate-github-body.sh /tmp/release-pr-body.md
+gh pr create --base main --head "$BASE_BRANCH" --title "Release: 제목" --body-file /tmp/release-pr-body.md
 gh pr review --approve
 gh pr merge --merge --delete-branch=false
 ```
+
+GitHub에 공개되는 PR/Issue 본문, 코멘트, review 본문은 `--body-file`로 등록하고, 등록 전 `scripts/validate-github-body.sh <body-file>`를 통과해야 한다. review 본문을 남기지 않는 단순 approve는 body-file 검증 대상이 아니지만, review request를 해소하기 위해 검토 내용을 남길 때는 `gh pr review --body-file`을 사용한다.
 
 ## 컨트리뷰터 워크플로우 (Fork 기반)
 
@@ -83,7 +88,8 @@ git checkout -b feature/my-task
 git push origin feature/my-task
 
 # 3. 원본 저장소의 통합 브랜치로 PR 생성
-gh pr create --repo postmelee/alhangeul-macos --base devel --head {contributor}:feature/my-task --title "제목"
+scripts/validate-github-body.sh /tmp/contributor-pr-body.md
+gh pr create --repo postmelee/alhangeul-macos --base devel --head {contributor}:feature/my-task --title "제목" --body-file /tmp/contributor-pr-body.md
 
 # 4. 메인테이너가 리뷰 + merge
 ```
