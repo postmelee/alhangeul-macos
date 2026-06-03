@@ -57,6 +57,8 @@ enum RenderNodeType: Decodable {
     case textBox
     case equation(EquationNode)
     case formObject(FormObjectNode)
+    case placeholder(PlaceholderNode)
+    case rawSvg(RawSvgNode)
     case footnoteMarker(FootnoteMarkerNode)
     case unknown
 
@@ -92,6 +94,8 @@ enum RenderNodeType: Decodable {
         if let v = try? keyed.decode(GroupNode.self, forKey: .init("Group")) { self = .group(v); return }
         if let v = try? keyed.decode(EquationNode.self, forKey: .init("Equation")) { self = .equation(v); return }
         if let v = try? keyed.decode(FormObjectNode.self, forKey: .init("FormObject")) { self = .formObject(v); return }
+        if let v = try? keyed.decode(PlaceholderNode.self, forKey: .init("Placeholder")) { self = .placeholder(v); return }
+        if let v = try? keyed.decode(RawSvgNode.self, forKey: .init("RawSvg")) { self = .rawSvg(v); return }
         if let v = try? keyed.decode(FootnoteMarkerNode.self, forKey: .init("FootnoteMarker")) { self = .footnoteMarker(v); return }
         self = .unknown
     }
@@ -369,6 +373,22 @@ struct FormObjectNode: Decodable {
         case formType = "form_type"
         case caption, text
     }
+}
+
+struct PlaceholderNode: Decodable {
+    let fillColor: UInt32
+    let strokeColor: UInt32
+    let label: String
+
+    enum CodingKeys: String, CodingKey {
+        case fillColor = "fill_color"
+        case strokeColor = "stroke_color"
+        case label
+    }
+}
+
+struct RawSvgNode: Decodable {
+    let svg: String
 }
 
 struct FootnoteMarkerNode: Decodable {

@@ -46,6 +46,8 @@ class CGTreeRenderer {
     private let maxPCXDecodedByteCount = 64 * 1024 * 1024
     private let maxPCXPixelByteCount = 64 * 1024 * 1024
     private let maxImageTileDrawCount = 4096
+    private let maxRawSvgFragmentBytes = 4 * 1024 * 1024
+    private let maxRawSvgRasterPixels = 67_108_864
 
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
@@ -224,6 +226,16 @@ class CGTreeRenderer {
         case .formObject:
             // 양식 개체는 M3 이후
             break
+
+        case .placeholder(let placeholder):
+            if shouldRenderFlowContent {
+                renderPlaceholder(placeholder, bbox: node.bbox, in: ctx)
+            }
+
+        case .rawSvg(let rawSvg):
+            if shouldRenderFlowContent {
+                renderRawSvg(rawSvg, bbox: node.bbox, in: ctx)
+            }
 
         case .footnoteMarker(let marker):
             if shouldRenderFlowContent {
@@ -1096,6 +1108,198 @@ class CGTreeRenderer {
         }
 
         ctx.restoreGState()
+    }
+
+    // MARK: - RawSvg / Placeholder
+
+    private func renderPlaceholder(_ placeholder: PlaceholderNode, bbox: BBox, in ctx: CGContext) {
+        guard let rect = validTopLeftRect(for: bbox) else { return }
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+
+        ctx.setFillColor(colorRefToCGColor(placeholder.fillColor))
+        ctx.fill(rect)
+
+        ctx.setStrokeColor(colorRefToCGColor(placeholder.strokeColor))
+        ctx.setLineWidth(1)
+        ctx.setLineDash(phase: 0, lengths: [6, 3])
+        ctx.stroke(rect.insetBy(dx: 0.5, dy: 0.5))
+        ctx.setLineDash(phase: 0, lengths: [])
+
+        let fontSize = min(max(min(rect.width, rect.height) * 0.06, 12), 28)
+        drawPlaceholderLabel(
+            placeholder.label,
+            in: visibleLabelRect(for: rect, in: ctx).insetBy(dx: 8, dy: 8),
+            color: colorRefToCGColor(placeholder.strokeColor),
+            fontSize: fontSize,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func renderRawSvg(_ rawSvg: RawSvgNode, bbox: BBox, in ctx: CGContext) {
+        guard let rect = validTopLeftRect(for: bbox),
+              rawSvg.svg.utf8.count <= maxRawSvgFragmentBytes,
+              !exceedsRawSvgRasterLimit(rect) else {
+            renderRawSvgFallback(bbox: bbox, in: ctx)
+            return
+        }
+
+        guard let imageData = decodeRawSvgSingleImageData(rawSvg.svg),
+              let image = decodeImage(imageData) else {
+            renderRawSvgFallback(bbox: bbox, in: ctx)
+            return
+        }
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        drawImage(image, inTopLeftRect: rect, in: ctx)
+        ctx.restoreGState()
+    }
+
+    private func decodeRawSvgSingleImageData(_ svg: String) -> Data? {
+        guard let dataURL = RawSvgSingleImageDataURLParser.parseDataURL(svg) else {
+            return nil
+        }
+        return decodeBase64ImageDataURL(dataURL)
+    }
+
+    private func decodeBase64ImageDataURL(_ dataURL: String) -> Data? {
+        guard dataURL.lowercased().hasPrefix("data:"),
+              let commaIndex = dataURL.firstIndex(of: ",") else {
+            return nil
+        }
+
+        let metadata = String(dataURL[dataURL.index(dataURL.startIndex, offsetBy: 5)..<commaIndex])
+        let normalizedMetadata = metadata.lowercased()
+        let metadataParts = normalizedMetadata.split(separator: ";", omittingEmptySubsequences: false)
+        let mediaType = metadataParts.first.map(String.init) ?? ""
+        guard (mediaType.isEmpty || mediaType.hasPrefix("image/")),
+              mediaType != "image/svg+xml",
+              metadataParts.contains("base64") else {
+            return nil
+        }
+
+        let encoded = dataURL[dataURL.index(after: commaIndex)...]
+        let compact = String(encoded.unicodeScalars.filter { !$0.properties.isWhitespace })
+        guard !compact.isEmpty else {
+            return nil
+        }
+        return Data(base64Encoded: compact)
+    }
+
+    private func renderRawSvgFallback(bbox: BBox, in ctx: CGContext) {
+        guard let rect = validTopLeftRect(for: bbox) else { return }
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(CGColor(gray: 0.97, alpha: 1.0))
+        ctx.fill(rect)
+        ctx.setStrokeColor(CGColor(gray: 0.45, alpha: 1.0))
+        ctx.setLineWidth(1)
+        ctx.setLineDash(phase: 0, lengths: [6, 3])
+        ctx.stroke(rect.insetBy(dx: 0.5, dy: 0.5))
+        ctx.setLineDash(phase: 0, lengths: [])
+
+        let fontSize = min(max(min(rect.width, rect.height) * 0.08, 12), 24)
+        drawPlaceholderLabel(
+            "SVG",
+            in: visibleLabelRect(for: rect, in: ctx).insetBy(dx: 8, dy: 8),
+            color: CGColor(gray: 0.35, alpha: 1.0),
+            fontSize: fontSize,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func drawPlaceholderLabel(
+        _ text: String,
+        in rect: CGRect,
+        color: CGColor,
+        fontSize: CGFloat,
+        in ctx: CGContext
+    ) {
+        guard !text.isEmpty,
+              isValidImageDrawSize(rect.size),
+              rect.width > 8,
+              rect.height > 8 else {
+            return
+        }
+
+        var resolvedFontSize = min(fontSize, rect.height * 0.65)
+        var line: CTLine?
+        var metrics = TextRunTypographicMetrics(width: 0, ascent: 0, descent: 0, leading: 0)
+
+        while resolvedFontSize >= 6 {
+            let font = resolveAppleFont(
+                hwpFontFamily: "Apple SD Gothic Neo",
+                bold: false,
+                italic: false,
+                size: resolvedFontSize
+            )
+            let attributes: [NSAttributedString.Key: Any] = [
+                coreTextFontKey: font,
+                coreTextForegroundColorKey: color,
+            ]
+            let candidateLine = CTLineCreateWithAttributedString(
+                NSAttributedString(string: text, attributes: attributes)
+            )
+            metrics = textRunTypographicMetrics(candidateLine)
+            if metrics.width <= rect.width || metrics.width <= 0 {
+                line = candidateLine
+                break
+            }
+            let scale = rect.width / metrics.width
+            let nextFontSize = floor(resolvedFontSize * scale)
+            if nextFontSize >= resolvedFontSize {
+                resolvedFontSize -= 1
+            } else {
+                resolvedFontSize = nextFontSize
+            }
+        }
+
+        guard let line, metrics.width.isFinite else { return }
+
+        let textX = max(0, (rect.width - metrics.width) / 2)
+        let textY = rect.height / 2 - (metrics.ascent - metrics.descent) / 2
+
+        ctx.saveGState()
+        ctx.translateBy(x: rect.minX, y: rect.minY + rect.height)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.textPosition = CGPoint(x: textX, y: textY)
+        CTLineDraw(line, ctx)
+        ctx.restoreGState()
+    }
+
+    private func validTopLeftRect(for bbox: BBox) -> CGRect? {
+        let rect = cgRect(bbox)
+        guard rect.origin.x.isFinite,
+              rect.origin.y.isFinite,
+              isValidImageDrawSize(rect.size) else {
+            return nil
+        }
+        return rect
+    }
+
+    private func visibleLabelRect(for rect: CGRect, in ctx: CGContext) -> CGRect {
+        let clipBounds = ctx.boundingBoxOfClipPath
+        guard !clipBounds.isNull, !clipBounds.isInfinite else {
+            return rect
+        }
+
+        let visibleRect = rect.intersection(clipBounds)
+        guard isValidImageDrawSize(visibleRect.size) else {
+            return rect
+        }
+        return visibleRect
+    }
+
+    private func exceedsRawSvgRasterLimit(_ rect: CGRect) -> Bool {
+        let pixelEstimate = Double(rect.width * rect.height)
+        return !pixelEstimate.isFinite || pixelEstimate > Double(maxRawSvgRasterPixels)
     }
 
     private func equationLocalBounds(equation: EquationNode, items: [EquationSVGDrawItem]) -> CGRect {
@@ -3760,6 +3964,81 @@ private enum EquationSVGTextAnchor {
     case start
     case middle
     case end
+}
+
+private final class RawSvgSingleImageDataURLParser: NSObject, XMLParserDelegate {
+    private var imageElementCount = 0
+    private var dataURL: String?
+    private var invalid = false
+
+    static func parseDataURL(_ fragment: String) -> String? {
+        let trimmed = fragment.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard isSingleSelfClosingImageFragment(trimmed),
+              let data = """
+              <root xmlns:xlink="http://www.w3.org/1999/xlink">\(trimmed)</root>
+              """.data(using: .utf8) else {
+            return nil
+        }
+
+        let delegate = RawSvgSingleImageDataURLParser()
+        let parser = XMLParser(data: data)
+        parser.delegate = delegate
+        parser.shouldProcessNamespaces = false
+        parser.shouldReportNamespacePrefixes = false
+        parser.shouldResolveExternalEntities = false
+
+        guard parser.parse(),
+              !delegate.invalid,
+              delegate.imageElementCount == 1,
+              let dataURL = delegate.dataURL?.trimmingCharacters(in: .whitespacesAndNewlines),
+              dataURL.lowercased().hasPrefix("data:") else {
+            return nil
+        }
+        return dataURL
+    }
+
+    func parser(
+        _ parser: XMLParser,
+        didStartElement elementName: String,
+        namespaceURI: String?,
+        qualifiedName qName: String?,
+        attributes attributeDict: [String: String]
+    ) {
+        switch elementName.lowercased() {
+        case "root":
+            return
+        case "image":
+            imageElementCount += 1
+            guard imageElementCount == 1 else {
+                invalid = true
+                return
+            }
+            dataURL = attributeDict["xlink:href"] ?? attributeDict["href"]
+        default:
+            invalid = true
+        }
+    }
+
+    func parser(_ parser: XMLParser, foundCharacters string: String) {
+        if !string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            invalid = true
+        }
+    }
+
+    private static func isSingleSelfClosingImageFragment(_ fragment: String) -> Bool {
+        guard fragment.hasPrefix("<image"),
+              fragment.hasSuffix("/>"),
+              fragment.unicodeScalars.filter({ $0 == "<" }).count == 1 else {
+            return false
+        }
+
+        let tagNameEnd = fragment.index(fragment.startIndex, offsetBy: "<image".count)
+        guard tagNameEnd < fragment.endIndex else {
+            return false
+        }
+        let next = fragment[tagNameEnd]
+        return next.isWhitespace || next == "/" || next == ">"
+    }
 }
 
 private final class EquationSVGFragmentParser: NSObject, XMLParserDelegate {
