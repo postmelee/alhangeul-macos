@@ -95,6 +95,11 @@ class CGTreeRenderer {
         case verticalRight
     }
 
+    private enum FormObjectLabelAlignment {
+        case left
+        case center
+    }
+
     func render(
         tree: RenderNode,
         in context: CGContext,
@@ -223,9 +228,10 @@ class CGTreeRenderer {
                 renderEquation(equation, bbox: node.bbox, in: ctx)
             }
 
-        case .formObject:
-            // 양식 개체는 M3 이후
-            break
+        case .formObject(let formObject):
+            if shouldRenderFlowContent {
+                renderFormObject(formObject, bbox: node.bbox, in: ctx)
+            }
 
         case .placeholder(let placeholder):
             if shouldRenderFlowContent {
@@ -1110,7 +1116,378 @@ class CGTreeRenderer {
         ctx.restoreGState()
     }
 
-    // MARK: - RawSvg / Placeholder
+    // MARK: - FormObject / RawSvg / Placeholder
+
+    private func renderFormObject(_ formObject: FormObjectNode, bbox: BBox, in ctx: CGContext) {
+        guard let rect = validTopLeftRect(for: bbox) else { return }
+
+        switch normalizedFormObjectType(formObject.formType) {
+        case "pushbutton":
+            renderPushButtonFormObject(formObject, rect: rect, in: ctx)
+        case "checkbox":
+            renderCheckBoxFormObject(formObject, rect: rect, in: ctx)
+        case "radiobutton":
+            renderRadioButtonFormObject(formObject, rect: rect, in: ctx)
+        case "combobox":
+            renderComboBoxFormObject(formObject, rect: rect, in: ctx)
+        case "edit":
+            renderEditFormObject(formObject, rect: rect, in: ctx)
+        default:
+            renderUnsupportedFormObject(formObject, rect: rect, in: ctx)
+        }
+    }
+
+    private func renderPushButtonFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(rgbColor(0xD0D0D0, alpha: alpha))
+        ctx.fill(rect)
+        ctx.setStrokeColor(rgbColor(0xA0A0A0, alpha: alpha))
+        ctx.setLineWidth(0.5)
+        ctx.stroke(rect.insetBy(dx: 0.25, dy: 0.25))
+
+        let labelRect = visibleLabelRect(for: rect, in: ctx).insetBy(dx: 4, dy: 2)
+        drawFormObjectLabel(
+            formObjectDisplayLabel(formObject),
+            in: labelRect,
+            color: rgbColor(0x808080, alpha: alpha),
+            fontSize: min(max(rect.height * 0.45, 9), 12),
+            alignment: .center,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func renderCheckBoxFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+        let squareSize = min(CGFloat(13), max(CGFloat(8), rect.height - 4))
+        let squareRect = CGRect(
+            x: rect.minX + 2,
+            y: rect.midY - squareSize / 2,
+            width: squareSize,
+            height: squareSize
+        )
+        let labelRect = CGRect(
+            x: squareRect.maxX + 3,
+            y: rect.minY,
+            width: max(0, rect.maxX - squareRect.maxX - 3),
+            height: rect.height
+        )
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(rgbColor(0xFFFFFF, alpha: alpha))
+        ctx.fill(squareRect)
+        ctx.setStrokeColor(rgbColor(0x606060, alpha: alpha))
+        ctx.setLineWidth(0.8)
+        ctx.stroke(squareRect.insetBy(dx: 0.4, dy: 0.4))
+
+        if isFormObjectSelected(formObject) {
+            ctx.setStrokeColor(formObjectTextColor(formObject, alpha: alpha))
+            ctx.setLineWidth(1.5)
+            ctx.setLineCap(.round)
+            ctx.setLineJoin(.round)
+            ctx.beginPath()
+            ctx.move(to: CGPoint(x: squareRect.minX + squareSize * 0.20, y: squareRect.minY + squareSize * 0.55))
+            ctx.addLine(to: CGPoint(x: squareRect.minX + squareSize * 0.45, y: squareRect.minY + squareSize * 0.80))
+            ctx.addLine(to: CGPoint(x: squareRect.minX + squareSize * 0.85, y: squareRect.minY + squareSize * 0.20))
+            ctx.strokePath()
+        }
+
+        drawFormObjectLabel(
+            formObjectDisplayLabel(formObject),
+            in: visibleLabelRect(for: labelRect, in: ctx),
+            color: formObjectTextColor(formObject, alpha: alpha),
+            fontSize: min(max(rect.height * 0.55, 9), 12),
+            alignment: .left,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func renderRadioButtonFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+        let radius = min(CGFloat(6.5), max(CGFloat(4), (rect.height - 4) / 2))
+        let center = CGPoint(x: rect.minX + 2 + radius, y: rect.midY)
+        let labelRect = CGRect(
+            x: center.x + radius + 3,
+            y: rect.minY,
+            width: max(0, rect.maxX - center.x - radius - 3),
+            height: rect.height
+        )
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(rgbColor(0xFFFFFF, alpha: alpha))
+        ctx.fillEllipse(in: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
+        ctx.setStrokeColor(rgbColor(0x606060, alpha: alpha))
+        ctx.setLineWidth(0.8)
+        ctx.strokeEllipse(in: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
+
+        if isFormObjectSelected(formObject) {
+            let dotRadius = radius * 0.45
+            ctx.setFillColor(formObjectTextColor(formObject, alpha: alpha))
+            ctx.fillEllipse(in: CGRect(
+                x: center.x - dotRadius,
+                y: center.y - dotRadius,
+                width: dotRadius * 2,
+                height: dotRadius * 2
+            ))
+        }
+
+        drawFormObjectLabel(
+            formObjectDisplayLabel(formObject),
+            in: visibleLabelRect(for: labelRect, in: ctx),
+            color: formObjectTextColor(formObject, alpha: alpha),
+            fontSize: min(max(rect.height * 0.55, 9), 12),
+            alignment: .left,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func renderComboBoxFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+        let buttonWidth = min(max(rect.height * 0.8, 12), rect.width * 0.35)
+        let buttonRect = CGRect(x: rect.maxX - buttonWidth, y: rect.minY, width: buttonWidth, height: rect.height)
+        let labelRect = CGRect(
+            x: rect.minX + 3,
+            y: rect.minY,
+            width: max(0, buttonRect.minX - rect.minX - 6),
+            height: rect.height
+        )
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(rgbColor(0xFFFFFF, alpha: alpha))
+        ctx.fill(rect)
+        ctx.setStrokeColor(rgbColor(0xA0A0A0, alpha: alpha))
+        ctx.setLineWidth(0.8)
+        ctx.stroke(rect.insetBy(dx: 0.4, dy: 0.4))
+        ctx.setFillColor(rgbColor(0xE0E0E0, alpha: alpha))
+        ctx.fill(buttonRect)
+        ctx.setStrokeColor(rgbColor(0xA0A0A0, alpha: alpha))
+        ctx.setLineWidth(0.5)
+        ctx.stroke(buttonRect.insetBy(dx: 0.25, dy: 0.25))
+        drawComboBoxArrow(in: buttonRect, alpha: alpha, in: ctx)
+
+        drawFormObjectLabel(
+            formObjectDisplayLabel(formObject),
+            in: visibleLabelRect(for: labelRect, in: ctx),
+            color: formObjectTextColor(formObject, alpha: alpha),
+            fontSize: min(max(rect.height * 0.55, 8), 10.6),
+            alignment: .left,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func renderEditFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+        let fillColor = editFormObjectFillColor(formObject, alpha: alpha)
+        let label = formObjectDisplayLabel(
+            formObject,
+            allowNameFallback: false,
+            allowTypeFallback: false
+        )
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(fillColor)
+        ctx.fill(rect)
+        ctx.setStrokeColor(rgbColor(0xA0A0A0, alpha: alpha))
+        ctx.setLineWidth(0.8)
+        ctx.stroke(rect.insetBy(dx: 0.4, dy: 0.4))
+
+        if !label.isEmpty {
+            drawFormObjectLabel(
+                label,
+                in: visibleLabelRect(for: rect.insetBy(dx: 3, dy: 2), in: ctx),
+                color: formObjectTextColor(formObject, alpha: alpha),
+                fontSize: min(max(rect.height * 0.55, 9), 12),
+                alignment: .left,
+                in: ctx
+            )
+        }
+
+        ctx.restoreGState()
+    }
+
+    private func renderUnsupportedFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+        let label = nonEmptyFormObjectString(formObject.name) ?? "FORM \(formObject.formType)"
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(formObjectColor(formObject.backColor, fallback: rgbColor(0xF7F7F7, alpha: alpha), alpha: alpha))
+        ctx.fill(rect)
+        ctx.setStrokeColor(rgbColor(0x6A7785, alpha: alpha))
+        ctx.setLineWidth(1)
+        ctx.stroke(rect.insetBy(dx: 0.5, dy: 0.5))
+
+        drawFormObjectLabel(
+            label,
+            in: visibleLabelRect(for: rect.insetBy(dx: 4, dy: 2), in: ctx),
+            color: formObjectTextColor(formObject, alpha: alpha),
+            fontSize: min(max(rect.height * 0.45, 8), 12),
+            alignment: .center,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func drawComboBoxArrow(in rect: CGRect, alpha: CGFloat, in ctx: CGContext) {
+        let arrowWidth = min(rect.width * 0.5, rect.height * 0.42)
+        let arrowHeight = arrowWidth * 0.5
+        let center = CGPoint(x: rect.midX, y: rect.midY + arrowHeight * 0.15)
+
+        ctx.setFillColor(rgbColor(0x404040, alpha: alpha))
+        ctx.beginPath()
+        ctx.move(to: CGPoint(x: center.x - arrowWidth / 2, y: center.y - arrowHeight / 2))
+        ctx.addLine(to: CGPoint(x: center.x + arrowWidth / 2, y: center.y - arrowHeight / 2))
+        ctx.addLine(to: CGPoint(x: center.x, y: center.y + arrowHeight / 2))
+        ctx.closePath()
+        ctx.fillPath()
+    }
+
+    private func drawFormObjectLabel(
+        _ text: String,
+        in rect: CGRect,
+        color: CGColor,
+        fontSize: CGFloat,
+        alignment: FormObjectLabelAlignment,
+        in ctx: CGContext
+    ) {
+        guard !text.isEmpty,
+              isValidImageDrawSize(rect.size),
+              rect.width > 3,
+              rect.height > 3 else {
+            return
+        }
+
+        var resolvedFontSize = min(fontSize, rect.height * 0.75)
+        var line: CTLine?
+        var metrics = TextRunTypographicMetrics(width: 0, ascent: 0, descent: 0, leading: 0)
+
+        while resolvedFontSize >= 5 {
+            let font = resolveAppleFont(
+                hwpFontFamily: "Apple SD Gothic Neo",
+                bold: false,
+                italic: false,
+                size: resolvedFontSize
+            )
+            let attributes: [NSAttributedString.Key: Any] = [
+                coreTextFontKey: font,
+                coreTextForegroundColorKey: color,
+            ]
+            let candidateLine = CTLineCreateWithAttributedString(
+                NSAttributedString(string: text, attributes: attributes)
+            )
+            metrics = textRunTypographicMetrics(candidateLine)
+            if metrics.width <= rect.width || metrics.width <= 0 {
+                line = candidateLine
+                break
+            }
+            let scale = rect.width / metrics.width
+            let nextFontSize = floor(resolvedFontSize * scale)
+            if nextFontSize >= resolvedFontSize {
+                resolvedFontSize -= 1
+            } else {
+                resolvedFontSize = nextFontSize
+            }
+        }
+
+        guard let line, metrics.width.isFinite else { return }
+
+        let textX: CGFloat
+        switch alignment {
+        case .left:
+            textX = 0
+        case .center:
+            textX = max(0, (rect.width - metrics.width) / 2)
+        }
+        let textY = rect.height / 2 - (metrics.ascent - metrics.descent) / 2
+
+        ctx.saveGState()
+        ctx.translateBy(x: rect.minX, y: rect.minY + rect.height)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.textPosition = CGPoint(x: textX, y: textY)
+        CTLineDraw(line, ctx)
+        ctx.restoreGState()
+    }
+
+    private func formObjectDisplayLabel(
+        _ formObject: FormObjectNode,
+        allowNameFallback: Bool = true,
+        allowTypeFallback: Bool = true
+    ) -> String {
+        if let text = nonEmptyFormObjectString(formObject.text) {
+            return text
+        }
+        if let caption = nonEmptyFormObjectString(formObject.caption) {
+            return caption
+        }
+        if allowNameFallback, let name = nonEmptyFormObjectString(formObject.name) {
+            return name
+        }
+        return allowTypeFallback ? formObject.formType : ""
+    }
+
+    private func nonEmptyFormObjectString(_ value: String?) -> String? {
+        guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !trimmed.isEmpty else {
+            return nil
+        }
+        return trimmed
+    }
+
+    private func normalizedFormObjectType(_ type: String) -> String {
+        String(type.unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) }).lowercased()
+    }
+
+    private func isFormObjectSelected(_ formObject: FormObjectNode) -> Bool {
+        (formObject.value ?? 0) != 0
+    }
+
+    private func formObjectAlpha(_ formObject: FormObjectNode) -> CGFloat {
+        formObject.enabled == false ? 0.45 : 1.0
+    }
+
+    private func formObjectTextColor(_ formObject: FormObjectNode, alpha: CGFloat) -> CGColor {
+        formObjectColor(formObject.foreColor, fallback: rgbColor(0x000000, alpha: alpha), alpha: alpha)
+    }
+
+    private func editFormObjectFillColor(_ formObject: FormObjectNode, alpha: CGFloat) -> CGColor {
+        let normalizedBackColor = formObject.backColor?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        guard normalizedBackColor != "#f0f0f0" else {
+            return rgbColor(0xFFFFFF, alpha: alpha)
+        }
+        return formObjectColor(formObject.backColor, fallback: rgbColor(0xFFFFFF, alpha: alpha), alpha: alpha)
+    }
+
+    private func formObjectColor(_ value: String?, fallback: CGColor, alpha: CGFloat) -> CGColor {
+        guard let value else {
+            return fallback.copy(alpha: clampedAlpha(Double(alpha))) ?? fallback
+        }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count == 7, trimmed.first == "#" else {
+            return fallback.copy(alpha: clampedAlpha(Double(alpha))) ?? fallback
+        }
+        let hex = String(trimmed.dropFirst())
+        guard let raw = UInt32(hex, radix: 16) else {
+            return fallback.copy(alpha: clampedAlpha(Double(alpha))) ?? fallback
+        }
+        return rgbColor(raw, alpha: alpha)
+    }
 
     private func renderPlaceholder(_ placeholder: PlaceholderNode, bbox: BBox, in ctx: CGContext) {
         guard let rect = validTopLeftRect(for: bbox) else { return }
@@ -3830,6 +4207,13 @@ class CGTreeRenderer {
         let r = CGFloat(ref & 0xFF) / 255.0
         let g = CGFloat((ref >> 8) & 0xFF) / 255.0
         let b = CGFloat((ref >> 16) & 0xFF) / 255.0
+        return CGColor(red: r, green: g, blue: b, alpha: clampedAlpha(Double(alpha)))
+    }
+
+    private func rgbColor(_ rgb: UInt32, alpha: CGFloat = 1.0) -> CGColor {
+        let r = CGFloat((rgb >> 16) & 0xFF) / 255.0
+        let g = CGFloat((rgb >> 8) & 0xFF) / 255.0
+        let b = CGFloat(rgb & 0xFF) / 255.0
         return CGColor(red: r, green: g, blue: b, alpha: clampedAlpha(Double(alpha)))
     }
 
