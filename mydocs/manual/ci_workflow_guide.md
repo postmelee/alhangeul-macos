@@ -288,6 +288,7 @@ bash scripts/ci/check-rhwp-upstream-release.sh --target-tag <rhwp-tag> --run-com
 - `dry_run=true`이면 target 조회와 impact 분류까지만 수행하고 build, push, PR 생성을 하지 않는다.
 - 같은 automation branch 또는 open PR이 이미 있으면 새 PR을 만들지 않는다.
 - generated PR body에는 `Automation source: #204`만 기록하고 issue close keyword를 쓰지 않는다.
+- upstream WASM build는 upstream root의 `.env.docker`를 사용한다. checkout에 `.env.docker`가 없고 `.env.docker.example`만 있으면 workflow가 example을 복사해 CI용 env file을 준비한다.
 
 입력:
 
