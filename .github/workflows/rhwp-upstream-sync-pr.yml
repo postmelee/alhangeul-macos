@@ -293,6 +293,15 @@ jobs:
 
           cd "$upstream_dir"
 
+          if [ ! -f .env.docker ]; then
+            if [ -f .env.docker.example ]; then
+              cp .env.docker.example .env.docker
+            else
+              echo "ERROR: upstream rhwp is missing .env.docker and .env.docker.example" >&2
+              exit 1
+            fi
+          fi
+
           if command -v docker-compose >/dev/null 2>&1; then
             docker-compose --env-file .env.docker run --rm wasm
           else
