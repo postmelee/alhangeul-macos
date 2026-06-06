@@ -7,6 +7,7 @@
 - 작업 브랜치: `local/task348`
 - 게시 브랜치: `publish/task348`
 - 기준 브랜치: `devel`
+- 수정 PR: #350 `https://github.com/postmelee/alhangeul-macos/pull/350`
 - 구현/검증 최종 커밋: `47eeb51 Task #348 Stage 5: full sync 자동 PR 생성 검증`
 
 이번 작업은 `rhwp Upstream Sync PR` workflow를 `rhwp-studio` bundled asset만 갱신하는 자동화에서, upstream `rhwp` release tag 하나를 기준으로 native core provenance와 bundled `rhwp-studio`를 함께 갱신하는 full upstream sync 후보 PR 생성 자동화로 확장했다.
@@ -204,4 +205,4 @@ check 결과:
 - PR CI 최종 pass 확인 완료
 - public release boundary 유지 확인 완료
 
-다음 절차는 `publish/task348`를 `devel` 대상으로 PR 게시하고, merge 후 #348 이슈를 정리하는 것이다.
+다음 절차는 #350을 review 후 merge하고, merge 후 #348 이슈를 정리하는 것이다.
