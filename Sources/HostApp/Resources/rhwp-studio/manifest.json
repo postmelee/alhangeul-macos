@@ -2,11 +2,11 @@
   "name": "rhwp-studio",
   "source_repository": "https://github.com/edwardkim/rhwp.git",
   "source_ref_kind": "release-tag",
-  "source_release_tag": "v0.7.13",
-  "source_resolved_commit": "b3e16ef212af81ef37d973ddb86d6816d3804642",
-  "wasm_build_command": "wasm-pack build --target web",
+  "source_release_tag": "v0.7.15",
+  "source_resolved_commit": "aa925a5954f0fd26dfcef2166cbce7877c481f44",
+  "wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "recommended_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
-  "actual_wasm_build_command": "wasm-pack build --target web",
+  "actual_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "studio_build_command": "npx tsc && npx vite build --base ./",
   "copied_from": "rhwp-studio/dist",
   "excluded_paths": [
@@ -16,24 +16,24 @@
     "alhangeul-wkwebview-overrides.css",
     "fonts/FONTS.md"
   ],
-  "copied_file_count": 57,
-  "copied_total_bytes": 36462802,
+  "copied_file_count": 58,
+  "copied_total_bytes": 37682413,
   "entrypoints": {
     "index_html": {
       "path": "index.html",
-      "sha256": "1aaff08baac8fa0238bcbcdc10ebbba8888cd0609cf8efd2185963d4295451d3"
+      "sha256": "28319c355e0dd9139b77f3fc11dc8b73a833776807969872adf031787082f3d4"
     },
     "main_js": {
-      "path": "assets/index-DokHBifW.js",
-      "sha256": "a4ad1f2db39098325ae3317bdc7be66bd4392d798b2b095e5a594683ac6c366b"
+      "path": "assets/index-DVBNvrb8.js",
+      "sha256": "4d0aeae00ec6c00864fb86bc2246490d07ecaccc29042843668999df7fcc5b1e"
     },
     "main_css": {
-      "path": "assets/index-Dp_1IBLX.css",
-      "sha256": "1bc93e8cb700ff500741a6bbd195cef62a6a538ff487a3bf7be62b6d7721b320"
+      "path": "assets/index-C9eG_4qi.css",
+      "sha256": "ccbb510b894d264b10256a4b8bd2190913d03d15d80d5a9098c2ce36806b0f8c"
     },
     "wasm": {
-      "path": "assets/rhwp_bg-BPam6dJo.wasm",
-      "sha256": "6de7b5ae2b0ddc9640558ea6124e6b04ed724aec9bf12e75b7bddfc992618708"
+      "path": "assets/rhwp_bg-4pi8y5Ik.wasm",
+      "sha256": "a7a5a6f60c23a0cecf133600246ad47595787ae26a4a5a104ac514067c3f7330"
     }
   }
 }
