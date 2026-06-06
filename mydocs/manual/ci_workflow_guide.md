@@ -289,6 +289,7 @@ bash scripts/ci/check-rhwp-upstream-release.sh --target-tag <rhwp-tag> --run-com
 - 같은 automation branch 또는 open PR이 이미 있으면 새 PR을 만들지 않는다.
 - generated PR body에는 `Automation source: #204`만 기록하고 issue close keyword를 쓰지 않는다.
 - upstream WASM build는 upstream root의 `.env.docker`를 사용한다. CI에서는 `.env.docker.example` 존재를 확인한 뒤 runner의 `id -u`, `id -g` 값으로 `.env.docker`를 생성해 Docker container user와 bind mount owner를 맞춘다.
+- 자동 PR 생성까지 동작하려면 repository Actions workflow permission에서 Actions의 PR 생성/승인이 허용되어야 한다. 꺼져 있으면 automation branch push는 성공해도 `GraphQL: GitHub Actions is not permitted to create or approve pull requests`로 PR 생성이 실패한다.
 
 입력:
 
