@@ -68,10 +68,10 @@ jobs:
       GH_TOKEN: ${{ github.token }}
 
     steps:
-      - name: Check out base branch
+      - name: Check out workflow ref
         uses: actions/checkout@v6
         with:
-          ref: ${{ env.BASE_BRANCH }}
+          ref: ${{ github.ref }}
           fetch-depth: 0
 
       - name: Verify helper syntax
@@ -336,10 +336,10 @@ jobs:
     if: ${{ needs.resolve-target.outputs.should_build == 'true' }}
 
     steps:
-      - name: Check out base branch
+      - name: Check out workflow ref
         uses: actions/checkout@v6
         with:
-          ref: ${{ env.BASE_BRANCH }}
+          ref: ${{ github.ref }}
           fetch-depth: 0
 
       - name: Check out upstream rhwp
@@ -416,10 +416,10 @@ jobs:
     if: ${{ needs.resolve-target.outputs.should_build == 'true' }}
 
     steps:
-      - name: Check out base branch
+      - name: Check out workflow ref
         uses: actions/checkout@v6
         with:
-          ref: ${{ env.BASE_BRANCH }}
+          ref: ${{ github.ref }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -514,6 +514,9 @@ jobs:
           upstream_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream"
           impact_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream-impact"
           mkdir -p "$work_dir"
+          body_helper="$work_dir/write-rhwp-full-sync-pr-body.sh"
+          cp scripts/ci/write-rhwp-full-sync-pr-body.sh "$body_helper"
+          chmod +x "$body_helper"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -568,7 +571,7 @@ jobs:
           impact_details_file="$(find "$impact_dir" -name 'impact-details-*.tsv' -type f | sort | head -1)"
 
           body_file="$work_dir/pr-body.md"
-          scripts/ci/write-rhwp-full-sync-pr-body.sh \
+          "$body_helper" \
             --output "$body_file" \
             --current-core-tag "${{ needs.resolve-target.outputs.current_core_tag }}" \
             --current-core-commit "${{ needs.resolve-target.outputs.current_core_commit }}" \
