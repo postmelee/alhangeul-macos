@@ -87,7 +87,7 @@ tracked stage 대상은 최소 다음을 포함한다.
 
 | 이름 | 위치 | 목적 |
 |------|------|------|
-| `ALHANGEUL_AUTOMATION_APP_ID` | repository variable | GitHub App ID |
+| `ALHANGEUL_AUTOMATION_CLIENT_ID` | repository variable | GitHub App Client ID |
 | `ALHANGEUL_AUTOMATION_APP_PRIVATE_KEY` | repository secret | GitHub App private key |
 
 GitHub App 권한:
@@ -157,7 +157,7 @@ Stage 3 구현 후 최소 검증은 다음 순서로 수행한다.
 
 ## 잔여 조건
 
-repository variable 목록 조회 결과 현재 출력되는 variable은 없었다. secret 목록 조회는 승인 검토 타임아웃으로 확인하지 못했다. 따라서 Stage 3 구현은 token 미설정 시 명확히 실패하는 구조로 만들고, Stage 5 실제 full run 전에 `ALHANGEUL_AUTOMATION_APP_ID`, `ALHANGEUL_AUTOMATION_APP_PRIVATE_KEY` 준비 여부를 다시 확인해야 한다.
+repository variable 목록 조회 결과 현재 출력되는 variable은 없었다. secret 목록 조회는 승인 검토 타임아웃으로 확인하지 못했다. 따라서 Stage 3 구현은 token 미설정 시 명확히 실패하는 구조로 만들고, Stage 5 실제 full run 전에 `ALHANGEUL_AUTOMATION_CLIENT_ID`, `ALHANGEUL_AUTOMATION_APP_PRIVATE_KEY` 준비 여부를 다시 확인해야 한다.
 
 ## 승인 요청 사항
 

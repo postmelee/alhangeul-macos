@@ -8,7 +8,7 @@ on:
         required: false
         default: ""
       force_pr:
-        description: Create a PR even when only non-impact upstream paths changed.
+        description: Compatibility input. Full sync creates a PR whenever core/studio provenance differs.
         required: true
         type: boolean
         default: false
@@ -21,29 +21,51 @@ on:
     - cron: "41 0 * * *"
 
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
+  contents: read
+  pull-requests: read
 
 concurrency:
   group: rhwp-upstream-sync-pr
   cancel-in-progress: false
 
+env:
+  BASE_BRANCH: devel
+  MAINTAINER: postmelee
+  TARGET_TAG_INPUT: ${{ inputs.target_tag || '' }}
+  FORCE_PR: ${{ inputs.force_pr || false }}
+  DRY_RUN: ${{ inputs.dry_run || false }}
+  UPSTREAM_REPOSITORY: edwardkim/rhwp
+  UPSTREAM_GIT_URL: https://github.com/edwardkim/rhwp.git
+
 jobs:
-  sync-rhwp-studio-pr:
-    name: Create rhwp-studio sync PR candidate
+  resolve-target:
+    name: Resolve rhwp full sync target
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 30
+
+    outputs:
+      current_core_tag: ${{ steps.resolve.outputs.current_core_tag }}
+      current_core_commit: ${{ steps.resolve.outputs.current_core_commit }}
+      current_studio_tag: ${{ steps.resolve.outputs.current_studio_tag }}
+      current_studio_commit: ${{ steps.resolve.outputs.current_studio_commit }}
+      impact_current_tag: ${{ steps.resolve.outputs.impact_current_tag }}
+      impact_current_commit: ${{ steps.resolve.outputs.impact_current_commit }}
+      target_tag: ${{ steps.resolve.outputs.target_tag }}
+      target_commit: ${{ steps.resolve.outputs.target_commit }}
+      target_url: ${{ steps.resolve.outputs.target_url }}
+      branch_name: ${{ steps.resolve.outputs.branch_name }}
+      current: ${{ steps.resolve.outputs.current }}
+      core_current: ${{ steps.resolve.outputs.core_current }}
+      studio_current: ${{ steps.resolve.outputs.studio_current }}
+      has_viewer_impact: ${{ steps.impact.outputs.has_viewer_impact }}
+      impact_reason_count: ${{ steps.impact.outputs.impact_reason_count }}
+      existing_branch: ${{ steps.existing.outputs.branch_exists }}
+      existing_pr_url: ${{ steps.existing.outputs.pr_url }}
+      should_build: ${{ steps.decision.outputs.should_build }}
+      decision: ${{ steps.decision.outputs.decision }}
 
     env:
       GH_TOKEN: ${{ github.token }}
-      BASE_BRANCH: devel
-      MAINTAINER: postmelee
-      TARGET_TAG_INPUT: ${{ inputs.target_tag || '' }}
-      FORCE_PR: ${{ inputs.force_pr || false }}
-      DRY_RUN: ${{ inputs.dry_run || false }}
-      UPSTREAM_REPOSITORY: edwardkim/rhwp
-      UPSTREAM_GIT_URL: https://github.com/edwardkim/rhwp.git
 
     steps:
       - name: Check out base branch
@@ -58,11 +80,13 @@ jobs:
           set -euo pipefail
           bash -n scripts/ci/check-rhwp-upstream-release.sh
           bash -n scripts/ci/detect-rhwp-studio-impact.sh
-          bash -n scripts/ci/write-rhwp-studio-sync-pr-body.sh
+          bash -n scripts/ci/read-rhwp-core-lock.sh
+          bash -n scripts/ci/write-rhwp-full-sync-pr-body.sh
           bash -n scripts/sync-rhwp-studio.sh
           bash -n scripts/verify-rhwp-studio-assets.sh
           scripts/ci/detect-rhwp-studio-impact.sh --help
-          scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
+          scripts/ci/read-rhwp-core-lock.sh --help
+          scripts/ci/write-rhwp-full-sync-pr-body.sh --help
           scripts/sync-rhwp-studio.sh --help
           scripts/verify-rhwp-studio-assets.sh --help
 
@@ -118,8 +142,10 @@ jobs:
           }
 
           manifest_path="Sources/HostApp/Resources/rhwp-studio/manifest.json"
-          current_tag="$(manifest_field "$manifest_path" source_release_tag)"
-          current_commit="$(manifest_field "$manifest_path" source_resolved_commit)"
+          current_core_tag="$(scripts/ci/read-rhwp-core-lock.sh rhwp_release_tag)"
+          current_core_commit="$(scripts/ci/read-rhwp-core-lock.sh rhwp_commit)"
+          current_studio_tag="$(manifest_field "$manifest_path" source_release_tag)"
+          current_studio_commit="$(manifest_field "$manifest_path" source_resolved_commit)"
 
           if [ -n "${TARGET_TAG_INPUT:-}" ]; then
             target_tag="$TARGET_TAG_INPUT"
@@ -130,48 +156,63 @@ jobs:
           validate_tag "$target_tag"
           target_url="$(gh release view "$target_tag" -R "$UPSTREAM_REPOSITORY" --json url --jq .url)"
           target_commit="$(resolve_tag_commit "$target_tag")"
-          branch_name="automation/rhwp-${target_tag}-studio-sync"
+          branch_name="automation/rhwp-${target_tag}-full-sync"
+
+          core_current="false"
+          if [ "$current_core_tag" = "$target_tag" ] && [ "$current_core_commit" = "$target_commit" ]; then
+            core_current="true"
+          fi
+
+          studio_current="false"
+          if [ "$current_studio_tag" = "$target_tag" ] && [ "$current_studio_commit" = "$target_commit" ]; then
+            studio_current="true"
+          fi
 
           current="false"
-          if [ "$current_tag" = "$target_tag" ] && [ "$current_commit" = "$target_commit" ]; then
+          if [ "$core_current" = "true" ] && [ "$studio_current" = "true" ]; then
             current="true"
           fi
 
+          impact_current_tag="$current_core_tag"
+          impact_current_commit="$current_core_commit"
+          if [ "$studio_current" != "true" ]; then
+            impact_current_tag="$current_studio_tag"
+            impact_current_commit="$current_studio_commit"
+          fi
+
           {
-            echo "current_tag=$current_tag"
-            echo "current_commit=$current_commit"
+            echo "current_core_tag=$current_core_tag"
+            echo "current_core_commit=$current_core_commit"
+            echo "current_studio_tag=$current_studio_tag"
+            echo "current_studio_commit=$current_studio_commit"
+            echo "impact_current_tag=$impact_current_tag"
+            echo "impact_current_commit=$impact_current_commit"
             echo "target_tag=$target_tag"
             echo "target_commit=$target_commit"
             echo "target_url=$target_url"
             echo "branch_name=$branch_name"
             echo "current=$current"
+            echo "core_current=$core_current"
+            echo "studio_current=$studio_current"
           } >> "$GITHUB_OUTPUT"
 
           {
-            echo "## rhwp upstream sync target"
+            echo "## rhwp upstream full sync target"
             echo
-            echo "- current bundled tag: \`$current_tag\`"
-            echo "- current bundled commit: \`$current_commit\`"
+            echo "- current core tag: \`$current_core_tag\`"
+            echo "- current core commit: \`$current_core_commit\`"
+            echo "- current studio tag: \`$current_studio_tag\`"
+            echo "- current studio commit: \`$current_studio_commit\`"
             echo "- target tag: \`$target_tag\`"
             echo "- target commit: \`$target_commit\`"
             echo "- target URL: $target_url"
-            echo "- current: \`$current\`"
+            echo "- core current: \`$core_current\`"
+            echo "- studio current: \`$studio_current\`"
+            echo "- full sync current: \`$current\`"
             echo "- base branch: \`$BASE_BRANCH\`"
             echo "- automation branch: \`$branch_name\`"
             echo "- force_pr: \`${FORCE_PR:-false}\`"
             echo "- dry_run: \`${DRY_RUN:-false}\`"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Stop when bundled rhwp-studio is current
-        if: ${{ steps.resolve.outputs.current == 'true' }}
-        shell: bash
-        run: |
-          {
-            echo
-            echo "## rhwp-studio sync PR"
-            echo
-            echo "- status: current"
-            echo "- action: no PR created"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check out upstream rhwp
@@ -186,7 +227,7 @@ jobs:
           git -C "$upstream_dir" config lfs.skipSmudge true
           GIT_LFS_SKIP_SMUDGE=1 git -C "$upstream_dir" checkout --detach "${{ steps.resolve.outputs.target_commit }}"
 
-      - name: Detect rhwp-studio impact
+      - name: Detect upstream viewer impact
         if: ${{ steps.resolve.outputs.current != 'true' }}
         id: impact
         shell: bash
@@ -195,28 +236,24 @@ jobs:
           output_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream-impact"
           scripts/ci/detect-rhwp-studio-impact.sh \
             --upstream-dir "$GITHUB_WORKSPACE/build.noindex/rhwp-upstream" \
-            --current-tag "${{ steps.resolve.outputs.current_tag }}" \
-            --current-commit "${{ steps.resolve.outputs.current_commit }}" \
+            --current-tag "${{ steps.resolve.outputs.impact_current_tag }}" \
+            --current-commit "${{ steps.resolve.outputs.impact_current_commit }}" \
             --target-tag "${{ steps.resolve.outputs.target_tag }}" \
             --target-commit "${{ steps.resolve.outputs.target_commit }}" \
             --output-dir "$output_dir" \
             --github-output "$GITHUB_OUTPUT"
 
-      - name: Stop when upstream has no viewer impact
-        if: ${{ steps.resolve.outputs.current != 'true' && steps.impact.outputs.has_viewer_impact != 'true' && env.FORCE_PR != 'true' }}
-        shell: bash
-        run: |
-          {
-            echo
-            echo "## rhwp-studio sync PR"
-            echo
-            echo "- status: no viewer impact"
-            echo "- action: no PR created"
-            echo "- force_pr: \`${FORCE_PR:-false}\`"
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload upstream impact files
+        if: ${{ steps.resolve.outputs.current != 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: rhwp-upstream-impact
+          path: build.noindex/rhwp-upstream-impact
+          if-no-files-found: error
+          retention-days: 3
 
       - name: Check existing automation PR
-        if: ${{ steps.resolve.outputs.current != 'true' && (steps.impact.outputs.has_viewer_impact == 'true' || env.FORCE_PR == 'true') }}
+        if: ${{ steps.resolve.outputs.current != 'true' }}
         id: existing
         shell: bash
         run: |
@@ -248,39 +285,75 @@ jobs:
 
           {
             echo
-            echo "## Existing sync PR check"
+            echo "## Existing full sync PR check"
             echo
             echo "- branch exists: \`$branch_exists\`"
             echo "- open PR: ${pr_url:-"(none)"}"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Stop in dry run
-        if: ${{ steps.resolve.outputs.current != 'true' && (steps.impact.outputs.has_viewer_impact == 'true' || env.FORCE_PR == 'true') && env.DRY_RUN == 'true' }}
+      - name: Decide full sync execution
+        id: decision
         shell: bash
+        env:
+          CURRENT: ${{ steps.resolve.outputs.current }}
+          EXISTING: ${{ steps.existing.outputs.exists || 'false' }}
+          DRY_RUN_VALUE: ${{ env.DRY_RUN }}
         run: |
+          set -euo pipefail
+
+          should_build="false"
+          decision="current"
+
+          if [ "$CURRENT" = "true" ]; then
+            decision="current"
+          elif [ "${DRY_RUN_VALUE:-false}" = "true" ]; then
+            decision="dry_run"
+          elif [ "${EXISTING:-false}" = "true" ]; then
+            decision="existing_automation_pr"
+          else
+            should_build="true"
+            decision="create_full_sync_pr"
+          fi
+
+          {
+            echo "should_build=$should_build"
+            echo "decision=$decision"
+          } >> "$GITHUB_OUTPUT"
+
           {
             echo
-            echo "## rhwp-studio sync PR"
+            echo "## rhwp full sync decision"
             echo
-            echo "- status: dry run"
-            echo "- action: no build, push, or PR created"
+            echo "- decision: \`$decision\`"
+            echo "- should build/create PR: \`$should_build\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Stop when automation branch or PR already exists
-        if: ${{ steps.existing.outputs.exists == 'true' && env.DRY_RUN != 'true' }}
+  build-studio-assets:
+    name: Build upstream rhwp-studio assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: resolve-target
+    if: ${{ needs.resolve-target.outputs.should_build == 'true' }}
+
+    steps:
+      - name: Check out base branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.BASE_BRANCH }}
+          fetch-depth: 0
+
+      - name: Check out upstream rhwp
         shell: bash
         run: |
-          {
-            echo
-            echo "## rhwp-studio sync PR"
-            echo
-            echo "- status: existing automation branch or PR"
-            echo "- action: no PR created"
-            echo "- existing PR: ${{ steps.existing.outputs.pr_url || '(none)' }}"
-          } >> "$GITHUB_STEP_SUMMARY"
+          set -euo pipefail
+          upstream_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream"
+          rm -rf "$upstream_dir"
+          mkdir -p "$(dirname "$upstream_dir")"
+          GIT_LFS_SKIP_SMUDGE=1 git clone "$UPSTREAM_GIT_URL" "$upstream_dir"
+          git -C "$upstream_dir" config lfs.skipSmudge true
+          GIT_LFS_SKIP_SMUDGE=1 git -C "$upstream_dir" checkout --detach "${{ needs.resolve-target.outputs.target_commit }}"
 
       - name: Build upstream rhwp-studio assets
-        if: ${{ steps.resolve.outputs.current != 'true' && (steps.impact.outputs.has_viewer_impact == 'true' || env.FORCE_PR == 'true') && steps.existing.outputs.exists != 'true' && env.DRY_RUN != 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -289,7 +362,7 @@ jobs:
           scripts/update-rhwp-core.sh \
             --check \
             --channel stable \
-            --tag "${{ steps.resolve.outputs.target_tag }}"
+            --tag "${{ needs.resolve-target.outputs.target_tag }}"
 
           cd "$upstream_dir"
 
@@ -314,34 +387,167 @@ jobs:
           npx tsc
           npx vite build --base ./
 
-      - name: Sync bundled rhwp-studio and create PR
-        if: ${{ steps.resolve.outputs.current != 'true' && (steps.impact.outputs.has_viewer_impact == 'true' || env.FORCE_PR == 'true') && steps.existing.outputs.exists != 'true' && env.DRY_RUN != 'true' }}
-        id: create_pr
+      - name: Prepare studio build artifact
         shell: bash
         run: |
           set -euo pipefail
-          branch_name="${{ steps.resolve.outputs.branch_name }}"
-          target_tag="${{ steps.resolve.outputs.target_tag }}"
-          target_commit="${{ steps.resolve.outputs.target_commit }}"
-          target_url="${{ steps.resolve.outputs.target_url }}"
-          work_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-sync-pr"
+          upstream_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream"
+          artifact_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-studio-build-artifact"
+          rm -rf "$artifact_dir"
+          mkdir -p "$artifact_dir/rhwp-studio"
+          cp -a "$upstream_dir/pkg" "$artifact_dir/pkg"
+          cp -a "$upstream_dir/rhwp-studio/dist" "$artifact_dir/rhwp-studio/dist"
+
+      - name: Upload studio build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: rhwp-studio-build
+          path: build.noindex/rhwp-studio-build-artifact
+          if-no-files-found: error
+          retention-days: 3
+
+  create-full-sync-pr:
+    name: Create rhwp full sync PR candidate
+    runs-on: macos-15
+    timeout-minutes: 180
+    needs:
+      - resolve-target
+      - build-studio-assets
+    if: ${{ needs.resolve-target.outputs.should_build == 'true' }}
+
+    steps:
+      - name: Check out base branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.BASE_BRANCH }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate automation token configuration
+        shell: bash
+        env:
+          AUTOMATION_CLIENT_ID: ${{ vars.ALHANGEUL_AUTOMATION_CLIENT_ID }}
+          AUTOMATION_PRIVATE_KEY: ${{ secrets.ALHANGEUL_AUTOMATION_APP_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          missing=0
+          if [ -z "${AUTOMATION_CLIENT_ID:-}" ]; then
+            echo "ERROR: missing repository variable: ALHANGEUL_AUTOMATION_CLIENT_ID" >&2
+            missing=1
+          fi
+          if [ -z "${AUTOMATION_PRIVATE_KEY:-}" ]; then
+            echo "ERROR: missing repository secret: ALHANGEUL_AUTOMATION_APP_PRIVATE_KEY" >&2
+            missing=1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            {
+              echo "## rhwp full sync PR"
+              echo
+              echo "- status: missing automation token configuration"
+              echo "- required variable: \`ALHANGEUL_AUTOMATION_CLIENT_ID\`"
+              echo "- required secret: \`ALHANGEUL_AUTOMATION_APP_PRIVATE_KEY\`"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3.2.0
+        with:
+          client-id: ${{ vars.ALHANGEUL_AUTOMATION_CLIENT_ID }}
+          private-key: ${{ secrets.ALHANGEUL_AUTOMATION_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v cbindgen >/dev/null 2>&1; then
+            brew install cbindgen
+          fi
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - name: Download upstream impact files
+        uses: actions/download-artifact@v8
+        with:
+          name: rhwp-upstream-impact
+          path: build.noindex/rhwp-upstream-impact
+
+      - name: Download studio build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: rhwp-studio-build
+          path: build.noindex/rhwp-studio-build-artifact
+
+      - name: Restore upstream checkout with built assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          upstream_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream"
+          artifact_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-studio-build-artifact"
+          rm -rf "$upstream_dir"
+          mkdir -p "$(dirname "$upstream_dir")"
+          GIT_LFS_SKIP_SMUDGE=1 git clone "$UPSTREAM_GIT_URL" "$upstream_dir"
+          git -C "$upstream_dir" config lfs.skipSmudge true
+          GIT_LFS_SKIP_SMUDGE=1 git -C "$upstream_dir" checkout --detach "${{ needs.resolve-target.outputs.target_commit }}"
+
+          rm -rf "$upstream_dir/pkg" "$upstream_dir/rhwp-studio/dist"
+          mkdir -p "$upstream_dir/rhwp-studio"
+          cp -a "$artifact_dir/pkg" "$upstream_dir/pkg"
+          cp -a "$artifact_dir/rhwp-studio/dist" "$upstream_dir/rhwp-studio/dist"
+
+      - name: Apply full sync and create PR
+        id: create_pr
+        shell: bash
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          branch_name="${{ needs.resolve-target.outputs.branch_name }}"
+          target_tag="${{ needs.resolve-target.outputs.target_tag }}"
+          target_commit="${{ needs.resolve-target.outputs.target_commit }}"
+          target_url="${{ needs.resolve-target.outputs.target_url }}"
+          work_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-full-sync-pr"
+          upstream_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream"
+          impact_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream-impact"
           mkdir -p "$work_dir"
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --prune origin "$BASE_BRANCH"
           git switch -c "$branch_name" "origin/$BASE_BRANCH"
 
+          scripts/update-rhwp-core.sh \
+            --channel stable \
+            --tag "$target_tag"
+
+          scripts/build-rust-macos.sh --update-lock
+          scripts/check-no-appkit.sh
+
           scripts/sync-rhwp-studio.sh \
-            --upstream-dir "$GITHUB_WORKSPACE/build.noindex/rhwp-upstream" \
+            --upstream-dir "$upstream_dir" \
             --tag "$target_tag" \
             --commit "$target_commit"
 
+          scripts/verify-rhwp-studio-assets.sh \
+            --tag "$target_tag" \
+            --commit "$target_commit"
+
+          git diff --check
+
           verification_file="$work_dir/verification.txt"
           {
-            echo "\`scripts/ci/detect-rhwp-studio-impact.sh\`: \`has_viewer_impact=${{ steps.impact.outputs.has_viewer_impact }}\`"
-            echo "\`scripts/update-rhwp-core.sh --check --channel stable --tag $target_tag\`: OK"
+            echo "\`scripts/ci/detect-rhwp-studio-impact.sh\`: \`has_viewer_impact=${{ needs.resolve-target.outputs.has_viewer_impact }}\`"
+            echo "\`scripts/update-rhwp-core.sh --channel stable --tag $target_tag\`: OK"
+            echo "\`scripts/build-rust-macos.sh --update-lock\`: OK"
+            echo "\`scripts/check-no-appkit.sh\`: OK"
             echo "\`scripts/sync-rhwp-studio.sh --tag $target_tag --commit $target_commit\`: OK"
-            echo "\`scripts/verify-rhwp-studio-assets.sh\`: OK"
+            echo "\`scripts/verify-rhwp-studio-assets.sh --tag $target_tag --commit $target_commit\`: OK"
+            echo "\`git diff --check\`: OK"
           } > "$verification_file"
 
           repo_changed_paths_file="$work_dir/repository-changed-paths.txt"
@@ -349,39 +555,62 @@ jobs:
           if [ ! -s "$repo_changed_paths_file" ]; then
             {
               echo
-              echo "## rhwp-studio sync PR"
+              echo "## rhwp full sync PR"
               echo
-              echo "- status: sync produced no repository changes"
+              echo "- status: full sync produced no repository changes"
               echo "- action: no PR created"
             } >> "$GITHUB_STEP_SUMMARY"
             echo "pr_url=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
+          changed_paths_file="$(find "$impact_dir" -name 'changed-*.txt' -type f | sort | head -1)"
+          impact_details_file="$(find "$impact_dir" -name 'impact-details-*.tsv' -type f | sort | head -1)"
+
           body_file="$work_dir/pr-body.md"
-          scripts/ci/write-rhwp-studio-sync-pr-body.sh \
+          scripts/ci/write-rhwp-full-sync-pr-body.sh \
             --output "$body_file" \
-            --current-tag "${{ steps.resolve.outputs.current_tag }}" \
-            --current-commit "${{ steps.resolve.outputs.current_commit }}" \
+            --current-core-tag "${{ needs.resolve-target.outputs.current_core_tag }}" \
+            --current-core-commit "${{ needs.resolve-target.outputs.current_core_commit }}" \
+            --current-studio-tag "${{ needs.resolve-target.outputs.current_studio_tag }}" \
+            --current-studio-commit "${{ needs.resolve-target.outputs.current_studio_commit }}" \
             --target-tag "$target_tag" \
             --target-commit "$target_commit" \
             --target-url "$target_url" \
             --base-branch "$BASE_BRANCH" \
             --mention "@$MAINTAINER" \
-            --changed-paths-file "${{ steps.impact.outputs.changed_paths_file }}" \
-            --impact-details-file "${{ steps.impact.outputs.impact_details_file }}" \
+            --changed-paths-file "$changed_paths_file" \
+            --impact-details-file "$impact_details_file" \
             --repository-changed-paths-file "$repo_changed_paths_file" \
             --verification-file "$verification_file"
 
-          git add Sources/HostApp/Resources/rhwp-studio
-          git commit -m "Task #204: Update bundled rhwp-studio to $target_tag"
+          git add \
+            Sources/HostApp/Resources/rhwp-studio \
+            RustBridge/Cargo.toml \
+            RustBridge/Cargo.lock \
+            rhwp-core.lock \
+            rhwp-ffi-symbols.txt
+
+          if git diff --cached --quiet; then
+            {
+              echo
+              echo "## rhwp full sync PR"
+              echo
+              echo "- status: no tracked changes after staging"
+              echo "- action: no PR created"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "pr_url=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "Sync rhwp upstream to $target_tag"
           git push --force-with-lease origin "$branch_name"
 
           pr_url="$(gh pr create \
             --repo "$GITHUB_REPOSITORY" \
             --base "$BASE_BRANCH" \
             --head "$branch_name" \
-            --title "Update bundled rhwp-studio to rhwp $target_tag" \
+            --title "Sync rhwp upstream $target_tag" \
             --body-file "$body_file")"
 
           gh pr edit "$pr_url" --add-assignee "$MAINTAINER" || true
@@ -391,7 +620,7 @@ jobs:
 
           {
             echo
-            echo "## rhwp-studio sync PR"
+            echo "## rhwp full sync PR"
             echo
             echo "- status: created"
             echo "- PR: $pr_url"

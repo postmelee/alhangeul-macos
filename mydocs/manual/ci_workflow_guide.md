@@ -13,7 +13,7 @@
 | `Release Publish DMG` | `workflow_dispatch` | `contents: write` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, release delta checklist artifact 생성 |
 | `Docs-only Pages Deploy` | `push` to `main` with `docs/**`, `workflow_dispatch` | `contents: read`, `pages: write`/`id-token: write` for Pages job, `environment: github-pages` | Ubuntu | 일반 Pages 문서 변경을 public Pages에 배포하고 기존 public appcast를 보존 |
 | `rhwp Upstream Release Check` | `workflow_dispatch`, schedule | `contents: read` | Ubuntu | upstream `rhwp` release와 `rhwp-core.lock` 비교 |
-| `rhwp Upstream Sync PR` | `workflow_dispatch`, schedule | `contents: write`, `pull-requests: write`, `issues: write` | Ubuntu | upstream viewer/WASM/core 영향 release를 감지해 bundled `rhwp-studio` 업데이트 후보 PR 생성 |
+| `rhwp Upstream Sync PR` | `workflow_dispatch`, schedule | workflow는 `contents: read`, `pull-requests: read`; PR 생성은 GitHub App token의 `contents: write`, `pull-requests: write`, `issues: write` | Ubuntu, macOS | upstream release를 감지해 `rhwp-core.lock`/RustBridge와 bundled `rhwp-studio`를 같은 tag로 갱신하는 full sync 후보 PR 생성 |
 
 ## JavaScript action runtime 기준
 
@@ -85,7 +85,9 @@ bash scripts/ci/classify-pr-changes.sh --help
 bash scripts/ci/check-rhwp-upstream-release.sh --help
 bash scripts/ci/detect-rhwp-studio-impact.sh --help
 bash scripts/ci/prepare-pages-artifact.sh --help
+bash scripts/ci/read-rhwp-core-lock.sh --help
 bash scripts/ci/update-release-version-notices.sh --help
+bash scripts/ci/write-rhwp-full-sync-pr-body.sh --help
 bash scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
 bash scripts/ci/write-sparkle-appcast.sh --help
 bash scripts/sync-rhwp-studio.sh --help
@@ -277,39 +279,47 @@ bash scripts/ci/check-rhwp-upstream-release.sh --target-tag <rhwp-tag> --run-com
 
 ## rhwp Upstream Sync PR
 
-`rhwp Upstream Sync PR`는 upstream `edwardkim/rhwp` release를 조회하고, current bundled `rhwp-studio` manifest commit부터 target release commit까지의 변경이 viewer/WASM/core 입력에 영향을 주는 경우 `devel` 대상 자동 PR 후보를 만든다.
+`rhwp Upstream Sync PR`는 upstream `edwardkim/rhwp` release를 조회하고, `rhwp-core.lock`과 bundled `rhwp-studio` manifest가 같은 target release tag/resolved commit을 가리키도록 `devel` 대상 full sync 자동 PR 후보를 만든다.
 
 유지해야 하는 조건:
 
 - base branch는 `devel`이다. 퇴역한 `devel-webview`는 사용하지 않는다.
-- 자동 branch 이름은 `automation/rhwp-<tag>-studio-sync`이다.
-- workflow 권한은 PR 생성을 위해 `contents: write`, `pull-requests: write`, assignee/reviewer 지정을 위해 `issues: write`를 사용한다.
+- 자동 branch 이름은 `automation/rhwp-<tag>-full-sync`이다.
+- workflow 자체 권한은 read 중심으로 둔다. 자동 branch push와 PR 생성은 repository에 설치한 GitHub App installation token으로 수행한다.
+- GitHub App token 설정은 repository variable `ALHANGEUL_AUTOMATION_CLIENT_ID`와 repository secret `ALHANGEUL_AUTOMATION_APP_PRIVATE_KEY`가 필요하다.
+- GitHub App 권한은 Contents write, Pull requests write, Issues write, Metadata read로 제한한다.
 - concurrency group은 `rhwp-upstream-sync-pr`, `cancel-in-progress: false`로 두어 schedule과 수동 실행이 같은 branch/PR 생성을 경쟁하지 않게 한다.
-- `dry_run=true`이면 target 조회와 impact 분류까지만 수행하고 build, push, PR 생성을 하지 않는다.
+- current 판정은 `rhwp-core.lock`과 `Sources/HostApp/Resources/rhwp-studio/manifest.json`이 모두 target tag/resolved commit과 일치할 때만 true다.
+- `dry_run=true`이면 target 조회, current 판정, impact 분류까지만 수행하고 build, push, PR 생성을 하지 않는다.
 - 같은 automation branch 또는 open PR이 이미 있으면 새 PR을 만들지 않는다.
-- generated PR body에는 `Automation source: #204`만 기록하고 issue close keyword를 쓰지 않는다.
+- generated PR body에는 `Automation source: rhwp Upstream Sync PR`만 기록하고 issue close keyword를 쓰지 않는다.
 - upstream WASM build는 upstream root의 `.env.docker`를 사용한다. CI에서는 `.env.docker.example` 존재를 확인한 뒤 runner의 `id -u`, `id -g` 값으로 `.env.docker`를 생성해 Docker container user와 bind mount owner를 맞춘다.
-- 자동 PR 생성까지 동작하려면 repository Actions workflow permission에서 Actions의 PR 생성/승인이 허용되어야 한다. 현재 운영 설정은 `default_workflow_permissions=read`, `can_approve_pull_request_reviews=true`이며, workflow별 필요 권한은 위 `permissions` block에서 명시한다. PR 생성/승인이 꺼져 있으면 automation branch push는 성공해도 `GraphQL: GitHub Actions is not permitted to create or approve pull requests`로 PR 생성이 실패한다.
+- upstream WASM/studio build는 Ubuntu runner에서 수행하고, native RustBridge/core lock update는 macOS runner에서 수행한다.
+- `Frameworks/` 생성 산출물은 commit하지 않고, `scripts/build-rust-macos.sh --update-lock`가 산출물 hash/size를 `rhwp-core.lock`에 기록한다.
+- `GITHUB_TOKEN` fallback으로 실제 PR을 생성하지 않는다. token variable/secret이 없으면 `dry_run=false` 실행은 실패해야 한다.
 
 입력:
 
 - `target_tag`: 비워두면 upstream latest release를 조회한다.
-- `force_pr`: viewer/WASM/core 영향 path가 없어도 후보 PR을 만들지 결정한다.
+- `force_pr`: 호환 유지용 입력이다. full sync workflow에서는 core/studio provenance가 target과 다르면 viewer impact가 없어도 후보 PR을 만든다.
 - `dry_run`: build, push, PR 생성을 생략하고 조회와 분류만 확인한다.
 
 workflow가 만드는 주요 산출물:
 
-- `automation/rhwp-<tag>-studio-sync` branch
-- `Update bundled rhwp-studio to rhwp <tag>` PR
+- `automation/rhwp-<tag>-full-sync` branch
+- `Sync rhwp upstream <tag>` PR
+- `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`
 - `Sources/HostApp/Resources/rhwp-studio/**` asset과 manifest 변경
-- workflow summary의 target, impact detection, existing PR, created/skipped 상태
+- workflow summary의 target, current 판정, impact detection, existing PR, created/skipped 상태
 
-이 workflow는 public release workflow가 아니다. `rhwp-core.lock` 갱신, signed/notarized DMG, GitHub Release, Sparkle appcast, Homebrew Cask 반영은 자동으로 수행하지 않으며, 별도 작업 승인과 보호 workflow를 거친다. 실제 schedule 활성화, write 권한, `gh pr create`, assignee/reviewer 지정은 workflow가 default branch에 merge된 뒤 GitHub-hosted runner에서 최종 확인한다.
+이 workflow는 public release workflow가 아니다. signed/notarized DMG, GitHub Release, Sparkle appcast, Homebrew Cask 반영은 자동으로 수행하지 않으며, 별도 작업 승인과 보호 workflow를 거친다. 실제 schedule 활성화, GitHub App token, `gh pr create`, assignee/reviewer 지정, PR CI 자동 trigger는 workflow가 default branch에 merge된 뒤 GitHub-hosted runner에서 최종 확인한다.
 
 로컬 재현:
 
 ```bash
 bash scripts/ci/detect-rhwp-studio-impact.sh --help
+bash scripts/ci/read-rhwp-core-lock.sh --help
+bash scripts/ci/write-rhwp-full-sync-pr-body.sh --help
 bash scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
 bash scripts/sync-rhwp-studio.sh --help
 bash scripts/verify-rhwp-studio-assets.sh --help
@@ -325,6 +335,6 @@ scripts/verify-rhwp-studio-assets.sh
 - `Release Rehearsal DMG` 실패: public release 전 packaging/release script 또는 ref delta 입력을 수정한다.
 - `Release Publish DMG` 실패: public release 산출물 상태를 먼저 확인하고, 필요한 경우 GitHub Release asset/appcast/Pages/Homebrew 반영을 중단한다.
 - `Docs-only Pages Deploy` 실패: public appcast 다운로드/XML 검증 실패, Pages artifact 조립 실패, `github-pages` environment policy, 또는 `deploy-pages` 실패를 먼저 확인한다. stale `docs/appcast.xml` fallback으로 우회하지 않는다.
-- `rhwp Upstream Sync PR` 실패: target release 조회, upstream checkout/build, impact helper output, 기존 automation branch/PR 상태, 또는 repository write 권한을 먼저 확인한다.
+- `rhwp Upstream Sync PR` 실패: target release 조회, core/studio current 판정, upstream checkout/build, macOS core lock update, GitHub App token 설정, 기존 automation branch/PR 상태를 먼저 확인한다.
 
 실패 증상, 재현 조건, 원인, 재발 방지 절차가 명확해진 경우에만 `mydocs/troubleshootings/`에 별도 문서로 남긴다.

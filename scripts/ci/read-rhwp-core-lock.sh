@@ -13,6 +13,11 @@ Reads a top-level scalar value from rhwp-core.lock.
 EOF
 }
 
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  usage
+  exit 0
+fi
+
 if [ "$#" -ne 1 ]; then
   usage
   exit 1
