@@ -27,6 +27,10 @@ export class HwpDocument {
      */
     applyCharFormatInCell(sec_idx: number, parent_para_idx: number, control_idx: number, cell_idx: number, cell_para_idx: number, start_offset: number, end_offset: number, props_json: string): string;
     /**
+     * 미주 모양을 적용한다.
+     */
+    applyEndnoteShape(section_idx: number, props_json: string): string;
+    /**
      * 머리말/꼬리말 마당(템플릿)을 적용한다.
      */
     applyHfTemplate(section_idx: number, is_header: boolean, apply_to: number, template_id: number): string;
@@ -35,6 +39,10 @@ export class HwpDocument {
      * 문단 서식을 적용한다 (셀 내 문단).
      */
     applyParaFormatInCell(sec_idx: number, parent_para_idx: number, control_idx: number, cell_idx: number, cell_para_idx: number, props_json: string): string;
+    /**
+     * 각주/미주 내부 문단 속성 적용
+     */
+    applyParaFormatInFootnote(section_idx: number, para_idx: number, control_idx: number, fn_para_idx: number, props_json: string): string;
     /**
      * 머리말/꼬리말 문단에 문단 서식을 적용한다.
      */
@@ -72,8 +80,11 @@ export class HwpDocument {
     convertToEditable(): string;
     /**
      * 컨트롤 객체(표, 이미지, 도형)를 내부 클립보드에 복사한다.
+     *
+     * [Task #1161] `cell_path_json` 이 빈 문자열/`"[]"` 면 본문, 그 외에는 셀/글상자
+     * 경로(`[{"controlIndex","cellIndex","cellParaIndex"}, ...]`)의 컨트롤을 복사한다.
      */
-    copyControl(section_idx: number, para_idx: number, control_idx: number): string;
+    copyControl(section_idx: number, para_idx: number, cell_path_json: string, control_idx: number): string;
     /**
      * 선택 영역을 내부 클립보드에 복사한다.
      *
@@ -140,6 +151,10 @@ export class HwpDocument {
      * 책갈피 삭제
      */
     deleteBookmark(sec: number, para: number, ctrl_idx: number): string;
+    /**
+     * [Task #1171 / PR #1254] 표 셀/글상자 내부 Picture 삭제 (by_path).
+     */
+    deleteCellPictureControlByPath(section_idx: number, parent_para_idx: number, cell_path_json: string, inner_control_idx: number): string;
     /**
      * 수식 컨트롤을 문단에서 삭제한다.
      *
@@ -258,7 +273,7 @@ export class HwpDocument {
     /**
      * 컨트롤 객체를 HTML 문자열로 변환한다.
      */
-    exportControlHtml(section_idx: number, para_idx: number, control_idx: number): string;
+    exportControlHtml(section_idx: number, para_idx: number, cell_path_json: string, control_idx: number): string;
     /**
      * 문서를 HWP 바이너리로 내보낸다.
      *
@@ -383,11 +398,19 @@ export class HwpDocument {
      */
     getCellParagraphLengthByPath(section_idx: number, parent_para_idx: number, path_json: string): number;
     /**
+     * [Task #1151 v4] 표 셀 내 Picture 속성 조회 (by_path). Shape 패턴 정합.
+     */
+    getCellPicturePropertiesByPath(section_idx: number, parent_para_idx: number, cell_path_json: string, inner_control_idx: number): string;
+    /**
      * 셀 속성을 조회한다.
      *
      * 반환: JSON `{width, height, paddingLeft, paddingRight, paddingTop, paddingBottom, verticalAlign, textDirection, isHeader}`
      */
     getCellProperties(section_idx: number, parent_para_idx: number, control_idx: number, cell_idx: number): string;
+    /**
+     * [Task #1138] 표 셀 내 Shape(글상자/사각형/도형) 속성 조회 (by_path).
+     */
+    getCellShapePropertiesByPath(section_idx: number, parent_para_idx: number, cell_path_json: string, inner_control_idx: number): string;
     /**
      * 셀 내부 문단의 스타일을 조회한다.
      */
@@ -419,11 +442,11 @@ export class HwpDocument {
     /**
      * 컨트롤의 이미지 바이너리 데이터를 반환한다 (Uint8Array).
      */
-    getControlImageData(section_idx: number, para_idx: number, control_idx: number): Uint8Array;
+    getControlImageData(section_idx: number, para_idx: number, cell_path_json: string, control_idx: number): Uint8Array;
     /**
      * 컨트롤의 이미지 MIME 타입을 반환한다.
      */
-    getControlImageMime(section_idx: number, para_idx: number, control_idx: number): string;
+    getControlImageMime(section_idx: number, para_idx: number, cell_path_json: string, control_idx: number): string;
     /**
      * 문단 내 컨트롤의 텍스트 위치 배열을 반환한다.
      */
@@ -459,6 +482,10 @@ export class HwpDocument {
      */
     getCursorRectInHeaderFooter(section_idx: number, is_header: boolean, apply_to: number, hf_para_idx: number, char_offset: number, preferred_page: number): string;
     /**
+     * 각주/미주 내부 커서 렉트 계산
+     */
+    getCursorRectInNote(section_idx: number, para_idx: number, control_idx: number, note_para_idx: number, char_offset: number): string;
+    /**
      * 문서 정보를 JSON 문자열로 반환한다.
      */
     getDocumentInfo(): string;
@@ -466,6 +493,10 @@ export class HwpDocument {
      * 현재 DPI를 반환한다.
      */
     getDpi(): number;
+    /**
+     * 미주 모양을 조회한다.
+     */
+    getEndnoteShape(section_idx: number): string;
     /**
      * 수식 컨트롤의 속성을 조회한다.
      *
@@ -486,6 +517,12 @@ export class HwpDocument {
      * 반환: JSON 배열 `["oracle.gif", "rdb02.gif", ...]` (중복 제거)
      */
     getExternalImageBasenames(): string;
+    /**
+     * [Task #1142] 외부 file path 그림 reference 목록을 구조화된 JSON 배열로 반환한다.
+     *
+     * 반환: JSON 배열 `[{ key, binDataId, originalPath, basename, extension, loaded }, ...]`
+     */
+    getExternalImageReferences(): string;
     /**
      * 현재 대체 폰트 경로를 반환한다.
      */
@@ -589,12 +626,24 @@ export class HwpDocument {
      */
     getLogicalLength(section_idx: number, para_idx: number): number;
     /**
+     * 각주/미주 편집 모드 진입 대상 조회
+     */
+    getNoteEditInfo(section_idx: number, para_idx: number, control_idx: number): string;
+    /**
+     * 각주/미주 내부 수식 컨트롤의 속성을 조회한다.
+     */
+    getNoteEquationProperties(kind: string, section_idx: number, parent_para_idx: number, note_control_idx: number, note_para_idx: number, inner_control_idx: number): string;
+    /**
      * 문서에 정의된 문단 번호(Numbering) 목록을 조회한다.
      *
      * 반환값: JSON 배열 [{ id, levelFormats: [...] }, ...]
      * id는 1-based (ParaShape.numbering_id와 동일)
      */
     getNumberingList(): string;
+    /**
+     * 구역의 쪽 테두리/배경 설정을 JSON으로 반환한다.
+     */
+    getPageBorderFill(section_idx: number): string;
     /**
      * 컨트롤(표, 이미지 등) 레이아웃 정보를 반환한다.
      */
@@ -644,6 +693,10 @@ export class HwpDocument {
      */
     getParaPropertiesAt(sec_idx: number, para_idx: number): string;
     /**
+     * 각주/미주 내부 문단 속성 조회
+     */
+    getParaPropertiesInFootnote(section_idx: number, para_idx: number, control_idx: number, fn_para_idx: number): string;
+    /**
      * 머리말/꼬리말 문단의 문단 속성을 조회한다.
      */
     getParaPropertiesInHf(section_idx: number, is_header: boolean, apply_to: number, hf_para_idx: number): string;
@@ -685,6 +738,10 @@ export class HwpDocument {
      * 반환: JSON 배열 `[{"pageIndex":N,"x":F,"y":F,"width":F,"height":F}, ...]`
      */
     getSelectionRectsInCell(section_idx: number, parent_para_idx: number, control_idx: number, cell_idx: number, start_cell_para_idx: number, start_char_offset: number, end_cell_para_idx: number, end_char_offset: number): string;
+    /**
+     * 각주/미주 내부 선택 영역의 줄별 사각형을 반환한다.
+     */
+    getSelectionRectsInFootnote(page_num: number, footnote_index: number, start_fn_para_idx: number, start_char_offset: number, end_fn_para_idx: number, end_char_offset: number): string;
     /**
      * [Task #919] 글상자/도형 컨트롤의 페이지 좌표 바운딩박스를 반환한다.
      *
@@ -863,9 +920,20 @@ export class HwpDocument {
      */
     injectExternalImage(basename: string, data: Uint8Array, display_path: string): number;
     /**
+     * [Task #1143] `getExternalImageReferences()` 의 key로 외부 이미지 bytes를 주입한다.
+     *
+     * 지원 key: `binData:<bin_data_id>`.
+     * 잘못된 key, 존재하지 않는 key, 이미 loaded 상태인 reference는 0을 반환한다.
+     */
+    injectExternalImageByKey(key: string, data: Uint8Array, display_path: string): number;
+    /**
      * 단 나누기 삽입 (Ctrl+Shift+Enter)
      */
     insertColumnBreak(section_idx: number, para_idx: number, char_offset: number): string;
+    /**
+     * 미주를 삽입한다.
+     */
+    insertEndnote(section_idx: number, para_idx: number, char_offset: number): string;
     /**
      * 수식을 삽입한다.
      */
@@ -894,9 +962,19 @@ export class HwpDocument {
      * width, height: HWPUNIT 단위 크기
      * extension: 파일 확장자 (jpg, png 등)
      *
-     * 반환: JSON `{"ok":true,"paraIdx":<N>,"controlIdx":0}`
+     * 반환:
+     * - 본문 inline: `{"ok":true,"paraIdx":<N>,"controlIdx":0}`
+     * - 셀 floating (#1151): `{"ok":true,"paraIdx":<table_para>,"controlIdx":<new_sibling_idx>}`
+     *
+     * `cell_path_json` 이 빈 문자열 또는 `"[]"` 면 본문 inline 삽입. 그 외에는
+     * 표 셀 영역에 floating picture (한컴 정합) 로 삽입한다.
+     * 예: `[{"controlIndex":0,"cellIndex":2,"cellParaIndex":0}]`
+     * [Task #1151 v8 결함 C] `paper_offset_x_hu / paper_offset_y_hu` 는 사용자가 셀 안에
+     * 클릭/드래그한 위치 (paper-relative HU). studio 의 finishImagePlacement 가 drag 좌표를
+     * 변환하여 전달. JS 측에서 `undefined` 전달 시 (또는 음수) wasm 이 셀 좌상단을 default 사용
+     * — 기존 동작 호환.
      */
-    insertPicture(section_idx: number, para_idx: number, char_offset: number, image_data: Uint8Array, width: number, height: number, natural_width_px: number, natural_height_px: number, extension: string, description: string): string;
+    insertPicture(section_idx: number, para_idx: number, char_offset: number, cell_path_json: string, image_data: Uint8Array, width: number, height: number, natural_width_px: number, natural_height_px: number, extension: string, description: string, paper_offset_x_hu?: number | null, paper_offset_y_hu?: number | null): string;
     /**
      * 표에 열을 삽입한다.
      *
@@ -1042,6 +1120,10 @@ export class HwpDocument {
      */
     pasteHtmlInCell(section_idx: number, parent_para_idx: number, control_idx: number, cell_idx: number, cell_para_idx: number, char_offset: number, html: string): string;
     /**
+     * HTML 문자열을 파싱하여 cellPath가 가리키는 중첩 표 셀에 삽입한다.
+     */
+    pasteHtmlInCellByPath(section_idx: number, parent_para_idx: number, path_json: string, char_offset: number, html: string): string;
+    /**
      * 내부 클립보드의 내용을 캐럿 위치에 붙여넣는다 (본문 문단).
      *
      * 반환값: JSON `{"ok":true,"paraIdx":<idx>,"charOffset":<offset>}`
@@ -1053,6 +1135,12 @@ export class HwpDocument {
      * 반환값: JSON `{"ok":true,"cellParaIdx":<idx>,"charOffset":<offset>}`
      */
     pasteInternalInCell(section_idx: number, parent_para_idx: number, control_idx: number, cell_idx: number, cell_para_idx: number, char_offset: number): string;
+    /**
+     * 내부 클립보드의 내용을 cellPath가 가리키는 중첩 표 셀에 붙여넣는다.
+     *
+     * 반환값: JSON `{"ok":true,"cellParaIdx":<idx>,"charOffset":<offset>}`
+     */
+    pasteInternalInCellByPath(section_idx: number, parent_para_idx: number, path_json: string, char_offset: number): string;
     /**
      * 사용자 명시 요청에 의한 lineseg 전체 reflow (#177).
      *
@@ -1104,8 +1192,9 @@ export class HwpDocument {
      * 다층 레이어 필터를 적용한 Canvas 렌더링 (Task #516, Stage 5.2).
      *
      * `layer_kind`:
-     * - `"all"` → 모든 그림 렌더 (기본 `renderPageToCanvas` 와 동일)
-     * - `"flow"` → 본문 layer (BehindText / InFrontOfText 그림 제외)
+     * - `"all"` → 모든 PaintOp 렌더 (기본 `renderPageToCanvas` 와 동일)
+     * - `"background"` → page background layer
+     * - `"flow"` → 본문 layer (BehindText / InFrontOfText plane 제외)
      * - `"behind"` → BehindText overlay layer
      * - `"front"` → InFrontOfText overlay layer
      *
@@ -1165,11 +1254,19 @@ export class HwpDocument {
      */
     setActiveFieldInCell(section_idx: number, parent_para_idx: number, control_idx: number, cell_idx: number, cell_para_idx: number, char_offset: number, is_textbox: boolean): boolean;
     /**
+     * [Task #1151 v4] 표 셀 내 Picture 속성 변경 (by_path). Shape 패턴 정합.
+     */
+    setCellPicturePropertiesByPath(section_idx: number, parent_para_idx: number, cell_path_json: string, inner_control_idx: number, props_json: string): string;
+    /**
      * 셀 속성을 수정한다.
      *
      * 반환: JSON `{"ok":true}`
      */
     setCellProperties(section_idx: number, parent_para_idx: number, control_idx: number, cell_idx: number, json: string): string;
+    /**
+     * [Task #1138] 표 셀 내 Shape 속성 변경 (by_path).
+     */
+    setCellShapePropertiesByPath(section_idx: number, parent_para_idx: number, cell_path_json: string, inner_control_idx: number, props_json: string): string;
     setClipEnabled(enabled: boolean): void;
     /**
      * 다단 설정 변경
@@ -1231,10 +1328,18 @@ export class HwpDocument {
      */
     setHeaderFooterPictureProperties(section_idx: number, outer_para_idx: number, outer_control_idx: number, inner_para_idx: number, inner_control_idx: number, props_json: string): string;
     /**
+     * 각주/미주 내부 수식 컨트롤의 속성을 변경한다.
+     */
+    setNoteEquationProperties(kind: string, section_idx: number, parent_para_idx: number, note_control_idx: number, note_para_idx: number, inner_control_idx: number, props_json: string): string;
+    /**
      * 문단 서식을 적용한다 (본문 문단).
      * 문단 번호 시작 방식 설정
      */
     setNumberingRestart(section_idx: number, para_idx: number, mode: number, start_num: number): string;
+    /**
+     * 구역의 쪽 테두리/배경 설정을 변경하고 재페이지네이션한다.
+     */
+    setPageBorderFill(section_idx: number, json: string): string;
     /**
      * 구역의 용지 설정(PageDef)을 변경하고 재페이지네이션한다.
      */
@@ -1436,9 +1541,11 @@ export interface InitOutput {
     readonly hwpdocument_applyCellStyle: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
     readonly hwpdocument_applyCharFormat: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
     readonly hwpdocument_applyCharFormatInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => [number, number, number, number];
+    readonly hwpdocument_applyEndnoteShape: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_applyHfTemplate: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
     readonly hwpdocument_applyParaFormat: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
     readonly hwpdocument_applyParaFormatInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number, number];
+    readonly hwpdocument_applyParaFormatInFootnote: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
     readonly hwpdocument_applyParaFormatInHf: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
     readonly hwpdocument_applyStyle: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_beginBatch: (a: number) => [number, number, number, number];
@@ -1447,7 +1554,7 @@ export interface InitOutput {
     readonly hwpdocument_clearClipboard: (a: number) => void;
     readonly hwpdocument_clipboardHasControl: (a: number) => number;
     readonly hwpdocument_convertToEditable: (a: number) => [number, number, number, number];
-    readonly hwpdocument_copyControl: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly hwpdocument_copyControl: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_copySelection: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_copySelectionInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number, number, number];
     readonly hwpdocument_createBlankDocument: (a: number) => [number, number, number, number];
@@ -1459,6 +1566,7 @@ export interface InitOutput {
     readonly hwpdocument_createTable: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_createTableEx: (a: number, b: number, c: number) => [number, number, number, number];
     readonly hwpdocument_deleteBookmark: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly hwpdocument_deleteCellPictureControlByPath: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_deleteEquationControl: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_deleteFootnote: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_deleteHeaderFooter: (a: number, b: number, c: number, d: number) => [number, number, number, number];
@@ -1481,7 +1589,7 @@ export interface InitOutput {
     readonly hwpdocument_ensureDefaultBullet: (a: number, b: number, c: number) => number;
     readonly hwpdocument_ensureDefaultNumbering: (a: number) => number;
     readonly hwpdocument_evaluateTableFormula: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number, number, number];
-    readonly hwpdocument_exportControlHtml: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly hwpdocument_exportControlHtml: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_exportHwp: (a: number) => [number, number, number, number];
     readonly hwpdocument_exportHwpVerify: (a: number) => [number, number, number, number];
     readonly hwpdocument_exportHwpx: (a: number) => [number, number, number, number];
@@ -1504,26 +1612,31 @@ export interface InitOutput {
     readonly hwpdocument_getCellParagraphCountByPath: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
     readonly hwpdocument_getCellParagraphLength: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number];
     readonly hwpdocument_getCellParagraphLengthByPath: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
+    readonly hwpdocument_getCellPicturePropertiesByPath: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_getCellProperties: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
+    readonly hwpdocument_getCellShapePropertiesByPath: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_getCellStyleAt: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
     readonly hwpdocument_getCellTextDirection: (a: number, b: number, c: number, d: number, e: number) => [number, number, number];
     readonly hwpdocument_getCharPropertiesAt: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_getClickHereProps: (a: number, b: number) => [number, number];
     readonly hwpdocument_getClipboardText: (a: number) => [number, number];
     readonly hwpdocument_getColumnDef: (a: number, b: number) => [number, number, number, number];
-    readonly hwpdocument_getControlImageData: (a: number, b: number, c: number, d: number) => [number, number, number, number];
-    readonly hwpdocument_getControlImageMime: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly hwpdocument_getControlImageData: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
+    readonly hwpdocument_getControlImageMime: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_getControlTextPositions: (a: number, b: number, c: number) => [number, number];
     readonly hwpdocument_getCursorRect: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_getCursorRectByPath: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_getCursorRectInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
     readonly hwpdocument_getCursorRectInFootnote: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
     readonly hwpdocument_getCursorRectInHeaderFooter: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
+    readonly hwpdocument_getCursorRectInNote: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_getDocumentInfo: (a: number) => [number, number];
     readonly hwpdocument_getDpi: (a: number) => number;
+    readonly hwpdocument_getEndnoteShape: (a: number, b: number) => [number, number, number, number];
     readonly hwpdocument_getEquationProperties: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_getEventLog: (a: number) => [number, number];
     readonly hwpdocument_getExternalImageBasenames: (a: number) => [number, number];
+    readonly hwpdocument_getExternalImageReferences: (a: number) => [number, number];
     readonly hwpdocument_getFallbackFont: (a: number) => [number, number];
     readonly hwpdocument_getFieldInfoAt: (a: number, b: number, c: number, d: number) => [number, number];
     readonly hwpdocument_getFieldInfoAtByPath: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number];
@@ -1543,7 +1656,10 @@ export interface InitOutput {
     readonly hwpdocument_getLineInfo: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_getLineInfoInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
     readonly hwpdocument_getLogicalLength: (a: number, b: number, c: number) => [number, number, number];
+    readonly hwpdocument_getNoteEditInfo: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly hwpdocument_getNoteEquationProperties: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number, number];
     readonly hwpdocument_getNumberingList: (a: number) => [number, number];
+    readonly hwpdocument_getPageBorderFill: (a: number, b: number) => [number, number, number, number];
     readonly hwpdocument_getPageControlLayout: (a: number, b: number) => [number, number, number, number];
     readonly hwpdocument_getPageDef: (a: number, b: number) => [number, number, number, number];
     readonly hwpdocument_getPageFootnoteInfo: (a: number, b: number, c: number) => [number, number, number, number];
@@ -1555,6 +1671,7 @@ export interface InitOutput {
     readonly hwpdocument_getPageRenderTree: (a: number, b: number) => [number, number, number, number];
     readonly hwpdocument_getPageTextLayout: (a: number, b: number) => [number, number, number, number];
     readonly hwpdocument_getParaPropertiesAt: (a: number, b: number, c: number) => [number, number, number, number];
+    readonly hwpdocument_getParaPropertiesInFootnote: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
     readonly hwpdocument_getParaPropertiesInHf: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
     readonly hwpdocument_getParagraphCount: (a: number, b: number) => [number, number, number];
     readonly hwpdocument_getParagraphLength: (a: number, b: number, c: number) => [number, number, number];
@@ -1564,6 +1681,7 @@ export interface InitOutput {
     readonly hwpdocument_getSectionDef: (a: number, b: number) => [number, number, number, number];
     readonly hwpdocument_getSelectionRects: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_getSelectionRectsInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number, number, number];
+    readonly hwpdocument_getSelectionRectsInFootnote: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
     readonly hwpdocument_getShapeBBox: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_getShapeProperties: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_getShowControlCodes: (a: number) => number;
@@ -1592,14 +1710,16 @@ export interface InitOutput {
     readonly hwpdocument_hitTestInFootnote: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_hitTestInHeaderFooter: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
     readonly hwpdocument_injectExternalImage: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
+    readonly hwpdocument_injectExternalImageByKey: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => number;
     readonly hwpdocument_insertColumnBreak: (a: number, b: number, c: number, d: number) => [number, number, number, number];
+    readonly hwpdocument_insertEndnote: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_insertEquation: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number, number];
     readonly hwpdocument_insertFieldInHf: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
     readonly hwpdocument_insertFootnote: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_insertNewNumber: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
     readonly hwpdocument_insertPageBreak: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_insertParagraph: (a: number, b: number, c: number) => [number, number, number, number];
-    readonly hwpdocument_insertPicture: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number) => [number, number, number, number];
+    readonly hwpdocument_insertPicture: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number, p: number, q: number, r: number) => [number, number, number, number];
     readonly hwpdocument_insertTableColumn: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_insertTableRow: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_insertText: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
@@ -1627,8 +1747,10 @@ export interface InitOutput {
     readonly hwpdocument_pasteControl: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_pasteHtml: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_pasteHtmlInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number, number, number];
+    readonly hwpdocument_pasteHtmlInCellByPath: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number, number];
     readonly hwpdocument_pasteInternal: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_pasteInternalInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
+    readonly hwpdocument_pasteInternalInCellByPath: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_reflowLinesegs: (a: number) => number;
     readonly hwpdocument_removeFieldAt: (a: number, b: number, c: number, d: number) => [number, number];
     readonly hwpdocument_removeFieldAtInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number];
@@ -1652,7 +1774,9 @@ export interface InitOutput {
     readonly hwpdocument_setActiveField: (a: number, b: number, c: number, d: number) => number;
     readonly hwpdocument_setActiveFieldByPath: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
     readonly hwpdocument_setActiveFieldInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => number;
+    readonly hwpdocument_setCellPicturePropertiesByPath: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number, number];
     readonly hwpdocument_setCellProperties: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => [number, number, number, number];
+    readonly hwpdocument_setCellShapePropertiesByPath: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number, number];
     readonly hwpdocument_setClipEnabled: (a: number, b: number) => void;
     readonly hwpdocument_setColumnDef: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_setDpi: (a: number, b: number) => void;
@@ -1664,7 +1788,9 @@ export interface InitOutput {
     readonly hwpdocument_setFormValue: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
     readonly hwpdocument_setFormValueInCell: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number, number, number];
     readonly hwpdocument_setHeaderFooterPictureProperties: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => [number, number, number, number];
+    readonly hwpdocument_setNoteEquationProperties: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => [number, number, number, number];
     readonly hwpdocument_setNumberingRestart: (a: number, b: number, c: number, d: number, e: number) => [number, number, number, number];
+    readonly hwpdocument_setPageBorderFill: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_setPageDef: (a: number, b: number, c: number, d: number) => [number, number, number, number];
     readonly hwpdocument_setPageHide: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number) => [number, number, number, number];
     readonly hwpdocument_setPictureProperties: (a: number, b: number, c: number, d: number, e: number, f: number) => [number, number, number, number];
