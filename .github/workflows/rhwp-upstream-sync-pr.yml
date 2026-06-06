@@ -553,19 +553,27 @@ jobs:
             echo "\`git diff --check\`: OK"
           } > "$verification_file"
 
-          repo_changed_paths_file="$work_dir/repository-changed-paths.txt"
-          git diff --name-only > "$repo_changed_paths_file"
-          if [ ! -s "$repo_changed_paths_file" ]; then
+          git add \
+            Sources/HostApp/Resources/rhwp-studio \
+            RustBridge/Cargo.toml \
+            RustBridge/Cargo.lock \
+            rhwp-core.lock \
+            rhwp-ffi-symbols.txt
+
+          if git diff --cached --quiet; then
             {
               echo
               echo "## rhwp full sync PR"
               echo
-              echo "- status: full sync produced no repository changes"
+              echo "- status: no tracked changes after staging"
               echo "- action: no PR created"
             } >> "$GITHUB_STEP_SUMMARY"
             echo "pr_url=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+
+          repo_changed_paths_file="$work_dir/repository-changed-paths.txt"
+          git diff --cached --name-only > "$repo_changed_paths_file"
 
           changed_paths_file="$(find "$impact_dir" -name 'changed-*.txt' -type f | sort | head -1)"
           impact_details_file="$(find "$impact_dir" -name 'impact-details-*.tsv' -type f | sort | head -1)"
@@ -586,25 +594,6 @@ jobs:
             --impact-details-file "$impact_details_file" \
             --repository-changed-paths-file "$repo_changed_paths_file" \
             --verification-file "$verification_file"
-
-          git add \
-            Sources/HostApp/Resources/rhwp-studio \
-            RustBridge/Cargo.toml \
-            RustBridge/Cargo.lock \
-            rhwp-core.lock \
-            rhwp-ffi-symbols.txt
-
-          if git diff --cached --quiet; then
-            {
-              echo
-              echo "## rhwp full sync PR"
-              echo
-              echo "- status: no tracked changes after staging"
-              echo "- action: no PR created"
-            } >> "$GITHUB_STEP_SUMMARY"
-            echo "pr_url=" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
 
           git commit -m "Sync rhwp upstream to $target_tag"
           git push --force-with-lease origin "$branch_name"
