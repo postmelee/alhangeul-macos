@@ -18,6 +18,7 @@
 - 릴리즈 상세 기록 `mydocs/release/v<version>.md`가 현재 release candidate 기준으로 갱신되었는가
 - 직전 public release 대비 delta checklist가 생성되고 release owner가 보정했는가
 - GitHub Release body의 `이번 버전의 주요 변경 사항`에 `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`가 실제 사용자-facing 내용으로 보정되었는가
+- GitHub Release body에 `mydocs/release/v<version>.md` 같은 실제 조회 가능한 상세 문서가 GitHub blob URL로 링크되어 있는가
 - 마지막 release candidate 변경, bugfix PR, draft signed/notarized DMG smoke 이후 official stable publish 전에 GitHub Release body와 Pages 업데이트 문서를 다시 검토했는가
 - `변경 요약`과 `알한글 앱 변화`가 특정 검증 샘플명, issue 번호, 내부 구현 용어가 아니라 사용자가 보는 증상과 개선 결과 중심으로 쓰였는가
 - GitHub Release title이 기본형 `Alhangeul v<version>`을 쓰는가, 또는 upstream `rhwp` 반영 중심 release라서 `(rhwp vX.Y.Z)` 병기 조건을 충족하는가
@@ -117,6 +118,7 @@ Release note에 포함할 내용:
 
 - Pages 업데이트 문서는 사용자용 안내 표면이다. 주요 변경, hero, 설치 안내에는 샘플 파일명, issue 번호, PR 번호, `PUA`, `sentinel`, `CoreGraphics` 같은 구현/검증 용어를 쓰지 않고 증상과 개선 결과로 일반화한다.
 - GitHub Release는 사용자와 개발자가 모두 보는 public 표면이다. `요약`과 `이번 버전의 주요 변경 사항`은 Pages와 같은 사용자-facing 표현을 쓰고, 샘플 파일명, 구현 용어, 관련 PR/Issue, 검증 fixture는 `기술 세부` 또는 `검증 세부` 같은 별도 section에만 둔다.
+- GitHub Release에는 `## 상세 문서` section을 두고 `mydocs/release/v<version>.md`, 필요 시 `mydocs/release/index.md`, Pages 릴리즈 노트처럼 실제 조회 가능한 문서를 링크한다. 저장소 문서는 plain code path만 쓰지 않고 `https://github.com/postmelee/alhangeul-macos/blob/main/...` 형식의 GitHub blob URL로 연결한다.
 - 내부 `mydocs/release/v<version>.md`는 release decision record다. 샘플 파일명, 재현 조건, 구현 용어, 검증 명령, workflow run, PR/Issue, SHA256, provenance를 가장 자세히 남긴다.
 - GitHub Release의 기술 세부 section은 사용자 요약보다 뒤에 둔다. 기술 세부가 없더라도 release body는 유효하지만, 앱 자체 렌더링 bugfix처럼 재현 샘플과 구현 경계가 중요한 release는 기술 세부를 두는 편을 우선한다.
 
@@ -133,7 +135,7 @@ public publish 이후 GitHub Release, Pages 업데이트 문서, release record,
 
 - `### 변경 요약`: 이번 릴리즈에서 달라진 점을 3~5개 bullet로 쓴다. `rhwp` 반영과 앱 자체 변경을 합쳐 사용자가 체감할 결과 중심으로 요약한다.
 - `### 포함된 rhwp 변화`: upstream `rhwp` core 또는 bundled `rhwp-studio` 변경 중 문서 열기, 렌더링, HWP/HWPX 호환성, viewer/editor 동작에 실제로 영향을 주는 내용을 적는다. upstream release note 전체를 복제하지 않는다.
-- `### 알한글 앱 변화`: HostApp, Quick Look, Finder thumbnail, 저장/공유/PDF/인쇄, 설치, 업데이트, About, DMG, Homebrew, Pages/Sparkle 등 앱 저장소가 소유한 변화를 적는다.
+- `### 알한글 앱 변화`: HostApp, Quick Look, Finder thumbnail, 저장/공유/PDF/인쇄, 설치, 업데이트처럼 앱 저장소가 소유하고 사용자가 체감하는 변화를 적는다. 앱 자체 신규 기능이나 동작 변화가 크지 않으면 "이번 릴리즈의 앱 자체 신규 기능은 크지 않으며, 핵심 변화는 bundled `rhwp` 문서 처리 개선을 앱/Quick Look/Finder 썸네일 경로에 반영한 것"처럼 1~2개 bullet로 짧게 쓴다. source metadata, workflow default, README/Pages 정렬, 단순 version bump, checksum 정렬은 사용자-facing 앱 변화로 쓰지 않는다.
 
 `rhwp` 버전이 직전 public release와 같으면 `포함된 rhwp 변화` heading은 유지하고 "이번 릴리즈에서 bundled `rhwp` core와 `rhwp-studio` 버전 변경은 없습니다."처럼 짧게 쓴다. upstream `rhwp` 반영이 release의 중심 사용자-facing 변화라면 title 병기 여부와 별개로 upstream release 링크, bundled tag/commit, 앱에서 확인한 영향을 함께 기록한다.
 
