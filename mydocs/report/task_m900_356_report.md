@@ -106,7 +106,17 @@ GitHub Release body 정정 후보는 다음 파일에 생성했다.
 build.noindex/release/github-release-v0.1.5-corrected.md
 ```
 
-이 파일은 `scripts/ci/check-release-notes-template.sh`와 `scripts/validate-github-body.sh`를 통과했다. 실제 public GitHub Release 반영은 별도 승인 후 수행한다.
+이 파일은 `scripts/ci/check-release-notes-template.sh`와 `scripts/validate-github-body.sh`를 통과했다. 공개 반영 승인 후 `gh release edit v0.1.5 --notes-file build.noindex/release/github-release-v0.1.5-corrected.md`로 GitHub Release body를 정정했다.
+
+Pages public 반영은 main 대상 docs-only PR `#357`로 진행했다.
+
+| 항목 | 값 |
+|------|----|
+| PR | `#357` |
+| PR URL | https://github.com/postmelee/alhangeul-macos/pull/357 |
+| merge commit | `bd075695dc77259d6b0624781a1c53ba0bd084cb` |
+| Pages deploy run | `27097945876` |
+| 결과 | success |
 
 ## 검증 결과
 
@@ -125,15 +135,20 @@ build.noindex/release/github-release-v0.1.5-corrected.md
 | Pages HTML parse | 통과 |
 | `git diff --check` | 통과 |
 
-## 미실행 항목
+## Public 반영 결과
 
-다음 public action은 실행하지 않았다.
+공개 반영 승인 후 다음을 완료했다.
 
-- `gh release edit v0.1.5 --notes-file build.noindex/release/github-release-v0.1.5-corrected.md`
-- public Pages 배포
-- workflow artifact upload의 실제 GitHub Actions 실행
+- GitHub Release `v0.1.5` body 정정.
+- `docs/updates/v0.1.5.html` public Pages 배포.
+- public GitHub Release body 재조회로 `직접 반영된 PR과 Issue`, 직접 반영 PR, 해결된 Issue section 확인.
+- public Pages 재조회로 Quick Look/썸네일/PDF/공유 출력 표시 보강과 앱 실행 후 업데이트 확인 보강 문구 확인.
 
-위 항목은 public 표면 수정 또는 GitHub Actions 실행이므로 작업지시자 별도 승인 후 진행한다.
+아래 항목은 여전히 로컬에서 직접 실행하지 않았다.
+
+- release rehearsal/publish workflow artifact upload의 실제 GitHub Actions 실행
+
+workflow artifact upload는 실제 release rehearsal/publish workflow 실행 시점에 확인한다.
 
 ## 남은 위험
 

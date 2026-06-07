@@ -4,7 +4,7 @@
 
 Stage 2~4에서 만든 문서 규칙, PR 분석 helper, release note generator/checker, workflow 연결을 `v0.1.5` 사례로 end-to-end 재검증했다.
 
-추가로 현재 public `v0.1.5` GitHub Release body와 Pages 릴리즈 노트에 `#324`, `#326`, `#329`, `#334`, `#349` 기반 사용자-facing 변화와 `직접 반영된 PR과 Issue` section이 충분히 반영되지 않은 것을 확인했다. 공개 반영은 별도 승인 gate로 남기고, 로컬 정정 후보와 Pages source 정정만 준비했다.
+추가로 현재 public `v0.1.5` GitHub Release body와 Pages 릴리즈 노트에 `#324`, `#326`, `#329`, `#334`, `#349` 기반 사용자-facing 변화와 `직접 반영된 PR과 Issue` section이 충분히 반영되지 않은 것을 확인했다. 공개 반영 승인 후 GitHub Release body를 직접 정정했고, Pages는 main 대상 docs-only PR `#357`을 merge해 public deploy까지 확인했다.
 
 ## 변경 내용
 
@@ -39,7 +39,7 @@ build.noindex/release/github-release-v0.1.5-corrected.md
 
 이 파일은 `scripts/ci/write-release-notes.sh`로 생성했고 `scripts/validate-github-body.sh`와 `scripts/ci/check-release-notes-template.sh`를 통과했다.
 
-실제 public GitHub Release 반영 명령은 아직 실행하지 않았다. 별도 승인 후 다음 형태로 반영한다.
+공개 반영 승인 후 다음 명령으로 GitHub Release body를 정정했다.
 
 ```bash
 gh release edit v0.1.5 \
@@ -65,7 +65,15 @@ gh release edit v0.1.5 \
 - `앱 자체 신규 기능은 크지 않습니다` 문구 제거.
 - PR/Issue 번호는 Pages 사용자 문구에 직접 나열하지 않음.
 
-Pages public 반영은 source PR이 merge된 뒤 Pages deploy 경로에서 진행한다. 이 단계에서는 public Pages deploy를 실행하지 않았다.
+Pages public 반영은 main 대상 docs-only PR `#357`로 진행했다.
+
+| 항목 | 값 |
+|------|----|
+| PR | `#357` |
+| PR URL | https://github.com/postmelee/alhangeul-macos/pull/357 |
+| merge commit | `bd075695dc77259d6b0624781a1c53ba0bd084cb` |
+| Pages deploy run | `27097945876` |
+| 결과 | success |
 
 ## End-to-End 검증 결과
 
@@ -96,11 +104,12 @@ scripts/validate-github-body.sh build.noindex/release/release-notes-0.1.5.md bui
 git diff --check
 ```
 
-## 남은 공개 반영 gate
+## Public 반영 결과
 
-아래 작업은 아직 실행하지 않았다.
+공개 반영 승인 후 다음을 완료했다.
 
 - GitHub Release `v0.1.5` body 정정.
 - `docs/updates/v0.1.5.html` public Pages 배포.
+- public URL 재조회로 `직접 반영된 PR과 Issue`, `#324`, `#326`, `#329`, `#334`, `#349`, `#110`과 Pages의 사용자-facing 정정 문구 확인.
 
-두 작업 모두 public 표면 수정이므로 작업지시자 별도 승인 후 진행한다.
+완료 시각: 01:18.
