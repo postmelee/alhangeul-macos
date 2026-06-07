@@ -5,22 +5,34 @@ struct HwpThumbnailRenderRequest {
     let fileURL: URL
     let maximumSize: CGSize
     let maximumPixelSize: CGSize
+    let policy: HwpPageRenderPolicy
+    let renderSignature: HwpThumbnailRenderSignature
     let key: HwpThumbnailCacheKey
 
-    init(fileURL: URL, maximumSize: CGSize, scale: CGFloat) throws {
+    init(
+        fileURL: URL,
+        maximumSize: CGSize,
+        scale: CGFloat,
+        policy: HwpPageRenderPolicy = .coreGraphicsOnly,
+        renderSignature: HwpThumbnailRenderSignature? = nil
+    ) throws {
         let values = try fileURL.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
         let pixelWidth = Self.pixelBucket(for: maximumSize.width, scale: scale)
         let pixelHeight = Self.pixelBucket(for: maximumSize.height, scale: scale)
+        let resolvedSignature = renderSignature ?? HwpThumbnailRenderSignature(policy: policy)
 
         self.fileURL = fileURL
         self.maximumSize = maximumSize
         self.maximumPixelSize = CGSize(width: pixelWidth, height: pixelHeight)
+        self.policy = policy
+        self.renderSignature = resolvedSignature
         self.key = HwpThumbnailCacheKey(
             path: fileURL.path,
             modificationTime: values.contentModificationDateKeyTimeInterval,
             fileSize: values.fileSize ?? 0,
             pixelWidth: pixelWidth,
-            pixelHeight: pixelHeight
+            pixelHeight: pixelHeight,
+            renderSignature: resolvedSignature
         )
     }
 
@@ -34,12 +46,94 @@ struct HwpThumbnailRenderRequest {
     }
 }
 
+struct HwpThumbnailRenderSignature: Hashable {
+    private static let rendererOptionVersion = "thumbnail-renderer-v1"
+    private static let coreReleaseTag = "v0.7.13"
+    private static let coreCommit = "b3e16ef212af81ef37d973ddb86d6816d3804642"
+    private static let coreEnabledFeatures = "native-skia"
+    private static let maxDimensionPolicyVersion = "skia-max-dimension-0"
+
+    let backendPolicy: String
+    let rendererOptionVersion: String
+    let coreReleaseTag: String
+    let coreCommit: String
+    let coreEnabledFeatures: String
+    let maxDimensionPolicyVersion: String
+
+    init(
+        policy: HwpPageRenderPolicy,
+        rendererOptionVersion: String = Self.rendererOptionVersion,
+        coreReleaseTag: String = Self.coreReleaseTag,
+        coreCommit: String = Self.coreCommit,
+        coreEnabledFeatures: String = Self.coreEnabledFeatures,
+        maxDimensionPolicyVersion: String = Self.maxDimensionPolicyVersion
+    ) {
+        self.backendPolicy = Self.policyIdentifier(policy)
+        self.rendererOptionVersion = rendererOptionVersion
+        self.coreReleaseTag = coreReleaseTag
+        self.coreCommit = coreCommit
+        self.coreEnabledFeatures = coreEnabledFeatures
+        self.maxDimensionPolicyVersion = maxDimensionPolicyVersion
+    }
+
+    var identifier: String {
+        [
+            backendPolicy,
+            rendererOptionVersion,
+            coreReleaseTag,
+            coreCommit,
+            coreEnabledFeatures,
+            maxDimensionPolicyVersion
+        ].joined(separator: "|")
+    }
+
+    private static func policyIdentifier(_ policy: HwpPageRenderPolicy) -> String {
+        switch policy {
+        case .coreGraphicsOnly:
+            return "coreGraphicsOnly"
+        case .skiaOptIn:
+            return "skiaOptIn"
+        }
+    }
+}
+
 struct HwpThumbnailCacheKey: Hashable {
     let path: String
     let modificationTime: TimeInterval
     let fileSize: Int
     let pixelWidth: Int
     let pixelHeight: Int
+    let renderSignature: HwpThumbnailRenderSignature
+}
+
+enum HwpThumbnailCacheEvent: CustomStringConvertible, Equatable {
+    case miss
+    case exactHit
+    case largerBucketHit(pixelWidth: Int, pixelHeight: Int)
+
+    var description: String {
+        switch self {
+        case .miss:
+            return "miss"
+        case .exactHit:
+            return "exactHit"
+        case .largerBucketHit(let pixelWidth, let pixelHeight):
+            return "largerBucketHit(\(pixelWidth)x\(pixelHeight))"
+        }
+    }
+}
+
+struct HwpThumbnailRenderResult {
+    let page: HwpRenderedPage
+    let cacheEvent: HwpThumbnailCacheEvent
+    let requestedKey: HwpThumbnailCacheKey
+    let matchedKey: HwpThumbnailCacheKey
+}
+
+private struct HwpThumbnailCacheHit {
+    let key: HwpThumbnailCacheKey
+    let page: HwpRenderedPage
+    let event: HwpThumbnailCacheEvent
 }
 
 private extension URLResourceValues {
@@ -60,7 +154,7 @@ final class HwpThumbnailRenderCache {
 
     private var cachedPages: [HwpThumbnailCacheKey: HwpRenderedPage] = [:]
     private var accessOrder: [HwpThumbnailCacheKey] = []
-    private var inFlight: [HwpThumbnailCacheKey: [(Result<HwpRenderedPage, Error>) -> Void]] = [:]
+    private var inFlight: [HwpThumbnailCacheKey: [(Result<HwpThumbnailRenderResult, Error>) -> Void]] = [:]
 
     private init() {}
 
@@ -68,11 +162,30 @@ final class HwpThumbnailRenderCache {
         for request: HwpThumbnailRenderRequest,
         completion: @escaping (Result<HwpRenderedPage, Error>) -> Void
     ) {
+        renderedPageResult(for: request) { result in
+            switch result {
+            case .success(let renderResult):
+                completion(.success(renderResult.page))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+    func renderedPageResult(
+        for request: HwpThumbnailRenderRequest,
+        completion: @escaping (Result<HwpThumbnailRenderResult, Error>) -> Void
+    ) {
         stateQueue.async {
-            if let (matchedKey, cached) = self.cachedPage(for: request.key) {
-                self.touch(matchedKey)
+            if let hit = self.cachedPage(for: request.key) {
+                self.touch(hit.key)
                 self.workerQueue.async {
-                    completion(.success(cached))
+                    completion(.success(HwpThumbnailRenderResult(
+                        page: hit.page,
+                        cacheEvent: hit.event,
+                        requestedKey: request.key,
+                        matchedKey: hit.key
+                    )))
                 }
                 return
             }
@@ -88,18 +201,29 @@ final class HwpThumbnailRenderCache {
                     try HwpPageImageRenderer.renderFirstPage(
                         fileURL: request.fileURL,
                         maximumPixelSize: request.maximumPixelSize,
-                        embeddedThumbnailPolicy: .never
+                        embeddedThumbnailPolicy: .never,
+                        policy: request.policy
                     )
                 }
 
                 self.stateQueue.async {
                     let callbacks = self.inFlight.removeValue(forKey: request.key) ?? []
-                    if case .success(let page) = result {
+                    let callbackResult: Result<HwpThumbnailRenderResult, Error>
+                    switch result {
+                    case .success(let page):
                         self.store(page, for: request.key)
+                        callbackResult = .success(HwpThumbnailRenderResult(
+                            page: page,
+                            cacheEvent: .miss,
+                            requestedKey: request.key,
+                            matchedKey: request.key
+                        ))
+                    case .failure(let error):
+                        callbackResult = .failure(error)
                     }
                     for callback in callbacks {
                         self.workerQueue.async {
-                            callback(result)
+                            callback(callbackResult)
                         }
                     }
                 }
@@ -122,12 +246,16 @@ final class HwpThumbnailRenderCache {
         accessOrder.append(key)
     }
 
-    private func cachedPage(for requestedKey: HwpThumbnailCacheKey) -> (HwpThumbnailCacheKey, HwpRenderedPage)? {
+    private func cachedPage(for requestedKey: HwpThumbnailCacheKey) -> HwpThumbnailCacheHit? {
         if let cached = cachedPages[requestedKey] {
-            return (requestedKey, cached)
+            return HwpThumbnailCacheHit(
+                key: requestedKey,
+                page: cached,
+                event: .exactHit
+            )
         }
 
-        var bestMatch: (HwpThumbnailCacheKey, HwpRenderedPage)?
+        var bestMatch: HwpThumbnailCacheHit?
         var bestArea = Int.max
 
         for (candidateKey, page) in cachedPages {
@@ -135,6 +263,7 @@ final class HwpThumbnailRenderCache {
                 candidateKey.path == requestedKey.path,
                 candidateKey.modificationTime == requestedKey.modificationTime,
                 candidateKey.fileSize == requestedKey.fileSize,
+                candidateKey.renderSignature == requestedKey.renderSignature,
                 candidateKey.pixelWidth >= requestedKey.pixelWidth,
                 candidateKey.pixelHeight >= requestedKey.pixelHeight
             else {
@@ -144,7 +273,14 @@ final class HwpThumbnailRenderCache {
             let area = candidateKey.pixelWidth * candidateKey.pixelHeight
             if area < bestArea {
                 bestArea = area
-                bestMatch = (candidateKey, page)
+                bestMatch = HwpThumbnailCacheHit(
+                    key: candidateKey,
+                    page: page,
+                    event: .largerBucketHit(
+                        pixelWidth: candidateKey.pixelWidth,
+                        pixelHeight: candidateKey.pixelHeight
+                    )
+                )
             }
         }
 
