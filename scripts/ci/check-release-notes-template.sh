@@ -32,6 +32,10 @@ required_headings=(
   "### 변경 요약"
   "### 포함된 rhwp 변화"
   "### 알한글 앱 변화"
+  "## 직접 반영된 PR과 Issue"
+  "### 직접 반영된 PR"
+  "### 해결된 Issue"
+  "### 관련 Issue"
   "## 다운로드 산출물과 SHA256"
   "## Homebrew Cask"
   "## Release metadata"
@@ -61,6 +65,7 @@ forbidden_texts=(
   "HostApp, Quick Look, Finder thumbnail, 저장/다른 이름 저장, PDF/인쇄/공유, 설치, 업데이트, About, DMG, Homebrew, Pages/Sparkle 변경"
   "문서 전용 변경과 설치본 smoke가 필요한 변경은 release delta checklist에서 구분합니다"
   "Homebrew Cask는 public DMG URL/SHA256과 tap context 검증을 통과했습니다"
+  "확인 필요"
 )
 
 for forbidden_text in "${forbidden_texts[@]}"; do
@@ -73,6 +78,35 @@ done
 if ! grep -Eq '\[`mydocs/release/v[0-9]+\.[0-9]+\.[0-9]+[^`]*\.md`\]\(https://github.com/[^)]*/blob/[^)]*/mydocs/release/v[0-9]+\.[0-9]+\.[0-9]+[^)]*\.md\)' "$RELEASE_NOTES_FILE"; then
   echo "ERROR: release notes must link to the public mydocs/release/v<version>.md document" >&2
   exit 1
+fi
+
+section_has_confirmed_content() {
+  local heading="$1"
+
+  awk -v heading="$heading" '
+    $0 == heading { in_section = 1; next }
+    in_section && /^##?#[[:space:]]/ { exit }
+    in_section && (/^- `#[0-9]+`/ || /^- 없음$/) { found = 1 }
+    END { exit found ? 0 : 1 }
+  ' "$RELEASE_NOTES_FILE"
+}
+
+for section_heading in "### 직접 반영된 PR" "### 해결된 Issue" "### 관련 Issue"; do
+  if ! section_has_confirmed_content "$section_heading"; then
+    echo "ERROR: release notes section must contain confirmed #N entries or '- 없음': $section_heading" >&2
+    exit 1
+  fi
+done
+
+release_detail_doc="$(
+  grep -Eo 'mydocs/release/v[0-9]+\.[0-9]+\.[0-9]+[^`)]*\.md' "$RELEASE_NOTES_FILE" | head -1 || true
+)"
+
+if [ -n "$release_detail_doc" ] && [ -f "$release_detail_doc" ]; then
+  if ! grep -Fxq "## 포함 PR 분석" "$release_detail_doc"; then
+    echo "ERROR: $release_detail_doc must contain '## 포함 PR 분석'" >&2
+    exit 1
+  fi
 fi
 
 echo "Release note template check passed: $RELEASE_NOTES_FILE"

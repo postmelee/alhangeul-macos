@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: pr-ci-${{ github.event.pull_request.number }}
@@ -225,20 +226,35 @@ jobs:
         run: |
           set -euo pipefail
           scripts/ci/write-release-notes.sh \
-            0.1.3 \
+            0.1.5 \
             0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
-            build.noindex/release/release-notes-0.1.3.md
+            build.noindex/release/release-notes-0.1.5.md
           scripts/ci/check-release-notes-template.sh \
-            build.noindex/release/release-notes-0.1.3.md
+            build.noindex/release/release-notes-0.1.5.md
+          scripts/validate-github-body.sh \
+            build.noindex/release/release-notes-0.1.5.md
+
+      - name: Verify release PR analysis helper
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          scripts/ci/write-release-pr-analysis.sh \
+            v0.1.4 \
+            HEAD \
+            build.noindex/release/pr-analysis-0.1.5.md
+          scripts/validate-github-body.sh \
+            build.noindex/release/pr-analysis-0.1.5.md
 
       - name: Verify release delta checklist
         shell: bash
         run: |
           set -euo pipefail
           scripts/ci/write-release-delta-checklist.sh \
-            v0.1.2 \
+            v0.1.4 \
             HEAD \
-            build.noindex/release/delta-checklist-0.1.3.md
+            build.noindex/release/delta-checklist-0.1.5.md
 
       - name: Verify Sparkle appcast helper
         shell: bash
@@ -276,6 +292,7 @@ jobs:
             echo
             echo "- release script help: OK"
             echo "- release notes dry-run/template check: OK"
+            echo "- release PR analysis helper dry-run: OK"
             echo "- release delta checklist dry-run: OK"
             echo "- Sparkle appcast helper dry-run: OK"
             echo "- Pages artifact helper dry-run: OK"

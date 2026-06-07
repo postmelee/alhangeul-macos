@@ -45,6 +45,7 @@
 - `scripts/ci/write-release-notes.sh`: GitHub Release 본문 후보 생성
 - `scripts/ci/check-release-notes-template.sh`: release note 필수 heading 검증
 - `scripts/ci/verify-universal-macos-app.sh`: app bundle 내부 앱/extension 실행 파일의 `arm64 + x86_64` slice 검증
+- `scripts/ci/write-release-pr-analysis.sh`: 직전 public release 이후 merge PR, PR body, linked Issue, 보고서 후보 기반 포함 PR 분석 초안 생성
 - `scripts/ci/write-release-delta-checklist.sh`: 직전 public release 대비 영향 영역 checklist 초안 생성
 - `scripts/ci/write-sparkle-appcast.sh`: stable Sparkle appcast 생성
 - `scripts/ci/prepare-pages-artifact.sh`: `docs/` 정적 파일과 generated appcast를 Pages artifact로 조립
@@ -56,8 +57,8 @@
 - `scripts/sync-rhwp-studio.sh`: upstream `rhwp-studio/dist`와 WASM 산출물을 HostApp bundled resource로 동기화
 - `scripts/verify-rhwp-studio-assets.sh`: bundled `rhwp-studio` manifest와 entrypoint asset 검증
 - `.github/workflows/pr-ci.yml`: PR 생성/갱신 시 기본 gate와 조건부 macOS/release helper 검증
-- `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum과 release delta checklist artifact 생성
-- `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, Pages deployment, release delta checklist artifact 생성
+- `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성
+- `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성
 - `.github/workflows/pages-docs-deploy.yml`: `main`의 `docs/**` 변경을 public Pages에 배포하고 기존 public appcast를 보존
 - `.github/workflows/rhwp-upstream-check.yml`: upstream `rhwp` release와 `rhwp-core.lock` 비교
 - `.github/workflows/rhwp-upstream-sync-pr.yml`: upstream release를 감지해 core lock/RustBridge와 bundled `rhwp-studio`를 같은 tag로 갱신하는 full sync 후보 PR 생성
@@ -81,7 +82,7 @@
 3. [`ci_workflow_guide.md`](ci_workflow_guide.md)의 PR CI와 release workflow 역할을 확인한다.
 4. [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md)의 릴리스 전 확인과 build 검증을 수행한다.
 5. [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)에 따라 merge PR title/body, linked Issue, 최종 보고서를 읽고 `포함 PR 분석` 표를 작성한다.
-6. 필요한 경우 `Release Rehearsal DMG` workflow를 실행하고 DMG/checksum과 delta checklist artifact를 누락 확인용 보조 자료로 확인한다.
+6. 필요한 경우 `Release Rehearsal DMG` workflow를 실행하고 포함 PR 분석 artifact를 release record 보정에 사용하며, DMG/checksum과 delta checklist artifact를 누락 확인용 보조 자료로 확인한다.
 7. [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md)의 credential 확인을 수행한다.
 8. release tag 생성 후 `Release Publish DMG` workflow를 `draft=true`, `prerelease=false`로 실행해 pre-public signed/notarized DMG를 생성한다.
 9. maintainer가 draft release asset 또는 Actions artifact DMG를 내려받아 app/extension universal slice, Gatekeeper, DMG layout, Finder Quick Look, Finder thumbnail smoke를 확인한다.

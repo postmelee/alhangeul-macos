@@ -59,20 +59,47 @@ for required_file in "$ROOT/$RELEASE_DETAIL_DOC" "$ROOT/$STUDIO_MANIFEST" "$ROOT
   fi
 done
 
-RELEASE_CHANGE_SECTIONS="$(
-  awk '
-    /^## GitHub Release 본문 구조 후보$/ { in_section = 1; next }
-    in_section && /^## / { exit }
-    in_section { print }
-  ' "$ROOT/$RELEASE_DETAIL_DOC" | sed '/./,$!d'
-)"
+if ! grep -Fxq "## 포함 PR 분석" "$ROOT/$RELEASE_DETAIL_DOC"; then
+  echo "ERROR: $RELEASE_DETAIL_DOC must contain '## 포함 PR 분석' before generating public release notes" >&2
+  exit 1
+fi
 
-for required_release_section in "### 변경 요약" "### 포함된 rhwp 변화" "### 알한글 앱 변화"; do
-  if ! grep -Fq "$required_release_section" <<<"$RELEASE_CHANGE_SECTIONS"; then
-    echo "ERROR: $RELEASE_DETAIL_DOC must contain $required_release_section under '## GitHub Release 본문 구조 후보'" >&2
+extract_release_subsection() {
+  local heading="$1"
+
+  awk -v heading="$heading" '
+    /^## GitHub Release 본문 구조 후보$/ { in_release_body = 1; next }
+    in_release_body && /^## / { exit }
+    in_release_body && $0 == heading { in_target = 1; print; next }
+    in_target && /^### / { exit }
+    in_target { print }
+  ' "$ROOT/$RELEASE_DETAIL_DOC" | sed '/./,$!d'
+}
+
+CHANGE_SUMMARY_SECTION="$(extract_release_subsection "### 변경 요약")"
+RHWP_CHANGES_SECTION="$(extract_release_subsection "### 포함된 rhwp 변화")"
+APP_CHANGES_SECTION="$(extract_release_subsection "### 알한글 앱 변화")"
+DIRECT_PRS_SECTION="$(extract_release_subsection "### 직접 반영된 PR")"
+RESOLVED_ISSUES_SECTION="$(extract_release_subsection "### 해결된 Issue")"
+RELATED_ISSUES_SECTION="$(extract_release_subsection "### 관련 Issue")"
+
+for required_release_section in \
+  "CHANGE_SUMMARY_SECTION:### 변경 요약" \
+  "RHWP_CHANGES_SECTION:### 포함된 rhwp 변화" \
+  "APP_CHANGES_SECTION:### 알한글 앱 변화" \
+  "DIRECT_PRS_SECTION:### 직접 반영된 PR" \
+  "RESOLVED_ISSUES_SECTION:### 해결된 Issue" \
+  "RELATED_ISSUES_SECTION:### 관련 Issue"; do
+  section_var="${required_release_section%%:*}"
+  section_heading="${required_release_section#*:}"
+  if [ -z "${!section_var}" ]; then
+    echo "ERROR: $RELEASE_DETAIL_DOC must contain $section_heading under '## GitHub Release 본문 구조 후보'" >&2
     exit 1
   fi
 done
+
+RELEASE_CHANGE_SECTIONS="$(printf '%s\n\n%s\n\n%s\n' "$CHANGE_SUMMARY_SECTION" "$RHWP_CHANGES_SECTION" "$APP_CHANGES_SECTION")"
+RELEASE_PR_ISSUE_SECTIONS="$(printf '%s\n\n%s\n\n%s\n' "$DIRECT_PRS_SECTION" "$RESOLVED_ISSUES_SECTION" "$RELATED_ISSUES_SECTION")"
 
 STUDIO_TAG="$(plutil -extract source_release_tag raw -o - "$ROOT/$STUDIO_MANIFEST")"
 STUDIO_COMMIT="$(plutil -extract source_resolved_commit raw -o - "$ROOT/$STUDIO_MANIFEST")"
@@ -86,7 +113,7 @@ cat > "$OUTPUT_FILE" <<EOF
 
 - macOS 12 이상에서 HWP/HWPX 문서를 Finder Quick Look, Finder thumbnail, 알한글 앱으로 확인할 수 있습니다.
 - 공식 DMG는 Intel Mac과 Apple Silicon Mac을 모두 지원하는 단일 universal DMG입니다.
-- 이번 릴리스의 상세 변경과 검증 기록은 [\`$RELEASE_DETAIL_DOC\`]($RELEASE_DETAIL_DOC_URL)와 release delta checklist를 기준으로 관리합니다.
+- 이번 릴리스의 상세 변경과 검증 기록은 [\`$RELEASE_DETAIL_DOC\`]($RELEASE_DETAIL_DOC_URL)의 포함 PR 분석을 기준으로 관리하고, release delta checklist는 누락 확인용 보조 자료로 사용합니다.
 - 설치, 첫 실행, 업데이트 확인, 알려진 제한 사항을 먼저 확인한 뒤 DMG를 내려받으세요.
 
 ## 설치 방법
@@ -126,6 +153,10 @@ cat > "$OUTPUT_FILE" <<EOF
 ## 이번 버전의 주요 변경 사항
 
 $RELEASE_CHANGE_SECTIONS
+
+## 직접 반영된 PR과 Issue
+
+$RELEASE_PR_ISSUE_SECTIONS
 
 ## 다운로드 산출물과 SHA256
 
