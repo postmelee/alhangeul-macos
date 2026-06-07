@@ -8,6 +8,7 @@
 
 - GitHub Release 게시, release asset upload, Sparkle appcast 갱신, Pages deployment는 작업지시자의 명시 승인 후 수행한다.
 - draft 또는 prerelease가 아닌 official release에서만 stable appcast와 Pages deployment를 실행한다.
+- `draft=true`, `prerelease=false` release workflow 실행은 signed/notarized DMG를 public publish 전에 smoke하기 위한 pre-public 검증 단계다. 이 단계에서 stable appcast와 Pages deployment가 skip되는 것은 정상 동작이다.
 - `main`에 merge된 `docs/**` 변경의 docs-only Pages 자동 배포는 승인된 merge 결과를 반영하는 운영 경로이며, Sparkle appcast를 새로 생성하지 않고 기존 public appcast를 보존한다.
 - GitHub token과 Sparkle EdDSA private key는 저장소에 기록하지 않는다.
 
@@ -17,7 +18,7 @@
 - 릴리즈 상세 기록 `mydocs/release/v<version>.md`가 현재 release candidate 기준으로 갱신되었는가
 - 직전 public release 대비 delta checklist가 생성되고 release owner가 보정했는가
 - GitHub Release body의 `이번 버전의 주요 변경 사항`에 `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`가 실제 사용자-facing 내용으로 보정되었는가
-- 마지막 release candidate 변경, bugfix PR, draft signed/notarized DMG smoke 이후 GitHub Release body와 Pages 업데이트 문서를 다시 검토했는가
+- 마지막 release candidate 변경, bugfix PR, draft signed/notarized DMG smoke 이후 official stable publish 전에 GitHub Release body와 Pages 업데이트 문서를 다시 검토했는가
 - `변경 요약`과 `알한글 앱 변화`가 특정 검증 샘플명, issue 번호, 내부 구현 용어가 아니라 사용자가 보는 증상과 개선 결과 중심으로 쓰였는가
 - GitHub Release title이 기본형 `Alhangeul v<version>`을 쓰는가, 또는 upstream `rhwp` 반영 중심 release라서 `(rhwp vX.Y.Z)` 병기 조건을 충족하는가
 - `rhwp-core.lock`의 core repository와 commit이 release note에 기록되었는가
@@ -110,7 +111,7 @@ Release note에 포함할 내용:
 - 검증 fixture, 샘플 파일명, issue 번호, PR 번호, stage 번호는 public Pages와 GitHub Release의 주요 변경 요약에 쓰지 않는다. 해당 정보는 내부 release record, 검증 결과, changelog provenance에 둔다.
 - `PUA`, `sentinel`, `render tree`, `CoreGraphics`처럼 일반 사용자가 바로 이해하기 어려운 구현 용어는 먼저 "특수 문자/기호 표시", "텍스트 배경/음영", "Quick Look 미리보기" 같은 사용자 용어로 설명하고, 필요할 때만 괄호나 metadata에서 기술 용어를 보충한다.
 - workflow default, README 정렬, manifest/checksum/provenance 같은 운영 변경은 사용자에게 직접 영향을 주는 설치, 업데이트, 보안 검증, 배포 경로 변화가 있을 때만 주요 변경에 넣는다. 그렇지 않으면 `Release metadata`, 내부 release record, 최종 보고서로 분리한다.
-- draft signed/notarized DMG smoke 이후 bugfix PR, tag 재지정, release candidate 변경이 있으면 publish 전에 주요 변경 사항을 최종 candidate 기준으로 다시 작성한다.
+- draft signed/notarized DMG smoke 이후 bugfix PR, tag 재지정, release candidate 변경이 있으면 official stable publish 전에 주요 변경 사항을 최종 candidate 기준으로 다시 작성한다.
 
 공개 표면별 역할:
 
@@ -225,6 +226,14 @@ appcast 보존 기준:
 https://postmelee.github.io/alhangeul-macos/appcast.xml
 ```
 
+### 앱 업데이트 확인 동작
+
+HostApp은 Sparkle updater를 시작한 뒤, `automaticallyChecksForUpdates`가 켜진 경우에만 `checkForUpdatesInBackground()`를 1회 요청한다. 이 경로는 앱 실행 시 새 release 안내를 더 빨리 받을 수 있게 하기 위한 백그라운드 확인이며, 최신 상태 안내 모달을 강제로 띄우는 수동 확인 경로가 아니다.
+
+앱 메뉴의 `알한글 > 업데이트 확인...`은 사용자가 직접 요청한 확인으로 유지한다. 이 메뉴는 `checkForUpdates(nil)` 경로를 사용하므로, 최신 상태 안내나 이미 진행 중인 업데이트 UI가 사용자에게 표시될 수 있다.
+
+`SUEnableAutomaticChecks`는 자동 확인 기본값을 켜지만, 사용자가 자동 확인을 끈 상태에서는 앱 실행 시 백그라운드 확인을 강제하지 않는다. `SUAutomaticallyUpdate`는 `false`로 유지하며, 새 버전이 발견되어도 설치 여부는 Sparkle 표준 UI에서 사용자가 선택한다.
+
 앱에 포함된 `SUPublicEDKey`는 Sparkle update archive 검증용 public key다. private key는 저장소에 기록하지 않고, release workflow에서는 GitHub Actions secret `SPARKLE_ED_PRIVATE_KEY`로만 전달한다.
 
 Sparkle private key를 GitHub Actions secret에 등록해야 할 때는 release 관리자 로컬 Keychain에서 다음 방식으로 export한다.
@@ -239,11 +248,12 @@ export한 파일 내용 전체를 `SPARKLE_ED_PRIVATE_KEY` secret 값으로 등�
 `Release Publish DMG` workflow의 appcast 동작 기준:
 
 - `draft=false`이고 `prerelease=false`인 공식 release에서만 stable appcast를 갱신한다.
-- draft 또는 prerelease 실행에서는 stable appcast를 갱신하지 않고 step summary에 skip 사유만 남긴다.
-- workflow는 signed/notarized DMG를 GitHub Release asset으로 업로드한 뒤 `sign_update --ed-key-file - -p`로 DMG EdDSA signature를 만든다.
-- `scripts/ci/write-sparkle-appcast.sh`가 tag 고정 DMG URL과 release notes URL로 `appcast.xml`을 생성한다.
-- workflow는 generated `appcast.xml`을 Pages artifact root의 `appcast.xml`로 포함한다.
-- `deploy-pages` job이 성공해야 stable appcast 배포 성공으로 본다. branch push fallback을 기본 경로로 사용하지 않는다.
+- `draft=true`, `prerelease=false` 실행은 pre-public signed/notarized DMG smoke 단계다. 이 단계에서는 stable appcast를 갱신하지 않고 step summary에 skip 사유만 남긴다.
+- prerelease 실행도 stable appcast와 Pages deployment를 갱신하지 않는다.
+- official stable release에서는 workflow가 signed/notarized DMG를 GitHub Release asset으로 업로드한 뒤 `sign_update --ed-key-file - -p`로 DMG EdDSA signature를 만든다.
+- official stable release에서는 `scripts/ci/write-sparkle-appcast.sh`가 tag 고정 DMG URL과 release notes URL로 `appcast.xml`을 생성한다.
+- official stable release에서는 workflow가 generated `appcast.xml`을 Pages artifact root의 `appcast.xml`로 포함한다.
+- official stable release의 `deploy-pages` job이 성공해야 stable appcast 배포 성공으로 본다. branch push fallback을 기본 경로로 사용하지 않는다.
 
 appcast enclosure URL은 latest URL이 아니라 tag 고정 URL을 사용한다.
 

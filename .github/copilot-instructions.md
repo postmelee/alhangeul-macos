@@ -19,8 +19,9 @@ Rendering and extension checks:
 - HostApp viewer code should keep document opening, security-scoped URLs, page cache, page selection, and zoom state separated in the store/view layers.
 
 Workflow and verification:
-- PRs normally target `devel`, including Skia common backend/provenance work, except HostApp native macOS shell, Skia viewport, and Swift editing UI/overlay work which targets `native-viewer-editor`; retired `devel-webview` is not a PR target. Maintainer PR heads normally come from `publish/taskN` and are backed by a GitHub Issue and Korean task documents under `mydocs/`. Branch policy details live in `mydocs/tech/branch_strategy_webview_native.md`.
-- PR descriptions should use `.github/pull_request_template.md`, separate the direct target task from contextual related issues, link each Stage summary to its report and commit, and list only verification that was actually run.
+- PRs normally target `devel`; native shell, Skia viewport, and Swift editing work targets `native-viewer-editor`. Retired `devel-webview` is not a PR target. Maintainer PR heads use `publish/taskN` with a GitHub Issue and Korean `mydocs/` task docs.
+- PR descriptions should use `.github/pull_request_template.md`, separate target task from related context, link each Stage summary to its report and commit, and list only verification actually run.
+- For `mydocs/plans/**`, `mydocs/working/**`, and `mydocs/report/**`, apply `.github/instructions/hyperfall-documents.instructions.md`; use this file for branch, build, architecture, and release-risk checks.
 - When a change touches RustBridge, core dependency, FFI, or generated bridge artifacts, expect `./scripts/build-rust-macos.sh` or `--verify-lock`, `./scripts/check-no-appkit.sh`, `xcodegen generate`, and HostApp `xcodebuild` as applicable.
 - When rendering behavior changes, expect `./scripts/validate-stage3-render.sh`; for visual differences or renderer bug fixes, expect `./scripts/render-debug-compare.sh` on relevant samples.
 - Do not request release, signing, notarization, or Homebrew Cask work unless the PR is explicitly about distribution.

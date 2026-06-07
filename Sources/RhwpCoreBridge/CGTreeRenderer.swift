@@ -45,6 +45,9 @@ class CGTreeRenderer {
     private let maxPCXImageDimension = 16_384
     private let maxPCXDecodedByteCount = 64 * 1024 * 1024
     private let maxPCXPixelByteCount = 64 * 1024 * 1024
+    private let maxImageTileDrawCount = 4096
+    private let maxRawSvgFragmentBytes = 4 * 1024 * 1024
+    private let maxRawSvgRasterPixels = 67_108_864
 
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
@@ -64,6 +67,37 @@ class CGTreeRenderer {
     private enum ArcSegment {
         case line(CGPoint)
         case curve(CGPoint, CGPoint, CGPoint)
+    }
+
+    private enum ImageFillPolicy {
+        case fitToSize
+        case placement(ImagePlacement)
+        case tile(ImageTileMode)
+    }
+
+    private enum ImagePlacement {
+        case leftTop
+        case centerTop
+        case rightTop
+        case leftCenter
+        case center
+        case rightCenter
+        case leftBottom
+        case centerBottom
+        case rightBottom
+    }
+
+    private enum ImageTileMode {
+        case all
+        case horizontalTop
+        case horizontalBottom
+        case verticalLeft
+        case verticalRight
+    }
+
+    private enum FormObjectLabelAlignment {
+        case left
+        case center
     }
 
     func render(
@@ -194,9 +228,20 @@ class CGTreeRenderer {
                 renderEquation(equation, bbox: node.bbox, in: ctx)
             }
 
-        case .formObject:
-            // 양식 개체는 M3 이후
-            break
+        case .formObject(let formObject):
+            if shouldRenderFlowContent {
+                renderFormObject(formObject, bbox: node.bbox, in: ctx)
+            }
+
+        case .placeholder(let placeholder):
+            if shouldRenderFlowContent {
+                renderPlaceholder(placeholder, bbox: node.bbox, in: ctx)
+            }
+
+        case .rawSvg(let rawSvg):
+            if shouldRenderFlowContent {
+                renderRawSvg(rawSvg, bbox: node.bbox, in: ctx)
+            }
 
         case .footnoteMarker(let marker):
             if shouldRenderFlowContent {
@@ -724,16 +769,14 @@ class CGTreeRenderer {
         ctx.saveGState()
         applyTransform(img.transform, bbox: bbox, in: ctx)
 
-        let drawImage = preparedImage(for: cgImage, node: img)
-        let r = cgRect(bbox)
-        let drawRect = imageDestinationRect(for: img, size: r.size)
-        // CG draw(image:) 는 이미지를 rect에 맞춰 그리지만 상하 반전으로 그린다.
-        // 이미지 영역에서만 Y축 반전하여 올바르게 표시한다.
-        ctx.saveGState()
-        ctx.translateBy(x: r.minX, y: r.minY + r.height)
-        ctx.scaleBy(x: 1, y: -1)
-        ctx.draw(drawImage, in: drawRect)
-        ctx.restoreGState()
+        let prepared = preparedImage(for: cgImage, node: img)
+        drawImage(
+            prepared,
+            node: img,
+            bbox: bbox,
+            decodedImageSize: cgSize(of: cgImage),
+            in: ctx
+        )
 
         ctx.restoreGState()
     }
@@ -765,18 +808,18 @@ class CGTreeRenderer {
         applyTransform(node.transform, bbox: image.bbox, in: ctx)
 
         let appliesAdjustments = !(image.bakedWatermark && image.source.data != nil)
-        let drawImage = preparedImage(
+        let prepared = preparedImage(
             for: cgImage,
             node: node,
             applyingAdjustments: appliesAdjustments
         )
-        let rect = cgRect(image.bbox)
-        let drawRect = imageDestinationRect(for: node, size: rect.size)
-        ctx.saveGState()
-        ctx.translateBy(x: rect.minX, y: rect.minY + rect.height)
-        ctx.scaleBy(x: 1, y: -1)
-        ctx.draw(drawImage, in: drawRect)
-        ctx.restoreGState()
+        drawImage(
+            prepared,
+            node: node,
+            bbox: image.bbox,
+            decodedImageSize: cgSize(of: cgImage),
+            in: ctx
+        )
 
         ctx.restoreGState()
         return true
@@ -1071,6 +1114,569 @@ class CGTreeRenderer {
         }
 
         ctx.restoreGState()
+    }
+
+    // MARK: - FormObject / RawSvg / Placeholder
+
+    private func renderFormObject(_ formObject: FormObjectNode, bbox: BBox, in ctx: CGContext) {
+        guard let rect = validTopLeftRect(for: bbox) else { return }
+
+        switch normalizedFormObjectType(formObject.formType) {
+        case "pushbutton":
+            renderPushButtonFormObject(formObject, rect: rect, in: ctx)
+        case "checkbox":
+            renderCheckBoxFormObject(formObject, rect: rect, in: ctx)
+        case "radiobutton":
+            renderRadioButtonFormObject(formObject, rect: rect, in: ctx)
+        case "combobox":
+            renderComboBoxFormObject(formObject, rect: rect, in: ctx)
+        case "edit":
+            renderEditFormObject(formObject, rect: rect, in: ctx)
+        default:
+            renderUnsupportedFormObject(formObject, rect: rect, in: ctx)
+        }
+    }
+
+    private func renderPushButtonFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(rgbColor(0xD0D0D0, alpha: alpha))
+        ctx.fill(rect)
+        ctx.setStrokeColor(rgbColor(0xA0A0A0, alpha: alpha))
+        ctx.setLineWidth(0.5)
+        ctx.stroke(rect.insetBy(dx: 0.25, dy: 0.25))
+
+        let labelRect = visibleLabelRect(for: rect, in: ctx).insetBy(dx: 4, dy: 2)
+        drawFormObjectLabel(
+            formObjectDisplayLabel(formObject),
+            in: labelRect,
+            color: rgbColor(0x808080, alpha: alpha),
+            fontSize: min(max(rect.height * 0.45, 9), 12),
+            alignment: .center,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func renderCheckBoxFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+        let squareSize = min(CGFloat(13), max(CGFloat(8), rect.height - 4))
+        let squareRect = CGRect(
+            x: rect.minX + 2,
+            y: rect.midY - squareSize / 2,
+            width: squareSize,
+            height: squareSize
+        )
+        let labelRect = CGRect(
+            x: squareRect.maxX + 3,
+            y: rect.minY,
+            width: max(0, rect.maxX - squareRect.maxX - 3),
+            height: rect.height
+        )
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(rgbColor(0xFFFFFF, alpha: alpha))
+        ctx.fill(squareRect)
+        ctx.setStrokeColor(rgbColor(0x606060, alpha: alpha))
+        ctx.setLineWidth(0.8)
+        ctx.stroke(squareRect.insetBy(dx: 0.4, dy: 0.4))
+
+        if isFormObjectSelected(formObject) {
+            ctx.setStrokeColor(formObjectTextColor(formObject, alpha: alpha))
+            ctx.setLineWidth(1.5)
+            ctx.setLineCap(.round)
+            ctx.setLineJoin(.round)
+            ctx.beginPath()
+            ctx.move(to: CGPoint(x: squareRect.minX + squareSize * 0.20, y: squareRect.minY + squareSize * 0.55))
+            ctx.addLine(to: CGPoint(x: squareRect.minX + squareSize * 0.45, y: squareRect.minY + squareSize * 0.80))
+            ctx.addLine(to: CGPoint(x: squareRect.minX + squareSize * 0.85, y: squareRect.minY + squareSize * 0.20))
+            ctx.strokePath()
+        }
+
+        drawFormObjectLabel(
+            formObjectDisplayLabel(formObject),
+            in: visibleLabelRect(for: labelRect, in: ctx),
+            color: formObjectTextColor(formObject, alpha: alpha),
+            fontSize: min(max(rect.height * 0.55, 9), 12),
+            alignment: .left,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func renderRadioButtonFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+        let radius = min(CGFloat(6.5), max(CGFloat(4), (rect.height - 4) / 2))
+        let center = CGPoint(x: rect.minX + 2 + radius, y: rect.midY)
+        let labelRect = CGRect(
+            x: center.x + radius + 3,
+            y: rect.minY,
+            width: max(0, rect.maxX - center.x - radius - 3),
+            height: rect.height
+        )
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(rgbColor(0xFFFFFF, alpha: alpha))
+        ctx.fillEllipse(in: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
+        ctx.setStrokeColor(rgbColor(0x606060, alpha: alpha))
+        ctx.setLineWidth(0.8)
+        ctx.strokeEllipse(in: CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2))
+
+        if isFormObjectSelected(formObject) {
+            let dotRadius = radius * 0.45
+            ctx.setFillColor(formObjectTextColor(formObject, alpha: alpha))
+            ctx.fillEllipse(in: CGRect(
+                x: center.x - dotRadius,
+                y: center.y - dotRadius,
+                width: dotRadius * 2,
+                height: dotRadius * 2
+            ))
+        }
+
+        drawFormObjectLabel(
+            formObjectDisplayLabel(formObject),
+            in: visibleLabelRect(for: labelRect, in: ctx),
+            color: formObjectTextColor(formObject, alpha: alpha),
+            fontSize: min(max(rect.height * 0.55, 9), 12),
+            alignment: .left,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func renderComboBoxFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+        let buttonWidth = min(max(rect.height * 0.8, 12), rect.width * 0.35)
+        let buttonRect = CGRect(x: rect.maxX - buttonWidth, y: rect.minY, width: buttonWidth, height: rect.height)
+        let labelRect = CGRect(
+            x: rect.minX + 3,
+            y: rect.minY,
+            width: max(0, buttonRect.minX - rect.minX - 6),
+            height: rect.height
+        )
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(rgbColor(0xFFFFFF, alpha: alpha))
+        ctx.fill(rect)
+        ctx.setStrokeColor(rgbColor(0xA0A0A0, alpha: alpha))
+        ctx.setLineWidth(0.8)
+        ctx.stroke(rect.insetBy(dx: 0.4, dy: 0.4))
+        ctx.setFillColor(rgbColor(0xE0E0E0, alpha: alpha))
+        ctx.fill(buttonRect)
+        ctx.setStrokeColor(rgbColor(0xA0A0A0, alpha: alpha))
+        ctx.setLineWidth(0.5)
+        ctx.stroke(buttonRect.insetBy(dx: 0.25, dy: 0.25))
+        drawComboBoxArrow(in: buttonRect, alpha: alpha, in: ctx)
+
+        drawFormObjectLabel(
+            formObjectDisplayLabel(formObject),
+            in: visibleLabelRect(for: labelRect, in: ctx),
+            color: formObjectTextColor(formObject, alpha: alpha),
+            fontSize: min(max(rect.height * 0.55, 8), 10.6),
+            alignment: .left,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func renderEditFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+        let fillColor = editFormObjectFillColor(formObject, alpha: alpha)
+        let label = formObjectDisplayLabel(
+            formObject,
+            allowNameFallback: false,
+            allowTypeFallback: false
+        )
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(fillColor)
+        ctx.fill(rect)
+        ctx.setStrokeColor(rgbColor(0xA0A0A0, alpha: alpha))
+        ctx.setLineWidth(0.8)
+        ctx.stroke(rect.insetBy(dx: 0.4, dy: 0.4))
+
+        if !label.isEmpty {
+            drawFormObjectLabel(
+                label,
+                in: visibleLabelRect(for: rect.insetBy(dx: 3, dy: 2), in: ctx),
+                color: formObjectTextColor(formObject, alpha: alpha),
+                fontSize: min(max(rect.height * 0.55, 9), 12),
+                alignment: .left,
+                in: ctx
+            )
+        }
+
+        ctx.restoreGState()
+    }
+
+    private func renderUnsupportedFormObject(_ formObject: FormObjectNode, rect: CGRect, in ctx: CGContext) {
+        let alpha = formObjectAlpha(formObject)
+        let label = nonEmptyFormObjectString(formObject.name) ?? "FORM \(formObject.formType)"
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(formObjectColor(formObject.backColor, fallback: rgbColor(0xF7F7F7, alpha: alpha), alpha: alpha))
+        ctx.fill(rect)
+        ctx.setStrokeColor(rgbColor(0x6A7785, alpha: alpha))
+        ctx.setLineWidth(1)
+        ctx.stroke(rect.insetBy(dx: 0.5, dy: 0.5))
+
+        drawFormObjectLabel(
+            label,
+            in: visibleLabelRect(for: rect.insetBy(dx: 4, dy: 2), in: ctx),
+            color: formObjectTextColor(formObject, alpha: alpha),
+            fontSize: min(max(rect.height * 0.45, 8), 12),
+            alignment: .center,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func drawComboBoxArrow(in rect: CGRect, alpha: CGFloat, in ctx: CGContext) {
+        let arrowWidth = min(rect.width * 0.5, rect.height * 0.42)
+        let arrowHeight = arrowWidth * 0.5
+        let center = CGPoint(x: rect.midX, y: rect.midY + arrowHeight * 0.15)
+
+        ctx.setFillColor(rgbColor(0x404040, alpha: alpha))
+        ctx.beginPath()
+        ctx.move(to: CGPoint(x: center.x - arrowWidth / 2, y: center.y - arrowHeight / 2))
+        ctx.addLine(to: CGPoint(x: center.x + arrowWidth / 2, y: center.y - arrowHeight / 2))
+        ctx.addLine(to: CGPoint(x: center.x, y: center.y + arrowHeight / 2))
+        ctx.closePath()
+        ctx.fillPath()
+    }
+
+    private func drawFormObjectLabel(
+        _ text: String,
+        in rect: CGRect,
+        color: CGColor,
+        fontSize: CGFloat,
+        alignment: FormObjectLabelAlignment,
+        in ctx: CGContext
+    ) {
+        guard !text.isEmpty,
+              isValidImageDrawSize(rect.size),
+              rect.width > 3,
+              rect.height > 3 else {
+            return
+        }
+
+        var resolvedFontSize = min(fontSize, rect.height * 0.75)
+        var line: CTLine?
+        var metrics = TextRunTypographicMetrics(width: 0, ascent: 0, descent: 0, leading: 0)
+
+        while resolvedFontSize >= 5 {
+            let font = resolveAppleFont(
+                hwpFontFamily: "Apple SD Gothic Neo",
+                bold: false,
+                italic: false,
+                size: resolvedFontSize
+            )
+            let attributes: [NSAttributedString.Key: Any] = [
+                coreTextFontKey: font,
+                coreTextForegroundColorKey: color,
+            ]
+            let candidateLine = CTLineCreateWithAttributedString(
+                NSAttributedString(string: text, attributes: attributes)
+            )
+            metrics = textRunTypographicMetrics(candidateLine)
+            if metrics.width <= rect.width || metrics.width <= 0 {
+                line = candidateLine
+                break
+            }
+            let scale = rect.width / metrics.width
+            let nextFontSize = floor(resolvedFontSize * scale)
+            if nextFontSize >= resolvedFontSize {
+                resolvedFontSize -= 1
+            } else {
+                resolvedFontSize = nextFontSize
+            }
+        }
+
+        guard let line, metrics.width.isFinite else { return }
+
+        let textX: CGFloat
+        switch alignment {
+        case .left:
+            textX = 0
+        case .center:
+            textX = max(0, (rect.width - metrics.width) / 2)
+        }
+        let textY = rect.height / 2 - (metrics.ascent - metrics.descent) / 2
+
+        ctx.saveGState()
+        ctx.translateBy(x: rect.minX, y: rect.minY + rect.height)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.textPosition = CGPoint(x: textX, y: textY)
+        CTLineDraw(line, ctx)
+        ctx.restoreGState()
+    }
+
+    private func formObjectDisplayLabel(
+        _ formObject: FormObjectNode,
+        allowNameFallback: Bool = true,
+        allowTypeFallback: Bool = true
+    ) -> String {
+        if let text = nonEmptyFormObjectString(formObject.text) {
+            return text
+        }
+        if let caption = nonEmptyFormObjectString(formObject.caption) {
+            return caption
+        }
+        if allowNameFallback, let name = nonEmptyFormObjectString(formObject.name) {
+            return name
+        }
+        return allowTypeFallback ? formObject.formType : ""
+    }
+
+    private func nonEmptyFormObjectString(_ value: String?) -> String? {
+        guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !trimmed.isEmpty else {
+            return nil
+        }
+        return trimmed
+    }
+
+    private func normalizedFormObjectType(_ type: String) -> String {
+        String(type.unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) }).lowercased()
+    }
+
+    private func isFormObjectSelected(_ formObject: FormObjectNode) -> Bool {
+        (formObject.value ?? 0) != 0
+    }
+
+    private func formObjectAlpha(_ formObject: FormObjectNode) -> CGFloat {
+        formObject.enabled == false ? 0.45 : 1.0
+    }
+
+    private func formObjectTextColor(_ formObject: FormObjectNode, alpha: CGFloat) -> CGColor {
+        formObjectColor(formObject.foreColor, fallback: rgbColor(0x000000, alpha: alpha), alpha: alpha)
+    }
+
+    private func editFormObjectFillColor(_ formObject: FormObjectNode, alpha: CGFloat) -> CGColor {
+        let normalizedBackColor = formObject.backColor?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        guard normalizedBackColor != "#f0f0f0" else {
+            return rgbColor(0xFFFFFF, alpha: alpha)
+        }
+        return formObjectColor(formObject.backColor, fallback: rgbColor(0xFFFFFF, alpha: alpha), alpha: alpha)
+    }
+
+    private func formObjectColor(_ value: String?, fallback: CGColor, alpha: CGFloat) -> CGColor {
+        guard let value else {
+            return fallback.copy(alpha: clampedAlpha(Double(alpha))) ?? fallback
+        }
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count == 7, trimmed.first == "#" else {
+            return fallback.copy(alpha: clampedAlpha(Double(alpha))) ?? fallback
+        }
+        let hex = String(trimmed.dropFirst())
+        guard let raw = UInt32(hex, radix: 16) else {
+            return fallback.copy(alpha: clampedAlpha(Double(alpha))) ?? fallback
+        }
+        return rgbColor(raw, alpha: alpha)
+    }
+
+    private func renderPlaceholder(_ placeholder: PlaceholderNode, bbox: BBox, in ctx: CGContext) {
+        guard let rect = validTopLeftRect(for: bbox) else { return }
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+
+        ctx.setFillColor(colorRefToCGColor(placeholder.fillColor))
+        ctx.fill(rect)
+
+        ctx.setStrokeColor(colorRefToCGColor(placeholder.strokeColor))
+        ctx.setLineWidth(1)
+        ctx.setLineDash(phase: 0, lengths: [6, 3])
+        ctx.stroke(rect.insetBy(dx: 0.5, dy: 0.5))
+        ctx.setLineDash(phase: 0, lengths: [])
+
+        let fontSize = min(max(min(rect.width, rect.height) * 0.06, 12), 28)
+        drawPlaceholderLabel(
+            placeholder.label,
+            in: visibleLabelRect(for: rect, in: ctx).insetBy(dx: 8, dy: 8),
+            color: colorRefToCGColor(placeholder.strokeColor),
+            fontSize: fontSize,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func renderRawSvg(_ rawSvg: RawSvgNode, bbox: BBox, in ctx: CGContext) {
+        guard let rect = validTopLeftRect(for: bbox),
+              rawSvg.svg.utf8.count <= maxRawSvgFragmentBytes,
+              !exceedsRawSvgRasterLimit(rect) else {
+            renderRawSvgFallback(bbox: bbox, in: ctx)
+            return
+        }
+
+        guard let imageData = decodeRawSvgSingleImageData(rawSvg.svg),
+              let image = decodeImage(imageData) else {
+            renderRawSvgFallback(bbox: bbox, in: ctx)
+            return
+        }
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        drawImage(image, inTopLeftRect: rect, in: ctx)
+        ctx.restoreGState()
+    }
+
+    private func decodeRawSvgSingleImageData(_ svg: String) -> Data? {
+        guard let dataURL = RawSvgSingleImageDataURLParser.parseDataURL(svg) else {
+            return nil
+        }
+        return decodeBase64ImageDataURL(dataURL)
+    }
+
+    private func decodeBase64ImageDataURL(_ dataURL: String) -> Data? {
+        guard dataURL.lowercased().hasPrefix("data:"),
+              let commaIndex = dataURL.firstIndex(of: ",") else {
+            return nil
+        }
+
+        let metadata = String(dataURL[dataURL.index(dataURL.startIndex, offsetBy: 5)..<commaIndex])
+        let normalizedMetadata = metadata.lowercased()
+        let metadataParts = normalizedMetadata.split(separator: ";", omittingEmptySubsequences: false)
+        let mediaType = metadataParts.first.map(String.init) ?? ""
+        guard (mediaType.isEmpty || mediaType.hasPrefix("image/")),
+              mediaType != "image/svg+xml",
+              metadataParts.contains("base64") else {
+            return nil
+        }
+
+        let encoded = dataURL[dataURL.index(after: commaIndex)...]
+        let compact = String(encoded.unicodeScalars.filter { !$0.properties.isWhitespace })
+        guard !compact.isEmpty else {
+            return nil
+        }
+        return Data(base64Encoded: compact)
+    }
+
+    private func renderRawSvgFallback(bbox: BBox, in ctx: CGContext) {
+        guard let rect = validTopLeftRect(for: bbox) else { return }
+
+        ctx.saveGState()
+        ctx.clip(to: rect)
+        ctx.setFillColor(CGColor(gray: 0.97, alpha: 1.0))
+        ctx.fill(rect)
+        ctx.setStrokeColor(CGColor(gray: 0.45, alpha: 1.0))
+        ctx.setLineWidth(1)
+        ctx.setLineDash(phase: 0, lengths: [6, 3])
+        ctx.stroke(rect.insetBy(dx: 0.5, dy: 0.5))
+        ctx.setLineDash(phase: 0, lengths: [])
+
+        let fontSize = min(max(min(rect.width, rect.height) * 0.08, 12), 24)
+        drawPlaceholderLabel(
+            "SVG",
+            in: visibleLabelRect(for: rect, in: ctx).insetBy(dx: 8, dy: 8),
+            color: CGColor(gray: 0.35, alpha: 1.0),
+            fontSize: fontSize,
+            in: ctx
+        )
+
+        ctx.restoreGState()
+    }
+
+    private func drawPlaceholderLabel(
+        _ text: String,
+        in rect: CGRect,
+        color: CGColor,
+        fontSize: CGFloat,
+        in ctx: CGContext
+    ) {
+        guard !text.isEmpty,
+              isValidImageDrawSize(rect.size),
+              rect.width > 8,
+              rect.height > 8 else {
+            return
+        }
+
+        var resolvedFontSize = min(fontSize, rect.height * 0.65)
+        var line: CTLine?
+        var metrics = TextRunTypographicMetrics(width: 0, ascent: 0, descent: 0, leading: 0)
+
+        while resolvedFontSize >= 6 {
+            let font = resolveAppleFont(
+                hwpFontFamily: "Apple SD Gothic Neo",
+                bold: false,
+                italic: false,
+                size: resolvedFontSize
+            )
+            let attributes: [NSAttributedString.Key: Any] = [
+                coreTextFontKey: font,
+                coreTextForegroundColorKey: color,
+            ]
+            let candidateLine = CTLineCreateWithAttributedString(
+                NSAttributedString(string: text, attributes: attributes)
+            )
+            metrics = textRunTypographicMetrics(candidateLine)
+            if metrics.width <= rect.width || metrics.width <= 0 {
+                line = candidateLine
+                break
+            }
+            let scale = rect.width / metrics.width
+            let nextFontSize = floor(resolvedFontSize * scale)
+            if nextFontSize >= resolvedFontSize {
+                resolvedFontSize -= 1
+            } else {
+                resolvedFontSize = nextFontSize
+            }
+        }
+
+        guard let line, metrics.width.isFinite else { return }
+
+        let textX = max(0, (rect.width - metrics.width) / 2)
+        let textY = rect.height / 2 - (metrics.ascent - metrics.descent) / 2
+
+        ctx.saveGState()
+        ctx.translateBy(x: rect.minX, y: rect.minY + rect.height)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.textPosition = CGPoint(x: textX, y: textY)
+        CTLineDraw(line, ctx)
+        ctx.restoreGState()
+    }
+
+    private func validTopLeftRect(for bbox: BBox) -> CGRect? {
+        let rect = cgRect(bbox)
+        guard rect.origin.x.isFinite,
+              rect.origin.y.isFinite,
+              isValidImageDrawSize(rect.size) else {
+            return nil
+        }
+        return rect
+    }
+
+    private func visibleLabelRect(for rect: CGRect, in ctx: CGContext) -> CGRect {
+        let clipBounds = ctx.boundingBoxOfClipPath
+        guard !clipBounds.isNull, !clipBounds.isInfinite else {
+            return rect
+        }
+
+        let visibleRect = rect.intersection(clipBounds)
+        guard isValidImageDrawSize(visibleRect.size) else {
+            return rect
+        }
+        return visibleRect
+    }
+
+    private func exceedsRawSvgRasterLimit(_ rect: CGRect) -> Bool {
+        let pixelEstimate = Double(rect.width * rect.height)
+        return !pixelEstimate.isFinite || pixelEstimate > Double(maxRawSvgRasterPixels)
     }
 
     private func equationLocalBounds(equation: EquationNode, items: [EquationSVGDrawItem]) -> CGRect {
@@ -1452,19 +2058,286 @@ class CGTreeRenderer {
         }
     }
 
-    private func imageDestinationRect(for img: ImageNode, size: CGSize) -> CGRect {
-        let fullRect = CGRect(origin: .zero, size: size)
-        guard let fillMode = img.fillMode?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !fillMode.isEmpty else {
-            return fullRect
+    private func normalizedImageFillPolicy(_ fillMode: String?) -> ImageFillPolicy {
+        guard let fillMode else { return .fitToSize }
+
+        switch normalizedStyleKey(fillMode) {
+        case "",
+             "fittosize",
+             "stretch",
+             "stretchtofit",
+             "none":
+            return .fitToSize
+        case "lefttop":
+            return .placement(.leftTop)
+        case "centertop":
+            return .placement(.centerTop)
+        case "righttop":
+            return .placement(.rightTop)
+        case "leftcenter":
+            return .placement(.leftCenter)
+        case "center", "centercenter":
+            return .placement(.center)
+        case "rightcenter":
+            return .placement(.rightCenter)
+        case "leftbottom":
+            return .placement(.leftBottom)
+        case "centerbottom":
+            return .placement(.centerBottom)
+        case "rightbottom":
+            return .placement(.rightBottom)
+        case "tileall":
+            return .tile(.all)
+        case "tilehorztop", "tilehoriztop", "tilehorizontaltop":
+            return .tile(.horizontalTop)
+        case "tilehorzbottom", "tilehorizbottom", "tilehorizontalbottom":
+            return .tile(.horizontalBottom)
+        case "tilevertleft", "tileverticalleft":
+            return .tile(.verticalLeft)
+        case "tilevertright", "tileverticalright":
+            return .tile(.verticalRight)
+        default:
+            return .fitToSize
+        }
+    }
+
+    private func drawImage(
+        _ image: CGImage,
+        node: ImageNode,
+        bbox: BBox,
+        decodedImageSize: CGSize,
+        in ctx: CGContext
+    ) {
+        let bboxRect = cgRect(bbox)
+        let policy = normalizedImageFillPolicy(node.fillMode)
+        switch policy {
+        case .fitToSize:
+            drawImage(image, inTopLeftRect: bboxRect, in: ctx)
+        case .placement(let placement):
+            guard let naturalSize = imageNaturalDrawSize(
+                for: node,
+                decodedImageSize: decodedImageSize,
+                drawImageSize: cgSize(of: image)
+            ) else {
+                drawImage(image, inTopLeftRect: bboxRect, in: ctx)
+                return
+            }
+            let destination = imagePlacementRect(
+                placement,
+                in: bboxRect,
+                size: naturalSize
+            )
+            ctx.saveGState()
+            ctx.clip(to: bboxRect)
+            drawImage(image, inTopLeftRect: destination, in: ctx)
+            ctx.restoreGState()
+        case .tile(let tileMode):
+            guard let tileSize = imageNaturalDrawSize(
+                for: node,
+                decodedImageSize: decodedImageSize,
+                drawImageSize: cgSize(of: image)
+            ) else {
+                drawImage(image, inTopLeftRect: bboxRect, in: ctx)
+                return
+            }
+            drawTiledImage(image, bbox: bboxRect, tileMode: tileMode, tileSize: tileSize, in: ctx)
+        }
+    }
+
+    private func imageNaturalDrawSize(
+        for node: ImageNode,
+        decodedImageSize: CGSize,
+        drawImageSize: CGSize
+    ) -> CGSize? {
+        if let originalSize = node.originalSize,
+           originalSize.count >= 2 {
+            let size = CGSize(width: CGFloat(originalSize[0]), height: CGFloat(originalSize[1]))
+            if isValidImageDrawSize(size) {
+                return size
+            }
         }
 
-        switch fillMode.replacingOccurrences(of: "_", with: "").lowercased() {
-        case "fittosize", "stretch", "stretchtofit":
-            return fullRect
-        default:
-            return fullRect
+        if isValidImageDrawSize(decodedImageSize) {
+            return decodedImageSize
         }
+        if isValidImageDrawSize(drawImageSize) {
+            return drawImageSize
+        }
+        return nil
+    }
+
+    private func imagePlacementRect(
+        _ placement: ImagePlacement,
+        in bbox: CGRect,
+        size: CGSize
+    ) -> CGRect {
+        let x: CGFloat
+        switch placement {
+        case .leftTop, .leftCenter, .leftBottom:
+            x = bbox.minX
+        case .centerTop, .center, .centerBottom:
+            x = bbox.midX - size.width / 2
+        case .rightTop, .rightCenter, .rightBottom:
+            x = bbox.maxX - size.width
+        }
+
+        let y: CGFloat
+        switch placement {
+        case .leftTop, .centerTop, .rightTop:
+            y = bbox.minY
+        case .leftCenter, .center, .rightCenter:
+            y = bbox.midY - size.height / 2
+        case .leftBottom, .centerBottom, .rightBottom:
+            y = bbox.maxY - size.height
+        }
+
+        return CGRect(origin: CGPoint(x: x, y: y), size: size)
+    }
+
+    private func drawImage(_ image: CGImage, inTopLeftRect rect: CGRect, in ctx: CGContext) {
+        guard isValidImageDrawSize(rect.size) else { return }
+
+        // CG draw(image:) 는 현재 top-left renderer 좌표계에서 상하 반전되므로,
+        // 이미지 draw call 내부에서만 국소적으로 Y축을 뒤집는다.
+        ctx.saveGState()
+        ctx.translateBy(x: rect.minX, y: rect.minY + rect.height)
+        ctx.scaleBy(x: 1, y: -1)
+        ctx.draw(image, in: CGRect(origin: .zero, size: rect.size))
+        ctx.restoreGState()
+    }
+
+    private func drawTiledImage(
+        _ image: CGImage,
+        bbox: CGRect,
+        tileMode: ImageTileMode,
+        tileSize: CGSize,
+        in ctx: CGContext
+    ) {
+        guard isValidImageDrawSize(tileSize), isValidImageDrawSize(bbox.size) else {
+            drawImage(image, inTopLeftRect: bbox, in: ctx)
+            return
+        }
+
+        ctx.saveGState()
+        ctx.clip(to: bbox)
+        var drawCount = 0
+
+        func drawTile(at origin: CGPoint) -> Bool {
+            guard drawCount < maxImageTileDrawCount else {
+                return false
+            }
+            drawImage(
+                image,
+                inTopLeftRect: CGRect(origin: origin, size: tileSize),
+                in: ctx
+            )
+            drawCount += 1
+            return true
+        }
+
+        switch tileMode {
+        case .all:
+            var y = bbox.minY
+            while y < bbox.maxY {
+                var x = bbox.minX
+                while x < bbox.maxX {
+                    guard drawTile(at: CGPoint(x: x, y: y)) else {
+                        ctx.restoreGState()
+                        return
+                    }
+                    x += tileSize.width
+                }
+                y += tileSize.height
+            }
+        case .horizontalTop:
+            drawHorizontalTiles(
+                image,
+                y: bbox.minY,
+                bbox: bbox,
+                tileSize: tileSize,
+                in: ctx,
+                drawCount: &drawCount
+            )
+        case .horizontalBottom:
+            drawHorizontalTiles(
+                image,
+                y: bbox.maxY - tileSize.height,
+                bbox: bbox,
+                tileSize: tileSize,
+                in: ctx,
+                drawCount: &drawCount
+            )
+        case .verticalLeft:
+            drawVerticalTiles(
+                image,
+                x: bbox.minX,
+                bbox: bbox,
+                tileSize: tileSize,
+                in: ctx,
+                drawCount: &drawCount
+            )
+        case .verticalRight:
+            drawVerticalTiles(
+                image,
+                x: bbox.maxX - tileSize.width,
+                bbox: bbox,
+                tileSize: tileSize,
+                in: ctx,
+                drawCount: &drawCount
+            )
+        }
+
+        ctx.restoreGState()
+    }
+
+    private func drawHorizontalTiles(
+        _ image: CGImage,
+        y: CGFloat,
+        bbox: CGRect,
+        tileSize: CGSize,
+        in ctx: CGContext,
+        drawCount: inout Int
+    ) {
+        var x = bbox.minX
+        while x < bbox.maxX {
+            guard drawCount < maxImageTileDrawCount else { return }
+            drawImage(
+                image,
+                inTopLeftRect: CGRect(origin: CGPoint(x: x, y: y), size: tileSize),
+                in: ctx
+            )
+            drawCount += 1
+            x += tileSize.width
+        }
+    }
+
+    private func drawVerticalTiles(
+        _ image: CGImage,
+        x: CGFloat,
+        bbox: CGRect,
+        tileSize: CGSize,
+        in ctx: CGContext,
+        drawCount: inout Int
+    ) {
+        var y = bbox.minY
+        while y < bbox.maxY {
+            guard drawCount < maxImageTileDrawCount else { return }
+            drawImage(
+                image,
+                inTopLeftRect: CGRect(origin: CGPoint(x: x, y: y), size: tileSize),
+                in: ctx
+            )
+            drawCount += 1
+            y += tileSize.height
+        }
+    }
+
+    private func cgSize(of image: CGImage) -> CGSize {
+        CGSize(width: CGFloat(image.width), height: CGFloat(image.height))
+    }
+
+    private func isValidImageDrawSize(_ size: CGSize) -> Bool {
+        size.width.isFinite && size.height.isFinite && size.width > 0 && size.height > 0
     }
 
     // MARK: - 그룹
@@ -3337,6 +4210,13 @@ class CGTreeRenderer {
         return CGColor(red: r, green: g, blue: b, alpha: clampedAlpha(Double(alpha)))
     }
 
+    private func rgbColor(_ rgb: UInt32, alpha: CGFloat = 1.0) -> CGColor {
+        let r = CGFloat((rgb >> 16) & 0xFF) / 255.0
+        let g = CGFloat((rgb >> 8) & 0xFF) / 255.0
+        let b = CGFloat(rgb & 0xFF) / 255.0
+        return CGColor(red: r, green: g, blue: b, alpha: clampedAlpha(Double(alpha)))
+    }
+
     private var coreTextForegroundColorKey: NSAttributedString.Key {
         NSAttributedString.Key(kCTForegroundColorAttributeName as String)
     }
@@ -3468,6 +4348,81 @@ private enum EquationSVGTextAnchor {
     case start
     case middle
     case end
+}
+
+private final class RawSvgSingleImageDataURLParser: NSObject, XMLParserDelegate {
+    private var imageElementCount = 0
+    private var dataURL: String?
+    private var invalid = false
+
+    static func parseDataURL(_ fragment: String) -> String? {
+        let trimmed = fragment.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard isSingleSelfClosingImageFragment(trimmed),
+              let data = """
+              <root xmlns:xlink="http://www.w3.org/1999/xlink">\(trimmed)</root>
+              """.data(using: .utf8) else {
+            return nil
+        }
+
+        let delegate = RawSvgSingleImageDataURLParser()
+        let parser = XMLParser(data: data)
+        parser.delegate = delegate
+        parser.shouldProcessNamespaces = false
+        parser.shouldReportNamespacePrefixes = false
+        parser.shouldResolveExternalEntities = false
+
+        guard parser.parse(),
+              !delegate.invalid,
+              delegate.imageElementCount == 1,
+              let dataURL = delegate.dataURL?.trimmingCharacters(in: .whitespacesAndNewlines),
+              dataURL.lowercased().hasPrefix("data:") else {
+            return nil
+        }
+        return dataURL
+    }
+
+    func parser(
+        _ parser: XMLParser,
+        didStartElement elementName: String,
+        namespaceURI: String?,
+        qualifiedName qName: String?,
+        attributes attributeDict: [String: String]
+    ) {
+        switch elementName.lowercased() {
+        case "root":
+            return
+        case "image":
+            imageElementCount += 1
+            guard imageElementCount == 1 else {
+                invalid = true
+                return
+            }
+            dataURL = attributeDict["xlink:href"] ?? attributeDict["href"]
+        default:
+            invalid = true
+        }
+    }
+
+    func parser(_ parser: XMLParser, foundCharacters string: String) {
+        if !string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            invalid = true
+        }
+    }
+
+    private static func isSingleSelfClosingImageFragment(_ fragment: String) -> Bool {
+        guard fragment.hasPrefix("<image"),
+              fragment.hasSuffix("/>"),
+              fragment.unicodeScalars.filter({ $0 == "<" }).count == 1 else {
+            return false
+        }
+
+        let tagNameEnd = fragment.index(fragment.startIndex, offsetBy: "<image".count)
+        guard tagNameEnd < fragment.endIndex else {
+            return false
+        }
+        let next = fragment[tagNameEnd]
+        return next.isWhitespace || next == "/" || next == ">"
+    }
 }
 
 private final class EquationSVGFragmentParser: NSObject, XMLParserDelegate {

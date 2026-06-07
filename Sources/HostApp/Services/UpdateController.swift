@@ -15,6 +15,7 @@ final class UpdateController: ObservableObject {
             updaterDelegate: nil,
             userDriverDelegate: nil
         )
+        requestLaunchUpdateCheckIfAllowed()
 
         canCheckForUpdatesObserver = updaterController.updater
             .publisher(for: \.canCheckForUpdates)
@@ -26,6 +27,14 @@ final class UpdateController: ObservableObject {
 
     func checkForUpdates() {
         updaterController.checkForUpdates(nil)
+    }
+
+    private func requestLaunchUpdateCheckIfAllowed() {
+        guard updaterController.updater.automaticallyChecksForUpdates else {
+            return
+        }
+
+        updaterController.updater.checkForUpdatesInBackground()
     }
 }
 

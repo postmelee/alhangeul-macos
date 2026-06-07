@@ -81,14 +81,18 @@ allow_implicit_invocation: false
    - 작업지시자가 같은 스레드에서 생성 승인을 명시하기 전에는 `gh issue create`를 실행하지 않는다.
 8. 승인 후 이슈 생성
    ```bash
+   ISSUE_BODY=/tmp/task-register-issue-body.md
+   # 승인된 이슈 본문을 "$ISSUE_BODY"에 작성한다.
+   scripts/validate-github-body.sh "$ISSUE_BODY"
    gh issue create --repo postmelee/alhangeul-macos \
      --title "{제목}" \
-     --body "{본문}" \
+     --body-file "$ISSUE_BODY" \
      --milestone "{milestone}" \
      --label "{label}"
    ```
    - label이 여러 개면 `--label documentation --label enhancement`처럼 반복한다.
    - label을 쓰지 않기로 했으면 `--label` 옵션을 생략한다.
+   - GitHub 공개 본문은 inline `--body`로 넣지 않고 `--body-file`과 `scripts/validate-github-body.sh`를 사용한다.
 9. 생성 결과 확인
    ```bash
    gh issue view {N} --repo postmelee/alhangeul-macos \
@@ -105,10 +109,12 @@ allow_implicit_invocation: false
 - 5개 이상 label이면 승인된 예외 사유가 생성 결과 보고에 포함되어야 한다.
 - `area:*` label은 주 작업 소유 영역 기준으로 선택되어야 한다.
 - 생성 결과 보고에 issue number, URL, milestone, label, 선택 이유가 포함되어야 한다.
+- 이슈 본문 파일이 `scripts/validate-github-body.sh`를 통과해야 한다.
 
 ## 절대 하지 말 것
 
 - 작업지시자 승인 없이 `gh issue create` 실행
+- GitHub 공개 이슈 본문을 inline `--body`로 등록
 - 새 milestone 또는 새 label 생성
 - 닫힌 milestone을 임의로 사용
 - 이슈 생성 후 승인 없이 `task-start`까지 이어서 실행

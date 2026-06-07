@@ -4,9 +4,9 @@
 
 이 구현계획서는 `v0.1.4` public release 준비와 배포 실행을 5단계로 나눈다. 확정된 release identity는 `version=0.1.4`, `build=10`, `previous_release_ref=v0.1.3`, `expected_rhwp_tag=v0.7.13`이다.
 
-각 단계는 하이퍼-워터폴 승인 gate를 가진다. Stage 1~2는 release candidate source와 communication 정렬, Stage 3은 source preflight와 rehearsal, Stage 4는 `main` 반영과 public publish gate, Stage 5는 post-publish 확인과 Homebrew gate다.
+각 단계는 하이퍼-워터폴 승인 gate를 가진다. Stage 1~2는 release candidate source와 communication 정렬, Stage 3은 source preflight와 rehearsal, Stage 4는 `main` 반영, pre-public signed/notarized DMG smoke, official stable publish gate, Stage 5는 post-publish public surface 확인과 Homebrew gate다.
 
-public publish, GitHub Release 게시, Pages/Sparkle 갱신, Homebrew tap 반영은 이 구현계획 승인만으로 실행하지 않는다. 해당 단계에서 작업지시자의 별도 명시 승인을 받은 뒤 진행한다.
+pre-public signed/notarized DMG smoke, public publish, GitHub Release 게시, Pages/Sparkle 갱신, Homebrew tap 반영은 이 구현계획 승인만으로 실행하지 않는다. 해당 단계에서 작업지시자의 별도 명시 승인을 받은 뒤 진행한다.
 
 ## Stage 1: Release Candidate Source Metadata 정렬
 
@@ -162,13 +162,13 @@ hdiutil verify build.noindex/release/alhangeul-macos-0.1.4-rehearsal.dmg
 
 ### 승인 요청
 
-Stage 3 완료보고서 기준으로 Stage 4 진행 승인을 요청한다. Stage 4의 `main` PR, tag 생성, public publish는 별도 승인 gate다.
+Stage 3 완료보고서 기준으로 Stage 4 진행 승인을 요청한다. Stage 4의 `main` PR, tag 생성, pre-public signed/notarized DMG smoke, official stable publish는 별도 승인 gate다.
 
-## Stage 4: Main/Tag/Public Publish Gate
+## Stage 4: Main/Tag/Pre-public Smoke와 Official Publish Gate
 
 ### 목표
 
-검증된 `devel` release candidate를 `main`으로 반영하고, `v0.1.4` tag와 public publish workflow 실행을 준비한다.
+검증된 `devel` release candidate를 `main`으로 반영하고, `v0.1.4` tag 생성, pre-public signed/notarized DMG smoke, official stable publish workflow 실행을 승인 gate별로 준비한다.
 
 ### 변경 파일
 
@@ -181,8 +181,11 @@ Stage 3 완료보고서 기준으로 Stage 4 진행 승인을 요청한다. Stag
 2. release PR 본문에 release record, 검증 결과, known limitations, publish input을 정리한다.
 3. 작업지시자 승인 후 `devel -> main` release PR을 만들고 merge한다.
 4. 작업지시자 승인 후 `v0.1.4` tag를 정확한 `main` candidate commit에 만든다.
-5. 작업지시자 승인 후 `Release Publish DMG` workflow를 실행한다.
-6. workflow summary에서 tag/ref 일치, `expected_rhwp_tag`, public DMG, GitHub Release, Pages/Sparkle job 결과를 확인한다.
+5. 작업지시자 승인 후 `Release Publish DMG` workflow를 `draft=true`, `prerelease=false`로 실행해 signed/notarized DMG를 생성한다.
+6. maintainer가 draft release asset 또는 Actions artifact DMG를 직접 설치 smoke하고, stable appcast와 Pages deployment가 skip된 것을 확인한다.
+7. draft smoke 통과 후 GitHub Release body, Pages 업데이트 문서, README 최신 요약, 내부 release record를 최종 candidate 기준으로 다시 검토한다.
+8. 작업지시자 별도 승인 후 `Release Publish DMG` workflow를 `draft=false`, `prerelease=false` official stable 기준으로 실행한다.
+9. workflow summary에서 tag/ref 일치, `expected_rhwp_tag`, public DMG, GitHub Release, Pages/Sparkle job 결과를 확인한다.
 
 ### 검증
 
@@ -193,7 +196,20 @@ gh pr view <release-pr> --repo postmelee/alhangeul-macos --json number,state,mer
 gh release view v0.1.4 --repo postmelee/alhangeul-macos --json tagName,name,isDraft,isPrerelease,assets,url
 ```
 
-publish workflow 승인 입력:
+pre-public draft smoke 승인 입력:
+
+```bash
+gh workflow run "Release Publish DMG" --ref v0.1.4 \
+  -f version=0.1.4 \
+  -f previous_release_ref=v0.1.3 \
+  -f expected_rhwp_tag=v0.7.13 \
+  -f require_latest_rhwp=true \
+  -f include_rhwp_in_title=true \
+  -f draft=true \
+  -f prerelease=false
+```
+
+official stable publish 승인 입력:
 
 ```bash
 gh workflow run "Release Publish DMG" --ref v0.1.4 \
@@ -210,17 +226,17 @@ gh workflow run "Release Publish DMG" --ref v0.1.4 \
 
 - `mydocs/working/task_m900_301_stage4.md`
 - 보정된 `mydocs/release/v0.1.4.md`
-- 단계 커밋: `Task #301 Stage 4: public publish gate 확인`
+- 단계 커밋: `Task #301 Stage 4: pre-public smoke와 official publish gate 확인`
 
 ### 승인 요청
 
 Stage 4 완료보고서 기준으로 Stage 5 진행 승인을 요청한다.
 
-## Stage 5: Post-publish 확인과 Homebrew Gate
+## Stage 5: Post-publish Public Surface 확인과 Homebrew Gate
 
 ### 목표
 
-public artifact와 update surface를 검증하고, Homebrew는 public DMG SHA256 확정 후 별도 승인으로 반영한다.
+official stable publish 이후 public artifact와 update surface를 검증하고, Homebrew는 public DMG SHA256 확정 후 별도 승인으로 반영한다.
 
 ### 변경 파일
 
@@ -234,7 +250,7 @@ public artifact와 update surface를 검증하고, Homebrew는 public DMG SHA256
 
 ### 작업
 
-1. GitHub Release URL, public DMG URL, SHA256, size, asset 목록을 확인한다.
+1. GitHub Release URL, official stable public DMG URL, SHA256, size, asset 목록을 확인한다.
 2. Pages `updates/v0.1.4.html`, latest download, stable appcast item, Sparkle EdDSA signature를 확인한다.
 3. release machine에서 가능한 범위의 stapler, `spctl`, universal slice 검증을 반복한다.
 4. Finder Quick Look/Thumbnail smoke와 Sparkle extension refresh smoke를 실행하거나 미실행 사유를 기록한다.
@@ -284,14 +300,14 @@ brew uninstall --cask alhangeul
 | 구현계획 승인 | Stage 1 source metadata 수정 |
 | Stage 1 승인 | Stage 2 release communication 작성 |
 | Stage 2 승인 | Stage 3 build/preflight/rehearsal |
-| Stage 3 승인 | `devel -> main` release PR, tag 생성, public publish |
+| Stage 3 승인 | `devel -> main` release PR, tag 생성, pre-public signed/notarized DMG smoke, official stable publish |
 | Stage 4 승인 | post-publish smoke, Homebrew gate |
 | Homebrew 별도 승인 | Cask SHA 고정, tap 반영, Homebrew 설치 안내 공개 |
 
 ## 검증/기록 원칙
 
 - 실행하지 않은 smoke는 성공으로 기록하지 않는다.
-- rehearsal DMG와 public DMG SHA256을 섞지 않는다.
+- rehearsal DMG, pre-public draft DMG, official stable public DMG SHA256을 섞지 않는다.
 - secret 값은 어떤 문서, commit, PR, shell history에도 기록하지 않는다.
 - public artifact URL, SHA256, workflow run URL, Pages URL, appcast 결과는 `mydocs/release/v0.1.4.md`에 남긴다.
 - GitHub-hosted workflow에서만 생성된 산출물은 workflow summary와 artifact를 기준으로 기록하고, 가능한 검증은 release machine에서 재실행한다.

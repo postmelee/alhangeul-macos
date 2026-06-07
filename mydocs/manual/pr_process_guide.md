@@ -23,6 +23,8 @@
 - 외부 기여 PR은 코드 변경과 문서 변경을 함께 검토한다.
 - 외부 PR 검토 결과는 `mydocs/pr/` 문서 흐름으로 관리한다.
 - 검토 문서는 재현 가능해야 하며, 실행한 검증 명령/결과를 포함한다.
+- GitHub에 공개되는 PR/Issue 본문, 코멘트, review 본문은 `--body-file`로 등록하고, 등록 전 `scripts/validate-github-body.sh <body-file>`를 통과해야 한다.
+- 긴 공개 본문을 `--body`에 직접 넣지 않는다.
 
 ## 내부 task PR 작성 규칙
 
@@ -153,19 +155,23 @@ PR 본문은 `.github/pull_request_template.md`를 기준으로 작성한다.
 git checkout local/task24
 BASE_BRANCH=devel # HostApp native shell/overlay 작업이면 native-viewer-editor
 git push origin local/task24:publish/task24
+PR_BODY=/tmp/task24-pr-body.md
+# .github/pull_request_template.md를 출발점으로 삼아 "$PR_BODY" 작성
+scripts/validate-github-body.sh "$PR_BODY"
 gh pr create \
   --base "$BASE_BRANCH" \
   --head publish/task24 \
   --title "Task #24: PR 템플릿과 PR 생성 규격 표준화" \
-  --template .github/pull_request_template.md
+  --body-file "$PR_BODY"
 ```
 
-`--template`은 PR 본문 작성의 출발점으로만 사용한다.
+`.github/pull_request_template.md`는 PR 본문 파일 작성의 출발점으로만 사용한다.
 
 최종 보고서와 단계 보고서를 바탕으로 PR 본문을 완성한 경우에는 `--body-file`을 우선 사용한다.
 
 ```bash
 BASE_BRANCH=devel # HostApp native shell/overlay 작업이면 native-viewer-editor
+scripts/validate-github-body.sh /tmp/task24-pr-body.md
 gh pr create \
   --base "$BASE_BRANCH" \
   --head publish/task24 \
@@ -177,6 +183,7 @@ gh pr create \
 
 - 템플릿에서 본문을 시작할 때: `--template .github/pull_request_template.md`
 - 최종 보고서 기반으로 본문을 확정했을 때: `--body-file <작성한 PR 본문 파일>` 우선
+- `--body-file`로 등록하기 전에는 `scripts/validate-github-body.sh <작성한 본문 파일>`을 실행한다.
 - `--fill`은 커밋 메시지만으로 본문을 만들기 때문에 이 저장소의 기본 방식으로 쓰지 않는다.
 - `--body`에 긴 본문을 직접 넣는 방식은 재사용과 검토가 어렵기 때문에 피한다.
 

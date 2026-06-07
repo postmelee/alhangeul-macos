@@ -4,6 +4,7 @@ description: |
   PR merge 확인 후 부산물을 정리하는 절차를 적용한다. 명시 호출 시에만 사용한다.
   GitHub 이슈 close, publish/task{N} 원격 브랜치 삭제,
   로컬 local/task{N} 브랜치와 분리 worktree 정리, 대상 통합 브랜치 복귀를 수행한다.
+  외부 PR 운영 기록 커밋이 대상 통합 브랜치에 로컬로만 남아 있으면 직접 push 여부를 확인한다.
   PR이 실제로 merge된 직후에만 호출.
 allow_implicit_invocation: false
 ---
@@ -39,6 +40,10 @@ allow_implicit_invocation: false
    git checkout "$BASE_BRANCH"
    git pull --ff-only
    ```
+   - `git pull --ff-only`가 실패하면 `git status --short --branch`와 `git log --oneline origin/$BASE_BRANCH..$BASE_BRANCH`를 확인한다.
+   - local-only 커밋이 외부 PR 운영 기록(`PR #N 검토`, `PR #N 완료 처리`)이고 변경 파일이 `mydocs/pr/**`에만 있으면, 작업지시자 승인 후 `git rebase origin/$BASE_BRANCH`로 최신화하고 `git push origin "$BASE_BRANCH"`로 직접 반영한다.
+   - Skill, 매뉴얼, 코드, 빌드 설정, 앱 동작 변경이 섞여 있으면 직접 push하지 말고 별도 Issue/브랜치/PR 절차로 분리한다.
+   - local-only 커밋 성격이 불명확하면 reset/rebase/force push를 하지 말고 작업지시자에게 보고한다.
 4. 원격 publish 브랜치 삭제 (이미 PR merge 시 `--delete-branch`로 삭제된 경우 skip)
    ```bash
    git push origin --delete publish/task{N} 2>&1 || echo "이미 삭제됨"
@@ -63,12 +68,15 @@ allow_implicit_invocation: false
 - `git ls-remote origin publish/task{N}` 빈 출력 (원격 삭제 확인)
 - `git worktree list` 출력에 정리 대상 worktree 미존재
 - `git branch --show-current`가 대상 PR의 `baseRefName`
+- 외부 PR 운영 기록을 직접 반영했다면 `git status --short --branch`에 대상 branch의 local-only ahead가 남지 않음
 
 ## 절대 하지 말 것
 
 - PR이 merged 상태가 아닌데 이슈 close
 - 작업지시자 다른 task 브랜치(`local/task{다른번호}`)나 메인 worktree 삭제
 - `git branch -D` 강제 삭제 무단 사용 (병합 안 된 커밋이 있을 때 손실 위험)
+- 외부 PR 운영 기록이 아닌 local-only 커밋을 cleanup 과정에서 직접 push
+- non-fast-forward 상태에서 강제 push
 - 다른 작업자의 stash 삭제
 
 ## 호출 방법
