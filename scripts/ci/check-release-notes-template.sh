@@ -27,6 +27,7 @@ required_headings=(
   "## 지원 환경과 아키텍처"
   "## 설치 후 첫 실행과 Quick Look/Thumbnail 활성화 안내"
   "## 업데이트 확인 방법"
+  "## 상세 문서"
   "## 이번 버전의 주요 변경 사항"
   "### 변경 요약"
   "### 포함된 rhwp 변화"
@@ -49,6 +50,28 @@ for heading in "${required_headings[@]}"; do
 done
 
 if [ "$missing_count" -ne 0 ]; then
+  exit 1
+fi
+
+forbidden_texts=(
+  "Release owner는"
+  "release owner가 보정"
+  "보정합니다"
+  "초안"
+  "HostApp, Quick Look, Finder thumbnail, 저장/다른 이름 저장, PDF/인쇄/공유, 설치, 업데이트, About, DMG, Homebrew, Pages/Sparkle 변경"
+  "문서 전용 변경과 설치본 smoke가 필요한 변경은 release delta checklist에서 구분합니다"
+  "Homebrew Cask는 public DMG URL/SHA256과 tap context 검증을 통과했습니다"
+)
+
+for forbidden_text in "${forbidden_texts[@]}"; do
+  if grep -Fq "$forbidden_text" "$RELEASE_NOTES_FILE"; then
+    echo "ERROR: release notes contain placeholder or unverified public wording: $forbidden_text" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Eq '\[`mydocs/release/v[0-9]+\.[0-9]+\.[0-9]+[^`]*\.md`\]\(https://github.com/[^)]*/blob/[^)]*/mydocs/release/v[0-9]+\.[0-9]+\.[0-9]+[^)]*\.md\)' "$RELEASE_NOTES_FILE"; then
+  echo "ERROR: release notes must link to the public mydocs/release/v<version>.md document" >&2
   exit 1
 fi
 

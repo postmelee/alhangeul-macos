@@ -134,6 +134,8 @@
 - [ ] release note에 `rhwp-core.lock`, `rhwp-studio` manifest, third-party notices 기준 기록
 - [ ] release note에 렌더링 경로, 알려진 한계, 수동 확인 항목 기록
 - [ ] release note의 주요 변경 사항이 `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`로 구분되어 있고 release owner가 실제 사용자-facing 내용으로 보정했는지 확인
+- [ ] GitHub Release note에 `mydocs/release/v<version>.md` 등 실제 조회 가능한 상세 문서가 GitHub blob URL로 링크되어 있는지 확인
+- [ ] `알한글 앱 변화`가 source metadata, workflow default, README/Pages 정렬, 단순 version bump 같은 운영 항목을 사용자-facing 변화처럼 나열하지 않는지 확인
 - [ ] release note template 필수 섹션 검증
 - [ ] 서명/공증 검증 완료
 - [ ] GitHub Release note 작성
