@@ -161,7 +161,7 @@ test -f build.noindex/release/pages-artifact/updates/index.html
 
 ## Release Rehearsal DMG
 
-`Release Rehearsal DMG`는 public release 전 layout, DMG 생성, checksum, release delta checklist를 확인하는 수동 workflow다.
+`Release Rehearsal DMG`는 public release 전 layout, DMG 생성, checksum, release delta checklist를 확인하는 수동 workflow다. 이 workflow가 생성하는 delta checklist는 path 기반 보조 자료이며, `mydocs/release/v<version>.md`의 포함 PR 분석을 대체하지 않는다.
 
 입력:
 
@@ -178,10 +178,11 @@ workflow가 생성하는 주요 산출물:
 
 rehearsal 산출물은 public GitHub Release asset이나 Homebrew Cask URL에 사용하지 않는다.
 rehearsal workflow가 만든 app bundle도 `arm64 + x86_64` universal slice 검증을 통과해야 하지만, signed/notarized public DMG와 실제 Intel Mac 실기기 smoke를 대체하지 않는다.
+release owner는 rehearsal 전후로 merge PR title/body, linked Issue, 최종 보고서 기반 `포함 PR 분석` 표를 release record에 남기고, rehearsal delta checklist는 누락 확인과 smoke 영역 점검에만 사용한다.
 
 ## Release Publish DMG
 
-`Release Publish DMG`는 공식 public DMG를 만드는 보호 workflow다.
+`Release Publish DMG`는 공식 public DMG를 만드는 보호 workflow다. publish 전에 release record의 `포함 PR 분석` 표, 사용자-facing 판단, 해결된 Issue와 관련 Issue 구분이 완료되어 있어야 한다.
 
 유지해야 하는 보호 조건:
 
@@ -212,6 +213,8 @@ workflow가 생성하거나 게시하는 주요 산출물:
 - stable release일 때 `docs/` + generated `appcast.xml` Pages artifact
 - stable release일 때 `deploy-pages` deployment URL
 - workflow summary의 release ref, delta checklist, core lock, public artifact, GitHub Release state, Sparkle appcast, Pages artifact, GitHub Pages deployment 섹션
+
+GitHub Release body 후보는 `mydocs/release/v<version>.md`의 사용자-facing 요약과 직접 반영된 PR/Issue section을 기준으로 작성한다. publish workflow의 delta checklist는 마지막 누락 확인용 보조 자료이며, release note의 주요 변경 사항 원천이 아니다.
 
 ## Docs-only Pages Deploy
 
