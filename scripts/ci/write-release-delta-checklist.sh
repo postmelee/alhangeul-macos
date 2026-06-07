@@ -47,7 +47,7 @@ path_matches_category() {
     "저장/다른 이름 저장/PDF/인쇄/공유:"Sources/HostApp/*Save*|"저장/다른 이름 저장/PDF/인쇄/공유:"Sources/HostApp/*Export*|"저장/다른 이름 저장/PDF/인쇄/공유:"Sources/HostApp/*Print*|"저장/다른 이름 저장/PDF/인쇄/공유:"Sources/HostApp/*Share*|"저장/다른 이름 저장/PDF/인쇄/공유:"Sources/HostApp/Services/*|"저장/다른 이름 저장/PDF/인쇄/공유:"Sources/HostApp/Commands/*)
       return 0
       ;;
-    "Sparkle/appcast/Pages:"docs/appcast.xml|"Sparkle/appcast/Pages:"docs/updates/*|"Sparkle/appcast/Pages:"docs/index.html|"Sparkle/appcast/Pages:".github/workflows/release-publish.yml|"Sparkle/appcast/Pages:"scripts/ci/write-sparkle-appcast.sh|"Sparkle/appcast/Pages:"scripts/ci/write-release-notes.sh|"Sparkle/appcast/Pages:"scripts/ci/check-release-notes-template.sh)
+    "Sparkle/appcast/Pages:"docs/appcast.xml|"Sparkle/appcast/Pages:"docs/updates/*|"Sparkle/appcast/Pages:"docs/index.html|"Sparkle/appcast/Pages:".github/workflows/release-publish.yml|"Sparkle/appcast/Pages:"scripts/ci/write-sparkle-appcast.sh|"Sparkle/appcast/Pages:"scripts/ci/write-release-notes.sh|"Sparkle/appcast/Pages:"scripts/ci/check-release-notes-template.sh|"Sparkle/appcast/Pages:"scripts/ci/write-release-pr-analysis.sh)
       return 0
       ;;
     "DMG/signing/notarization:".github/workflows/release-rehearsal.yml|"DMG/signing/notarization:".github/workflows/release-publish.yml|"DMG/signing/notarization:"scripts/release.sh|"DMG/signing/notarization:"scripts/package-release.sh|"DMG/signing/notarization:"scripts/create-dmg-background.swift|"DMG/signing/notarization:"scripts/ci/import-developer-id-certificate.sh)

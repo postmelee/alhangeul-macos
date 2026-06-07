@@ -8,7 +8,7 @@ on:
         required: true
         default: "0.1.5"
       previous_release_ref:
-        description: Git ref for the previous public release used to draft the release delta checklist.
+        description: Git ref for the previous public release used to draft the release PR analysis and delta checklist.
         required: true
         default: "v0.1.4"
       expected_rhwp_tag:
@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: release-rehearsal-${{ github.ref }}-${{ inputs.version }}
@@ -33,6 +34,7 @@ jobs:
       VERSION: ${{ inputs.version }}
       PREVIOUS_RELEASE_REF: ${{ inputs.previous_release_ref }}
       EXPECTED_RHWP_TAG: ${{ inputs.expected_rhwp_tag }}
+      GH_TOKEN: ${{ github.token }}
       ALHANGEUL_BUILD_ROOT: ${{ github.workspace }}/build.noindex
       ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY: "1"
 
@@ -41,6 +43,14 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Install release validation dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v rg >/dev/null 2>&1; then
+            brew install ripgrep
+          fi
 
       - name: Validate version input
         shell: bash
@@ -76,6 +86,45 @@ jobs:
             echo "- lock commit: \`$rhwp_commit\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Write release PR analysis
+        id: pr_analysis
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate_ref="$GITHUB_SHA"
+          analysis_path="$ALHANGEUL_BUILD_ROOT/release/pr-analysis-$VERSION.md"
+
+          scripts/ci/write-release-pr-analysis.sh \
+            "$PREVIOUS_RELEASE_REF" \
+            "$candidate_ref" \
+            "$analysis_path"
+          scripts/validate-github-body.sh "$analysis_path"
+
+          {
+            echo "analysis_path=$analysis_path"
+            echo "previous_release_ref=$PREVIOUS_RELEASE_REF"
+            echo "candidate_ref=$candidate_ref"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo
+            echo "## Release PR analysis"
+            echo
+            echo "- previous release ref: \`$PREVIOUS_RELEASE_REF\`"
+            echo "- candidate ref: \`$candidate_ref\`"
+            echo "- analysis path: \`$analysis_path\`"
+            echo
+            echo "This PR/Issue/report draft is the primary input for release note review. The release owner must classify each PR before publishing public wording."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload release PR analysis artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: alhangeul-macos-${{ inputs.version }}-rehearsal-pr-analysis
+          path: ${{ steps.pr_analysis.outputs.analysis_path }}
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Write release delta checklist
         id: delta
         shell: bash
@@ -103,7 +152,7 @@ jobs:
             echo "- candidate ref: \`$candidate_ref\`"
             echo "- checklist path: \`$checklist_path\`"
             echo
-            echo "This path-based draft must be reviewed and corrected before publishing release notes."
+            echo "This path-based draft is a secondary aid for missing impact/smoke checks and must not replace PR analysis."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload release delta checklist artifact

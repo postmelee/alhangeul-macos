@@ -94,7 +94,9 @@ manual에서 특정 사건 문서를 참조해야 할 때는 본문에 사건 �
 
 - 사용자용 요약
 - 직전 공개 릴리즈 대비 변경점
+- 포함 PR 분석: PR title/body, linked Issue, 최종 보고서 기준 분류와 사용자-facing 여부
 - 연결된 Issue/PR과 기여자
+- GitHub Release body에 직접 반영된 PR, 해결된 Issue, 관련 Issue 구분
 - 검증 결과와 public release에서 반복할 smoke 항목
 - 알려진 제한 사항과 후속 이슈
 - `rhwp` core와 viewer asset provenance
@@ -113,7 +115,7 @@ manual에서 특정 사건 문서를 참조해야 할 때는 본문에 사건 �
 - [`release_policy_guide.md`](release_policy_guide.md): 운영 기준, 배포 브랜치, public 배포 수준, 사용자 안내, artifact/checksum/provenance, 렌더링 경로와 알려진 한계
 - [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md): build 검증, 개발용 zip, public/rehearsal DMG, DMG layout, Finder 통합 smoke
 - [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md): Developer ID, notarytool, credential 기록 금지, signing/notarization 검증
-- [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md): GitHub Release body, delta checklist, Pages 업데이트 문서, Sparkle appcast
+- [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md): GitHub Release body, 포함 PR 분석, delta checklist, Pages 업데이트 문서, Sparkle appcast
 - [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md): Homebrew Cask source, public DMG SHA256, tap 반영과 audit
 
 고위험 guardrail은 의도적으로 중복할 수 있다. 예를 들어 public release 실행, GitHub Release 게시, appcast 갱신, Cask 반영은 entrypoint와 관련 하위 문서 모두에 "작업지시자 명시 승인 후 수행" 원칙을 남긴다.

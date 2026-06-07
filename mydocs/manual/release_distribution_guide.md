@@ -21,11 +21,11 @@
 | 문서 | 읽는 시점 | 내용 |
 |------|-----------|------|
 | [`public_release_runbook.md`](public_release_runbook.md) | public release 당일에 최신 release context 수집부터 publish, Pages/Sparkle, Homebrew gate, rollback까지 순서대로 실행할 때 | 메인테이너용 반복 실행 절차, workflow input 확정, 승인 gate, post-publish 확인 |
-| [`ci_workflow_guide.md`](ci_workflow_guide.md) | PR CI, release rehearsal/publish workflow, upstream check의 역할과 재현 명령을 확인할 때 | workflow trigger, 권한, 변경 범위 flag, docs-only skip, release delta checklist summary/artifact |
+| [`ci_workflow_guide.md`](ci_workflow_guide.md) | PR CI, release rehearsal/publish workflow, upstream check의 역할과 재현 명령을 확인할 때 | workflow trigger, 권한, 변경 범위 flag, docs-only skip, release delta checklist summary/artifact, 포함 PR 분석과 delta checklist 경계 |
 | [`release_policy_guide.md`](release_policy_guide.md) | 릴리스 정책, 산출물 계층, 사용자 안내 기준을 판단할 때 | 운영 기준, 배포 브랜치, public 배포 수준, artifact/checksum/provenance, 렌더링 경로와 알려진 한계 |
 | [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md) | package/release script, DMG, Finder smoke를 다룰 때 | 릴리스 전 확인, build 검증, zip, public/rehearsal DMG, DMG layout, Finder 통합 smoke |
 | [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md) | Developer ID, notarytool, Gatekeeper 검증을 다룰 때 | credential 원칙, 기록 금지 정보, signing/notarization 확인, `codesign`/`stapler`/`spctl` |
-| [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md) | GitHub Release, Pages, Sparkle appcast를 다룰 때 | release note template, delta checklist, Pages 업데이트 문서, stable appcast |
+| [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md) | GitHub Release, Pages, Sparkle appcast를 다룰 때 | release note template, 포함 PR 분석, delta checklist, Pages 업데이트 문서, stable appcast |
 | [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md) | Homebrew Cask와 tap 배포를 다룰 때 | Cask source, public DMG SHA256, tap 반영, `brew style`/`brew audit` |
 
 릴리즈별 실제 결정, SHA256, 검증 기록은 [`mydocs/release/`](../release/)에 남긴다. 환경 스냅샷은 [`release_environment.md`](../tech/release_environment.md)에 둔다. 실패 증상, 재현 조건, 원인, 재발 방지 절차가 모인 경우에만 `mydocs/troubleshootings/`로 분리한다.
@@ -45,6 +45,7 @@
 - `scripts/ci/write-release-notes.sh`: GitHub Release 본문 후보 생성
 - `scripts/ci/check-release-notes-template.sh`: release note 필수 heading 검증
 - `scripts/ci/verify-universal-macos-app.sh`: app bundle 내부 앱/extension 실행 파일의 `arm64 + x86_64` slice 검증
+- `scripts/ci/write-release-pr-analysis.sh`: 직전 public release 이후 merge PR, PR body, linked Issue, 보고서 후보 기반 포함 PR 분석 초안 생성
 - `scripts/ci/write-release-delta-checklist.sh`: 직전 public release 대비 영향 영역 checklist 초안 생성
 - `scripts/ci/write-sparkle-appcast.sh`: stable Sparkle appcast 생성
 - `scripts/ci/prepare-pages-artifact.sh`: `docs/` 정적 파일과 generated appcast를 Pages artifact로 조립
@@ -56,8 +57,8 @@
 - `scripts/sync-rhwp-studio.sh`: upstream `rhwp-studio/dist`와 WASM 산출물을 HostApp bundled resource로 동기화
 - `scripts/verify-rhwp-studio-assets.sh`: bundled `rhwp-studio` manifest와 entrypoint asset 검증
 - `.github/workflows/pr-ci.yml`: PR 생성/갱신 시 기본 gate와 조건부 macOS/release helper 검증
-- `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum과 release delta checklist artifact 생성
-- `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, Pages deployment, release delta checklist artifact 생성
+- `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성
+- `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성
 - `.github/workflows/pages-docs-deploy.yml`: `main`의 `docs/**` 변경을 public Pages에 배포하고 기존 public appcast를 보존
 - `.github/workflows/rhwp-upstream-check.yml`: upstream `rhwp` release와 `rhwp-core.lock` 비교
 - `.github/workflows/rhwp-upstream-sync-pr.yml`: upstream release를 감지해 core lock/RustBridge와 bundled `rhwp-studio`를 같은 tag로 갱신하는 full sync 후보 PR 생성
@@ -76,19 +77,20 @@
 
 실제 public release 실행 지시를 받으면 먼저 [`public_release_runbook.md`](public_release_runbook.md)를 따라 최신 release context와 승인 gate를 확정한다. 아래 흐름과 최종 체크리스트는 정책과 누락 방지 기준이며, 배포일의 단계별 실행 순서는 runbook을 우선한다.
 
-1. release version, release candidate commit, 포함 PR 범위를 확정한다.
+1. release version, release candidate commit, `previous_release_ref..candidate_ref` 포함 PR 범위를 확정한다.
 2. [`release_policy_guide.md`](release_policy_guide.md)의 branch, artifact, 사용자 안내 기준을 확인한다.
 3. [`ci_workflow_guide.md`](ci_workflow_guide.md)의 PR CI와 release workflow 역할을 확인한다.
 4. [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md)의 릴리스 전 확인과 build 검증을 수행한다.
-5. 필요한 경우 `Release Rehearsal DMG` workflow를 실행하고 DMG/checksum과 delta checklist artifact를 확인한다.
-6. [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md)의 credential 확인을 수행한다.
-7. release tag 생성 후 `Release Publish DMG` workflow를 `draft=true`, `prerelease=false`로 실행해 pre-public signed/notarized DMG를 생성한다.
-8. maintainer가 draft release asset 또는 Actions artifact DMG를 내려받아 app/extension universal slice, Gatekeeper, DMG layout, Finder Quick Look, Finder thumbnail smoke를 확인한다.
-9. draft smoke 통과 후 [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 release note와 delta checklist를 실제 SHA256/provenance로 보정한다.
-10. 작업지시자 별도 승인 후 `Release Publish DMG` workflow를 `draft=false`, `prerelease=false` official stable release 기준으로 실행한다.
-11. GitHub Release asset, Pages deployment URL, Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 post-publish public surface로 확인한다.
-12. Homebrew 배포를 진행할 경우 #209에서 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 `postmelee/homebrew-tap`에 Cask를 반영하고 tap context 검증을 수행한다.
-13. [`mydocs/release/v<version>.md`](../release/)와 최종 release report에 실제 결과와 잔여 위험을 기록한다.
+5. [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)에 따라 merge PR title/body, linked Issue, 최종 보고서를 읽고 `포함 PR 분석` 표를 작성한다.
+6. 필요한 경우 `Release Rehearsal DMG` workflow를 실행하고 포함 PR 분석 artifact를 release record 보정에 사용하며, DMG/checksum과 delta checklist artifact를 누락 확인용 보조 자료로 확인한다.
+7. [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md)의 credential 확인을 수행한다.
+8. release tag 생성 후 `Release Publish DMG` workflow를 `draft=true`, `prerelease=false`로 실행해 pre-public signed/notarized DMG를 생성한다.
+9. maintainer가 draft release asset 또는 Actions artifact DMG를 내려받아 app/extension universal slice, Gatekeeper, DMG layout, Finder Quick Look, Finder thumbnail smoke를 확인한다.
+10. draft smoke 통과 후 [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 포함 PR 분석, release note, delta checklist를 실제 SHA256/provenance로 보정한다.
+11. 작업지시자 별도 승인 후 `Release Publish DMG` workflow를 `draft=false`, `prerelease=false` official stable release 기준으로 실행한다.
+12. GitHub Release asset, Pages deployment URL, Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 post-publish public surface로 확인한다.
+13. Homebrew 배포를 진행할 경우 Issue #209 작업에서 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 `postmelee/homebrew-tap`에 Cask를 반영하고 tap context 검증을 수행한다.
+14. [`mydocs/release/v<version>.md`](../release/)와 최종 release report에 실제 결과와 잔여 위험을 기록한다.
 
 ## public release 전 확정 항목
 
@@ -98,17 +100,22 @@
 - pre-public signed/notarized draft DMG 설치 smoke를 수행할 maintainer와 기록 위치
 - GitHub Release를 draft/prerelease가 아닌 public release로 게시할 시점
 - Cask 초안의 `sha256 :no_check`를 public DMG 생성 후 실제 digest로 교체할 시점
-- `postmelee/homebrew-tap` 공개 배포를 #209에서 진행할 시점
+- `postmelee/homebrew-tap` 공개 배포를 Issue #209 작업에서 진행할 시점
 
 ## 최종 체크리스트
 
 - [ ] 릴리스 버전 확정
 - [ ] 릴리스 기준 branch/commit 확정
 - [ ] `mydocs/release/v<version>.md` 릴리즈 상세 기록 초안 작성
+- [ ] `previous_release_ref..candidate_ref` 범위의 merge PR 목록 생성
+- [ ] 각 PR의 title/body, linked Issue, `mydocs/report/task_*_report.md` 후보 확인
+- [ ] `mydocs/release/v<version>.md`에 `포함 PR 분석` 표 작성
+- [ ] 포함 PR을 사용자-facing, 개발자-facing, 운영/배포, 문서-only, upstream sync로 분류
+- [ ] 해결된 Issue와 참고/연관 Issue를 대상 타스크 Issue, closing keyword, release record 완료 확정 기준으로 분리
 - [ ] PR CI 또는 동등한 로컬 검증 결과 확인
 - [ ] `scripts/ci/write-release-delta-checklist.sh`로 직전 public release 대비 delta checklist 생성
 - [ ] workflow 사용 시 `previous_release_ref` 입력과 delta checklist summary/artifact 확인
-- [ ] release owner가 delta checklist 누락/과잉 항목 보정
+- [ ] release owner가 delta checklist를 누락/과잉 확인용 보조 자료로 보정
 - [ ] `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock` 정합성 확인
 - [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과 (`librhwp.a` byte hash skip 여부와 남는 source/header/ABI 검증 확인)
 - [ ] `scripts/verify-rhwp-studio-assets.sh` 통과
@@ -134,6 +141,14 @@
 - [ ] release note에 `rhwp-core.lock`, `rhwp-studio` manifest, third-party notices 기준 기록
 - [ ] release note에 렌더링 경로, 알려진 한계, 수동 확인 항목 기록
 - [ ] release note의 주요 변경 사항이 `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`로 구분되어 있고 release owner가 실제 사용자-facing 내용으로 보정했는지 확인
+- [ ] GitHub Release body의 첫 top-level section이 `이번 버전의 주요 변경 사항`인지 확인
+- [ ] `변경 요약`과 `알한글 앱 변화`가 `포함 PR 분석` 표에서 사용자-facing으로 판정된 항목만 기준으로 작성됐는지 확인
+- [ ] GitHub Release body에 릴리즈 요약에 반영된 PR, 해결된 Issue, 참고/연관 Issue section이 있는지 확인
+- [ ] PR/Issue 목록이 `#<number>` 단독 또는 inline code가 아니라 `[#<number>: 제목](URL) - 한 줄 설명` 형식인지 확인
+- [ ] 해결된 Issue가 대상 타스크 Issue, closing keyword, release record 완료 확정 항목 기준인지 확인
+- [ ] 이전 public release에서 이미 해결된 Issue가 GitHub Release body의 참고/연관 Issue에 다시 노출되지 않는지 확인
+- [ ] `다운로드 및 설치`가 `다운로드`, `지원 환경`, `설치 후 첫 실행`, `업데이트 확인`, `Homebrew` 하위 section으로 구분되어 있는지 확인
+- [ ] GitHub Release body에 `릴리즈 delta 기반 추가 확인 항목`이나 실제 결과가 아닌 검증 가이드라인 문구가 남아 있지 않은지 확인
 - [ ] GitHub Release note에 `mydocs/release/v<version>.md` 등 실제 조회 가능한 상세 문서가 GitHub blob URL로 링크되어 있는지 확인
 - [ ] `알한글 앱 변화`가 source metadata, workflow default, README/Pages 정렬, 단순 version bump 같은 운영 항목을 사용자-facing 변화처럼 나열하지 않는지 확인
 - [ ] release note template 필수 섹션 검증
@@ -155,7 +170,7 @@
 - [ ] Pages, Sparkle appcast, Homebrew Cask가 아키텍처별 DMG 분기 없이 같은 public universal DMG URL을 기준으로 안내되는지 확인
 - [ ] Homebrew 배포 시 `scripts/update-cask-sha256.sh`로 Cask version/sha256 갱신
 - [ ] Homebrew tap 대상이 `postmelee/homebrew-tap`인지 확인
-- [ ] #209에서 tap 반영 후 `brew style`/`brew audit`/install smoke 검증
+- [ ] Issue #209 작업에서 tap 반영 후 `brew style`/`brew audit`/install smoke 검증
 - [ ] README, Pages, GitHub Release/릴리즈 노트의 Homebrew 설치 안내가 검증된 명령과 일치하는지 확인
 - [ ] 릴리스 최종 보고서 작성
 

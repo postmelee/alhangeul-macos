@@ -22,23 +22,23 @@ if [ ! -f "$RELEASE_NOTES_FILE" ]; then
 fi
 
 required_headings=(
-  "## 사용자용 요약"
-  "## 설치 방법"
-  "## 지원 환경과 아키텍처"
-  "## 설치 후 첫 실행과 Quick Look/Thumbnail 활성화 안내"
-  "## 업데이트 확인 방법"
-  "## 상세 문서"
   "## 이번 버전의 주요 변경 사항"
   "### 변경 요약"
   "### 포함된 rhwp 변화"
   "### 알한글 앱 변화"
-  "## 다운로드 산출물과 SHA256"
-  "## Homebrew Cask"
-  "## Release metadata"
-  "## 검증 결과"
-  "## 릴리즈 delta 기반 추가 확인 항목"
-  "## 알려진 제한 사항과 후속 이슈"
-  "## Third Party notices"
+  "## 다운로드 및 설치"
+  "### 다운로드"
+  "### 지원 환경"
+  "### 설치 후 첫 실행"
+  "### 업데이트 확인"
+  "### Homebrew"
+  "## 알려진 제한 사항"
+  "## 이번 릴리즈 관련 PR과 Issue"
+  "### 릴리즈 요약에 반영된 PR"
+  "### 해결된 Issue"
+  "### 참고/연관 Issue"
+  "## 상세 기록"
+  "### Release metadata"
 )
 
 missing_count=0
@@ -53,14 +53,39 @@ if [ "$missing_count" -ne 0 ]; then
   exit 1
 fi
 
+first_h2="$(grep -m1 '^## ' "$RELEASE_NOTES_FILE" || true)"
+if [ "$first_h2" != "## 이번 버전의 주요 변경 사항" ]; then
+  echo "ERROR: release notes must put '## 이번 버전의 주요 변경 사항' as the first top-level section" >&2
+  echo "First top-level section: ${first_h2:-없음}" >&2
+  exit 1
+fi
+
 forbidden_texts=(
   "Release owner는"
   "release owner가 보정"
   "보정합니다"
   "초안"
+  "## 사용자용 요약"
+  "## 설치 방법"
+  "## 지원 환경과 아키텍처"
+  "## 설치 후 첫 실행과 Quick Look/Thumbnail 활성화 안내"
+  "## 업데이트 확인 방법"
+  "## 상세 문서"
+  "## 다운로드 산출물과 SHA256"
+  "## Homebrew Cask"
+  "## 검증 결과"
+  "## 릴리즈 delta 기반 추가 확인 항목"
+  "## 직접 반영된 PR과 Issue"
+  "### 직접 반영된 PR"
+  "### 관련 Issue"
+  "## 알려진 제한 사항과 후속 이슈"
+  "## Third Party notices"
+  "release publish workflow에서"
+  "기준 범위는 직전 공개 release tag부터 현재 release candidate commit까지입니다"
   "HostApp, Quick Look, Finder thumbnail, 저장/다른 이름 저장, PDF/인쇄/공유, 설치, 업데이트, About, DMG, Homebrew, Pages/Sparkle 변경"
   "문서 전용 변경과 설치본 smoke가 필요한 변경은 release delta checklist에서 구분합니다"
   "Homebrew Cask는 public DMG URL/SHA256과 tap context 검증을 통과했습니다"
+  "확인 필요"
 )
 
 for forbidden_text in "${forbidden_texts[@]}"; do
@@ -73,6 +98,66 @@ done
 if ! grep -Eq '\[`mydocs/release/v[0-9]+\.[0-9]+\.[0-9]+[^`]*\.md`\]\(https://github.com/[^)]*/blob/[^)]*/mydocs/release/v[0-9]+\.[0-9]+\.[0-9]+[^)]*\.md\)' "$RELEASE_NOTES_FILE"; then
   echo "ERROR: release notes must link to the public mydocs/release/v<version>.md document" >&2
   exit 1
+fi
+
+section_has_confirmed_content() {
+  local heading="$1"
+  local expected_path="$2"
+  local section_lines=""
+  local line=""
+  local found=0
+
+  section_lines="$(
+    awk -v heading="$heading" '
+    $0 == heading { in_section = 1; next }
+    in_section && /^##?#[[:space:]]/ { exit }
+    in_section { print }
+  ' "$RELEASE_NOTES_FILE"
+  )"
+
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    [[ "$line" == "- "* ]] || continue
+
+    if [ "$line" = "- 없음" ]; then
+      found=1
+      continue
+    fi
+
+    if printf '%s\n' "$line" | grep -Eq "^- \\[#[0-9]+: [^]]+\\]\\(https://github\\.com/[^)]*/$expected_path/[0-9]+\\)( - .+)?$"; then
+      found=1
+      continue
+    fi
+
+    echo "ERROR: release notes section entry must include a linked #N title or '- 없음': $heading" >&2
+    echo "Problem entry: $line" >&2
+    return 1
+  done <<< "$section_lines"
+
+  [ "$found" -eq 1 ]
+}
+
+if ! section_has_confirmed_content "### 릴리즈 요약에 반영된 PR" "pull"; then
+  echo "ERROR: release notes section must contain confirmed linked PR entries or '- 없음': ### 릴리즈 요약에 반영된 PR" >&2
+  exit 1
+fi
+
+for section_heading in "### 해결된 Issue" "### 참고/연관 Issue"; do
+  if ! section_has_confirmed_content "$section_heading" "issues"; then
+    echo "ERROR: release notes section must contain confirmed linked Issue entries or '- 없음': $section_heading" >&2
+    exit 1
+  fi
+done
+
+release_detail_doc="$(
+  grep -Eo 'mydocs/release/v[0-9]+\.[0-9]+\.[0-9]+[^`)]*\.md' "$RELEASE_NOTES_FILE" | head -1 || true
+)"
+
+if [ -n "$release_detail_doc" ] && [ -f "$release_detail_doc" ]; then
+  if ! grep -Fxq "## 포함 PR 분석" "$release_detail_doc"; then
+    echo "ERROR: $release_detail_doc must contain '## 포함 PR 분석'" >&2
+    exit 1
+  fi
 fi
 
 echo "Release note template check passed: $RELEASE_NOTES_FILE"
