@@ -324,6 +324,7 @@ write_pr_row() {
   local issues_file="$TMP_DIR/issues-$pr_number.txt"
   local resolved_file="$TMP_DIR/resolved-$pr_number.txt"
   local related_file="$TMP_DIR/related-$pr_number.txt"
+  local related_clean_file="$TMP_DIR/related-clean-$pr_number.txt"
   local reports_file="$TMP_DIR/reports-$pr_number.txt"
   local gh_status="git metadata only"
   local merge_commit="$merge_hash"
@@ -358,6 +359,8 @@ write_pr_row() {
 
   extract_issue_refs "$body_file" "$pr_number" "$resolved_file" "$related_file"
   extract_task_issue_from_subject "$subject" "$related_file"
+  issue_file_without "$related_file" "$resolved_file" "$related_clean_file"
+  mv "$related_clean_file" "$related_file"
 
   cat "$resolved_file" "$related_file" 2>/dev/null | sort -n -u > "$issues_file"
   collect_report_candidates "$issues_file" "$reports_file"

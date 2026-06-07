@@ -52,34 +52,42 @@
 | first-parent release transport | `#353`, `#322`, `#321` 등 first-parent 후보 표시 |
 | 사용자-facing 후보 hint | `#324`, `#326`, `#329`, `#334`가 사용자-facing 후보로 표시 |
 | upstream sync 후보 hint | `#349`, `#353`이 upstream sync 후보로 표시 |
-| 관련 Issue 후보 | branch/task 번호 fallback으로 `#110`, `#121`, `#122`, `#323`, `#351` 등 추출 |
+| 관련 Issue 후보 | `#116`, `#121`, `#122`, `#280`, `#282`, `#323`, `#351` 등 추출 |
 | 보고서 후보 | `task_m014_110_report.md`, `task_m014_121_report.md`, `task_m014_122_report.md`, `task_m040_323_report.md` 등 확인 |
-| 해결된 Issue 후보 | fallback 경로에서는 PR body를 읽지 못하므로 없음으로 남김 |
+| 해결된 Issue 후보 | PR body closing keyword 기준으로 `#110`, `#132`, `#302`, `#332`, `#336`, `#348`, `#349` 등 후보 추출 |
 
 ## GitHub API 보강 경로
 
 스크립트에는 `gh pr view` 기반 보강 경로를 넣었다. 이 경로가 동작하면 PR title/body/files/merge commit을 읽고 closing keyword 기반 해결된 Issue 후보를 더 정확히 채운다.
 
-이번 Stage 3 검증 중 `gh` 네트워크 보강 dry-run은 sandbox network restriction과 escalation 승인 timeout으로 끝까지 재현하지 못했다. 따라서 현재 완료 검증은 git metadata fallback 경로 기준이다. GitHub token과 network가 있는 환경에서는 같은 helper가 `gh pr view` 경로를 먼저 시도하고, 실패하면 fallback으로 내려간다.
+추가 검증에서 `gh auth status`와 대표 PR `#334` metadata 조회가 통과했다. 일반 sandbox에서는 helper의 `/bin/bash` 실행 중 `gh` network connection이 실패해 fallback으로 내려갔고, 승인 경로에서 전체 helper dry-run을 다시 실행해 PR body 기반 보강 경로를 검증했다.
+
+승인 경로 dry-run에서는 `#334` 행이 `Task #110: FormObject 정적 프리뷰 보강` title, `PR body` 근거, 해결된 Issue `#110`, 관련 Issue `#116`, `#121`, `#122`, `#280`, `#282`로 출력되는 것을 확인했다. 이 검증 과정에서 해결된 Issue가 branch/task 번호 추론으로 관련 Issue에 중복 표시되는 문제를 발견했고, helper가 row 단위와 전역 후보 단위 모두에서 해결된 Issue를 관련 Issue에서 제외하도록 보강했다.
 
 ## 검증 결과
 
 | 검증 | 결과 | 비고 |
 |------|------|------|
+| `gh auth status` | 통과 | `postmelee` 계정 인증 확인 |
+| `gh pr view 334 --repo postmelee/alhangeul-macos --json number,title,body,files,mergeCommit` | 통과 | PR body, file list, merge commit 조회 |
 | `bash -n scripts/ci/write-release-pr-analysis.sh` | 통과 | shell syntax 오류 없음 |
-| `scripts/ci/write-release-pr-analysis.sh v0.1.4 v0.1.5 build.noindex/release/pr-analysis-0.1.5.md` | 통과 | Markdown 초안 생성 |
-| 핵심 키워드 검색 | 통과 | `포함 PR 분석`, `직접 반영된 PR`, `해결된 Issue`, `관련 Issue`, 대표 PR/report 후보 확인 |
-| `scripts/validate-github-body.sh build.noindex/release/pr-analysis-0.1.5.md` | 통과 | PR/Issue ref 뒤 한글 조사 결합 없음 |
+| `scripts/ci/write-release-pr-analysis.sh v0.1.4 v0.1.5 build.noindex/release/pr-analysis-0.1.5.md` | 통과 | fallback Markdown 초안 생성 |
+| 승인 경로 `scripts/ci/write-release-pr-analysis.sh v0.1.4 v0.1.5 build.noindex/release/pr-analysis-0.1.5-gh.md` | 통과 | PR body 기반 Markdown 초안 생성 |
+| 핵심 키워드 검색 | 통과 | `포함 PR 분석`, `직접 반영된 PR`, `해결된 Issue`, `관련 Issue`, 대표 PR/report 후보, `PR body` 근거 확인 |
+| `scripts/validate-github-body.sh build.noindex/release/pr-analysis-0.1.5-gh.md` | 통과 | PR/Issue ref 뒤 한글 조사 결합 없음 |
 | `git diff --check` | 통과 | whitespace 오류 없음 |
 
 검증 명령:
 
 ```bash
+gh auth status
+gh pr view 334 --repo postmelee/alhangeul-macos --json number,title,body,files,mergeCommit
 bash -n scripts/ci/write-release-pr-analysis.sh
 scripts/ci/write-release-pr-analysis.sh v0.1.4 v0.1.5 build.noindex/release/pr-analysis-0.1.5.md
-rg -n "Release PR 분석 초안|포함 PR 분석|직접 반영된 PR|해결된 Issue|관련 Issue|#324|#326|#329|#334|#349|#352|#353|task_m014_110_report|task_m014_121_report|task_m014_122_report|task_m040_323_report" \
-  build.noindex/release/pr-analysis-0.1.5.md
-scripts/validate-github-body.sh build.noindex/release/pr-analysis-0.1.5.md
+scripts/ci/write-release-pr-analysis.sh v0.1.4 v0.1.5 build.noindex/release/pr-analysis-0.1.5-gh.md
+rg -n "Release PR 분석 초안|포함 PR 분석|직접 반영된 PR|해결된 Issue|관련 Issue|#324|#326|#329|#334|#349|#352|#353|task_m014_110_report|task_m014_121_report|task_m014_122_report|task_m040_323_report|PR body" \
+  build.noindex/release/pr-analysis-0.1.5-gh.md
+scripts/validate-github-body.sh build.noindex/release/pr-analysis-0.1.5-gh.md
 git diff --check
 ```
 
