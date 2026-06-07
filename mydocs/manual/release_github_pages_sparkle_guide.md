@@ -123,27 +123,15 @@ Issue 구분 기준:
 
 Release note에 포함할 내용:
 
-- 사용자용 요약
-- 설치 방법
-- 지원 macOS 버전과 지원 아키텍처
-- 설치 후 첫 실행과 Quick Look/Thumbnail 활성화 안내
-- 업데이트 확인 방법
 - 주요 변경 사항: `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`
+- 다운로드 및 설치: DMG, SHA256, 지원 macOS, universal DMG, 첫 실행, Quick Look/Thumbnail 활성화, 업데이트 확인, Homebrew 공개 상태
+- 알려진 제한 사항: viewer/editor 실행 경로, Quick Look/Thumbnail/PDF/인쇄 경로 차이, smoke 의미, 후속 native renderer 범위
 - 직접 반영된 PR과 Issue: 공개 body에 반영한 PR, 해결된 Issue, 관련 Issue 구분
-- 다운로드 산출물과 SHA256
-- Homebrew Cask 공개 상태
-- `Release metadata`: app version, `edwardkim/rhwp` core tag/commit, bundled `rhwp-studio` tag/commit, `rhwp-core.lock`, studio manifest
-- HostApp viewer, PDF 내보내기, 인쇄, Quick Look, Thumbnail의 렌더링 경로와 알려진 한계
-- 설치본 smoke 결과와 수동 확인 항목
-- 릴리즈 delta 기반 추가 확인 항목
-- Third Party notices와 bundled font notice 위치
-- 설치/실행 주의사항
-- Quick Look/Thumbnail extension 등록 확인 방법
-- 알려진 문제
+- 상세 기록: release detail doc, release index, Pages 릴리즈 노트, GitHub Release URL, `Release metadata`, Third Party notices, bundled font notice
 
 ### 주요 변경 사항 작성 기준
 
-`## 이번 버전의 주요 변경 사항`은 release owner가 직전 public release 대비 실제 사용자-facing 변화를 보정해 작성한다. generated template이나 delta checklist 초안을 그대로 두지 않는다. `변경 요약`과 `알한글 앱 변화`는 `포함 PR 분석` 표에서 사용자-facing으로 판정된 항목만 기준으로 작성한다.
+`## 이번 버전의 주요 변경 사항`은 release owner가 직전 public release 대비 실제 사용자-facing 변화를 보정해 작성한다. generated template이나 delta checklist 초안을 그대로 두지 않는다. GitHub Release body에서는 이 section을 첫 top-level section으로 둔다. `변경 요약`과 `알한글 앱 변화`는 `포함 PR 분석` 표에서 사용자-facing으로 판정된 항목만 기준으로 작성한다.
 
 작성 원칙:
 
@@ -152,15 +140,18 @@ Release note에 포함할 내용:
 - `PUA`, `sentinel`, `render tree`, `CoreGraphics`처럼 일반 사용자가 바로 이해하기 어려운 구현 용어는 먼저 "특수 문자/기호 표시", "텍스트 배경/음영", "Quick Look 미리보기" 같은 사용자 용어로 설명하고, 필요할 때만 괄호나 metadata에서 기술 용어를 보충한다.
 - workflow default, README 정렬, manifest/checksum/provenance 같은 운영 변경은 사용자에게 직접 영향을 주는 설치, 업데이트, 보안 검증, 배포 경로 변화가 있을 때만 주요 변경에 넣는다. 그렇지 않으면 `Release metadata`, 내부 release record, 최종 보고서로 분리한다.
 - 개발자-facing, 운영/배포, 문서-only PR은 사용자-facing 결과가 따로 확인되지 않는 한 `변경 요약`이나 `알한글 앱 변화`의 근거로 쓰지 않는다. 필요한 경우 GitHub Release의 `직접 반영된 PR과 Issue`, `기술 세부`, `검증 세부`, 내부 release record에 둔다.
+- 설치, 지원 OS, Quick Look 활성화, 업데이트 확인, 상세 문서 링크는 `다운로드 및 설치` 또는 `상세 기록`으로 합치고, `이번 버전의 주요 변경 사항`보다 앞에 두지 않는다.
+- `릴리즈 delta 기반 추가 확인 항목`처럼 release owner용 내부 절차는 public GitHub Release body에 쓰지 않는다. delta checklist는 내부 release record와 workflow artifact에서만 누락 확인용으로 사용한다.
+- `검증 결과`는 실제 실행 결과가 아닌 가이드라인 문구로 쓰지 않는다. public body에는 검증 세부를 길게 복제하지 않고, 필요한 경우 `상세 기록`의 release detail doc 링크로 연결한다.
 - draft signed/notarized DMG smoke 이후 bugfix PR, tag 재지정, release candidate 변경이 있으면 official stable publish 전에 주요 변경 사항을 최종 candidate 기준으로 다시 작성한다.
 
 공개 표면별 역할:
 
 - Pages 업데이트 문서는 사용자용 안내 표면이다. 주요 변경, hero, 설치 안내에는 샘플 파일명, issue 번호, PR 번호, `PUA`, `sentinel`, `CoreGraphics` 같은 구현/검증 용어를 쓰지 않고 증상과 개선 결과로 일반화한다.
-- GitHub Release는 사용자와 개발자가 모두 보는 public 표면이다. `요약`과 `이번 버전의 주요 변경 사항`은 Pages와 같은 사용자-facing 표현을 쓰고, 샘플 파일명, 구현 용어, 관련 PR/Issue, 검증 fixture는 `기술 세부` 또는 `검증 세부` 같은 별도 section에만 둔다.
-- GitHub Release에는 `## 상세 문서` section을 두고 `mydocs/release/v<version>.md`, 필요 시 `mydocs/release/index.md`, Pages 릴리즈 노트처럼 실제 조회 가능한 문서를 링크한다. 저장소 문서는 plain code path만 쓰지 않고 `https://github.com/postmelee/alhangeul-macos/blob/main/...` 형식의 GitHub blob URL로 연결한다.
+- GitHub Release는 사용자와 개발자가 모두 보는 public 표면이다. 첫 top-level section은 `## 이번 버전의 주요 변경 사항`이어야 하며, 설치와 provenance보다 이번 버전에서 달라진 결과를 먼저 보여준다. 샘플 파일명, 구현 용어, 관련 PR/Issue, 검증 fixture는 `직접 반영된 PR과 Issue` 또는 내부 release record로 분리한다.
+- GitHub Release에는 `## 상세 기록` section을 두고 `mydocs/release/v<version>.md`, 필요 시 `mydocs/release/index.md`, Pages 릴리즈 노트처럼 실제 조회 가능한 문서를 링크한다. 저장소 문서는 plain code path만 쓰지 않고 `https://github.com/postmelee/alhangeul-macos/blob/main/...` 형식의 GitHub blob URL로 연결한다.
 - 내부 `mydocs/release/v<version>.md`는 release decision record다. 샘플 파일명, 재현 조건, 구현 용어, 검증 명령, workflow run, 포함 PR 분석, PR/Issue, SHA256, provenance를 가장 자세히 남긴다.
-- GitHub Release의 기술 세부 section은 사용자 요약보다 뒤에 둔다. 기술 세부가 없더라도 release body는 유효하지만, 앱 자체 렌더링 bugfix처럼 재현 샘플과 구현 경계가 중요한 release는 기술 세부를 두는 편을 우선한다.
+- GitHub Release의 기술 세부 section이 필요하면 주요 변경과 다운로드/설치보다 뒤에 둔다. 기술 세부가 없더라도 release body는 유효하지만, 앱 자체 렌더링 bugfix처럼 재현 샘플과 구현 경계가 중요한 release는 내부 release record 링크를 우선한다.
 
 ### Post-publish 문구 정정
 

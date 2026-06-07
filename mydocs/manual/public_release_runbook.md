@@ -247,6 +247,7 @@ signed/notarized DMG smoke는 public publish 전에 통과해야 하는 blocking
 
 - `변경 요약`은 특정 샘플 문서명이나 issue 번호가 아니라 사용자가 보는 증상과 개선 결과로 일반화되어 있다.
 - `변경 요약`과 `알한글 앱 변화`는 `포함 PR 분석` 표에서 사용자-facing으로 판정된 항목만 기준으로 작성되어 있다.
+- GitHub Release body의 첫 top-level section은 `이번 버전의 주요 변경 사항`이다.
 - GitHub Release body에는 `직접 반영된 PR과 Issue` section이 있고, 직접 반영된 PR, 해결된 Issue, 관련 Issue가 분리되어 있다.
 - GitHub Release body의 PR/Issue 항목은 `#<number>`만 단독으로 두거나 inline code로 감싸지 않고, `[#<number>: 제목](URL) - 한 줄 설명` 형식으로 작성되어 있다.
 - 해결된 Issue는 PR body closing keyword 또는 release record 완료 확정 항목만 포함한다.
@@ -255,7 +256,8 @@ signed/notarized DMG smoke는 public publish 전에 통과해야 하는 blocking
 - 구현 용어는 사용자 용어로 번역되어 있다. 예를 들어 PUA는 특수 문자/기호 표시, shade sentinel은 텍스트 배경/음영 표시처럼 설명한다.
 - GitHub Release에 샘플 파일명, PUA, sentinel, CoreGraphics, PR/Issue 같은 개발자/검증자용 정보가 필요하면 `기술 세부` 또는 `검증 세부` section으로 분리되어 있고, 요약보다 뒤에 있다.
 - Pages 업데이트 문서에는 기술 세부 section을 두지 않고, 해당 정보는 GitHub Release의 기술 세부 또는 내부 release record로 연결된다.
-- workflow default, manifest, checksum, release record 정렬 같은 운영 정보는 주요 변경 요약이 아니라 metadata, 검증 결과, 내부 release record에 둔다.
+- workflow default, manifest, checksum, release record 정렬 같은 운영 정보는 주요 변경 요약이 아니라 상세 기록 또는 내부 release record에 둔다.
+- `릴리즈 delta 기반 추가 확인 항목`처럼 release owner용 절차 문구는 public GitHub Release body에 두지 않고 내부 release record와 workflow artifact로 분리한다.
 
 GitHub Actions 예시:
 

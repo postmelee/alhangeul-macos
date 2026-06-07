@@ -8,14 +8,17 @@ Stage 2~4에서 만든 문서 규칙, PR 분석 helper, release note generator/c
 
 이후 GitHub Release body의 PR/Issue 항목이 inline code 번호만으로 렌더링되어 제목과 설명을 본문에서 읽을 수 없는 문제가 추가로 확인됐다. GitHub Markdown API 확인 결과 `` `#324` ``는 autolink가 차단되고, `#324`도 제목 텍스트로 치환되지 않고 짧은 링크 텍스트로만 렌더링됐다. 이에 helper, checker, 매뉴얼, `v0.1.5` release record, public GitHub Release body를 `[#<number>: 제목](URL) - 한 줄 설명` 형식으로 재보정했다.
 
+추가 검토에서 GitHub Release body의 `이번 버전의 주요 변경 사항`보다 `사용자용 요약`, 설치, 지원 환경, 첫 실행, 업데이트, 상세 문서 section이 앞에 있어 핵심 변경이 뒤로 밀리는 문제가 확인됐다. 또한 `검증 결과`와 `릴리즈 delta 기반 추가 확인 항목`은 실제 public 검증 결과가 아니라 release owner용 절차 문구였다. 이에 GitHub Release body 구조를 `이번 버전의 주요 변경 사항` 첫 section, `다운로드 및 설치`, `알려진 제한 사항`, `직접 반영된 PR과 Issue`, `상세 기록` 순서로 재정렬하고 public body를 다시 반영했다.
+
 ## 변경 내용
 
 | 파일 | 변경 |
 |------|------|
 | `docs/updates/v0.1.5.html` | `포함 PR 분석` 기준 사용자-facing 변화 반영. Quick Look/썸네일/PDF/공유 표시 보강, 앱 실행 후 업데이트 확인 보강, `앱 자체 신규 기능은 크지 않습니다` 문구 제거 |
 | `scripts/ci/write-release-pr-analysis.sh` | PR/Issue 후보를 제목 포함 Markdown 링크로 출력하도록 보강 |
-| `scripts/ci/check-release-notes-template.sh` | GitHub Release body의 PR/Issue section에서 inline code 번호-only 항목을 금지하고 제목 포함 링크를 요구 |
-| `mydocs/manual/release_github_pages_sparkle_guide.md` 외 매뉴얼 | GitHub 자동 제목 치환에 의존하지 않고 PR/Issue 제목 또는 설명을 직접 남기는 규칙 추가 |
+| `scripts/ci/write-release-notes.sh` | GitHub Release body를 주요 변경 우선 구조로 재정렬하고 내부 delta/guideline section 제거 |
+| `scripts/ci/check-release-notes-template.sh` | GitHub Release body의 첫 top-level section과 PR/Issue 제목 포함 링크를 검증하고 옛 section을 금지 |
+| `mydocs/manual/release_github_pages_sparkle_guide.md` 외 매뉴얼 | GitHub 자동 제목 치환에 의존하지 않고 PR/Issue 제목 또는 설명을 직접 남기는 규칙과 주요 변경 우선 구조 추가 |
 | `mydocs/release/v0.1.5.md` | GitHub Release body 후보의 직접 반영 PR, 해결된 Issue, 관련 Issue를 제목/설명 포함 링크로 정정 |
 | `mydocs/working/task_m900_356_stage5.md` | Stage 5 완료보고서 추가 |
 | `mydocs/report/task_m900_356_report.md` | 최종 보고서 추가 |
@@ -90,7 +93,7 @@ Pages public 반영은 main 대상 docs-only PR `#357`로 진행했다.
 | `write-release-pr-analysis.sh v0.1.4 v0.1.5` 제목 포함 dry-run | 통과 | `build.noindex/release/release-pr-analysis-v0.1.5-dry-run.md` 생성. PR 참조는 Issue 후보에서 제외 확인 |
 | `write-release-delta-checklist.sh v0.1.4 HEAD` | 통과 | path 기반 보조 checklist 생성 |
 | `write-release-notes.sh 0.1.5 ...` | 통과 | release notes와 public correction body file 생성 |
-| `check-release-notes-template.sh` | 통과 | `직접 반영된 PR과 Issue` section의 제목 포함 링크 검증 |
+| `check-release-notes-template.sh` | 통과 | 첫 section `이번 버전의 주요 변경 사항`, PR/Issue 제목 포함 링크, 옛 section 제거 검증 |
 | `validate-github-body.sh` | 통과 | release notes, correction body, PR analysis, Pages source |
 | `update-release-version-notices.sh --check` | 통과 | latest `v0.1.5` 상태 유지 |
 | HTML parse | 통과 | `docs/updates/v0.1.5.html` 기본 parse |
@@ -118,7 +121,8 @@ git diff --check
 
 - GitHub Release `v0.1.5` body 정정.
 - GitHub Release `v0.1.5` body의 PR/Issue section을 제목/설명 포함 링크 형식으로 재정정.
+- GitHub Release `v0.1.5` body를 주요 변경 우선 구조로 재정정하고 `검증 결과`, `릴리즈 delta 기반 추가 확인 항목` section 제거.
 - `docs/updates/v0.1.5.html` public Pages 배포.
-- public URL 재조회로 `직접 반영된 PR과 Issue`, `#324`, `#326`, `#329`, `#334`, `#349`, `#110`의 제목/설명 포함 표기와 Pages의 사용자-facing 정정 문구 확인.
+- public URL 재조회로 첫 section `이번 버전의 주요 변경 사항`, `다운로드 및 설치`, `상세 기록`, `직접 반영된 PR과 Issue`, `#324`, `#326`, `#329`, `#334`, `#349`, `#110`의 제목/설명 포함 표기와 Pages의 사용자-facing 정정 문구 확인.
 
-완료 시각: 01:36.
+완료 시각: 02:02.

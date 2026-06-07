@@ -219,7 +219,7 @@ workflow가 생성하거나 게시하는 주요 산출물:
 - stable release일 때 `deploy-pages` deployment URL
 - workflow summary의 release ref, release PR analysis, delta checklist, core lock, public artifact, GitHub Release state, Sparkle appcast, Pages artifact, GitHub Pages deployment 섹션
 
-GitHub Release body 후보는 `mydocs/release/v<version>.md`의 사용자-facing 요약과 직접 반영된 PR/Issue section을 기준으로 작성한다. publish workflow의 delta checklist는 마지막 누락 확인용 보조 자료이며, release note의 주요 변경 사항 원천이 아니다.
+GitHub Release body 후보는 `mydocs/release/v<version>.md`의 사용자-facing 주요 변경 사항과 직접 반영된 PR/Issue section을 기준으로 작성한다. 첫 top-level section은 `이번 버전의 주요 변경 사항`이어야 하며, 설치/지원/업데이트 안내와 상세 기록은 그 뒤에 둔다. publish workflow의 delta checklist는 마지막 누락 확인용 보조 자료이며, release note의 주요 변경 사항 원천이 아니다.
 
 ## Docs-only Pages Deploy
 

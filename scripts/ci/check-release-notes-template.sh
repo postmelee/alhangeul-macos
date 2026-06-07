@@ -22,27 +22,18 @@ if [ ! -f "$RELEASE_NOTES_FILE" ]; then
 fi
 
 required_headings=(
-  "## 사용자용 요약"
-  "## 설치 방법"
-  "## 지원 환경과 아키텍처"
-  "## 설치 후 첫 실행과 Quick Look/Thumbnail 활성화 안내"
-  "## 업데이트 확인 방법"
-  "## 상세 문서"
   "## 이번 버전의 주요 변경 사항"
   "### 변경 요약"
   "### 포함된 rhwp 변화"
   "### 알한글 앱 변화"
+  "## 다운로드 및 설치"
+  "## 알려진 제한 사항"
   "## 직접 반영된 PR과 Issue"
   "### 직접 반영된 PR"
   "### 해결된 Issue"
   "### 관련 Issue"
-  "## 다운로드 산출물과 SHA256"
-  "## Homebrew Cask"
-  "## Release metadata"
-  "## 검증 결과"
-  "## 릴리즈 delta 기반 추가 확인 항목"
-  "## 알려진 제한 사항과 후속 이슈"
-  "## Third Party notices"
+  "## 상세 기록"
+  "### Release metadata"
 )
 
 missing_count=0
@@ -57,11 +48,32 @@ if [ "$missing_count" -ne 0 ]; then
   exit 1
 fi
 
+first_h2="$(grep -m1 '^## ' "$RELEASE_NOTES_FILE" || true)"
+if [ "$first_h2" != "## 이번 버전의 주요 변경 사항" ]; then
+  echo "ERROR: release notes must put '## 이번 버전의 주요 변경 사항' as the first top-level section" >&2
+  echo "First top-level section: ${first_h2:-없음}" >&2
+  exit 1
+fi
+
 forbidden_texts=(
   "Release owner는"
   "release owner가 보정"
   "보정합니다"
   "초안"
+  "## 사용자용 요약"
+  "## 설치 방법"
+  "## 지원 환경과 아키텍처"
+  "## 설치 후 첫 실행과 Quick Look/Thumbnail 활성화 안내"
+  "## 업데이트 확인 방법"
+  "## 상세 문서"
+  "## 다운로드 산출물과 SHA256"
+  "## Homebrew Cask"
+  "## 검증 결과"
+  "## 릴리즈 delta 기반 추가 확인 항목"
+  "## 알려진 제한 사항과 후속 이슈"
+  "## Third Party notices"
+  "release publish workflow에서"
+  "기준 범위는 직전 공개 release tag부터 현재 release candidate commit까지입니다"
   "HostApp, Quick Look, Finder thumbnail, 저장/다른 이름 저장, PDF/인쇄/공유, 설치, 업데이트, About, DMG, Homebrew, Pages/Sparkle 변경"
   "문서 전용 변경과 설치본 smoke가 필요한 변경은 release delta checklist에서 구분합니다"
   "Homebrew Cask는 public DMG URL/SHA256과 tap context 검증을 통과했습니다"

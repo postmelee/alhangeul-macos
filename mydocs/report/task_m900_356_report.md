@@ -11,6 +11,8 @@
 - 각 PR을 사용자-facing, 개발자-facing, 운영/배포, 문서-only, upstream sync로 분류하는 기준 문서화.
 - GitHub Release body에 `직접 반영된 PR과 Issue` section을 생성/검증하도록 generator/checker 보강.
 - GitHub Release body의 PR/Issue 목록이 GitHub 자동 제목 치환에 의존하지 않고 제목/설명 포함 링크로 남도록 helper/checker/규칙 보강.
+- GitHub Release body의 첫 top-level section을 `이번 버전의 주요 변경 사항`으로 고정하고, 설치/지원/업데이트는 `다운로드 및 설치`로 통합.
+- public body에서 실제 결과가 아닌 `검증 결과` 가이드라인과 `릴리즈 delta 기반 추가 확인 항목` 절차 문구 제거.
 - Release Rehearsal/Publish workflow와 PR CI에 PR 분석 helper dry-run과 artifact 생성을 연결.
 - `v0.1.5` release record와 Pages source를 PR 분석 기준으로 보정.
 
@@ -50,6 +52,8 @@
 | 관련 Issue | `Refs`, `Related`, 대상 타스크, 선행/연관, 단순 참고 Issue |
 | GitHub Release body | `직접 반영된 PR`, `해결된 Issue`, `관련 Issue` 구분 section 필수 |
 | PR/Issue section 표기 | `#<number>` 단독 또는 inline code가 아니라 `[#<number>: 제목](URL) - 한 줄 설명` 형식 |
+| GitHub Release body 순서 | 첫 top-level section은 `이번 버전의 주요 변경 사항` |
+| public body 제외 항목 | `릴리즈 delta 기반 추가 확인 항목`, 실제 결과가 아닌 검증 가이드라인 문구 |
 
 ## 자동화 결과
 
@@ -70,7 +74,7 @@ helper는 merge PR 목록, first-parent release transport 후보, PR title/body/
 - `### 해결된 Issue`
 - `### 관련 Issue`
 
-`scripts/ci/check-release-notes-template.sh`는 generated body에서 `## 직접 반영된 PR과 Issue` section, 제목 포함 PR/Issue 링크 또는 `없음` 항목, `확인 필요` 금지, release detail doc의 `## 포함 PR 분석` 존재를 검증한다.
+`scripts/ci/check-release-notes-template.sh`는 generated body에서 첫 top-level section이 `## 이번 버전의 주요 변경 사항`인지, `## 직접 반영된 PR과 Issue` section이 제목 포함 PR/Issue 링크 또는 `없음` 항목을 쓰는지, `확인 필요`와 옛 구조 heading이 남지 않았는지, release detail doc에 `## 포함 PR 분석`이 있는지 검증한다.
 
 ## v0.1.5 보정 결과
 
@@ -108,7 +112,7 @@ GitHub Release body 정정 후보는 다음 파일에 생성했다.
 build.noindex/release/github-release-v0.1.5-corrected.md
 ```
 
-이 파일은 `scripts/ci/check-release-notes-template.sh`와 `scripts/validate-github-body.sh`를 통과했다. 공개 반영 승인 후 `gh release edit v0.1.5 --notes-file build.noindex/release/github-release-v0.1.5-corrected.md`로 GitHub Release body를 정정했다. 이후 PR/Issue 항목이 inline code 번호-only로 보이는 문제를 확인하고, 같은 body file을 제목/설명 포함 링크 형식으로 재생성해 같은 명령으로 다시 반영했다.
+이 파일은 `scripts/ci/check-release-notes-template.sh`와 `scripts/validate-github-body.sh`를 통과했다. 공개 반영 승인 후 `gh release edit v0.1.5 --notes-file build.noindex/release/github-release-v0.1.5-corrected.md`로 GitHub Release body를 정정했다. 이후 PR/Issue 항목이 inline code 번호-only로 보이는 문제를 확인하고, 같은 body file을 제목/설명 포함 링크 형식으로 재생성해 같은 명령으로 다시 반영했다. 추가로 주요 변경 사항보다 설치/지원/업데이트 section이 앞서는 구조와 `검증 결과`, `릴리즈 delta 기반 추가 확인 항목`의 가이드라인 문구 노출 문제를 확인해, body를 주요 변경 우선 구조로 재생성하고 같은 명령으로 다시 반영했다.
 
 Pages public 반영은 main 대상 docs-only PR `#357`로 진행했다.
 
@@ -144,8 +148,9 @@ Pages public 반영은 main 대상 docs-only PR `#357`로 진행했다.
 
 - GitHub Release `v0.1.5` body 정정.
 - GitHub Release `v0.1.5` body의 직접 반영 PR, 해결된 Issue, 관련 Issue section을 제목/설명 포함 링크 형식으로 재정정.
+- GitHub Release `v0.1.5` body를 주요 변경 우선 구조로 재정정하고 `검증 결과`, `릴리즈 delta 기반 추가 확인 항목` section 제거.
 - `docs/updates/v0.1.5.html` public Pages 배포.
-- public GitHub Release body 재조회로 `직접 반영된 PR과 Issue`, 직접 반영 PR, 해결된 Issue, 관련 Issue section의 제목/설명 포함 표기 확인.
+- public GitHub Release body 재조회로 첫 section `이번 버전의 주요 변경 사항`, `다운로드 및 설치`, `상세 기록`, 직접 반영 PR, 해결된 Issue, 관련 Issue section의 제목/설명 포함 표기 확인.
 - public Pages 재조회로 Quick Look/썸네일/PDF/공유 출력 표시 보강과 앱 실행 후 업데이트 확인 보강 문구 확인.
 
 아래 항목은 여전히 로컬에서 직접 실행하지 않았다.
