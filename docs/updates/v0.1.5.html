@@ -5,13 +5,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#ffffff" />
-  <meta name="description" content="알한글 v0.1.3 릴리즈 노트입니다." />
-  <meta property="og:title" content="알한글 v0.1.3 릴리즈 노트" />
-  <meta property="og:description" content="rhwp v0.7.12를 반영해 HWP/HWPX parser, viewer, WMF/HWP3 처리 개선을 포함한 알한글 패치 릴리즈입니다." />
+  <meta name="description" content="알한글 v0.1.5 릴리즈 노트입니다." />
+  <meta property="og:title" content="알한글 v0.1.5 릴리즈 노트" />
+  <meta property="og:description" content="rhwp v0.7.15를 반영해 수식과 미주 흐름, HWPX 저장 호환성, 문단 정보 UI 후속 개선을 포함한 알한글 패치 릴리즈입니다." />
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://postmelee.github.io/alhangeul-macos/updates/v0.1.3.html" />
+  <meta property="og:url" content="https://postmelee.github.io/alhangeul-macos/updates/v0.1.5.html" />
   <meta property="og:image" content="https://postmelee.github.io/alhangeul-macos/assets/og-main.png" />
-  <title>알한글 v0.1.3 릴리즈 노트</title>
+  <title>알한글 v0.1.5 릴리즈 노트</title>
   <link rel="icon" href="../assets/logo-256@2x.png" />
   <link rel="apple-touch-icon" href="../assets/logo-256@2x.png" />
   <link rel="stylesheet" href="../styles.css?v=20260513-release-notice" />
@@ -34,7 +34,7 @@
           GitHub
         </a>
         <a class="header-download-button"
-          href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.3/alhangeul-macos-0.1.3.dmg"
+          href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.5/alhangeul-macos-0.1.5.dmg"
           aria-label="Mac용 알한글 DMG 다운로드">
           다운로드
         </a>
@@ -42,27 +42,16 @@
     </div>
   </header>
 
-  <aside class="release-version-notice" aria-label="최신 릴리즈 안내">
-    <div class="release-version-notice-inner">
-      <p><strong>이 문서는 이전 버전(v0.1.3)의 릴리즈 노트입니다.</strong> 최신 버전 v0.1.5에서 수정 사항과 최신 설치 파일을 확인하세요.</p>
-      <div class="release-version-notice-actions">
-        <a class="notice-primary-link" href="./v0.1.5.html">최신 릴리즈 노트</a>
-        <a class="notice-secondary-link" href="https://github.com/postmelee/alhangeul-macos/releases/latest"
-          rel="noreferrer">GitHub 최신 릴리즈</a>
-      </div>
-    </div>
-  </aside>
-
   <main id="main" class="updates-page">
     <section class="updates-hero" aria-labelledby="release-title">
-      <h1 id="release-title">알한글 v0.1.3</h1>
-      <p>업스트림 <code>rhwp v0.7.12</code>를 반영해 HWP/HWPX 문서 열기와 viewer asset 기준을 갱신한 패치 릴리즈입니다.</p>
+      <h1 id="release-title">알한글 v0.1.5</h1>
+      <p><code>rhwp v0.7.15</code>를 반영해 수식과 미주 흐름, HWPX 저장 호환성, 문단 정보 UI 후속 개선을 포함한 패치 릴리즈입니다.</p>
       <div class="updates-actions" aria-label="릴리즈 주요 링크">
         <a class="page-action-button"
-          href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.3/alhangeul-macos-0.1.3.dmg">
+          href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.5/alhangeul-macos-0.1.5.dmg">
           DMG 다운로드
         </a>
-        <a class="page-secondary-link" href="https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.3"
+        <a class="page-secondary-link" href="https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.5"
           rel="noreferrer">GitHub Release</a>
         <a class="page-secondary-link" href="./">업데이트 목록</a>
       </div>
@@ -72,30 +61,33 @@
       <section class="updates-section" aria-labelledby="release-summary-title">
         <h2 id="release-summary-title">변경 요약</h2>
         <ul>
-          <li><code>rhwp</code> core와 bundled <code>rhwp-studio</code>를 <code>v0.7.12</code> 기준으로 갱신했습니다.</li>
-          <li>업스트림의 HWP/HWPX parser, viewer, WMF, HWP3, 렌더링 관련 수정이 알한글 앱과 Finder 통합 경로에 포함됩니다.</li>
-          <li>앱 본체, Quick Look preview, Finder thumbnail extension의 release version을 <code>0.1.3 (9)</code>로 맞췄습니다.</li>
-          <li>공식 DMG는 Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용하는 signed/notarized universal DMG 기준을 유지합니다.</li>
+          <li><code>rhwp</code> core와 bundled <code>rhwp-studio</code>를 <code>v0.7.15</code> 기준으로 갱신했습니다.</li>
+          <li>수식 줄바꿈과 들여쓰기, 강제 줄바꿈 뒤 커서 이동, 미주 안 수식 배치 관련 upstream 보정을 포함했습니다.</li>
+          <li>HWPX 저장/내보내기에서 그림 회전·반전, 대각선 셀 테두리, 0바이트 필드 순서 보존 개선을 포함했습니다.</li>
+          <li>bundled viewer/editor의 문단 정보 대화상자가 왼쪽 여백과 내어쓰기 값을 분리해 다루도록 보강했습니다.</li>
+          <li>앱 본체, Quick Look 미리보기, Finder 썸네일 extension을 <code>0.1.5 (11)</code> 기준 signed/notarized universal DMG로 배포합니다.</li>
         </ul>
       </section>
 
       <section class="updates-section" aria-labelledby="release-rhwp-title">
         <h2 id="release-rhwp-title">포함된 rhwp 변화</h2>
-        <p>v0.1.3은 <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.7.12"
-            rel="noreferrer"><code>rhwp v0.7.12</code></a> 기준의 core와 bundled <code>rhwp-studio</code>를 사용합니다. 앱 내부 provenance 기준 commit은 <code>1899ef9bc2dfd1c6c0c4d18b192d253a2d0a1fb5</code>입니다.</p>
+        <p>v0.1.5는 <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.7.15"
+            rel="noreferrer"><code>rhwp v0.7.15</code></a> 기준의 core와 bundled <code>rhwp-studio</code>를 사용합니다. 앱 내부 provenance 기준 commit은 <code>aa925a5954f0fd26dfcef2166cbce7877c481f44</code>입니다.</p>
         <ul>
-          <li>업스트림 tag 메시지 기준으로 여러 PR의 parser/viewer 결함 수정과 WMF, HWP3, LTO 관련 개선이 포함됩니다.</li>
-          <li>bundled <code>rhwp-studio</code> Web/WASM asset도 같은 <code>v0.7.12</code> commit에서 다시 빌드했습니다.</li>
-          <li>Rust FFI에는 native PNG 렌더링용 <code>rhwp_render_page_png</code> symbol이 추가됐고, 앱 viewer와 Finder extension 경로는 새 bridge artifact 기준으로 검증했습니다.</li>
+          <li>수식 TAC 줄바꿈, 들여쓰기, 강제 줄바꿈 뒤 커서 이동, 미주 안 수식 script 렌더링과 간격 조정이 포함됩니다.</li>
+          <li>HWPX 그림 serialization의 반전/회전/isEmbeded 값, 대각선 셀 테두리, 0바이트 필드 ordering 보존이 보강됩니다.</li>
+          <li>bundled <code>rhwp-studio</code>에는 문단 정보 대화상자의 왼쪽 여백과 내어쓰기 binding 분리, 렌더 sweep 가이드와 폰트 문서 보강이 포함됩니다.</li>
+          <li>upstream browser extension service worker의 문서 fetch 경로 보안 강화가 같은 release에 포함되지만, 알한글 macOS 앱은 별도 브라우저 확장 권한이나 네트워크 경로를 추가하지 않습니다.</li>
         </ul>
       </section>
 
       <section class="updates-section" aria-labelledby="release-app-title">
         <h2 id="release-app-title">알한글 앱 변화</h2>
         <ul>
-          <li>About 창과 내부 provenance 기준이 <code>rhwp v0.7.12</code>를 표시할 수 있도록 bundled manifest를 갱신했습니다.</li>
-          <li>release rehearsal/publish workflow의 기본 입력을 <code>v0.1.3</code>, 직전 공개 릴리즈 <code>v0.1.2</code>, expected <code>rhwp v0.7.12</code> 기준으로 정리했습니다.</li>
-          <li>third-party notices와 release record가 앱 bundle에 포함된 core/studio 기준을 같은 commit으로 가리키도록 맞췄습니다.</li>
+          <li>앱 본체와 Quick Look/Thumbnail extension의 source metadata를 <code>0.1.5 (11)</code>로 맞췄습니다.</li>
+          <li>release rehearsal/publish workflow의 기본 입력을 <code>v0.1.5</code>, 직전 공개 릴리즈 <code>v0.1.4</code>, expected <code>rhwp v0.7.15</code> 기준으로 정리했습니다.</li>
+          <li>About 창과 내부 provenance 정보는 bundled <code>rhwp v0.7.15</code> 기준을 표시합니다.</li>
+          <li>GitHub Release, Pages, Sparkle, Homebrew Cask가 같은 public DMG URL과 checksum을 가리키도록 후속 배포 단계에서 검증합니다.</li>
         </ul>
       </section>
 
@@ -110,7 +102,7 @@
 
       <section class="updates-section" aria-labelledby="release-install-title">
         <h2 id="release-install-title">설치와 업데이트</h2>
-        <p>DMG 파일을 내려받아 앱을 Applications 폴더로 옮긴 뒤, 앱을 한 번 실행합니다. v0.1.3 공식 DMG는 Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용합니다.</p>
+        <p>DMG 파일을 내려받아 앱을 Applications 폴더로 옮긴 뒤, 앱을 한 번 실행합니다. v0.1.5 공식 DMG는 Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용합니다.</p>
         <p>Homebrew Cask를 사용하는 경우 아래 명령으로 같은 signed/notarized universal DMG를 설치할 수 있습니다.</p>
         <pre class="code-panel"><code>brew install --cask postmelee/tap/alhangeul</code></pre>
         <p>설치한 앱에서는 메뉴 막대의 <code>알한글 &gt; 업데이트 확인...</code>을 선택해 새 버전을 확인할 수 있습니다.</p>
