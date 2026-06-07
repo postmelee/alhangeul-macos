@@ -111,7 +111,7 @@
 - [ ] 각 PR의 title/body, linked Issue, `mydocs/report/task_*_report.md` 후보 확인
 - [ ] `mydocs/release/v<version>.md`에 `포함 PR 분석` 표 작성
 - [ ] 포함 PR을 사용자-facing, 개발자-facing, 운영/배포, 문서-only, upstream sync로 분류
-- [ ] 해결된 Issue와 관련 Issue를 대상 타스크 Issue, closing keyword, release record 완료 확정 기준으로 분리
+- [ ] 해결된 Issue와 참고/연관 Issue를 대상 타스크 Issue, closing keyword, release record 완료 확정 기준으로 분리
 - [ ] PR CI 또는 동등한 로컬 검증 결과 확인
 - [ ] `scripts/ci/write-release-delta-checklist.sh`로 직전 public release 대비 delta checklist 생성
 - [ ] workflow 사용 시 `previous_release_ref` 입력과 delta checklist summary/artifact 확인
@@ -143,9 +143,10 @@
 - [ ] release note의 주요 변경 사항이 `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`로 구분되어 있고 release owner가 실제 사용자-facing 내용으로 보정했는지 확인
 - [ ] GitHub Release body의 첫 top-level section이 `이번 버전의 주요 변경 사항`인지 확인
 - [ ] `변경 요약`과 `알한글 앱 변화`가 `포함 PR 분석` 표에서 사용자-facing으로 판정된 항목만 기준으로 작성됐는지 확인
-- [ ] GitHub Release body에 직접 반영된 PR, 해결된 Issue, 관련 Issue section이 있는지 확인
+- [ ] GitHub Release body에 릴리즈 요약에 반영된 PR, 해결된 Issue, 참고/연관 Issue section이 있는지 확인
 - [ ] PR/Issue 목록이 `#<number>` 단독 또는 inline code가 아니라 `[#<number>: 제목](URL) - 한 줄 설명` 형식인지 확인
 - [ ] 해결된 Issue가 대상 타스크 Issue, closing keyword, release record 완료 확정 항목 기준인지 확인
+- [ ] 이전 public release에서 이미 해결된 Issue가 GitHub Release body의 참고/연관 Issue에 다시 노출되지 않는지 확인
 - [ ] `다운로드 및 설치`가 `다운로드`, `지원 환경`, `설치 후 첫 실행`, `업데이트 확인`, `Homebrew` 하위 section으로 구분되어 있는지 확인
 - [ ] GitHub Release body에 `릴리즈 delta 기반 추가 확인 항목`이나 실제 결과가 아닌 검증 가이드라인 문구가 남아 있지 않은지 확인
 - [ ] GitHub Release note에 `mydocs/release/v<version>.md` 등 실제 조회 가능한 상세 문서가 GitHub blob URL로 링크되어 있는지 확인

@@ -79,17 +79,17 @@ extract_release_subsection() {
 CHANGE_SUMMARY_SECTION="$(extract_release_subsection "### 변경 요약")"
 RHWP_CHANGES_SECTION="$(extract_release_subsection "### 포함된 rhwp 변화")"
 APP_CHANGES_SECTION="$(extract_release_subsection "### 알한글 앱 변화")"
-DIRECT_PRS_SECTION="$(extract_release_subsection "### 직접 반영된 PR")"
+DIRECT_PRS_SECTION="$(extract_release_subsection "### 릴리즈 요약에 반영된 PR")"
 RESOLVED_ISSUES_SECTION="$(extract_release_subsection "### 해결된 Issue")"
-RELATED_ISSUES_SECTION="$(extract_release_subsection "### 관련 Issue")"
+RELATED_ISSUES_SECTION="$(extract_release_subsection "### 참고/연관 Issue")"
 
 for required_release_section in \
   "CHANGE_SUMMARY_SECTION:### 변경 요약" \
   "RHWP_CHANGES_SECTION:### 포함된 rhwp 변화" \
   "APP_CHANGES_SECTION:### 알한글 앱 변화" \
-  "DIRECT_PRS_SECTION:### 직접 반영된 PR" \
+  "DIRECT_PRS_SECTION:### 릴리즈 요약에 반영된 PR" \
   "RESOLVED_ISSUES_SECTION:### 해결된 Issue" \
-  "RELATED_ISSUES_SECTION:### 관련 Issue"; do
+  "RELATED_ISSUES_SECTION:### 참고/연관 Issue"; do
   section_var="${required_release_section%%:*}"
   section_heading="${required_release_section#*:}"
   if [ -z "${!section_var}" ]; then
@@ -153,7 +153,7 @@ $RELEASE_CHANGE_SECTIONS
 - 손상·대용량·미지원 문서 fallback은 복구가 아니라 앱과 extension이 raw error, hang, crash로 끝나지 않게 하는 안전장치입니다.
 - native renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity 개선은 v0.5 이후 Swift native viewer 범위에서 계속 다룹니다.
 
-## 직접 반영된 PR과 Issue
+## 이번 릴리즈 관련 PR과 Issue
 
 $RELEASE_PR_ISSUE_SECTIONS
 

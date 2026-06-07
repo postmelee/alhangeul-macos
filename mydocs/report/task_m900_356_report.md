@@ -9,7 +9,7 @@
 - `mydocs/release/v<version>.md`에 `포함 PR 분석` 표를 남기는 표준 구조 추가.
 - `previous_release_ref..candidate_ref` 범위의 merge PR 분석 helper 추가.
 - 각 PR을 사용자-facing, 개발자-facing, 운영/배포, 문서-only, upstream sync로 분류하는 기준 문서화.
-- GitHub Release body에 `직접 반영된 PR과 Issue` section을 생성/검증하도록 generator/checker 보강.
+- GitHub Release body에 `이번 릴리즈 관련 PR과 Issue` section을 생성/검증하도록 generator/checker 보강.
 - GitHub Release body의 PR/Issue 목록이 GitHub 자동 제목 치환에 의존하지 않고 제목/설명 포함 링크로 남도록 helper/checker/규칙 보강.
 - GitHub Release body의 첫 top-level section을 `이번 버전의 주요 변경 사항`으로 고정하고, 설치/지원/업데이트는 `다운로드 및 설치`로 통합.
 - public body에서 실제 결과가 아닌 `검증 결과` 가이드라인과 `릴리즈 delta 기반 추가 확인 항목` 절차 문구 제거.
@@ -49,8 +49,8 @@
 | release record | `포함 PR 분석` 표 필수 |
 | 공개 요약 | `포함 PR 분석` 표에서 사용자-facing으로 확정된 항목만 기준 |
 | 해결된 Issue | 대상 타스크 Issue, PR body closing keyword, release record 완료 확정 항목 |
-| 관련 Issue | `Refs`, `Related`, 선행/연관, 단순 참고 Issue |
-| GitHub Release body | `직접 반영된 PR`, `해결된 Issue`, `관련 Issue` 구분 section 필수 |
+| 참고/연관 Issue | `Refs`, `Related`, 선행/연관, 단순 참고 Issue. 이전 public release에서 이미 해결된 Issue는 public body가 아니라 `포함 PR 분석` 표에만 기록 |
+| GitHub Release body | `릴리즈 요약에 반영된 PR`, `해결된 Issue`, `참고/연관 Issue` 구분 section 필수 |
 | PR/Issue section 표기 | `#<number>` 단독 또는 inline code가 아니라 `[#<number>: 제목](URL) - 한 줄 설명` 형식 |
 | GitHub Release body 순서 | 첫 top-level section은 `이번 버전의 주요 변경 사항` |
 | public body 제외 항목 | `릴리즈 delta 기반 추가 확인 항목`, 실제 결과가 아닌 검증 가이드라인 문구 |
@@ -63,18 +63,18 @@
 scripts/ci/write-release-pr-analysis.sh <previous-release-ref> <candidate-ref> <output-file>
 ```
 
-helper는 merge PR 목록, first-parent release transport 후보, PR title/body/files, closing keyword, 관련 Issue 후보, 보고서 후보, path/title 기반 분류 hint를 Markdown으로 모은다. `gh pr view`가 가능하면 PR body 경로를 우선 사용하고, 실패하면 git metadata fallback으로 내려간다. GitHub API 사용 가능 시 REST issue endpoint의 `pull_request` field로 PR 참조를 구분해 해결/관련 Issue 후보에서 제외한다.
+helper는 merge PR 목록, first-parent release transport 후보, PR title/body/files, closing keyword, 참고/연관 Issue 후보, 보고서 후보, path/title 기반 분류 hint를 Markdown으로 모은다. `gh pr view`가 가능하면 PR body 경로를 우선 사용하고, 실패하면 git metadata fallback으로 내려간다. GitHub API 사용 가능 시 REST issue endpoint의 `pull_request` field로 PR 참조를 구분해 해결/참고 Issue 후보에서 제외한다. 참고/연관 Issue 후보는 누락 방지용이므로, 이전 public release에서 이미 해결된 Issue는 public body가 아니라 `포함 PR 분석` 표에만 남긴다.
 
 `scripts/ci/write-release-notes.sh`는 이제 release detail doc의 `## 포함 PR 분석`과 다음 GitHub Release 후보 section을 요구한다.
 
 - `### 변경 요약`
 - `### 포함된 rhwp 변화`
 - `### 알한글 앱 변화`
-- `### 직접 반영된 PR`
+- `### 릴리즈 요약에 반영된 PR`
 - `### 해결된 Issue`
-- `### 관련 Issue`
+- `### 참고/연관 Issue`
 
-`scripts/ci/check-release-notes-template.sh`는 generated body에서 첫 top-level section이 `## 이번 버전의 주요 변경 사항`인지, `## 직접 반영된 PR과 Issue` section이 제목 포함 PR/Issue 링크 또는 `없음` 항목을 쓰는지, `확인 필요`와 옛 구조 heading이 남지 않았는지, release detail doc에 `## 포함 PR 분석`이 있는지 검증한다.
+`scripts/ci/check-release-notes-template.sh`는 generated body에서 첫 top-level section이 `## 이번 버전의 주요 변경 사항`인지, `## 이번 릴리즈 관련 PR과 Issue` section이 제목 포함 PR/Issue 링크 또는 `없음` 항목을 쓰는지, `확인 필요`와 옛 구조 heading이 남지 않았는지, release detail doc에 `## 포함 PR 분석`이 있는지 검증한다.
 
 ## v0.1.5 보정 결과
 
@@ -95,14 +95,9 @@ public body 후보 기준 직접 반영 PR:
 - `#122`: Swift native renderer 이미지 fill mode·타일·배치 렌더링 parity 보강
 - `#323`: 앱 실행 시 Sparkle 백그라운드 업데이트 확인 실행
 
-관련 Issue:
+참고/연관 Issue:
 
-- `#106`: 이미지 crop/effect/brightness/contrast 보강
-- `#116`: JPEG 워터마크 효과/투명키 렌더링 보강
-- `#280`: preview visual diff harness 구축
-- `#282`: Quick Look/Thumbnail native compositor 후속 구조
-- `#348`: upstream sync 작업 맥락
-- `#351`: `v0.1.5` release 실행 맥락
+- 없음. `#116`처럼 이전 public release에서 이미 해결된 Issue와 `#348`, `#351` 같은 운영 맥락은 public body가 아니라 `포함 PR 분석` 표에만 남겼다.
 
 Pages source `docs/updates/v0.1.5.html`은 `앱 자체 신규 기능은 크지 않습니다` 문구를 제거하고, Quick Look/썸네일/PDF/공유 출력 표시 보강과 앱 실행 후 업데이트 확인 보강을 사용자-facing 변화로 반영했다.
 
@@ -112,7 +107,7 @@ GitHub Release body 정정 후보는 다음 파일에 생성했다.
 build.noindex/release/github-release-v0.1.5-corrected.md
 ```
 
-이 파일은 `scripts/ci/check-release-notes-template.sh`와 `scripts/validate-github-body.sh`를 통과했다. 공개 반영 승인 후 `gh release edit v0.1.5 --notes-file build.noindex/release/github-release-v0.1.5-corrected.md`로 GitHub Release body를 정정했다. 이후 PR/Issue 항목이 inline code 번호-only로 보이는 문제를 확인하고, 같은 body file을 제목/설명 포함 링크 형식으로 재생성해 같은 명령으로 다시 반영했다. 추가로 주요 변경 사항보다 설치/지원/업데이트 section이 앞서는 구조와 `검증 결과`, `릴리즈 delta 기반 추가 확인 항목`의 가이드라인 문구 노출 문제를 확인해 body를 주요 변경 우선 구조로 재생성했다. 마지막으로 `다운로드 및 설치`를 하위 section으로 나누고, 대상 타스크 Issue를 해결된 Issue로 재분류한 body를 다시 반영했다.
+이 파일은 `scripts/ci/check-release-notes-template.sh`와 `scripts/validate-github-body.sh`를 통과했다. 공개 반영 승인 후 `gh release edit v0.1.5 --notes-file build.noindex/release/github-release-v0.1.5-corrected.md`로 GitHub Release body를 정정했다. 이후 PR/Issue 항목이 inline code 번호-only로 보이는 문제를 확인하고, 같은 body file을 제목/설명 포함 링크 형식으로 재생성해 같은 명령으로 다시 반영했다. 추가로 주요 변경 사항보다 설치/지원/업데이트 section이 앞서는 구조와 `검증 결과`, `릴리즈 delta 기반 추가 확인 항목`의 가이드라인 문구 노출 문제를 확인해 body를 주요 변경 우선 구조로 재생성했다. 마지막으로 `다운로드 및 설치`를 하위 section으로 나누고, 대상 타스크 Issue를 해결된 Issue로 재분류했으며, 이전 해결 Issue를 public 참고 목록에서 제거한 body를 다시 반영했다.
 
 Pages public 반영은 main 대상 docs-only PR `#357`로 진행했다.
 
@@ -147,12 +142,13 @@ Pages public 반영은 main 대상 docs-only PR `#357`로 진행했다.
 공개 반영 승인 후 다음을 완료했다.
 
 - GitHub Release `v0.1.5` body 정정.
-- GitHub Release `v0.1.5` body의 직접 반영 PR, 해결된 Issue, 관련 Issue section을 제목/설명 포함 링크 형식으로 재정정.
+- GitHub Release `v0.1.5` body의 릴리즈 요약 반영 PR, 해결된 Issue, 참고/연관 Issue section을 제목/설명 포함 링크 형식으로 재정정.
 - GitHub Release `v0.1.5` body를 주요 변경 우선 구조로 재정정하고 `검증 결과`, `릴리즈 delta 기반 추가 확인 항목` section 제거.
 - GitHub Release `v0.1.5` body의 `다운로드 및 설치`를 `다운로드`, `지원 환경`, `설치 후 첫 실행`, `업데이트 확인`, `Homebrew` 하위 section으로 세분화.
 - 대상 타스크 Issue 기준으로 해결된 Issue를 `#110`, `#121`, `#122`, `#323`으로 재정리.
+- GitHub Release `v0.1.5` body section명을 `이번 릴리즈 관련 PR과 Issue`, `릴리즈 요약에 반영된 PR`, `참고/연관 Issue`로 정리하고, 이전 해결 Issue인 `#116`은 public 목록에서 제외.
 - `docs/updates/v0.1.5.html` public Pages 배포.
-- public GitHub Release body 재조회로 첫 section `이번 버전의 주요 변경 사항`, `다운로드 및 설치` 하위 section, `상세 기록`, 직접 반영 PR, 해결된 Issue, 관련 Issue section의 제목/설명 포함 표기 확인.
+- public GitHub Release body 재조회로 첫 section `이번 버전의 주요 변경 사항`, `다운로드 및 설치` 하위 section, `상세 기록`, 릴리즈 요약 반영 PR, 해결된 Issue, 참고/연관 Issue section의 제목/설명 포함 표기 확인.
 - public Pages 재조회로 Quick Look/썸네일/PDF/공유 출력 표시 보강과 앱 실행 후 업데이트 확인 보강 문구 확인.
 
 아래 항목은 여전히 로컬에서 직접 실행하지 않았다.

@@ -33,10 +33,10 @@ required_headings=(
   "### 업데이트 확인"
   "### Homebrew"
   "## 알려진 제한 사항"
-  "## 직접 반영된 PR과 Issue"
-  "### 직접 반영된 PR"
+  "## 이번 릴리즈 관련 PR과 Issue"
+  "### 릴리즈 요약에 반영된 PR"
   "### 해결된 Issue"
-  "### 관련 Issue"
+  "### 참고/연관 Issue"
   "## 상세 기록"
   "### Release metadata"
 )
@@ -75,6 +75,9 @@ forbidden_texts=(
   "## Homebrew Cask"
   "## 검증 결과"
   "## 릴리즈 delta 기반 추가 확인 항목"
+  "## 직접 반영된 PR과 Issue"
+  "### 직접 반영된 PR"
+  "### 관련 Issue"
   "## 알려진 제한 사항과 후속 이슈"
   "## Third Party notices"
   "release publish workflow에서"
@@ -134,12 +137,12 @@ section_has_confirmed_content() {
   [ "$found" -eq 1 ]
 }
 
-if ! section_has_confirmed_content "### 직접 반영된 PR" "pull"; then
-  echo "ERROR: release notes section must contain confirmed linked PR entries or '- 없음': ### 직접 반영된 PR" >&2
+if ! section_has_confirmed_content "### 릴리즈 요약에 반영된 PR" "pull"; then
+  echo "ERROR: release notes section must contain confirmed linked PR entries or '- 없음': ### 릴리즈 요약에 반영된 PR" >&2
   exit 1
 fi
 
-for section_heading in "### 해결된 Issue" "### 관련 Issue"; do
+for section_heading in "### 해결된 Issue" "### 참고/연관 Issue"; do
   if ! section_has_confirmed_content "$section_heading" "issues"; then
     echo "ERROR: release notes section must contain confirmed linked Issue entries or '- 없음': $section_heading" >&2
     exit 1

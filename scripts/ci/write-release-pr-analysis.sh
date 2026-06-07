@@ -593,7 +593,7 @@ write_pr_row() {
     echo "- 사용자-facing: 확인 필요"
     echo "- 공개 요약 반영: 확인 필요"
     echo "- 해결된 Issue 후보: $resolved_cell"
-    echo "- 관련 Issue 후보: $related_cell"
+    echo "- 참고/연관 Issue 후보: $related_cell"
     echo "- 보고서 후보: $reports_cell"
     echo
     echo "변경 path preview:"
@@ -636,13 +636,13 @@ cat > "$OUTPUT_FILE" <<EOF
 
 ## 포함 PR 분석
 
-| PR | 제목 | 분류 | 사용자-facing | 공개 요약 반영 | 해결된 Issue | 관련 Issue | 근거 문서 | 비고 |
+| PR | 제목 | 분류 | 사용자-facing | 공개 요약 반영 | 해결된 Issue | 참고/연관 Issue | 근거 문서 | 비고 |
 |----|------|------|---------------|----------------|---------------|-------------|-----------|------|
 $(cat "$TABLE_ROWS_FILE")
 
-## 직접 반영된 PR과 Issue 후보
+## 이번 릴리즈 관련 PR과 Issue 후보
 
-### 직접 반영된 PR 후보
+### 릴리즈 요약 반영 PR 후보
 
 $(if [ -s "$DIRECT_PRS_FILE" ]; then while IFS= read -r pr; do echo "- $(render_pr_link "$pr") 확인 필요"; done < "$DIRECT_PRS_FILE"; else echo "- 없음"; fi)
 
@@ -650,9 +650,9 @@ $(if [ -s "$DIRECT_PRS_FILE" ]; then while IFS= read -r pr; do echo "- $(render_
 
 $(if [ -s "$RESOLVED_ISSUES_FILE" ]; then while IFS= read -r issue; do echo "- $(render_issue_link "$issue") 대상 타스크, closing keyword, 또는 release record 확인 필요"; done < "$RESOLVED_ISSUES_FILE"; else echo "- 없음"; fi)
 
-### 관련 Issue 후보
+### 참고/연관 Issue 후보
 
-$(if [ -s "$RELATED_ONLY_ISSUES_FILE" ]; then while IFS= read -r issue; do echo "- $(render_issue_link "$issue") 관련 Issue 여부 확인 필요"; done < "$RELATED_ONLY_ISSUES_FILE"; else echo "- 없음"; fi)
+$(if [ -s "$RELATED_ONLY_ISSUES_FILE" ]; then while IFS= read -r issue; do echo "- $(render_issue_link "$issue") 참고/연관 Issue 여부 확인 필요"; done < "$RELATED_ONLY_ISSUES_FILE"; else echo "- 없음"; fi)
 
 ## PR별 상세 후보
 
@@ -664,6 +664,7 @@ $(cat "$DETAILS_FILE")
 - 각 PR의 title/body, linked Issue, 최종 보고서를 읽고 분류를 확정한다.
 - \`변경 요약\`과 \`알한글 앱 변화\`에는 사용자-facing으로 확정된 항목만 반영한다.
 - PR title/body/report/branch에서 확인되는 대상 타스크 Issue와 closing keyword 또는 release record 완료 확정 항목은 해결된 Issue로 쓴다.
-- \`Refs\`, \`Related\`, \`관련 이슈\`, \`선행/연관\`, 단순 언급은 관련 Issue로 분리한다.
+- \`Refs\`, \`Related\`, \`관련 이슈\`, \`선행/연관\`, 단순 언급은 참고/연관 Issue로 분리한다.
+- 참고/연관 Issue 후보 중 이전 public release에서 이미 해결된 Issue는 public GitHub Release body에 다시 나열하지 않고 \`포함 PR 분석\` 표의 PR별 참고 근거로만 남긴다.
 - path 기반 delta checklist는 누락 확인과 smoke 영역 점검용 보조 자료로만 사용한다.
 EOF

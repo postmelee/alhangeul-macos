@@ -20,7 +20,7 @@
 - 직전 public release 대비 delta checklist가 생성되고 release owner가 PR 분석표의 누락 확인용 보조 자료로 보정했는가
 - GitHub Release body의 `이번 버전의 주요 변경 사항`에 `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`가 실제 사용자-facing 내용으로 보정되었는가
 - `변경 요약`과 `알한글 앱 변화`가 `포함 PR 분석` 표에서 사용자-facing으로 판정된 항목만 기준으로 작성되었는가
-- GitHub Release body에 직접 반영된 PR, 해결된 Issue, 관련 Issue를 구분하는 section이 있는가
+- GitHub Release body에 릴리즈 요약에 반영된 PR, 해결된 Issue, 참고/연관 Issue를 구분하는 section이 있는가
 - GitHub Release body에 `mydocs/release/v<version>.md` 같은 실제 조회 가능한 상세 문서가 GitHub blob URL로 링크되어 있는가
 - 마지막 release candidate 변경, bugfix PR, draft signed/notarized DMG smoke 이후 official stable publish 전에 GitHub Release body와 Pages 업데이트 문서를 다시 검토했는가
 - `변경 요약`과 `알한글 앱 변화`가 특정 검증 샘플명, issue 번호, 내부 구현 용어가 아니라 사용자가 보는 증상과 개선 결과 중심으로 쓰였는가
@@ -91,7 +91,7 @@ GitHub Actions workflow에서 생성되는 경우:
 분석 순서:
 
 1. `previous_release_ref..candidate_ref` 범위의 merge PR 목록을 만든다.
-2. 각 PR의 title, body, closing keyword, 관련 Issue 표기, 변경 파일 요약을 확인한다.
+2. 각 PR의 title, body, closing keyword, 참고/연관 Issue 표기, 변경 파일 요약을 확인한다.
 3. 내부 타스크 PR이면 `mydocs/report/task_*_<issue>_report.md` 후보를 찾아 최종 보고서를 읽는다.
 4. 각 PR을 `사용자-facing`, `개발자-facing`, `운영/배포`, `문서-only`, `upstream sync` 중 하나로 분류한다.
 5. 사용자-facing 여부와 공개 요약 반영 여부를 release owner가 확정한다.
@@ -99,7 +99,7 @@ GitHub Actions workflow에서 생성되는 경우:
 
 `mydocs/release/v<version>.md`에는 다음 표준 표를 남긴다.
 
-| PR | 제목 | 분류 | 사용자-facing | 공개 요약 반영 | 해결된 Issue | 관련 Issue | 근거 문서 | 비고 |
+| PR | 제목 | 분류 | 사용자-facing | 공개 요약 반영 | 해결된 Issue | 참고/연관 Issue | 근거 문서 | 비고 |
 |----|------|------|---------------|----------------|---------------|-------------|-----------|------|
 | `#<PR>` | PR title | 사용자-facing / 개발자-facing / 운영/배포 / 문서-only / upstream sync | 예/아니오/확인 필요 | 예/아니오 | `#<issue>` 또는 없음 | `#<issue>` 또는 없음 | PR body, 최종 보고서, release record | 판단 근거 |
 
@@ -114,8 +114,9 @@ GitHub Actions workflow에서 생성되는 경우:
 Issue 구분 기준:
 
 - `해결된 Issue`는 PR title/body/report/branch에서 확인되는 대상 타스크 Issue, PR body의 closing keyword(`Closes`, `Fixes`, `Resolves` 등), 또는 release record에서 완료 확정된 항목을 쓴다.
-- `Related`, `Refs`, `관련 이슈`, `선행/연관`, 단순 링크는 `관련 Issue`로 분리한다.
+- `Related`, `Refs`, `관련 이슈`, `선행/연관`, 단순 링크는 `참고/연관 Issue`로 분리한다.
 - PR body가 특정 Issue를 언급하더라도 완료 확정 근거가 없으면 해결된 Issue로 쓰지 않는다.
+- 이전 public release에서 이미 해결된 Issue는 이번 릴리즈의 public `참고/연관 Issue`에 다시 나열하지 않고 `포함 PR 분석` 표의 PR별 참고 근거로만 남긴다.
 - GitHub Release body와 PR body에 `#<number>` 뒤 한글 조사가 바로 붙지 않게 한다. 공개 body는 등록 전 `scripts/validate-github-body.sh <body-file>`를 통과해야 한다.
 - GitHub Release body의 PR/Issue 목록은 GitHub 자동 제목 치환에 의존하지 않는다. `[#<number>: 제목](URL) - 한 줄 설명`처럼 번호, 제목, 필요한 설명을 본문에 직접 남긴다.
 
@@ -126,7 +127,7 @@ Release note에 포함할 내용:
 - 주요 변경 사항: `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`
 - 다운로드 및 설치: `다운로드`, `지원 환경`, `설치 후 첫 실행`, `업데이트 확인`, `Homebrew` 하위 구분으로 DMG, SHA256, 지원 macOS, universal DMG, 첫 실행, Quick Look/Thumbnail 활성화, 업데이트 확인, Homebrew 공개 상태를 정리한다.
 - 알려진 제한 사항: viewer/editor 실행 경로, Quick Look/Thumbnail/PDF/인쇄 경로 차이, smoke 의미, 후속 native renderer 범위
-- 직접 반영된 PR과 Issue: 공개 body에 반영한 PR, 해결된 Issue, 관련 Issue 구분
+- 이번 릴리즈 관련 PR과 Issue: 릴리즈 요약에 반영한 PR, 해결된 Issue, 참고/연관 Issue 구분
 - 상세 기록: release detail doc, release index, Pages 릴리즈 노트, GitHub Release URL, `Release metadata`, Third Party notices, bundled font notice
 
 ### 주요 변경 사항 작성 기준
@@ -139,7 +140,7 @@ Release note에 포함할 내용:
 - 검증 fixture, 샘플 파일명, issue 번호, PR 번호, stage 번호는 public Pages와 GitHub Release의 주요 변경 요약에 쓰지 않는다. 해당 정보는 내부 release record, 검증 결과, changelog provenance에 둔다.
 - `PUA`, `sentinel`, `render tree`, `CoreGraphics`처럼 일반 사용자가 바로 이해하기 어려운 구현 용어는 먼저 "특수 문자/기호 표시", "텍스트 배경/음영", "Quick Look 미리보기" 같은 사용자 용어로 설명하고, 필요할 때만 괄호나 metadata에서 기술 용어를 보충한다.
 - workflow default, README 정렬, manifest/checksum/provenance 같은 운영 변경은 사용자에게 직접 영향을 주는 설치, 업데이트, 보안 검증, 배포 경로 변화가 있을 때만 주요 변경에 넣는다. 그렇지 않으면 `Release metadata`, 내부 release record, 최종 보고서로 분리한다.
-- 개발자-facing, 운영/배포, 문서-only PR은 사용자-facing 결과가 따로 확인되지 않는 한 `변경 요약`이나 `알한글 앱 변화`의 근거로 쓰지 않는다. 필요한 경우 GitHub Release의 `직접 반영된 PR과 Issue`, `기술 세부`, `검증 세부`, 내부 release record에 둔다.
+- 개발자-facing, 운영/배포, 문서-only PR은 사용자-facing 결과가 따로 확인되지 않는 한 `변경 요약`이나 `알한글 앱 변화`의 근거로 쓰지 않는다. 필요한 경우 GitHub Release의 `이번 릴리즈 관련 PR과 Issue`, `기술 세부`, `검증 세부`, 내부 release record에 둔다.
 - 설치, 지원 OS, Quick Look 활성화, 업데이트 확인, 상세 문서 링크는 `다운로드 및 설치` 또는 `상세 기록`으로 합치고, `이번 버전의 주요 변경 사항`보다 앞에 두지 않는다.
 - `릴리즈 delta 기반 추가 확인 항목`처럼 release owner용 내부 절차는 public GitHub Release body에 쓰지 않는다. delta checklist는 내부 release record와 workflow artifact에서만 누락 확인용으로 사용한다.
 - `검증 결과`는 실제 실행 결과가 아닌 가이드라인 문구로 쓰지 않는다. public body에는 검증 세부를 길게 복제하지 않고, 필요한 경우 `상세 기록`의 release detail doc 링크로 연결한다.
@@ -148,7 +149,7 @@ Release note에 포함할 내용:
 공개 표면별 역할:
 
 - Pages 업데이트 문서는 사용자용 안내 표면이다. 주요 변경, hero, 설치 안내에는 샘플 파일명, issue 번호, PR 번호, `PUA`, `sentinel`, `CoreGraphics` 같은 구현/검증 용어를 쓰지 않고 증상과 개선 결과로 일반화한다.
-- GitHub Release는 사용자와 개발자가 모두 보는 public 표면이다. 첫 top-level section은 `## 이번 버전의 주요 변경 사항`이어야 하며, 설치와 provenance보다 이번 버전에서 달라진 결과를 먼저 보여준다. 샘플 파일명, 구현 용어, 관련 PR/Issue, 검증 fixture는 `직접 반영된 PR과 Issue` 또는 내부 release record로 분리한다.
+- GitHub Release는 사용자와 개발자가 모두 보는 public 표면이다. 첫 top-level section은 `## 이번 버전의 주요 변경 사항`이어야 하며, 설치와 provenance보다 이번 버전에서 달라진 결과를 먼저 보여준다. 샘플 파일명, 구현 용어, 관련 PR/Issue, 검증 fixture는 `이번 릴리즈 관련 PR과 Issue` 또는 내부 release record로 분리한다.
 - GitHub Release에는 `## 상세 기록` section을 두고 `mydocs/release/v<version>.md`, 필요 시 `mydocs/release/index.md`, Pages 릴리즈 노트처럼 실제 조회 가능한 문서를 링크한다. 저장소 문서는 plain code path만 쓰지 않고 `https://github.com/postmelee/alhangeul-macos/blob/main/...` 형식의 GitHub blob URL로 연결한다.
 - 내부 `mydocs/release/v<version>.md`는 release decision record다. 샘플 파일명, 재현 조건, 구현 용어, 검증 명령, workflow run, 포함 PR 분석, PR/Issue, SHA256, provenance를 가장 자세히 남긴다.
 - GitHub Release의 기술 세부 section이 필요하면 주요 변경과 다운로드/설치보다 뒤에 둔다. 기술 세부가 없더라도 release body는 유효하지만, 앱 자체 렌더링 bugfix처럼 재현 샘플과 구현 경계가 중요한 release는 내부 release record 링크를 우선한다.
@@ -168,11 +169,11 @@ public publish 이후 GitHub Release, Pages 업데이트 문서, release record,
 - `### 포함된 rhwp 변화`: upstream `rhwp` core 또는 bundled `rhwp-studio` 변경 중 문서 열기, 렌더링, HWP/HWPX 호환성, viewer/editor 동작에 실제로 영향을 주는 내용을 적는다. upstream release note 전체를 복제하지 않는다.
 - `### 알한글 앱 변화`: HostApp, Quick Look, Finder thumbnail, 저장/공유/PDF/인쇄, 설치, 업데이트처럼 앱 저장소가 소유하고 사용자가 체감하는 변화를 적는다. 앱 자체 신규 기능이나 동작 변화가 크지 않으면 "이번 릴리즈의 앱 자체 신규 기능은 크지 않으며, 핵심 변화는 bundled `rhwp` 문서 처리 개선을 앱/Quick Look/Finder 썸네일 경로에 반영한 것"처럼 1~2개 bullet로 짧게 쓴다. source metadata, workflow default, README/Pages 정렬, 단순 version bump, checksum 정렬은 사용자-facing 앱 변화로 쓰지 않는다.
 
-GitHub Release body에는 사용자 요약보다 뒤에 `## 직접 반영된 PR과 Issue` section을 둔다. 이 section은 최소 다음 하위 항목을 포함한다. `#<number>`만 단독으로 나열하거나 inline code로 감싸지 않고, GitHub PR/Issue 제목 또는 release owner가 확정한 한 줄 설명을 함께 쓴다.
+GitHub Release body에는 사용자 요약보다 뒤에 `## 이번 릴리즈 관련 PR과 Issue` section을 둔다. 이 section은 최소 다음 하위 항목을 포함한다. `#<number>`만 단독으로 나열하거나 inline code로 감싸지 않고, GitHub PR/Issue 제목 또는 release owner가 확정한 한 줄 설명을 함께 쓴다.
 
-- `### 직접 반영된 PR`: release body의 사용자-facing/기술 세부/검증 세부에 실제로 반영한 PR을 `[#<number>: PR 제목](PR URL) - 반영 내용` 형식으로 나열한다.
+- `### 릴리즈 요약에 반영된 PR`: release body의 사용자-facing/기술 세부/검증 세부에 실제로 반영한 PR을 `[#<number>: PR 제목](PR URL) - 반영 내용` 형식으로 나열한다.
 - `### 해결된 Issue`: 대상 타스크 Issue, closing keyword, release record에서 완료 확정된 Issue만 `[#<number>: Issue 제목](Issue URL) - 완료 근거` 형식으로 나열한다.
-- `### 관련 Issue`: `Refs`, `Related`, 선행/연관, 단순 참고 Issue를 `[#<number>: Issue 제목](Issue URL) - 관련 근거` 형식으로 분리해 나열한다.
+- `### 참고/연관 Issue`: `Refs`, `Related`, 선행/연관, 단순 참고 Issue 중 이번 릴리즈 설명에 필요한 항목만 `[#<number>: Issue 제목](Issue URL) - 관련 근거` 형식으로 분리해 나열한다. 이전 public release에서 이미 해결된 Issue나 운영 기록용 Issue는 public body 대신 내부 release record의 `포함 PR 분석` 표에 남긴다.
 
 `rhwp` 버전이 직전 public release와 같으면 `포함된 rhwp 변화` heading은 유지하고 "이번 릴리즈에서 bundled `rhwp` core와 `rhwp-studio` 버전 변경은 없습니다."처럼 짧게 쓴다. upstream `rhwp` 반영이 release의 중심 사용자-facing 변화라면 title 병기 여부와 별개로 upstream release 링크, bundled tag/commit, 앱에서 확인한 영향을 함께 기록한다.
 
