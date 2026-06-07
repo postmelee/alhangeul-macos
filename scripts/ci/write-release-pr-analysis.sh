@@ -343,11 +343,14 @@ extract_task_issue_from_subject() {
   local output_file="$2"
   local issue=""
 
-  if [[ "$subject" =~ task[-_/]?([0-9]+) ]]; then
+  if [[ "$subject" =~ [Tt]ask[[:space:]#:_-]*([0-9]+) ]]; then
+    issue="${BASH_REMATCH[1]}"
+  elif [[ "$subject" =~ task[-_/]?([0-9]+) ]]; then
     issue="${BASH_REMATCH[1]}"
   fi
 
   if [ -n "$issue" ]; then
+    is_issue_reference "$issue" || return 0
     append_unique_line "$output_file" "$issue"
   fi
 }
@@ -531,7 +534,8 @@ write_pr_row() {
   fi
 
   extract_issue_refs "$body_file" "$pr_number" "$resolved_file" "$related_file"
-  extract_task_issue_from_subject "$subject" "$related_file"
+  extract_task_issue_from_subject "$subject" "$resolved_file"
+  extract_task_issue_from_subject "$title" "$resolved_file"
   issue_file_without "$related_file" "$resolved_file" "$related_clean_file"
   mv "$related_clean_file" "$related_file"
 
@@ -644,7 +648,7 @@ $(if [ -s "$DIRECT_PRS_FILE" ]; then while IFS= read -r pr; do echo "- $(render_
 
 ### 해결된 Issue 후보
 
-$(if [ -s "$RESOLVED_ISSUES_FILE" ]; then while IFS= read -r issue; do echo "- $(render_issue_link "$issue") closing keyword 또는 release record 확인 필요"; done < "$RESOLVED_ISSUES_FILE"; else echo "- 없음"; fi)
+$(if [ -s "$RESOLVED_ISSUES_FILE" ]; then while IFS= read -r issue; do echo "- $(render_issue_link "$issue") 대상 타스크, closing keyword, 또는 release record 확인 필요"; done < "$RESOLVED_ISSUES_FILE"; else echo "- 없음"; fi)
 
 ### 관련 Issue 후보
 
@@ -659,7 +663,7 @@ $(cat "$DETAILS_FILE")
 - first-parent release transport PR과 실제 포함 작업 PR을 구분한다.
 - 각 PR의 title/body, linked Issue, 최종 보고서를 읽고 분류를 확정한다.
 - \`변경 요약\`과 \`알한글 앱 변화\`에는 사용자-facing으로 확정된 항목만 반영한다.
-- closing keyword 또는 release record 완료 확정 항목만 해결된 Issue로 쓴다.
-- \`Refs\`, \`Related\`, \`대상 타스크\`, \`관련 이슈\`, \`선행/연관\`은 관련 Issue로 분리한다.
+- PR title/body/report/branch에서 확인되는 대상 타스크 Issue와 closing keyword 또는 release record 완료 확정 항목은 해결된 Issue로 쓴다.
+- \`Refs\`, \`Related\`, \`관련 이슈\`, \`선행/연관\`, 단순 언급은 관련 Issue로 분리한다.
 - path 기반 delta checklist는 누락 확인과 smoke 영역 점검용 보조 자료로만 사용한다.
 EOF

@@ -135,7 +135,7 @@ find mydocs/report -maxdepth 1 -name 'task_*_<issue>_report.md' -print
 | 최종 보고서 | 내부 task PR이면 `mydocs/report/task_*_<issue>_report.md` 후보를 읽는다 |
 | 분류 | 사용자-facing, 개발자-facing, 운영/배포, 문서-only, upstream sync 중 하나로 기록한다 |
 | 사용자-facing 여부 | GitHub Release와 Pages의 `변경 요약` / `알한글 앱 변화` 근거로 쓸지 release owner가 확정한다 |
-| Issue 구분 | closing keyword 또는 release record 완료 확정 항목만 해결된 Issue로 쓴다 |
+| Issue 구분 | 대상 타스크 Issue, closing keyword, release record 완료 확정 항목만 해결된 Issue로 쓴다 |
 
 `mydocs/release/v<version>.md`에는 `포함 PR 분석` 표를 남긴다. 표준 column은 `PR`, `제목`, `분류`, `사용자-facing`, `공개 요약 반영`, `해결된 Issue`, `관련 Issue`, `근거 문서`, `비고`다.
 
@@ -250,7 +250,9 @@ signed/notarized DMG smoke는 public publish 전에 통과해야 하는 blocking
 - GitHub Release body의 첫 top-level section은 `이번 버전의 주요 변경 사항`이다.
 - GitHub Release body에는 `직접 반영된 PR과 Issue` section이 있고, 직접 반영된 PR, 해결된 Issue, 관련 Issue가 분리되어 있다.
 - GitHub Release body의 PR/Issue 항목은 `#<number>`만 단독으로 두거나 inline code로 감싸지 않고, `[#<number>: 제목](URL) - 한 줄 설명` 형식으로 작성되어 있다.
-- 해결된 Issue는 PR body closing keyword 또는 release record 완료 확정 항목만 포함한다.
+- 해결된 Issue는 대상 타스크 Issue, PR body closing keyword, 또는 release record 완료 확정 항목만 포함한다.
+- `Related`, `Refs`, 선행/연관, 단순 참고 Issue는 관련 Issue로 분리한다.
+- `다운로드 및 설치`는 `다운로드`, `지원 환경`, `설치 후 첫 실행`, `업데이트 확인`, `Homebrew` 하위 section으로 구분되어 있다.
 - `알한글 앱 변화`는 HostApp, Quick Look preview, Finder thumbnail, 설치, 업데이트처럼 앱 저장소가 소유한 사용자-visible 변화를 먼저 설명한다. 앱 자체 신규 기능이 크지 않으면 1~2개 bullet로 짧게 쓰고, source metadata, workflow default, README/Pages 정렬, 단순 version bump를 사용자-facing 변화처럼 나열하지 않는다.
 - GitHub Release body에는 `mydocs/release/v<version>.md` 같은 실제 조회 가능한 상세 문서를 GitHub blob URL로 링크한다.
 - 구현 용어는 사용자 용어로 번역되어 있다. 예를 들어 PUA는 특수 문자/기호 표시, shade sentinel은 텍스트 배경/음영 표시처럼 설명한다.

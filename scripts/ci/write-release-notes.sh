@@ -115,19 +115,33 @@ $RELEASE_CHANGE_SECTIONS
 
 ## 다운로드 및 설치
 
+### 다운로드
+
 - DMG: [\`$DMG_NAME\`]($DMG_URL)
 - SHA256: \`$DMG_SHA256\`
 - SHA256 file: \`$SHA256_NAME\`
+
+### 지원 환경
+
 - macOS 12 이상을 지원합니다.
 - Intel Mac과 Apple Silicon Mac 모두 같은 DMG 파일을 사용합니다.
+
+### 설치 후 첫 실행
+
 - DMG를 열고 \`Alhangeul.app\`을 \`Applications\` 폴더로 드래그해 설치합니다.
 - GitHub Release에 게시된 signed/notarized public DMG만 사용자 배포 산출물로 사용합니다.
 - 설치 후 \`Applications\` 폴더의 \`Alhangeul.app\`을 한 번 실행합니다.
 - 첫 실행 후 macOS가 Quick Look preview와 Finder thumbnail extension을 발견하고 등록할 수 있습니다.
 - Finder에서 \`.hwp\` 또는 \`.hwpx\` 파일을 선택한 뒤 Space로 Quick Look preview를 확인하고, icon view에서 thumbnail 갱신을 확인합니다.
+
+### 업데이트 확인
+
 - 앱 메뉴에서 \`알한글 > 업데이트 확인...\`을 선택해 Sparkle 업데이트를 수동 확인할 수 있습니다.
 - 업데이트 feed: \`$APPCAST_URL\`
 - 버전별 Pages 릴리즈 노트: $PAGES_RELEASE_NOTES_URL
+
+### Homebrew
+
 - Homebrew Cask 반영 전에는 위 GitHub Release DMG를 직접 내려받아 설치하세요.
 
 ## 알려진 제한 사항

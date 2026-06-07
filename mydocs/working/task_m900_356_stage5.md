@@ -10,15 +10,17 @@ Stage 2~4에서 만든 문서 규칙, PR 분석 helper, release note generator/c
 
 추가 검토에서 GitHub Release body의 `이번 버전의 주요 변경 사항`보다 `사용자용 요약`, 설치, 지원 환경, 첫 실행, 업데이트, 상세 문서 section이 앞에 있어 핵심 변경이 뒤로 밀리는 문제가 확인됐다. 또한 `검증 결과`와 `릴리즈 delta 기반 추가 확인 항목`은 실제 public 검증 결과가 아니라 release owner용 절차 문구였다. 이에 GitHub Release body 구조를 `이번 버전의 주요 변경 사항` 첫 section, `다운로드 및 설치`, `알려진 제한 사항`, `직접 반영된 PR과 Issue`, `상세 기록` 순서로 재정렬하고 public body를 다시 반영했다.
 
+하이퍼-워터폴 운영상 PR이 대상 타스크 Issue를 기반으로 merge된 경우 해당 대상 타스크 Issue는 해결된 Issue로 보는 것이 더 일관적이라고 판단했다. 따라서 직접 반영 PR의 대상 타스크 Issue를 해결된 Issue로 올리고, `Related`, `Refs`, 선행/연관, 단순 참고 Issue만 관련 Issue로 유지하도록 규칙과 `v0.1.5` body를 다시 보정했다.
+
 ## 변경 내용
 
 | 파일 | 변경 |
 |------|------|
 | `docs/updates/v0.1.5.html` | `포함 PR 분석` 기준 사용자-facing 변화 반영. Quick Look/썸네일/PDF/공유 표시 보강, 앱 실행 후 업데이트 확인 보강, `앱 자체 신규 기능은 크지 않습니다` 문구 제거 |
-| `scripts/ci/write-release-pr-analysis.sh` | PR/Issue 후보를 제목 포함 Markdown 링크로 출력하도록 보강 |
-| `scripts/ci/write-release-notes.sh` | GitHub Release body를 주요 변경 우선 구조로 재정렬하고 내부 delta/guideline section 제거 |
-| `scripts/ci/check-release-notes-template.sh` | GitHub Release body의 첫 top-level section과 PR/Issue 제목 포함 링크를 검증하고 옛 section을 금지 |
-| `mydocs/manual/release_github_pages_sparkle_guide.md` 외 매뉴얼 | GitHub 자동 제목 치환에 의존하지 않고 PR/Issue 제목 또는 설명을 직접 남기는 규칙과 주요 변경 우선 구조 추가 |
+| `scripts/ci/write-release-pr-analysis.sh` | PR/Issue 후보를 제목 포함 Markdown 링크로 출력하고 대상 타스크 Issue를 해결된 Issue 후보로 분류하도록 보강 |
+| `scripts/ci/write-release-notes.sh` | GitHub Release body를 주요 변경 우선 구조로 재정렬하고 `다운로드 및 설치` 하위 section을 생성하도록 보강 |
+| `scripts/ci/check-release-notes-template.sh` | GitHub Release body의 첫 top-level section, 설치 하위 section, PR/Issue 제목 포함 링크를 검증하고 옛 section을 금지 |
+| `mydocs/manual/release_github_pages_sparkle_guide.md` 외 매뉴얼 | GitHub 자동 제목 치환에 의존하지 않고 PR/Issue 제목 또는 설명을 직접 남기는 규칙, 주요 변경 우선 구조, 대상 타스크 Issue 분류 기준 추가 |
 | `mydocs/release/v0.1.5.md` | GitHub Release body 후보의 직접 반영 PR, 해결된 Issue, 관련 Issue를 제목/설명 포함 링크로 정정 |
 | `mydocs/working/task_m900_356_stage5.md` | Stage 5 완료보고서 추가 |
 | `mydocs/report/task_m900_356_report.md` | 최종 보고서 추가 |
@@ -61,8 +63,8 @@ gh release edit v0.1.5 \
 | section | 항목 |
 |---------|------|
 | 직접 반영된 PR | `#324` Sparkle 백그라운드 업데이트 확인, `#326` 이미지 fill mode parity, `#329` RawSvg/OLE·차트 리소스, `#334` FormObject 정적 프리뷰, `#349` `rhwp v0.7.15` sync |
-| 해결된 Issue | `#110` FormObject 정적 프리뷰 보강 |
-| 관련 Issue | `#106`, `#116`, `#121`, `#122`, `#280`, `#282`, `#323`, `#348`, `#351` 제목/관련 근거 포함 |
+| 해결된 Issue | `#110` FormObject 정적 프리뷰, `#121` RawSvg/OLE·차트 리소스, `#122` 이미지 fill mode, `#323` Sparkle 백그라운드 업데이트 확인 |
+| 관련 Issue | `#106`, `#116`, `#280`, `#282`, `#348`, `#351` 제목/관련 근거 포함 |
 
 ## Pages 정정
 
@@ -122,7 +124,9 @@ git diff --check
 - GitHub Release `v0.1.5` body 정정.
 - GitHub Release `v0.1.5` body의 PR/Issue section을 제목/설명 포함 링크 형식으로 재정정.
 - GitHub Release `v0.1.5` body를 주요 변경 우선 구조로 재정정하고 `검증 결과`, `릴리즈 delta 기반 추가 확인 항목` section 제거.
+- GitHub Release `v0.1.5` body의 `다운로드 및 설치`를 `다운로드`, `지원 환경`, `설치 후 첫 실행`, `업데이트 확인`, `Homebrew` 하위 section으로 세분화.
+- 대상 타스크 Issue 기준으로 해결된 Issue를 `#110`, `#121`, `#122`, `#323`으로 재정리.
 - `docs/updates/v0.1.5.html` public Pages 배포.
-- public URL 재조회로 첫 section `이번 버전의 주요 변경 사항`, `다운로드 및 설치`, `상세 기록`, `직접 반영된 PR과 Issue`, `#324`, `#326`, `#329`, `#334`, `#349`, `#110`의 제목/설명 포함 표기와 Pages의 사용자-facing 정정 문구 확인.
+- public URL 재조회로 첫 section `이번 버전의 주요 변경 사항`, `다운로드 및 설치` 하위 section, `상세 기록`, `직접 반영된 PR과 Issue`, `#324`, `#326`, `#329`, `#334`, `#349`, `#110`, `#121`, `#122`, `#323`의 제목/설명 포함 표기와 Pages의 사용자-facing 정정 문구 확인.
 
-완료 시각: 02:02.
+완료 시각: 02:24.

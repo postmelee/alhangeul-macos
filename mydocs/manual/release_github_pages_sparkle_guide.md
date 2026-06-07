@@ -113,8 +113,8 @@ GitHub Actions workflow에서 생성되는 경우:
 
 Issue 구분 기준:
 
-- `해결된 Issue`는 PR body의 closing keyword(`Closes`, `Fixes`, `Resolves` 등) 또는 release record에서 완료 확정된 항목만 쓴다.
-- `Related`, `Refs`, `대상 타스크`, `관련 이슈`, `선행/연관`, 단순 링크는 `관련 Issue`로 분리한다.
+- `해결된 Issue`는 PR title/body/report/branch에서 확인되는 대상 타스크 Issue, PR body의 closing keyword(`Closes`, `Fixes`, `Resolves` 등), 또는 release record에서 완료 확정된 항목을 쓴다.
+- `Related`, `Refs`, `관련 이슈`, `선행/연관`, 단순 링크는 `관련 Issue`로 분리한다.
 - PR body가 특정 Issue를 언급하더라도 완료 확정 근거가 없으면 해결된 Issue로 쓰지 않는다.
 - GitHub Release body와 PR body에 `#<number>` 뒤 한글 조사가 바로 붙지 않게 한다. 공개 body는 등록 전 `scripts/validate-github-body.sh <body-file>`를 통과해야 한다.
 - GitHub Release body의 PR/Issue 목록은 GitHub 자동 제목 치환에 의존하지 않는다. `[#<number>: 제목](URL) - 한 줄 설명`처럼 번호, 제목, 필요한 설명을 본문에 직접 남긴다.
@@ -124,7 +124,7 @@ Issue 구분 기준:
 Release note에 포함할 내용:
 
 - 주요 변경 사항: `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`
-- 다운로드 및 설치: DMG, SHA256, 지원 macOS, universal DMG, 첫 실행, Quick Look/Thumbnail 활성화, 업데이트 확인, Homebrew 공개 상태
+- 다운로드 및 설치: `다운로드`, `지원 환경`, `설치 후 첫 실행`, `업데이트 확인`, `Homebrew` 하위 구분으로 DMG, SHA256, 지원 macOS, universal DMG, 첫 실행, Quick Look/Thumbnail 활성화, 업데이트 확인, Homebrew 공개 상태를 정리한다.
 - 알려진 제한 사항: viewer/editor 실행 경로, Quick Look/Thumbnail/PDF/인쇄 경로 차이, smoke 의미, 후속 native renderer 범위
 - 직접 반영된 PR과 Issue: 공개 body에 반영한 PR, 해결된 Issue, 관련 Issue 구분
 - 상세 기록: release detail doc, release index, Pages 릴리즈 노트, GitHub Release URL, `Release metadata`, Third Party notices, bundled font notice
@@ -171,7 +171,7 @@ public publish 이후 GitHub Release, Pages 업데이트 문서, release record,
 GitHub Release body에는 사용자 요약보다 뒤에 `## 직접 반영된 PR과 Issue` section을 둔다. 이 section은 최소 다음 하위 항목을 포함한다. `#<number>`만 단독으로 나열하거나 inline code로 감싸지 않고, GitHub PR/Issue 제목 또는 release owner가 확정한 한 줄 설명을 함께 쓴다.
 
 - `### 직접 반영된 PR`: release body의 사용자-facing/기술 세부/검증 세부에 실제로 반영한 PR을 `[#<number>: PR 제목](PR URL) - 반영 내용` 형식으로 나열한다.
-- `### 해결된 Issue`: closing keyword 또는 release record에서 완료 확정된 Issue만 `[#<number>: Issue 제목](Issue URL) - 완료 근거` 형식으로 나열한다.
+- `### 해결된 Issue`: 대상 타스크 Issue, closing keyword, release record에서 완료 확정된 Issue만 `[#<number>: Issue 제목](Issue URL) - 완료 근거` 형식으로 나열한다.
 - `### 관련 Issue`: `Refs`, `Related`, 선행/연관, 단순 참고 Issue를 `[#<number>: Issue 제목](Issue URL) - 관련 근거` 형식으로 분리해 나열한다.
 
 `rhwp` 버전이 직전 public release와 같으면 `포함된 rhwp 변화` heading은 유지하고 "이번 릴리즈에서 bundled `rhwp` core와 `rhwp-studio` 버전 변경은 없습니다."처럼 짧게 쓴다. upstream `rhwp` 반영이 release의 중심 사용자-facing 변화라면 title 병기 여부와 별개로 upstream release 링크, bundled tag/commit, 앱에서 확인한 영향을 함께 기록한다.

@@ -48,8 +48,8 @@
 | 보조 입력 | path 기반 delta checklist. 누락 확인과 smoke 영역 점검용 |
 | release record | `포함 PR 분석` 표 필수 |
 | 공개 요약 | `포함 PR 분석` 표에서 사용자-facing으로 확정된 항목만 기준 |
-| 해결된 Issue | PR body closing keyword 또는 release record 완료 확정 항목 |
-| 관련 Issue | `Refs`, `Related`, 대상 타스크, 선행/연관, 단순 참고 Issue |
+| 해결된 Issue | 대상 타스크 Issue, PR body closing keyword, release record 완료 확정 항목 |
+| 관련 Issue | `Refs`, `Related`, 선행/연관, 단순 참고 Issue |
 | GitHub Release body | `직접 반영된 PR`, `해결된 Issue`, `관련 Issue` 구분 section 필수 |
 | PR/Issue section 표기 | `#<number>` 단독 또는 inline code가 아니라 `[#<number>: 제목](URL) - 한 줄 설명` 형식 |
 | GitHub Release body 순서 | 첫 top-level section은 `이번 버전의 주요 변경 사항` |
@@ -91,16 +91,16 @@ public body 후보 기준 직접 반영 PR:
 해결된 Issue:
 
 - `#110`: Swift native renderer Placeholder/FormObject 정적 프리뷰 보강
+- `#121`: Swift native renderer RawSvg/OLE·차트 리소스 렌더링 보강
+- `#122`: Swift native renderer 이미지 fill mode·타일·배치 렌더링 parity 보강
+- `#323`: 앱 실행 시 Sparkle 백그라운드 업데이트 확인 실행
 
 관련 Issue:
 
 - `#106`: 이미지 crop/effect/brightness/contrast 보강
 - `#116`: JPEG 워터마크 효과/투명키 렌더링 보강
-- `#121`: RawSvg/OLE·차트 리소스 렌더링 보강
-- `#122`: 이미지 fill mode·타일·배치 렌더링 parity 보강
 - `#280`: preview visual diff harness 구축
 - `#282`: Quick Look/Thumbnail native compositor 후속 구조
-- `#323`: Sparkle 백그라운드 업데이트 확인 대상 타스크
 - `#348`: upstream sync 작업 맥락
 - `#351`: `v0.1.5` release 실행 맥락
 
@@ -112,7 +112,7 @@ GitHub Release body 정정 후보는 다음 파일에 생성했다.
 build.noindex/release/github-release-v0.1.5-corrected.md
 ```
 
-이 파일은 `scripts/ci/check-release-notes-template.sh`와 `scripts/validate-github-body.sh`를 통과했다. 공개 반영 승인 후 `gh release edit v0.1.5 --notes-file build.noindex/release/github-release-v0.1.5-corrected.md`로 GitHub Release body를 정정했다. 이후 PR/Issue 항목이 inline code 번호-only로 보이는 문제를 확인하고, 같은 body file을 제목/설명 포함 링크 형식으로 재생성해 같은 명령으로 다시 반영했다. 추가로 주요 변경 사항보다 설치/지원/업데이트 section이 앞서는 구조와 `검증 결과`, `릴리즈 delta 기반 추가 확인 항목`의 가이드라인 문구 노출 문제를 확인해, body를 주요 변경 우선 구조로 재생성하고 같은 명령으로 다시 반영했다.
+이 파일은 `scripts/ci/check-release-notes-template.sh`와 `scripts/validate-github-body.sh`를 통과했다. 공개 반영 승인 후 `gh release edit v0.1.5 --notes-file build.noindex/release/github-release-v0.1.5-corrected.md`로 GitHub Release body를 정정했다. 이후 PR/Issue 항목이 inline code 번호-only로 보이는 문제를 확인하고, 같은 body file을 제목/설명 포함 링크 형식으로 재생성해 같은 명령으로 다시 반영했다. 추가로 주요 변경 사항보다 설치/지원/업데이트 section이 앞서는 구조와 `검증 결과`, `릴리즈 delta 기반 추가 확인 항목`의 가이드라인 문구 노출 문제를 확인해 body를 주요 변경 우선 구조로 재생성했다. 마지막으로 `다운로드 및 설치`를 하위 section으로 나누고, 대상 타스크 Issue를 해결된 Issue로 재분류한 body를 다시 반영했다.
 
 Pages public 반영은 main 대상 docs-only PR `#357`로 진행했다.
 
@@ -149,8 +149,10 @@ Pages public 반영은 main 대상 docs-only PR `#357`로 진행했다.
 - GitHub Release `v0.1.5` body 정정.
 - GitHub Release `v0.1.5` body의 직접 반영 PR, 해결된 Issue, 관련 Issue section을 제목/설명 포함 링크 형식으로 재정정.
 - GitHub Release `v0.1.5` body를 주요 변경 우선 구조로 재정정하고 `검증 결과`, `릴리즈 delta 기반 추가 확인 항목` section 제거.
+- GitHub Release `v0.1.5` body의 `다운로드 및 설치`를 `다운로드`, `지원 환경`, `설치 후 첫 실행`, `업데이트 확인`, `Homebrew` 하위 section으로 세분화.
+- 대상 타스크 Issue 기준으로 해결된 Issue를 `#110`, `#121`, `#122`, `#323`으로 재정리.
 - `docs/updates/v0.1.5.html` public Pages 배포.
-- public GitHub Release body 재조회로 첫 section `이번 버전의 주요 변경 사항`, `다운로드 및 설치`, `상세 기록`, 직접 반영 PR, 해결된 Issue, 관련 Issue section의 제목/설명 포함 표기 확인.
+- public GitHub Release body 재조회로 첫 section `이번 버전의 주요 변경 사항`, `다운로드 및 설치` 하위 section, `상세 기록`, 직접 반영 PR, 해결된 Issue, 관련 Issue section의 제목/설명 포함 표기 확인.
 - public Pages 재조회로 Quick Look/썸네일/PDF/공유 출력 표시 보강과 앱 실행 후 업데이트 확인 보강 문구 확인.
 
 아래 항목은 여전히 로컬에서 직접 실행하지 않았다.
@@ -162,5 +164,5 @@ workflow artifact upload는 실제 release rehearsal/publish workflow 실행 시
 ## 남은 위험
 
 - release owner가 `포함 PR 분석` 표의 사용자-facing 판단을 잘못 확정하면 generator는 그 판단을 그대로 public body에 반영한다.
-- PR body closing keyword가 누락된 실제 완료 Issue는 release record에서 명시적으로 완료 확정해야 해결된 Issue로 들어간다.
+- 대상 타스크 Issue가 PR title/body/report/branch에서 확인되지 않거나 PR body closing keyword가 누락된 실제 완료 Issue는 release record에서 명시적으로 완료 확정해야 해결된 Issue로 들어간다.
 - workflow artifact upload는 로컬에서 검증할 수 없어 YAML parse와 helper dry-run으로만 확인했다.
