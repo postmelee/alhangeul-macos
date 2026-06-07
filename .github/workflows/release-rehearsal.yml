@@ -44,6 +44,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install release validation dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v rg >/dev/null 2>&1; then
+            brew install ripgrep
+          fi
+
       - name: Validate version input
         shell: bash
         run: |

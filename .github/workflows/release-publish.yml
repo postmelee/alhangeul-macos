@@ -83,6 +83,14 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
+      - name: Install release validation dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v rg >/dev/null 2>&1; then
+            brew install ripgrep
+          fi
+
       - name: Validate release inputs and tag ref
         shell: bash
         run: |

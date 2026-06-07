@@ -29,6 +29,7 @@
 | Stage 4 | generator/checker/workflow 연결 | `6ffebe2` |
 | Stage 5 | end-to-end 검증, public surface 정정, 최종 보고 | `68ff599`, `aecb260`, `2fc9976`, `dd1934c`, `0c34ae3`, `75a3ea7` |
 | PR 준비 | 최종 보고서 최신화와 PR body 검증 | PR 직전 커밋 |
+| CI follow-up | macOS release helper job의 `rg` 의존성 설치 보강 | PR CI 실패 분석 후 추가 커밋 |
 
 ## 변경 파일 요약
 
@@ -126,6 +127,7 @@ Pages public 반영은 main 대상 docs-only PR `#357`로 진행했다.
 |------|------|
 | shell syntax checks | 통과 |
 | workflow YAML parse | 통과 |
+| PR CI 실패 분석 | 확인 | `Release helper checks`가 `validate-github-body.sh` 실행 중 `rg` 누락으로 실패해 macOS release 관련 jobs에 `ripgrep` 설치 step 추가 |
 | `write-release-pr-analysis.sh v0.1.4 v0.1.5` | 통과 |
 | `write-release-pr-analysis.sh v0.1.4 v0.1.5` 제목 포함 dry-run | 통과 |
 | GitHub API PR metadata path | 통과 |
