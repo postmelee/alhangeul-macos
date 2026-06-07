@@ -65,7 +65,7 @@
           <li>수식 줄바꿈과 들여쓰기, 강제 줄바꿈 뒤 커서 이동, 미주 안 수식 배치 관련 upstream 보정을 포함했습니다.</li>
           <li>HWPX 저장/내보내기에서 그림 회전·반전, 대각선 셀 테두리, 0바이트 필드 순서 보존 개선을 포함했습니다.</li>
           <li>bundled viewer/editor의 문단 정보 대화상자가 왼쪽 여백과 내어쓰기 값을 분리해 다루도록 보강했습니다.</li>
-          <li>앱 본체, Quick Look 미리보기, Finder 썸네일 extension을 <code>0.1.5 (11)</code> 기준 signed/notarized universal DMG로 배포합니다.</li>
+          <li>공식 DMG는 Intel Mac과 Apple Silicon Mac을 모두 지원하는 signed/notarized universal DMG입니다.</li>
         </ul>
       </section>
 
@@ -84,10 +84,9 @@
       <section class="updates-section" aria-labelledby="release-app-title">
         <h2 id="release-app-title">알한글 앱 변화</h2>
         <ul>
-          <li>앱 본체와 Quick Look/Thumbnail extension의 source metadata를 <code>0.1.5 (11)</code>로 맞췄습니다.</li>
-          <li>release rehearsal/publish workflow의 기본 입력을 <code>v0.1.5</code>, 직전 공개 릴리즈 <code>v0.1.4</code>, expected <code>rhwp v0.7.15</code> 기준으로 정리했습니다.</li>
-          <li>About 창과 내부 provenance 정보는 bundled <code>rhwp v0.7.15</code> 기준을 표시합니다.</li>
-          <li>GitHub Release, Pages, Sparkle, Homebrew Cask가 같은 public DMG URL과 checksum을 가리키도록 후속 배포 단계에서 검증합니다.</li>
+          <li>이번 릴리즈의 앱 자체 신규 기능은 크지 않습니다. 핵심 변화는 <code>rhwp v0.7.15</code> 문서 처리 개선을 앱 화면, Quick Look 미리보기, Finder 썸네일 경로에 반영한 것입니다.</li>
+          <li>About 창에서 bundled <code>rhwp v0.7.15</code> 기준을 확인할 수 있습니다.</li>
+          <li>설치본은 <code>0.1.5 (11)</code> signed/notarized universal DMG로 배포됩니다.</li>
         </ul>
       </section>
 
@@ -103,8 +102,7 @@
       <section class="updates-section" aria-labelledby="release-install-title">
         <h2 id="release-install-title">설치와 업데이트</h2>
         <p>DMG 파일을 내려받아 앱을 Applications 폴더로 옮긴 뒤, 앱을 한 번 실행합니다. v0.1.5 공식 DMG는 Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용합니다.</p>
-        <p>Homebrew Cask를 사용하는 경우 아래 명령으로 같은 signed/notarized universal DMG를 설치할 수 있습니다.</p>
-        <pre class="code-panel"><code>brew install --cask postmelee/tap/alhangeul</code></pre>
+        <p>Homebrew Cask 반영은 별도 배포 단계에서 진행합니다. 반영 전에는 GitHub Release의 DMG를 직접 내려받아 설치하세요.</p>
         <p>설치한 앱에서는 메뉴 막대의 <code>알한글 &gt; 업데이트 확인...</code>을 선택해 새 버전을 확인할 수 있습니다.</p>
       </section>
     </div>
