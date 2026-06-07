@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#ffffff" />
   <meta name="description" content="알한글 v0.1.5 릴리즈 노트입니다." />
   <meta property="og:title" content="알한글 v0.1.5 릴리즈 노트" />
-  <meta property="og:description" content="rhwp v0.7.15를 반영해 수식과 미주 흐름, HWPX 저장 호환성, 문단 정보 UI 후속 개선을 포함한 알한글 패치 릴리즈입니다." />
+  <meta property="og:description" content="rhwp v0.7.15 문서 처리 개선과 Quick Look·썸네일·PDF/공유 출력 표시 보강을 포함한 알한글 패치 릴리즈입니다." />
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://postmelee.github.io/alhangeul-macos/updates/v0.1.5.html" />
   <meta property="og:image" content="https://postmelee.github.io/alhangeul-macos/assets/og-main.png" />
@@ -45,7 +45,7 @@
   <main id="main" class="updates-page">
     <section class="updates-hero" aria-labelledby="release-title">
       <h1 id="release-title">알한글 v0.1.5</h1>
-      <p><code>rhwp v0.7.15</code>를 반영해 수식과 미주 흐름, HWPX 저장 호환성, 문단 정보 UI 후속 개선을 포함한 패치 릴리즈입니다.</p>
+      <p><code>rhwp v0.7.15</code> 문서 처리 개선과 Quick Look·썸네일·PDF/공유 출력 표시 보강을 포함한 패치 릴리즈입니다.</p>
       <div class="updates-actions" aria-label="릴리즈 주요 링크">
         <a class="page-action-button"
           href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.5/alhangeul-macos-0.1.5.dmg">
@@ -61,10 +61,11 @@
       <section class="updates-section" aria-labelledby="release-summary-title">
         <h2 id="release-summary-title">변경 요약</h2>
         <ul>
-          <li><code>rhwp</code> core와 bundled <code>rhwp-studio</code>를 <code>v0.7.15</code> 기준으로 갱신했습니다.</li>
-          <li>수식 줄바꿈과 들여쓰기, 강제 줄바꿈 뒤 커서 이동, 미주 안 수식 배치 관련 upstream 보정을 포함했습니다.</li>
-          <li>HWPX 저장/내보내기에서 그림 회전·반전, 대각선 셀 테두리, 0바이트 필드 순서 보존 개선을 포함했습니다.</li>
-          <li>bundled viewer/editor의 문단 정보 대화상자가 왼쪽 여백과 내어쓰기 값을 분리해 다루도록 보강했습니다.</li>
+          <li><code>rhwp v0.7.15</code>를 반영해 수식 줄바꿈, 미주 안 수식 배치, HWPX 저장/내보내기 호환성을 보강했습니다.</li>
+          <li>Finder Quick Look 미리보기, Finder 썸네일, PDF/공유 출력에서 일부 양식 컨트롤과 문서 안에 포함된 리소스 표시를 보강했습니다.</li>
+          <li>이미지 채움 방식 표시를 보강해 앱 외부 미리보기와 출력 경로의 문서 표현을 개선했습니다.</li>
+          <li>앱 실행 후 업데이트 확인이 백그라운드에서 시작되도록 보강했습니다.</li>
+          <li>bundled viewer/editor의 문단 정보 대화상자가 왼쪽 여백과 내어쓰기 값을 더 분명히 구분합니다.</li>
           <li>공식 DMG는 Intel Mac과 Apple Silicon Mac을 모두 지원하는 signed/notarized universal DMG입니다.</li>
         </ul>
       </section>
@@ -74,9 +75,9 @@
         <p>v0.1.5는 <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.7.15"
             rel="noreferrer"><code>rhwp v0.7.15</code></a> 기준의 core와 bundled <code>rhwp-studio</code>를 사용합니다. 앱 내부 provenance 기준 commit은 <code>aa925a5954f0fd26dfcef2166cbce7877c481f44</code>입니다.</p>
         <ul>
-          <li>수식 TAC 줄바꿈, 들여쓰기, 강제 줄바꿈 뒤 커서 이동, 미주 안 수식 script 렌더링과 간격 조정이 포함됩니다.</li>
-          <li>HWPX 그림 serialization의 반전/회전/isEmbeded 값, 대각선 셀 테두리, 0바이트 필드 ordering 보존이 보강됩니다.</li>
-          <li>bundled <code>rhwp-studio</code>에는 문단 정보 대화상자의 왼쪽 여백과 내어쓰기 binding 분리, 렌더 sweep 가이드와 폰트 문서 보강이 포함됩니다.</li>
+          <li>수식 줄바꿈과 들여쓰기, 강제 줄바꿈 뒤 커서 이동, 미주 안 수식 배치가 보정됩니다.</li>
+          <li>HWPX 저장/내보내기에서 그림 회전·반전, 대각선 셀 테두리, 빈 필드 순서 보존이 보강됩니다.</li>
+          <li>bundled <code>rhwp-studio</code>에는 문단 정보 대화상자의 왼쪽 여백과 내어쓰기 값 구분 보강이 포함됩니다.</li>
           <li>upstream browser extension service worker의 문서 fetch 경로 보안 강화가 같은 release에 포함되지만, 알한글 macOS 앱은 별도 브라우저 확장 권한이나 네트워크 경로를 추가하지 않습니다.</li>
         </ul>
       </section>
@@ -84,7 +85,8 @@
       <section class="updates-section" aria-labelledby="release-app-title">
         <h2 id="release-app-title">알한글 앱 변화</h2>
         <ul>
-          <li>이번 릴리즈의 앱 자체 신규 기능은 크지 않습니다. 핵심 변화는 <code>rhwp v0.7.15</code> 문서 처리 개선을 앱 화면, Quick Look 미리보기, Finder 썸네일 경로에 반영한 것입니다.</li>
+          <li>Finder Quick Look 미리보기, Finder 썸네일, PDF/공유 출력에서 일부 양식 컨트롤, 문서 안에 포함된 리소스, 이미지 채움 방식 표시를 보강했습니다.</li>
+          <li>앱 실행 후 업데이트 확인이 백그라운드에서 시작되도록 보강했습니다.</li>
           <li>About 창에서 bundled <code>rhwp v0.7.15</code> 기준을 확인할 수 있습니다.</li>
           <li>설치본은 <code>0.1.5 (11)</code> signed/notarized universal DMG로 배포됩니다.</li>
         </ul>
