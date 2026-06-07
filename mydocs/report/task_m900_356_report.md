@@ -27,7 +27,8 @@
 | Stage 3 | `write-release-pr-analysis.sh` helper 추가 | `76c1e64` |
 | Stage 3 보강 | GitHub API 분석 경로 검증과 Issue 중복 제거 | `f3aff53` |
 | Stage 4 | generator/checker/workflow 연결 | `6ffebe2` |
-| Stage 5 | end-to-end 검증, public surface 정정 후보, 최종 보고 | 최종 커밋 예정 |
+| Stage 5 | end-to-end 검증, public surface 정정, 최종 보고 | `68ff599`, `aecb260`, `2fc9976`, `dd1934c`, `0c34ae3`, `75a3ea7` |
+| PR 준비 | 최종 보고서 최신화와 PR body 검증 | PR 직전 커밋 |
 
 ## 변경 파일 요약
 
@@ -80,7 +81,7 @@ helper는 merge PR 목록, first-parent release transport 후보, PR title/body/
 
 `mydocs/release/v0.1.5.md`에 `v0.1.4..v0.1.5` 포함 PR 분석 표를 추가했다.
 
-public body 후보 기준 직접 반영 PR:
+public body 후보 기준 릴리즈 요약에 반영된 PR:
 
 - `#324`: 앱 실행 시 Sparkle 백그라운드 업데이트 확인 실행
 - `#326`: Swift native renderer 이미지 fill mode parity 보강
