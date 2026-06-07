@@ -39,9 +39,12 @@ RELATED_ISSUES_FILE="$TMP_DIR/related-issues.txt"
 RELATED_ONLY_ISSUES_FILE="$TMP_DIR/related-only-issues.txt"
 TABLE_ROWS_FILE="$TMP_DIR/table-rows.md"
 DETAILS_FILE="$TMP_DIR/details.md"
+PR_TITLES_FILE="$TMP_DIR/pr-titles.tsv"
+ISSUE_TITLES_FILE="$TMP_DIR/issue-titles.tsv"
+REFERENCE_TYPES_FILE="$TMP_DIR/reference-types.tsv"
 
 mkdir -p "$(dirname "$OUTPUT_FILE")"
-touch "$FIRST_PARENT_PRS_FILE" "$PRS_FILE" "$DIRECT_PRS_FILE" "$RESOLVED_ISSUES_FILE" "$RELATED_ISSUES_FILE" "$RELATED_ONLY_ISSUES_FILE" "$TABLE_ROWS_FILE" "$DETAILS_FILE"
+touch "$FIRST_PARENT_PRS_FILE" "$PRS_FILE" "$DIRECT_PRS_FILE" "$RESOLVED_ISSUES_FILE" "$RELATED_ISSUES_FILE" "$RELATED_ONLY_ISSUES_FILE" "$TABLE_ROWS_FILE" "$DETAILS_FILE" "$PR_TITLES_FILE" "$ISSUE_TITLES_FILE" "$REFERENCE_TYPES_FILE"
 
 previous_commit="$(git rev-parse "$PREVIOUS_REF^{commit}")"
 candidate_commit="$(git rev-parse "$CANDIDATE_REF^{commit}")"
@@ -58,7 +61,173 @@ append_unique_line() {
   fi
 }
 
-join_issue_numbers() {
+sanitize_reference_text() {
+  local value="${1:-}"
+
+  value="${value//$'\r'/ }"
+  value="${value//$'\n'/ }"
+  value="${value//$'\t'/ }"
+  value="${value//|/ }"
+  printf '%s' "$value"
+}
+
+markdown_escape_link_text() {
+  local value
+
+  value="$(sanitize_reference_text "${1:-}")"
+  value="${value//\\/\\\\}"
+  value="${value//[/\\[}"
+  value="${value//]/\\]}"
+  printf '%s' "$value"
+}
+
+lookup_cached_title() {
+  local cache_file="$1"
+  local number="$2"
+
+  awk -F '\t' -v number="$number" '
+    $1 == number { print $2; found = 1; exit }
+    END { exit found ? 0 : 1 }
+  ' "$cache_file" 2>/dev/null || true
+}
+
+store_cached_title() {
+  local cache_file="$1"
+  local number="$2"
+  local title
+
+  title="$(sanitize_reference_text "${3:-}")"
+  [ -n "$title" ] || return 0
+  if ! awk -F '\t' -v number="$number" '$1 == number { found = 1 } END { exit found ? 0 : 1 }' "$cache_file" 2>/dev/null; then
+    printf '%s\t%s\n' "$number" "$title" >> "$cache_file"
+  fi
+}
+
+lookup_pr_title() {
+  local number="$1"
+  local title
+
+  title="$(lookup_cached_title "$PR_TITLES_FILE" "$number")"
+  if [ -n "$title" ]; then
+    printf '%s' "$title"
+    return
+  fi
+
+  if command -v gh >/dev/null 2>&1; then
+    title="$(gh pr view "$number" --repo "$REPOSITORY" --json title --jq '.title // ""' 2>/dev/null || true)"
+    title="$(sanitize_reference_text "$title")"
+    store_cached_title "$PR_TITLES_FILE" "$number" "$title"
+    printf '%s' "$title"
+  fi
+}
+
+lookup_issue_title() {
+  local number="$1"
+  local title
+
+  title="$(lookup_cached_title "$ISSUE_TITLES_FILE" "$number")"
+  if [ -n "$title" ]; then
+    printf '%s' "$title"
+    return
+  fi
+
+  if command -v gh >/dev/null 2>&1; then
+    title="$(gh issue view "$number" --repo "$REPOSITORY" --json title --jq '.title // ""' 2>/dev/null || true)"
+    title="$(sanitize_reference_text "$title")"
+    store_cached_title "$ISSUE_TITLES_FILE" "$number" "$title"
+    printf '%s' "$title"
+  fi
+}
+
+lookup_reference_type() {
+  local number="$1"
+  local reference_type
+
+  reference_type="$(lookup_cached_title "$REFERENCE_TYPES_FILE" "$number")"
+  if [ -n "$reference_type" ]; then
+    printf '%s' "$reference_type"
+    return
+  fi
+
+  reference_type="unknown"
+  if command -v gh >/dev/null 2>&1; then
+    reference_type="$(gh api "repos/$REPOSITORY/issues/$number" --jq 'if .pull_request then "pr" else "issue" end' 2>/dev/null || printf 'unknown')"
+    reference_type="$(sanitize_reference_text "$reference_type")"
+    [ -n "$reference_type" ] || reference_type="unknown"
+  fi
+
+  store_cached_title "$REFERENCE_TYPES_FILE" "$number" "$reference_type"
+  printf '%s' "$reference_type"
+}
+
+is_issue_reference() {
+  local number="$1"
+  local reference_type
+
+  reference_type="$(lookup_reference_type "$number")"
+  [ "$reference_type" != "pr" ]
+}
+
+render_reference_link() {
+  local kind="$1"
+  local number="$2"
+  local title=""
+  local url_path
+  local label
+
+  case "$kind" in
+    pr)
+      title="$(lookup_pr_title "$number")"
+      url_path="pull"
+      ;;
+    issue)
+      title="$(lookup_issue_title "$number")"
+      url_path="issues"
+      ;;
+    *)
+      echo "ERROR: unsupported reference kind: $kind" >&2
+      exit 1
+      ;;
+  esac
+
+  if [ -n "$title" ]; then
+    label="#$number: $title"
+  else
+    label="#$number"
+  fi
+  printf '[%s](https://github.com/%s/%s/%s)' "$(markdown_escape_link_text "$label")" "$REPOSITORY" "$url_path" "$number"
+}
+
+render_reference_number_link() {
+  local kind="$1"
+  local number="$2"
+  local url_path
+
+  case "$kind" in
+    pr) url_path="pull" ;;
+    issue) url_path="issues" ;;
+    *)
+      echo "ERROR: unsupported reference kind: $kind" >&2
+      exit 1
+      ;;
+  esac
+
+  printf '[#%s](https://github.com/%s/%s/%s)' "$number" "$REPOSITORY" "$url_path" "$number"
+}
+
+render_pr_link() {
+  render_reference_link pr "$1"
+}
+
+render_issue_link() {
+  render_reference_link issue "$1"
+}
+
+render_pr_number_link() {
+  render_reference_number_link pr "$1"
+}
+
+join_issue_references() {
   local path="$1"
   local rendered=""
   local issue
@@ -73,7 +242,7 @@ join_issue_numbers() {
     if [ -n "$rendered" ]; then
       rendered="$rendered, "
     fi
-    rendered="${rendered}\`#$issue\`"
+    rendered="${rendered}$(render_issue_link "$issue")"
   done < "$path"
 
   if [ -n "$rendered" ]; then
@@ -156,6 +325,7 @@ extract_issue_refs() {
   while IFS= read -r issue; do
     [ -n "$issue" ] || continue
     [ "$issue" != "$pr_number" ] || continue
+    is_issue_reference "$issue" || continue
     append_unique_line "$resolved_output" "$issue"
   done < "$resolved_refs_file"
 
@@ -163,6 +333,7 @@ extract_issue_refs() {
   while IFS= read -r issue; do
     [ -n "$issue" ] || continue
     [ "$issue" != "$pr_number" ] || continue
+    is_issue_reference "$issue" || continue
     append_unique_line "$related_output" "$issue"
   done < "$related_refs_file"
 }
@@ -335,6 +506,7 @@ write_pr_row() {
   local evidence_cell
   local note_cell
   local title_cell
+  local pr_ref_cell
 
   : > "$body_file"
   : > "$paths_file"
@@ -346,6 +518,7 @@ write_pr_row() {
   if command -v gh >/dev/null 2>&1; then
     if pr_title="$(gh pr view "$pr_number" --repo "$REPOSITORY" --json title --jq '.title' 2>/dev/null)"; then
       title="$pr_title"
+      store_cached_title "$PR_TITLES_FILE" "$pr_number" "$pr_title"
       gh_status="PR body"
       gh pr view "$pr_number" --repo "$REPOSITORY" --json body --jq '.body // ""' > "$body_file" 2>/dev/null || : > "$body_file"
       gh pr view "$pr_number" --repo "$REPOSITORY" --json files --jq '.files[].path' > "$paths_file" 2>/dev/null || : > "$paths_file"
@@ -380,10 +553,11 @@ write_pr_row() {
   append_unique_line "$DIRECT_PRS_FILE" "$pr_number"
 
   classification="$(classify_hint "$title" "$paths_file")"
-  resolved_cell="$(join_issue_numbers "$resolved_file")"
-  related_cell="$(join_issue_numbers "$related_file")"
+  resolved_cell="$(join_issue_references "$resolved_file")"
+  related_cell="$(join_issue_references "$related_file")"
   reports_cell="$(join_backtick_paths "$reports_file")"
   title_cell="$(sanitize_cell "$title")"
+  pr_ref_cell="$(render_pr_number_link "$pr_number")"
   evidence_cell="$gh_status"
   if [ "$reports_cell" != "없음" ]; then
     evidence_cell="$evidence_cell, $reports_cell"
@@ -396,8 +570,8 @@ write_pr_row() {
     note_cell="$note_cell, 포함 작업 PR 후보"
   fi
 
-  printf '| `#%s` | %s | %s | 확인 필요 | 확인 필요 | %s | %s | %s | %s |\n' \
-    "$pr_number" \
+  printf '| %s | %s | %s | 확인 필요 | 확인 필요 | %s | %s | %s | %s |\n' \
+    "$pr_ref_cell" \
     "$title_cell" \
     "$classification" \
     "$resolved_cell" \
@@ -466,15 +640,15 @@ $(cat "$TABLE_ROWS_FILE")
 
 ### 직접 반영된 PR 후보
 
-$(if [ -s "$DIRECT_PRS_FILE" ]; then while IFS= read -r pr; do echo "- \`#$pr\` 확인 필요"; done < "$DIRECT_PRS_FILE"; else echo "- 없음"; fi)
+$(if [ -s "$DIRECT_PRS_FILE" ]; then while IFS= read -r pr; do echo "- $(render_pr_link "$pr") 확인 필요"; done < "$DIRECT_PRS_FILE"; else echo "- 없음"; fi)
 
 ### 해결된 Issue 후보
 
-$(if [ -s "$RESOLVED_ISSUES_FILE" ]; then while IFS= read -r issue; do echo "- \`#$issue\` closing keyword 또는 release record 확인 필요"; done < "$RESOLVED_ISSUES_FILE"; else echo "- 없음"; fi)
+$(if [ -s "$RESOLVED_ISSUES_FILE" ]; then while IFS= read -r issue; do echo "- $(render_issue_link "$issue") closing keyword 또는 release record 확인 필요"; done < "$RESOLVED_ISSUES_FILE"; else echo "- 없음"; fi)
 
 ### 관련 Issue 후보
 
-$(if [ -s "$RELATED_ONLY_ISSUES_FILE" ]; then while IFS= read -r issue; do echo "- \`#$issue\` 관련 Issue 여부 확인 필요"; done < "$RELATED_ONLY_ISSUES_FILE"; else echo "- 없음"; fi)
+$(if [ -s "$RELATED_ONLY_ISSUES_FILE" ]; then while IFS= read -r issue; do echo "- $(render_issue_link "$issue") 관련 Issue 여부 확인 필요"; done < "$RELATED_ONLY_ISSUES_FILE"; else echo "- 없음"; fi)
 
 ## PR별 상세 후보
 

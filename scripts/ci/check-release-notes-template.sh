@@ -82,18 +82,49 @@ fi
 
 section_has_confirmed_content() {
   local heading="$1"
+  local expected_path="$2"
+  local section_lines=""
+  local line=""
+  local found=0
 
-  awk -v heading="$heading" '
+  section_lines="$(
+    awk -v heading="$heading" '
     $0 == heading { in_section = 1; next }
     in_section && /^##?#[[:space:]]/ { exit }
-    in_section && (/^- `#[0-9]+`/ || /^- 없음$/) { found = 1 }
-    END { exit found ? 0 : 1 }
+    in_section { print }
   ' "$RELEASE_NOTES_FILE"
+  )"
+
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    [[ "$line" == "- "* ]] || continue
+
+    if [ "$line" = "- 없음" ]; then
+      found=1
+      continue
+    fi
+
+    if printf '%s\n' "$line" | grep -Eq "^- \\[#[0-9]+: [^]]+\\]\\(https://github\\.com/[^)]*/$expected_path/[0-9]+\\)( - .+)?$"; then
+      found=1
+      continue
+    fi
+
+    echo "ERROR: release notes section entry must include a linked #N title or '- 없음': $heading" >&2
+    echo "Problem entry: $line" >&2
+    return 1
+  done <<< "$section_lines"
+
+  [ "$found" -eq 1 ]
 }
 
-for section_heading in "### 직접 반영된 PR" "### 해결된 Issue" "### 관련 Issue"; do
-  if ! section_has_confirmed_content "$section_heading"; then
-    echo "ERROR: release notes section must contain confirmed #N entries or '- 없음': $section_heading" >&2
+if ! section_has_confirmed_content "### 직접 반영된 PR" "pull"; then
+  echo "ERROR: release notes section must contain confirmed linked PR entries or '- 없음': ### 직접 반영된 PR" >&2
+  exit 1
+fi
+
+for section_heading in "### 해결된 Issue" "### 관련 Issue"; do
+  if ! section_has_confirmed_content "$section_heading" "issues"; then
+    echo "ERROR: release notes section must contain confirmed linked Issue entries or '- 없음': $section_heading" >&2
     exit 1
   fi
 done

@@ -143,6 +143,7 @@
 - [ ] release note의 주요 변경 사항이 `변경 요약`, `포함된 rhwp 변화`, `알한글 앱 변화`로 구분되어 있고 release owner가 실제 사용자-facing 내용으로 보정했는지 확인
 - [ ] `변경 요약`과 `알한글 앱 변화`가 `포함 PR 분석` 표에서 사용자-facing으로 판정된 항목만 기준으로 작성됐는지 확인
 - [ ] GitHub Release body에 직접 반영된 PR, 해결된 Issue, 관련 Issue section이 있는지 확인
+- [ ] PR/Issue 목록이 `#<number>` 단독 또는 inline code가 아니라 `[#<number>: 제목](URL) - 한 줄 설명` 형식인지 확인
 - [ ] GitHub Release note에 `mydocs/release/v<version>.md` 등 실제 조회 가능한 상세 문서가 GitHub blob URL로 링크되어 있는지 확인
 - [ ] `알한글 앱 변화`가 source metadata, workflow default, README/Pages 정렬, 단순 version bump 같은 운영 항목을 사용자-facing 변화처럼 나열하지 않는지 확인
 - [ ] release note template 필수 섹션 검증

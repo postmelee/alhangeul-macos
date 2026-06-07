@@ -248,6 +248,7 @@ signed/notarized DMG smoke는 public publish 전에 통과해야 하는 blocking
 - `변경 요약`은 특정 샘플 문서명이나 issue 번호가 아니라 사용자가 보는 증상과 개선 결과로 일반화되어 있다.
 - `변경 요약`과 `알한글 앱 변화`는 `포함 PR 분석` 표에서 사용자-facing으로 판정된 항목만 기준으로 작성되어 있다.
 - GitHub Release body에는 `직접 반영된 PR과 Issue` section이 있고, 직접 반영된 PR, 해결된 Issue, 관련 Issue가 분리되어 있다.
+- GitHub Release body의 PR/Issue 항목은 `#<number>`만 단독으로 두거나 inline code로 감싸지 않고, `[#<number>: 제목](URL) - 한 줄 설명` 형식으로 작성되어 있다.
 - 해결된 Issue는 PR body closing keyword 또는 release record 완료 확정 항목만 포함한다.
 - `알한글 앱 변화`는 HostApp, Quick Look preview, Finder thumbnail, 설치, 업데이트처럼 앱 저장소가 소유한 사용자-visible 변화를 먼저 설명한다. 앱 자체 신규 기능이 크지 않으면 1~2개 bullet로 짧게 쓰고, source metadata, workflow default, README/Pages 정렬, 단순 version bump를 사용자-facing 변화처럼 나열하지 않는다.
 - GitHub Release body에는 `mydocs/release/v<version>.md` 같은 실제 조회 가능한 상세 문서를 GitHub blob URL로 링크한다.
