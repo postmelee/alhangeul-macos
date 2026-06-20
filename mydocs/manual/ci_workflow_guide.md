@@ -8,9 +8,9 @@
 
 | workflow | trigger | 권한 | runner | 역할 |
 |----------|---------|------|--------|------|
-| `PR CI` | `pull_request` to `main`, `devel`, `native-viewer-editor` | `contents: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax, 조건부 macOS build, 조건부 release helper dry-run |
-| `Release Rehearsal DMG` | `workflow_dispatch` | `contents: read` | macOS | signed/notarized 전 universal rehearsal DMG/checksum과 release delta checklist artifact 생성 |
-| `Release Publish DMG` | `workflow_dispatch` | `contents: write` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, release delta checklist artifact 생성 |
+| `PR CI` | `pull_request` to `main`, `devel`, `native-viewer-editor` | `contents: read`, `pull-requests: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax, 조건부 macOS build, 조건부 release helper dry-run |
+| `Release Rehearsal DMG` | `workflow_dispatch` | `contents: read`, `pull-requests: read` | macOS | signed/notarized 전 universal rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
+| `Release Publish DMG` | `workflow_dispatch` | `contents: write`/`pull-requests: read` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
 | `Docs-only Pages Deploy` | `push` to `main` with `docs/**`, `workflow_dispatch` | `contents: read`, `pages: write`/`id-token: write` for Pages job, `environment: github-pages` | Ubuntu | 일반 Pages 문서 변경을 public Pages에 배포하고 기존 public appcast를 보존 |
 | `rhwp Upstream Release Check` | `workflow_dispatch`, schedule | `contents: read` | Ubuntu | upstream `rhwp` release와 `rhwp-core.lock` 비교 |
 | `rhwp Upstream Sync PR` | `workflow_dispatch`, schedule | workflow는 `contents: read`, `pull-requests: read`; PR 생성은 GitHub App token의 `contents: write`, `pull-requests: write`, `issues: write` | Ubuntu, macOS | upstream release를 감지해 `rhwp-core.lock`/RustBridge와 bundled `rhwp-studio`를 같은 tag로 갱신하는 full sync 후보 PR 생성 |
@@ -134,18 +134,21 @@ release checks 재현:
 
 ```bash
 ./scripts/release.sh --help
-scripts/ci/write-release-notes.sh 0.1.1 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef build.noindex/release/release-notes-0.1.1.md
-scripts/ci/check-release-notes-template.sh build.noindex/release/release-notes-0.1.1.md
+scripts/ci/write-release-notes.sh 0.1.5 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef build.noindex/release/release-notes-0.1.5.md
+scripts/ci/check-release-notes-template.sh build.noindex/release/release-notes-0.1.5.md
+scripts/validate-github-body.sh build.noindex/release/release-notes-0.1.5.md
 scripts/ci/update-release-version-notices.sh --updates-dir docs/updates --check
 scripts/ci/verify-universal-macos-app.sh build.noindex/release/Alhangeul.app
-scripts/ci/write-release-delta-checklist.sh v0.1.0 HEAD build.noindex/release/delta-checklist-0.1.1.md
+scripts/ci/write-release-pr-analysis.sh v0.1.4 HEAD build.noindex/release/pr-analysis-0.1.5.md
+scripts/validate-github-body.sh build.noindex/release/pr-analysis-0.1.5.md
+scripts/ci/write-release-delta-checklist.sh v0.1.4 HEAD build.noindex/release/delta-checklist-0.1.5.md
 scripts/ci/write-sparkle-appcast.sh \
-  --version 0.1.1 \
-  --build 2 \
-  --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.1/alhangeul-macos-0.1.1.dmg \
+  --version 0.1.5 \
+  --build 11 \
+  --dmg-url https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.5/alhangeul-macos-0.1.5.dmg \
   --length 1 \
   --ed-signature dummy-ed-signature \
-  --release-notes-url https://postmelee.github.io/alhangeul-macos/updates/v0.1.1.html \
+  --release-notes-url https://postmelee.github.io/alhangeul-macos/updates/v0.1.5.html \
   --pub-date "Fri, 08 May 2026 09:00:00 +0000" \
   --minimum-system-version 12.0 \
   --output build.noindex/release/appcast.xml
@@ -161,7 +164,7 @@ test -f build.noindex/release/pages-artifact/updates/index.html
 
 ## Release Rehearsal DMG
 
-`Release Rehearsal DMG`는 public release 전 layout, DMG 생성, checksum, release delta checklist를 확인하는 수동 workflow다.
+`Release Rehearsal DMG`는 public release 전 layout, DMG 생성, checksum, 포함 PR 분석 초안, release delta checklist를 확인하는 수동 workflow다. 이 workflow가 생성하는 delta checklist는 path 기반 보조 자료이며, `mydocs/release/v<version>.md`의 포함 PR 분석을 대체하지 않는다.
 
 입력:
 
@@ -173,15 +176,17 @@ workflow가 생성하는 주요 산출물:
 
 - `alhangeul-macos-<version>-rehearsal.dmg`
 - `alhangeul-macos-<version>-rehearsal.dmg.sha256`
+- `pr-analysis-<version>.md`
 - `delta-checklist-<version>.md`
-- workflow summary의 core lock, release delta checklist, rehearsal artifact 섹션
+- workflow summary의 core lock, release PR analysis, release delta checklist, rehearsal artifact 섹션
 
 rehearsal 산출물은 public GitHub Release asset이나 Homebrew Cask URL에 사용하지 않는다.
 rehearsal workflow가 만든 app bundle도 `arm64 + x86_64` universal slice 검증을 통과해야 하지만, signed/notarized public DMG와 실제 Intel Mac 실기기 smoke를 대체하지 않는다.
+release owner는 rehearsal 전후로 merge PR title/body, linked Issue, 최종 보고서 기반 `포함 PR 분석` 표를 release record에 남기고, rehearsal delta checklist는 누락 확인과 smoke 영역 점검에만 사용한다.
 
 ## Release Publish DMG
 
-`Release Publish DMG`는 공식 public DMG를 만드는 보호 workflow다.
+`Release Publish DMG`는 공식 public DMG를 만드는 보호 workflow다. publish 전에 release record의 `포함 PR 분석` 표, 사용자-facing 판단, 해결된 Issue와 관련 Issue 구분이 완료되어 있어야 한다.
 
 유지해야 하는 보호 조건:
 
@@ -207,11 +212,14 @@ workflow가 생성하거나 게시하는 주요 산출물:
 - signed/notarized universal `alhangeul-macos-<version>.dmg`
 - DMG `.sha256`
 - GitHub Release body 후보
+- `pr-analysis-<version>.md`
 - `delta-checklist-<version>.md`
 - stable release일 때 generated `appcast.xml`
 - stable release일 때 `docs/` + generated `appcast.xml` Pages artifact
 - stable release일 때 `deploy-pages` deployment URL
-- workflow summary의 release ref, delta checklist, core lock, public artifact, GitHub Release state, Sparkle appcast, Pages artifact, GitHub Pages deployment 섹션
+- workflow summary의 release ref, release PR analysis, delta checklist, core lock, public artifact, GitHub Release state, Sparkle appcast, Pages artifact, GitHub Pages deployment 섹션
+
+GitHub Release body 후보는 `mydocs/release/v<version>.md`의 사용자-facing 주요 변경 사항과 직접 반영된 PR/Issue section을 기준으로 작성한다. 첫 top-level section은 `이번 버전의 주요 변경 사항`이어야 하며, 설치/지원/업데이트 안내와 상세 기록은 그 뒤에 둔다. publish workflow의 delta checklist는 마지막 누락 확인용 보조 자료이며, release note의 주요 변경 사항 원천이 아니다.
 
 ## Docs-only Pages Deploy
 

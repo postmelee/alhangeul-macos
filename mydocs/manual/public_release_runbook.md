@@ -38,7 +38,7 @@
 | [`ci_workflow_guide.md`](ci_workflow_guide.md) | release workflow input, 권한, artifact, Pages deployment 기준 확인 |
 | [`release_packaging_dmg_guide.md`](release_packaging_dmg_guide.md) | release script, rehearsal/public DMG, Finder smoke 확인 |
 | [`release_signing_notarization_guide.md`](release_signing_notarization_guide.md) | Developer ID, notarytool, signing preflight, Gatekeeper 검증 확인 |
-| [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md) | GitHub Release body, Pages, Sparkle appcast, delta checklist 확인 |
+| [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md) | GitHub Release body, Pages, Sparkle appcast, 포함 PR 분석, delta checklist 확인 |
 | [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md) | public DMG SHA256 확정 후 Cask 갱신과 tap 검증 확인 |
 | [`../tech/release_environment.md`](../tech/release_environment.md) | 비밀이 아닌 운영 식별자와 GitHub Actions variable/secret 이름 확인 |
 
@@ -99,7 +99,7 @@ release owner가 다음 값을 명시적으로 확정해야 한다.
 | `version` | 앱 release version. Git tag, DMG filename, Sparkle short version, Homebrew version 기준 |
 | `build` | `CFBundleVersion`. 직전 public build보다 커야 한다 |
 | `candidate commit` | public release 기준 commit. tag가 가리킬 commit |
-| `previous_release_ref` | delta checklist 기준 직전 public release tag 또는 commit |
+| `previous_release_ref` | 포함 PR 분석과 delta checklist 기준 직전 public release tag 또는 commit |
 | `expected_rhwp_tag` | `rhwp-core.lock`과 bundled manifest가 가리켜야 할 upstream release tag |
 | `require_latest_rhwp` | upstream latest와 lock tag 일치 강제 여부 |
 | `include_rhwp_in_title` | GitHub Release title에 `(rhwp vX.Y.Z)`를 병기할지 여부 |
@@ -111,7 +111,41 @@ release owner가 다음 값을 명시적으로 확정해야 한다.
 - upstream `rhwp` 반영이 release의 중심 사용자-facing 변화이면 `Alhangeul v<version> (rhwp v<expected-rhwp-tag>)` 병기를 검토한다.
 - `draft=true`, `prerelease=false`는 signed/notarized DMG를 생성해 maintainer 설치 smoke를 수행하는 pre-public 검증 단계로 본다. 이 단계는 stable appcast와 Pages deployment를 성공 조건에 포함하지 않는다.
 - `draft=false`, `prerelease=false`일 때만 official stable release로 보고 Sparkle stable appcast와 Pages deployment까지 성공 조건에 포함한다.
-- `previous_release_ref`가 틀리면 delta checklist가 틀리므로 publish 전 반드시 workflow summary 또는 artifact에서 previous/candidate ref를 확인한다.
+- `previous_release_ref`가 틀리면 포함 PR 분석과 delta checklist가 틀리므로 publish 전 반드시 previous/candidate ref를 확인한다.
+
+## Gate 1.5. 포함 PR 분석
+
+release owner가 `previous_release_ref`와 `candidate commit`을 확정한 뒤, release note를 쓰기 전에 포함 PR 분석을 먼저 수행한다.
+
+확인 명령 예시:
+
+```bash
+git log --oneline --merges <previous-release-ref>..<candidate-ref>
+git log --first-parent --oneline --merges <previous-release-ref>..<candidate-ref>
+gh pr view <PR-number> --repo postmelee/alhangeul-macos --json number,title,body,mergedAt,mergeCommit,files,url
+find mydocs/report -maxdepth 1 -name 'task_*_<issue>_report.md' -print
+```
+
+확인 대상:
+
+| 항목 | 기준 |
+|------|------|
+| merge PR 목록 | release transport PR과 실제 포함 작업 PR을 구분한다 |
+| PR body | title, summary, closing keyword, linked Issue, related/ref Issue를 읽는다 |
+| 최종 보고서 | 내부 task PR이면 `mydocs/report/task_*_<issue>_report.md` 후보를 읽는다 |
+| 분류 | 사용자-facing, 개발자-facing, 운영/배포, 문서-only, upstream sync 중 하나로 기록한다 |
+| 사용자-facing 여부 | GitHub Release와 Pages의 `변경 요약` / `알한글 앱 변화` 근거로 쓸지 release owner가 확정한다 |
+| Issue 구분 | 대상 타스크 Issue, closing keyword, release record 완료 확정 항목만 해결된 Issue로 쓰고, 참고/연관 Issue와 분리한다 |
+
+`mydocs/release/v<version>.md`에는 `포함 PR 분석` 표를 남긴다. 표준 column은 `PR`, `제목`, `분류`, `사용자-facing`, `공개 요약 반영`, `해결된 Issue`, `참고/연관 Issue`, `근거 문서`, `비고`다.
+
+중단 기준:
+
+- `previous_release_ref..candidate_ref` 범위가 확정되지 않았다.
+- merge PR 목록이 release transport PR만 보여 실제 포함 작업 PR을 놓칠 가능성이 있다.
+- 사용자-facing으로 판정한 PR의 최종 보고서 또는 PR body를 확인하지 못했다.
+- 해결된 Issue와 참고/연관 Issue가 구분되지 않았다.
+- `변경 요약` 또는 `알한글 앱 변화`가 사용자-facing으로 판정되지 않은 운영/문서/source metadata 변경을 주요 앱 변화처럼 설명한다.
 
 ## Gate 2. Source preflight
 
@@ -212,12 +246,21 @@ signed/notarized DMG smoke는 public publish 전에 통과해야 하는 blocking
 사용자-facing release note 최종 확인:
 
 - `변경 요약`은 특정 샘플 문서명이나 issue 번호가 아니라 사용자가 보는 증상과 개선 결과로 일반화되어 있다.
+- `변경 요약`과 `알한글 앱 변화`는 `포함 PR 분석` 표에서 사용자-facing으로 판정된 항목만 기준으로 작성되어 있다.
+- GitHub Release body의 첫 top-level section은 `이번 버전의 주요 변경 사항`이다.
+- GitHub Release body에는 `이번 릴리즈 관련 PR과 Issue` section이 있고, 릴리즈 요약에 반영된 PR, 해결된 Issue, 참고/연관 Issue가 분리되어 있다.
+- GitHub Release body의 PR/Issue 항목은 `#<number>`만 단독으로 두거나 inline code로 감싸지 않고, `[#<number>: 제목](URL) - 한 줄 설명` 형식으로 작성되어 있다.
+- 해결된 Issue는 대상 타스크 Issue, PR body closing keyword, 또는 release record 완료 확정 항목만 포함한다.
+- `Related`, `Refs`, 선행/연관, 단순 참고 Issue는 참고/연관 Issue로 분리한다.
+- 이전 public release에서 이미 해결된 Issue는 public GitHub Release body에 다시 나열하지 않고 `포함 PR 분석` 표의 PR별 참고 근거로만 둔다.
+- `다운로드 및 설치`는 `다운로드`, `지원 환경`, `설치 후 첫 실행`, `업데이트 확인`, `Homebrew` 하위 section으로 구분되어 있다.
 - `알한글 앱 변화`는 HostApp, Quick Look preview, Finder thumbnail, 설치, 업데이트처럼 앱 저장소가 소유한 사용자-visible 변화를 먼저 설명한다. 앱 자체 신규 기능이 크지 않으면 1~2개 bullet로 짧게 쓰고, source metadata, workflow default, README/Pages 정렬, 단순 version bump를 사용자-facing 변화처럼 나열하지 않는다.
 - GitHub Release body에는 `mydocs/release/v<version>.md` 같은 실제 조회 가능한 상세 문서를 GitHub blob URL로 링크한다.
 - 구현 용어는 사용자 용어로 번역되어 있다. 예를 들어 PUA는 특수 문자/기호 표시, shade sentinel은 텍스트 배경/음영 표시처럼 설명한다.
 - GitHub Release에 샘플 파일명, PUA, sentinel, CoreGraphics, PR/Issue 같은 개발자/검증자용 정보가 필요하면 `기술 세부` 또는 `검증 세부` section으로 분리되어 있고, 요약보다 뒤에 있다.
 - Pages 업데이트 문서에는 기술 세부 section을 두지 않고, 해당 정보는 GitHub Release의 기술 세부 또는 내부 release record로 연결된다.
-- workflow default, manifest, checksum, release record 정렬 같은 운영 정보는 주요 변경 요약이 아니라 metadata, 검증 결과, 내부 release record에 둔다.
+- workflow default, manifest, checksum, release record 정렬 같은 운영 정보는 주요 변경 요약이 아니라 상세 기록 또는 내부 release record에 둔다.
+- `릴리즈 delta 기반 추가 확인 항목`처럼 release owner용 절차 문구는 public GitHub Release body에 두지 않고 내부 release record와 workflow artifact로 분리한다.
 
 GitHub Actions 예시:
 
