@@ -3,12 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#2b6cb0" />
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const isThemeMode = (value) => value === 'system' || value === 'light' || value === 'dark';
+      let mode = 'system';
+      try {
+        const settings = JSON.parse(localStorage.getItem('rhwp-settings') || '{}');
+        const storedMode = settings && settings.theme && settings.theme.mode;
+        if (isThemeMode(storedMode)) mode = storedMode;
+      } catch {
+        mode = 'system';
+      }
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const effective = mode === 'dark' || (mode === 'system' && prefersDark) ? 'dark' : 'light';
+      const scheme = `only ${effective}`;
+      root.dataset.themeMode = mode;
+      root.dataset.themeEffective = effective;
+      root.style.colorScheme = scheme;
+      const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
+      if (colorSchemeMeta) colorSchemeMeta.setAttribute('content', scheme);
+      const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeColorMeta) themeColorMeta.setAttribute('content', effective === 'dark' ? '#2b3037' : '#f5f5f5');
+    })();
+  </script>
   <link rel="icon" href="./favicon.ico" />
   <link rel="apple-touch-icon" href="./icons/icon-256.png" />
   <title>rhwp-studio</title>
-  <script type="module" src="./assets/index-DVBNvrb8.js"></script>
-  <link rel="stylesheet" href="./assets/index-C9eG_4qi.css">
+  <script type="module" src="./assets/index-2nxfiXnQ.js"></script>
+  <link rel="stylesheet" href="./assets/index-BCYJGuoE.css">
   <link rel="stylesheet" href="./alhangeul-wkwebview-overrides.css">
 <link rel="manifest" href="./manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
 <body>
@@ -73,6 +98,15 @@
               <div class="md-item" data-cmd="view:zoom-150"><span class="md-icon"></span><span class="md-label">150%</span></div>
               <div class="md-item" data-cmd="view:zoom-200"><span class="md-icon"></span><span class="md-label">200%</span></div>
               <div class="md-item" data-cmd="view:zoom-300"><span class="md-icon"></span><span class="md-label">300%</span></div>
+            </div>
+          </div>
+          <div class="md-sep"></div>
+          <div class="md-sub">
+            <span class="md-label">테마</span><span class="md-arrow">▶</span>
+            <div class="md-sub-panel">
+              <div class="md-item" role="menuitemradio" data-cmd="view:theme-system" data-theme-mode-choice="system"><span class="md-icon"></span><span class="md-label">시스템 설정</span></div>
+              <div class="md-item" role="menuitemradio" data-cmd="view:theme-light" data-theme-mode-choice="light"><span class="md-icon"></span><span class="md-label">밝게</span></div>
+              <div class="md-item" role="menuitemradio" data-cmd="view:theme-dark" data-theme-mode-choice="dark"><span class="md-icon"></span><span class="md-label">어둡게</span></div>
             </div>
           </div>
           <div class="md-sep"></div>
