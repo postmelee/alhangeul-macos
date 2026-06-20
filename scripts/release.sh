@@ -754,6 +754,12 @@ on run argv
 
     set position of item appName of volumeFolder to {178, 268}
     set position of item "Applications" of volumeFolder to {542, 268}
+    try
+      set position of item ".background" of volumeFolder to {68, 58}
+    end try
+    try
+      set position of item ".fseventsd" of volumeFolder to {652, 58}
+    end try
 
     update volumeFolder without registering applications
     delay 2
