@@ -38,6 +38,7 @@
 				<string>com.hancom.hwpx</string>
 				<string>com.haansoft.hancomofficeviewer.mac.hwp</string>
 				<string>com.haansoft.hancomofficeviewer.mac.hwpx</string>
+				<string>org.libreoffice.hwp-document</string>
 			</array>
 			<key>QLSupportsSearchableItems</key>
 			<false/>
