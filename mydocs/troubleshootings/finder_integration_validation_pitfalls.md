@@ -86,7 +86,33 @@ qlmanage -r cache
 - `lsregister -delete`와 재부팅은 더 강한 reset이다. 특정 후보 registration 해제로 해결되지 않는 경우의 마지막 진단 수단으로만 검토한다.
 - Finder 종료, `quicklookd`/`thumbnaild` kill은 사용자의 현재 Finder 작업과 Quick Look 상태를 흔들 수 있다. helper 안에서 실행하더라도 smoke/troubleshooting 목적을 명확히 기록한다.
 
-## 5. 표준 helper 선택 기준
+## 5. LibreOffice HWP UTI 공존 진단
+
+LibreOffice가 설치된 환경에서는 `.hwp` 파일이 Hancom 계열 UTI가 아니라 `org.libreoffice.hwp-document`로 분류될 수 있다. 이 경우 알한글 Quick Look/Thumbnail extension이 해당 UTI를 지원하지 않으면 provider 우선순위와 무관하게 알한글 provider matching이 끊길 수 있다.
+
+먼저 실제 sample의 content type을 확인한다.
+
+```bash
+mdls -name kMDItemContentType -name kMDItemContentTypeTree <file.hwp>
+```
+
+판정 기준:
+
+- `kMDItemContentType`이 `org.libreoffice.hwp-document`이면 LibreOffice UTI 공존 경로로 본다.
+- `kMDItemContentTypeTree`에 알한글이 지원하는 HWP UTI가 없고 Quick Look/Thumbnail이 표시되지 않으면 supported content type 누락을 우선 의심한다.
+- LibreOffice Quick Look appex가 HWP를 직접 지원하는지 여부는 별도로 확인한다. HWP가 없으면 LibreOffice provider가 preview를 직접 가로챈 문제가 아니라 LaunchServices content type mismatch 문제일 가능성이 높다.
+
+확인 명령:
+
+```bash
+plutil -p /Applications/LibreOffice.app/Contents/Info.plist | rg "org.libreoffice.hwp-document|Hangul WP 97|hwp"
+plutil -p /Applications/LibreOffice.app/Contents/PlugIns/QuickLookPreview.appex/Contents/Info.plist | rg "QLSupportedContentTypes|hwp|org.libreoffice.hwp-document"
+plutil -p /Applications/LibreOffice.app/Contents/PlugIns/QuickLookThumbnail.appex/Contents/Info.plist | rg "QLSupportedContentTypes|hwp|org.libreoffice.hwp-document"
+```
+
+해결 방향은 LibreOffice 제거가 아니라 알한글 앱과 두 extension의 supported content type에 확인된 외부 HWP UTI를 호환 타입으로 추가하는 것이다. 이후 설치본 기준으로 active provider path, Quick Look cache, fresh sample thumbnail 생성을 다시 검증한다. 전역 LaunchServices reset이나 Finder/Quick Look daemon 종료는 이 문서의 전역 reset 주의 기준을 따른다.
+
+## 6. 표준 helper 선택 기준
 
 | 목적 | 권장 helper | 주의 |
 |------|-------------|------|
@@ -96,7 +122,7 @@ qlmanage -r cache
 | `$HOME/Applications/Alhangeul.app` 기준 간단 Finder integration smoke | `scripts/smoke-finder-integration.sh` | legacy 후보 방어는 있지만 현재 이름 개발 산출물 cleanup 전용은 아니다 |
 | Sparkle 업데이트 후 새 설치본 provider가 자연 등록됐는지 확인 | `scripts/smoke-sparkle-extension-refresh.sh` | `--repair-registration`은 triage 전용이며 release gate가 아니다 |
 
-## 6. 표시명 문제와 extension 실패 혼동 방지
+## 7. 표시명 문제와 extension 실패 혼동 방지
 
 Spotlight/Dock/Finder 표시명은 현재 사용자 언어와 LaunchServices/Spotlight 캐시의 영향을 받는다. 표시명이 `Alhangeul`로 보이고 `알한글`로 보이지 않더라도 extension 실행은 정상일 수 있고, 그 반대도 가능하다.
 
