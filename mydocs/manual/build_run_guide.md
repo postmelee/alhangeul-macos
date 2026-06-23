@@ -27,7 +27,7 @@
 
 ## 초기 설정
 
-현재 core dependency는 `RustBridge/Cargo.toml`의 `edwardkim/rhwp` git dependency로 고정한다. `RustBridge/Cargo.lock`은 Cargo가 해석한 실제 source commit을, `rhwp-core.lock`은 배포 provenance와 Rust bridge reference artifact metadata를 기록한다.
+현재 core dependency는 `RustBridge/Cargo.toml`의 `edwardkim/rhwp` git dependency로 고정한다. `RustBridge/Cargo.lock`은 Cargo가 해석한 실제 source commit을, `rhwp-core.lock`은 배포 provenance와 Rust bridge reference artifact metadata를 기록한다. upstream root `Cargo.lock`은 `rhwp-studio`/WASM sync provenance용 fingerprint이며, native Rust bridge build lock을 대체하지 않는다.
 
 ```bash
 rustup target add aarch64-apple-darwin x86_64-apple-darwin
@@ -58,11 +58,13 @@ core 업데이트는 다음 형태로 분리한다.
 
 이 스크립트가 수행하는 일:
 
-- `RustBridge` staticlib arm64/x86_64 빌드
+- `RustBridge` staticlib arm64/x86_64 locked build
 - `lipo`로 universal staticlib 생성
 - `cbindgen`으로 C header 생성
 - `rhwp-ffi-symbols.txt`와 생성 심볼 비교
 - `Frameworks/Rhwp.xcframework` 생성
+
+`RustBridge` cargo build는 `--locked`로 실행한다. `RustBridge/Cargo.toml`을 바꾼 뒤 `RustBridge/Cargo.lock`을 갱신하지 않으면 build가 실패하며, 이는 dependency graph drift를 조기에 잡기 위한 동작이다.
 
 일반 build는 `rhwp-core.lock`을 수정하지 않는다. core commit 또는 Rust bridge 산출물을 lock에 반영해야 할 때만 명시적으로 update 모드를 사용한다.
 
@@ -253,6 +255,8 @@ pgrep -x Alhangeul
 ```
 
 `/absolute/path/to/Alhangeul.app`은 현재 worktree의 `build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app`로 바꾼다. 이 smoke는 local launch, document open handoff, WKWebView bundle resource 연결의 최소 확인이다. 실제 문서 내용의 시각 정합성은 foreground 앱에서 수동 확인하거나 별도 UI 자동화로 보강한다.
+
+`rhwp-studio` manifest에 `source_cargo_lock_sha256`이 있으면 `scripts/verify-rhwp-studio-assets.sh`는 sha256 형식을 검증한다. 실제 upstream target `Cargo.lock`과의 값 일치는 sync PR reviewer checklist에서 target checkout 기준으로 확인한다.
 
 fallback 경로를 바꾼 경우에는 source resource를 건드리지 않고 Debug app 복사본만 훼손해 negative smoke를 수행한다.
 
