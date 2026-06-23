@@ -16,6 +16,7 @@ enum HwpDocumentInputError: LocalizedError, Equatable {
 
 enum HwpDocumentInputValidator {
     private static let hwpMagic: [UInt8] = [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]
+    private static let hwp3MagicPrefix: [UInt8] = Array("HWP Document File V3.".utf8)
     private static let hwpxMagics: [[UInt8]] = [
         [0x50, 0x4B, 0x03, 0x04],
         [0x50, 0x4B, 0x05, 0x06],
@@ -32,7 +33,9 @@ enum HwpDocumentInputValidator {
     }
 
     static func isSupportedDocumentSignature(_ data: Data) -> Bool {
-        data.starts(with: hwpMagic) || hwpxMagics.contains { data.starts(with: $0) }
+        data.starts(with: hwpMagic)
+            || data.starts(with: hwp3MagicPrefix)
+            || hwpxMagics.contains { data.starts(with: $0) }
     }
 }
 
