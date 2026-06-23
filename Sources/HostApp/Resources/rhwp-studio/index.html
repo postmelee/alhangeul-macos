@@ -5,35 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" content="#2b6cb0" />
-  <script>
-    (() => {
-      const root = document.documentElement;
-      const isThemeMode = (value) => value === 'system' || value === 'light' || value === 'dark';
-      let mode = 'system';
-      try {
-        const settings = JSON.parse(localStorage.getItem('rhwp-settings') || '{}');
-        const storedMode = settings && settings.theme && settings.theme.mode;
-        if (isThemeMode(storedMode)) mode = storedMode;
-      } catch {
-        mode = 'system';
-      }
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const effective = mode === 'dark' || (mode === 'system' && prefersDark) ? 'dark' : 'light';
-      const scheme = `only ${effective}`;
-      root.dataset.themeMode = mode;
-      root.dataset.themeEffective = effective;
-      root.style.colorScheme = scheme;
-      const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
-      if (colorSchemeMeta) colorSchemeMeta.setAttribute('content', scheme);
-      const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeColorMeta) themeColorMeta.setAttribute('content', effective === 'dark' ? '#2b3037' : '#f5f5f5');
-    })();
-  </script>
+  <!-- 다크테마 FOUC 방지 — 확장 CSP가 인라인 스크립트를 금지하므로 외부 파일로 분리(#1444).
+       module/defer 금지(동기 로드)로 번들 전 즉시 실행되어 FOUC 방지를 유지한다. -->
+  <script src="./theme-init.js"></script>
   <link rel="icon" href="./favicon.ico" />
   <link rel="apple-touch-icon" href="./icons/icon-256.png" />
   <title>rhwp-studio</title>
-  <script type="module" src="./assets/index-2nxfiXnQ.js"></script>
-  <link rel="stylesheet" href="./assets/index-BCYJGuoE.css">
+  <script type="module" src="./assets/index-B-NDEaFR.js"></script>
+  <link rel="stylesheet" href="./assets/index-sQvB-4Hv.css">
   <link rel="stylesheet" href="./alhangeul-wkwebview-overrides.css">
 <link rel="manifest" href="./manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="./registerSW.js"></script></head>
 <body>
@@ -65,7 +44,8 @@
           <div class="md-item" data-cmd="edit:cut"><span class="md-icon icon-cut"></span><span class="md-label">오려 두기</span><span class="md-shortcut">Ctrl+X</span></div>
           <div class="md-item" data-cmd="edit:copy"><span class="md-icon icon-copy"></span><span class="md-label">복사하기</span><span class="md-shortcut">Ctrl+C</span></div>
           <div class="md-item" data-cmd="edit:paste"><span class="md-icon icon-paste"></span><span class="md-label">붙이기</span><span class="md-shortcut">Ctrl+V</span></div>
-          <div class="md-item disabled" data-cmd="edit:format-copy"><span class="md-icon icon-format-copy"></span><span class="md-label">모양 복사</span><span class="md-shortcut">Ctrl+Alt+C</span></div>
+          <div class="md-item disabled" data-cmd="edit:format-copy"><span class="md-icon icon-format-copy"></span><span class="md-label">모양 복사</span><span class="md-shortcut">Alt+C</span></div>
+          <div class="md-item disabled" data-cmd="edit:format-paste"><span class="md-icon icon-format-copy"></span><span class="md-label">모양 붙여넣기</span></div>
           <div class="md-sep"></div>
           <div class="md-item disabled" data-cmd="edit:delete"><span class="md-icon icon-delete"></span><span class="md-label">지우기</span><span class="md-shortcut">Ctrl+E</span></div>
           <div class="md-item disabled" data-cmd="edit:select-all"><span class="md-icon icon-select-all"></span><span class="md-label">모두 선택</span><span class="md-shortcut">Ctrl+A</span></div>
@@ -387,14 +367,8 @@
             </div>
           </div>
           <div class="md-sep"></div>
-          <div class="md-item disabled" data-cmd="table:insert-row-above"><span class="md-icon"></span><span class="md-label">위쪽에 줄 추가하기</span></div>
-          <div class="md-item disabled" data-cmd="table:insert-row-below"><span class="md-icon"></span><span class="md-label">아래쪽에 줄 추가하기</span></div>
-          <div class="md-sep"></div>
-          <div class="md-item disabled" data-cmd="table:insert-col-left"><span class="md-icon"></span><span class="md-label">왼쪽에 칸 추가하기</span><span class="md-shortcut">Alt+Insert</span></div>
-          <div class="md-item disabled" data-cmd="table:insert-col-right"><span class="md-icon"></span><span class="md-label">오른쪽에 칸 추가하기</span></div>
-          <div class="md-sep"></div>
-          <div class="md-item disabled" data-cmd="table:delete-row"><span class="md-icon"></span><span class="md-label">줄 지우기</span></div>
-          <div class="md-item disabled" data-cmd="table:delete-col"><span class="md-icon"></span><span class="md-label">칸 지우기</span><span class="md-shortcut">Alt+Delete</span></div>
+          <div class="md-item disabled" data-cmd="table:insert-row-col"><span class="md-icon"></span><span class="md-label">줄/칸 추가하기(I)...</span><span class="md-shortcut">Alt+Enter</span></div>
+          <div class="md-item disabled" data-cmd="table:delete-row-col"><span class="md-icon"></span><span class="md-label">줄/칸 지우기(E)...</span><span class="md-shortcut">Alt+Delete</span></div>
           <div class="md-sep"></div>
           <div class="md-item disabled" data-cmd="table:cell-split"><span class="md-icon"></span><span class="md-label">셀 나누기</span><span class="md-shortcut">S</span></div>
           <div class="md-item disabled" data-cmd="table:cell-merge"><span class="md-icon"></span><span class="md-label">셀 합치기</span><span class="md-shortcut">M</span></div>
@@ -427,7 +401,7 @@
         <button class="tb-btn tb-paste" title="붙이기 (Ctrl+V)">
           <span class="tb-sprite icon-paste"></span><span class="tb-label">붙이기</span>
         </button>
-        <button class="tb-btn" title="모양 복사"><span class="tb-sprite icon-format-copy"></span><span class="tb-label">모양<br/>복사</span></button>
+        <button class="tb-btn" data-cmd="edit:format-copy" title="모양 복사 (Alt+C)"><span class="tb-sprite icon-format-copy"></span><span class="tb-label">모양<br/>복사</span></button>
       </div>
       <span class="tb-sep"></span>
       <div class="tb-group">

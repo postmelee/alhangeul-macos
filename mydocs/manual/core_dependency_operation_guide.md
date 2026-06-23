@@ -7,6 +7,7 @@
 ## 소유 경계
 
 - `edwardkim/rhwp`: Rust HWP/HWPX parser/renderer core
+- upstream root `Cargo.lock`: upstream release checkout의 CLI/WASM/studio dependency graph fingerprint
 - `RustBridge`: 이 저장소가 소유하는 macOS C ABI bridge
 - `RustBridge/Cargo.toml`: core dependency 선언
 - `RustBridge/Cargo.lock`: Cargo가 해석한 core source와 resolved commit
@@ -20,15 +21,16 @@
 ## core 기준
 
 - Stable 안정 기준은 release tag + resolved commit. Demo/Preview는 필요한 API가 포함된 resolved commit을 `rev`로 고정.
-- 현재 `rhwp-core.lock`은 `v0.7.13` Stable release tag pin 상태다. `RustBridge/Cargo.toml`은 `tag = "v0.7.13"`을 사용하고, `RustBridge/Cargo.lock`과 `rhwp-core.lock`은 resolved commit `b3e16ef212af81ef37d973ddb86d6816d3804642`를 기록한다.
-- `v0.7.13`에는 현재 bridge가 요구하는 `build_page_render_tree`, `get_bin_data`, `render_page_svg_native`, `get_page_info_native`, `extract_thumbnail_only` API가 포함되어 있다.
+- 현재 `rhwp-core.lock`은 `v0.7.16` Stable release tag pin 상태다. `RustBridge/Cargo.toml`은 `tag = "v0.7.16"`을 사용하고, `RustBridge/Cargo.lock`과 `rhwp-core.lock`은 resolved commit `de02159ab4d2c5d165d6e25568bad3f8af5ef6cb`를 기록한다.
+- `v0.7.16`에는 현재 bridge가 요구하는 `build_page_render_tree`, `get_bin_data`, `render_page_svg_native`, `get_page_info_native`, `extract_thumbnail_only` API가 포함되어 있다.
 - `main`, `devel` 같은 branch는 필요한 API가 포함된 과도기 commit을 찾는 참고 출처일 뿐, 안정 기준으로 사용하지 않는다.
 - 채널별 dependency/lock 필드와 compatibility gate 상세는 [`core_release_compatibility.md`](../tech/core_release_compatibility.md)를 따른다.
 
 ## 운영 원칙
 
 - core API 변경은 먼저 `edwardkim/rhwp`에 반영한다.
-- 앱 저장소에서는 `RustBridge` dependency, `Cargo.lock`, `rhwp-core.lock`, Swift/Rust bridge 적응만 커밋한다.
+- 앱 저장소에서는 `RustBridge` dependency, `RustBridge/Cargo.lock`, `rhwp-core.lock`, Swift/Rust bridge 적응만 커밋한다.
+- upstream root `Cargo.lock`은 downstream `RustBridge/Cargo.lock`을 대체하지 않는다. upstream release checkout의 dependency graph fingerprint로만 기록하고, native bridge build gate는 계속 `RustBridge/Cargo.lock`과 `rhwp-core.lock`을 기준으로 한다.
 - core를 로컬에서 실험해야 하면 별도 clone 또는 임시 Cargo patch/local override를 사용하고, local path 변경은 커밋하지 않는다.
 - ABI 변경은 `rhwp-ffi-symbols.txt`와 Swift bridge 영향 검토를 동반한다.
 - Demo/Preview 배포를 Stable release처럼 표시하지 않는다.
@@ -40,7 +42,7 @@
 
 `Frameworks/universal/librhwp.a` hash/size는 reference artifact metadata로 유지한다. 이 값은 기준 환경에서 생성한 Rust bridge static archive 식별자로 유용하지만, Rust compiler, Xcode, macOS runner image, archive tool, build path 차이에 따라 source와 ABI가 같아도 byte-for-byte 값이 달라질 수 있다.
 
-GitHub-hosted CI/release workflow는 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 `librhwp.a` byte hash/size 비교만 제외할 수 있다. 이 경우에도 source provenance, `Cargo.lock`, generated header, FFI symbol 검증은 유지한다. strict staticlib byte hash를 필수 release gate로 복귀하려면 toolchain/runner/build path 또는 CI 기준 lock 생성 환경을 먼저 고정한다.
+GitHub-hosted CI/release workflow는 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 `librhwp.a` byte hash/size 비교만 제외할 수 있다. 이 경우에도 source provenance, `RustBridge/Cargo.lock`, generated header, FFI symbol 검증은 유지한다. strict staticlib byte hash를 필수 release gate로 복귀하려면 toolchain/runner/build path 또는 CI 기준 lock 생성 환경을 먼저 고정한다.
 
 ## 업데이트 절차
 
@@ -93,7 +95,7 @@ xcodebuild -project Alhangeul.xcodeproj \
 - `.github/workflows/rhwp-upstream-check.yml`은 read-only 감시 workflow로 upstream latest release와 `rhwp-core.lock`을 비교한다.
 - `.github/workflows/rhwp-upstream-sync-pr.yml`은 upstream target release를 `devel` 대상 `automation/rhwp-<tag>-full-sync` branch에 반영하는 full sync 후보 PR을 만든다.
 - sync workflow는 `scripts/update-rhwp-core.sh --check --channel stable --tag <tag>`로 target release compatibility를 먼저 조회하고, 실제 PR 생성 단계에서는 `scripts/update-rhwp-core.sh --channel stable --tag <tag>`와 `scripts/build-rust-macos.sh --update-lock`로 `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`을 갱신한다.
-- sync workflow는 같은 target commit에서 upstream WASM/studio asset을 빌드하고 `scripts/sync-rhwp-studio.sh`로 bundled `rhwp-studio` manifest와 asset을 갱신한다.
+- sync workflow는 같은 target commit에서 upstream WASM/studio asset을 빌드하고 `scripts/sync-rhwp-studio.sh`로 bundled `rhwp-studio` manifest와 asset을 갱신한다. 이때 upstream root `Cargo.lock`의 sha256은 manifest의 `source_cargo_lock_sha256`에 기록해 studio/WASM dependency graph provenance로 검토한다.
 - full sync 변경 PR은 PR CI에서 `scripts/verify-rhwp-studio-assets.sh`, HostApp build, Rust/core provenance verify, release helper dry-run을 확인한다.
 - signed/notarized DMG, GitHub Release, Sparkle appcast, Homebrew Cask 반영은 별도 release 승인과 보호 workflow가 필요하다.
 
@@ -105,6 +107,7 @@ xcodebuild -project Alhangeul.xcodeproj \
 - Stable이면 `rhwp_release_tag`와 resolved commit 일치
 - Demo/Preview이면 `rhwp_release_transition_status = "demo-commit-pin"` 유지
 - `rhwp-core.lock`의 `Frameworks/universal/librhwp.a` reference metadata와 `Frameworks/generated_rhwp.h` sha256/size 기록 갱신 여부
+- bundled `rhwp-studio` manifest의 `source_cargo_lock_sha256`이 target upstream root `Cargo.lock`과 일치하는지 여부
 - `rhwp-ffi-symbols.txt` 변경 여부와 의도성
 - Swift `RenderTree` 모델과 core JSON 구조 호환성
 - Quick Look/Thumbnail smoke test 필요 여부
@@ -114,7 +117,8 @@ xcodebuild -project Alhangeul.xcodeproj \
 
 - branch dependency 또는 floating ref를 배포 기준으로 사용
 - Cargo local path override를 커밋
-- `Cargo.lock`과 `rhwp-core.lock`의 resolved commit 불일치 방치
+- `RustBridge/Cargo.lock`과 `rhwp-core.lock`의 resolved commit 불일치 방치
+- upstream root `Cargo.lock`을 `RustBridge/Cargo.lock` 대체물로 취급
 - ABI 영향 검토 없이 FFI 변경 반영
 - core 저장소 PR과 앱 저장소 PR을 혼합 진행
 - Demo/Preview 배포를 Stable release처럼 표시
