@@ -620,8 +620,8 @@ ensure_rhwp_source_available
 mkdir -p "$OUT"
 
 echo "[1/4] Rust staticlib (arm64 + x86_64)..."
-cargo build --release --manifest-path "$BRIDGE_ROOT/Cargo.toml" --target aarch64-apple-darwin
-cargo build --release --manifest-path "$BRIDGE_ROOT/Cargo.toml" --target x86_64-apple-darwin
+cargo build --release --locked --manifest-path "$BRIDGE_ROOT/Cargo.toml" --target aarch64-apple-darwin
+cargo build --release --locked --manifest-path "$BRIDGE_ROOT/Cargo.toml" --target x86_64-apple-darwin
 
 echo "[2/4] Universal binary..."
 mkdir -p "$OUT/universal"

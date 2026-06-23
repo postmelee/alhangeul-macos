@@ -139,7 +139,11 @@ impact_reason() {
       echo "WASM package output"
       return 0
       ;;
-    Cargo.toml|Cargo.lock|rust-toolchain.toml|rust-toolchain|.cargo/*|crates/*|src/*)
+    Cargo.lock)
+      echo "Rust dependency graph lockfile"
+      return 0
+      ;;
+    Cargo.toml|rust-toolchain.toml|rust-toolchain|.cargo/*|crates/*|src/*)
       echo "Rust/core source or build input"
       return 0
       ;;

@@ -47,7 +47,9 @@ rhwp_latest_checked_release_commit = "<latest checked release resolved commit>"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
 ```
 
-`Cargo.lock`은 `RustBridge/Cargo.toml`의 `rhwp` git dependency를 해석한 실제 source와 commit을 담는다. 현재 기준에서는 `Cargo.lock`의 `rhwp` package source가 `rhwp-core.lock`의 repo, ref kind, commit과 일치해야 한다. Stable 전환에서는 release tag와 resolved commit도 함께 일치해야 한다.
+`RustBridge/Cargo.lock`은 `RustBridge/Cargo.toml`의 `rhwp` git dependency를 해석한 실제 source와 commit을 담는다. 현재 기준에서는 `RustBridge/Cargo.lock`의 `rhwp` package source가 `rhwp-core.lock`의 repo, ref kind, commit과 일치해야 한다. Stable 전환에서는 release tag와 resolved commit도 함께 일치해야 한다.
+
+upstream root `Cargo.lock`은 별도 기준이다. 이 파일은 `edwardkim/rhwp` release checkout의 CLI/WASM/studio dependency graph fingerprint이며, bundled `rhwp-studio` manifest의 `source_cargo_lock_sha256`으로 기록할 수 있다. downstream native bridge의 lock 기준을 `RustBridge/Cargo.lock`에서 upstream root `Cargo.lock`으로 대체하지 않는다.
 
 ## 배포 채널 기준
 
@@ -56,69 +58,66 @@ ffi_symbols_file = "rhwp-ffi-symbols.txt"
 | Demo/Preview | API가 포함된 resolved commit | `git` + `rev` | 기능 검증용 공개 배포. GitHub Release는 prerelease로 게시하고 정식 안정 기준으로 표시하지 않는다. |
 | Stable | API가 포함된 release tag + resolved commit | `git` + `tag` | 일반 사용자 대상 정식 배포. compatibility gate 전체를 통과해야 한다. |
 
-Demo/Preview도 branch dependency는 사용하지 않는다. 반드시 commit SHA를 `rev`로 고정하고, `Cargo.lock`, `rhwp-core.lock`, 산출물 hash/size를 함께 남긴다.
+Demo/Preview도 branch dependency는 사용하지 않는다. 반드시 commit SHA를 `rev`로 고정하고, `RustBridge/Cargo.lock`, `rhwp-core.lock`, 산출물 hash/size를 함께 남긴다.
 
-현재 Stable dependency 형식:
+Stable dependency 형식:
 
 ```toml
-rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "v0.7.10" }
+rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "<release tag>" }
 ```
 
 ## 현재 release 상태
 
-2026-05-06 확인 기준 현재 Stable release pin은 다음이다.
+2026-06-24 저장소 lock 기준 현재 Stable release pin은 다음이다.
 
 ```text
-release tag: v0.7.10
-publishedAt: 2026-05-05T17:56:40Z
-tag object: 2a6f59f1f64958ace5181f04cdf40cf77fa709b5
-resolved commit: 62a458aa317e962cd3d0eec6096728c172d57110
+release tag: v0.7.16
+resolved commit: de02159ab4d2c5d165d6e25568bad3f8af5ef6cb
 ```
 
-`v0.7.10` 확인 명령은 required API gate를 통과한다.
+현재 lock 기준은 required API gate를 통과한 release tag pin이다.
 
 ```text
 Checked rhwp core target:
   channel: stable
-  tag:     v0.7.10
-  commit:  62a458aa317e962cd3d0eec6096728c172d57110
+  tag:     v0.7.16
+  commit:  de02159ab4d2c5d165d6e25568bad3f8af5ef6cb
 ```
 
-따라서 현재 앱 저장소는 `v0.7.10` Stable release tag pin으로 전환되어 있다.
+따라서 현재 앱 저장소는 `v0.7.16` Stable release tag pin으로 전환되어 있다.
 
 현재 lock 기준:
 
 ```text
-rhwp_release_tag: v0.7.10
-rhwp_commit: 62a458aa317e962cd3d0eec6096728c172d57110
-RustBridge/Cargo.lock source: git+https://github.com/edwardkim/rhwp.git?tag=v0.7.10#62a458aa317e962cd3d0eec6096728c172d57110
+rhwp_release_tag: v0.7.16
+rhwp_commit: de02159ab4d2c5d165d6e25568bad3f8af5ef6cb
+RustBridge/Cargo.lock source: git+https://github.com/edwardkim/rhwp.git?tag=v0.7.16#de02159ab4d2c5d165d6e25568bad3f8af5ef6cb
 ```
 
 현재 artifact 기준:
 
 ```text
 Frameworks/universal/librhwp.a
-sha256: fefa08d741cfdd6645081ca838601f677f6da064d95308555e29629f7609f7a2
-size: 107120120
+sha256: 824fee2ccd0bacd978ca043df4b576133c4a78488178c1edd0715c62aeffc9a7
+size: 202389312
 
 Frameworks/generated_rhwp.h
-sha256: 69aeca5047bf743286d1b2260f8fc9a091ce4f1d7fd61c80084fab81c3a95ac5
-size: 1349
+sha256: 31ed496ccbe86082885a82c584166669e1913a552dba26556ef5182842959601
+size: 2059
 ```
 
-`v0.7.10`에는 현재 RustBridge가 요구하는 PageRenderTree API와 PageLayerTree API가 포함되어 있다. alhangeul-macos는 이번 전환에서 기존 PageRenderTree 기반 C ABI와 Swift renderer를 유지하며, PageLayerTree 기반 Swift renderer 전환과 신규 ABI 추가는 후속 작업으로 분리한다.
+`v0.7.16`에는 현재 RustBridge가 요구하는 PageRenderTree API와 PageLayerTree API가 포함되어 있다. alhangeul-macos는 기존 PageRenderTree 기반 C ABI와 Swift renderer를 유지하며, PageLayerTree 기반 Swift renderer 전환과 신규 ABI 추가는 후속 작업으로 분리한다.
 
-앱 저장소는 core source를 수정하지 않고 release tag pin, Rust bridge 산출물 provenance, bundled `rhwp-studio` asset, macOS build/render smoke 기준을 `v0.7.10`으로 전환했다.
+앱 저장소는 core source를 수정하지 않고 release tag pin, Rust bridge 산출물 provenance, bundled `rhwp-studio` asset, macOS build/render smoke 기준을 `v0.7.16`으로 전환했다.
 
-2026-05-06 기준 alhangeul-macos use case 검증 결과는 다음이다.
+현재 lock 기준 use case 검증은 release/task별 보고서에 남긴다. core release compatibility 관점에서 최소 확인할 항목은 다음이다.
 
-- `./scripts/update-rhwp-core.sh --check --channel stable --tag v0.7.10` 통과
-- `./scripts/build-rust-macos.sh --update-lock`와 `--verify-lock` 통과
-- `scripts/verify-rhwp-studio-assets.sh` 통과
-- `./scripts/check-no-appkit.sh` 통과
-- HostApp Debug build 통과
-- HostApp Release build 통과
-- 기본 native render smoke 통과: `KTX.hwp`, `request.hwp`, `exam_kor.hwp`
+- `./scripts/update-rhwp-core.sh --check --channel stable --tag v0.7.16`
+- `scripts/build-rust-macos.sh --verify-lock`
+- `scripts/verify-rhwp-studio-assets.sh`
+- `./scripts/check-no-appkit.sh`
+- HostApp Debug/Release build
+- 기본 native render smoke: `KTX.hwp`, `request.hwp`, `exam_kor.hwp`
 
 Release package 생성, 설치본 LaunchServices/PlugInKit 등록, `qlmanage` smoke는 M16의 Quick Look/Thumbnail 설치본 smoke gate 작업에서 별도로 판정한다.
 
@@ -256,6 +255,8 @@ release tag dependency 전환 후에는 다음 항목이 서로 일치해야 한
 - `rhwp-core.lock`의 `rhwp_repo`
 - `rhwp-core.lock`의 `rhwp_release_tag`
 - `rhwp-core.lock`의 `rhwp_commit`
+- bundled `rhwp-studio` manifest의 `source_release_tag`, `source_resolved_commit`
+- manifest에 `source_cargo_lock_sha256`이 있으면 target upstream root `Cargo.lock` sha256
 
 불일치하면 `Cargo.lock mismatch`로 기록한다.
 
@@ -287,7 +288,7 @@ release tag dependency 전환 후에는 다음 항목이 서로 일치해야 한
 Demo/Preview 채널은 release tag를 기다리지 않고 필요한 API가 포함된 resolved commit을 사용할 수 있는 경로다. 단, 다음 조건을 모두 만족해야 한다.
 
 - commit SHA를 `rev`로 명시한다.
-- `Cargo.lock`의 `rhwp` source가 해당 commit으로 고정되어 있다.
+- `RustBridge/Cargo.lock`의 `rhwp` source가 해당 commit으로 고정되어 있다.
 - `rhwp-core.lock`의 `rhwp_ref_kind`는 `commit`으로 기록한다.
 - `rhwp-core.lock`에 latest checked release tag와 해당 release의 resolved commit을 함께 남겨 Stable 전환 대기 상태를 보존한다.
 - `build_page_render_tree`, `get_bin_data`, `render_page_svg_native`, `get_page_info_native`, `extract_thumbnail_only` 존재를 확인한다.
@@ -332,9 +333,9 @@ Demo/Preview를 이유로 `main` 또는 `devel` branch dependency를 사용하�
 4. `RustBridge/Cargo.toml` dependency 갱신
    - demo: `git` + `rev`
    - stable: `git` + `tag`
-5. `Cargo.lock` 갱신
+5. `RustBridge/Cargo.lock` 갱신
    - `cargo generate-lockfile`
-   - 갱신 후 `Cargo.lock`의 source commit을 추출한다.
+   - 갱신 후 `RustBridge/Cargo.lock`의 source commit을 추출한다.
 6. `rhwp-core.lock` skeleton 갱신
    - demo: `rhwp_ref_kind = "commit"`
    - stable: `rhwp_ref_kind = "release-tag"`
@@ -350,6 +351,7 @@ Demo/Preview를 이유로 `main` 또는 `devel` branch dependency를 사용하�
 - `RustBridge/Cargo.lock`의 `rhwp` source commit과 `rhwp-core.lock.rhwp_commit` 일치
 - Stable이면 `rhwp_release_tag`가 존재하고 `Cargo.toml`의 tag와 일치
 - Demo/Preview이면 `rhwp_release_transition_status = "demo-commit-pin"` 또는 이에 준하는 상태값 존재
+- `cargo build --locked`로 `RustBridge/Cargo.lock` drift가 없는지 확인
 - `Frameworks/universal/librhwp.a` sha256/size 일치
 - `Frameworks/generated_rhwp.h` sha256/size 일치
 - generated FFI symbol set과 `rhwp-ffi-symbols.txt` 일치
@@ -371,7 +373,8 @@ Demo/Preview를 이유로 `main` 또는 `devel` branch dependency를 사용하�
 | 실패 유형 | 의미 | 대표 증상 | 처리 |
 |------|------|------|------|
 | `missing core API` | RustBridge가 요구하는 core API가 target release에 없다. | `no method named build_page_render_tree`, `no method named get_bin_data` | Stable 전환 금지. Demo/Preview는 API가 포함된 별도 commit을 `rev`로 고정할 때만 진행한다. |
-| `Cargo.lock mismatch` | Cargo가 해석한 git dependency commit과 `rhwp-core.lock` 기준이 다르다. | `Cargo.lock` source hash와 `rhwp-core.lock.rhwp_commit` 불일치 | Cargo.lock/rhwp-core.lock 갱신 순서를 보정한다. |
+| `Cargo.lock mismatch` | Cargo가 해석한 git dependency commit과 `rhwp-core.lock` 기준이 다르다. | `RustBridge/Cargo.lock` source hash와 `rhwp-core.lock.rhwp_commit` 불일치 | `RustBridge/Cargo.lock`/`rhwp-core.lock` 갱신 순서를 보정한다. |
+| `upstream Cargo.lock provenance mismatch` | bundled studio/WASM manifest fingerprint와 target upstream checkout root `Cargo.lock`이 다르다. | `source_cargo_lock_sha256` 값이 target `Cargo.lock` sha256과 불일치 | sync 대상 checkout과 manifest 생성 시점을 다시 확인한다. |
 | `artifact hash mismatch` | 현재 빌드 산출물과 `rhwp-core.lock` artifact hash/size가 다르다. | `./scripts/build-rust-macos.sh --verify-lock` 실패 | 의도한 변경이면 `--update-lock`, 아니면 산출물 재생성/rollback을 검토한다. |
 | `FFI symbol diff` | generated C ABI symbol set이 기대값과 다르다. | `diff -u rhwp-ffi-symbols.txt Frameworks/generated_rhwp_symbols.txt` 실패 | Swift 영향 분석과 ABI 의도성 확인 전 merge 금지. |
 | `render smoke failure` | build는 되지만 native render tree 렌더 결과가 깨진다. | decode 실패, page size 0, 이미지 조회 실패, smoke script 실패 | render tree schema/Swift renderer/core output을 분리 조사한다. |
@@ -392,7 +395,7 @@ Demo/Preview commit-pinned 전환:
 - [ ] target commit이 `rhwp::parser::extract_thumbnail_only`를 포함한다.
 - [ ] `RustBridge/Cargo.toml`이 `git` + `rev` dependency로 전환된다.
 - [ ] fresh checkout에서 별도 core source checkout 없이 build가 통과한다.
-- [ ] `Cargo.lock`과 `rhwp-core.lock`의 repo, ref kind, commit 정합성 검증 방법이 준비되어 있다.
+- [ ] `RustBridge/Cargo.lock`과 `rhwp-core.lock`의 repo, ref kind, commit 정합성 검증 방법이 준비되어 있다.
 - [ ] GitHub Release는 prerelease로 게시하고 Stable release로 표시하지 않는다.
 
 Stable release tag 전환:
@@ -408,7 +411,8 @@ Stable release tag 전환:
 - [ ] `RustBridge` x86_64 build가 통과한다.
 - [ ] generated FFI symbol set이 `rhwp-ffi-symbols.txt`와 일치하거나, ABI 변경 계획이 별도로 승인되었다.
 - [ ] render smoke가 앱 저장소 루트 `samples/` 기준으로 통과한다.
-- [ ] `Cargo.lock`과 `rhwp-core.lock`의 repo, release tag, resolved commit 정합성 검증 방법이 준비되어 있다.
+- [ ] `RustBridge/Cargo.lock`과 `rhwp-core.lock`의 repo, release tag, resolved commit 정합성 검증 방법이 준비되어 있다.
+- [ ] bundled `rhwp-studio`를 함께 sync하는 경우 manifest의 `source_cargo_lock_sha256` 검토 방법이 준비되어 있다.
 - [ ] `rhwp-core.lock`에 release tag, resolved commit, artifact hash/size를 기록할 수 있다.
 - [ ] native render tree 경로가 HostApp, Quick Look, Thumbnail의 기준 경로로 유지된다.
 

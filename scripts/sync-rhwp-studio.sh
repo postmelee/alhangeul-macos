@@ -168,6 +168,11 @@ if [ "$actual_commit" != "$expected_commit_resolved" ]; then
   exit 1
 fi
 
+if [ ! -f "$UPSTREAM_DIR/Cargo.lock" ]; then
+  fail "missing upstream root Cargo.lock: $UPSTREAM_DIR/Cargo.lock"
+fi
+source_cargo_lock_sha256="$(shasum -a 256 "$UPSTREAM_DIR/Cargo.lock" | awk '{print $1}')"
+
 DIST="$UPSTREAM_DIR/rhwp-studio/dist"
 
 if [ ! -f "$UPSTREAM_DIR/pkg/rhwp.js" ] || [ ! -f "$UPSTREAM_DIR/pkg/rhwp_bg.wasm" ]; then
@@ -232,6 +237,7 @@ cat > "$TARGET/manifest.json" <<JSON
   "source_ref_kind": "release-tag",
   "source_release_tag": "$EXPECTED_RELEASE_TAG",
   "source_resolved_commit": "$expected_commit_resolved",
+  "source_cargo_lock_sha256": "$source_cargo_lock_sha256",
   "wasm_build_command": "$ACTUAL_WASM_BUILD_COMMAND",
   "recommended_wasm_build_command": "$RECOMMENDED_WASM_BUILD_COMMAND",
   "actual_wasm_build_command": "$ACTUAL_WASM_BUILD_COMMAND",
