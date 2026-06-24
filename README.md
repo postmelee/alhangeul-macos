@@ -50,15 +50,15 @@
 
 ## 최신 공개 릴리즈
 
-### v0.1.6
+### v0.1.7
 
-`v0.1.6`은 upstream `rhwp v0.7.16` core/studio를 반영해 HWPX 저장 계약 보존, 누름틀 안내문 한컴 호환, bundled viewer/editor 보안·UX와 다크 테마 보강을 포함하는 patch release입니다. 앱 소유 UTI `com.postmelee.alhangeul.*`, Hancom 계열 UTI 지원, About 창의 bundled `rhwp` provenance 표시, Sparkle 업데이트 확인, signed/notarized universal DMG 배포 기준은 유지합니다.
+`v0.1.7`은 upstream `rhwp v0.7.17` core/studio를 반영해 차트 렌더링, legacy 도형 주석 보존, bundled viewer/editor 표 편집과 자동복구 흐름을 보강하는 patch release입니다. LibreOffice가 선언한 HWP UTI와 HWP 3.0 문서 signature도 지원 경로에 추가해 일부 환경에서 문서가 열리기 전 차단되는 문제를 줄였습니다. 앱 소유 UTI `com.postmelee.alhangeul.*`, Hancom 계열 UTI 지원, About 창의 bundled `rhwp` provenance 표시, Sparkle 업데이트 확인, signed/notarized universal DMG 배포 기준은 유지합니다.
 
-- GitHub Release: [Alhangeul v0.1.6](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.6)
-- 업데이트 페이지: [알한글 v0.1.6](https://postmelee.github.io/alhangeul-macos/updates/v0.1.6.html)
+- GitHub Release: [Alhangeul v0.1.7](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.7)
+- 업데이트 페이지: [알한글 v0.1.7](https://postmelee.github.io/alhangeul-macos/updates/v0.1.7.html)
 - Homebrew Cask: public DMG SHA256 확정 후 별도 배포 단계에서 반영
-- 포함된 `rhwp`: [`v0.7.16`](https://github.com/edwardkim/rhwp/releases/tag/v0.7.16) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
-- Sparkle update 기준: short version은 `0.1.6`, build는 `12`입니다.
+- 포함된 `rhwp`: [`v0.7.17`](https://github.com/edwardkim/rhwp/releases/tag/v0.7.17) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
+- Sparkle update 기준: short version은 `0.1.7`, build는 `13`입니다.
 
 과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약하고, bundled `rhwp` provenance는 한 줄 요약만 표시합니다.
 
