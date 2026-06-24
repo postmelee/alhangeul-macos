@@ -60,7 +60,12 @@ jobs:
       has_viewer_impact: ${{ steps.impact.outputs.has_viewer_impact }}
       impact_reason_count: ${{ steps.impact.outputs.impact_reason_count }}
       existing_branch: ${{ steps.existing.outputs.branch_exists }}
-      existing_pr_url: ${{ steps.existing.outputs.pr_url }}
+      existing_pr_url: ${{ steps.existing.outputs.open_pr_url }}
+      existing_open_pr_url: ${{ steps.existing.outputs.open_pr_url }}
+      existing_merged_pr_url: ${{ steps.existing.outputs.merged_pr_url }}
+      existing_branch_only: ${{ steps.existing.outputs.branch_only }}
+      existing_cleanup_candidate: ${{ steps.existing.outputs.cleanup_candidate }}
+      existing_blocker_reason: ${{ steps.existing.outputs.blocker_reason }}
       should_build: ${{ steps.decision.outputs.should_build }}
       decision: ${{ steps.decision.outputs.decision }}
 
@@ -266,7 +271,7 @@ jobs:
             branch_exists="true"
           fi
 
-          pr_url="$(gh pr list \
+          open_pr_url="$(gh pr list \
             --repo "$GITHUB_REPOSITORY" \
             --base "$BASE_BRANCH" \
             --head "$branch_name" \
@@ -274,15 +279,39 @@ jobs:
             --json url \
             --jq '.[0].url // ""')"
 
+          merged_pr_url="$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --base "$BASE_BRANCH" \
+            --head "$branch_name" \
+            --state merged \
+            --json url \
+            --jq '.[0].url // ""')"
+
           exists="false"
-          if [ "$branch_exists" = "true" ] || [ -n "$pr_url" ]; then
+          branch_only="false"
+          cleanup_candidate="false"
+          blocker_reason="none"
+
+          if [ -n "$open_pr_url" ]; then
             exists="true"
+            blocker_reason="open_pr"
+          elif [ "$branch_exists" = "true" ] && [ -z "$merged_pr_url" ]; then
+            exists="true"
+            branch_only="true"
+            blocker_reason="branch_without_pr"
+          elif [ "$branch_exists" = "true" ] && [ -n "$merged_pr_url" ]; then
+            cleanup_candidate="true"
           fi
 
           {
             echo "exists=$exists"
             echo "branch_exists=$branch_exists"
-            echo "pr_url=$pr_url"
+            echo "branch_only=$branch_only"
+            echo "cleanup_candidate=$cleanup_candidate"
+            echo "blocker_reason=$blocker_reason"
+            echo "open_pr_url=$open_pr_url"
+            echo "merged_pr_url=$merged_pr_url"
+            echo "pr_url=$open_pr_url"
           } >> "$GITHUB_OUTPUT"
 
           {
@@ -290,7 +319,11 @@ jobs:
             echo "## Existing full sync PR check"
             echo
             echo "- branch exists: \`$branch_exists\`"
-            echo "- open PR: ${pr_url:-"(none)"}"
+            echo "- open PR: ${open_pr_url:-"(none)"}"
+            echo "- merged PR: ${merged_pr_url:-"(none)"}"
+            echo "- branch-only blocker: \`$branch_only\`"
+            echo "- cleanup candidate: \`$cleanup_candidate\`"
+            echo "- blocker reason: \`$blocker_reason\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Decide full sync execution
@@ -299,6 +332,7 @@ jobs:
         env:
           CURRENT: ${{ steps.resolve.outputs.current }}
           EXISTING: ${{ steps.existing.outputs.exists || 'false' }}
+          EXISTING_REASON: ${{ steps.existing.outputs.blocker_reason || 'none' }}
           DRY_RUN_VALUE: ${{ env.DRY_RUN }}
         run: |
           set -euo pipefail
@@ -328,6 +362,7 @@ jobs:
             echo
             echo "- decision: \`$decision\`"
             echo "- should build/create PR: \`$should_build\`"
+            echo "- existing blocker reason: \`${EXISTING_REASON:-none}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
   build-studio-assets:
