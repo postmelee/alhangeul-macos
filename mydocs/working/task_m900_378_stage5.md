@@ -2,7 +2,7 @@
 
 ## 단계 요약
 
-`v0.1.7` official stable publish를 완료하고 public GitHub Release, DMG asset, Sparkle appcast, Pages 업데이트 표면을 확인했다. Homebrew Cask 반영은 이번 승인 범위 밖의 별도 gate로 남겼다.
+`v0.1.7` official stable publish를 완료하고 public GitHub Release, DMG asset, Sparkle appcast, Pages 업데이트 표면을 확인했다. 이후 Homebrew Cask 반영과 tap smoke까지 같은 release closeout 흐름에서 완료했다.
 
 | 항목 | 값 |
 |------|----|
@@ -40,10 +40,9 @@
 
 | 항목 | 사유 |
 |------|------|
-| Homebrew Cask 갱신과 tap smoke | 별도 승인 gate. public SHA256은 확정됐지만 이번 지시는 GitHub Release/Pages/Sparkle 공개 배포까지로 처리 |
 | Sparkle old-version update smoke | 기존 public 설치본에서 업데이트를 시작하는 별도 수동 검증이 필요함. 이번에는 stable appcast public surface 확인까지만 수행 |
 | official stable DMG 재다운로드 후 로컬 Finder smoke | pre-public draft DMG는 작업지시자가 직접 smoke 완료. official stable DMG는 workflow의 signing/notarization/public artifact 검증과 public surface 확인으로 기록 |
 
 ## 다음 단계
 
-Stage 6에서는 release record의 남은 pre-public 기록을 실제 결과로 보정하고 최종 보고서를 작성한다. Homebrew를 이번 릴리즈에 이어서 공개할 경우 별도 승인 후 public DMG SHA256 `332208ff6f68c78a49d0fc60b895eeabb41d4996dad38fde158fa1935ab4b09d` 기준으로 Cask와 tap 검증을 진행한다.
+Stage 6에서는 release record의 남은 pre-public 기록을 실제 결과로 보정하고 최종 보고서를 작성한다. Homebrew는 public DMG SHA256 `332208ff6f68c78a49d0fc60b895eeabb41d4996dad38fde158fa1935ab4b09d` 기준으로 Cask와 tap 검증까지 완료했다.
