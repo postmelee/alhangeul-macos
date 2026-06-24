@@ -41,6 +41,14 @@ manifest_field() {
   ' "$manifest_path"
 }
 
+validate_sha256() {
+  local key="$1"
+  local value="$2"
+  if ! [[ "$value" =~ ^[0-9a-f]{64}$ ]]; then
+    fail "manifest $key must be a lowercase sha256 hex string"
+  fi
+}
+
 parse_args() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -129,6 +137,9 @@ fi
 
 grep -Fq "\"source_release_tag\": \"$EXPECTED_RELEASE_TAG\"" "$RESOURCE_DIR/manifest.json" || fail "manifest release tag does not match $EXPECTED_RELEASE_TAG"
 grep -Fq "\"source_resolved_commit\": \"$EXPECTED_COMMIT\"" "$RESOURCE_DIR/manifest.json" || fail "manifest commit does not match expected commit $EXPECTED_COMMIT"
+if source_cargo_lock_sha256="$(manifest_field "$RESOURCE_DIR/manifest.json" source_cargo_lock_sha256)"; then
+  validate_sha256 source_cargo_lock_sha256 "$source_cargo_lock_sha256"
+fi
 wasm_build_command="$(manifest_field "$RESOURCE_DIR/manifest.json" wasm_build_command)" \
   || fail "manifest missing wasm_build_command"
 recommended_wasm_build_command="$(manifest_field "$RESOURCE_DIR/manifest.json" recommended_wasm_build_command)" \

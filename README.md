@@ -50,15 +50,15 @@
 
 ## 최신 공개 릴리즈
 
-### v0.1.6
+### v0.1.7
 
-`v0.1.6`은 upstream `rhwp v0.7.16` core/studio를 반영해 HWPX 저장 계약 보존, 누름틀 안내문 한컴 호환, bundled viewer/editor 보안·UX와 다크 테마 보강을 포함하는 patch release입니다. 앱 소유 UTI `com.postmelee.alhangeul.*`, Hancom 계열 UTI 지원, About 창의 bundled `rhwp` provenance 표시, Sparkle 업데이트 확인, signed/notarized universal DMG 배포 기준은 유지합니다.
+`v0.1.7`은 upstream `rhwp v0.7.17` core/studio를 반영해 차트 렌더링, legacy 도형 주석 보존, bundled viewer/editor 표 편집과 자동복구 흐름을 보강하는 patch release입니다. LibreOffice가 선언한 HWP UTI와 HWP 3.0 문서 signature도 지원 경로에 추가해 일부 환경에서 문서가 열리기 전 차단되는 문제를 줄였습니다. 앱 소유 UTI `com.postmelee.alhangeul.*`, Hancom 계열 UTI 지원, About 창의 bundled `rhwp` provenance 표시, Sparkle 업데이트 확인, signed/notarized universal DMG 배포 기준은 유지합니다.
 
-- GitHub Release: [Alhangeul v0.1.6](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.6)
-- 업데이트 페이지: [알한글 v0.1.6](https://postmelee.github.io/alhangeul-macos/updates/v0.1.6.html)
-- Homebrew Cask: `brew install --cask postmelee/tap/alhangeul`
-- 포함된 `rhwp`: [`v0.7.16`](https://github.com/edwardkim/rhwp/releases/tag/v0.7.16) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
-- Sparkle update 기준: short version은 `0.1.6`, build는 `12`입니다.
+- GitHub Release: [Alhangeul v0.1.7](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.7)
+- 업데이트 페이지: [알한글 v0.1.7](https://postmelee.github.io/alhangeul-macos/updates/v0.1.7.html)
+- Homebrew Cask: public DMG SHA256 확정 후 별도 배포 단계에서 반영
+- 포함된 `rhwp`: [`v0.7.17`](https://github.com/edwardkim/rhwp/releases/tag/v0.7.17) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
+- Sparkle update 기준: short version은 `0.1.7`, build는 `13`입니다.
 
 과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약하고, bundled `rhwp` provenance는 한 줄 요약만 표시합니다.
 
@@ -178,13 +178,7 @@ WKWebView 경로는 native macOS shell이 충분히 안정화될 때까지 fallb
 
 공개 배포 기준은 Developer ID로 서명하고 Apple notarization을 통과한 DMG입니다. GitHub Release에는 `alhangeul-macos-<version>.dmg`와 checksum을 함께 공개합니다. `v0.1.1`부터 공식 DMG는 앱 본체와 Quick Look/Thumbnail extension 실행 파일이 `arm64 + x86_64` slice를 포함하는 단일 universal DMG 기준으로 검증합니다. Intel Mac과 Apple Silicon Mac 모두 같은 파일을 받으며, 아키텍처별 DMG는 따로 제공하지 않습니다.
 
-Homebrew Cask를 사용하는 경우 아래 명령으로 같은 signed/notarized universal DMG를 설치할 수 있습니다.
-
-```bash
-brew install --cask postmelee/tap/alhangeul
-```
-
-Homebrew가 untrusted tap 정책으로 설치를 거부하면 `brew trust --cask postmelee/tap/alhangeul`을 한 번 실행한 뒤 다시 설치하세요.
+Homebrew Cask는 public DMG SHA256 확정 후 별도 배포 단계에서 반영합니다. 최신 버전 반영 전에는 GitHub Release의 DMG를 직접 내려받아 설치하세요.
 
 설치 후에는 `Alhangeul.app`을 한 번 실행하세요. macOS가 Quick Look 및 Thumbnail extension을 발견하고 등록한 뒤 Finder에서 `.hwp`, `.hwpx` preview와 thumbnail을 사용할 수 있습니다.
 

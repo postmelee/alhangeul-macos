@@ -56,7 +56,7 @@ path_matches_category() {
     "Homebrew Cask:"Casks/*|"Homebrew Cask:"scripts/update-cask-sha256.sh)
       return 0
       ;;
-    "rhwp core/viewer provenance:"rhwp-core.lock|"rhwp core/viewer provenance:"RustBridge/*|"rhwp core/viewer provenance:"Frameworks/*|"rhwp core/viewer provenance:"Sources/HostApp/Resources/rhwp-studio/*|"rhwp core/viewer provenance:"scripts/sync-rhwp-studio.sh|"rhwp core/viewer provenance:"scripts/verify-rhwp-studio-assets.sh|"rhwp core/viewer provenance:"scripts/build-rust-macos.sh)
+    "rhwp core/viewer provenance:"rhwp-core.lock|"rhwp core/viewer provenance:"RustBridge/*|"rhwp core/viewer provenance:"Frameworks/*|"rhwp core/viewer provenance:"Sources/HostApp/Resources/rhwp-studio/*|"rhwp core/viewer provenance:"scripts/sync-rhwp-studio.sh|"rhwp core/viewer provenance:"scripts/verify-rhwp-studio-assets.sh|"rhwp core/viewer provenance:"scripts/build-rust-macos.sh|"rhwp core/viewer provenance:"scripts/ci/detect-rhwp-studio-impact.sh|"rhwp core/viewer provenance:"scripts/ci/write-rhwp-full-sync-pr-body.sh|"rhwp core/viewer provenance:"scripts/ci/write-rhwp-studio-sync-pr-body.sh)
       return 0
       ;;
     "문서 전용 변경:"README.md|"문서 전용 변경:"mydocs/*)
@@ -184,6 +184,7 @@ $(category_matches "수동 분류 필요")
 ## release owner 보정 항목
 
 - 각 영향 영역의 실제 사용자-facing 변화 여부를 확인한다.
+- \`Cargo.lock\` 또는 \`source_cargo_lock_sha256\` 관련 변경은 dependency graph/provenance 변화인지 확인한다.
 - 변경 파일이 여러 영역에 걸치는 경우 checklist를 수동으로 중복 반영한다.
 - 실행하지 않은 smoke는 성공으로 쓰지 않는다.
 - public DMG signing, notarization, appcast, Homebrew Cask는 release 실행 시점 산출물로 다시 검증한다.
