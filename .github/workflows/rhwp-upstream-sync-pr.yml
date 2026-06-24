@@ -68,10 +68,10 @@ jobs:
       GH_TOKEN: ${{ github.token }}
 
     steps:
-      - name: Check out workflow ref
+      - name: Check out base branch
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ env.BASE_BRANCH }}
           fetch-depth: 0
 
       - name: Verify helper syntax
@@ -210,6 +210,8 @@ jobs:
             echo "- studio current: \`$studio_current\`"
             echo "- full sync current: \`$current\`"
             echo "- base branch: \`$BASE_BRANCH\`"
+            echo "- repository content ref: \`$BASE_BRANCH\`"
+            echo "- workflow event ref: \`${GITHUB_REF:-unknown}\`"
             echo "- automation branch: \`$branch_name\`"
             echo "- force_pr: \`${FORCE_PR:-false}\`"
             echo "- dry_run: \`${DRY_RUN:-false}\`"
@@ -336,10 +338,10 @@ jobs:
     if: ${{ needs.resolve-target.outputs.should_build == 'true' }}
 
     steps:
-      - name: Check out workflow ref
+      - name: Check out base branch
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ env.BASE_BRANCH }}
           fetch-depth: 0
 
       - name: Check out upstream rhwp
@@ -416,10 +418,10 @@ jobs:
     if: ${{ needs.resolve-target.outputs.should_build == 'true' }}
 
     steps:
-      - name: Check out workflow ref
+      - name: Check out base branch
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ env.BASE_BRANCH }}
           fetch-depth: 0
           persist-credentials: false
 
