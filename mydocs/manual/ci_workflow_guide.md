@@ -297,9 +297,9 @@ bash scripts/ci/check-rhwp-upstream-release.sh --target-tag <rhwp-tag> --run-com
 - GitHub App token 설정은 repository variable `ALHANGEUL_AUTOMATION_CLIENT_ID`와 repository secret `ALHANGEUL_AUTOMATION_APP_PRIVATE_KEY`가 필요하다.
 - GitHub App 권한은 Contents write, Pull requests write, Issues write, Metadata read로 제한한다.
 - concurrency group은 `rhwp-upstream-sync-pr`, `cancel-in-progress: false`로 두어 schedule과 수동 실행이 같은 branch/PR 생성을 경쟁하지 않게 한다.
-- current 판정은 `rhwp-core.lock`과 `Sources/HostApp/Resources/rhwp-studio/manifest.json`이 모두 target tag/resolved commit과 일치할 때만 true다.
+- current 판정은 `BASE_BRANCH` content의 `rhwp-core.lock`과 `Sources/HostApp/Resources/rhwp-studio/manifest.json`이 모두 target tag/resolved commit과 일치할 때만 true다. schedule workflow file은 default branch에서 실행될 수 있지만, sync 후보 판단에 쓰는 repository content ref는 base branch다.
 - `dry_run=true`이면 target 조회, current 판정, impact 분류까지만 수행하고 build, push, PR 생성을 하지 않는다.
-- 같은 automation branch 또는 open PR이 이미 있으면 새 PR을 만들지 않는다.
+- 같은 target의 open PR이 이미 있으면 새 PR을 만들지 않는다. 원격 automation branch만 있고 관련 PR이 없으면 branch push 후 PR 생성 실패 가능성이 있어 blocker로 둔다. 같은 head의 PR이 이미 merge됐고 branch만 남아 있으면 blocker가 아니라 cleanup 후보로 표시한다.
 - generated PR body에는 `Automation source: rhwp Upstream Sync PR`만 기록하고 issue close keyword를 쓰지 않는다.
 - upstream WASM build는 upstream root의 `.env.docker`를 사용한다. CI에서는 `.env.docker.example` 존재를 확인한 뒤 runner의 `id -u`, `id -g` 값으로 `.env.docker`를 생성해 Docker container user와 bind mount owner를 맞춘다.
 - upstream WASM/studio build는 Ubuntu runner에서 수행하고, native RustBridge/core lock update는 macOS runner에서 수행한다.
@@ -318,7 +318,7 @@ workflow가 만드는 주요 산출물:
 - `Sync rhwp upstream <tag>` PR
 - `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`
 - `Sources/HostApp/Resources/rhwp-studio/**` asset과 manifest 변경
-- workflow summary의 target, current 판정, impact detection, existing PR, created/skipped 상태
+- workflow summary의 target, base branch content ref, workflow event ref, current 판정, impact detection, existing PR/branch blocker, cleanup 후보, created/skipped 상태
 
 이 workflow는 public release workflow가 아니다. signed/notarized DMG, GitHub Release, Sparkle appcast, Homebrew Cask 반영은 자동으로 수행하지 않으며, 별도 작업 승인과 보호 workflow를 거친다. 실제 schedule 활성화, GitHub App token, `gh pr create`, assignee/reviewer 지정, PR CI 자동 trigger는 workflow가 default branch에 merge된 뒤 GitHub-hosted runner에서 최종 확인한다.
 

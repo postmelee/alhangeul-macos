@@ -93,7 +93,8 @@ xcodebuild -project Alhangeul.xcodeproj \
 `rhwp-core.lock`은 Rust bridge가 링크하는 core 기준이고, `Sources/HostApp/Resources/rhwp-studio/manifest.json`은 WKWebView viewer asset의 source release와 resolved commit 기준이다. 두 provenance는 release note와 검증에서 함께 확인하지만, 자동 sync PR은 public release 결정을 대신하지 않는다.
 
 - `.github/workflows/rhwp-upstream-check.yml`은 read-only 감시 workflow로 upstream latest release와 `rhwp-core.lock`을 비교한다.
-- `.github/workflows/rhwp-upstream-sync-pr.yml`은 upstream target release를 `devel` 대상 `automation/rhwp-<tag>-full-sync` branch에 반영하는 full sync 후보 PR을 만든다.
+- `.github/workflows/rhwp-upstream-sync-pr.yml`은 upstream target release를 `devel` 대상 `automation/rhwp-<tag>-full-sync` branch에 반영하는 full sync 후보 PR을 만든다. current 판정은 `devel` content의 core lock과 bundled studio manifest 기준으로 수행한다.
+- sync workflow는 같은 target의 open PR 또는 PR 없는 branch-only 상태를 중복 생성 blocker로 취급한다. merge 완료 PR의 head branch가 남아 있으면 blocker가 아니라 cleanup 후보로 표시하며, 실제 원격 branch 삭제는 별도 승인 또는 merge 후 cleanup 절차에서 수행한다.
 - sync workflow는 `scripts/update-rhwp-core.sh --check --channel stable --tag <tag>`로 target release compatibility를 먼저 조회하고, 실제 PR 생성 단계에서는 `scripts/update-rhwp-core.sh --channel stable --tag <tag>`와 `scripts/build-rust-macos.sh --update-lock`로 `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`을 갱신한다.
 - sync workflow는 같은 target commit에서 upstream WASM/studio asset을 빌드하고 `scripts/sync-rhwp-studio.sh`로 bundled `rhwp-studio` manifest와 asset을 갱신한다. 이때 upstream root `Cargo.lock`의 sha256은 manifest의 `source_cargo_lock_sha256`에 기록해 studio/WASM dependency graph provenance로 검토한다.
 - full sync 변경 PR은 PR CI에서 `scripts/verify-rhwp-studio-assets.sh`, HostApp build, Rust/core provenance verify, release helper dry-run을 확인한다.
