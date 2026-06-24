@@ -184,7 +184,7 @@ $(category_matches "수동 분류 필요")
 ## release owner 보정 항목
 
 - 각 영향 영역의 실제 사용자-facing 변화 여부를 확인한다.
-- `Cargo.lock` 또는 `source_cargo_lock_sha256` 관련 변경은 dependency graph/provenance 변화인지 확인한다.
+- \`Cargo.lock\` 또는 \`source_cargo_lock_sha256\` 관련 변경은 dependency graph/provenance 변화인지 확인한다.
 - 변경 파일이 여러 영역에 걸치는 경우 checklist를 수동으로 중복 반영한다.
 - 실행하지 않은 smoke는 성공으로 쓰지 않는다.
 - public DMG signing, notarization, appcast, Homebrew Cask는 release 실행 시점 산출물로 다시 검증한다.
