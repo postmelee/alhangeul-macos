@@ -2,7 +2,7 @@
 
 ## 개요
 
-`v0.1.7` public release 준비, `devel -> main` 반영, `v0.1.7` tag 생성, pre-public signed/notarized DMG smoke, official stable GitHub Release 게시, Sparkle appcast와 Pages 배포를 완료했다. Homebrew Cask 반영은 별도 승인 gate로 남겼다.
+`v0.1.7` public release 준비, `devel -> main` 반영, `v0.1.7` tag 생성, pre-public signed/notarized DMG smoke, official stable GitHub Release 게시, Sparkle appcast와 Pages 배포, Homebrew Cask 반영과 smoke를 완료했다.
 
 | 항목 | 값 |
 |------|----|
@@ -13,7 +13,7 @@
 | rhwp | `v0.7.17` / `03351190ec35436e58cbfee0aa9278a8fdc04a59` |
 | Tag commit | `876d2667c2bff60e8599af8bccb45c4cab19099f` |
 | Public DMG SHA256 | `332208ff6f68c78a49d0fc60b895eeabb41d4996dad38fde158fa1935ab4b09d` |
-| Homebrew Cask | 별도 gate 미진행 |
+| Homebrew Cask | `brew install --cask postmelee/tap/alhangeul` |
 
 ## 반영 PR
 
@@ -32,6 +32,16 @@
 - Sparkle appcast는 `sparkle:version=13`, `sparkle:shortVersionString=0.1.7`, public DMG URL, length `156747415`, EdDSA signature를 포함한다.
 - GitHub Pages 배포 job이 성공했고, `updates/v0.1.7.html`과 updates index가 v0.1.7 public DMG를 가리킨다.
 
+## Homebrew
+
+- repository Cask source `Casks/alhangeul.rb`를 `0.1.7`과 public DMG SHA256으로 갱신했다.
+- `postmelee/homebrew-tap` main commit `f1567d507f69e8b58164a879f008e754eda4b35e`에 같은 Cask를 반영했다.
+- `brew style --cask alhangeul`, `brew audit --cask alhangeul`, `brew audit --cask --new alhangeul`이 통과했다.
+- 임시 appdir `/private/tmp/alhangeul-homebrew-smoke-apps` 기준으로 `brew install --cask --appdir=... postmelee/tap/alhangeul`과 `brew uninstall --cask alhangeul` smoke를 완료했다.
+- Homebrew 설치본은 `0.1.7 (13)`였고, `codesign --verify --deep --strict`와 `spctl --assess --type execute`가 통과했다.
+- 검증 환경의 Homebrew 6.0.3은 `postmelee/tap`을 untrusted tap으로 차단해 `brew trust --cask postmelee/tap/alhangeul`을 선행했다. README, Pages, GitHub Release 본문에 같은 보조 명령을 안내한다.
+- GitHub Release body는 Homebrew 설치 명령으로 직접 갱신했고 `scripts/validate-github-body.sh`를 통과했다.
+
 ## 주요 검증
 
 | 검증 | 결과 |
@@ -44,9 +54,11 @@
 | public `.dmg.sha256` 내용 | 통과 |
 | public appcast stable item | 통과 |
 | Pages v0.1.7 release note와 updates index | 통과 |
+| Homebrew Cask source/tap/style/audit | 통과 |
+| Homebrew install/uninstall smoke | 통과 |
+| GitHub Release Homebrew 안내 갱신 | 통과 |
 
 ## 남은 항목
 
-- Homebrew Cask 반영과 tap smoke는 별도 승인 gate에서 진행한다.
 - 기존 public 설치본에서 Sparkle update를 실제로 시작하는 smoke는 별도 수동 검증이 필요하다.
-- Issue #378 close와 branch cleanup은 이 closeout 기록 반영 후 수행한다.
+- Issue #378 close와 branch cleanup은 이 최종 기록 반영 후 수행한다.
