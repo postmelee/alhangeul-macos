@@ -41,6 +41,9 @@
         <a class="header-link" href="./updates/" aria-label="업데이트 안내로 이동">
           업데이트
         </a>
+        <a class="header-link" href="#feedback" aria-label="문의와 제보 안내로 이동">
+          문의/제보
+        </a>
         <a class="header-link" href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer"
           aria-label="GitHub 저장소로 이동">
           GitHub
@@ -174,6 +177,38 @@
       </div>
     </section>
 
+    <section id="feedback" class="feedback-section" aria-labelledby="feedback-title">
+      <div class="feedback-inner">
+        <div class="section-heading feedback-heading">
+          <h2 id="feedback-title">문의/제보</h2>
+          <p>GitHub을 사용하지 않아도 괜찮습니다. 사용 중 불편한 점, 렌더링 차이, 설치 문제를 편하게 알려 주세요.</p>
+        </div>
+        <div class="feedback-options" aria-label="문의와 제보 방법">
+          <article class="feedback-card feedback-card-primary">
+            <h3>이메일로 제보하기</h3>
+            <p>앱 버전, macOS 버전, 증상, 가능하면 스크린샷을 함께 보내 주세요. 문서 원본에는 개인정보가 있을 수 있으니 필요한 부분만 공유해 주세요.</p>
+            <a class="feedback-primary-link"
+              href="mailto:alhangeul.feedback@gmail.com?subject=%5B%EC%95%8C%ED%95%9C%EA%B8%80%20%EB%AC%B8%EC%9D%98%2F%EC%A0%9C%EB%B3%B4%5D&amp;body=%EC%95%B1%20%EB%B2%84%EC%A0%84%3A%0D%0AmacOS%20%EB%B2%84%EC%A0%84%3A%0D%0A%EB%AC%B8%EC%84%9C%20%ED%98%95%EC%8B%9D%28HWP%2FHWPX%29%3A%0D%0A%EC%A6%9D%EC%83%81%3A%0D%0A%EC%9E%AC%ED%98%84%20%EB%B0%A9%EB%B2%95%3A%0D%0A%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%20%EB%98%90%EB%8A%94%20%EC%B0%B8%EA%B3%A0%20%EC%84%A4%EB%AA%85%3A%0D%0A"
+              aria-label="이메일로 알한글 문의 또는 제보 보내기">
+              이메일 보내기
+            </a>
+          </article>
+          <article class="feedback-card">
+            <h3>GitHub Issue로 제보하기</h3>
+            <p>재현 절차, 샘플 파일, 개발 논의가 필요한 버그는 공개 Issue로 남겨 주세요. 진행 상태를 추적하기 가장 좋습니다.</p>
+            <a class="feedback-secondary-link" href="https://github.com/postmelee/alhangeul-macos/issues"
+              target="_blank" rel="noreferrer" aria-label="알한글 GitHub Issues로 이동">
+              Issue 작성하기
+            </a>
+          </article>
+        </div>
+        <p class="feedback-note">
+          이메일 주소는 <a href="mailto:alhangeul.feedback@gmail.com">alhangeul.feedback@gmail.com</a>입니다. 문서에 주민등록번호,
+          연락처, 내부 문서 내용 같은 민감한 정보가 있으면 원본 대신 설명이나 일부 화면만 보내 주세요.
+        </p>
+      </div>
+    </section>
+
     <section class="faq-section" aria-labelledby="faq-title">
       <div class="section-heading">
         <h2 id="faq-title">FAQ</h2>
@@ -222,12 +257,13 @@
         </details>
         <details>
           <summary>오류는 어디에 제보하면 되나요?</summary>
-          <p>미리보기, 썸네일, 공유 등 알한글 저장소가 다루는 기능의 오류는 <a
+          <p>GitHub을 사용하지 않는다면 <a href="mailto:alhangeul.feedback@gmail.com">alhangeul.feedback@gmail.com</a>으로
+            제보해 주세요. 앱 버전, macOS 버전, 증상, 스크린샷을 함께 보내면 확인에 도움이 됩니다. 공개 추적이나 재현 논의가 필요한 오류는 <a
               href="https://github.com/postmelee/alhangeul-macos/issues" target="_blank" rel="noreferrer">알한글 GitHub
-              Issues</a>에 제보해 주세요. 편집 화면은 <a href="https://github.com/edwardkim/rhwp" target="_blank"
+              Issues</a>에 남겨 주세요. 편집 화면은 <a href="https://github.com/edwardkim/rhwp" target="_blank"
               rel="noreferrer"><code>rhwp-studio</code></a>를 WebView로 사용하므로, 렌더링과 편집 엔진 자체의 오류는 <a
               href="https://github.com/edwardkim/rhwp/issues" target="_blank" rel="noreferrer">rhwp upstream</a>에 제보하는
-            것이 가장 정확합니다. 알한글은 upstream 업데이트가 반영되면 macOS 앱에 맞춰 가져옵니다.</p>
+            것이 가장 정확합니다.</p>
         </details>
       </div>
       <p class="faq-credit">
