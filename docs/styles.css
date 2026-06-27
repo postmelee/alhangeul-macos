@@ -37,18 +37,25 @@
 html {
   background: var(--bg);
   color: var(--text);
-  overflow-x: hidden;
+  overflow-x: clip;
   scroll-behavior: smooth;
 }
 
 body {
+  display: flex;
+  flex-direction: column;
   margin: 0;
+  min-height: 100svh;
   min-width: 320px;
-  overflow-x: hidden;
+  overflow-x: clip;
   background: var(--bg);
   color: var(--text);
   font-size: 17px;
   line-height: 1.47;
+}
+
+body > main {
+  flex: 1 0 auto;
 }
 
 a {
@@ -622,9 +629,7 @@ video {
   width: 100%;
   min-height: calc(100svh - var(--header-height));
   scroll-margin-top: var(--header-height);
-  display: grid;
-  place-items: center;
-  padding: 92px 20px;
+  padding: 88px 20px 96px;
   background: #ffffff;
 }
 
@@ -639,40 +644,225 @@ video {
   text-align: center;
 }
 
-.feedback-copy {
+.feedback-methods {
   display: grid;
-  gap: 16px;
-  margin-top: 34px;
-  color: var(--muted);
-  font-size: 20px;
-  line-height: 1.62;
-  word-break: keep-all;
-  text-align: center;
+  gap: 34px;
+  margin-top: 42px;
 }
 
-.feedback-copy p {
+.feedback-method {
+  padding: 0;
+  text-align: left;
+}
+
+.feedback-method h3 {
   margin: 0;
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: 0;
 }
 
-.feedback-text-link,
-.feedback-note a {
+.feedback-method p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+.feedback-email-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.feedback-email-address {
+  min-width: 0;
+  max-width: 100%;
+  color: #3a3a40;
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.feedback-email-address:hover {
   color: var(--accent);
+  text-decoration: none;
+}
+
+.feedback-copy-button,
+.feedback-send-button,
+.feedback-issue-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  border-radius: 999px;
+  padding: 0 13px;
+  font-size: 14px;
+  line-height: 1;
   font-weight: 600;
 }
 
-.feedback-text-link:hover,
-.feedback-note a:hover {
-  text-decoration: underline;
+.feedback-copy-button {
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.feedback-copy-button:hover {
+  border-color: rgba(0, 102, 204, 0.44);
+  color: var(--accent-hover);
+}
+
+.feedback-copy-button.is-copied {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.feedback-copy-button.is-selected {
+  border-color: rgba(0, 102, 204, 0.44);
+  background: rgba(0, 102, 204, 0.06);
+  color: var(--accent);
+}
+
+.feedback-send-button,
+.feedback-issue-button {
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  padding: 0 20px;
+  color: #ffffff;
+  font-size: 15px;
+}
+
+.feedback-send-button:hover,
+.feedback-issue-button:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  color: #ffffff;
+}
+
+.feedback-github-mark {
+  flex: 0 0 auto;
+  fill: currentColor;
 }
 
 .feedback-note {
-  width: min(680px, 100%);
-  margin: 26px auto 0;
+  width: min(640px, 100%);
+  margin: 30px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.62;
+  text-align: left;
+  word-break: keep-all;
+}
+
+.feedback-hero p {
+  width: min(1040px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.feedback-hero p span {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.feedback-privacy-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid rgba(0, 102, 204, 0.18);
+  border-radius: 8px;
+  background: rgba(0, 102, 204, 0.06);
+  padding: 16px 18px;
   color: var(--muted);
   font-size: 15px;
-  line-height: 1.62;
-  text-align: center;
+  line-height: 1.55;
   word-break: keep-all;
+}
+
+.feedback-privacy-icon {
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.feedback-privacy-note div {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.feedback-privacy-note strong {
+  color: var(--text);
+  font-weight: 650;
+}
+
+.feedback-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.feedback-contact-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 24px;
+}
+
+.feedback-card-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: auto;
+}
+
+.feedback-card-actions .feedback-email-row {
+  margin-top: 0;
+}
+
+.feedback-contact-card h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 26px;
+  line-height: 1.18;
+  letter-spacing: 0;
+}
+
+.feedback-card-copy p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+.feedback-contact-card .feedback-send-button,
+.feedback-contact-card .feedback-issue-button {
+  align-self: flex-start;
 }
 
 .faq-section {
@@ -961,6 +1151,24 @@ video {
   text-decoration: underline;
 }
 
+.updates-section .feedback-issue-button {
+  color: var(--accent);
+}
+
+.updates-section .feedback-issue-button:hover {
+  color: var(--accent-hover);
+  text-decoration: none;
+}
+
+.updates-section .feedback-email-address {
+  color: #3a3a40;
+}
+
+.updates-section .feedback-email-address:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
 .updates-section code {
   font: inherit;
   font-weight: 600;
@@ -1044,6 +1252,7 @@ video {
 }
 
 .site-footer {
+  flex: 0 0 auto;
   width: 100%;
   display: grid;
   grid-template-columns: minmax(160px, 1fr) minmax(0, max-content) minmax(160px, 1fr);
@@ -1269,6 +1478,10 @@ video {
   .faq-list {
     grid-template-columns: 1fr;
   }
+
+  .feedback-card-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 
@@ -1436,10 +1649,43 @@ video {
     line-height: 1.42;
   }
 
-  .feedback-copy {
-    margin-top: 24px;
-    font-size: 16px;
+  .feedback-section {
+    padding: 72px 20px 80px;
+  }
+
+  .feedback-methods {
+    margin-top: 30px;
+    gap: 30px;
+  }
+
+  .feedback-method {
+    padding: 0;
+  }
+
+  .feedback-method h3 {
+    font-size: 21px;
+  }
+
+  .feedback-method p {
+    font-size: 15px;
     line-height: 1.58;
+  }
+
+  .feedback-contact-card {
+    padding: 20px;
+  }
+
+  .feedback-contact-card h2 {
+    font-size: 24px;
+  }
+
+  .feedback-card-copy p {
+    font-size: 15px;
+    line-height: 1.58;
+  }
+
+  .feedback-email-address {
+    font-size: 14px;
   }
 
   .feedback-note {
