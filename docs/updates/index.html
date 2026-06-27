@@ -14,7 +14,7 @@
   <title>알한글 업데이트</title>
   <link rel="icon" href="../assets/logo-256@2x.png" />
   <link rel="apple-touch-icon" href="../assets/logo-256@2x.png" />
-  <link rel="stylesheet" href="../styles.css?v=20260510-reveal" />
+  <link rel="stylesheet" href="../styles.css?v=20260626-feedback-page" />
 </head>
 
 <body>
@@ -28,6 +28,9 @@
       <nav class="header-actions" aria-label="주요 링크">
         <a class="header-link" href="../" aria-label="알한글 홈으로 이동">
           홈
+        </a>
+        <a class="header-link" href="../feedback/" aria-label="문의와 제보 안내로 이동">
+          문의/제보
         </a>
         <a class="header-link" href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer"
           aria-label="GitHub 저장소로 이동">
@@ -66,9 +69,7 @@
 
       <section class="updates-section" aria-labelledby="homebrew-title">
         <h2 id="homebrew-title">Homebrew Cask</h2>
-        <p>Homebrew Cask를 사용하는 경우 아래 명령으로 같은 signed/notarized universal DMG를 설치할 수 있습니다.</p>
-        <pre class="code-panel"><code>brew install --cask postmelee/tap/alhangeul</code></pre>
-        <p>Homebrew가 untrusted tap 정책으로 설치를 거부하면 <code>brew trust --cask postmelee/tap/alhangeul</code>을 한 번 실행한 뒤 다시 설치하세요.</p>
+        <p>Homebrew Cask는 GitHub Release DMG 공개 뒤 별도 배포 단계에서 반영합니다. 최신 v0.1.7이 필요하면 위 DMG 다운로드를 사용하세요.</p>
       </section>
 
       <section class="updates-section" aria-labelledby="release-notes-title">

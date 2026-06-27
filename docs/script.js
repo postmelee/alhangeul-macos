@@ -1,6 +1,7 @@
 const faqItems = document.querySelectorAll(".faq-list details");
 const featureSteps = Array.from(document.querySelectorAll("[data-feature-step]"));
 const featureVideos = Array.from(document.querySelectorAll("[data-feature-video]"));
+const feedbackCopyButtons = Array.from(document.querySelectorAll("[data-feedback-copy]"));
 const revealGroups = Array.from(document.querySelectorAll("[data-reveal-group]"));
 const prefersReducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -16,6 +17,88 @@ faqItems.forEach((item) => {
         otherItem.removeAttribute("open");
       }
     });
+  });
+});
+
+const copyTextWithTextarea = (text) => {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.top = "0";
+  textarea.style.left = "0";
+  textarea.style.width = "1px";
+  textarea.style.height = "1px";
+  textarea.style.opacity = "0";
+  textarea.style.pointerEvents = "none";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  const didCopy = document.execCommand("copy");
+  textarea.remove();
+
+  if (!didCopy) {
+    throw new Error("Copy command failed");
+  }
+};
+
+const copyText = async (text) => {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      copyTextWithTextarea(text);
+      return;
+    }
+  }
+
+  copyTextWithTextarea(text);
+};
+
+const selectFallbackEmail = (button) => {
+  const emailAddress = button.closest(".feedback-email-row")?.querySelector(".feedback-email-address");
+  if (!emailAddress || !window.getSelection || !document.createRange) return false;
+
+  const range = document.createRange();
+  range.selectNodeContents(emailAddress);
+
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+  return true;
+};
+
+feedbackCopyButtons.forEach((button) => {
+  const defaultLabel = button.dataset.copyLabel || button.textContent.trim();
+  const successLabel = button.dataset.copySuccess || "복사됨";
+  const fallbackLabel = button.dataset.copyFallback || "주소 선택됨";
+  let resetTimer;
+
+  button.addEventListener("click", async () => {
+    const text = button.dataset.copyText;
+    if (!text) return;
+
+    try {
+      await copyText(text);
+      button.textContent = successLabel;
+      button.classList.add("is-copied");
+      button.classList.remove("is-selected");
+      window.clearTimeout(resetTimer);
+      resetTimer = window.setTimeout(() => {
+        button.textContent = defaultLabel;
+        button.classList.remove("is-copied");
+      }, 1600);
+    } catch {
+      const didSelect = selectFallbackEmail(button);
+      button.textContent = didSelect ? fallbackLabel : defaultLabel;
+      button.classList.toggle("is-selected", didSelect);
+      window.clearTimeout(resetTimer);
+      resetTimer = window.setTimeout(() => {
+        button.textContent = defaultLabel;
+        button.classList.remove("is-selected");
+      }, 1600);
+    }
   });
 });
 
