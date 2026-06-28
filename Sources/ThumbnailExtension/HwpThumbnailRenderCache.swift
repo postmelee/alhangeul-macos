@@ -48,9 +48,9 @@ struct HwpThumbnailRenderRequest {
 
 struct HwpThumbnailRenderSignature: Hashable {
     private static let rendererOptionVersion = "thumbnail-renderer-v1"
-    private static let coreReleaseTag = "v0.7.13"
-    private static let coreCommit = "b3e16ef212af81ef37d973ddb86d6816d3804642"
-    private static let coreEnabledFeatures = "native-skia"
+    private static let coreReleaseTag = RhwpCoreBuildInfo.releaseTag
+    private static let coreCommit = RhwpCoreBuildInfo.commit
+    private static let coreEnabledFeatures = RhwpCoreBuildInfo.enabledFeatures
     private static let maxDimensionPolicyVersion = "skia-max-dimension-0"
 
     let backendPolicy: String
