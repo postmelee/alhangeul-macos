@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 SHARED_FILES=(
+  "$ROOT/Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift"
   "$ROOT/Sources/RhwpCoreBridge/RhwpDocument.swift"
   "$ROOT/Sources/RhwpCoreBridge/RenderTree.swift"
   "$ROOT/Sources/RhwpCoreBridge/FontFallback.swift"

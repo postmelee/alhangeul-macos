@@ -83,6 +83,7 @@ swiftc -parse-as-library \
   -module-cache-path "$SWIFT_MODULE_CACHE" \
   -Xcc -fmodules-cache-path="$CLANG_MODULE_CACHE" \
   -I "$MODULEMAP_DIR" \
+  "$ROOT/Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift" \
   "$ROOT/Sources/RhwpCoreBridge/RhwpDocument.swift" \
   "$ROOT/Sources/RhwpCoreBridge/RenderTree.swift" \
   "$ROOT/Sources/RhwpCoreBridge/PageOverlayImages.swift" \
