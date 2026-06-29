@@ -1,0 +1,537 @@
+{
+  "label": "quicklook-thumbnail-skia-baseline",
+  "version": 1,
+  "issue": 396,
+  "pageIndexBase": 1,
+  "policyPair": [
+    "coreGraphicsOnly",
+    "skiaOptIn"
+  ],
+  "suites": {
+    "quick": {
+      "description": "Fast representative smoke for renderer-related changes.",
+      "intendedUse": "Stage validation and PR review signal.",
+      "defaultPageMode": "first",
+      "expectedSampleCount": 5
+    },
+    "extended": {
+      "description": "Manual readiness sweep across renderer feature categories.",
+      "intendedUse": "Skia default-readiness or release-readiness review.",
+      "defaultPageMode": "manifest",
+      "expectedSampleCount": 20
+    }
+  },
+  "surfaces": {
+    "visual": {
+      "description": "rhwp-studio reference PNG versus native renderer PNG comparison."
+    },
+    "quicklook": {
+      "description": "Quick Look preview surface signal."
+    },
+    "thumbnail": {
+      "description": "Finder thumbnail surface signal."
+    }
+  },
+  "thresholdPolicy": {
+    "hardFailSignals": [
+      "crash",
+      "hang-or-timeout",
+      "empty-output",
+      "decode-failure",
+      "major-structure-missing",
+      "aspect-ratio-mismatch",
+      "fallback-after-skia-without-coregraphics-recovery"
+    ],
+    "changedPercentTriageBands": [
+      {
+        "range": "0-1",
+        "meaning": "Antialiasing or tiny rasterizer differences are likely."
+      },
+      {
+        "range": "1-5",
+        "meaning": "Text edges, 1px rounding, or small object differences need image review."
+      },
+      {
+        "range": "5-10",
+        "meaning": "Document structure must be checked before considering the result acceptable."
+      },
+      {
+        "range": "10+",
+        "meaning": "Large structural difference is likely; default transition is blocked until triaged."
+      }
+    ],
+    "defaults": {
+      "maxAllowedSizeDriftPx": 0,
+      "maxChangedPercentWarn": 10.0,
+      "maxSkiaMinusCGChangedPercentWarn": 5.0,
+      "maxMeanRGBDeltaWarn": 20.0
+    },
+    "knownRiskDisposition": {
+      "regression-sentinel": "Keep in both quick and extended suites and always report Skia minus CoreGraphics delta.",
+      "capture-contamination": "Do not use changed-percent as renderer quality evidence until the reference capture is fixed.",
+      "size-drift-watch": "A 1px thumbnail drift is a triage warning, not a cache failure by itself.",
+      "display-text-sensitive": "Inspect user-facing text and control marks even when changed-percent is low."
+    }
+  },
+  "samples": [
+    {
+      "id": "request-basic-quick",
+      "path": "samples/basic/request.hwp",
+      "category": "single-page-basic",
+      "suite": [
+        "quick",
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook",
+        "thumbnail"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 1,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Healthy single-page smoke sample where #390 showed Skia visual direction better than CoreGraphics."
+    },
+    {
+      "id": "ktx-regression-sentinel",
+      "path": "samples/basic/KTX.hwp",
+      "category": "single-page-regression",
+      "suite": [
+        "quick",
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook",
+        "thumbnail"
+      ],
+      "knownRisk": [
+        "regression-sentinel",
+        "size-drift-watch"
+      ],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 1,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 10.0
+      },
+      "notes": "#390 measured Skia changed percent 46.3795 versus CoreGraphics 30.8921, delta +15.4874pp."
+    },
+    {
+      "id": "bokhakwonseo-capture-sentinel",
+      "path": "samples/복학원서.hwp",
+      "category": "known-risk-capture",
+      "suite": [
+        "quick",
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook",
+        "thumbnail"
+      ],
+      "knownRisk": [
+        "capture-contamination",
+        "display-text-sensitive"
+      ],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 1,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "#390 reference capture included the local font overlay, so visual metrics are tracked but excluded from default-readiness scoring."
+    },
+    {
+      "id": "hwp-multi-001-page-loop",
+      "path": "samples/hwp-multi-001.hwp",
+      "category": "multi-page",
+      "suite": [
+        "quick",
+        "extended"
+      ],
+      "pages": [
+        1,
+        2
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook",
+        "thumbnail"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 1,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Representative HWP multi-page preview sample; quick mode should use page 1."
+    },
+    {
+      "id": "hwpx-01-path",
+      "path": "samples/hwpx/hwpx-01.hwpx",
+      "category": "hwpx",
+      "suite": [
+        "quick",
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook",
+        "thumbnail"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 1,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Representative HWPX path used by #390 readiness measurement."
+    },
+    {
+      "id": "exam-math-equation",
+      "path": "samples/exam_math.hwp",
+      "category": "equation-shape",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Math-heavy document for equation and text layout replay."
+    },
+    {
+      "id": "hwp-img-001-image",
+      "path": "samples/hwp-img-001.hwp",
+      "category": "image",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Image decode and placement representative."
+    },
+    {
+      "id": "img-start-001-image-start",
+      "path": "samples/img-start-001.hwp",
+      "category": "image",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Image-at-start layout representative."
+    },
+    {
+      "id": "pic-crop-01-image-crop",
+      "path": "samples/pic-crop-01.hwp",
+      "category": "image",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Image crop and placement representative."
+    },
+    {
+      "id": "eq-01-equation",
+      "path": "samples/eq-01.hwp",
+      "category": "equation-shape",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Equation rendering sentinel."
+    },
+    {
+      "id": "group-drawing-02-vector",
+      "path": "samples/group-drawing-02.hwp",
+      "category": "equation-shape",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Grouped drawing and vector replay representative."
+    },
+    {
+      "id": "draw-group-vector",
+      "path": "samples/draw-group.hwp",
+      "category": "equation-shape",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Drawing group replay representative."
+    },
+    {
+      "id": "form-01-form",
+      "path": "samples/form-01.hwp",
+      "category": "form-field",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "HWP form control representative."
+    },
+    {
+      "id": "hwpx-form-002-form",
+      "path": "samples/hwpx/form-002.hwpx",
+      "category": "form-field",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "HWPX form control representative."
+    },
+    {
+      "id": "field-01-field",
+      "path": "samples/field-01.hwp",
+      "category": "form-field",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Field rendering representative."
+    },
+    {
+      "id": "footnote-01-footnote",
+      "path": "samples/footnote-01.hwp",
+      "category": "text-font",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Footnote layout and text replay representative."
+    },
+    {
+      "id": "lseg-02-mixed-line",
+      "path": "samples/lseg-02-mixed.hwp",
+      "category": "text-font",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Line segment, mixed Korean/English, and spacing representative."
+    },
+    {
+      "id": "re-font-batang-hancom-font",
+      "path": "samples/re-font-batang-hancom.hwp",
+      "category": "text-font",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Font fallback and Hangul text representative."
+    },
+    {
+      "id": "shortcut-control-mark",
+      "path": "samples/basic/shortcut.hwp",
+      "category": "text-font",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [
+        "display-text-sensitive"
+      ],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Control mark and display text sensitive sample from the #259 taxonomy."
+    },
+    {
+      "id": "table-complex-table",
+      "path": "samples/table-complex.hwp",
+      "category": "table",
+      "suite": [
+        "extended"
+      ],
+      "pages": [
+        1
+      ],
+      "surfaces": [
+        "visual",
+        "quicklook"
+      ],
+      "knownRisk": [],
+      "threshold": {
+        "maxAllowedSizeDriftPx": 0,
+        "maxChangedPercentWarn": 10.0,
+        "maxSkiaMinusCGChangedPercentWarn": 5.0
+      },
+      "notes": "Complex table layout representative."
+    }
+  ]
+}
