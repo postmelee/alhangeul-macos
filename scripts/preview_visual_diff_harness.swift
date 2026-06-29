@@ -82,6 +82,12 @@ struct StudioCaptureMetadata: Codable {
     let filename: String
     let page: Int
     let loadURL: String
+    let automationLoad: Bool
+    let automationStrategy: String
+    let automationPageCount: Int
+    let automationFileName: String
+    let automationSourceFormat: String?
+    let automationLocalFontsSeeded: Bool
     let selector: String
     let rect: RectMetadata
     let canvasRect: RectMetadata
@@ -97,6 +103,14 @@ struct StudioCaptureMetadata: Codable {
     let captureMode: String
     let overlayIncluded: Bool
     let statusText: String
+    let captureContaminated: Bool
+    let uiSuppressed: Bool
+    let modalCount: Int
+    let toastCount: Int
+    let localFontUIVisible: Bool
+    let contaminationText: [String]
+    let preCaptureUI: UIContaminationProbe
+    let postCaptureUI: UIContaminationProbe
     let captureMs: Double
     let settleMs: Int
     let studioReleaseTag: String
@@ -121,6 +135,8 @@ struct StudioCaptureResult {
     let canvasSampleNonWhitePixels: Int
     let canvasSamplePixels: Int
     let captureMode: String
+    let captureContaminated: Bool
+    let uiSuppressed: Bool
     let captureMs: Double
 }
 
@@ -129,7 +145,26 @@ struct AutomationLoadInfo {
     let fileName: String
     let sourceFormat: String?
     let strategy: String?
+    let localFontsSeeded: Bool
     let statusText: String
+}
+
+struct UIContaminationProbe: Codable {
+    let modalCount: Int
+    let toastCount: Int
+    let localFontUIVisible: Bool
+    let contaminationText: [String]
+
+    var captureContaminated: Bool {
+        modalCount > 0 || toastCount > 0 || localFontUIVisible
+    }
+
+    init(dictionary: [String: Any]) {
+        modalCount = intValue(dictionary["modalCount"])
+        toastCount = intValue(dictionary["toastCount"])
+        localFontUIVisible = dictionary["localFontUIVisible"] as? Bool ?? false
+        contaminationText = stringArrayValue(dictionary["contaminationText"])
+    }
 }
 
 struct PNGOutput {
@@ -603,6 +638,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             throw PreviewHarnessError(description: "page \(pageNumber) rect is unavailable")
         }
 
+        let preCaptureUI = try currentUIContaminationProbe()
         var png: PNGOutput
         var captureMode = "canvasDataURL"
         var overlayIncluded = false
@@ -627,6 +663,13 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
                 snapshotSamplePixels = snapshotPNG.samplePixels
             }
         }
+        let postCaptureUI = try currentUIContaminationProbe()
+        let captureContaminated = preCaptureUI.captureContaminated || postCaptureUI.captureContaminated
+        let uiSuppressed = false
+        let modalCount = max(preCaptureUI.modalCount, postCaptureUI.modalCount)
+        let toastCount = max(preCaptureUI.toastCount, postCaptureUI.toastCount)
+        let localFontUIVisible = preCaptureUI.localFontUIVisible || postCaptureUI.localFontUIVisible
+        let contaminationText = combinedContaminationText(preCaptureUI, postCaptureUI)
         try png.data.write(to: pngURL, options: .atomic)
 
         let elapsedMs = Date().timeIntervalSince(startTime) * 1000
@@ -635,6 +678,12 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             filename: inputURL.lastPathComponent,
             page: pageNumber,
             loadURL: loadURL.absoluteString,
+            automationLoad: true,
+            automationStrategy: automationLoadInfo.strategy ?? "unknown",
+            automationPageCount: automationLoadInfo.pageCount,
+            automationFileName: automationLoadInfo.fileName.isEmpty ? inputURL.lastPathComponent : automationLoadInfo.fileName,
+            automationSourceFormat: automationLoadInfo.sourceFormat,
+            automationLocalFontsSeeded: automationLoadInfo.localFontsSeeded,
             selector: pageState.selector,
             rect: snapshotRectMetadata,
             canvasRect: canvasRectMetadata,
@@ -650,6 +699,14 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             captureMode: captureMode,
             overlayIncluded: overlayIncluded,
             statusText: pageState.statusText,
+            captureContaminated: captureContaminated,
+            uiSuppressed: uiSuppressed,
+            modalCount: modalCount,
+            toastCount: toastCount,
+            localFontUIVisible: localFontUIVisible,
+            contaminationText: contaminationText,
+            preCaptureUI: preCaptureUI,
+            postCaptureUI: postCaptureUI,
             captureMs: elapsedMs,
             settleMs: settleMilliseconds,
             studioReleaseTag: manifest.source_release_tag,
@@ -675,6 +732,8 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             canvasSampleNonWhitePixels: pageState.canvasSampleNonWhitePixels,
             canvasSamplePixels: pageState.canvasSamplePixels,
             captureMode: captureMode,
+            captureContaminated: captureContaminated,
+            uiSuppressed: uiSuppressed,
             captureMs: elapsedMs
         )
     }
@@ -945,6 +1004,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             fileName: dictionary["fileName"] as? String ?? "",
             sourceFormat: dictionary["sourceFormat"] as? String,
             strategy: dictionary["strategy"] as? String,
+            localFontsSeeded: dictionary["localFontsSeeded"] as? Bool ?? false,
             statusText: dictionary["statusText"] as? String ?? ""
         )
     }
@@ -1008,6 +1068,34 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             )
         }
         return PageState(dictionary: dictionary)
+    }
+
+    private func currentUIContaminationProbe() throws -> UIContaminationProbe {
+        let value = try evaluateJavaScript(uiContaminationProbeScript(), timeout: 5, phase: .settle)
+        guard let json = value as? String,
+              let data = json.data(using: .utf8),
+              let dictionary = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else {
+            throw PreviewHarnessPhaseError(
+                phase: .settle,
+                detail: "unexpected UI contamination probe result: \(describeJavaScriptValue(value))"
+            )
+        }
+        return UIContaminationProbe(dictionary: dictionary)
+    }
+
+    private func combinedContaminationText(_ first: UIContaminationProbe, _ second: UIContaminationProbe) -> [String] {
+        var seen = Set<String>()
+        var values: [String] = []
+        for text in first.contaminationText + second.contaminationText {
+            let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !normalized.isEmpty, !seen.contains(normalized) else {
+                continue
+            }
+            seen.insert(normalized)
+            values.append(normalized)
+        }
+        return values
     }
 
     private func evaluateJavaScript(
@@ -1490,6 +1578,92 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             });
           }
         })()
+        """
+    }
+
+    private func uiContaminationProbeScript() -> String {
+        """
+        JSON.stringify((() => {
+          const isVisible = (element) => {
+            if (!element || !(element instanceof Element)) {
+              return false;
+            }
+            const style = window.getComputedStyle(element);
+            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) {
+              return false;
+            }
+            const rect = element.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+          };
+          const uniqueElements = (selectors) => {
+            const seen = new Set();
+            const elements = [];
+            for (const selector of selectors) {
+              for (const element of Array.from(document.querySelectorAll(selector))) {
+                if (seen.has(element)) {
+                  continue;
+                }
+                seen.add(element);
+                if (isVisible(element)) {
+                  elements.push(element);
+                }
+              }
+            }
+            return elements;
+          };
+          const outermostElements = (elements) => elements.filter((element) =>
+            !elements.some((other) => other !== element && other.contains(element))
+          );
+          const textOf = (element) => (element.textContent || '').replace(/\\s+/g, ' ').trim();
+          const snippet = (text) => text.length > 160 ? `${text.slice(0, 157)}...` : text;
+          const modalElements = outermostElements(uniqueElements([
+            'dialog',
+            '[role="dialog"]',
+            '[aria-modal="true"]',
+            '.modal-overlay',
+            '.dialog-wrap',
+            '.modal',
+            '[class*="modal"]',
+            '[id*="modal"]'
+          ]));
+          const toastElements = outermostElements(uniqueElements([
+            '#rhwp-toast-container > *',
+            '#rhwp-toast-container [role="status"]',
+            '.toast',
+            '.snackbar',
+            '.notification',
+            '[class*="toast"]',
+            '[class*="snackbar"]',
+            '[class*="notification"]'
+          ]));
+          const statusElements = uniqueElements(['#sb-message', '[role="alert"]']);
+          const candidateElements = [...modalElements, ...toastElements, ...statusElements];
+          const localFontPattern = /로컬\\s*(글꼴|폰트)|글꼴\\s*감지|폰트\\s*감지|Local\\s*Font/i;
+          const contaminationTexts = [];
+          for (const element of candidateElements) {
+            const text = textOf(element);
+            if (!text) {
+              continue;
+            }
+            if (modalElements.includes(element) || toastElements.includes(element) || localFontPattern.test(text)) {
+              contaminationTexts.push(snippet(text));
+            }
+          }
+          const dedupedTexts = [];
+          const seenTexts = new Set();
+          for (const text of contaminationTexts) {
+            if (!seenTexts.has(text)) {
+              seenTexts.add(text);
+              dedupedTexts.push(text);
+            }
+          }
+          return {
+            modalCount: modalElements.length,
+            toastCount: toastElements.length,
+            localFontUIVisible: candidateElements.some((element) => localFontPattern.test(textOf(element))),
+            contaminationText: dedupedTexts.slice(0, 12)
+          };
+        })())
         """
     }
 
@@ -2009,7 +2183,7 @@ struct PreviewVisualDiffHarness {
                     formatDouble(diff.meanRGBDelta),
                     "\(diff.maxRGBDelta)",
                     boundsString(diff.bounds),
-                    result.captureMode,
+                    studioCaptureSummary(result),
                     native.backendUsed + fallbackSuffix(native.fallbackReason),
                     formatMilliseconds(native.renderMs),
                     markdownCell(result.pngURL.path),
@@ -2271,6 +2445,16 @@ private func doubleValue(_ value: Any?, default defaultValue: Double = 0) -> Dou
     return defaultValue
 }
 
+private func stringArrayValue(_ value: Any?) -> [String] {
+    if let strings = value as? [String] {
+        return strings
+    }
+    if let values = value as? [Any] {
+        return values.compactMap { $0 as? String }
+    }
+    return []
+}
+
 private func markdownCell(_ value: String) -> String {
     value.replacingOccurrences(of: "|", with: "/")
 }
@@ -2342,6 +2526,12 @@ private func boundsString(_ bounds: CGRect?) -> String {
         return "-"
     }
     return "\(Int(bounds.minX)),\(Int(bounds.minY)) \(Int(bounds.width))x\(Int(bounds.height))"
+}
+
+private func studioCaptureSummary(_ result: StudioCaptureResult) -> String {
+    let contamination = result.captureContaminated ? "ui=contaminated" : "ui=clean"
+    let suppression = result.uiSuppressed ? ";suppressed=true" : ""
+    return "\(result.captureMode);\(contamination)\(suppression)"
 }
 
 private func renderPolicyName(_ policy: HwpPageRenderPolicy) -> String {
