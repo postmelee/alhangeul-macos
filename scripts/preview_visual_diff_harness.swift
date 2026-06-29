@@ -1492,7 +1492,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             let overlayCount = 0;
 
             for (const element of Array.from(content.querySelectorAll('*'))) {
-              if (element === target || element.tagName.toLowerCase() === 'canvas') {
+              if (element === target) {
                 continue;
               }
               const style = window.getComputedStyle(element);
