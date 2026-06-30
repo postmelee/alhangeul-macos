@@ -69,6 +69,8 @@
     "knownRiskDisposition": {
       "regression-sentinel": "Keep in both quick and extended suites and always report Skia minus CoreGraphics delta.",
       "capture-contamination": "Do not use changed-percent as renderer quality evidence until the reference capture is fixed.",
+      "clean-capture-sentinel": "Keep automation capture metadata visible and require captureContaminated=false before using visual metrics.",
+      "layout-overflow-watch": "Treat layout overflow as renderer/layout risk, not as reference capture contamination.",
       "size-drift-watch": "A 1px thumbnail drift is a triage warning, not a cache failure by itself.",
       "display-text-sensitive": "Inspect user-facing text and control marks even when changed-percent is low."
     }
@@ -128,7 +130,7 @@
     {
       "id": "bokhakwonseo-capture-sentinel",
       "path": "samples/복학원서.hwp",
-      "category": "known-risk-capture",
+      "category": "known-risk-layout",
       "suite": [
         "quick",
         "extended"
@@ -142,7 +144,8 @@
         "thumbnail"
       ],
       "knownRisk": [
-        "capture-contamination",
+        "clean-capture-sentinel",
+        "layout-overflow-watch",
         "display-text-sensitive"
       ],
       "threshold": {
@@ -150,7 +153,7 @@
         "maxChangedPercentWarn": 10.0,
         "maxSkiaMinusCGChangedPercentWarn": 5.0
       },
-      "notes": "#390 reference capture included the local font overlay, so visual metrics are tracked but excluded from default-readiness scoring."
+      "notes": "#398 fixed local font UI capture contamination. Require automationLoad=true and captureContaminated=false, then treat remaining LAYOUT_OVERFLOW/displayText sensitivity as renderer-layout triage."
     },
     {
       "id": "hwp-multi-001-page-loop",

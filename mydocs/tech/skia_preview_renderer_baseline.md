@@ -46,7 +46,7 @@ quick suite는 다음 5개로 고정한다.
 |----|------|------|
 | `request-basic-quick` | `samples/basic/request.hwp` | 건강한 단일 page 기준선 |
 | `ktx-regression-sentinel` | `samples/basic/KTX.hwp` | #390 Skia visual regression sentinel |
-| `bokhakwonseo-capture-sentinel` | `samples/복학원서.hwp` | reference capture contamination / displayText 민감 sample |
+| `bokhakwonseo-capture-sentinel` | `samples/복학원서.hwp` | #398 clean capture sentinel / layout overflow와 displayText 민감 sample |
 | `hwp-multi-001-page-loop` | `samples/hwp-multi-001.hwp` | HWP multi-page preview loop |
 | `hwpx-01-path` | `samples/hwpx/hwpx-01.hwpx` | HWPX path |
 
@@ -89,12 +89,14 @@ Thumbnail surface가 포함된 quick sample은 #390의 1px dimension 차이를 �
 |-----------|------|
 | `regression-sentinel` | quick/extended 모두에서 유지하고 Skia-CG `ChangedPercent` delta를 항상 노출 |
 | `capture-contamination` | reference capture가 정리되기 전에는 renderer 품질 점수로 사용하지 않음 |
+| `clean-capture-sentinel` | #398 이후 automation capture metadata가 clean인지 확인하고 visual metric을 renderer triage 입력으로 사용 |
+| `layout-overflow-watch` | capture contamination이 아니라 renderer/layout warning으로 별도 해석 |
 | `size-drift-watch` | 1px thumbnail drift를 triage warning으로 기록하되 cache 실패와 분리 |
 | `display-text-sensitive` | diff 수치가 낮아도 사용자-facing text와 control mark를 눈검증 |
 
 `KTX.hwp`는 `regression-sentinel`이다. #390에서 Skia changed percent는 `46.3795%`, CoreGraphics는 `30.8921%`였고 delta는 `+15.4874pp`였다. 이 sample이 악화된 상태라면 Skia default 전환은 막는다.
 
-`복학원서.hwp`는 `capture-contamination` sentinel이다. #390에서 rhwp-studio reference PNG에 `로컬 글꼴 감지` overlay가 포함되어 CoreGraphics/Skia 모두 99%대 changed percent가 나왔다. 이 sample은 visual metric이 아니라 capture 안정성과 displayText 민감성 확인용으로 해석한다.
+`복학원서.hwp`는 #398 이후 `clean-capture-sentinel`이다. #390에서는 rhwp-studio reference PNG에 `로컬 글꼴 감지` overlay가 포함되어 CoreGraphics/Skia 모두 99%대 changed percent가 나왔지만, #398에서 automation load와 local font UI contamination metadata를 추가해 `captureContaminated=false` 기준을 확보했다. 따라서 이 sample은 더 이상 local font modal contamination 때문에 제외하지 않고, 남은 `LAYOUT_OVERFLOW`와 displayText 민감성을 renderer/layout triage로 분리해 해석한다.
 
 ## Surface 해석
 
