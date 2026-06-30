@@ -120,3 +120,54 @@ Stage 3 helper는 manifest를 읽어 다음을 수행해야 한다.
 6. `knownRisk` sample은 failure와 별도 column으로 표시한다.
 
 이 계약은 Skia default 전환 기준이 아니라 반복 가능한 측정 구조다. default 판단은 Stage 4 실행 결과와 #392/#389/#393 후속 입력을 종합해 별도 승인으로 결정한다.
+
+## 실행 Runbook
+
+Quick smoke:
+
+```bash
+./scripts/preview-renderer-baseline.sh build.noindex/skia-baseline-quick --suite quick
+```
+
+Extended sweep:
+
+```bash
+./scripts/preview-renderer-baseline.sh build.noindex/skia-baseline-extended --suite extended
+```
+
+입력만 검증할 때:
+
+```bash
+./scripts/preview-renderer-baseline.sh --validate-only --suite extended --page-mode manifest
+```
+
+기본 해석 순서:
+
+1. top-level `summary.md`의 `Runs`에서 policy/page별 exit code를 본다.
+2. `Pair Summary`에서 `Triage`, `KnownRisk`, `SkiaMinusCGChangedPercent`, `NativeSizeDriftPx`를 먼저 본다.
+3. `FAIL` row는 `Phase` 또는 status prefix의 `[phase:...]`를 기준으로 `readiness`, `render`, `comparison`을 분리한다.
+4. `warn:skia-delta`는 Skia가 같은 reference 대비 CoreGraphics보다 악화된 signal이다. default 전환 blocker 후보로 본다.
+5. `warn:skia-changed`는 reference 대비 changed percent가 threshold를 넘었다는 signal이다. Skia가 CoreGraphics보다 나쁘다는 뜻은 아니므로 diff PNG 눈검증으로 본다.
+6. `known-risk`는 무시가 아니라 별도 해석이다. `clean-capture-sentinel`처럼 capture가 clean한 경우에는 visual metric을 renderer triage 입력으로 쓴다.
+
+## 2026-06-30 Baseline 해석
+
+Task #396 Stage 4 기준 quick suite는 CoreGraphics/Skia 양쪽 모두 exit 0이다. extended suite는 page-1 batch에서 readiness failure가 섞여 exit 1이었지만, helper가 실패 phase와 sample을 summary에 보존했다.
+
+주요 기준:
+
+| sample | 기준 해석 |
+|--------|-----------|
+| `KTX.hwp` | quick/extended 모두 `warn:skia-delta`, `+15.4874pp`. Skia default 전환 blocker 성격의 regression sentinel |
+| `복학원서.hwp` | quick/extended 모두 `domComposite;ui=clean`, `known-risk`. capture contamination이 아니라 layout overflow/displayText 민감성으로 해석 |
+| `field-01.hwp` | extended에서 `warn:skia-delta`, `+8.9979pp`. text/form field 계열 Skia regression 후보 |
+| `form-002.hwpx` | CoreGraphics/Skia 양쪽에서 persistent `readiness` document load timeout. renderer 품질 실패로 세지 않음 |
+| `table-complex.hwp`, `pic-crop-01.hwp` | extended full batch에서는 readiness timeout이 있었지만 소규모 재시도에서 통과. transient readiness failure로 기록 |
+
+현재 운영 기준:
+
+- PR smoke에는 quick suite를 우선 사용한다.
+- extended suite는 Skia default 판단 전 수동 sweep으로 사용한다.
+- extended suite를 CI hard gate로 올리기 전에는 retry/flake 정책이 필요하다.
+- `form-002.hwpx`는 rhwp-studio automation readiness 개선 전까지 renderer 품질 판단에서 제외하거나 persistent readiness failure로 별도 표기한다.
+- Thumbnail/Finder cache 판단은 이 visual suite만으로 완료하지 않는다. #392, #389 후속 작업의 surface smoke가 필요하다.
