@@ -170,4 +170,5 @@ Task #396 Stage 4 기준 quick suite는 CoreGraphics/Skia 양쪽 모두 exit 0�
 - extended suite는 Skia default 판단 전 수동 sweep으로 사용한다.
 - extended suite를 CI hard gate로 올리기 전에는 retry/flake 정책이 필요하다.
 - `form-002.hwpx`는 rhwp-studio automation readiness 개선 전까지 renderer 품질 판단에서 제외하거나 persistent readiness failure로 별도 표기한다.
-- Thumbnail/Finder cache 판단은 이 visual suite만으로 완료하지 않는다. #392, #389 후속 작업의 surface smoke가 필요하다.
+- Thumbnail/Finder cache 판단은 visual suite만으로 완료하지 않는다. #389에서 provider diagnostic path, resolver contract, internal thumbnail cache signature separation smoke는 확보했다.
+- 남은 Thumbnail surface 판단은 #392의 `maximumPixelSize -> Skia maxDimension/scale/rounding` mapping 실험과 visual/size drift 해석을 함께 본다.
