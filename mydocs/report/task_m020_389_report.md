@@ -24,11 +24,12 @@ Finder Thumbnail production default는 CoreGraphics로 유지하면서, DEBUG/in
 
 | 파일 | 내용 |
 |------|------|
+| `Sources/Shared/HwpPageImageRenderer.swift` | `HwpPageRenderPolicy.identifier` 단일 source-of-truth 추가 |
 | `Sources/ThumbnailExtension/HwpThumbnailPolicyResolver.swift` | DEBUG/internal thumbnail render policy resolver 추가 |
 | `Sources/ThumbnailExtension/HwpThumbnailProvider.swift` | resolver policy 전달, `renderedPageResult(for:)` 사용, cache/backend/fallback/timing 로그 추가 |
 | `Alhangeul.xcodeproj/project.pbxproj` | `xcodegen generate`로 신규 resolver source를 target에 반영 |
 | `scripts/smoke-thumbnail-skia-policy.sh` | resolver source compile list 추가, smoke binary `-DDEBUG` compile |
-| `scripts/thumbnail_skia_policy_smoke.swift` | resolver contract detail, cache signature separation summary/detail 추가 |
+| `scripts/thumbnail_skia_policy_smoke.swift` | resolver contract detail, Debug/Release 기대값, cache signature separation summary/detail 추가 |
 | `mydocs/tech/skia_quicklook_thumbnail_backend.md` | #389 기준 DEBUG opt-in provider diagnostic path와 대표 smoke 기준선 기록 |
 | `mydocs/tech/skia_preview_renderer_baseline.md` | #389 완료 후 Thumbnail/Finder cache 판단 상태와 #392 잔여 범위 갱신 |
 | `mydocs/plans/task_m020_389.md` | 수행계획서 |
@@ -112,6 +113,28 @@ Provider success log는 다음 진단 값을 포함한다.
 
 `복학원서.hwp` smoke 중 기존 `LAYOUT_OVERFLOW` warning 3줄이 stderr에 출력됐다. render status는 모두 `OK`였고 fallback은 발생하지 않았다.
 
+### PR review follow-up smoke
+
+Copilot review 반영 후 실행:
+
+```bash
+./scripts/check-no-appkit.sh
+git diff --check
+xcodebuild -project Alhangeul.xcodeproj -scheme ThumbnailExtension -configuration Debug \
+  -derivedDataPath build.noindex/DerivedDataTask389ReviewFix CODE_SIGNING_ALLOWED=NO build
+./scripts/smoke-thumbnail-skia-policy.sh build.noindex/task389-review-thumbnail-policy \
+  samples/basic/request.hwp samples/basic/KTX.hwp
+```
+
+Release 조건은 smoke runner를 `-DDEBUG` 없이 별도 컴파일해 `samples/basic/request.hwp`로 확인했다.
+
+결과:
+
+- `check-no-appkit.sh`, `git diff --check`: 성공.
+- `xcodebuild ... DerivedDataTask389ReviewFix ... build`: 성공. macOS build는 `BUILD SUCCEEDED`.
+- Debug smoke: resolver contract `OK`, 16 render rows 모두 `OK`.
+- Release smoke: `ResolverBuild: RELEASE`, `skia`/`skiaOptIn` env case가 모두 expected/resolved `coreGraphicsOnly`.
+
 ## #392 handoff
 
 #392 `Thumbnail Skia maxDimension mapping 실험`에는 다음 기준을 넘긴다.
@@ -143,7 +166,8 @@ Provider success log는 다음 진단 값을 포함한다.
 | Stage 2 | `e7a210f` | provider Skia opt-in resolver와 cache/backend/fallback logging 구현 |
 | Stage 3 | `49e9b25` | thumbnail diagnostic smoke resolver/cache separation 보강 |
 | Stage 4 | `183fcae` | 대표 샘플 smoke와 #392 handoff 정리 |
-| Stage 5 | 이번 커밋 | 최종 보고서와 기술 문서 기준선 정리 |
+| Stage 5 | `6047332` | 최종 보고서와 기술 문서 기준선 정리 |
+| PR review follow-up | 이번 커밋 | Copilot review 피드백 반영 |
 
 ## 검증 결과
 
@@ -160,6 +184,8 @@ xcodebuild -project Alhangeul.xcodeproj -scheme ThumbnailExtension -configuratio
 ./scripts/smoke-thumbnail-skia-policy.sh build.noindex/task389-thumbnail-policy-representative \
   samples/복학원서.hwp samples/basic/KTX.hwp samples/basic/request.hwp \
   samples/hwpx/hwpx-01.hwpx samples/hwp-multi-001.hwp
+./scripts/smoke-thumbnail-skia-policy.sh build.noindex/task389-review-thumbnail-policy \
+  samples/basic/request.hwp samples/basic/KTX.hwp
 ```
 
 결과:
@@ -170,6 +196,8 @@ xcodebuild -project Alhangeul.xcodeproj -scheme ThumbnailExtension -configuratio
 - `xcodebuild ... ThumbnailExtension ... build`: 성공. macOS build는 `BUILD SUCCEEDED`. Xcode/CoreSimulator version warning은 출력됐지만 build 실패는 아니었다.
 - quick smoke: 성공. 16 rows 모두 `OK`.
 - representative smoke: 성공. 40 rows 모두 `OK`.
+- PR review follow-up Debug smoke: 성공. 16 rows 모두 `OK`.
+- PR review follow-up Release smoke: 성공. `skia`/`skiaOptIn` env case 모두 `coreGraphicsOnly`로 resolve.
 - `git diff --check`: 각 단계에서 성공.
 
 최종 보고서 검증:
@@ -186,13 +214,13 @@ git log --oneline devel..local/task389
 
 | 항목 | 상태 | 처리 |
 |------|------|------|
-| Release env opt-in 차단 | source `#if DEBUG`로 보장 | 별도 Release smoke는 이번 범위 밖 |
+| Release env opt-in 차단 | source `#if DEBUG`와 Release smoke로 확인 | 계속 유지 |
 | forced fallback reason fixture | 없음 | 정상 샘플에서는 fallback `-`; forced failure fixture는 필요 시 별도 작업 |
 | Finder/LaunchServices system cache | 범위 밖 | 이번 smoke는 extension 내부 render cache contract 검증 |
 | 1px pixel size drift | 관측됨 | #392 maxDimension mapping 실험으로 이관 |
 | Skia visual default 판단 | 범위 밖 | #396 visual suite, #392, #393 등 후속 입력과 함께 판단 |
 
-## PR 게시 준비 메모
+## PR 게시 메모
 
 권장 PR 제목:
 
@@ -208,6 +236,6 @@ Task #389: Thumbnail Skia opt-in diagnostic path와 cache logging 추가
 - smoke helper가 resolver contract와 policy별 cache signature separation을 과도한 product coupling 없이 검증하는지
 - #392로 넘긴 1px pixel size drift가 #389 범위에 섞이지 않았는지
 
-## 작업지시자 승인 요청
+## PR review follow-up
 
-Task #389의 구현, 대표 smoke, 최종 보고서, 기술 문서 갱신, 오늘할일 완료 처리를 마쳤다. PR 게시 단계 진입 여부를 승인해 달라.
+PR #401 Copilot review의 identifier 중복과 Release resolver 기대값 피드백은 본 follow-up 커밋에서 반영했다.

@@ -14,6 +14,15 @@ enum HwpPageRenderBackend {
 enum HwpPageRenderPolicy {
     case coreGraphicsOnly
     case skiaOptIn
+
+    var identifier: String {
+        switch self {
+        case .coreGraphicsOnly:
+            return "coreGraphicsOnly"
+        case .skiaOptIn:
+            return "skiaOptIn"
+        }
+    }
 }
 
 enum HwpPageRenderFallbackReason {

@@ -68,7 +68,7 @@ struct HwpThumbnailRenderSignature: Hashable {
         coreEnabledFeatures: String = Self.coreEnabledFeatures,
         maxDimensionPolicyVersion: String = Self.maxDimensionPolicyVersion
     ) {
-        self.backendPolicy = Self.policyIdentifier(policy)
+        self.backendPolicy = policy.identifier
         self.rendererOptionVersion = rendererOptionVersion
         self.coreReleaseTag = coreReleaseTag
         self.coreCommit = coreCommit
@@ -85,15 +85,6 @@ struct HwpThumbnailRenderSignature: Hashable {
             coreEnabledFeatures,
             maxDimensionPolicyVersion
         ].joined(separator: "|")
-    }
-
-    private static func policyIdentifier(_ policy: HwpPageRenderPolicy) -> String {
-        switch policy {
-        case .coreGraphicsOnly:
-            return "coreGraphicsOnly"
-        case .skiaOptIn:
-            return "skiaOptIn"
-        }
     }
 }
 

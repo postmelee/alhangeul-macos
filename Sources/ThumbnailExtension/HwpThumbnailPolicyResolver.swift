@@ -26,12 +26,7 @@ enum HwpThumbnailPolicyResolver {
     }
 
     static func identifier(for policy: HwpPageRenderPolicy) -> String {
-        switch policy {
-        case .coreGraphicsOnly:
-            return "coreGraphicsOnly"
-        case .skiaOptIn:
-            return "skiaOptIn"
-        }
+        policy.identifier
     }
 
     private static func normalizedValue(_ value: String) -> String {

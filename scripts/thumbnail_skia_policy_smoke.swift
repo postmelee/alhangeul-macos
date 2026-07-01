@@ -197,13 +197,13 @@ struct ThumbnailSkiaPolicySmoke {
         let coreGraphics = measurePolicy(
             inputURL: inputURL,
             requests: requests,
-            policyName: "coreGraphicsOnly",
+            policyName: HwpPageRenderPolicy.coreGraphicsOnly.identifier,
             policy: .coreGraphicsOnly
         )
         let skiaOptIn = measurePolicy(
             inputURL: inputURL,
             requests: requests,
-            policyName: "skiaOptIn",
+            policyName: HwpPageRenderPolicy.skiaOptIn.identifier,
             policy: .skiaOptIn
         )
         return FileMeasurement(
@@ -492,14 +492,16 @@ struct ThumbnailSkiaPolicySmoke {
 
     private static func measureResolverContract() -> [ResolverMeasurement] {
         let key = HwpThumbnailPolicyResolver.environmentKey
+        let coreGraphicsOnly = HwpPageRenderPolicy.coreGraphicsOnly.identifier
+        let expectedSkiaEnvPolicy = expectedSkiaEnvPolicyIdentifier
         let cases: [(caseName: String, envValue: String?, expectedPolicy: String)] = [
-            ("missing", nil, "coreGraphicsOnly"),
-            ("empty", "", "coreGraphicsOnly"),
-            ("invalid", "invalid", "coreGraphicsOnly"),
-            ("coreGraphics", "coreGraphics", "coreGraphicsOnly"),
-            ("coreGraphicsOnly", "coreGraphicsOnly", "coreGraphicsOnly"),
-            ("skia", "skia", "skiaOptIn"),
-            ("skiaOptIn", "skiaOptIn", "skiaOptIn")
+            ("missing", nil, coreGraphicsOnly),
+            ("empty", "", coreGraphicsOnly),
+            ("invalid", "invalid", coreGraphicsOnly),
+            ("coreGraphics", "coreGraphics", coreGraphicsOnly),
+            ("coreGraphicsOnly", "coreGraphicsOnly", coreGraphicsOnly),
+            ("skia", "skia", expectedSkiaEnvPolicy),
+            ("skiaOptIn", "skiaOptIn", expectedSkiaEnvPolicy)
         ]
 
         return cases.map { testCase in
@@ -512,6 +514,14 @@ struct ThumbnailSkiaPolicySmoke {
                 resolvedPolicy: HwpThumbnailPolicyResolver.identifier(for: resolved)
             )
         }
+    }
+
+    private static var expectedSkiaEnvPolicyIdentifier: String {
+#if DEBUG
+        HwpPageRenderPolicy.skiaOptIn.identifier
+#else
+        HwpPageRenderPolicy.coreGraphicsOnly.identifier
+#endif
     }
 
     private static func resolverStatusSummary(_ measurements: [ResolverMeasurement]) -> String {
