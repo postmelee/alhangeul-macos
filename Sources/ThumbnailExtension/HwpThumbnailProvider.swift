@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import OSLog
 import QuickLookThumbnailing
 
@@ -12,20 +13,25 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
         for request: QLFileThumbnailRequest,
         _ handler: @escaping (QLThumbnailReply?, Error?) -> Void
     ) {
-        Self.logger.debug("Thumbnail requested file=\(request.fileURL.lastPathComponent, privacy: .public) max=\(Int(request.maximumSize.width), privacy: .public)x\(Int(request.maximumSize.height), privacy: .public) scale=\(request.scale, privacy: .public)")
+        let policy = HwpThumbnailPolicyResolver.resolve()
+        let policyID = HwpThumbnailPolicyResolver.identifier(for: policy)
+        Self.logger.debug("Thumbnail requested file=\(request.fileURL.lastPathComponent, privacy: .public) policy=\(policyID, privacy: .public) max=\(Int(request.maximumSize.width), privacy: .public)x\(Int(request.maximumSize.height), privacy: .public) scale=\(request.scale, privacy: .public)")
         do {
             let renderRequest = try HwpThumbnailRenderRequest(
                 fileURL: request.fileURL,
                 maximumSize: request.maximumSize,
-                scale: request.scale
+                scale: request.scale,
+                policy: policy
             )
-            Self.logger.debug("Thumbnail render enqueued file=\(request.fileURL.lastPathComponent, privacy: .public) pixels=\(Int(renderRequest.maximumPixelSize.width), privacy: .public)x\(Int(renderRequest.maximumPixelSize.height), privacy: .public)")
-            HwpThumbnailRenderCache.shared.renderedPage(for: renderRequest) { result in
+            Self.logger.debug("Thumbnail render enqueued file=\(request.fileURL.lastPathComponent, privacy: .public) policy=\(policyID, privacy: .public) pixels=\(Int(renderRequest.maximumPixelSize.width), privacy: .public)x\(Int(renderRequest.maximumPixelSize.height), privacy: .public)")
+            HwpThumbnailRenderCache.shared.renderedPageResult(for: renderRequest) { result in
                 switch result {
-                case .success(let renderedPage):
+                case .success(let renderResult):
+                    let renderedPage = renderResult.page
+                    let diagnostics = renderedPage.diagnostics
                     let contextSize = Self.aspectFit(renderedPage.size, within: request.maximumSize)
                     let image = renderedPage.image
-                    Self.logger.debug("Thumbnail ready file=\(request.fileURL.lastPathComponent, privacy: .public) context=\(Int(contextSize.width), privacy: .public)x\(Int(contextSize.height), privacy: .public) page=\(Int(renderedPage.size.width), privacy: .public)x\(Int(renderedPage.size.height), privacy: .public)")
+                    Self.logger.debug("Thumbnail ready file=\(request.fileURL.lastPathComponent, privacy: .public) policy=\(policyID, privacy: .public) cache=\(renderResult.cacheEvent.description, privacy: .public) requestedBucket=\(Self.bucketDescription(renderResult.requestedKey), privacy: .public) matchedBucket=\(Self.bucketDescription(renderResult.matchedKey), privacy: .public) backend=\(Self.backendDescription(diagnostics.backendUsed), privacy: .public) fallback=\(Self.fallbackDescription(diagnostics.fallbackReason), privacy: .public) renderMs=\(Self.durationDescription(diagnostics.durationMs.totalMs), privacy: .public) pixels=\(Self.sizeDescription(diagnostics.pixelSize), privacy: .public) context=\(Self.sizeDescription(contextSize), privacy: .public) page=\(Self.sizeDescription(renderedPage.size), privacy: .public)")
                     let reply = QLThumbnailReply(contextSize: contextSize) { context in
                         Self.drawPageImage(image, in: context, size: contextSize)
                         return true
@@ -34,20 +40,20 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
                     handler(reply, nil)
 
                 case .failure(let error) where HwpDocumentFallbackClassifier.shouldUseThumbnailFallback(for: error):
-                    Self.logger.warning("Thumbnail fallback file=\(request.fileURL.lastPathComponent, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
+                    Self.logger.warning("Thumbnail fallback file=\(request.fileURL.lastPathComponent, privacy: .public) policy=\(policyID, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
                     handler(Self.fallbackReply(for: request), nil)
 
                 case .failure(let error):
-                    Self.logger.error("Thumbnail failed file=\(request.fileURL.lastPathComponent, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
+                    Self.logger.error("Thumbnail failed file=\(request.fileURL.lastPathComponent, privacy: .public) policy=\(policyID, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
                     handler(nil, error)
                 }
             }
         } catch {
             if HwpDocumentFallbackClassifier.shouldUseThumbnailFallback(for: error) {
-                Self.logger.warning("Thumbnail fallback before render file=\(request.fileURL.lastPathComponent, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
+                Self.logger.warning("Thumbnail fallback before render file=\(request.fileURL.lastPathComponent, privacy: .public) policy=\(policyID, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
                 handler(Self.fallbackReply(for: request), nil)
             } else {
-                Self.logger.error("Thumbnail failed before render file=\(request.fileURL.lastPathComponent, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
+                Self.logger.error("Thumbnail failed before render file=\(request.fileURL.lastPathComponent, privacy: .public) policy=\(policyID, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
                 handler(nil, error)
             }
         }
@@ -103,6 +109,54 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
             return CGRect(origin: .zero, size: fallbackSize)
         }
         return clipBounds
+    }
+
+    private static func bucketDescription(_ key: HwpThumbnailCacheKey) -> String {
+        "\(key.pixelWidth)x\(key.pixelHeight)"
+    }
+
+    private static func backendDescription(_ backend: HwpPageRenderBackend) -> String {
+        switch backend {
+        case .coreGraphics:
+            return "coreGraphics"
+        case .skia:
+            return "skia"
+        case .embeddedThumbnail:
+            return "embeddedThumbnail"
+        }
+    }
+
+    private static func fallbackDescription(_ reason: HwpPageRenderFallbackReason?) -> String {
+        guard let reason else {
+            return "-"
+        }
+
+        switch reason {
+        case .ffiUnavailable:
+            return "ffiUnavailable"
+        case .invalidDocumentHandle:
+            return "invalidDocumentHandle"
+        case .invalidPageIndex:
+            return "invalidPageIndex"
+        case .invalidRenderOptions:
+            return "invalidRenderOptions"
+        case .invalidPageSize:
+            return "invalidPageSize"
+        case .skiaRenderFailure:
+            return "skiaRenderFailure"
+        case .pngDecodeFailure:
+            return "pngDecodeFailure"
+        case .memoryTimeoutFallback:
+            return "memoryTimeoutFallback"
+        }
+    }
+
+    private static func durationDescription(_ milliseconds: Double) -> String {
+        String(format: "%.2f", milliseconds)
+    }
+
+    private static func sizeDescription(_ size: CGSize) -> String {
+        "\(Int(size.width))x\(Int(size.height))"
     }
 
     private static func errorDescription(_ error: Error) -> String {
