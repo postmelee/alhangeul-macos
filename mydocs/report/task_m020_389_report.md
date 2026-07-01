@@ -126,7 +126,7 @@ xcodebuild -project Alhangeul.xcodeproj -scheme ThumbnailExtension -configuratio
   samples/basic/request.hwp samples/basic/KTX.hwp
 ```
 
-Release 조건은 smoke runner를 `-DDEBUG` 없이 별도 컴파일해 `samples/basic/request.hwp`로 확인했다.
+Release 조건은 smoke runner를 `-DDEBUG` 없이 별도 컴파일해 `samples/basic/request.hwp`로 확인했다. 두 번째 Copilot review 반영 후에는 `resolve()` 기본 인자에서 `ProcessInfo.processInfo.environment`를 제거해, Release 호출 경로가 환경변수 딕셔너리를 만들지 않도록 정리했다.
 
 결과:
 
@@ -134,6 +134,7 @@ Release 조건은 smoke runner를 `-DDEBUG` 없이 별도 컴파일해 `samples/
 - `xcodebuild ... DerivedDataTask389ReviewFix ... build`: 성공. macOS build는 `BUILD SUCCEEDED`.
 - Debug smoke: resolver contract `OK`, 16 render rows 모두 `OK`.
 - Release smoke: `ResolverBuild: RELEASE`, `skia`/`skiaOptIn` env case가 모두 expected/resolved `coreGraphicsOnly`.
+- Release provider call: `resolve()` 기본 호출은 `nil` default를 사용하므로 `ProcessInfo.processInfo.environment`를 평가하지 않는다.
 
 ## #392 handoff
 
@@ -167,7 +168,8 @@ Release 조건은 smoke runner를 `-DDEBUG` 없이 별도 컴파일해 `samples/
 | Stage 3 | `49e9b25` | thumbnail diagnostic smoke resolver/cache separation 보강 |
 | Stage 4 | `183fcae` | 대표 샘플 smoke와 #392 handoff 정리 |
 | Stage 5 | `6047332` | 최종 보고서와 기술 문서 기준선 정리 |
-| PR review follow-up | 이번 커밋 | Copilot review 피드백 반영 |
+| PR review follow-up 1 | `31d26f1` | identifier 단일화와 smoke Release 기대값 반영 |
+| PR review follow-up 2 | 이번 커밋 | Release `resolve()` 기본 호출의 environment 평가 제거 |
 
 ## 검증 결과
 
@@ -214,7 +216,7 @@ git log --oneline devel..local/task389
 
 | 항목 | 상태 | 처리 |
 |------|------|------|
-| Release env opt-in 차단 | source `#if DEBUG`와 Release smoke로 확인 | 계속 유지 |
+| Release env opt-in 차단 | source `#if DEBUG`, `nil` default, Release smoke로 확인 | 계속 유지 |
 | forced fallback reason fixture | 없음 | 정상 샘플에서는 fallback `-`; forced failure fixture는 필요 시 별도 작업 |
 | Finder/LaunchServices system cache | 범위 밖 | 이번 smoke는 extension 내부 render cache contract 검증 |
 | 1px pixel size drift | 관측됨 | #392 maxDimension mapping 실험으로 이관 |
@@ -238,4 +240,4 @@ Task #389: Thumbnail Skia opt-in diagnostic path와 cache logging 추가
 
 ## PR review follow-up
 
-PR #401 Copilot review의 identifier 중복과 Release resolver 기대값 피드백은 본 follow-up 커밋에서 반영했다.
+PR #401 Copilot review의 identifier 중복, Release resolver 기대값, Release `resolve()` 기본 호출 environment 평가 피드백은 follow-up 커밋에서 반영했다.

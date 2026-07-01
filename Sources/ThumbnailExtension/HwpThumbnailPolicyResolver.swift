@@ -4,9 +4,10 @@ enum HwpThumbnailPolicyResolver {
     static let environmentKey = "ALHANGEUL_THUMBNAIL_RENDER_POLICY"
 
     static func resolve(
-        environment: [String: String] = ProcessInfo.processInfo.environment
+        environment: [String: String]? = nil
     ) -> HwpPageRenderPolicy {
 #if DEBUG
+        let environment = environment ?? ProcessInfo.processInfo.environment
         guard let rawValue = environment[environmentKey] else {
             return .coreGraphicsOnly
         }
@@ -20,7 +21,6 @@ enum HwpThumbnailPolicyResolver {
             return .coreGraphicsOnly
         }
 #else
-        _ = environment
         return .coreGraphicsOnly
 #endif
     }
