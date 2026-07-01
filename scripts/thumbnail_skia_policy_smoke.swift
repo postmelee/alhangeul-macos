@@ -43,6 +43,17 @@ struct RenderMeasurement {
     let elapsedSeconds: Double?
 }
 
+struct ResolverMeasurement {
+    let caseName: String
+    let envValue: String?
+    let expectedPolicy: String
+    let resolvedPolicy: String
+
+    var status: String {
+        expectedPolicy == resolvedPolicy ? "OK" : "FAIL"
+    }
+}
+
 struct FileMeasurement {
     let fileName: String
     let filePath: String
@@ -51,11 +62,25 @@ struct FileMeasurement {
     let skiaOptIn: [RenderMeasurement]
 }
 
+struct CacheSeparationMeasurement {
+    let fileName: String
+    let status: String
+    let coreGraphicsFirstCache: String
+    let skiaOptInFirstCache: String
+    let coreGraphicsSignature: String
+    let skiaOptInSignature: String
+    let note: String
+}
+
 @main
 struct ThumbnailSkiaPolicySmoke {
     static func main() throws {
         let parsed = try parseArguments(Array(CommandLine.arguments.dropFirst()))
         try FileManager.default.createDirectory(at: parsed.outputDir, withIntermediateDirectories: true)
+
+        let resolverMeasurements = measureResolverContract()
+        try writeResolverDetail(resolverMeasurements, outputDir: parsed.outputDir)
+        print("resolver: \(resolverStatusSummary(resolverMeasurements))")
 
         var measurements: [FileMeasurement] = []
         for inputURL in parsed.inputs {
@@ -65,7 +90,12 @@ struct ThumbnailSkiaPolicySmoke {
             print("\(measurement.fileName): \(rowSummary(measurement))")
         }
 
-        try writeSummary(measurements, requests: parsed.requests, outputDir: parsed.outputDir)
+        try writeSummary(
+            measurements,
+            requests: parsed.requests,
+            resolverMeasurements: resolverMeasurements,
+            outputDir: parsed.outputDir
+        )
     }
 
     private struct ParsedArguments {
@@ -121,6 +151,14 @@ struct ThumbnailSkiaPolicySmoke {
         RequestPreset(name: "medium-after-large", maximumSize: CGSize(width: 256, height: 256), scale: 2),
         RequestPreset(name: "small-after-large", maximumSize: CGSize(width: 128, height: 128), scale: 1)
     ]
+
+    private static var resolverBuildMode: String {
+#if DEBUG
+        "DEBUG"
+#else
+        "RELEASE"
+#endif
+    }
 
     private static func parseRequest(_ value: String) throws -> RequestPreset {
         let nameAndRest = value.split(separator: ":", maxSplits: 1).map(String.init)
@@ -270,6 +308,7 @@ struct ThumbnailSkiaPolicySmoke {
     private static func writeSummary(
         _ measurements: [FileMeasurement],
         requests: [RequestPreset],
+        resolverMeasurements: [ResolverMeasurement],
         outputDir: URL
     ) throws {
         var lines: [String] = []
@@ -277,6 +316,11 @@ struct ThumbnailSkiaPolicySmoke {
         lines.append("")
         lines.append("GeneratedAt: \(ISO8601DateFormatter().string(from: Date()))")
         lines.append("Requests: \(requests.map(\.display).joined(separator: ", "))")
+        lines.append("ResolverBuild: \(resolverBuildMode)")
+        lines.append("ResolverEnvKey: \(HwpThumbnailPolicyResolver.environmentKey)")
+        lines.append("ResolverContract: \(resolverStatusSummary(resolverMeasurements))")
+        lines.append("")
+        appendResolverContract(resolverMeasurements, lines: &lines)
         lines.append("")
         lines.append("| File | Policy | Request | Status | Cache | RequestedBucket | MatchedBucket | Backend | Fallback | Pixel | OutputBytes | PNGBytes | RenderMs | Seconds |")
         lines.append("|------|--------|---------|--------|-------|-----------------|---------------|---------|----------|-------|-------------|----------|----------|---------|")
@@ -285,6 +329,15 @@ struct ThumbnailSkiaPolicySmoke {
             for render in measurement.coreGraphics + measurement.skiaOptIn {
                 lines.append(summaryRow(fileName: measurement.fileName, render: render))
             }
+        }
+
+        lines.append("")
+        lines.append("## Cache Signature Separation")
+        lines.append("")
+        lines.append("| File | Status | CoreFirstCache | SkiaFirstCache | CoreSignature | SkiaSignature | Note |")
+        lines.append("|------|--------|----------------|----------------|---------------|---------------|------|")
+        for measurement in measurements {
+            lines.append(cacheSeparationRow(cacheSeparation(for: measurement)))
         }
 
         let failed = measurements.flatMap { $0.coreGraphics + $0.skiaOptIn }.filter { $0.status == "FAIL" }
@@ -312,9 +365,56 @@ struct ThumbnailSkiaPolicySmoke {
         var lines: [String] = []
         lines.append("File: \(measurement.filePath)")
         lines.append("FileBytes: \(measurement.fileBytes)")
+        appendCacheSeparation(cacheSeparation(for: measurement), lines: &lines)
         appendPolicy(measurement.coreGraphics, name: "CoreGraphics", lines: &lines)
         appendPolicy(measurement.skiaOptIn, name: "SkiaOptIn", lines: &lines)
         try lines.joined(separator: "\n").write(to: detailURL, atomically: true, encoding: .utf8)
+    }
+
+    private static func writeResolverDetail(
+        _ resolverMeasurements: [ResolverMeasurement],
+        outputDir: URL
+    ) throws {
+        var lines: [String] = []
+        lines.append("# Thumbnail Policy Resolver Contract")
+        lines.append("")
+        lines.append("ResolverBuild: \(resolverBuildMode)")
+        lines.append("ResolverEnvKey: \(HwpThumbnailPolicyResolver.environmentKey)")
+        lines.append("ResolverContract: \(resolverStatusSummary(resolverMeasurements))")
+        lines.append("")
+        appendResolverContract(resolverMeasurements, lines: &lines)
+        try lines.joined(separator: "\n").write(
+            to: outputDir.appendingPathComponent("resolver-contract.txt"),
+            atomically: true,
+            encoding: .utf8
+        )
+    }
+
+    private static func appendResolverContract(
+        _ resolverMeasurements: [ResolverMeasurement],
+        lines: inout [String]
+    ) {
+        lines.append("## Resolver Contract")
+        lines.append("")
+        lines.append("| Case | EnvValue | Expected | Resolved | Status |")
+        lines.append("|------|----------|----------|----------|--------|")
+        for measurement in resolverMeasurements {
+            lines.append(resolverRow(measurement))
+        }
+    }
+
+    private static func appendCacheSeparation(
+        _ check: CacheSeparationMeasurement,
+        lines: inout [String]
+    ) {
+        lines.append("")
+        lines.append("[CacheSignatureSeparation]")
+        lines.append("Status: \(check.status)")
+        lines.append("CoreFirstCache: \(check.coreGraphicsFirstCache)")
+        lines.append("SkiaFirstCache: \(check.skiaOptInFirstCache)")
+        lines.append("CoreSignature: \(check.coreGraphicsSignature)")
+        lines.append("SkiaSignature: \(check.skiaOptInSignature)")
+        lines.append("Note: \(check.note)")
     }
 
     private static func appendPolicy(_ renders: [RenderMeasurement], name: String, lines: inout [String]) {
@@ -361,11 +461,94 @@ struct ThumbnailSkiaPolicySmoke {
         ].joined(separator: " | ").wrappedTableRow
     }
 
+    private static func resolverRow(_ measurement: ResolverMeasurement) -> String {
+        [
+            markdownCell(measurement.caseName),
+            markdownCell(measurement.envValue ?? "<missing>"),
+            measurement.expectedPolicy,
+            measurement.resolvedPolicy,
+            measurement.status
+        ].joined(separator: " | ").wrappedTableRow
+    }
+
+    private static func cacheSeparationRow(_ check: CacheSeparationMeasurement) -> String {
+        [
+            markdownCell(check.fileName),
+            check.status,
+            check.coreGraphicsFirstCache,
+            check.skiaOptInFirstCache,
+            markdownCell(check.coreGraphicsSignature),
+            markdownCell(check.skiaOptInSignature),
+            markdownCell(check.note)
+        ].joined(separator: " | ").wrappedTableRow
+    }
+
     private static func rowSummary(_ measurement: FileMeasurement) -> String {
         let renders = measurement.coreGraphics + measurement.skiaOptIn
         let failed = renders.filter { $0.status == "FAIL" }.count
         let cacheEvents = renders.map { $0.cacheEvent ?? "fail" }.joined(separator: ",")
         return "renders=\(renders.count) failed=\(failed) cache=\(cacheEvents)"
+    }
+
+    private static func measureResolverContract() -> [ResolverMeasurement] {
+        let key = HwpThumbnailPolicyResolver.environmentKey
+        let cases: [(caseName: String, envValue: String?, expectedPolicy: String)] = [
+            ("missing", nil, "coreGraphicsOnly"),
+            ("empty", "", "coreGraphicsOnly"),
+            ("invalid", "invalid", "coreGraphicsOnly"),
+            ("coreGraphics", "coreGraphics", "coreGraphicsOnly"),
+            ("coreGraphicsOnly", "coreGraphicsOnly", "coreGraphicsOnly"),
+            ("skia", "skia", "skiaOptIn"),
+            ("skiaOptIn", "skiaOptIn", "skiaOptIn")
+        ]
+
+        return cases.map { testCase in
+            let environment = testCase.envValue.map { [key: $0] } ?? [:]
+            let resolved = HwpThumbnailPolicyResolver.resolve(environment: environment)
+            return ResolverMeasurement(
+                caseName: testCase.caseName,
+                envValue: testCase.envValue,
+                expectedPolicy: testCase.expectedPolicy,
+                resolvedPolicy: HwpThumbnailPolicyResolver.identifier(for: resolved)
+            )
+        }
+    }
+
+    private static func resolverStatusSummary(_ measurements: [ResolverMeasurement]) -> String {
+        let failed = measurements.filter { $0.status != "OK" }.count
+        return failed == 0 ? "OK" : "FAIL(\(failed))"
+    }
+
+    private static func cacheSeparation(for measurement: FileMeasurement) -> CacheSeparationMeasurement {
+        let coreFirst = measurement.coreGraphics.first
+        let skiaFirst = measurement.skiaOptIn.first
+        let coreCache = coreFirst?.cacheEvent ?? "-"
+        let skiaCache = skiaFirst?.cacheEvent ?? "-"
+        let coreSignature = coreFirst?.signature ?? "-"
+        let skiaSignature = skiaFirst?.signature ?? "-"
+        let signaturesDiffer = coreSignature != "-"
+            && skiaSignature != "-"
+            && coreSignature != skiaSignature
+        let firstRequestsMiss = coreCache == "miss" && skiaCache == "miss"
+        let status = signaturesDiffer && firstRequestsMiss ? "OK" : "WARN"
+        let note: String
+        if signaturesDiffer && firstRequestsMiss {
+            note = "policy signatures are separated"
+        } else if !signaturesDiffer {
+            note = "policy signatures are not separated"
+        } else {
+            note = "first policy requests did not both miss"
+        }
+
+        return CacheSeparationMeasurement(
+            fileName: measurement.fileName,
+            status: status,
+            coreGraphicsFirstCache: coreCache,
+            skiaOptInFirstCache: skiaCache,
+            coreGraphicsSignature: coreSignature,
+            skiaOptInSignature: skiaSignature,
+            note: note
+        )
     }
 
     private static func bucketString(_ key: HwpThumbnailCacheKey) -> String {

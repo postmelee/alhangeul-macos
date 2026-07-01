@@ -80,6 +80,7 @@ rm -rf "$SWIFT_MODULE_CACHE" "$CLANG_MODULE_CACHE"
 mkdir -p "$SWIFT_MODULE_CACHE" "$CLANG_MODULE_CACHE"
 
 swiftc -parse-as-library \
+  -DDEBUG \
   -module-cache-path "$SWIFT_MODULE_CACHE" \
   -Xcc -fmodules-cache-path="$CLANG_MODULE_CACHE" \
   -I "$MODULEMAP_DIR" \
@@ -92,6 +93,7 @@ swiftc -parse-as-library \
   "$ROOT/Sources/RhwpCoreBridge/CGTreeRenderer.swift" \
   "$ROOT/Sources/Shared/HwpPageImageRenderer.swift" \
   "$ROOT/Sources/Shared/HwpNativePageCompositor.swift" \
+  "$ROOT/Sources/ThumbnailExtension/HwpThumbnailPolicyResolver.swift" \
   "$ROOT/Sources/ThumbnailExtension/HwpThumbnailRenderCache.swift" \
   "$ROOT/scripts/thumbnail_skia_policy_smoke.swift" \
   "$LIB" \
