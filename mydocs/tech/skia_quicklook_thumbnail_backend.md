@@ -266,6 +266,16 @@ Skia optional backend는 다음 순서로 진행한다.
 - Skia opt-in backend: 모든 opt-in row `skia`
 - 산출물: `build.noindex/task258-thumbnail-policy-representative/summary.txt`
 
+2026-07-01 #389 Thumbnail diagnostic path 기준선:
+
+- Provider default는 계속 `coreGraphicsOnly`다.
+- `HwpThumbnailPolicyResolver`는 `ALHANGEUL_THUMBNAIL_RENDER_POLICY`를 DEBUG/internal 진단 경로에서만 해석한다.
+- 허용 값은 `skia`, `skiaOptIn`, `coreGraphics`, `coreGraphicsOnly`다. missing/empty/invalid 값과 Release build는 모두 `coreGraphicsOnly`로 수렴한다.
+- `HwpThumbnailProvider`는 `renderedPageResult(for:)`를 사용해 success log에 `policy`, `cache`, `requestedBucket`, `matchedBucket`, `backend`, `fallback`, `renderMs`, `pixels`를 남긴다.
+- `scripts/smoke-thumbnail-skia-policy.sh`는 resolver contract와 cache signature separation을 summary/detail에 기록한다.
+- 2026-07-01 대표 smoke 결과는 5 files x 2 policies x 4 requests = 40 rows 모두 `OK`, resolver contract `OK`, cache signature separation 5 rows 모두 `OK`였다.
+- 동일 `1024x1024` bucket에서 Skia pixel size가 CoreGraphics보다 긴 축 기준 1px 크게 나오는 패턴은 cache 실패가 아니라 #392 `maxDimension` mapping 실험 입력으로 분리한다.
+
 비책임:
 
 - Quick Look provider와 다중 페이지 PDF path는 #257에서 처리한다.
