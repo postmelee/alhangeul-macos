@@ -18,8 +18,9 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         do {
             let documentContext = try HwpPreviewPDFRenderer.load(fileURL: request.fileURL)
             if documentContext.pageCount == 1 {
-                logger.debug("Preview selected PNG reply file=\(documentContext.filename, privacy: .public) pages=\(documentContext.pageCount, privacy: .public) size=\(Int(documentContext.contentSize.width), privacy: .public)x\(Int(documentContext.contentSize.height), privacy: .public)")
-                return try Self.pngReply(documentContext)
+                let mode = HwpQuickLookPNGReplyModeResolver.resolve()
+                logger.debug("Preview selected PNG reply file=\(documentContext.filename, privacy: .public) mode=\(mode.identifier, privacy: .public) pages=\(documentContext.pageCount, privacy: .public) size=\(Int(documentContext.contentSize.width), privacy: .public)x\(Int(documentContext.contentSize.height), privacy: .public)")
+                return try Self.pngReply(documentContext, mode: mode)
             } else {
                 logger.debug("Preview selected PDF reply file=\(documentContext.filename, privacy: .public) pages=\(documentContext.pageCount, privacy: .public) size=\(Int(documentContext.contentSize.width), privacy: .public)x\(Int(documentContext.contentSize.height), privacy: .public)")
                 return try Self.pdfReply(documentContext)
@@ -37,37 +38,37 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         }
     }
 
-    private static func pngReply(_ documentContext: HwpPreviewDocumentContext) throws -> QLPreviewReply {
-        logger.debug("Preview rendering PNG file=\(documentContext.filename, privacy: .public)")
+    private static func pngReply(
+        _ documentContext: HwpPreviewDocumentContext,
+        mode: HwpPreviewPNGReplyMode
+    ) throws -> QLPreviewReply {
+        logger.debug("Preview rendering PNG file=\(documentContext.filename, privacy: .public) mode=\(mode.identifier, privacy: .public)")
         let filename = documentContext.filename
-        let contentSize = documentContext.contentSize
-        let page = try HwpPageImageRenderer.renderPage(
-            document: documentContext.document,
-            pageIndex: 0,
-            policy: .coreGraphicsOnly
+        let result = try HwpPreviewPNGRenderer.render(
+            context: documentContext,
+            mode: mode
         )
-        logRenderedPageDiagnostics(page, replyType: "PNG", filename: filename)
-        let data = try HwpPageImageRenderer.encodePNG(page.image)
-        logger.debug("Preview PNG ready file=\(filename, privacy: .public) bytes=\(data.count, privacy: .public)")
+        let data = result.data
+        logPNGDiagnostics(result, filename: filename)
+        logger.debug("Preview PNG ready file=\(filename, privacy: .public) mode=\(result.diagnostics.outputMode.identifier, privacy: .public) bytes=\(data.count, privacy: .public)")
 
         return QLPreviewReply(
             dataOfContentType: .png,
-            contentSize: contentSize
+            contentSize: result.contentSize
         ) { reply in
             reply.title = filename
             return data
         }
     }
 
-    private static func logRenderedPageDiagnostics(
-        _ page: HwpRenderedPage,
-        replyType: String,
+    private static func logPNGDiagnostics(
+        _ result: HwpRenderedPreviewPNG,
         filename: String
     ) {
-        let diagnostics = page.diagnostics
-        logger.debug("Preview \(replyType, privacy: .public) render backend file=\(filename, privacy: .public) policy=\(String(describing: diagnostics.policy), privacy: .public) backend=\(String(describing: diagnostics.backendUsed), privacy: .public) fallback=\(fallbackReasonDescription(diagnostics.fallbackReason), privacy: .public)")
-        logger.debug("Preview \(replyType, privacy: .public) render output pixel=\(Int(diagnostics.pixelSize.width), privacy: .public)x\(Int(diagnostics.pixelSize.height), privacy: .public) pngBytes=\(optionalIntDescription(diagnostics.pngBytes), privacy: .public)")
-        logger.debug("Preview \(replyType, privacy: .public) render timing totalMs=\(millisecondsDescription(diagnostics.durationMs.totalMs), privacy: .public) skiaMs=\(optionalMillisecondsDescription(diagnostics.durationMs.skiaRenderMs), privacy: .public) decodeMs=\(optionalMillisecondsDescription(diagnostics.durationMs.pngDecodeMs), privacy: .public) coreMs=\(optionalMillisecondsDescription(diagnostics.durationMs.coreGraphicsRenderMs), privacy: .public)")
+        let diagnostics = result.diagnostics
+        logger.debug("Preview PNG render backend file=\(filename, privacy: .public) requestedMode=\(diagnostics.requestedMode.identifier, privacy: .public) outputMode=\(diagnostics.outputMode.identifier, privacy: .public) backend=\(backendDescription(diagnostics.backendUsed), privacy: .public) fallback=\(optionalStringDescription(diagnostics.fallbackReason), privacy: .public)")
+        logger.debug("Preview PNG render output file=\(filename, privacy: .public) bytes=\(diagnostics.outputBytes, privacy: .public) skiaPNGBytes=\(optionalIntDescription(diagnostics.skiaPNGBytes), privacy: .public) pixel=\(optionalSizeDescription(diagnostics.pngPixelSize), privacy: .public)")
+        logger.debug("Preview PNG render timing totalMs=\(millisecondsDescription(diagnostics.durationMs.totalMs), privacy: .public) skiaMs=\(optionalMillisecondsDescription(diagnostics.durationMs.skiaRenderMs), privacy: .public) validateMs=\(optionalMillisecondsDescription(diagnostics.durationMs.pngHeaderValidateMs), privacy: .public) decodeMs=\(optionalMillisecondsDescription(diagnostics.durationMs.pngDecodeMs), privacy: .public) encodeMs=\(optionalMillisecondsDescription(diagnostics.durationMs.pngEncodeMs), privacy: .public) coreMs=\(optionalMillisecondsDescription(diagnostics.durationMs.coreGraphicsRenderMs), privacy: .public)")
     }
 
     private static func pdfReply(_ documentContext: HwpPreviewDocumentContext) throws -> QLPreviewReply {
@@ -137,18 +138,22 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         return "\(type(of: error))(domain=\(nsError.domain), code=\(nsError.code))"
     }
 
-    private static func fallbackReasonDescription(_ reason: HwpPageRenderFallbackReason?) -> String {
-        guard let reason else {
-            return "none"
-        }
-        return String(describing: reason)
-    }
-
     private static func optionalIntDescription(_ value: Int?) -> String {
         guard let value else {
             return "none"
         }
         return String(value)
+    }
+
+    private static func optionalStringDescription(_ value: String?) -> String {
+        value ?? "none"
+    }
+
+    private static func optionalSizeDescription(_ value: CGSize?) -> String {
+        guard let value else {
+            return "none"
+        }
+        return "\(Int(value.width))x\(Int(value.height))"
     }
 
     private static func optionalMillisecondsDescription(_ value: Double?) -> String {
@@ -160,5 +165,16 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
 
     private static func millisecondsDescription(_ value: Double) -> String {
         String(format: "%.3f", value)
+    }
+
+    private static func backendDescription(_ backend: HwpPageRenderBackend) -> String {
+        switch backend {
+        case .coreGraphics:
+            return "coreGraphics"
+        case .skia:
+            return "skia"
+        case .embeddedThumbnail:
+            return "embeddedThumbnail"
+        }
     }
 }
