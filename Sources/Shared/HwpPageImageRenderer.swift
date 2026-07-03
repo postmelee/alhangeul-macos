@@ -187,7 +187,8 @@ enum HwpPageImageRenderer {
                 document: document,
                 pageIndex: pageIndex,
                 pageSize: pageSize,
-                scale: scale
+                scale: scale,
+                maxDimension: skiaMaxDimension(from: maximumPixelSize)
             )
             if let page = attempt.page {
                 return page
@@ -330,13 +331,14 @@ enum HwpPageImageRenderer {
         document: RhwpDocument,
         pageIndex: Int,
         pageSize: CGSize,
-        scale: CGFloat
+        scale: CGFloat,
+        maxDimension: Int
     ) -> SkiaRenderAttempt {
         let skiaStart = DispatchTime.now().uptimeNanoseconds
         let png = document.renderPagePNG(
             at: pageIndex,
-            scale: Double(scale),
-            maxDimension: 0
+            scale: maxDimension > 0 ? 0 : Double(scale),
+            maxDimension: maxDimension
         )
         let skiaRenderMs = elapsedMilliseconds(since: skiaStart)
 
@@ -528,5 +530,17 @@ enum HwpPageImageRenderer {
             maximumPixelSize.height / pageSize.height
         )
         return scale.isFinite && scale > 0 ? scale : 1
+    }
+
+    private static func skiaMaxDimension(from maximumPixelSize: CGSize?) -> Int {
+        guard let maximumPixelSize else {
+            return 0
+        }
+        let longestEdge = max(maximumPixelSize.width, maximumPixelSize.height)
+        guard longestEdge.isFinite, longestEdge > 0 else {
+            return 0
+        }
+        let cappedEdge = min(ceil(longestEdge), CGFloat(Int32.max))
+        return Int(cappedEdge)
     }
 }
