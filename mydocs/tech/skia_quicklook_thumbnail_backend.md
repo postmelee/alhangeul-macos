@@ -90,6 +90,17 @@ Quick Look은 사용자에게 문서 내용을 크게 보여주는 surface이므
 
 Quick Look에서 Skia가 직접 PNG bytes를 반환하는 장점은 단일 페이지 PNG reply에서 Swift `CGImage` 생성과 PNG 재인코딩을 줄일 수 있다는 점이다. 반면 다중 페이지 PDF는 `CGImage` decode가 필요하므로 초기 성능 이득을 단정하지 않는다.
 
+2026-07-03 #393 Quick Look direct PNG opt-in 실험 결과:
+
+- Provider default는 계속 `coreGraphics`다.
+- `HwpQuickLookPNGReplyModeResolver`는 `ALHANGEUL_QUICKLOOK_PNG_REPLY_MODE`를 DEBUG/internal 진단 경로에서만 해석한다. missing/empty/invalid 값과 Release build는 모두 `coreGraphics`로 수렴한다.
+- 허용 값은 `coreGraphics`/`coreGraphicsOnly`, `skia`/`skiaDecode`/`skiaOptIn`, `direct`/`skiaDirect`다. `skia` 계열은 기존 decode/re-encode path, `direct` 계열은 Skia PNG bytes 직접 반환 path다.
+- `skiaDirect`는 단일 페이지 context에서 `RhwpDocument.renderPagePNG(at: 0, scale: 1, maxDimension: 0)`을 호출하고, PNG signature와 IHDR만 검증한 뒤 `QLPreviewReply` PNG data로 반환한다.
+- direct 실패는 Quick Look text fallback으로 바로 내려가지 않고 CoreGraphics PNG reply로 fallback한다.
+- 대표 smoke 결과는 단일 페이지 3개 샘플 `request.hwp`, `KTX.hwp`, `복학원서.hwp` 모두 `skiaDirect` backend `skia`, fallback 0건이었다. direct latency는 각각 `0.023481s`, `0.042532s`, `0.051415s`로 기존 `skiaDecode`보다 빨랐다.
+- 다중 페이지 2개 샘플 `hwp-multi-001.hwp`, `hwpx-01.hwpx`는 `skiaDirect=N/A`로 기록되어 direct path가 적용되지 않았다.
+- 이 결과는 Quick Look 단일 PNG opt-in fast path 후보가 유효하다는 입력이다. `KTX.hwp` Skia visual regression은 direct PNG로 해결되지 않으므로 #259/#396 quality gate를 우회하지 않는다.
+
 ## Thumbnail 정책
 
 Thumbnail은 작은 bitmap을 빠르게 제공하는 surface이므로 latency, memory, cache 안정성을 우선한다.
@@ -107,7 +118,7 @@ Thumbnail은 Quick Look보다 `max_dimension` 입력 경계가 명확하다. 다
 
 | 입력 | CoreGraphics 현재 처리 | Skia 후보 매핑 |
 |---|---|---|
-| Quick Look 단일 페이지 | page size 기준 1x bitmap 후 PNG encode | `scale = 1.0`부터 시작. 이후 target size 정책이 생기면 scale 계산 |
+| Quick Look 단일 페이지 | page size 기준 1x bitmap 후 PNG encode | `skiaDecode`는 `scale = 1.0` PNG decode 후 재인코딩. `skiaDirect`는 DEBUG opt-in에서 upstream PNG bytes 직접 반환 |
 | Quick Look 다중 페이지 | page size 기준 page별 bitmap을 PDF에 draw | 초기 opt-in에서는 CoreGraphics 유지. 별도 flag에서 page별 `scale = 1.0` 검증 |
 | Thumbnail maximum size/scale | `maximumPixelSize` bucket 계산 후 renderScale 산출 | 긴 변을 `PngExportOptions.max_dimension`에 매핑 |
 | file size > 50 MB | render 전 거절 | Skia 호출 전 동일하게 거절 |
