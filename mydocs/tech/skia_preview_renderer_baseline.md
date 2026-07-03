@@ -173,3 +173,4 @@ Task #396 Stage 4 기준 quick suite는 CoreGraphics/Skia 양쪽 모두 exit 0�
 - Thumbnail/Finder cache 판단은 visual suite만으로 완료하지 않는다. #389에서 provider diagnostic path, resolver contract, internal thumbnail cache signature separation smoke는 확보했다.
 - #392에서 `maximumPixelSize -> Skia maxDimension` mapping을 적용한 결과, 대표 5개 중 4개는 1px thumbnail drift가 해소됐다.
 - `request-basic-quick`은 Skia maxDimension path에서 `567x794`로 낮아지는 underfill risk가 확인됐다. 따라서 Thumbnail surface 판단은 size drift 해소만으로 끝내지 않고, visual/thumbnail readiness에서 underfill과 구조 누락 여부를 함께 본다.
+- #393에서 Quick Look 단일 페이지 `skiaDirect`는 대표 3개 단일 샘플에서 fallback 없이 성공했고 기존 `skiaDecode`보다 빨랐다. 다만 direct PNG는 같은 Skia output을 더 직접 반환하는 opt-in fast path이므로 `KTX.hwp` 같은 visual regression sentinel과 default quality gate를 대체하지 않는다.
