@@ -171,4 +171,5 @@ Task #396 Stage 4 기준 quick suite는 CoreGraphics/Skia 양쪽 모두 exit 0�
 - extended suite를 CI hard gate로 올리기 전에는 retry/flake 정책이 필요하다.
 - `form-002.hwpx`는 rhwp-studio automation readiness 개선 전까지 renderer 품질 판단에서 제외하거나 persistent readiness failure로 별도 표기한다.
 - Thumbnail/Finder cache 판단은 visual suite만으로 완료하지 않는다. #389에서 provider diagnostic path, resolver contract, internal thumbnail cache signature separation smoke는 확보했다.
-- 남은 Thumbnail surface 판단은 #392의 `maximumPixelSize -> Skia maxDimension/scale/rounding` mapping 실험과 visual/size drift 해석을 함께 본다.
+- #392에서 `maximumPixelSize -> Skia maxDimension` mapping을 적용한 결과, 대표 5개 중 4개는 1px thumbnail drift가 해소됐다.
+- `request-basic-quick`은 Skia maxDimension path에서 `567x794`로 낮아지는 underfill risk가 확인됐다. 따라서 Thumbnail surface 판단은 size drift 해소만으로 끝내지 않고, visual/thumbnail readiness에서 underfill과 구조 누락 여부를 함께 본다.
