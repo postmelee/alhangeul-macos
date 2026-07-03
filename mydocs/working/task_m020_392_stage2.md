@@ -11,8 +11,8 @@ Stage 1에서 고정한 scale-only baseline을 바탕으로, Stage 3에서 적�
 | 파일/산출물 | 줄 수 | 내용 |
 |------|------:|------|
 | `RustBridge/src/lib.rs` | 307 | FFI `rhwp_render_page_png`의 `scale`, `max_dimension` guard와 option 변환 확인 |
-| `/Users/melee/Documents/projects/forks/rhwp/src/document_core/queries/rendering.rs` | 4710 | upstream `PngExportOptions`와 scale 결정 우선순위 확인 |
-| `/Users/melee/Documents/projects/forks/rhwp/src/renderer/skia/renderer.rs` | 3082 | raster scale/max_dimension validation 확인 |
+| [`edwardkim/rhwp@03351190/src/document_core/queries/rendering.rs`](https://github.com/edwardkim/rhwp/blob/03351190ec35436e58cbfee0aa9278a8fdc04a59/src/document_core/queries/rendering.rs) | 4710 | upstream `PngExportOptions`와 scale 결정 우선순위 확인 |
+| [`edwardkim/rhwp@03351190/src/renderer/skia/renderer.rs`](https://github.com/edwardkim/rhwp/blob/03351190ec35436e58cbfee0aa9278a8fdc04a59/src/renderer/skia/renderer.rs) | 3082 | raster scale/max_dimension validation 확인 |
 | `Sources/Shared/HwpPageImageRenderer.swift` | 532 | Stage 3 변경 지점 확인 |
 | `Sources/RhwpCoreBridge/RhwpDocument.swift` | 260 | Swift wrapper guard 확인 |
 | `Sources/ThumbnailExtension/HwpThumbnailRenderCache.swift` | 280 | render signature version 변경 지점 확인 |
