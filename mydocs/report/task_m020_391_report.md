@@ -180,7 +180,17 @@ v1 path resolver 정책:
 
 ## 후속 이슈 초안
 
-아래 초안은 즉시 등록하지 않는다. 작업지시자 승인 후 GitHub Issue로 분리 등록한다.
+작업지시자 승인 후 parent issue #407 및 native sub-issue #408-#413으로 등록했다.
+
+| 이슈 | 제목 | 성격 |
+|------|------|------|
+| #407 | external image context ABI 후속 구현 추적 | parent/umbrella |
+| #408 | RustBridge external image context C ABI 구현 | RustBridge ABI |
+| #409 | Swift external image wrapper/resolver와 Quick Look Preview 적용 | Swift wrapper/Quick Look |
+| #410 | CoreGraphics `ImageNode.externalPath`와 missing/decode diagnostic 보강 | Swift renderer |
+| #411 | Thumbnail external resource cache signature와 prepared request 적용 | Finder Thumbnail cache |
+| #412 | external/large image fixture suite와 visual regression 측정 | fixture/verification |
+| #413 | HostApp WKWebView external image bridge 설계 | viewer-app 후속 설계 |
 
 ### 1. RustBridge external image context C ABI 구현
 
@@ -447,9 +457,9 @@ PR 게시 전 상태:
 - Stage 1-4 조사/설계 보고서 작성 완료
 - Stage 5 최종 보고서 작성 완료
 - 제품 코드 변경 없음
-- 후속 구현 이슈는 초안만 작성했고 등록하지 않음
-- PR 게시에는 작업지시자 승인 후 `publish/task391` 브랜치와 PR 생성 단계가 필요
+- 후속 구현 이슈는 #407 parent와 #408-#413 native sub-issue로 등록 완료
+- 작업지시자 승인 후 `publish/task391` 브랜치와 PR 생성 단계로 진행
 
 ## 작업지시자 승인 요청
 
-Task #391의 filename/external image context ABI 조사와 bridge 설계를 완료했다. PR 게시 단계 진입 여부와 후속 구현 이슈 등록 여부를 승인해 달라.
+Task #391의 filename/external image context ABI 조사와 bridge 설계를 완료했고, 후속 구현 이슈도 #407 parent와 #408-#413 native sub-issue로 등록했다. PR 게시 단계에서 본 결과를 제출한다.
