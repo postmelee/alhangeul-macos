@@ -3,7 +3,7 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::ptr;
 
 use rhwp::document_core::queries::rendering::PngExportOptions;
-use rhwp::DocumentCore;
+use rhwp::wasm_api::HwpDocument;
 
 macro_rules! ffi_guard {
     ($handle:expr, $default:expr, $body:expr) => {{
@@ -18,7 +18,7 @@ macro_rules! ffi_guard {
 }
 
 pub struct RhwpHandle {
-    doc: DocumentCore,
+    doc: HwpDocument,
 }
 
 #[repr(C)]
@@ -106,7 +106,7 @@ pub extern "C" fn rhwp_open(data: *const u8, len: usize) -> *mut RhwpHandle {
 
     let result = catch_unwind(AssertUnwindSafe(|| {
         let bytes = unsafe { std::slice::from_raw_parts(data, len) };
-        match DocumentCore::from_bytes(bytes) {
+        match HwpDocument::from_bytes(bytes) {
             Ok(doc) => Box::into_raw(Box::new(RhwpHandle { doc })),
             Err(_) => ptr::null_mut(),
         }
@@ -126,7 +126,10 @@ pub extern "C" fn rhwp_page_count(handle: *const RhwpHandle) -> u32 {
 
 #[no_mangle]
 pub extern "C" fn rhwp_page_size(handle: *const RhwpHandle, page: u32) -> RhwpPageSize {
-    const ZERO: RhwpPageSize = RhwpPageSize { width_pt: 0.0, height_pt: 0.0 };
+    const ZERO: RhwpPageSize = RhwpPageSize {
+        width_pt: 0.0,
+        height_pt: 0.0,
+    };
     ffi_guard!(handle, ZERO, {
         let h = unsafe { &*handle };
         let json = match h.doc.get_page_info_native(page) {
@@ -224,7 +227,10 @@ pub extern "C" fn rhwp_render_page_png(
             font_paths: Vec::new(),
         };
 
-        match h.doc.render_page_png_native_with_export_options(page, &options) {
+        match h
+            .doc
+            .render_page_png_native_with_export_options(page, &options)
+        {
             Ok(bytes) if !bytes.is_empty() => {
                 let mut owned = bytes.into_boxed_slice();
                 let owned_len = owned.len();
@@ -252,7 +258,9 @@ pub extern "C" fn rhwp_image_data(
 ) -> *const u8 {
     if handle.is_null() || out_len.is_null() || bin_data_id == 0 {
         if !out_len.is_null() {
-            unsafe { *out_len = 0; }
+            unsafe {
+                *out_len = 0;
+            }
         }
         return ptr::null();
     }
@@ -260,11 +268,15 @@ pub extern "C" fn rhwp_image_data(
     let idx = (bin_data_id - 1) as usize;
     match h.doc.get_bin_data(idx) {
         Some(data) => {
-            unsafe { *out_len = data.len(); }
+            unsafe {
+                *out_len = data.len();
+            }
             data.as_ptr()
         }
         None => {
-            unsafe { *out_len = 0; }
+            unsafe {
+                *out_len = 0;
+            }
             ptr::null()
         }
     }
@@ -273,21 +285,27 @@ pub extern "C" fn rhwp_image_data(
 #[no_mangle]
 pub extern "C" fn rhwp_free_string(ptr: *mut c_char) {
     if !ptr.is_null() {
-        unsafe { drop(CString::from_raw(ptr)); }
+        unsafe {
+            drop(CString::from_raw(ptr));
+        }
     }
 }
 
 #[no_mangle]
 pub extern "C" fn rhwp_free_bytes(ptr: *mut u8, len: usize) {
     if !ptr.is_null() {
-        unsafe { drop(Vec::from_raw_parts(ptr, len, len)); }
+        unsafe {
+            drop(Vec::from_raw_parts(ptr, len, len));
+        }
     }
 }
 
 #[no_mangle]
 pub extern "C" fn rhwp_close(handle: *mut RhwpHandle) {
     if !handle.is_null() {
-        unsafe { drop(Box::from_raw(handle)); }
+        unsafe {
+            drop(Box::from_raw(handle));
+        }
     }
 }
 

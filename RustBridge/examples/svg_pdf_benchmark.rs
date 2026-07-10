@@ -95,7 +95,11 @@ fn parse_args(args: Vec<String>) -> Result<Config, String> {
         return Err("missing input files".to_string());
     }
 
-    Ok(Config { output_dir, runs, inputs })
+    Ok(Config {
+        output_dir,
+        runs,
+        inputs,
+    })
 }
 
 fn usage() -> String {
@@ -110,7 +114,9 @@ fn measure(input: &Path, output_dir: &Path, run: usize) -> Measurement {
         .unwrap_or("input")
         .to_string();
     let file_path = input.display().to_string();
-    let file_bytes = fs::metadata(input).map(|metadata| metadata.len()).unwrap_or(0);
+    let file_bytes = fs::metadata(input)
+        .map(|metadata| metadata.len())
+        .unwrap_or(0);
 
     match measure_ok(input, output_dir, run) {
         Ok(mut measurement) => {
@@ -144,7 +150,9 @@ fn measure_ok(input: &Path, output_dir: &Path, run: usize) -> Result<Measurement
         .unwrap_or("input")
         .to_string();
     let file_path = input.display().to_string();
-    let file_bytes = fs::metadata(input).map_err(|error| error.to_string())?.len();
+    let file_bytes = fs::metadata(input)
+        .map_err(|error| error.to_string())?
+        .len();
 
     let data_read_start = Instant::now();
     let data = fs::read(input).map_err(|error| error.to_string())?;
@@ -168,7 +176,8 @@ fn measure_ok(input: &Path, output_dir: &Path, run: usize) -> Result<Measurement
     let svg_seconds = svg_start.elapsed().as_secs_f64();
 
     let pdf_start = Instant::now();
-    let pdf_bytes = rhwp::renderer::pdf::svgs_to_pdf(&svg_pages).map_err(|error| error.to_string())?;
+    let pdf_bytes =
+        rhwp::renderer::pdf::svgs_to_pdf(&svg_pages).map_err(|error| error.to_string())?;
     let pdf_seconds = pdf_start.elapsed().as_secs_f64();
 
     let stem = input
@@ -204,14 +213,18 @@ fn write_outputs(output_dir: &Path, measurements: &[Measurement]) -> Result<(), 
         tsv.push_str(&measurement.to_tsv());
         tsv.push('\n');
     }
-    fs::write(output_dir.join("svg_pdf_measurements.tsv"), tsv).map_err(|error| error.to_string())?;
+    fs::write(output_dir.join("svg_pdf_measurements.tsv"), tsv)
+        .map_err(|error| error.to_string())?;
 
     let mut summary = String::new();
     summary.push_str("# rhwp SVG PDF Benchmark\n\n");
     summary.push_str("| File | Runs | Status | Pages | AvgTotalSeconds | MinTotalSeconds | MaxTotalSeconds | AvgPDFSeconds | AvgPDFBytes |\n");
     summary.push_str("|------|------|--------|-------|-----------------|-----------------|-----------------|---------------|-------------|\n");
 
-    let mut files: Vec<&str> = measurements.iter().map(|measurement| measurement.file_name.as_str()).collect();
+    let mut files: Vec<&str> = measurements
+        .iter()
+        .map(|measurement| measurement.file_name.as_str())
+        .collect();
     files.sort_unstable();
     files.dedup();
 
@@ -221,14 +234,19 @@ fn write_outputs(output_dir: &Path, measurements: &[Measurement]) -> Result<(), 
             .filter(|measurement| measurement.file_name == file && measurement.status == "OK")
             .collect();
         if rows.is_empty() {
-            summary.push_str(&format!("| `{file}` | 0 | FAIL | - | - | - | - | - | - |\n"));
+            summary.push_str(&format!(
+                "| `{file}` | 0 | FAIL | - | - | - | - | - | - |\n"
+            ));
             continue;
         }
 
         let runs = rows.len();
         let pages = rows[0].page_count;
         let avg_total = average(rows.iter().map(|row| row.total_seconds));
-        let min_total = rows.iter().map(|row| row.total_seconds).fold(f64::INFINITY, f64::min);
+        let min_total = rows
+            .iter()
+            .map(|row| row.total_seconds)
+            .fold(f64::INFINITY, f64::min);
         let max_total = rows.iter().map(|row| row.total_seconds).fold(0.0, f64::max);
         let avg_pdf = average(rows.iter().map(|row| row.pdf_seconds));
         let avg_pdf_bytes = average(rows.iter().map(|row| row.pdf_bytes as f64));
