@@ -634,7 +634,7 @@ xcrun lipo -info "$UNIVERSAL_LIB"
 echo "[3/4] cbindgen header check..."
 cbindgen --quiet --config "$BRIDGE_ROOT/cbindgen.toml" --crate rhwp_mac_bridge \
   --output "$GENERATED_H" "$BRIDGE_ROOT"
-grep -oE '\brhwp_[a-z_]+' "$GENERATED_H" | sort -u > "$GENERATED_SYMBOLS"
+grep -oE '\brhwp_[a-z0-9_]+' "$GENERATED_H" | sort -u > "$GENERATED_SYMBOLS"
 if ! diff -u "$EXPECTED_SYMBOLS" "$GENERATED_SYMBOLS"; then
   echo "ERROR: generated FFI symbol set differs from $EXPECTED_SYMBOLS" >&2
   echo "Generated header: $GENERATED_H" >&2

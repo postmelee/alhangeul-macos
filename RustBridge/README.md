@@ -24,7 +24,7 @@
 
 ## Core dependency 기준
 
-현재 v0.1.0 목표는 Demo/Preview release이며, `RustBridge/Cargo.toml`은 `git` + `rev`로 commit pin 상태다. Stable은 release tag가 필요한 bridge API를 포함할 때만 별도 승격하고, branch/floating ref는 사용하지 않는다.
+현재 `rhwp-core.lock`과 `RustBridge/Cargo.toml`은 release tag `v0.7.17`, resolved commit `03351190ec35436e58cbfee0aa9278a8fdc04a59`, feature `native-skia`를 기준으로 한다. Stable 기준은 release tag와 resolved commit을 함께 고정하며 branch/floating ref는 사용하지 않는다.
 
 채널별 dependency 기준, lock 필드, compatibility gate 상세는 [`core_release_compatibility.md`](../mydocs/tech/core_release_compatibility.md)를 참조한다.
 
@@ -43,12 +43,35 @@ core 기준을 바꿀 때는 저장소 루트에서 다음 스크립트를 사�
 ./scripts/update-rhwp-core.sh --channel stable --tag <release-tag>
 ```
 
+## External image context ABI
+
+RustBridge는 external image 파일을 직접 찾거나 읽지 않는다. Swift/macOS shell이 source URL 권한, basename-only resolver, size 제한과 bytes read를 소유하고, 허용된 context와 bytes만 다음 ABI로 전달한다.
+
+| ABI | 역할 |
+|-----|------|
+| `rhwp_set_file_name_utf8` | UTF-8 filename context를 document에 설정한다. |
+| `rhwp_external_image_refs_json` | `key`, `binDataId`, `originalPath`, `basename`, `extension`, `loaded`를 포함한 upstream JSON 배열을 반환한다. |
+| `rhwp_inject_external_image_by_key` | refs JSON의 key로 caller가 읽은 image bytes를 document에 주입한다. |
+
+세터와 injection은 `RhwpExternalImageStatus`를 반환한다. status는 성공, invalid handle/input/UTF-8, reference 미존재, 이미 loaded, 일반 failure를 구분한다.
+
+메모리와 수명 규칙:
+
+- filename, key, data, display path 입력 pointer는 caller-owned이며 호출 동안만 빌려 쓴다.
+- `rhwp_external_image_refs_json` 반환 문자열은 Rust-owned이며 `rhwp_free_string`으로 해제한다.
+- injection에 성공하면 upstream document가 image bytes를 복사해 소유한다.
+- `rhwp_image_data` 반환 pointer는 document-owned이므로 caller는 즉시 복사하고 setter/injection 같은 mutable 호출을 넘겨 보관하지 않는다.
+- `originalPath`와 `display_path`는 bridge가 filesystem 접근 경로로 해석하지 않는다.
+
+pinned public API에는 embedded/external/missing/injected 전체 image 상태를 반환하는 함수가 없어 `rhwp_image_state_json`은 제공하지 않는다. External 상태는 refs JSON의 `loaded`로 전달하고 renderer missing/decode diagnostic은 downstream renderer 이슈에서 별도로 다룬다.
+
 ## 경계 규칙
 
 - core API 변경은 먼저 `edwardkim/rhwp` 저장소에 반영한다.
 - 앱 저장소 안에서 core source를 직접 수정하지 않는다.
 - `rhwp_*` ABI 변경 시 `rhwp-ffi-symbols.txt`, generated header, Swift bridge 호출부, `rhwp-core.lock` 정합성을 함께 확인한다.
 - Rust가 Swift에 넘긴 문자열과 byte buffer는 지정된 free 함수로 해제해야 한다.
+- external resource 권한·탐색·bytes read는 Swift/macOS shell이 소유하며 RustBridge가 filesystem을 직접 탐색하지 않는다.
 
 관련 상세 문서:
 
