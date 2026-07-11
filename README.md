@@ -31,6 +31,9 @@
 > Rust 기반 [`rhwp`](https://github.com/edwardkim/rhwp) 코어를 macOS 앱, Quick Look preview, Finder thumbnail, Swift bridge로 연결합니다. 첫 viewer는 `rhwp-studio`를 WKWebView로 품고, Finder/Quick Look과 PDF 내보내기에는 이 저장소의 Swift/Rust bridge 렌더링 경로를 함께 사용합니다.
 > "닫힌 HWP/HWPX 문서를 더 많은 환경에서 다룰 수 있게 한다"는 [`rhwp`](https://github.com/edwardkim/rhwp)의 방향을 **Mac 네이티브** 경험으로 확장합니다.
 
+## Support
+Maintained with support from **OpenAI’s [Codex for Open Source](https://developers.openai.com/community/codex-for-oss)** program.
+> _Support is provided to the maintainer and does not imply endorsement._
 
 ## 현재 작업 축
 
