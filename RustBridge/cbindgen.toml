@@ -5,6 +5,7 @@ include_guard = "RHWP_MAC_BRIDGE_H"
 [export]
 include = [
   "RhwpHandle",
+  "RhwpExternalImageStatus",
   "RhwpPageSize",
   "RhwpRenderStatus",
 ]
