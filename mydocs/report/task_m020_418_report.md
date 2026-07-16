@@ -36,7 +36,23 @@ stale `rhwp v0.7.18` automation PR #415를 그대로 병합하지 않고 최신 
 | Stage 4 | `328d0f7` | Rust/Xcode/renderer/visual 회귀 검증과 build info 보정 |
 | Stage 5 | 이번 커밋 | 최종 보고서, 포함 PR 분석, public release handoff 정리 |
 
-## 최종 변경 범위
+## 변경 파일 목록과 영향 범위
+
+| 파일 | 내용 |
+|------|------|
+| `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock` | native core dependency를 stable `rhwp v0.7.18` / resolved commit에 고정 |
+| `rhwp-core.lock` | current #408 RustBridge source에서 재생성한 native artifact provenance 기록 |
+| `Sources/HostApp/Resources/rhwp-studio/**` | `v0.7.18` bundled editor/viewer hashed JS, CSS, WASM과 manifest 전체 동기화 |
+| `Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift` | 앱과 Thumbnail signature가 참조하는 core tag/commit을 lock과 정렬 |
+| `mydocs/manual/core_dependency_operation_guide.md` | current stable core 운영 기준 갱신 |
+| `mydocs/tech/core_release_compatibility.md` | current artifact, ABI, external image context compatibility 기록 갱신 |
+| `mydocs/tech/project_architecture.md` | current core 소유 경계와 provenance 갱신 |
+| `mydocs/plans/task_m020_418*.md` | Task #418 수행계획과 5단계 구현계획 기록 |
+| `mydocs/working/task_m020_418_stage*.md` | Stage 1~4 조사, automation, 통합, 회귀 검증 결과 기록 |
+| `mydocs/report/task_m020_418_report.md` | 최종 결과, 포함 PR 분석, public release handoff 기록 |
+| `mydocs/orders/20260716.md`, `mydocs/orders/20260717.md` | 선행 작업 보존과 Task #418 진행·완료 상태 기록 |
+
+## 변경 전·후 정량 비교
 
 ### Core와 bundled studio
 
@@ -285,4 +301,6 @@ Task #406의 unsigned/debug A/B는 HostApp 후보 수정 성립을 확인했지�
 
 따라서 Task #418 결과는 별도 public release task의 입력으로 사용할 수 있다. release task는 `v0.1.8 (14)`를 후보 identity로 시작하되 version/build는 그 Task에서 확정하고, signed HOP exact UTI smoke를 public publish 전 blocking gate로 수행해야 한다.
 
-Task #418 최종 보고서 승인을 받은 뒤 `task-final-report` 절차로 `publish/task418` PR을 게시한다.
+## 작업지시자 승인 요청
+
+최종 보고서 승인을 반영해 `task-final-report` 절차로 `publish/task418` PR을 게시한다. PR 생성 후 단계 커밋과 release handoff 내용의 리뷰 및 merge 승인을 요청한다.
