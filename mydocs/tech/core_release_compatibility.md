@@ -68,11 +68,11 @@ rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "<release tag>" }
 
 ## 현재 release 상태
 
-2026-06-24 저장소 lock 기준 현재 Stable release pin은 다음이다.
+2026-07-17 저장소 lock 기준 현재 Stable release pin은 다음이다.
 
 ```text
-release tag: v0.7.16
-resolved commit: de02159ab4d2c5d165d6e25568bad3f8af5ef6cb
+release tag: v0.7.18
+resolved commit: 93862a4e16df59834ebce46d91e948cd739208e9
 ```
 
 현재 lock 기준은 required API gate를 통과한 release tag pin이다.
@@ -80,39 +80,39 @@ resolved commit: de02159ab4d2c5d165d6e25568bad3f8af5ef6cb
 ```text
 Checked rhwp core target:
   channel: stable
-  tag:     v0.7.16
-  commit:  de02159ab4d2c5d165d6e25568bad3f8af5ef6cb
+  tag:     v0.7.18
+  commit:  93862a4e16df59834ebce46d91e948cd739208e9
 ```
 
-따라서 현재 앱 저장소는 `v0.7.16` Stable release tag pin으로 전환되어 있다.
+따라서 현재 앱 저장소는 `v0.7.18` Stable release tag pin으로 전환되어 있다.
 
 현재 lock 기준:
 
 ```text
-rhwp_release_tag: v0.7.16
-rhwp_commit: de02159ab4d2c5d165d6e25568bad3f8af5ef6cb
-RustBridge/Cargo.lock source: git+https://github.com/edwardkim/rhwp.git?tag=v0.7.16#de02159ab4d2c5d165d6e25568bad3f8af5ef6cb
+rhwp_release_tag: v0.7.18
+rhwp_commit: 93862a4e16df59834ebce46d91e948cd739208e9
+RustBridge/Cargo.lock source: git+https://github.com/edwardkim/rhwp.git?tag=v0.7.18#93862a4e16df59834ebce46d91e948cd739208e9
 ```
 
 현재 artifact 기준:
 
 ```text
 Frameworks/universal/librhwp.a
-sha256: 824fee2ccd0bacd978ca043df4b576133c4a78488178c1edd0715c62aeffc9a7
-size: 202389312
+sha256: b7029e88c44774d44e4e30c624113eced4b305918a114834acb5725584c8b0a7
+size: 208707280
 
 Frameworks/generated_rhwp.h
-sha256: 31ed496ccbe86082885a82c584166669e1913a552dba26556ef5182842959601
-size: 2059
+sha256: c4cba0728b7e443ba78541dc1184d6aa286b91b72006e423e9283d998c31d8e5
+size: 3310
 ```
 
-`v0.7.16`에는 현재 RustBridge가 요구하는 PageRenderTree API와 PageLayerTree API가 포함되어 있다. alhangeul-macos는 기존 PageRenderTree 기반 C ABI와 Swift renderer를 유지하며, PageLayerTree 기반 Swift renderer 전환과 신규 ABI 추가는 후속 작업으로 분리한다.
+`v0.7.18`에는 현재 RustBridge가 요구하는 PageRenderTree, native PNG/overlay image, filename/external image context API가 포함되어 있다. alhangeul-macos는 PageRenderTree 기반 C ABI와 Swift renderer를 유지하며, PageLayerTree 기반 Swift renderer 전환은 후속 작업으로 분리한다.
 
-앱 저장소는 core source를 수정하지 않고 release tag pin, Rust bridge 산출물 provenance, bundled `rhwp-studio` asset, macOS build/render smoke 기준을 `v0.7.16`으로 전환했다.
+앱 저장소는 core source를 수정하지 않고 release tag pin, Rust bridge 산출물 provenance, bundled `rhwp-studio` asset 기준을 `v0.7.18`로 전환했다. macOS build/render smoke 결과는 release/task별 보고서에 남긴다.
 
 현재 lock 기준 use case 검증은 release/task별 보고서에 남긴다. core release compatibility 관점에서 최소 확인할 항목은 다음이다.
 
-- `./scripts/update-rhwp-core.sh --check --channel stable --tag v0.7.16`
+- `./scripts/update-rhwp-core.sh --check --channel stable --tag v0.7.18`
 - `scripts/build-rust-macos.sh --verify-lock`
 - `scripts/verify-rhwp-studio-assets.sh`
 - `./scripts/check-no-appkit.sh`
@@ -123,16 +123,21 @@ Release package 생성, 설치본 LaunchServices/PlugInKit 등록, `qlmanage` sm
 
 ## RustBridge core API contract
 
-`RustBridge`는 앱 저장소가 소유하는 유일한 core adapter다. Swift/macOS 계층은 `DocumentCore` 내부 구조나 Rust crate 세부 type을 직접 알지 않고 C ABI만 사용한다.
+`RustBridge`는 앱 저장소가 소유하는 유일한 core adapter다. Swift/macOS 계층은 `HwpDocument`/`DocumentCore` 내부 구조나 Rust crate 세부 type을 직접 알지 않고 C ABI만 사용한다. opaque handle은 `HwpDocument`를 소유하며 기존 page/render API는 wrapper의 `Deref`를 통해 호출한다.
 
 | C ABI | core API | contract |
 |------|------|------|
-| `rhwp_open` | `DocumentCore::from_bytes` | HWP/HWPX bytes를 파싱해 opaque handle을 만든다. 실패 시 null을 반환한다. |
-| `rhwp_page_count` | `DocumentCore::page_count` | 총 페이지 수를 `u32`로 반환한다. 실패 또는 null handle은 0으로 처리한다. |
-| `rhwp_page_size` | `DocumentCore::get_page_info_native` | page info JSON에서 `width`, `height`를 point 단위 `f64`로 해석한다. 실패 시 0 크기를 반환한다. |
-| `rhwp_render_page_tree` | `DocumentCore::build_page_render_tree` | page render tree root를 JSON string으로 반환한다. HostApp, Quick Look, Thumbnail의 기준 렌더 경로다. |
-| `rhwp_image_data` | `DocumentCore::get_bin_data` | 1-indexed `bin_data_id`를 0-indexed core bin data index로 변환해 borrowed byte pointer와 길이를 반환한다. Swift는 즉시 `Data`로 복사한다. |
-| `rhwp_render_page_svg` | `DocumentCore::render_page_svg_native` | SVG string을 반환한다. 현재 기준 경로가 아니라 진단/임시 표시 후보로만 취급한다. |
+| `rhwp_open` | `HwpDocument::from_bytes` | HWP/HWPX bytes를 파싱해 opaque handle을 만든다. 실패 시 null을 반환한다. |
+| `rhwp_set_file_name_utf8` | `HwpDocument::set_file_name` | UTF-8 filename context를 document에 설정한다. 빈 이름은 허용하고 non-empty null buffer와 invalid UTF-8은 status code로 구분한다. |
+| `rhwp_external_image_refs_json` | `HwpDocument::get_external_image_references` | external image reference 상태를 Rust-owned JSON string으로 반환한다. 호출자는 `rhwp_free_string`으로 해제한다. |
+| `rhwp_inject_external_image_by_key` | `HwpDocument::inject_external_image_by_key` | key와 bytes를 document에 주입하고 not-found/already-loaded/failure를 status code로 구분한다. |
+| `rhwp_page_count` | `HwpDocument` deref `page_count` | 총 페이지 수를 `u32`로 반환한다. 실패 또는 null handle은 0으로 처리한다. |
+| `rhwp_page_size` | `HwpDocument` deref `get_page_info_native` | page info JSON에서 `width`, `height`를 point 단위 `f64`로 해석한다. 실패 시 0 크기를 반환한다. |
+| `rhwp_render_page_tree` | `HwpDocument` deref `build_page_render_tree` | page render tree root를 JSON string으로 반환한다. HostApp, Quick Look, Thumbnail의 기준 렌더 경로다. |
+| `rhwp_page_overlay_images` | `HwpDocument` deref `get_page_overlay_images_native` | page overlay image metadata JSON을 Rust-owned string으로 반환한다. |
+| `rhwp_render_page_png` | `HwpDocument` deref `render_page_png_native_with_export_options` | scale/max-dimension 옵션으로 native PNG bytes를 생성하고 명시적 status를 반환한다. |
+| `rhwp_image_data` | `HwpDocument` deref `get_bin_data` | 1-indexed `bin_data_id`를 0-indexed core bin data index로 변환해 borrowed byte pointer와 길이를 반환한다. Swift는 즉시 `Data`로 복사한다. |
+| `rhwp_render_page_svg` | `HwpDocument` deref `render_page_svg_native` | SVG string을 반환한다. 현재 기준 경로가 아니라 진단/임시 표시 후보로만 취급한다. |
 | `rhwp_extract_thumbnail` | `rhwp::parser::extract_thumbnail_only` | embedded thumbnail bytes, width, height, format을 Rust-owned buffer로 반환한다. Swift는 `rhwp_free_bytes`, `rhwp_free_string`으로 해제한다. |
 
 필수 C ABI symbol set은 `rhwp-ffi-symbols.txt`로 고정한다. symbol 추가, 제거, 이름 변경은 `FFI symbol diff`로 분리해 검토한다.
