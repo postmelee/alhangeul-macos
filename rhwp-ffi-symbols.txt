@@ -1,8 +1,10 @@
 rhwp_close
+rhwp_external_image_refs_json
 rhwp_extract_thumbnail
 rhwp_free_bytes
 rhwp_free_string
 rhwp_image_data
+rhwp_inject_external_image_by_key
 rhwp_open
 rhwp_page_count
 rhwp_page_overlay_images
@@ -10,3 +12,4 @@ rhwp_page_size
 rhwp_render_page_png
 rhwp_render_page_svg
 rhwp_render_page_tree
+rhwp_set_file_name_utf8

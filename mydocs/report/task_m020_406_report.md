@@ -142,12 +142,14 @@ Debug 앱에 HWP와 HWPX를 순서대로 전달했다. 두 파일 모두 같은 
 | HostApp 문서 타입/imported declaration | OK | HOP UTI 두 개와 extension/MIME/conformance 확인 |
 | Quick Look/Thumbnail 지원 목록 | OK | source와 built appex에서 두 HOP UTI 확인 |
 | 앱 내부 열기 패널 | OK | 두 HOP UTI 포함, `.data` fallback 유지 |
-| HostApp Debug build | OK | `BUILD SUCCEEDED` (`4.218 sec`) |
+| `origin/devel` 통합 | OK | #408 8커밋 merge, orders add/add 한 건에서 두 task 행 보존 |
+| Rust framework lock/FFI | OK | `build-rust-macos.sh --verify-lock`, 15개 FFI symbol과 `rhwp-core.lock` 검증 |
+| HostApp Debug build | OK | 통합 전 `4.218 sec`, 통합 후 재생성 XCFramework 기준 `12.900 sec` 모두 `BUILD SUCCEEDED` |
 | built bundle 반영 | OK | app과 두 embedded appex 최종 `Info.plist` 확인 |
 | Finder 후보 수정 효과 | OK | HWPX 수정 전 누락, 수정판 등록 후 알한글 추가 |
 | exact HOP UTI handler | OK | 두 타입 모두 수정판 등록 중 `com.postmelee.alhangeul` 포함 |
 | 기존 HWP/HWPX open | OK | 동일 앱 프로세스에 두 문서 handoff 확인 |
-| registration 정리 | OK | diagnostics `20260716-214324`, development registrations/issues 없음 |
+| registration 정리 | OK | 통합 후 diagnostics `20260716-215244`, development registrations/issues 없음 |
 | `git diff --check` | OK | whitespace 오류 없음 |
 
 최종 실행 명령:
@@ -159,6 +161,7 @@ plutil -p Sources/HostApp/Info.plist | rg "net.golbin.hop.(hwp|hwpx)"
 plutil -p Sources/QLExtension/Info.plist | rg "net.golbin.hop.(hwp|hwpx)"
 plutil -p Sources/ThumbnailExtension/Info.plist | rg "net.golbin.hop.(hwp|hwpx)"
 rg -n "net.golbin.hop.(hwp|hwpx)" Sources/HostApp/Services/DocumentOpenPanel.swift
+./scripts/build-rust-macos.sh --verify-lock
 xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug \
   -derivedDataPath build.noindex/DerivedData CODE_SIGNING_ALLOWED=NO build
 scripts/check-extension-registration-hygiene.sh --check-only
@@ -175,13 +178,15 @@ git diff --check
 | Stage 2 | `3766442` | 네 지원 표면에 HOP HWP/HWPX UTI 추가 |
 | Stage 3 | `80256a1` | 일반 문서 open, thumbnail, registration 검증 |
 | Stage 3.1 | `995b6a0` | HOP 설치 환경 exact handler와 Finder 후보 A/B 검증 |
-| Stage 4 | 이번 커밋 | 통합 검증과 최종 보고 |
+| Stage 4 | `92fc683` | 통합 검증과 최종 보고 |
 
 ## 통합 브랜치 상태
 
-최종 검증 시 `local/task406`은 `origin/devel`보다 8커밋 뒤이며, 해당 진행분은 #408 RustBridge external image context C ABI 작업이다.
+최종 검증 후 `origin/devel`의 #408 RustBridge external image context C ABI 작업 8커밋을 `local/task406`에 merge했다.
 
-`git merge-tree` 확인 결과 #406 제품 source 및 troubleshooting 문서는 devel 진행분과 겹치지 않았다. 유일한 충돌 후보는 양쪽 브랜치가 각각 추가한 `mydocs/orders/20260711.md`의 add/add 충돌이다. PR 게시 전 작업지시자 승인 후 integration 방식을 정하고 #406과 #408 행을 모두 보존해 해결해야 한다. 진행 중인 `local/task406`에는 임의 merge/rebase를 수행하지 않았다.
+사전 `git merge-tree` 결과와 동일하게 #406 제품 source 및 troubleshooting 문서는 충돌 없이 병합됐다. 양쪽 브랜치가 각각 추가한 `mydocs/orders/20260711.md`에서만 add/add 충돌이 발생했고, #406과 #408 행을 모두 보존해 해결했다.
+
+통합 후 `build-rust-macos.sh --verify-lock`으로 #408의 새 FFI 15개와 framework lock을 검증하고 XCFramework를 재생성했다. 해당 framework로 HostApp, Quick Look, Thumbnail을 다시 compile/link했으며 `BUILD SUCCEEDED` (`12.900 sec`)를 확인했다. 최종 registration hygiene diagnostics `20260716-215244`도 development registrations와 issues가 없었다.
 
 ## 잔여 위험과 후속 작업
 
@@ -191,7 +196,7 @@ git diff --check
 | HOP exact UTI Quick Look/Thumbnail active provider | Debug unsigned/unsealed 산출물이라 runtime 미검증 | 서명된 설치본 release smoke에서 확인. source/built bundle 선언은 확인 완료 |
 | HWP Finder GUI 직접 A/B | 현재 공개 알한글이 이미 후보여서 누락 미재현 | exact `net.golbin.hop.hwp` handler A/B로 지원 자격 확인. 직접 Finder 재현 입력은 HWPX |
 | LaunchServices/Spotlight cache | 설치·실행 순서와 기존 owner UTI에 영향받음 | troubleshooting 기준에 설치 위치, 최초 실행, `mdls`, 선언 대조 순서 기록 |
-| `origin/devel` add/add 문서 충돌 | `mydocs/orders/20260711.md` 한 건 | PR 전 승인된 merge/rebase에서 두 task 행 모두 보존 |
+| `origin/devel` 통합 | `mydocs/orders/20260711.md` add/add 한 건 해결 | #406과 #408 행을 모두 보존했으며 제품 source 충돌 없음 |
 
 ## 결론
 
@@ -201,4 +206,4 @@ Finder 기본 앱은 알한글이 강제로 변경하지 않는다. 이번 수�
 
 ## 승인 요청
 
-Stage 4 통합 검증과 최종 보고서 검토를 요청한다. 승인 후 `origin/devel`의 `mydocs/orders/20260711.md` add/add 충돌 해결 방식을 정하고 `publish/task406` push 및 `devel` 대상 Open PR 게시 절차로 진행한다.
+`origin/devel` 통합과 최종 검증 결과를 포함한 Open PR의 리뷰 및 merge 승인을 요청한다.

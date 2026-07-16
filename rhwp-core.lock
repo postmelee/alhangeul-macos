@@ -4,15 +4,15 @@ rhwp_ref_kind = "release-tag"
 rhwp_release_tag = "v0.7.17"
 rhwp_commit = "03351190ec35436e58cbfee0aa9278a8fdc04a59"
 rhwp_enabled_features = "native-skia"
-built_at = "2026-06-23T04:58:54Z"
+built_at = "2026-07-11T13:10:18Z"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
 
 [[artifacts]]
 path = "Frameworks/universal/librhwp.a"
-sha256 = "96f550e03ead0af52f8952bf013c9c997fb2c193e073f5f5fdbe647f0a9ef8a6"
-size = 202902712
+sha256 = "e454ac6b32667c84509d320ce6da7972277a5d97655f3187f19f2f5a9a8a5acd"
+size = 202931144
 
 [[artifacts]]
 path = "Frameworks/generated_rhwp.h"
-sha256 = "31ed496ccbe86082885a82c584166669e1913a552dba26556ef5182842959601"
-size = 2059
+sha256 = "c4cba0728b7e443ba78541dc1184d6aa286b91b72006e423e9283d998c31d8e5"
+size = 3310
