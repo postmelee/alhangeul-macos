@@ -112,7 +112,35 @@ plutil -p /Applications/LibreOffice.app/Contents/PlugIns/QuickLookThumbnail.appe
 
 해결 방향은 LibreOffice 제거가 아니라 알한글 앱과 두 extension의 supported content type에 확인된 외부 HWP UTI를 호환 타입으로 추가하는 것이다. 이후 설치본 기준으로 active provider path, Quick Look cache, fresh sample thumbnail 생성을 다시 검증한다. 전역 LaunchServices reset이나 Finder/Quick Look daemon 종료는 이 문서의 전역 reset 주의 기준을 따른다.
 
-## 6. 표준 helper 선택 기준
+## 6. HOP HWP/HWPX UTI 공존 진단
+
+HOP가 설치된 환경에서는 `.hwp`, `.hwpx` 파일이 HOP의 custom UTI인 `net.golbin.hop.hwp`, `net.golbin.hop.hwpx`로 분류될 수 있다. HOP는 두 타입을 `Editor` / `Owner`로 등록하므로, 알한글이 같은 UTI를 지원하지 않으면 Finder `다음으로 열기`와 기본 앱 후보 또는 Quick Look/Thumbnail provider matching에서 빠질 수 있다.
+
+먼저 실제 파일의 content type을 확인한다.
+
+```bash
+mdls -name kMDItemContentType -name kMDItemContentTypeTree <file.hwp>
+mdls -name kMDItemContentType -name kMDItemContentTypeTree <file.hwpx>
+```
+
+판정 기준:
+
+- `kMDItemContentType`이 `net.golbin.hop.hwp` 또는 `net.golbin.hop.hwpx`이면 HOP UTI 공존 경로로 본다.
+- 알한글 HostApp의 `LSItemContentTypes`와 `UTImportedTypeDeclarations`, 두 extension의 `QLSupportedContentTypes`에 해당 identifier가 모두 있는지 확인한다.
+- `mdls` 결과가 이미 알한글이 지원하는 Hancom/Hancom Office Viewer/LibreOffice UTI라면 HOP UTI 누락으로 단정하지 않고 설치 위치, 앱 최초 실행, LaunchServices 등록 상태를 별도로 진단한다.
+- 기본 앱 후보와 선택 결과는 LaunchServices와 사용자가 결정한다. 알한글은 호환 타입을 선언할 수 있지만 기본 앱을 강제로 바꾸지 않는다.
+
+확인 명령:
+
+```bash
+plutil -p /Applications/Alhangeul.app/Contents/Info.plist | rg "net.golbin.hop.(hwp|hwpx)|LSItemContentTypes|UTImportedTypeDeclarations"
+plutil -p /Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex/Contents/Info.plist | rg "net.golbin.hop.(hwp|hwpx)|QLSupportedContentTypes"
+plutil -p /Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex/Contents/Info.plist | rg "net.golbin.hop.(hwp|hwpx)|QLSupportedContentTypes"
+```
+
+HOP 제거, 전역 LaunchServices reset, Finder/Quick Look daemon 종료를 기본 해결책으로 사용하지 않는다. 알한글 설치본의 UTI 선언과 active provider path를 확인하고 fresh sample로 다시 검증한다.
+
+## 7. 표준 helper 선택 기준
 
 | 목적 | 권장 helper | 주의 |
 |------|-------------|------|
@@ -122,7 +150,7 @@ plutil -p /Applications/LibreOffice.app/Contents/PlugIns/QuickLookThumbnail.appe
 | `$HOME/Applications/Alhangeul.app` 기준 간단 Finder integration smoke | `scripts/smoke-finder-integration.sh` | legacy 후보 방어는 있지만 현재 이름 개발 산출물 cleanup 전용은 아니다 |
 | Sparkle 업데이트 후 새 설치본 provider가 자연 등록됐는지 확인 | `scripts/smoke-sparkle-extension-refresh.sh` | `--repair-registration`은 triage 전용이며 release gate가 아니다 |
 
-## 7. 표시명 문제와 extension 실패 혼동 방지
+## 8. 표시명 문제와 extension 실패 혼동 방지
 
 Spotlight/Dock/Finder 표시명은 현재 사용자 언어와 LaunchServices/Spotlight 캐시의 영향을 받는다. 표시명이 `Alhangeul`로 보이고 `알한글`로 보이지 않더라도 extension 실행은 정상일 수 있고, 그 반대도 가능하다.
 
