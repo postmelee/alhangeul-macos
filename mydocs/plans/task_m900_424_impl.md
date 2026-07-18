@@ -75,9 +75,12 @@ Stage 1 완료보고서 기준으로 Stage 2 진행 승인을 요청한다.
 ### 변경 파일
 
 - `README.md`
+- `docs/index.html`
 - `docs/updates/v0.1.8.html`
 - `docs/updates/index.html`
+- `docs/updates/v0.1.0.html` ~ `docs/updates/v0.1.7.html`의 최신 릴리스 고지
 - `mydocs/release/index.md`
+- `mydocs/release/v0.1.7.md`의 public 완료 상태 보정
 - `mydocs/release/v0.1.8.md`
 - `mydocs/working/task_m900_424_stage2.md`
 
@@ -88,7 +91,7 @@ Stage 1 완료보고서 기준으로 Stage 2 진행 승인을 요청한다.
 3. release note에는 `rhwp v0.7.18`의 실제 노출 변화와 HOP UTI 후보 경로 보강을 사용자 용어로 작성한다.
 4. HOP 기본 앱 자동 설정, external linked image 완료, Skia default와 `rhwp v0.7.19` 기능은 주장하지 않는다.
 5. `v0.7.19` 제외와 latest guard 예외 근거는 내부 release record와 검증 세부에 기록한다.
-6. Pages `docs/updates/v0.1.8.html`, updates index와 README 최신 릴리스 요약을 후보 기준으로 정렬한다.
+6. Pages `docs/updates/v0.1.8.html`, 홈/updates index와 README 최신 릴리스 요약을 후보 기준으로 정렬하고, 이전 릴리스 노트의 최신 버전 고지를 갱신한다.
 
 ### 검증
 
@@ -98,7 +101,7 @@ scripts/ci/write-release-notes.sh 0.1.8 0123456789abcdef0123456789abcdef01234567
 scripts/ci/check-release-notes-template.sh build.noindex/release/release-notes-0.1.8.md
 scripts/ci/update-release-version-notices.sh --updates-dir docs/updates --check
 rg -n "0\\.1\\.8|v0\\.1\\.8|v0\\.7\\.18|HOP|다음으로 열기|alhangeul-macos-0\\.1\\.8\\.dmg" \
-  README.md docs/updates mydocs/release/v0.1.8.md
+  README.md docs/index.html docs/updates mydocs/release/v0.1.8.md
 git diff --check
 ```
 
