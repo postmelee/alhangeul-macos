@@ -95,8 +95,8 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - 현재 v0.1.0 목표는 Demo/Preview release다.
 - Demo/Preview 배포는 필요한 bridge API가 포함된 resolved commit을 `rev`로 고정하는 commit-pinned git dependency를 허용한다.
 - Stable 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
-- 현재 lock은 `v0.7.18` Stable release tag pin 상태다. `rhwp-core.lock`은 release tag `v0.7.18`과 resolved commit `93862a4e16df59834ebce46d91e948cd739208e9`를 함께 기록한다.
-- `v0.7.18`에는 현재 `RustBridge`가 사용하는 page/render/image API와 `set_file_name`, `get_external_image_references`, `inject_external_image_by_key` external image context API가 포함되어 있다.
+- 현재 lock은 `v0.7.19` Stable release tag pin 상태다. `rhwp-core.lock`은 release tag `v0.7.19`와 resolved commit `f137b4c9468eaff5bb43e25108e9c9d39a2ed15b`를 함께 기록한다.
+- `v0.7.19`에는 현재 `RustBridge`가 사용하는 page/render/image API와 `set_file_name`, `get_external_image_references`, `inject_external_image_by_key` external image context API가 포함되어 있다.
 - branch/floating ref는 배포 기준으로 사용하지 않는다.
 
 ### RustBridge

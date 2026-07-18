@@ -68,11 +68,11 @@ rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "<release tag>" }
 
 ## 현재 release 상태
 
-2026-07-17 저장소 lock 기준 현재 Stable release pin은 다음이다.
+2026-07-19 저장소 lock 기준 현재 Stable release pin은 다음이다.
 
 ```text
-release tag: v0.7.18
-resolved commit: 93862a4e16df59834ebce46d91e948cd739208e9
+release tag: v0.7.19
+resolved commit: f137b4c9468eaff5bb43e25108e9c9d39a2ed15b
 ```
 
 현재 lock 기준은 required API gate를 통과한 release tag pin이다.
@@ -80,39 +80,39 @@ resolved commit: 93862a4e16df59834ebce46d91e948cd739208e9
 ```text
 Checked rhwp core target:
   channel: stable
-  tag:     v0.7.18
-  commit:  93862a4e16df59834ebce46d91e948cd739208e9
+  tag:     v0.7.19
+  commit:  f137b4c9468eaff5bb43e25108e9c9d39a2ed15b
 ```
 
-따라서 현재 앱 저장소는 `v0.7.18` Stable release tag pin으로 전환되어 있다.
+따라서 현재 앱 저장소는 `v0.7.19` Stable release tag pin으로 전환되어 있다.
 
 현재 lock 기준:
 
 ```text
-rhwp_release_tag: v0.7.18
-rhwp_commit: 93862a4e16df59834ebce46d91e948cd739208e9
-RustBridge/Cargo.lock source: git+https://github.com/edwardkim/rhwp.git?tag=v0.7.18#93862a4e16df59834ebce46d91e948cd739208e9
+rhwp_release_tag: v0.7.19
+rhwp_commit: f137b4c9468eaff5bb43e25108e9c9d39a2ed15b
+RustBridge/Cargo.lock source: git+https://github.com/edwardkim/rhwp.git?tag=v0.7.19#f137b4c9468eaff5bb43e25108e9c9d39a2ed15b
 ```
 
 현재 artifact 기준:
 
 ```text
 Frameworks/universal/librhwp.a
-sha256: b7029e88c44774d44e4e30c624113eced4b305918a114834acb5725584c8b0a7
-size: 208707280
+sha256: 4b1ce5fd99592f16b07985507b7049f78bd192d3b737d44dcef5a19b6b4110fd
+size: 210223376
 
 Frameworks/generated_rhwp.h
 sha256: c4cba0728b7e443ba78541dc1184d6aa286b91b72006e423e9283d998c31d8e5
 size: 3310
 ```
 
-`v0.7.18`에는 현재 RustBridge가 요구하는 PageRenderTree, native PNG/overlay image, filename/external image context API가 포함되어 있다. alhangeul-macos는 PageRenderTree 기반 C ABI와 Swift renderer를 유지하며, PageLayerTree 기반 Swift renderer 전환은 후속 작업으로 분리한다.
+`v0.7.19`에는 현재 RustBridge가 요구하는 PageRenderTree, native PNG/overlay image, filename/external image context API가 포함되어 있다. alhangeul-macos는 PageRenderTree 기반 C ABI와 Swift renderer를 유지하며, PageLayerTree 기반 Swift renderer 전환은 후속 작업으로 분리한다.
 
-앱 저장소는 core source를 수정하지 않고 release tag pin, Rust bridge 산출물 provenance, bundled `rhwp-studio` asset 기준을 `v0.7.18`로 전환했다. macOS build/render smoke 결과는 release/task별 보고서에 남긴다.
+앱 저장소는 core source를 수정하지 않고 release tag pin, Rust bridge 산출물 provenance, bundled `rhwp-studio` asset 기준을 `v0.7.19`로 전환했다. macOS build/render smoke 결과는 release/task별 보고서에 남긴다.
 
 현재 lock 기준 use case 검증은 release/task별 보고서에 남긴다. core release compatibility 관점에서 최소 확인할 항목은 다음이다.
 
-- `./scripts/update-rhwp-core.sh --check --channel stable --tag v0.7.18`
+- `./scripts/update-rhwp-core.sh --check --channel stable --tag v0.7.19`
 - `scripts/build-rust-macos.sh --verify-lock`
 - `scripts/verify-rhwp-studio-assets.sh`
 - `./scripts/check-no-appkit.sh`
