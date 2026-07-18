@@ -129,6 +129,8 @@ DMG를 읽기 전용 임시 mount한 뒤 다음을 확인하고 즉시 detach했
 
 첫 AppleScript는 Finder 속성을 한 구조로 직렬화하는 과정에서 `-10000` 오류가 났다. DMG는 정상 detach됐고, 같은 DMG를 다시 mount해 속성을 개별 조회한 결과 위 layout 기준이 모두 일치했다.
 
+작업지시자는 2026-07-19 rehearsal DMG를 Finder에서 직접 열어 배경과 화살표, `Alhangeul.app`과 `Applications` 아이콘 정렬, 텍스트 잘림·겹침 및 불필요한 visible root 항목이 없음을 육안으로 확인했다.
+
 ## Registration cleanup
 
 Xcode와 Finder mount가 만든 개발 registration을 종료 시 점검했다.
