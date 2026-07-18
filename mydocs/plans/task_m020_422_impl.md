@@ -6,9 +6,9 @@
 
 ## 작업 개요
 
-- 이슈: #422 `rhwp v0.7.19 full sync 통합과 릴리스 후보 회귀 검증`
-- upstream release: `edwardkim/rhwp v0.7.19`
-- target commit: `f137b4c9468eaff5bb43e25108e9c9d39a2ed15b`
+- 이슈: #422 `rhwp v0.7.19 회귀 판정과 v0.7.18 릴리스 후보 확정`
+- 검토한 upstream release: `edwardkim/rhwp v0.7.19`
+- 최종 release candidate: `v0.7.18` / `93862a4e16df59834ebce46d91e948cd739208e9`
 - automation candidate: PR #421 `Sync rhwp upstream v0.7.19`
 - automation commit: `ddcc0329ae1b6bef7c6dacb51ee8375de3b6d42c`
 - 직전 기준: Task #418 작업, PR #420 반영, `rhwp v0.7.18`
@@ -22,8 +22,8 @@
 
 | 항목 | 확인 결과 | 계획 반영 |
 |------|-----------|-----------|
-| current core/studio | `v0.7.18` / `93862a4e16df59834ebce46d91e948cd739208e9` | `v0.7.19`로 갱신 필요 |
-| target release | `v0.7.19` / `f137b4c9468eaff5bb43e25108e9c9d39a2ed15b` | stable tag + resolved commit으로 고정 |
+| 시작 core/studio | `v0.7.18` / `93862a4e16df59834ebce46d91e948cd739208e9` | Stage 1~3 비교 기준 |
+| 검토 release | `v0.7.19` / `f137b4c9468eaff5bb43e25108e9c9d39a2ed15b` | Stage 4에서 Host RPC blocker 확인 |
 | upstream release 범위 | 55개 PR, 578개 commit | compile 외 renderer/studio 회귀 검증 필요 |
 | PR #421 base | `devel` at `9ca9c488937bdda00fb045eb82b1ab2ecb31aa83` | Task branch 시작점과 동일 |
 | PR #421 head | `ddcc0329ae1b6bef7c6dacb51ee8375de3b6d42c` | exact automation input으로 사용 |
@@ -32,7 +32,13 @@
 | repository changed paths | core lock/dependency와 studio asset 15개 | task branch에서 current artifact/provenance 재검증 |
 | current FFI 기준 | external image context 포함 15개 symbol | 추가·삭제 없이 보존해야 함 |
 | renderer 정책 | CoreGraphics production default, Skia internal opt-in | default 전환 없이 양 경로 비교 |
-| public release | `v0.1.8 (14)` 후보, 아직 미등록 | 이 Task 완료 후 `v0.7.19` 기준 별도 이슈 등록 |
+| public release | `v0.1.8 (14)` 후보, 아직 미등록 | 이 Task 완료 후 `v0.7.18` 기준 별도 이슈 등록 |
+
+## 2026-07-19 계획 변경
+
+Stage 4에서 original `v0.7.19` bundled studio를 custom scheme WKWebView로 검증한 결과, upstream commit `023041f55febf0e987c947c74cc5f5d67affdf69`의 MessageChannel origin 정책이 top-level same-window legacy `rhwp-request`를 차단했다. quick visual suite는 CoreGraphics/Skia 10건 모두 readiness timeout됐고, 실제 HostApp은 문서를 열었지만 PDF 내보내기 Host RPC가 완료되지 않았다. 진단용 same-window 예외를 적용한 asset에서는 10/10이 통과해 원인을 분리했으며 upstream Issue #2396에 등록했다.
+
+작업지시자는 이번 release를 `v0.7.18` 반영으로 확정하고 upstream 해결 후 다음 release에서 후속 tag를 반영하도록 승인했다. Stage 1~3 완료보고와 commit은 조사 이력으로 보존한다. Stage 4는 `v0.7.19` blocker 판정, tracked core/studio의 `v0.7.18` 복원, artifact 재생성, Host RPC/visual 재검증을 함께 완료한다.
 
 ## 구현 원칙
 
@@ -41,12 +47,12 @@
 3. Stage 1 시점에 PR #421 base가 current Task 시작점과 달라졌거나 automation branch가 재작성됐으면 통합을 중단하고 freshness 계약을 다시 승인받는다.
 4. automation의 `rhwp-core.lock` reference metadata는 current RustBridge source에서 `build-rust-macos.sh --update-lock`을 다시 실행해 확정한다.
 5. `rhwp-ffi-symbols.txt`의 15개 symbol, generated header, generated symbol list를 ABI 기준으로 유지한다. 차이가 생기면 임의 수용하지 않고 source API와 bridge export를 조사한다.
-6. native core와 bundled `rhwp-studio`는 같은 `v0.7.19` tag/commit에 고정한다. manifest의 source `Cargo.lock` fingerprint와 hashed entrypoint도 직접 검증한다.
+6. 최종 native core와 bundled `rhwp-studio`는 같은 `v0.7.18` tag/commit에 고정한다. manifest의 source `Cargo.lock` fingerprint와 hashed entrypoint도 직접 검증한다.
 7. `RhwpCoreBuildInfo.swift`와 기술·운영 문서는 final lock과 동일 provenance로 맞춘다.
 8. `project.yml`을 Xcode project 원본으로 사용하고 generated `Alhangeul.xcodeproj`를 commit하지 않는다. `Frameworks/**`와 `build.noindex/**`도 검증 산출물로만 사용한다.
 9. production renderer 기본값은 CoreGraphics로 유지한다. Skia 측정은 DEBUG/internal opt-in 경로로 제한하고 known `KTX.hwp` delta와 신규 회귀를 분리한다.
-10. HML, MessageChannel, external linked image resolver는 실제 macOS integration이 없으므로 사용자-facing 완료 기능으로 표현하지 않는다.
-11. PR #421 close와 automation branch 삭제는 Task PR merge 확인 후 `pr-merge-cleanup` 단계에서 수행한다.
+10. MessageChannel v1은 macOS에서 채택하지 않았고 기존 legacy `rhwp-request` Host RPC만 사용한다. HML, MessageChannel v1, external linked image resolver를 사용자-facing 완료 기능으로 표현하지 않는다.
+11. PR #421은 `v0.7.19` release blocker 근거를 연결해 superseded 처리하되, close와 automation branch 삭제는 Task PR merge 확인 후 `pr-merge-cleanup` 단계에서 수행한다.
 12. app version/build 변경과 public release 실행은 이 Task에 포함하지 않는다.
 
 ## 최종 변경 표면
@@ -308,11 +314,11 @@ git diff --check
 Task #422 Stage 3: v0.7.19 ABI와 앱 runtime 회귀 검증
 ```
 
-## Stage 4. renderer와 bundled studio visual 회귀 판정
+## Stage 4. v0.7.19 blocker 판정과 v0.7.18 릴리스 후보 복원
 
 ### 목표
 
-CoreGraphics/Skia representative visual suite와 bundled studio 로딩·글꼴 경로를 측정해 `v0.7.19`의 레이아웃, 표, 이미지와 font 변경에 blocking regression이 없는지 판정한다.
+`v0.7.19` bundled studio Host RPC 회귀를 release blocker로 확정하고, tracked core/studio provenance와 ignored native artifact를 stable `v0.7.18`로 복원한다. `v0.7.18`에서 custom scheme legacy readiness, 대표 CoreGraphics/Skia visual, 앱 build/runtime이 다시 통과하는지 확인한다.
 
 ### 대상
 
@@ -320,31 +326,45 @@ CoreGraphics/Skia representative visual suite와 bundled studio 로딩·글꼴 �
 - CoreGraphics production path와 Skia internal opt-in path
 - `KTX.hwp` known Skia delta sentinel
 - bundled studio WKWebView asset와 NotoSansKR font
+- `v0.7.19` original/diagnostic asset 비교 결과와 upstream Issue #2396
+- `v0.7.18` core/studio provenance 및 native artifact
 - `mydocs/working/task_m020_422_stage4.md`
 - orders 문서
 
 ### 작업
 
-1. Task #418 baseline의 sample set과 이전 CoreGraphics/Skia 수치를 재확인한다.
-2. 같은 sample set을 clean output directory에서 CoreGraphics와 Skia policy로 각각 실행한다.
-3. page count/size drift, changed pixel 비율, blank/fallback, latency와 cache 결과를 수집한다.
-4. `KTX.hwp` Skia-CG delta를 기존 sentinel과 비교해 같은 수준인지 신규 악화인지 판정한다.
-5. 저장 지오메트리와 표 페이지네이션 영향 문서를 대표하는 samples에서 잘림, 과소분할과 내용 소실을 직접 확인한다.
-6. bundled studio entrypoint, WASM, CanvasKit chunk와 NotoSansKR font가 로드되고 첫 페이지가 비어 있지 않은지 확인한다.
-7. BinData 지연 로딩은 대표 이미지 문서의 성공과 memory 관찰 범위만 기록하며 upstream 수치를 앱 실측값처럼 인용하지 않는다.
-8. 변화는 upstream 개선, 허용 가능한 drift, known sentinel, regression 후보로 분류한다.
+1. original `v0.7.19` quick suite 10/10 readiness timeout과 실제 HostApp PDF 내보내기 실패를 기록한다.
+2. upstream source의 `v0.7.18..v0.7.19` commit ancestry와 runtime origin filter를 비교해 regression boundary를 확정한다.
+3. same-window origin 예외를 적용한 ignored diagnostic asset의 10/10 통과 결과로 원인을 분리하고 upstream Issue #2396을 연결한다.
+4. Stage 2에서 바꾼 tracked product/provenance 파일만 Task 시작점의 `v0.7.18` 상태로 복원한다. Stage 1~3 보고서는 삭제하거나 재작성하지 않는다.
+5. current RustBridge source에서 `v0.7.18` native artifact와 lock을 재생성하고 15개 ABI, build info, studio manifest를 검증한다.
+6. 같은 5개 sample을 clean output에서 실행해 readiness, page count/size, changed pixel, blank/fallback과 `KTX.hwp` sentinel을 확인한다.
+7. HostApp 세 target build와 custom scheme 문서 열기 및 Host RPC 경로를 확인한다.
+8. `v0.7.19`는 upstream #2396 해결 전 release blocker, `v0.7.18`은 이번 release candidate로 판정한다.
 
 ### 검증
 
 ```bash
-./scripts/preview-renderer-baseline.sh build.noindex/task422-baseline
+./scripts/update-rhwp-core.sh --check --channel stable --tag v0.7.18
+./scripts/build-rust-macos.sh --update-lock
+./scripts/build-rust-macos.sh --verify-lock
+./scripts/check-no-appkit.sh
+./scripts/verify-rhwp-core-build-info.sh
+./scripts/verify-rhwp-studio-assets.sh \
+  --tag v0.7.18 \
+  --commit 93862a4e16df59834ebce46d91e948cd739208e9
+./scripts/preview-renderer-baseline.sh build.noindex/task422-v0718-baseline
 ./scripts/smoke-quicklook-skia-policy.sh build.noindex/task422-quicklook-visual \
   samples/basic/request.hwp samples/basic/KTX.hwp samples/hwpx/hwpx-01.hwpx
 ./scripts/smoke-thumbnail-skia-policy.sh build.noindex/task422-thumbnail-visual \
   samples/basic/request.hwp samples/basic/KTX.hwp samples/hwpx/hwpx-01.hwpx
-./scripts/verify-rhwp-studio-assets.sh \
-  --tag v0.7.19 \
-  --commit f137b4c9468eaff5bb43e25108e9c9d39a2ed15b
+xcodegen generate
+xcodebuild -project Alhangeul.xcodeproj -scheme HostApp -configuration Debug \
+  -derivedDataPath build.noindex/DerivedData-task422-v0718-host CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project Alhangeul.xcodeproj -scheme QLExtension -configuration Debug \
+  -derivedDataPath build.noindex/DerivedData-task422-v0718-ql CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project Alhangeul.xcodeproj -scheme ThumbnailExtension -configuration Debug \
+  -derivedDataPath build.noindex/DerivedData-task422-v0718-thumbnail CODE_SIGNING_ALLOWED=NO build
 git diff --check
 ```
 
@@ -352,30 +372,32 @@ Stage 1에서 current harness usage와 sample 위치를 다시 확인해 잘못�
 
 ### 완료 조건
 
-- representative visual suite가 모든 sample의 output과 정량 결과를 생성한다.
+- tracked core/studio/build info가 `v0.7.18` tag와 resolved commit으로 일치한다.
+- representative visual suite가 모든 sample의 output과 정량 결과를 생성하고 legacy readiness가 timeout되지 않는다.
 - blank/fallback, page size/count drift와 내용 소실 같은 blocking regression이 없다.
 - `KTX.hwp` 결과가 known sentinel 범위인지 수치로 판정돼 있다.
-- bundled studio와 font asset의 load/render 결과가 기록돼 있다.
+- bundled studio와 font asset의 load/render 및 Host RPC 결과가 기록돼 있다.
 - upstream 수치와 알한글 local 측정값이 구분돼 있다.
+- upstream #2396과 다음 stable release 전까지의 `v0.7.19` 미반영 경계가 기록돼 있다.
 
 ### 중단 조건
 
 - 동일 입력에서 native page 수나 크기가 예상 밖으로 변한다.
 - CoreGraphics 또는 Skia 결과에 신규 blank, crash, content loss가 있다.
-- bundled studio가 entrypoint/WASM/font를 로드하지 못한다.
+- bundled studio가 entrypoint/WASM/font를 로드하지 못하거나 legacy Host RPC가 응답하지 않는다.
 - visual 결과가 환경 문제와 renderer regression으로 구분되지 않는다.
 
 ### 커밋
 
 ```text
-Task #422 Stage 4: v0.7.19 renderer와 studio 회귀 판정
+Task #422 Stage 4: v0.7.19 blocker 판정과 v0.7.18 후보 복원
 ```
 
 ## Stage 5. 최종 보고와 v0.1.8 release handoff
 
 ### 목표
 
-full sync 결과, upstream 사용자 영향, 검증 근거와 잔여 위험을 정리하고 `rhwp v0.7.19` 기준의 별도 public release Task가 바로 시작할 수 있는 입력을 확정한다.
+full sync 검증과 rollback 결과, upstream 사용자 영향, 검증 근거와 잔여 위험을 정리하고 `rhwp v0.7.18` 기준의 별도 public release Task가 바로 시작할 수 있는 입력을 확정한다.
 
 ### 대상
 
@@ -389,18 +411,18 @@ full sync 결과, upstream 사용자 영향, 검증 근거와 잔여 위험을 �
 1. Stage 1~4의 commit, source/provenance diff, automation CI, local build/runtime/visual 결과를 요약한다.
 2. upstream release note를 HostApp, bundled studio, Quick Look/Thumbnail과 내부 구현 영향으로 분류한다.
 3. 공개 release note 후보는 실제 검증된 HWP/HWPX 레이아웃·표·글꼴·메모리 영향 안에서 작성한다.
-4. HML과 MessageChannel은 macOS integration이 없으므로 공개 지원 완료로 표현하지 않는다.
+4. MessageChannel 회귀와 upstream #2396을 기록하고, 해결된 새 stable tag 전까지 `v0.7.19`를 release input으로 사용하지 않는다.
 5. Issue #409 작업 전에는 external linked image 제품 지원 완료를 주장하지 않는다.
 6. Issue #406 작업의 signed HOP exact UTI smoke를 release blocking manual gate로 유지한다.
 7. 최신 공개 앱 `v0.1.7 (13)` 이후 포함 PR을 final candidate 기준으로 다시 분석한다.
-8. 다음 release identity 후보 `v0.1.8 (14)`, previous ref `v0.1.7`, expected rhwp `v0.7.19`와 resolved commit을 handoff 값으로 기록한다.
+8. 다음 release identity 후보 `v0.1.8 (14)`, previous ref `v0.1.7`, expected rhwp `v0.7.18`과 resolved commit을 handoff 값으로 기록한다.
 9. Task PR merge 후 PR #421 superseded comment/close, automation branch 삭제와 local worktree cleanup 순서를 기록한다.
 10. 오늘할일을 완료 처리하고 최종 결과보고서 승인을 요청한다.
 
 ### 검증
 
 ```bash
-rg -n "#422|v0.7.19|f137b4c9468eaff5bb43e25108e9c9d39a2ed15b|#421|#406|#409|v0.1.8|release" \
+rg -n "#422|v0.7.18|93862a4e16df59834ebce46d91e948cd739208e9|#2396|#421|#406|#409|v0.1.8|release" \
   mydocs/report/task_m020_422_report.md mydocs/orders
 ./scripts/build-rust-macos.sh --verify-lock
 ./scripts/verify-rhwp-studio-assets.sh
@@ -427,7 +449,7 @@ git log --oneline origin/devel..HEAD
 ### 커밋
 
 ```text
-Task #422 Stage 5 + 최종 보고서: v0.7.19 release handoff 정리
+Task #422 Stage 5 + 최종 보고서: v0.7.18 release handoff 정리
 ```
 
 ## 단계별 승인 지점
@@ -435,7 +457,7 @@ Task #422 Stage 5 + 최종 보고서: v0.7.19 release handoff 정리
 1. 이 구현계획서 승인 후 Stage 1 read-only 조사와 완료보고를 시작한다.
 2. Stage 1 완료보고 승인 후에만 PR #421 automation candidate를 Task branch에 적용하고 artifact를 재생성한다.
 3. Stage 2 완료보고 승인 후 full local ABI/app/runtime validation을 수행한다.
-4. Stage 3 완료보고 승인 후 renderer와 bundled studio visual 회귀 검증을 수행한다.
+4. Stage 3 완료보고 승인 후 bundled studio 회귀 판정, `v0.7.18` 복원과 visual/Host RPC 검증을 수행한다.
 5. Stage 4 완료보고 승인 후 최종 보고와 public release handoff를 작성한다.
 6. 최종 결과보고서 승인 후 `task-final-report` 절차로 `publish/task422` PR을 게시한다.
 7. Task #422 PR merge 확인 후 PR #421 및 automation branch, local task branch/worktree를 정리한다.
