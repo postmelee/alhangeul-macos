@@ -68,7 +68,7 @@ rhwp = { git = "https://github.com/edwardkim/rhwp.git", tag = "<release tag>" }
 
 ## 현재 release 상태
 
-2026-07-17 저장소 lock 기준 현재 Stable release pin은 다음이다.
+2026-07-19 저장소 lock 기준 현재 Stable release pin은 다음이다.
 
 ```text
 release tag: v0.7.18

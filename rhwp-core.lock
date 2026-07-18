@@ -4,7 +4,7 @@ rhwp_ref_kind = "release-tag"
 rhwp_release_tag = "v0.7.18"
 rhwp_commit = "93862a4e16df59834ebce46d91e948cd739208e9"
 rhwp_enabled_features = "native-skia"
-built_at = "2026-07-16T15:57:48Z"
+built_at = "2026-07-18T16:53:39Z"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
 
 [[artifacts]]
