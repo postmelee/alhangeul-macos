@@ -90,6 +90,17 @@ Quick Look은 사용자에게 문서 내용을 크게 보여주는 surface이므
 
 Quick Look에서 Skia가 직접 PNG bytes를 반환하는 장점은 단일 페이지 PNG reply에서 Swift `CGImage` 생성과 PNG 재인코딩을 줄일 수 있다는 점이다. 반면 다중 페이지 PDF는 `CGImage` decode가 필요하므로 초기 성능 이득을 단정하지 않는다.
 
+2026-07-03 #393 Quick Look direct PNG opt-in 실험 결과:
+
+- Provider default는 계속 `coreGraphics`다.
+- `HwpQuickLookPNGReplyModeResolver`는 `ALHANGEUL_QUICKLOOK_PNG_REPLY_MODE`를 DEBUG/internal 진단 경로에서만 해석한다. missing/empty/invalid 값과 Release build는 모두 `coreGraphics`로 수렴한다.
+- 허용 값은 `coreGraphics`/`coreGraphicsOnly`, `skia`/`skiaDecode`/`skiaOptIn`, `direct`/`skiaDirect`다. `skia` 계열은 기존 decode/re-encode path, `direct` 계열은 Skia PNG bytes 직접 반환 path다.
+- `skiaDirect`는 단일 페이지 context에서 `RhwpDocument.renderPagePNG(at: 0, scale: 1, maxDimension: 0)`을 호출하고, PNG signature와 IHDR만 검증한 뒤 `QLPreviewReply` PNG data로 반환한다.
+- direct 실패는 Quick Look text fallback으로 바로 내려가지 않고 CoreGraphics PNG reply로 fallback한다.
+- 대표 smoke 결과는 단일 페이지 3개 샘플 `request.hwp`, `KTX.hwp`, `복학원서.hwp` 모두 `skiaDirect` backend `skia`, fallback 0건이었다. direct latency는 각각 `0.023481s`, `0.042532s`, `0.051415s`로 기존 `skiaDecode`보다 빨랐다.
+- 다중 페이지 2개 샘플 `hwp-multi-001.hwp`, `hwpx-01.hwpx`는 `skiaDirect=N/A`로 기록되어 direct path가 적용되지 않았다.
+- 이 결과는 Quick Look 단일 PNG opt-in fast path 후보가 유효하다는 입력이다. `KTX.hwp` Skia visual regression은 direct PNG로 해결되지 않으므로 #259/#396 quality gate를 우회하지 않는다.
+
 ## Thumbnail 정책
 
 Thumbnail은 작은 bitmap을 빠르게 제공하는 surface이므로 latency, memory, cache 안정성을 우선한다.
@@ -101,13 +112,13 @@ Thumbnail은 작은 bitmap을 빠르게 제공하는 surface이므로 latency, m
 - Skia 실패는 fallback tile로 바로 가지 않고 CoreGraphics fallback을 먼저 시도한다.
 - CoreGraphics fallback까지 실패하면 기존 fallback tile 정책을 유지한다.
 
-Thumbnail은 Quick Look보다 `max_dimension` 매핑이 명확하다. 다만 PNG decode 비용과 cache key 변화가 있으므로 `Skia first` 전환은 Quick Look과 독립적으로 판단한다.
+Thumbnail은 Quick Look보다 `max_dimension` 입력 경계가 명확하다. 다만 #392에서 `request.hwp`처럼 upstream Skia가 자연 해상도 이상 확대하지 않아 output bitmap이 작아지는 underfill risk가 확인됐다. PNG decode 비용, cache key 변화, underfill risk가 있으므로 `Skia first` 전환은 Quick Look과 독립적으로 판단한다.
 
 ## option mapping
 
 | 입력 | CoreGraphics 현재 처리 | Skia 후보 매핑 |
 |---|---|---|
-| Quick Look 단일 페이지 | page size 기준 1x bitmap 후 PNG encode | `scale = 1.0`부터 시작. 이후 target size 정책이 생기면 scale 계산 |
+| Quick Look 단일 페이지 | page size 기준 1x bitmap 후 PNG encode | `skiaDecode`는 `scale = 1.0` PNG decode 후 재인코딩. `skiaDirect`는 DEBUG opt-in에서 upstream PNG bytes 직접 반환 |
 | Quick Look 다중 페이지 | page size 기준 page별 bitmap을 PDF에 draw | 초기 opt-in에서는 CoreGraphics 유지. 별도 flag에서 page별 `scale = 1.0` 검증 |
 | Thumbnail maximum size/scale | `maximumPixelSize` bucket 계산 후 renderScale 산출 | 긴 변을 `PngExportOptions.max_dimension`에 매핑 |
 | file size > 50 MB | render 전 거절 | Skia 호출 전 동일하게 거절 |
@@ -265,6 +276,27 @@ Skia optional backend는 다음 순서로 진행한다.
 - fallback: 모든 row `-`
 - Skia opt-in backend: 모든 opt-in row `skia`
 - 산출물: `build.noindex/task258-thumbnail-policy-representative/summary.txt`
+
+2026-07-01 #389 Thumbnail diagnostic path 기준선:
+
+- Provider default는 계속 `coreGraphicsOnly`다.
+- `HwpThumbnailPolicyResolver`는 `ALHANGEUL_THUMBNAIL_RENDER_POLICY`를 DEBUG/internal 진단 경로에서만 해석한다.
+- 허용 값은 `skia`, `skiaOptIn`, `coreGraphics`, `coreGraphicsOnly`다. missing/empty/invalid 값과 Release build는 모두 `coreGraphicsOnly`로 수렴한다.
+- `HwpThumbnailProvider`는 `renderedPageResult(for:)`를 사용해 success log에 `policy`, `cache`, `requestedBucket`, `matchedBucket`, `backend`, `fallback`, `renderMs`, `pixels`를 남긴다.
+- `scripts/smoke-thumbnail-skia-policy.sh`는 resolver contract와 cache signature separation을 summary/detail에 기록한다.
+- 2026-07-01 대표 smoke 결과는 5 files x 2 policies x 4 requests = 40 rows 모두 `OK`, resolver contract `OK`, cache signature separation 5 rows 모두 `OK`였다.
+- 동일 `1024x1024` bucket에서 Skia pixel size가 CoreGraphics보다 긴 축 기준 1px 크게 나오는 패턴은 cache 실패가 아니라 #392 `maxDimension` mapping 실험 입력으로 분리한다.
+
+2026-07-03 #392 Thumbnail maxDimension mapping 실험 결과:
+
+- Provider default는 계속 `coreGraphicsOnly`다.
+- `skiaOptIn` path는 `HwpThumbnailRenderRequest.maximumPixelSize`의 긴 변을 upstream `PngExportOptions.max_dimension`에 전달한다.
+- `maxDimension > 0`일 때는 upstream 자동 scale 계산을 사용하기 위해 `scale: 0`으로 `renderPagePNG`를 호출한다.
+- Thumbnail render signature suffix는 `skia-max-dimension-thumbnail-v1`이다. 기존 `skia-max-dimension-0` scale-only cache와 섞이지 않는다.
+- 대표 smoke 결과는 5 files x 2 policies x 4 requests = 40 rows 모두 `OK`, resolver contract `OK`, cache signature separation 5 rows 모두 `OK`, fallback 0건이었다.
+- #389 scale-only 대비 `복학원서.hwp`, `KTX.hwp`, `hwpx-01.hwpx`, `hwp-multi-001.hwp`의 1px 초과 drift는 해소됐다.
+- `request.hwp`는 `732x1025`에서 `567x794`로 바뀌었다. 1024px 초과는 없어졌지만, Skia가 자연 해상도 이상 확대하지 않는 underfill risk로 분류한다.
+- 따라서 maxDimension 매핑은 1px drift 방지에는 유효하지만, 단독으로 Thumbnail Skia default 전환 근거가 되지는 않는다. #259 readiness gate에서는 underfill risk와 visual 품질을 함께 본다.
 
 비책임:
 

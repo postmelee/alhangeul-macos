@@ -27,6 +27,7 @@
 		227BB0B9C6B7D7C6811A4C36 /* BuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA73996BDEAF04DE10497E23 /* BuildInfo.swift */; };
 		2CBAC0F13FA5A5C4486D4452 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2612A2057C62E35A5E751E7 /* Foundation.framework */; };
 		2DC3A5C591A43ED5139D6D7C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2612A2057C62E35A5E751E7 /* Foundation.framework */; };
+		3009365CCC313802FEA32EA8 /* RhwpCoreBuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7582723794D9CFE90ED759 /* RhwpCoreBuildInfo.swift */; };
 		302DEA2AC6D48AB95F3A7C00 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B85C87F3CD3C8EFD709842FF /* ApplicationServices.framework */; };
 		307CE14735FB510DD719EC5F /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F5AFC8EC56882BF138E698C /* Rhwp.xcframework */; };
 		308D4855D7022391FEF9CCD8 /* ExtensionSystemRegistrationRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E51D4DC8276BF1D36E5FEC /* ExtensionSystemRegistrationRefresher.swift */; };
@@ -37,7 +38,9 @@
 		37B400334D28A4A06AC40307 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4457E7F57DA695C2D4A7757 /* CoreServices.framework */; };
 		39EB4CA94F5944239BDB869F /* FontResourceRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC2D57719DF9672E7C311D7 /* FontResourceRegistry.swift */; };
 		3BA210E4DB4D1BF2C8E03893 /* HwpNativePageCompositor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541160BFAFD7D51040244110 /* HwpNativePageCompositor.swift */; };
+		3BAE06A9A748D31D69C23101 /* HwpThumbnailPolicyResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7117AC630958C9A5DAE6545 /* HwpThumbnailPolicyResolver.swift */; };
 		41C5D25E1060BEF211833C8A /* HwpPreviewProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F373DBDDC753FC79292E2D /* HwpPreviewProvider.swift */; };
+		43A1584B860794E3A9E9FF3C /* HwpPreviewPNGRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8645A8FD6F4761F6A5BE264A /* HwpPreviewPNGRenderer.swift */; };
 		44CDAB1946DFA27A7CADCF6D /* RecentDocumentThumbnailRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4915E7318DD22D9A61F584 /* RecentDocumentThumbnailRefresher.swift */; };
 		4603821692664AB0F6480AD4 /* FontFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF11065A3E3439B4C5B8DD7 /* FontFallback.swift */; };
 		477B4C8AC6A0370182751D8F /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */; };
@@ -47,9 +50,11 @@
 		4B80D13CDBFBFAD3AB4AF18D /* CGTreeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B69400B5B8A2851995C68DE /* CGTreeRenderer.swift */; };
 		539DFB38A0293062B5A01ED9 /* HwpThumbnailRenderCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895C9E62B889A9E90C3FF8C6 /* HwpThumbnailRenderCache.swift */; };
 		5487A3B00729AE0595A43DF2 /* AboutWindowPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26979062297C483B463918BA /* AboutWindowPresenter.swift */; };
+		5527F4F08635A8EDCA74EA61 /* HwpPreviewPNGRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8645A8FD6F4761F6A5BE264A /* HwpPreviewPNGRenderer.swift */; };
 		55993B1F9BBFFBBA62397829 /* LaunchMaintenanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F64C25EF462BA350A75A155D /* LaunchMaintenanceService.swift */; };
 		58FEED15D7979CC23FADA9D9 /* FontResourceRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC2D57719DF9672E7C311D7 /* FontResourceRegistry.swift */; };
 		59DC1D6F67C3F459AC4A8ADC /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B49CA0DEC91C628C9B92B7A1 /* CoreFoundation.framework */; };
+		5C02265DAB27BE08F8FF4D8C /* RhwpCoreBuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7582723794D9CFE90ED759 /* RhwpCoreBuildInfo.swift */; };
 		5D0E58974DAD8BEA1E040E5A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D0ED3A363318BCA70DEA5C4C /* Assets.xcassets */; };
 		5E071C1C500CDB5723E42680 /* sample.hwpx in Resources */ = {isa = PBXBuildFile; fileRef = E4F2FDC67F5328E229845401 /* sample.hwpx */; };
 		6180BA787D50DD6F44AB68AF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2612A2057C62E35A5E751E7 /* Foundation.framework */; };
@@ -79,7 +84,9 @@
 		9E7FC8AC6078A6BD9975CD4E /* RhwpProvenance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2953DECE3F38280938C3CE2B /* RhwpProvenance.swift */; };
 		A155D58D6F716FCFDAC1675C /* DocumentOpenRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F4546426B7A9CF2CC1B9D5 /* DocumentOpenRouter.swift */; };
 		A15CE462970FB420A669581E /* HwpNativePageCompositor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541160BFAFD7D51040244110 /* HwpNativePageCompositor.swift */; };
+		A174DAE4D877346E0350AF02 /* HwpPreviewPNGRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8645A8FD6F4761F6A5BE264A /* HwpPreviewPNGRenderer.swift */; };
 		A37A870989D1BA673D744596 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D03050B560F60198F4CBBB0 /* Metal.framework */; };
+		A6189FF8E0BA6CC94255FEFA /* HwpQuickLookPNGReplyModeResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CACAAFF817D4598145526EE /* HwpQuickLookPNGReplyModeResolver.swift */; };
 		A6B358FD54D1069D3C08BF76 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B49CA0DEC91C628C9B92B7A1 /* CoreFoundation.framework */; };
 		A9D512641E80997A3D087945 /* HwpNativePageCompositor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541160BFAFD7D51040244110 /* HwpNativePageCompositor.swift */; };
 		ACA5EC231EB0D299AC1CD286 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D60B1C83682555AB978A8F1C /* InfoPlist.strings */; };
@@ -111,6 +118,7 @@
 		DBD45292114D646A364B0B87 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C316C5FBCECA08C309CF9 /* HwpPageImageRenderer.swift */; };
 		DBF2603BA09D093A91E230C9 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E931CF12C8BE40BCE94DC51 /* libc++.tbd */; };
 		DE194623702B252806CF09DF /* RhwpStudioDocumentPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16BED1B65658BC71151FB7AC /* RhwpStudioDocumentPayload.swift */; };
+		E209FF4CC62FC20D4DC368AD /* RhwpCoreBuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7582723794D9CFE90ED759 /* RhwpCoreBuildInfo.swift */; };
 		E31F1F5AF648803FDDC2E893 /* DocumentSavePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CD083E83BB7DFA8089562B5 /* DocumentSavePanel.swift */; };
 		E7AA85F51DE595BC11D36345 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A5315FE25D0AB65823C1D91A /* libz.tbd */; };
 		E7E737D711C9523AF943BB70 /* ThumbnailExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3F33B7AA294D0DC689399E16 /* ThumbnailExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -205,8 +213,10 @@
 		6A6F3480DCEB0F0A30DF06A1 /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = System/Library/Frameworks/IOSurface.framework; sourceTree = SDKROOT; };
 		77B27A9A00D195F9031B6311 /* PageOverlayImages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageOverlayImages.swift; sourceTree = "<group>"; };
 		7B8D5D5DECBC9E6071002C34 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		7CACAAFF817D4598145526EE /* HwpQuickLookPNGReplyModeResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpQuickLookPNGReplyModeResolver.swift; sourceTree = "<group>"; };
 		81391ABAF81F59C2FAE9880D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		82B73611C892296A43FDC8B2 /* ColorSync.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ColorSync.framework; path = System/Library/Frameworks/ColorSync.framework; sourceTree = SDKROOT; };
+		8645A8FD6F4761F6A5BE264A /* HwpPreviewPNGRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewPNGRenderer.swift; sourceTree = "<group>"; };
 		8957BC445F1A6388BF82B28C /* QLExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QLExtension.entitlements; sourceTree = "<group>"; };
 		895C9E62B889A9E90C3FF8C6 /* HwpThumbnailRenderCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpThumbnailRenderCache.swift; sourceTree = "<group>"; };
 		8BDDD5E15FCF571ED9D88598 /* HwpThumbnailProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpThumbnailProvider.swift; sourceTree = "<group>"; };
@@ -220,6 +230,7 @@
 		A5315FE25D0AB65823C1D91A /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		A8E9CC5E34BCCA387A0B385E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B49CA0DEC91C628C9B92B7A1 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		B7117AC630958C9A5DAE6545 /* HwpThumbnailPolicyResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpThumbnailPolicyResolver.swift; sourceTree = "<group>"; };
 		B74C6D69DBD1D9B163C9A247 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		B85C87F3CD3C8EFD709842FF /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		BED96A22509C493BF3039CEC /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
@@ -237,6 +248,7 @@
 		E72EEE01C9016462E4E5956E /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		EA2088B1914C461BF4EC8023 /* HostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostApp.swift; sourceTree = "<group>"; };
 		EC5D4F52776B873F6AB20372 /* DocumentFileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentFileActions.swift; sourceTree = "<group>"; };
+		ED7582723794D9CFE90ED759 /* RhwpCoreBuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpCoreBuildInfo.swift; sourceTree = "<group>"; };
 		F64C25EF462BA350A75A155D /* LaunchMaintenanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchMaintenanceService.swift; sourceTree = "<group>"; };
 		F6870F9FC321B27386359E2E /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		F6DA732CC42A781180AA2F88 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
@@ -340,6 +352,7 @@
 			children = (
 				BED96A22509C493BF3039CEC /* .gitkeep */,
 				07F373DBDDC753FC79292E2D /* HwpPreviewProvider.swift */,
+				7CACAAFF817D4598145526EE /* HwpQuickLookPNGReplyModeResolver.swift */,
 				5E97EA87050B083B9FA29249 /* Info.plist */,
 				8957BC445F1A6388BF82B28C /* QLExtension.entitlements */,
 				F9934AE3C35F4086219CFA3B /* Resources */,
@@ -355,6 +368,7 @@
 				541160BFAFD7D51040244110 /* HwpNativePageCompositor.swift */,
 				4B5C316C5FBCECA08C309CF9 /* HwpPageImageRenderer.swift */,
 				2512041CBA5B9CE5521537DC /* HwpPreviewPDFRenderer.swift */,
+				8645A8FD6F4761F6A5BE264A /* HwpPreviewPNGRenderer.swift */,
 			);
 			name = Shared;
 			path = Sources/Shared;
@@ -396,6 +410,7 @@
 			isa = PBXGroup;
 			children = (
 				7B8D5D5DECBC9E6071002C34 /* .gitkeep */,
+				B7117AC630958C9A5DAE6545 /* HwpThumbnailPolicyResolver.swift */,
 				8BDDD5E15FCF571ED9D88598 /* HwpThumbnailProvider.swift */,
 				895C9E62B889A9E90C3FF8C6 /* HwpThumbnailRenderCache.swift */,
 				9EE454540A36086BCFD273BC /* Info.plist */,
@@ -414,6 +429,7 @@
 				DEC2D57719DF9672E7C311D7 /* FontResourceRegistry.swift */,
 				77B27A9A00D195F9031B6311 /* PageOverlayImages.swift */,
 				6A01160D544F0F71CA0C3501 /* RenderTree.swift */,
+				ED7582723794D9CFE90ED759 /* RhwpCoreBuildInfo.swift */,
 				423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */,
 			);
 			name = RhwpCoreBridge;
@@ -687,11 +703,13 @@
 				A15CE462970FB420A669581E /* HwpNativePageCompositor.swift in Sources */,
 				7BF16A0B1E4314FB46041152 /* HwpPageImageRenderer.swift in Sources */,
 				02E1371B73A762F8E64ED8EF /* HwpPreviewPDFRenderer.swift in Sources */,
+				A174DAE4D877346E0350AF02 /* HwpPreviewPNGRenderer.swift in Sources */,
 				55993B1F9BBFFBBA62397829 /* LaunchMaintenanceService.swift in Sources */,
 				329C78D1A7232AF2B5ABFD9E /* PageOverlayImages.swift in Sources */,
 				09D138398C713C14EB0266D1 /* RecentDocumentStore.swift in Sources */,
 				44CDAB1946DFA27A7CADCF6D /* RecentDocumentThumbnailRefresher.swift in Sources */,
 				D8932BD515CBB96629CADD55 /* RenderTree.swift in Sources */,
+				3009365CCC313802FEA32EA8 /* RhwpCoreBuildInfo.swift in Sources */,
 				90F97E295C84EDBABCA218F6 /* RhwpDocument.swift in Sources */,
 				9E7FC8AC6078A6BD9975CD4E /* RhwpProvenance.swift in Sources */,
 				DE194623702B252806CF09DF /* RhwpStudioDocumentPayload.swift in Sources */,
@@ -718,10 +736,13 @@
 				A9D512641E80997A3D087945 /* HwpNativePageCompositor.swift in Sources */,
 				C898F0CA6BE3F209145CAC28 /* HwpPageImageRenderer.swift in Sources */,
 				D6ECD4A743DEDC3A090EEEF4 /* HwpPreviewPDFRenderer.swift in Sources */,
+				5527F4F08635A8EDCA74EA61 /* HwpPreviewPNGRenderer.swift in Sources */,
+				3BAE06A9A748D31D69C23101 /* HwpThumbnailPolicyResolver.swift in Sources */,
 				8348EA8DD0B313DC71B3E9C7 /* HwpThumbnailProvider.swift in Sources */,
 				539DFB38A0293062B5A01ED9 /* HwpThumbnailRenderCache.swift in Sources */,
 				7561FA65463CDF9CC5BED398 /* PageOverlayImages.swift in Sources */,
 				6475910A39D8217C7E004CB8 /* RenderTree.swift in Sources */,
+				E209FF4CC62FC20D4DC368AD /* RhwpCoreBuildInfo.swift in Sources */,
 				477B4C8AC6A0370182751D8F /* RhwpDocument.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -737,9 +758,12 @@
 				3BA210E4DB4D1BF2C8E03893 /* HwpNativePageCompositor.swift in Sources */,
 				DBD45292114D646A364B0B87 /* HwpPageImageRenderer.swift in Sources */,
 				D9E0E7DB88B12FDF40623328 /* HwpPreviewPDFRenderer.swift in Sources */,
+				43A1584B860794E3A9E9FF3C /* HwpPreviewPNGRenderer.swift in Sources */,
 				41C5D25E1060BEF211833C8A /* HwpPreviewProvider.swift in Sources */,
+				A6189FF8E0BA6CC94255FEFA /* HwpQuickLookPNGReplyModeResolver.swift in Sources */,
 				F853A92E67C1E05F3C1C8722 /* PageOverlayImages.swift in Sources */,
 				748E5560ED13294F03F1B627 /* RenderTree.swift in Sources */,
+				5C02265DAB27BE08F8FF4D8C /* RhwpCoreBuildInfo.swift in Sources */,
 				BCE95338397154D9AC1C61C6 /* RhwpDocument.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

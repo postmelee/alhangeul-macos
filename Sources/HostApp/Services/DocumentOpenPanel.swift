@@ -21,6 +21,8 @@ enum DocumentOpenPanel {
         [
             "com.postmelee.alhangeul.hwp",
             "com.postmelee.alhangeul.hwpx",
+            "net.golbin.hop.hwp",
+            "net.golbin.hop.hwpx",
             "com.hancom.hwp",
             "com.hancom.hwpx",
             "com.haansoft.hancomofficeviewer.mac.hwp",

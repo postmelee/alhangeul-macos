@@ -48,10 +48,10 @@ struct HwpThumbnailRenderRequest {
 
 struct HwpThumbnailRenderSignature: Hashable {
     private static let rendererOptionVersion = "thumbnail-renderer-v1"
-    private static let coreReleaseTag = "v0.7.13"
-    private static let coreCommit = "b3e16ef212af81ef37d973ddb86d6816d3804642"
-    private static let coreEnabledFeatures = "native-skia"
-    private static let maxDimensionPolicyVersion = "skia-max-dimension-0"
+    private static let coreReleaseTag = RhwpCoreBuildInfo.releaseTag
+    private static let coreCommit = RhwpCoreBuildInfo.commit
+    private static let coreEnabledFeatures = RhwpCoreBuildInfo.enabledFeatures
+    private static let maxDimensionPolicyVersion = "skia-max-dimension-thumbnail-v1"
 
     let backendPolicy: String
     let rendererOptionVersion: String
@@ -68,7 +68,7 @@ struct HwpThumbnailRenderSignature: Hashable {
         coreEnabledFeatures: String = Self.coreEnabledFeatures,
         maxDimensionPolicyVersion: String = Self.maxDimensionPolicyVersion
     ) {
-        self.backendPolicy = Self.policyIdentifier(policy)
+        self.backendPolicy = policy.identifier
         self.rendererOptionVersion = rendererOptionVersion
         self.coreReleaseTag = coreReleaseTag
         self.coreCommit = coreCommit
@@ -85,15 +85,6 @@ struct HwpThumbnailRenderSignature: Hashable {
             coreEnabledFeatures,
             maxDimensionPolicyVersion
         ].joined(separator: "|")
-    }
-
-    private static func policyIdentifier(_ policy: HwpPageRenderPolicy) -> String {
-        switch policy {
-        case .coreGraphicsOnly:
-            return "coreGraphicsOnly"
-        case .skiaOptIn:
-            return "skiaOptIn"
-        }
     }
 }
 

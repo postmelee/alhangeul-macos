@@ -82,6 +82,12 @@ struct StudioCaptureMetadata: Codable {
     let filename: String
     let page: Int
     let loadURL: String
+    let automationLoad: Bool
+    let automationStrategy: String
+    let automationPageCount: Int
+    let automationFileName: String
+    let automationSourceFormat: String?
+    let automationLocalFontsSeeded: Bool
     let selector: String
     let rect: RectMetadata
     let canvasRect: RectMetadata
@@ -97,6 +103,14 @@ struct StudioCaptureMetadata: Codable {
     let captureMode: String
     let overlayIncluded: Bool
     let statusText: String
+    let captureContaminated: Bool
+    let uiSuppressed: Bool
+    let modalCount: Int
+    let toastCount: Int
+    let localFontUIVisible: Bool
+    let contaminationText: [String]
+    let preCaptureUI: UIContaminationProbe
+    let postCaptureUI: UIContaminationProbe
     let captureMs: Double
     let settleMs: Int
     let studioReleaseTag: String
@@ -121,7 +135,36 @@ struct StudioCaptureResult {
     let canvasSampleNonWhitePixels: Int
     let canvasSamplePixels: Int
     let captureMode: String
+    let captureContaminated: Bool
+    let uiSuppressed: Bool
     let captureMs: Double
+}
+
+struct AutomationLoadInfo {
+    let pageCount: Int
+    let fileName: String
+    let sourceFormat: String?
+    let strategy: String?
+    let localFontsSeeded: Bool
+    let statusText: String
+}
+
+struct UIContaminationProbe: Codable {
+    let modalCount: Int
+    let toastCount: Int
+    let localFontUIVisible: Bool
+    let contaminationText: [String]
+
+    var captureContaminated: Bool {
+        modalCount > 0 || toastCount > 0 || localFontUIVisible
+    }
+
+    init(dictionary: [String: Any]) {
+        modalCount = intValue(dictionary["modalCount"])
+        toastCount = intValue(dictionary["toastCount"])
+        localFontUIVisible = dictionary["localFontUIVisible"] as? Bool ?? false
+        contaminationText = stringArrayValue(dictionary["contaminationText"])
+    }
 }
 
 struct PNGOutput {
@@ -536,14 +579,16 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         pageNumber: Int,
         manifest: StudioManifest
     ) throws -> StudioCaptureResult {
+        let revision = 1
         let data = try Data(contentsOf: inputURL)
-        let loadURL = try makeLoadURL(filename: inputURL.lastPathComponent, revision: 1)
+        let documentURL = try makeDocumentURL(revision: revision)
+        let loadURL = try makeAutomationAppURL()
         let baseName = outputStem(for: inputURL)
         let outputBase = "\(baseName)-page\(pageNumber)"
         let pngURL = outputDir.appendingPathComponent("\(outputBase)-studio.png", isDirectory: false)
         let jsonURL = outputDir.appendingPathComponent("\(outputBase)-studio.json", isDirectory: false)
 
-        try createWebView(documentData: data, revision: 1)
+        try createWebView(documentData: data, revision: revision)
         defer {
             webView?.navigationDelegate = nil
             webView?.stopLoading()
@@ -568,6 +613,18 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         if navigation == nil {
             recordNavigationEvent("loadReturnedNil:\(loadURL.scheme ?? "nil")")
         }
+        try waitForAutomationRuntime(timeout: 30)
+        let automationLoadInfo = try loadDocumentForAutomation(
+            documentURL: documentURL,
+            filename: inputURL.lastPathComponent,
+            timeout: 30
+        )
+        guard pageNumber >= 1, pageNumber <= automationLoadInfo.pageCount else {
+            throw PreviewHarnessPhaseError(
+                phase: .readiness,
+                detail: "automation load page \(pageNumber) is out of range: pageCount=\(automationLoadInfo.pageCount)"
+            )
+        }
         try waitForPageReady(pageNumber: pageNumber, timeout: 30)
         try alignPageAndHideChrome(pageNumber: pageNumber)
         runMainLoop(milliseconds: settleMilliseconds)
@@ -581,6 +638,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             throw PreviewHarnessError(description: "page \(pageNumber) rect is unavailable")
         }
 
+        let preCaptureUI = try currentUIContaminationProbe()
         var png: PNGOutput
         var captureMode = "canvasDataURL"
         var overlayIncluded = false
@@ -605,6 +663,13 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
                 snapshotSamplePixels = snapshotPNG.samplePixels
             }
         }
+        let postCaptureUI = try currentUIContaminationProbe()
+        let captureContaminated = preCaptureUI.captureContaminated || postCaptureUI.captureContaminated
+        let uiSuppressed = false
+        let modalCount = max(preCaptureUI.modalCount, postCaptureUI.modalCount)
+        let toastCount = max(preCaptureUI.toastCount, postCaptureUI.toastCount)
+        let localFontUIVisible = preCaptureUI.localFontUIVisible || postCaptureUI.localFontUIVisible
+        let contaminationText = combinedContaminationText(preCaptureUI, postCaptureUI)
         try png.data.write(to: pngURL, options: .atomic)
 
         let elapsedMs = Date().timeIntervalSince(startTime) * 1000
@@ -613,6 +678,12 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             filename: inputURL.lastPathComponent,
             page: pageNumber,
             loadURL: loadURL.absoluteString,
+            automationLoad: true,
+            automationStrategy: automationLoadInfo.strategy ?? "unknown",
+            automationPageCount: automationLoadInfo.pageCount,
+            automationFileName: automationLoadInfo.fileName.isEmpty ? inputURL.lastPathComponent : automationLoadInfo.fileName,
+            automationSourceFormat: automationLoadInfo.sourceFormat,
+            automationLocalFontsSeeded: automationLoadInfo.localFontsSeeded,
             selector: pageState.selector,
             rect: snapshotRectMetadata,
             canvasRect: canvasRectMetadata,
@@ -628,6 +699,14 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             captureMode: captureMode,
             overlayIncluded: overlayIncluded,
             statusText: pageState.statusText,
+            captureContaminated: captureContaminated,
+            uiSuppressed: uiSuppressed,
+            modalCount: modalCount,
+            toastCount: toastCount,
+            localFontUIVisible: localFontUIVisible,
+            contaminationText: contaminationText,
+            preCaptureUI: preCaptureUI,
+            postCaptureUI: postCaptureUI,
             captureMs: elapsedMs,
             settleMs: settleMilliseconds,
             studioReleaseTag: manifest.source_release_tag,
@@ -653,6 +732,8 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             canvasSampleNonWhitePixels: pageState.canvasSampleNonWhitePixels,
             canvasSamplePixels: pageState.canvasSamplePixels,
             captureMode: captureMode,
+            captureContaminated: captureContaminated,
+            uiSuppressed: uiSuppressed,
             captureMs: elapsedMs
         )
     }
@@ -781,6 +862,153 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         )
     }
 
+    private func waitForAutomationRuntime(timeout: TimeInterval) throws {
+        let deadline = Date().addingTimeInterval(timeout)
+        var lastJSON = ""
+        var lastError: Error?
+        var errorCount = 0
+        var startedProbe = false
+        while Date() < deadline {
+            try throwIfNavigationFailed()
+            guard case .success = navigationResult else {
+                RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.05))
+                continue
+            }
+            if !startedProbe {
+                _ = try evaluateJavaScript(
+                    automationReadyStartScript(),
+                    timeout: 5,
+                    phase: .readiness
+                )
+                startedProbe = true
+            }
+            do {
+                let value = try evaluateJavaScript(
+                    "String(window.__alhangeulPreviewAutomationReadyJSON || '')",
+                    timeout: 2,
+                    phase: .readiness
+                )
+                if let json = value as? String, !json.isEmpty {
+                    lastJSON = json
+                    guard let data = json.data(using: .utf8),
+                          let dictionary = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+                    else {
+                        throw PreviewHarnessPhaseError(
+                            phase: .readiness,
+                            detail: "unexpected automation ready result: \(json)"
+                        )
+                    }
+                    if dictionary["ok"] as? Bool == true {
+                        return
+                    }
+                    let errorMessage = dictionary["error"] as? String ?? "unknown automation ready error"
+                    throw PreviewHarnessPhaseError(
+                        phase: .readiness,
+                        detail: "rhwp-studio automation runtime failed: \(errorMessage)"
+                    )
+                }
+            } catch {
+                lastError = error
+                errorCount += 1
+            }
+            RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.05))
+        }
+
+        var details = [
+            "navigation=\(navigationStatusDescription)",
+            "events=[\(navigationEvents.joined(separator: ","))]",
+            "scheme={\(schemeStats.summary)}",
+            "lastAutomationJSON=\(lastJSON)"
+        ]
+        if let lastError {
+            details.append("lastError={\(lastError)}")
+        }
+        if errorCount > 0 {
+            details.append("errorCount=\(errorCount)")
+        }
+        throw PreviewHarnessPhaseError(
+            phase: .readiness,
+            detail: "rhwp-studio automation runtime timed out: \(details.joined(separator: "; "))"
+        )
+    }
+
+    private func loadDocumentForAutomation(
+        documentURL: URL,
+        filename: String,
+        timeout: TimeInterval
+    ) throws -> AutomationLoadInfo {
+        _ = try evaluateJavaScript(
+            automationLoadStartScript(documentURL: documentURL, filename: filename),
+            timeout: 5,
+            phase: .readiness
+        )
+
+        let deadline = Date().addingTimeInterval(timeout)
+        var lastJSON = ""
+        var lastError: Error?
+        while Date() < deadline {
+            do {
+                let value = try evaluateJavaScript(
+                    "String(window.__alhangeulPreviewAutomationLoadJSON || '')",
+                    timeout: 2,
+                    phase: .readiness
+                )
+                if let json = value as? String, !json.isEmpty {
+                    lastJSON = json
+                    return try automationLoadInfo(from: json)
+                }
+            } catch {
+                lastError = error
+            }
+            RunLoop.current.run(mode: .default, before: Date().addingTimeInterval(0.05))
+        }
+
+        var details = [
+            "filename=\(filename)",
+            "documentURL=\(documentURL.absoluteString)",
+            "navigation=\(navigationStatusDescription)",
+            "events=[\(navigationEvents.joined(separator: ","))]",
+            "scheme={\(schemeStats.summary)}"
+        ]
+        if !lastJSON.isEmpty {
+            details.append("lastAutomationJSON=\(lastJSON)")
+        }
+        if let lastError {
+            details.append("lastError={\(lastError)}")
+        }
+        throw PreviewHarnessPhaseError(
+            phase: .readiness,
+            detail: "rhwp-studio automation document load timed out: \(details.joined(separator: "; "))"
+        )
+    }
+
+    private func automationLoadInfo(from json: String) throws -> AutomationLoadInfo {
+        guard let data = json.data(using: .utf8),
+              let dictionary = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else {
+            throw PreviewHarnessPhaseError(
+                phase: .readiness,
+                detail: "unexpected automation load result: \(json)"
+            )
+        }
+        if dictionary["ok"] as? Bool != true {
+            let errorMessage = dictionary["error"] as? String ?? "unknown automation load error"
+            throw PreviewHarnessPhaseError(
+                phase: .readiness,
+                detail: "rhwp-studio automation document load failed: \(errorMessage)"
+            )
+        }
+
+        return AutomationLoadInfo(
+            pageCount: intValue(dictionary["pageCount"]),
+            fileName: dictionary["fileName"] as? String ?? "",
+            sourceFormat: dictionary["sourceFormat"] as? String,
+            strategy: dictionary["strategy"] as? String,
+            localFontsSeeded: dictionary["localFontsSeeded"] as? Bool ?? false,
+            statusText: dictionary["statusText"] as? String ?? ""
+        )
+    }
+
     private func throwIfNavigationFailed() throws {
         if case .failure(let error) = navigationResult {
             throw PreviewHarnessPhaseError(
@@ -840,6 +1068,34 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             )
         }
         return PageState(dictionary: dictionary)
+    }
+
+    private func currentUIContaminationProbe() throws -> UIContaminationProbe {
+        let value = try evaluateJavaScript(uiContaminationProbeScript(), timeout: 5, phase: .settle)
+        guard let json = value as? String,
+              let data = json.data(using: .utf8),
+              let dictionary = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else {
+            throw PreviewHarnessPhaseError(
+                phase: .settle,
+                detail: "unexpected UI contamination probe result: \(describeJavaScriptValue(value))"
+            )
+        }
+        return UIContaminationProbe(dictionary: dictionary)
+    }
+
+    private func combinedContaminationText(_ first: UIContaminationProbe, _ second: UIContaminationProbe) -> [String] {
+        var seen = Set<String>()
+        var values: [String] = []
+        for text in first.contaminationText + second.contaminationText {
+            let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !normalized.isEmpty, !seen.contains(normalized) else {
+                continue
+            }
+            seen.insert(normalized)
+            values.append(normalized)
+        }
+        return values
     }
 
     private func evaluateJavaScript(
@@ -978,7 +1234,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         )
     }
 
-    private func makeLoadURL(filename: String, revision: Int) throws -> URL {
+    private func makeDocumentURL(revision: Int) throws -> URL {
         var documentComponents = URLComponents()
         documentComponents.scheme = StudioDocumentSchemeHandler.scheme
         documentComponents.host = StudioDocumentSchemeHandler.host
@@ -988,6 +1244,22 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
         guard let documentURL = documentComponents.url else {
             throw PreviewHarnessError(description: "failed to build document URL")
         }
+        return documentURL
+    }
+
+    private func makeAutomationAppURL() throws -> URL {
+        var components = URLComponents()
+        components.scheme = StudioResourceSchemeHandler.scheme
+        components.host = StudioResourceSchemeHandler.host
+        components.path = "/index.html"
+        guard let url = components.url else {
+            throw PreviewHarnessError(description: "failed to build rhwp-studio automation URL")
+        }
+        return url
+    }
+
+    private func makeLoadURL(filename: String, revision: Int) throws -> URL {
+        let documentURL = try makeDocumentURL(revision: revision)
 
         var components = URLComponents()
         components.scheme = StudioResourceSchemeHandler.scheme
@@ -1001,6 +1273,156 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             throw PreviewHarnessError(description: "failed to build rhwp-studio load URL")
         }
         return url
+    }
+
+    private func automationReadyStartScript() -> String {
+        """
+        (() => {
+          window.__alhangeulPreviewAutomationReadyJSON = '';
+          const finish = (payload) => {
+            window.__alhangeulPreviewAutomationReadyJSON = JSON.stringify(payload);
+          };
+          if (window.__wasm && window.__canvasView) {
+            finish({ ok: true, strategy: 'direct-globals' });
+            return true;
+          }
+          const requestId = `alhangeul-preview-ready-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+          const cleanup = () => {
+            clearTimeout(timer);
+            window.removeEventListener('message', onMessage);
+          };
+          const onMessage = (event) => {
+            const data = event.data;
+            if (!data || data.type !== 'rhwp-response' || data.id !== requestId) {
+              return;
+            }
+            cleanup();
+            if (data.error) {
+              finish({ ok: false, strategy: 'rhwp-request', error: String(data.error) });
+            } else {
+              finish({ ok: true, strategy: 'rhwp-request' });
+            }
+          };
+          const timer = setTimeout(() => {
+            cleanup();
+            finish({ ok: false, strategy: 'rhwp-request', error: 'ready request timed out' });
+          }, 15000);
+          window.addEventListener('message', onMessage);
+          window.postMessage({ type: 'rhwp-request', id: requestId, method: 'ready' }, '*');
+          return true;
+        })();
+        """
+    }
+
+    private func automationLoadStartScript(documentURL: URL, filename: String) -> String {
+        let documentURLLiteral = javaScriptStringLiteral(documentURL.absoluteString)
+        let filenameLiteral = javaScriptStringLiteral(filename)
+        return """
+        (() => {
+          window.__alhangeulPreviewAutomationLoadJSON = '';
+          const documentURL = \(documentURLLiteral);
+          const filename = \(filenameLiteral);
+          const finish = (payload) => {
+            window.__alhangeulPreviewAutomationLoadJSON = JSON.stringify(payload);
+          };
+          const seedAutomationLocalFonts = () => {
+            try {
+              window.localStorage?.setItem('rhwp-local-fonts', JSON.stringify({
+                version: 1,
+                source: 'local-font-access',
+                detectedAt: '1970-01-01T00:00:00.000Z',
+                families: []
+              }));
+              return true;
+            } catch (_) {
+              return false;
+            }
+          };
+          const postRhwpRequest = (method, params) => new Promise((resolve, reject) => {
+            const requestId = `alhangeul-preview-load-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+            const cleanup = () => {
+              clearTimeout(timer);
+              window.removeEventListener('message', onMessage);
+            };
+            const onMessage = (event) => {
+              const data = event.data;
+              if (!data || data.type !== 'rhwp-response' || data.id !== requestId) {
+                return;
+              }
+              cleanup();
+              if (data.error) {
+                reject(new Error(String(data.error)));
+              } else {
+                resolve(data.result);
+              }
+            };
+            const timer = setTimeout(() => {
+              cleanup();
+              reject(new Error(`${method} request timed out`));
+            }, 30000);
+            window.addEventListener('message', onMessage);
+            window.postMessage({ type: 'rhwp-request', id: requestId, method, params }, '*');
+          });
+          (async () => {
+            try {
+              const localFontsSeeded = seedAutomationLocalFonts();
+              const response = await fetch(documentURL, { cache: 'no-store' });
+              if (!response.ok) {
+                throw new Error(`document fetch failed: HTTP ${response.status}`);
+              }
+              const buffer = await response.arrayBuffer();
+              const bytes = new Uint8Array(buffer);
+              let strategy = 'direct-globals';
+              let pageCount = 0;
+              let fileName = filename;
+              let sourceFormat = null;
+              if (window.__wasm && window.__canvasView) {
+                const docInfo = window.__wasm.loadDocument(bytes, filename);
+                if (!docInfo) {
+                  throw new Error('window.__wasm.loadDocument returned null');
+                }
+                if (typeof window.__canvasView.loadDocument !== 'function') {
+                  throw new Error('window.__canvasView.loadDocument is not available');
+                }
+                window.__canvasView.loadDocument();
+                pageCount = Number(docInfo.pageCount ?? window.__wasm.pageCount ?? 0) || 0;
+                fileName = window.__wasm.fileName || filename;
+                sourceFormat = typeof window.__wasm.getSourceFormat === 'function'
+                  ? window.__wasm.getSourceFormat()
+                  : null;
+              } else {
+                strategy = 'rhwp-request';
+                const result = await postRhwpRequest('loadFile', {
+                  data: bytes,
+                  fileName: filename,
+                  skipUnsavedGuard: true
+                });
+                pageCount = Number(result?.pageCount || 0) || 0;
+              }
+              const statusText = `${filename} — ${pageCount}페이지 (automation)`;
+              const statusElement = document.querySelector('#sb-message');
+              if (statusElement) {
+                statusElement.textContent = statusText;
+              }
+              finish({
+                ok: true,
+                pageCount,
+                fileName,
+                sourceFormat,
+                strategy,
+                localFontsSeeded,
+                statusText
+              });
+            } catch (error) {
+              finish({
+                ok: false,
+                error: error && error.message ? error.message : String(error)
+              });
+            }
+          })();
+          return true;
+        })();
+        """
     }
 
     private func pageStateScript(pageNumber: Int) -> String {
@@ -1070,7 +1492,7 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             let overlayCount = 0;
 
             for (const element of Array.from(content.querySelectorAll('*'))) {
-              if (element === target || element.tagName.toLowerCase() === 'canvas') {
+              if (element === target) {
                 continue;
               }
               const style = window.getComputedStyle(element);
@@ -1156,6 +1578,92 @@ final class StudioReferenceRenderer: NSObject, WKNavigationDelegate {
             });
           }
         })()
+        """
+    }
+
+    private func uiContaminationProbeScript() -> String {
+        """
+        JSON.stringify((() => {
+          const isVisible = (element) => {
+            if (!element || !(element instanceof Element)) {
+              return false;
+            }
+            const style = window.getComputedStyle(element);
+            if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) {
+              return false;
+            }
+            const rect = element.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+          };
+          const uniqueElements = (selectors) => {
+            const seen = new Set();
+            const elements = [];
+            for (const selector of selectors) {
+              for (const element of Array.from(document.querySelectorAll(selector))) {
+                if (seen.has(element)) {
+                  continue;
+                }
+                seen.add(element);
+                if (isVisible(element)) {
+                  elements.push(element);
+                }
+              }
+            }
+            return elements;
+          };
+          const outermostElements = (elements) => elements.filter((element) =>
+            !elements.some((other) => other !== element && other.contains(element))
+          );
+          const textOf = (element) => (element.textContent || '').replace(/\\s+/g, ' ').trim();
+          const snippet = (text) => text.length > 160 ? `${text.slice(0, 157)}...` : text;
+          const modalElements = outermostElements(uniqueElements([
+            'dialog',
+            '[role="dialog"]',
+            '[aria-modal="true"]',
+            '.modal-overlay',
+            '.dialog-wrap',
+            '.modal',
+            '[class*="modal"]',
+            '[id*="modal"]'
+          ]));
+          const toastElements = outermostElements(uniqueElements([
+            '#rhwp-toast-container > *',
+            '#rhwp-toast-container [role="status"]',
+            '.toast',
+            '.snackbar',
+            '.notification',
+            '[class*="toast"]',
+            '[class*="snackbar"]',
+            '[class*="notification"]'
+          ]));
+          const statusElements = uniqueElements(['#sb-message', '[role="alert"]']);
+          const candidateElements = [...modalElements, ...toastElements, ...statusElements];
+          const localFontPattern = /로컬\\s*(글꼴|폰트)|글꼴\\s*감지|폰트\\s*감지|Local\\s*Font/i;
+          const contaminationTexts = [];
+          for (const element of candidateElements) {
+            const text = textOf(element);
+            if (!text) {
+              continue;
+            }
+            if (modalElements.includes(element) || toastElements.includes(element) || localFontPattern.test(text)) {
+              contaminationTexts.push(snippet(text));
+            }
+          }
+          const dedupedTexts = [];
+          const seenTexts = new Set();
+          for (const text of contaminationTexts) {
+            if (!seenTexts.has(text)) {
+              seenTexts.add(text);
+              dedupedTexts.push(text);
+            }
+          }
+          return {
+            modalCount: modalElements.length,
+            toastCount: toastElements.length,
+            localFontUIVisible: candidateElements.some((element) => localFontPattern.test(textOf(element))),
+            contaminationText: dedupedTexts.slice(0, 12)
+          };
+        })())
         """
     }
 
@@ -1675,7 +2183,7 @@ struct PreviewVisualDiffHarness {
                     formatDouble(diff.meanRGBDelta),
                     "\(diff.maxRGBDelta)",
                     boundsString(diff.bounds),
-                    result.captureMode,
+                    studioCaptureSummary(result),
                     native.backendUsed + fallbackSuffix(native.fallbackReason),
                     formatMilliseconds(native.renderMs),
                     markdownCell(result.pngURL.path),
@@ -1937,6 +2445,16 @@ private func doubleValue(_ value: Any?, default defaultValue: Double = 0) -> Dou
     return defaultValue
 }
 
+private func stringArrayValue(_ value: Any?) -> [String] {
+    if let strings = value as? [String] {
+        return strings
+    }
+    if let values = value as? [Any] {
+        return values.compactMap { $0 as? String }
+    }
+    return []
+}
+
 private func markdownCell(_ value: String) -> String {
     value.replacingOccurrences(of: "|", with: "/")
 }
@@ -2008,6 +2526,12 @@ private func boundsString(_ bounds: CGRect?) -> String {
         return "-"
     }
     return "\(Int(bounds.minX)),\(Int(bounds.minY)) \(Int(bounds.width))x\(Int(bounds.height))"
+}
+
+private func studioCaptureSummary(_ result: StudioCaptureResult) -> String {
+    let contamination = result.captureContaminated ? "ui=contaminated" : "ui=clean"
+    let suppression = result.uiSuppressed ? ";suppressed=true" : ""
+    return "\(result.captureMode);\(contamination)\(suppression)"
 }
 
 private func renderPolicyName(_ policy: HwpPageRenderPolicy) -> String {

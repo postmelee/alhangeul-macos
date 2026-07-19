@@ -95,8 +95,8 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - 현재 v0.1.0 목표는 Demo/Preview release다.
 - Demo/Preview 배포는 필요한 bridge API가 포함된 resolved commit을 `rev`로 고정하는 commit-pinned git dependency를 허용한다.
 - Stable 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
-- 현재 lock은 `v0.7.11` Stable release tag pin 상태다. `rhwp-core.lock`은 release tag `v0.7.11`과 resolved commit `a9dcdee32b17a7f9a20c609a5ed547e62fb8ebae`를 함께 기록한다.
-- `v0.7.11`에는 현재 `RustBridge`가 사용하는 `build_page_render_tree`, `get_bin_data`, `render_page_svg_native`, `get_page_info_native`, `extract_thumbnail_only` API가 포함되어 있다.
+- 현재 lock은 `v0.7.18` Stable release tag pin 상태다. `rhwp-core.lock`은 release tag `v0.7.18`과 resolved commit `93862a4e16df59834ebce46d91e948cd739208e9`를 함께 기록한다.
+- `v0.7.18`에는 현재 `RustBridge`가 사용하는 page/render/image API와 `set_file_name`, `get_external_image_references`, `inject_external_image_by_key` external image context API가 포함되어 있다.
 - branch/floating ref는 배포 기준으로 사용하지 않는다.
 
 ### RustBridge
@@ -175,10 +175,15 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 
 - `rhwp_open`
 - `rhwp_close`
+- `rhwp_set_file_name_utf8`
+- `rhwp_external_image_refs_json`
+- `rhwp_inject_external_image_by_key`
 - `rhwp_page_count`
 - `rhwp_page_size`
 - `rhwp_render_page_svg`
 - `rhwp_render_page_tree`
+- `rhwp_page_overlay_images`
+- `rhwp_render_page_png`
 - `rhwp_image_data`
 - `rhwp_extract_thumbnail`
 - `rhwp_free_string`
@@ -192,18 +197,26 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - `rhwp_render_page_tree`: 상세 render tree JSON 반환
 - `rhwp_image_data`: `bin_data_id`에 대응하는 이미지 바이트 조회
 - `rhwp_extract_thumbnail`: embedded thumbnail 바이트와 메타데이터 조회
+- `rhwp_set_file_name_utf8`: filename context를 document에 설정
+- `rhwp_external_image_refs_json`: external image reference와 loaded 상태를 upstream JSON 배열로 조회
+- `rhwp_inject_external_image_by_key`: Swift/macOS shell이 읽은 image bytes를 reference key로 주입
 - `rhwp_close`: 문서 핸들 해제
 - `rhwp_free_string`: Rust가 할당한 문자열 해제
 - `rhwp_free_bytes`: Rust가 소유권을 넘긴 byte buffer 해제
 
 `rhwp_render_page_svg`는 현재 HostApp/extension의 주 렌더링 경로는 아니지만, 진단/호환성 관점에서 ABI에 포함되어 있다. core SVG와 native renderer 비교 절차는 [`render_core_native_compare_guide.md`](../manual/render_core_native_compare_guide.md)를 따른다.
 
+External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제품 경로에서 직접 호출하지 않는다. RustBridge는 external path를 열지 않으며 source URL 권한, resolver policy, bytes read와 cache signature는 Swift/macOS shell 책임이다. `rhwp_image_state_json`은 pinned public API가 전체 image 상태를 제공하지 않아 현재 ABI에 포함하지 않는다.
+
 ## FFI 안전성 규칙
 
 - null pointer 입력은 Rust와 Swift 양쪽에서 방어한다.
 - `RhwpDocument`의 수명은 내부 `OpaquePointer` handle 수명과 일치해야 한다.
 - `rhwp_render_page_tree`와 `rhwp_render_page_svg`가 반환한 문자열은 반드시 `rhwp_free_string`으로 해제한다.
+- `rhwp_external_image_refs_json`이 반환한 문자열도 반드시 `rhwp_free_string`으로 해제한다.
+- filename, external key, image bytes, display path 입력 pointer는 caller-owned이며 FFI 호출 동안 유효해야 한다.
 - `rhwp_image_data`는 내부 문서 버퍼를 가리키므로, Swift에서는 즉시 `Data`로 복사해 사용한다.
+- `rhwp_image_data` pointer는 filename setter나 external image injection 같은 mutable 호출을 넘겨 보관하지 않는다.
 - `rhwp_extract_thumbnail`이 반환한 byte buffer는 Swift에서 복사 후 `rhwp_free_bytes`로 해제한다.
 - 이미지 조회의 `bin_data_id`는 1-indexed 규칙을 유지한다.
 
