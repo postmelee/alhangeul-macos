@@ -31,6 +31,9 @@
 > Rust 기반 [`rhwp`](https://github.com/edwardkim/rhwp) 코어를 macOS 앱, Quick Look preview, Finder thumbnail, Swift bridge로 연결합니다. 첫 viewer는 `rhwp-studio`를 WKWebView로 품고, Finder/Quick Look과 PDF 내보내기에는 이 저장소의 Swift/Rust bridge 렌더링 경로를 함께 사용합니다.
 > "닫힌 HWP/HWPX 문서를 더 많은 환경에서 다룰 수 있게 한다"는 [`rhwp`](https://github.com/edwardkim/rhwp)의 방향을 **Mac 네이티브** 경험으로 확장합니다.
 
+## Support
+Maintained with support from **OpenAI’s [Codex for Open Source](https://developers.openai.com/community/codex-for-oss)** program.
+> _Support is provided to the maintainer and does not imply endorsement._
 
 ## 현재 작업 축
 
@@ -178,7 +181,13 @@ WKWebView 경로는 native macOS shell이 충분히 안정화될 때까지 fallb
 
 공개 배포 기준은 Developer ID로 서명하고 Apple notarization을 통과한 DMG입니다. GitHub Release에는 `alhangeul-macos-<version>.dmg`와 checksum을 함께 공개합니다. `v0.1.1`부터 공식 DMG는 앱 본체와 Quick Look/Thumbnail extension 실행 파일이 `arm64 + x86_64` slice를 포함하는 단일 universal DMG 기준으로 검증합니다. Intel Mac과 Apple Silicon Mac 모두 같은 파일을 받으며, 아키텍처별 DMG는 따로 제공하지 않습니다.
 
-Homebrew Cask는 public DMG SHA256 확정 후 별도 배포 단계에서 반영합니다. 최신 버전 반영 전에는 GitHub Release의 DMG를 직접 내려받아 설치하세요.
+Homebrew Cask를 사용하는 경우 아래 명령으로 같은 signed/notarized universal DMG를 설치할 수 있습니다.
+
+```bash
+brew install --cask postmelee/tap/alhangeul
+```
+
+Homebrew가 untrusted tap 정책으로 설치를 거부하면 `brew trust --cask postmelee/tap/alhangeul`을 한 번 실행한 뒤 다시 설치하세요.
 
 설치 후에는 `Alhangeul.app`을 한 번 실행하세요. macOS가 Quick Look 및 Thumbnail extension을 발견하고 등록한 뒤 Finder에서 `.hwp`, `.hwpx` preview와 thumbnail을 사용할 수 있습니다.
 
