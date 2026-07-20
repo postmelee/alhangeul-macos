@@ -402,6 +402,46 @@ video {
   word-break: keep-all;
 }
 
+.philosophy-section {
+  width: 100%;
+  border-top: 1px solid rgba(29, 29, 31, 0.08);
+  padding: clamp(88px, 10vh, 120px) 20px;
+  background: #ffffff;
+}
+
+.philosophy-inner {
+  width: min(860px, 100%);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.philosophy-inner h2 {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1.14;
+  letter-spacing: -0.035em;
+  font-weight: 400;
+  word-break: keep-all;
+}
+
+.philosophy-highlight {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.philosophy-emphasis {
+  font-weight: 600;
+}
+
+.philosophy-description {
+  max-width: 760px;
+  margin: 26px auto 0;
+  color: var(--muted);
+  font-size: clamp(18px, 1.8vw, 21px);
+  line-height: 1.55;
+  word-break: keep-all;
+}
+
 .features-section {
   width: 100%;
   padding: clamp(80px, 10vh, 112px) 20px clamp(96px, 13vh, 144px);
@@ -1411,6 +1451,10 @@ video {
     font-size: 38px;
   }
 
+  .philosophy-inner h2 {
+    font-size: 38px;
+  }
+
   .app-intro-lead {
     font-size: 20px;
   }
@@ -1548,6 +1592,7 @@ video {
 
   .demo-section,
   .app-intro-section,
+  .philosophy-section,
   .features-section,
   .feedback-section,
   .faq-section {
@@ -1564,6 +1609,22 @@ video {
   .app-intro-section {
     padding-top: 44px;
     padding-bottom: 56px;
+  }
+
+  .philosophy-section {
+    padding-top: 68px;
+    padding-bottom: 68px;
+  }
+
+  .philosophy-inner h2 {
+    font-size: 32px;
+    line-height: 1.2;
+  }
+
+  .philosophy-description {
+    margin-top: 20px;
+    font-size: 17px;
+    line-height: 1.55;
   }
 
   .app-intro-inner {
