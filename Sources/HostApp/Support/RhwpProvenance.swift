@@ -1,6 +1,6 @@
 import Foundation
 
-struct RhwpProvenance: Equatable {
+struct RhwpProvenance: Equatable, Sendable {
     let releaseTag: String
     let resolvedCommit: String
 

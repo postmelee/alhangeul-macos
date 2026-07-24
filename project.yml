@@ -128,3 +128,15 @@ targets:
         INFOPLIST_FILE: Sources/ThumbnailExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/ThumbnailExtension/ThumbnailExtension.entitlements
         CODE_SIGN_STYLE: Automatic
+
+  HostAppTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/HostAppTests
+      - path: Sources/HostApp/Services/QuickLookConflictDetector.swift
+      - path: Sources/HostApp/Support/RhwpProvenance.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.HostAppTests
+        GENERATE_INFOPLIST_FILE: YES
