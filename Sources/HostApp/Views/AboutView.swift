@@ -88,10 +88,6 @@ private struct AboutQuickLookTab: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                quickLookGuidance
-
-                Divider()
-
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Text("알한글 확장 상태")
@@ -114,6 +110,10 @@ private struct AboutQuickLookTab: View {
                         )
                     }
                 }
+
+                Divider()
+
+                quickLookGuidance
             }
             .padding(24)
         }
