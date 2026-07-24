@@ -65,6 +65,15 @@ final class QuickLookConflictNoticePolicyTests: XCTestCase {
         )
     }
 
+    func testOpenSettingsKeepsNoticeActive() {
+        XCTAssertFalse(QuickLookConflictNoticeAction.openSettings.completesNotice)
+    }
+
+    func testLaterAndDetailsCompleteNotice() {
+        XCTAssertTrue(QuickLookConflictNoticeAction.later.completesNotice)
+        XCTAssertTrue(QuickLookConflictNoticeAction.showDetails.completesNotice)
+    }
+
     func testDismissalStorePersistsAndReadsFingerprint() {
         let store = QuickLookConflictDismissalStore(userDefaults: userDefaults)
 

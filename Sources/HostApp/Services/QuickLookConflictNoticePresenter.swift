@@ -1,12 +1,6 @@
 import AppKit
 import SwiftUI
 
-enum QuickLookConflictNoticeAction {
-    case openSettings
-    case showDetails
-    case later
-}
-
 @MainActor
 final class QuickLookConflictNoticePresenter: NSObject, NSWindowDelegate {
     static let shared = QuickLookConflictNoticePresenter()
@@ -29,7 +23,7 @@ final class QuickLookConflictNoticePresenter: NSObject, NSWindowDelegate {
             rootView: QuickLookConflictNoticeView(
                 presentation: presentation,
                 onAction: { [weak self] action in
-                    self?.finish(with: action)
+                    self?.handle(action)
                 }
             )
         )
@@ -64,6 +58,15 @@ final class QuickLookConflictNoticePresenter: NSObject, NSWindowDelegate {
         window.delegate = nil
         windowController = nil
         callback?(.later)
+    }
+
+    private func handle(_ action: QuickLookConflictNoticeAction) {
+        guard action.completesNotice else {
+            onAction?(action)
+            return
+        }
+
+        finish(with: action)
     }
 
     private func finish(with action: QuickLookConflictNoticeAction) {

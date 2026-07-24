@@ -168,7 +168,7 @@ UI와 분리된 값 모델·catalog·감지 서비스를 만들고, 설치 없�
 - App launch 완료 후 conflict detector를 비동기로 실행하는 coordinator를 추가한다.
 - 알려진 HOP Preview와 더 최신인 알한글 `rhwp` 조합에서만 자동 안내를 표시한다.
 - 전용 SwiftUI notice presenter를 추가하고 `나중에`, `자세히 보기`, `확장 프로그램 설정 열기` 동작을 제공한다.
-- `확장 프로그램 설정 열기` 선택 시 시스템 설정을 열고 현재 fingerprint를 확인한 것으로 기록한다.
+- `확장 프로그램 설정 열기` 선택 시 시스템 설정만 열고 팝업과 현재 fingerprint의 미확인 상태를 유지한다.
 - `나중에`, `자세히 보기`, 창 닫기 선택 시 현재 fingerprint의 자동 안내를 `UserDefaults`에 저장한다.
 - About 화면을 `정보`와 `Quick Look` 탭으로 분리해 긴 단일 스크롤에서 충돌 정보가 가려지지 않게 한다.
 - 팝업의 `자세히 보기`는 About의 `Quick Look` 탭을 직접 선택하고, About 메뉴로 직접 연 화면은 `정보` 탭을 기본으로 한다.

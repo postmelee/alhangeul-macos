@@ -52,7 +52,9 @@ final class QuickLookConflictNoticeCoordinator {
                 return
             }
 
-            dismissalStore.recordDismissal(fingerprint: fingerprint)
+            if action.completesNotice {
+                dismissalStore.recordDismissal(fingerprint: fingerprint)
+            }
 
             switch action {
             case .openSettings:

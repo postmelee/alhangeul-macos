@@ -1,5 +1,20 @@
 import Foundation
 
+enum QuickLookConflictNoticeAction {
+    case openSettings
+    case showDetails
+    case later
+
+    var completesNotice: Bool {
+        switch self {
+        case .openSettings:
+            false
+        case .showDetails, .later:
+            true
+        }
+    }
+}
+
 enum QuickLookConflictNoticePolicy {
     static func shouldPresent(
         snapshot: QuickLookConflictSnapshot,
