@@ -1,29 +1,100 @@
 import AppKit
 import SwiftUI
 
+enum AboutSection: String, CaseIterable, Identifiable {
+    case info
+    case quickLook
+
+    var id: Self {
+        self
+    }
+
+    var title: String {
+        switch self {
+        case .info:
+            "정보"
+        case .quickLook:
+            "Quick Look"
+        }
+    }
+}
+
+@MainActor
+final class AboutNavigationModel: ObservableObject {
+    @Published var selection: AboutSection = .info
+}
+
 struct AboutView: View {
+    @ObservedObject private var navigationModel: AboutNavigationModel
     @StateObject private var extensionStatus = ExtensionStatusModel()
+
+    init(navigationModel: AboutNavigationModel) {
+        self.navigationModel = navigationModel
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Picker("About 화면", selection: $navigationModel.selection) {
+                ForEach(AboutSection.allCases) { section in
+                    Text(section.title)
+                        .tag(section)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .padding(.horizontal, 24)
+            .padding(.vertical, 16)
+
+            Divider()
+
+            switch navigationModel.selection {
+            case .info:
+                AboutInfoTab()
+            case .quickLook:
+                AboutQuickLookTab(extensionStatus: extensionStatus)
+            }
+        }
+        .frame(minWidth: 520, minHeight: 390)
+        .task {
+            extensionStatus.refresh()
+        }
+    }
+}
+
+private struct AboutInfoTab: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            AboutHeaderView()
+
+            Divider()
+                .padding(.vertical, 18)
+
+            VStack(alignment: .leading, spacing: 10) {
+                AboutInfoRow(title: "버전", value: BuildInfo.version)
+                AboutInfoRow(title: "빌드", value: BuildInfo.build)
+                AboutInfoRow(title: "rhwp", value: BuildInfo.rhwpDisplayVersion)
+            }
+
+            Spacer()
+        }
+        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+private struct AboutQuickLookTab: View {
+    @ObservedObject var extensionStatus: ExtensionStatusModel
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                AboutHeaderView()
+            VStack(alignment: .leading, spacing: 18) {
+                quickLookGuidance
 
                 Divider()
-                    .padding(.vertical, 18)
-
-                VStack(alignment: .leading, spacing: 10) {
-                    AboutInfoRow(title: "버전", value: BuildInfo.version)
-                    AboutInfoRow(title: "빌드", value: BuildInfo.build)
-                    AboutInfoRow(title: "rhwp", value: BuildInfo.rhwpDisplayVersion)
-                }
-
-                Divider()
-                    .padding(.vertical, 18)
 
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text("확장")
+                        Text("알한글 확장 상태")
                             .font(.headline)
 
                         Spacer()
@@ -43,25 +114,41 @@ struct AboutView: View {
                         )
                     }
                 }
-
-                if case let .detected(snapshot) = extensionStatus.quickLookConflictState,
-                   let presentation = QuickLookConflictPresentation(snapshot: snapshot) {
-                    Divider()
-                        .padding(.vertical, 18)
-
-                    AboutQuickLookConflictCard(
-                        presentation: presentation,
-                        settingsOpener: QuickLookSettingsOpener(),
-                        onRefresh: extensionStatus.refresh
-                    )
-                    .id(snapshot.fingerprint)
-                }
             }
             .padding(24)
         }
-        .frame(minWidth: 520, minHeight: 390)
-        .task {
-            extensionStatus.refresh()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var quickLookGuidance: some View {
+        switch extensionStatus.quickLookConflictState {
+        case .checking:
+            HStack(spacing: 8) {
+                ProgressView()
+                    .controlSize(.small)
+                Text("다른 HWP/HWPX Quick Look 확장을 확인하고 있습니다.")
+                    .foregroundStyle(.secondary)
+            }
+            .font(.subheadline)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        case .notDetected:
+            Label(
+                "현재 다른 HWP/HWPX Quick Look 미리보기 확장이 감지되지 않았습니다.",
+                systemImage: "checkmark.circle.fill"
+            )
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        case let .detected(snapshot):
+            if let presentation = QuickLookConflictPresentation(snapshot: snapshot) {
+                AboutQuickLookConflictCard(
+                    presentation: presentation,
+                    settingsOpener: QuickLookSettingsOpener(),
+                    onRefresh: extensionStatus.refresh
+                )
+                .id(snapshot.fingerprint)
+            }
         }
     }
 }

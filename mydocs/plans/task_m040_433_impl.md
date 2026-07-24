@@ -167,9 +167,12 @@ UI와 분리된 값 모델·catalog·감지 서비스를 만들고, 설치 없�
 
 - App launch 완료 후 conflict detector를 비동기로 실행하는 coordinator를 추가한다.
 - 알려진 HOP Preview와 더 최신인 알한글 `rhwp` 조합에서만 자동 안내를 표시한다.
-- 기존 `AboutWindowPresenter`를 재사용하거나 전용 SwiftUI notice presenter를 추가해 버전 비교 UI를 공유한다.
+- 전용 SwiftUI notice presenter를 추가하고 `나중에`, `자세히 보기`, `Quick Look 설정 열기` 동작을 제공한다.
 - `Quick Look 설정 열기` 선택 시 시스템 설정을 열고 현재 fingerprint를 확인한 것으로 기록한다.
-- `나중에` 선택 시 현재 fingerprint의 자동 안내를 `UserDefaults`에 저장한다.
+- `나중에`, `자세히 보기`, 창 닫기 선택 시 현재 fingerprint의 자동 안내를 `UserDefaults`에 저장한다.
+- About 화면을 `정보`와 `Quick Look` 탭으로 분리해 긴 단일 스크롤에서 충돌 정보가 가려지지 않게 한다.
+- 팝업의 `자세히 보기`는 About의 `Quick Look` 탭을 직접 선택하고, About 메뉴로 직접 연 화면은 `정보` 탭을 기본으로 한다.
+- `Quick Look` 탭에서는 충돌 안내를 확장 등록 상태보다 먼저 표시한다.
 - About 메뉴로 직접 연 화면에서는 자동 안내 dismissal과 무관하게 충돌 정보를 계속 표시한다.
 - app/Preview/`rhwp` version이 변하면 새 fingerprint로 다시 안내한다.
 - 여러 문서 창이 열리거나 앱이 다시 활성화되어도 중복 notice window가 생기지 않게 한다.
@@ -180,13 +183,14 @@ UI와 분리된 값 모델·catalog·감지 서비스를 만들고, 설치 없�
 - `나중에` 이후 같은 fingerprint에서는 다시 자동 표시되지 않는다.
 - version 변화 synthetic case에서는 다시 표시 대상이 된다.
 - 알 수 없는 HOP version과 HOP 미설치 환경에서는 자동 notice가 없다.
-- About 화면의 수동 확인 경로는 항상 유지된다.
+- `자세히 보기`는 About의 `Quick Look` 탭으로 이동한다.
+- About 메뉴 수동 진입은 `정보` 탭을 기본으로 하고, `Quick Look` 탭의 확인 경로는 항상 유지된다.
 
 ### 검증
 
 - launch notice policy unit test
 - `UserDefaults` test suite 또는 격리된 suite name으로 fingerprint 저장 검증
-- HostApp Debug 실행에서 단일 notice, 나중에, 재실행, About 수동 진입 확인
+- HostApp Debug 실행에서 단일 notice, 자세히 보기, 재실행, About 수동 진입과 탭 전환 확인
 - 다중 문서 창과 앱 재활성화 시 중복 표시 여부 확인
 - `git diff --check`
 

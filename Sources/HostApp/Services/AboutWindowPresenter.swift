@@ -5,18 +5,23 @@ import SwiftUI
 final class AboutWindowPresenter: NSObject, NSWindowDelegate {
     static let shared = AboutWindowPresenter()
 
+    private let navigationModel = AboutNavigationModel()
     private var windowController: NSWindowController?
 
-    func show() {
+    func show(section: AboutSection = .info) {
+        navigationModel.selection = section
+
         if let window = windowController?.window {
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
             return
         }
 
-        let hostingController = NSHostingController(rootView: AboutView())
+        let hostingController = NSHostingController(
+            rootView: AboutView(navigationModel: navigationModel)
+        )
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 640, height: 680),
+            contentRect: NSRect(x: 0, y: 0, width: 640, height: 620),
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false
