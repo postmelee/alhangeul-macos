@@ -317,7 +317,7 @@ private struct AboutQuickLookConflictCard: View {
                 Button {
                     settingsOpenResult = settingsOpener.open()
                 } label: {
-                    Label("Quick Look 설정 열기", systemImage: "gearshape")
+                    Label("확장 프로그램 설정 열기", systemImage: "gearshape")
                 }
 
                 Button {

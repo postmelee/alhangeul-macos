@@ -52,7 +52,7 @@ struct QuickLookConflictNoticeView: View {
                 )
             }
 
-            Text("알한글은 HOP 확장을 자동으로 끄거나 현재 Quick Look provider를 변경하지 않습니다.")
+            Text("알한글은 설정 화면만 열어 드립니다. HOP과 알한글 확장의 활성 상태는 사용자가 직접 변경해야 합니다.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -70,7 +70,7 @@ struct QuickLookConflictNoticeView: View {
 
                 Spacer()
 
-                Button("Quick Look 설정 열기") {
+                Button("확장 프로그램 설정 열기") {
                     onAction(.openSettings)
                 }
                 .keyboardShortcut(.defaultAction)

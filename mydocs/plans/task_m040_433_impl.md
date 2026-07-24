@@ -127,11 +127,11 @@ UI와 분리된 값 모델·catalog·감지 서비스를 만들고, 설치 없�
   - 검증된 HOP `rhwp` version
 - 사용자 문구를 다음 원칙으로 적용한다.
   - “알한글은 HOP Preview보다 최신인 `rhwp` 렌더러를 포함합니다.”
-  - “HOP Quick Look Preview를 끄고 알한글 미리보기를 켜는 것을 권장합니다.”
+  - “‘확장 프로그램 설정 열기’를 누른 다음, ‘확장 프로그램’ 섹션에서 HOP 훑어보기를 끄고 알한글 훑어보기를 켜세요.”
   - 실제 활성 상태가 아닌 “충돌 가능성”이라고 설명한다.
 - 알 수 없는 HOP version에서는 `rhwp 확인 불가`와 일반 중복 안내만 표시한다.
 - `다시 확인`으로 extension registration refresh와 HOP metadata 감지를 함께 재실행한다.
-- `Quick Look 설정 열기` 서비스를 추가한다.
+- `확장 프로그램 설정 열기` 서비스를 추가한다.
   - macOS 13 이상에서는 로그인 항목 및 확장 프로그램 상위 화면 진입을 우선한다.
   - macOS 12에서는 Extensions preference pane 진입을 시도한다.
   - deep link 실패 시 System Settings/System Preferences 실행과 수동 경로 문구를 제공한다.
@@ -167,8 +167,8 @@ UI와 분리된 값 모델·catalog·감지 서비스를 만들고, 설치 없�
 
 - App launch 완료 후 conflict detector를 비동기로 실행하는 coordinator를 추가한다.
 - 알려진 HOP Preview와 더 최신인 알한글 `rhwp` 조합에서만 자동 안내를 표시한다.
-- 전용 SwiftUI notice presenter를 추가하고 `나중에`, `자세히 보기`, `Quick Look 설정 열기` 동작을 제공한다.
-- `Quick Look 설정 열기` 선택 시 시스템 설정을 열고 현재 fingerprint를 확인한 것으로 기록한다.
+- 전용 SwiftUI notice presenter를 추가하고 `나중에`, `자세히 보기`, `확장 프로그램 설정 열기` 동작을 제공한다.
+- `확장 프로그램 설정 열기` 선택 시 시스템 설정을 열고 현재 fingerprint를 확인한 것으로 기록한다.
 - `나중에`, `자세히 보기`, 창 닫기 선택 시 현재 fingerprint의 자동 안내를 `UserDefaults`에 저장한다.
 - About 화면을 `정보`와 `Quick Look` 탭으로 분리해 긴 단일 스크롤에서 충돌 정보가 가려지지 않게 한다.
 - 팝업의 `자세히 보기`는 About의 `Quick Look` 탭을 직접 선택하고, About 메뉴로 직접 연 화면은 `정보` 탭을 기본으로 한다.

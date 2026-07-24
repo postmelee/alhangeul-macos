@@ -49,8 +49,9 @@ struct QuickLookConflictPresentation: Equatable, Sendable {
             두 확장이 함께 설치되어 있으면 macOS가 예상과 다른 미리보기를 선택할 수 있습니다.
             """
             recommendation = """
-            알한글은 HOP Preview보다 최신인 rhwp 렌더러를 포함합니다. \
-            HOP Quick Look Preview를 끄고 알한글 미리보기를 켜는 것을 권장합니다.
+            아래의 ‘확장 프로그램 설정 열기’를 누른 다음, ‘확장 프로그램’ 섹션에서 \
+            HOP 훑어보기를 끄고 알한글 훑어보기를 켜세요. \
+            알한글은 HOP Preview보다 최신인 rhwp 렌더러를 포함합니다.
             """
         }
     }
