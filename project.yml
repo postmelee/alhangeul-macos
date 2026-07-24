@@ -149,6 +149,7 @@ targets:
     platform: macOS
     sources:
       - path: Tests/ExternalImageTests
+      - path: Sources/Shared/HwpExternalImageResolver.swift
       - path: Sources/RhwpCoreBridge/RhwpDocument.swift
       - path: Sources/RhwpCoreBridge/RenderTree.swift
     dependencies:
