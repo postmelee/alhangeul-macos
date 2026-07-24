@@ -143,3 +143,33 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.HostAppTests
         GENERATE_INFOPLIST_FILE: YES
+
+  ExternalImageTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/ExternalImageTests
+      - path: Sources/RhwpCoreBridge/RhwpDocument.swift
+      - path: Sources/RhwpCoreBridge/RenderTree.swift
+    dependencies:
+      - framework: Frameworks/Rhwp.xcframework
+        embed: false
+      - sdk: CoreFoundation.framework
+      - sdk: CoreText.framework
+      - sdk: CoreGraphics.framework
+      - sdk: Foundation.framework
+      - sdk: ImageIO.framework
+      - sdk: CoreServices.framework
+      - sdk: ApplicationServices.framework
+      - sdk: Security.framework
+      - sdk: Metal.framework
+      - sdk: QuartzCore.framework
+      - sdk: IOSurface.framework
+      - sdk: ColorSync.framework
+      - sdk: libc++.tbd
+      - sdk: libiconv.tbd
+      - sdk: libz.tbd
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.ExternalImageTests
+        GENERATE_INFOPLIST_FILE: YES

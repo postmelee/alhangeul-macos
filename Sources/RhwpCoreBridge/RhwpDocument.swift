@@ -1,5 +1,65 @@
+import Darwin
 import Foundation
 import Rhwp
+
+enum RhwpExternalImageOperationStatus: Equatable {
+    case ok
+    case invalidHandle
+    case invalidInput
+    case invalidUTF8
+    case referenceNotFound
+    case alreadyLoaded
+    case failure
+    case unknown(UInt32)
+
+    init(_ status: Rhwp.RhwpExternalImageStatus) {
+        self.init(rawValue: status.rawValue)
+    }
+
+    init(rawValue: UInt32) {
+        switch rawValue {
+        case 0:
+            self = .ok
+        case 1:
+            self = .invalidHandle
+        case 2:
+            self = .invalidInput
+        case 3:
+            self = .invalidUTF8
+        case 4:
+            self = .referenceNotFound
+        case 5:
+            self = .alreadyLoaded
+        case 6:
+            self = .failure
+        default:
+            self = .unknown(rawValue)
+        }
+    }
+}
+
+struct RhwpExternalImageReference: Decodable, Equatable {
+    let key: String
+    let binDataId: UInt16
+    let originalPath: String
+    let basename: String
+    let fileExtension: String
+    let loaded: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case key
+        case binDataId
+        case originalPath
+        case basename
+        case fileExtension = "extension"
+        case loaded
+    }
+}
+
+enum RhwpExternalImageBridgeError: Error, Equatable {
+    case referencesUnavailable
+    case invalidReferencesJSON
+}
 
 struct RhwpEmbeddedThumbnail {
     let data: Data
@@ -92,6 +152,75 @@ class RhwpDocument {
             throw RhwpError.parseFailure(filename: filename)
         }
         self.handle = validHandle
+    }
+
+    @discardableResult
+    func setFileName(_ filename: String) -> RhwpExternalImageOperationStatus {
+        Self.withUTF8Bytes(filename) { namePointer, nameLength in
+            RhwpExternalImageOperationStatus(
+                rhwp_set_file_name_utf8(
+                    handle,
+                    namePointer,
+                    nameLength
+                )
+            )
+        }
+    }
+
+    func externalImageReferences() throws -> [RhwpExternalImageReference] {
+        guard let jsonPointer = rhwp_external_image_refs_json(handle) else {
+            throw RhwpExternalImageBridgeError.referencesUnavailable
+        }
+        defer {
+            rhwp_free_string(jsonPointer)
+        }
+
+        let jsonData = Data(
+            bytes: jsonPointer,
+            count: Int(strlen(jsonPointer))
+        )
+        return try Self.decodeExternalImageReferences(from: jsonData)
+    }
+
+    @discardableResult
+    func injectExternalImage(
+        key: String,
+        data: Data,
+        displayPath: String? = nil
+    ) -> RhwpExternalImageOperationStatus {
+        Self.withUTF8Bytes(key) { keyPointer, keyLength in
+            data.withUnsafeBytes { dataBuffer in
+                let dataPointer = dataBuffer.bindMemory(to: UInt8.self).baseAddress
+                return Self.withOptionalUTF8Bytes(displayPath) {
+                    displayPathPointer,
+                    displayPathLength in
+                    RhwpExternalImageOperationStatus(
+                        rhwp_inject_external_image_by_key(
+                            handle,
+                            keyPointer,
+                            keyLength,
+                            dataPointer,
+                            UInt(dataBuffer.count),
+                            displayPathPointer,
+                            displayPathLength
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    static func decodeExternalImageReferences(
+        from data: Data
+    ) throws -> [RhwpExternalImageReference] {
+        do {
+            return try JSONDecoder().decode(
+                [RhwpExternalImageReference].self,
+                from: data
+            )
+        } catch {
+            throw RhwpExternalImageBridgeError.invalidReferencesJSON
+        }
     }
 
     deinit {
@@ -256,5 +385,25 @@ class RhwpDocument {
             height: Int(outHeight),
             format: outFormat.map { String(cString: $0) }
         )
+    }
+
+    private static func withUTF8Bytes<Result>(
+        _ string: String,
+        _ body: (UnsafePointer<UInt8>?, UInt) -> Result
+    ) -> Result {
+        let bytes = Array(string.utf8)
+        return bytes.withUnsafeBufferPointer { buffer in
+            body(buffer.baseAddress, UInt(buffer.count))
+        }
+    }
+
+    private static func withOptionalUTF8Bytes<Result>(
+        _ string: String?,
+        _ body: (UnsafePointer<UInt8>?, UInt) -> Result
+    ) -> Result {
+        guard let string, !string.isEmpty else {
+            return body(nil, 0)
+        }
+        return withUTF8Bytes(string, body)
     }
 }
