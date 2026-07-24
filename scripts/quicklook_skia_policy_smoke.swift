@@ -67,6 +67,8 @@ struct FileMeasurement {
     let pageCount: Int?
     let replyType: String?
     let firstPageSize: CGSize?
+    let externalResourceState: String?
+    let externalResourceSummary: RhwpExternalResourceSummary?
     let coreGraphics: ModeMeasurement?
     let skiaDecode: ModeMeasurement?
     let skiaDirect: ModeMeasurement?
@@ -145,6 +147,8 @@ struct QuickLookSkiaPolicySmoke {
                 pageCount: context.pageCount,
                 replyType: replyType,
                 firstPageSize: context.contentSize,
+                externalResourceState: context.externalResourceReport.state.identifier,
+                externalResourceSummary: context.externalResourceReport.summary,
                 coreGraphics: coreGraphics,
                 skiaDecode: skiaDecode,
                 skiaDirect: skiaDirect
@@ -159,6 +163,8 @@ struct QuickLookSkiaPolicySmoke {
                 pageCount: nil,
                 replyType: nil,
                 firstPageSize: nil,
+                externalResourceState: nil,
+                externalResourceSummary: nil,
                 coreGraphics: nil,
                 skiaDecode: nil,
                 skiaDirect: nil
@@ -369,8 +375,8 @@ struct QuickLookSkiaPolicySmoke {
         lines.append("ResolverEnvKey: \(resolverContract.environmentKey)")
         lines.append("ResolverContract: \(resolverContract.status)")
         lines.append("")
-        lines.append("| File | Load | Reply | Pages | Size | CGStatus | CGBackend | CGFallback | CGBytes | CGSeconds | SkiaDecodeStatus | SkiaDecodeBackend | SkiaDecodeFallback | SkiaDecodeBytes | SkiaDecodePNGBytes | SkiaDecodeSeconds | SkiaDirectStatus | SkiaDirectBackend | SkiaDirectFallback | SkiaDirectBytes | SkiaDirectPNGBytes | SkiaDirectSeconds | SkiaDirectPixel |")
-        lines.append("|------|------|-------|-------|------|----------|-----------|------------|---------|-----------|------------------|-------------------|--------------------|----------------|-------------------|-------------------|------------------|-------------------|--------------------|----------------|-------------------|-------------------|-----------------|")
+        lines.append("| File | Load | Reply | Pages | Size | ExternalState | ExternalTotal | ExternalInjected | ExternalAlreadyLoaded | ExternalMissing | ExternalRejected | ExternalTooLarge | ExternalPermissionDenied | ExternalReadFailed | ExternalBridgeFailed | CGStatus | CGBackend | CGFallback | CGBytes | CGSeconds | SkiaDecodeStatus | SkiaDecodeBackend | SkiaDecodeFallback | SkiaDecodeBytes | SkiaDecodePNGBytes | SkiaDecodeSeconds | SkiaDirectStatus | SkiaDirectBackend | SkiaDirectFallback | SkiaDirectBytes | SkiaDirectPNGBytes | SkiaDirectSeconds | SkiaDirectPixel |")
+        lines.append("|------|------|-------|-------|------|---------------|---------------|------------------|-----------------------|-----------------|------------------|------------------|--------------------------|--------------------|----------------------|----------|-----------|------------|---------|-----------|------------------|-------------------|--------------------|----------------|-------------------|-------------------|------------------|-------------------|--------------------|----------------|-------------------|-------------------|-----------------|")
 
         for measurement in measurements {
             lines.append([
@@ -379,6 +385,16 @@ struct QuickLookSkiaPolicySmoke {
                 measurement.replyType ?? "-",
                 optionalInt(measurement.pageCount),
                 sizeString(measurement.firstPageSize),
+                measurement.externalResourceState ?? "-",
+                optionalInt(measurement.externalResourceSummary?.total),
+                optionalInt(measurement.externalResourceSummary?.injected),
+                optionalInt(measurement.externalResourceSummary?.alreadyLoaded),
+                optionalInt(measurement.externalResourceSummary?.missing),
+                optionalInt(measurement.externalResourceSummary?.rejected),
+                optionalInt(measurement.externalResourceSummary?.tooLarge),
+                optionalInt(measurement.externalResourceSummary?.permissionDenied),
+                optionalInt(measurement.externalResourceSummary?.readFailed),
+                optionalInt(measurement.externalResourceSummary?.bridgeFailed),
                 measurement.coreGraphics?.status ?? "-",
                 backendSummary(measurement.coreGraphics),
                 fallbackSummary(measurement.coreGraphics),
@@ -440,6 +456,16 @@ struct QuickLookSkiaPolicySmoke {
         lines.append("ReplyType: \(measurement.replyType ?? "-")")
         lines.append("PageCount: \(optionalInt(measurement.pageCount))")
         lines.append("FirstPageSize: \(sizeString(measurement.firstPageSize))")
+        lines.append("ExternalResourceState: \(measurement.externalResourceState ?? "-")")
+        lines.append("ExternalResourceTotal: \(optionalInt(measurement.externalResourceSummary?.total))")
+        lines.append("ExternalResourceInjected: \(optionalInt(measurement.externalResourceSummary?.injected))")
+        lines.append("ExternalResourceAlreadyLoaded: \(optionalInt(measurement.externalResourceSummary?.alreadyLoaded))")
+        lines.append("ExternalResourceMissing: \(optionalInt(measurement.externalResourceSummary?.missing))")
+        lines.append("ExternalResourceRejected: \(optionalInt(measurement.externalResourceSummary?.rejected))")
+        lines.append("ExternalResourceTooLarge: \(optionalInt(measurement.externalResourceSummary?.tooLarge))")
+        lines.append("ExternalResourcePermissionDenied: \(optionalInt(measurement.externalResourceSummary?.permissionDenied))")
+        lines.append("ExternalResourceReadFailed: \(optionalInt(measurement.externalResourceSummary?.readFailed))")
+        lines.append("ExternalResourceBridgeFailed: \(optionalInt(measurement.externalResourceSummary?.bridgeFailed))")
         appendMode(measurement.coreGraphics, name: "CoreGraphics", lines: &lines)
         appendMode(measurement.skiaDecode, name: "SkiaDecode", lines: &lines)
         appendMode(measurement.skiaDirect, name: "SkiaDirect", lines: &lines)
@@ -570,7 +596,7 @@ struct QuickLookSkiaPolicySmoke {
         guard measurement.loadStatus == "OK" else {
             return measurement.loadError ?? "load failed"
         }
-        return "reply=\(measurement.replyType ?? "-") pages=\(optionalInt(measurement.pageCount)) cg=\(backendSummary(measurement.coreGraphics)) skiaDecode=\(backendSummary(measurement.skiaDecode)) skiaDirect=\(backendSummary(measurement.skiaDirect)) directFallback=\(fallbackSummary(measurement.skiaDirect))"
+        return "reply=\(measurement.replyType ?? "-") pages=\(optionalInt(measurement.pageCount)) external=\(measurement.externalResourceState ?? "-"):\(optionalInt(measurement.externalResourceSummary?.total)) cg=\(backendSummary(measurement.coreGraphics)) skiaDecode=\(backendSummary(measurement.skiaDecode)) skiaDirect=\(backendSummary(measurement.skiaDirect)) directFallback=\(fallbackSummary(measurement.skiaDirect))"
     }
 
     private static func isFailure(_ measurement: ModeMeasurement?) -> Bool {

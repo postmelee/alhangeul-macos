@@ -25,27 +25,45 @@ struct HwpPreviewDocumentContext {
     let contentSize: CGSize
     let pageCount: Int
     let document: RhwpDocument
+    let externalResourceReport: RhwpExternalResourceReport
 }
 
 enum HwpPreviewPDFRenderer {
     static func load(fileURL: URL) throws -> HwpPreviewDocumentContext {
-        let loadedDocument = try loadDocument(fileURL: fileURL)
+        let input = try loadInput(fileURL: fileURL)
+        let openResult = try HwpExternalImageResolver.open(
+            data: input.data,
+            context: RhwpDocumentOpenContext(
+                sourceURL: fileURL,
+                displayFilename: input.filename,
+                maximumExternalResourceBytes: hwpQuickLookMaxFileSize
+            )
+        )
+        let metadata = try previewMetadata(
+            document: openResult.document
+        )
 
         return HwpPreviewDocumentContext(
-            filename: loadedDocument.filename,
-            contentSize: loadedDocument.contentSize,
-            pageCount: loadedDocument.pageCount,
-            document: loadedDocument.document
+            filename: input.filename,
+            contentSize: metadata.contentSize,
+            pageCount: metadata.pageCount,
+            document: openResult.document,
+            externalResourceReport: openResult.externalResourceReport
         )
     }
 
     static func inspect(fileURL: URL) throws -> HwpPreviewDocumentInfo {
-        let loadedDocument = try loadDocument(fileURL: fileURL)
+        let input = try loadInput(fileURL: fileURL)
+        let document = try RhwpDocument(
+            data: input.data,
+            filename: input.filename
+        )
+        let metadata = try previewMetadata(document: document)
         return HwpPreviewDocumentInfo(
-            data: loadedDocument.data,
-            filename: loadedDocument.filename,
-            contentSize: loadedDocument.contentSize,
-            pageCount: loadedDocument.pageCount
+            data: input.data,
+            filename: input.filename,
+            contentSize: metadata.contentSize,
+            pageCount: metadata.pageCount
         )
     }
 
@@ -162,23 +180,32 @@ enum HwpPreviewPDFRenderer {
         context.endPDFPage()
     }
 
-    private struct LoadedDocument {
+    private struct LoadedInput {
         let data: Data
         let filename: String
-        let contentSize: CGSize
-        let pageCount: Int
-        let document: RhwpDocument
     }
 
-    private static func loadDocument(fileURL: URL) throws -> LoadedDocument {
+    private struct PreviewMetadata {
+        let contentSize: CGSize
+        let pageCount: Int
+    }
+
+    private static func loadInput(fileURL: URL) throws -> LoadedInput {
         let values = try fileURL.resourceValues(forKeys: [.fileSizeKey])
         if let fileSize = values.fileSize, fileSize > hwpQuickLookMaxFileSize {
             throw HwpRenderError.fileTooLarge
         }
 
         let data = try Data(contentsOf: fileURL, options: [.mappedIfSafe])
-        let filename = fileURL.lastPathComponent
-        let document = try RhwpDocument(data: data, filename: filename)
+        return LoadedInput(
+            data: data,
+            filename: fileURL.lastPathComponent
+        )
+    }
+
+    private static func previewMetadata(
+        document: RhwpDocument
+    ) throws -> PreviewMetadata {
         let pageCount = document.pageCount
         guard pageCount > 0 else {
             throw HwpRenderError.emptyDocument
@@ -189,12 +216,9 @@ enum HwpPreviewPDFRenderer {
             throw HwpRenderError.invalidPageSize
         }
 
-        return LoadedDocument(
-            data: data,
-            filename: filename,
+        return PreviewMetadata(
             contentSize: CGSize(width: firstPageSize.width, height: firstPageSize.height),
-            pageCount: pageCount,
-            document: document
+            pageCount: pageCount
         )
     }
 }
