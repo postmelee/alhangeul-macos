@@ -16,13 +16,14 @@ final class AboutWindowPresenter: NSObject, NSWindowDelegate {
 
         let hostingController = NSHostingController(rootView: AboutView())
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 540, height: 430),
-            styleMask: [.titled, .closable],
+            contentRect: NSRect(x: 0, y: 0, width: 640, height: 680),
+            styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false
         )
         window.title = "알한글에 관하여"
         window.contentViewController = hostingController
+        window.minSize = NSSize(width: 540, height: 430)
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.center()

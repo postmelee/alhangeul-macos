@@ -135,6 +135,8 @@ targets:
     sources:
       - path: Tests/HostAppTests
       - path: Sources/HostApp/Services/QuickLookConflictDetector.swift
+      - path: Sources/HostApp/Services/QuickLookConflictPresentation.swift
+      - path: Sources/HostApp/Services/QuickLookSettingsOpener.swift
       - path: Sources/HostApp/Support/RhwpProvenance.swift
     settings:
       base:
