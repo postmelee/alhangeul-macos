@@ -179,6 +179,7 @@ private struct HostAppCommands: Commands {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         LaunchMaintenanceService.runIfNeeded()
+        QuickLookConflictNoticeCoordinator.shared.startIfNeeded()
 
         NotificationCenter.default.addObserver(
             self,

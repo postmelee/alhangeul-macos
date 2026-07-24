@@ -132,12 +132,22 @@ enum ExtensionRegistrationState: Equatable {
     }
 }
 
+enum QuickLookConflictDetectionState: Equatable, Sendable {
+    case checking
+    case notDetected
+    case detected(QuickLookConflictSnapshot)
+}
+
 @MainActor
 final class ExtensionStatusModel: ObservableObject {
     @Published private var snapshots: [ExtensionStatus: ExtensionStatusSnapshot]
+    @Published private(set) var quickLookConflictState: QuickLookConflictDetectionState
+
+    private var refreshIdentifier: UUID?
 
     init() {
         snapshots = Self.checkingSnapshots()
+        quickLookConflictState = .checking
     }
 
     func state(for status: ExtensionStatus) -> ExtensionRegistrationState {
@@ -150,6 +160,10 @@ final class ExtensionStatusModel: ObservableObject {
 
     func refresh() {
         snapshots = Self.checkingSnapshots()
+        quickLookConflictState = .checking
+
+        let refreshIdentifier = UUID()
+        self.refreshIdentifier = refreshIdentifier
 
         let appBundleURL = Bundle.main.bundleURL
         ExtensionSystemRegistrationRefresher.refresh(appBundleURL: appBundleURL)
@@ -160,9 +174,19 @@ final class ExtensionStatusModel: ObservableObject {
                     (status, Self.snapshot(for: status, appBundleURL: appBundleURL))
                 }
             )
+            let quickLookConflict = QuickLookConflictDetector().detect(
+                alhangeulAppBundleURL: appBundleURL
+            )
 
             await MainActor.run {
+                guard self.refreshIdentifier == refreshIdentifier else {
+                    return
+                }
+
                 self.snapshots = snapshots
+                self.quickLookConflictState = quickLookConflict.guidance == .none
+                    ? .notDetected
+                    : .detected(quickLookConflict)
             }
         }
     }
