@@ -2,9 +2,9 @@
   "name": "rhwp-studio",
   "source_repository": "https://github.com/edwardkim/rhwp.git",
   "source_ref_kind": "release-tag",
-  "source_release_tag": "v0.7.18",
-  "source_resolved_commit": "93862a4e16df59834ebce46d91e948cd739208e9",
-  "source_cargo_lock_sha256": "5cf25bdd98a070906ff6c78126f8384bb3122db974143dcd8e39cd3099359045",
+  "source_release_tag": "v0.8.0",
+  "source_resolved_commit": "60911e822b0d0bd4c86e7e98d31e1b13f195c99c",
+  "source_cargo_lock_sha256": "fa26a55f9ff0099b636a56c8b85bc5a9147eceba711d6493e16ad0f24fc18c98",
   "wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "recommended_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "actual_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
@@ -17,24 +17,24 @@
     "alhangeul-wkwebview-overrides.css",
     "fonts/FONTS.md"
   ],
-  "copied_file_count": 60,
-  "copied_total_bytes": 39392653,
+  "copied_file_count": 61,
+  "copied_total_bytes": 40162544,
   "entrypoints": {
     "index_html": {
       "path": "index.html",
-      "sha256": "3c859b690a0f1c94e15ae263d21dc7e2da7f17df5aacb52e991cacae8fdc3662"
+      "sha256": "e7ed7d0aec8cb01608b652f740c557556c82f47da3ed9a71d1d8ab5d2585903a"
     },
     "main_js": {
-      "path": "assets/index-D5QjYkw5.js",
-      "sha256": "bdee757d526cb677adced51ae5b764c226d71c80f8dfc3e6e8f86af045feabf7"
+      "path": "assets/index-Sd3KgomA.js",
+      "sha256": "fa77536f703026a1e717ae647b0806275c83c28a77f292447f4533112ecfd439"
     },
     "main_css": {
-      "path": "assets/index-BKc-ZB2H.css",
-      "sha256": "b9b3897998fc973ca71b2fd42ccd9819ff5dfce258dae91d452be57c1247a4d8"
+      "path": "assets/index-CX93BaKm.css",
+      "sha256": "5f372660fbcb3c0e721cebc29b50b27c954301744ea86ad584a0145b76b81c80"
     },
     "wasm": {
-      "path": "assets/rhwp_bg-CfVwz6LI.wasm",
-      "sha256": "843340290a2995b29993f6ba5821815528ed886d3bf8948eee3e630706a22d30"
+      "path": "assets/rhwp_bg-zwwb5n4b.wasm",
+      "sha256": "4d2ecd51878a0f3c9c8f270309962e251d340e1ac249c8958fafd495405340f8"
     }
   }
 }
