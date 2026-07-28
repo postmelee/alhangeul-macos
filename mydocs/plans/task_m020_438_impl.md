@@ -47,6 +47,20 @@ Stage 2 첫 검증에서 PR #436의 `rhwp-core.lock`과 bundled studio는 `v0.8.
 4. `local/task438`에는 제품 source를 복제하지 않고 구현계획 보정, 단계 보고서와 오늘할일만 커밋한다.
 5. full sync workflow가 build info를 갱신·stage하지 않고 PR CI도 독립 build-info gate를 실행하지 않는 재발 원인은 별도 후속 GitHub Issue #439 `rhwp Upstream Sync PR에 RhwpCoreBuildInfo 갱신과 검증 gate 추가`로 분리한다. 이 타스크에서는 후속 이슈 등록까지만 수행하고 구현이나 `task-start`는 하지 않는다.
 
+## 승인된 Stage 3 범위 보정
+
+Stage 3의 `xcodegen generate` 검증에서 current `devel`의 `project.yml`에는 Task #409 external image target과 source가 선언돼 있지만 tracked `Alhangeul.xcodeproj/project.pbxproj`에는 해당 generated 항목이 반영되지 않은 기존 drift를 확인했다. 재생성 결과는 `ExternalImageTests`, `HwpExternalImageResolver.swift`의 제품 target 연결과 관련 test source를 추가하는 단일 파일 151줄이며 삭제나 다른 target 설정 변경은 없다.
+
+PR CI와 release script는 build 전에 `xcodegen generate`를 실행하므로 이 drift가 current build 실패를 만들지는 않았다. 그러나 `project.yml`을 원본으로 유지하고 generated project 무손실을 확인한다는 Stage 3 완료 조건을 충족하려면 tracked project를 동기화해야 한다.
+
+작업지시자가 승인한 범위 보정은 다음과 같다.
+
+1. PR #436 head는 변경하지 않는다.
+2. `local/task438`에서 `project.yml`을 수정하지 않고 `xcodegen generate`로 `Alhangeul.xcodeproj/project.pbxproj`만 재생성한다.
+3. generated file이 Stage 3 candidate에서 24개 ExternalImageTests와 세 제품 target build에 사용한 file과 byte-identical한지 확인한다.
+4. `xcodegen generate`를 다시 실행해 추가 diff가 없는지 확인하고 generated project 정합화 파일을 Stage 3 보고서와 같은 commit에 포함한다.
+5. Stage 3 Debug build가 자동 등록한 task 전용 app, extension과 Sparkle updater 경로만 해제하고 다른 작업의 개발 등록은 변경하지 않는다.
+
 ## 공통 작업 원칙
 
 1. 모든 단계 보고서에 `origin/devel` base SHA, PR #436 head SHA, 후보 구성 방식, 후보 identity를 기록한다.
@@ -338,6 +352,7 @@ Task #438 Stage 2: v0.8.2 core와 bundled studio provenance 검증
 - integration worktree의 `Sources/ThumbnailExtension/**`
 - integration worktree의 `Tests/ExternalImageTests/**`
 - integration worktree의 `project.yml`
+- `local/task438`의 generated `Alhangeul.xcodeproj/project.pbxproj`
 - `build.noindex/DerivedDataTask438Stage3*`
 - `mydocs/working/task_m020_438_stage3.md`
 - `mydocs/orders/20260728.md`
@@ -354,6 +369,10 @@ Task #438 Stage 2: v0.8.2 core와 bundled studio provenance 검증
 8. HostApp app bundle에 bundled studio index, 단일 WASM, manifest와 required asset이 포함되는지 확인한다.
 9. app bundle 안의 bundled studio copy도 verification script로 확인한다.
 10. xcodegen/build 과정이 candidate의 tracked source를 바꾸지 않았는지 확인한다.
+11. `xcodegen generate`가 만든 drift를 Task #409의 `project.yml` 선언과 비교해 unrelated 변경이 없는지 확인한다.
+12. 승인된 범위에 따라 같은 generated project를 `local/task438`에 반영하고 candidate 검증 file과 byte identity를 확인한다.
+13. `local/task438`에서 `xcodegen generate`를 재실행해 generated project에 추가 drift가 없는지 확인한다.
+14. Stage 3 build가 등록한 task 전용 Debug app, extension과 Sparkle updater만 LaunchServices/PlugInKit에서 해제한다.
 
 ### 검증
 
@@ -399,7 +418,9 @@ git diff --check
 - external image 24개 current test가 모두 통과하거나 변경된 test 수의 의도성이 증명된다.
 - HostApp, QLExtension, ThumbnailExtension이 `v0.8.2` framework와 compile/link된다.
 - HostApp bundle의 bundled studio copy가 source manifest와 일치한다.
-- Xcode project와 candidate tracked source에 검증으로 인한 drift가 없다.
+- `local/task438`의 generated Xcode project가 `project.yml` 및 candidate에서 검증한 file과 byte-identical하고 재생성 후 추가 drift가 없다.
+- 승인된 generated project correction 외 candidate와 task branch source에 검증으로 인한 drift가 없다.
+- Stage 3 task 전용 Debug app, extension과 Sparkle updater 등록이 남아 있지 않다.
 - source/test 실패와 sandbox·network 환경 실패가 분리돼 기록돼 있다.
 
 ### 커밋
