@@ -35,6 +35,18 @@
 | task branch 변경 | 계획·단계·최종 보고 문서 | 제품 변경이 필요하면 자동 수정하지 않고 범위 보정 승인을 요청한다. |
 | public release | 현재 공개 앱은 `v0.1.8`, 다음 version 미확정 | 이 타스크는 release handoff만 만들고 version bump·publish를 하지 않는다. |
 
+## 승인된 Stage 2 범위 보정
+
+Stage 2 첫 검증에서 PR #436의 `rhwp-core.lock`과 bundled studio는 `v0.8.2` / `9b16aa9e23f476e2b335d7c029fc9f24a199d63c`로 갱신됐지만 `Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift`가 `v0.7.18` / `93862a4e16df59834ebce46d91e948cd739208e9`에 남아 있음을 확인했다. 이 값은 Thumbnail render cache signature에 포함되므로 stale metadata를 유지한 채 merge하지 않는다.
+
+작업지시자가 승인한 범위 보정은 다음과 같다.
+
+1. PR #436 head에 `RhwpCoreBuildInfo.releaseTag`와 `commit` 두 상수만 target lock 값으로 갱신한다. `enabledFeatures`와 renderer 동작은 변경하지 않는다.
+2. 보정 commit을 기존 `automation/rhwp-v0.8.2-full-sync` branch에 push하고, 새 head와 current `devel`을 결합한 GitHub merge ref를 다시 고정한다.
+3. 새 candidate에서 Stage 2 전체 provenance/artifact gate를 처음부터 다시 실행하고, push로 발생한 `synchronize` PR CI가 같은 candidate를 검증하는지 확인한다.
+4. `local/task438`에는 제품 source를 복제하지 않고 구현계획 보정, 단계 보고서와 오늘할일만 커밋한다.
+5. full sync workflow가 build info를 갱신·stage하지 않고 PR CI도 독립 build-info gate를 실행하지 않는 재발 원인은 별도 후속 GitHub Issue #439 `rhwp Upstream Sync PR에 RhwpCoreBuildInfo 갱신과 검증 gate 추가`로 분리한다. 이 타스크에서는 후속 이슈 등록까지만 수행하고 구현이나 `task-start`는 하지 않는다.
+
 ## 공통 작업 원칙
 
 1. 모든 단계 보고서에 `origin/devel` base SHA, PR #436 head SHA, 후보 구성 방식, 후보 identity를 기록한다.
@@ -218,6 +230,7 @@ Task #438 Stage 1: v0.8.2 통합 기준과 후보 구성 확정
 - integration worktree의 `RustBridge/Cargo.lock`
 - integration worktree의 `rhwp-core.lock`
 - integration worktree의 `rhwp-ffi-symbols.txt`
+- PR #436 head의 `Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift`
 - integration worktree의 `Sources/HostApp/Resources/rhwp-studio/**`
 - task 전용 upstream `v0.8.2` checkout
 - non-committed `Frameworks/**`
@@ -237,7 +250,12 @@ Task #438 Stage 1: v0.8.2 통합 기준과 후보 구성 확정
 9. Rust universal static library, generated header, generated symbols와 XCFramework를 lock 기준으로 검증한다.
 10. strict `--verify-lock` 결과를 먼저 기록한다. strict 실패가 `librhwp.a` byte hash/size 하나로 제한될 때만 portable verification을 실행한다.
 11. generated header/symbol, Cargo source, bundled asset mismatch는 portable skip 대상으로 취급하지 않는다.
-12. build 후 후보의 tracked source에 새 drift가 없는지 확인한다.
+12. `RhwpCoreBuildInfo.swift`의 release tag와 commit이 lock과 다르면 승인된 최소 보정 두 상수만 PR #436 head에 반영한다.
+13. PR head 보정 commit push 후 current base/head parent와 candidate tree를 다시 고정한다.
+14. 새 candidate에서 이 단계의 전체 검증 명령을 처음부터 재실행한다.
+15. 새 PR CI가 새 merge candidate를 checkout하고 모든 필수 job을 통과하는지 확인한다.
+16. build 후 후보의 tracked source에 새 drift가 없는지 확인한다.
+17. 자동 sync의 build-info 갱신·stage와 PR CI gate 누락은 별도 후속 이슈 초안으로 분리하고 `task-register` 승인 절차에 따라 등록한다.
 
 ### 검증
 
@@ -285,10 +303,21 @@ strict `--verify-lock`가 통과하면 portable 명령은 교차 확인으로 �
 - upstream root `Cargo.lock`과 manifest fingerprint가 일치한다.
 - bundled asset manifest와 actual files가 모두 검증된다.
 - source, Cargo, generated header, expected/generated FFI symbol gate가 통과한다.
+- `RhwpCoreBuildInfo.swift`의 release tag, commit, enabled features가 `rhwp-core.lock`과 일치한다.
 - strict/portable static archive 결과와 toolchain 민감도가 구분돼 있다.
+- 보정된 PR head와 current `devel`의 새 merge candidate를 PR CI가 검증한다.
+- 자동 sync/CI 재발 방지는 후속 이슈 #439로 등록돼 있고 이 타스크에서 구현을 시작하지 않는다.
 - integration candidate에 검증으로 인한 tracked drift가 없다.
 
 ### 커밋
+
+PR #436 head 보정 commit:
+
+```text
+Task #438 [Stage 2.1]: v0.8.2 core build info 정합화
+```
+
+`local/task438` 단계 문서 commit:
 
 ```text
 Task #438 Stage 2: v0.8.2 core와 bundled studio provenance 검증
