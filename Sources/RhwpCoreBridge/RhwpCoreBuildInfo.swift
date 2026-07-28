@@ -1,5 +1,5 @@
 enum RhwpCoreBuildInfo {
-    static let releaseTag = "v0.7.18"
-    static let commit = "93862a4e16df59834ebce46d91e948cd739208e9"
+    static let releaseTag = "v0.8.2"
+    static let commit = "9b16aa9e23f476e2b335d7c029fc9f24a199d63c"
     static let enabledFeatures = "native-skia"
 }
