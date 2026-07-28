@@ -57,6 +57,7 @@ swiftc -parse-as-library \
   "$ROOT/Sources/RhwpCoreBridge/FontFallback.swift" \
   "$ROOT/Sources/RhwpCoreBridge/FontResourceRegistry.swift" \
   "$ROOT/Sources/RhwpCoreBridge/CGTreeRenderer.swift" \
+  "$ROOT/Sources/Shared/HwpExternalImageResolver.swift" \
   "$ROOT/Sources/Shared/HwpPageImageRenderer.swift" \
   "$ROOT/Sources/Shared/HwpNativePageCompositor.swift" \
   "$ROOT/Sources/Shared/HwpPreviewPDFRenderer.swift" \

@@ -17,6 +17,7 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         logger.debug("Preview requested file=\(request.fileURL.lastPathComponent, privacy: .public)")
         do {
             let documentContext = try HwpPreviewPDFRenderer.load(fileURL: request.fileURL)
+            logExternalResourceReport(documentContext.externalResourceReport)
             if documentContext.pageCount == 1 {
                 let mode = HwpQuickLookPNGReplyModeResolver.resolve()
                 logger.debug("Preview selected PNG reply file=\(documentContext.filename, privacy: .public) mode=\(mode.identifier, privacy: .public) pages=\(documentContext.pageCount, privacy: .public) size=\(Int(documentContext.contentSize.width), privacy: .public)x\(Int(documentContext.contentSize.height), privacy: .public)")
@@ -36,6 +37,13 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
             logger.error("Preview failed file=\(request.fileURL.lastPathComponent, privacy: .public) error=\(Self.errorDescription(error), privacy: .public)")
             throw error
         }
+    }
+
+    private static func logExternalResourceReport(
+        _ report: RhwpExternalResourceReport
+    ) {
+        let summary = report.summary
+        logger.debug("Preview externalResource state=\(report.state.identifier, privacy: .public) total=\(summary.total, privacy: .public) injected=\(summary.injected, privacy: .public) alreadyLoaded=\(summary.alreadyLoaded, privacy: .public) missing=\(summary.missing, privacy: .public) rejected=\(summary.rejected, privacy: .public) tooLarge=\(summary.tooLarge, privacy: .public) permissionDenied=\(summary.permissionDenied, privacy: .public) readFailed=\(summary.readFailed, privacy: .public) bridgeFailed=\(summary.bridgeFailed, privacy: .public)")
     }
 
     private static func pngReply(
