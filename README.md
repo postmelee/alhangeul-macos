@@ -53,15 +53,15 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 ## 최신 공개 릴리즈
 
-### v0.1.8
+### v0.1.9
 
-`v0.1.8`은 upstream `rhwp v0.7.18` core와 bundled 편집기를 반영해 복잡한 표·도형·페이지 배치의 문서 호환성, 큰 표 처리 성능, 편집기의 입력·실행취소·후반 페이지 조작을 보강하는 patch release입니다. HOP이 등록한 HWP/HWPX 문서 형식도 알한글의 호환 형식으로 인식해 Finder의 `다음으로 열기`와 기본 앱 후보에서 알한글을 선택할 수 있는 경로를 보강했습니다. macOS 기본 앱을 자동으로 변경하지는 않습니다.
+`v0.1.9`은 upstream `rhwp v0.8.2` core와 bundled 편집기를 반영해 복잡한 표·페이지 배치, 저장 뒤 서식 보존, 오래된 HWP 그림 표시와 편집기의 입력·실행취소 안정성을 보강하고, 창 너비에 따라 viewer/editor 상단 도구 모음이 겹치거나 잘리던 문제를 수정하는 patch release입니다. HOP과 알한글 Quick Look이 함께 설치된 검증 가능한 조합에서는 예상과 다른 미리보기가 선택될 수 있음을 알리고 확장 프로그램 설정 경로를 안내합니다. Quick Look의 외부 연결 그림은 macOS가 sibling file 접근을 허용할 때만 불러오며, 접근이 거부돼도 문서 본문 미리보기는 계속 표시합니다.
 
-- GitHub Release: [Alhangeul v0.1.8](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.8)
-- 업데이트 페이지: [알한글 v0.1.8](https://postmelee.github.io/alhangeul-macos/updates/v0.1.8.html)
+- GitHub Release: [Alhangeul v0.1.9](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.9)
+- 업데이트 페이지: [알한글 v0.1.9](https://postmelee.github.io/alhangeul-macos/updates/v0.1.9.html)
 - Homebrew Cask: public DMG SHA256 확정 후 별도 배포 단계에서 반영
-- 포함된 `rhwp`: [`v0.7.18`](https://github.com/edwardkim/rhwp/releases/tag/v0.7.18) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
-- Sparkle update 기준: short version은 `0.1.8`, build는 `14`입니다.
+- 포함된 `rhwp`: [`v0.8.2`](https://github.com/edwardkim/rhwp/releases/tag/v0.8.2) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
+- Sparkle update 기준: short version은 `0.1.9`, build는 `15`입니다.
 
 과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약하고, bundled `rhwp` provenance는 한 줄 요약만 표시합니다.
 
