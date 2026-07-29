@@ -49,6 +49,30 @@ validate_sha256() {
   fi
 }
 
+verify_local_override_ownership() {
+  local override_css="$1"
+  local forbidden_selector_pattern
+  local forbidden_dimension_pattern
+
+  forbidden_selector_pattern='^[[:space:]]*(#style-bar|#style-name|\.sb-font-lang|\.sb-font|\.sb-size-group|\.sb-size|\.sb-size-unit|\.sb-size-arrows|\.sb-ls-group|\.sb-ls-arrows|\.sb-arrow)([[:space:]>+~,:{]|$)'
+  forbidden_dimension_pattern='^[[:space:]]*(width|height|min-height|align-items)[[:space:]]*:'
+
+  grep -Eq '^[[:space:]]*select\.sb-combo[[:space:],{]' "$override_css" \
+    || fail "Alhangeul WKWebView override must retain select.sb-combo presentation"
+  grep -Eq '^[[:space:]]*select\.sb-ls-select[[:space:],{]' "$override_css" \
+    || fail "Alhangeul WKWebView override must retain select.sb-ls-select presentation"
+  grep -Fq 'appearance: none;' "$override_css" \
+    || fail "Alhangeul WKWebView override must disable native select appearance"
+
+  if grep -En "$forbidden_selector_pattern" "$override_css"; then
+    fail "Alhangeul WKWebView override must not own upstream toolbar layout selectors"
+  fi
+
+  if grep -En "$forbidden_dimension_pattern" "$override_css"; then
+    fail "Alhangeul WKWebView override must not own upstream control dimensions"
+  fi
+}
+
 parse_args() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -100,6 +124,8 @@ parse_args "$@"
 [ -f "$RESOURCE_DIR/manifest.webmanifest" ] || fail "missing manifest.webmanifest"
 [ -f "$RESOURCE_DIR/alhangeul-wkwebview-overrides.css" ] || fail "missing Alhangeul WKWebView override stylesheet"
 [ -d "$RESOURCE_DIR/assets" ] || fail "missing assets directory: $RESOURCE_DIR/assets"
+
+verify_local_override_ownership "$RESOURCE_DIR/alhangeul-wkwebview-overrides.css"
 
 if [ -z "$EXPECTED_RELEASE_TAG" ]; then
   EXPECTED_RELEASE_TAG="$(manifest_field "$RESOURCE_DIR/manifest.json" source_release_tag)" \
