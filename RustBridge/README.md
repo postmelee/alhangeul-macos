@@ -24,7 +24,7 @@
 
 ## Core dependency 기준
 
-현재 `rhwp-core.lock`과 `RustBridge/Cargo.toml`은 release tag `v0.7.17`, resolved commit `03351190ec35436e58cbfee0aa9278a8fdc04a59`, feature `native-skia`를 기준으로 한다. Stable 기준은 release tag와 resolved commit을 함께 고정하며 branch/floating ref는 사용하지 않는다.
+현재 `rhwp-core.lock`과 `RustBridge/Cargo.toml`은 release tag `v0.8.2`, resolved commit `9b16aa9e23f476e2b335d7c029fc9f24a199d63c`, feature `native-skia`를 기준으로 한다. Stable 기준은 release tag와 resolved commit을 함께 고정하며 branch/floating ref는 사용하지 않는다.
 
 채널별 dependency 기준, lock 필드, compatibility gate 상세는 [`core_release_compatibility.md`](../mydocs/tech/core_release_compatibility.md)를 참조한다.
 
@@ -60,7 +60,8 @@ RustBridge는 external image 파일을 직접 찾거나 읽지 않는다. Swift/
 - filename, key, data, display path 입력 pointer는 caller-owned이며 호출 동안만 빌려 쓴다.
 - `rhwp_external_image_refs_json` 반환 문자열은 Rust-owned이며 `rhwp_free_string`으로 해제한다.
 - injection에 성공하면 upstream document가 image bytes를 복사해 소유한다.
-- `rhwp_image_data` 반환 pointer는 document-owned이므로 caller는 즉시 복사하고 setter/injection 같은 mutable 호출을 넘겨 보관하지 않는다.
+- `rhwp_image_data`가 반환한 non-null pointer는 caller-owned Rust allocation이다. caller는 bytes를 복사한 뒤 반환받은 동일 pointer와 length를 `rhwp_free_bytes`에 정확히 한 번 전달한다.
+- `rhwp_image_data` allocation은 document handle과 독립이며 `rhwp_free_bytes` 호출 전까지 유효하다. free 뒤 pointer를 보관하거나 다시 해제하지 않는다.
 - `originalPath`와 `display_path`는 bridge가 filesystem 접근 경로로 해석하지 않는다.
 
 pinned public API에는 embedded/external/missing/injected 전체 image 상태를 반환하는 함수가 없어 `rhwp_image_state_json`은 제공하지 않는다. External 상태는 refs JSON의 `loaded`로 전달하고 renderer missing/decode diagnostic은 downstream renderer 이슈에서 별도로 다룬다.
