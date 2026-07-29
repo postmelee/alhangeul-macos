@@ -351,31 +351,38 @@ pub extern "C" fn rhwp_image_data(
     handle: *const RhwpHandle,
     bin_data_id: u16,
     out_len: *mut usize,
-) -> *const u8 {
-    if handle.is_null() || out_len.is_null() || bin_data_id == 0 {
-        if !out_len.is_null() {
-            unsafe {
-                *out_len = 0;
-            }
-        }
-        return ptr::null();
+) -> *mut u8 {
+    if out_len.is_null() {
+        return ptr::null_mut();
     }
-    let h = unsafe { &*handle };
-    let idx = (bin_data_id - 1) as usize;
-    match h.doc.get_bin_data(idx) {
-        Some(data) => {
-            unsafe {
-                *out_len = data.len();
-            }
-            data.as_ptr()
-        }
-        None => {
-            unsafe {
-                *out_len = 0;
-            }
-            ptr::null()
-        }
+
+    unsafe {
+        *out_len = 0;
     }
+    if handle.is_null() || bin_data_id == 0 {
+        return ptr::null_mut();
+    }
+
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let h = unsafe { &*handle };
+        let idx = (bin_data_id - 1) as usize;
+        match h.doc.get_bin_data(idx) {
+            Some(data) if !data.is_empty() => {
+                let mut owned = data.into_boxed_slice();
+                let owned_len = owned.len();
+                let owned_ptr = owned.as_mut_ptr();
+                std::mem::forget(owned);
+
+                unsafe {
+                    *out_len = owned_len;
+                }
+                owned_ptr
+            }
+            Some(_) | None => ptr::null_mut(),
+        }
+    }));
+
+    result.unwrap_or(ptr::null_mut())
 }
 
 #[no_mangle]
@@ -485,9 +492,40 @@ mod tests {
         }
     }
 
+    struct TestBytes {
+        ptr: *mut u8,
+        len: usize,
+    }
+
+    impl TestBytes {
+        fn from_image(handle: *const RhwpHandle, bin_data_id: u16) -> Self {
+            let mut len = 0;
+            let ptr = rhwp_image_data(handle, bin_data_id, &mut len);
+            assert!(!ptr.is_null());
+            assert!(len > 0);
+            Self { ptr, len }
+        }
+
+        fn as_slice(&self) -> &[u8] {
+            unsafe { std::slice::from_raw_parts(self.ptr, self.len) }
+        }
+    }
+
+    impl Drop for TestBytes {
+        fn drop(&mut self) {
+            rhwp_free_bytes(self.ptr, self.len);
+        }
+    }
+
     fn open_fixture() -> TestHandle {
-        let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../samples/basic/KTX.hwp");
-        let data = fs::read(fixture).expect("KTX fixture should be readable");
+        open_fixture_at("samples/basic/KTX.hwp")
+    }
+
+    fn open_fixture_at(relative_path: &str) -> TestHandle {
+        let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join(relative_path);
+        let data = fs::read(fixture).expect("fixture should be readable");
         let handle = rhwp_open(data.as_ptr(), data.len());
         assert!(!handle.is_null());
         TestHandle(handle)
@@ -645,5 +683,66 @@ mod tests {
             Err(())
         );
         assert_eq!(external_image_reference_loaded("{}", "binData:1"), Err(()));
+    }
+
+    #[test]
+    fn image_data_owned_buffer_survives_allocator_pressure_and_handle_close() {
+        let handle = open_fixture_at("samples/복학원서.hwp");
+
+        let expected = {
+            let bytes = TestBytes::from_image(handle.0, 1);
+            bytes.as_slice().to_vec()
+        };
+        assert!(!expected.is_empty());
+
+        let bytes = TestBytes::from_image(handle.0, 1);
+        let pressure: Vec<Vec<u8>> = (0..64)
+            .map(|index| vec![index as u8; expected.len() + index])
+            .collect();
+        std::hint::black_box(&pressure);
+        assert_eq!(bytes.as_slice(), expected);
+
+        drop(handle);
+
+        let more_pressure: Vec<Vec<u8>> = (0..64)
+            .map(|index| vec![index as u8; expected.len() + index + 64])
+            .collect();
+        std::hint::black_box(&more_pressure);
+        assert_eq!(bytes.as_slice(), expected);
+    }
+
+    #[test]
+    fn repeated_image_data_allocations_are_independently_owned() {
+        let handle = open_fixture_at("samples/복학원서.hwp");
+        let first = TestBytes::from_image(handle.0, 1);
+        let second = TestBytes::from_image(handle.0, 1);
+
+        assert_eq!(first.as_slice(), second.as_slice());
+        let expected = second.as_slice().to_vec();
+        drop(first);
+
+        let pressure: Vec<Vec<u8>> = (0..64)
+            .map(|index| vec![index as u8; expected.len() + index])
+            .collect();
+        std::hint::black_box(&pressure);
+        assert_eq!(second.as_slice(), expected);
+    }
+
+    #[test]
+    fn image_data_invalid_inputs_reset_output_length() {
+        let mut len = usize::MAX;
+        assert!(rhwp_image_data(ptr::null(), 1, &mut len).is_null());
+        assert_eq!(len, 0);
+
+        let handle = open_fixture_at("samples/복학원서.hwp");
+        len = usize::MAX;
+        assert!(rhwp_image_data(handle.0, 0, &mut len).is_null());
+        assert_eq!(len, 0);
+
+        len = usize::MAX;
+        assert!(rhwp_image_data(handle.0, u16::MAX, &mut len).is_null());
+        assert_eq!(len, 0);
+
+        assert!(rhwp_image_data(handle.0, 1, ptr::null_mut()).is_null());
     }
 }
