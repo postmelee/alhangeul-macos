@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#ffffff" />
   <meta name="description" content="알한글 v0.1.9 릴리즈 노트입니다." />
   <meta property="og:title" content="알한글 v0.1.9 릴리즈 노트" />
-  <meta property="og:description" content="rhwp v0.8.2 문서 처리·편집 개선과 Quick Look 충돌 안내를 포함한 알한글 패치 릴리즈입니다." />
+  <meta property="og:description" content="rhwp v0.8.2 문서 처리·편집 개선, 반응형 툴바 수정과 Quick Look 충돌 안내를 포함한 알한글 패치 릴리즈입니다." />
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://postmelee.github.io/alhangeul-macos/updates/v0.1.9.html" />
   <meta property="og:image" content="https://postmelee.github.io/alhangeul-macos/assets/og-main.png" />
@@ -48,7 +48,7 @@
   <main id="main" class="updates-page">
     <section class="updates-hero" aria-labelledby="release-title">
       <h1 id="release-title">알한글 v0.1.9</h1>
-      <p><code>rhwp v0.8.2</code> 문서 처리·편집 개선과 Quick Look 충돌 안내를 포함한 패치 릴리즈입니다.</p>
+      <p><code>rhwp v0.8.2</code> 문서 처리·편집 개선, 반응형 툴바 수정과 Quick Look 충돌 안내를 포함한 패치 릴리즈입니다.</p>
       <div class="updates-actions" aria-label="릴리즈 주요 링크">
         <a class="page-action-button"
           href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.9/alhangeul-macos-0.1.9.dmg">
@@ -66,6 +66,7 @@
         <ul>
           <li><code>rhwp v0.8.2</code>를 반영해 복잡한 표·페이지 배치, 오래된 HWP 그림과 테두리 표시를 보강했습니다.</li>
           <li>편집 뒤 저장할 때 문서 서식을 보존하는 범위와 편집기의 입력 반응성·실행취소 동작을 보강했습니다.</li>
+          <li>창 너비가 바뀔 때 viewer/editor 상단 도구 모음과 서식 도구 모음이 겹치거나 잘리던 문제를 수정했습니다.</li>
           <li>HOP과 알한글 Quick Look이 함께 설치된 검증 가능한 조합에서는 예상과 다른 미리보기가 선택될 수 있음을 알리고 확장 프로그램 설정 경로를 안내합니다.</li>
           <li>Quick Look에서 외부 연결 그림을 읽을 수 없는 경우에도 문서 본문 미리보기를 계속 표시하도록 처리 경계를 보강했습니다.</li>
         </ul>
@@ -88,6 +89,7 @@
         <h2 id="release-app-title">알한글 앱 변화</h2>
         <ul>
           <li>앱 viewer/editor 화면은 bundled <code>rhwp-studio v0.8.2</code>를 사용하며, native core와 같은 release commit을 기준으로 합니다.</li>
+          <li>앱 전용 WKWebView 표시 보정을 최신 반응형 레이아웃과 분리해 작은 창부터 넓은 창까지 툴바 높이와 항목 배치를 유지합니다.</li>
           <li>검증된 HOP Quick Look version이 알한글보다 오래된 <code>rhwp</code>를 포함하면 실행 안내와 About의 Quick Look 진단에서 버전 근거를 보여줍니다.</li>
           <li>알한글은 확장 프로그램 설정 화면만 열며 HOP이나 알한글 확장의 활성 상태를 자동으로 바꾸지 않습니다.</li>
           <li>Quick Look은 안전한 sibling filename만 외부 연결 그림 후보로 사용하고, 누락·권한 거부·크기 초과를 문서 전체 실패와 분리합니다.</li>
