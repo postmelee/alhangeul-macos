@@ -55,7 +55,7 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 ### v0.1.9
 
-`v0.1.9`은 upstream `rhwp v0.8.2` core와 bundled 편집기를 반영해 복잡한 표·페이지 배치, 저장 뒤 서식 보존, 오래된 HWP 그림 표시와 편집기의 입력·실행취소 안정성을 보강하고, 창 너비에 따라 viewer/editor 상단 도구 모음이 겹치거나 잘리던 문제를 수정하는 patch release입니다. HOP과 알한글 Quick Look이 함께 설치된 검증 가능한 조합에서는 예상과 다른 미리보기가 선택될 수 있음을 알리고 확장 프로그램 설정 경로를 안내합니다. Quick Look의 외부 연결 그림은 macOS가 sibling file 접근을 허용할 때만 불러오며, 접근이 거부돼도 문서 본문 미리보기는 계속 표시합니다.
+`v0.1.9`은 upstream `rhwp v0.8.2` core와 bundled 편집기를 반영해 복잡한 표·페이지 배치, 저장 뒤 서식 보존, 오래된 HWP 그림 표시와 편집기의 입력·실행취소 안정성을 보강하고, 창 너비에 따라 viewer/editor 상단 도구 모음이 겹치거나 잘리던 문제를 수정하는 patch release입니다. HOP과 알한글 Quick Look이 함께 설치된 검증 가능한 조합에서는 예상과 다른 미리보기가 선택될 수 있음을 알리고 확장 프로그램 설정 경로를 안내합니다. Quick Look의 외부 연결 그림은 macOS가 sibling file 접근을 허용할 때만 불러오며, 접근이 거부돼도 문서 본문 미리보기는 계속 표시합니다. 외부 그림 데이터를 처리할 때 Finder 썸네일 확장이 종료될 수 있던 문제도 수정했습니다.
 
 - GitHub Release: [Alhangeul v0.1.9](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.9)
 - 업데이트 페이지: [알한글 v0.1.9](https://postmelee.github.io/alhangeul-macos/updates/v0.1.9.html)
