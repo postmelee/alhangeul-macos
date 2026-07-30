@@ -135,4 +135,63 @@ final class RhwpDocumentExternalImageBridgeTests: XCTestCase {
             XCTAssertEqual(try document.externalImageReferences(), [])
         }
     }
+
+    func testImageDataCopyAndLengthRemainStableUnderAllocationPressure() throws {
+        let document = try RhwpDocument(
+            data: ExternalImageTestSupport.sampleData(at: "samples/복학원서.hwp"),
+            filename: "복학원서.hwp"
+        )
+        let expected = try XCTUnwrap(document.imageData(binDataId: 1))
+
+        XCTAssertFalse(expected.isEmpty)
+        XCTAssertEqual(document.imageDataLength(binDataId: 1), expected.count)
+
+        for index in 0..<128 {
+            let pressure = Data(
+                repeating: UInt8(truncatingIfNeeded: index),
+                count: expected.count + index
+            )
+            XCTAssertEqual(document.imageData(binDataId: 1), expected)
+            XCTAssertEqual(document.imageDataLength(binDataId: 1), expected.count)
+            XCTAssertEqual(pressure.count, expected.count + index)
+        }
+    }
+
+    func testCopiedImageDataOutlivesDocument() throws {
+        let copiedImage: Data = try {
+            let document = try RhwpDocument(
+                data: ExternalImageTestSupport.sampleData(at: "samples/복학원서.hwp"),
+                filename: "복학원서.hwp"
+            )
+            return try XCTUnwrap(document.imageData(binDataId: 1))
+        }()
+
+        let expectedCount = copiedImage.count
+        let expectedPrefix = Data(copiedImage.prefix(32))
+        let pressure = (0..<128).map {
+            Data(repeating: UInt8(truncatingIfNeeded: $0), count: expectedCount + $0)
+        }
+        let reopenedDocument = try RhwpDocument(
+            data: ExternalImageTestSupport.sampleData(at: "samples/복학원서.hwp"),
+            filename: "복학원서.hwp"
+        )
+
+        XCTAssertFalse(copiedImage.isEmpty)
+        XCTAssertEqual(copiedImage.count, expectedCount)
+        XCTAssertEqual(Data(copiedImage.prefix(32)), expectedPrefix)
+        XCTAssertEqual(copiedImage, reopenedDocument.imageData(binDataId: 1))
+        XCTAssertEqual(pressure.count, 128)
+    }
+
+    func testImageDataRejectsInvalidIdentifiers() throws {
+        let document = try RhwpDocument(
+            data: ExternalImageTestSupport.sampleData(at: "samples/복학원서.hwp"),
+            filename: "복학원서.hwp"
+        )
+
+        XCTAssertNil(document.imageData(binDataId: 0))
+        XCTAssertNil(document.imageDataLength(binDataId: 0))
+        XCTAssertNil(document.imageData(binDataId: UInt16.max))
+        XCTAssertNil(document.imageDataLength(binDataId: UInt16.max))
+    }
 }

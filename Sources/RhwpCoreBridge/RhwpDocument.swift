@@ -322,20 +322,32 @@ class RhwpDocument {
 
     /// 이미지 바이너리 데이터를 반환한다 (bin_data_id는 1-indexed).
     func imageData(binDataId: UInt16) -> Data? {
-        var len: Int = 0
+        var len: UInt = 0
         guard let ptr = rhwp_image_data(handle, binDataId, &len), len > 0 else {
             return nil
         }
-        return Data(bytes: ptr, count: len)
+        defer {
+            rhwp_free_bytes(ptr, len)
+        }
+        guard len <= UInt(Int.max) else {
+            return nil
+        }
+        return Data(bytes: ptr, count: Int(len))
     }
 
     /// 이미지 바이너리의 존재 여부와 길이만 확인한다 (bin_data_id는 1-indexed).
     func imageDataLength(binDataId: UInt16) -> Int? {
-        var len: Int = 0
-        guard rhwp_image_data(handle, binDataId, &len) != nil, len > 0 else {
+        var len: UInt = 0
+        guard let ptr = rhwp_image_data(handle, binDataId, &len), len > 0 else {
             return nil
         }
-        return len
+        defer {
+            rhwp_free_bytes(ptr, len)
+        }
+        guard len <= UInt(Int.max) else {
+            return nil
+        }
+        return Int(len)
     }
 
     func hasImageData(binDataId: UInt16) -> Bool {

@@ -95,8 +95,8 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - 현재 v0.1.0 목표는 Demo/Preview release다.
 - Demo/Preview 배포는 필요한 bridge API가 포함된 resolved commit을 `rev`로 고정하는 commit-pinned git dependency를 허용한다.
 - Stable 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
-- 현재 lock은 `v0.7.18` Stable release tag pin 상태다. `rhwp-core.lock`은 release tag `v0.7.18`과 resolved commit `93862a4e16df59834ebce46d91e948cd739208e9`를 함께 기록한다.
-- `v0.7.18`에는 현재 `RustBridge`가 사용하는 page/render/image API와 `set_file_name`, `get_external_image_references`, `inject_external_image_by_key` external image context API가 포함되어 있다.
+- 현재 lock은 `v0.8.2` Stable release tag pin 상태다. `rhwp-core.lock`은 release tag `v0.8.2`와 resolved commit `9b16aa9e23f476e2b335d7c029fc9f24a199d63c`를 함께 기록한다.
+- `v0.8.2`에는 현재 `RustBridge`가 사용하는 page/render/image API와 `set_file_name`, `get_external_image_references`, `inject_external_image_by_key` external image context API가 포함되어 있다.
 - branch/floating ref는 배포 기준으로 사용하지 않는다.
 
 ### RustBridge
@@ -215,9 +215,9 @@ External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제
 - `rhwp_render_page_tree`와 `rhwp_render_page_svg`가 반환한 문자열은 반드시 `rhwp_free_string`으로 해제한다.
 - `rhwp_external_image_refs_json`이 반환한 문자열도 반드시 `rhwp_free_string`으로 해제한다.
 - filename, external key, image bytes, display path 입력 pointer는 caller-owned이며 FFI 호출 동안 유효해야 한다.
-- `rhwp_image_data`는 내부 문서 버퍼를 가리키므로, Swift에서는 즉시 `Data`로 복사해 사용한다.
-- `rhwp_image_data` pointer는 filename setter나 external image injection 같은 mutable 호출을 넘겨 보관하지 않는다.
-- `rhwp_extract_thumbnail`이 반환한 byte buffer는 Swift에서 복사 후 `rhwp_free_bytes`로 해제한다.
+- `rhwp_image_data`가 반환한 non-null pointer는 caller-owned allocation이다. Swift에서는 즉시 `Data`로 복사하고 반환받은 동일 pointer와 length를 `rhwp_free_bytes`로 정확히 한 번 해제한다.
+- `rhwp_image_data` allocation은 document handle과 독립이며 `rhwp_free_bytes` 호출 전까지 유효하다. free 뒤 pointer를 보관하거나 재사용하지 않는다.
+- `rhwp_extract_thumbnail`이 반환한 byte buffer도 Swift에서 복사 후 `rhwp_free_bytes`로 해제한다.
 - 이미지 조회의 `bin_data_id`는 1-indexed 규칙을 유지한다.
 
 ## 렌더링 구조
