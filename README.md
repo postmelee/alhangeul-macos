@@ -59,7 +59,7 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 - GitHub Release: [Alhangeul v0.1.9](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.9)
 - 업데이트 페이지: [알한글 v0.1.9](https://postmelee.github.io/alhangeul-macos/updates/v0.1.9.html)
-- Homebrew Cask: public DMG SHA256 확정 후 별도 배포 단계에서 반영
+- Homebrew Cask: [`postmelee/tap/alhangeul`](https://github.com/postmelee/homebrew-tap)에서 v0.1.9 배포 중
 - 포함된 `rhwp`: [`v0.8.2`](https://github.com/edwardkim/rhwp/releases/tag/v0.8.2) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
 - Sparkle update 기준: short version은 `0.1.9`, build는 `15`입니다.
 
