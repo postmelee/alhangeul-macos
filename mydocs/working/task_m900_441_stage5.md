@@ -4,7 +4,7 @@
 
 Stage 4 signed candidate 차단 gate를 통과한 exact `v0.1.9` tag를 official stable release로 게시하고, public GitHub Release·DMG·Pages·Sparkle와 실제 `v0.1.8 -> v0.1.9` 업데이트 뒤 앱·Preview·Thumbnail surface를 검증한다.
 
-Homebrew Cask는 public DMG URL과 SHA256 확정 뒤에도 별도 승인 gate를 유지하므로 이번 단계에서는 수정하거나 설치·제거하지 않는다.
+official publish 뒤 별도 승인으로 Homebrew Cask를 같은 public DMG URL과 SHA256에 맞추고, maintainer tap 게시와 install/uninstall smoke까지 Stage 5.1로 수행한다.
 
 ## 검증 기준점
 
@@ -42,7 +42,7 @@ official 실행 전에 tag와 `origin/main`, release body, Pages source, 앱·�
 
 tag 입력 검증, upstream latest guard, source/header/ABI lock, signed/notarized DMG build, public artifact 검증, GitHub Release 게시, stable appcast 작성과 Pages artifact/deploy가 모두 성공했다. stable publish이므로 draft 정책용 skip 기록 step만 의도대로 skip됐다.
 
-run annotation에는 runner에 이미 존재한 untrusted `aws/tap` Homebrew warning이 한 건 있었지만 이번 workflow나 공개 artifact에는 영향을 주지 않았다. 이번 단계에서는 Homebrew 명령을 실행하지 않았다.
+run annotation에는 runner에 이미 존재한 untrusted `aws/tap` Homebrew warning이 한 건 있었지만 이번 workflow나 공개 artifact에는 영향을 주지 않았다. official workflow 자체는 Homebrew 명령을 실행하지 않으며, Cask 배포는 아래 Stage 5.1에서 별도 승인으로 수행했다.
 
 ## Public GitHub Release와 DMG
 
@@ -150,19 +150,77 @@ Sparkle로 갱신된 public 설치본에서 같은 fresh sample을 직접 열었
 
 두 문서 모두 `alhangeul-studio://app/index.html`의 current document revision으로 열렸고 상태 막대의 filename, page count와 render time이 일치했다. 테스트 후 앱은 종료했고 Finder 창은 검증 전의 다운로드 폴더로 복구했다.
 
+## Homebrew Cask 배포와 검증 (Stage 5.1)
+
+### Cask와 tap 반영
+
+공식 checksum asset으로 `scripts/update-cask-sha256.sh --dry-run`을 먼저 통과한 뒤 이 저장소의 `Casks/alhangeul.rb`와 공개 tap의 같은 파일을 다음 값으로 맞췄다.
+
+| 항목 | 결과 |
+|------|------|
+| version | `0.1.9` |
+| SHA256 | `8110dc4cc2d965b4fe4d0a8cd6b285488a1fb5443f5bda606a35207c5bccc6ca` |
+| URL | tag-fixed official public universal DMG |
+| tap | [`postmelee/homebrew-tap`](https://github.com/postmelee/homebrew-tap) |
+| tap commit | [`b8c7b6a544989a32da9034ca7c6e6d4e241d3d10`](https://github.com/postmelee/homebrew-tap/commit/b8c7b6a544989a32da9034ca7c6e6d4e241d3d10) |
+| tap branch | `main`, push 뒤 remote/installed tap fast-forward 일치 |
+| trust | `postmelee/tap/alhangeul`이 기존 trusted Cask 목록에 있어 추가 trust 변경 없음 |
+
+Homebrew tap context에서 다음 검증이 모두 통과했다.
+
+- `brew style --cask alhangeul`
+- `brew audit --cask alhangeul`
+- 참고 기준인 `brew audit --cask --new alhangeul`
+
+기존 매뉴얼에는 `--new`에서 GitHub notability 경고 가능성을 기록했지만 이번 Homebrew 6 실행에서는 해당 경고 없이 통과했다. raw path style은 tap context를 요구해 거부됐고, 이는 가이드에 기록된 정상 경계이므로 tap token 기준 결과를 최종값으로 사용했다.
+
+### Install·실행·extension smoke
+
+기존 설치본을 삭제하지 않고 `build.noindex/task441-homebrew-v0.1.9/pre-smoke-original/`로 격리한 뒤 exact Cask를 설치했다.
+
+| 항목 | 결과 |
+|------|------|
+| install | `brew install --cask postmelee/tap/alhangeul` 통과 |
+| installed Cask | `alhangeul 0.1.9` |
+| Caskroom | `/opt/homebrew/Caskroom/alhangeul/0.1.9` |
+| app / extensions | HostApp, Preview, Thumbnail 모두 `0.1.9 (15)` |
+| architecture | HostApp `x86_64 + arm64` |
+| provenance | HostApp, Preview, Thumbnail executable이 pre-smoke official 앱과 byte-identical |
+| signing | deep/strict codesign 통과 |
+| notarization | app staple validate와 Gatekeeper `Notarized Developer ID` accepted |
+| identity | Team ID `XH6JHKYXV8`, CDHash `30d6332479839f45ea74709c46cf303404f94e14` |
+| first launch | `/Applications/Alhangeul.app`의 앱 창과 전체 viewer/editor UI 로드 확인 |
+| extension refresh | `scripts/smoke-sparkle-extension-refresh.sh` 통과, registration repair `0` |
+| smoke output | `/private/tmp/alhangeul-sparkle-extension-refresh/20260731-121932` |
+
+설치 과정에서 Homebrew 자체가 `6.0.12 -> 6.0.13`으로 자동 업데이트됐지만 Cask 내용이나 앱 검증 결과에는 영향을 주지 않았다.
+
+### Uninstall과 원상 복구
+
+- `brew uninstall --cask alhangeul`이 통과했고 Cask 목록과 `/Applications`의 테스트 설치본이 모두 제거됐다.
+- smoke 전에 보관한 official `/Applications/Alhangeul.app` `0.1.9 (15)`와 기존 `/Users/melee/Applications/Alhangeul.app` `0.1.8 (14)`를 각각 원래 위치로 되돌렸다.
+- 복원된 official 앱에서 extension refresh를 다시 실행해 registration repair `0`으로 통과했다. output은 `/private/tmp/alhangeul-sparkle-extension-refresh/20260731-122225`다.
+- final registration hygiene는 official `/Applications` 앱만 provider로 보고 issue `0`으로 통과했다. diagnostics는 `/private/tmp/alhangeul-extension-registration-hygiene/20260731-122147`이다.
+- smoke marker 이후 HostApp, Preview, Thumbnail 관련 신규 crash report는 `0`개다.
+- Stage 4에서 남아 있던 read-only rehearsal DMG `/dev/disk12`는 사용 process가 없음을 확인한 뒤 정상 detach했다.
+- 최종 상태는 Homebrew Cask 미설치, official `/Applications` 앱 `0.1.9 (15)` 복구, HostApp 미실행과 rehearsal DMG 미마운트다.
+- public GitHub Release의 Homebrew 문단은 검증된 설치 명령으로 즉시 갱신했다. README와 Pages source도 같은 명령으로 보정했으며, public Pages 반영은 Task #441 변경의 `devel` 통합과 후속 `main` docs 승격 뒤 수행한다.
+- `scripts/ci/prepare-pages-artifact.sh`를 `build.noindex/task441-homebrew-v0.1.9/pages-artifact` 대상으로 다시 실행해 home/updates/v0.1.9 세 페이지의 설치 명령과 stable appcast SHA256 `c80b7f...e372d` 보존을 확인했다.
+
 ## 설치본·registration 복구
 
-- `/Applications/Alhangeul.app`은 실제 Sparkle update 결과인 official `v0.1.9 (15)`로 유지했다.
+- `/Applications/Alhangeul.app`은 Homebrew smoke 전 보관한 official `v0.1.9 (15)`로 원상 복구했다.
+- 기존 `/Users/melee/Applications/Alhangeul.app` `v0.1.8 (14)`도 원래 위치로 복구했다.
+- Homebrew Cask는 uninstall돼 테스트 설치본과 Caskroom version이 남지 않았다.
 - HostApp은 종료했으며 남은 Preview/Thumbnail process는 official `/Applications` 경로만 사용했다.
 - `scripts/check-extension-registration-hygiene.sh --check-only`는 development registration, legacy candidate와 issue가 모두 없다고 판정했다.
-- 최종 hygiene diagnostics는 `/private/tmp/alhangeul-extension-registration-hygiene/20260731-020110`이다.
-- `build.noindex/`의 미등록 개발 app bundle 존재와 PlugInKit provider path 미보고는 warning으로만 남았다.
-- official publish 시점 이후 Alhangeul, Preview, Thumbnail 관련 신규 crash report는 `0`개다.
-- signed DMG는 detach 상태이고 임시 mount registration은 남기지 않았다.
+- 최종 hygiene diagnostics는 `/private/tmp/alhangeul-extension-registration-hygiene/20260731-122147`이다.
+- `build.noindex/`의 미등록 개발 app bundle 존재는 warning으로만 남았다.
+- Homebrew smoke marker 이후 Alhangeul, Preview, Thumbnail 관련 신규 crash report는 `0`개다.
+- signed/rehearsal DMG는 detach 상태이고 임시 mount registration은 남기지 않았다.
 
 ## 미실행 항목
 
-- Homebrew Cask 수정과 `brew style/audit/install/uninstall`: public DMG URL과 SHA256은 확정했지만 별도 승인 전이라 실행하지 않음
 - Intel Mac 실기기 설치와 실행: universal slice 자동 검증과 Apple Silicon 실기기 smoke로 대체했으며 미실행
 
 ## 검증 결과
@@ -182,14 +240,16 @@ Sparkle로 갱신된 public 설치본에서 같은 fresh sample을 직접 열었
 | HWP/HWPX Thumbnail / Quick Look | 통과 |
 | 신규 crash | `0` |
 | registration hygiene | issue `0` |
-| Homebrew | 미진행, 별도 승인 gate |
+| Homebrew | Cask/tap 게시, style/audit/install/uninstall과 extension refresh 통과 |
+| Pages source package | 세 Homebrew 명령 일치, stable appcast byte hash 보존 |
 | `git diff --check` | 통과 |
 
 ## 잔여 위험
 
 - Intel Mac 실기기 설치·실행은 수행하지 않았다. `x86_64 + arm64` 자동 검증과 별개 위험으로 유지한다.
 - registered Quick Look sandbox의 external sibling 접근 제한과 upstream Issue #3412, #3450은 Stage 4에 기록한 상태로 남는다. public update smoke에서 새 blocker는 재현하지 않았다.
-- public DMG와 appcast digest는 확정했지만 Homebrew Cask는 아직 이전 공개 상태일 수 있다. 반영 전에는 GitHub Release DMG를 공식 설치 경로로 사용한다.
+- Homebrew 배포는 maintainer tap `postmelee/homebrew-tap` 기준이다. `Homebrew/homebrew-cask` 공식 저장소 신규 제출은 이번 release 범위가 아니다.
+- public Pages에는 아직 Homebrew “별도 배포 예정” 문구가 남는다. 이 브랜치의 README/Pages source 보정이 `devel`과 `main`에 순서대로 통합되고 docs-only Pages workflow가 성공해야 공개 문구가 최종 정렬된다.
 - helper가 발견하는 `build.noindex/` 개발 app bundle은 미등록 상태다. 실제 provider 검증은 process path와 PlugInKit 결과를 함께 사용했다.
 
 ## 판단
@@ -199,15 +259,13 @@ Sparkle로 갱신된 public 설치본에서 같은 fresh sample을 직접 열었
 - Pages와 stable appcast가 `0.1.9 (15)` 및 같은 public DMG URL과 size를 사용한다.
 - clean official `v0.1.8 (14)`에서 실제 Sparkle update가 성공했고 수동 registration repair 없이 app/Preview/Thumbnail이 `v0.1.9 (15)`로 갱신됐다.
 - public 설치본의 HWP/HWPX 앱 열기, Finder Thumbnail과 Quick Look이 exact `/Applications` provider에서 통과했다.
-- Homebrew Cask는 별도 승인 gate로 남긴다.
-- Stage 5 official publish와 post-publish public surface gate를 통과로 판정한다.
+- Homebrew Cask가 official public universal DMG와 같은 URL/SHA256으로 게시됐고 maintainer tap gate를 통과했다.
+- Stage 5 official publish와 Homebrew 배포 gate를 통과로 판정한다. public Pages의 Homebrew 안내는 source 보정 완료·배포 승격 대기 상태로 분리한다.
 
 ## 다음 단계 영향
 
-Stage 6에서는 이 Stage 5 결과를 release record와 최종 보고서에 반영하고, Task #441 source/운영 기록을 `publish/task441` PR로 정리한다. Homebrew를 이번 타스크에 포함하려면 Stage 6 진입 전에 별도 승인을 받아 Cask 수정과 install/uninstall smoke를 먼저 수행해야 한다.
+Stage 6에서는 이 Stage 5와 Stage 5.1 결과를 최종 보고서에 반영하고, Task #441 source/운영 기록과 README/Pages 보정을 `publish/task441`의 `devel` 대상 PR로 정리한다. PR merge 뒤에는 `devel -> main` docs 승격과 Pages workflow 결과를 후속 release closeout으로 확인한다.
 
 ## 승인 요청
 
 Stage 5 완료 결과를 승인하고 Stage 6 release record·최종 보고와 종료 정리 진행 승인을 요청한다.
-
-Homebrew Cask를 이번 타스크에 포함할지는 별도 승인으로 결정한다.
