@@ -17,7 +17,7 @@
 
 | 버전 | 상태 | GitHub Release | Pages 릴리즈 노트 | 내부 기록 |
 |------|------|----------------|-------------------|-----------|
-| `v0.1.9` | 후보 · Stage 4 재검증중 | [Alhangeul v0.1.9](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.9) | [v0.1.9](https://postmelee.github.io/alhangeul-macos/updates/v0.1.9.html) | [`v0.1.9.md`](v0.1.9.md) |
+| `v0.1.9` | 공개 완료 | [Alhangeul v0.1.9](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.9) | [v0.1.9](https://postmelee.github.io/alhangeul-macos/updates/v0.1.9.html) | [`v0.1.9.md`](v0.1.9.md) |
 | `v0.1.8` | 공개 완료 | [Alhangeul v0.1.8](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.8) | [v0.1.8](https://postmelee.github.io/alhangeul-macos/updates/v0.1.8.html) | [`v0.1.8.md`](v0.1.8.md) |
 | `v0.1.7` | 공개 완료 | [Alhangeul v0.1.7](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.7) | [v0.1.7](https://postmelee.github.io/alhangeul-macos/updates/v0.1.7.html) | [`v0.1.7.md`](v0.1.7.md) |
 | `v0.1.6` | 공개 완료 | [Alhangeul v0.1.6](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.6) | [v0.1.6](https://postmelee.github.io/alhangeul-macos/updates/v0.1.6.html) | [`v0.1.6.md`](v0.1.6.md) |
