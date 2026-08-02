@@ -237,12 +237,14 @@ enum AppExecutionEventPolicy {
 
         state.lastObservedVersion = currentVersion
         state.pendingSparkleUpdate = nil
-        state.outbox.append(
+        AppExecutionOutboxPolicy.enqueue(
             AppExecutionOutboxEntry(
                 event: event,
                 createdAt: occurredAt,
                 firstAttemptedAt: nil
-            )
+            ),
+            into: &state.outbox,
+            now: occurredAt
         )
         return event
     }

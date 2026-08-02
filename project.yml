@@ -136,6 +136,7 @@ targets:
       - path: Tests/HostAppTests
       - path: Sources/HostApp/Services/AppExecutionAnalyticsState.swift
       - path: Sources/HostApp/Services/AppExecutionEvent.swift
+      - path: Sources/HostApp/Services/AppExecutionOutbox.swift
       - path: Sources/HostApp/Services/QuickLookConflictDetector.swift
       - path: Sources/HostApp/Services/QuickLookConflictNoticePolicy.swift
       - path: Sources/HostApp/Services/QuickLookConflictPresentation.swift
