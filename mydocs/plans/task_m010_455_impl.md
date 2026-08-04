@@ -9,7 +9,7 @@
 - 수행계획서: `mydocs/plans/task_m010_455.md`
 - 단계 수: 5
 
-현재 toolbar PDF 내보내기는 native `NSSavePanel`, atomic write와 Finder 표시를 사용하지만, upstream editor를 HWP bytes로 다시 export한 뒤 native render tree 기반 page bitmap PDF를 만든다. bundled 파일 메뉴의 `file:print-to-pdf`는 비활성 browser print 항목이라 이 native 경로에도 연결되지 않는다.
+현재 toolbar PDF 내보내기는 native `NSSavePanel`, atomic write와 Finder 표시를 사용하지만, upstream editor를 HWP bytes로 다시 export한 뒤 native render tree 기반 page bitmap PDF를 만든다. bundled 파일 메뉴의 `file:print-to-pdf`는 static markup에서는 초기 `disabled` 상태이고 문서가 열리면 upstream command registry가 활성화해 browser print 흐름을 실행하므로 이 native 경로에 연결되지 않는다.
 
 반면 일반 인쇄는 upstream embed RPC의 `pageCount`와 `getPageSvg`로 현재 페이지 SVG를 받아 offscreen `WKWebView.createPDF(configuration:)`으로 변환하고 PDFKit으로 합치는 경로를 이미 사용한다. 이번 작업은 이 생성부를 UI 동작에서 분리해 인쇄와 PDF 저장이 함께 사용하도록 만들고, 내부 메뉴와 toolbar의 PDF 저장 요청을 하나의 native command·payload·상태 전이로 통합한다.
 
@@ -153,7 +153,7 @@ renderer completion은 `Result<PDFDocument, Error>`로 반환한다. renderer는
 
 ### 검증 시나리오
 
-- `file:print-to-pdf`가 bundled DOM에는 있으나 native command set에는 없고 비활성임을 확인
+- `file:print-to-pdf`가 bundled DOM의 초기 `disabled` 항목이지만 upstream `canExecute: hasDocument`로 활성화되며, native command set에는 없음을 확인
 - toolbar PDF command만 native destination panel을 여는 현재 상태 확인
 - 현재 PDF export helper가 HWP bytes를 native로 전달함을 확인
 - 현재 print helper가 편집 settle 후 page SVG 배열을 전달함을 확인
