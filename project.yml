@@ -40,6 +40,7 @@ targets:
       - sdk: Foundation.framework
       - sdk: ImageIO.framework
       - sdk: CoreServices.framework
+      - sdk: Network.framework
       - sdk: ApplicationServices.framework
       - sdk: Security.framework
       - sdk: Metal.framework
@@ -135,6 +136,7 @@ targets:
     sources:
       - path: Tests/HostAppTests
       - path: Sources/HostApp/Services/AppExecutionAnalyticsState.swift
+      - path: Sources/HostApp/Services/AppExecutionAnalyticsRuntime.swift
       - path: Sources/HostApp/Services/AppExecutionEvent.swift
       - path: Sources/HostApp/Services/AppExecutionOutbox.swift
       - path: Sources/HostApp/Services/QuickLookConflictDetector.swift
@@ -146,6 +148,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.HostAppTests
         GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - sdk: Network.framework
 
   ExternalImageTests:
     type: bundle.unit-test

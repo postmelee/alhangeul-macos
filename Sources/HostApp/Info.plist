@@ -20,6 +20,8 @@
 	<string>0.1.9</string>
 	<key>CFBundleVersion</key>
 	<string>15</string>
+	<key>AlhangeulAppExecutionEndpoint</key>
+	<string>https://alhangeul-install-events.postmelee.workers.dev/v1/install-events</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>12.0</string>
 	<key>LSHasLocalizedDisplayName</key>

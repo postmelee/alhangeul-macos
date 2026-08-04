@@ -178,6 +178,9 @@ private struct HostAppCommands: Commands {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AppExecutionAnalyticsRuntime.shared.prepareForLaunch(
+            currentVersion: BuildInfo.version
+        )
         LaunchMaintenanceService.runIfNeeded()
         QuickLookConflictNoticeCoordinator.shared.startIfNeeded()
 
