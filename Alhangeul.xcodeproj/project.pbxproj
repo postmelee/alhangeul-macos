@@ -68,6 +68,7 @@
 		4B73A1FAB9A42EC0FCCF51EF /* FontFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF11065A3E3439B4C5B8DD7 /* FontFallback.swift */; };
 		4B80D13CDBFBFAD3AB4AF18D /* CGTreeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B69400B5B8A2851995C68DE /* CGTreeRenderer.swift */; };
 		4BA55AC7AE885CA2527383E4 /* AppExecutionAnalyticsRuntimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC162C2D50B780F7B113E42 /* AppExecutionAnalyticsRuntimeTests.swift */; };
+		4D0C99DED184D28F3F25E30B /* RhwpStudioPrintOrientationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68AA71A85B8293FC85599FEB /* RhwpStudioPrintOrientationPolicy.swift */; };
 		4D168DDC50595656F0190D78 /* QuickLookConflictPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CC07AD7EFC4382DB0FA3159 /* QuickLookConflictPresentation.swift */; };
 		4D97135716F6E9E2F6D10CC6 /* RhwpProvenance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2953DECE3F38280938C3CE2B /* RhwpProvenance.swift */; };
 		539DFB38A0293062B5A01ED9 /* HwpThumbnailRenderCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895C9E62B889A9E90C3FF8C6 /* HwpThumbnailRenderCache.swift */; };
@@ -147,6 +148,7 @@
 		B3FCD89D0CAE7B5226F0A9A3 /* ColorSync.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B73611C892296A43FDC8B2 /* ColorSync.framework */; };
 		B400A4BA8ADF0F0859240E4D /* AppExecutionAnalyticsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB049ADD6B2E35FFEBAA8BF7 /* AppExecutionAnalyticsState.swift */; };
 		B440DC974A2D658C23E93E41 /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */; };
+		B544AA3D8829D8CE8EA9B863 /* RhwpStudioPrintOrientationPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B2EF7B163D45E8EFD21CDDF /* RhwpStudioPrintOrientationPolicyTests.swift */; };
 		B8431077BFAC5321EB89E5AD /* DocumentCloseConfirmationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF5F2312600B0FAE8D1D9FF /* DocumentCloseConfirmationController.swift */; };
 		B98567E2BF18CDD24BB51F5B /* FontFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCF11065A3E3439B4C5B8DD7 /* FontFallback.swift */; };
 		BCE95338397154D9AC1C61C6 /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */; };
@@ -194,6 +196,7 @@
 		EEE38B9B49F47241316A7ACA /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1309795C091DEE3BD8E9EA7D /* CoreGraphics.framework */; };
 		EF8E526AE8B136C274FBEC67 /* AppExecutionAnalyticsStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47D58213D1B6E2002C79C6CD /* AppExecutionAnalyticsStateTests.swift */; };
 		EFEF2DF2AC26BB7B5B53A1ED /* rhwp-studio in Resources */ = {isa = PBXBuildFile; fileRef = 374B3DC439891F2F5D4643AC /* rhwp-studio */; };
+		EFF55FAB8D59B3638F545D3E /* RhwpStudioPrintOrientationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68AA71A85B8293FC85599FEB /* RhwpStudioPrintOrientationPolicy.swift */; };
 		F0492566B34AFD2621D5C3E9 /* ColorSync.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B73611C892296A43FDC8B2 /* ColorSync.framework */; };
 		F0BCACFD3FF11E325A68882C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B74C6D69DBD1D9B163C9A247 /* Security.framework */; };
 		F1111861DDCA7703FC7F496C /* RhwpStudioDocumentSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB3292BAE195A15E4FDE311 /* RhwpStudioDocumentSchemeHandler.swift */; };
@@ -280,6 +283,7 @@
 		34D472AE322872D733515F8A /* DocumentViewerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentViewerView.swift; sourceTree = "<group>"; };
 		34F4546426B7A9CF2CC1B9D5 /* DocumentOpenRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentOpenRouter.swift; sourceTree = "<group>"; };
 		374B3DC439891F2F5D4643AC /* rhwp-studio */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "rhwp-studio"; path = "Sources/HostApp/Resources/rhwp-studio"; sourceTree = SOURCE_ROOT; };
+		3B2EF7B163D45E8EFD21CDDF /* RhwpStudioPrintOrientationPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPrintOrientationPolicyTests.swift; sourceTree = "<group>"; };
 		3F33B7AA294D0DC689399E16 /* ThumbnailExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ThumbnailExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F54C76110CD58588556359B /* RhwpStudioPagePDFRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPagePDFRendererTests.swift; sourceTree = "<group>"; };
 		40D1C342C644D062423ACFF9 /* QuickLookConflictDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookConflictDetectorTests.swift; sourceTree = "<group>"; };
@@ -299,6 +303,7 @@
 		623CE04A42DB529EA5AC5477 /* DocumentSaveContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSaveContractTests.swift; sourceTree = "<group>"; };
 		62E51D4DC8276BF1D36E5FEC /* ExtensionSystemRegistrationRefresher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionSystemRegistrationRefresher.swift; sourceTree = "<group>"; };
 		68061986E6786FDE9A0183BD /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		68AA71A85B8293FC85599FEB /* RhwpStudioPrintOrientationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPrintOrientationPolicy.swift; sourceTree = "<group>"; };
 		6A01160D544F0F71CA0C3501 /* RenderTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderTree.swift; sourceTree = "<group>"; };
 		6A6F3480DCEB0F0A30DF06A1 /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = System/Library/Frameworks/IOSurface.framework; sourceTree = SDKROOT; };
 		6B275F79003550F284393EFD /* HostAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HostAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -493,6 +498,7 @@
 				531B81FC1D06E1AE2C3F2CDB /* RhwpStudioHostBridgeScriptTests.swift */,
 				47F24A33AAA897A046A60EBA /* RhwpStudioPagePayloadTests.swift */,
 				3F54C76110CD58588556359B /* RhwpStudioPagePDFRendererTests.swift */,
+				3B2EF7B163D45E8EFD21CDDF /* RhwpStudioPrintOrientationPolicyTests.swift */,
 			);
 			name = HostAppTests;
 			path = Tests/HostAppTests;
@@ -711,6 +717,7 @@
 				1116217E7FF50304A4A7EEF8 /* RhwpStudioPagePDFRenderer.swift */,
 				034A145B545356520B20598D /* RhwpStudioPDFExportController.swift */,
 				1A0E726A1E03A5D6891045C8 /* RhwpStudioPrintController.swift */,
+				68AA71A85B8293FC85599FEB /* RhwpStudioPrintOrientationPolicy.swift */,
 				FEAC07979C76F049103FFFDF /* RhwpStudioResourceLocator.swift */,
 				5D6D965AEFE52537281289A1 /* RhwpStudioResourceSchemeHandler.swift */,
 				2C9543624DAA07DE76E6E954 /* SharePresentationAnchor.swift */,
@@ -977,6 +984,7 @@
 				322EF78EDBF2A454B209FB71 /* RhwpStudioPagePDFRenderer.swift in Sources */,
 				1811D715136A996768A0C009 /* RhwpStudioPagePayload.swift in Sources */,
 				9BFD17415060EB3D21AA11BB /* RhwpStudioPrintController.swift in Sources */,
+				4D0C99DED184D28F3F25E30B /* RhwpStudioPrintOrientationPolicy.swift in Sources */,
 				8601FBB00A129F727E6FA20B /* RhwpStudioResourceLocator.swift in Sources */,
 				7A30B489C04C957C050AB78F /* RhwpStudioResourceSchemeHandler.swift in Sources */,
 				07E0FE00AA4A4A61F8B36B7A /* RhwpStudioWebView.swift in Sources */,
@@ -1061,6 +1069,8 @@
 				14EA123C29C4E27B5515D961 /* RhwpStudioPagePDFRendererTests.swift in Sources */,
 				2AB0C061B6D7D8147C48977B /* RhwpStudioPagePayload.swift in Sources */,
 				165B3845C13882655599A626 /* RhwpStudioPagePayloadTests.swift in Sources */,
+				EFF55FAB8D59B3638F545D3E /* RhwpStudioPrintOrientationPolicy.swift in Sources */,
+				B544AA3D8829D8CE8EA9B863 /* RhwpStudioPrintOrientationPolicyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

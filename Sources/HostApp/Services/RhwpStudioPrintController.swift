@@ -32,6 +32,9 @@ final class RhwpStudioPrintController {
         printInfo.jobDisposition = .spool
         printInfo.horizontalPagination = .fit
         printInfo.verticalPagination = .fit
+        if let orientation = RhwpStudioPrintOrientationPolicy.orientation(for: document) {
+            printInfo.orientation = orientation
+        }
 
         guard let operation = document.printOperation(
             for: printInfo,

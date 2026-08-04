@@ -193,6 +193,7 @@ page payload validation과 `WKWebView.createPDF` 변환을 인쇄 UI에서 분�
 - `RhwpStudioPagePDFRenderer`에 offscreen WebView, HTML wrapper, metrics, page별 `createPDF`, PDFKit merge와 단일 완료 lifecycle을 구현한다.
 - 유효하지 않은 metrics, navigation 실패, page PDF decode 실패, page count mismatch를 명시적 오류로 구분한다.
 - `RhwpStudioPrintController`에서 WebKit navigation/render 구현을 제거하고 공용 renderer 결과로 print operation만 실행하게 한다.
+- 전체 PDF 페이지 방향이 가로 또는 세로로 통일된 경우에만 해당 `NSPrintInfo.orientation`을 초기화하고, 혼합 방향 문서는 orientation을 강제하지 않은 채 page별 `autoRotate`를 유지한다.
 - print error presenter와 print operation lifetime을 유지한다.
 - HostAppTests에 payload source/test를 포함하도록 `project.yml`을 수정하고 XcodeGen으로 project를 재생성한다.
 
@@ -204,6 +205,7 @@ page payload validation과 `WKWebView.createPDF` 변환을 인쇄 UI에서 분�
 - page별 PDF가 정확히 한 page가 아니면 최종 document에 추가하지 않음
 - 중간 navigation/`createPDF` 실패 시 completion 1회와 renderer 상태 정리
 - 일반 인쇄가 공용 renderer를 거쳐 기존 PDFKit print panel을 표시
+- 전체 가로/전체 세로 문서는 해당 인쇄 방향으로 초기화되고 혼합 방향 문서는 job orientation을 강제하지 않음
 
 ### 완료 기준
 
@@ -211,6 +213,7 @@ page payload validation과 `WKWebView.createPDF` 변환을 인쇄 UI에서 분�
 - 공용 renderer가 UI/파일 저장 책임 없이 page SVG를 `PDFDocument`로 변환한다.
 - payload 단위 테스트와 HostApp build가 통과한다.
 - 대표 문서의 일반 print preview가 비어 있지 않다.
+- 대표 가로 문서의 print preview가 세로 용지 안에서 90도 회전하지 않는다.
 
 ### 검증
 
