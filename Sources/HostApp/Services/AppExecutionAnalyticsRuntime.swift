@@ -99,6 +99,7 @@ final class AppExecutionURLSessionTransport: AppExecutionEventTransport {
 
     private let endpoint: URL
     private let session: URLSession
+    private let redirectDelegate: AppExecutionRedirectRejectingDelegate?
     private let encoder: JSONEncoder
 
     init(
@@ -107,10 +108,19 @@ final class AppExecutionURLSessionTransport: AppExecutionEventTransport {
         encoder: JSONEncoder = JSONEncoder()
     ) {
         self.endpoint = endpoint
-        self.session = session ?? URLSession(
-            configuration: Self.makeEphemeralConfiguration()
-        )
         self.encoder = encoder
+        if let session {
+            self.session = session
+            redirectDelegate = nil
+        } else {
+            let redirectDelegate = AppExecutionRedirectRejectingDelegate()
+            self.redirectDelegate = redirectDelegate
+            self.session = URLSession(
+                configuration: Self.makeEphemeralConfiguration(),
+                delegate: redirectDelegate,
+                delegateQueue: nil
+            )
+        }
     }
 
     func send(_ event: AppExecutionEvent) async -> AppExecutionTransportResult {
@@ -155,7 +165,23 @@ final class AppExecutionURLSessionTransport: AppExecutionEventTransport {
         configuration.urlCredentialStorage = nil
         configuration.httpShouldSetCookies = false
         configuration.waitsForConnectivity = false
+        configuration.httpAdditionalHeaders = [
+            "User-Agent": "Alhangeul",
+            "Accept-Language": "en",
+        ]
         return configuration
+    }
+}
+
+final class AppExecutionRedirectRejectingDelegate: NSObject, URLSessionTaskDelegate {
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping (URLRequest?) -> Void
+    ) {
+        completionHandler(nil)
     }
 }
 
@@ -185,37 +211,32 @@ final class AppExecutionAnalyticsCoordinator {
     }
 
     func startIfNeeded() {
-        let shouldStart = lock.withLock {
+        lock.withLock {
             guard !didStart else {
-                return false
+                return
             }
             didStart = true
-            return true
-        }
-        guard shouldStart,
-              stateStore.isEnabled,
-              !stateStore.load().outbox.isEmpty,
-              let endpoint
-        else {
-            return
-        }
+            guard stateStore.isEnabled,
+                  !stateStore.load().outbox.isEmpty,
+                  let endpoint
+            else {
+                return
+            }
 
-        let connectivityResolver = connectivityResolver
-        let processor = AppExecutionOutboxProcessor(
-            outbox: AppExecutionOutbox(stateStore: stateStore),
-            transport: transportFactory(endpoint)
-        )
-        let task = Task {
-            guard await connectivityResolver.isConnected() else {
-                return
+            let connectivityResolver = connectivityResolver
+            let processor = AppExecutionOutboxProcessor(
+                outbox: AppExecutionOutbox(stateStore: stateStore),
+                transport: transportFactory(endpoint)
+            )
+            flushTask = Task {
+                guard await connectivityResolver.isConnected() else {
+                    return
+                }
+                guard !Task.isCancelled, stateStore.isEnabled else {
+                    return
+                }
+                await processor.processCurrentSnapshot()
             }
-            guard !Task.isCancelled, stateStore.isEnabled else {
-                return
-            }
-            await processor.processCurrentSnapshot()
-        }
-        lock.withLock {
-            flushTask = task
         }
     }
 

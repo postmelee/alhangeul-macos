@@ -183,6 +183,8 @@ private struct HostAppCommands: Commands {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Keep analytics first: the following services write legacy-evidence keys
+        // that distinguish an existing installation from a genuine first launch.
         AppExecutionAnalyticsRuntime.shared.prepareForLaunch(
             currentVersion: BuildInfo.version
         )

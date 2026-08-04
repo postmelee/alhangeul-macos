@@ -38,6 +38,19 @@ enum AppExecutionDeliveryPolicy {
             return .retry
         }
     }
+
+    static func shouldStopPass(after result: AppExecutionTransportResult) -> Bool {
+        switch result {
+        case .response(statusCode: 429):
+            return true
+        case let .response(statusCode) where (500...599).contains(statusCode):
+            return true
+        case .failure(.network), .failure(.timeout):
+            return true
+        case .response, .failure(.other):
+            return false
+        }
+    }
 }
 
 enum AppExecutionOutboxPolicy {
@@ -212,6 +225,9 @@ struct AppExecutionOutboxProcessor {
 
             let result = await transport.send(attemptedEntry.event)
             outbox.apply(result, to: attemptedEntry.id)
+            if AppExecutionDeliveryPolicy.shouldStopPass(after: result) {
+                return
+            }
         }
     }
 }

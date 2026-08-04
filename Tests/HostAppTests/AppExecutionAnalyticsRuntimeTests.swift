@@ -65,6 +65,40 @@ final class AppExecutionAnalyticsRuntimeTests: XCTestCase {
         XCTAssertNil(configuration.urlCredentialStorage)
         XCTAssertFalse(configuration.httpShouldSetCookies)
         XCTAssertFalse(configuration.waitsForConnectivity)
+        XCTAssertEqual(
+            configuration.httpAdditionalHeaders?["User-Agent"] as? String,
+            "Alhangeul"
+        )
+        XCTAssertEqual(
+            configuration.httpAdditionalHeaders?["Accept-Language"] as? String,
+            "en"
+        )
+    }
+
+    func testRedirectDelegateRejectsRedirectRequest() throws {
+        let delegate = AppExecutionRedirectRejectingDelegate()
+        let originalURL = try XCTUnwrap(URL(string: "https://collector.example/events"))
+        let redirectedURL = try XCTUnwrap(URL(string: "https://other.example/events"))
+        let response = try XCTUnwrap(
+            HTTPURLResponse(
+                url: originalURL,
+                statusCode: 307,
+                httpVersion: nil,
+                headerFields: ["Location": redirectedURL.absoluteString]
+            )
+        )
+        let task = URLSession.shared.dataTask(with: originalURL)
+        var redirectedRequest: URLRequest? = URLRequest(url: redirectedURL)
+
+        delegate.urlSession(
+            .shared,
+            task: task,
+            willPerformHTTPRedirection: response,
+            newRequest: URLRequest(url: redirectedURL),
+            completionHandler: { redirectedRequest = $0 }
+        )
+
+        XCTAssertNil(redirectedRequest)
     }
 
     func testTransportPostsOnlyCollectorPayloadAndReturnsStatusCode() async throws {
@@ -324,7 +358,10 @@ final class AppExecutionAnalyticsRuntimeTests: XCTestCase {
             self.stateStore.load().outbox.isEmpty
         }
         XCTAssertTrue(didRemoveAcceptedEvent)
-        XCTAssertEqual(restoredTransport.sentEvents.map(\.occurredDate), ["2026-08-04"])
+        XCTAssertEqual(
+            restoredTransport.sentEvents.map(\.occurredDate),
+            [entry.event.occurredDate]
+        )
         XCTAssertEqual(restoredTransport.sentEvents.map(\.id), [entry.id])
     }
 
@@ -345,15 +382,19 @@ final class AppExecutionAnalyticsRuntimeTests: XCTestCase {
     }
 
     private func makeEntry(index: Int) -> AppExecutionOutboxEntry {
-        let event = makeEvent(index: index)
+        let occurredAt = Date()
+        let event = makeEvent(index: index, occurredAt: occurredAt)
         return AppExecutionOutboxEntry(
             event: event,
-            createdAt: date("2026-08-04T00:00:00Z"),
+            createdAt: occurredAt,
             firstAttemptedAt: nil
         )
     }
 
-    private func makeEvent(index: Int) -> AppExecutionEvent {
+    private func makeEvent(
+        index: Int,
+        occurredAt: Date = Date()
+    ) -> AppExecutionEvent {
         AppExecutionEvent.make(
             eventID: UUID(
                 uuidString: String(
@@ -362,7 +403,7 @@ final class AppExecutionAnalyticsRuntimeTests: XCTestCase {
                 )
             )!,
             eventType: .firstLaunch,
-            occurredAt: date("2026-08-04T00:00:00Z"),
+            occurredAt: occurredAt,
             fromVersion: nil,
             toVersion: "0.1.9",
             updateChannel: .unknown

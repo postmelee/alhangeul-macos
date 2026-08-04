@@ -39,6 +39,8 @@
 
 `event_id`는 설치 간 연결에 재사용하지 않는다. 공개 endpoint는 인증 없는 HTTPS URL이며 앱 bundle에 포함돼도 되는 비밀이 아닌 값이다.
 
+HTTP 요청 header는 `Content-Type: application/json`, `User-Agent: Alhangeul`, `Accept-Language: en`의 고정값만 사용한다. 앱·build·CFNetwork·Darwin version이나 사용자의 선호 언어가 기본 header로 노출되지 않도록 ephemeral session configuration에서 명시적으로 덮어쓴다. 수집 endpoint는 고정 URL이므로 HTTP redirect는 같은 host 여부와 관계없이 따르지 않는다.
+
 ## 로컬 상태와 오프라인 동작
 
 분석 전용 `UserDefaults` state에는 공개 payload와 다음 bookkeeping만 저장한다.
@@ -55,7 +57,7 @@
 - 연결 복구 뒤에도 `occurred_date`를 수신일로 바꾸지 않음
 - 영구 폐쇄망에서 만료된 이벤트는 조용히 폐기하며 강제 반출하지 않음
 
-요청은 앱 실행당 최대 한 pass에서 snapshot의 각 이벤트를 FIFO로 한 번씩만 처리한다. 연결 확인은 일회성이고 상주 monitor나 retry timer를 만들지 않는다. request와 resource timeout은 5초다.
+요청은 앱 실행당 최대 한 pass에서 snapshot의 각 이벤트를 FIFO로 한 번씩만 처리한다. 연결 확인은 일회성이고 상주 monitor나 retry timer를 만들지 않는다. request와 resource timeout은 5초다. 네트워크 오류·timeout·HTTP `429`·`500...599`가 발생하면 해당 pass를 즉시 끝내며, 아직 시도하지 않은 snapshot 항목은 다음 앱 실행까지 최초 시도 시각을 기록하지 않은 채 보관한다.
 
 ## 응답과 업데이트 분류
 
@@ -76,6 +78,7 @@ Sparkle은 `willInstallUpdate`에서 pending만 저장한다. 다음 실행의 �
 비활성화하면 다음 동작을 원자적으로 수행한다.
 
 - outbox와 Sparkle pending 즉시 제거
+- 마지막 서버 수락 version 제거
 - 시작된 flush task 취소
 - 신규 이벤트 생성과 전송 중단
 - 현재 version 기준선만 유지해 재활성화 시 과거 전환을 소급 생성하지 않음
@@ -87,3 +90,5 @@ Sparkle은 `willInstallUpdate`에서 pending만 저장한다. 다음 실행의 �
 - app bundle에는 공개 endpoint 외 분석 credential을 넣지 않는다.
 - event ID, payload, outbox와 문서 정보를 production log에 남기지 않는다.
 - 대시보드와 운영 문서는 지표를 항상 “관측된 익명 이벤트”로 표현한다.
+
+공개 수집기는 Cloudflare Worker에서 요청을 처리하므로 전송 계층의 client IP와 Cloudflare 요청 metadata는 공급자 인프라를 통과한다. 배포된 Worker는 `request.cf`, IP, User-Agent, Accept-Language와 원문 body를 D1에 저장하거나 application log로 남기지 않고, Workers observability를 비활성화하며 Logpush를 사용하지 않는다. D1에는 7일 중복 제거용 `event_id` SHA-256 hash와 허용된 집계 차원만 저장한다. 사용자 안내는 앱 payload의 비식별성과 수집기 저장 정책을 구분해 표현한다.

@@ -193,6 +193,12 @@ Homebrew가 untrusted tap 정책으로 설치를 거부하면 `brew trust --cask
 
 최신 공개 릴리즈는 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases/latest)와 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인합니다. 릴리스가 게시되기 전에는 아래 소스 빌드 절차를 사용하세요. unsigned, ad-hoc signed, rehearsal DMG는 일반 사용자 배포 산출물이 아닙니다.
 
+## 개인정보 및 익명 사용 추이
+
+알한글은 최초 실행과 버전 전환 추이를 파악하기 위한 익명 이벤트 공유를 기본으로 활성화합니다. 전송 데이터는 이벤트별 임시 ID, 실제 발생 UTC 날짜, 이벤트 유형, 이전·현재 버전과 확인 가능한 업데이트 경로로 제한하며 문서 내용·파일명·경로, 계정, 기기·사용자·설치 식별자를 포함하지 않습니다. 이 값은 전체 설치 수나 고유 사용자 수가 아니라 네트워크 연결 환경에서 수집 서버에 도달한 관측 이벤트입니다.
+
+수집 요청은 Cloudflare Worker를 통해 처리하지만 요청의 IP·지역·header를 알한글 분석 저장소에 보관하지 않습니다. 앱은 OS·언어 정보를 드러내지 않는 고정 request header를 사용하고 redirect를 따르지 않습니다. macOS `설정… > 개인정보`에서 `익명 사용 추이 공유`를 끌 수 있으며, 끄면 보관 중인 이벤트와 전송 상태를 즉시 삭제합니다. 자세한 데이터·오프라인 보관·재시도 계약은 [익명 실행 이벤트 계약](mydocs/tech/task_m040_453_app_execution_analytics_contract.md)을 참조하세요.
+
 ## Quick Start (소스 빌드)
 처음 프로젝트에 참여하는 개발자는 [Project Structure](#project-structure)를 먼저 보고, 세부 경계는 [아키텍처 문서](mydocs/tech/project_architecture.md), 상세한 빌드 및 검증 절차는 [빌드 및 실행 가이드](mydocs/manual/build_run_guide.md)를 확인하세요. 실제 빌드는 Rust bridge 산출물을 만든 뒤 Xcode project를 생성하고 HostApp을 빌드하는 순서입니다.
 

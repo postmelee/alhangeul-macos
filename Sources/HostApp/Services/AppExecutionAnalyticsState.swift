@@ -118,6 +118,7 @@ final class AppExecutionAnalyticsStateStore {
         withLock {
             if !isEnabled {
                 var state = loadWithoutLock()
+                state.lastAcceptedVersion = nil
                 state.pendingSparkleUpdate = nil
                 state.outbox.removeAll()
                 guard saveWithoutLock(state) else {

@@ -89,7 +89,7 @@ macOS 설정의 개인정보 화면에서 사용자는 수집 범위와 한계�
 | 검증 | 결과 |
 |------|------|
 | `xcodegen generate` | 통과 |
-| 전체 HostAppTests | 75개 통과, 실패·건너뜀 0 |
+| 전체 HostAppTests | PR 리뷰 보완 후 76개 통과, 실패·건너뜀 0 |
 | HostApp Debug clean build | 통과 |
 | 오프라인 → 연결 복구 통합 테스트 | 원래 event ID와 `occurred_date` 유지, `202` 뒤 제거 확인 |
 | 보존·retry·응답·64건 FIFO·opt-out 정책 | 전체 단위·통합 테스트 통과 |
@@ -100,6 +100,25 @@ macOS 설정의 개인정보 화면에서 사용자는 수집 범위와 한계�
 | Sparkle/분석 결합도 | updater delegate에 transport·endpoint·연결 확인 의존 없음 |
 | `./scripts/check-no-appkit.sh` | 통과 |
 | `git diff --check` | 통과 |
+
+## PR 리뷰 병합 전 보완
+
+PR #454의 Copilot 인라인 리뷰와 메인테이너 추가 리뷰를 반영해 다음 항목을 병합 전에 보강했다.
+
+| 항목 | 반영 결과 |
+|------|-----------|
+| 요청 header 개인정보 경계 | `User-Agent: Alhangeul`, `Accept-Language: en` 고정값으로 앱·OS·선호 언어 기본 지문 차단 |
+| redirect | 고정 수집 endpoint에서 모든 HTTP redirect 거부 |
+| launch 분류 순서 | analytics 관측이 legacy evidence key를 쓰는 maintenance·notice보다 먼저여야 하는 불변 조건을 호출부에 명시 |
+| `flushTask` 취소 경합 | task 생성과 `flushTask` 등록을 동일 lock 임계 구역에서 수행 |
+| 장시간 flush pass | 네트워크 오류·timeout·HTTP 429·5xx에서 즉시 pass 종료, 남은 이벤트는 미시도 상태 유지 |
+| opt-out 상태 | 현재 관측 version 기준선만 남기고 마지막 서버 수락 version·pending·outbox 제거 |
+| 미래 플래키 테스트 | runtime helper를 실행 시점 날짜로 바꾸고 원래 entry의 `occurred_date`를 직접 비교 |
+| 사용자 문서 | README와 설정 화면에서 기본 활성, 수집 범위, Cloudflare 처리와 분석 저장소 미보관 정책 공개 |
+
+공개 수집기는 `postmelee/alhangeul-analytics` Issue #10과 PR #12에서 이미 구현·배포돼 정확히 HTTP `202`를 반환한다. Worker는 요청 IP·지역·header·원문 body를 D1 또는 application log에 저장하지 않고 observability를 비활성화한 상태다. 따라서 “Worker 미구현”을 새 이슈로 남기지 않고 현재 운영 경계를 계약 문서에 명시했다.
+
+리뷰 보완 뒤 clean test result에서 HostAppTests 76개가 모두 통과했고 HostApp Debug compile·link, `check-no-appkit`, 정적 개인정보 경계 검사와 `git diff --check`를 다시 통과했다. 공개 Worker에는 smoke 요청을 보내지 않았다.
 
 실제 운영 집계를 오염시키지 않도록 공개 Worker를 호출하지 않았다. 일회용 Debug app의 endpoint를 제거하고 bundle ID를 `com.postmelee.alhangeul.Stage5Smoke`로 분리한 뒤 다음 UI smoke를 수행했다.
 

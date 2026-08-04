@@ -184,6 +184,32 @@ final class AppExecutionOutboxTests: XCTestCase {
             AppExecutionDeliveryPolicy.disposition(for: .response(statusCode: 302)),
             .retry
         )
+        XCTAssertTrue(
+            AppExecutionDeliveryPolicy.shouldStopPass(
+                after: .response(statusCode: 429)
+            )
+        )
+        XCTAssertTrue(
+            AppExecutionDeliveryPolicy.shouldStopPass(
+                after: .response(statusCode: 503)
+            )
+        )
+        XCTAssertTrue(
+            AppExecutionDeliveryPolicy.shouldStopPass(after: .failure(.network))
+        )
+        XCTAssertTrue(
+            AppExecutionDeliveryPolicy.shouldStopPass(after: .failure(.timeout))
+        )
+        XCTAssertFalse(
+            AppExecutionDeliveryPolicy.shouldStopPass(
+                after: .response(statusCode: 202)
+            )
+        )
+        XCTAssertFalse(
+            AppExecutionDeliveryPolicy.shouldStopPass(
+                after: .response(statusCode: 422)
+            )
+        )
     }
 
     func testAcceptedResponseRemovesEventAndRecordsAcceptedVersion() {
@@ -223,18 +249,13 @@ final class AppExecutionOutboxTests: XCTestCase {
         XCTAssertEqual(stateStore.load().lastAcceptedVersion, "0.1.9")
     }
 
-    func testRetryResultsKeepEntriesAndOriginalAttemptDate() async {
+    func testInfrastructureRetryStopsPassAndLeavesRemainingEntriesUnattempted() async {
         let now = date("2026-08-03T03:00:00Z")
         let entries = (1...4).map { makeEntry(index: $0, createdAt: now) }
         seed(entries: entries)
         let outbox = AppExecutionOutbox(stateStore: stateStore, now: { now })
         let transport = FakeAppExecutionTransport(
-            results: [
-                .response(statusCode: 429),
-                .response(statusCode: 500),
-                .failure(.network),
-                .failure(.timeout),
-            ]
+            results: [.failure(.timeout)]
         )
 
         await AppExecutionOutboxProcessor(
@@ -242,10 +263,13 @@ final class AppExecutionOutboxTests: XCTestCase {
             transport: transport
         ).processCurrentSnapshot()
 
-        XCTAssertEqual(transport.sentEventIDs, entries.map(\.id))
+        XCTAssertEqual(transport.sentEventIDs, [entries[0].id])
         XCTAssertEqual(stateStore.load().outbox.map(\.id), entries.map(\.id))
+        XCTAssertEqual(stateStore.load().outbox[0].firstAttemptedAt, now)
         XCTAssertTrue(
-            stateStore.load().outbox.allSatisfy { $0.firstAttemptedAt == now }
+            stateStore.load().outbox.dropFirst().allSatisfy {
+                $0.firstAttemptedAt == nil
+            }
         )
     }
 

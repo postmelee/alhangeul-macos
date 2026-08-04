@@ -195,7 +195,7 @@ final class AppExecutionAnalyticsStateTests: XCTestCase {
         XCTAssertTrue(stateStore.load().outbox.isEmpty)
     }
 
-    func testOptOutImmediatelyClearsPendingAndOutboxButKeepsObservedVersion() throws {
+    func testOptOutClearsDeliveryStateButKeepsObservedVersionBaseline() throws {
         _ = makeObserver().observe(currentVersion: "0.1.8")
         let pending = try XCTUnwrap(
             AppExecutionPendingSparkleUpdate.make(
@@ -204,13 +204,19 @@ final class AppExecutionAnalyticsStateTests: XCTestCase {
                 recordedAt: fixedDate
             )
         )
-        XCTAssertTrue(stateStore.update { $0.pendingSparkleUpdate = pending })
+        XCTAssertTrue(
+            stateStore.update {
+                $0.lastAcceptedVersion = "0.1.7"
+                $0.pendingSparkleUpdate = pending
+            }
+        )
 
         XCTAssertTrue(stateStore.setEnabled(false))
 
         let state = stateStore.load()
         XCTAssertFalse(stateStore.isEnabled)
         XCTAssertEqual(state.lastObservedVersion, "0.1.8")
+        XCTAssertNil(state.lastAcceptedVersion)
         XCTAssertTrue(state.outbox.isEmpty)
         XCTAssertNil(state.pendingSparkleUpdate)
     }
