@@ -108,6 +108,26 @@ extension RhwpStudioWebView {
             case selected(URL)
         }
 
+        private struct PendingSaveRequest {
+            let destination: SaveDestination
+            let format: DocumentSaveFormat
+
+            var destinationURL: URL {
+                switch destination {
+                case .source(let sourceDocument):
+                    return sourceDocument.url
+                case .selected(let url):
+                    return url
+                }
+            }
+        }
+
+        private struct SavePayload {
+            let data: Data
+            let fileName: String
+            let format: DocumentSaveFormat
+        }
+
         private struct NativeDropMarker {
             let fileName: String
             let handledAt: Date
@@ -124,7 +144,7 @@ extension RhwpStudioWebView {
         private weak var commandWebView: WKWebView?
         private var printController: RhwpStudioPrintController?
         private var pdfExportController: RhwpStudioPDFExportController?
-        private var pendingSaveDestination: SaveDestination?
+        private var pendingSaveRequest: PendingSaveRequest?
         private var pendingSaveCompletion: ((RhwpStudioDocumentSaveResult) -> Void)?
         private var pendingPDFDestinationURL: URL?
         private var isChoosingSaveDestination = false
@@ -392,6 +412,8 @@ extension RhwpStudioWebView {
                 completePendingSave(.failed(message ?? "문서를 저장할 수 없습니다."))
                 pendingPDFDestinationURL = nil
                 onError(message)
+            case "save-sync-error":
+                onError(body["message"] as? String)
             case "runtime-error":
                 handleRuntimeError(body)
             case "document-load-error":
@@ -557,27 +579,36 @@ extension RhwpStudioWebView {
                 return
             }
 
+            if let saveCommand = DocumentSaveCommand(rawValue: command) {
+                guard let webView = commandWebView else {
+                    onError("저장할 viewer를 찾을 수 없습니다.")
+                    return
+                }
+
+                let suggestedFilename = body["fileName"] as? String
+                let format = saveCommand.resolveFormat(
+                    sourceURL: currentSourceDocument?.url,
+                    filename: suggestedFilename ?? currentDocument?.filename
+                )
+                if saveCommand.usesSavePanel {
+                    requestSaveAsDocument(
+                        in: webView,
+                        format: format,
+                        suggestedFilename: suggestedFilename
+                    )
+                } else {
+                    requestSaveDocument(
+                        in: webView,
+                        format: format,
+                        suggestedFilename: suggestedFilename
+                    )
+                }
+                return
+            }
+
             switch command {
             case "file:open":
                 onOpenDocument()
-            case "file:save":
-                guard let webView = commandWebView else {
-                    onError("저장할 viewer를 찾을 수 없습니다.")
-                    return
-                }
-                requestSaveDocument(
-                    in: webView,
-                    suggestedFilename: body["fileName"] as? String
-                )
-            case "file:save-as":
-                guard let webView = commandWebView else {
-                    onError("저장할 viewer를 찾을 수 없습니다.")
-                    return
-                }
-                requestSaveAsDocument(
-                    in: webView,
-                    suggestedFilename: body["fileName"] as? String
-                )
             case "file:export-pdf":
                 guard let webView = commandWebView else {
                     onError("PDF로 내보낼 viewer를 찾을 수 없습니다.")
@@ -593,39 +624,39 @@ extension RhwpStudioWebView {
         }
 
         private func saveDocument(_ body: [String: Any]) {
-            let destination = pendingSaveDestination
+            guard let request = pendingSaveRequest else {
+                onError("예상하지 못한 저장 응답을 받았습니다.")
+                return
+            }
+
             let completion = pendingSaveCompletion
-            pendingSaveDestination = nil
+            pendingSaveRequest = nil
             pendingSaveCompletion = nil
 
-            guard let payload = exportedDocumentPayload(
-                from: body,
-                missingMessage: "문서를 내보낼 수 없습니다"
-            ) else {
-                completion?(.failed("문서를 내보낼 수 없습니다."))
+            let payload: SavePayload
+            do {
+                payload = try validatedSavePayload(from: body, request: request)
+            } catch {
+                let message = "문서를 내보낼 수 없습니다: \(error.localizedDescription)"
+                onError(message)
+                completion?(.failed(message))
                 return
             }
 
             do {
-                switch destination {
-                case .some(.source(let sourceDocument)):
+                switch request.destination {
+                case .source(let sourceDocument):
                     let savedURL = try writePayload(payload, to: sourceDocument)
                     recordSavedDocument(at: savedURL)
                     completion?(.saved(savedURL))
-                case .some(.selected(let destinationURL)):
+                case .selected(let destinationURL):
                     try DocumentSavePanel.write(data: payload.data, to: destinationURL)
                     recordSavedDocument(at: destinationURL)
                     completion?(.saved(destinationURL))
-                case .none:
-                    if let savedURL = try savePayloadWithPanel(payload) {
-                        completion?(.saved(savedURL))
-                    } else {
-                        completion?(.cancelled)
-                    }
                 }
             } catch {
-                switch destination {
-                case .some(.source):
+                switch request.destination {
+                case .source:
                     do {
                         if let savedURL = try savePayloadWithPanel(payload) {
                             completion?(.saved(savedURL))
@@ -637,7 +668,7 @@ extension RhwpStudioWebView {
                         onError(message)
                         completion?(.failed(message))
                     }
-                default:
+                case .selected:
                     let message = "문서를 저장할 수 없습니다: \(error.localizedDescription)"
                     onError(message)
                     completion?(.failed(message))
@@ -645,8 +676,30 @@ extension RhwpStudioWebView {
             }
         }
 
+        private func validatedSavePayload(
+            from body: [String: Any],
+            request: PendingSaveRequest
+        ) throws -> SavePayload {
+            let data = try DocumentSaveContract.decodeAndValidate(
+                base64: body["base64"] as? String,
+                responseFormatRawValue: body["format"] as? String,
+                responseByteCount: intValue(body["byteCount"]),
+                requestFormat: request.format,
+                destinationURL: request.destinationURL
+            )
+            let responseFilename = body["fileName"] as? String
+                ?? currentSourceDocument?.displayName
+                ?? currentDocument?.filename
+                ?? request.format.defaultFilename
+            return SavePayload(
+                data: data,
+                fileName: request.format.normalizedFilename(responseFilename),
+                format: request.format
+            )
+        }
+
         private func writePayload(
-            _ payload: (data: Data, fileName: String),
+            _ payload: SavePayload,
             to sourceDocument: RecentDocumentItem
         ) throws -> URL {
             let url = try sourceDocument.resolvedURL()
@@ -661,9 +714,10 @@ extension RhwpStudioWebView {
             return url
         }
 
-        private func savePayloadWithPanel(_ payload: (data: Data, fileName: String)) throws -> URL? {
+        private func savePayloadWithPanel(_ payload: SavePayload) throws -> URL? {
             if let savedURL = try DocumentSavePanel.save(
                 data: payload.data,
+                format: payload.format,
                 suggestedFilename: payload.fileName
             ) {
                 recordSavedDocument(at: savedURL)
@@ -675,22 +729,37 @@ extension RhwpStudioWebView {
         private func recordSavedDocument(at url: URL) {
             currentSourceDocument = RecentDocumentItem.make(for: url)
             onDocumentSaved(url)
-            showSaveCompletedStatus(for: url)
+            synchronizeSavedDocument(at: url)
         }
 
-        private func showSaveCompletedStatus(for url: URL) {
+        private func synchronizeSavedDocument(at url: URL) {
             guard let webView = commandWebView else {
+                onError("문서는 저장했지만 편집기 상태를 동기화할 수 없습니다: viewer를 찾을 수 없습니다.")
                 return
             }
 
             let timeText = Self.saveStatusTimeText()
             let script = """
-            window.__alhangeulHostBridgeShowSaveCompletedStatus?.(
-              \(Self.javaScriptStringLiteral(timeText)),
-              \(Self.javaScriptStringLiteral(url.lastPathComponent))
+            window.__alhangeulHostBridgeNotifySaved?.(
+              \(Self.javaScriptStringLiteral(url.lastPathComponent)),
+              \(Self.javaScriptStringLiteral(timeText))
             )
             """
-            webView.evaluateJavaScript(script)
+            webView.evaluateJavaScript(script) { [weak self] result, error in
+                if let error {
+                    self?.onError(
+                        "문서는 저장했지만 편집기 상태를 동기화할 수 없습니다: \(error.localizedDescription)"
+                    )
+                    return
+                }
+                if let didStart = result as? Bool, didStart {
+                    return
+                }
+                if let didStart = result as? NSNumber, didStart.boolValue {
+                    return
+                }
+                self?.onError("문서는 저장했지만 편집기 상태 동기화 bridge를 실행할 수 없습니다.")
+            }
         }
 
         private static func saveStatusTimeText() -> String {
@@ -875,16 +944,23 @@ extension RhwpStudioWebView {
         }
 
         private func runNativeCommand(_ command: String, in webView: WKWebView) {
+            if let saveCommand = DocumentSaveCommand(rawValue: command) {
+                let format = saveCommand.resolveFormat(
+                    sourceURL: currentSourceDocument?.url,
+                    filename: currentDocument?.filename
+                )
+                if saveCommand.usesSavePanel {
+                    requestSaveAsDocument(in: webView, format: format)
+                } else {
+                    requestSaveDocument(in: webView, format: format)
+                }
+                return
+            }
+
             let script: String
             switch command {
             case "file:open":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:open')"
-            case "file:save":
-                requestSaveDocument(in: webView)
-                return
-            case "file:save-as":
-                requestSaveAsDocument(in: webView)
-                return
             case "file:print":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:print')"
             case "file:share":
@@ -904,6 +980,7 @@ extension RhwpStudioWebView {
 
         private func requestSaveDocument(
             in webView: WKWebView,
+            format requestedFormat: DocumentSaveFormat? = nil,
             suggestedFilename: String? = nil,
             completion: ((RhwpStudioDocumentSaveResult) -> Void)? = nil
         ) {
@@ -915,36 +992,39 @@ extension RhwpStudioWebView {
             }
 
             guard !isChoosingSaveDestination,
-                  pendingSaveDestination == nil
+                  pendingSaveRequest == nil
             else {
                 completion?(.failed("이미 저장이 진행 중입니다."))
                 return
             }
 
+            let format = requestedFormat ?? DocumentSaveFormat.resolve(
+                sourceURL: currentSourceDocument?.url,
+                filename: suggestedFilename ?? currentDocument?.filename
+            )
+
             guard let sourceDocument = currentSourceDocument,
-                  canSaveInPlace(sourceDocument)
+                  canSaveInPlace(sourceDocument, format: format)
             else {
                 requestSaveAsDocument(
                     in: webView,
+                    format: format,
                     suggestedFilename: suggestedFilename,
                     completion: completion
                 )
                 return
             }
 
-            pendingSaveDestination = .source(sourceDocument)
-            pendingSaveCompletion = completion
-            evaluateHostBridgeAction(
-                "window.__alhangeulHostBridgeExportHwpDocument?.('save-document')",
+            beginSaveExport(
+                PendingSaveRequest(destination: .source(sourceDocument), format: format),
                 in: webView,
-                failureMessage: "문서를 내보낼 수 없습니다"
-            ) { [weak self] in
-                self?.completePendingSave(.failed("문서를 내보낼 수 없습니다."))
-            }
+                completion: completion
+            )
         }
 
         private func requestSaveAsDocument(
             in webView: WKWebView,
+            format requestedFormat: DocumentSaveFormat? = nil,
             suggestedFilename: String? = nil,
             completion: ((RhwpStudioDocumentSaveResult) -> Void)? = nil
         ) {
@@ -956,16 +1036,21 @@ extension RhwpStudioWebView {
             }
 
             guard !isChoosingSaveDestination,
-                  pendingSaveDestination == nil
+                  pendingSaveRequest == nil
             else {
                 completion?(.failed("이미 저장이 진행 중입니다."))
                 return
             }
 
+            let format = requestedFormat ?? DocumentSaveFormat.resolve(
+                sourceURL: currentSourceDocument?.url,
+                filename: suggestedFilename ?? currentDocument?.filename
+            )
+
             let filename = suggestedFilename
                 ?? currentSourceDocument?.displayName
                 ?? currentDocument?.filename
-                ?? "document.hwp"
+                ?? format.defaultFilename
             let presentingWindow = webView.window
             isChoosingSaveDestination = true
 
@@ -982,6 +1067,7 @@ extension RhwpStudioWebView {
                 }
 
                 let destinationURL = await DocumentSavePanel.chooseDestinationURL(
+                    format: format,
                     suggestedFilename: filename,
                     presentingWindow: presentingWindow ?? webView.window
                 )
@@ -990,27 +1076,47 @@ extension RhwpStudioWebView {
                     return
                 }
 
-                self.pendingSaveDestination = .selected(destinationURL)
-                self.pendingSaveCompletion = completion
-                self.evaluateHostBridgeAction(
-                    "window.__alhangeulHostBridgeExportHwpDocument?.('save-document')",
+                self.beginSaveExport(
+                    PendingSaveRequest(destination: .selected(destinationURL), format: format),
                     in: webView,
-                    failureMessage: "문서를 내보낼 수 없습니다"
-                ) { [weak self] in
-                    self?.completePendingSave(.failed("문서를 내보낼 수 없습니다."))
-                }
+                    completion: completion
+                )
+            }
+        }
+
+        private func beginSaveExport(
+            _ request: PendingSaveRequest,
+            in webView: WKWebView,
+            completion: ((RhwpStudioDocumentSaveResult) -> Void)?
+        ) {
+            pendingSaveRequest = request
+            pendingSaveCompletion = completion
+            let script = """
+            window.__alhangeulHostBridgeExportSaveDocument?.(
+              \(Self.javaScriptStringLiteral(request.format.rawValue))
+            )
+            """
+            evaluateHostBridgeAction(
+                script,
+                in: webView,
+                failureMessage: "문서를 내보낼 수 없습니다"
+            ) { [weak self] in
+                self?.completePendingSave(.failed("문서를 내보낼 수 없습니다."))
             }
         }
 
         private func completePendingSave(_ result: RhwpStudioDocumentSaveResult) {
-            pendingSaveDestination = nil
+            pendingSaveRequest = nil
             let completion = pendingSaveCompletion
             pendingSaveCompletion = nil
             completion?(result)
         }
 
-        private func canSaveInPlace(_ sourceDocument: RecentDocumentItem) -> Bool {
-            sourceDocument.url.pathExtension.lowercased() == "hwp"
+        private func canSaveInPlace(
+            _ sourceDocument: RecentDocumentItem,
+            format: DocumentSaveFormat
+        ) -> Bool {
+            DocumentSaveFormat(url: sourceDocument.url) == format
         }
 
         private func requestPDFExport(

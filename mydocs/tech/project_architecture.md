@@ -33,7 +33,8 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - `DocumentOpenPanel`과 외부 열기 요청을 통해 HWP/HWPX 파일 URL을 받는다.
 - 보안 범위 접근으로 원본 파일 bytes를 읽고 `rhwp-studio` WKWebView에 전달할 문서 payload와 revision을 관리한다.
 - 앱 bundle의 `Resources/rhwp-studio` 정적 asset을 `alhangeul-studio://app` 내부 resource scheme으로 제공하고, `alhangeul-document://current` 내부 document scheme으로 현재 문서 bytes를 제공한다.
-- `rhwp-studio` 파일 메뉴와 `Command/Ctrl+O/S/P` 단축키의 열기/저장/인쇄 명령은 WKUserScript, `WKScriptMessageHandler`, AppKit key equivalent fallback, SwiftUI File menu command를 통해 HostApp의 `DocumentOpenPanel`, `DocumentSavePanel`, AppKit print operation으로 연결한다.
+- `rhwp-studio` 파일 메뉴와 `Command/Ctrl+O/S/P` 단축키의 열기/저장/인쇄 명령은 WKUserScript, `WKScriptMessageHandler`, AppKit key equivalent fallback, SwiftUI File menu command를 통해 HostApp의 `DocumentOpenPanel`, 형식 인식형 `DocumentSavePanel`, AppKit print operation으로 연결한다.
+- HWP/HWPX 저장 메뉴와 native 저장 UX, 형식·destination 검증과 atomic write는 HostApp이 소유한다. 현재 편집 상태의 HWP/HWPX bytes 생성과 저장 성공 뒤 dirty state 정리는 bundled `rhwp-studio`의 embed RPC가 담당한다.
 - HostApp titlebar toolbar는 macOS 공유, Finder에서 보기, PDF로 내보내기, 최근 문서 접근을 제공한다. 공유 picker는 toolbar 버튼에 심은 `NSViewRepresentable` anchor view를 기준으로 표시한다.
 - HostApp MVP viewer의 zoom/page/search 조작은 `rhwp-studio` 내부 UI가 소유한다.
 - `project.yml` 기준으로 `Sources/Shared`, `Sources/RhwpCoreBridge`, `Frameworks/Rhwp.xcframework`를 포함하지만, MVP viewer 화면은 native render tree 경로를 호출하지 않는다. HostApp PDF export는 viewer 화면과 별개로 `Shared/HwpPreviewPDFRenderer`와 native render tree 경로를 사용한다.
@@ -146,11 +147,64 @@ HostApp은 앱 실행과 version 전환을 영구 사용자·기기·설치 식�
 7. `rhwp-studio`의 `loadFromUrlParam()`이 내부 document URL을 `fetch`하면 `RhwpStudioDocumentSchemeHandler`가 현재 revision의 bytes를 `application/octet-stream`으로 응답한다.
 8. HWP/HWPX parsing, page layout, zoom/page UI는 `rhwp-studio`와 그 WASM bundle이 담당한다.
 9. `파일 > 열기`는 injected host bridge script가 Swift callback으로 전달해 기존 문서 열기 flow를 다시 호출한다.
-10. `파일 > 저장`은 `rhwp-studio`의 `exportHwp` response bytes를 받아 `NSSavePanel`로 저장한다. HWPX 직접 저장 비활성화 정책은 upstream UI 상태를 따른다.
-11. `파일 > 인쇄`는 `rhwp-studio`에서 받은 page HTML/SVG payload를 별도 WKWebView에 싣고 PDFKit/AppKit print operation을 실행한다.
-12. `PDF로 내보내기`는 active editor element를 settle한 뒤 `rhwp-studio`의 `exportHwp` response bytes를 native로 전달하고, `RhwpStudioPDFExportController`가 `RhwpDocument`와 `HwpPreviewPDFRenderer`를 통해 PDF를 생성한 뒤 저장 완료 후 Finder에서 결과 파일을 표시한다.
-13. `공유`는 active editor element를 settle한 뒤 `rhwp-studio`의 `exportHwp` response bytes를 임시 파일로 만든 뒤 `NSSharingServicePicker`로 전달한다.
-14. 최근 문서는 security-scoped bookmark와 함께 저장하고, toolbar menu에서 다시 열 수 있게 한다.
+10. `파일 > 저장`, `다른 이름으로 저장`, `HWP 형식으로 저장`, `HWPX 형식으로 저장`은 injected bridge가 upstream menu handler보다 먼저 소비해 HostApp command로 전달한다.
+11. HostApp은 명시적 형식 command를 우선하고, 일반 저장 command는 current source URL, 현재 filename, 기본 HWP 순서로 저장 형식을 정한다.
+12. HWP 저장은 `exportHwpBase64`와 `exportHwp` fallback을, HWPX 저장은 `exportHwpx`를 사용해 현재 편집 상태의 bytes를 받는다.
+13. HostApp은 요청·응답 형식, byte count, CFB/ZIP signature와 destination 확장자를 확인한 뒤 security-scoped source 또는 native panel에서 선택한 URL에 atomic write한다.
+14. 저장 성공 뒤 current source와 최근 문서를 실제 destination으로 갱신하고 `notifySaved(fileName)`을 호출해 upstream filename, dirty state와 recovery 상태를 동기화한다.
+15. `파일 > 인쇄`는 `rhwp-studio`에서 받은 page HTML/SVG payload를 별도 WKWebView에 싣고 PDFKit/AppKit print operation을 실행한다.
+16. `PDF로 내보내기`는 active editor element를 settle한 뒤 `rhwp-studio`의 `exportHwp` response bytes를 native로 전달하고, `RhwpStudioPDFExportController`가 `RhwpDocument`와 `HwpPreviewPDFRenderer`를 통해 PDF를 생성한 뒤 저장 완료 후 Finder에서 결과 파일을 표시한다.
+17. `공유`는 active editor element를 settle한 뒤 `rhwp-studio`의 `exportHwp` response bytes를 임시 파일로 만든 뒤 `NSSharingServicePicker`로 전달한다.
+18. 최근 문서는 security-scoped bookmark와 함께 저장하고, toolbar menu에서 다시 열 수 있게 한다.
+
+### HostApp HWP/HWPX 저장 경로
+
+#### 소유 경계
+
+- HostApp은 upstream 파일 메뉴의 저장 command를 native command로 intercept하고 저장 형식 결정, `NSSavePanel`, destination, security-scoped 접근, payload 검증, atomic write, current source와 최근 문서 갱신을 소유한다.
+- bundled `rhwp-studio`는 현재 editor state를 settle하고 해당 형식 exporter를 호출하며, HWP/HWPX bytes를 HostApp에 전달한다. 로컬 파일 경로 선택과 write는 수행하지 않는다.
+- durable write 뒤 HostApp은 `notifySaved(fileName)` embed RPC를 호출한다. upstream은 filename, dirty state와 recovery draft를 정리하고 HostApp은 저장 완료 상태를 표시한다.
+- `notifySaved` 실패는 이미 완료된 파일 write와 current source 갱신을 되돌리지 않는다. HostApp은 파일 저장과 editor state 동기화 실패를 구분해 사용자에게 알린다.
+
+#### command와 형식 결정
+
+| command | 형식 결정 | destination |
+|---------|-----------|-------------|
+| `file:save` | current source URL → 현재 filename → 기본 HWP | 같은 형식의 source가 있으면 제자리 저장, source가 없거나 write에 실패하면 같은 형식 save panel |
+| `file:save-as` | current source URL → 현재 filename → 기본 HWP | 현재 형식을 유지하는 native save panel |
+| `file:save-as-hwp` | 명시적 HWP | HWP native save panel |
+| `file:save-as-hwpx` | 명시적 HWPX | HWPX native save panel |
+
+지원 확장자는 대소문자를 구분하지 않고 판정한다. 저장 패널의 title, UTI, 기본 filename과 확장자 정규화는 하나의 `DocumentSaveFormat`에서 파생하며 `.hwp.hwpx` 같은 중복 suffix를 만들지 않는다. source와 filename 모두 형식을 제공하지 않는 새 문서·임시 문서는 HWP를 기본값으로 사용한다.
+
+명시적 HWPX 저장이 성공하면 current source URL과 filename이 실제 `.hwpx` destination으로 바뀐다. 이후 일반 `Command+S`는 current source에서 HWPX를 다시 결정하므로 panel 없이 같은 URL에 `exportHwpx` 결과를 저장한다. HWPX에서 HWP로 저장한 반대 방향도 동일한 규칙으로 후속 `Command+S`가 HWP exporter를 유지한다.
+
+#### exporter와 write 전 검증
+
+```text
+HWP  -> exportHwpBase64 -> 미지원 시 exportHwp fallback
+HWPX -> exportHwpx -> chunked base64 encode
+```
+
+bridge의 `save-document` response는 `format`, 정규화한 `fileName`, `base64`, `byteCount`를 포함한다. HostApp은 다음 조건을 모두 만족한 경우에만 파일을 쓴다.
+
+1. destination과 format을 가진 pending save request가 존재한다.
+2. response format이 HWP/HWPX 중 하나이며 pending format과 일치한다.
+3. base64 decode 결과와 `byteCount`가 일치한다.
+4. HWP는 CFB magic, HWPX는 ZIP magic을 가진다.
+5. destination 확장자와 요청 format이 일치한다.
+
+검증 실패 시 파일, current source, 최근 문서와 clean state를 변경하지 않는다. 제자리 atomic write가 실패하면 원래 요청 format을 유지한 native save panel로 fallback한다. 저장 패널 선택이나 export가 진행 중일 때 들어온 중복 요청은 새 pending state를 만들지 않는다.
+
+runtime signature guard는 완전히 다른 형식의 bytes를 잘못된 확장자로 쓰는 오류를 빠르게 막는 역할만 한다. HWPX의 `mimetype`, `Contents/`, `META-INF/` entry와 실제 재열기는 별도 container/render smoke에서 확인한다.
+
+#### 지원 범위와 호환 제한
+
+- HostApp은 upstream exporter가 반환한 bytes를 별도 본문 변환 없이 atomic write한다. HWP/HWPX parser, document model과 exporter의 형식 호환성은 bundled `rhwp-studio`/`rhwp` 구현 범위에 따른다.
+- 대표 fixture에서 HWP → HWP, HWP → HWPX, HWPX → HWPX, HWPX → HWP 저장과 재열기, page 1의 텍스트·표·이미지 또는 non-blank render를 검증했다. 이는 모든 HWP/HWPX 기능의 의미론적 완전 무손실을 보장하지 않는다.
+- HWPX runtime 검증은 ZIP magic까지만 수행한다. 손상된 ZIP이나 필수 entry가 빠진 container는 별도 검증 없이는 runtime guard를 통과할 수 있다.
+- HWPX exporter는 call-stack overflow를 피하도록 chunked base64 encoding하지만, JS와 Swift 양쪽에 전체 payload를 보유하는 메모리 비용은 남는다.
+- 공유와 현재 PDF export는 이 저장 경로와 별개로 HWP exporter payload를 사용하는 기존 동작을 유지한다.
 
 ### Quick Look preview 경로
 
