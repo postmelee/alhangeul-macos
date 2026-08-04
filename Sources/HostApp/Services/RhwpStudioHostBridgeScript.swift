@@ -106,6 +106,7 @@ enum RhwpStudioHostBridgeScript {
         "file:save-as-hwp",
         "file:save-as-hwpx",
         "file:print",
+        "file:print-to-pdf",
         "file:share",
         "file:export-pdf"
       ]);
@@ -116,6 +117,7 @@ enum RhwpStudioHostBridgeScript {
         "file:save-as-hwp",
         "file:save-as-hwpx",
         "file:print",
+        "file:print-to-pdf",
         "file:share",
         "file:export-pdf",
         "file:about",
@@ -492,10 +494,29 @@ enum RhwpStudioHostBridgeScript {
         document.querySelectorAll(".md-item[data-cmd]").forEach((item) => {
           const command = item.dataset.cmd;
           if (nativeCommands.has(command)) {
-            item.classList.remove("disabled");
-            item.removeAttribute("aria-disabled");
+            if (item.classList.contains("disabled")) {
+              item.classList.remove("disabled");
+            }
+            if (item.hasAttribute("aria-disabled")) {
+              item.removeAttribute("aria-disabled");
+            }
           }
         });
+      }
+
+      function overrideNativePDFMenuItem() {
+        const item = document.querySelector('.md-item[data-cmd="file:print-to-pdf"]');
+        if (!item) {
+          return;
+        }
+
+        const title = "알한글에서 PDF 파일로 저장합니다.";
+        if (item.getAttribute("title") !== title) {
+          item.setAttribute("title", title);
+        }
+        if (item.getAttribute("aria-label") !== "PDF로 저장") {
+          item.setAttribute("aria-label", "PDF로 저장");
+        }
       }
 
       function ensureSaveAsMenuItem() {
@@ -540,10 +561,33 @@ enum RhwpStudioHostBridgeScript {
       function refreshHostOverrides() {
         ensureSaveAsMenuItem();
         enableNativeCommandItems();
+        overrideNativePDFMenuItem();
         rewriteShortcutLabelsForMac();
+        observeNativePDFMenuItem();
       }
 
       let pendingHostOverridesRefresh = false;
+      let observedNativePDFMenuItem = null;
+
+      const nativePDFMenuItemObserver = new MutationObserver(() => {
+        scheduleHostOverridesRefresh();
+      });
+
+      function observeNativePDFMenuItem() {
+        const item = document.querySelector('.md-item[data-cmd="file:print-to-pdf"]');
+        if (item === observedNativePDFMenuItem) {
+          return;
+        }
+
+        nativePDFMenuItemObserver.disconnect();
+        observedNativePDFMenuItem = item;
+        if (item) {
+          nativePDFMenuItemObserver.observe(item, {
+            attributes: true,
+            attributeFilter: ["class", "aria-disabled", "title"]
+          });
+        }
+      }
 
       function scheduleHostOverridesRefresh() {
         if (pendingHostOverridesRefresh) {
@@ -653,13 +697,12 @@ enum RhwpStudioHostBridgeScript {
 
       async function exportPDFDocument() {
         try {
-          await settleEditorState();
-          const payload = await requestHwpExportPayload();
+          const { pageCount, pages } = await documentPages();
           postNative({
             type: "export-pdf-document",
             fileName: currentFileName(),
-            base64: payload.base64,
-            byteCount: payload.byteCount
+            pageCount,
+            pages
           });
         } catch (error) {
           postNative({
@@ -687,26 +730,30 @@ enum RhwpStudioHostBridgeScript {
       }
 
       async function handleNativeCommand(command) {
-        if (command === "file:open" ||
-            command === "file:save" ||
-            command === "file:save-as" ||
-            command === "file:save-as-hwp" ||
-            command === "file:save-as-hwpx" ||
-            command === "file:export-pdf") {
+        const canonicalCommand = command === "file:print-to-pdf"
+          ? "file:export-pdf"
+          : command;
+
+        if (canonicalCommand === "file:open" ||
+            canonicalCommand === "file:save" ||
+            canonicalCommand === "file:save-as" ||
+            canonicalCommand === "file:save-as-hwp" ||
+            canonicalCommand === "file:save-as-hwpx" ||
+            canonicalCommand === "file:export-pdf") {
           postNative({
             type: "command",
-            command,
+            command: canonicalCommand,
             fileName: currentFileName()
           });
           return;
         }
 
-        if (command === "file:share") {
+        if (canonicalCommand === "file:share") {
           exportHwpDocument("share-document", "공유 데이터를 만들 수 없습니다");
           return;
         }
 
-        if (command === "file:print") {
+        if (canonicalCommand === "file:print") {
           printDocument();
           return;
         }

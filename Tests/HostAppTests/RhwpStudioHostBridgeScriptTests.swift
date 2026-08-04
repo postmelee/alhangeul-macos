@@ -25,4 +25,47 @@ final class RhwpStudioHostBridgeScriptTests: XCTestCase {
             RhwpStudioHostBridgeScript.source.contains("type: \"save-sync-error\"")
         )
     }
+
+    func testBundledPDFMenuIsCapturedAndCanonicalizedToNativeExportCommand() {
+        let source = RhwpStudioHostBridgeScript.source
+        XCTAssertTrue(source.contains("\"file:print-to-pdf\""))
+        XCTAssertTrue(source.contains("command === \"file:print-to-pdf\""))
+        XCTAssertTrue(source.contains("? \"file:export-pdf\""))
+        XCTAssertTrue(source.contains("command: canonicalCommand"))
+        XCTAssertTrue(source.contains("알한글에서 PDF 파일로 저장합니다."))
+    }
+
+    func testPDFExportUsesPageSVGsWithoutHwpBytePayload() throws {
+        let section = try sourceSection(
+            from: "async function exportPDFDocument()",
+            to: "async function printDocument()"
+        )
+
+        XCTAssertTrue(section.contains("documentPages()"))
+        XCTAssertTrue(section.contains("pageCount,"))
+        XCTAssertTrue(section.contains("pages"))
+        XCTAssertFalse(section.contains("requestHwpExportPayload"))
+        XCTAssertFalse(section.contains("exportHwp"))
+        XCTAssertFalse(section.contains("base64"))
+        XCTAssertFalse(section.contains("byteCount"))
+    }
+
+    func testNativePDFMenuOverrideIsReappliedAfterAttributeChanges() {
+        let source = RhwpStudioHostBridgeScript.source
+        XCTAssertTrue(source.contains("overrideNativePDFMenuItem();"))
+        XCTAssertTrue(source.contains("nativePDFMenuItemObserver.observe(item"))
+        XCTAssertTrue(source.contains("attributes: true"))
+        XCTAssertTrue(
+            source.contains("attributeFilter: [\"class\", \"aria-disabled\", \"title\"]")
+        )
+    }
+
+    private func sourceSection(from start: String, to end: String) throws -> Substring {
+        let source = RhwpStudioHostBridgeScript.source
+        let startIndex = try XCTUnwrap(source.range(of: start)?.lowerBound)
+        let endIndex = try XCTUnwrap(
+            source.range(of: end, range: startIndex..<source.endIndex)?.lowerBound
+        )
+        return source[startIndex..<endIndex]
+    }
 }
