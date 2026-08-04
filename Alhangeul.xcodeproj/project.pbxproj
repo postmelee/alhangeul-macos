@@ -112,6 +112,7 @@
 		979D708081AD7DEA8C3F4F67 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81391ABAF81F59C2FAE9880D /* ContentView.swift */; };
 		97C458A839EDF21B2F1E6910 /* HwpExternalImageResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E95E4CD2871B8BED8B5F72D /* HwpExternalImageResolver.swift */; };
 		99BDD4D8DDB2AFB51FE3BA5D /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B49CA0DEC91C628C9B92B7A1 /* CoreFoundation.framework */; };
+		9AB65F7967A7CDFC6B2B3CE2 /* DocumentSaveFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EEB63611773CF6E03B89A0 /* DocumentSaveFormat.swift */; };
 		9B0F29134B03D8A00E8379D0 /* AppExecutionOutbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CCBBB1CE93E4840CC4CF27D /* AppExecutionOutbox.swift */; };
 		9B231AF5DDFA9167E4E5ED98 /* HwpExternalImageResolverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E366184AF5B6B9EAB46F352A /* HwpExternalImageResolverTests.swift */; };
 		9BFD17415060EB3D21AA11BB /* RhwpStudioPrintController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0E726A1E03A5D6891045C8 /* RhwpStudioPrintController.swift */; };
@@ -121,6 +122,7 @@
 		A15CE462970FB420A669581E /* HwpNativePageCompositor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541160BFAFD7D51040244110 /* HwpNativePageCompositor.swift */; };
 		A174DAE4D877346E0350AF02 /* HwpPreviewPNGRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8645A8FD6F4761F6A5BE264A /* HwpPreviewPNGRenderer.swift */; };
 		A37A870989D1BA673D744596 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D03050B560F60198F4CBBB0 /* Metal.framework */; };
+		A42C9BE15ED1F8180D5D8EDA /* DocumentSaveFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22C7FCB985EBD7C94DD90E03 /* DocumentSaveFormatTests.swift */; };
 		A618986443F4F97B918DF49A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1309795C091DEE3BD8E9EA7D /* CoreGraphics.framework */; };
 		A6189FF8E0BA6CC94255FEFA /* HwpQuickLookPNGReplyModeResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CACAAFF817D4598145526EE /* HwpQuickLookPNGReplyModeResolver.swift */; };
 		A6B358FD54D1069D3C08BF76 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B49CA0DEC91C628C9B92B7A1 /* CoreFoundation.framework */; };
@@ -154,6 +156,7 @@
 		CD864F15977761E62A646DE4 /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A6F3480DCEB0F0A30DF06A1 /* IOSurface.framework */; };
 		CFDB485A58F81FA18F40FB49 /* AppExecutionAnalyticsRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83133CD50926F4D0A93C5655 /* AppExecutionAnalyticsRuntime.swift */; };
 		D18EB4ED1958A17CF2A24FD3 /* QLExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2E61A1530D3A8D7AF3DEE02C /* QLExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D1A4737D513E6EFCACC45D3D /* DocumentSaveFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EEB63611773CF6E03B89A0 /* DocumentSaveFormat.swift */; };
 		D21941D098EFE607821C67D4 /* DocumentOpenPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9765F0524B38ED7EFD56BC48 /* DocumentOpenPanel.swift */; };
 		D291CC60D4A2C1256CE2B41E /* RhwpStudioPDFExportController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034A145B545356520B20598D /* RhwpStudioPDFExportController.swift */; };
 		D409DC0EA3451507D10C440D /* AppExecutionAnalyticsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46111B2C92166FABDD64FF11 /* AppExecutionAnalyticsSettingsView.swift */; };
@@ -227,6 +230,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		01EEB63611773CF6E03B89A0 /* DocumentSaveFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSaveFormat.swift; sourceTree = "<group>"; };
 		02FBEC3A120D20AC265A2C79 /* DocumentViewerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentViewerStore.swift; sourceTree = "<group>"; };
 		034A145B545356520B20598D /* RhwpStudioPDFExportController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPDFExportController.swift; sourceTree = "<group>"; };
 		07F373DBDDC753FC79292E2D /* HwpPreviewProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewProvider.swift; sourceTree = "<group>"; };
@@ -247,6 +251,7 @@
 		1C5A2536FE100F6D56A308CB /* QuickLookSettingsOpenerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookSettingsOpenerTests.swift; sourceTree = "<group>"; };
 		1EB3292BAE195A15E4FDE311 /* RhwpStudioDocumentSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioDocumentSchemeHandler.swift; sourceTree = "<group>"; };
 		20E87D97188514E1A14C30E4 /* QuickLookConflictDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookConflictDetector.swift; sourceTree = "<group>"; };
+		22C7FCB985EBD7C94DD90E03 /* DocumentSaveFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSaveFormatTests.swift; sourceTree = "<group>"; };
 		23F35BCAF2E4A2B5A3AF9DC0 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		2512041CBA5B9CE5521537DC /* HwpPreviewPDFRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewPDFRenderer.swift; sourceTree = "<group>"; };
 		26979062297C483B463918BA /* AboutWindowPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutWindowPresenter.swift; sourceTree = "<group>"; };
@@ -461,6 +466,7 @@
 				47D58213D1B6E2002C79C6CD /* AppExecutionAnalyticsStateTests.swift */,
 				08A3E95853FC125A982DA75C /* AppExecutionEventTests.swift */,
 				BFD8F8CDAE3C68AC47194251 /* AppExecutionOutboxTests.swift */,
+				22C7FCB985EBD7C94DD90E03 /* DocumentSaveFormatTests.swift */,
 				40D1C342C644D062423ACFF9 /* QuickLookConflictDetectorTests.swift */,
 				5633998CAA235F39FA96056D /* QuickLookConflictNoticePolicyTests.swift */,
 				74575C9AC5A808EDE3C1BA5D /* QuickLookConflictPresentationTests.swift */,
@@ -661,6 +667,7 @@
 				9765F0524B38ED7EFD56BC48 /* DocumentOpenPanel.swift */,
 				34F4546426B7A9CF2CC1B9D5 /* DocumentOpenRouter.swift */,
 				3445867D6FAAB95F19E2C992 /* DocumentPDFExportPanel.swift */,
+				01EEB63611773CF6E03B89A0 /* DocumentSaveFormat.swift */,
 				8CD083E83BB7DFA8089562B5 /* DocumentSavePanel.swift */,
 				27EB9FF4728E67B683789ECF /* DocumentTerminationCoordinator.swift */,
 				D8E524F7A95D1616AB85E3F2 /* ExtensionStatusModel.swift */,
@@ -906,6 +913,7 @@
 				D21941D098EFE607821C67D4 /* DocumentOpenPanel.swift in Sources */,
 				A155D58D6F716FCFDAC1675C /* DocumentOpenRouter.swift in Sources */,
 				1C933AAE48EF8E6A19030EA9 /* DocumentPDFExportPanel.swift in Sources */,
+				9AB65F7967A7CDFC6B2B3CE2 /* DocumentSaveFormat.swift in Sources */,
 				E31F1F5AF648803FDDC2E893 /* DocumentSavePanel.swift in Sources */,
 				72BDAE6714CD21F62B6547CB /* DocumentTerminationCoordinator.swift in Sources */,
 				7F08D9DE276A1AB65D6A53BA /* DocumentViewerStore.swift in Sources */,
@@ -1006,6 +1014,8 @@
 				461CC73228EC10F1C6BC2B1C /* AppExecutionEventTests.swift in Sources */,
 				C2825BC28D62BA0B03566637 /* AppExecutionOutbox.swift in Sources */,
 				8DD11A59269A08802E4776F4 /* AppExecutionOutboxTests.swift in Sources */,
+				D1A4737D513E6EFCACC45D3D /* DocumentSaveFormat.swift in Sources */,
+				A42C9BE15ED1F8180D5D8EDA /* DocumentSaveFormatTests.swift in Sources */,
 				8CB7876CD097AEAA46583BBE /* QuickLookConflictDetector.swift in Sources */,
 				C3D31652BE1401EFC8DAB0C8 /* QuickLookConflictDetectorTests.swift in Sources */,
 				847F0CE187501128E4CB0492 /* QuickLookConflictNoticePolicy.swift in Sources */,

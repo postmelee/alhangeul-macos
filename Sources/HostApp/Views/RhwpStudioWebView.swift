@@ -664,6 +664,7 @@ extension RhwpStudioWebView {
         private func savePayloadWithPanel(_ payload: (data: Data, fileName: String)) throws -> URL? {
             if let savedURL = try DocumentSavePanel.save(
                 data: payload.data,
+                format: .hwp,
                 suggestedFilename: payload.fileName
             ) {
                 recordSavedDocument(at: savedURL)
@@ -982,6 +983,7 @@ extension RhwpStudioWebView {
                 }
 
                 let destinationURL = await DocumentSavePanel.chooseDestinationURL(
+                    format: .hwp,
                     suggestedFilename: filename,
                     presentingWindow: presentingWindow ?? webView.window
                 )
