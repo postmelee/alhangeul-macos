@@ -191,7 +191,89 @@ final class AppExecutionAnalyticsStateTests: XCTestCase {
 
         XCTAssertFalse(stateStore.isEnabled)
         XCTAssertNil(event)
-        XCTAssertNil(stateStore.load().lastObservedVersion)
+        XCTAssertEqual(stateStore.load().lastObservedVersion, "0.1.9")
+        XCTAssertTrue(stateStore.load().outbox.isEmpty)
+    }
+
+    func testOptOutImmediatelyClearsPendingAndOutboxButKeepsObservedVersion() throws {
+        _ = makeObserver().observe(currentVersion: "0.1.8")
+        let pending = try XCTUnwrap(
+            AppExecutionPendingSparkleUpdate.make(
+                fromVersion: "0.1.8",
+                toVersion: "0.1.9",
+                recordedAt: fixedDate
+            )
+        )
+        XCTAssertTrue(stateStore.update { $0.pendingSparkleUpdate = pending })
+
+        XCTAssertTrue(stateStore.setEnabled(false))
+
+        let state = stateStore.load()
+        XCTAssertFalse(stateStore.isEnabled)
+        XCTAssertEqual(state.lastObservedVersion, "0.1.8")
+        XCTAssertTrue(state.outbox.isEmpty)
+        XCTAssertNil(state.pendingSparkleUpdate)
+    }
+
+    func testReenableDoesNotBackfillVersionObservedWhileDisabled() {
+        _ = makeObserver().observe(currentVersion: "0.1.8")
+        stateStore.setEnabled(false)
+
+        XCTAssertNil(makeObserver().observe(currentVersion: "0.1.9"))
+        XCTAssertEqual(stateStore.load().lastObservedVersion, "0.1.9")
+        XCTAssertTrue(stateStore.load().outbox.isEmpty)
+
+        stateStore.setEnabled(true)
+        XCTAssertNil(makeObserver().observe(currentVersion: "0.1.9"))
+
+        let nextUpdate = makeObserver(
+            eventID: UUID(uuidString: "87654321-4321-4abc-8def-abcdef123456")!
+        ).observe(currentVersion: "0.2.0")
+        XCTAssertEqual(nextUpdate?.eventType, .update)
+        XCTAssertEqual(nextUpdate?.fromVersion, "0.1.9")
+        XCTAssertEqual(nextUpdate?.toVersion, "0.2.0")
+    }
+
+    func testSparkleObserverStoresValidatedPendingWithoutCreatingEvent() {
+        let observer = AppExecutionSparkleUpdateObserver(
+            stateStore: stateStore,
+            dependencies: .init(now: { self.fixedDate })
+        )
+
+        let pending = observer.willInstallUpdate(
+            fromVersion: "v0.1.8",
+            displayVersion: "0.1.9"
+        )
+
+        XCTAssertEqual(pending?.fromVersion, "0.1.8")
+        XCTAssertEqual(pending?.toVersion, "0.1.9")
+        XCTAssertEqual(pending?.recordedAt, fixedDate)
+        XCTAssertEqual(stateStore.load().pendingSparkleUpdate, pending)
+        XCTAssertTrue(stateStore.load().outbox.isEmpty)
+    }
+
+    func testSparkleObserverIgnoresInvalidOrDisabledTransition() {
+        let observer = AppExecutionSparkleUpdateObserver(
+            stateStore: stateStore,
+            dependencies: .init(now: { self.fixedDate })
+        )
+
+        XCTAssertNil(
+            observer.willInstallUpdate(
+                fromVersion: "0.1.9",
+                displayVersion: "0.1.9"
+            )
+        )
+        XCTAssertNil(stateStore.load().pendingSparkleUpdate)
+
+        stateStore.setEnabled(false)
+        XCTAssertNil(
+            observer.willInstallUpdate(
+                fromVersion: "0.1.9",
+                displayVersion: "0.2.0"
+            )
+        )
+        XCTAssertNil(stateStore.load().pendingSparkleUpdate)
     }
 
     private func makeObserver(

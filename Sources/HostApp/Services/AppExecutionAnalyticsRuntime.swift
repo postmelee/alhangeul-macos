@@ -168,6 +168,7 @@ final class AppExecutionAnalyticsCoordinator {
     private let transportFactory: TransportFactory
     private let lock = NSLock()
     private var didStart = false
+    private var flushTask: Task<Void, Never>?
 
     init(
         stateStore: AppExecutionAnalyticsStateStore,
@@ -204,12 +205,27 @@ final class AppExecutionAnalyticsCoordinator {
             outbox: AppExecutionOutbox(stateStore: stateStore),
             transport: transportFactory(endpoint)
         )
-        Task {
+        let task = Task {
             guard await connectivityResolver.isConnected() else {
+                return
+            }
+            guard !Task.isCancelled, stateStore.isEnabled else {
                 return
             }
             await processor.processCurrentSnapshot()
         }
+        lock.withLock {
+            flushTask = task
+        }
+    }
+
+    func cancel() {
+        let task = lock.withLock {
+            let task = flushTask
+            flushTask = nil
+            return task
+        }
+        task?.cancel()
     }
 }
 
@@ -217,6 +233,7 @@ final class AppExecutionAnalyticsRuntime {
     static let shared: AppExecutionAnalyticsRuntime = {
         let stateStore = AppExecutionAnalyticsStateStore()
         return AppExecutionAnalyticsRuntime(
+            stateStore: stateStore,
             observer: AppExecutionAnalyticsObserver(
                 stateStore: stateStore,
                 legacyEvidenceResolver: AppExecutionLegacyEvidenceResolver()
@@ -229,13 +246,16 @@ final class AppExecutionAnalyticsRuntime {
         )
     }()
 
+    let stateStore: AppExecutionAnalyticsStateStore
     private let observer: AppExecutionAnalyticsObserver
     private let coordinator: AppExecutionAnalyticsCoordinator
 
     init(
+        stateStore: AppExecutionAnalyticsStateStore,
         observer: AppExecutionAnalyticsObserver,
         coordinator: AppExecutionAnalyticsCoordinator
     ) {
+        self.stateStore = stateStore
         self.observer = observer
         self.coordinator = coordinator
     }
@@ -243,6 +263,17 @@ final class AppExecutionAnalyticsRuntime {
     func prepareForLaunch(currentVersion: String) {
         observer.observe(currentVersion: currentVersion)
         coordinator.startIfNeeded()
+    }
+
+    var isCollectionEnabled: Bool {
+        stateStore.isEnabled
+    }
+
+    func setCollectionEnabled(_ isEnabled: Bool) {
+        stateStore.setEnabled(isEnabled)
+        if !isEnabled {
+            coordinator.cancel()
+        }
     }
 }
 

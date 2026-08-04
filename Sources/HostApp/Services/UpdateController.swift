@@ -7,12 +7,19 @@ final class UpdateController: ObservableObject {
     @Published private(set) var canCheckForUpdates = false
 
     private let updaterController: SPUStandardUpdaterController
+    private let analyticsUpdaterDelegate: AppExecutionSparkleUpdaterDelegate
     private var canCheckForUpdatesObserver: AnyCancellable?
 
     init() {
+        let analyticsUpdaterDelegate = AppExecutionSparkleUpdaterDelegate(
+            observer: AppExecutionSparkleUpdateObserver(
+                stateStore: AppExecutionAnalyticsRuntime.shared.stateStore
+            )
+        )
+        self.analyticsUpdaterDelegate = analyticsUpdaterDelegate
         updaterController = SPUStandardUpdaterController(
             startingUpdater: true,
-            updaterDelegate: nil,
+            updaterDelegate: analyticsUpdaterDelegate,
             userDriverDelegate: nil
         )
         requestLaunchUpdateCheckIfAllowed()
@@ -35,6 +42,22 @@ final class UpdateController: ObservableObject {
         }
 
         updaterController.updater.checkForUpdatesInBackground()
+    }
+}
+
+@MainActor
+private final class AppExecutionSparkleUpdaterDelegate: NSObject, SPUUpdaterDelegate {
+    private let observer: AppExecutionSparkleUpdateObserver
+
+    init(observer: AppExecutionSparkleUpdateObserver) {
+        self.observer = observer
+    }
+
+    func updater(_ updater: SPUUpdater, willInstallUpdate item: SUAppcastItem) {
+        observer.willInstallUpdate(
+            fromVersion: BuildInfo.version,
+            displayVersion: item.displayVersionString
+        )
     }
 }
 

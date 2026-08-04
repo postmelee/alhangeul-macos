@@ -109,16 +109,25 @@ final class AppExecutionAnalyticsStateStore {
 
     var isEnabled: Bool {
         withLock {
-            guard userDefaults.object(forKey: enabledKey) != nil else {
-                return true
-            }
-            return userDefaults.bool(forKey: enabledKey)
+            isEnabledWithoutLock()
         }
     }
 
-    func setEnabled(_ isEnabled: Bool) {
+    @discardableResult
+    func setEnabled(_ isEnabled: Bool) -> Bool {
         withLock {
+            if !isEnabled {
+                var state = loadWithoutLock()
+                state.pendingSparkleUpdate = nil
+                state.outbox.removeAll()
+                guard saveWithoutLock(state) else {
+                    userDefaults.set(false, forKey: enabledKey)
+                    userDefaults.removeObject(forKey: stateKey)
+                    return false
+                }
+            }
             userDefaults.set(isEnabled, forKey: enabledKey)
+            return true
         }
     }
 
@@ -133,16 +142,37 @@ final class AppExecutionAnalyticsStateStore {
         withLock {
             var state = loadWithoutLock()
             mutation(&state)
+            return saveWithoutLock(state)
+        }
+    }
 
-            guard state.isValidForCurrentSchema,
-                  let data = try? JSONEncoder().encode(state)
-            else {
-                return false
-            }
+    @discardableResult
+    func updateForCurrentPreference(
+        _ mutation: (Bool, inout AppExecutionAnalyticsState) -> Void
+    ) -> Bool {
+        withLock {
+            var state = loadWithoutLock()
+            mutation(isEnabledWithoutLock(), &state)
+            return saveWithoutLock(state)
+        }
+    }
 
-            userDefaults.set(data, forKey: stateKey)
+    private func isEnabledWithoutLock() -> Bool {
+        guard userDefaults.object(forKey: enabledKey) != nil else {
             return true
         }
+        return userDefaults.bool(forKey: enabledKey)
+    }
+
+    private func saveWithoutLock(_ state: AppExecutionAnalyticsState) -> Bool {
+        guard state.isValidForCurrentSchema,
+              let data = try? JSONEncoder().encode(state)
+        else {
+            return false
+        }
+
+        userDefaults.set(data, forKey: stateKey)
+        return true
     }
 
     private func loadWithoutLock() -> AppExecutionAnalyticsState {
@@ -277,15 +307,19 @@ struct AppExecutionAnalyticsObserver {
 
     @discardableResult
     func observe(currentVersion: String) -> AppExecutionEvent? {
-        guard stateStore.isEnabled else {
-            return nil
-        }
-
         let hasLegacyEvidence = legacyEvidenceResolver.hasEvidence()
         let occurredAt = dependencies.now()
         let eventID = dependencies.makeEventID()
         var generatedEvent: AppExecutionEvent?
-        let didCommit = stateStore.update { state in
+        let didCommit = stateStore.updateForCurrentPreference { isEnabled, state in
+            guard isEnabled else {
+                if let normalizedVersion = AppExecutionVersion.normalize(currentVersion) {
+                    state.lastObservedVersion = normalizedVersion
+                }
+                state.pendingSparkleUpdate = nil
+                state.outbox.removeAll()
+                return
+            }
             generatedEvent = AppExecutionEventPolicy.observe(
                 currentVersion: currentVersion,
                 hasLegacyEvidence: hasLegacyEvidence,
@@ -296,5 +330,49 @@ struct AppExecutionAnalyticsObserver {
         }
 
         return didCommit ? generatedEvent : nil
+    }
+}
+
+struct AppExecutionSparkleUpdateObserver {
+    struct Dependencies {
+        var now: () -> Date
+
+        static let live = Dependencies(now: Date.init)
+    }
+
+    private let stateStore: AppExecutionAnalyticsStateStore
+    private let dependencies: Dependencies
+
+    init(
+        stateStore: AppExecutionAnalyticsStateStore,
+        dependencies: Dependencies = .live
+    ) {
+        self.stateStore = stateStore
+        self.dependencies = dependencies
+    }
+
+    @discardableResult
+    func willInstallUpdate(
+        fromVersion: String,
+        displayVersion: String
+    ) -> AppExecutionPendingSparkleUpdate? {
+        guard let pendingUpdate = AppExecutionPendingSparkleUpdate.make(
+            fromVersion: fromVersion,
+            toVersion: displayVersion,
+            recordedAt: dependencies.now()
+        )
+        else {
+            return nil
+        }
+
+        var recordedUpdate: AppExecutionPendingSparkleUpdate?
+        let didCommit = stateStore.updateForCurrentPreference { isEnabled, state in
+            guard isEnabled else {
+                return
+            }
+            state.pendingSparkleUpdate = pendingUpdate
+            recordedUpdate = pendingUpdate
+        }
+        return didCommit ? recordedUpdate : nil
     }
 }

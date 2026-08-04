@@ -229,6 +229,30 @@ final class AppExecutionAnalyticsRuntimeTests: XCTestCase {
         connectivity.finish(result: false)
     }
 
+    func testOptOutCancelsSuspendedFlushBeforeTransport() async {
+        seed(entries: [makeEntry(index: 1)])
+        let connectivityStarted = expectation(description: "connectivity suspended")
+        let connectivity = SuspendingAppExecutionConnectivityResolver(
+            onStart: { connectivityStarted.fulfill() }
+        )
+        let transport = TestAppExecutionTransport(result: .response(statusCode: 202))
+        let coordinator = makeCoordinator(
+            connectivity: connectivity,
+            transport: transport
+        )
+        coordinator.startIfNeeded()
+        await fulfillment(of: [connectivityStarted], timeout: 1)
+
+        stateStore.setEnabled(false)
+        coordinator.cancel()
+        connectivity.finish(result: true)
+        await waitForAsyncTurn()
+
+        XCTAssertFalse(stateStore.isEnabled)
+        XCTAssertTrue(stateStore.load().outbox.isEmpty)
+        XCTAssertEqual(transport.sentEventIDs, [])
+    }
+
     func testNewCoordinatorRetriesOnlyRemainingEventOnNextLaunch() async {
         let entry = makeEntry(index: 1)
         seed(entries: [entry])

@@ -6,6 +6,7 @@ import SwiftUI
 struct AlHangeulMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var updateController = UpdateController()
+    @StateObject private var analyticsSettingsModel = AppExecutionAnalyticsSettingsModel()
 
     var body: some Scene {
         WindowGroup {
@@ -13,6 +14,10 @@ struct AlHangeulMacApp: App {
         }
         .commands {
             HostAppCommands(updateController: updateController)
+        }
+
+        Settings {
+            AppExecutionAnalyticsSettingsView(model: analyticsSettingsModel)
         }
     }
 }

@@ -199,9 +199,15 @@ struct AppExecutionOutboxProcessor {
     func processCurrentSnapshot() async {
         let snapshot = outbox.prepareSnapshot()
         for entry in snapshot {
+            guard !Task.isCancelled else {
+                return
+            }
             guard let attemptedEntry = outbox.markAttemptStarted(eventID: entry.id)
             else {
                 continue
+            }
+            guard !Task.isCancelled else {
+                return
             }
 
             let result = await transport.send(attemptedEntry.event)

@@ -156,6 +156,7 @@
 		D18EB4ED1958A17CF2A24FD3 /* QLExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 2E61A1530D3A8D7AF3DEE02C /* QLExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D21941D098EFE607821C67D4 /* DocumentOpenPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9765F0524B38ED7EFD56BC48 /* DocumentOpenPanel.swift */; };
 		D291CC60D4A2C1256CE2B41E /* RhwpStudioPDFExportController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034A145B545356520B20598D /* RhwpStudioPDFExportController.swift */; };
+		D409DC0EA3451507D10C440D /* AppExecutionAnalyticsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46111B2C92166FABDD64FF11 /* AppExecutionAnalyticsSettingsView.swift */; };
 		D5EA41C519B33CC1366F96C0 /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F5AFC8EC56882BF138E698C /* Rhwp.xcframework */; };
 		D6979DD69801E510594EA8EA /* AppExecutionAnalyticsState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB049ADD6B2E35FFEBAA8BF7 /* AppExecutionAnalyticsState.swift */; };
 		D6ECD4A743DEDC3A090EEEF4 /* HwpPreviewPDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512041CBA5B9CE5521537DC /* HwpPreviewPDFRenderer.swift */; };
@@ -265,6 +266,7 @@
 		3F33B7AA294D0DC689399E16 /* ThumbnailExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ThumbnailExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		40D1C342C644D062423ACFF9 /* QuickLookConflictDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookConflictDetectorTests.swift; sourceTree = "<group>"; };
 		423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpDocument.swift; sourceTree = "<group>"; };
+		46111B2C92166FABDD64FF11 /* AppExecutionAnalyticsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExecutionAnalyticsSettingsView.swift; sourceTree = "<group>"; };
 		47D58213D1B6E2002C79C6CD /* AppExecutionAnalyticsStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExecutionAnalyticsStateTests.swift; sourceTree = "<group>"; };
 		4B5C316C5FBCECA08C309CF9 /* HwpPageImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPageImageRenderer.swift; sourceTree = "<group>"; };
 		4D19355F771E9D7C6E9E068F /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
@@ -637,6 +639,7 @@
 			isa = PBXGroup;
 			children = (
 				23F35BCAF2E4A2B5A3AF9DC0 /* AboutView.swift */,
+				46111B2C92166FABDD64FF11 /* AppExecutionAnalyticsSettingsView.swift */,
 				81391ABAF81F59C2FAE9880D /* ContentView.swift */,
 				34D472AE322872D733515F8A /* DocumentViewerView.swift */,
 				77B6CA474978D10B697EEA41 /* QuickLookConflictNoticeView.swift */,
@@ -891,6 +894,7 @@
 				6D2FF5EC61E827B6A4E46B1D /* AboutView.swift in Sources */,
 				5487A3B00729AE0595A43DF2 /* AboutWindowPresenter.swift in Sources */,
 				CFDB485A58F81FA18F40FB49 /* AppExecutionAnalyticsRuntime.swift in Sources */,
+				D409DC0EA3451507D10C440D /* AppExecutionAnalyticsSettingsView.swift in Sources */,
 				B400A4BA8ADF0F0859240E4D /* AppExecutionAnalyticsState.swift in Sources */,
 				87B1211E7B9239FED4415944 /* AppExecutionEvent.swift in Sources */,
 				9B0F29134B03D8A00E8379D0 /* AppExecutionOutbox.swift in Sources */,
