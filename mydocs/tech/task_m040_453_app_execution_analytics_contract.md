@@ -1,0 +1,89 @@
+# 알한글 익명 실행 이벤트 계약
+
+## 목적
+
+이 문서는 HostApp이 수집하는 익명 최초 실행·버전 전환 이벤트의 데이터 경계, 오프라인 동작, 해석 한계와 검증 기준을 정의한다. 구현 진실 원천은 `Sources/HostApp/Services/AppExecutionEvent.swift`, `AppExecutionAnalyticsState.swift`, `AppExecutionOutbox.swift`, `AppExecutionAnalyticsRuntime.swift`다.
+
+## 지표의 의미와 한계
+
+수집 결과는 **네트워크 연결 환경에서 공개 수집 서버에 도달한 익명 앱 실행 이벤트**다. 다음 값으로 해석하면 안 된다.
+
+- 전체 설치 수
+- 고유 사용자 수
+- 고유 기기 수
+- 현재 활성 사용자 수
+- 영구 폐쇄망을 포함한 전체 실행 수
+
+영구 사용자·기기·설치 식별자를 만들지 않으므로 서로 다른 이벤트가 같은 설치에서 발생했는지 연결할 수 없다. 기능 도입 이전 설치본은 앱 소유 로컬 상태가 남아 있을 때만 `existing_baseline`으로 분류한다. 이전 상태가 없거나 삭제됐다면 기존 설치도 `first_launch`로 관측될 수 있다.
+
+## 공개 payload
+
+전송 JSON은 다음 여섯 key만 허용한다.
+
+| key | 값 |
+|---|---|
+| `event_id` | 이벤트마다 새로 생성하고 재전송 중복 제거에만 쓰는 UUID v4 |
+| `event_type` | `first_launch`, `existing_baseline`, `update` |
+| `occurred_date` | 실제 이벤트 발생 UTC 날짜 `YYYY-MM-DD` |
+| `from_version` | update의 이전 semantic version, 그 외 `null` |
+| `to_version` | 현재 또는 대상 semantic version |
+| `update_channel` | `sparkle` 또는 확인할 수 없는 경우 `unknown`; 계약상 `direct_dmg`, `homebrew` 허용 |
+
+다음 정보는 payload, endpoint query, header, 로그에 넣지 않는다.
+
+- 문서 내용, 파일명, 파일 경로, 최근 문서 목록
+- 계정, 이메일, 사용자·기기·설치 식별자
+- IP 주소를 앱이 별도 필드로 수집한 값
+- 하드웨어, macOS 또는 Sparkle System Profile
+- 집계 조회 token, API key, 운영 secret
+
+`event_id`는 설치 간 연결에 재사용하지 않는다. 공개 endpoint는 인증 없는 HTTPS URL이며 앱 bundle에 포함돼도 되는 비밀이 아닌 값이다.
+
+## 로컬 상태와 오프라인 동작
+
+분석 전용 `UserDefaults` state에는 공개 payload와 다음 bookkeeping만 저장한다.
+
+- 마지막 관측 version과 마지막 서버 수락 version
+- Sparkle 설치 예정 이전·대상 version과 기록 시각
+- outbox entry 생성 시각과 최초 전송 시도 시각
+
+오프라인에서는 문서 기능과 앱 실행을 계속하고 HTTP 요청을 만들지 않는다. outbox 정책은 다음과 같다.
+
+- 최대 64건 FIFO
+- 최초 요청 전: UTC 발생일 day 0부터 day 30까지 보관, day 31 폐기
+- 최초 요청 후: UTC 최초 시도일 day 0부터 day 6까지 재시도, day 7 폐기
+- 연결 복구 뒤에도 `occurred_date`를 수신일로 바꾸지 않음
+- 영구 폐쇄망에서 만료된 이벤트는 조용히 폐기하며 강제 반출하지 않음
+
+요청은 앱 실행당 최대 한 pass에서 snapshot의 각 이벤트를 FIFO로 한 번씩만 처리한다. 연결 확인은 일회성이고 상주 monitor나 retry timer를 만들지 않는다. request와 resource timeout은 5초다.
+
+## 응답과 업데이트 분류
+
+| 결과 | outbox 처리 |
+|---|---|
+| HTTP `202` | 제거하고 수락 version 기록 |
+| HTTP `429`, `500...599` | 재시도 기간 안에서 유지 |
+| 네트워크 오류·timeout | 재시도 기간 안에서 유지 |
+| 그 외 `400...499` | 잘못된 payload로 보고 제거 |
+| 예상하지 못한 상태·내부 오류 | 보수적으로 유지 |
+
+Sparkle은 `willInstallUpdate`에서 pending만 저장한다. 다음 실행의 실제 bundle version이 pending target과 일치할 때만 `sparkle` update로 확정한다. 취소·실패·target mismatch는 Sparkle 성공으로 기록하지 않는다.
+
+## 사용자 선택
+
+분석은 미설정 시 활성화되며 macOS `설정… > 개인정보`에서 끌 수 있다.
+
+비활성화하면 다음 동작을 원자적으로 수행한다.
+
+- outbox와 Sparkle pending 즉시 제거
+- 시작된 flush task 취소
+- 신규 이벤트 생성과 전송 중단
+- 현재 version 기준선만 유지해 재활성화 시 과거 전환을 소급 생성하지 않음
+
+## 운영·검증 원칙
+
+- 기본 단위·통합·smoke 검증은 fake connectivity와 URLProtocol stub 또는 endpoint가 제거된 일회용 Debug app을 사용한다.
+- 공개 Worker를 직접 호출하는 smoke는 운영 집계를 오염시키므로 별도 승인과 테스트 이벤트 제거 정책 없이 실행하지 않는다.
+- app bundle에는 공개 endpoint 외 분석 credential을 넣지 않는다.
+- event ID, payload, outbox와 문서 정보를 production log에 남기지 않는다.
+- 대시보드와 운영 문서는 지표를 항상 “관측된 익명 이벤트”로 표현한다.

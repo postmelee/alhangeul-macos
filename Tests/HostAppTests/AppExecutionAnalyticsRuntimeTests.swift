@@ -292,6 +292,42 @@ final class AppExecutionAnalyticsRuntimeTests: XCTestCase {
         XCTAssertEqual(stateStore.load().lastAcceptedVersion, entry.event.toVersion)
     }
 
+    func testOfflineLaunchThenConnectedLaunchSendsOriginalOccurredDate() async {
+        let entry = makeEntry(index: 1)
+        seed(entries: [entry])
+        let offlineChecked = expectation(description: "offline path checked")
+        makeCoordinator(
+            connectivity: TestAppExecutionConnectivityResolver(
+                result: false,
+                onCheck: { offlineChecked.fulfill() }
+            ),
+            transport: TestAppExecutionTransport(result: .response(statusCode: 202))
+        ).startIfNeeded()
+
+        await fulfillment(of: [offlineChecked], timeout: 1)
+        await waitForAsyncTurn()
+        XCTAssertEqual(stateStore.load().outbox, [entry])
+        XCTAssertNil(stateStore.load().outbox.first?.firstAttemptedAt)
+
+        let restoredSend = expectation(description: "restored path sent")
+        let restoredTransport = TestAppExecutionTransport(
+            result: .response(statusCode: 202),
+            onSend: { _ in restoredSend.fulfill() }
+        )
+        makeCoordinator(
+            connectivity: TestAppExecutionConnectivityResolver(result: true),
+            transport: restoredTransport
+        ).startIfNeeded()
+
+        await fulfillment(of: [restoredSend], timeout: 1)
+        let didRemoveAcceptedEvent = await waitUntil {
+            self.stateStore.load().outbox.isEmpty
+        }
+        XCTAssertTrue(didRemoveAcceptedEvent)
+        XCTAssertEqual(restoredTransport.sentEvents.map(\.occurredDate), ["2026-08-04"])
+        XCTAssertEqual(restoredTransport.sentEvents.map(\.id), [entry.id])
+    }
+
     private func makeCoordinator(
         connectivity: AppExecutionConnectivityResolving,
         transport: AppExecutionEventTransport
@@ -423,12 +459,18 @@ private final class TestAppExecutionTransport: AppExecutionEventTransport {
     private let lock = NSLock()
     private let result: AppExecutionTransportResult
     private let onSend: ((AppExecutionEvent) -> Void)?
-    private var storedEventIDs: [UUID] = []
+    private var storedEvents: [AppExecutionEvent] = []
 
     var sentEventIDs: [UUID] {
         lock.lock()
         defer { lock.unlock() }
-        return storedEventIDs
+        return storedEvents.map(\.id)
+    }
+
+    var sentEvents: [AppExecutionEvent] {
+        lock.lock()
+        defer { lock.unlock() }
+        return storedEvents
     }
 
     init(
@@ -440,14 +482,14 @@ private final class TestAppExecutionTransport: AppExecutionEventTransport {
     }
 
     func send(_ event: AppExecutionEvent) async -> AppExecutionTransportResult {
-        record(event.id)
+        record(event)
         onSend?(event)
         return result
     }
 
-    private func record(_ eventID: UUID) {
+    private func record(_ event: AppExecutionEvent) {
         lock.lock()
-        storedEventIDs.append(eventID)
+        storedEvents.append(event)
         lock.unlock()
     }
 }

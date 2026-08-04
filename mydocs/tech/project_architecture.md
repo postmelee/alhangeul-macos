@@ -131,6 +131,10 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 
 ## 런타임 데이터 흐름
 
+### HostApp 익명 실행 이벤트 경로
+
+HostApp은 앱 실행과 version 전환을 영구 사용자·기기·설치 식별자 없이 익명 이벤트로 기록할 수 있다. 이벤트는 문서 데이터 흐름과 분리된 `Sources/HostApp/Services/AppExecution*` 계층이 소유하며, 네트워크가 없어도 앱 실행·문서 열기·종료와 Sparkle 업데이트를 막지 않는다. payload, 오프라인 outbox, opt-out, 지표 해석과 운영 검증 기준은 [`task_m040_453_app_execution_analytics_contract.md`](task_m040_453_app_execution_analytics_contract.md)를 따른다.
+
 ### HostApp viewer 경로
 
 1. `DocumentOpenPanel` 또는 외부 열기 요청이 파일 URL을 전달한다.
