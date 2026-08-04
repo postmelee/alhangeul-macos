@@ -908,11 +908,9 @@ extension RhwpStudioWebView {
         private func printPayload(
             from body: [String: Any],
             missingMessage: String
-        ) -> RhwpStudioPrintPayload? {
+        ) -> RhwpStudioPagePayload? {
             guard let pageCount = intValue(body["pageCount"]),
-                  let pages = body["pages"] as? [String],
-                  pageCount > 0,
-                  pages.count == pageCount
+                  let pages = body["pages"] as? [String]
             else {
                 onError("\(missingMessage): 페이지 데이터가 없습니다.")
                 return nil
@@ -921,7 +919,16 @@ extension RhwpStudioWebView {
             let fileName = body["fileName"] as? String
                 ?? currentDocument?.filename
                 ?? "document.hwp"
-            return RhwpStudioPrintPayload(fileName: fileName, pages: pages)
+            do {
+                return try RhwpStudioPagePayload(
+                    fileName: fileName,
+                    pageCount: pageCount,
+                    pages: pages
+                )
+            } catch {
+                onError("\(missingMessage): \(error.localizedDescription)")
+                return nil
+            }
         }
 
         private func intValue(_ value: Any?) -> Int? {

@@ -146,6 +146,8 @@ targets:
       - path: Sources/HostApp/Services/QuickLookConflictPresentation.swift
       - path: Sources/HostApp/Services/QuickLookSettingsOpener.swift
       - path: Sources/HostApp/Services/RhwpStudioHostBridgeScript.swift
+      - path: Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift
+      - path: Sources/HostApp/Services/RhwpStudioPagePayload.swift
       - path: Sources/HostApp/Support/RhwpProvenance.swift
     settings:
       base:
