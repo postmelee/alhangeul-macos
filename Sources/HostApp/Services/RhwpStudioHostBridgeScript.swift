@@ -99,11 +99,22 @@ enum RhwpStudioHostBridgeScript {
       }
       window.__alhangeulHostBridgeInstalled = true;
 
-      const nativeCommands = new Set(["file:open", "file:save", "file:save-as", "file:print", "file:share", "file:export-pdf"]);
+      const nativeCommands = new Set([
+        "file:open",
+        "file:save",
+        "file:save-as",
+        "file:save-as-hwp",
+        "file:save-as-hwpx",
+        "file:print",
+        "file:share",
+        "file:export-pdf"
+      ]);
       const nonMutatingCommands = new Set([
         "file:open",
         "file:save",
         "file:save-as",
+        "file:save-as-hwp",
+        "file:save-as-hwpx",
         "file:print",
         "file:share",
         "file:export-pdf",
@@ -424,6 +435,28 @@ enum RhwpStudioHostBridgeScript {
         };
       }
 
+      async function requestSaveExportPayload(format) {
+        if (format === "hwp") {
+          return requestHwpExportPayload();
+        }
+        if (format === "hwpx") {
+          const bytes = await requestRhwp("exportHwpx");
+          return {
+            base64: encodeBytesToBase64(bytes),
+            byteCount: bytes.length
+          };
+        }
+        throw new Error(`지원하지 않는 저장 형식입니다: ${format}`);
+      }
+
+      function fileNameForSaveFormat(format) {
+        const stem = currentFileName()
+          .trim()
+          .replace(/(?:\\.(?:hwp|hwpx))+$/i, "")
+          .trim() || "document";
+        return `${stem}.${format}`;
+      }
+
       function waitForAnimationFrame() {
         return new Promise((resolve) => {
           requestAnimationFrame(() => resolve());
@@ -586,6 +619,38 @@ enum RhwpStudioHostBridgeScript {
         }
       }
 
+      async function exportSaveDocument(format) {
+        try {
+          await settleEditorState();
+          const payload = await requestSaveExportPayload(format);
+          postNative({
+            type: "save-document",
+            format,
+            fileName: fileNameForSaveFormat(format),
+            base64: payload.base64,
+            byteCount: payload.byteCount
+          });
+        } catch (error) {
+          postNative({
+            type: "error",
+            message: `문서를 내보낼 수 없습니다: ${error?.message || String(error)}`
+          });
+        }
+      }
+
+      async function notifySavedDocument(fileName, timeText) {
+        try {
+          await requestRhwp("notifySaved", { fileName });
+          rememberCurrentFileName(fileName);
+          showTemporaryStatusMessage(`저장 완료 ${timeText}`, fileName);
+        } catch (error) {
+          postNative({
+            type: "save-sync-error",
+            message: `문서는 저장했지만 편집기 상태를 동기화할 수 없습니다: ${error?.message || String(error)}`
+          });
+        }
+      }
+
       async function exportPDFDocument() {
         try {
           await settleEditorState();
@@ -622,7 +687,12 @@ enum RhwpStudioHostBridgeScript {
       }
 
       async function handleNativeCommand(command) {
-        if (command === "file:open" || command === "file:save" || command === "file:save-as" || command === "file:export-pdf") {
+        if (command === "file:open" ||
+            command === "file:save" ||
+            command === "file:save-as" ||
+            command === "file:save-as-hwp" ||
+            command === "file:save-as-hwpx" ||
+            command === "file:export-pdf") {
           postNative({
             type: "command",
             command,
@@ -651,6 +721,15 @@ enum RhwpStudioHostBridgeScript {
         return true;
       };
 
+      window.__alhangeulHostBridgeExportSaveDocument = (format) => {
+        if (format !== "hwp" && format !== "hwpx") {
+          return false;
+        }
+
+        exportSaveDocument(format);
+        return true;
+      };
+
       window.__alhangeulHostBridgeExportPDFDocument = () => {
         exportPDFDocument();
         return true;
@@ -658,6 +737,15 @@ enum RhwpStudioHostBridgeScript {
 
       window.__alhangeulHostBridgeShowSaveCompletedStatus = (timeText, fileName) => {
         return showTemporaryStatusMessage(`저장 완료 ${timeText}`, fileName);
+      };
+
+      window.__alhangeulHostBridgeNotifySaved = (fileName, timeText) => {
+        if (!fileName) {
+          return false;
+        }
+
+        notifySavedDocument(fileName, timeText);
+        return true;
       };
 
       window.__alhangeulHostBridgeRunNativeCommand = (command) => {
