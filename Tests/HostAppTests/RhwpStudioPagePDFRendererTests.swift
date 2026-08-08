@@ -207,6 +207,24 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
     }
 
     func testRendererBlocksExternalResourcesAndNavigationWithoutRequests() async throws {
+        let controlProbe = try LoopbackRequestProbe()
+        try await controlProbe.start()
+        defer { controlProbe.stop() }
+
+        let controlPort = try XCTUnwrap(controlProbe.port)
+        let controlBaseURL = "http://127.0.0.1:\(controlPort.rawValue)"
+        let controlConfiguration = WKWebViewConfiguration()
+        controlConfiguration.websiteDataStore = .nonPersistent()
+        let controlWebView = WKWebView(frame: .zero, configuration: controlConfiguration)
+        controlWebView.loadHTMLString(
+            "<img src=\"\(controlBaseURL)/positive-control.png\">",
+            baseURL: nil
+        )
+        try await controlProbe.waitForAcceptedConnection()
+        controlWebView.stopLoading()
+        controlProbe.stop()
+        XCTAssertGreaterThan(controlProbe.acceptedConnectionCount, 0)
+
         let probe = try LoopbackRequestProbe()
         try await probe.start()
         defer { probe.stop() }
@@ -215,32 +233,22 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         let httpBaseURL = "http://127.0.0.1:\(port.rawValue)"
         let httpsBaseURL = "https://127.0.0.1:\(port.rawValue)"
 
-        let controlConfiguration = WKWebViewConfiguration()
-        controlConfiguration.websiteDataStore = .nonPersistent()
-        let controlWebView = WKWebView(frame: .zero, configuration: controlConfiguration)
-        controlWebView.loadHTMLString(
-            "<img src=\"\(httpBaseURL)/positive-control.png\">",
-            baseURL: nil
-        )
-        try await probe.waitForAcceptedConnection()
-        controlWebView.stopLoading()
-        try await Task.sleep(nanoseconds: 100_000_000)
-        XCTAssertGreaterThan(probe.acceptedConnectionCount, 0)
-        probe.resetAcceptedConnectionCount()
-
         let payload = try RhwpStudioPagePayload(
             fileName: "external-resource-blocking.hwp",
             pageCount: 1,
             pages: [
                 """
-                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                     width="200" height="300" viewBox="0 0 200 300">
                   <style>
+                    @import url("\(httpBaseURL)/import.css");
                     @font-face { font-family: probe; src: url(\(httpBaseURL)/font.woff2); }
                     .external-fill { fill: url(\(httpsBaseURL)/paint.svg#paint); font-family: probe; }
                   </style>
                   <rect width="200" height="300" fill="white" />
                   <text x="20" y="40" font-size="18" fill="black" class="external-fill">NETWORK-BLOCKED</text>
                   <image href="\(httpBaseURL)/image.png" x="0" y="60" width="100" height="100" />
+                  <image xlink:href="\(httpBaseURL)/legacy-image.png" x="0" y="160" width="100" height="100" />
                   <use href="\(httpsBaseURL)/sprite.svg#shape" x="100" y="60" width="100" height="100" />
                 </svg>
                 <link rel="stylesheet" href="\(httpBaseURL)/style.css">
@@ -270,6 +278,52 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         XCTAssertTrue(document.page(at: 0)?.string?.contains("NETWORK-BLOCKED") == true)
         XCTAssertEqual(completionCount, 1)
         XCTAssertEqual(probe.acceptedConnectionCount, 0)
+    }
+
+    func testRendererBlocksFileImageAndStylesheetResources() async throws {
+        let fixtureDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: fixtureDirectory,
+            withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: fixtureDirectory) }
+
+        let imageURL = fixtureDirectory.appendingPathComponent("blocked.png")
+        try pngData(color: .red).write(to: imageURL)
+        let stylesheetURL = fixtureDirectory.appendingPathComponent("blocked.css")
+        try ".file-import { fill: #ff0000; }".write(
+            to: stylesheetURL,
+            atomically: true,
+            encoding: .utf8
+        )
+
+        let payload = try RhwpStudioPagePayload(
+            fileName: "file-resource-blocking.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                     width="200" height="300" viewBox="0 0 200 300">
+                  <style>@import url("\(stylesheetURL.absoluteString)");</style>
+                  <rect class="file-import" width="200" height="300" fill="#00ff00" />
+                  <image href="\(imageURL.absoluteString)" width="100" height="150" />
+                  <image xlink:href="\(imageURL.absoluteString)" y="150" width="100" height="150" />
+                </svg>
+                """
+            ]
+        )
+
+        let document = try await render(payload)
+        let page = try XCTUnwrap(document.page(at: 0))
+        let redFraction = try pixelFraction(on: page) { color in
+            color.redComponent > 0.8 && color.greenComponent < 0.4 && color.blueComponent < 0.4
+        }
+        let greenFraction = try pixelFraction(on: page) { color in
+            color.greenComponent > 0.8 && color.redComponent < 0.6 && color.blueComponent < 0.5
+        }
+        XCTAssertLessThan(redFraction, 0.05)
+        XCTAssertGreaterThan(greenFraction, 0.5)
     }
 
     func testMetricsRejectMissingAndNonPositiveDimensions() {
@@ -308,6 +362,35 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         )
     }
 
+    func testRendererPageTimeoutFinishesExactlyOnceAndAllowsRetry() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "timeout.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Timeout")]
+        )
+        let renderer = RhwpStudioPagePDFRenderer(pageRenderTimeoutNanoseconds: 0)
+        var results: [Result<PDFDocument, Error>] = []
+
+        let firstCompletion = expectation(description: "first timeout")
+        renderer.render(payload: payload) { result in
+            results.append(result)
+            firstCompletion.fulfill()
+        }
+        await fulfillment(of: [firstCompletion], timeout: 1)
+        renderer.webViewWebContentProcessDidTerminate(WKWebView())
+        XCTAssertEqual(results.count, 1)
+        assertPageRenderTimedOut(results[0], page: 1)
+
+        let secondCompletion = expectation(description: "second timeout")
+        renderer.render(payload: payload) { result in
+            results.append(result)
+            secondCompletion.fulfill()
+        }
+        await fulfillment(of: [secondCompletion], timeout: 1)
+        XCTAssertEqual(results.count, 2)
+        assertPageRenderTimedOut(results[1], page: 1)
+    }
+
     private func render(_ payload: RhwpStudioPagePayload) async throws -> PDFDocument {
         try await withCheckedThrowingContinuation { continuation in
             let renderer = RhwpStudioPagePDFRenderer()
@@ -329,6 +412,10 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
     }
 
     private func dataPNGDataURI(color: NSColor) throws -> String {
+        "data:image/png;base64,\(try pngData(color: color).base64EncodedString())"
+    }
+
+    private func pngData(color: NSColor) throws -> Data {
         let image = NSImage(size: NSSize(width: 2, height: 2))
         image.lockFocus()
         color.setFill()
@@ -336,8 +423,25 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         image.unlockFocus()
         let tiffData = try XCTUnwrap(image.tiffRepresentation)
         let bitmap = try XCTUnwrap(NSBitmapImageRep(data: tiffData))
-        let data = try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
-        return "data:image/png;base64,\(data.base64EncodedString())"
+        return try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
+    }
+
+    private func assertPageRenderTimedOut(
+        _ result: Result<PDFDocument, Error>,
+        page: Int,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        guard case .failure(let error) = result else {
+            XCTFail("PDF page timeout이 실패로 완료되지 않았습니다.", file: file, line: line)
+            return
+        }
+        XCTAssertEqual(
+            error as? RhwpStudioPagePDFRenderError,
+            .pageRenderTimedOut(page),
+            file: file,
+            line: line
+        )
     }
 
     private func pixelFraction(
@@ -423,10 +527,6 @@ private final class LoopbackRequestProbe {
             try await Task.sleep(nanoseconds: 20_000_000)
         }
         throw LoopbackRequestProbeError.connectionTimedOut
-    }
-
-    func resetAcceptedConnectionCount() {
-        acceptedConnectionCount = 0
     }
 
     private func handleStateUpdate(_ state: NWListener.State) {

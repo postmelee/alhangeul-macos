@@ -280,9 +280,11 @@ upstream `getPageSvg` 결과는 현재 editor에서 생성되지만 원본 문�
 | app-owned metrics | page 크기 측정 script만 `WKContentWorld.defaultClient`에서 실행한다. 이 world는 page script 전역과 격리되며 DOM의 width/height, viewBox와 bounding rect만 읽는다. 실패 시 content JavaScript를 다시 켜는 fallback은 없다. |
 | subresource policy | raw SVG보다 앞에 CSP meta를 배치한다. `default-src`, script, connect, frame, object, media, worker, manifest와 font는 `'none'`이며 `base-uri`와 `form-action`도 거부한다. wrapper/SVG 표현을 위한 inline style과 실제 page bitmap을 위한 `data:` image만 허용한다. |
 | navigation policy | page마다 `loadHTMLString(baseURL: nil)`이 만드는 최초 main-frame `about:blank` navigation만 한 번 허용한다. 이후 main-frame 이동, subframe, `targetFrame == nil` new-window와 HTTP/HTTPS/file/blob/custom scheme navigation은 취소한다. |
-| 실패 처리 | invalid metrics, 단일-page PDF가 아닌 결과, 잘못된 media box, 최종 page count 불일치와 WebContent process 종료를 명시적 render 실패로 반환한다. 권한을 확대하거나 차단된 resource를 다시 로드하지 않는다. |
+| 실패 처리 | page load·metrics·`createPDF`를 포함한 page별 render가 30초 안에 끝나지 않으면 watchdog timeout으로 완료한다. invalid metrics, 단일-page PDF가 아닌 결과, 잘못된 media box, 최종 page count 불일치와 WebContent process 종료도 명시적 render 실패로 반환한다. 권한을 확대하거나 차단된 resource를 다시 로드하지 않는다. |
 
 navigation delegate는 모든 image, font와 CSS subresource 요청을 관측하는 경계가 아니므로 외부 resource 차단은 CSP가 담당하고 navigation policy는 frame·document 이동을 담당한다. non-persistent store는 renderer session의 website data를 영구 저장하지 않는 마지막 격리선이다. 이 세 정책 중 하나를 제거할 때는 다른 정책이 같은 범위를 대신한다고 가정하지 않고 WebKit 통합 테스트를 함께 갱신해야 한다.
+
+WebKit은 navigation policy에서 `.cancel`한 load에 `didFinish`나 `didFailProvisionalNavigation`을 보장하지 않는다. page별 watchdog은 정책이 정상 load를 취소하거나 WebKit callback이 멈춰도 renderer completion을 timeout 실패로 정확히 한 번 호출하고 다음 PDF·인쇄 요청이 재진입할 수 있게 한다. `finish`는 정상·실패·timeout 모두에서 watchdog과 WebView load를 정리한다.
 
 HostAppTests는 CSP가 없는 test-only WebView가 `127.0.0.1` 임시 listener에 실제 연결되는 양성 대조를 먼저 확인한 뒤, hardened renderer의 HTTP/HTTPS image, `<use>`, CSS paint/font/stylesheet, iframe, object, meta refresh와 new-window fixture가 연결 0건인지 검증한다. 별도 script/event sentinel은 page content가 실행되지 않으면서 HostApp metrics, searchable text, embedded data PNG와 nested data SVG raster가 유지됨을 확인한다.
 
@@ -306,7 +308,7 @@ Stage 4 실제 UI smoke에서 HWP/HWPX menu와 toolbar 결과의 page count, pag
 #### 잔여 제한과 실패 기준
 
 - page SVG는 순차 생성·변환하지만 bridge message와 native payload가 전체 page SVG 문자열을 보유하므로 대용량·다중-page 문서의 memory/time 비용이 남는다.
-- page별 `getPageSvg`에는 30초 timeout이 있지만 전체 document export를 포괄하는 별도 deadline은 없다.
+- page별 `getPageSvg`와 native page render에는 각각 30초 timeout이 있지만 전체 document export를 포괄하는 별도 deadline은 없다.
 - SVG page metrics는 명시적 width/height, viewBox, bounding rect 순으로 해석하고 정수 point로 올림한다. 잘못되거나 0 이하인 metrics와 최종 page count 불일치는 오류로 종료한다.
 - upstream SVG는 Preview에서 선택 가능한 text layer를 유지하지만 positioned text 특성 때문에 `pdftotext -layout`에서 한글이나 편집 marker 사이에 시각 위치 기준 공백이 추가될 수 있다.
 - Quartz PDF metadata에는 생성 시각이 포함되므로 같은 본문을 다시 저장해도 PDF file SHA-256은 달라질 수 있다. 본문 동등성은 page count, geometry, extracted text와 raster 비교로 판정한다.
@@ -402,7 +404,7 @@ External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제
 ### HostApp page SVG PDF 렌더링
 
 - HostApp PDF export와 일반 인쇄는 bundled `rhwp-studio`가 현재 editor state에서 생성한 page SVG를 사용한다.
-- 문서 유래 page SVG는 비신뢰 정적 렌더 입력이다. `RhwpStudioPagePDFRenderer`는 non-persistent 전용 WKWebView에서 content JavaScript를 끄고 deny-by-default CSP와 최초 `about:blank` main-frame 1회만 허용하는 navigation policy를 적용한다.
+- 문서 유래 page SVG는 비신뢰 정적 렌더 입력이다. `RhwpStudioPagePDFRenderer`는 non-persistent 전용 WKWebView에서 content JavaScript를 끄고 deny-by-default CSP, 최초 `about:blank` main-frame 1회만 허용하는 navigation policy와 page별 30초 watchdog을 적용한다.
 - HostApp의 page metrics script만 `WKContentWorld.defaultClient`에서 실행해 SVG metrics를 보존하고 `WKWebView.createPDF`를 호출한 뒤 PDFKit으로 결과 page를 합친다.
 - `RhwpStudioPDFExportController`는 결과를 사용자 destination에 atomic write하며, `RhwpStudioPrintController`는 같은 `PDFDocument`를 AppKit print operation에 전달한다.
 - 이 경로는 HWP/HWPX source bytes, `RhwpDocument`, render tree bitmap과 `HwpPreviewPDFRenderer`를 거치지 않는다.

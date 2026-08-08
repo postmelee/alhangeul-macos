@@ -189,9 +189,7 @@ extension RhwpStudioWebView {
             )
             configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
 
-            if #available(macOS 11.0, *) {
-                configuration.defaultWebpagePreferences.allowsContentJavaScript = true
-            }
+            configuration.defaultWebpagePreferences.allowsContentJavaScript = true
 
             let webView = RhwpStudioNativeCommandWebView(frame: .zero, configuration: configuration)
             commandWebView = webView

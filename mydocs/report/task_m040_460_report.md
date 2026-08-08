@@ -16,8 +16,9 @@ raw SVG보다 앞선 deny-by-default CSP는 inline style과 `data:` image만 허
 
 | 파일 | 내용 |
 |---|---|
-| `Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift` | non-persistent 전용 WebView configuration, content JavaScript·popup 비활성, strict CSP, default client metrics와 최초 `about:blank` 1회 navigation 정책을 구현했다. |
-| `Tests/HostAppTests/RhwpStudioPagePDFRendererTests.swift` | script/event, data image·nested SVG, navigation, external resource 0건, geometry·text·raster·print 회귀를 검증하는 합성 WebKit 테스트와 loopback 양성 대조를 추가했다. |
+| `Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift` | non-persistent 전용 WebView configuration, content JavaScript·popup 비활성, strict CSP, default client metrics, 최초 `about:blank` 1회 navigation 정책과 page별 watchdog을 구현했다. |
+| `Sources/HostApp/Views/RhwpStudioWebView.swift` | deployment target에서 항상 참인 content JavaScript availability guard를 제거했다. |
+| `Tests/HostAppTests/RhwpStudioPagePDFRendererTests.swift` | script/event, data image·nested SVG, navigation, external resource 0건, file/xlink/import, timeout 단일 완료·재진입, geometry·text·raster·print 회귀를 검증하는 합성 WebKit 테스트와 분리된 loopback 양성 대조를 추가했다. |
 | `mydocs/tech/project_architecture.md` | page SVG trust boundary, 각 방어선의 책임, 허용 resource, 실패 조건과 알려진 제한을 기록했다. |
 | `mydocs/plans/task_m040_460.md` | 보안 hardening 목표, 포함·제외 범위, 설계 방향과 검증 계획을 기록했다. |
 | `mydocs/plans/task_m040_460_impl.md` | WebKit 계약과 5단계 구현·검증·승인 게이트를 확정했다. |
@@ -35,16 +36,17 @@ raw SVG보다 앞선 deny-by-default CSP는 inline style과 `data:` image만 허
 
 | 항목 | 변경 전 | 변경 후 |
 |---|---:|---:|
-| renderer source | 308줄 | 371줄 |
-| renderer test source | 95줄 | 473줄 |
-| HostAppTests | 120개 | 126개, 실패 0개 |
+| renderer source | 308줄 | 414줄 |
+| renderer test source | 95줄 | 573줄 |
+| HostAppTests | 120개 | 128개, 실패 0개 |
 | page content script | 실행 가능 | `allowsContentJavaScript = false`로 실행 차단 |
 | renderer data store | 기본 persistent store | `.nonPersistent()` |
 | subresource 정책 | 명시적 CSP 없음 | deny-by-default CSP, inline style·`data:` image만 허용 |
 | navigation 정책 | 전용 deny 계약 없음 | 최초 main-frame `about:blank` 1회 외 전부 취소 |
+| callback stall | completion 보장 없음 | page별 30초 watchdog이 timeout 실패로 단일 완료 |
 | 외부 요청 검증 | 정량 검증 없음 | loopback 양성 대조 후 hardened renderer 요청 0건 |
 
-최종 보고서 작성 전 `devel...HEAD` 기준 변경은 11개 파일, 1,674줄 추가와 7줄 삭제다. production source는 renderer 한 파일에서 69줄 추가·6줄 삭제이며, test source는 378줄 추가됐다.
+PR review 보완을 포함한 `devel` 기준 변경은 13개 파일, 1,967줄 추가와 12줄 삭제다. production source는 renderer에서 113줄 추가·7줄 삭제, main editor availability 정리에서 1줄 추가·3줄 삭제이며, renderer test source는 478줄 추가됐다.
 
 ## 단계별 결과
 
@@ -73,11 +75,15 @@ navigation delegate는 renderer가 `loadHTMLString(baseURL: nil)`으로 만드�
 
 CSP는 image·font·CSS 등 subresource를, navigation policy는 frame·document 이동을 담당한다. non-persistent store는 영구 website data를 남기지 않는 격리선이며 다른 두 정책의 대체 수단으로 취급하지 않는다.
 
+PR review에서 WebKit이 policy `.cancel` 뒤 성공·실패 delegate callback을 보내지 않는 경우를 확인했다. renderer는 page load, metrics와 `createPDF`를 아우르는 page별 30초 watchdog을 시작하고 모든 정상·실패 종료에서 취소한다. timeout도 completion을 정확히 한 번 호출하므로 PDF export의 `isExporting`, HostApp controller 참조와 인쇄 completion이 영구 고착되지 않으며 같은 renderer가 다음 요청을 받을 수 있다.
+
 ### 실제 WebKit 공격·보존 검증
 
 test-local `NWListener`는 CSP가 없는 양성 대조 WebView가 loopback HTTP endpoint에 실제 연결되는지 먼저 확인한다. 같은 endpoint를 가리키는 hardened SVG의 HTTP/HTTPS image, `<use>`, CSS paint/font/stylesheet, iframe, object, meta refresh와 new-window fixture는 renderer 성공과 연결 0건을 함께 만족한다.
 
-별도 sentinel은 SVG `<script>`, `onload`와 nested data SVG script가 실행되지 않음을 확인한다. 동시에 searchable text, embedded data PNG, nested data SVG raster, portrait/landscape media box와 PDF page count가 보존된다.
+양성 대조와 hardened renderer는 서로 다른 loopback listener·port를 사용해 대조 WebView의 늦은 재시도가 차단 검증 count를 오염시키지 않는다. HTTP legacy `xlink:href`, CSS `@import`와 실제 임시 file image·stylesheet도 차단된다.
+
+별도 sentinel은 SVG `<script>`, `onload`와 nested data SVG script가 실행되지 않음을 확인한다. 동시에 searchable text, embedded data PNG, nested data SVG raster, portrait/landscape media box와 PDF page count가 보존된다. 즉시 만료하도록 주입한 watchdog test는 timeout completion이 한 번만 호출되고 같은 renderer의 다음 요청이 `.renderingInProgress` 없이 다시 timeout 완료되는지 확인한다.
 
 ### PDF·인쇄 정상 경로 보존
 
@@ -97,16 +103,17 @@ PDF 저장과 인쇄는 source document를 쓰지 않는다. smoke 전후 reposi
 | 외부 HTTP/HTTPS resource 요청 없음 | OK | CSP 없는 양성 대조 연결 성공 후 hardened renderer loopback 요청 0건 |
 | HostApp page metrics 정상 동작 | OK | `WKContentWorld.defaultClient`에서 width/height/viewBox/bounding rect 측정과 PDF 생성 통과 |
 | PDF·인쇄 page count, geometry와 searchable text 유지 | OK | synthetic portrait/landscape/mixed 및 실제 KTX/HWP/HWPX 비교 통과 |
-| HostAppTests와 HostApp Debug build 통과 | OK | 새 clean DerivedData에서 126 tests, 실패 0개와 Debug build 성공 |
+| HostAppTests와 HostApp Debug build 통과 | OK | 새 review DerivedData에서 128 tests, 실패 0개와 Debug build 성공 |
 | 보안 정책과 알려진 제한 architecture 반영 | OK | `page SVG trust boundary`에 WebView/CSP/navigation/실패·제한 계약 기록 |
+| navigation/WebKit stall이 controller를 영구 고착시키지 않음 | OK | page watchdog timeout 단일 completion과 같은 renderer 재진입 테스트 통과 |
 
 ### 최종 통합 검증
 
 | 검증 | 결과 |
 |---|---|
 | `xcodegen generate` | 통과, 생성 project의 추가 tracked diff 없음 |
-| HostAppTests (`build.noindex/task460/final-tests`) | `** TEST SUCCEEDED **`, 126개, 실패 0개 |
-| HostApp Debug build (`build.noindex/task460/final-build`) | `** BUILD SUCCEEDED **` |
+| HostAppTests (`build.noindex/task460/review-full-tests`) | `** TEST SUCCEEDED **`, 128개, 실패 0개 |
+| HostApp Debug build (`build.noindex/task460/review-build`) | `** BUILD SUCCEEDED **` |
 | built app bundled studio asset | `OK: rhwp-studio assets verified` |
 | `./scripts/check-no-appkit.sh` | Shared/RhwpCoreBridge AppKit/UIKit 의존 없음 |
 | core·bundled studio asset scope | `devel` 기준 변경 0건 |
@@ -119,11 +126,13 @@ WebKit test process의 RunningBoard, pasteboard와 linkd 관련 sandbox 진단�
 - 검증은 현재 개발 호스트의 WebKit과 인쇄 panel에서 수행됐다. deployment target macOS 12 실제 장비의 UI·WebKit 동작은 별도 환경에서 확인해야 한다.
 - `style-src 'unsafe-inline'`과 `img-src data:`는 현재 upstream SVG 충실도에 필요한 최소 예외다. 향후 data font나 다른 resource 계약을 추가하면 허용 범위를 넓히기 전에 별도 보안·PDF·인쇄 회귀 검증이 필요하다.
 - renderer는 SVG 문자열을 범용 sanitizer로 재작성하지 않는다. 안전성은 content JavaScript 비활성, CSP, navigation deny와 전용 non-persistent WebView의 결합에 의존한다.
-- bridge message와 native payload가 전체 page SVG 문자열을 보유하고 page별 30초 timeout 외에 전체 document deadline이 없다. 대용량 memory/time, progress와 사용자 취소는 이번 범위 밖이다.
+- bridge message와 native payload가 전체 page SVG 문자열을 보유한다. `getPageSvg`와 native render에는 page별 30초 timeout이 있지만 전체 document deadline은 없으며, 대용량 memory/time, progress와 사용자 취소는 이번 범위 밖이다.
 - 실제 가로·세로 혼합 HWP/HWPX fixture는 없다. 현재는 synthetic exact geometry와 PDFKit 인쇄 정책으로 검증한다.
 - PDF·인쇄 lifecycle의 중복 요청과 stale navigation callback 방어는 별도 [Issue #459](https://github.com/postmelee/alhangeul-macos/issues/459)에서 추적한다.
 
 Issue #460 완료를 막는 잔여 결함은 확인되지 않았다. resource 계약 확장, 대용량 성능 또는 구형 macOS 실장 검증을 실제로 추진할 때는 각각 독립 범위로 등록한다.
+
+main editor WebView는 content JavaScript, native message·command handler와 custom scheme을 의도적으로 소유하며 이번 offscreen renderer와 trust boundary가 다르다. 실제 문서 유래 SVG가 editor DOM에 삽입되는지부터 확인하는 별도 보안 조사 후보로 유지한다.
 
 ## 최종 결론
 

@@ -4,15 +4,23 @@ import WebKit
 
 @MainActor
 final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
+    private static let defaultPageRenderTimeoutNanoseconds: UInt64 = 30_000_000_000
+
     private let webView: WKWebView
+    private let pageRenderTimeoutNanoseconds: UInt64
     private var completion: ((Result<PDFDocument, Error>) -> Void)?
     private var payload: RhwpStudioPagePayload?
     private var renderedDocument = PDFDocument()
     private var renderingPageIndex = 0
     private var didFinish = true
     private var isInitialMainFrameLoadPending = false
+    private var pageRenderTimeoutTask: Task<Void, Never>?
 
-    override init() {
+    init(
+        pageRenderTimeoutNanoseconds: UInt64 = RhwpStudioPagePDFRenderer
+            .defaultPageRenderTimeoutNanoseconds
+    ) {
+        self.pageRenderTimeoutNanoseconds = pageRenderTimeoutNanoseconds
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
@@ -24,6 +32,10 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         )
         super.init()
         webView.navigationDelegate = self
+    }
+
+    deinit {
+        pageRenderTimeoutTask?.cancel()
     }
 
     func render(
@@ -108,6 +120,7 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             origin: .zero,
             size: RhwpStudioPagePDFMetrics.initialPageSize
         )
+        startPageRenderTimeout(pageNumber: renderingPageIndex + 1)
         isInitialMainFrameLoadPending = true
         webView.loadHTMLString(
             RhwpStudioPagePDFHTML.pageHTML(for: payload.pages[renderingPageIndex]),
@@ -205,12 +218,39 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         renderNextPage()
     }
 
+    private func startPageRenderTimeout(pageNumber: Int) {
+        pageRenderTimeoutTask?.cancel()
+        let expectedPageIndex = renderingPageIndex
+        let timeoutNanoseconds = pageRenderTimeoutNanoseconds
+        pageRenderTimeoutTask = Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: timeoutNanoseconds)
+            } catch {
+                return
+            }
+
+            guard !Task.isCancelled,
+                  let self,
+                  !self.didFinish,
+                  self.renderingPageIndex == expectedPageIndex
+            else {
+                return
+            }
+
+            self.finish(.failure(
+                RhwpStudioPagePDFRenderError.pageRenderTimedOut(pageNumber)
+            ))
+        }
+    }
+
     private func finish(_ result: Result<PDFDocument, Error>) {
         guard !didFinish else {
             return
         }
 
         didFinish = true
+        pageRenderTimeoutTask?.cancel()
+        pageRenderTimeoutTask = nil
         webView.stopLoading()
         let completion = completion
         self.completion = nil
@@ -343,6 +383,7 @@ enum RhwpStudioPagePDFMetrics {
 
 enum RhwpStudioPagePDFRenderError: LocalizedError, Equatable {
     case renderingInProgress
+    case pageRenderTimedOut(Int)
     case webContentProcessTerminated
     case invalidPageMetrics(Int)
     case pdfEncodingFailed(Int)
@@ -354,6 +395,8 @@ enum RhwpStudioPagePDFRenderError: LocalizedError, Equatable {
         switch self {
         case .renderingInProgress:
             "PDF 페이지 변환이 이미 진행 중입니다."
+        case .pageRenderTimedOut(let page):
+            "\(page)페이지 PDF 변환 시간이 초과됐습니다."
         case .webContentProcessTerminated:
             "PDF 페이지 변환 중 WebKit 프로세스가 종료됐습니다."
         case .invalidPageMetrics(let page):
