@@ -13,10 +13,9 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
 
     override init() {
         let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = .nonPersistent()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
-        if #available(macOS 11.0, *) {
-            configuration.defaultWebpagePreferences.allowsContentJavaScript = true
-        }
+        configuration.defaultWebpagePreferences.allowsContentJavaScript = false
 
         webView = WKWebView(
             frame: NSRect(origin: .zero, size: RhwpStudioPagePDFMetrics.initialPageSize),
@@ -101,11 +100,20 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             return
         }
 
-        webView.evaluateJavaScript(RhwpStudioPagePDFHTML.pageMetricsScript) { [weak self] result, error in
+        webView.evaluateJavaScript(
+            RhwpStudioPagePDFHTML.pageMetricsScript,
+            in: nil,
+            in: .defaultClient
+        ) { [weak self] result in
             guard let self, !self.didFinish else {
                 return
             }
-            if let error {
+
+            let metrics: Any
+            switch result {
+            case .success(let value):
+                metrics = value
+            case .failure(let error):
                 self.finish(.failure(error))
                 return
             }
@@ -114,7 +122,7 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             let pageSize: NSSize
             do {
                 pageSize = try RhwpStudioPagePDFMetrics.size(
-                    fromMetrics: result,
+                    fromMetrics: metrics,
                     pageNumber: pageNumber
                 )
             } catch {
@@ -194,6 +202,22 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
 }
 
 enum RhwpStudioPagePDFHTML {
+    static let contentSecurityPolicy = [
+        "default-src 'none'",
+        "script-src 'none'",
+        "connect-src 'none'",
+        "frame-src 'none'",
+        "object-src 'none'",
+        "media-src 'none'",
+        "worker-src 'none'",
+        "manifest-src 'none'",
+        "base-uri 'none'",
+        "form-action 'none'",
+        "style-src 'unsafe-inline'",
+        "img-src data:",
+        "font-src 'none'"
+    ].joined(separator: "; ") + ";"
+
     static let pageMetricsScript = """
     (() => {
       const svg = document.querySelector("svg");
@@ -225,6 +249,7 @@ enum RhwpStudioPagePDFHTML {
         <html lang="ko">
         <head>
           <meta charset="utf-8">
+          <meta http-equiv="Content-Security-Policy" content="\(contentSecurityPolicy)">
           <style>
             * { box-sizing: border-box; }
             html, body {
