@@ -146,9 +146,9 @@ extension RhwpStudioWebView {
         private var pdfExportController: RhwpStudioPDFExportController?
         private var pendingSaveRequest: PendingSaveRequest?
         private var pendingSaveCompletion: ((RhwpStudioDocumentSaveResult) -> Void)?
-        private var pendingPDFDestinationURL: URL?
+        private var pdfExportState: RhwpStudioPDFExportState = .idle
+        private var nextPDFExportRequestID = 0
         private var isChoosingSaveDestination = false
-        private var isChoosingPDFDestination = false
         private var activeLoadID = 0
         private var loadTimeoutTask: Task<Void, Never>?
         private var recentNativeDrop: NativeDropMarker?
@@ -239,6 +239,8 @@ extension RhwpStudioWebView {
                 return
             }
 
+            pdfExportState.invalidatePendingRequestForDocumentChange()
+
             do {
                 let loadURL = try RhwpStudioResourceLocator.loadURL(for: document)
                 loadedIdentity = nextIdentity
@@ -280,6 +282,7 @@ extension RhwpStudioWebView {
         }
 
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+            pdfExportState.invalidatePendingRequestForDocumentChange()
             hasCompletedCurrentLoad = false
             finishLoading()
             onFailure(
@@ -407,10 +410,11 @@ extension RhwpStudioWebView {
                 printDocument(body)
             case "export-pdf-document":
                 exportPDFDocument(body)
+            case "export-pdf-error":
+                handlePDFExportError(body)
             case "error":
                 let message = body["message"] as? String
                 completePendingSave(.failed(message ?? "문서를 저장할 수 없습니다."))
-                pendingPDFDestinationURL = nil
                 onError(message)
             case "save-sync-error":
                 onError(body["message"] as? String)
@@ -847,7 +851,7 @@ extension RhwpStudioWebView {
         }
 
         private func printDocument(_ body: [String: Any]) {
-            guard let payload = printPayload(from: body, missingMessage: "인쇄 데이터를 만들 수 없습니다") else {
+            guard let payload = pagePayload(from: body, missingMessage: "인쇄 데이터를 만들 수 없습니다") else {
                 return
             }
 
@@ -862,57 +866,59 @@ extension RhwpStudioWebView {
         }
 
         private func exportPDFDocument(_ body: [String: Any]) {
-            let destinationURL = pendingPDFDestinationURL
-            pendingPDFDestinationURL = nil
+            guard let requestID = intValue(body["requestID"]) else {
+                onError("PDF 내보내기 응답에 요청 식별자가 없습니다.")
+                return
+            }
 
-            guard let payload = exportedDocumentPayload(
+            guard pdfExportState.collection(for: requestID) != nil else {
+                return
+            }
+
+            guard let payload = pagePayload(
                 from: body,
                 missingMessage: "PDF 데이터를 만들 수 없습니다"
             ) else {
+                pdfExportState.failCollection(requestID: requestID)
+                return
+            }
+
+            guard let destinationURL = pdfExportState.beginExporting(requestID: requestID) else {
                 return
             }
 
             let controller = RhwpStudioPDFExportController()
             pdfExportController = controller
-            let completion: (Result<URL?, Error>) -> Void = { [weak self] result in
-                guard let self else {
+            let completion: (Result<URL, Error>) -> Void = { [weak self, weak controller] result in
+                guard let self,
+                      let controller,
+                      self.pdfExportController === controller,
+                      self.pdfExportState.finishExport(requestID: requestID)
+                else {
                     return
                 }
                 self.pdfExportController = nil
                 switch result {
                 case .success(let url):
-                    if let url {
-                        DocumentFileActions.revealInFinder(url)
-                    }
+                    DocumentFileActions.revealInFinder(url)
                 case .failure(let error):
                     self.onError("PDF를 내보낼 수 없습니다: \(error.localizedDescription)")
                 }
             }
 
-            if let destinationURL {
-                controller.export(
-                    data: payload.data,
-                    filename: payload.fileName,
-                    destinationURL: destinationURL,
-                    completion: completion
-                )
-            } else {
-                controller.export(
-                    data: payload.data,
-                    filename: payload.fileName,
-                    completion: completion
-                )
-            }
+            controller.export(
+                payload: payload,
+                destinationURL: destinationURL,
+                completion: completion
+            )
         }
 
-        private func printPayload(
+        private func pagePayload(
             from body: [String: Any],
             missingMessage: String
-        ) -> RhwpStudioPrintPayload? {
+        ) -> RhwpStudioPagePayload? {
             guard let pageCount = intValue(body["pageCount"]),
-                  let pages = body["pages"] as? [String],
-                  pageCount > 0,
-                  pages.count == pageCount
+                  let pages = body["pages"] as? [String]
             else {
                 onError("\(missingMessage): 페이지 데이터가 없습니다.")
                 return nil
@@ -921,7 +927,16 @@ extension RhwpStudioWebView {
             let fileName = body["fileName"] as? String
                 ?? currentDocument?.filename
                 ?? "document.hwp"
-            return RhwpStudioPrintPayload(fileName: fileName, pages: pages)
+            do {
+                return try RhwpStudioPagePayload(
+                    fileName: fileName,
+                    pageCount: pageCount,
+                    pages: pages
+                )
+            } catch {
+                onError("\(missingMessage): \(error.localizedDescription)")
+                return nil
+            }
         }
 
         private func intValue(_ value: Any?) -> Int? {
@@ -1123,22 +1138,34 @@ extension RhwpStudioWebView {
             in webView: WKWebView,
             suggestedFilename: String? = nil
         ) {
-            guard !isChoosingPDFDestination,
-                  pendingPDFDestinationURL == nil
-            else {
+            guard currentDocument != nil else {
+                onError("PDF로 내보낼 문서가 없습니다.")
                 return
             }
 
+            guard pdfExportState.isIdle else {
+                onError("PDF 내보내기가 이미 진행 중입니다.")
+                return
+            }
+
+            nextPDFExportRequestID &+= 1
+            let request = RhwpStudioPDFExportRequest(
+                id: nextPDFExportRequestID,
+                loadID: activeLoadID
+            )
             let filename = suggestedFilename ?? currentDocument?.filename ?? "document.hwp"
             let presentingWindow = webView.window
-            isChoosingPDFDestination = true
+            guard pdfExportState.beginChoosingDestination(for: request) else {
+                onError("PDF 내보내기가 이미 진행 중입니다.")
+                return
+            }
 
             Task { @MainActor [weak self, weak webView, weak presentingWindow] in
                 guard let self else {
                     return
                 }
                 defer {
-                    self.isChoosingPDFDestination = false
+                    self.pdfExportState.cancelDestinationSelection(requestID: request.id)
                 }
 
                 guard let webView else {
@@ -1153,15 +1180,35 @@ extension RhwpStudioWebView {
                     return
                 }
 
-                self.pendingPDFDestinationURL = destinationURL
+                guard self.pdfExportState.beginCollectingPages(
+                    for: request,
+                    destinationURL: destinationURL,
+                    currentLoadID: self.activeLoadID
+                ) else {
+                    return
+                }
                 self.evaluateHostBridgeAction(
-                    "window.__alhangeulHostBridgeExportPDFDocument?.()",
+                    "window.__alhangeulHostBridgeExportPDFDocument?.(\(request.id))",
                     in: webView,
                     failureMessage: "PDF 데이터를 만들 수 없습니다"
                 ) { [weak self] in
-                    self?.pendingPDFDestinationURL = nil
+                    self?.resetPendingPDFExportCollection(requestID: request.id)
                 }
             }
+        }
+
+        private func handlePDFExportError(_ body: [String: Any]) {
+            guard let requestID = intValue(body["requestID"]),
+                  resetPendingPDFExportCollection(requestID: requestID)
+            else {
+                return
+            }
+            onError(body["message"] as? String ?? "PDF 데이터를 만들 수 없습니다.")
+        }
+
+        @discardableResult
+        private func resetPendingPDFExportCollection(requestID: Int) -> Bool {
+            pdfExportState.failCollection(requestID: requestID)
         }
 
         private func evaluateHostBridgeAction(

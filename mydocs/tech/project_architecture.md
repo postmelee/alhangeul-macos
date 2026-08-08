@@ -33,11 +33,11 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - `DocumentOpenPanel`과 외부 열기 요청을 통해 HWP/HWPX 파일 URL을 받는다.
 - 보안 범위 접근으로 원본 파일 bytes를 읽고 `rhwp-studio` WKWebView에 전달할 문서 payload와 revision을 관리한다.
 - 앱 bundle의 `Resources/rhwp-studio` 정적 asset을 `alhangeul-studio://app` 내부 resource scheme으로 제공하고, `alhangeul-document://current` 내부 document scheme으로 현재 문서 bytes를 제공한다.
-- `rhwp-studio` 파일 메뉴와 `Command/Ctrl+O/S/P` 단축키의 열기/저장/인쇄 명령은 WKUserScript, `WKScriptMessageHandler`, AppKit key equivalent fallback, SwiftUI File menu command를 통해 HostApp의 `DocumentOpenPanel`, 형식 인식형 `DocumentSavePanel`, AppKit print operation으로 연결한다.
+- `rhwp-studio` 파일 메뉴와 `Command/Ctrl+O/S/P` 단축키의 열기/저장/인쇄 명령은 WKUserScript, `WKScriptMessageHandler`, AppKit key equivalent fallback, SwiftUI File menu command를 통해 HostApp의 `DocumentOpenPanel`, 형식 인식형 `DocumentSavePanel`, PDF export panel과 AppKit print operation으로 연결한다.
 - HWP/HWPX 저장 메뉴와 native 저장 UX, 형식·destination 검증과 atomic write는 HostApp이 소유한다. 현재 편집 상태의 HWP/HWPX bytes 생성과 저장 성공 뒤 dirty state 정리는 bundled `rhwp-studio`의 embed RPC가 담당한다.
 - HostApp titlebar toolbar는 macOS 공유, Finder에서 보기, PDF로 내보내기, 최근 문서 접근을 제공한다. 공유 picker는 toolbar 버튼에 심은 `NSViewRepresentable` anchor view를 기준으로 표시한다.
 - HostApp MVP viewer의 zoom/page/search 조작은 `rhwp-studio` 내부 UI가 소유한다.
-- `project.yml` 기준으로 `Sources/Shared`, `Sources/RhwpCoreBridge`, `Frameworks/Rhwp.xcframework`를 포함하지만, MVP viewer 화면은 native render tree 경로를 호출하지 않는다. HostApp PDF export는 viewer 화면과 별개로 `Shared/HwpPreviewPDFRenderer`와 native render tree 경로를 사용한다.
+- `project.yml` 기준으로 `Sources/Shared`, `Sources/RhwpCoreBridge`, `Frameworks/Rhwp.xcframework`를 포함하지만, MVP viewer 화면과 사용자용 PDF export는 native render tree 경로를 호출하지 않는다. PDF export와 일반 인쇄는 현재 editor의 upstream page SVG를 HostApp 전용 `RhwpStudioPagePDFRenderer`가 `WKWebView.createPDF`로 변환하는 경로를 공유한다.
 - `QLExtension`과 `ThumbnailExtension`을 app bundle 안에 embed한다.
 
 ### QLExtension
@@ -67,7 +67,7 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 
 - 현재 핵심 소유 코드는 `HwpPageImageRenderer`와 `HwpPreviewPDFRenderer`다.
 - 파일 크기 제한, page index 기반 render tree 요청, bitmap context 생성, PNG 인코딩, Quick Look 표시용 PNG/PDF preview 생성을 공통 처리한다.
-- HostApp MVP viewer 화면은 `rhwp-studio` WKWebView 경로를 사용하므로 이 native bitmap helper를 직접 호출하지 않는다. HostApp PDF export는 현재 문서 bytes를 다시 열어 이 계층의 PDF renderer를 사용한다.
+- HostApp MVP viewer 화면, 사용자용 PDF export와 일반 인쇄는 이 native bitmap helper를 직접 호출하지 않는다. `HwpPreviewPDFRenderer`는 Finder Quick Look 다중-page preview용 PDF container를 만드는 경로에 한정한다.
 - Finder/Quick Look 호출 방식에 가까운 helper는 이 계층에 둘 수 있다.
 - 문서 핸들 수명, render tree 모델, FFI 호출 규칙 자체는 `RhwpCoreBridge`가 소유한다.
 
@@ -78,7 +78,7 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - `RhwpDocument`가 Rust 문서 핸들의 생성과 해제를 관리한다.
 - `RenderTree.swift`가 render tree JSON을 Swift 모델로 디코딩한다.
 - `CGTreeRenderer`가 배경, 텍스트, 도형, 이미지, 그룹 노드를 CoreGraphics/CoreText로 렌더링한다.
-- HostApp PDF export, Quick Look preview, Finder thumbnail은 현재 이 render tree 기반 bitmap 경로를 공유한다. HostApp MVP viewer 화면은 WKWebView `rhwp-studio` 경로를 사용한다.
+- Quick Look preview와 Finder thumbnail은 이 render tree 기반 bitmap 경로를 공유한다. HostApp MVP viewer 화면, 사용자용 PDF export와 일반 인쇄는 WKWebView `rhwp-studio`와 upstream page SVG 경로를 사용한다.
 - 장기 native macOS viewer/editor shell은 Swift가 renderer 전체를 재구현하는 것이 아니라 Rust/rhwp Skia renderer와 Swift 편집 UI/오버레이를 결합하는 방향으로 둔다. 책임 경계는 [`native_macos_skia_editor_strategy.md`](native_macos_skia_editor_strategy.md)를 따른다.
 - 이 계층에는 AppKit/UIKit 직접 의존을 넣지 않는다. 플랫폼 UI 상태, 뷰 생명주기, Finder/Quick Look 연동은 상위 타깃 또는 `Shared`가 소유한다.
 
@@ -152,8 +152,8 @@ HostApp은 앱 실행과 version 전환을 영구 사용자·기기·설치 식�
 12. HWP 저장은 `exportHwpBase64`와 `exportHwp` fallback을, HWPX 저장은 `exportHwpx`를 사용해 현재 편집 상태의 bytes를 받는다.
 13. HostApp은 요청·응답 형식, byte count, CFB/ZIP signature와 destination 확장자를 확인한 뒤 security-scoped source 또는 native panel에서 선택한 URL에 atomic write한다.
 14. 저장 성공 뒤 current source와 최근 문서를 실제 destination으로 갱신하고 `notifySaved(fileName)`을 호출해 upstream filename, dirty state와 recovery 상태를 동기화한다.
-15. `파일 > 인쇄`는 `rhwp-studio`에서 받은 page HTML/SVG payload를 별도 WKWebView에 싣고 PDFKit/AppKit print operation을 실행한다.
-16. `PDF로 내보내기`는 active editor element를 settle한 뒤 `rhwp-studio`의 `exportHwp` response bytes를 native로 전달하고, `RhwpStudioPDFExportController`가 `RhwpDocument`와 `HwpPreviewPDFRenderer`를 통해 PDF를 생성한 뒤 저장 완료 후 Finder에서 결과 파일을 표시한다.
+15. `파일 > 인쇄`는 active editor state를 settle한 뒤 `pageCount`와 page별 `getPageSvg`를 순서대로 수집하고, HostApp 공용 page SVG renderer로 만든 `PDFDocument`를 PDFKit/AppKit print operation에 전달한다.
+16. 내부 `PDF로 저장…`의 `file:print-to-pdf`와 toolbar의 `file:export-pdf`는 canonical `file:export-pdf`로 합쳐진다. HostApp이 native destination panel을 먼저 표시한 뒤 현재 editor의 page SVG를 수집하고, `WKWebView.createPDF`로 page geometry와 text layer를 보존한 PDF를 만들어 atomic write한 성공 URL만 Finder에 표시한다.
 17. `공유`는 active editor element를 settle한 뒤 `rhwp-studio`의 `exportHwp` response bytes를 임시 파일로 만든 뒤 `NSSharingServicePicker`로 전달한다.
 18. 최근 문서는 security-scoped bookmark와 함께 저장하고, toolbar menu에서 다시 열 수 있게 한다.
 
@@ -204,7 +204,92 @@ runtime signature guard는 완전히 다른 형식의 bytes를 잘못된 확장�
 - 대표 fixture에서 HWP → HWP, HWP → HWPX, HWPX → HWPX, HWPX → HWP 저장과 재열기, page 1의 텍스트·표·이미지 또는 non-blank render를 검증했다. 이는 모든 HWP/HWPX 기능의 의미론적 완전 무손실을 보장하지 않는다.
 - HWPX runtime 검증은 ZIP magic까지만 수행한다. 손상된 ZIP이나 필수 entry가 빠진 container는 별도 검증 없이는 runtime guard를 통과할 수 있다.
 - HWPX exporter는 call-stack overflow를 피하도록 chunked base64 encoding하지만, JS와 Swift 양쪽에 전체 payload를 보유하는 메모리 비용은 남는다.
-- 공유와 현재 PDF export는 이 저장 경로와 별개로 HWP exporter payload를 사용하는 기존 동작을 유지한다.
+- 공유는 이 저장 경로와 별개로 HWP exporter payload를 사용하는 기존 동작을 유지한다. PDF export와 일반 인쇄는 HWP/HWPX bytes exporter를 사용하지 않고 현재 editor의 page SVG를 사용한다.
+
+### HostApp PDF 저장과 일반 인쇄 경로
+
+#### command와 native save ownership
+
+bundled `rhwp-studio`의 내부 PDF menu command는 `file:print-to-pdf`지만 HostBridge가 upstream browser print handler보다 먼저 소비해 `file:export-pdf`로 정규화한다. HostApp toolbar도 처음부터 `file:export-pdf`를 전달하므로 두 진입점은 같은 coordinator method와 native save panel을 사용한다.
+
+| 진입점 | 입력 command | canonical command | HostApp 동작 |
+|--------|---------------|-------------------|--------------|
+| 내부 `PDF로 저장…` | `file:print-to-pdf` | `file:export-pdf` | `requestPDFExport` |
+| titlebar toolbar PDF | `file:export-pdf` | `file:export-pdf` | `requestPDFExport` |
+
+HostApp은 다음 pending state를 소유한다.
+
+```text
+idle
+  -> choosingDestination(requestID, loadID)
+  -> collectingPages(requestID, destinationURL)
+  -> exporting(requestID)
+  -> idle
+```
+
+- `DocumentPDFExportPanel`은 `choosingDestination`에서 한 번만 native sheet로 표시된다.
+- panel 취소는 page SVG를 요청하지 않고 `idle`로 복귀한다.
+- destination이 결정된 뒤에만 HostBridge의 PDF page 수집 함수를 평가한다.
+- request ID는 HostBridge의 성공·실패 message까지 왕복하며 현재 request와 일치하는 응답만 state를 전이시킨다.
+- 문서 load identity가 바뀌거나 main WebContent process가 종료되면 destination 선택·page 수집 request를 무효화하고 늦게 도착한 응답을 무시한다. 이미 독립 renderer에서 시작한 export는 해당 request completion까지 유지한다.
+- page 수집, render/write 중 중복 export command는 새 panel이나 pending destination을 만들지 않는다.
+- bridge evaluation, payload 검증, render와 write의 성공·실패 completion은 request ID와 controller identity가 일치할 때만 pending controller와 state를 정리한다.
+- offscreen renderer의 WebContent process 종료는 명시적 실패 completion으로 변환해 export state가 `exporting`에 남지 않게 한다.
+- write에 성공한 destination만 Finder에 표시한다.
+
+#### page SVG payload와 공용 renderer
+
+upstream과 HostApp 사이의 PDF/print payload는 형식에 관계없이 다음 구조를 사용한다.
+
+```json
+{
+  "fileName": "example.hwpx",
+  "pageCount": 3,
+  "pages": ["<svg ...>", "<svg ...>", "<svg ...>"]
+}
+```
+
+HostBridge의 `documentPages()`는 active editor state를 settle한 뒤 `pageCount`를 읽고 page index 0부터 `getPageSvg`를 순차 호출한다. 각 page 요청 timeout은 30초다. `RhwpStudioPagePayload`는 양의 page count, 실제 SVG 배열 수와 비어 있지 않은 page SVG를 검증한다.
+
+```text
+current editor
+  -> pageCount + getPageSvg(page) 순차 수집
+  -> RhwpStudioPagePayload
+  -> RhwpStudioPagePDFRenderer
+       -> page SVG를 전용 WKWebView에 load
+       -> SVG width/height/viewBox 기반 page metrics 계산
+       -> page 크기로 WKPDFConfiguration.rect 설정
+       -> WKWebView.createPDF
+       -> PDFKit으로 단일 page를 최종 PDFDocument에 순서대로 삽입
+```
+
+`RhwpStudioPagePDFRenderer`는 PDF command, save panel과 파일 write를 소유하지 않는다. page별 geometry 확인과 `WKWebView.createPDF` 호출, page count 일치 검증만 담당한다.
+
+- `RhwpStudioPDFExportController`는 renderer 결과의 `%PDF` signature를 확인하고 선택한 URL에 `Data.write(.atomic)`으로 기록한다.
+- `RhwpStudioPrintController`는 같은 renderer 결과를 `PDFDocument.printOperation`에 전달한다. 모든 non-square page 방향이 하나로 일치할 때만 job orientation을 초기화하며, 가로·세로 혼합 문서는 job orientation을 강제하지 않고 PDFKit auto-rotate에 맡긴다.
+- Quick Look과 Thumbnail은 이 renderer를 사용하지 않는다. 두 extension은 `RhwpDocument`와 render tree 기반 `HwpPageImageRenderer`의 bitmap 경로를 유지한다.
+
+#### HWP/HWPX와 원본 불변 경계
+
+PDF 저장은 HWP와 HWPX에 같은 `pageCount`/`getPageSvg` 경로를 적용한다. HWPX를 HWP로 중간 변환하지 않으며 `exportHwp`, `exportHwpBase64`, `exportHwpx`, `RhwpDocument`와 `HwpPreviewPDFRenderer`는 사용자용 PDF export controller의 입력이 아니다.
+
+PDF export는 non-mutating command다.
+
+- current source URL, current filename과 source format을 변경하지 않는다.
+- HWP/HWPX 원본 bytes를 다시 쓰지 않는다.
+- editor dirty state를 clean으로 바꾸거나 `notifySaved`를 호출하지 않는다.
+- 현재 editor state에서 생성한 page SVG만 destination PDF에 반영한다.
+
+Stage 4 실제 UI smoke에서 HWP/HWPX menu와 toolbar 결과의 page count, page geometry, 추출 text와 page raster가 일치했다. KTX 가로 page는 `1123 × 794 pt`, 대표 HWP/HWPX는 upstream과 같은 9쪽 `794 × 1123 pt`를 유지했고 모든 page가 nonblank였다. macOS Preview에서 한글 text selection과 저장 전 current edit 반영도 확인했다. smoke 전후 원본 SHA-256과 수정 시각은 변하지 않았다.
+
+#### 잔여 제한과 실패 기준
+
+- page SVG는 순차 생성·변환하지만 bridge message와 native payload가 전체 page SVG 문자열을 보유하므로 대용량·다중-page 문서의 memory/time 비용이 남는다.
+- page별 `getPageSvg`에는 30초 timeout이 있지만 전체 document export를 포괄하는 별도 deadline은 없다.
+- SVG page metrics는 명시적 width/height, viewBox, bounding rect 순으로 해석하고 정수 point로 올림한다. 잘못되거나 0 이하인 metrics와 최종 page count 불일치는 오류로 종료한다.
+- upstream SVG는 Preview에서 선택 가능한 text layer를 유지하지만 positioned text 특성 때문에 `pdftotext -layout`에서 한글이나 편집 marker 사이에 시각 위치 기준 공백이 추가될 수 있다.
+- Quartz PDF metadata에는 생성 시각이 포함되므로 같은 본문을 다시 저장해도 PDF file SHA-256은 달라질 수 있다. 본문 동등성은 page count, geometry, extracted text와 raster 비교로 판정한다.
+- destination panel 취소는 output을 만들지 않는다. atomic write 실패는 partial destination을 남기지 않고 사용자 오류를 표시하며 state를 `idle`로 복구한다.
 
 ### Quick Look preview 경로
 
@@ -290,16 +375,23 @@ External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제
 
 - `Shared/HwpPageImageRenderer`는 요청된 page index를 `CGContext`에 직접 그린다.
 - Quick Look preview는 단일 페이지 문서를 PNG로 반환하고, 다중 페이지 문서는 렌더된 page bitmap들을 PDF page에 삽입해 반환한다.
-- HostApp PDF export는 `rhwp-studio`가 export한 HWP bytes를 다시 `RhwpDocument`로 열고, 같은 render tree 기반 page bitmap들을 PDF page에 삽입해 저장한다.
 - Thumbnail extension은 같은 이미지를 요청 크기에 맞춰 aspect-fit으로 그린다.
-- 현재 PDF export, Quick Look preview, thumbnail의 기본 경로는 render tree 기반 bitmap 렌더링이다.
+- render tree 기반 bitmap renderer의 제품 경로는 Quick Look preview와 Thumbnail이다. Quick Look 다중-page PDF는 Finder 표시를 위한 bitmap container이며 사용자용 PDF export와 다른 산출물이다.
+
+### HostApp page SVG PDF 렌더링
+
+- HostApp PDF export와 일반 인쇄는 bundled `rhwp-studio`가 현재 editor state에서 생성한 page SVG를 사용한다.
+- `RhwpStudioPagePDFRenderer`는 page별 SVG metrics를 보존한 전용 WKWebView에서 `WKWebView.createPDF`를 호출하고 PDFKit으로 결과 page를 합친다.
+- `RhwpStudioPDFExportController`는 결과를 사용자 destination에 atomic write하며, `RhwpStudioPrintController`는 같은 `PDFDocument`를 AppKit print operation에 전달한다.
+- 이 경로는 HWP/HWPX source bytes, `RhwpDocument`, render tree bitmap과 `HwpPreviewPDFRenderer`를 거치지 않는다.
+- PDF의 searchable/selectable text semantics는 upstream page SVG와 WebKit PDF 생성 결과에 따른다.
 
 ### 장기 HostApp native 경로
 
 - HostApp의 장기 native viewer/editor 경로는 Swift native macOS shell과 Rust/rhwp Skia renderer를 결합하는 방향으로 둔다.
 - Swift 계층은 window, toolbar, sidebar, zoom/scroll/cache orchestration, accessibility, caret/selection/IME/ruler/object overlay, command routing을 소유한다.
 - HWP/HWPX parsing, document model, layout, Skia rendering, hit-test/selection anchor, dirty region, save/export 안정성은 core와 RustBridge contract가 소유해야 한다.
-- CoreGraphics/CoreText render tree renderer는 현행 Quick Look/Thumbnail/PDF export의 기준 경로이자 fallback/diagnostic 경로로 유지한다.
+- CoreGraphics/CoreText render tree renderer는 현행 Quick Look/Thumbnail의 기준 경로이자 fallback/diagnostic 경로로 유지한다. HostApp PDF export와 일반 인쇄의 기준 경로는 upstream page SVG와 WebKit PDF renderer다.
 - native editor mutation은 renderer 도입만으로 열지 않고, hit-test, selection, mutation, dirty state, save/round-trip gate를 별도 이슈에서 통과해야 한다.
 
 ## 변경 시 주의할 점
