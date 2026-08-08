@@ -25,7 +25,7 @@ HWPX PDF 저장에서 `exportHwp` 중간 변환과 `RhwpDocument`/bitmap PDF 의
 | 일반 인쇄 PDF 생성 | print controller 내부 전용 WebKit 구현 | 공용 `RhwpStudioPagePDFRenderer` 사용 |
 | 인쇄 방향 초기화 | shared print info 기본 방향 영향 | 전체 page가 단일 방향일 때만 초기화, 혼합 방향은 강제하지 않음 |
 | Quick Look/Thumbnail | render tree bitmap | 변경 없음 |
-| HostAppTests | 100개 | 116개, 실패 0개 |
+| HostAppTests | 100개 | 120개, 실패 0개 |
 
 `origin/devel...HEAD` 기준 최종 보고서 작성 전 diff는 24개 파일, 2,613줄 추가, 319줄 삭제다.
 
@@ -39,6 +39,7 @@ HWPX PDF 저장에서 `exportHwp` 중간 변환과 `RhwpDocument`/bitmap PDF 의
 | `Sources/HostApp/Services/RhwpStudioPrintController.swift` | WebKit 생성 책임을 제거하고 공용 renderer 결과를 print operation에 연결 |
 | `Sources/HostApp/Services/RhwpStudioHostBridgeScript.swift` | 내부 PDF 메뉴 capture·canonical command, current page SVG payload와 menu override 구현 |
 | `Sources/HostApp/Services/RhwpStudioPDFExportController.swift` | HWP bytes/bitmap 경로를 공용 SVG renderer, `%PDF` 검증과 atomic write로 교체 |
+| `Sources/HostApp/Services/RhwpStudioPDFExportState.swift` | request/load identity 기반 export state와 stale callback 무효화 규칙 구현 |
 | `Sources/HostApp/Services/DocumentPDFExportPanel.swift` | controller 내부 중복 panel 경로 제거, coordinator 단일 소유로 정리 |
 | `Sources/HostApp/Views/RhwpStudioWebView.swift` | native panel, pending state, page payload 수락, 중복·오류·성공 lifecycle 통합 |
 | `Tests/HostAppTests/RhwpStudio*PDF*Tests.swift`와 관련 테스트 | payload, renderer, export controller, command bridge와 orientation 정책 검증 |
@@ -81,7 +82,7 @@ toolbar file:export-pdf ┘
 
 HostBridge가 내부 메뉴 event를 upstream browser print handler보다 먼저 소비한다. 초기 `disabled`/`aria-disabled`와 browser print tooltip은 알한글 native 저장 동작에 맞게 보정한다. upstream menu DOM 갱신에 대응하는 observer는 해당 menu element 하나만 관찰하고 frame당 한 번만 복원해 document 전체 attribute 반복 갱신으로 앱이 멈추던 최초 Stage 3 회귀를 제거했다.
 
-Coordinator는 `idle → choosingDestination → collectingPages(destinationURL) → exporting → idle` 상태를 소유한다. 취소는 SVG 요청이나 output 생성 없이 복귀하고, 진행 중 중복 command는 새 panel·renderer를 만들지 않는다. 실패 후 controller와 pending destination을 정리하며 write에 성공한 URL만 Finder에 표시한다.
+Coordinator는 `idle → choosingDestination(requestID, loadID) → collectingPages(requestID, destinationURL) → exporting(requestID) → idle` 상태를 소유한다. request ID를 HostBridge 성공·실패 message까지 왕복시켜 현재 작업과 일치하는 callback만 state를 전이시킨다. 문서 교체나 main WebContent process 종료는 아직 독립 renderer로 넘어가지 않은 선택·수집 작업을 무효화하고, 이미 시작된 export는 같은 request와 controller의 completion이 도착할 때만 정리한다. 진행 중 중복 command에는 오류를 표시하며 새 panel·renderer를 만들지 않는다.
 
 ### current page SVG와 공용 PDF renderer
 
@@ -164,13 +165,21 @@ Quick Look 다중-page preview와 Thumbnail은 Rust render tree를 CoreGraphics 
 - read-only destination: 사용자 오류, partial output 0건, 오류 뒤 export 재진입 성공
 - 일반 인쇄: 편집된 9-page HWPX의 `9페이지 모두`, 정상 portrait preview와 취소 복귀 확인
 
+### PR review lifecycle 보완
+
+- 문서 교체 중 save panel 또는 page SVG 수집이 남아도 pending request를 무효화하고 이전 request의 늦은 성공·실패 message를 무시한다.
+- HostBridge PDF message에 request ID를 포함하고 PDF 전용 오류 type을 분리해 다른 bridge 오류가 현재 PDF state를 임의로 초기화하지 않게 했다.
+- offscreen `WKWebView`의 WebContent process 종료를 명시적 renderer 실패로 완료해 `exporting` 영구 고착 경로를 제거했다.
+- 중복 PDF command가 들어오면 묵묵히 무시하지 않고 사용자 오류를 표시한다.
+- state 전이·stale callback·process 종료 회귀 테스트 4개를 추가했다.
+
 ## 최종 통합 검증
 
 | 검증 | 결과 |
 |------|------|
 | `xcodegen generate` | 통과. `project.yml`에서 재생성 후 Xcode project 추가 diff 0건 |
-| clean HostAppTests (`build.noindex/task455/stage5-tests`) | `** TEST SUCCEEDED **`, 116개, 실패 0개 |
-| clean HostApp Debug build (`build.noindex/task455/stage5-build`) | `** BUILD SUCCEEDED **` |
+| HostAppTests (`build.noindex/task455/review-tests`) | `** TEST SUCCEEDED **`, 120개, 실패 0개 |
+| HostApp Debug build (`build.noindex/task455/review-build`) | `** BUILD SUCCEEDED **` |
 | built app bundled asset | manifest와 자산 일치 |
 | 실제 PDF page count/geometry/text/raster | KTX, HWP, HWPX 대표 결과 모두 통과 |
 | macOS Preview text selection | `보도자료` 실제 selection 통과 |
@@ -194,7 +203,7 @@ Quick Look 다중-page preview와 Thumbnail은 Rust render tree를 CoreGraphics 
 
 ## 최종 결론
 
-Issue #455의 계획된 Stage 1~5와 Stage 2.1 보완을 완료했다. 알한글이 내부 메뉴와 toolbar의 native 저장 UX를 일관되게 소유하고, PDF 본문은 upstream current page SVG를 공용 WebKit renderer로 생성한다.
+Issue #455의 계획된 Stage 1~5와 Stage 2.1, PR review lifecycle 보완을 완료했다. 알한글이 내부 메뉴와 toolbar의 native 저장 UX를 일관되게 소유하고, PDF 본문은 upstream current page SVG를 공용 WebKit renderer로 생성한다.
 
 HWPX 중간 HWP 변환과 사용자 PDF의 bitmap renderer 의존이 제거됐으며, 실제 HWP/HWPX/KTX에서 page geometry, nonblank 출력, 검색·선택 가능한 text, 최신 편집 반영과 원본 불변을 확인했다. 일반 인쇄는 같은 renderer를 공유하면서 기존 print panel UX를 유지하고, Quick Look/Thumbnail은 기존 bitmap 경계를 유지한다.
 

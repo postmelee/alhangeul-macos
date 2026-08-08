@@ -1,5 +1,6 @@
 import AppKit
 import PDFKit
+import WebKit
 import XCTest
 
 @MainActor
@@ -46,6 +47,30 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
                 fromMetrics: ["width": 0, "height": 100],
                 pageNumber: 1
             )
+        )
+    }
+
+    func testRendererFinishesWhenWebContentProcessTerminates() throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "terminated.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Terminated")]
+        )
+        let renderer = RhwpStudioPagePDFRenderer()
+        var completionResult: Result<PDFDocument, Error>?
+
+        renderer.render(payload: payload) { result in
+            completionResult = result
+        }
+        renderer.webViewWebContentProcessDidTerminate(WKWebView())
+
+        guard case .failure(let error) = completionResult else {
+            XCTFail("WebKit process 종료가 PDF 변환 실패로 완료되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(
+            error as? RhwpStudioPagePDFRenderError,
+            .webContentProcessTerminated
         )
     }
 

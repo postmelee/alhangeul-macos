@@ -221,17 +221,20 @@ HostApp은 다음 pending state를 소유한다.
 
 ```text
 idle
-  -> choosingDestination
-  -> collectingPages(destinationURL)
-  -> exporting
+  -> choosingDestination(requestID, loadID)
+  -> collectingPages(requestID, destinationURL)
+  -> exporting(requestID)
   -> idle
 ```
 
 - `DocumentPDFExportPanel`은 `choosingDestination`에서 한 번만 native sheet로 표시된다.
 - panel 취소는 page SVG를 요청하지 않고 `idle`로 복귀한다.
 - destination이 결정된 뒤에만 HostBridge의 PDF page 수집 함수를 평가한다.
+- request ID는 HostBridge의 성공·실패 message까지 왕복하며 현재 request와 일치하는 응답만 state를 전이시킨다.
+- 문서 load identity가 바뀌거나 main WebContent process가 종료되면 destination 선택·page 수집 request를 무효화하고 늦게 도착한 응답을 무시한다. 이미 독립 renderer에서 시작한 export는 해당 request completion까지 유지한다.
 - page 수집, render/write 중 중복 export command는 새 panel이나 pending destination을 만들지 않는다.
-- bridge evaluation, payload 검증, render와 write의 성공·실패 completion은 pending controller와 state를 정리한다.
+- bridge evaluation, payload 검증, render와 write의 성공·실패 completion은 request ID와 controller identity가 일치할 때만 pending controller와 state를 정리한다.
+- offscreen renderer의 WebContent process 종료는 명시적 실패 completion으로 변환해 export state가 `exporting`에 남지 않게 한다.
 - write에 성공한 destination만 Finder에 표시한다.
 
 #### page SVG payload와 공용 renderer

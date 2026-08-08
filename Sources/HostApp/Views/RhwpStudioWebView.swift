@@ -128,13 +128,6 @@ extension RhwpStudioWebView {
             let format: DocumentSaveFormat
         }
 
-        private enum PDFExportState {
-            case idle
-            case choosingDestination
-            case collectingPages(URL)
-            case exporting
-        }
-
         private struct NativeDropMarker {
             let fileName: String
             let handledAt: Date
@@ -153,7 +146,8 @@ extension RhwpStudioWebView {
         private var pdfExportController: RhwpStudioPDFExportController?
         private var pendingSaveRequest: PendingSaveRequest?
         private var pendingSaveCompletion: ((RhwpStudioDocumentSaveResult) -> Void)?
-        private var pdfExportState: PDFExportState = .idle
+        private var pdfExportState: RhwpStudioPDFExportState = .idle
+        private var nextPDFExportRequestID = 0
         private var isChoosingSaveDestination = false
         private var activeLoadID = 0
         private var loadTimeoutTask: Task<Void, Never>?
@@ -245,6 +239,8 @@ extension RhwpStudioWebView {
                 return
             }
 
+            pdfExportState.invalidatePendingRequestForDocumentChange()
+
             do {
                 let loadURL = try RhwpStudioResourceLocator.loadURL(for: document)
                 loadedIdentity = nextIdentity
@@ -286,6 +282,7 @@ extension RhwpStudioWebView {
         }
 
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+            pdfExportState.invalidatePendingRequestForDocumentChange()
             hasCompletedCurrentLoad = false
             finishLoading()
             onFailure(
@@ -413,10 +410,11 @@ extension RhwpStudioWebView {
                 printDocument(body)
             case "export-pdf-document":
                 exportPDFDocument(body)
+            case "export-pdf-error":
+                handlePDFExportError(body)
             case "error":
                 let message = body["message"] as? String
                 completePendingSave(.failed(message ?? "문서를 저장할 수 없습니다."))
-                resetPendingPDFExportCollection()
                 onError(message)
             case "save-sync-error":
                 onError(body["message"] as? String)
@@ -868,8 +866,12 @@ extension RhwpStudioWebView {
         }
 
         private func exportPDFDocument(_ body: [String: Any]) {
-            guard case .collectingPages(let destinationURL) = pdfExportState else {
-                onError("예상하지 못한 PDF 내보내기 응답을 받았습니다.")
+            guard let requestID = intValue(body["requestID"]) else {
+                onError("PDF 내보내기 응답에 요청 식별자가 없습니다.")
+                return
+            }
+
+            guard pdfExportState.collection(for: requestID) != nil else {
                 return
             }
 
@@ -877,19 +879,25 @@ extension RhwpStudioWebView {
                 from: body,
                 missingMessage: "PDF 데이터를 만들 수 없습니다"
             ) else {
-                pdfExportState = .idle
+                pdfExportState.failCollection(requestID: requestID)
                 return
             }
 
-            pdfExportState = .exporting
+            guard let destinationURL = pdfExportState.beginExporting(requestID: requestID) else {
+                return
+            }
+
             let controller = RhwpStudioPDFExportController()
             pdfExportController = controller
-            let completion: (Result<URL, Error>) -> Void = { [weak self] result in
-                guard let self else {
+            let completion: (Result<URL, Error>) -> Void = { [weak self, weak controller] result in
+                guard let self,
+                      let controller,
+                      self.pdfExportController === controller,
+                      self.pdfExportState.finishExport(requestID: requestID)
+                else {
                     return
                 }
                 self.pdfExportController = nil
-                self.pdfExportState = .idle
                 switch result {
                 case .success(let url):
                     DocumentFileActions.revealInFinder(url)
@@ -1135,22 +1143,29 @@ extension RhwpStudioWebView {
                 return
             }
 
-            guard case .idle = pdfExportState else {
+            guard pdfExportState.isIdle else {
+                onError("PDF 내보내기가 이미 진행 중입니다.")
                 return
             }
 
+            nextPDFExportRequestID &+= 1
+            let request = RhwpStudioPDFExportRequest(
+                id: nextPDFExportRequestID,
+                loadID: activeLoadID
+            )
             let filename = suggestedFilename ?? currentDocument?.filename ?? "document.hwp"
             let presentingWindow = webView.window
-            pdfExportState = .choosingDestination
+            guard pdfExportState.beginChoosingDestination(for: request) else {
+                onError("PDF 내보내기가 이미 진행 중입니다.")
+                return
+            }
 
             Task { @MainActor [weak self, weak webView, weak presentingWindow] in
                 guard let self else {
                     return
                 }
                 defer {
-                    if case .choosingDestination = self.pdfExportState {
-                        self.pdfExportState = .idle
-                    }
+                    self.pdfExportState.cancelDestinationSelection(requestID: request.id)
                 }
 
                 guard let webView else {
@@ -1165,21 +1180,35 @@ extension RhwpStudioWebView {
                     return
                 }
 
-                self.pdfExportState = .collectingPages(destinationURL)
+                guard self.pdfExportState.beginCollectingPages(
+                    for: request,
+                    destinationURL: destinationURL,
+                    currentLoadID: self.activeLoadID
+                ) else {
+                    return
+                }
                 self.evaluateHostBridgeAction(
-                    "window.__alhangeulHostBridgeExportPDFDocument?.()",
+                    "window.__alhangeulHostBridgeExportPDFDocument?.(\(request.id))",
                     in: webView,
                     failureMessage: "PDF 데이터를 만들 수 없습니다"
                 ) { [weak self] in
-                    self?.resetPendingPDFExportCollection()
+                    self?.resetPendingPDFExportCollection(requestID: request.id)
                 }
             }
         }
 
-        private func resetPendingPDFExportCollection() {
-            if case .collectingPages = pdfExportState {
-                pdfExportState = .idle
+        private func handlePDFExportError(_ body: [String: Any]) {
+            guard let requestID = intValue(body["requestID"]),
+                  resetPendingPDFExportCollection(requestID: requestID)
+            else {
+                return
             }
+            onError(body["message"] as? String ?? "PDF 데이터를 만들 수 없습니다.")
+        }
+
+        @discardableResult
+        private func resetPendingPDFExportCollection(requestID: Int) -> Bool {
+            pdfExportState.failCollection(requestID: requestID)
         }
 
         private func evaluateHostBridgeAction(

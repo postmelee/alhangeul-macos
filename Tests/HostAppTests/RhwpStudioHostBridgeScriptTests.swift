@@ -37,13 +37,27 @@ final class RhwpStudioHostBridgeScriptTests: XCTestCase {
 
     func testPDFExportUsesPageSVGsWithoutHwpBytePayload() throws {
         let section = try sourceSection(
-            from: "async function exportPDFDocument()",
+            from: "async function exportPDFDocument(requestID)",
             to: "async function printDocument()"
         )
 
         XCTAssertTrue(section.contains("documentPages()"))
+        XCTAssertTrue(section.contains("type: \"export-pdf-document\""))
+        XCTAssertTrue(section.contains("type: \"export-pdf-error\""))
+        XCTAssertTrue(section.contains("requestID,"))
         XCTAssertTrue(section.contains("pageCount,"))
         XCTAssertTrue(section.contains("pages"))
+        XCTAssertTrue(
+            RhwpStudioHostBridgeScript.source.contains(
+                "__alhangeulHostBridgeExportPDFDocument = (requestID)"
+            )
+        )
+        XCTAssertTrue(
+            RhwpStudioHostBridgeScript.source.contains("Number.isInteger(requestID)")
+        )
+        XCTAssertTrue(
+            RhwpStudioHostBridgeScript.source.contains("exportPDFDocument(requestID);")
+        )
         XCTAssertFalse(section.contains("requestHwpExportPayload"))
         XCTAssertFalse(section.contains("exportHwp"))
         XCTAssertFalse(section.contains("base64"))

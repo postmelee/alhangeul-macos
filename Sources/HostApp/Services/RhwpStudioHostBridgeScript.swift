@@ -695,18 +695,20 @@ enum RhwpStudioHostBridgeScript {
         }
       }
 
-      async function exportPDFDocument() {
+      async function exportPDFDocument(requestID) {
         try {
           const { pageCount, pages } = await documentPages();
           postNative({
             type: "export-pdf-document",
+            requestID,
             fileName: currentFileName(),
             pageCount,
             pages
           });
         } catch (error) {
           postNative({
-            type: "error",
+            type: "export-pdf-error",
+            requestID,
             message: `PDF 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
           });
         }
@@ -777,8 +779,11 @@ enum RhwpStudioHostBridgeScript {
         return true;
       };
 
-      window.__alhangeulHostBridgeExportPDFDocument = () => {
-        exportPDFDocument();
+      window.__alhangeulHostBridgeExportPDFDocument = (requestID) => {
+        if (!Number.isInteger(requestID)) {
+          return false;
+        }
+        exportPDFDocument(requestID);
         return true;
       };
 

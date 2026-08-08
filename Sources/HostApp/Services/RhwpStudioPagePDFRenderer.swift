@@ -63,6 +63,10 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         finish(.failure(error))
     }
 
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        finish(.failure(RhwpStudioPagePDFRenderError.webContentProcessTerminated))
+    }
+
     private func renderNextPage() {
         guard !didFinish, let payload else {
             return
@@ -274,8 +278,9 @@ enum RhwpStudioPagePDFMetrics {
     }
 }
 
-enum RhwpStudioPagePDFRenderError: LocalizedError {
+enum RhwpStudioPagePDFRenderError: LocalizedError, Equatable {
     case renderingInProgress
+    case webContentProcessTerminated
     case invalidPageMetrics(Int)
     case pdfEncodingFailed(Int)
     case unexpectedPDFPageCount(page: Int, actual: Int)
@@ -286,6 +291,8 @@ enum RhwpStudioPagePDFRenderError: LocalizedError {
         switch self {
         case .renderingInProgress:
             "PDF 페이지 변환이 이미 진행 중입니다."
+        case .webContentProcessTerminated:
+            "PDF 페이지 변환 중 WebKit 프로세스가 종료됐습니다."
         case .invalidPageMetrics(let page):
             "\(page)페이지 크기를 확인할 수 없습니다."
         case .pdfEncodingFailed(let page):
