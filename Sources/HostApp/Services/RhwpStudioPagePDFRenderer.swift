@@ -4,19 +4,27 @@ import WebKit
 
 @MainActor
 final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
+    private static let defaultPageRenderTimeoutNanoseconds: UInt64 = 30_000_000_000
+
     private let webView: WKWebView
+    private let pageRenderTimeoutNanoseconds: UInt64
     private var completion: ((Result<PDFDocument, Error>) -> Void)?
     private var payload: RhwpStudioPagePayload?
     private var renderedDocument = PDFDocument()
     private var renderingPageIndex = 0
     private var didFinish = true
+    private var isInitialMainFrameLoadPending = false
+    private var pageRenderTimeoutTask: Task<Void, Never>?
 
-    override init() {
+    init(
+        pageRenderTimeoutNanoseconds: UInt64 = RhwpStudioPagePDFRenderer
+            .defaultPageRenderTimeoutNanoseconds
+    ) {
+        self.pageRenderTimeoutNanoseconds = pageRenderTimeoutNanoseconds
         let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = .nonPersistent()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
-        if #available(macOS 11.0, *) {
-            configuration.defaultWebpagePreferences.allowsContentJavaScript = true
-        }
+        configuration.defaultWebpagePreferences.allowsContentJavaScript = false
 
         webView = WKWebView(
             frame: NSRect(origin: .zero, size: RhwpStudioPagePDFMetrics.initialPageSize),
@@ -24,6 +32,10 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         )
         super.init()
         webView.navigationDelegate = self
+    }
+
+    deinit {
+        pageRenderTimeoutTask?.cancel()
     }
 
     func render(
@@ -45,6 +57,24 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         renderCurrentPagePDF()
+    }
+
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+    ) {
+        let shouldAllow = RhwpStudioPagePDFNavigationPolicy.allowsNavigation(
+            to: navigationAction.request.url,
+            targetFrameIsMainFrame: navigationAction.targetFrame?.isMainFrame,
+            initialMainFrameLoadPending: isInitialMainFrameLoadPending
+        )
+        if shouldAllow {
+            isInitialMainFrameLoadPending = false
+            decisionHandler(.allow)
+        } else {
+            decisionHandler(.cancel)
+        }
     }
 
     func webView(
@@ -90,6 +120,8 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             origin: .zero,
             size: RhwpStudioPagePDFMetrics.initialPageSize
         )
+        startPageRenderTimeout(pageNumber: renderingPageIndex + 1)
+        isInitialMainFrameLoadPending = true
         webView.loadHTMLString(
             RhwpStudioPagePDFHTML.pageHTML(for: payload.pages[renderingPageIndex]),
             baseURL: nil
@@ -101,11 +133,20 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             return
         }
 
-        webView.evaluateJavaScript(RhwpStudioPagePDFHTML.pageMetricsScript) { [weak self] result, error in
+        webView.evaluateJavaScript(
+            RhwpStudioPagePDFHTML.pageMetricsScript,
+            in: nil,
+            in: .defaultClient
+        ) { [weak self] result in
             guard let self, !self.didFinish else {
                 return
             }
-            if let error {
+
+            let metrics: Any
+            switch result {
+            case .success(let value):
+                metrics = value
+            case .failure(let error):
                 self.finish(.failure(error))
                 return
             }
@@ -114,7 +155,7 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             let pageSize: NSSize
             do {
                 pageSize = try RhwpStudioPagePDFMetrics.size(
-                    fromMetrics: result,
+                    fromMetrics: metrics,
                     pageNumber: pageNumber
                 )
             } catch {
@@ -177,23 +218,84 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         renderNextPage()
     }
 
+    private func startPageRenderTimeout(pageNumber: Int) {
+        pageRenderTimeoutTask?.cancel()
+        let expectedPageIndex = renderingPageIndex
+        let timeoutNanoseconds = pageRenderTimeoutNanoseconds
+        pageRenderTimeoutTask = Task { @MainActor [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: timeoutNanoseconds)
+            } catch {
+                return
+            }
+
+            guard !Task.isCancelled,
+                  let self,
+                  !self.didFinish,
+                  self.renderingPageIndex == expectedPageIndex
+            else {
+                return
+            }
+
+            self.finish(.failure(
+                RhwpStudioPagePDFRenderError.pageRenderTimedOut(pageNumber)
+            ))
+        }
+    }
+
     private func finish(_ result: Result<PDFDocument, Error>) {
         guard !didFinish else {
             return
         }
 
         didFinish = true
+        pageRenderTimeoutTask?.cancel()
+        pageRenderTimeoutTask = nil
         webView.stopLoading()
         let completion = completion
         self.completion = nil
         payload = nil
         renderedDocument = PDFDocument()
         renderingPageIndex = 0
+        isInitialMainFrameLoadPending = false
         completion?(result)
     }
 }
 
+enum RhwpStudioPagePDFNavigationPolicy {
+    static func allowsNavigation(
+        to url: URL?,
+        targetFrameIsMainFrame: Bool?,
+        initialMainFrameLoadPending: Bool
+    ) -> Bool {
+        guard initialMainFrameLoadPending,
+              targetFrameIsMainFrame == true,
+              url?.absoluteString.lowercased() == "about:blank"
+        else {
+            return false
+        }
+
+        return true
+    }
+}
+
 enum RhwpStudioPagePDFHTML {
+    static let contentSecurityPolicy = [
+        "default-src 'none'",
+        "script-src 'none'",
+        "connect-src 'none'",
+        "frame-src 'none'",
+        "object-src 'none'",
+        "media-src 'none'",
+        "worker-src 'none'",
+        "manifest-src 'none'",
+        "base-uri 'none'",
+        "form-action 'none'",
+        "style-src 'unsafe-inline'",
+        "img-src data:",
+        "font-src 'none'"
+    ].joined(separator: "; ") + ";"
+
     static let pageMetricsScript = """
     (() => {
       const svg = document.querySelector("svg");
@@ -225,6 +327,7 @@ enum RhwpStudioPagePDFHTML {
         <html lang="ko">
         <head>
           <meta charset="utf-8">
+          <meta http-equiv="Content-Security-Policy" content="\(contentSecurityPolicy)">
           <style>
             * { box-sizing: border-box; }
             html, body {
@@ -280,6 +383,7 @@ enum RhwpStudioPagePDFMetrics {
 
 enum RhwpStudioPagePDFRenderError: LocalizedError, Equatable {
     case renderingInProgress
+    case pageRenderTimedOut(Int)
     case webContentProcessTerminated
     case invalidPageMetrics(Int)
     case pdfEncodingFailed(Int)
@@ -291,6 +395,8 @@ enum RhwpStudioPagePDFRenderError: LocalizedError, Equatable {
         switch self {
         case .renderingInProgress:
             "PDF 페이지 변환이 이미 진행 중입니다."
+        case .pageRenderTimedOut(let page):
+            "\(page)페이지 PDF 변환 시간이 초과됐습니다."
         case .webContentProcessTerminated:
             "PDF 페이지 변환 중 WebKit 프로세스가 종료됐습니다."
         case .invalidPageMetrics(let page):
