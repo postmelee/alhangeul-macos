@@ -269,6 +269,27 @@ current editor
 - `RhwpStudioPrintController`는 같은 renderer 결과를 `PDFDocument.printOperation`에 전달한다. 모든 non-square page 방향이 하나로 일치할 때만 job orientation을 초기화하며, 가로·세로 혼합 문서는 job orientation을 강제하지 않고 PDFKit auto-rotate에 맡긴다.
 - Quick Look과 Thumbnail은 이 renderer를 사용하지 않는다. 두 extension은 `RhwpDocument`와 render tree 기반 `HwpPageImageRenderer`의 bitmap 경로를 유지한다.
 
+#### page SVG trust boundary
+
+upstream `getPageSvg` 결과는 현재 editor에서 생성되지만 원본 문서 내용에서 유래한 markup이므로 trusted executable HTML이 아니라 비신뢰 정적 렌더 입력으로 취급한다. renderer는 SVG 문자열 자체를 범용 sanitizer로 재작성하지 않고, 전용 offscreen WebView의 실행·resource·navigation capability를 최소화한다.
+
+| 방어선 | 계약 |
+|--------|------|
+| WebView 격리 | renderer 전용 `WKWebViewConfiguration`과 `WKWebView`를 사용하고 website data store는 `.nonPersistent()`로 둔다. main editor WebView, user script, message handler와 URL scheme handler를 공유하지 않는다. |
+| 문서 script 차단 | `defaultWebpagePreferences.allowsContentJavaScript = false`와 `javaScriptCanOpenWindowsAutomatically = false`를 적용한다. SVG `<script>`, event handler와 `javascript:` URL을 실행하지 않는다. |
+| app-owned metrics | page 크기 측정 script만 `WKContentWorld.defaultClient`에서 실행한다. 이 world는 page script 전역과 격리되며 DOM의 width/height, viewBox와 bounding rect만 읽는다. 실패 시 content JavaScript를 다시 켜는 fallback은 없다. |
+| subresource policy | raw SVG보다 앞에 CSP meta를 배치한다. `default-src`, script, connect, frame, object, media, worker, manifest와 font는 `'none'`이며 `base-uri`와 `form-action`도 거부한다. wrapper/SVG 표현을 위한 inline style과 실제 page bitmap을 위한 `data:` image만 허용한다. |
+| navigation policy | page마다 `loadHTMLString(baseURL: nil)`이 만드는 최초 main-frame `about:blank` navigation만 한 번 허용한다. 이후 main-frame 이동, subframe, `targetFrame == nil` new-window와 HTTP/HTTPS/file/blob/custom scheme navigation은 취소한다. |
+| 실패 처리 | invalid metrics, 단일-page PDF가 아닌 결과, 잘못된 media box, 최종 page count 불일치와 WebContent process 종료를 명시적 render 실패로 반환한다. 권한을 확대하거나 차단된 resource를 다시 로드하지 않는다. |
+
+navigation delegate는 모든 image, font와 CSS subresource 요청을 관측하는 경계가 아니므로 외부 resource 차단은 CSP가 담당하고 navigation policy는 frame·document 이동을 담당한다. non-persistent store는 renderer session의 website data를 영구 저장하지 않는 마지막 격리선이다. 이 세 정책 중 하나를 제거할 때는 다른 정책이 같은 범위를 대신한다고 가정하지 않고 WebKit 통합 테스트를 함께 갱신해야 한다.
+
+HostAppTests는 CSP가 없는 test-only WebView가 `127.0.0.1` 임시 listener에 실제 연결되는 양성 대조를 먼저 확인한 뒤, hardened renderer의 HTTP/HTTPS image, `<use>`, CSS paint/font/stylesheet, iframe, object, meta refresh와 new-window fixture가 연결 0건인지 검증한다. 별도 script/event sentinel은 page content가 실행되지 않으면서 HostApp metrics, searchable text, embedded data PNG와 nested data SVG raster가 유지됨을 확인한다.
+
+허용된 `style-src 'unsafe-inline'`과 `img-src data:`는 현재 upstream page SVG 충실도에 필요한 최소 예외다. HTTP/HTTPS, `blob:`, file URL, 외부 font와 임의 custom scheme은 허용하지 않는다. upstream이 향후 data font나 다른 resource 계약을 추가하면 기존 예외를 넓히기 전에 대표 HWP/HWPX PDF·인쇄 회귀, script/network 차단과 deployment target WebKit 동작을 별도 변경으로 검증해야 한다.
+
+이 trust boundary는 사용자용 PDF export와 일반 인쇄의 공용 offscreen renderer에만 적용된다. main editor의 `alhangeul-studio://app` resource policy, HWP/HWPX 저장 exporter, Quick Look/Thumbnail과 Rust `rhwp` core의 실행 경계는 변경하지 않는다.
+
 #### HWP/HWPX와 원본 불변 경계
 
 PDF 저장은 HWP와 HWPX에 같은 `pageCount`/`getPageSvg` 경로를 적용한다. HWPX를 HWP로 중간 변환하지 않으며 `exportHwp`, `exportHwpBase64`, `exportHwpx`, `RhwpDocument`와 `HwpPreviewPDFRenderer`는 사용자용 PDF export controller의 입력이 아니다.
@@ -381,7 +402,8 @@ External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제
 ### HostApp page SVG PDF 렌더링
 
 - HostApp PDF export와 일반 인쇄는 bundled `rhwp-studio`가 현재 editor state에서 생성한 page SVG를 사용한다.
-- `RhwpStudioPagePDFRenderer`는 page별 SVG metrics를 보존한 전용 WKWebView에서 `WKWebView.createPDF`를 호출하고 PDFKit으로 결과 page를 합친다.
+- 문서 유래 page SVG는 비신뢰 정적 렌더 입력이다. `RhwpStudioPagePDFRenderer`는 non-persistent 전용 WKWebView에서 content JavaScript를 끄고 deny-by-default CSP와 최초 `about:blank` main-frame 1회만 허용하는 navigation policy를 적용한다.
+- HostApp의 page metrics script만 `WKContentWorld.defaultClient`에서 실행해 SVG metrics를 보존하고 `WKWebView.createPDF`를 호출한 뒤 PDFKit으로 결과 page를 합친다.
 - `RhwpStudioPDFExportController`는 결과를 사용자 destination에 atomic write하며, `RhwpStudioPrintController`는 같은 `PDFDocument`를 AppKit print operation에 전달한다.
 - 이 경로는 HWP/HWPX source bytes, `RhwpDocument`, render tree bitmap과 `HwpPreviewPDFRenderer`를 거치지 않는다.
 - PDF의 searchable/selectable text semantics는 upstream page SVG와 WebKit PDF 생성 결과에 따른다.
