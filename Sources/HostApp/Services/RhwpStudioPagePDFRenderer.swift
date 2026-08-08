@@ -10,6 +10,7 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
     private var renderedDocument = PDFDocument()
     private var renderingPageIndex = 0
     private var didFinish = true
+    private var isInitialMainFrameLoadPending = false
 
     override init() {
         let configuration = WKWebViewConfiguration()
@@ -44,6 +45,24 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         renderCurrentPagePDF()
+    }
+
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+    ) {
+        let shouldAllow = RhwpStudioPagePDFNavigationPolicy.allowsNavigation(
+            to: navigationAction.request.url,
+            targetFrameIsMainFrame: navigationAction.targetFrame?.isMainFrame,
+            initialMainFrameLoadPending: isInitialMainFrameLoadPending
+        )
+        if shouldAllow {
+            isInitialMainFrameLoadPending = false
+            decisionHandler(.allow)
+        } else {
+            decisionHandler(.cancel)
+        }
     }
 
     func webView(
@@ -89,6 +108,7 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             origin: .zero,
             size: RhwpStudioPagePDFMetrics.initialPageSize
         )
+        isInitialMainFrameLoadPending = true
         webView.loadHTMLString(
             RhwpStudioPagePDFHTML.pageHTML(for: payload.pages[renderingPageIndex]),
             baseURL: nil
@@ -197,7 +217,25 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         payload = nil
         renderedDocument = PDFDocument()
         renderingPageIndex = 0
+        isInitialMainFrameLoadPending = false
         completion?(result)
+    }
+}
+
+enum RhwpStudioPagePDFNavigationPolicy {
+    static func allowsNavigation(
+        to url: URL?,
+        targetFrameIsMainFrame: Bool?,
+        initialMainFrameLoadPending: Bool
+    ) -> Bool {
+        guard initialMainFrameLoadPending,
+              targetFrameIsMainFrame == true,
+              url?.absoluteString.lowercased() == "about:blank"
+        else {
+            return false
+        }
+
+        return true
     }
 }
 

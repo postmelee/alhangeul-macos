@@ -1,4 +1,5 @@
 import AppKit
+import Network
 import PDFKit
 import WebKit
 import XCTest
@@ -35,6 +36,38 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         let svgRange = try XCTUnwrap(html.range(of: "<svg id=\"document-svg\""))
         XCTAssertLessThan(cspRange.lowerBound, svgRange.lowerBound)
         XCTAssertTrue(html.contains("content=\"\(expectedPolicy)\""))
+    }
+
+    func testNavigationPolicyAllowsOnlyPendingInitialAboutBlankMainFrame() {
+        XCTAssertTrue(
+            RhwpStudioPagePDFNavigationPolicy.allowsNavigation(
+                to: URL(string: "about:blank"),
+                targetFrameIsMainFrame: true,
+                initialMainFrameLoadPending: true
+            )
+        )
+
+        let blockedCases: [(url: URL?, isMainFrame: Bool?, isPending: Bool)] = [
+            (URL(string: "about:blank"), true, false),
+            (URL(string: "about:blank"), false, true),
+            (URL(string: "about:blank"), nil, true),
+            (URL(string: "http://127.0.0.1/resource"), true, true),
+            (URL(string: "https://127.0.0.1/resource"), true, true),
+            (URL(fileURLWithPath: "/tmp/resource"), true, true),
+            (URL(string: "blob:https://example.invalid/resource"), true, true),
+            (URL(string: "custom:resource"), true, true),
+            (nil, true, true)
+        ]
+
+        for blockedCase in blockedCases {
+            XCTAssertFalse(
+                RhwpStudioPagePDFNavigationPolicy.allowsNavigation(
+                    to: blockedCase.url,
+                    targetFrameIsMainFrame: blockedCase.isMainFrame,
+                    initialMainFrameLoadPending: blockedCase.isPending
+                )
+            )
+        }
     }
 
     func testRendererPreservesPortraitAndLandscapePageOrientation() async throws {
@@ -158,6 +191,72 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         XCTAssertLessThan(redFraction, 0.05)
     }
 
+    func testRendererBlocksExternalResourcesAndNavigationWithoutRequests() async throws {
+        let probe = try LoopbackRequestProbe()
+        try await probe.start()
+        defer { probe.stop() }
+
+        let port = try XCTUnwrap(probe.port)
+        let httpBaseURL = "http://127.0.0.1:\(port.rawValue)"
+        let httpsBaseURL = "https://127.0.0.1:\(port.rawValue)"
+
+        let controlConfiguration = WKWebViewConfiguration()
+        controlConfiguration.websiteDataStore = .nonPersistent()
+        let controlWebView = WKWebView(frame: .zero, configuration: controlConfiguration)
+        controlWebView.loadHTMLString(
+            "<img src=\"\(httpBaseURL)/positive-control.png\">",
+            baseURL: nil
+        )
+        try await probe.waitForAcceptedConnection()
+        controlWebView.stopLoading()
+        try await Task.sleep(nanoseconds: 100_000_000)
+        XCTAssertGreaterThan(probe.acceptedConnectionCount, 0)
+        probe.resetAcceptedConnectionCount()
+
+        let payload = try RhwpStudioPagePayload(
+            fileName: "external-resource-blocking.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+                  <style>
+                    @font-face { font-family: probe; src: url(\(httpBaseURL)/font.woff2); }
+                    .external-fill { fill: url(\(httpsBaseURL)/paint.svg#paint); font-family: probe; }
+                  </style>
+                  <rect width="200" height="300" fill="white" />
+                  <text x="20" y="40" font-size="18" fill="black" class="external-fill">NETWORK-BLOCKED</text>
+                  <image href="\(httpBaseURL)/image.png" x="0" y="60" width="100" height="100" />
+                  <use href="\(httpsBaseURL)/sprite.svg#shape" x="100" y="60" width="100" height="100" />
+                </svg>
+                <link rel="stylesheet" href="\(httpBaseURL)/style.css">
+                <img src="\(httpsBaseURL)/html-image.png">
+                <iframe src="\(httpBaseURL)/frame.html"></iframe>
+                <object data="\(httpsBaseURL)/object.svg"></object>
+                <meta http-equiv="refresh" content="0;url=\(httpBaseURL)/redirected.html">
+                <a href="\(httpsBaseURL)/new-window.html" target="_blank">NEW-WINDOW-BLOCKED</a>
+                """
+            ]
+        )
+
+        var completionCount = 0
+        let document = try await withCheckedThrowingContinuation { continuation in
+            let renderer = RhwpStudioPagePDFRenderer()
+            renderer.render(payload: payload) { [renderer] result in
+                _ = renderer
+                completionCount += 1
+                if completionCount == 1 {
+                    continuation.resume(with: result)
+                }
+            }
+        }
+
+        try await Task.sleep(nanoseconds: 500_000_000)
+        XCTAssertEqual(document.pageCount, 1)
+        XCTAssertTrue(document.page(at: 0)?.string?.contains("NETWORK-BLOCKED") == true)
+        XCTAssertEqual(completionCount, 1)
+        XCTAssertEqual(probe.acceptedConnectionCount, 0)
+    }
+
     func testMetricsRejectMissingAndNonPositiveDimensions() {
         XCTAssertThrowsError(
             try RhwpStudioPagePDFMetrics.size(fromMetrics: nil, pageNumber: 1)
@@ -250,5 +349,109 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         }
 
         return Double(matchingPixels) / Double(totalPixels)
+    }
+}
+
+@MainActor
+private final class LoopbackRequestProbe {
+    private let listener: NWListener
+    private let queue = DispatchQueue(label: "com.postmelee.alhangeul.tests.pdf-network-probe")
+    private var startContinuation: CheckedContinuation<Void, Error>?
+    private var readinessTimeoutTask: Task<Void, Never>?
+    private(set) var acceptedConnectionCount = 0
+
+    var port: NWEndpoint.Port? {
+        listener.port
+    }
+
+    init() throws {
+        listener = try NWListener(using: .tcp, on: .any)
+    }
+
+    func start() async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            startContinuation = continuation
+            listener.stateUpdateHandler = { [weak self] state in
+                Task { @MainActor in
+                    self?.handleStateUpdate(state)
+                }
+            }
+            listener.newConnectionHandler = { [weak self] connection in
+                connection.cancel()
+                Task { @MainActor in
+                    self?.acceptedConnectionCount += 1
+                }
+            }
+            listener.start(queue: queue)
+            readinessTimeoutTask = Task { @MainActor [weak self] in
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                guard !Task.isCancelled else {
+                    return
+                }
+                self?.resolveStart(with: .failure(LoopbackRequestProbeError.readyTimedOut))
+            }
+        }
+    }
+
+    func stop() {
+        readinessTimeoutTask?.cancel()
+        readinessTimeoutTask = nil
+        listener.cancel()
+    }
+
+    func waitForAcceptedConnection() async throws {
+        for _ in 0..<100 {
+            if acceptedConnectionCount > 0 {
+                return
+            }
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        throw LoopbackRequestProbeError.connectionTimedOut
+    }
+
+    func resetAcceptedConnectionCount() {
+        acceptedConnectionCount = 0
+    }
+
+    private func handleStateUpdate(_ state: NWListener.State) {
+        switch state {
+        case .ready:
+            resolveStart(with: .success(()))
+        case .failed(let error):
+            resolveStart(with: .failure(error))
+        case .cancelled:
+            if startContinuation != nil {
+                resolveStart(with: .failure(LoopbackRequestProbeError.cancelledBeforeReady))
+            }
+        case .setup, .waiting:
+            break
+        @unknown default:
+            break
+        }
+    }
+
+    private func resolveStart(with result: Result<Void, Error>) {
+        readinessTimeoutTask?.cancel()
+        readinessTimeoutTask = nil
+        let continuation = startContinuation
+        startContinuation = nil
+        continuation?.resume(with: result)
+    }
+}
+
+private enum LoopbackRequestProbeError: LocalizedError {
+    case cancelledBeforeReady
+    case connectionTimedOut
+    case readyTimedOut
+
+    var errorDescription: String? {
+        switch self {
+        case .cancelledBeforeReady:
+            "loopback listener가 준비되기 전에 취소됐습니다."
+        case .connectionTimedOut:
+            "loopback listener 양성 대조 연결 시간이 초과됐습니다."
+        case .readyTimedOut:
+            "loopback listener 준비 시간이 초과됐습니다."
+        }
     }
 }
