@@ -63,10 +63,10 @@ base-uri 'none';
 form-action 'none';
 style-src 'unsafe-inline';
 img-src data:;
-font-src data:;
+font-src 'none';
 ```
 
-wrapper의 inline style과 upstream SVG의 embedded bitmap/font 보존을 위해 `style-src 'unsafe-inline'`, `img-src data:`, `font-src data:`만 예외 후보로 둔다. HTTP/HTTPS, `blob:`, file URL과 임의 custom scheme은 허용하지 않는다. Stage 1에서 실제 bundled SVG 생성 코드와 대표 문서 결과를 조사해 data image/font 필요 범위를 확인하고, 필요하지 않은 directive는 더 좁힌다.
+wrapper의 inline style과 upstream SVG의 embedded bitmap 보존을 위해 `style-src 'unsafe-inline'`, `img-src data:`만 예외로 둔다. Stage 1 조사에서 현재 HostApp의 `getPageSvg`가 legacy `renderPageSvg` 경로를 사용하고 대표 SVG에 `@font-face`나 data font가 없음을 확인했으므로 `font-src`는 명시적으로 `'none'`을 유지한다. HTTP/HTTPS, `blob:`, file URL과 임의 custom scheme은 허용하지 않는다. 향후 bundled renderer가 data font를 실제 page SVG 계약에 추가할 때는 별도 검증과 정책 변경이 필요하다.
 
 ## 구현 원칙
 
@@ -153,6 +153,7 @@ renderer의 navigation policy는 초기 `loadHTMLString`에 필요한 내부 mai
 
 - known-good `data:image/png;base64,...` fixture가 PDF raster에 남는지 확인
 - `data:image/svg+xml,...` 중첩 SVG의 script/event가 실행되지 않는지 확인
+- data font는 현재 page SVG 계약에 없으므로 로드되지 않는지 확인
 - literal `blob:` 참조는 허용되지 않고 외부 요청·navigation을 만들지 않는지 확인
 - upstream 대표 문서의 image와 text가 CSP 적용 전 기준과 비교해 누락되지 않는지 확인
 
@@ -339,7 +340,7 @@ CSP가 HTTP/HTTPS subresource 요청을 실제로 차단하고 renderer 외 navi
 ### 작업
 
 - synthetic page의 media box, page count, text와 raster assertions를 보강한다.
-- data PNG/font가 필요한 실제 문서의 시각 요소가 CSP 적용 뒤 유지되는지 비교한다.
+- data image가 필요한 실제 문서의 시각 요소가 CSP 적용 뒤 유지되는지 비교한다.
 - toolbar와 내부 menu PDF 저장이 동일한 hardened renderer를 사용하는지 확인한다.
 - 일반 인쇄가 같은 renderer 결과와 기존 orientation policy를 유지하는지 확인한다.
 - 세로·가로·혼합 문서의 실제 인쇄 패널 preview를 확인한다.
@@ -437,7 +438,7 @@ architecture의 PDF/print renderer 설명을 실제 보안 계약과 맞추고, 
 ## 승인 요청 사항
 
 - content JavaScript를 비활성화하고 HostApp metrics만 `WKContentWorld.defaultClient`에서 실행하는 구현 계약을 승인 요청한다.
-- CSP에서 HTTP/HTTPS/blob을 거부하고 inline style과 실제 필요가 확인된 data image/font만 허용하는 정책을 승인 요청한다.
+- CSP에서 HTTP/HTTPS/blob과 font resource를 거부하고 inline style과 실제 필요가 확인된 data image만 허용하는 정책을 승인 요청한다.
 - CSP + navigation delegate + non-persistent store를 기본 방어선으로 사용하고, content rule list는 통합 테스트에서 차단 공백이 확인될 때만 추가하는 결정을 승인 요청한다.
 - loopback `NWListener`로 실제 WKWebView 외부 요청 0건을 검증하는 테스트 방향을 승인 요청한다.
 - 이 구현계획을 기준으로 Stage 1 조사와 보안 계약 확정 작업 진행 승인을 요청한다.
