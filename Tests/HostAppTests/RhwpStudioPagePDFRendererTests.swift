@@ -85,8 +85,23 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
 
         let portraitBounds = try XCTUnwrap(document.page(at: 0)?.bounds(for: .mediaBox))
         let landscapeBounds = try XCTUnwrap(document.page(at: 1)?.bounds(for: .mediaBox))
+        XCTAssertEqual(portraitBounds.width, 200, accuracy: 0.01)
+        XCTAssertEqual(portraitBounds.height, 300, accuracy: 0.01)
+        XCTAssertEqual(landscapeBounds.width, 300, accuracy: 0.01)
+        XCTAssertEqual(landscapeBounds.height, 200, accuracy: 0.01)
         XCTAssertLessThan(portraitBounds.width, portraitBounds.height)
         XCTAssertGreaterThan(landscapeBounds.width, landscapeBounds.height)
+        XCTAssertNil(RhwpStudioPrintOrientationPolicy.orientation(for: document))
+
+        for pageIndex in 0..<document.pageCount {
+            let page = try XCTUnwrap(document.page(at: pageIndex))
+            let blueFraction = try pixelFraction(on: page) { color in
+                color.blueComponent > 0.5
+                    && color.redComponent < 0.5
+                    && color.greenComponent < 0.7
+            }
+            XCTAssertGreaterThan(blueFraction, 0.001)
+        }
 
         let data = try XCTUnwrap(document.dataRepresentation())
         XCTAssertTrue(data.starts(with: Data("%PDF".utf8)))
@@ -307,6 +322,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         """
         <svg xmlns="http://www.w3.org/2000/svg" width="\(width)" height="\(height)" viewBox="0 0 \(width) \(height)">
           <rect width="\(width)" height="\(height)" fill="white" />
+          <rect x="0" y="0" width="20" height="20" fill="#3366cc" />
           <text x="20" y="40" font-size="20" fill="black">\(text)</text>
         </svg>
         """
