@@ -276,7 +276,8 @@ JSON
 "$ROOT/scripts/verify-rhwp-studio-assets.sh" \
   --resource-dir "$TARGET" \
   --tag "$EXPECTED_RELEASE_TAG" \
-  --commit "$expected_commit_resolved"
+  --commit "$expected_commit_resolved" \
+  --upstream-dir "$UPSTREAM_DIR"
 
 if [ "$CHECK_MODE" = "true" ]; then
   echo "OK: rhwp-studio sync check passed for $EXPECTED_RELEASE_TAG at $expected_commit_resolved"
