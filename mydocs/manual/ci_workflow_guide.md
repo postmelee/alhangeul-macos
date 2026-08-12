@@ -75,7 +75,7 @@ PR CI는 외부 PR에서도 안전하게 실행할 수 있는 검증만 수행�
 
 ### docs-only skip 기준
 
-docs-only PR에서도 `classify-changes`와 `script-checks`는 실행한다. 따라서 build-info helper fixture는 항상 실행되지만 tracked Swift source verifier는 관련 변경이 `run_macos_build=true`를 켰을 때 macOS validation에서 실행한다. `run_macos_build=false`이면 `macos-validation` job은 skipped 상태가 된다. 단, release 관련 문서나 Pages/appcast 파일은 문서여도 `run_release_checks=true`가 될 수 있다.
+docs-only PR에서도 `classify-changes`와 `script-checks`는 실행한다. 따라서 build-info helper fixture와 studio Cargo.lock fingerprint fixture는 항상 실행되지만 tracked Swift source verifier는 관련 변경이 `run_macos_build=true`를 켰을 때 macOS validation에서 실행한다. studio fixture는 production resource를 수정하지 않고 resource-only 하위 호환, strict 일치, 누락, malformed sha256, 실제 값 mismatch와 sync self-check를 독립적으로 검증한다. `run_macos_build=false`이면 `macos-validation` job은 skipped 상태가 된다. 단, release 관련 문서나 Pages/appcast 파일은 문서여도 `run_release_checks=true`가 될 수 있다.
 
 ### PR CI 로컬 재현
 
@@ -97,6 +97,7 @@ bash scripts/update-rhwp-core-build-info.sh --help
 bash scripts/verify-rhwp-core-build-info.sh --help
 bash scripts/verify-rhwp-studio-assets.sh --help
 scripts/ci/test-rhwp-core-build-info.sh
+scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
 scripts/ci/update-release-version-notices.sh --updates-dir docs/updates --check
 ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |path| Psych.parse_file(path); puts "Parsed #{path}" }'
 ```
@@ -128,7 +129,7 @@ Rust/core 변경이 있으면 `./scripts/build-rust-macos.sh` 대신 다음 lock
 
 PR CI의 macOS validation은 GitHub-hosted runner/toolchain 차이를 고려해 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`을 설정한다. 이 값은 `Frameworks/universal/librhwp.a` byte hash/size 비교만 제외한다. `rhwp` source provenance, `RustBridge/Cargo.lock`, generated header hash/size, `rhwp-ffi-symbols.txt` 검증은 계속 실패 가능한 gate로 남는다.
 
-Build-info fixture와 tracked source verifier는 Ubuntu `script-checks`에서 먼저 실행해 canonical drift를 Rust build 전에 차단한다. 같은 verifier를 macOS validation에서도 다시 실행한다. Verifier는 `rhwp-core.lock`에서 canonical `RhwpCoreBuildInfo.swift` 전체를 생성해 tracked source와 byte 비교하며 파일을 자동 수정하지 않는다. 존재하는 빈 `rhwp_enabled_features`는 유효하지만 key 누락, malformed token, source member/comment 누락·여분은 실패한다.
+Build-info fixture와 studio Cargo.lock fingerprint fixture는 Ubuntu `script-checks`에서 먼저 실행해 canonical drift와 provenance verifier 회귀를 Rust build 전에 차단한다. tracked build-info verifier는 macOS validation에서도 다시 실행한다. Build-info verifier는 `rhwp-core.lock`에서 canonical `RhwpCoreBuildInfo.swift` 전체를 생성해 tracked source와 byte 비교하며 파일을 자동 수정하지 않는다. 존재하는 빈 `rhwp_enabled_features`는 유효하지만 key 누락, malformed token, source member/comment 누락·여분은 실패한다.
 
 `RustBridge/examples/*` 같은 benchmark/helper 변경은 macOS build는 요구할 수 있지만 lock-level `run_rust_verify`는 켜지 않는다.
 
@@ -316,7 +317,8 @@ bash scripts/ci/check-rhwp-upstream-release.sh --target-tag <rhwp-tag> --run-com
 - upstream WASM/studio build는 Ubuntu runner에서 수행하고, native RustBridge/core lock update는 macOS runner에서 수행한다.
 - `Frameworks/` 생성 산출물은 commit하지 않고, `scripts/build-rust-macos.sh --update-lock`가 산출물 hash/size를 `rhwp-core.lock`에 기록한다.
 - complete lock 생성 직후 `scripts/update-rhwp-core-build-info.sh`와 verifier를 실행하고 `Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift`를 후보 PR에 명시적으로 stage한다. 옵션 없는 writer 실행은 이 sync candidate 생성 경로에만 둔다.
-- generated PR body와 Actions summary에는 writer/verifier 결과를 기록한다. Maintainer checklist는 lock/Cargo resolved commit, generated build info, bundled studio provenance와 app-facing impact를 사람이 함께 확인하도록 유지한다.
+- bundled studio sync 직후 `scripts/verify-rhwp-studio-assets.sh --upstream-dir <target-checkout> --tag <tag> --commit <commit>`를 실행한다. manifest fingerprint 누락, malformed sha256, target root `Cargo.lock` 누락, 실제 값 mismatch 중 하나라도 있으면 후보 branch push와 PR 생성을 진행하지 않는다.
+- generated PR body와 Actions summary에는 build-info writer/verifier 결과와 target `Cargo.lock` fingerprint 자동 비교 결과를 기록한다. Maintainer checklist는 lock/Cargo resolved commit, generated build info, 자동 검증된 bundled studio provenance와 app-facing impact를 사람이 함께 확인하도록 유지한다.
 - `GITHUB_TOKEN` fallback으로 실제 PR을 생성하지 않는다. token variable/secret이 없으면 `dry_run=false` 실행은 실패해야 한다.
 
 입력:
@@ -348,19 +350,24 @@ bash scripts/update-rhwp-core-build-info.sh --help
 bash scripts/verify-rhwp-core-build-info.sh --help
 bash scripts/verify-rhwp-studio-assets.sh --help
 scripts/ci/test-rhwp-core-build-info.sh
+scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
 ./scripts/verify-rhwp-core-build-info.sh
 scripts/verify-rhwp-studio-assets.sh
+scripts/verify-rhwp-studio-assets.sh \
+  --upstream-dir /absolute/path/to/target-rhwp-checkout \
+  --tag <release-tag> \
+  --commit <resolved-commit>
 ```
 
 ## 실패 해석 기준
 
 - `classify-changes` 실패: base/head ref나 변경 범위 helper 문제를 먼저 확인한다.
-- `script-checks` 실패: shell syntax, helper interface 또는 build-info fixture 회귀다. macOS build 전 수정한다.
+- `script-checks` 실패: shell syntax, helper interface, build-info fixture 또는 studio Cargo.lock fingerprint fixture 회귀다. macOS build 전 수정한다.
 - `macos-validation` 실패: 앱 build, XcodeGen 입력, shared Swift boundary, Rust lock/build info, renderer smoke 중 하나가 깨진 것이다.
 - `release-checks` 실패: release helper, release note template, delta checklist, Sparkle appcast XML 생성 경계가 깨진 것이다.
 - `Release Rehearsal DMG` 실패: public release 전 core lock/build-info drift, packaging/release script 또는 ref delta 입력을 수정한다.
 - `Release Publish DMG` 실패: core lock/build-info와 public release 산출물 상태를 먼저 확인하고, 필요한 경우 GitHub Release asset/appcast/Pages/Homebrew 반영을 중단한다.
 - `Docs-only Pages Deploy` 실패: public appcast 다운로드/XML 검증 실패, Pages artifact 조립 실패, `github-pages` environment policy, 또는 `deploy-pages` 실패를 먼저 확인한다. stale `docs/appcast.xml` fallback으로 우회하지 않는다.
-- `rhwp Upstream Sync PR` 실패: target release 조회, core/studio current 판정, upstream checkout/build, macOS core lock/build-info update, GitHub App token 설정, 기존 automation branch/PR 상태를 먼저 확인한다.
+- `rhwp Upstream Sync PR` 실패: target release 조회, core/studio current 판정, upstream checkout/build, studio manifest의 `source_cargo_lock_sha256` strict 비교, macOS core lock/build-info update, GitHub App token 설정, 기존 automation branch/PR 상태를 먼저 확인한다. fingerprint 실패는 malformed manifest field와 실제 target `Cargo.lock` mismatch를 verifier 진단으로 구분한다.
 
 실패 증상, 재현 조건, 원인, 재발 방지 절차가 명확해진 경우에만 `mydocs/troubleshootings/`에 별도 문서로 남긴다.

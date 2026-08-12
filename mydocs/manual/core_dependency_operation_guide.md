@@ -114,8 +114,8 @@ xcodebuild -project Alhangeul.xcodeproj \
 - `.github/workflows/rhwp-upstream-sync-pr.yml`은 upstream target release를 `devel` 대상 `automation/rhwp-<tag>-full-sync` branch에 반영하는 full sync 후보 PR을 만든다. current 판정은 `devel` content의 core lock과 bundled studio manifest 기준으로 수행한다.
 - sync workflow는 같은 target의 open PR 또는 PR 없는 branch-only 상태를 중복 생성 blocker로 취급한다. merge 완료 PR의 head branch가 남아 있으면 blocker가 아니라 cleanup 후보로 표시하며, 실제 원격 branch 삭제는 별도 승인 또는 merge 후 cleanup 절차에서 수행한다.
 - sync workflow는 `scripts/update-rhwp-core.sh --check --channel stable --tag <tag>`로 target release compatibility를 먼저 조회하고, 실제 PR 생성 단계에서는 `scripts/update-rhwp-core.sh --channel stable --tag <tag>`와 `scripts/build-rust-macos.sh --update-lock`로 `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`을 갱신한다. complete lock 직후 build info writer와 verifier를 실행하고 `RhwpCoreBuildInfo.swift`를 후보 PR에 명시적으로 stage한다.
-- sync workflow는 같은 target commit에서 upstream WASM/studio asset을 빌드하고 `scripts/sync-rhwp-studio.sh`로 bundled `rhwp-studio` manifest와 asset을 갱신한다. 이때 upstream root `Cargo.lock`의 sha256은 manifest의 `source_cargo_lock_sha256`에 기록해 studio/WASM dependency graph provenance로 검토한다.
-- full sync 변경 PR은 PR CI에서 build info fixture와 tracked source verifier, `scripts/verify-rhwp-studio-assets.sh`, HostApp build, Rust/core provenance verify, release helper dry-run을 확인한다. PR CI와 release rehearsal/publish는 build info를 자동 수정하지 않는다.
+- sync workflow는 같은 target commit에서 upstream WASM/studio asset을 빌드하고 `scripts/sync-rhwp-studio.sh`로 bundled `rhwp-studio` manifest와 asset을 갱신한다. 이때 upstream root `Cargo.lock`의 sha256을 manifest의 `source_cargo_lock_sha256`에 기록하고, target checkout을 넘긴 verifier가 기록값과 실제 파일을 자동 비교한다.
+- full sync 변경 PR은 후보 생성 단계에서 `scripts/verify-rhwp-studio-assets.sh --upstream-dir <target-checkout>` strict gate를 통과해야 한다. 일반 PR CI는 upstream checkout이 없으므로 resource-only verifier와 별도 fixture로 strict 비교의 정상·누락·malformed·mismatch 경계를 검증한다. HostApp build, Rust/core provenance verify, release helper dry-run도 함께 확인하며 PR CI와 release rehearsal/publish는 build info를 자동 수정하지 않는다.
 - signed/notarized DMG, GitHub Release, Sparkle appcast, Homebrew Cask 반영은 별도 release 승인과 보호 workflow가 필요하다.
 
 ## 업데이트 후 확인 항목
@@ -128,7 +128,7 @@ xcodebuild -project Alhangeul.xcodeproj \
 - `RhwpCoreBuildInfo.releaseTag`가 Stable의 `rhwp_release_tag` 또는 Demo/Preview의 `rhwp_latest_checked_release_tag`와 일치
 - `RhwpCoreBuildInfo.commit`, `enabledFeatures`가 실제 lock의 `rhwp_commit`, `rhwp_enabled_features`와 일치하고 `./scripts/verify-rhwp-core-build-info.sh` 통과
 - `rhwp-core.lock`의 `Frameworks/universal/librhwp.a` reference metadata와 `Frameworks/generated_rhwp.h` sha256/size 기록 갱신 여부
-- bundled `rhwp-studio` manifest의 `source_cargo_lock_sha256`이 target upstream root `Cargo.lock`과 일치하는지 여부
+- `scripts/verify-rhwp-studio-assets.sh --upstream-dir <target-checkout> --tag <tag> --commit <commit>`가 통과하고 bundled `rhwp-studio` manifest의 `source_cargo_lock_sha256`이 target upstream root `Cargo.lock`과 일치하는지 여부
 - `rhwp-ffi-symbols.txt` 변경 여부와 의도성
 - Swift `RenderTree` 모델과 core JSON 구조 호환성
 - Quick Look/Thumbnail smoke test 필요 여부
