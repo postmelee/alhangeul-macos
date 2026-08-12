@@ -2,9 +2,9 @@
   "name": "rhwp-studio",
   "source_repository": "https://github.com/edwardkim/rhwp.git",
   "source_ref_kind": "release-tag",
-  "source_release_tag": "v0.8.2",
-  "source_resolved_commit": "9b16aa9e23f476e2b335d7c029fc9f24a199d63c",
-  "source_cargo_lock_sha256": "64ff4041c1874c01c7a901b28df2639082836ced44df392cd37b3227d4772279",
+  "source_release_tag": "v0.8.4",
+  "source_resolved_commit": "496333b27d21ddb9114ba9ae340bcb895870c9a7",
+  "source_cargo_lock_sha256": "217783dc2ee85525ff8eaefd3ae6b44a8523d0a38daaf6031f3cc277de16b893",
   "wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "recommended_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "actual_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
@@ -18,23 +18,23 @@
     "fonts/FONTS.md"
   ],
   "copied_file_count": 61,
-  "copied_total_bytes": 40176448,
+  "copied_total_bytes": 41102101,
   "entrypoints": {
     "index_html": {
       "path": "index.html",
-      "sha256": "c2acf072c142ab22cf05d74b0d0fd071aa1a566425d50e55365d0a102ec751db"
+      "sha256": "31286720083e3f60ee7883f10662ec00005d9a1ca4a082dc2e2c718d091b1005"
     },
     "main_js": {
-      "path": "assets/index-DZp2UYI6.js",
-      "sha256": "2215534e6aed9383afa81d3e8713f809da34ddfb5c357c65d950788d2fc91147"
+      "path": "assets/index-2K8l69fn.js",
+      "sha256": "b17fec4714d2bb07655c6d493bdfc66b1ae8182f926a48354c9deeed2ee0866c"
     },
     "main_css": {
-      "path": "assets/index-CX93BaKm.css",
-      "sha256": "5f372660fbcb3c0e721cebc29b50b27c954301744ea86ad584a0145b76b81c80"
+      "path": "assets/index-RCGbZ9bS.css",
+      "sha256": "11698afc6ca3891a72ff881e80a6a77139afb157e0ed6f60a001af7ea741efee"
     },
     "wasm": {
-      "path": "assets/rhwp_bg-ftaI0hCm.wasm",
-      "sha256": "1f6ab50679a1172a305f06c74b8c314e72a167f34160d762dc18b994f0864bc2"
+      "path": "assets/rhwp_bg-CKllGEX8.wasm",
+      "sha256": "865544531ebafa21a8e2b6da7dd2e0b8c52e381130a86159495f50b18e071ca8"
     }
   }
 }
