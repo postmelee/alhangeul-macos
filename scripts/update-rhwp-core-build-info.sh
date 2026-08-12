@@ -6,25 +6,25 @@ ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 READ_LOCK="$ROOT/scripts/ci/read-rhwp-core-lock.sh"
 BUILD_INFO_COMMON="$ROOT/scripts/ci/rhwp-core-build-info-common.sh"
 LOCK_FILE="$ROOT/rhwp-core.lock"
-BUILD_INFO="$ROOT/Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift"
-EXPECTED_BUILD_INFO=""
+OUTPUT="$ROOT/Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift"
+TMP_OUTPUT=""
 
 usage() {
   cat >&2 <<EOF
-Usage: $0 [--lock-file FILE] [--build-info FILE]
+Usage: $0 [--lock-file FILE] [--output FILE]
 
-Verifies that Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift mirrors the
-current rhwp-core.lock release baseline, resolved commit, and enabled features.
+Writes deterministic RhwpCoreBuildInfo Swift source from a complete
+rhwp-core.lock. Stable tags and demo commit pins are supported.
 
 Options:
   --lock-file FILE  Read FILE instead of the repository rhwp-core.lock.
-  --build-info FILE Verify FILE instead of the repository Swift build info.
+  --output FILE     Write FILE instead of the repository Swift build info.
 EOF
 }
 
 cleanup() {
-  if [ -n "$EXPECTED_BUILD_INFO" ] && [ -f "$EXPECTED_BUILD_INFO" ]; then
-    rm -f "$EXPECTED_BUILD_INFO"
+  if [ -n "$TMP_OUTPUT" ] && [ -f "$TMP_OUTPUT" ]; then
+    rm -f "$TMP_OUTPUT"
   fi
 }
 trap cleanup EXIT
@@ -40,13 +40,13 @@ while [ "$#" -gt 0 ]; do
       LOCK_FILE="$2"
       shift 2
       ;;
-    --build-info)
+    --output)
       if [ "$#" -lt 2 ] || [ -z "$2" ]; then
-        echo "ERROR: --build-info requires a path" >&2
+        echo "ERROR: --output requires a path" >&2
         usage
         exit 1
       fi
-      BUILD_INFO="$2"
+      OUTPUT="$2"
       shift 2
       ;;
     --help|-h)
@@ -76,23 +76,25 @@ if [ ! -f "$LOCK_FILE" ]; then
   exit 1
 fi
 
-if [ ! -f "$BUILD_INFO" ]; then
-  echo "ERROR: missing Swift build info: $BUILD_INFO" >&2
-  exit 1
-fi
-
 # shellcheck source=scripts/ci/rhwp-core-build-info-common.sh
 source "$BUILD_INFO_COMMON"
 rhwp_build_info_load_lock "$LOCK_FILE" "$READ_LOCK"
 
-EXPECTED_BUILD_INFO="$(mktemp "${TMPDIR:-/tmp}/rhwp-core-build-info-verify.XXXXXX")"
-rhwp_build_info_render_swift > "$EXPECTED_BUILD_INFO"
-
-if ! cmp -s "$BUILD_INFO" "$EXPECTED_BUILD_INFO"; then
-  echo "ERROR: $BUILD_INFO is not the canonical build info for $LOCK_FILE" >&2
-  diff -u "$BUILD_INFO" "$EXPECTED_BUILD_INFO" >&2 || true
-  echo "Update: $ROOT/scripts/update-rhwp-core-build-info.sh --lock-file $LOCK_FILE --output $BUILD_INFO" >&2
+OUTPUT_DIR="$(dirname "$OUTPUT")"
+if [ ! -d "$OUTPUT_DIR" ]; then
+  echo "ERROR: missing output directory: $OUTPUT_DIR" >&2
   exit 1
 fi
 
-echo "OK: $BUILD_INFO matches $LOCK_FILE"
+TMP_OUTPUT="$(mktemp "$OUTPUT.tmp.XXXXXX")"
+rhwp_build_info_render_swift > "$TMP_OUTPUT"
+chmod 0644 "$TMP_OUTPUT"
+
+if [ -f "$OUTPUT" ] && cmp -s "$TMP_OUTPUT" "$OUTPUT"; then
+  echo "OK: $OUTPUT is already up to date with $LOCK_FILE"
+  exit 0
+fi
+
+mv "$TMP_OUTPUT" "$OUTPUT"
+TMP_OUTPUT=""
+echo "Updated: $OUTPUT"

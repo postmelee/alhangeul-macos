@@ -87,7 +87,21 @@ jobs:
           bash scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
           bash scripts/ci/write-sparkle-appcast.sh --help
           bash scripts/sync-rhwp-studio.sh --help
+          bash scripts/update-rhwp-core-build-info.sh --help
+          bash scripts/verify-rhwp-core-build-info.sh --help
           bash scripts/verify-rhwp-studio-assets.sh --help
+
+      - name: Check core build info helper fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/test-rhwp-core-build-info.sh
+
+      - name: Verify tracked core build info
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/verify-rhwp-core-build-info.sh
 
       - name: Check release note version notices
         shell: bash
@@ -165,6 +179,12 @@ jobs:
         run: |
           set -euo pipefail
           ./scripts/check-no-appkit.sh
+
+      - name: Verify core build info
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/verify-rhwp-core-build-info.sh
 
       - name: Verify bundled rhwp-studio assets
         shell: bash
