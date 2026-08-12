@@ -277,6 +277,7 @@ $MENTION upstream \`edwardkim/rhwp\` release 감지 결과 full upstream sync �
 ## Full sync scope
 
 - \`rhwp-core.lock\`, \`RustBridge/Cargo.toml\`, \`RustBridge/Cargo.lock\` are updated to the target upstream release provenance.
+- \`Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift\` is regenerated from the completed \`rhwp-core.lock\`.
 - Bundled \`rhwp-studio\` and WASM assets are rebuilt from the same target commit.
 - Bundled \`rhwp-studio\` manifest records the target upstream root \`Cargo.lock\` fingerprint.
 - Generated \`Frameworks/\` artifacts are not committed; their reference metadata is recorded in \`rhwp-core.lock\`.
@@ -316,6 +317,7 @@ EOF
 ## Maintainer checklist
 
 - [ ] \`rhwp-core.lock\` tag/commit and \`RustBridge/Cargo.lock\` resolved commit match the upstream release.
+- [ ] \`RhwpCoreBuildInfo.swift\` release tag, commit, and enabled features match \`rhwp-core.lock\`.
 - [ ] bundled \`rhwp-studio\` manifest tag/commit matches the upstream release.
 - [ ] bundled \`rhwp-studio\` manifest \`source_cargo_lock_sha256\` matches the target upstream root \`Cargo.lock\`.
 - [ ] PR CI macOS build, Rust/core verify, bundled studio verify, and release helper checks pass.

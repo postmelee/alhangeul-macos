@@ -146,6 +146,14 @@ classify_path() {
   esac
 
   case "$path" in
+    Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift|scripts/update-rhwp-core-build-info.sh|scripts/verify-rhwp-core-build-info.sh|scripts/ci/read-rhwp-core-lock.sh|scripts/ci/test-rhwp-core-build-info.sh)
+      enable_macos_build "$path affects core build info synchronization"
+      enable_rust_verify "$path affects core build info lock verification"
+      matched=1
+      ;;
+  esac
+
+  case "$path" in
     RustBridge/examples/*)
       ;;
     RustBridge/*|rhwp-core.lock|Frameworks/*|Vendor/rhwp/*|rust-toolchain.toml|scripts/build-rust-macos.sh|scripts/update-rhwp-core.sh|scripts/sync-rhwp-studio.sh|scripts/verify-rhwp-studio-assets.sh)
