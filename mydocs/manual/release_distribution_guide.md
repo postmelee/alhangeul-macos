@@ -53,6 +53,9 @@
 - `scripts/ci/classify-pr-changes.sh`: PR CI 변경 범위 flag 생성
 - `scripts/ci/detect-rhwp-studio-impact.sh`: upstream `rhwp` current..target diff에서 bundled studio/viewer 영향 path 감지
 - `scripts/ci/write-rhwp-full-sync-pr-body.sh`: 자동 upstream `rhwp` full sync PR body 생성
+- `scripts/update-rhwp-core-build-info.sh`: 완성된 `rhwp-core.lock`에서 deterministic Swift build info 생성
+- `scripts/verify-rhwp-core-build-info.sh`: lock과 tracked Swift build info의 release baseline/commit/features 검증
+- `scripts/ci/test-rhwp-core-build-info.sh`: stable/demo writer·verifier isolated fixture와 production 파일 무손실 검증
 - `scripts/ci/write-rhwp-studio-sync-pr-body.sh`: 자동 bundled `rhwp-studio` sync PR body 생성
 - `scripts/sync-rhwp-studio.sh`: upstream `rhwp-studio/dist`와 WASM 산출물을 HostApp bundled resource로 동기화
 - `scripts/verify-rhwp-studio-assets.sh`: bundled `rhwp-studio` manifest와 entrypoint asset 검증
@@ -69,7 +72,14 @@
 
 ## upstream 자동 sync PR 경계
 
-`rhwp Upstream Sync PR` workflow가 만든 PR은 upstream `rhwp` full sync 후보일 뿐 public release가 아니다. 해당 PR은 `devel` 대상 PR CI에서 HostApp build, bundled asset 검증, Rust/core provenance verify, release helper dry-run을 통과해야 하며, 작업자는 `rhwp-core.lock`, `RustBridge/Cargo.lock`, bundled studio manifest tag/commit과 upstream release 링크가 맞는지 확인한다.
+`rhwp Upstream Sync PR` workflow가 만든 PR은 upstream `rhwp` full sync 후보일 뿐 public release가 아니다. Sync candidate 생성 경로는 complete `rhwp-core.lock`에서 `RhwpCoreBuildInfo.swift`를 자동 생성·검증·stage한다. 해당 PR은 `devel` 대상 PR CI에서 build-info fixture와 tracked source verifier, HostApp build, bundled asset 검증, Rust/core provenance verify, release helper dry-run을 통과해야 한다.
+
+자동 gate와 maintainer 확인 책임은 다음과 같이 나눈다.
+
+- sync workflow만 writer를 실행한다. PR CI와 release rehearsal/publish는 verifier만 실행하며 mismatch를 자동 수정하지 않는다.
+- 자동 gate는 lock과 Swift build info의 release baseline, 실제 commit, enabled features가 같은지 검사한다.
+- 작업자는 target upstream release와 resolved commit이 의도한 대상인지, generated build info diff와 bundled studio manifest가 같은 provenance인지, app-facing 변화와 smoke 범위가 적절한지 확인한다.
+- 자동 sync PR merge와 public release 포함 여부, release note, rehearsal/publish 실행은 각각 별도 승인 사항이다.
 
 이 workflow는 signed/notarized DMG, GitHub Release, Sparkle stable appcast, Homebrew Cask 변경을 만들지 않는다. public release 포함 여부, release note 표기, rehearsal/publish workflow 실행은 별도 명시 승인 후 이 가이드의 release flow를 따른다.
 
@@ -118,6 +128,8 @@
 - [ ] release owner가 delta checklist를 누락/과잉 확인용 보조 자료로 보정
 - [ ] `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock` 정합성 확인
 - [ ] `./scripts/build-rust-macos.sh --verify-lock` 통과 (`librhwp.a` byte hash skip 여부와 남는 source/header/ABI 검증 확인)
+- [ ] `RhwpCoreBuildInfo.swift`의 release baseline, commit, enabled features가 `rhwp-core.lock`과 일치
+- [ ] `./scripts/verify-rhwp-core-build-info.sh` 통과하고 release workflow가 writer로 drift를 자동 보정하지 않았는지 확인
 - [ ] `scripts/verify-rhwp-studio-assets.sh` 통과
 - [ ] Debug build 통과
 - [ ] Release build 통과

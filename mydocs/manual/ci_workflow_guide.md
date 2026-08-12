@@ -8,12 +8,12 @@
 
 | workflow | trigger | 권한 | runner | 역할 |
 |----------|---------|------|--------|------|
-| `PR CI` | `pull_request` to `main`, `devel`, `native-viewer-editor` | `contents: read`, `pull-requests: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax, 조건부 macOS build, 조건부 release helper dry-run |
-| `Release Rehearsal DMG` | `workflow_dispatch` | `contents: read`, `pull-requests: read` | macOS | signed/notarized 전 universal rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
-| `Release Publish DMG` | `workflow_dispatch` | `contents: write`/`pull-requests: read` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
+| `PR CI` | `pull_request` to `main`, `devel`, `native-viewer-editor` | `contents: read`, `pull-requests: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax/build-info fixture, 조건부 macOS build와 build-info verifier, 조건부 release helper dry-run |
+| `Release Rehearsal DMG` | `workflow_dispatch` | `contents: read`, `pull-requests: read` | macOS | core lock/build-info verifier, signed/notarized 전 universal rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
+| `Release Publish DMG` | `workflow_dispatch` | `contents: write`/`pull-requests: read` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag와 core lock/build-info 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
 | `Docs-only Pages Deploy` | `push` to `main` with `docs/**`, `workflow_dispatch` | `contents: read`, `pages: write`/`id-token: write` for Pages job, `environment: github-pages` | Ubuntu | 일반 Pages 문서 변경을 public Pages에 배포하고 기존 public appcast를 보존 |
 | `rhwp Upstream Release Check` | `workflow_dispatch`, schedule | `contents: read` | Ubuntu | upstream `rhwp` release와 `rhwp-core.lock` 비교 |
-| `rhwp Upstream Sync PR` | `workflow_dispatch`, schedule | workflow는 `contents: read`, `pull-requests: read`; PR 생성은 GitHub App token의 `contents: write`, `pull-requests: write`, `issues: write` | Ubuntu, macOS | upstream release를 감지해 `rhwp-core.lock`/RustBridge와 bundled `rhwp-studio`를 같은 tag로 갱신하는 full sync 후보 PR 생성 |
+| `rhwp Upstream Sync PR` | `workflow_dispatch`, schedule | workflow는 `contents: read`, `pull-requests: read`; PR 생성은 GitHub App token의 `contents: write`, `pull-requests: write`, `issues: write` | Ubuntu, macOS | upstream release를 감지해 `rhwp-core.lock`/RustBridge, Swift build info와 bundled `rhwp-studio`를 같은 core identity로 갱신하는 full sync 후보 PR 생성 |
 
 ## JavaScript action runtime 기준
 
@@ -71,9 +71,11 @@ PR CI는 외부 PR에서도 안전하게 실행할 수 있는 검증만 수행�
 
 `Sources/HostApp/Resources/rhwp-studio/**`는 자동 upstream sync PR의 주 변경 범위다. 이 경로는 HostApp bundle asset과 `rhwp` release provenance를 동시에 바꾸므로 `run_macos_build=true`, `run_rust_verify=true`, `run_release_checks=true`로 분류한다. macOS validation은 이 범위에서 `scripts/verify-rhwp-studio-assets.sh`도 실행해 manifest tag/commit, relative asset path, WASM/JS/CSS entrypoint를 확인한다.
 
+`RhwpCoreBuildInfo.swift`, build-info writer/verifier, lock reader와 fixture test 변경은 `run_macos_build=true`, `run_rust_verify=true`로 분류한다. Swift build info는 renderer source 경로에도 속하므로 `run_render_smoke=true`가 함께 켜진다. `scripts/ci/**`에 있는 reader/test는 기존 release automation 분류도 누적한다.
+
 ### docs-only skip 기준
 
-docs-only PR에서도 `classify-changes`와 `script-checks`는 실행한다. `run_macos_build=false`이면 `macos-validation` job은 skipped 상태가 된다. 단, release 관련 문서나 Pages/appcast 파일은 문서여도 `run_release_checks=true`가 될 수 있다.
+docs-only PR에서도 `classify-changes`와 `script-checks`는 실행한다. 따라서 build-info helper fixture는 항상 실행되지만 tracked Swift source verifier는 관련 변경이 `run_macos_build=true`를 켰을 때 macOS validation에서 실행한다. `run_macos_build=false`이면 `macos-validation` job은 skipped 상태가 된다. 단, release 관련 문서나 Pages/appcast 파일은 문서여도 `run_release_checks=true`가 될 수 있다.
 
 ### PR CI 로컬 재현
 
@@ -91,7 +93,10 @@ bash scripts/ci/write-rhwp-full-sync-pr-body.sh --help
 bash scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
 bash scripts/ci/write-sparkle-appcast.sh --help
 bash scripts/sync-rhwp-studio.sh --help
+bash scripts/update-rhwp-core-build-info.sh --help
+bash scripts/verify-rhwp-core-build-info.sh --help
 bash scripts/verify-rhwp-studio-assets.sh --help
+scripts/ci/test-rhwp-core-build-info.sh
 scripts/ci/update-release-version-notices.sh --updates-dir docs/updates --check
 ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |path| Psych.parse_file(path); puts "Parsed #{path}" }'
 ```
@@ -102,6 +107,7 @@ macOS validation 재현:
 rustup target add aarch64-apple-darwin x86_64-apple-darwin
 ./scripts/build-rust-macos.sh
 ./scripts/check-no-appkit.sh
+./scripts/verify-rhwp-core-build-info.sh
 ./scripts/verify-rhwp-studio-assets.sh
 xcodegen generate
 xcodebuild -project Alhangeul.xcodeproj \
@@ -121,6 +127,8 @@ Rust/core 변경이 있으면 `./scripts/build-rust-macos.sh` 대신 다음 lock
 ```
 
 PR CI의 macOS validation은 GitHub-hosted runner/toolchain 차이를 고려해 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`을 설정한다. 이 값은 `Frameworks/universal/librhwp.a` byte hash/size 비교만 제외한다. `rhwp` source provenance, `RustBridge/Cargo.lock`, generated header hash/size, `rhwp-ffi-symbols.txt` 검증은 계속 실패 가능한 gate로 남는다.
+
+build-info verifier도 같은 macOS validation에서 별도로 실행한다. 이 verifier는 `rhwp-core.lock`과 tracked `RhwpCoreBuildInfo.swift`의 release baseline, commit, enabled features를 비교하며 파일을 자동 수정하지 않는다.
 
 `RustBridge/examples/*` 같은 benchmark/helper 변경은 macOS build는 요구할 수 있지만 lock-level `run_rust_verify`는 켜지 않는다.
 
@@ -183,6 +191,7 @@ workflow가 생성하는 주요 산출물:
 rehearsal 산출물은 public GitHub Release asset이나 Homebrew Cask URL에 사용하지 않는다.
 rehearsal workflow가 만든 app bundle도 `arm64 + x86_64` universal slice 검증을 통과해야 하지만, signed/notarized public DMG와 실제 Intel Mac 실기기 smoke를 대체하지 않는다.
 release owner는 rehearsal 전후로 merge PR title/body, linked Issue, 최종 보고서 기반 `포함 PR 분석` 표를 release record에 남기고, rehearsal delta checklist는 누락 확인과 smoke 영역 점검에만 사용한다.
+rehearsal DMG build 전에는 Rust/core lock verify에 이어 `verify-rhwp-core-build-info.sh`가 tracked Swift build info 정합성을 확인한다. 이 단계에서 drift를 자동 수정하지 않는다.
 
 ## Release Publish DMG
 
@@ -220,6 +229,8 @@ workflow가 생성하거나 게시하는 주요 산출물:
 - workflow summary의 release ref, release PR analysis, delta checklist, core lock, public artifact, GitHub Release state, Sparkle appcast, Pages artifact, GitHub Pages deployment 섹션
 
 GitHub Release body 후보는 `mydocs/release/v<version>.md`의 사용자-facing 주요 변경 사항과 직접 반영된 PR/Issue section을 기준으로 작성한다. 첫 top-level section은 `이번 버전의 주요 변경 사항`이어야 하며, 설치/지원/업데이트 안내와 상세 기록은 그 뒤에 둔다. publish workflow의 delta checklist는 마지막 누락 확인용 보조 자료이며, release note의 주요 변경 사항 원천이 아니다.
+
+signed/notarized DMG build 전에는 Rust/core lock verify에 이어 `verify-rhwp-core-build-info.sh`가 실행된다. mismatch는 signing/notarization과 public artifact 생성을 차단하며 publish workflow는 writer를 실행하지 않는다.
 
 ## Docs-only Pages Deploy
 
@@ -304,6 +315,8 @@ bash scripts/ci/check-rhwp-upstream-release.sh --target-tag <rhwp-tag> --run-com
 - upstream WASM build는 upstream root의 `.env.docker`를 사용한다. CI에서는 `.env.docker.example` 존재를 확인한 뒤 runner의 `id -u`, `id -g` 값으로 `.env.docker`를 생성해 Docker container user와 bind mount owner를 맞춘다.
 - upstream WASM/studio build는 Ubuntu runner에서 수행하고, native RustBridge/core lock update는 macOS runner에서 수행한다.
 - `Frameworks/` 생성 산출물은 commit하지 않고, `scripts/build-rust-macos.sh --update-lock`가 산출물 hash/size를 `rhwp-core.lock`에 기록한다.
+- complete lock 생성 직후 `scripts/update-rhwp-core-build-info.sh`와 verifier를 실행하고 `Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift`를 후보 PR에 명시적으로 stage한다. 옵션 없는 writer 실행은 이 sync candidate 생성 경로에만 둔다.
+- generated PR body와 Actions summary에는 writer/verifier 결과를 기록한다. Maintainer checklist는 lock/Cargo resolved commit, generated build info, bundled studio provenance와 app-facing impact를 사람이 함께 확인하도록 유지한다.
 - `GITHUB_TOKEN` fallback으로 실제 PR을 생성하지 않는다. token variable/secret이 없으면 `dry_run=false` 실행은 실패해야 한다.
 
 입력:
@@ -317,6 +330,7 @@ workflow가 만드는 주요 산출물:
 - `automation/rhwp-<tag>-full-sync` branch
 - `Sync rhwp upstream <tag>` PR
 - `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`
+- `Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift`
 - `Sources/HostApp/Resources/rhwp-studio/**` asset과 manifest 변경
 - workflow summary의 target, base branch content ref, workflow event ref, current 판정, impact detection, existing PR/branch blocker, cleanup 후보, created/skipped 상태
 
@@ -330,19 +344,23 @@ bash scripts/ci/read-rhwp-core-lock.sh --help
 bash scripts/ci/write-rhwp-full-sync-pr-body.sh --help
 bash scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
 bash scripts/sync-rhwp-studio.sh --help
+bash scripts/update-rhwp-core-build-info.sh --help
+bash scripts/verify-rhwp-core-build-info.sh --help
 bash scripts/verify-rhwp-studio-assets.sh --help
+scripts/ci/test-rhwp-core-build-info.sh
+./scripts/verify-rhwp-core-build-info.sh
 scripts/verify-rhwp-studio-assets.sh
 ```
 
 ## 실패 해석 기준
 
 - `classify-changes` 실패: base/head ref나 변경 범위 helper 문제를 먼저 확인한다.
-- `script-checks` 실패: shell syntax 또는 helper interface 회귀다. macOS build 전 수정한다.
-- `macos-validation` 실패: 앱 build, XcodeGen 입력, shared Swift boundary, Rust lock, renderer smoke 중 하나가 깨진 것이다.
+- `script-checks` 실패: shell syntax, helper interface 또는 build-info fixture 회귀다. macOS build 전 수정한다.
+- `macos-validation` 실패: 앱 build, XcodeGen 입력, shared Swift boundary, Rust lock/build info, renderer smoke 중 하나가 깨진 것이다.
 - `release-checks` 실패: release helper, release note template, delta checklist, Sparkle appcast XML 생성 경계가 깨진 것이다.
-- `Release Rehearsal DMG` 실패: public release 전 packaging/release script 또는 ref delta 입력을 수정한다.
-- `Release Publish DMG` 실패: public release 산출물 상태를 먼저 확인하고, 필요한 경우 GitHub Release asset/appcast/Pages/Homebrew 반영을 중단한다.
+- `Release Rehearsal DMG` 실패: public release 전 core lock/build-info drift, packaging/release script 또는 ref delta 입력을 수정한다.
+- `Release Publish DMG` 실패: core lock/build-info와 public release 산출물 상태를 먼저 확인하고, 필요한 경우 GitHub Release asset/appcast/Pages/Homebrew 반영을 중단한다.
 - `Docs-only Pages Deploy` 실패: public appcast 다운로드/XML 검증 실패, Pages artifact 조립 실패, `github-pages` environment policy, 또는 `deploy-pages` 실패를 먼저 확인한다. stale `docs/appcast.xml` fallback으로 우회하지 않는다.
-- `rhwp Upstream Sync PR` 실패: target release 조회, core/studio current 판정, upstream checkout/build, macOS core lock update, GitHub App token 설정, 기존 automation branch/PR 상태를 먼저 확인한다.
+- `rhwp Upstream Sync PR` 실패: target release 조회, core/studio current 판정, upstream checkout/build, macOS core lock/build-info update, GitHub App token 설정, 기존 automation branch/PR 상태를 먼저 확인한다.
 
 실패 증상, 재현 조건, 원인, 재발 방지 절차가 명확해진 경우에만 `mydocs/troubleshootings/`에 별도 문서로 남긴다.
