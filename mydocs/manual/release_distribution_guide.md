@@ -77,7 +77,7 @@
 자동 gate와 maintainer 확인 책임은 다음과 같이 나눈다.
 
 - sync workflow만 writer를 실행한다. PR CI와 release rehearsal/publish는 verifier만 실행하며 mismatch를 자동 수정하지 않는다.
-- 자동 gate는 lock과 Swift build info의 release baseline, 실제 commit, enabled features가 같은지 검사한다.
+- 자동 gate는 lock에서 생성한 canonical Swift build info 전체가 tracked source와 byte 단위로 같은지 검사한다. 이 과정에 release baseline, 실제 commit, enabled features와 generated header가 포함된다.
 - 작업자는 target upstream release와 resolved commit이 의도한 대상인지, generated build info diff와 bundled studio manifest가 같은 provenance인지, app-facing 변화와 smoke 범위가 적절한지 확인한다.
 - 자동 sync PR merge와 public release 포함 여부, release note, rehearsal/publish 실행은 각각 별도 승인 사항이다.
 

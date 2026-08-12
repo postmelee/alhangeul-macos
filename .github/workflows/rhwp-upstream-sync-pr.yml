@@ -86,6 +86,7 @@ jobs:
           bash -n scripts/ci/check-rhwp-upstream-release.sh
           bash -n scripts/ci/detect-rhwp-studio-impact.sh
           bash -n scripts/ci/read-rhwp-core-lock.sh
+          bash -n scripts/ci/rhwp-core-build-info-common.sh
           bash -n scripts/ci/test-rhwp-core-build-info.sh
           bash -n scripts/ci/write-rhwp-full-sync-pr-body.sh
           bash -n scripts/sync-rhwp-studio.sh

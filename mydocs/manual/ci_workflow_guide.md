@@ -128,7 +128,7 @@ Rust/core 변경이 있으면 `./scripts/build-rust-macos.sh` 대신 다음 lock
 
 PR CI의 macOS validation은 GitHub-hosted runner/toolchain 차이를 고려해 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`을 설정한다. 이 값은 `Frameworks/universal/librhwp.a` byte hash/size 비교만 제외한다. `rhwp` source provenance, `RustBridge/Cargo.lock`, generated header hash/size, `rhwp-ffi-symbols.txt` 검증은 계속 실패 가능한 gate로 남는다.
 
-build-info verifier도 같은 macOS validation에서 별도로 실행한다. 이 verifier는 `rhwp-core.lock`과 tracked `RhwpCoreBuildInfo.swift`의 release baseline, commit, enabled features를 비교하며 파일을 자동 수정하지 않는다.
+Build-info fixture와 tracked source verifier는 Ubuntu `script-checks`에서 먼저 실행해 canonical drift를 Rust build 전에 차단한다. 같은 verifier를 macOS validation에서도 다시 실행한다. Verifier는 `rhwp-core.lock`에서 canonical `RhwpCoreBuildInfo.swift` 전체를 생성해 tracked source와 byte 비교하며 파일을 자동 수정하지 않는다. 존재하는 빈 `rhwp_enabled_features`는 유효하지만 key 누락, malformed token, source member/comment 누락·여분은 실패한다.
 
 `RustBridge/examples/*` 같은 benchmark/helper 변경은 macOS build는 요구할 수 있지만 lock-level `run_rust_verify`는 켜지 않는다.
 

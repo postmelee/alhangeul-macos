@@ -146,7 +146,7 @@ classify_path() {
   esac
 
   case "$path" in
-    Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift|scripts/update-rhwp-core-build-info.sh|scripts/verify-rhwp-core-build-info.sh|scripts/ci/read-rhwp-core-lock.sh|scripts/ci/test-rhwp-core-build-info.sh)
+    Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift|scripts/update-rhwp-core-build-info.sh|scripts/verify-rhwp-core-build-info.sh|scripts/ci/read-rhwp-core-lock.sh|scripts/ci/rhwp-core-build-info-common.sh|scripts/ci/test-rhwp-core-build-info.sh)
       enable_macos_build "$path affects core build info synchronization"
       enable_rust_verify "$path affects core build info lock verification"
       matched=1

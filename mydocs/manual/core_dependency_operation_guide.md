@@ -54,9 +54,9 @@ GitHub-hosted CI/release workflow는 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=
 | `release-tag` | `rhwp_release_tag` | 실제 `rhwp_commit` | 실제 `rhwp_enabled_features` |
 | `commit` | `rhwp_latest_checked_release_tag` | 실제 `rhwp_commit` | 실제 `rhwp_enabled_features` |
 
-Demo/Preview commit pin에서 `releaseTag`는 해당 commit에 release tag가 붙었다는 뜻이 아니라 마지막으로 호환성을 확인한 Stable baseline label이다. 실제 provenance와 thumbnail cache invalidation은 `commit`이 담당한다. Demo lock에 `rhwp_latest_checked_release_tag`가 없거나 lock version/ref kind/commit/features 형식이 유효하지 않으면 writer와 verifier는 실패해야 한다.
+Demo/Preview commit pin에서 `releaseTag`는 해당 commit에 release tag가 붙었다는 뜻이 아니라 마지막으로 호환성을 확인한 Stable baseline label이다. 실제 provenance와 thumbnail cache invalidation은 `commit`이 담당한다. Demo lock에 `rhwp_latest_checked_release_tag`가 없거나 lock version/ref kind/commit/features 형식이 유효하지 않으면 writer와 verifier는 실패해야 한다. `rhwp_enabled_features = ""`는 Cargo dependency에 명시 feature가 없는 유효한 값이며 key 누락과 구분한다.
 
-writer는 `scripts/build-rust-macos.sh --update-lock`가 enabled features와 artifact metadata를 기록해 lock을 완성한 뒤에만 실행한다. incomplete lock을 이전 값이나 빈 값으로 보정하지 않는다. PR CI와 release workflow는 writer를 실행해 drift를 고치지 않고 verifier 실패로 차단한다.
+writer는 `scripts/build-rust-macos.sh --update-lock`가 enabled features와 artifact metadata를 기록해 lock을 완성한 뒤에만 실행한다. 누락 key나 malformed lock을 이전 값으로 보정하지 않는다. Writer와 verifier는 공통 mapping·validation·canonical renderer를 사용하며, verifier는 일부 상수만 찾지 않고 generated header를 포함한 Swift source 전체가 canonical output과 byte 단위로 같은지 확인한다. PR CI와 release workflow는 writer를 실행해 drift를 고치지 않고 verifier 실패로 차단한다.
 
 ## 업데이트 절차
 

@@ -78,9 +78,4 @@ if ! VALUE="$(awk -F' = ' -v key="$KEY" '
   exit 1
 fi
 
-if [ -z "$VALUE" ]; then
-  echo "ERROR: missing lock key: $KEY" >&2
-  exit 1
-fi
-
 printf '%s\n' "$VALUE"

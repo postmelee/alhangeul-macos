@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 READ_LOCK="$ROOT/scripts/ci/read-rhwp-core-lock.sh"
-VERIFY_BUILD_INFO="$ROOT/scripts/verify-rhwp-core-build-info.sh"
+BUILD_INFO_COMMON="$ROOT/scripts/ci/rhwp-core-build-info-common.sh"
 LOCK_FILE="$ROOT/rhwp-core.lock"
 OUTPUT="$ROOT/Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift"
 TMP_OUTPUT=""
@@ -66,8 +66,8 @@ if [ ! -x "$READ_LOCK" ]; then
   exit 1
 fi
 
-if [ ! -x "$VERIFY_BUILD_INFO" ]; then
-  echo "ERROR: missing executable build info verifier: $VERIFY_BUILD_INFO" >&2
+if [ ! -r "$BUILD_INFO_COMMON" ]; then
+  echo "ERROR: missing build info common helper: $BUILD_INFO_COMMON" >&2
   exit 1
 fi
 
@@ -76,63 +76,9 @@ if [ ! -f "$LOCK_FILE" ]; then
   exit 1
 fi
 
-lock_scalar() {
-  "$READ_LOCK" --lock-file "$LOCK_FILE" "$1"
-}
-
-validate_release_tag() {
-  local key="$1"
-  local value="$2"
-  if ! [[ "$value" =~ ^[A-Za-z0-9][A-Za-z0-9._+/:~-]*$ ]]; then
-    echo "ERROR: invalid $key in $LOCK_FILE: $value" >&2
-    exit 1
-  fi
-}
-
-validate_commit() {
-  local value="$1"
-  if ! [[ "$value" =~ ^[0-9a-f]{40}$ ]]; then
-    echo "ERROR: invalid rhwp_commit in $LOCK_FILE: $value" >&2
-    exit 1
-  fi
-}
-
-validate_enabled_features() {
-  local value="$1"
-  if ! [[ "$value" =~ ^[A-Za-z0-9_-]+(,[A-Za-z0-9_-]+)*$ ]]; then
-    echo "ERROR: invalid rhwp_enabled_features in $LOCK_FILE: $value" >&2
-    exit 1
-  fi
-}
-
-lock_version="$(lock_scalar lock_version)"
-if [ "$lock_version" != "2" ]; then
-  echo "ERROR: unsupported rhwp-core.lock version: ${lock_version:-missing}" >&2
-  echo "Expected: 2" >&2
-  exit 1
-fi
-
-ref_kind="$(lock_scalar rhwp_ref_kind)"
-case "$ref_kind" in
-  release-tag)
-    release_tag_key="rhwp_release_tag"
-    ;;
-  commit)
-    release_tag_key="rhwp_latest_checked_release_tag"
-    ;;
-  *)
-    echo "ERROR: unsupported rhwp_ref_kind in $LOCK_FILE: $ref_kind" >&2
-    exit 1
-    ;;
-esac
-
-release_tag="$(lock_scalar "$release_tag_key")"
-commit="$(lock_scalar rhwp_commit)"
-enabled_features="$(lock_scalar rhwp_enabled_features)"
-
-validate_release_tag "$release_tag_key" "$release_tag"
-validate_commit "$commit"
-validate_enabled_features "$enabled_features"
+# shellcheck source=scripts/ci/rhwp-core-build-info-common.sh
+source "$BUILD_INFO_COMMON"
+rhwp_build_info_load_lock "$LOCK_FILE" "$READ_LOCK"
 
 OUTPUT_DIR="$(dirname "$OUTPUT")"
 if [ ! -d "$OUTPUT_DIR" ]; then
@@ -141,18 +87,11 @@ if [ ! -d "$OUTPUT_DIR" ]; then
 fi
 
 TMP_OUTPUT="$(mktemp "$OUTPUT.tmp.XXXXXX")"
-{
-  echo 'enum RhwpCoreBuildInfo {'
-  echo "    static let releaseTag = \"$release_tag\""
-  echo "    static let commit = \"$commit\""
-  echo "    static let enabledFeatures = \"$enabled_features\""
-  echo '}'
-} > "$TMP_OUTPUT"
+rhwp_build_info_render_swift > "$TMP_OUTPUT"
 chmod 0644 "$TMP_OUTPUT"
-"$VERIFY_BUILD_INFO" --lock-file "$LOCK_FILE" --build-info "$TMP_OUTPUT" >/dev/null
 
 if [ -f "$OUTPUT" ] && cmp -s "$TMP_OUTPUT" "$OUTPUT"; then
-  echo "OK: RhwpCoreBuildInfo is already up to date: $OUTPUT"
+  echo "OK: $OUTPUT is already up to date with $LOCK_FILE"
   exit 0
 fi
 

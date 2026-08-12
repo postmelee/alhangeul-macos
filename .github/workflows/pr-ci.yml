@@ -97,6 +97,12 @@ jobs:
           set -euo pipefail
           scripts/ci/test-rhwp-core-build-info.sh
 
+      - name: Verify tracked core build info
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./scripts/verify-rhwp-core-build-info.sh
+
       - name: Check release note version notices
         shell: bash
         run: |
