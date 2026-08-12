@@ -7,16 +7,40 @@ LOCK_FILE="$ROOT/rhwp-core.lock"
 
 usage() {
   cat >&2 <<EOF
-Usage: $0 <key>
+Usage: $0 [--lock-file FILE] <key>
 
 Reads a top-level scalar value from rhwp-core.lock.
+
+Options:
+  --lock-file FILE  Read FILE instead of the repository rhwp-core.lock.
 EOF
 }
 
-if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
-  usage
-  exit 0
-fi
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --lock-file)
+      if [ "$#" -lt 2 ] || [ -z "$2" ]; then
+        echo "ERROR: --lock-file requires a path" >&2
+        usage
+        exit 1
+      fi
+      LOCK_FILE="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    --*)
+      echo "ERROR: unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
 
 if [ "$#" -ne 1 ]; then
   usage
@@ -35,7 +59,7 @@ if [ ! -f "$LOCK_FILE" ]; then
   exit 1
 fi
 
-VALUE="$(awk -F' = ' -v key="$KEY" '
+if ! VALUE="$(awk -F' = ' -v key="$KEY" '
   $1 == key {
     value = $2
     gsub(/^"/, "", value)
@@ -49,7 +73,10 @@ VALUE="$(awk -F' = ' -v key="$KEY" '
       exit 2
     }
   }
-' "$LOCK_FILE")"
+' "$LOCK_FILE")"; then
+  echo "ERROR: missing lock key: $KEY" >&2
+  exit 1
+fi
 
 if [ -z "$VALUE" ]; then
   echo "ERROR: missing lock key: $KEY" >&2

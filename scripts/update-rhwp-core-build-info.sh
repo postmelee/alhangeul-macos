@@ -4,21 +4,30 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 READ_LOCK="$ROOT/scripts/ci/read-rhwp-core-lock.sh"
+VERIFY_BUILD_INFO="$ROOT/scripts/verify-rhwp-core-build-info.sh"
 LOCK_FILE="$ROOT/rhwp-core.lock"
-BUILD_INFO="$ROOT/Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift"
+OUTPUT="$ROOT/Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift"
+TMP_OUTPUT=""
 
 usage() {
   cat >&2 <<EOF
-Usage: $0 [--lock-file FILE] [--build-info FILE]
+Usage: $0 [--lock-file FILE] [--output FILE]
 
-Verifies that Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift mirrors the
-current rhwp-core.lock release baseline, resolved commit, and enabled features.
+Writes deterministic RhwpCoreBuildInfo Swift source from a complete
+rhwp-core.lock. Stable tags and demo commit pins are supported.
 
 Options:
   --lock-file FILE  Read FILE instead of the repository rhwp-core.lock.
-  --build-info FILE Verify FILE instead of the repository Swift build info.
+  --output FILE     Write FILE instead of the repository Swift build info.
 EOF
 }
+
+cleanup() {
+  if [ -n "$TMP_OUTPUT" ] && [ -f "$TMP_OUTPUT" ]; then
+    rm -f "$TMP_OUTPUT"
+  fi
+}
+trap cleanup EXIT
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -31,13 +40,13 @@ while [ "$#" -gt 0 ]; do
       LOCK_FILE="$2"
       shift 2
       ;;
-    --build-info)
+    --output)
       if [ "$#" -lt 2 ] || [ -z "$2" ]; then
-        echo "ERROR: --build-info requires a path" >&2
+        echo "ERROR: --output requires a path" >&2
         usage
         exit 1
       fi
-      BUILD_INFO="$2"
+      OUTPUT="$2"
       shift 2
       ;;
     --help|-h)
@@ -57,13 +66,13 @@ if [ ! -x "$READ_LOCK" ]; then
   exit 1
 fi
 
-if [ ! -f "$LOCK_FILE" ]; then
-  echo "ERROR: missing lock file: $LOCK_FILE" >&2
+if [ ! -x "$VERIFY_BUILD_INFO" ]; then
+  echo "ERROR: missing executable build info verifier: $VERIFY_BUILD_INFO" >&2
   exit 1
 fi
 
-if [ ! -f "$BUILD_INFO" ]; then
-  echo "ERROR: missing Swift build info: $BUILD_INFO" >&2
+if [ ! -f "$LOCK_FILE" ]; then
+  echo "ERROR: missing lock file: $LOCK_FILE" >&2
   exit 1
 fi
 
@@ -92,46 +101,6 @@ validate_enabled_features() {
   local value="$1"
   if ! [[ "$value" =~ ^[A-Za-z0-9_-]+(,[A-Za-z0-9_-]+)*$ ]]; then
     echo "ERROR: invalid rhwp_enabled_features in $LOCK_FILE: $value" >&2
-    exit 1
-  fi
-}
-
-swift_scalar() {
-  local key="$1"
-  awk -v key="$key" '
-    $0 ~ "static[[:space:]]+let[[:space:]]+" key "[[:space:]]*=" {
-      value = $0
-      sub(/^.*=[[:space:]]*"/, "", value)
-      sub(/".*$/, "", value)
-      print value
-      found = 1
-      exit
-    }
-    END {
-      if (!found) {
-        exit 2
-      }
-    }
-  ' "$BUILD_INFO"
-}
-
-compare_value() {
-  local lock_key="$1"
-  local swift_key="$2"
-  local expected="$3"
-  local actual
-
-  if ! actual="$(swift_scalar "$swift_key")"; then
-    echo "ERROR: missing RhwpCoreBuildInfo.$swift_key in $BUILD_INFO" >&2
-    exit 1
-  fi
-
-  if [ "$expected" != "$actual" ]; then
-    echo "ERROR: RhwpCoreBuildInfo.$swift_key differs from rhwp-core.lock" >&2
-    echo "Lock key:       $lock_key" >&2
-    echo "Expected value: $expected" >&2
-    echo "Actual value:   $actual" >&2
-    echo "Update:         $BUILD_INFO" >&2
     exit 1
   fi
 }
@@ -165,8 +134,28 @@ validate_release_tag "$release_tag_key" "$release_tag"
 validate_commit "$commit"
 validate_enabled_features "$enabled_features"
 
-compare_value "$release_tag_key" releaseTag "$release_tag"
-compare_value rhwp_commit commit "$commit"
-compare_value rhwp_enabled_features enabledFeatures "$enabled_features"
+OUTPUT_DIR="$(dirname "$OUTPUT")"
+if [ ! -d "$OUTPUT_DIR" ]; then
+  echo "ERROR: missing output directory: $OUTPUT_DIR" >&2
+  exit 1
+fi
 
-echo "OK: RhwpCoreBuildInfo matches rhwp-core.lock"
+TMP_OUTPUT="$(mktemp "$OUTPUT.tmp.XXXXXX")"
+{
+  echo 'enum RhwpCoreBuildInfo {'
+  echo "    static let releaseTag = \"$release_tag\""
+  echo "    static let commit = \"$commit\""
+  echo "    static let enabledFeatures = \"$enabled_features\""
+  echo '}'
+} > "$TMP_OUTPUT"
+chmod 0644 "$TMP_OUTPUT"
+"$VERIFY_BUILD_INFO" --lock-file "$LOCK_FILE" --build-info "$TMP_OUTPUT" >/dev/null
+
+if [ -f "$OUTPUT" ] && cmp -s "$TMP_OUTPUT" "$OUTPUT"; then
+  echo "OK: RhwpCoreBuildInfo is already up to date: $OUTPUT"
+  exit 0
+fi
+
+mv "$TMP_OUTPUT" "$OUTPUT"
+TMP_OUTPUT=""
+echo "Updated: $OUTPUT"
