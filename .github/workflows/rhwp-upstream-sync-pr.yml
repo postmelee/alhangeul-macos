@@ -88,6 +88,7 @@ jobs:
           bash -n scripts/ci/read-rhwp-core-lock.sh
           bash -n scripts/ci/rhwp-core-build-info-common.sh
           bash -n scripts/ci/test-rhwp-core-build-info.sh
+          bash -n scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
           bash -n scripts/ci/write-rhwp-full-sync-pr-body.sh
           bash -n scripts/sync-rhwp-studio.sh
           bash -n scripts/update-rhwp-core-build-info.sh
@@ -101,6 +102,7 @@ jobs:
           scripts/verify-rhwp-core-build-info.sh --help
           scripts/verify-rhwp-studio-assets.sh --help
           scripts/ci/test-rhwp-core-build-info.sh
+          scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
 
       - name: Resolve current and target rhwp release
         id: resolve
@@ -584,7 +586,8 @@ jobs:
 
           scripts/verify-rhwp-studio-assets.sh \
             --tag "$target_tag" \
-            --commit "$target_commit"
+            --commit "$target_commit" \
+            --upstream-dir "$upstream_dir"
 
           git diff --check
 
@@ -597,7 +600,7 @@ jobs:
             echo "\`scripts/verify-rhwp-core-build-info.sh\`: OK"
             echo "\`scripts/check-no-appkit.sh\`: OK"
             echo "\`scripts/sync-rhwp-studio.sh --tag $target_tag --commit $target_commit\`: OK"
-            echo "\`scripts/verify-rhwp-studio-assets.sh --tag $target_tag --commit $target_commit\`: OK"
+            echo "\`scripts/verify-rhwp-studio-assets.sh --tag $target_tag --commit $target_commit --upstream-dir <target-checkout>\`: Cargo.lock fingerprint match OK"
             echo "\`git diff --check\`: OK"
           } > "$verification_file"
 
