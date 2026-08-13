@@ -22,7 +22,7 @@
 | release title | `Alhangeul v0.1.10 (rhwp v0.8.4)` |
 | workflow 정책 | `require_latest_rhwp=true`, `include_rhwp_in_title=true` |
 
-2026-08-13 구현계획 작성 시점의 `origin/main`은 `26f3104469135c5e80b3a19dddb9d0baebfbfb0a`, `origin/devel`은 `4abdc30746edcd25be3d11fa3d5c1e09f600c6c3`이며 `origin/main...origin/devel` 좌우 차이는 `3 68`이다. Stage 1에서 `main` 전용 3개 commit의 patch와 tree가 `devel`에 이미 등가 반영됐는지 확인하고, 필요한 경우 Stage 4 전에 reviewed `main -> devel` back-merge PR로 이력을 보존한다.
+2026-08-13 구현계획 작성 시점의 `origin/main`은 `26f3104469135c5e80b3a19dddb9d0baebfbfb0a`, `origin/devel`은 `4abdc30746edcd25be3d11fa3d5c1e09f600c6c3`이며 `origin/main...origin/devel` 좌우 차이는 `3 68`이었다. PR #473 merge 뒤 Stage 4 재검증에서는 좌우 차이가 `3 75`이고 `main` 전용 non-merge commit은 없다. PR #446, #450과 #452 merge tree가 각각 두 번째 parent와 동일하고 current `main` tree도 merge base와 같으므로 실제 content drift가 아닌 transport-only ancestry divergence로 판정한다. Task #472에서는 history-only back-merge를 생략하고 장기 정책·자동 gate는 Issue #474로 분리한다.
 
 ## 공통 작업 원칙
 
@@ -30,7 +30,7 @@
 2. release identity의 진실 원천은 세 app target plist, `rhwp-core.lock`, `RustBridge/Cargo.lock`, `RhwpCoreBuildInfo`, bundled studio manifest와 final tag commit의 교집합이다.
 3. candidate SHA가 이동하면 이전 검증을 자동 승계하지 않는다. 새 merge PR, changed path와 재실행해야 할 gate를 먼저 보고한다.
 4. Stage 1~3 source와 release communication 변경은 intermediate source PR로 `devel`에 먼저 반영한다. 이 PR merge 전에는 `devel -> main` release PR을 만들지 않는다.
-5. `main` 전용 변경을 보존할 필요가 있으면 squash/cherry-pick으로 이력을 다시 쓰지 않고 reviewed `main -> devel` back-merge PR을 사용한다.
+5. `main` 전용 실제 content를 보존할 필요가 있으면 squash/cherry-pick으로 이력을 다시 쓰지 않고 reviewed `main -> devel` back-merge PR을 사용한다. source parent와 tree가 같은 release transport merge만 남은 경우에는 history-only back-merge를 만들지 않는다.
 6. release PR은 updated `devel` head에서 `main` base로 만들고 merge commit을 유지한다. tag는 merge된 `main` release commit에만 생성한다.
 7. sync writer는 release 단계에서 실행하지 않는다. `RhwpCoreBuildInfo`와 bundled studio provenance는 verifier로만 검사하며, 후보를 맞추기 위한 자동 rewrite를 허용하지 않는다.
 8. strict static archive byte 검증과 portable source/header/FFI 검증을 별개 결과로 기록한다. local strict mismatch만을 이유로 `rhwp-core.lock` artifact hash를 갱신하지 않는다.
@@ -49,8 +49,8 @@
 | Rehearsal workflow 실행 | Stage 3 local source preflight 통과 후 | 실행하지 않음 |
 | `publish/task472` push와 intermediate source PR 생성 | Stage 3 완료보고 승인 후 | local branch만 유지 |
 | source PR merge | source PR CI와 review 통과 후 | Open 상태 유지 |
-| `main -> devel` back-merge PR 생성·merge | source PR merge와 branch divergence 확인 후 | 생성·merge하지 않음 |
-| `devel -> main` release PR 생성·merge | source와 back-merge gate 통과 후 | 생성·merge하지 않음 |
+| 실제 content drift용 `main -> devel` back-merge PR 생성·merge | source PR merge와 branch content 판정 후 | transport-only면 생성하지 않음 |
+| `devel -> main` release PR 생성·merge | source merge와 branch content 판정 후 | 생성·merge하지 않음 |
 | annotated `v0.1.10` tag 생성·push | release PR merge commit 확정 후 | tag 없음 |
 | draft Publish workflow | tag와 pre-public 입력 재확인 후 | 실행하지 않음 |
 | official Publish workflow | signed/notarized draft smoke 통과 후 | draft/public surface 유지 |
@@ -382,19 +382,20 @@ Stage 3 진행 중·완료보고에서 다음 mutation을 분리해 승인 요�
 2. Rehearsal workflow 실행
 3. `publish/task472` source PR 생성
 4. source PR CI 통과 뒤 merge
-5. Stage 4의 `main` back-merge/release PR 준비 진입
+5. Stage 4의 `main` content 판정과 release PR 준비 진입
 
 ## Stage 4. Source 반영, main/tag와 pre-public signed candidate
 
 ### 목표
 
-승인된 Stage 1~3 source와 communication을 `devel`에 반영하고, main-only 변경을 보존한 final release candidate를 `main`과 annotated tag로 확정한 뒤 signed/notarized draft DMG의 차단 smoke를 수행한다.
+승인된 Stage 1~3 source와 communication이 `devel`에 반영됐음을 확인하고, main-only ancestry와 실제 content drift를 구분해 final release candidate를 `main`과 annotated tag로 확정한 뒤 signed/notarized draft DMG의 차단 smoke를 수행한다.
 
 ### 대상
 
 - `publish/task472` intermediate source PR
 - `origin/main`, `origin/devel`과 양쪽 전용 commit/tree
-- tree 변경 없는 release 이력 정리용 `main -> devel` back-merge PR
+- branch content 판정 근거와 후속 Issue #474
+- 실제 content drift가 있을 때만 만드는 `main -> devel` back-merge PR
 - `devel -> main` release PR
 - annotated `v0.1.10` tag
 - draft `Release Publish DMG` run과 artifact
@@ -407,8 +408,8 @@ Stage 3 진행 중·완료보고에서 다음 mutation을 분리해 승인 요�
 2. source PR의 exact head SHA, PR CI gate와 release helper 결과를 확인하고 별도 승인 후 merge commit 방식으로 merge한다.
 3. source PR merge 뒤 local task branch를 새 `origin/devel`에 정렬하고 remote publish branch를 다음 게시 전까지 정리한다.
 4. `origin/main...origin/devel` left/right commit, file diff와 merge tree를 다시 계산한다. 현재 기준 `main` 전용 PR #446, #450, #452 merge는 각각 `devel` 쪽 부모와 tree-identical이고 `main` 전용 non-merge content와 `docs/` 차이는 없다.
-5. source PR merge 뒤에도 같은 판정이면 content 복구가 아니라 release transport 이력 정리를 목적으로 tree 변경 없는 reviewed `main -> devel` back-merge PR을 별도 승인으로 진행한다. `main`이 이동해 실제 content 차이가 생기면 이 판정을 중단하고 대상 파일과 소유 branch를 다시 확인한다.
-6. back-merge 뒤 local task branch를 새 `origin/devel`에 정렬하고 core/studio provenance, source identity, release communication과 CI를 다시 확인한다.
+5. source PR merge 뒤에도 같은 판정이면 transport-only ancestry divergence를 허용하고 history-only `main -> devel` back-merge를 생략한다. 이 invariant의 문서화와 자동 gate는 Issue #474로 추적한다. `main`이 이동해 실제 content 차이가 생기면 이 판정을 중단하고 대상 파일과 소유 branch를 다시 확인한 뒤 별도 승인으로 back-merge한다.
+6. branch content 판정 뒤 local task branch가 최신 `origin/devel`과 일치하는지 확인하고 core/studio provenance, source identity, release communication과 CI를 다시 확인한다.
 7. 정확한 updated `devel` head에서 `main` 대상 release PR을 만들고 title/body, included commits, tree와 branch protection check를 검증한다.
 8. 별도 승인 후 release PR을 merge commit 방식으로 merge한다.
 9. merge된 `main` release commit과 tree를 확인하고 별도 승인 후 annotated `v0.1.10` tag를 생성·push한다.
@@ -425,7 +426,7 @@ Stage 3 진행 중·완료보고에서 다음 mutation을 분리해 승인 요�
 
 ### 검증
 
-생성 결과의 exact 번호를 `TASK472_SOURCE_PR`, `TASK472_BACKMERGE_PR`, `TASK472_RELEASE_PR`에 넣어 다음 검증을 실행한다. back-merge 전후 tree가 동일한지 확인하고 history-only 목적을 Stage 보고서에 기록한다.
+생성 결과의 exact 번호를 `TASK472_SOURCE_PR`, `TASK472_RELEASE_PR`에 넣어 다음 검증을 실행한다. `TASK472_BACKMERGE_PR`은 실제 content drift로 back-merge가 필요할 때만 사용한다. transport-only 판정이면 source parent/tree 동일성, `main` 전용 non-merge commit 부재와 Issue #474를 Stage 보고서에 기록한다. 좌측 ancestry count는 release transport merge마다 증가하는 진단값이며 content drift 판정값으로 사용하지 않는다.
 
 ```bash
 gh pr view "$TASK472_SOURCE_PR" --repo postmelee/alhangeul-macos \
@@ -434,8 +435,16 @@ git fetch origin --prune
 git rev-list --left-right --count origin/main...origin/devel
 git log --left-right --cherry-pick --oneline origin/main...origin/devel
 git diff --stat origin/main...origin/devel
-gh pr view "$TASK472_BACKMERGE_PR" --repo postmelee/alhangeul-macos \
-  --json number,state,mergeable,mergeStateStatus,mergeCommit,statusCheckRollup,url
+git rev-list --left-only --no-merges origin/main...origin/devel
+git diff --name-status \
+  origin/main "$(git merge-base origin/main origin/devel)"
+for commit in $(git rev-list --left-only --merges origin/main...origin/devel); do
+  git diff --name-status "$commit^2" "$commit"
+done
+if test -n "${TASK472_BACKMERGE_PR:-}"; then
+  gh pr view "$TASK472_BACKMERGE_PR" --repo postmelee/alhangeul-macos \
+    --json number,state,mergeable,mergeStateStatus,mergeCommit,statusCheckRollup,url
+fi
 gh pr view "$TASK472_RELEASE_PR" --repo postmelee/alhangeul-macos \
   --json number,state,mergeable,mergeStateStatus,mergeCommit,statusCheckRollup,url
 git rev-parse origin/main
@@ -477,7 +486,8 @@ scripts/smoke-finder-integration.sh --version 0.1.10
 ### 완료 조건
 
 - Stage 1~3 source PR이 `devel`에 merge되고 source branch와 merge commit이 기록돼 있다.
-- main-only 변경 보존 여부가 명시돼 있고 필요한 back-merge가 CI/review 후 완료됐다.
+- main-only ancestry와 실제 content drift 판정이 명시돼 있고, transport-only면 history-only back-merge를 생략한 근거가 기록돼 있다. 실제 content drift가 있으면 필요한 back-merge가 CI/review 후 완료됐다.
+- Stage 4 보고서에는 Stage 1의 history-only back-merge 필요 권고를 번복한 사실과 non-merge commit 부재, source parent/tree 동일성 근거가 기록돼 있다.
 - release PR merge commit, annotated tag와 checked-out release tree가 같은 candidate다.
 - draft workflow가 exact tag에서 성공하고 stable appcast/Pages는 갱신되지 않았다.
 - draft DMG가 signing/notarization/staple/Gatekeeper/universal/layout gate를 통과한다.
@@ -488,7 +498,7 @@ scripts/smoke-finder-integration.sh --version 0.1.10
 
 ### 산출물과 커밋
 
-- source/back-merge/release PR과 merge commit URL
+- source/release PR과 merge commit URL, 필요 시 실제 content drift back-merge PR
 - annotated `v0.1.10` tag와 release commit
 - draft workflow run, DMG URL/SHA256와 수동 smoke 기록
 - 보정된 `mydocs/release/v0.1.10.md`
@@ -619,7 +629,7 @@ Stage 5 완료보고서 기준으로 Stage 6 release record·최종 보고와 �
 
 ### 작업
 
-1. release identity, final tag/commit, source/back-merge/release PR, workflow run과 모든 public URL을 확정한다.
+1. release identity, final tag/commit, source/release PR, 필요 시 content back-merge PR, workflow run과 모든 public URL을 확정한다.
 2. public DMG filename, URL, SHA256, size, signing/notarization, appcast와 Homebrew 결과 또는 미실행 사유를 release record에 반영한다.
 3. draft/official install, 저장·재열기, PDF·인쇄, Finder/Preview, Sparkle와 Intel Mac smoke의 실제 실행 여부를 구분한다.
 4. 최종 보고서에 Stage 1~5 결과, 승인 이력, blocking/non-blocking 결과, known limitations와 후속 이슈를 정리한다.
@@ -679,7 +689,7 @@ Stage 6 완료보고서와 최종 보고서 승인을 받은 뒤 필요한 close
 - upstream root `Cargo.lock` fingerprint가 bundled manifest와 일치하지 않는다.
 - strict artifact mismatch가 남았는데 portable 결과와 release owner 허용 판정 없이 Rehearsal로 넘어가야 한다.
 - generated header/FFI, Rust/Swift tests, decoder fixture, app target, renderer, 저장/PDF/인쇄 회귀, release helper, universal slice 또는 release note 검증이 실패한다.
-- source PR이 merge되지 않았거나 main-only 변경 보존 판단 없이 release PR로 넘어가야 한다.
+- source PR이 merge되지 않았거나 main-only ancestry/content 판정 없이 release PR로 넘어가야 한다.
 - release PR/tag/tree가 서로 다른 candidate를 가리킨다.
 - tag 생성, draft/official Publish, Pages/Sparkle, Homebrew 또는 PR merge를 별도 승인 없이 실행해야 한다.
 - signed draft의 notarization, staple, Gatekeeper, 저장·PDF·인쇄, app/Finder/provider 또는 crash gate가 실패한다.
@@ -694,10 +704,10 @@ Stage 6 완료보고서와 최종 보고서 승인을 받은 뒤 필요한 close
 
 1. 이 구현계획의 6개 Stage와 각 Stage 완료보고 승인 순서를 사용한다.
 2. Stage 1~3 source/communication은 intermediate `devel` PR로 먼저 반영한다.
-3. current `main` 전용 변경은 Stage 1에서 분석하고, 필요한 경우 Stage 4에서 reviewed `main -> devel` back-merge로 보존한 뒤 `devel -> main` release PR을 진행한다.
+3. current `main` 전용 commit은 Stage 4에서 transport-only로 재확인해 history-only back-merge를 생략한다. 실제 content drift가 있으면 reviewed `main -> devel` back-merge로 보존한 뒤 `devel -> main` release PR을 진행하며, 장기 자동 판정은 Issue #474로 추적한다.
 4. `RhwpCoreBuildInfo` writer나 studio sync를 release 경로에서 실행하지 않고 verifier-only gate를 사용한다.
 5. strict static archive mismatch가 남으면 Rehearsal 전에 strict/portable 근거와 release artifact 허용 여부를 별도로 승인받는다.
-6. Rehearsal, source PR merge, back-merge, release PR merge, tag, draft Publish, official Publish, Homebrew와 main closeout은 외부 mutation 승인표대로 각각 별도 승인받는다.
+6. Rehearsal, source PR merge, 실제 content drift가 있을 때의 back-merge, release PR merge, tag, draft Publish, official Publish, Homebrew와 main closeout은 외부 mutation 승인표대로 각각 별도 승인받는다.
 7. signed draft에서 실제 HWP/HWPX 저장·재열기, PDF 저장·인쇄 시작, WebKit trust boundary, app/Finder provider와 crash를 official publish 전 차단 gate로 검증한다.
 8. clean official v0.1.9 baseline에서 Sparkle update를 검증하고, baseline이 invalid하면 재설치 또는 대체 경로를 먼저 승인받는다.
 9. stale LaunchServices record 자체는 전역 reset 사유로 삼지 않고 활성 provider root와 signed candidate 동작을 판정 기준으로 사용한다.
