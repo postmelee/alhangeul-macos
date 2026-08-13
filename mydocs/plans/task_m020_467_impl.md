@@ -230,3 +230,34 @@ PR 본문에는 다음을 포함한다.
 - path classification과 CI 영향
 - Task #467 merge 뒤 PR #466 갱신/재생성 handoff
 - 공개 release가 범위 밖이라는 명시
+
+## PR #468 리뷰 반영 계획
+
+리뷰: `https://github.com/postmelee/alhangeul-macos/pull/468#issuecomment-5276420011`
+
+초기 PR은 merge 가능 판정을 받았고 current/legacy envelope fixture, CI 위치, helper mode와 하이퍼-워터폴 문서/커밋 규칙이 유효하다고 확인됐다. 작업지시자 승인에 따라 다음 소규모 보완을 같은 PR에 반영한다.
+
+1. `TextRunNode`와 모든 non-optional `TextStyle` field를 포함하는 payload JSON을 fixture에 추가하고 `.textRun` case, text/style 대표 값과 field marker를 assert한다.
+2. Fixture의 thrown error를 `do`/`catch`에서 stderr로 출력하고 `EXIT_FAILURE`로 종료해 CI 실패를 exit 1로 정규화한다.
+3. `rhwp-core.lock`과 `Frameworks/*` 변경을 renderer path로 명시해 `run_render_smoke=true`를 직접 보장한다.
+4. 초기 계획과 최종 보고서에 리뷰 반영 범위, 검증 결과와 follow-up 이슈를 기록한다.
+
+다음 구조 개선은 Task #467 범위를 확장하지 않고 별도 이슈로 분리한다.
+
+- #469: pin된 core producer의 render tree golden 자동 갱신과 Swift decoder 계약 검증
+- #470: known `RenderNodeType` payload decode 실패와 unknown future variant 구분·진단
+
+리뷰 보정 검증:
+
+```bash
+scripts/ci/test-render-tree-decoder.sh
+# 의도적 assertion 실패 probe에서 stderr prefix와 exit 1 확인
+bash -n scripts/ci/test-render-tree-decoder.sh scripts/ci/classify-pr-changes.sh
+shellcheck -e SC2129 scripts/ci/test-render-tree-decoder.sh scripts/ci/classify-pr-changes.sh
+scripts/ci/classify-pr-changes.sh origin/devel origin/automation/rhwp-v0.8.4-full-sync
+./scripts/check-no-appkit.sh
+ruby -e 'require "psych"; Dir[".github/workflows/*.yml"].sort.each { |path| Psych.parse_file(path) }'
+git diff --check
+```
+
+Producer-backed golden과 runtime decode 오류 정책은 각각 #469, #470 수용 조건에서 구현하며 이 PR에서는 수동 payload fixture와 classification 경계만 보강한다.

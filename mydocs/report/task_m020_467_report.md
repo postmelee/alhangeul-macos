@@ -14,7 +14,7 @@
 
 Rhwp v0.8.4에서 제거된 `RenderNode.dirty`를 Swift decoder가 계속 필수 key로 요구해 native render tree 전체가 `nil`이 되는 호환성 회귀를 보정했다.
 
-사용하지 않는 Swift property와 coding key를 제거해 v0.8.4 JSON을 수용하고, JSONDecoder의 unknown-key 허용으로 `dirty`가 남은 v0.8.2 JSON도 계속 수용한다. 두 형식을 중첩 node fixture로 고정하고 PR CI에서 Rust build 전에 실행하도록 연결했다. 신규 fixture/helper만 바뀌는 후속 PR도 macOS build와 native render smoke를 건너뛰지 않게 path classification을 보강했다.
+사용하지 않는 Swift property와 coding key를 제거해 v0.8.4 JSON을 수용하고, JSONDecoder의 unknown-key 허용으로 `dirty`가 남은 v0.8.2 JSON도 계속 수용한다. 두 형식을 중첩 node fixture로 고정하고 PR CI에서 Rust build 전에 실행하도록 연결했다. PR 리뷰 후에는 전체 `TextRunNode`/`TextStyle` payload decode와 `.textRun` case를 추가하고, 실패를 stderr와 exit 1로 정규화했다. 신규 fixture/helper뿐 아니라 `rhwp-core.lock`/`Frameworks/*` 변경도 native render smoke를 직접 활성화하도록 path classification을 보강했다.
 
 PR #466 v0.8.4 candidate에 같은 보정을 격리 적용한 결과 기본 sample 3종의 render tree, Hangul text/glyph와 non-blank PNG smoke가 모두 통과했다. Task #467은 PR #466, upstream automation branch, core pin과 공개 release 상태를 변경하지 않았다.
 
@@ -56,9 +56,9 @@ Swift `RenderNode`에서 사용하지 않는 `dirty` property와 coding key를 �
 | 파일 | 변경 내용 |
 |------|-----------|
 | `Sources/RhwpCoreBridge/RenderTree.swift` | `dirty` property/CodingKey 제거, retired/legacy field 호환 의도 주석 |
-| `scripts/ci/render_tree_decoder_fixture.swift` | Current/legacy root-child JSON decode와 구조 assertion |
+| `scripts/ci/render_tree_decoder_fixture.swift` | Current/legacy root-child JSON, 전체 TextRun/TextStyle payload decode와 구조/case assertion, stderr/exit 1 failure |
 | `scripts/ci/test-render-tree-decoder.sh` | Foundation-only 격리 compile/run, help/argument/cleanup contract |
-| `scripts/ci/classify-pr-changes.sh` | 신규 fixture/helper를 macOS build와 render smoke trigger로 분류 |
+| `scripts/ci/classify-pr-changes.sh` | 신규 fixture/helper와 core lock/artifact를 macOS build와 render smoke trigger로 분류 |
 | `.github/workflows/pr-ci.yml` | Helper interface 확인, macOS checkout 직후 조기 decoder fixture 실행 |
 | `mydocs/plans/task_m020_467.md` | 목적, 범위, 설계 방향, 3단계와 위험 |
 | `mydocs/plans/task_m020_467_impl.md` | Stage별 exact contract, 판정 규칙과 검증 명령 |
@@ -88,16 +88,18 @@ Swift `RenderNode`에서 사용하지 않는 `dirty` property와 coding key를 �
 | Stage 2 | `1b49a87` | `dirty` 제거, current/legacy fixture/helper와 PR CI/classification 구현 |
 | Stage 3 | `56497f7` | 전체 회귀, v0.8.4 bridge provenance와 sample 3종 smoke 완료 |
 | 최종 보고 | 현재 커밋 | 최종 수용 결과, 오늘할일 완료와 PR #466 handoff 정리 |
+| PR 리뷰 반영 | 후속 커밋 | TextRun payload, 명시적 exit 1, core lock/artifact render 분류와 #469/#470 등록 |
 
 ## 변경 전·후 정량 비교
 
 | 항목 | 변경 전 | 변경 후 |
 |------|---------|---------|
 | Swift 필수 `dirty` decode member | property 1개 + CodingKey 1개 | 0개 |
-| Decoder compatibility fixture | 없음 | current/legacy 2 case, root/child assertion |
+| Decoder compatibility fixture | 없음 | current/legacy envelope 2 case + TextRun/TextStyle payload 1 case |
 | Fixture helper | 없음 | Foundation-only shell helper 1개 |
 | PR CI decoder gate | 실제 native smoke에서 간접 검출 | Rust build 전 독립 fixture + 이후 native smoke |
 | Helper-only macOS/render 분류 | 보장 안 됨 | exact path 2개 모두 true |
+| Core lock/artifact render 분류 | BuildInfo source 변경의 부수 효과 | `rhwp-core.lock`, `Frameworks/*` direct renderer trigger |
 | Stage 2 source diff | 없음 | 5 files, `+138 / -3` |
 | 단계 보고서 | 없음 | Stage 1~3 보고서 3개 |
 | 최종 보고 전 전체 diff | 없음 | 11 files, `+928 / -3` |
@@ -106,18 +108,23 @@ Swift `RenderNode`에서 사용하지 않는 `dirty` property와 coding key를 �
 
 ### Swift fixture
 
-두 case 모두 `MasterPage` root와 `Header` child를 가진다.
+Envelope 두 case는 `MasterPage` root와 `Header` child를 가진다.
 
 - `current-without-dirty`: root/child 모두 `dirty` 없음
 - `legacy-with-dirty`: root/child 모두 `dirty` 있음
 
 각 case에서 root/child id, node type, visible, child count와 empty descendants를 확인한다. 실제 실패 지점이었던 `children[0]`을 포함하므로 top-level-only 검증으로 회귀가 빠져나가지 않는다.
 
+PR 리뷰 반영으로 세 번째 `text-run-payload` case를 추가했다. 이 JSON은 `TextRunNode`의 필수 field와 `TextStyle`의 모든 non-optional field를 포함한다. Decode 뒤 `.textRun` case인지 확인해 known payload 실패가 조용히 `.unknown`으로 바뀌는 회귀를 막고, text/font/tab stop/border fill/field marker 대표 값을 assert한다.
+
+수동 payload snapshot은 local Swift decoder 변경을 검출하지만 future upstream producer drift를 자동 반영하지는 않는다. 실제 producer-backed golden은 #469 작업으로 분리했다.
+
 ### Shell helper
 
 - Argument 없는 production 실행
 - `--help`/`-h` 성공
 - Unexpected argument exit 2
+- Fixture decode/assertion 실패는 `ERROR: render tree decoder fixture failed:` stderr와 exit 1
 - `mktemp -d`의 binary/module cache만 사용
 - `trap`으로 exact temp root 정리
 - Tracked source와 repository build output 무변경
@@ -134,7 +141,7 @@ MacOS validation의 순서는 다음과 같다.
 6. Xcode project 생성과 HostApp build
 7. Native renderer smoke
 
-Schema-only 오류는 비싼 Rust universal build 전에 직접적인 fixture failure로 종료된다. Source/helper/workflow 전체 Task #467 diff의 classification은 `macOS=true`, `render=true`, `release=true`, `Rust verify=false`다. Core provenance 입력이 바뀌지 않았으므로 Rust verify false는 의도한 값이다.
+Schema-only 오류는 비싼 Rust universal build 전에 직접적인 fixture failure로 종료된다. Source/helper/workflow 전체 Task #467 diff의 classification은 `macOS=true`, `render=true`, `release=true`, `Rust verify=false`다. Core provenance 입력이 바뀌지 않았으므로 Rust verify false는 의도한 값이다. Upstream core candidate에서는 `rhwp-core.lock` 자체가 render reason을 제공하므로 generated `RhwpCoreBuildInfo.swift`가 우연히 renderer pattern에 걸리는 데 의존하지 않는다. `Frameworks/`는 현재 gitignore 대상이지만 향후 tracked artifact 경로가 생겨도 같은 direct gate를 적용한다.
 
 ## 검증 결과
 
@@ -142,7 +149,8 @@ Schema-only 오류는 비싼 Rust universal build 전에 직접적인 fixture fa
 
 ```text
 전체 shell syntax: 통과
-render tree decoder current/legacy fixture: 통과
+render tree decoder current/legacy envelope + TextRun payload fixture: 통과
+의도적 TextRun assertion 실패 probe: stderr prefix와 exit 1 통과
 helper help와 unexpected argument: 통과
 shellcheck -e SC2129: 통과
 core build-info isolated fixture: 통과
@@ -152,6 +160,7 @@ production RhwpCoreBuildInfo verifier: 통과
 bundled rhwp-studio asset verifier: 통과
 전체 workflow Psych parse: 6개 통과
 committed ref PR classification: 기대 flag/reason 통과
+v0.8.4 sync classification: rhwp-core.lock direct render reason 확인
 git diff --check: 통과
 ```
 
@@ -185,6 +194,15 @@ PR #466 detached worktree, 두 architecture의 Cargo target, 209MB universal sta
 
 ## 잔여 위험과 후속 작업
 
+### 등록한 follow-up 이슈
+
+- [#469 Pin된 core render tree golden 자동 갱신 및 Swift decoder 계약 검증](https://github.com/postmelee/alhangeul-macos/issues/469)
+  - 수동 JSON snapshot이 future upstream producer drift를 자동 검출하지 못하는 구조적 갭을 다룬다.
+- [#470 Known RenderNodeType payload decode 실패 진단과 unknown variant 구분](https://github.com/postmelee/alhangeul-macos/issues/470)
+  - Known payload의 malformed decode와 unknown future variant를 구분하고 envelope/payload 오류의 coding path를 노출한다.
+
+Task #467은 두 후속 이슈의 runtime/golden 구조를 선행 구현하지 않고 빠른 수동 fixture와 CI classification만 보강했다.
+
 ### Task #467 PR
 
 - Open PR 생성 후 GitHub-hosted `Classify changed files`, `Script syntax checks`, `macOS validation`, `Release helper checks`를 확인한다.
@@ -211,7 +229,8 @@ Task #467은 signing/notarization, GitHub Release, Pages/Sparkle, Homebrew Cask 
 Task #467 PR에서 다음을 중점 확인해 달라.
 
 1. 사용하지 않는 retired `dirty` member를 optional로 남기지 않고 제거한 최소 보정
-2. Current/legacy JSON 모두 root/child까지 검증하는 fixture 계약
+2. Current/legacy JSON의 root/child와 TextRun/TextStyle payload case를 검증하는 fixture 계약
 3. Rust build 전 조기 fixture와 이후 native smoke의 2단계 검출 경계
-4. Fixture/helper-only 변경도 macOS/render gate를 활성화하는 path classification
-5. PR #466을 직접 수정하지 않고 Task #467 merge 뒤 최신 `devel`에서 갱신하는 handoff
+4. Fixture/helper와 core lock/artifact 변경이 macOS/render gate를 활성화하는 path classification
+5. Producer golden과 runtime decode 진단을 #469/#470 작업으로 분리한 경계
+6. PR #466을 직접 수정하지 않고 Task #467 merge 뒤 최신 `devel`에서 갱신하는 handoff

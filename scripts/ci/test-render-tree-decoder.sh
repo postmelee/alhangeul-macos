@@ -9,7 +9,8 @@ usage() {
 Usage: $0
 
 Compiles RenderTree.swift with an isolated fixture and verifies both current
-JSON without the retired dirty field and legacy JSON that still contains it.
+JSON without the retired dirty field, legacy JSON that still contains it,
+and a complete TextRun/TextStyle payload.
 EOF
 }
 
