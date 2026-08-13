@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RESOURCE_DIR="$ROOT/Sources/HostApp/Resources/rhwp-studio"
 EXPECTED_RELEASE_TAG=""
 EXPECTED_COMMIT=""
+UPSTREAM_DIR=""
 
 fail() {
   echo "FAIL: $*" >&2
@@ -14,12 +15,15 @@ fail() {
 usage() {
   cat >&2 <<EOF
 Usage: $0 [RESOURCE_DIR] [options]
-       $0 [--resource-dir DIR] [--tag TAG] [--commit COMMIT]
+       $0 [--resource-dir DIR] [--tag TAG] [--commit COMMIT] [--upstream-dir DIR]
 
 Options:
   --resource-dir DIR  rhwp-studio resource directory. Defaults to bundled HostApp resource.
   --tag TAG           Expected rhwp release tag. Defaults to manifest source_release_tag.
   --commit COMMIT     Expected rhwp resolved commit. Defaults to manifest source_resolved_commit.
+  --upstream-dir DIR  Compare manifest source_cargo_lock_sha256 with DIR/Cargo.lock.
+                      When set, DIR must be a Git checkout at the expected commit;
+                      the manifest fingerprint and upstream Cargo.lock are required.
   -h, --help          Show this help.
 EOF
 }
@@ -97,6 +101,13 @@ parse_args() {
         EXPECTED_COMMIT="$2"
         shift
         ;;
+      --upstream-dir)
+        if [ "$#" -lt 2 ] || [ -z "$2" ]; then
+          fail "missing value for --upstream-dir"
+        fi
+        UPSTREAM_DIR="$2"
+        shift
+        ;;
       -h|--help)
         usage
         exit 0
@@ -163,8 +174,40 @@ fi
 
 grep -Fq "\"source_release_tag\": \"$EXPECTED_RELEASE_TAG\"" "$RESOURCE_DIR/manifest.json" || fail "manifest release tag does not match $EXPECTED_RELEASE_TAG"
 grep -Fq "\"source_resolved_commit\": \"$EXPECTED_COMMIT\"" "$RESOURCE_DIR/manifest.json" || fail "manifest commit does not match expected commit $EXPECTED_COMMIT"
+source_cargo_lock_sha256=""
 if source_cargo_lock_sha256="$(manifest_field "$RESOURCE_DIR/manifest.json" source_cargo_lock_sha256)"; then
   validate_sha256 source_cargo_lock_sha256 "$source_cargo_lock_sha256"
+elif [ -n "$UPSTREAM_DIR" ]; then
+  fail "manifest missing source_cargo_lock_sha256 required for upstream comparison"
+fi
+
+if [ -n "$UPSTREAM_DIR" ]; then
+  [ -d "$UPSTREAM_DIR" ] || fail "missing upstream directory: $UPSTREAM_DIR"
+  upstream_cargo_lock="$UPSTREAM_DIR/Cargo.lock"
+  [ -f "$upstream_cargo_lock" ] || fail "missing upstream root Cargo.lock: $upstream_cargo_lock"
+  if ! upstream_head="$(git -C "$UPSTREAM_DIR" rev-parse --verify 'HEAD^{commit}' 2>/dev/null)"; then
+    fail "upstream directory is not a git checkout: $UPSTREAM_DIR"
+  fi
+  if ! expected_upstream_commit="$(git -C "$UPSTREAM_DIR" rev-parse --verify "$EXPECTED_COMMIT^{commit}" 2>/dev/null)"; then
+    fail "expected upstream commit is not available in checkout: $EXPECTED_COMMIT"
+  fi
+  if [ "$upstream_head" != "$expected_upstream_commit" ]; then
+    echo "FAIL: upstream checkout HEAD does not match expected commit" >&2
+    echo "Expected commit: $expected_upstream_commit" >&2
+    echo "Actual HEAD:     $upstream_head" >&2
+    echo "Checkout:        $UPSTREAM_DIR" >&2
+    exit 1
+  fi
+  echo "OK: upstream checkout HEAD matches $expected_upstream_commit"
+  actual_cargo_lock_sha256="$(shasum -a 256 "$upstream_cargo_lock" | awk '{print $1}')"
+  if [ "$source_cargo_lock_sha256" != "$actual_cargo_lock_sha256" ]; then
+    echo "FAIL: manifest source_cargo_lock_sha256 does not match upstream root Cargo.lock" >&2
+    echo "Manifest value: $source_cargo_lock_sha256" >&2
+    echo "Actual value:   $actual_cargo_lock_sha256" >&2
+    echo "Cargo.lock:     $upstream_cargo_lock" >&2
+    exit 1
+  fi
+  echo "OK: manifest source_cargo_lock_sha256 matches $upstream_cargo_lock"
 fi
 wasm_build_command="$(manifest_field "$RESOURCE_DIR/manifest.json" wasm_build_command)" \
   || fail "manifest missing wasm_build_command"

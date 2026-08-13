@@ -273,10 +273,13 @@ cat > "$TARGET/manifest.json" <<JSON
 }
 JSON
 
+# Re-read the generated manifest and source file to catch writer, quoting, and copy drift.
+# Upstream HEAD was already resolved above; the verifier independently enforces it again.
 "$ROOT/scripts/verify-rhwp-studio-assets.sh" \
   --resource-dir "$TARGET" \
   --tag "$EXPECTED_RELEASE_TAG" \
-  --commit "$expected_commit_resolved"
+  --commit "$expected_commit_resolved" \
+  --upstream-dir "$UPSTREAM_DIR"
 
 if [ "$CHECK_MODE" = "true" ]; then
   echo "OK: rhwp-studio sync check passed for $EXPECTED_RELEASE_TAG at $expected_commit_resolved"

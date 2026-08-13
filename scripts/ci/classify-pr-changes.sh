@@ -154,6 +154,14 @@ classify_path() {
   esac
 
   case "$path" in
+    scripts/ci/test-rhwp-studio-cargo-lock-verification.sh)
+      enable_macos_build "$path affects bundled studio Cargo.lock provenance verification"
+      enable_rust_verify "$path affects bundled studio/core provenance verification"
+      matched=1
+      ;;
+  esac
+
+  case "$path" in
     RustBridge/examples/*)
       ;;
     RustBridge/*|rhwp-core.lock|Frameworks/*|Vendor/rhwp/*|rust-toolchain.toml|scripts/build-rust-macos.sh|scripts/update-rhwp-core.sh|scripts/sync-rhwp-studio.sh|scripts/verify-rhwp-studio-assets.sh)

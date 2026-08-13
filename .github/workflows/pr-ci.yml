@@ -97,6 +97,12 @@ jobs:
           set -euo pipefail
           scripts/ci/test-rhwp-core-build-info.sh
 
+      - name: Check studio Cargo.lock verification fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
+
       - name: Verify tracked core build info
         shell: bash
         run: |

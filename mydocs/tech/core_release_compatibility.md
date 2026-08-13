@@ -261,9 +261,18 @@ release tag dependency 전환 후에는 다음 항목이 서로 일치해야 한
 - `rhwp-core.lock`의 `rhwp_release_tag`
 - `rhwp-core.lock`의 `rhwp_commit`
 - bundled `rhwp-studio` manifest의 `source_release_tag`, `source_resolved_commit`
-- manifest에 `source_cargo_lock_sha256`이 있으면 target upstream root `Cargo.lock` sha256
+- bundled studio를 sync하는 경우 manifest의 `source_cargo_lock_sha256`과 target upstream root `Cargo.lock` sha256
 
-불일치하면 `Cargo.lock mismatch`로 기록한다.
+RustBridge dependency lock 불일치는 `Cargo.lock mismatch`로 기록한다. bundled studio provenance는 target checkout을 보존한 상태에서 다음 strict verifier로 확인하고, 불일치는 별도 `upstream Cargo.lock provenance mismatch`로 기록한다.
+
+```bash
+scripts/verify-rhwp-studio-assets.sh \
+  --upstream-dir /absolute/path/to/target-rhwp-checkout \
+  --tag <release-tag> \
+  --commit <resolved-commit>
+```
+
+upstream checkout이 없는 일반 앱 검증에서는 resource-only 모드를 유지해 기존 manifest의 field 누락을 허용한다. strict 모드는 Git checkout HEAD와 expected resolved commit을 먼저 결합하고, non-Git directory, stale checkout, field 누락, malformed sha256, upstream root `Cargo.lock` 누락, 실제 hash mismatch를 서로 다른 오류로 보고한다.
 
 ### 7. artifact hash/size 확인
 
@@ -379,7 +388,7 @@ Demo/Preview를 이유로 `main` 또는 `devel` branch dependency를 사용하�
 |------|------|------|------|
 | `missing core API` | RustBridge가 요구하는 core API가 target release에 없다. | `no method named build_page_render_tree`, `no method named get_bin_data` | Stable 전환 금지. Demo/Preview는 API가 포함된 별도 commit을 `rev`로 고정할 때만 진행한다. |
 | `Cargo.lock mismatch` | Cargo가 해석한 git dependency commit과 `rhwp-core.lock` 기준이 다르다. | `RustBridge/Cargo.lock` source hash와 `rhwp-core.lock.rhwp_commit` 불일치 | `RustBridge/Cargo.lock`/`rhwp-core.lock` 갱신 순서를 보정한다. |
-| `upstream Cargo.lock provenance mismatch` | bundled studio/WASM manifest fingerprint와 target upstream checkout root `Cargo.lock`이 다르다. | `source_cargo_lock_sha256` 값이 target `Cargo.lock` sha256과 불일치 | sync 대상 checkout과 manifest 생성 시점을 다시 확인한다. |
+| `upstream Cargo.lock provenance mismatch` | bundled studio/WASM manifest identity가 target upstream checkout commit 또는 root `Cargo.lock`과 다르다. | strict verifier가 expected/actual checkout identity 또는 manifest/actual hash와 비교 경로를 출력하고 실패 | sync 대상 checkout과 manifest 생성 시점을 다시 확인한 뒤 후보 asset을 재생성한다. commit/hash를 수동 보정하지 않는다. |
 | `artifact hash mismatch` | 현재 빌드 산출물과 `rhwp-core.lock` artifact hash/size가 다르다. | `./scripts/build-rust-macos.sh --verify-lock` 실패 | 의도한 변경이면 `--update-lock`, 아니면 산출물 재생성/rollback을 검토한다. |
 | `FFI symbol diff` | generated C ABI symbol set이 기대값과 다르다. | `diff -u rhwp-ffi-symbols.txt Frameworks/generated_rhwp_symbols.txt` 실패 | Swift 영향 분석과 ABI 의도성 확인 전 merge 금지. |
 | `render smoke failure` | build는 되지만 native render tree 렌더 결과가 깨진다. | decode 실패, page size 0, 이미지 조회 실패, smoke script 실패 | render tree schema/Swift renderer/core output을 분리 조사한다. |
@@ -417,7 +426,7 @@ Stable release tag 전환:
 - [ ] generated FFI symbol set이 `rhwp-ffi-symbols.txt`와 일치하거나, ABI 변경 계획이 별도로 승인되었다.
 - [ ] render smoke가 앱 저장소 루트 `samples/` 기준으로 통과한다.
 - [ ] `RustBridge/Cargo.lock`과 `rhwp-core.lock`의 repo, release tag, resolved commit 정합성 검증 방법이 준비되어 있다.
-- [ ] bundled `rhwp-studio`를 함께 sync하는 경우 manifest의 `source_cargo_lock_sha256` 검토 방법이 준비되어 있다.
+- [ ] bundled `rhwp-studio`를 함께 sync하는 경우 target checkout을 넘긴 strict verifier가 checkout HEAD/expected commit과 manifest `source_cargo_lock_sha256`/root `Cargo.lock` 실제 hash 일치를 자동 확인한다.
 - [ ] `rhwp-core.lock`에 release tag, resolved commit, artifact hash/size를 기록할 수 있다.
 - [ ] native render tree 경로가 HostApp, Quick Look, Thumbnail의 기준 경로로 유지된다.
 
