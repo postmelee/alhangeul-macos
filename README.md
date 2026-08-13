@@ -28,7 +28,7 @@
 ## 알한글 for macOS
 
 <strong>알한글(alhangeul-macos)</strong>은 HWP/HWPX 파일을 macOS에서 미리보고, 앱에서 열고, 저장하고, 공유하고, PDF로 내보낼 수 있게 하는 오픈소스 데스크톱 앱입니다. 파일을 업로드하지 않고 로컬에서 문서를 다루는 것을 기본값으로 둡니다.
-> Rust 기반 [`rhwp`](https://github.com/edwardkim/rhwp) 코어를 macOS 앱, Quick Look preview, Finder thumbnail, Swift bridge로 연결합니다. 첫 viewer는 `rhwp-studio`를 WKWebView로 품고, Finder/Quick Look과 PDF 내보내기에는 이 저장소의 Swift/Rust bridge 렌더링 경로를 함께 사용합니다.
+> Rust 기반 [`rhwp`](https://github.com/edwardkim/rhwp) 코어를 macOS 앱, Quick Look preview, Finder thumbnail, Swift bridge로 연결합니다. 첫 viewer는 `rhwp-studio`를 WKWebView로 품고, Finder/Quick Look은 Swift/Rust bridge native renderer를, PDF/인쇄는 현재 editor의 page SVG를 격리된 native 출력 경로에서 사용합니다.
 > "닫힌 HWP/HWPX 문서를 더 많은 환경에서 다룰 수 있게 한다"는 [`rhwp`](https://github.com/edwardkim/rhwp)의 방향을 **Mac 네이티브** 경험으로 확장합니다.
 
 ## Support
@@ -53,15 +53,15 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 ## 최신 공개 릴리즈
 
-### v0.1.9
+### v0.1.10
 
-`v0.1.9`은 upstream `rhwp v0.8.2` core와 bundled 편집기를 반영해 복잡한 표·페이지 배치, 저장 뒤 서식 보존, 오래된 HWP 그림 표시와 편집기의 입력·실행취소 안정성을 보강하고, 창 너비에 따라 viewer/editor 상단 도구 모음이 겹치거나 잘리던 문제를 수정하는 patch release입니다. HOP과 알한글 Quick Look이 함께 설치된 검증 가능한 조합에서는 예상과 다른 미리보기가 선택될 수 있음을 알리고 확장 프로그램 설정 경로를 안내합니다. Quick Look의 외부 연결 그림은 macOS가 sibling file 접근을 허용할 때만 불러오며, 접근이 거부돼도 문서 본문 미리보기는 계속 표시합니다. 외부 그림 데이터를 처리할 때 Finder 썸네일 확장이 종료될 수 있던 문제도 수정했습니다.
+`v0.1.10`은 HWP와 HWPX를 형식에 맞는 macOS 저장 패널로 저장하고 다시 여는 경로를 연결하며, 현재 편집 상태의 전체 페이지를 searchable PDF와 인쇄로 내보내는 patch release입니다. PDF·인쇄용 문서 SVG는 전용 WebView에서 script, 외부 resource와 navigation을 차단하면서 page geometry와 text를 유지합니다. upstream `rhwp v0.8.4`의 암호 문서, 중첩 표 조판·선택·복사, 특수 글리프와 대형 문서 처리 보강을 포함하고, 새 render tree schema를 native Quick Look/Thumbnail 경로에서도 수용합니다. 설정의 개인정보 화면에서는 영구 사용자·기기 식별자 없이 수집되는 익명 실행·업데이트 추이 공유를 끌 수 있습니다.
 
-- GitHub Release: [Alhangeul v0.1.9](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.9)
-- 업데이트 페이지: [알한글 v0.1.9](https://postmelee.github.io/alhangeul-macos/updates/v0.1.9.html)
-- Homebrew Cask: [`postmelee/tap/alhangeul`](https://github.com/postmelee/homebrew-tap)에서 v0.1.9 배포 중
-- 포함된 `rhwp`: [`v0.8.2`](https://github.com/edwardkim/rhwp/releases/tag/v0.8.2) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
-- Sparkle update 기준: short version은 `0.1.9`, build는 `15`입니다.
+- GitHub Release: [Alhangeul v0.1.10](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.10)
+- 업데이트 페이지: [알한글 v0.1.10](https://postmelee.github.io/alhangeul-macos/updates/v0.1.10.html)
+- Homebrew Cask: public DMG SHA256 확정 후 별도 배포 단계에서 반영
+- 포함된 `rhwp`: [`v0.8.4`](https://github.com/edwardkim/rhwp/releases/tag/v0.8.4) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
+- Sparkle update 기준: short version은 `0.1.10`, build는 `16`입니다.
 
 과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약하고, bundled `rhwp` provenance는 한 줄 요약만 표시합니다.
 
@@ -94,7 +94,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 - [x] Finder 또는 다른 앱에서 HWP/HWPX 파일 열기
 - [x] Finder에서 viewer 영역으로 끌어와서 열기
 - [x] 최근 문서 목록과 security-scoped bookmark 기반 재열기
-- [x] HWP 저장과 다른 이름으로 저장
+- [x] HWP/HWPX 형식별 저장과 다른 이름으로 저장
 - [x] PDF 내보내기
 - [x] native 인쇄 flow 연결
 - [x] macOS 공유 sheet
@@ -108,9 +108,9 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 
 - 앱 화면의 viewer/editor와 Finder Quick Look/thumbnail, PDF 내보내기, 인쇄는 서로 다른 렌더링 경로를 사용할 수 있습니다.
 - Quick Look/Thumbnail smoke 통과는 extension 등록과 기본 렌더 성공을 뜻하며, 모든 문서가 앱 화면과 같은 시각 결과로 보인다는 보장은 아닙니다.
-- HWPX 문서는 현재 직접 저장이 제한되어 HWP export 경로를 사용합니다.
+- HWP/HWPX 저장은 형식별 exporter와 container signature를 확인하지만, upstream exporter가 모든 문서 요소를 의미론적으로 완전 무손실 보존한다고 보장하지 않습니다.
 - 손상, 대용량, 미지원 문서 fallback은 앱과 extension이 멈추지 않도록 하는 안전장치이며, 파일 복구나 부분 렌더링을 보장하지 않습니다.
-- CoreGraphics/CoreText 기반 native renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity gap은 현재 Quick Look/Thumbnail/PDF와 fallback/diagnostic 경로에서 계속 다룹니다. HostApp 장기 native 경로는 Rust/rhwp Skia renderer와 Swift overlay를 결합하는 방향으로 분리합니다.
+- CoreGraphics/CoreText 기반 native renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity gap은 현재 Quick Look/Thumbnail과 fallback/diagnostic 경로에서 계속 다룹니다. HostApp 장기 native 경로는 Rust/rhwp Skia renderer와 Swift overlay를 결합하는 방향으로 분리합니다.
 
 ## Features
 
@@ -126,7 +126,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 ### WKWebView Viewer (MVP 뷰어)
 
 - macOS SwiftUI 기반 HostApp shell과 WKWebView
-- `edwardkim/rhwp` `v0.7.16` snapshot의 `rhwp-studio` viewer 통합
+- `edwardkim/rhwp` `v0.8.4`의 `rhwp-studio` viewer/editor 통합
 - HWP/HWPX 파일 열기
 - WebView 내부 찾기, 복사, 기본 편집 UI
 - Finder 또는 다른 앱에서 파일 열기 요청 수신
@@ -138,23 +138,23 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 ### Document Actions (문서 작업)
 
 - 파일 메뉴와 `Command+O/S/Shift+S/P` 단축키를 native 열기, 저장, 다른 이름으로 저장, 인쇄 flow에 연결
-- HWP 문서 저장과 다른 이름으로 저장
+- HWP/HWPX 형식별 저장과 다른 이름으로 저장, 저장 결과 재열기
 - PDF로 내보내기 후 저장된 PDF를 Finder에서 표시
 - macOS 공유 sheet로 현재 문서 공유
 - 원본 URL이 있는 문서를 Finder에서 보기
-- HWPX 문서는 현재 bundled `rhwp-studio`의 정책에 따라 직접 저장이 비활성화되어 있으며, 저장 flow는 HWP export 경로를 사용
+- HWPX로 저장한 문서는 같은 URL과 HWPX 형식을 유지한 후속 `Command+S` 경로 사용
 
 ### Rendering Paths (렌더링 경로)
 
 | 표면 | v0.1 렌더링 경로 | 기준 |
 |------|------------------|------|
 | HostApp viewer/editor 화면 | `rhwp-studio` Web/WASM rendering in WKWebView | 첫 공개 배포의 기본 viewer/editor 경로 |
-| PDF 내보내기 | Rust bridge + Swift CoreGraphics/CoreText render tree PDF 경로 | 앱 화면과 같은 renderer를 쓰지는 않음 |
-| 인쇄 | `rhwp-studio` page payload + 별도 WKWebView/PDFKit/AppKit print operation | PDF 내보내기와 다른 출력 경로 |
+| PDF 내보내기 | `rhwp-studio` page SVG + 전용 WKWebView/PDFKit native PDF 경로 | 현재 편집 상태의 전체 페이지와 searchable text 반영 |
+| 인쇄 | PDF 내보내기와 같은 page SVG renderer + PDFKit/AppKit print operation | page geometry를 공유하고 native print panel 사용 |
 | Quick Look preview | Rust bridge + Swift CoreGraphics/CoreText render tree bitmap/PDF | Finder preview용 경로 |
 | Finder thumbnail | Rust bridge + Swift CoreGraphics/CoreText first-page bitmap/cache | Finder icon/thumbnail용 경로 |
 
-WKWebView 경로는 native macOS shell이 충분히 안정화될 때까지 fallback과 비교 기준선으로 유지합니다. 현재 Quick Look/Thumbnail/PDF export의 native bitmap 경로는 Rust core render tree JSON, CoreGraphics, CoreText, 이미지 bin data를 사용합니다. HostApp 장기 native 경로는 Swift macOS shell, Rust/rhwp Skia renderer, Swift 편집 UI/오버레이를 결합하는 방향으로 둡니다.
+WKWebView viewer/editor 경로는 native macOS shell이 충분히 안정화될 때까지 fallback과 비교 기준선으로 유지합니다. Quick Look/Thumbnail의 native bitmap 경로는 Rust core render tree JSON, CoreGraphics, CoreText, 이미지 bin data를 사용하고, PDF/인쇄는 현재 editor의 page SVG를 별도 script-disabled WebView에서 변환합니다. HostApp 장기 native 경로는 Swift macOS shell, Rust/rhwp Skia renderer, Swift 편집 UI/오버레이를 결합하는 방향으로 둡니다.
 
 ### Core Bridge (코어 브리지)
 
@@ -192,6 +192,12 @@ Homebrew가 untrusted tap 정책으로 설치를 거부하면 `brew trust --cask
 설치 후에는 `Alhangeul.app`을 한 번 실행하세요. macOS가 Quick Look 및 Thumbnail extension을 발견하고 등록한 뒤 Finder에서 `.hwp`, `.hwpx` preview와 thumbnail을 사용할 수 있습니다.
 
 최신 공개 릴리즈는 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases/latest)와 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인합니다. 릴리스가 게시되기 전에는 아래 소스 빌드 절차를 사용하세요. unsigned, ad-hoc signed, rehearsal DMG는 일반 사용자 배포 산출물이 아닙니다.
+
+## 개인정보 및 익명 사용 추이
+
+알한글은 최초 실행과 버전 전환 추이를 파악하기 위한 익명 이벤트 공유를 기본으로 활성화합니다. 전송 데이터는 이벤트별 임시 ID, 실제 발생 UTC 날짜, 이벤트 유형, 이전·현재 버전과 확인 가능한 업데이트 경로로 제한하며 문서 내용·파일명·경로, 계정, 기기·사용자·설치 식별자를 포함하지 않습니다. 이 값은 전체 설치 수나 고유 사용자 수가 아니라 네트워크 연결 환경에서 수집 서버에 도달한 관측 이벤트입니다.
+
+수집 요청은 Cloudflare Worker를 통해 처리하지만 요청의 IP·지역·header를 알한글 분석 저장소에 보관하지 않습니다. 앱은 OS·언어 정보를 드러내지 않는 고정 request header를 사용하고 redirect를 따르지 않습니다. macOS `설정… > 개인정보`에서 `익명 사용 추이 공유`를 끌 수 있으며, 끄면 보관 중인 이벤트와 전송 상태를 즉시 삭제합니다. 자세한 데이터·오프라인 보관·재시도 계약은 [익명 실행 이벤트 계약](mydocs/tech/task_m040_453_app_execution_analytics_contract.md)을 참조하세요.
 
 ## Quick Start (소스 빌드)
 처음 프로젝트에 참여하는 개발자는 [Project Structure](#project-structure)를 먼저 보고, 세부 경계는 [아키텍처 문서](mydocs/tech/project_architecture.md), 상세한 빌드 및 검증 절차는 [빌드 및 실행 가이드](mydocs/manual/build_run_guide.md)를 확인하세요. 실제 빌드는 Rust bridge 산출물을 만든 뒤 Xcode project를 생성하고 HostApp을 빌드하는 순서입니다.

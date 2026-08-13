@@ -4,33 +4,51 @@ import UniformTypeIdentifiers
 enum DocumentSavePanel {
     @MainActor
     static func chooseDestinationURL(
+        format: DocumentSaveFormat,
         suggestedFilename: String,
         presentingWindow: NSWindow?
     ) async -> URL? {
-        let panel = makePanel(suggestedFilename: suggestedFilename)
+        let panel = makePanel(format: format, suggestedFilename: suggestedFilename)
         guard let presentingWindow else {
-            return panel.runModal() == .OK ? panel.url : nil
+            guard panel.runModal() == .OK, let url = panel.url else {
+                return nil
+            }
+            return format.normalizedDestinationURL(url)
         }
 
         return await SavePanelPresenter.chooseURL(panel, presentingWindow: presentingWindow)
+            .map(format.normalizedDestinationURL)
     }
 
     @MainActor
-    static func chooseDestinationURL(suggestedFilename: String) -> URL? {
-        let panel = makePanel(suggestedFilename: suggestedFilename)
-        return panel.runModal() == .OK ? panel.url : nil
+    static func chooseDestinationURL(
+        format: DocumentSaveFormat,
+        suggestedFilename: String
+    ) -> URL? {
+        let panel = makePanel(format: format, suggestedFilename: suggestedFilename)
+        guard panel.runModal() == .OK, let url = panel.url else {
+            return nil
+        }
+        return format.normalizedDestinationURL(url)
     }
 
     @MainActor
-    private static func makePanel(suggestedFilename: String) -> NSSavePanel {
+    private static func makePanel(
+        format: DocumentSaveFormat,
+        suggestedFilename: String
+    ) -> NSSavePanel {
         let panel = NSSavePanel()
         panel.canCreateDirectories = true
-        panel.title = "HWP 문서 저장"
+        panel.allowsOtherFileTypes = false
+        panel.isExtensionHidden = false
+        panel.title = format.panelTitle
         panel.message = "저장할 위치를 선택하세요."
-        panel.nameFieldStringValue = normalizedFilename(suggestedFilename)
+        panel.nameFieldStringValue = format.normalizedFilename(suggestedFilename)
 
-        if let hwpType = UTType(filenameExtension: "hwp") {
-            panel.allowedContentTypes = [hwpType]
+        if let documentType = UTType(format.uniformTypeIdentifier) {
+            panel.allowedContentTypes = [documentType]
+        } else if let documentType = UTType(filenameExtension: format.fileExtension) {
+            panel.allowedContentTypes = [documentType]
         }
 
         return panel
@@ -41,24 +59,20 @@ enum DocumentSavePanel {
     }
 
     @MainActor
-    static func save(data: Data, suggestedFilename: String) throws -> URL? {
-        guard let url = chooseDestinationURL(suggestedFilename: suggestedFilename) else {
+    static func save(
+        data: Data,
+        format: DocumentSaveFormat,
+        suggestedFilename: String
+    ) throws -> URL? {
+        guard let url = chooseDestinationURL(
+            format: format,
+            suggestedFilename: suggestedFilename
+        ) else {
             return nil
         }
 
         try write(data: data, to: url)
         return url
-    }
-
-    private static func normalizedFilename(_ filename: String) -> String {
-        let trimmed = filename.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty {
-            return "document.hwp"
-        }
-        if trimmed.lowercased().hasSuffix(".hwp") {
-            return trimmed
-        }
-        return "\(trimmed).hwp"
     }
 }
 

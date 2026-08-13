@@ -4,29 +4,75 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 READ_LOCK="$ROOT/scripts/ci/read-rhwp-core-lock.sh"
+BUILD_INFO_COMMON="$ROOT/scripts/ci/rhwp-core-build-info-common.sh"
+LOCK_FILE="$ROOT/rhwp-core.lock"
 BUILD_INFO="$ROOT/Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift"
+EXPECTED_BUILD_INFO=""
 
 usage() {
   cat >&2 <<EOF
-Usage: $0
+Usage: $0 [--lock-file FILE] [--build-info FILE]
 
 Verifies that Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift mirrors the
-current rhwp-core.lock release tag, resolved commit, and enabled features.
+current rhwp-core.lock release baseline, resolved commit, and enabled features.
+
+Options:
+  --lock-file FILE  Read FILE instead of the repository rhwp-core.lock.
+  --build-info FILE Verify FILE instead of the repository Swift build info.
 EOF
 }
 
-if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
-  usage
-  exit 0
-fi
+cleanup() {
+  if [ -n "$EXPECTED_BUILD_INFO" ] && [ -f "$EXPECTED_BUILD_INFO" ]; then
+    rm -f "$EXPECTED_BUILD_INFO"
+  fi
+}
+trap cleanup EXIT
 
-if [ "$#" -ne 0 ]; then
-  usage
-  exit 1
-fi
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --lock-file)
+      if [ "$#" -lt 2 ] || [ -z "$2" ]; then
+        echo "ERROR: --lock-file requires a path" >&2
+        usage
+        exit 1
+      fi
+      LOCK_FILE="$2"
+      shift 2
+      ;;
+    --build-info)
+      if [ "$#" -lt 2 ] || [ -z "$2" ]; then
+        echo "ERROR: --build-info requires a path" >&2
+        usage
+        exit 1
+      fi
+      BUILD_INFO="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "ERROR: unknown argument: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
 
 if [ ! -x "$READ_LOCK" ]; then
   echo "ERROR: missing executable lock reader: $READ_LOCK" >&2
+  exit 1
+fi
+
+if [ ! -r "$BUILD_INFO_COMMON" ]; then
+  echo "ERROR: missing build info common helper: $BUILD_INFO_COMMON" >&2
+  exit 1
+fi
+
+if [ ! -f "$LOCK_FILE" ]; then
+  echo "ERROR: missing lock file: $LOCK_FILE" >&2
   exit 1
 fi
 
@@ -35,49 +81,18 @@ if [ ! -f "$BUILD_INFO" ]; then
   exit 1
 fi
 
-swift_scalar() {
-  local key="$1"
-  awk -v key="$key" '
-    $0 ~ "static[[:space:]]+let[[:space:]]+" key "[[:space:]]*=" {
-      value = $0
-      sub(/^.*=[[:space:]]*"/, "", value)
-      sub(/".*$/, "", value)
-      print value
-      found = 1
-      exit
-    }
-    END {
-      if (!found) {
-        exit 2
-      }
-    }
-  ' "$BUILD_INFO"
-}
+# shellcheck source=scripts/ci/rhwp-core-build-info-common.sh
+source "$BUILD_INFO_COMMON"
+rhwp_build_info_load_lock "$LOCK_FILE" "$READ_LOCK"
 
-compare_scalar() {
-  local lock_key="$1"
-  local swift_key="$2"
-  local expected
-  local actual
+EXPECTED_BUILD_INFO="$(mktemp "${TMPDIR:-/tmp}/rhwp-core-build-info-verify.XXXXXX")"
+rhwp_build_info_render_swift > "$EXPECTED_BUILD_INFO"
 
-  expected="$("$READ_LOCK" "$lock_key")"
-  if ! actual="$(swift_scalar "$swift_key")"; then
-    echo "ERROR: missing RhwpCoreBuildInfo.$swift_key in $BUILD_INFO" >&2
-    exit 1
-  fi
+if ! cmp -s "$BUILD_INFO" "$EXPECTED_BUILD_INFO"; then
+  echo "ERROR: $BUILD_INFO is not the canonical build info for $LOCK_FILE" >&2
+  diff -u "$BUILD_INFO" "$EXPECTED_BUILD_INFO" >&2 || true
+  echo "Update: $ROOT/scripts/update-rhwp-core-build-info.sh --lock-file $LOCK_FILE --output $BUILD_INFO" >&2
+  exit 1
+fi
 
-  if [ "$expected" != "$actual" ]; then
-    echo "ERROR: RhwpCoreBuildInfo.$swift_key differs from rhwp-core.lock" >&2
-    echo "Lock key:       $lock_key" >&2
-    echo "Expected value: $expected" >&2
-    echo "Actual value:   $actual" >&2
-    echo "Update:         $BUILD_INFO" >&2
-    exit 1
-  fi
-}
-
-compare_scalar rhwp_release_tag releaseTag
-compare_scalar rhwp_commit commit
-compare_scalar rhwp_enabled_features enabledFeatures
-
-echo "OK: RhwpCoreBuildInfo matches rhwp-core.lock"
+echo "OK: $BUILD_INFO matches $LOCK_FILE"

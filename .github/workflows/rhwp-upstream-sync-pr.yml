@@ -86,14 +86,23 @@ jobs:
           bash -n scripts/ci/check-rhwp-upstream-release.sh
           bash -n scripts/ci/detect-rhwp-studio-impact.sh
           bash -n scripts/ci/read-rhwp-core-lock.sh
+          bash -n scripts/ci/rhwp-core-build-info-common.sh
+          bash -n scripts/ci/test-rhwp-core-build-info.sh
+          bash -n scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
           bash -n scripts/ci/write-rhwp-full-sync-pr-body.sh
           bash -n scripts/sync-rhwp-studio.sh
+          bash -n scripts/update-rhwp-core-build-info.sh
+          bash -n scripts/verify-rhwp-core-build-info.sh
           bash -n scripts/verify-rhwp-studio-assets.sh
           scripts/ci/detect-rhwp-studio-impact.sh --help
           scripts/ci/read-rhwp-core-lock.sh --help
           scripts/ci/write-rhwp-full-sync-pr-body.sh --help
           scripts/sync-rhwp-studio.sh --help
+          scripts/update-rhwp-core-build-info.sh --help
+          scripts/verify-rhwp-core-build-info.sh --help
           scripts/verify-rhwp-studio-assets.sh --help
+          scripts/ci/test-rhwp-core-build-info.sh
+          scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
 
       - name: Resolve current and target rhwp release
         id: resolve
@@ -566,6 +575,8 @@ jobs:
             --tag "$target_tag"
 
           scripts/build-rust-macos.sh --update-lock
+          scripts/update-rhwp-core-build-info.sh
+          scripts/verify-rhwp-core-build-info.sh
           scripts/check-no-appkit.sh
 
           scripts/sync-rhwp-studio.sh \
@@ -575,7 +586,8 @@ jobs:
 
           scripts/verify-rhwp-studio-assets.sh \
             --tag "$target_tag" \
-            --commit "$target_commit"
+            --commit "$target_commit" \
+            --upstream-dir "$upstream_dir"
 
           git diff --check
 
@@ -584,13 +596,26 @@ jobs:
             echo "\`scripts/ci/detect-rhwp-studio-impact.sh\`: \`has_viewer_impact=${{ needs.resolve-target.outputs.has_viewer_impact }}\`"
             echo "\`scripts/update-rhwp-core.sh --channel stable --tag $target_tag\`: OK"
             echo "\`scripts/build-rust-macos.sh --update-lock\`: OK"
+            echo "\`scripts/update-rhwp-core-build-info.sh\`: OK"
+            echo "\`scripts/verify-rhwp-core-build-info.sh\`: OK"
             echo "\`scripts/check-no-appkit.sh\`: OK"
             echo "\`scripts/sync-rhwp-studio.sh --tag $target_tag --commit $target_commit\`: OK"
-            echo "\`scripts/verify-rhwp-studio-assets.sh --tag $target_tag --commit $target_commit\`: OK"
+            echo "\`scripts/verify-rhwp-studio-assets.sh --tag $target_tag --commit $target_commit --upstream-dir <target-checkout>\`: Cargo.lock fingerprint match OK"
             echo "\`git diff --check\`: OK"
           } > "$verification_file"
 
+          {
+            echo
+            echo "## rhwp full sync verification"
+            echo
+            while IFS= read -r verification_line; do
+              [ -n "$verification_line" ] || continue
+              echo "- $verification_line"
+            done < "$verification_file"
+          } >> "$GITHUB_STEP_SUMMARY"
+
           git add \
+            Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift \
             Sources/HostApp/Resources/rhwp-studio \
             RustBridge/Cargo.toml \
             RustBridge/Cargo.lock \

@@ -1,68 +1,82 @@
-import AppKit
 import Foundation
+import PDFKit
 
+@MainActor
 final class RhwpStudioPDFExportController {
-    @MainActor
+    private let renderer = RhwpStudioPagePDFRenderer()
+    private var completion: ((Result<URL, Error>) -> Void)?
+    private var isExporting = false
+
     func export(
-        data: Data,
-        filename: String,
+        payload: RhwpStudioPagePayload,
         destinationURL: URL,
-        completion: @escaping (Result<URL?, Error>) -> Void
+        completion: @escaping (Result<URL, Error>) -> Void
     ) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            let result: Result<URL?, Error>
+        guard !isExporting else {
+            completion(.failure(RhwpStudioPDFExportError.exportInProgress))
+            return
+        }
+
+        self.completion = completion
+        isExporting = true
+        renderer.render(payload: payload) { [weak self] result in
+            guard let self else {
+                return
+            }
+
+            switch result {
+            case .success(let document):
+                guard let data = document.dataRepresentation(),
+                      data.starts(with: Data("%PDF".utf8))
+                else {
+                    self.finish(.failure(RhwpStudioPDFExportError.pdfEncodingFailed))
+                    return
+                }
+                self.write(data: data, to: destinationURL)
+            case .failure(let error):
+                self.finish(.failure(error))
+            }
+        }
+    }
+
+    private func write(data: Data, to destinationURL: URL) {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let result: Result<URL, Error>
             do {
-                let pdfData = try Self.renderPDFData(data: data, filename: filename)
-                try pdfData.write(to: destinationURL, options: .atomic)
+                try data.write(to: destinationURL, options: .atomic)
                 result = .success(destinationURL)
             } catch {
                 result = .failure(error)
             }
 
             DispatchQueue.main.async {
-                completion(result)
+                self?.finish(result)
             }
         }
     }
 
-    @MainActor
-    func export(
-        data: Data,
-        filename: String,
-        completion: @escaping (Result<URL?, Error>) -> Void
-    ) {
-        guard let destinationURL = DocumentPDFExportPanel.chooseDestinationURL(
-            suggestedFilename: filename
-        ) else {
-            completion(.success(nil))
+    private func finish(_ result: Result<URL, Error>) {
+        guard isExporting else {
             return
         }
 
-        export(
-            data: data,
-            filename: filename,
-            destinationURL: destinationURL,
-            completion: completion
-        )
+        isExporting = false
+        let completion = completion
+        self.completion = nil
+        completion?(result)
     }
+}
 
-    private static func renderPDFData(data: Data, filename: String) throws -> Data {
-        let document = try RhwpDocument(data: data, filename: filename)
-        let pageCount = document.pageCount
-        guard pageCount > 0 else {
-            throw HwpRenderError.emptyDocument
+enum RhwpStudioPDFExportError: LocalizedError, Equatable {
+    case exportInProgress
+    case pdfEncodingFailed
+
+    var errorDescription: String? {
+        switch self {
+        case .exportInProgress:
+            "PDF 내보내기가 이미 진행 중입니다."
+        case .pdfEncodingFailed:
+            "PDF 데이터를 만들 수 없습니다."
         }
-
-        let firstPageSize = document.pageSize(at: 0)
-        guard firstPageSize.width > 0, firstPageSize.height > 0 else {
-            throw HwpRenderError.invalidPageSize
-        }
-
-        let renderedPDF = try HwpPreviewPDFRenderer.render(
-            document: document,
-            pageCount: pageCount,
-            contentSize: CGSize(width: firstPageSize.width, height: firstPageSize.height)
-        )
-        return renderedPDF.data
     }
 }

@@ -99,12 +99,25 @@ enum RhwpStudioHostBridgeScript {
       }
       window.__alhangeulHostBridgeInstalled = true;
 
-      const nativeCommands = new Set(["file:open", "file:save", "file:save-as", "file:print", "file:share", "file:export-pdf"]);
+      const nativeCommands = new Set([
+        "file:open",
+        "file:save",
+        "file:save-as",
+        "file:save-as-hwp",
+        "file:save-as-hwpx",
+        "file:print",
+        "file:print-to-pdf",
+        "file:share",
+        "file:export-pdf"
+      ]);
       const nonMutatingCommands = new Set([
         "file:open",
         "file:save",
         "file:save-as",
+        "file:save-as-hwp",
+        "file:save-as-hwpx",
         "file:print",
+        "file:print-to-pdf",
         "file:share",
         "file:export-pdf",
         "file:about",
@@ -424,6 +437,28 @@ enum RhwpStudioHostBridgeScript {
         };
       }
 
+      async function requestSaveExportPayload(format) {
+        if (format === "hwp") {
+          return requestHwpExportPayload();
+        }
+        if (format === "hwpx") {
+          const bytes = await requestRhwp("exportHwpx");
+          return {
+            base64: encodeBytesToBase64(bytes),
+            byteCount: bytes.length
+          };
+        }
+        throw new Error(`지원하지 않는 저장 형식입니다: ${format}`);
+      }
+
+      function fileNameForSaveFormat(format) {
+        const stem = currentFileName()
+          .trim()
+          .replace(/(?:\\.(?:hwp|hwpx))+$/i, "")
+          .trim() || "document";
+        return `${stem}.${format}`;
+      }
+
       function waitForAnimationFrame() {
         return new Promise((resolve) => {
           requestAnimationFrame(() => resolve());
@@ -459,10 +494,29 @@ enum RhwpStudioHostBridgeScript {
         document.querySelectorAll(".md-item[data-cmd]").forEach((item) => {
           const command = item.dataset.cmd;
           if (nativeCommands.has(command)) {
-            item.classList.remove("disabled");
-            item.removeAttribute("aria-disabled");
+            if (item.classList.contains("disabled")) {
+              item.classList.remove("disabled");
+            }
+            if (item.hasAttribute("aria-disabled")) {
+              item.removeAttribute("aria-disabled");
+            }
           }
         });
+      }
+
+      function overrideNativePDFMenuItem() {
+        const item = document.querySelector('.md-item[data-cmd="file:print-to-pdf"]');
+        if (!item) {
+          return;
+        }
+
+        const title = "알한글에서 PDF 파일로 저장합니다.";
+        if (item.getAttribute("title") !== title) {
+          item.setAttribute("title", title);
+        }
+        if (item.getAttribute("aria-label") !== "PDF로 저장") {
+          item.setAttribute("aria-label", "PDF로 저장");
+        }
       }
 
       function ensureSaveAsMenuItem() {
@@ -507,10 +561,33 @@ enum RhwpStudioHostBridgeScript {
       function refreshHostOverrides() {
         ensureSaveAsMenuItem();
         enableNativeCommandItems();
+        overrideNativePDFMenuItem();
         rewriteShortcutLabelsForMac();
+        observeNativePDFMenuItem();
       }
 
       let pendingHostOverridesRefresh = false;
+      let observedNativePDFMenuItem = null;
+
+      const nativePDFMenuItemObserver = new MutationObserver(() => {
+        scheduleHostOverridesRefresh();
+      });
+
+      function observeNativePDFMenuItem() {
+        const item = document.querySelector('.md-item[data-cmd="file:print-to-pdf"]');
+        if (item === observedNativePDFMenuItem) {
+          return;
+        }
+
+        nativePDFMenuItemObserver.disconnect();
+        observedNativePDFMenuItem = item;
+        if (item) {
+          nativePDFMenuItemObserver.observe(item, {
+            attributes: true,
+            attributeFilter: ["class", "aria-disabled", "title"]
+          });
+        }
+      }
 
       function scheduleHostOverridesRefresh() {
         if (pendingHostOverridesRefresh) {
@@ -586,19 +663,52 @@ enum RhwpStudioHostBridgeScript {
         }
       }
 
-      async function exportPDFDocument() {
+      async function exportSaveDocument(format) {
         try {
           await settleEditorState();
-          const payload = await requestHwpExportPayload();
+          const payload = await requestSaveExportPayload(format);
           postNative({
-            type: "export-pdf-document",
-            fileName: currentFileName(),
+            type: "save-document",
+            format,
+            fileName: fileNameForSaveFormat(format),
             base64: payload.base64,
             byteCount: payload.byteCount
           });
         } catch (error) {
           postNative({
             type: "error",
+            message: `문서를 내보낼 수 없습니다: ${error?.message || String(error)}`
+          });
+        }
+      }
+
+      async function notifySavedDocument(fileName, timeText) {
+        try {
+          await requestRhwp("notifySaved", { fileName });
+          rememberCurrentFileName(fileName);
+          showTemporaryStatusMessage(`저장 완료 ${timeText}`, fileName);
+        } catch (error) {
+          postNative({
+            type: "save-sync-error",
+            message: `문서는 저장했지만 편집기 상태를 동기화할 수 없습니다: ${error?.message || String(error)}`
+          });
+        }
+      }
+
+      async function exportPDFDocument(requestID) {
+        try {
+          const { pageCount, pages } = await documentPages();
+          postNative({
+            type: "export-pdf-document",
+            requestID,
+            fileName: currentFileName(),
+            pageCount,
+            pages
+          });
+        } catch (error) {
+          postNative({
+            type: "export-pdf-error",
+            requestID,
             message: `PDF 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
           });
         }
@@ -622,21 +732,30 @@ enum RhwpStudioHostBridgeScript {
       }
 
       async function handleNativeCommand(command) {
-        if (command === "file:open" || command === "file:save" || command === "file:save-as" || command === "file:export-pdf") {
+        const canonicalCommand = command === "file:print-to-pdf"
+          ? "file:export-pdf"
+          : command;
+
+        if (canonicalCommand === "file:open" ||
+            canonicalCommand === "file:save" ||
+            canonicalCommand === "file:save-as" ||
+            canonicalCommand === "file:save-as-hwp" ||
+            canonicalCommand === "file:save-as-hwpx" ||
+            canonicalCommand === "file:export-pdf") {
           postNative({
             type: "command",
-            command,
+            command: canonicalCommand,
             fileName: currentFileName()
           });
           return;
         }
 
-        if (command === "file:share") {
+        if (canonicalCommand === "file:share") {
           exportHwpDocument("share-document", "공유 데이터를 만들 수 없습니다");
           return;
         }
 
-        if (command === "file:print") {
+        if (canonicalCommand === "file:print") {
           printDocument();
           return;
         }
@@ -651,13 +770,34 @@ enum RhwpStudioHostBridgeScript {
         return true;
       };
 
-      window.__alhangeulHostBridgeExportPDFDocument = () => {
-        exportPDFDocument();
+      window.__alhangeulHostBridgeExportSaveDocument = (format) => {
+        if (format !== "hwp" && format !== "hwpx") {
+          return false;
+        }
+
+        exportSaveDocument(format);
+        return true;
+      };
+
+      window.__alhangeulHostBridgeExportPDFDocument = (requestID) => {
+        if (!Number.isInteger(requestID)) {
+          return false;
+        }
+        exportPDFDocument(requestID);
         return true;
       };
 
       window.__alhangeulHostBridgeShowSaveCompletedStatus = (timeText, fileName) => {
         return showTemporaryStatusMessage(`저장 완료 ${timeText}`, fileName);
+      };
+
+      window.__alhangeulHostBridgeNotifySaved = (fileName, timeText) => {
+        if (!fileName) {
+          return false;
+        }
+
+        notifySavedDocument(fileName, timeText);
+        return true;
       };
 
       window.__alhangeulHostBridgeRunNativeCommand = (command) => {

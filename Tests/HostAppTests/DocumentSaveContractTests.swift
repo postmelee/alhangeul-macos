@@ -1,0 +1,217 @@
+import Foundation
+import XCTest
+
+final class DocumentSaveContractTests: XCTestCase {
+    private let hwpData = Data([
+        0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1, 0x00
+    ])
+    private let hwpxData = Data([0x50, 0x4B, 0x03, 0x04, 0x00])
+
+    func testGenericCommandsPreserveSourceFormat() {
+        let sourceURL = URL(fileURLWithPath: "/tmp/source.hwpx")
+
+        XCTAssertEqual(
+            DocumentSaveCommand.save.resolveFormat(
+                sourceURL: sourceURL,
+                filename: "stale.hwp"
+            ),
+            .hwpx
+        )
+        XCTAssertEqual(
+            DocumentSaveCommand.saveAs.resolveFormat(
+                sourceURL: sourceURL,
+                filename: "stale.hwp"
+            ),
+            .hwpx
+        )
+    }
+
+    func testGenericCommandsUseFilenameThenHwpDefault() {
+        XCTAssertEqual(
+            DocumentSaveCommand.save.resolveFormat(sourceURL: nil, filename: "draft.hwpx"),
+            .hwpx
+        )
+        XCTAssertEqual(
+            DocumentSaveCommand.saveAs.resolveFormat(sourceURL: nil, filename: nil),
+            .hwp
+        )
+    }
+
+    func testExplicitCommandsOverrideSourceFormat() {
+        XCTAssertEqual(
+            DocumentSaveCommand.saveAsHwp.resolveFormat(
+                sourceURL: URL(fileURLWithPath: "/tmp/source.hwpx"),
+                filename: "source.hwpx"
+            ),
+            .hwp
+        )
+        XCTAssertEqual(
+            DocumentSaveCommand.saveAsHwpx.resolveFormat(
+                sourceURL: URL(fileURLWithPath: "/tmp/source.hwp"),
+                filename: "source.hwp"
+            ),
+            .hwpx
+        )
+    }
+
+    func testOnlyPlainSaveSkipsSavePanel() {
+        XCTAssertFalse(DocumentSaveCommand.save.usesSavePanel)
+        XCTAssertTrue(DocumentSaveCommand.saveAs.usesSavePanel)
+        XCTAssertTrue(DocumentSaveCommand.saveAsHwp.usesSavePanel)
+        XCTAssertTrue(DocumentSaveCommand.saveAsHwpx.usesSavePanel)
+    }
+
+    func testValidHwpAndHwpxResponsesAreDecoded() throws {
+        XCTAssertEqual(
+            try validate(data: hwpData, responseFormat: .hwp, requestFormat: .hwp),
+            hwpData
+        )
+        XCTAssertEqual(
+            try validate(data: hwpxData, responseFormat: .hwpx, requestFormat: .hwpx),
+            hwpxData
+        )
+    }
+
+    func testResponseFormatMismatchIsRejected() {
+        XCTAssertThrowsError(
+            try validate(data: hwpData, responseFormat: .hwp, requestFormat: .hwpx)
+        ) { error in
+            XCTAssertEqual(
+                error as? DocumentSaveContractError,
+                .responseFormatMismatch(expected: .hwpx, actual: .hwp)
+            )
+        }
+    }
+
+    func testResponseFormatIsValidatedBeforePayload() {
+        XCTAssertThrowsError(
+            try DocumentSaveContract.decodeAndValidate(
+                base64: "%%%",
+                responseFormatRawValue: DocumentSaveFormat.hwp.rawValue,
+                responseByteCount: hwpData.count,
+                requestFormat: .hwpx,
+                destinationURL: URL(fileURLWithPath: "/tmp/document.hwpx")
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? DocumentSaveContractError,
+                .responseFormatMismatch(expected: .hwpx, actual: .hwp)
+            )
+        }
+    }
+
+    func testInvalidSignatureIsRejected() {
+        XCTAssertThrowsError(
+            try DocumentSaveContract.decodeAndValidate(
+                base64: hwpData.base64EncodedString(),
+                responseFormatRawValue: DocumentSaveFormat.hwpx.rawValue,
+                responseByteCount: hwpData.count,
+                requestFormat: .hwpx,
+                destinationURL: URL(fileURLWithPath: "/tmp/document.hwpx")
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? DocumentSaveContractError,
+                .invalidPayloadSignature(.hwpx)
+            )
+        }
+    }
+
+    func testByteCountMismatchIsRejected() {
+        XCTAssertThrowsError(
+            try DocumentSaveContract.decodeAndValidate(
+                base64: hwpData.base64EncodedString(),
+                responseFormatRawValue: DocumentSaveFormat.hwp.rawValue,
+                responseByteCount: hwpData.count + 1,
+                requestFormat: .hwp,
+                destinationURL: URL(fileURLWithPath: "/tmp/document.hwp")
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? DocumentSaveContractError,
+                .byteCountMismatch(expected: self.hwpData.count + 1, actual: self.hwpData.count)
+            )
+        }
+    }
+
+    func testMissingMetadataAndInvalidBase64AreRejected() {
+        XCTAssertThrowsError(
+            try DocumentSaveContract.decodeAndValidate(
+                base64: nil,
+                responseFormatRawValue: "hwp",
+                responseByteCount: hwpData.count,
+                requestFormat: .hwp,
+                destinationURL: URL(fileURLWithPath: "/tmp/document.hwp")
+            )
+        ) { error in
+            XCTAssertEqual(error as? DocumentSaveContractError, .missingBase64)
+        }
+
+        XCTAssertThrowsError(
+            try DocumentSaveContract.decodeAndValidate(
+                base64: "%%%",
+                responseFormatRawValue: "hwp",
+                responseByteCount: hwpData.count,
+                requestFormat: .hwp,
+                destinationURL: URL(fileURLWithPath: "/tmp/document.hwp")
+            )
+        ) { error in
+            XCTAssertEqual(error as? DocumentSaveContractError, .invalidBase64)
+        }
+
+        XCTAssertThrowsError(
+            try DocumentSaveContract.decodeAndValidate(
+                base64: hwpData.base64EncodedString(),
+                responseFormatRawValue: nil,
+                responseByteCount: hwpData.count,
+                requestFormat: .hwp,
+                destinationURL: URL(fileURLWithPath: "/tmp/document.hwp")
+            )
+        ) { error in
+            XCTAssertEqual(error as? DocumentSaveContractError, .missingResponseFormat)
+        }
+
+        XCTAssertThrowsError(
+            try DocumentSaveContract.decodeAndValidate(
+                base64: hwpData.base64EncodedString(),
+                responseFormatRawValue: "hwp",
+                responseByteCount: nil,
+                requestFormat: .hwp,
+                destinationURL: URL(fileURLWithPath: "/tmp/document.hwp")
+            )
+        ) { error in
+            XCTAssertEqual(error as? DocumentSaveContractError, .missingByteCount)
+        }
+    }
+
+    func testDestinationFormatMismatchIsRejected() {
+        XCTAssertThrowsError(
+            try DocumentSaveContract.decodeAndValidate(
+                base64: hwpxData.base64EncodedString(),
+                responseFormatRawValue: DocumentSaveFormat.hwpx.rawValue,
+                responseByteCount: hwpxData.count,
+                requestFormat: .hwpx,
+                destinationURL: URL(fileURLWithPath: "/tmp/document.hwp")
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? DocumentSaveContractError,
+                .destinationFormatMismatch(expected: .hwpx, actualExtension: "hwp")
+            )
+        }
+    }
+
+    private func validate(
+        data: Data,
+        responseFormat: DocumentSaveFormat,
+        requestFormat: DocumentSaveFormat
+    ) throws -> Data {
+        try DocumentSaveContract.decodeAndValidate(
+            base64: data.base64EncodedString(),
+            responseFormatRawValue: responseFormat.rawValue,
+            responseByteCount: data.count,
+            requestFormat: requestFormat,
+            destinationURL: URL(fileURLWithPath: "/tmp/document.\(requestFormat.fileExtension)")
+        )
+    }
+}

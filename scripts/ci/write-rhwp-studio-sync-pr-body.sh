@@ -285,7 +285,7 @@ EOF
 ## Maintainer checklist
 
 - [ ] bundled \`rhwp-studio\` manifest의 tag/commit과 upstream release가 맞는지 확인
-- [ ] bundled \`rhwp-studio\` manifest의 \`source_cargo_lock_sha256\`이 target upstream root \`Cargo.lock\`과 맞는지 확인
+- [ ] Verification 결과에 \`source_cargo_lock_sha256\`과 target upstream root \`Cargo.lock\` 일치가 기록되었는지 확인
 - [ ] PR CI의 macOS build, Rust/core verify, release helper checks 결과 확인
 - [ ] viewer/editor smoke 필요 여부 판단
 - [ ] release note에 upstream \`rhwp\` 반영을 표시할지 판단

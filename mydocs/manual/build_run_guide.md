@@ -256,7 +256,16 @@ pgrep -x Alhangeul
 
 `/absolute/path/to/Alhangeul.app`은 현재 worktree의 `build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app`로 바꾼다. 이 smoke는 local launch, document open handoff, WKWebView bundle resource 연결의 최소 확인이다. 실제 문서 내용의 시각 정합성은 foreground 앱에서 수동 확인하거나 별도 UI 자동화로 보강한다.
 
-`rhwp-studio` manifest에 `source_cargo_lock_sha256`이 있으면 `scripts/verify-rhwp-studio-assets.sh`는 sha256 형식을 검증한다. 실제 upstream target `Cargo.lock`과의 값 일치는 sync PR reviewer checklist에서 target checkout 기준으로 확인한다.
+`rhwp-studio` manifest에 `source_cargo_lock_sha256`이 있으면 `scripts/verify-rhwp-studio-assets.sh`는 sha256 형식을 검증한다. 일반 앱 build처럼 upstream checkout이 없는 resource-only 검증은 기존 manifest와의 하위 호환을 위해 이 필드를 필수로 요구하지 않는다. upstream sync 후보를 검증할 때는 target checkout을 함께 넘겨 실제 root `Cargo.lock`과 자동 비교한다.
+
+```bash
+scripts/verify-rhwp-studio-assets.sh \
+  --upstream-dir /absolute/path/to/target-rhwp-checkout \
+  --tag <release-tag> \
+  --commit <resolved-commit>
+```
+
+`--upstream-dir`를 사용하면 해당 directory는 `--commit` 또는 manifest `source_resolved_commit`과 HEAD가 일치하는 Git checkout이어야 하며, manifest field와 root `Cargo.lock`도 모두 필수다. Non-Git directory와 stale checkout은 hash 비교 전에 실패한다. malformed sha256은 형식 오류로, 값 불일치는 manifest 값·실제 값·비교한 `Cargo.lock` 경로를 포함한 provenance mismatch로 구분해 실패한다. `scripts/sync-rhwp-studio.sh`도 후보 asset을 만든 직후 같은 strict 비교를 자체 실행한다.
 
 fallback 경로를 바꾼 경우에는 source resource를 건드리지 않고 Debug app 복사본만 훼손해 negative smoke를 수행한다.
 

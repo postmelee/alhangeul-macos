@@ -516,4 +516,6 @@ print_check_summary
 echo "Updated: $CARGO_TOML"
 echo "Updated: $CARGO_LOCK"
 echo "Updated: $LOCK_FILE"
-echo "Next: ./scripts/build-rust-macos.sh --update-lock && ./scripts/check-no-appkit.sh"
+echo "Next: ./scripts/build-rust-macos.sh --update-lock"
+echo "Then: ./scripts/update-rhwp-core-build-info.sh && ./scripts/verify-rhwp-core-build-info.sh"
+echo "Then: ./scripts/check-no-appkit.sh"

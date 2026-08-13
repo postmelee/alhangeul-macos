@@ -6,6 +6,7 @@ import SwiftUI
 struct AlHangeulMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var updateController = UpdateController()
+    @StateObject private var analyticsSettingsModel = AppExecutionAnalyticsSettingsModel()
 
     var body: some Scene {
         WindowGroup {
@@ -13,6 +14,10 @@ struct AlHangeulMacApp: App {
         }
         .commands {
             HostAppCommands(updateController: updateController)
+        }
+
+        Settings {
+            AppExecutionAnalyticsSettingsView(model: analyticsSettingsModel)
         }
     }
 }
@@ -178,6 +183,11 @@ private struct HostAppCommands: Commands {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Keep analytics first: the following services write legacy-evidence keys
+        // that distinguish an existing installation from a genuine first launch.
+        AppExecutionAnalyticsRuntime.shared.prepareForLaunch(
+            currentVersion: BuildInfo.version
+        )
         LaunchMaintenanceService.runIfNeeded()
         QuickLookConflictNoticeCoordinator.shared.startIfNeeded()
 

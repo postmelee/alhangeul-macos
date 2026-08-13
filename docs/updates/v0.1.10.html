@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="알한글 v0.1.10 릴리즈 노트입니다." />
+  <meta property="og:title" content="알한글 v0.1.10 릴리즈 노트" />
+  <meta property="og:description" content="HWP/HWPX 형식별 저장, 전체 페이지 PDF·인쇄와 rhwp v0.8.4 문서 호환성 개선을 포함한 알한글 패치 릴리즈입니다." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://postmelee.github.io/alhangeul-macos/updates/v0.1.10.html" />
+  <meta property="og:image" content="https://postmelee.github.io/alhangeul-macos/assets/og-main.png" />
+  <title>알한글 v0.1.10 릴리즈 노트</title>
+  <link rel="icon" href="../assets/logo-256@2x.png" />
+  <link rel="apple-touch-icon" href="../assets/logo-256@2x.png" />
+  <link rel="stylesheet" href="../styles.css?v=20260626-feedback-page" />
+</head>
+
+<body>
+  <a class="skip-link" href="#main">본문으로 이동</a>
+  <header class="site-header" aria-label="주요 탐색">
+    <div class="site-header-inner">
+      <a class="brand-link" href="../" aria-label="알한글 홈">
+        <img src="../assets/logo-256@2x.png" width="28" height="28" alt="" />
+        <span>알한글</span>
+      </a>
+      <nav class="header-actions" aria-label="주요 링크">
+        <a class="header-link" href="../" aria-label="알한글 홈으로 이동">
+          홈
+        </a>
+        <a class="header-link" href="../feedback/" aria-label="문의와 제보 안내로 이동">
+          문의/제보
+        </a>
+        <a class="header-link" href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer"
+          aria-label="GitHub 저장소로 이동">
+          GitHub
+        </a>
+        <a class="header-download-button"
+          href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.10/alhangeul-macos-0.1.10.dmg"
+          aria-label="Mac용 알한글 DMG 다운로드">
+          다운로드
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="updates-page">
+    <section class="updates-hero" aria-labelledby="release-title">
+      <h1 id="release-title">알한글 v0.1.10</h1>
+      <p>HWP/HWPX 형식별 저장, 전체 페이지 PDF·인쇄와 <code>rhwp v0.8.4</code> 문서 호환성 개선을 포함한 패치 릴리즈입니다.</p>
+      <div class="updates-actions" aria-label="릴리즈 주요 링크">
+        <a class="page-action-button"
+          href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.10/alhangeul-macos-0.1.10.dmg">
+          DMG 다운로드
+        </a>
+        <a class="page-secondary-link" href="https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.10"
+          rel="noreferrer">GitHub Release</a>
+        <a class="page-secondary-link" href="./">업데이트 목록</a>
+      </div>
+    </section>
+
+    <div class="updates-content">
+      <section class="updates-section" aria-labelledby="release-summary-title">
+        <h2 id="release-summary-title">변경 요약</h2>
+        <ul>
+          <li>HWP와 HWPX를 형식에 맞는 macOS 저장 패널로 저장하고, 저장 결과를 같은 형식으로 다시 열 수 있습니다.</li>
+          <li>현재 편집 상태의 전체 페이지를 searchable PDF로 저장하고 같은 page geometry로 native 인쇄를 시작합니다.</li>
+          <li>PDF·인쇄용 문서 SVG의 script, 외부 resource와 navigation을 전용 WebView에서 차단합니다.</li>
+          <li><code>rhwp v0.8.4</code>를 반영해 암호 문서, 중첩 표, 특수 글리프와 대형 문서 처리 범위를 보강했습니다.</li>
+          <li>개인정보 설정에서 영구 사용자·기기 식별자 없는 익명 실행·업데이트 추이 공유를 끌 수 있습니다.</li>
+        </ul>
+      </section>
+
+      <section class="updates-section" aria-labelledby="release-rhwp-title">
+        <h2 id="release-rhwp-title">포함된 rhwp 변화</h2>
+        <p>v0.1.10은 <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.8.4"
+            rel="noreferrer"><code>rhwp v0.8.4</code></a> 기준의 core와 bundled <code>rhwp-studio</code>를 사용합니다. 앱 내부 provenance 기준 commit은 <code>496333b27d21ddb9114ba9ae340bcb895870<wbr>c9a7</code>입니다.</p>
+        <ul>
+          <li>HWP5 EncryptVersion 4, HWP3와 암호화 HWPX의 열기·저장·재열기 계약을 확장했습니다.</li>
+          <li>중첩 표의 페이지 분할, 셀 내부 흐름과 마지막 하단 테두리 표시를 보강했습니다.</li>
+          <li>중첩 표 안의 텍스트·표 선택과 복사, 다중 셀 서식과 셀 크기 조절을 개선했습니다.</li>
+          <li>PUA로 기록된 사각 번호와 작은 오른쪽 삼각형을 실제 글리프로 복원합니다.</li>
+          <li>압축 해제 상한과 대형 표 처리 개선으로 비정상 압축 입력과 큰 문서의 memory·render 위험을 줄였습니다.</li>
+        </ul>
+      </section>
+
+      <section class="updates-section" aria-labelledby="release-app-title">
+        <h2 id="release-app-title">알한글 앱 변화</h2>
+        <ul>
+          <li>HWP/HWPX 저장 command, exporter 결과와 목적지 확장자·container signature를 write 전에 함께 확인합니다.</li>
+          <li>HWPX 저장 뒤 후속 <code>Command+S</code>도 같은 URL과 HWPX 형식을 유지합니다.</li>
+          <li>PDF 저장과 인쇄는 현재 editor가 만든 page SVG를 공용 renderer로 변환해 최신 편집 내용과 searchable text를 반영합니다.</li>
+          <li>PDF·인쇄 renderer는 content JavaScript와 popup을 끄고, inline style과 embedded <code>data:</code> image 외 resource·navigation을 기본 차단합니다.</li>
+          <li><code>rhwp v0.8.4</code>에서 제거된 render-tree field를 Swift decoder가 요구하지 않도록 보정해 native preview/thumbnail 호환성을 유지합니다.</li>
+          <li>익명 실행·업데이트 이벤트는 문서 내용·파일명·경로나 영구 식별자를 포함하지 않으며, opt-out하면 보관 중인 이벤트를 삭제합니다.</li>
+          <li>설치본 version/build 기준은 <code>0.1.10 (16)</code>입니다.</li>
+        </ul>
+      </section>
+
+      <section class="updates-section" aria-labelledby="release-limits-title">
+        <h2 id="release-limits-title">알려진 한계</h2>
+        <ul>
+          <li>Quick Look과 Finder 썸네일은 native 렌더 경로를 사용하고, 앱 화면은 WKWebView 기반 <code>rhwp-studio</code> 경로를 사용합니다.</li>
+          <li>일부 문서에서는 글꼴, 배치, 페이지 표현이 원본 한글 프로그램과 다르게 보일 수 있습니다.</li>
+          <li>HWP/HWPX 저장은 대표 문서의 container·재열기를 확인하지만 모든 문서 요소의 의미론적 완전 무손실을 보장하지 않습니다.</li>
+          <li>PDF 내보내기는 전체 page SVG를 memory에 보유하며 문서 전체 progress, deadline과 수집 중 취소 UI는 아직 없습니다.</li>
+          <li>실제 가로·세로 혼합 문서 fixture는 없어 혼합 geometry와 인쇄 방향은 합성 page SVG 계약으로 검증했습니다.</li>
+          <li>익명 실행 추이는 전체 설치 수나 고유 사용자 수가 아니라 수집 서버에 도달한 이벤트 건수입니다.</li>
+        </ul>
+      </section>
+
+      <section class="updates-section" aria-labelledby="release-install-title">
+        <h2 id="release-install-title">설치와 업데이트</h2>
+        <p>DMG 파일을 내려받아 앱을 Applications 폴더로 옮긴 뒤, 앱을 한 번 실행합니다. v0.1.10 공식 DMG는 Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용합니다.</p>
+        <p>Homebrew Cask는 public DMG URL과 SHA256이 확정된 뒤 별도 배포 단계에서 반영합니다.</p>
+        <p>설치한 앱에서는 메뉴 막대의 <code>알한글 &gt; 업데이트 확인...</code>을 선택해 새 버전을 확인할 수 있습니다.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <img src="../assets/logo-256@2x.png" width="32" height="32" alt="" />
+      <span>알한글</span>
+    </div>
+    <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 편집 앱입니다. 한글 파일이 더 이상 낯선 파일로 남지 않도록 만듭니다.</p>
+    <nav aria-label="푸터 링크">
+      <a href="https://github.com/postmelee/alhangeul-macos/blob/main/LICENSE" rel="noreferrer">MIT License</a>
+    </nav>
+  </footer>
+</body>
+
+</html>

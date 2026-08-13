@@ -16,12 +16,6 @@ enum DocumentPDFExportPanel {
     }
 
     @MainActor
-    static func chooseDestinationURL(suggestedFilename: String) -> URL? {
-        let panel = makePanel(suggestedFilename: suggestedFilename)
-        return panel.runModal() == .OK ? panel.url : nil
-    }
-
-    @MainActor
     private static func makePanel(suggestedFilename: String) -> NSSavePanel {
         let panel = NSSavePanel()
         panel.canCreateDirectories = true
