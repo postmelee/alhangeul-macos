@@ -82,6 +82,7 @@ jobs:
           bash scripts/ci/detect-rhwp-studio-impact.sh --help
           bash scripts/ci/prepare-pages-artifact.sh --help
           bash scripts/ci/read-rhwp-core-lock.sh --help
+          bash scripts/ci/test-render-tree-decoder.sh --help
           bash scripts/ci/update-release-version-notices.sh --help
           bash scripts/ci/write-rhwp-full-sync-pr-body.sh --help
           bash scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
@@ -144,6 +145,12 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Verify render tree decoder compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/test-render-tree-decoder.sh
 
       - name: Install build dependencies
         shell: bash

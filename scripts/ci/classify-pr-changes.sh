@@ -172,7 +172,7 @@ classify_path() {
   esac
 
   case "$path" in
-    Sources/RhwpCoreBridge/*|Sources/Shared/*|Sources/QLExtension/*|Sources/ThumbnailExtension/*|samples/*|scripts/stage3_render_check.swift|scripts/validate-stage3-render.sh|scripts/render-debug-compare.sh|scripts/render_debug_compare.swift)
+    Sources/RhwpCoreBridge/*|Sources/Shared/*|Sources/QLExtension/*|Sources/ThumbnailExtension/*|Frameworks/*|rhwp-core.lock|samples/*|scripts/ci/render_tree_decoder_fixture.swift|scripts/ci/test-render-tree-decoder.sh|scripts/stage3_render_check.swift|scripts/validate-stage3-render.sh|scripts/render-debug-compare.sh|scripts/render_debug_compare.swift)
       enable_macos_build "$path affects renderer or extension paths"
       enable_render_smoke "$path affects renderer smoke coverage"
       matched=1

@@ -8,12 +8,13 @@ import Foundation
 
 // MARK: - 렌더 노드
 
+// Upstream에서 제거된 필드는 모델에 남기지 않는다. JSONDecoder는 구버전 JSON의
+// 알 수 없는 추가 키(예: dirty)를 무시하므로 이전 core 출력도 계속 수용한다.
 struct RenderNode: Decodable {
     let id: UInt32
     let nodeType: RenderNodeType
     let bbox: BBox
     let children: [RenderNode]
-    let dirty: Bool
     let visible: Bool
 
     enum CodingKeys: String, CodingKey {
@@ -21,7 +22,6 @@ struct RenderNode: Decodable {
         case nodeType = "node_type"
         case bbox
         case children
-        case dirty
         case visible
     }
 }
