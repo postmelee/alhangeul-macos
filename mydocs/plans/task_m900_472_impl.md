@@ -394,7 +394,7 @@ Stage 3 진행 중·완료보고에서 다음 mutation을 분리해 승인 요�
 
 - `publish/task472` intermediate source PR
 - `origin/main`, `origin/devel`과 양쪽 전용 commit/tree
-- 필요 시 `main -> devel` back-merge PR
+- tree 변경 없는 release 이력 정리용 `main -> devel` back-merge PR
 - `devel -> main` release PR
 - annotated `v0.1.10` tag
 - draft `Release Publish DMG` run과 artifact
@@ -406,8 +406,8 @@ Stage 3 진행 중·완료보고에서 다음 mutation을 분리해 승인 요�
 1. Stage 3 승인 후 `local/task472`을 `publish/task472`로 push하고 검증된 body-file로 `devel` 대상 intermediate source PR을 만든다.
 2. source PR의 exact head SHA, PR CI gate와 release helper 결과를 확인하고 별도 승인 후 merge commit 방식으로 merge한다.
 3. source PR merge 뒤 local task branch를 새 `origin/devel`에 정렬하고 remote publish branch를 다음 게시 전까지 정리한다.
-4. `origin/main...origin/devel` left/right commit, file diff와 merge tree를 다시 계산한다.
-5. `main` 전용 release closeout 또는 Pages 기록이 `devel`에 등가 반영되지 않았으면 별도 reviewed `main -> devel` back-merge PR로 보존한다.
+4. `origin/main...origin/devel` left/right commit, file diff와 merge tree를 다시 계산한다. 현재 기준 `main` 전용 PR #446, #450, #452 merge는 각각 `devel` 쪽 부모와 tree-identical이고 `main` 전용 non-merge content와 `docs/` 차이는 없다.
+5. source PR merge 뒤에도 같은 판정이면 content 복구가 아니라 release transport 이력 정리를 목적으로 tree 변경 없는 reviewed `main -> devel` back-merge PR을 별도 승인으로 진행한다. `main`이 이동해 실제 content 차이가 생기면 이 판정을 중단하고 대상 파일과 소유 branch를 다시 확인한다.
 6. back-merge 뒤 local task branch를 새 `origin/devel`에 정렬하고 core/studio provenance, source identity, release communication과 CI를 다시 확인한다.
 7. 정확한 updated `devel` head에서 `main` 대상 release PR을 만들고 title/body, included commits, tree와 branch protection check를 검증한다.
 8. 별도 승인 후 release PR을 merge commit 방식으로 merge한다.
@@ -425,7 +425,7 @@ Stage 3 진행 중·완료보고에서 다음 mutation을 분리해 승인 요�
 
 ### 검증
 
-생성 결과의 exact 번호를 `TASK472_SOURCE_PR`, `TASK472_BACKMERGE_PR`, `TASK472_RELEASE_PR`에 넣어 다음 검증을 실행한다. back-merge가 불필요하다고 판정된 경우 해당 조회는 생략하고 근거를 Stage 보고서에 기록한다.
+생성 결과의 exact 번호를 `TASK472_SOURCE_PR`, `TASK472_BACKMERGE_PR`, `TASK472_RELEASE_PR`에 넣어 다음 검증을 실행한다. back-merge 전후 tree가 동일한지 확인하고 history-only 목적을 Stage 보고서에 기록한다.
 
 ```bash
 gh pr view "$TASK472_SOURCE_PR" --repo postmelee/alhangeul-macos \
@@ -513,6 +513,7 @@ draft signed candidate 차단 gate를 통과한 exact tag를 official stable rel
 - stable Sparkle appcast
 - 기존 official `v0.1.9 (15)` 설치본과 update path
 - 필요 시 `Casks/alhangeul.rb` 및 `postmelee/homebrew-tap`
+- Homebrew 결과에 따른 `README.md`, `docs/index.html`, `docs/updates/index.html` closeout 문구
 - `mydocs/release/v0.1.10.md`
 - `mydocs/working/task_m900_472_stage5.md`
 
@@ -530,7 +531,9 @@ draft signed candidate 차단 gate를 통과한 exact tag를 official stable rel
 10. public 설치본의 HWP/HWPX open, Quick Look와 Thumbnail을 실제 provider process 기준으로 확인한다.
 11. 새 crash, registration repair 사용 여부와 설치본 복구 상태를 기록한다.
 12. public DMG URL/SHA256 확정 뒤 별도 승인으로 repository/tap Cask를 갱신하고 style/audit/install/uninstall smoke를 실행한다.
-13. Homebrew를 실행하지 않으면 미진행 상태와 후속 gate를 release record에 남긴다.
+13. Homebrew 반영이 성공하면 `README.md`, `docs/index.html`, `docs/updates/index.html`의 “별도 배포 단계” 문구를 실제 `v0.1.10` Cask 제공 상태와 설치 명령으로 정렬하는 exact closeout diff를 확정한다.
+14. 문서 closeout은 Stage 6의 별도 승인된 단일 `main` 대상 PR과 Pages 재배포로 반영한다. 해당 PR merge와 Pages 성공 전에는 repository source와 public Pages가 Homebrew 반영 완료 상태라고 기록하지 않는다.
+15. Homebrew를 실행하지 않으면 현재 대기 문구를 유지하고 미진행 상태와 후속 gate를 release record에 남긴다.
 
 ### 검증
 
@@ -583,13 +586,14 @@ brew uninstall --cask alhangeul
 - Pages와 appcast가 `0.1.10 (16)` 및 같은 public universal DMG를 가리킨다.
 - clean v0.1.9 baseline에서 Sparkle update와 extension refresh 결과 또는 명확한 미실행 사유가 있다.
 - public app/Finder smoke와 provider provenance가 확인돼 있다.
-- Homebrew 승인 시 tap-context 검증이 통과하고, 미승인 시 미진행 상태가 남아 있다.
+- Homebrew 승인 시 tap-context 검증과 세 public 문서의 closeout diff·Pages 재배포 인계가 확인되고, 미승인 시 현재 대기 문구와 미진행 상태가 남아 있다.
 
 ### 산출물과 커밋
 
 - official workflow/GitHub Release/Pages/appcast URL
 - public DMG URL/SHA256/size와 설치 smoke 기록
 - Homebrew 결과 또는 미진행 사유
+- Homebrew 결과에 따른 public 문서 closeout diff와 Pages 재배포 인계 또는 현 문구 유지 근거
 - 보정된 `mydocs/release/v0.1.10.md`
 - `mydocs/working/task_m900_472_stage5.md`
 - 커밋: `Task #472 Stage 5: official publish와 public surface 확인`
