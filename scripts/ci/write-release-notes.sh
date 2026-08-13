@@ -147,8 +147,10 @@ $RELEASE_CHANGE_SECTIONS
 ## 알려진 제한 사항
 
 - 앱 viewer/editor 화면은 bundled \`rhwp-studio\`를 WKWebView에서 실행합니다.
-- PDF 내보내기, Quick Look preview, Finder thumbnail은 Rust bridge와 Swift native renderer 계열 경로를 사용하므로 앱 화면과 표시가 다를 수 있습니다.
-- 인쇄는 \`rhwp-studio\` page payload를 별도 WKWebView/PDFKit/AppKit 출력 경로로 처리합니다.
+- PDF 내보내기와 인쇄는 현재 editor의 page SVG를 별도 script-disabled WKWebView/PDFKit/AppKit 출력 경로로 처리하므로 앱 화면과 표시가 다를 수 있습니다.
+- Quick Look preview와 Finder thumbnail은 Rust bridge와 Swift native renderer 경로를 사용하므로 앱 viewer/editor·PDF/인쇄와 표시가 다를 수 있습니다.
+- HWP/HWPX 저장은 형식별 container와 대표 문서 재열기를 확인하지만, 모든 문서 요소의 의미론적 완전 무손실을 보장하지 않습니다.
+- PDF 내보내기는 전체 page SVG를 memory에 보유하며 document 전체 progress, deadline과 수집 중 취소 UI는 아직 없습니다.
 - Quick Look/Thumbnail smoke 통과는 extension 등록과 기본 렌더 성공 확인이며, 모든 문서가 앱 화면과 같은 시각 결과로 보인다는 보장은 아닙니다.
 - 손상·대용량·미지원 문서 fallback은 복구가 아니라 앱과 extension이 raw error, hang, crash로 끝나지 않게 하는 안전장치입니다.
 - native renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity 개선은 v0.5 이후 Swift native viewer 범위에서 계속 다룹니다.
