@@ -22,7 +22,8 @@ Options:
   --tag TAG           Expected rhwp release tag. Defaults to manifest source_release_tag.
   --commit COMMIT     Expected rhwp resolved commit. Defaults to manifest source_resolved_commit.
   --upstream-dir DIR  Compare manifest source_cargo_lock_sha256 with DIR/Cargo.lock.
-                      When set, the manifest fingerprint and upstream Cargo.lock are required.
+                      When set, DIR must be a Git checkout at the expected commit;
+                      the manifest fingerprint and upstream Cargo.lock are required.
   -h, --help          Show this help.
 EOF
 }
@@ -184,6 +185,20 @@ if [ -n "$UPSTREAM_DIR" ]; then
   [ -d "$UPSTREAM_DIR" ] || fail "missing upstream directory: $UPSTREAM_DIR"
   upstream_cargo_lock="$UPSTREAM_DIR/Cargo.lock"
   [ -f "$upstream_cargo_lock" ] || fail "missing upstream root Cargo.lock: $upstream_cargo_lock"
+  if ! upstream_head="$(git -C "$UPSTREAM_DIR" rev-parse --verify 'HEAD^{commit}' 2>/dev/null)"; then
+    fail "upstream directory is not a git checkout: $UPSTREAM_DIR"
+  fi
+  if ! expected_upstream_commit="$(git -C "$UPSTREAM_DIR" rev-parse --verify "$EXPECTED_COMMIT^{commit}" 2>/dev/null)"; then
+    fail "expected upstream commit is not available in checkout: $EXPECTED_COMMIT"
+  fi
+  if [ "$upstream_head" != "$expected_upstream_commit" ]; then
+    echo "FAIL: upstream checkout HEAD does not match expected commit" >&2
+    echo "Expected commit: $expected_upstream_commit" >&2
+    echo "Actual HEAD:     $upstream_head" >&2
+    echo "Checkout:        $UPSTREAM_DIR" >&2
+    exit 1
+  fi
+  echo "OK: upstream checkout HEAD matches $expected_upstream_commit"
   actual_cargo_lock_sha256="$(shasum -a 256 "$upstream_cargo_lock" | awk '{print $1}')"
   if [ "$source_cargo_lock_sha256" != "$actual_cargo_lock_sha256" ]; then
     echo "FAIL: manifest source_cargo_lock_sha256 does not match upstream root Cargo.lock" >&2

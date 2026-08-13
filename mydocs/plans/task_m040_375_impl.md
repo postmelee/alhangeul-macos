@@ -27,10 +27,11 @@
 | `--upstream-dir` 없음 | 있음 | Fingerprint 형식만 검증하고 resource integrity 검증 성공 |
 | `--upstream-dir DIR` | 없음 | Strict candidate 검증 실패: 비교에 필요한 manifest field 누락 |
 | `--upstream-dir DIR` | malformed | 형식 오류로 실패 |
+| `--upstream-dir DIR` | valid, hash match but HEAD mismatch | Stale/wrong checkout provenance 실패 |
 | `--upstream-dir DIR` | valid, match | 실제 `DIR/Cargo.lock` SHA-256 일치 성공 |
 | `--upstream-dir DIR` | valid, mismatch | Provenance mismatch로 실패하고 manifest/actual 값을 구분 출력 |
 
-`--upstream-dir`이 제공되면 directory와 root `Cargo.lock` 존재를 각각 확인한다. Git repository 여부나 checkout HEAD 검증은 `sync-rhwp-studio.sh`가 이미 tag/commit 계약으로 담당하므로 asset verifier는 파일 provenance 비교에만 집중한다.
+`--upstream-dir`이 제공되면 directory와 root `Cargo.lock` 존재뿐 아니라 유효한 Git checkout인지, checkout HEAD가 manifest/`--commit`의 resolved commit과 같은지를 먼저 확인한다. 그 뒤 root `Cargo.lock` actual hash를 비교해 `(resolved commit, Cargo.lock hash)`를 하나의 strict provenance 계약으로 묶는다. `sync-rhwp-studio.sh`도 writer 실행 전에 같은 commit identity를 검증하며, 최종 verifier 재실행은 generated manifest의 quoting/copy drift와 결합 계약 회귀를 방어한다.
 
 ### Mutation boundary
 
@@ -44,10 +45,13 @@
 - `manifest source_cargo_lock_sha256 must be a lowercase sha256 hex string`
 - `missing upstream directory: <path>`
 - `missing upstream root Cargo.lock: <path>`
+- `upstream directory is not a git checkout: <path>`
+- `expected upstream commit is not available in checkout: <commit>`
+- `upstream checkout HEAD does not match expected commit`
 - `manifest missing source_cargo_lock_sha256 required for upstream comparison`
 - `manifest source_cargo_lock_sha256 does not match upstream root Cargo.lock`
 
-Mismatch 진단에는 resource manifest 값, 실제 upstream 값, 비교한 `Cargo.lock` path를 함께 출력한다.
+Checkout mismatch 진단에는 expected commit, actual HEAD와 checkout path를 출력한다. Hash mismatch 진단에는 resource manifest 값, 실제 upstream 값, 비교한 `Cargo.lock` path를 함께 출력한다.
 
 ## Stage 1 — 현행 provenance 경로 조사와 계약 확정
 
@@ -90,8 +94,8 @@ git diff --check
 
 1. Verifier에 optional `--upstream-dir DIR` interface와 help를 추가한다.
 2. Resource-only optional field 호환과 strict candidate field 필수 조건을 분리한다.
-3. Upstream directory/Cargo.lock 존재, format, actual hash match를 순서대로 검증한다.
-4. Mismatch에 manifest/actual/path 진단을 출력한다.
+3. Upstream directory/Cargo.lock 존재, Git checkout HEAD/expected commit 결합, format, actual hash match를 순서대로 검증한다.
+4. Checkout mismatch에는 expected/actual/path, hash mismatch에는 manifest/actual/path 진단을 출력한다.
 5. Sync writer의 최종 verifier 호출에 같은 `UPSTREAM_DIR`을 전달한다.
 6. 최소 resource/upstream fixture로 정상·오류·interface case와 production 무손실을 검증한다.
 
@@ -113,7 +117,7 @@ git diff --check
 ### 수용 기준
 
 - Legacy missing field는 resource-only mode에서 성공한다.
-- Strict mode의 match는 성공하고 mismatch/field 누락/Cargo.lock 누락/malformed는 구분된 메시지로 실패한다.
+- Strict mode의 match는 성공하고 stale checkout/non-Git directory/mismatch/field 누락/Cargo.lock 누락/malformed는 구분된 메시지로 실패한다.
 - Production bundled resource는 변경되지 않고 기본 verifier가 통과한다.
 
 ### 커밋
@@ -137,7 +141,7 @@ git diff --check
 1. PR CI Ubuntu script-checks와 upstream sync preflight에서 신규 fixture를 실행한다.
 2. Full sync candidate의 explicit verifier에 restored target `upstream_dir`을 전달한다.
 3. Workflow verification summary에 strict comparison command/result를 기록한다.
-4. Full/studio PR body의 수동 hash equality checkbox를 자동 verifier 결과 확인 기준으로 바꾼다.
+4. Full PR body는 automatic verifier 결과, 현재 활성 workflow가 없는 studio helper는 전달된 verification 결과 확인 기준으로 수동 hash equality checkbox를 바꾼다.
 5. 신규 fixture 변경이 macOS/Rust/release gate를 skip하지 않도록 classification을 보강한다.
 
 ### 검증
@@ -159,7 +163,7 @@ git diff --check
 ### 수용 기준
 
 - Workflow가 `--upstream-dir` strict 비교 실패 시 candidate PR 생성 전에 중단한다.
-- Verification summary/body는 automatic match result를 포함한다.
+- Full sync verification summary/body는 automatic match result를 포함하고 studio helper는 verification 결과 기록을 요구한다.
 - Maintainer checklist가 수동 hash 재계산을 요구하지 않는다.
 
 ### 커밋

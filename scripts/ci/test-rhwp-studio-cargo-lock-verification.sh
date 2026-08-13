@@ -58,6 +58,7 @@ expect_failure() {
 write_resource() {
   local resource_dir="$1"
   local fingerprint="${2:-}"
+  local resolved_commit="${3:-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}"
   local fingerprint_line=""
 
   mkdir -p "$resource_dir/assets"
@@ -87,7 +88,7 @@ EOF
 {
   "name": "rhwp-studio",
   "source_release_tag": "v9.9.9",
-  "source_resolved_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source_resolved_commit": "$resolved_commit",
 $fingerprint_line
   "wasm_build_command": "fixture wasm build",
   "recommended_wasm_build_command": "fixture recommended wasm build",
@@ -141,17 +142,28 @@ assert_contains "$COMMAND_STDOUT" "rhwp-studio assets verified" \
 
 upstream_dir="$TMP_ROOT/upstream"
 write_upstream_checkout "$upstream_dir"
+upstream_commit="$(git -C "$upstream_dir" rev-parse HEAD)"
 expected_fingerprint="$(shasum -a 256 "$upstream_dir/Cargo.lock" | awk '{print $1}')"
 
 strict_resource="$TMP_ROOT/strict-resource"
-write_resource "$strict_resource" "$expected_fingerprint"
+write_resource "$strict_resource" "$expected_fingerprint" "$upstream_commit"
 "$VERIFIER" \
   --resource-dir "$strict_resource" \
   --upstream-dir "$upstream_dir" \
   > "$COMMAND_STDOUT"
 assert_contains "$COMMAND_STDOUT" \
+  "upstream checkout HEAD matches $upstream_commit" \
+  "strict fingerprint verification did not bind the checkout commit"
+assert_contains "$COMMAND_STDOUT" \
   "manifest source_cargo_lock_sha256 matches $upstream_dir/Cargo.lock" \
   "strict fingerprint verification did not report the compared Cargo.lock"
+
+unknown_commit_resource="$TMP_ROOT/unknown-commit-resource"
+write_resource "$unknown_commit_resource" "$expected_fingerprint" \
+  "cccccccccccccccccccccccccccccccccccccccc"
+expect_failure "strict verification with unavailable expected commit" \
+  "expected upstream commit is not available in checkout: cccccccccccccccccccccccccccccccccccccccc" \
+  "$VERIFIER" --resource-dir "$unknown_commit_resource" --upstream-dir "$upstream_dir"
 
 malformed_resource="$TMP_ROOT/malformed-resource"
 write_resource "$malformed_resource" "not-a-sha256"
@@ -161,7 +173,8 @@ expect_failure "malformed manifest fingerprint" \
 
 mismatch_resource="$TMP_ROOT/mismatch-resource"
 write_resource "$mismatch_resource" \
-  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" \
+  "$upstream_commit"
 expect_failure "upstream fingerprint mismatch" \
   "manifest source_cargo_lock_sha256 does not match upstream root Cargo.lock" \
   "$VERIFIER" --resource-dir "$mismatch_resource" --upstream-dir "$upstream_dir"
@@ -188,13 +201,34 @@ expect_failure "strict verification without upstream directory" \
     --resource-dir "$strict_resource" \
     --upstream-dir "$TMP_ROOT/missing-upstream"
 
+non_checkout_upstream="$TMP_ROOT/non-checkout-upstream"
+mkdir -p "$non_checkout_upstream"
+cp "$upstream_dir/Cargo.lock" "$non_checkout_upstream/Cargo.lock"
+expect_failure "strict verification without Git checkout" \
+  "upstream directory is not a git checkout: $non_checkout_upstream" \
+  "$VERIFIER" --resource-dir "$strict_resource" --upstream-dir "$non_checkout_upstream"
+
 expect_failure "upstream option without value" \
   "missing value for --upstream-dir" \
   "$VERIFIER" --upstream-dir
 
+printf '%s\n' 'stale checkout marker' > "$upstream_dir/stale-checkout-marker.txt"
+git -C "$upstream_dir" add stale-checkout-marker.txt
+git -C "$upstream_dir" commit -qm "advance fixture checkout without changing Cargo.lock"
+stale_upstream_head="$(git -C "$upstream_dir" rev-parse HEAD)"
+expect_failure "strict verification with stale checkout" \
+  "upstream checkout HEAD does not match expected commit" \
+  "$VERIFIER" --resource-dir "$strict_resource" --upstream-dir "$upstream_dir"
+assert_contains "$COMMAND_STDERR" "Expected commit: $upstream_commit" \
+  "stale checkout diagnostic omitted the expected commit"
+assert_contains "$COMMAND_STDERR" "Actual HEAD:     $stale_upstream_head" \
+  "stale checkout diagnostic omitted the actual HEAD"
+assert_contains "$COMMAND_STDERR" "Checkout:        $upstream_dir" \
+  "stale checkout diagnostic omitted the checkout path"
+
 sync_target="$TMP_ROOT/sync-target"
 write_resource "$sync_target"
-upstream_commit="$(git -C "$upstream_dir" rev-parse HEAD)"
+upstream_commit="$stale_upstream_head"
 "$SYNC" \
   --check \
   --upstream-dir "$upstream_dir" \

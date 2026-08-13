@@ -265,7 +265,7 @@ scripts/verify-rhwp-studio-assets.sh \
   --commit <resolved-commit>
 ```
 
-`--upstream-dir`를 사용하면 manifest field와 target checkout의 root `Cargo.lock`이 모두 필수다. malformed sha256은 형식 오류로, 값 불일치는 manifest 값·실제 값·비교한 `Cargo.lock` 경로를 포함한 provenance mismatch로 구분해 실패한다. `scripts/sync-rhwp-studio.sh`도 후보 asset을 만든 직후 같은 strict 비교를 자체 실행한다.
+`--upstream-dir`를 사용하면 해당 directory는 `--commit` 또는 manifest `source_resolved_commit`과 HEAD가 일치하는 Git checkout이어야 하며, manifest field와 root `Cargo.lock`도 모두 필수다. Non-Git directory와 stale checkout은 hash 비교 전에 실패한다. malformed sha256은 형식 오류로, 값 불일치는 manifest 값·실제 값·비교한 `Cargo.lock` 경로를 포함한 provenance mismatch로 구분해 실패한다. `scripts/sync-rhwp-studio.sh`도 후보 asset을 만든 직후 같은 strict 비교를 자체 실행한다.
 
 fallback 경로를 바꾼 경우에는 source resource를 건드리지 않고 Debug app 복사본만 훼손해 negative smoke를 수행한다.
 

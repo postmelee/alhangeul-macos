@@ -273,6 +273,8 @@ cat > "$TARGET/manifest.json" <<JSON
 }
 JSON
 
+# Re-read the generated manifest and source file to catch writer, quoting, and copy drift.
+# Upstream HEAD was already resolved above; the verifier independently enforces it again.
 "$ROOT/scripts/verify-rhwp-studio-assets.sh" \
   --resource-dir "$TARGET" \
   --tag "$EXPECTED_RELEASE_TAG" \
