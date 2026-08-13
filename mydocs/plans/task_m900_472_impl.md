@@ -426,7 +426,7 @@ Stage 3 진행 중·완료보고에서 다음 mutation을 분리해 승인 요�
 
 ### 검증
 
-생성 결과의 exact 번호를 `TASK472_SOURCE_PR`, `TASK472_RELEASE_PR`에 넣어 다음 검증을 실행한다. `TASK472_BACKMERGE_PR`은 실제 content drift로 back-merge가 필요할 때만 사용한다. transport-only 판정이면 source parent/tree 동일성, `main` 전용 non-merge commit 부재와 Issue #474를 Stage 보고서에 기록한다.
+생성 결과의 exact 번호를 `TASK472_SOURCE_PR`, `TASK472_RELEASE_PR`에 넣어 다음 검증을 실행한다. `TASK472_BACKMERGE_PR`은 실제 content drift로 back-merge가 필요할 때만 사용한다. transport-only 판정이면 source parent/tree 동일성, `main` 전용 non-merge commit 부재와 Issue #474를 Stage 보고서에 기록한다. 좌측 ancestry count는 release transport merge마다 증가하는 진단값이며 content drift 판정값으로 사용하지 않는다.
 
 ```bash
 gh pr view "$TASK472_SOURCE_PR" --repo postmelee/alhangeul-macos \
@@ -435,6 +435,12 @@ git fetch origin --prune
 git rev-list --left-right --count origin/main...origin/devel
 git log --left-right --cherry-pick --oneline origin/main...origin/devel
 git diff --stat origin/main...origin/devel
+git rev-list --left-only --no-merges origin/main...origin/devel
+git diff --name-status \
+  origin/main "$(git merge-base origin/main origin/devel)"
+for commit in $(git rev-list --left-only --merges origin/main...origin/devel); do
+  git diff --name-status "$commit^2" "$commit"
+done
 if test -n "${TASK472_BACKMERGE_PR:-}"; then
   gh pr view "$TASK472_BACKMERGE_PR" --repo postmelee/alhangeul-macos \
     --json number,state,mergeable,mergeStateStatus,mergeCommit,statusCheckRollup,url
@@ -481,6 +487,7 @@ scripts/smoke-finder-integration.sh --version 0.1.10
 
 - Stage 1~3 source PR이 `devel`에 merge되고 source branch와 merge commit이 기록돼 있다.
 - main-only ancestry와 실제 content drift 판정이 명시돼 있고, transport-only면 history-only back-merge를 생략한 근거가 기록돼 있다. 실제 content drift가 있으면 필요한 back-merge가 CI/review 후 완료됐다.
+- Stage 4 보고서에는 Stage 1의 history-only back-merge 필요 권고를 번복한 사실과 non-merge commit 부재, source parent/tree 동일성 근거가 기록돼 있다.
 - release PR merge commit, annotated tag와 checked-out release tree가 같은 candidate다.
 - draft workflow가 exact tag에서 성공하고 stable appcast/Pages는 갱신되지 않았다.
 - draft DMG가 signing/notarization/staple/Gatekeeper/universal/layout gate를 통과한다.
