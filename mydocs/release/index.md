@@ -17,7 +17,7 @@
 
 | 버전 | 상태 | GitHub Release | Pages 릴리즈 노트 | 내부 기록 |
 |------|------|----------------|-------------------|-----------|
-| `v0.1.10` | 후보 · signed draft 차단 gate 완료 · official 승인 대기 | [draft](https://github.com/postmelee/alhangeul-macos/releases/tag/untagged-91bda2ed93cfa0d3ca56) · [tag `v0.1.10`](https://github.com/postmelee/alhangeul-macos/tree/v0.1.10) | [v0.1.10](https://postmelee.github.io/alhangeul-macos/updates/v0.1.10.html) | [`v0.1.10.md`](v0.1.10.md) |
+| `v0.1.10` | 공개 완료 · Homebrew 별도 승인 대기 | [Alhangeul v0.1.10 (rhwp v0.8.4)](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.10) | [v0.1.10](https://postmelee.github.io/alhangeul-macos/updates/v0.1.10.html) | [`v0.1.10.md`](v0.1.10.md) |
 | `v0.1.9` | 공개 완료 | [Alhangeul v0.1.9](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.9) | [v0.1.9](https://postmelee.github.io/alhangeul-macos/updates/v0.1.9.html) | [`v0.1.9.md`](v0.1.9.md) |
 | `v0.1.8` | 공개 완료 | [Alhangeul v0.1.8](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.8) | [v0.1.8](https://postmelee.github.io/alhangeul-macos/updates/v0.1.8.html) | [`v0.1.8.md`](v0.1.8.md) |
 | `v0.1.7` | 공개 완료 | [Alhangeul v0.1.7](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.7) | [v0.1.7](https://postmelee.github.io/alhangeul-macos/updates/v0.1.7.html) | [`v0.1.7.md`](v0.1.7.md) |
