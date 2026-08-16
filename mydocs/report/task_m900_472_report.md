@@ -17,11 +17,12 @@
 | signed draft | [run `31806721517`](https://github.com/postmelee/alhangeul-macos/actions/runs/31806721517) |
 | official Publish | [run `31812500336`](https://github.com/postmelee/alhangeul-macos/actions/runs/31812500336) |
 | Homebrew tap | [`postmelee/homebrew-tap` commit `f712c88`](https://github.com/postmelee/homebrew-tap/commit/f712c88e7e468395aeb09210cb6e24503dfb7d4f) |
+| main closeout | draft PR [#477](https://github.com/postmelee/alhangeul-macos/pull/477) |
 | 단계 | 수행계획, 구현계획, Stage 1~6 |
 
 `v0.1.10` release source와 communication을 upstream `rhwp v0.8.4` 기준으로 정렬하고 source preflight, unsigned Rehearsal, signed/notarized draft 차단 gate를 거쳐 official stable release를 게시했다. public DMG, Pages, stable Sparkle appcast, 실제 `v0.1.9 -> v0.1.10` 업데이트와 app/Finder provider를 확인한 뒤 같은 official DMG를 maintainer Homebrew tap에도 배포했다.
 
-Stage 6에서는 release identity와 public surface를 다시 조회하고 repository Cask, README, Pages source와 GitHub Release body의 Homebrew 대기 문구를 closeout 대상으로 확정했다. source 변경, appcast 보존 Pages artifact와 Release body 후보를 검증했고, 작업지시자 승인 뒤 공개 GitHub Release 본문을 후보와 일치하도록 보정했다. main PR과 Pages 재배포는 아직 대기한다.
+Stage 6에서는 release identity와 public surface를 다시 조회하고 repository Cask, README, Pages source와 GitHub Release body의 Homebrew 대기 문구를 closeout 대상으로 확정했다. source 변경, appcast 보존 Pages artifact와 Release body 후보를 검증했고, 작업지시자 승인 뒤 공개 GitHub Release 본문을 후보와 일치하도록 보정하고 main closeout draft PR [#477](https://github.com/postmelee/alhangeul-macos/pull/477)을 게시했다. CI/merge와 Pages 재배포는 아직 대기한다.
 
 ## 단계별 결과
 
@@ -37,6 +38,7 @@ Stage 6에서는 release identity와 public surface를 다시 조회하고 repos
 | Stage 5 | `2c6ba3a` | official stable Publish, public artifact/Pages/appcast와 실제 Sparkle update 검증 |
 | Stage 5.1 | `870fa90` | repository/tap Cask 게시, audit/install/uninstall과 설치본 복구 |
 | Stage 6 | `43390f2` | public communication closeout source, 최종 release record와 최종 보고 준비 |
+| Stage 6.1 | `2f62314` | GitHub Release body 보정, 공개 본문 재검증과 closeout 기록 갱신 |
 
 Stage 1~3 변경은 PR [#473](https://github.com/postmelee/alhangeul-macos/pull/473)으로 `devel` merge commit `447b31b...`에 반영했다. PR [#475](https://github.com/postmelee/alhangeul-macos/pull/475)는 history-only back-merge 생략 판정을 `devel` merge commit `34ba512...`에 반영했고, PR [#476](https://github.com/postmelee/alhangeul-macos/pull/476)은 같은 tree를 `main` release commit `fafed425...`으로 승격했다.
 
@@ -144,7 +146,7 @@ tap의 기존 `Untrusted` 상태를 바꾸지 않았고 `brew trust` 같은 전�
 
 Stage 6 head를 `origin/main`과 `origin/devel`에 각각 비교한 tree diff는 같은 12파일이다. Cask, README, 네 Pages/공개 문서, 두 작업일 기록, release index/record, Stage 4~5 보고서와 최종 보고서만 포함하며 `Sources/`, project, workflow와 release tag 제품 tree는 바꾸지 않는다. 따라서 main closeout과 devel 운영 기록 PR을 분리해도 불필요한 제품 diff는 생기지 않는다.
 
-main closeout branch push/PR도 이번 작업지시자 승인 범위에 포함해 진행한다. PR merge와 docs-only Pages workflow는 후속 외부 mutation이므로 별도 지시 전에는 실행하지 않고, 그 전에는 public Pages의 대기 문구를 완료 상태로 기록하지 않는다.
+main closeout draft PR [#477](https://github.com/postmelee/alhangeul-macos/pull/477)은 `main` 대상 exact 12파일로 게시했다. PR merge와 docs-only Pages workflow는 후속 외부 mutation이므로 별도 지시 전에는 실행하지 않고, 그 전에는 public Pages의 대기 문구를 완료 상태로 기록하지 않는다.
 
 ## 승인 이력과 주요 결정
 
@@ -156,6 +158,7 @@ main closeout branch push/PR도 이번 작업지시자 승인 범위에 포함�
 - stale LaunchServices record만 없애기 위한 전역 reset은 수행하지 않고 실제 provider path와 process provenance로 판정했다.
 - Stage 6 closeout source와 최종 보고 작성은 2026-08-16 별도 승인으로 진행했다.
 - 검증된 body file을 사용한 GitHub Release Homebrew 문구 보정과 공개 본문 재검증은 2026-08-16 후속 승인으로 진행했다.
+- main closeout branch push와 draft PR #477 게시도 같은 후속 승인 범위에서 진행했다.
 
 ## 미실행 항목과 잔여 위험
 
@@ -182,8 +185,8 @@ Task #472의 release 준비, official publish, Homebrew 배포 실행과 GitHub 
 
 ## 게시와 종료 조건
 
-1. 단일 `main` 대상 closeout PR을 exact diff로 게시한다.
-2. review/CI 뒤 별도 승인으로 main closeout PR을 merge한다.
+1. draft PR #477의 review/CI를 확인한다.
+2. 별도 승인으로 main closeout PR을 merge한다.
 3. docs-only Pages workflow 성공, public Homebrew 문구와 stable appcast byte 보존을 확인한다.
 4. 명시적인 `task-final-report` 절차로 Task #472 `devel` 최종 PR을 게시한다.
 5. 위 공개 반영과 필요한 PR merge 뒤 Issue #472를 close하고 `publish/task472`, closeout branch, `local/task472`과 임시 worktree를 `pr-merge-cleanup` 절차로 정리한다.
