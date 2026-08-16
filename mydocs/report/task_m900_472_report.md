@@ -21,7 +21,7 @@
 
 `v0.1.10` release source와 communication을 upstream `rhwp v0.8.4` 기준으로 정렬하고 source preflight, unsigned Rehearsal, signed/notarized draft 차단 gate를 거쳐 official stable release를 게시했다. public DMG, Pages, stable Sparkle appcast, 실제 `v0.1.9 -> v0.1.10` 업데이트와 app/Finder provider를 확인한 뒤 같은 official DMG를 maintainer Homebrew tap에도 배포했다.
 
-Stage 6에서는 release identity와 public surface를 다시 조회하고 repository Cask, README, Pages source와 GitHub Release body의 Homebrew 대기 문구를 closeout 대상으로 확정했다. source 변경, appcast 보존 Pages artifact와 Release body 후보는 검증했지만 main PR, Release 본문 직접 수정과 Pages 재배포는 이번 완료보고 승인 전에는 게시하지 않았다.
+Stage 6에서는 release identity와 public surface를 다시 조회하고 repository Cask, README, Pages source와 GitHub Release body의 Homebrew 대기 문구를 closeout 대상으로 확정했다. source 변경, appcast 보존 Pages artifact와 Release body 후보를 검증했고, 작업지시자 승인 뒤 공개 GitHub Release 본문을 후보와 일치하도록 보정했다. main PR과 Pages 재배포는 아직 대기한다.
 
 ## 단계별 결과
 
@@ -36,7 +36,7 @@ Stage 6에서는 release identity와 public surface를 다시 조회하고 repos
 | Stage 4.2 / 4 | `868b119`, `8292782` | release PR/tag identity, signed draft와 저장·PDF·인쇄·Finder 차단 gate 통과 |
 | Stage 5 | `2c6ba3a` | official stable Publish, public artifact/Pages/appcast와 실제 Sparkle update 검증 |
 | Stage 5.1 | `870fa90` | repository/tap Cask 게시, audit/install/uninstall과 설치본 복구 |
-| Stage 6 | 이번 커밋 | public communication closeout source, 최종 release record와 최종 보고 준비 |
+| Stage 6 | `43390f2` | public communication closeout source, 최종 release record와 최종 보고 준비 |
 
 Stage 1~3 변경은 PR [#473](https://github.com/postmelee/alhangeul-macos/pull/473)으로 `devel` merge commit `447b31b...`에 반영했다. PR [#475](https://github.com/postmelee/alhangeul-macos/pull/475)는 history-only back-merge 생략 판정을 `devel` merge commit `34ba512...`에 반영했고, PR [#476](https://github.com/postmelee/alhangeul-macos/pull/476)은 같은 tree를 `main` release commit `fafed425...`으로 승격했다.
 
@@ -132,7 +132,7 @@ tap의 기존 `Untrusted` 상태를 바꾸지 않았고 `brew trust` 같은 전�
 
 | surface | 현재 live 상태 | closeout 준비 |
 |---------|----------------|---------------|
-| GitHub Release/DMG | v0.1.10 stable/latest와 exact asset 유지 | Homebrew 문단 한 줄 보정 후보 검증 |
+| GitHub Release/DMG | v0.1.10 stable/latest와 exact asset 유지, Homebrew 설치 명령 반영 | 검증된 후보와 공개 본문 일치 확인 |
 | Homebrew tap | public v0.1.10 Cask 제공 | repository `Casks/alhangeul.rb`를 같은 version/SHA256으로 정렬 |
 | Pages home/update | 다운로드와 appcast는 v0.1.10, Homebrew 대기 문구 잔존 | 세 화면과 v0.1.10 note를 현재 설치 명령으로 보정 |
 | stable appcast | `0.1.10 (16)`, SHA256 `36b5d62b...af5a` | docs-only artifact에서 byte-identical 보존 |
@@ -140,11 +140,11 @@ tap의 기존 `Untrusted` 상태를 바꾸지 않았고 `brew trust` 같은 전�
 
 준비한 public source diff는 `README.md`, `docs/index.html`, `docs/updates/index.html`, `docs/updates/v0.1.10.html`의 Homebrew 문구다. repository Cask, release index/record, Stage 4~5 기록과 이 최종 보고서를 함께 release closeout 기록으로 유지한다.
 
-`scripts/ci/update-release-version-notices.sh --check`, release note template check, GitHub body validator와 prepared Pages artifact가 통과했다. prepared artifact의 `appcast.xml`은 현재 public appcast와 byte-identical하다. GitHub Release body 후보도 현재 public body에서 Homebrew 한 줄만 의미상 변경한다.
+`scripts/ci/update-release-version-notices.sh --check`, release note template check, GitHub body validator와 prepared Pages artifact가 통과했다. prepared artifact의 `appcast.xml`은 현재 public appcast와 byte-identical하다. GitHub Release body는 검증된 후보 파일로 수정한 뒤 후보와의 전체 본문 일치, 현재 Homebrew 명령 포함과 이전 대기 문구 제거를 재확인했다.
 
 Stage 6 head를 `origin/main`과 `origin/devel`에 각각 비교한 tree diff는 같은 12파일이다. Cask, README, 네 Pages/공개 문서, 두 작업일 기록, release index/record, Stage 4~5 보고서와 최종 보고서만 포함하며 `Sources/`, project, workflow와 release tag 제품 tree는 바꾸지 않는다. 따라서 main closeout과 devel 운영 기록 PR을 분리해도 불필요한 제품 diff는 생기지 않는다.
 
-main closeout branch push/PR, GitHub Release body 직접 수정, PR merge와 docs-only Pages workflow는 외부 mutation이다. 이번 보고 승인 뒤 별도 명시 지시로 실행하며, 그 전에는 public Pages의 대기 문구를 완료 상태로 기록하지 않는다.
+main closeout branch push/PR도 이번 작업지시자 승인 범위에 포함해 진행한다. PR merge와 docs-only Pages workflow는 후속 외부 mutation이므로 별도 지시 전에는 실행하지 않고, 그 전에는 public Pages의 대기 문구를 완료 상태로 기록하지 않는다.
 
 ## 승인 이력과 주요 결정
 
@@ -155,6 +155,7 @@ main closeout branch push/PR, GitHub Release body 직접 수정, PR merge와 doc
 - 익명 최초 실행·version transition event의 기본 활성화와 opt-out 전 첫 event 가능성을 인지한 상태에서 v0.1.10 정책으로 승인했다.
 - stale LaunchServices record만 없애기 위한 전역 reset은 수행하지 않고 실제 provider path와 process provenance로 판정했다.
 - Stage 6 closeout source와 최종 보고 작성은 2026-08-16 별도 승인으로 진행했다.
+- 검증된 body file을 사용한 GitHub Release Homebrew 문구 보정과 공개 본문 재검증은 2026-08-16 후속 승인으로 진행했다.
 
 ## 미실행 항목과 잔여 위험
 
@@ -169,7 +170,7 @@ main closeout branch push/PR, GitHub Release body 직접 수정, PR merge와 doc
 | known payload decode 진단 | 미구현 | Issue #470 |
 | main/devel content gate | 규칙·자동화 미구현 | Issue #474 |
 | 비활성 개발 LaunchServices record | 일부 잔존 | 활성 provider와 무관, 전역 reset 미사용 |
-| public Homebrew 문구 | source 준비, live 반영 전 | main closeout·Release body·Pages 성공 뒤 확인 |
+| public Homebrew 문구 | GitHub Release 반영, Pages source 준비 | main closeout merge·Pages 성공 뒤 화면 확인 |
 
 ## 최종 결론
 
@@ -177,13 +178,12 @@ main closeout branch push/PR, GitHub Release body 직접 수정, PR merge와 doc
 
 strict local static archive, Intel Mac/macOS 12 실기기, 일부 renderer/lifecycle 후속과 비활성 LaunchServices record는 실제 결과와 분리해 잔여 위험으로 기록했다. 어느 항목도 public v0.1.10 identity, signing/notarization, 실제 Apple Silicon 설치·업데이트·Finder 또는 Homebrew smoke를 실패시키는 blocker로 재현되지 않았다.
 
-Task #472의 release 준비, official publish와 Homebrew 배포 실행 목표는 달성했다. 다만 repository `main`, GitHub Release 본문과 public Pages의 Homebrew closeout은 아직 승인된 source 후보 상태이므로 Issue #472는 자동으로 닫지 않는다.
+Task #472의 release 준비, official publish, Homebrew 배포 실행과 GitHub Release 본문 보정 목표는 달성했다. 다만 repository `main`과 public Pages의 Homebrew closeout은 아직 source 후보 상태이므로 Issue #472는 자동으로 닫지 않는다.
 
 ## 게시와 종료 조건
 
-1. 이 Stage 6 최종 보고와 closeout 범위를 승인한다.
-2. GitHub Release body의 Homebrew 한 줄을 검증된 설치 명령으로 보정한다.
-3. 단일 `main` 대상 closeout PR과 Task #472 `devel` 최종 PR을 exact diff로 게시한다.
-4. review/CI 뒤 별도 승인으로 필요한 PR을 merge한다.
-5. docs-only Pages workflow 성공, public Homebrew 문구와 stable appcast byte 보존을 확인한다.
-6. 위 공개 반영 뒤 Issue #472를 close하고 `publish/task472`, closeout branch, `local/task472`과 임시 worktree를 `pr-merge-cleanup` 절차로 정리한다.
+1. 단일 `main` 대상 closeout PR을 exact diff로 게시한다.
+2. review/CI 뒤 별도 승인으로 main closeout PR을 merge한다.
+3. docs-only Pages workflow 성공, public Homebrew 문구와 stable appcast byte 보존을 확인한다.
+4. 명시적인 `task-final-report` 절차로 Task #472 `devel` 최종 PR을 게시한다.
+5. 위 공개 반영과 필요한 PR merge 뒤 Issue #472를 close하고 `publish/task472`, closeout branch, `local/task472`과 임시 worktree를 `pr-merge-cleanup` 절차로 정리한다.
