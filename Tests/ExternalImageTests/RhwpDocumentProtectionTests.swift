@@ -3,11 +3,11 @@ import XCTest
 
 final class RhwpDocumentProtectionTests: XCTestCase {
     func testRawStatusMappingFailsClosedForUnknownValues() {
-        XCTAssertEqual(RhwpDocumentProtection(rawValue: 0), .plain)
-        XCTAssertEqual(RhwpDocumentProtection(rawValue: 1), .passwordProtected)
-        XCTAssertEqual(RhwpDocumentProtection(rawValue: 2), .unsupportedProtection)
-        XCTAssertEqual(RhwpDocumentProtection(rawValue: 3), .invalidOrUnknown)
-        XCTAssertEqual(RhwpDocumentProtection(rawValue: UInt32.max), .invalidOrUnknown)
+        XCTAssertEqual(RhwpDocumentProtection(status: 0), .plain)
+        XCTAssertEqual(RhwpDocumentProtection(status: 1), .passwordProtected)
+        XCTAssertEqual(RhwpDocumentProtection(status: 2), .unsupportedProtection)
+        XCTAssertEqual(RhwpDocumentProtection(status: 3), .invalidOrUnknown)
+        XCTAssertEqual(RhwpDocumentProtection(status: UInt32.max), .invalidOrUnknown)
     }
 
     func testPlainFixtureAndInvalidInputClassification() throws {

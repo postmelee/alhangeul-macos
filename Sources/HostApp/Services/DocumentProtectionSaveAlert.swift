@@ -37,6 +37,7 @@ enum DocumentProtectionSaveAlert {
     ) -> String {
         let protectionMessage = switch sourceProtection {
         case .plain:
+            // 호출부가 requiresPlainCopyWarning으로 거르지만 exhaustive fallback은 유지한다.
             "문서를 다른 이름으로 저장합니다."
         case .passwordProtected:
             "현재 버전은 native 암호 저장을 지원하지 않습니다. 원본은 변경하지 않고, 암호가 제거된 복사본을 원본과 다른 위치에 저장할 수 있습니다."

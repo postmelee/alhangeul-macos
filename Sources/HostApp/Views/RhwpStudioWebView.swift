@@ -1127,13 +1127,17 @@ extension RhwpStudioWebView {
                 filename: suggestedFilename ?? currentDocument.filename
             )
 
-            let filename = suggestedFilename
-                ?? currentSourceDocument?.displayName
-                ?? currentDocument.filename
             let documentRevision = currentDocument.revision
             let sourceProtection = currentDocument.sourceProtection
             let outputProtectionIntent = DocumentSaveProtectionPolicy.outputIntent(
                 for: sourceProtection
+            )
+            let filename = DocumentSaveProtectionPolicy.suggestedFilename(
+                for: suggestedFilename
+                    ?? currentSourceDocument?.displayName
+                    ?? currentDocument.filename,
+                format: format,
+                outputIntent: outputProtectionIntent
             )
             let sourceURL = currentSourceDocument.map(resolvedSourceURL)
             let presentingWindow = webView.window
@@ -1165,7 +1169,7 @@ extension RhwpStudioWebView {
                 }
 
                 guard self.currentDocument?.revision == documentRevision else {
-                    completion?(.failed("문서가 변경되어 저장을 취소했습니다."))
+                    completion?(.failed("저장 대기 중 다른 문서가 열려 저장을 취소했습니다."))
                     return
                 }
 
@@ -1180,7 +1184,7 @@ extension RhwpStudioWebView {
                 }
 
                 guard self.currentDocument?.revision == documentRevision else {
-                    completion?(.failed("문서가 변경되어 저장을 취소했습니다."))
+                    completion?(.failed("저장 대기 중 다른 문서가 열려 저장을 취소했습니다."))
                     return
                 }
 

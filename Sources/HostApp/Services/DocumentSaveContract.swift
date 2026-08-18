@@ -21,17 +21,20 @@ enum DocumentSaveProtectionPolicyError: Error, Equatable, LocalizedError {
     case protectedSourceRequiresPlainCopy(DocumentSourceProtection)
     case plainSourceRequiresPreserveIntent
     case plainCopyMustUseDifferentDestination
+    case plainCopyRequiresNewDestination
 
     var errorDescription: String? {
         switch self {
         case .documentChanged:
-            return "저장 요청 뒤 문서 또는 보호 상태가 변경되었습니다."
+            return "저장 요청 뒤 다른 문서가 열렸거나 보호 상태가 변경되었습니다."
         case .protectedSourceRequiresPlainCopy:
             return "보호된 문서는 현재 원본 보호를 유지한 채 저장할 수 없습니다."
         case .plainSourceRequiresPreserveIntent:
             return "평문 문서의 저장 보호 의도가 올바르지 않습니다."
         case .plainCopyMustUseDifferentDestination:
             return "보호를 해제한 복사본은 원본과 다른 위치에 저장해야 합니다."
+        case .plainCopyRequiresNewDestination:
+            return "원본 위치를 확인할 수 없는 보호 문서는 기존 파일을 덮어쓸 수 없습니다. 새 파일 이름을 선택해 주세요."
         }
     }
 }
@@ -89,12 +92,29 @@ enum DocumentSaveProtectionPolicy {
             )
         case (_, .plainCopy):
             guard let sourceURL else {
+                guard !FileManager.default.fileExists(atPath: destinationURL.path) else {
+                    throw DocumentSaveProtectionPolicyError.plainCopyRequiresNewDestination
+                }
                 return
             }
             guard !sameFile(sourceURL, destinationURL) else {
                 throw DocumentSaveProtectionPolicyError.plainCopyMustUseDifferentDestination
             }
         }
+    }
+
+    static func suggestedFilename(
+        for filename: String,
+        format: DocumentSaveFormat,
+        outputIntent: DocumentSaveOutputProtectionIntent
+    ) -> String {
+        let normalizedFilename = format.normalizedFilename(filename)
+        guard outputIntent == .plainCopy else {
+            return normalizedFilename
+        }
+
+        let stem = (normalizedFilename as NSString).deletingPathExtension
+        return format.normalizedFilename("\(stem) (평문 복사본)")
     }
 
     private static func sameFile(_ lhs: URL, _ rhs: URL) -> Bool {

@@ -1,14 +1,14 @@
 import Foundation
 import Rhwp
 
-enum RhwpDocumentProtection: Equatable {
+enum RhwpDocumentProtection: Equatable, Sendable {
     case plain
     case passwordProtected
     case unsupportedProtection
     case invalidOrUnknown
 
-    init(rawValue: UInt32) {
-        switch rawValue {
+    init(status: UInt32) {
+        switch status {
         case 0:
             self = .plain
         case 1:
@@ -33,7 +33,7 @@ enum RhwpDocumentProtection: Equatable {
                 baseAddress.assumingMemoryBound(to: UInt8.self),
                 UInt(rawBuffer.count)
             )
-            return RhwpDocumentProtection(rawValue: status.rawValue)
+            return RhwpDocumentProtection(status: status.rawValue)
         }
     }
 }

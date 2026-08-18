@@ -209,6 +209,19 @@ git diff --check
 
 `Task #480 Stage 2: 암호 문서 평문 덮어쓰기 차단`
 
+### 5.8 PR #481 리뷰 보정
+
+Stage 2 PR 리뷰에서 확인된 안전성과 성능 경계를 다음과 같이 보강한다.
+
+1. 보호 입력의 원본 URL을 알 수 없으면 기존 파일 destination을 모두 거부하고 신규 경로만 허용한다. data drop처럼 source provenance가 없는 경우에도 평문 복사본이 기존 파일을 대체하지 못해야 한다.
+2. 평문 복사본 save panel 기본 이름은 `원본 (평문 복사본).hwp`처럼 보호 해제를 드러내 원본 교체 확인 뒤 정책 오류로 끝나는 흐름을 피한다.
+3. 보호 상태 probe의 native full parse는 `Task.detached`에서 수행한다. 연속 문서 열기에서는 load ID가 최신인 결과만 반영하고, 판정 중에는 이전 WebView 입력과 저장 명령을 비활성화한다.
+4. Swift status 변환 initializer는 unknown 값을 흡수하는 의미가 드러나도록 `init(status:)`로 명명하고, save alert의 `.plain` exhaustive fallback 의도를 주석으로 남긴다.
+5. revision guard 문구는 편집 변경이 아니라 다른 문서 전환과 보호 상태 변경을 검사한다는 범위가 드러나도록 보정한다.
+6. 평문 HWP3의 무경고 HWP5 변환 overwrite는 Stage 2 보호 문서 범위와 분리해 [#482](https://github.com/postmelee/alhangeul-macos/issues/482)에서 추적한다.
+
+리뷰 보정은 Stage 2의 fail-closed 목적을 강화하며 upstream pin, bundled Studio asset, serializer와 C ABI를 변경하지 않는다.
+
 ## 6. Stage 3 — native 암호 저장 연결
 
 ### 6.1 진입 조건

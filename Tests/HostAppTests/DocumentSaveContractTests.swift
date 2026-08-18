@@ -269,6 +269,69 @@ final class DocumentSaveContractTests: XCTestCase {
         )
     }
 
+    func testPlainCopyWithoutSourceURLRejectsExistingDestination() throws {
+        let directoryURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: directoryURL,
+            withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: directoryURL) }
+
+        let existingURL = directoryURL.appendingPathComponent("existing.hwp")
+        try Data("original".utf8).write(to: existingURL)
+
+        XCTAssertThrowsError(
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: .passwordProtected,
+                outputIntent: .plainCopy,
+                sourceURL: nil,
+                destinationURL: existingURL
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? DocumentSaveProtectionPolicyError,
+                .plainCopyRequiresNewDestination
+            )
+        }
+
+        XCTAssertNoThrow(
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: .passwordProtected,
+                outputIntent: .plainCopy,
+                sourceURL: nil,
+                destinationURL: directoryURL.appendingPathComponent("new-copy.hwp")
+            )
+        )
+    }
+
+    func testPlainCopySuggestedFilenameDescribesProtectionRemoval() {
+        XCTAssertEqual(
+            DocumentSaveProtectionPolicy.suggestedFilename(
+                for: "원본.hwp",
+                format: .hwp,
+                outputIntent: .plainCopy
+            ),
+            "원본 (평문 복사본).hwp"
+        )
+        XCTAssertEqual(
+            DocumentSaveProtectionPolicy.suggestedFilename(
+                for: "원본.hwp",
+                format: .hwpx,
+                outputIntent: .plainCopy
+            ),
+            "원본 (평문 복사본).hwpx"
+        )
+        XCTAssertEqual(
+            DocumentSaveProtectionPolicy.suggestedFilename(
+                for: "원본.hwp",
+                format: .hwp,
+                outputIntent: .preserveSourceProtection
+            ),
+            "원본.hwp"
+        )
+    }
+
     func testPlainSavePreservesPlainProtection() throws {
         let sourceURL = URL(fileURLWithPath: "/tmp/original.hwp")
 

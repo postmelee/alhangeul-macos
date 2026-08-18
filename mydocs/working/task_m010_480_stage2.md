@@ -100,6 +100,32 @@ HWP3 보호 입력은 원형을 보존할 수 없으므로 경고문에 선택�
 
 Xcode는 기존 `RhwpStudioPagePDFRenderer`의 Swift 6 actor-isolation 경고와 test deployment target 관련 linker 경고를 출력한다. 이번 변경에서 발생한 오류는 아니며 현재 Swift 5 mode의 Stage 2 blocker로 판단하지 않았다.
 
+## PR #481 리뷰 보정
+
+PR 리뷰에서 data drop처럼 원본 URL을 보유하지 않는 보호 입력의 destination 검증과 main actor에서 실행되는 native full parse가 보완 대상으로 확인됐다. 다음 변경을 Stage 2 안전 차단에 추가했다.
+
+- `sourceURL == nil`인 평문 복사본은 destination이 존재하면 거부하고 새 파일 경로만 허용한다. 이 검증은 save panel 반환 뒤, exporter 호출 전, payload 응답 뒤에 반복된다.
+- 평문 복사본의 기본 파일명을 `원본 (평문 복사본).확장자`로 제안해 원본 교체 확인과 정책 거부가 연속되는 UX를 줄였다.
+- 보호 상태 full parse를 `Task.detached(priority: .userInitiated)`로 옮겼다. 각 load에 증가 ID를 부여하고 이전 task를 취소한 뒤 최신 ID의 결과만 document revision에 반영한다.
+- 보호 상태 판정 중에는 command 실행과 WebView hit testing을 비활성화해 이전 문서에 저장·편집 입력이 들어가지 않게 했다.
+- Swift raw status 변환을 `init(status:)`로 명명하고 `Sendable` 계약을 명시했다. save alert의 도달 불가 `.plain` 분기는 exhaustive fallback이라는 주석을 남겼다.
+- revision 오류 문구를 다른 문서 열기 또는 보호 상태 변경을 검사하는 실제 범위에 맞췄다.
+- 평문 HWP3의 무경고 HWP5 변환 overwrite는 별도 이슈 [#482](https://github.com/postmelee/alhangeul-macos/issues/482)로 등록했다.
+
+### 리뷰 보정 검증
+
+| 검증 | 결과 |
+|------|------|
+| `HostAppTests` Debug test | 통과. 135개 테스트, 실패 0. source URL 없는 기존 destination 거부와 평문 복사본 제안 파일명 회귀 포함 |
+| `ExternalImageTests` Debug test | 통과. 30개 테스트, 실패 0. `init(status:)` unknown fail-closed mapping 포함 |
+| `HostApp` Debug build | 통과. 비동기 protection probe, load ID guard와 로드 중 입력 차단 포함 `BUILD SUCCEEDED` |
+| `./scripts/check-no-appkit.sh` | 통과. 공통 Swift bridge의 AppKit/UIKit 비의존 유지 |
+| `scripts/verify-rhwp-studio-assets.sh` | 통과. bundled Studio asset 변경 없음 |
+| `git diff --check` | 통과. whitespace 오류 없음 |
+| 개발 등록 정리 | `--cleanup-dev-registrations` 실행. PlugInKit provider root는 승인된 설치본 두 경로만 남았으나 LaunchServices dump에는 과거 개발 경로 stale record가 계속 보고돼 active provider 오염과 분리 기록 |
+
+첫 `HostAppTests` 실행은 전체 앱 Store를 포함하지 않는 선택적 test target에 Store 전용 테스트를 추가해 컴파일에 실패했다. test target 경계를 불필요하게 확장하지 않고 해당 테스트 파일을 제거한 뒤 저장 정책 회귀는 기존 target에 추가했고, 비동기 Store 변경은 전체 HostApp build로 검증했다. 제품 소스 컴파일 오류나 테스트 실패로 남은 항목은 없다.
+
 ## 잔여 위험
 
 - 현 bundled production host RPC에는 password exporter와 source protection state가 없으므로 native 암호 저장 자체는 아직 구현되지 않았다. 이번 단계는 데이터 손실을 막는 안전 차단이다.
@@ -108,6 +134,8 @@ Xcode는 기존 `RhwpStudioPagePDFRenderer`의 Swift 6 actor-isolation 경고와
 - protection probe의 typed 분류는 pinned core parser 계약에 의존한다. 새 parser status와 알 수 없는 raw value는 계속 fail-closed로 다뤄야 한다.
 - actual password export round-trip, 무암호·오답 거부와 정답 성공 검증은 upstream stable API가 준비된 뒤 Stage 3/4에서 수행해야 한다.
 - protected fixture를 사용한 최종 app UI smoke와 dirty/clean 상호작용의 재확인은 Stage 4 회귀 검증에 남는다. 현재 차단 경계는 exporter 호출 전 정책과 자동 테스트로 고정했다.
+- native full parse 자체의 CPU·메모리 비용은 남지만 main actor에서는 실행하지 않는다. 취소된 parse는 FFI 호출 중 즉시 중단되지 않을 수 있으나 load ID guard가 오래 걸린 이전 결과의 상태 반영을 차단한다.
+- 평문 HWP3 변환 overwrite는 이번 보호 문서 범위에 포함하지 않고 #482에서 별도 해결한다.
 
 ## 다음 단계 영향
 
