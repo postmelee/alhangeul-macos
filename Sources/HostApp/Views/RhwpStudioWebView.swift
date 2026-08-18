@@ -119,7 +119,9 @@ extension RhwpStudioWebView {
             let format: DocumentSaveFormat
             let documentRevision: Int
             let sourceProtection: DocumentSourceProtection
+            let sourceFormat: DocumentSourceFormatIdentity
             let outputProtectionIntent: DocumentSaveOutputProtectionIntent
+            let conversionIntent: DocumentSaveConversionIntent
             let sourceURL: URL?
 
             var destinationURL: URL {
@@ -659,13 +661,26 @@ extension RhwpStudioWebView {
             }
 
             do {
+                try validatePendingSaveRequest(request)
+            } catch {
+                let message = "문서를 저장할 수 없습니다: \(error.localizedDescription)"
+                onError(message)
+                completion?(.failed(message))
+                return
+            }
+
+            do {
                 switch request.destination {
                 case .source(let sourceDocument):
                     let savedURL = try writePayload(payload, to: sourceDocument)
                     recordSavedDocument(at: savedURL, payload: payload, request: request)
                     completion?(.saved(savedURL))
                 case .selected(let destinationURL):
-                    try DocumentSavePanel.write(data: payload.data, to: destinationURL)
+                    try DocumentSavePanel.write(
+                        data: payload.data,
+                        to: destinationURL,
+                        allowOverwrite: !request.conversionIntent.requiresNewDestination
+                    )
                     recordSavedDocument(
                         at: destinationURL,
                         payload: payload,
@@ -707,14 +722,10 @@ extension RhwpStudioWebView {
             try DocumentSaveProtectionPolicy.validateCurrentDocument(
                 requestRevision: request.documentRevision,
                 requestProtection: request.sourceProtection,
+                requestSourceFormat: request.sourceFormat,
                 currentRevision: currentDocument?.revision,
-                currentProtection: currentDocument?.sourceProtection
-            )
-            try DocumentSaveProtectionPolicy.validateRequest(
-                sourceProtection: request.sourceProtection,
-                outputIntent: request.outputProtectionIntent,
-                sourceURL: request.sourceURL,
-                destinationURL: request.destinationURL
+                currentProtection: currentDocument?.sourceProtection,
+                currentSourceFormat: currentDocument?.sourceFormatIdentity
             )
             let data = try DocumentSaveContract.decodeAndValidate(
                 base64: body["base64"] as? String,
@@ -723,6 +734,7 @@ extension RhwpStudioWebView {
                 requestFormat: request.format,
                 destinationURL: request.destinationURL
             )
+            try validatePendingSaveRequest(request)
             let responseFilename = body["fileName"] as? String
                 ?? currentSourceDocument?.displayName
                 ?? currentDocument?.filename
@@ -1071,12 +1083,14 @@ extension RhwpStudioWebView {
                 sourceURL: currentSourceDocument?.url,
                 filename: suggestedFilename ?? currentDocument.filename
             )
+            let sourceFormat = currentDocument.sourceFormatIdentity
 
             guard let sourceDocument = currentSourceDocument,
                   canSaveInPlace(
                       sourceDocument,
                       format: format,
-                      sourceProtection: currentDocument.sourceProtection
+                      sourceProtection: currentDocument.sourceProtection,
+                      sourceFormat: sourceFormat
                   )
             else {
                 requestSaveAsDocument(
@@ -1094,7 +1108,9 @@ extension RhwpStudioWebView {
                     format: format,
                     documentRevision: currentDocument.revision,
                     sourceProtection: currentDocument.sourceProtection,
+                    sourceFormat: sourceFormat,
                     outputProtectionIntent: .preserveSourceProtection,
+                    conversionIntent: .none,
                     sourceURL: resolvedSourceURL(sourceDocument)
                 ),
                 in: webView,
@@ -1129,15 +1145,25 @@ extension RhwpStudioWebView {
 
             let documentRevision = currentDocument.revision
             let sourceProtection = currentDocument.sourceProtection
+            let sourceFormat = currentDocument.sourceFormatIdentity
             let outputProtectionIntent = DocumentSaveProtectionPolicy.outputIntent(
                 for: sourceProtection
+            )
+            let conversionIntent = DocumentSaveConversionIntent.resolve(
+                sourceFormat: sourceFormat,
+                outputFormat: format
+            )
+            let warningIntent = DocumentSaveWarningIntent.resolve(
+                sourceProtection: sourceProtection,
+                conversionIntent: conversionIntent
             )
             let filename = DocumentSaveProtectionPolicy.suggestedFilename(
                 for: suggestedFilename
                     ?? currentSourceDocument?.displayName
                     ?? currentDocument.filename,
                 format: format,
-                outputIntent: outputProtectionIntent
+                outputIntent: outputProtectionIntent,
+                conversionIntent: conversionIntent
             )
             let sourceURL = currentSourceDocument.map(resolvedSourceURL)
             let presentingWindow = webView.window
@@ -1155,21 +1181,25 @@ extension RhwpStudioWebView {
                     return
                 }
 
-                if sourceProtection.requiresPlainCopyWarning {
-                    let confirmed = await DocumentProtectionSaveAlert.confirmPlainCopy(
-                        sourceProtection: sourceProtection,
-                        isHWP3Source: currentDocument.isHWP3Source,
-                        outputFormat: format,
-                        presentingWindow: presentingWindow ?? webView.window
-                    )
+                if warningIntent.requiresConfirmation {
+                    let confirmed = await DocumentProtectionSaveAlert
+                        .confirmSaveTransformation(
+                            sourceProtection: sourceProtection,
+                            conversionIntent: conversionIntent,
+                            presentingWindow: presentingWindow ?? webView.window
+                        )
                     guard confirmed else {
                         completion?(.cancelled)
                         return
                     }
                 }
 
-                guard self.currentDocument?.revision == documentRevision else {
-                    completion?(.failed("저장 대기 중 다른 문서가 열려 저장을 취소했습니다."))
+                guard self.validateCurrentDocument(
+                    revision: documentRevision,
+                    protection: sourceProtection,
+                    sourceFormat: sourceFormat,
+                    completion: completion
+                ) else {
                     return
                 }
 
@@ -1183,8 +1213,12 @@ extension RhwpStudioWebView {
                     return
                 }
 
-                guard self.currentDocument?.revision == documentRevision else {
-                    completion?(.failed("저장 대기 중 다른 문서가 열려 저장을 취소했습니다."))
+                guard self.validateCurrentDocument(
+                    revision: documentRevision,
+                    protection: sourceProtection,
+                    sourceFormat: sourceFormat,
+                    completion: completion
+                ) else {
                     return
                 }
 
@@ -1192,6 +1226,9 @@ extension RhwpStudioWebView {
                     try DocumentSaveProtectionPolicy.validateRequest(
                         sourceProtection: sourceProtection,
                         outputIntent: outputProtectionIntent,
+                        sourceFormat: sourceFormat,
+                        outputFormat: format,
+                        conversionIntent: conversionIntent,
                         sourceURL: sourceURL,
                         destinationURL: destinationURL
                     )
@@ -1208,7 +1245,9 @@ extension RhwpStudioWebView {
                         format: format,
                         documentRevision: documentRevision,
                         sourceProtection: sourceProtection,
+                        sourceFormat: sourceFormat,
                         outputProtectionIntent: outputProtectionIntent,
+                        conversionIntent: conversionIntent,
                         sourceURL: sourceURL
                     ),
                     in: webView,
@@ -1223,18 +1262,7 @@ extension RhwpStudioWebView {
             completion: ((RhwpStudioDocumentSaveResult) -> Void)?
         ) {
             do {
-                try DocumentSaveProtectionPolicy.validateCurrentDocument(
-                    requestRevision: request.documentRevision,
-                    requestProtection: request.sourceProtection,
-                    currentRevision: currentDocument?.revision,
-                    currentProtection: currentDocument?.sourceProtection
-                )
-                try DocumentSaveProtectionPolicy.validateRequest(
-                    sourceProtection: request.sourceProtection,
-                    outputIntent: request.outputProtectionIntent,
-                    sourceURL: request.sourceURL,
-                    destinationURL: request.destinationURL
-                )
+                try validatePendingSaveRequest(request)
             } catch {
                 let message = "문서를 저장할 수 없습니다: \(error.localizedDescription)"
                 onError(message)
@@ -1268,10 +1296,58 @@ extension RhwpStudioWebView {
         private func canSaveInPlace(
             _ sourceDocument: RecentDocumentItem,
             format: DocumentSaveFormat,
-            sourceProtection: DocumentSourceProtection
+            sourceProtection: DocumentSourceProtection,
+            sourceFormat: DocumentSourceFormatIdentity
         ) -> Bool {
-            DocumentSaveProtectionPolicy.allowsInPlaceSave(sourceProtection)
+            DocumentSaveProtectionPolicy.allowsInPlaceSave(
+                sourceProtection: sourceProtection,
+                sourceFormat: sourceFormat
+            )
                 && DocumentSaveFormat(url: sourceDocument.url) == format
+        }
+
+        private func validateCurrentDocument(
+            revision: Int,
+            protection: DocumentSourceProtection,
+            sourceFormat: DocumentSourceFormatIdentity,
+            completion: ((RhwpStudioDocumentSaveResult) -> Void)?
+        ) -> Bool {
+            do {
+                try DocumentSaveProtectionPolicy.validateCurrentDocument(
+                    requestRevision: revision,
+                    requestProtection: protection,
+                    requestSourceFormat: sourceFormat,
+                    currentRevision: currentDocument?.revision,
+                    currentProtection: currentDocument?.sourceProtection,
+                    currentSourceFormat: currentDocument?.sourceFormatIdentity
+                )
+                return true
+            } catch {
+                let message = "문서를 저장할 수 없습니다: \(error.localizedDescription)"
+                onError(message)
+                completion?(.failed(message))
+                return false
+            }
+        }
+
+        private func validatePendingSaveRequest(_ request: PendingSaveRequest) throws {
+            try DocumentSaveProtectionPolicy.validateCurrentDocument(
+                requestRevision: request.documentRevision,
+                requestProtection: request.sourceProtection,
+                requestSourceFormat: request.sourceFormat,
+                currentRevision: currentDocument?.revision,
+                currentProtection: currentDocument?.sourceProtection,
+                currentSourceFormat: currentDocument?.sourceFormatIdentity
+            )
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: request.sourceProtection,
+                outputIntent: request.outputProtectionIntent,
+                sourceFormat: request.sourceFormat,
+                outputFormat: request.format,
+                conversionIntent: request.conversionIntent,
+                sourceURL: request.sourceURL,
+                destinationURL: request.destinationURL
+            )
         }
 
         private func resolvedSourceURL(_ sourceDocument: RecentDocumentItem) -> URL {
