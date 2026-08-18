@@ -17,9 +17,20 @@ final class DocumentViewerStore: ObservableObject {
 
     private static let webViewErrorAutoDismissDelayNanoseconds: UInt64 = 5_000_000_000
 
+    private let classifyDocumentProtection: @Sendable (Data) -> RhwpDocumentProtection
     private var webViewErrorDismissTask: Task<Void, Never>?
     private var webViewErrorDismissToken = 0
     private var webViewErrorDedupeKey: String?
+    private var activeDocumentLoadID = 0
+    private var documentLoadTask: Task<Void, Never>?
+
+    init(
+        classifyDocumentProtection: @escaping @Sendable (Data) -> RhwpDocumentProtection = {
+            RhwpDocumentProtection.classify(data: $0)
+        }
+    ) {
+        self.classifyDocumentProtection = classifyDocumentProtection
+    }
 
     var hasDocument: Bool {
         rhwpStudioDocument != nil
@@ -30,7 +41,7 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     var canRunWebViewCommands: Bool {
-        hasDocument && !isWebViewLoading && webViewFailure == nil
+        hasDocument && !isLoading && !isWebViewLoading && webViewFailure == nil
     }
 
     func openDocument() {
@@ -41,11 +52,7 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func loadDocument(from url: URL) {
-        isLoading = true
-        errorMessage = nil
-        dismissWebViewError()
-        webViewFailure = nil
-        isWebViewLoading = false
+        let loadID = beginDocumentLoad()
 
         let didStartSecurityScope = url.startAccessingSecurityScopedResource()
         defer {
@@ -57,38 +64,40 @@ final class DocumentViewerStore: ObservableObject {
         do {
             let sourceDocument = RecentDocumentItem.make(for: url)
             let data = try Data(contentsOf: url)
-            try loadDocument(
+            try startDocumentLoad(
                 data: data,
                 filename: url.lastPathComponent,
-                sourceDocument: sourceDocument
+                sourceDocument: sourceDocument,
+                loadID: loadID
             )
         } catch {
+            guard activeDocumentLoadID == loadID else {
+                return
+            }
             errorMessage = Self.openingErrorMessage(for: error)
             clearCurrentDocument()
+            isLoading = false
         }
-
-        isLoading = false
     }
 
     func loadDroppedDocument(data: Data, filename: String) {
-        isLoading = true
-        errorMessage = nil
-        dismissWebViewError()
-        webViewFailure = nil
-        isWebViewLoading = false
+        let loadID = beginDocumentLoad()
 
         do {
-            try loadDocument(
+            try startDocumentLoad(
                 data: data,
                 filename: Self.sanitizedFilename(filename),
-                sourceDocument: nil
+                sourceDocument: nil,
+                loadID: loadID
             )
         } catch {
+            guard activeDocumentLoadID == loadID else {
+                return
+            }
             clearCurrentDocument()
             presentWebViewError("끌어놓은 문서를 열 수 없습니다: \(Self.openingErrorMessage(for: error))")
+            isLoading = false
         }
-
-        isLoading = false
     }
 
     func openRecentDocument(_ document: RecentDocumentItem) {
@@ -119,11 +128,20 @@ final class DocumentViewerStore: ObservableObject {
         DocumentFileActions.revealInFinder(sourceDocument.url)
     }
 
-    func recordSavedDocument(at url: URL) {
+    func recordSavedDocument(_ savedDocument: RhwpStudioSavedDocument) {
+        let url = savedDocument.url
         let sourceDocument = RecentDocumentItem.make(for: url)
         filename = url.lastPathComponent
         self.sourceDocument = sourceDocument
         recentDocuments = RecentDocumentStore.record(sourceDocument)
+        if let document = rhwpStudioDocument {
+            rhwpStudioDocument = RhwpStudioDocumentPayload(
+                data: savedDocument.data,
+                filename: url.lastPathComponent,
+                revision: document.revision,
+                sourceProtection: savedDocument.sourceProtection
+            )
+        }
         clearUnsavedChanges()
     }
 
@@ -185,13 +203,54 @@ final class DocumentViewerStore: ObservableObject {
         webViewErrorMessage = nil
     }
 
-    private func loadDocument(
+    private func beginDocumentLoad() -> Int {
+        activeDocumentLoadID += 1
+        documentLoadTask?.cancel()
+        documentLoadTask = nil
+        isLoading = true
+        errorMessage = nil
+        dismissWebViewError()
+        webViewFailure = nil
+        isWebViewLoading = false
+        return activeDocumentLoadID
+    }
+
+    private func startDocumentLoad(
         data: Data,
         filename: String,
-        sourceDocument: RecentDocumentItem?
+        sourceDocument: RecentDocumentItem?,
+        loadID: Int
     ) throws {
         try HwpDocumentInputValidator.validateOpeningData(data)
 
+        let classifyDocumentProtection = classifyDocumentProtection
+        documentLoadTask = Task { [weak self] in
+            let protection = await Task.detached(priority: .userInitiated) {
+                classifyDocumentProtection(data)
+            }.value
+
+            guard let self,
+                  !Task.isCancelled,
+                  self.activeDocumentLoadID == loadID
+            else {
+                return
+            }
+
+            self.finishDocumentLoad(
+                data: data,
+                filename: filename,
+                sourceDocument: sourceDocument,
+                sourceProtection: Self.sourceProtection(from: protection)
+            )
+        }
+    }
+
+    private func finishDocumentLoad(
+        data: Data,
+        filename: String,
+        sourceDocument: RecentDocumentItem?,
+        sourceProtection: DocumentSourceProtection
+    ) {
         self.filename = filename
         self.sourceDocument = sourceDocument
         documentRevision += 1
@@ -199,11 +258,14 @@ final class DocumentViewerStore: ObservableObject {
         rhwpStudioDocument = RhwpStudioDocumentPayload(
             data: data,
             filename: filename,
-            revision: documentRevision
+            revision: documentRevision,
+            sourceProtection: sourceProtection
         )
         dismissWebViewError()
         webViewFailure = nil
         isWebViewLoading = false
+        isLoading = false
+        documentLoadTask = nil
 
         if let sourceDocument {
             recentDocuments = RecentDocumentStore.record(sourceDocument)
@@ -262,6 +324,21 @@ final class DocumentViewerStore: ObservableObject {
         let trimmedFilename = filename.trimmingCharacters(in: .whitespacesAndNewlines)
         let lastPathComponent = URL(fileURLWithPath: trimmedFilename).lastPathComponent
         return lastPathComponent.isEmpty ? "document.hwp" : lastPathComponent
+    }
+
+    private static func sourceProtection(
+        from protection: RhwpDocumentProtection
+    ) -> DocumentSourceProtection {
+        switch protection {
+        case .plain:
+            return .plain
+        case .passwordProtected:
+            return .passwordProtected
+        case .unsupportedProtection:
+            return .unsupportedProtection
+        case .invalidOrUnknown:
+            return .invalidOrUnknown
+        }
     }
 
     private static func openingErrorMessage(for error: Error) -> String {

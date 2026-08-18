@@ -166,6 +166,7 @@ targets:
       - path: Tests/ExternalImageTests
       - path: Sources/Shared/HwpExternalImageResolver.swift
       - path: Sources/RhwpCoreBridge/RhwpDocument.swift
+      - path: Sources/RhwpCoreBridge/RhwpDocumentProtection.swift
       - path: Sources/RhwpCoreBridge/RenderTree.swift
     dependencies:
       - framework: Frameworks/Rhwp.xcframework

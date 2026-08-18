@@ -1,9 +1,16 @@
 import Foundation
 
 struct RhwpStudioDocumentPayload {
+    private static let hwp3MagicPrefix = Data("HWP Document File".utf8)
+
     let data: Data
     let filename: String
     let revision: Int
+    let sourceProtection: DocumentSourceProtection
+
+    var isHWP3Source: Bool {
+        data.starts(with: Self.hwp3MagicPrefix)
+    }
 }
 
 enum RhwpStudioDocumentRoute {

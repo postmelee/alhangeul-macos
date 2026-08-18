@@ -73,9 +73,9 @@ private struct RhwpStudioContainerView: View {
                             store.loadDocument(from: url)
                         }
                     },
-                    onDocumentSaved: { url in
+                    onDocumentSaved: { savedDocument in
                         Task { @MainActor in
-                            store.recordSavedDocument(at: url)
+                            store.recordSavedDocument(savedDocument)
                         }
                     },
                     onDocumentEdited: {
@@ -84,6 +84,7 @@ private struct RhwpStudioContainerView: View {
                         }
                     }
                 )
+                .allowsHitTesting(!store.isLoading)
 
                 if store.isLoading || store.isWebViewLoading {
                     LoadingOverlayView(message: store.isLoading ? "불러오는 중..." : "웹 viewer 로딩 중...")
