@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#ffffff" />
   <meta name="description" content="알한글 v0.1.10 릴리즈 노트입니다." />
   <meta property="og:title" content="알한글 v0.1.10 릴리즈 노트" />
-  <meta property="og:description" content="HWP/HWPX 형식별 저장, 전체 페이지 PDF·인쇄와 rhwp v0.8.4 문서 호환성 개선을 포함한 알한글 패치 릴리즈입니다." />
+  <meta property="og:description" content="평문 HWP5/HWPX 형식별 저장, 전체 페이지 PDF·인쇄와 rhwp v0.8.4 문서 호환성 개선을 포함한 알한글 패치 릴리즈입니다." />
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://postmelee.github.io/alhangeul-macos/updates/v0.1.10.html" />
   <meta property="og:image" content="https://postmelee.github.io/alhangeul-macos/assets/og-main.png" />
@@ -48,7 +48,7 @@
   <main id="main" class="updates-page">
     <section class="updates-hero" aria-labelledby="release-title">
       <h1 id="release-title">알한글 v0.1.10</h1>
-      <p>HWP/HWPX 형식별 저장, 전체 페이지 PDF·인쇄와 <code>rhwp v0.8.4</code> 문서 호환성 개선을 포함한 패치 릴리즈입니다.</p>
+      <p>평문 HWP5/HWPX 형식별 저장, 전체 페이지 PDF·인쇄와 <code>rhwp v0.8.4</code> 문서 호환성 개선을 포함한 패치 릴리즈입니다.</p>
       <div class="updates-actions" aria-label="릴리즈 주요 링크">
         <a class="page-action-button"
           href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.10/alhangeul-macos-0.1.10.dmg">
@@ -64,7 +64,7 @@
       <section class="updates-section" aria-labelledby="release-summary-title">
         <h2 id="release-summary-title">변경 요약</h2>
         <ul>
-          <li>HWP와 HWPX를 형식에 맞는 macOS 저장 패널로 저장하고, 저장 결과를 같은 형식으로 다시 열 수 있습니다.</li>
+          <li>평문 HWP5와 HWPX를 형식에 맞는 macOS 저장 패널로 저장하고, 저장 결과를 같은 형식으로 다시 열 수 있습니다.</li>
           <li>현재 편집 상태의 전체 페이지를 searchable PDF로 저장하고 같은 page geometry로 native 인쇄를 시작합니다.</li>
           <li>PDF·인쇄용 문서 SVG의 script, 외부 resource와 navigation을 전용 WebView에서 차단합니다.</li>
           <li><code>rhwp v0.8.4</code>를 반영해 암호 문서, 중첩 표, 특수 글리프와 대형 문서 처리 범위를 보강했습니다.</li>
@@ -77,7 +77,7 @@
         <p>v0.1.10은 <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.8.4"
             rel="noreferrer"><code>rhwp v0.8.4</code></a> 기준의 core와 bundled <code>rhwp-studio</code>를 사용합니다. 앱 내부 provenance 기준 commit은 <code>496333b27d21ddb9114ba9ae340bcb895870<wbr>c9a7</code>입니다.</p>
         <ul>
-          <li>HWP5 EncryptVersion 4, HWP3와 암호화 HWPX의 열기·저장·재열기 계약을 확장했습니다.</li>
+          <li>HWP5 EncryptVersion 4, HWP3와 암호화 HWPX의 parser·exporter 계약을 확장했습니다. 알한글 native 저장 경로의 암호·HWP3 저장 범위는 아래 알려진 한계를 따릅니다.</li>
           <li>중첩 표의 페이지 분할, 셀 내부 흐름과 마지막 하단 테두리 표시를 보강했습니다.</li>
           <li>중첩 표 안의 텍스트·표 선택과 복사, 다중 셀 서식과 셀 크기 조절을 개선했습니다.</li>
           <li>PUA로 기록된 사각 번호와 작은 오른쪽 삼각형을 실제 글리프로 복원합니다.</li>
@@ -90,6 +90,8 @@
         <ul>
           <li>HWP/HWPX 저장 command, exporter 결과와 목적지 확장자·container signature를 write 전에 함께 확인합니다.</li>
           <li>HWPX 저장 뒤 후속 <code>Command+S</code>도 같은 URL과 HWPX 형식을 유지합니다.</li>
+          <li>평문 HWP3는 저장 전에 형식 변환을 알리고, 원본이나 다른 기존 파일을 덮어쓰지 않는 새 HWP5/HWPX 변환 복사본으로만 저장합니다.</li>
+          <li>암호 문서는 열 수 있지만 native 저장에서 보호를 유지하지는 않으며, 사용자 확인 뒤 원본과 다른 새 경로의 평문 복사본으로만 저장합니다.</li>
           <li>PDF 저장과 인쇄는 현재 editor가 만든 page SVG를 공용 renderer로 변환해 최신 편집 내용과 searchable text를 반영합니다.</li>
           <li>PDF·인쇄 renderer는 content JavaScript와 popup을 끄고, inline style과 embedded <code>data:</code> image 외 resource·navigation을 기본 차단합니다.</li>
           <li><code>rhwp v0.8.4</code>에서 제거된 render-tree field를 Swift decoder가 요구하지 않도록 보정해 native preview/thumbnail 호환성을 유지합니다.</li>
@@ -103,7 +105,9 @@
         <ul>
           <li>Quick Look과 Finder 썸네일은 native 렌더 경로를 사용하고, 앱 화면은 WKWebView 기반 <code>rhwp-studio</code> 경로를 사용합니다.</li>
           <li>일부 문서에서는 글꼴, 배치, 페이지 표현이 원본 한글 프로그램과 다르게 보일 수 있습니다.</li>
-          <li>HWP/HWPX 저장은 대표 문서의 container·재열기를 확인하지만 모든 문서 요소의 의미론적 완전 무손실을 보장하지 않습니다.</li>
+          <li>HWP3 문서는 열 수 있지만 HWP3 원형 저장은 지원하지 않습니다. 새 HWP5 또는 HWPX 변환 복사본만 저장할 수 있습니다.</li>
+          <li>암호 문서는 열 수 있지만 native 저장 경로에서는 암호 보호 유지나 새 암호 설정을 지원하지 않습니다. 저장한 복사본은 평문입니다.</li>
+          <li>HWP5/HWPX 저장은 대표 문서의 container·재열기를 확인하지만 모든 문서 요소의 의미론적 완전 무손실을 보장하지 않습니다.</li>
           <li>PDF 내보내기는 전체 page SVG를 memory에 보유하며 문서 전체 progress, deadline과 수집 중 취소 UI는 아직 없습니다.</li>
           <li>실제 가로·세로 혼합 문서 fixture는 없어 혼합 geometry와 인쇄 방향은 합성 page SVG 계약으로 검증했습니다.</li>
           <li>익명 실행 추이는 전체 설치 수나 고유 사용자 수가 아니라 수집 서버에 도달한 이벤트 건수입니다.</li>
