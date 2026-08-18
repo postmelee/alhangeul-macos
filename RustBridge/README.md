@@ -24,7 +24,7 @@
 
 ## Core dependency 기준
 
-현재 `rhwp-core.lock`과 `RustBridge/Cargo.toml`은 release tag `v0.8.2`, resolved commit `9b16aa9e23f476e2b335d7c029fc9f24a199d63c`, feature `native-skia`를 기준으로 한다. Stable 기준은 release tag와 resolved commit을 함께 고정하며 branch/floating ref는 사용하지 않는다.
+현재 `rhwp-core.lock`과 `RustBridge/Cargo.toml`은 release tag `v0.8.4`, resolved commit `496333b27d21ddb9114ba9ae340bcb895870c9a7`, feature `native-skia`를 기준으로 한다. Stable 기준은 release tag와 resolved commit을 함께 고정하며 branch/floating ref는 사용하지 않는다.
 
 채널별 dependency 기준, lock 필드, compatibility gate 상세는 [`core_release_compatibility.md`](../mydocs/tech/core_release_compatibility.md)를 참조한다.
 
@@ -64,6 +64,19 @@ RustBridge는 external image 파일을 직접 찾거나 읽지 않는다. Swift/
 - `rhwp_image_data` allocation은 document handle과 독립이며 `rhwp_free_bytes` 호출 전까지 유효하다. free 뒤 pointer를 보관하거나 다시 해제하지 않는다.
 - `originalPath`와 `display_path`는 bridge가 filesystem 접근 경로로 해석하지 않는다.
 
+## 문서 보호 상태 ABI
+
+`rhwp_document_protection`은 caller-owned 문서 bytes를 호출 동안만 빌려 public parser 결과를 다음 status로 축약한다. 암호 문자열, parser 오류 문자열과 문서 handle은 반환하지 않는다.
+
+| status | 의미 |
+|--------|------|
+| `RHWP_DOCUMENT_PROTECTION_PLAIN` | 암호 없이 parse 가능한 문서 |
+| `RHWP_DOCUMENT_PROTECTION_PASSWORD_PROTECTED` | `ParseError::EncryptedDocument`로 확인된 암호 문서 |
+| `RHWP_DOCUMENT_PROTECTION_UNSUPPORTED` | typed format 감지로 확인된 미지원 DRM/보호 컨테이너 |
+| `RHWP_DOCUMENT_PROTECTION_INVALID_OR_UNKNOWN` | null/empty, 손상, parse 실패, panic 또는 알 수 없는 상태 |
+
+알 수 없는 status와 판정 실패는 Swift에서 `invalidOrUnknown`으로 fail-closed 처리한다. 이 probe는 문서를 복호화하지 않으며 기존 `rhwp_open`의 parse 실패 계약을 변경하지 않는다.
+
 pinned public API에는 embedded/external/missing/injected 전체 image 상태를 반환하는 함수가 없어 `rhwp_image_state_json`은 제공하지 않는다. External 상태는 refs JSON의 `loaded`로 전달하고 renderer missing/decode diagnostic은 downstream renderer 이슈에서 별도로 다룬다.
 
 ## 경계 규칙
@@ -71,6 +84,7 @@ pinned public API에는 embedded/external/missing/injected 전체 image 상태�
 - core API 변경은 먼저 `edwardkim/rhwp` 저장소에 반영한다.
 - 앱 저장소 안에서 core source를 직접 수정하지 않는다.
 - `rhwp_*` ABI 변경 시 `rhwp-ffi-symbols.txt`, generated header, Swift bridge 호출부, `rhwp-core.lock` 정합성을 함께 확인한다.
+- `rhwp_document_protection` 입력 bytes는 caller-owned이며 호출 동안 유효해야 한다. null pointer와 0 length는 `INVALID_OR_UNKNOWN`으로 처리한다.
 - Rust가 Swift에 넘긴 문자열과 byte buffer는 지정된 free 함수로 해제해야 한다.
 - external resource 권한·탐색·bytes read는 Swift/macOS shell이 소유하며 RustBridge가 filesystem을 직접 탐색하지 않는다.
 

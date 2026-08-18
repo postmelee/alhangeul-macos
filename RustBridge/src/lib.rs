@@ -53,6 +53,16 @@ pub enum RhwpExternalImageStatus {
     RHWP_EXTERNAL_IMAGE_FAILURE = 6,
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum RhwpDocumentProtectionStatus {
+    RHWP_DOCUMENT_PROTECTION_PLAIN = 0,
+    RHWP_DOCUMENT_PROTECTION_PASSWORD_PROTECTED = 1,
+    RHWP_DOCUMENT_PROTECTION_UNSUPPORTED = 2,
+    RHWP_DOCUMENT_PROTECTION_INVALID_OR_UNKNOWN = 3,
+}
+
 #[no_mangle]
 pub extern "C" fn rhwp_extract_thumbnail(
     data: *const u8,
@@ -126,6 +136,23 @@ pub extern "C" fn rhwp_open(data: *const u8, len: usize) -> *mut RhwpHandle {
     }));
 
     result.unwrap_or(ptr::null_mut())
+}
+
+#[no_mangle]
+pub extern "C" fn rhwp_document_protection(
+    data: *const u8,
+    len: usize,
+) -> RhwpDocumentProtectionStatus {
+    if data.is_null() || len == 0 {
+        return RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_INVALID_OR_UNKNOWN;
+    }
+
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let bytes = unsafe { std::slice::from_raw_parts(data, len) };
+        classify_document_protection(bytes)
+    }));
+
+    result.unwrap_or(RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_INVALID_OR_UNKNOWN)
 }
 
 #[no_mangle]
@@ -419,6 +446,23 @@ fn string_to_c(value: String) -> *mut c_char {
     }
 }
 
+fn classify_document_protection(data: &[u8]) -> RhwpDocumentProtectionStatus {
+    if matches!(
+        rhwp::parser::detect_format(data),
+        rhwp::parser::FileFormat::DrmProtected
+    ) {
+        return RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_UNSUPPORTED;
+    }
+
+    match rhwp::parser::parse_document(data) {
+        Ok(_) => RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_PLAIN,
+        Err(rhwp::parser::ParseError::EncryptedDocument) => {
+            RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_PASSWORD_PROTECTED
+        }
+        Err(_) => RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_INVALID_OR_UNKNOWN,
+    }
+}
+
 fn external_image_reference_loaded(refs_json: &str, key: &str) -> Result<Option<bool>, ()> {
     let refs: serde_json::Value = serde_json::from_str(refs_json).map_err(|_| ())?;
     let references = refs.as_array().ok_or(())?;
@@ -484,6 +528,8 @@ mod tests {
     use std::fs;
     use std::path::PathBuf;
 
+    const TEST_PROTECTION_PASSWORD: &[u8] = &[116, 101, 115, 116, 45, 112, 97, 115, 115];
+
     struct TestHandle(*mut RhwpHandle);
 
     impl Drop for TestHandle {
@@ -529,6 +575,49 @@ mod tests {
         let handle = rhwp_open(data.as_ptr(), data.len());
         assert!(!handle.is_null());
         TestHandle(handle)
+    }
+
+    #[test]
+    fn document_protection_probe_classifies_plain_password_and_drm_inputs() {
+        let plain = fs::read(
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("..")
+                .join("samples/basic/KTX.hwp"),
+        )
+        .expect("plain fixture should be readable");
+        assert_eq!(
+            rhwp_document_protection(plain.as_ptr(), plain.len()),
+            RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_PLAIN
+        );
+
+        let document = HwpDocument::from_bytes(&plain).expect("plain fixture should open");
+        let protected = document
+            .export_hwpx_native_with_password(TEST_PROTECTION_PASSWORD)
+            .expect("test-only protected fixture should export");
+        assert_eq!(
+            rhwp_document_protection(protected.as_ptr(), protected.len()),
+            RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_PASSWORD_PROTECTED
+        );
+
+        let drm = b"\x9b DRMONE  test-only unsupported protection fixture";
+        assert_eq!(
+            rhwp_document_protection(drm.as_ptr(), drm.len()),
+            RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_UNSUPPORTED
+        );
+    }
+
+    #[test]
+    fn document_protection_probe_fails_closed_for_invalid_inputs() {
+        assert_eq!(
+            rhwp_document_protection(ptr::null(), 0),
+            RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_INVALID_OR_UNKNOWN
+        );
+
+        let invalid = b"not a supported document";
+        assert_eq!(
+            rhwp_document_protection(invalid.as_ptr(), invalid.len()),
+            RhwpDocumentProtectionStatus::RHWP_DOCUMENT_PROTECTION_INVALID_OR_UNKNOWN
+        );
     }
 
     #[test]

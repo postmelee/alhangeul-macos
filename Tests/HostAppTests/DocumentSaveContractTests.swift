@@ -201,6 +201,136 @@ final class DocumentSaveContractTests: XCTestCase {
         }
     }
 
+    func testOnlyPlainDocumentsAllowInPlaceSave() {
+        XCTAssertTrue(DocumentSaveProtectionPolicy.allowsInPlaceSave(.plain))
+        XCTAssertFalse(DocumentSaveProtectionPolicy.allowsInPlaceSave(.passwordProtected))
+        XCTAssertFalse(DocumentSaveProtectionPolicy.allowsInPlaceSave(.unsupportedProtection))
+        XCTAssertFalse(DocumentSaveProtectionPolicy.allowsInPlaceSave(.invalidOrUnknown))
+    }
+
+    func testNonPlainDocumentsRequirePlainCopyIntent() {
+        let destinationURL = URL(fileURLWithPath: "/tmp/copy.hwp")
+
+        for protection in [
+            DocumentSourceProtection.passwordProtected,
+            .unsupportedProtection,
+            .invalidOrUnknown
+        ] {
+            XCTAssertEqual(
+                DocumentSaveProtectionPolicy.outputIntent(for: protection),
+                .plainCopy
+            )
+            XCTAssertThrowsError(
+                try DocumentSaveProtectionPolicy.validateRequest(
+                    sourceProtection: protection,
+                    outputIntent: .preserveSourceProtection,
+                    sourceURL: URL(fileURLWithPath: "/tmp/original.hwp"),
+                    destinationURL: destinationURL
+                )
+            ) { error in
+                XCTAssertEqual(
+                    error as? DocumentSaveProtectionPolicyError,
+                    .protectedSourceRequiresPlainCopy(protection)
+                )
+            }
+        }
+    }
+
+    func testPlainCopyMustUseDifferentDestination() throws {
+        let sourceURL = URL(fileURLWithPath: "/tmp/folder/original.hwp")
+
+        for destinationURL in [
+            sourceURL,
+            URL(fileURLWithPath: "/tmp/folder/./original.hwp"),
+            URL(fileURLWithPath: "/TMP/FOLDER/original.hwp")
+        ] {
+            XCTAssertThrowsError(
+                try DocumentSaveProtectionPolicy.validateRequest(
+                    sourceProtection: .passwordProtected,
+                    outputIntent: .plainCopy,
+                    sourceURL: sourceURL,
+                    destinationURL: destinationURL
+                )
+            ) { error in
+                XCTAssertEqual(
+                    error as? DocumentSaveProtectionPolicyError,
+                    .plainCopyMustUseDifferentDestination
+                )
+            }
+        }
+
+        XCTAssertNoThrow(
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: .passwordProtected,
+                outputIntent: .plainCopy,
+                sourceURL: sourceURL,
+                destinationURL: URL(fileURLWithPath: "/tmp/folder/plain-copy.hwp")
+            )
+        )
+    }
+
+    func testPlainSavePreservesPlainProtection() throws {
+        let sourceURL = URL(fileURLWithPath: "/tmp/original.hwp")
+
+        XCTAssertEqual(
+            DocumentSaveProtectionPolicy.outputIntent(for: .plain),
+            .preserveSourceProtection
+        )
+        XCTAssertNoThrow(
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: .plain,
+                outputIntent: .preserveSourceProtection,
+                sourceURL: sourceURL,
+                destinationURL: sourceURL
+            )
+        )
+        XCTAssertEqual(
+            DocumentSaveProtectionPolicy.resultingProtection(
+                sourceProtection: .plain,
+                for: .preserveSourceProtection
+            ),
+            .plain
+        )
+        XCTAssertEqual(
+            DocumentSaveProtectionPolicy.resultingProtection(
+                sourceProtection: .passwordProtected,
+                for: .plainCopy
+            ),
+            .plain
+        )
+    }
+
+    func testSaveContextRejectsDocumentOrProtectionChanges() throws {
+        XCTAssertNoThrow(
+            try DocumentSaveProtectionPolicy.validateCurrentDocument(
+                requestRevision: 7,
+                requestProtection: .passwordProtected,
+                currentRevision: 7,
+                currentProtection: .passwordProtected
+            )
+        )
+
+        for (revision, protection) in [
+            (Int?.some(8), DocumentSourceProtection?.some(.passwordProtected)),
+            (Int?.some(7), DocumentSourceProtection?.some(.plain)),
+            (nil, nil)
+        ] {
+            XCTAssertThrowsError(
+                try DocumentSaveProtectionPolicy.validateCurrentDocument(
+                    requestRevision: 7,
+                    requestProtection: .passwordProtected,
+                    currentRevision: revision,
+                    currentProtection: protection
+                )
+            ) { error in
+                XCTAssertEqual(
+                    error as? DocumentSaveProtectionPolicyError,
+                    .documentChanged
+                )
+            }
+        }
+    }
+
     private func validate(
         data: Data,
         responseFormat: DocumentSaveFormat,

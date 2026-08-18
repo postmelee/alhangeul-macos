@@ -119,11 +119,20 @@ final class DocumentViewerStore: ObservableObject {
         DocumentFileActions.revealInFinder(sourceDocument.url)
     }
 
-    func recordSavedDocument(at url: URL) {
+    func recordSavedDocument(_ savedDocument: RhwpStudioSavedDocument) {
+        let url = savedDocument.url
         let sourceDocument = RecentDocumentItem.make(for: url)
         filename = url.lastPathComponent
         self.sourceDocument = sourceDocument
         recentDocuments = RecentDocumentStore.record(sourceDocument)
+        if let document = rhwpStudioDocument {
+            rhwpStudioDocument = RhwpStudioDocumentPayload(
+                data: savedDocument.data,
+                filename: url.lastPathComponent,
+                revision: document.revision,
+                sourceProtection: savedDocument.sourceProtection
+            )
+        }
         clearUnsavedChanges()
     }
 
@@ -191,6 +200,9 @@ final class DocumentViewerStore: ObservableObject {
         sourceDocument: RecentDocumentItem?
     ) throws {
         try HwpDocumentInputValidator.validateOpeningData(data)
+        let sourceProtection = Self.sourceProtection(
+            from: RhwpDocumentProtection.classify(data: data)
+        )
 
         self.filename = filename
         self.sourceDocument = sourceDocument
@@ -199,7 +211,8 @@ final class DocumentViewerStore: ObservableObject {
         rhwpStudioDocument = RhwpStudioDocumentPayload(
             data: data,
             filename: filename,
-            revision: documentRevision
+            revision: documentRevision,
+            sourceProtection: sourceProtection
         )
         dismissWebViewError()
         webViewFailure = nil
@@ -262,6 +275,21 @@ final class DocumentViewerStore: ObservableObject {
         let trimmedFilename = filename.trimmingCharacters(in: .whitespacesAndNewlines)
         let lastPathComponent = URL(fileURLWithPath: trimmedFilename).lastPathComponent
         return lastPathComponent.isEmpty ? "document.hwp" : lastPathComponent
+    }
+
+    private static func sourceProtection(
+        from protection: RhwpDocumentProtection
+    ) -> DocumentSourceProtection {
+        switch protection {
+        case .plain:
+            return .plain
+        case .passwordProtected:
+            return .passwordProtected
+        case .unsupportedProtection:
+            return .unsupportedProtection
+        case .invalidOrUnknown:
+            return .invalidOrUnknown
+        }
     }
 
     private static func openingErrorMessage(for error: Error) -> String {

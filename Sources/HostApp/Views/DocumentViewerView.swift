@@ -73,9 +73,9 @@ private struct RhwpStudioContainerView: View {
                             store.loadDocument(from: url)
                         }
                     },
-                    onDocumentSaved: { url in
+                    onDocumentSaved: { savedDocument in
                         Task { @MainActor in
-                            store.recordSavedDocument(at: url)
+                            store.recordSavedDocument(savedDocument)
                         }
                     },
                     onDocumentEdited: {

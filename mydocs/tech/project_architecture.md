@@ -96,8 +96,8 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - 현재 v0.1.0 목표는 Demo/Preview release다.
 - Demo/Preview 배포는 필요한 bridge API가 포함된 resolved commit을 `rev`로 고정하는 commit-pinned git dependency를 허용한다.
 - Stable 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
-- 현재 lock은 `v0.8.2` Stable release tag pin 상태다. `rhwp-core.lock`은 release tag `v0.8.2`와 resolved commit `9b16aa9e23f476e2b335d7c029fc9f24a199d63c`를 함께 기록한다.
-- `v0.8.2`에는 현재 `RustBridge`가 사용하는 page/render/image API와 `set_file_name`, `get_external_image_references`, `inject_external_image_by_key` external image context API가 포함되어 있다.
+- 현재 lock은 `v0.8.4` Stable release tag pin 상태다. `rhwp-core.lock`은 release tag `v0.8.4`와 resolved commit `496333b27d21ddb9114ba9ae340bcb895870c9a7`를 함께 기록한다.
+- `v0.8.4`에는 현재 `RustBridge`가 사용하는 page/render/image API, typed parser error와 `set_file_name`, `get_external_image_references`, `inject_external_image_by_key` external image context API가 포함되어 있다.
 - branch/floating ref는 배포 기준으로 사용하지 않는다.
 
 ### RustBridge
@@ -139,7 +139,7 @@ HostApp은 앱 실행과 version 전환을 영구 사용자·기기·설치 식�
 ### HostApp viewer 경로
 
 1. `DocumentOpenPanel` 또는 외부 열기 요청이 파일 URL을 전달한다.
-2. `DocumentViewerStore`가 보안 범위 접근 안에서 파일 bytes를 읽고 파일명, bytes, document revision을 `RhwpStudioDocumentPayload`로 보관한다.
+2. `DocumentViewerStore`가 보안 범위 접근 안에서 파일 bytes를 읽고 `rhwp_document_protection`의 typed status를 fail-closed로 분류한 뒤 파일명, bytes, document revision과 source protection을 `RhwpStudioDocumentPayload`로 보관한다.
 3. `DocumentViewerView`가 `RhwpStudioWebView`를 표시한다.
 4. `RhwpStudioResourceLocator`가 `alhangeul-studio://app/index.html`에 `url=alhangeul-document://current?revision=...`와 `filename=...` query를 붙여 entrypoint URL을 만든다.
 5. `RhwpStudioResourceSchemeHandler`가 app bundle의 `Resources/rhwp-studio` 정적 asset을 MIME type과 함께 응답한다.
@@ -197,6 +197,20 @@ bridge의 `save-document` response는 `format`, 정규화한 `fileName`, `base64
 검증 실패 시 파일, current source, 최근 문서와 clean state를 변경하지 않는다. 제자리 atomic write가 실패하면 원래 요청 format을 유지한 native save panel로 fallback한다. 저장 패널 선택이나 export가 진행 중일 때 들어온 중복 요청은 새 pending state를 만들지 않는다.
 
 runtime signature guard는 완전히 다른 형식의 bytes를 잘못된 확장자로 쓰는 오류를 빠르게 막는 역할만 한다. HWPX의 `mimetype`, `Contents/`, `META-INF/` entry와 실제 재열기는 별도 container/render smoke에서 확인한다.
+
+#### source protection과 평문 복사본
+
+RustBridge는 source bytes를 `plain`, `passwordProtected`, `unsupportedProtection`, `invalidOrUnknown`으로 분류한다. Swift bridge의 알 수 없는 raw status와 모든 probe 실패는 `invalidOrUnknown`으로 축약한다. HostApp payload는 이 상태를 document revision과 함께 보관하고 새 문서, reload와 load failure에서 이전 상태를 재사용하지 않는다.
+
+- `plain`만 기존 source URL에 in-place 저장할 수 있다.
+- 나머지 세 상태는 exporter 호출 전에 in-place 저장을 차단한다.
+- 사용자가 보호 해제 경고를 확인한 경우에만 `plainCopy` intent로 native save panel을 표시한다.
+- 평문 복사본 destination은 canonical path 기준으로 원본과 달라야 한다.
+- 경고·panel 취소, revision 변경, export/검증/write 실패는 원본 bytes와 editor dirty state를 변경하지 않는다.
+- 평문 복사본 저장이 성공하면 current source payload의 bytes와 보호 상태를 저장 결과의 `plain`으로 갱신한다. 같은 editor session의 다음 `Command+S`는 새 평문 source를 기준으로 동작한다.
+- HWP3 암호 입력은 현재 exporter에서 HWP3 원형을 보존하지 않으므로 경고에 선택한 HWP/HWPX 형식으로의 변환을 함께 표시하고 원본 위치에는 쓰지 않는다.
+
+현재 production embed RPC에는 password exporter와 source protection metadata가 없다. native 암호 저장은 같은 editor transaction에서 보호된 bytes와 검증 metadata를 반환하는 upstream stable RPC가 제공된 뒤 별도 단계에서 연결한다.
 
 #### 지원 범위와 호환 제한
 
@@ -340,6 +354,7 @@ Stage 4 실제 UI smoke에서 HWP/HWPX menu와 toolbar 결과의 page count, pag
 현재 `Rhwp.xcframework`가 외부에 노출하는 기대 심볼은 다음과 같다.
 
 - `rhwp_open`
+- `rhwp_document_protection`
 - `rhwp_close`
 - `rhwp_set_file_name_utf8`
 - `rhwp_external_image_refs_json`
@@ -358,6 +373,7 @@ Stage 4 실제 UI smoke에서 HWP/HWPX menu와 toolbar 결과의 page count, pag
 현재 제품 경로에서 핵심적으로 사용하는 API는 다음과 같다.
 
 - `rhwp_open`: 문서 바이트를 파싱해 문서 핸들을 생성
+- `rhwp_document_protection`: public parser enum을 plain/password/unsupported/invalid status로 축약
 - `rhwp_page_count`: 총 페이지 수 조회
 - `rhwp_page_size`: 페이지 크기 조회
 - `rhwp_render_page_tree`: 상세 render tree JSON 반환
@@ -377,6 +393,7 @@ External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제
 ## FFI 안전성 규칙
 
 - null pointer 입력은 Rust와 Swift 양쪽에서 방어한다.
+- `rhwp_document_protection`은 caller-owned bytes를 호출 동안만 빌리며 null/empty, panic과 알 수 없는 결과를 `invalidOrUnknown`으로 처리한다.
 - `RhwpDocument`의 수명은 내부 `OpaquePointer` handle 수명과 일치해야 한다.
 - `rhwp_render_page_tree`와 `rhwp_render_page_svg`가 반환한 문자열은 반드시 `rhwp_free_string`으로 해제한다.
 - `rhwp_external_image_refs_json`이 반환한 문자열도 반드시 `rhwp_free_string`으로 해제한다.

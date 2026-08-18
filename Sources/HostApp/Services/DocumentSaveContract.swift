@@ -1,5 +1,109 @@
 import Foundation
 
+enum DocumentSourceProtection: Equatable {
+    case plain
+    case passwordProtected
+    case unsupportedProtection
+    case invalidOrUnknown
+
+    var requiresPlainCopyWarning: Bool {
+        self != .plain
+    }
+}
+
+enum DocumentSaveOutputProtectionIntent: Equatable {
+    case preserveSourceProtection
+    case plainCopy
+}
+
+enum DocumentSaveProtectionPolicyError: Error, Equatable, LocalizedError {
+    case documentChanged
+    case protectedSourceRequiresPlainCopy(DocumentSourceProtection)
+    case plainSourceRequiresPreserveIntent
+    case plainCopyMustUseDifferentDestination
+
+    var errorDescription: String? {
+        switch self {
+        case .documentChanged:
+            return "저장 요청 뒤 문서 또는 보호 상태가 변경되었습니다."
+        case .protectedSourceRequiresPlainCopy:
+            return "보호된 문서는 현재 원본 보호를 유지한 채 저장할 수 없습니다."
+        case .plainSourceRequiresPreserveIntent:
+            return "평문 문서의 저장 보호 의도가 올바르지 않습니다."
+        case .plainCopyMustUseDifferentDestination:
+            return "보호를 해제한 복사본은 원본과 다른 위치에 저장해야 합니다."
+        }
+    }
+}
+
+enum DocumentSaveProtectionPolicy {
+    static func validateCurrentDocument(
+        requestRevision: Int,
+        requestProtection: DocumentSourceProtection,
+        currentRevision: Int?,
+        currentProtection: DocumentSourceProtection?
+    ) throws {
+        guard currentRevision == requestRevision,
+              currentProtection == requestProtection
+        else {
+            throw DocumentSaveProtectionPolicyError.documentChanged
+        }
+    }
+
+    static func allowsInPlaceSave(_ sourceProtection: DocumentSourceProtection) -> Bool {
+        sourceProtection == .plain
+    }
+
+    static func outputIntent(
+        for sourceProtection: DocumentSourceProtection
+    ) -> DocumentSaveOutputProtectionIntent {
+        sourceProtection == .plain ? .preserveSourceProtection : .plainCopy
+    }
+
+    static func resultingProtection(
+        sourceProtection: DocumentSourceProtection,
+        for outputIntent: DocumentSaveOutputProtectionIntent
+    ) -> DocumentSourceProtection {
+        switch outputIntent {
+        case .preserveSourceProtection:
+            return sourceProtection
+        case .plainCopy:
+            return .plain
+        }
+    }
+
+    static func validateRequest(
+        sourceProtection: DocumentSourceProtection,
+        outputIntent: DocumentSaveOutputProtectionIntent,
+        sourceURL: URL?,
+        destinationURL: URL
+    ) throws {
+        switch (sourceProtection, outputIntent) {
+        case (.plain, .preserveSourceProtection):
+            return
+        case (.plain, .plainCopy):
+            throw DocumentSaveProtectionPolicyError.plainSourceRequiresPreserveIntent
+        case (_, .preserveSourceProtection):
+            throw DocumentSaveProtectionPolicyError.protectedSourceRequiresPlainCopy(
+                sourceProtection
+            )
+        case (_, .plainCopy):
+            guard let sourceURL else {
+                return
+            }
+            guard !sameFile(sourceURL, destinationURL) else {
+                throw DocumentSaveProtectionPolicyError.plainCopyMustUseDifferentDestination
+            }
+        }
+    }
+
+    private static func sameFile(_ lhs: URL, _ rhs: URL) -> Bool {
+        let lhsURL = lhs.standardizedFileURL.resolvingSymlinksInPath()
+        let rhsURL = rhs.standardizedFileURL.resolvingSymlinksInPath()
+        return lhsURL.path.compare(rhsURL.path, options: .caseInsensitive) == .orderedSame
+    }
+}
+
 enum DocumentSaveCommand: String, CaseIterable {
     case save = "file:save"
     case saveAs = "file:save-as"

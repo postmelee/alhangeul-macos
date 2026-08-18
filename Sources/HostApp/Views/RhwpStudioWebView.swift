@@ -7,6 +7,12 @@ struct RhwpStudioDroppedDocument {
     let fileName: String
 }
 
+struct RhwpStudioSavedDocument {
+    let url: URL
+    let data: Data
+    let sourceProtection: DocumentSourceProtection
+}
+
 enum RhwpStudioDocumentSaveResult {
     case saved(URL)
     case cancelled
@@ -23,7 +29,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
     let onOpenDocument: () -> Void
     let onDroppedDocument: (RhwpStudioDroppedDocument) -> Void
     let onDroppedFileURL: (URL) -> Void
-    let onDocumentSaved: (URL) -> Void
+    let onDocumentSaved: (RhwpStudioSavedDocument) -> Void
     let onDocumentEdited: () -> Void
 
     init(
@@ -36,7 +42,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         onOpenDocument: @escaping () -> Void = {},
         onDroppedDocument: @escaping (RhwpStudioDroppedDocument) -> Void = { _ in },
         onDroppedFileURL: @escaping (URL) -> Void = { _ in },
-        onDocumentSaved: @escaping (URL) -> Void = { _ in },
+        onDocumentSaved: @escaping (RhwpStudioSavedDocument) -> Void = { _ in },
         onDocumentEdited: @escaping () -> Void = {}
     ) {
         self.document = document
@@ -86,7 +92,7 @@ extension RhwpStudioWebView {
         var onOpenDocument: () -> Void = {}
         var onDroppedDocument: (RhwpStudioDroppedDocument) -> Void = { _ in }
         var onDroppedFileURL: (URL) -> Void = { _ in }
-        var onDocumentSaved: (URL) -> Void = { _ in }
+        var onDocumentSaved: (RhwpStudioSavedDocument) -> Void = { _ in }
         var onDocumentEdited: () -> Void = {}
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
@@ -111,6 +117,10 @@ extension RhwpStudioWebView {
         private struct PendingSaveRequest {
             let destination: SaveDestination
             let format: DocumentSaveFormat
+            let documentRevision: Int
+            let sourceProtection: DocumentSourceProtection
+            let outputProtectionIntent: DocumentSaveOutputProtectionIntent
+            let sourceURL: URL?
 
             var destinationURL: URL {
                 switch destination {
@@ -238,6 +248,9 @@ extension RhwpStudioWebView {
             }
 
             pdfExportState.invalidatePendingRequestForDocumentChange()
+            if pendingSaveRequest != nil {
+                completePendingSave(.failed("문서가 변경되어 진행 중이던 저장을 취소했습니다."))
+            }
 
             do {
                 let loadURL = try RhwpStudioResourceLocator.loadURL(for: document)
@@ -649,11 +662,15 @@ extension RhwpStudioWebView {
                 switch request.destination {
                 case .source(let sourceDocument):
                     let savedURL = try writePayload(payload, to: sourceDocument)
-                    recordSavedDocument(at: savedURL)
+                    recordSavedDocument(at: savedURL, payload: payload, request: request)
                     completion?(.saved(savedURL))
                 case .selected(let destinationURL):
                     try DocumentSavePanel.write(data: payload.data, to: destinationURL)
-                    recordSavedDocument(at: destinationURL)
+                    recordSavedDocument(
+                        at: destinationURL,
+                        payload: payload,
+                        request: request
+                    )
                     completion?(.saved(destinationURL))
                 }
             } catch {
@@ -661,6 +678,11 @@ extension RhwpStudioWebView {
                 case .source:
                     do {
                         if let savedURL = try savePayloadWithPanel(payload) {
+                            recordSavedDocument(
+                                at: savedURL,
+                                payload: payload,
+                                request: request
+                            )
                             completion?(.saved(savedURL))
                         } else {
                             completion?(.cancelled)
@@ -682,6 +704,18 @@ extension RhwpStudioWebView {
             from body: [String: Any],
             request: PendingSaveRequest
         ) throws -> SavePayload {
+            try DocumentSaveProtectionPolicy.validateCurrentDocument(
+                requestRevision: request.documentRevision,
+                requestProtection: request.sourceProtection,
+                currentRevision: currentDocument?.revision,
+                currentProtection: currentDocument?.sourceProtection
+            )
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: request.sourceProtection,
+                outputIntent: request.outputProtectionIntent,
+                sourceURL: request.sourceURL,
+                destinationURL: request.destinationURL
+            )
             let data = try DocumentSaveContract.decodeAndValidate(
                 base64: body["base64"] as? String,
                 responseFormatRawValue: body["format"] as? String,
@@ -722,15 +756,37 @@ extension RhwpStudioWebView {
                 format: payload.format,
                 suggestedFilename: payload.fileName
             ) {
-                recordSavedDocument(at: savedURL)
                 return savedURL
             }
             return nil
         }
 
-        private func recordSavedDocument(at url: URL) {
+        private func recordSavedDocument(
+            at url: URL,
+            payload: SavePayload,
+            request: PendingSaveRequest
+        ) {
+            let resultingProtection = DocumentSaveProtectionPolicy.resultingProtection(
+                sourceProtection: request.sourceProtection,
+                for: request.outputProtectionIntent
+            )
+            if let document = currentDocument {
+                currentDocument = RhwpStudioDocumentPayload(
+                    data: payload.data,
+                    filename: url.lastPathComponent,
+                    revision: document.revision,
+                    sourceProtection: resultingProtection
+                )
+                documentProvider.setDocument(currentDocument)
+            }
             currentSourceDocument = RecentDocumentItem.make(for: url)
-            onDocumentSaved(url)
+            onDocumentSaved(
+                RhwpStudioSavedDocument(
+                    url: url,
+                    data: payload.data,
+                    sourceProtection: resultingProtection
+                )
+            )
             synchronizeSavedDocument(at: url)
         }
 
@@ -997,7 +1053,7 @@ extension RhwpStudioWebView {
             suggestedFilename: String? = nil,
             completion: ((RhwpStudioDocumentSaveResult) -> Void)? = nil
         ) {
-            guard currentDocument != nil else {
+            guard let currentDocument else {
                 let message = "저장할 문서가 없습니다."
                 onError(message)
                 completion?(.failed(message))
@@ -1013,11 +1069,15 @@ extension RhwpStudioWebView {
 
             let format = requestedFormat ?? DocumentSaveFormat.resolve(
                 sourceURL: currentSourceDocument?.url,
-                filename: suggestedFilename ?? currentDocument?.filename
+                filename: suggestedFilename ?? currentDocument.filename
             )
 
             guard let sourceDocument = currentSourceDocument,
-                  canSaveInPlace(sourceDocument, format: format)
+                  canSaveInPlace(
+                      sourceDocument,
+                      format: format,
+                      sourceProtection: currentDocument.sourceProtection
+                  )
             else {
                 requestSaveAsDocument(
                     in: webView,
@@ -1029,7 +1089,14 @@ extension RhwpStudioWebView {
             }
 
             beginSaveExport(
-                PendingSaveRequest(destination: .source(sourceDocument), format: format),
+                PendingSaveRequest(
+                    destination: .source(sourceDocument),
+                    format: format,
+                    documentRevision: currentDocument.revision,
+                    sourceProtection: currentDocument.sourceProtection,
+                    outputProtectionIntent: .preserveSourceProtection,
+                    sourceURL: resolvedSourceURL(sourceDocument)
+                ),
                 in: webView,
                 completion: completion
             )
@@ -1041,7 +1108,7 @@ extension RhwpStudioWebView {
             suggestedFilename: String? = nil,
             completion: ((RhwpStudioDocumentSaveResult) -> Void)? = nil
         ) {
-            guard currentDocument != nil else {
+            guard let currentDocument else {
                 let message = "저장할 문서가 없습니다."
                 onError(message)
                 completion?(.failed(message))
@@ -1057,13 +1124,18 @@ extension RhwpStudioWebView {
 
             let format = requestedFormat ?? DocumentSaveFormat.resolve(
                 sourceURL: currentSourceDocument?.url,
-                filename: suggestedFilename ?? currentDocument?.filename
+                filename: suggestedFilename ?? currentDocument.filename
             )
 
             let filename = suggestedFilename
                 ?? currentSourceDocument?.displayName
-                ?? currentDocument?.filename
-                ?? format.defaultFilename
+                ?? currentDocument.filename
+            let documentRevision = currentDocument.revision
+            let sourceProtection = currentDocument.sourceProtection
+            let outputProtectionIntent = DocumentSaveProtectionPolicy.outputIntent(
+                for: sourceProtection
+            )
+            let sourceURL = currentSourceDocument.map(resolvedSourceURL)
             let presentingWindow = webView.window
             isChoosingSaveDestination = true
 
@@ -1079,6 +1151,24 @@ extension RhwpStudioWebView {
                     return
                 }
 
+                if sourceProtection.requiresPlainCopyWarning {
+                    let confirmed = await DocumentProtectionSaveAlert.confirmPlainCopy(
+                        sourceProtection: sourceProtection,
+                        isHWP3Source: currentDocument.isHWP3Source,
+                        outputFormat: format,
+                        presentingWindow: presentingWindow ?? webView.window
+                    )
+                    guard confirmed else {
+                        completion?(.cancelled)
+                        return
+                    }
+                }
+
+                guard self.currentDocument?.revision == documentRevision else {
+                    completion?(.failed("문서가 변경되어 저장을 취소했습니다."))
+                    return
+                }
+
                 let destinationURL = await DocumentSavePanel.chooseDestinationURL(
                     format: format,
                     suggestedFilename: filename,
@@ -1089,8 +1179,34 @@ extension RhwpStudioWebView {
                     return
                 }
 
+                guard self.currentDocument?.revision == documentRevision else {
+                    completion?(.failed("문서가 변경되어 저장을 취소했습니다."))
+                    return
+                }
+
+                do {
+                    try DocumentSaveProtectionPolicy.validateRequest(
+                        sourceProtection: sourceProtection,
+                        outputIntent: outputProtectionIntent,
+                        sourceURL: sourceURL,
+                        destinationURL: destinationURL
+                    )
+                } catch {
+                    let message = "문서를 저장할 수 없습니다: \(error.localizedDescription)"
+                    self.onError(message)
+                    completion?(.failed(message))
+                    return
+                }
+
                 self.beginSaveExport(
-                    PendingSaveRequest(destination: .selected(destinationURL), format: format),
+                    PendingSaveRequest(
+                        destination: .selected(destinationURL),
+                        format: format,
+                        documentRevision: documentRevision,
+                        sourceProtection: sourceProtection,
+                        outputProtectionIntent: outputProtectionIntent,
+                        sourceURL: sourceURL
+                    ),
                     in: webView,
                     completion: completion
                 )
@@ -1102,6 +1218,26 @@ extension RhwpStudioWebView {
             in webView: WKWebView,
             completion: ((RhwpStudioDocumentSaveResult) -> Void)?
         ) {
+            do {
+                try DocumentSaveProtectionPolicy.validateCurrentDocument(
+                    requestRevision: request.documentRevision,
+                    requestProtection: request.sourceProtection,
+                    currentRevision: currentDocument?.revision,
+                    currentProtection: currentDocument?.sourceProtection
+                )
+                try DocumentSaveProtectionPolicy.validateRequest(
+                    sourceProtection: request.sourceProtection,
+                    outputIntent: request.outputProtectionIntent,
+                    sourceURL: request.sourceURL,
+                    destinationURL: request.destinationURL
+                )
+            } catch {
+                let message = "문서를 저장할 수 없습니다: \(error.localizedDescription)"
+                onError(message)
+                completion?(.failed(message))
+                return
+            }
+
             pendingSaveRequest = request
             pendingSaveCompletion = completion
             let script = """
@@ -1127,9 +1263,15 @@ extension RhwpStudioWebView {
 
         private func canSaveInPlace(
             _ sourceDocument: RecentDocumentItem,
-            format: DocumentSaveFormat
+            format: DocumentSaveFormat,
+            sourceProtection: DocumentSourceProtection
         ) -> Bool {
-            DocumentSaveFormat(url: sourceDocument.url) == format
+            DocumentSaveProtectionPolicy.allowsInPlaceSave(sourceProtection)
+                && DocumentSaveFormat(url: sourceDocument.url) == format
+        }
+
+        private func resolvedSourceURL(_ sourceDocument: RecentDocumentItem) -> URL {
+            (try? sourceDocument.resolvedURL()) ?? sourceDocument.url
         }
 
         private func requestPDFExport(
