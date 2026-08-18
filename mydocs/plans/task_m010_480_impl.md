@@ -179,9 +179,14 @@ cargo test --manifest-path RustBridge/Cargo.toml --locked
 ./scripts/build-rust-macos.sh --verify-lock
 comm -3 <(sort rhwp-ffi-symbols.txt) <(sort Frameworks/generated_rhwp_symbols.txt)
 ./scripts/verify-rhwp-core-build-info.sh
-swift test
 ./scripts/check-no-appkit.sh
 xcodegen generate
+xcodebuild -project Alhangeul.xcodeproj \
+  -scheme HostAppTests \
+  -configuration Debug \
+  -derivedDataPath build.noindex/task480-stage2-tests \
+  CODE_SIGNING_ALLOWED=NO \
+  test
 xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
@@ -260,10 +265,15 @@ git diff --check
 ### 6.5 검증
 
 ```bash
-swift test
 ./scripts/check-no-appkit.sh
 scripts/verify-rhwp-studio-assets.sh
 xcodegen generate
+xcodebuild -project Alhangeul.xcodeproj \
+  -scheme HostAppTests \
+  -configuration Debug \
+  -derivedDataPath build.noindex/task480-stage3-tests \
+  CODE_SIGNING_ALLOWED=NO \
+  test
 xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
@@ -326,10 +336,15 @@ git diff --check
 cargo test --manifest-path RustBridge/Cargo.toml --locked
 ./scripts/build-rust-macos.sh --verify-lock
 ./scripts/verify-rhwp-core-build-info.sh
-swift test
 ./scripts/check-no-appkit.sh
 scripts/verify-rhwp-studio-assets.sh
 xcodegen generate
+xcodebuild -project Alhangeul.xcodeproj \
+  -scheme HostAppTests \
+  -configuration Debug \
+  -derivedDataPath build.noindex/task480-stage4-tests \
+  CODE_SIGNING_ALLOWED=NO \
+  test
 xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
   -configuration Debug \
