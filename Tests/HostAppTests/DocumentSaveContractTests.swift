@@ -7,6 +7,62 @@ final class DocumentSaveContractTests: XCTestCase {
     ])
     private let hwpxData = Data([0x50, 0x4B, 0x03, 0x04, 0x00])
 
+    func testSourceFormatIdentityRecognizesHwp3Magic() {
+        XCTAssertEqual(
+            DocumentSourceFormatIdentity.identify(Data("HWP Document File V3.00".utf8)),
+            .hwp3
+        )
+        XCTAssertEqual(
+            DocumentSourceFormatIdentity.identify(Data("HWP Document".utf8)),
+            .other
+        )
+        XCTAssertEqual(DocumentSourceFormatIdentity.identify(hwpData), .other)
+        XCTAssertEqual(DocumentSourceFormatIdentity.identify(hwpxData), .other)
+    }
+
+    func testHwp3ConversionIntentUsesActualOutputFormat() {
+        XCTAssertEqual(
+            DocumentSaveConversionIntent.resolve(
+                sourceFormat: .hwp3,
+                outputFormat: .hwp
+            ),
+            .hwp3ToHwp5
+        )
+        XCTAssertEqual(
+            DocumentSaveConversionIntent.resolve(
+                sourceFormat: .hwp3,
+                outputFormat: .hwpx
+            ),
+            .hwp3ToHwpx
+        )
+        XCTAssertEqual(
+            DocumentSaveConversionIntent.resolve(
+                sourceFormat: .other,
+                outputFormat: .hwp
+            ),
+            .none
+        )
+    }
+
+    func testRequestRejectsConversionIntentThatDoesNotMatchSourceAndOutput() {
+        XCTAssertThrowsError(
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: .plain,
+                outputIntent: .preserveSourceProtection,
+                sourceFormat: .hwp3,
+                outputFormat: .hwp,
+                conversionIntent: .none,
+                sourceURL: URL(fileURLWithPath: "/tmp/original.hwp"),
+                destinationURL: URL(fileURLWithPath: "/tmp/new-copy.hwp")
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? DocumentSaveProtectionPolicyError,
+                .conversionIntentMismatch
+            )
+        }
+    }
+
     func testGenericCommandsPreserveSourceFormat() {
         let sourceURL = URL(fileURLWithPath: "/tmp/source.hwpx")
 
@@ -201,11 +257,143 @@ final class DocumentSaveContractTests: XCTestCase {
         }
     }
 
-    func testOnlyPlainDocumentsAllowInPlaceSave() {
-        XCTAssertTrue(DocumentSaveProtectionPolicy.allowsInPlaceSave(.plain))
-        XCTAssertFalse(DocumentSaveProtectionPolicy.allowsInPlaceSave(.passwordProtected))
-        XCTAssertFalse(DocumentSaveProtectionPolicy.allowsInPlaceSave(.unsupportedProtection))
-        XCTAssertFalse(DocumentSaveProtectionPolicy.allowsInPlaceSave(.invalidOrUnknown))
+    func testOnlyPlainNonHwp3DocumentsAllowInPlaceSave() {
+        XCTAssertTrue(
+            DocumentSaveProtectionPolicy.allowsInPlaceSave(
+                sourceProtection: .plain,
+                sourceFormat: .other
+            )
+        )
+        XCTAssertFalse(
+            DocumentSaveProtectionPolicy.allowsInPlaceSave(
+                sourceProtection: .plain,
+                sourceFormat: .hwp3
+            )
+        )
+
+        for protection in [
+            DocumentSourceProtection.passwordProtected,
+            .unsupportedProtection,
+            .invalidOrUnknown
+        ] {
+            XCTAssertFalse(
+                DocumentSaveProtectionPolicy.allowsInPlaceSave(
+                    sourceProtection: protection,
+                    sourceFormat: .other
+                )
+            )
+        }
+    }
+
+    func testWarningIntentCombinesProtectionRemovalAndHwp3Conversion() {
+        XCTAssertEqual(
+            DocumentSaveWarningIntent.resolve(
+                sourceProtection: .plain,
+                conversionIntent: .none
+            ),
+            .none
+        )
+        XCTAssertEqual(
+            DocumentSaveWarningIntent.resolve(
+                sourceProtection: .plain,
+                conversionIntent: .hwp3ToHwp5
+            ),
+            .conversionCopy
+        )
+        XCTAssertEqual(
+            DocumentSaveWarningIntent.resolve(
+                sourceProtection: .passwordProtected,
+                conversionIntent: .none
+            ),
+            .plainCopy
+        )
+        XCTAssertEqual(
+            DocumentSaveWarningIntent.resolve(
+                sourceProtection: .passwordProtected,
+                conversionIntent: .hwp3ToHwpx
+            ),
+            .plainConversionCopy
+        )
+    }
+
+    func testWritePolicyRefusesToOverwriteExistingConversionDestination() throws {
+        let directoryURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: directoryURL,
+            withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: directoryURL) }
+
+        let existingURL = directoryURL.appendingPathComponent("existing.hwp")
+        let newURL = directoryURL.appendingPathComponent("new.hwp")
+        let originalData = Data("original".utf8)
+        let convertedData = Data("converted".utf8)
+        try originalData.write(to: existingURL)
+
+        XCTAssertThrowsError(
+            try DocumentSaveWritePolicy.write(
+                data: convertedData,
+                to: existingURL,
+                allowOverwrite: false
+            )
+        )
+        XCTAssertEqual(try Data(contentsOf: existingURL), originalData)
+
+        XCTAssertNoThrow(
+            try DocumentSaveWritePolicy.write(
+                data: convertedData,
+                to: newURL,
+                allowOverwrite: false
+            )
+        )
+        XCTAssertEqual(try Data(contentsOf: newURL), convertedData)
+
+        XCTAssertNoThrow(
+            try DocumentSaveWritePolicy.write(
+                data: convertedData,
+                to: existingURL,
+                allowOverwrite: true
+            )
+        )
+        XCTAssertEqual(try Data(contentsOf: existingURL), convertedData)
+    }
+
+    func testAtomicNewFileWriteFailureLeavesNoDestinationOrTemporaryFile() throws {
+        struct SimulatedWriteFailure: Error {}
+
+        let directoryURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: directoryURL,
+            withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: directoryURL) }
+
+        let destinationURL = directoryURL.appendingPathComponent("interrupted.hwp")
+        let convertedData = Data("converted-payload".utf8)
+
+        XCTAssertThrowsError(
+            try DocumentSaveWritePolicy.writeNewFileAtomically(
+                data: convertedData,
+                to: destinationURL,
+                temporaryFileWriter: { data, temporaryURL in
+                    try data.prefix(4).write(to: temporaryURL)
+                    throw SimulatedWriteFailure()
+                },
+                temporaryFilePublisher: { _, _ in
+                    XCTFail("임시 파일 쓰기 실패 뒤 publish가 호출되면 안 됩니다.")
+                }
+            )
+        ) { error in
+            XCTAssertTrue(error is SimulatedWriteFailure)
+        }
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destinationURL.path))
+        XCTAssertEqual(
+            try FileManager.default.contentsOfDirectory(atPath: directoryURL.path),
+            []
+        )
     }
 
     func testNonPlainDocumentsRequirePlainCopyIntent() {
@@ -224,6 +412,9 @@ final class DocumentSaveContractTests: XCTestCase {
                 try DocumentSaveProtectionPolicy.validateRequest(
                     sourceProtection: protection,
                     outputIntent: .preserveSourceProtection,
+                    sourceFormat: .other,
+                    outputFormat: .hwp,
+                    conversionIntent: .none,
                     sourceURL: URL(fileURLWithPath: "/tmp/original.hwp"),
                     destinationURL: destinationURL
                 )
@@ -248,6 +439,9 @@ final class DocumentSaveContractTests: XCTestCase {
                 try DocumentSaveProtectionPolicy.validateRequest(
                     sourceProtection: .passwordProtected,
                     outputIntent: .plainCopy,
+                    sourceFormat: .other,
+                    outputFormat: .hwp,
+                    conversionIntent: .none,
                     sourceURL: sourceURL,
                     destinationURL: destinationURL
                 )
@@ -263,6 +457,9 @@ final class DocumentSaveContractTests: XCTestCase {
             try DocumentSaveProtectionPolicy.validateRequest(
                 sourceProtection: .passwordProtected,
                 outputIntent: .plainCopy,
+                sourceFormat: .other,
+                outputFormat: .hwp,
+                conversionIntent: .none,
                 sourceURL: sourceURL,
                 destinationURL: URL(fileURLWithPath: "/tmp/folder/plain-copy.hwp")
             )
@@ -285,6 +482,9 @@ final class DocumentSaveContractTests: XCTestCase {
             try DocumentSaveProtectionPolicy.validateRequest(
                 sourceProtection: .passwordProtected,
                 outputIntent: .plainCopy,
+                sourceFormat: .other,
+                outputFormat: .hwp,
+                conversionIntent: .none,
                 sourceURL: nil,
                 destinationURL: existingURL
             )
@@ -299,8 +499,113 @@ final class DocumentSaveContractTests: XCTestCase {
             try DocumentSaveProtectionPolicy.validateRequest(
                 sourceProtection: .passwordProtected,
                 outputIntent: .plainCopy,
+                sourceFormat: .other,
+                outputFormat: .hwp,
+                conversionIntent: .none,
                 sourceURL: nil,
                 destinationURL: directoryURL.appendingPathComponent("new-copy.hwp")
+            )
+        )
+    }
+
+    func testHwp3ConversionRejectsSourceEquivalentAndExistingDestinations() throws {
+        let directoryURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: directoryURL,
+            withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: directoryURL) }
+
+        let sourceURL = directoryURL.appendingPathComponent("original.hwp")
+        let symlinkURL = directoryURL.appendingPathComponent("source-link.hwp")
+        let existingURL = directoryURL.appendingPathComponent("existing.hwp")
+        try Data("hwp3-source".utf8).write(to: sourceURL)
+        try FileManager.default.createSymbolicLink(
+            at: symlinkURL,
+            withDestinationURL: sourceURL
+        )
+        try Data("existing".utf8).write(to: existingURL)
+
+        for destinationURL in [
+            sourceURL,
+            directoryURL.appendingPathComponent("./original.hwp"),
+            URL(fileURLWithPath: sourceURL.path.uppercased()),
+            symlinkURL
+        ] {
+            XCTAssertThrowsError(
+                try DocumentSaveProtectionPolicy.validateRequest(
+                    sourceProtection: .plain,
+                    outputIntent: .preserveSourceProtection,
+                    sourceFormat: .hwp3,
+                    outputFormat: .hwp,
+                    conversionIntent: .hwp3ToHwp5,
+                    sourceURL: sourceURL,
+                    destinationURL: destinationURL
+                )
+            ) { error in
+                XCTAssertEqual(
+                    error as? DocumentSaveProtectionPolicyError,
+                    .hwp3ConversionMustUseDifferentDestination
+                )
+            }
+        }
+
+        XCTAssertThrowsError(
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: .plain,
+                outputIntent: .preserveSourceProtection,
+                sourceFormat: .hwp3,
+                outputFormat: .hwpx,
+                conversionIntent: .hwp3ToHwpx,
+                sourceURL: sourceURL,
+                destinationURL: existingURL
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? DocumentSaveProtectionPolicyError,
+                .hwp3ConversionRequiresNewDestination
+            )
+        }
+
+        XCTAssertThrowsError(
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: .passwordProtected,
+                outputIntent: .plainCopy,
+                sourceFormat: .hwp3,
+                outputFormat: .hwp,
+                conversionIntent: .hwp3ToHwp5,
+                sourceURL: nil,
+                destinationURL: existingURL
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? DocumentSaveProtectionPolicyError,
+                .hwp3ConversionRequiresNewDestination
+            )
+        }
+
+        let newURL = directoryURL.appendingPathComponent("new-copy.hwp")
+        XCTAssertNoThrow(
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: .plain,
+                outputIntent: .preserveSourceProtection,
+                sourceFormat: .hwp3,
+                outputFormat: .hwp,
+                conversionIntent: .hwp3ToHwp5,
+                sourceURL: sourceURL,
+                destinationURL: newURL
+            )
+        )
+        XCTAssertNoThrow(
+            try DocumentSaveProtectionPolicy.validateRequest(
+                sourceProtection: .passwordProtected,
+                outputIntent: .plainCopy,
+                sourceFormat: .hwp3,
+                outputFormat: .hwp,
+                conversionIntent: .hwp3ToHwp5,
+                sourceURL: sourceURL,
+                destinationURL: newURL
             )
         )
     }
@@ -310,7 +615,8 @@ final class DocumentSaveContractTests: XCTestCase {
             DocumentSaveProtectionPolicy.suggestedFilename(
                 for: "원본.hwp",
                 format: .hwp,
-                outputIntent: .plainCopy
+                outputIntent: .plainCopy,
+                conversionIntent: .none
             ),
             "원본 (평문 복사본).hwp"
         )
@@ -318,7 +624,8 @@ final class DocumentSaveContractTests: XCTestCase {
             DocumentSaveProtectionPolicy.suggestedFilename(
                 for: "원본.hwp",
                 format: .hwpx,
-                outputIntent: .plainCopy
+                outputIntent: .plainCopy,
+                conversionIntent: .none
             ),
             "원본 (평문 복사본).hwpx"
         )
@@ -326,9 +633,49 @@ final class DocumentSaveContractTests: XCTestCase {
             DocumentSaveProtectionPolicy.suggestedFilename(
                 for: "원본.hwp",
                 format: .hwp,
-                outputIntent: .preserveSourceProtection
+                outputIntent: .preserveSourceProtection,
+                conversionIntent: .none
             ),
             "원본.hwp"
+        )
+    }
+
+    func testSuggestedFilenameDescribesHwp3ConversionAndProtectionRemoval() {
+        XCTAssertEqual(
+            DocumentSaveProtectionPolicy.suggestedFilename(
+                for: "원본.hwp",
+                format: .hwp,
+                outputIntent: .preserveSourceProtection,
+                conversionIntent: .hwp3ToHwp5
+            ),
+            "원본 (변환 복사본).hwp"
+        )
+        XCTAssertEqual(
+            DocumentSaveProtectionPolicy.suggestedFilename(
+                for: "원본.hwp",
+                format: .hwpx,
+                outputIntent: .preserveSourceProtection,
+                conversionIntent: .hwp3ToHwpx
+            ),
+            "원본 (변환 복사본).hwpx"
+        )
+        XCTAssertEqual(
+            DocumentSaveProtectionPolicy.suggestedFilename(
+                for: "원본.hwp",
+                format: .hwp,
+                outputIntent: .plainCopy,
+                conversionIntent: .hwp3ToHwp5
+            ),
+            "원본 (평문 변환 복사본).hwp"
+        )
+        XCTAssertEqual(
+            DocumentSaveProtectionPolicy.suggestedFilename(
+                for: "원본.hwp",
+                format: .hwpx,
+                outputIntent: .plainCopy,
+                conversionIntent: .hwp3ToHwpx
+            ),
+            "원본 (평문 변환 복사본).hwpx"
         )
     }
 
@@ -343,6 +690,9 @@ final class DocumentSaveContractTests: XCTestCase {
             try DocumentSaveProtectionPolicy.validateRequest(
                 sourceProtection: .plain,
                 outputIntent: .preserveSourceProtection,
+                sourceFormat: .other,
+                outputFormat: .hwp,
+                conversionIntent: .none,
                 sourceURL: sourceURL,
                 destinationURL: sourceURL
             )
@@ -368,22 +718,39 @@ final class DocumentSaveContractTests: XCTestCase {
             try DocumentSaveProtectionPolicy.validateCurrentDocument(
                 requestRevision: 7,
                 requestProtection: .passwordProtected,
+                requestSourceFormat: .hwp3,
                 currentRevision: 7,
-                currentProtection: .passwordProtected
+                currentProtection: .passwordProtected,
+                currentSourceFormat: .hwp3
             )
         )
 
-        for (revision, protection) in [
-            (Int?.some(8), DocumentSourceProtection?.some(.passwordProtected)),
-            (Int?.some(7), DocumentSourceProtection?.some(.plain)),
-            (nil, nil)
+        for (revision, protection, sourceFormat) in [
+            (
+                Int?.some(8),
+                DocumentSourceProtection?.some(.passwordProtected),
+                DocumentSourceFormatIdentity?.some(.hwp3)
+            ),
+            (
+                Int?.some(7),
+                DocumentSourceProtection?.some(.plain),
+                DocumentSourceFormatIdentity?.some(.hwp3)
+            ),
+            (
+                Int?.some(7),
+                DocumentSourceProtection?.some(.passwordProtected),
+                DocumentSourceFormatIdentity?.some(.other)
+            ),
+            (nil, nil, nil)
         ] {
             XCTAssertThrowsError(
                 try DocumentSaveProtectionPolicy.validateCurrentDocument(
                     requestRevision: 7,
                     requestProtection: .passwordProtected,
+                    requestSourceFormat: .hwp3,
                     currentRevision: revision,
-                    currentProtection: protection
+                    currentProtection: protection,
+                    currentSourceFormat: sourceFormat
                 )
             ) { error in
                 XCTAssertEqual(

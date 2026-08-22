@@ -54,8 +54,16 @@ enum DocumentSavePanel {
         return panel
     }
 
-    static func write(data: Data, to url: URL) throws {
-        try data.write(to: url, options: .atomic)
+    static func write(
+        data: Data,
+        to url: URL,
+        allowOverwrite: Bool = true
+    ) throws {
+        try DocumentSaveWritePolicy.write(
+            data: data,
+            to: url,
+            allowOverwrite: allowOverwrite
+        )
     }
 
     @MainActor
