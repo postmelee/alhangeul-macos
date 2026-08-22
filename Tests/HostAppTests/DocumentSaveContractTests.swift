@@ -329,20 +329,71 @@ final class DocumentSaveContractTests: XCTestCase {
         let newURL = directoryURL.appendingPathComponent("new.hwp")
         let originalData = Data("original".utf8)
         let convertedData = Data("converted".utf8)
-        let options = DocumentSaveWritePolicy.options(allowOverwrite: false)
         try originalData.write(to: existingURL)
 
-        XCTAssertFalse(options.contains(.atomic))
-        XCTAssertTrue(options.contains(.withoutOverwriting))
-        XCTAssertThrowsError(try convertedData.write(to: existingURL, options: options))
+        XCTAssertThrowsError(
+            try DocumentSaveWritePolicy.write(
+                data: convertedData,
+                to: existingURL,
+                allowOverwrite: false
+            )
+        )
         XCTAssertEqual(try Data(contentsOf: existingURL), originalData)
 
-        XCTAssertNoThrow(try convertedData.write(to: newURL, options: options))
+        XCTAssertNoThrow(
+            try DocumentSaveWritePolicy.write(
+                data: convertedData,
+                to: newURL,
+                allowOverwrite: false
+            )
+        )
         XCTAssertEqual(try Data(contentsOf: newURL), convertedData)
 
-        let overwriteOptions = DocumentSaveWritePolicy.options(allowOverwrite: true)
-        XCTAssertTrue(overwriteOptions.contains(.atomic))
-        XCTAssertFalse(overwriteOptions.contains(.withoutOverwriting))
+        XCTAssertNoThrow(
+            try DocumentSaveWritePolicy.write(
+                data: convertedData,
+                to: existingURL,
+                allowOverwrite: true
+            )
+        )
+        XCTAssertEqual(try Data(contentsOf: existingURL), convertedData)
+    }
+
+    func testAtomicNewFileWriteFailureLeavesNoDestinationOrTemporaryFile() throws {
+        struct SimulatedWriteFailure: Error {}
+
+        let directoryURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: directoryURL,
+            withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: directoryURL) }
+
+        let destinationURL = directoryURL.appendingPathComponent("interrupted.hwp")
+        let convertedData = Data("converted-payload".utf8)
+
+        XCTAssertThrowsError(
+            try DocumentSaveWritePolicy.writeNewFileAtomically(
+                data: convertedData,
+                to: destinationURL,
+                temporaryFileWriter: { data, temporaryURL in
+                    try data.prefix(4).write(to: temporaryURL)
+                    throw SimulatedWriteFailure()
+                },
+                temporaryFilePublisher: { _, _ in
+                    XCTFail("임시 파일 쓰기 실패 뒤 publish가 호출되면 안 됩니다.")
+                }
+            )
+        ) { error in
+            XCTAssertTrue(error is SimulatedWriteFailure)
+        }
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destinationURL.path))
+        XCTAssertEqual(
+            try FileManager.default.contentsOfDirectory(atPath: directoryURL.path),
+            []
+        )
     }
 
     func testNonPlainDocumentsRequirePlainCopyIntent() {
@@ -361,6 +412,8 @@ final class DocumentSaveContractTests: XCTestCase {
                 try DocumentSaveProtectionPolicy.validateRequest(
                     sourceProtection: protection,
                     outputIntent: .preserveSourceProtection,
+                    sourceFormat: .other,
+                    outputFormat: .hwp,
                     conversionIntent: .none,
                     sourceURL: URL(fileURLWithPath: "/tmp/original.hwp"),
                     destinationURL: destinationURL
@@ -386,6 +439,8 @@ final class DocumentSaveContractTests: XCTestCase {
                 try DocumentSaveProtectionPolicy.validateRequest(
                     sourceProtection: .passwordProtected,
                     outputIntent: .plainCopy,
+                    sourceFormat: .other,
+                    outputFormat: .hwp,
                     conversionIntent: .none,
                     sourceURL: sourceURL,
                     destinationURL: destinationURL
@@ -402,6 +457,8 @@ final class DocumentSaveContractTests: XCTestCase {
             try DocumentSaveProtectionPolicy.validateRequest(
                 sourceProtection: .passwordProtected,
                 outputIntent: .plainCopy,
+                sourceFormat: .other,
+                outputFormat: .hwp,
                 conversionIntent: .none,
                 sourceURL: sourceURL,
                 destinationURL: URL(fileURLWithPath: "/tmp/folder/plain-copy.hwp")
@@ -425,6 +482,8 @@ final class DocumentSaveContractTests: XCTestCase {
             try DocumentSaveProtectionPolicy.validateRequest(
                 sourceProtection: .passwordProtected,
                 outputIntent: .plainCopy,
+                sourceFormat: .other,
+                outputFormat: .hwp,
                 conversionIntent: .none,
                 sourceURL: nil,
                 destinationURL: existingURL
@@ -440,6 +499,8 @@ final class DocumentSaveContractTests: XCTestCase {
             try DocumentSaveProtectionPolicy.validateRequest(
                 sourceProtection: .passwordProtected,
                 outputIntent: .plainCopy,
+                sourceFormat: .other,
+                outputFormat: .hwp,
                 conversionIntent: .none,
                 sourceURL: nil,
                 destinationURL: directoryURL.appendingPathComponent("new-copy.hwp")
@@ -629,6 +690,8 @@ final class DocumentSaveContractTests: XCTestCase {
             try DocumentSaveProtectionPolicy.validateRequest(
                 sourceProtection: .plain,
                 outputIntent: .preserveSourceProtection,
+                sourceFormat: .other,
+                outputFormat: .hwp,
                 conversionIntent: .none,
                 sourceURL: sourceURL,
                 destinationURL: sourceURL

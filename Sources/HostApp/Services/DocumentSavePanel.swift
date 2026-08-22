@@ -59,9 +59,10 @@ enum DocumentSavePanel {
         to url: URL,
         allowOverwrite: Bool = true
     ) throws {
-        try data.write(
+        try DocumentSaveWritePolicy.write(
+            data: data,
             to: url,
-            options: DocumentSaveWritePolicy.options(allowOverwrite: allowOverwrite)
+            allowOverwrite: allowOverwrite
         )
     }
 

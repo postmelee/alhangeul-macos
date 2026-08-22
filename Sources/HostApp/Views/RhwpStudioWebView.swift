@@ -653,6 +653,11 @@ extension RhwpStudioWebView {
             let payload: SavePayload
             do {
                 payload = try validatedSavePayload(from: body, request: request)
+            } catch let error as DocumentSaveProtectionPolicyError {
+                let message = "문서를 저장할 수 없습니다: \(error.localizedDescription)"
+                onError(message)
+                completion?(.failed(message))
+                return
             } catch {
                 let message = "문서를 내보낼 수 없습니다: \(error.localizedDescription)"
                 onError(message)
@@ -734,7 +739,6 @@ extension RhwpStudioWebView {
                 requestFormat: request.format,
                 destinationURL: request.destinationURL
             )
-            try validatePendingSaveRequest(request)
             let responseFilename = body["fileName"] as? String
                 ?? currentSourceDocument?.displayName
                 ?? currentDocument?.filename

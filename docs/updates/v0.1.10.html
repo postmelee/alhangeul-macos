@@ -90,8 +90,6 @@
         <ul>
           <li>HWP/HWPX 저장 command, exporter 결과와 목적지 확장자·container signature를 write 전에 함께 확인합니다.</li>
           <li>HWPX 저장 뒤 후속 <code>Command+S</code>도 같은 URL과 HWPX 형식을 유지합니다.</li>
-          <li>평문 HWP3는 저장 전에 형식 변환을 알리고, 원본이나 다른 기존 파일을 덮어쓰지 않는 새 HWP5/HWPX 변환 복사본으로만 저장합니다.</li>
-          <li>암호 문서는 열 수 있지만 native 저장에서 보호를 유지하지는 않으며, 사용자 확인 뒤 원본과 다른 새 경로의 평문 복사본으로만 저장합니다.</li>
           <li>PDF 저장과 인쇄는 현재 editor가 만든 page SVG를 공용 renderer로 변환해 최신 편집 내용과 searchable text를 반영합니다.</li>
           <li>PDF·인쇄 renderer는 content JavaScript와 popup을 끄고, inline style과 embedded <code>data:</code> image 외 resource·navigation을 기본 차단합니다.</li>
           <li><code>rhwp v0.8.4</code>에서 제거된 render-tree field를 Swift decoder가 요구하지 않도록 보정해 native preview/thumbnail 호환성을 유지합니다.</li>
@@ -105,8 +103,8 @@
         <ul>
           <li>Quick Look과 Finder 썸네일은 native 렌더 경로를 사용하고, 앱 화면은 WKWebView 기반 <code>rhwp-studio</code> 경로를 사용합니다.</li>
           <li>일부 문서에서는 글꼴, 배치, 페이지 표현이 원본 한글 프로그램과 다르게 보일 수 있습니다.</li>
-          <li>HWP3 문서는 열 수 있지만 HWP3 원형 저장은 지원하지 않습니다. 새 HWP5 또는 HWPX 변환 복사본만 저장할 수 있습니다.</li>
-          <li>암호 문서는 열 수 있지만 native 저장 경로에서는 암호 보호 유지나 새 암호 설정을 지원하지 않습니다. 저장한 복사본은 평문입니다.</li>
+          <li><strong>저장 전 주의:</strong> v0.1.10 배포본은 HWP3 원형 저장을 지원하지 않으며, 평문 HWP3 저장 시 원본을 HWP5 bytes로 덮어쓸 수 있습니다(<a href="https://github.com/postmelee/alhangeul-macos/issues/482">#482</a>). 수정 릴리스 전까지 먼저 사본을 만들고 native 저장을 사용하지 마세요.</li>
+          <li><strong>저장 전 주의:</strong> v0.1.10 배포본의 native 저장은 암호 보호 유지나 새 암호 설정을 지원하지 않으며, 보호 문서 원본을 평문으로 덮어쓸 수 있습니다(<a href="https://github.com/postmelee/alhangeul-macos/issues/480">#480</a>). 수정 릴리스 전까지 먼저 사본을 만들고 native 저장을 사용하지 마세요.</li>
           <li>HWP5/HWPX 저장은 대표 문서의 container·재열기를 확인하지만 모든 문서 요소의 의미론적 완전 무손실을 보장하지 않습니다.</li>
           <li>PDF 내보내기는 전체 page SVG를 memory에 보유하며 문서 전체 progress, deadline과 수집 중 취소 UI는 아직 없습니다.</li>
           <li>실제 가로·세로 혼합 문서 fixture는 없어 혼합 geometry와 인쇄 방향은 합성 page SVG 계약으로 검증했습니다.</li>

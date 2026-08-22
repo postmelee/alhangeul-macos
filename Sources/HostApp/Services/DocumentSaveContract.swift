@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 
 enum DocumentSourceFormatIdentity: Equatable {
@@ -84,13 +85,90 @@ enum DocumentSaveWarningIntent: Equatable {
 }
 
 enum DocumentSaveWritePolicy {
-    static func options(allowOverwrite: Bool) -> Data.WritingOptions {
+    typealias TemporaryFileWriter = (Data, URL) throws -> Void
+    typealias TemporaryFilePublisher = (URL, URL) throws -> Void
+
+    static func write(
+        data: Data,
+        to destinationURL: URL,
+        allowOverwrite: Bool
+    ) throws {
         if allowOverwrite {
-            return .atomic
+            try data.write(to: destinationURL, options: .atomic)
+            return
         }
-        // Foundation은 atomic과 withoutOverwriting 동시 사용 시 중단하므로,
-        // HWP3 변환은 기존 파일 보존을 우선해 배타적 신규 쓰기를 사용한다.
-        return .withoutOverwriting
+
+        try writeNewFileAtomically(data: data, to: destinationURL)
+    }
+
+    private static func writeNewFileAtomically(
+        data: Data,
+        to destinationURL: URL
+    ) throws {
+        try writeNewFileAtomically(
+            data: data,
+            to: destinationURL,
+            temporaryFileWriter: { data, temporaryURL in
+                try data.write(to: temporaryURL, options: .atomic)
+            },
+            temporaryFilePublisher: publishNewFileExclusively
+        )
+    }
+
+    static func writeNewFileAtomically(
+        data: Data,
+        to destinationURL: URL,
+        temporaryFileWriter: TemporaryFileWriter,
+        temporaryFilePublisher: TemporaryFilePublisher
+    ) throws {
+        let temporaryURL = destinationURL
+            .deletingLastPathComponent()
+            .appendingPathComponent(
+                ".\(destinationURL.lastPathComponent).\(UUID().uuidString).tmp",
+                isDirectory: false
+            )
+        defer {
+            try? FileManager.default.removeItem(at: temporaryURL)
+        }
+
+        // 목적지는 완성된 임시 파일만 배타적으로 rename해 노출한다.
+        // 중간 write 실패와 publish 직전의 destination 생성 경쟁을 모두 fail-closed로 처리한다.
+        try temporaryFileWriter(data, temporaryURL)
+        try temporaryFilePublisher(temporaryURL, destinationURL)
+    }
+
+    private static func publishNewFileExclusively(
+        at temporaryURL: URL,
+        to destinationURL: URL
+    ) throws {
+        let result: Int32 = temporaryURL.withUnsafeFileSystemRepresentation { temporaryPath in
+            guard let temporaryPath else {
+                errno = EINVAL
+                return Int32(-1)
+            }
+            return destinationURL.withUnsafeFileSystemRepresentation { destinationPath in
+                guard let destinationPath else {
+                    errno = EINVAL
+                    return Int32(-1)
+                }
+                return renameatx_np(
+                    AT_FDCWD,
+                    temporaryPath,
+                    AT_FDCWD,
+                    destinationPath,
+                    UInt32(RENAME_EXCL)
+                )
+            }
+        }
+
+        guard result == 0 else {
+            let errorCode = errno
+            throw NSError(
+                domain: NSPOSIXErrorDomain,
+                code: Int(errorCode),
+                userInfo: [NSFilePathErrorKey: destinationURL.path]
+            )
+        }
     }
 }
 
@@ -171,8 +249,8 @@ enum DocumentSaveProtectionPolicy {
     static func validateRequest(
         sourceProtection: DocumentSourceProtection,
         outputIntent: DocumentSaveOutputProtectionIntent,
-        sourceFormat: DocumentSourceFormatIdentity = .other,
-        outputFormat: DocumentSaveFormat = .hwp,
+        sourceFormat: DocumentSourceFormatIdentity,
+        outputFormat: DocumentSaveFormat,
         conversionIntent: DocumentSaveConversionIntent,
         sourceURL: URL?,
         destinationURL: URL

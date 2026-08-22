@@ -175,6 +175,7 @@ HWP3 source identity를 저장 요청에 결합하고, 평문 HWP3의 일반 저
    - payload 응답 검증 뒤 write 직전
 8. 저장 성공 뒤 current payload가 output bytes로 갱신되어 HWP3 identity가 해제되고 후속 저장이 정상 in-place 조건을 사용하도록 한다.
 9. revision/source identity 변경, 취소와 오류 문구를 실제 검사 범위에 맞춘다.
+10. 변환 payload는 destination과 같은 디렉터리의 임시 파일에 atomic write한 뒤 `renameatx_np(..., RENAME_EXCL)`로 배타적으로 게시한다. 임시 write·publish 실패에서는 destination을 만들거나 교체하지 않고 임시 파일을 정리한다.
 
 ### 5.4 단위 회귀
 
@@ -184,6 +185,8 @@ HWP3 source identity를 저장 요청에 결합하고, 평문 HWP3의 일반 저
 - HWP3 변환의 원본 동일 URL, 표준화 경로, 대소문자 차이, symlink 경로 거부
 - HWP3 변환의 다른 기존 파일 destination 거부
 - HWP3 변환의 신규 destination 허용
+- 변환 임시 write 실패 뒤 destination과 임시 파일이 남지 않음
+- publish 직전 destination이 생겨도 기존 bytes를 보존하고 변환 결과를 게시하지 않음
 - protection-only, conversion-only, protection+conversion intent 조합
 - 네 조합의 제안 파일명
 - document revision·protection·source identity 변경 시 요청 거부
@@ -257,8 +260,8 @@ Stage 3에서 새로운 구조 변경이나 범위 밖 회귀를 발견하면 �
 ### 6.4 문서 보정
 
 - README 저장 설명에 HWP3 원형 재저장을 지원하지 않으며 HWP5/HWPX 변환 복사본만 신규 경로에 저장할 수 있음을 기록한다.
-- v0.1.10 업데이트 문서가 HWP3 열기 지원과 HWP3 원형 저장 지원을 혼동하지 않도록 보정한다.
-- 릴리스 기록에는 #480의 보호 문서 제한과 #482의 평문 HWP3 변환 제한을 별도 항목으로 기록한다.
+- v0.1.10 업데이트 문서는 이미 공개된 tag에 #480/#482 수정이 포함된 것처럼 기술하지 않고, 배포본의 원본 덮어쓰기 위험과 사본 보관 권고를 명시한다.
+- 릴리스 기록에는 v0.1.10의 실제 위험과 다음 릴리스 후보에서 적용하는 #480/#482 수정 동작을 분리해 기록한다.
 - 실제 fixture hash나 로컬 절대 경로는 Stage 보고에 필요한 재현 정보만 남기고 사용자 문서에는 기록하지 않는다.
 
 ### 6.5 검증

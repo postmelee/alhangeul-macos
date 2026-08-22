@@ -55,7 +55,10 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 ### v0.1.10
 
-`v0.1.10`은 평문 HWP5와 HWPX를 형식에 맞는 macOS 저장 패널로 저장하고 다시 여는 경로를 연결하며, 현재 편집 상태의 전체 페이지를 searchable PDF와 인쇄로 내보내는 patch release입니다. HWP3는 열 수 있지만 HWP3 원형 저장은 지원하지 않으며 새 HWP5/HWPX 변환 복사본으로만 저장합니다. PDF·인쇄용 문서 SVG는 전용 WebView에서 script, 외부 resource와 navigation을 차단하면서 page geometry와 text를 유지합니다. upstream `rhwp v0.8.4`의 암호 문서, 중첩 표 조판·선택·복사, 특수 글리프와 대형 문서 처리 보강을 포함하고, 새 render tree schema를 native Quick Look/Thumbnail 경로에서도 수용합니다. 설정의 개인정보 화면에서는 영구 사용자·기기 식별자 없이 수집되는 익명 실행·업데이트 추이 공유를 끌 수 있습니다.
+`v0.1.10`은 HWP와 HWPX를 형식에 맞는 macOS 저장 패널로 저장하고 다시 여는 경로를 연결하며, 현재 편집 상태의 전체 페이지를 searchable PDF와 인쇄로 내보내는 patch release입니다. PDF·인쇄용 문서 SVG는 전용 WebView에서 script, 외부 resource와 navigation을 차단하면서 page geometry와 text를 유지합니다. upstream `rhwp v0.8.4`의 암호 문서, 중첩 표 조판·선택·복사, 특수 글리프와 대형 문서 처리 보강을 포함하고, 새 render tree schema를 native Quick Look/Thumbnail 경로에서도 수용합니다. 설정의 개인정보 화면에서는 영구 사용자·기기 식별자 없이 수집되는 익명 실행·업데이트 추이 공유를 끌 수 있습니다.
+
+> [!WARNING]
+> 공개된 `v0.1.10`에는 평문 HWP3 저장 시 원본이 HWP5 bytes로 바뀌거나, 보호 문서 저장 시 보호가 제거된 평문으로 원본을 덮어쓸 수 있는 문제가 있습니다([#482](https://github.com/postmelee/alhangeul-macos/issues/482), [#480](https://github.com/postmelee/alhangeul-macos/issues/480)). 두 문제의 수정이 포함된 다음 릴리스 전까지 HWP3·암호 문서는 먼저 사본을 만들고 native 저장을 사용하지 마세요.
 
 - GitHub Release: [Alhangeul v0.1.10](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.10)
 - 업데이트 페이지: [알한글 v0.1.10](https://postmelee.github.io/alhangeul-macos/updates/v0.1.10.html)

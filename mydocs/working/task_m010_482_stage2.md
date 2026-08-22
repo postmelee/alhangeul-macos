@@ -60,7 +60,7 @@ HWP3의 `.hwp` 출력은 단순 HWP가 아니라 실제 변환 결과인 HWP5로
 
 ### write와 성공 상태
 
-일반 저장은 기존 `.atomic` write를 유지한다. HWP3 변환 저장은 `.withoutOverwriting`을 사용해 선택 뒤 destination이 생성되는 경쟁 조건에서도 기존 파일을 덮어쓰지 않는다. Foundation은 `.atomic`과 `.withoutOverwriting`을 동시에 사용하면 프로세스를 중단하므로, 단위 테스트에서 이를 발견한 뒤 두 정책을 배타적으로 분리했다.
+일반 저장은 기존 `.atomic` write를 유지한다. Stage 2 최초 구현은 HWP3 변환 저장에 `.withoutOverwriting`을 사용했지만, PR #483 리뷰에서 write 도중 실패하면 잘린 destination이 남을 수 있음이 확인됐다. 최종 PR 후보는 변환 payload를 destination과 같은 디렉터리의 고유 임시 파일에 atomic write한 뒤 `renameatx_np(..., RENAME_EXCL)`로 배타적으로 게시한다. 임시 write 또는 publish가 실패하면 destination을 만들거나 교체하지 않고 임시 파일을 정리한다.
 
 저장 성공 뒤에만 export bytes와 destination URL을 current document에 기록한다. HWP5/HWPX output bytes로 payload가 교체되면 source identity가 `other`로 전환되므로 후속 same-format `Command+S`는 기존 평문 in-place 조건을 사용할 수 있다. 취소·정책 거부·export/payload/write 오류에서는 성공 상태를 기록하지 않는다.
 
@@ -74,7 +74,8 @@ HWP3의 `.hwp` 출력은 단순 HWP가 아니라 실제 변환 결과인 HWP5로
 | exporter 호출 직전 | pending request 전체 재검증 | export 요청 미등록 |
 | payload 응답 검증 | current document, signature·byte count·format·destination 재검증 | write 미실행 |
 | 실제 write 직전 | pending request 전체 재검증 | write 미실행 |
-| conversion write | `withoutOverwriting` 신규 쓰기 | 경쟁 중 생성된 기존 파일 보존 |
+| conversion temporary write | 같은 디렉터리 고유 임시 파일에 atomic write | 실패 시 destination 미생성, 임시 파일 정리 |
+| conversion publish | `renameatx_np(..., RENAME_EXCL)` 배타적 rename | 경쟁 중 생성된 기존 파일 보존, 완성된 payload만 노출 |
 | write 성공 후 | payload·source URL·저장 상태 갱신 | 새 output 형식으로 전환 |
 
 ## 단위 회귀
@@ -86,6 +87,7 @@ HWP3의 `.hwp` 출력은 단순 HWP가 아니라 실제 변환 결과인 HWP5로
 - 평문 비-HWP3만 in-place 허용
 - protection-only, conversion-only, protection+conversion 경고 intent
 - 변환 write의 기존 destination 거부·기존 bytes 보존·신규 경로 성공과 일반 atomic write 유지
+- 임시 write가 일부 bytes를 남긴 뒤 실패해도 destination과 임시 파일이 남지 않음
 - 원본 동일 URL, 표준화 경로, 대소문자 변형과 symlink destination 거부
 - 다른 기존 destination과 source URL 없는 기존 destination 거부
 - 평문/보호 HWP3의 신규 destination 허용
@@ -109,7 +111,7 @@ HWP3의 `.hwp` 출력은 단순 HWP가 아니라 실제 변환 결과인 HWP5로
 | 명령/검증 | 결과 |
 |-----------|------|
 | `xcodegen generate` | 통과. project 재생성 뒤 project/source 설정 diff 없음 |
-| `xcodebuild ... -scheme HostAppTests ... test` | 통과. 142 tests, 0 failures |
+| `xcodebuild ... -scheme HostAppTests ... test` | Stage 완료 시 142 tests, 0 failures. PR 리뷰 보정 뒤 143 tests, 0 failures |
 | `xcodebuild ... -scheme HostApp ... build` | 통과. Debug HostApp build 성공 |
 | `./scripts/check-no-appkit.sh` | 통과. `RhwpCoreBridge` AppKit 의존 없음 |
 | `scripts/verify-rhwp-studio-assets.sh` | 통과. 저장소 bundled asset 무결성 확인 |
@@ -117,14 +119,14 @@ HWP3의 `.hwp` 출력은 단순 HWP가 아니라 실제 변환 결과인 HWP5로
 | `git diff --check` | 통과. whitespace 오류 없음 |
 | LaunchServices 개발 등록 확인 | repo `build.noindex` 아래 Sparkle `Updater.app` 21개 정확한 경로를 등록 해제한 뒤 development registration 없음 |
 
-첫 HostAppTests 실행은 sandbox DNS 제한으로 dependency 조회에 실패해 동일 명령을 허용된 외부 네트워크 환경에서 재실행했다. 구현 중 Swift의 optional switch 결과 타입 추론 오류는 명시적 `String?`으로 보정했다. 변환 write 테스트가 `.atomic + .withoutOverwriting` 조합의 Foundation fatal을 드러내어 배타적 옵션 정책으로 수정했으며, 이후 전체 142개 테스트와 최종 HostApp build가 통과했다.
+첫 HostAppTests 실행은 sandbox DNS 제한으로 dependency 조회에 실패해 동일 명령을 허용된 외부 네트워크 환경에서 재실행했다. 구현 중 Swift의 optional switch 결과 타입 추론 오류는 명시적 `String?`으로 보정했다. 변환 write 테스트가 `.atomic + .withoutOverwriting` 조합의 Foundation fatal을 드러내어 최초 Stage에서는 두 옵션을 분리했다. PR #483 리뷰 뒤 임시 atomic write와 `RENAME_EXCL` 배타적 게시로 다시 보정하고 실패 주입 회귀를 추가했으며, 최종 전체 143개 테스트가 통과했다.
 
 빌드에는 기존 `RhwpStudioPagePDFRenderer.swift`의 Swift 6 main-actor 관련 warning이 남지만 이번 변경 파일과 무관하며 실패를 만들지 않았다.
 
 ## 잔여 위험
 
 - Stage 2 단위 테스트는 Foundation-only 정책을 검증한다. 실제 alert 문구, save panel 전환, exporter 호출 순서와 저장 성공 뒤 후속 `Command+S`는 Stage 3 Debug app fixture smoke로 확인해야 한다.
-- `.withoutOverwriting`은 기존 파일 보존을 보장하지만 atomic 임시파일 교체와 함께 사용할 수 없다. 신규 destination write 자체가 실패하면 원본과 다른 신규 파일에 부분 산출물이 남을 가능성은 Stage 3 오류 smoke와 운영 관찰 대상으로 남긴다.
+- 변환 저장의 임시 write·배타적 publish 실패는 destination을 만들지 않도록 자동 회귀로 고정했다. 지원하지 않는 파일시스템에서 `RENAME_EXCL`이 실패하면 저장은 실패하지만 기존 destination과 원본은 보존된다.
 - LaunchServices development registration은 정리 후 없지만 PlugInKit에는 설치본 provider가 `/Applications/Alhangeul.app`과 `/Users/melee/Applications/Alhangeul.app` 두 위치에 남아 있다. 설치본 파일이나 provider 등록 변경은 Stage 2 권한·범위 밖이므로 건드리지 않았다.
 - 실제 HWP3 → HWP5/HWPX content fidelity는 serializer 범위이며 이번 단계는 원본·기존 파일 덮어쓰기 차단을 담당한다. fixture smoke에서 예상 밖 content loss를 발견하면 계획의 분기 기준에 따라 별도 범위를 제안한다.
 

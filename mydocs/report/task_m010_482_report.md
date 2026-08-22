@@ -21,20 +21,21 @@
 | Stage 1 | `a0e8ce9` | v0.1.10 release app에서 평문 HWP3의 무경고 HWP5 원본 덮어쓰기 재현, 변환·destination 계약 확정 |
 | Stage 2 | `6c4feaa` | HWP3 source identity, 변환 경고, 신규 destination 정책과 단위 회귀 구현 |
 | Stage 3 | `8c9375b` | Debug app HWP5/HWPX 변환·보호 정책 회귀 smoke와 사용자 문서 보정 |
+| PR #483 리뷰 보정 | 게시 전 보정 커밋 | v0.1.10 역사 문서 정정, 배타적 원자 게시와 실패 회귀, 중복 검증·기본 인자 정리 |
 
 ## 변경 파일과 영향 범위
 
 | 파일 | 내용 |
 |------|------|
-| `Sources/HostApp/Services/DocumentSaveContract.swift` | HWP3 source identity, HWP3 → HWP5/HWPX conversion intent, in-place·신규 destination·write·current document 검증 추가 |
+| `Sources/HostApp/Services/DocumentSaveContract.swift` | HWP3 source identity, conversion intent, in-place·신규 destination 검증과 임시 atomic write·`RENAME_EXCL` 배타적 게시 추가 |
 | `Sources/HostApp/Services/RhwpStudioDocumentPayload.swift` | 원본 payload bytes에서 source format identity 노출 |
 | `Sources/HostApp/Services/DocumentProtectionSaveAlert.swift` | 보호 해제와 HWP3 변환을 한 alert로 합성하고 실제 output format 문구·확인 버튼 제공 |
 | `Sources/HostApp/Services/DocumentSavePanel.swift` | 보호·변환 조합별 평문/변환 복사본 제안 파일명 연결 |
-| `Sources/HostApp/Views/RhwpStudioWebView.swift` | HWP3 in-place 차단, pending source identity 캡처, 단계별 destination 재검증, 신규 파일 write와 성공 상태 전환 구현 |
-| `Tests/HostAppTests/DocumentSaveContractTests.swift` | HWP3 identity·conversion·warning·destination·write·filename·current state 단위 회귀 추가 |
-| `README.md` | 평문 HWP5/HWPX 저장, HWP3 변환 복사본과 native 암호 저장 제한 명시 |
-| `docs/updates/v0.1.10.html` | v0.1.10 저장 범위를 실제 native 지원 경계로 보정 |
-| `mydocs/release/v0.1.10.md` | upstream 암호 저장 지원과 알한글 native 저장 경계, #480/#482 제한 분리 |
+| `Sources/HostApp/Views/RhwpStudioWebView.swift` | HWP3 in-place 차단, pending source identity 캡처, 단계별 destination 재검증, 중복 최종 검증 제거와 성공 상태 전환 구현 |
+| `Tests/HostAppTests/DocumentSaveContractTests.swift` | HWP3 identity·conversion·warning·destination·write 실패·filename·current state 단위 회귀 추가 |
+| `README.md` | 현재 안전 동작과 공개 v0.1.10의 HWP3·보호 문서 저장 위험을 시점별로 분리 |
+| `docs/updates/v0.1.10.html` | v0.1.10에 실제 포함되지 않은 수정 설명을 제거하고 원본 덮어쓰기 위험·사본 보관 권고 명시 |
+| `mydocs/release/v0.1.10.md` | v0.1.10 실제 배포 동작과 #480/#482 이후 안전 동작 분리 |
 | `mydocs/plans/task_m010_482.md` | Task #482 수행 범위와 3단계 계획 |
 | `mydocs/plans/task_m010_482_impl.md` | source identity·변환·destination·검증 구현계획 |
 | `mydocs/working/task_m010_482_stage1.md` ~ `task_m010_482_stage3.md` | 재현, 구현, 실제 fixture 회귀와 문서 보정 결과 |
@@ -52,18 +53,19 @@ upstream `rhwp` core, Rust FFI, `rhwp-core.lock`, bundled `rhwp-studio` asset, `
 | 기존 destination | macOS 대치 확인 뒤 overwrite 가능 | 원본과 다른 기존 파일까지 HostApp이 write 전 거부 |
 | 보호 HWP3 안내 | 보호 해제 중심 | 보호 해제와 HWP3 형식 변환을 한 alert에 표시 |
 | 변환 제안 파일명 | 원본과 같은 stem·형식 | `(변환 복사본)` 또는 `(평문 변환 복사본)` suffix |
-| `DocumentSaveContractTests` | 18개 | 25개, 7개 증가 |
-| HostAppTests 전체 | 135개 | 142개, 실패 0개 |
+| 변환 write 실패 | 잘린 destination이 남을 수 있음 | 임시 파일만 정리하고 destination 미생성 |
+| `DocumentSaveContractTests` | 18개 | 26개, 8개 증가 |
+| HostAppTests 전체 | 135개 | 143개, 실패 0개 |
 | 실제 HWP3 변환 smoke | release app의 위험 동작 재현 | HWP5/HWPX 신규 저장·원본 보존·후속 저장 확인 |
 
-최종 보고서 작성 전 `origin/devel...HEAD` diff는 15개 파일, 1,536줄 추가, 92줄 삭제였다.
+PR 리뷰 보정까지 포함한 `origin/devel` 대비 최종 diff는 16개 파일, 1,863줄 추가, 91줄 삭제다.
 
 | 구분 | 추가 | 삭제 |
 |------|------|------|
-| HostApp 제품 source | 327 | 62 |
-| HostAppTests | 318 | 14 |
-| 사용자·release 문서 | 30 | 15 |
-| 계획·단계·orders 문서 | 861 | 1 |
+| HostApp 제품 source | 410 | 62 |
+| HostAppTests | 381 | 14 |
+| 사용자·release 문서 | 34 | 14 |
+| 계획·단계·orders 문서 | 1,038 | 1 |
 
 ## 구현 결과
 
@@ -98,10 +100,14 @@ HWP3 conversion intent가 있는 요청은 source URL 유무와 보호 상태에
 - 원본이 아닌 다른 기존 destination도 거부
 - save panel 반환 뒤, exporter 호출 직전, payload 검증 뒤와 실제 write 직전에 반복 검증
 - pending request의 revision·protection·source identity·conversion intent가 현재 문서와 다르면 중단
-- 일반 저장은 기존 atomic write, HWP3 변환은 `.withoutOverwriting` 신규 write 사용
+- 일반 저장은 기존 atomic write 유지
+- HWP3 변환은 같은 디렉터리 임시 파일에 atomic write한 뒤 `renameatx_np(..., RENAME_EXCL)`로 게시
+- 임시 write 실패에서는 destination을 만들지 않고 임시 파일을 정리하며, publish 경쟁에서는 기존 destination을 교체하지 않음
 - 성공 뒤에만 current payload와 source URL을 output bytes·destination으로 갱신
 
-경고 취소, panel 취소, 정책 거부, export/payload/write 실패에서는 원본 bytes와 성공 상태를 변경하지 않는다. 저장 성공 뒤 payload identity가 HWP5/HWPX로 전환되므로 후속 same-format `Command+S`는 변환 경고 없이 같은 URL에 저장한다.
+경고 취소, panel 취소, 정책 거부, export/payload/write 실패에서는 원본 bytes와 성공 상태를 변경하지 않는다. PR 리뷰 뒤 일부 임시 bytes를 기록하고 실패하는 단위 회귀에서도 destination과 임시 파일이 남지 않음을 확인했다. 저장 성공 뒤 payload identity가 HWP5/HWPX로 전환되므로 후속 same-format `Command+S`는 변환 경고 없이 같은 URL에 저장한다.
+
+payload decode 뒤 중복 실행되던 `validatePendingSaveRequest`를 제거하고 바깥 최종 검증만 유지했다. decode 전 current-document 검증이 던지는 정책 오류는 `문서를 저장할 수 없습니다`로, payload 형식·signature 오류는 `문서를 내보낼 수 없습니다`로 구분한다. 안전 관문의 `sourceFormat`과 `outputFormat` 기본값도 제거해 모든 호출자가 source/output identity를 명시하게 했다.
 
 ## 실제 fixture 검증
 
@@ -129,18 +135,19 @@ exact pinned upstream `rhwp v0.8.4` commit `496333b27d21ddb9114ba9ae340bcb895870
 | 취소·정책 거부에서 원본 hash 유지 | OK | 경고/panel 취소, 원본·기존 destination 거부 fixture hash 확인 |
 | 변환 결과가 요청 signature와 일치 | OK | HWP5 CFB와 HWPX ZIP 결과 확인 |
 | 변환 결과는 신규 destination만 사용 | OK | 원본 동일·다른 기존 파일 거부와 신규 파일 성공 |
+| 변환 write 실패에서 불완전 destination이 남지 않음 | OK | 실패 주입 뒤 destination·임시 파일 미존재 단위 회귀 |
 | 성공 뒤 후속 `Command+S`가 output 형식과 URL 유지 | OK | HWP5/HWPX 각각 panel 없는 후속 저장과 mtime 갱신 |
 | 기존 평문 HWP5/HWPX in-place 저장 유지 | OK | 두 형식의 실제 Debug app 회귀 smoke |
 | #480 보호 문서 정책 유지 | OK | 보호 HWP3/HWP5/HWPX 경고·버튼·취소와 원본 hash 유지 |
 | upstream/core/asset 직접 수정 없음 | OK | core lock·bundled asset unchanged, asset verifier 통과 |
-| 사용자 문서가 실제 저장 범위와 일치 | OK | README, v0.1.10 update/release record 보정 |
+| 사용자 문서가 배포 시점별 저장 범위와 일치 | OK | v0.1.10 실제 위험과 다음 릴리스 후보 안전 동작 분리 |
 
 ## 최종 통합 검증
 
 | 검증 | 결과 |
 |------|------|
 | `xcodegen generate` | 통과. project 재생성 뒤 추가 diff 없음 |
-| HostAppTests | `** TEST SUCCEEDED **`, 142개, 실패 0개 |
+| HostAppTests | `** TEST SUCCEEDED **`, 143개, 실패 0개 |
 | HostApp Debug build | `** BUILD SUCCEEDED **` |
 | `./scripts/check-no-appkit.sh` | 통과 |
 | 저장소 bundled asset 검증 | 통과 |
@@ -148,7 +155,7 @@ exact pinned upstream `rhwp v0.8.4` commit `496333b27d21ddb9114ba9ae340bcb895870
 | `scripts/check-extension-registration-hygiene.sh --cleanup-dev-registrations` | 통과. development registration 없음 |
 | registration hygiene `--check-only` | 통과. issue 없음 |
 | `git diff --check` | 통과 |
-| 최신 `origin/devel...HEAD` | `0 5`, 작업 브랜치가 뒤처지지 않고 5개 commit 앞섬 |
+| 최신 `origin/devel...HEAD` | `0 7`, 작업 브랜치가 뒤처지지 않고 7개 commit 앞섬 |
 
 HostAppTests와 build에는 기존 `RhwpStudioPagePDFRenderer.swift`의 Swift 6 main-actor warning과 WebKit test process의 sandbox 진단이 남지만 테스트·빌드 실패는 없다. UI smoke가 만든 Debug 앱은 종료했고 최종 등록 위생 검사에서 개발 경로 registration이 남지 않았다.
 
@@ -158,6 +165,7 @@ HostAppTests와 build에는 기존 `RhwpStudioPagePDFRenderer.swift`의 Swift 6 
 - native 저장 경로는 암호 보호 유지나 새 암호 설정을 지원하지 않는다. #480 정책에 따라 사용자 확인 뒤 신규 평문 복사본만 허용한다.
 - 대표 fixture의 container와 원본 보존을 확인했지만 upstream exporter가 모든 문서 요소를 의미론적으로 완전 무손실 보존한다고 보장하지 않는다.
 - HWPX runtime guard는 ZIP magic까지 확인하며 필수 entry 전체 검증은 exporter·재열기 smoke에 의존한다.
+- `RENAME_EXCL`을 지원하지 않는 파일시스템에서는 변환 저장이 실패할 수 있지만 destination과 원본은 보존된다.
 - HWP3 저장 뒤 앱 종료에서 저장 직후에도 unsaved-changes 경고가 한 차례 다시 관찰됐다. #480 Stage 1에도 기록된 현상이며 durable write·후속 저장·원본 보존에는 영향이 없었다. 반복 원인 조사는 별도 승인 범위로 남긴다.
 - PR merge 확인 뒤 #482 close, `publish/task482`/`local/task482`와 필요 없는 worktree·개발 등록 부산물을 정리한다.
 

@@ -52,17 +52,17 @@ HWP3 → HWP5 결과의 후속 저장 전후 SHA는 `4c537176ce8f734ab977c7c2813
 
 ## 사용자 문서 보정
 
-### HWP3 저장 범위
+### 공개 v0.1.10과 현재 수정 동작 분리
 
-- HWP3는 열 수 있지만 HWP3 원형 serializer는 지원하지 않는다고 명시했다.
-- 평문 HWP3 저장은 형식 변환을 먼저 알리고, 원본이나 다른 기존 파일을 덮어쓰지 않는 신규 HWP5/HWPX 변환 복사본만 허용한다고 설명했다.
-- 일반 HWP 저장 지원은 평문 HWP5/HWPX 형식별 저장으로 범위를 정확히 좁혔다.
+- PR #483 최초 문서는 #480/#482 수정 동작을 v0.1.10에 이미 포함된 것처럼 기술했다.
+- 리뷰 보정에서 v0.1.10 업데이트 페이지와 최신 공개 릴리스 요약은 실제 배포본의 HWP3·보호 문서 원본 덮어쓰기 위험과 사본 보관 권고를 명시하도록 고쳤다.
+- 수정된 평문 HWP3의 신규 HWP5/HWPX 변환 복사본 전용 저장은 README의 현재 기능 설명에 유지하고 다음 릴리스 기록으로 분리했다.
 
 ### 암호 문서 저장 범위
 
 - upstream core/studio의 암호 parser·exporter 지원과 알한글 native 저장 경로를 분리했다.
 - 암호 문서는 열 수 있지만 현재 native 저장은 보호 유지나 새 암호 설정을 지원하지 않는다고 명시했다.
-- 사용자 확인 뒤 원본과 다른 신규 경로의 평문 복사본만 저장된다는 #480 안전 경계를 기록했다.
+- v0.1.10 배포본의 무경고 평문 원본 덮어쓰기 위험과, #480 이후 사용자 확인·신규 평문 복사본 전용 안전 경계를 서로 다른 시점으로 기록했다.
 
 보정 대상은 `README.md`, `docs/updates/v0.1.10.html`, `mydocs/release/v0.1.10.md`다. 공개 문서에는 fixture hash나 로컬 경로를 넣지 않았다.
 
@@ -82,7 +82,7 @@ HWP3 → HWP5 결과의 후속 저장 전후 SHA는 `4c537176ce8f734ab977c7c2813
 | 명령/검증 | 결과 |
 |-----------|------|
 | `xcodegen generate` | 통과. project 재생성 뒤 project/source 설정 diff 없음 |
-| `xcodebuild ... -scheme HostAppTests ... test` | 통과. 142 tests, 0 failures |
+| `xcodebuild ... -scheme HostAppTests ... test` | Stage 완료 시 142 tests, 0 failures. PR 리뷰 보정 뒤 143 tests, 0 failures |
 | `xcodebuild ... -scheme HostApp ... build` | 통과. Debug HostApp build 성공 |
 | `./scripts/check-no-appkit.sh` | 통과. shared Swift code AppKit/UIKit 의존 없음 |
 | `scripts/verify-rhwp-studio-assets.sh` | 통과. 저장소 bundled asset 무결성 확인 |
@@ -91,7 +91,7 @@ HWP3 → HWP5 결과의 후속 저장 전후 SHA는 `4c537176ce8f734ab977c7c2813
 | `scripts/check-extension-registration-hygiene.sh --check-only` | 통과. issue 없음, build.noindex 앱은 존재하지만 등록되지 않음 |
 | `git diff --check` | 통과. whitespace 오류 없음 |
 
-첫 HostAppTests 실행은 sandbox DNS 제한으로 Sparkle checkout에 실패했다. 같은 명령을 승인된 외부 실행으로 다시 수행해 Sparkle 2.9.1을 해석하고 전체 142개 테스트를 통과했다. 빌드에는 기존 `RhwpStudioPagePDFRenderer.swift`의 Swift 6 main-actor warning이 남지만 이번 변경과 무관하며 실패를 만들지 않았다.
+첫 HostAppTests 실행은 sandbox DNS 제한으로 Sparkle checkout에 실패했다. 같은 명령을 승인된 외부 실행으로 다시 수행해 Sparkle 2.9.1을 해석하고 Stage 완료 시 전체 142개 테스트를 통과했다. PR 리뷰 보정 뒤 실패 주입 회귀 1개를 추가해 전체 143개 테스트를 다시 통과했다. 빌드에는 기존 `RhwpStudioPagePDFRenderer.swift`의 Swift 6 main-actor warning이 남지만 이번 변경과 무관하며 실패를 만들지 않았다.
 
 UI smoke 뒤 Debug 앱과 접근성 확인용 임시 앱을 종료하고 등록 cleanup을 반복했다. 최종 helper 결과는 development registration과 legacy candidate가 없고, Quick Look/Thumbnail provider path는 PlugInKit이 보고하지 않았다는 warning만 남겼다.
 
