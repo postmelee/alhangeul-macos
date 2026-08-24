@@ -3,9 +3,13 @@ import PDFKit
 
 @MainActor
 final class RhwpStudioPDFExportController {
-    private let renderer = RhwpStudioPagePDFRenderer()
+    private let renderer: RhwpStudioPagePDFRenderer
     private var completion: ((Result<URL, Error>) -> Void)?
     private var isExporting = false
+
+    init(renderer: RhwpStudioPagePDFRenderer? = nil) {
+        self.renderer = renderer ?? RhwpStudioPagePDFRenderer()
+    }
 
     func export(
         payload: RhwpStudioPagePayload,
