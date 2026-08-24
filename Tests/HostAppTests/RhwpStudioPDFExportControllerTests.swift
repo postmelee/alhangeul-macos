@@ -20,8 +20,8 @@ final class RhwpStudioPDFExportControllerTests: XCTestCase {
             fileName: "mixed.hwpx",
             pageCount: 2,
             pages: [
-                svg(width: 200, height: 300, text: "Portrait export"),
-                svg(width: 300, height: 200, text: "Landscape export")
+                svg(width: 200, height: 300, text: "세로 문1 함수"),
+                svg(width: 300, height: 200, text: "가로 값은")
             ]
         )
 
@@ -32,8 +32,11 @@ final class RhwpStudioPDFExportControllerTests: XCTestCase {
         XCTAssertTrue(data.starts(with: Data("%PDF".utf8)))
         let document = try XCTUnwrap(PDFDocument(data: data))
         XCTAssertEqual(document.pageCount, 2)
-        XCTAssertTrue(document.page(at: 0)?.string?.contains("Portrait export") == true)
-        XCTAssertTrue(document.page(at: 1)?.string?.contains("Landscape export") == true)
+        XCTAssertTrue(document.page(at: 0)?.string?.contains("세로 문1 함수") == true)
+        XCTAssertTrue(document.page(at: 1)?.string?.contains("가로 값은") == true)
+        XCTAssertGreaterThan(document.findString("문1", withOptions: []).count, 0)
+        XCTAssertGreaterThan(document.findString("함수", withOptions: []).count, 0)
+        XCTAssertGreaterThan(document.findString("값은", withOptions: []).count, 0)
 
         let portraitBounds = try XCTUnwrap(document.page(at: 0)?.bounds(for: .mediaBox))
         let landscapeBounds = try XCTUnwrap(document.page(at: 1)?.bounds(for: .mediaBox))
@@ -42,7 +45,7 @@ final class RhwpStudioPDFExportControllerTests: XCTestCase {
     }
 
     func testSecondExportIsRejectedWhileRenderingIsInProgress() throws {
-        let controller = RhwpStudioPDFExportController()
+        let controller = makeController()
         let payload = try RhwpStudioPagePayload(
             fileName: "duplicate.hwp",
             pageCount: 1,
@@ -89,7 +92,7 @@ final class RhwpStudioPDFExportControllerTests: XCTestCase {
         payload: RhwpStudioPagePayload,
         to destinationURL: URL
     ) async throws -> URL {
-        let controller = RhwpStudioPDFExportController()
+        let controller = makeController()
         return try await withCheckedThrowingContinuation { continuation in
             controller.export(payload: payload, destinationURL: destinationURL) { [controller] result in
                 _ = controller
@@ -102,8 +105,25 @@ final class RhwpStudioPDFExportControllerTests: XCTestCase {
         """
         <svg xmlns="http://www.w3.org/2000/svg" width="\(width)" height="\(height)" viewBox="0 0 \(width) \(height)">
           <rect width="\(width)" height="\(height)" fill="white" />
-          <text x="20" y="40" font-size="20" fill="black">\(text)</text>
+          <text x="20" y="40" font-family="'Haansoft Dotum','Noto Sans KR',sans-serif"
+                font-size="20" fill="black">\(text)</text>
         </svg>
         """
+    }
+
+    private func makeController() -> RhwpStudioPDFExportController {
+        RhwpStudioPDFExportController(renderer: RhwpStudioPagePDFRenderer(
+            fontResourceProvider: RhwpStudioPDFFontDirectoryResourceProvider(
+                directoryURL: repositoryRootURL
+                    .appendingPathComponent("Sources/HostApp/Resources/rhwp-studio/fonts", isDirectory: true)
+            )
+        ))
+    }
+
+    private var repositoryRootURL: URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
     }
 }

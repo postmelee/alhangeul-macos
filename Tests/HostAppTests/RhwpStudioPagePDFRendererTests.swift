@@ -20,22 +20,189 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             "form-action 'none'",
             "style-src 'unsafe-inline'",
             "img-src data:",
-            "font-src 'none'"
+            "font-src alhangeul-pdf-font:"
         ].joined(separator: "; ") + ";"
         XCTAssertEqual(RhwpStudioPagePDFHTML.contentSecurityPolicy, expectedPolicy)
         XCTAssertFalse(RhwpStudioPagePDFHTML.contentSecurityPolicy.contains("font-src data:"))
         XCTAssertFalse(RhwpStudioPagePDFHTML.contentSecurityPolicy.contains("http:"))
         XCTAssertFalse(RhwpStudioPagePDFHTML.contentSecurityPolicy.contains("https:"))
         XCTAssertFalse(RhwpStudioPagePDFHTML.contentSecurityPolicy.contains("blob:"))
+        XCTAssertFalse(RhwpStudioPagePDFHTML.contentSecurityPolicy.contains("file:"))
 
         let svg = "<svg id=\"document-svg\" xmlns=\"http://www.w3.org/2000/svg\"></svg>"
         let html = RhwpStudioPagePDFHTML.pageHTML(for: svg)
         let cspRange = try XCTUnwrap(
             html.range(of: "<meta http-equiv=\"Content-Security-Policy\"")
         )
+        let fontFaceRange = try XCTUnwrap(html.range(of: "@font-face"))
         let svgRange = try XCTUnwrap(html.range(of: "<svg id=\"document-svg\""))
         XCTAssertLessThan(cspRange.lowerBound, svgRange.lowerBound)
+        XCTAssertLessThan(fontFaceRange.lowerBound, svgRange.lowerBound)
         XCTAssertTrue(html.contains("content=\"\(expectedPolicy)\""))
+        XCTAssertTrue(html.contains(RhwpStudioPDFFontStyle.hangulUnicodeRange))
+        XCTAssertTrue(html.contains("U+3200-321E"))
+        XCTAssertTrue(html.contains("U+3260-327F"))
+        XCTAssertTrue(RhwpStudioPagePDFHTML.pagePreparationScript.contains(
+            "const hangulPattern = /[\(RhwpStudioPDFFontStyle.hangulJavaScriptCharacterClass)]/;"
+        ))
+        XCTAssertTrue(html.contains(
+            "alhangeul-pdf-font://bundle/NotoSansKR-Regular.woff2"
+        ))
+        XCTAssertTrue(html.contains(
+            "alhangeul-pdf-font://bundle/NotoSerifKR-Bold.woff2"
+        ))
+        XCTAssertFalse(html.contains("LatinModernMath-Regular.woff2"))
+    }
+
+    func testPDFFontRouteAllowsOnlyExactAllowlistedBundleURLs() throws {
+        for resource in RhwpStudioPDFFontResource.allCases {
+            let url = try XCTUnwrap(URL(string:
+                "alhangeul-pdf-font://bundle/\(resource.rawValue)"
+            ))
+            XCTAssertEqual(try RhwpStudioPDFFontRoute.resource(for: url), resource)
+        }
+
+        let rejectedValues: [String?] = [
+            nil,
+            "alhangeul-pdf-font://bundle/Unknown.woff2",
+            "alhangeul-pdf-font://bundle/fonts/NotoSansKR-Regular.woff2",
+            "alhangeul-pdf-font://bundle/%4eotoSansKR-Regular.woff2",
+            "alhangeul-pdf-font://bundle/NotoSansKR-Regular.woff2?cache=1",
+            "alhangeul-pdf-font://bundle/NotoSansKR-Regular.woff2#fragment",
+            "alhangeul-pdf-font://user@bundle/NotoSansKR-Regular.woff2",
+            "alhangeul-pdf-font://bundle:443/NotoSansKR-Regular.woff2",
+            "alhangeul-pdf-font://other/NotoSansKR-Regular.woff2",
+            "https://bundle/NotoSansKR-Regular.woff2"
+        ]
+
+        for value in rejectedValues {
+            XCTAssertThrowsError(try RhwpStudioPDFFontRoute.resource(
+                for: value.flatMap(URL.init(string:))
+            ), "URL이 거부되어야 합니다: \(value ?? "nil")")
+        }
+    }
+
+    func testPDFFontProviderResolvesOnlyRegularFilesWithinSizeLimit() throws {
+        let provider = fontResourceProvider()
+        for resource in RhwpStudioPDFFontResource.allCases {
+            let data = try provider.data(for: resource)
+            XCTAssertFalse(data.isEmpty)
+            XCTAssertLessThanOrEqual(
+                data.count,
+                RhwpStudioPDFFontResource.maximumByteCount
+            )
+        }
+
+        let fixtureDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("rhwp-pdf-font-provider-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: fixtureDirectory,
+            withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: fixtureDirectory) }
+
+        let oversizedURL = fixtureDirectory.appendingPathComponent(
+            RhwpStudioPDFFontResource.notoSansKRRegular.rawValue
+        )
+        try Data(
+            repeating: 0,
+            count: RhwpStudioPDFFontResource.maximumByteCount + 1
+        ).write(to: oversizedURL)
+
+        let invalidDirectoryURL = fixtureDirectory.appendingPathComponent(
+            RhwpStudioPDFFontResource.notoSansKRBold.rawValue,
+            isDirectory: true
+        )
+        try FileManager.default.createDirectory(
+            at: invalidDirectoryURL,
+            withIntermediateDirectories: false
+        )
+        let invalidFormatURL = fixtureDirectory.appendingPathComponent(
+            RhwpStudioPDFFontResource.notoSerifKRBold.rawValue
+        )
+        try Data([0x00, 0x01, 0x02, 0x03]).write(to: invalidFormatURL)
+
+        let invalidProvider = RhwpStudioPDFFontDirectoryResourceProvider(
+            directoryURL: fixtureDirectory
+        )
+        XCTAssertThrowsError(try invalidProvider.data(for: .notoSansKRRegular)) { error in
+            guard case .resourceTooLarge = error as? RhwpStudioPDFFontResourceError else {
+                XCTFail("과대 글꼴 오류가 아닙니다: \(error)")
+                return
+            }
+        }
+        XCTAssertThrowsError(try invalidProvider.data(for: .notoSansKRBold)) { error in
+            XCTAssertEqual(
+                error as? RhwpStudioPDFFontResourceError,
+                .invalidResourceFile(RhwpStudioPDFFontResource.notoSansKRBold.rawValue)
+            )
+        }
+        XCTAssertThrowsError(try invalidProvider.data(for: .notoSerifKRRegular)) { error in
+            XCTAssertEqual(
+                error as? RhwpStudioPDFFontResourceError,
+                .missingResource(RhwpStudioPDFFontResource.notoSerifKRRegular.rawValue)
+            )
+        }
+        XCTAssertThrowsError(try invalidProvider.data(for: .notoSerifKRBold)) { error in
+            XCTAssertEqual(
+                error as? RhwpStudioPDFFontResourceError,
+                .invalidResourceFormat(RhwpStudioPDFFontResource.notoSerifKRBold.rawValue)
+            )
+        }
+
+        try FileManager.default.removeItem(at: invalidDirectoryURL)
+        try FileManager.default.createSymbolicLink(
+            at: invalidDirectoryURL,
+            withDestinationURL: oversizedURL
+        )
+        XCTAssertThrowsError(try invalidProvider.data(for: .notoSansKRBold)) { error in
+            XCTAssertEqual(
+                error as? RhwpStudioPDFFontResourceError,
+                .invalidResourceFile(RhwpStudioPDFFontResource.notoSansKRBold.rawValue)
+            )
+        }
+    }
+
+    func testPDFFontBundleProviderResolvesAllProductionResources() throws {
+        let fileManager = FileManager.default
+        let bundleURL = fileManager.temporaryDirectory
+            .appendingPathComponent("RhwpStudioPDFFonts-\(UUID().uuidString).bundle")
+        let contentsURL = bundleURL.appendingPathComponent("Contents", isDirectory: true)
+        let resourceDirectoryURL = contentsURL
+            .appendingPathComponent("Resources/rhwp-studio/fonts", isDirectory: true)
+        try fileManager.createDirectory(
+            at: resourceDirectoryURL,
+            withIntermediateDirectories: true
+        )
+        defer { try? fileManager.removeItem(at: bundleURL) }
+
+        let infoData = try PropertyListSerialization.data(
+            fromPropertyList: [
+                "CFBundleIdentifier": "com.postmelee.alhangeul.tests.pdf-fonts.\(UUID().uuidString)",
+                "CFBundleName": "RhwpStudioPDFFonts",
+                "CFBundlePackageType": "BNDL",
+                "CFBundleVersion": "1"
+            ],
+            format: .xml,
+            options: 0
+        )
+        try infoData.write(to: contentsURL.appendingPathComponent("Info.plist"))
+
+        let sourceProvider = fontResourceProvider()
+        for resource in RhwpStudioPDFFontResource.allCases {
+            try sourceProvider.data(for: resource).write(
+                to: resourceDirectoryURL.appendingPathComponent(resource.rawValue)
+            )
+        }
+
+        let bundle = try XCTUnwrap(Bundle(url: bundleURL))
+        let provider = RhwpStudioPDFFontBundleResourceProvider(bundle: bundle)
+        for resource in RhwpStudioPDFFontResource.allCases {
+            XCTAssertEqual(
+                try provider.data(for: resource),
+                try sourceProvider.data(for: resource)
+            )
+        }
     }
 
     func testNavigationPolicyAllowsOnlyPendingInitialAboutBlankMainFrame() {
@@ -55,6 +222,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             (URL(string: "https://127.0.0.1/resource"), true, true),
             (URL(fileURLWithPath: "/tmp/resource"), true, true),
             (URL(string: "blob:https://example.invalid/resource"), true, true),
+            (URL(string: "alhangeul-pdf-font://bundle/NotoSansKR-Regular.woff2"), true, true),
             (URL(string: "custom:resource"), true, true),
             (nil, true, true)
         ]
@@ -116,6 +284,174 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
                 autoRotate: true
             )
         )
+    }
+
+    func testRendererEmbedsSelectableKoreanFontsWithToUnicode() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "korean-math.hwp",
+            pageCount: 1,
+            pages: [koreanMathSVG()]
+        )
+
+        let document = try await render(payload)
+        let page = try XCTUnwrap(document.page(at: 0))
+        let pageText = try XCTUnwrap(page.string)
+        let fullSelection = try XCTUnwrap(
+            page.selection(for: page.bounds(for: .mediaBox))?.string
+        )
+
+        for sentinel in ["문1", "함수", "값은"] {
+            XCTAssertTrue(pageText.contains(sentinel), "PDFPage.string 누락: \(sentinel)")
+            XCTAssertTrue(fullSelection.contains(sentinel), "영역 선택 누락: \(sentinel)")
+            XCTAssertGreaterThan(
+                document.findString(sentinel, withOptions: []).count,
+                0,
+                "PDF 검색 누락: \(sentinel)"
+            )
+        }
+        XCTAssertTrue(pageText.contains("f(x)"))
+        XCTAssertTrue(fullSelection.contains("f(x)"))
+        XCTAssertGreaterThan(document.findString("f(x)", withOptions: []).count, 0)
+
+        let fontRecords = CGPDFFontResourceInspector.records(in: document)
+        let koreanFontRecords = fontRecords.filter {
+            $0.baseFont.contains("NotoSansKR") || $0.baseFont.contains("NotoSerifKR")
+        }
+        XCTAssertFalse(koreanFontRecords.isEmpty, "Noto 한글 PDF font resource가 없습니다.")
+        XCTAssertTrue(
+            koreanFontRecords.allSatisfy(\.hasToUnicode),
+            "ToUnicode 없는 Noto resource: \(koreanFontRecords)"
+        )
+        XCTAssertTrue(koreanFontRecords.contains { $0.baseFont.contains("NotoSansKR") })
+        XCTAssertTrue(koreanFontRecords.contains { $0.baseFont.contains("NotoSerifKR") })
+    }
+
+    func testRendererMapsHangulInsideMathSerifStackWithoutChangingMathText() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "mixed-hangul-math-stack.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="500" height="200" viewBox="0 0 500 200">
+                  <rect width="500" height="200" fill="white" />
+                  <text x="40" y="80"
+                        font-family="'Latin Modern Math','STIX Two Text','STIX Two Math','Times New Roman',Times,serif"
+                        font-size="24">문2 함수 f(x)=x²+2x+1</text>
+                </svg>
+                """
+            ]
+        )
+
+        let document = try await render(payload)
+        let page = try XCTUnwrap(document.page(at: 0))
+        let pageText = try XCTUnwrap(page.string)
+        let fullSelection = try XCTUnwrap(
+            page.selection(for: page.bounds(for: .mediaBox))?.string
+        )
+
+        for sentinel in ["문2", "함수", "f(x)=x²+2x+1"] {
+            XCTAssertTrue(pageText.contains(sentinel), "PDFPage.string 누락: \(sentinel)")
+            XCTAssertTrue(fullSelection.contains(sentinel), "영역 선택 누락: \(sentinel)")
+            XCTAssertGreaterThan(document.findString(sentinel, withOptions: []).count, 0)
+        }
+
+        let serifKoreanFonts = CGPDFFontResourceInspector.records(in: document).filter {
+            $0.baseFont.contains("NotoSerifKR")
+        }
+        XCTAssertFalse(serifKoreanFonts.isEmpty)
+        XCTAssertTrue(serifKoreanFonts.allSatisfy(\.hasToUnicode))
+    }
+
+    func testRendererMapsUnclassifiedAndEnclosedHangulWithOwnedSansFallback() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "unclassified-hangul-family.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="500" height="300" viewBox="0 0 500 300">
+                  <rect width="500" height="300" fill="white" />
+                  <text x="250" y="50" text-anchor="middle" fill="#666666"
+                        font-size="20">[외부: sample.png]</text>
+                  <text x="20" y="110" font-family="monospace"
+                        font-size="20">모노스페이스 한글</text>
+                  <text x="20" y="170" font-family="'Unknown Hangul Family'"
+                        font-size="20">미등록 글꼴 한글</text>
+                  <text x="20" y="230" font-size="20">㈀ 원문자 ㉠ 한글</text>
+                </svg>
+                """
+            ]
+        )
+
+        let document = try await render(payload)
+        let page = try XCTUnwrap(document.page(at: 0))
+        let pageText = try XCTUnwrap(page.string)
+        let fullSelection = try XCTUnwrap(
+            page.selection(for: page.bounds(for: .mediaBox))?.string
+        )
+
+        for sentinel in ["외부", "모노스페이스", "미등록", "㈀", "㉠"] {
+            XCTAssertTrue(pageText.contains(sentinel), "PDFPage.string 누락: \(sentinel)")
+            XCTAssertTrue(fullSelection.contains(sentinel), "영역 선택 누락: \(sentinel)")
+            XCTAssertGreaterThan(document.findString(sentinel, withOptions: []).count, 0)
+        }
+
+        let sansKoreanFonts = CGPDFFontResourceInspector.records(in: document).filter {
+            $0.baseFont.contains("NotoSansKR")
+        }
+        XCTAssertFalse(sansKoreanFonts.isEmpty)
+        XCTAssertTrue(sansKoreanFonts.allSatisfy(\.hasToUnicode))
+    }
+
+    func testRendererFailsWhenRequiredKoreanFontCannotLoadExactlyOnce() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "missing-bold-font.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+                  <rect width="200" height="300" fill="white" />
+                  <text x="20" y="50" font-family="'Haansoft Dotum','Noto Sans KR',sans-serif"
+                        font-size="20" font-weight="bold">문1 함수의 값은</text>
+                </svg>
+                """
+            ]
+        )
+        let provider = RejectingPDFFontResourceProvider(
+            wrapped: fontResourceProvider(),
+            rejectedResources: [.notoSansKRBold]
+        )
+        let renderer = RhwpStudioPagePDFRenderer(fontResourceProvider: provider)
+        var completionCount = 0
+
+        let result: Result<PDFDocument, Error> = await withCheckedContinuation { continuation in
+            renderer.render(payload: payload) { [renderer] result in
+                _ = renderer
+                completionCount += 1
+                if completionCount == 1 {
+                    continuation.resume(returning: result)
+                }
+            }
+        }
+
+        try await Task.sleep(nanoseconds: 300_000_000)
+        XCTAssertEqual(completionCount, 1)
+        guard case .failure(let error) = result,
+              case .fontPreparationFailed(let page, let reason) =
+                error as? RhwpStudioPagePDFRenderError
+        else {
+            XCTFail("필수 한글 글꼴 누락이 typed error로 완료되지 않았습니다: \(result)")
+            return
+        }
+        XCTAssertEqual(page, 1)
+        XCTAssertTrue(reason.contains("Haansoft Dotum/bold"), reason)
+    }
+
+    func testCGPDFFontInspectorTraversalRejectsCyclesAndExcessDepth() {
+        var traversal = CGPDFResourceTraversalState(maximumDepth: 2)
+        XCTAssertTrue(traversal.shouldVisit(dictionaryAddress: 1, depth: 0))
+        XCTAssertFalse(traversal.shouldVisit(dictionaryAddress: 1, depth: 1))
+        XCTAssertTrue(traversal.shouldVisit(dictionaryAddress: 2, depth: 2))
+        XCTAssertFalse(traversal.shouldVisit(dictionaryAddress: 3, depth: 3))
     }
 
     func testRendererDoesNotExecuteDocumentScriptsOrEventHandlers() async throws {
@@ -243,7 +579,14 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
                   <style>
                     @import url("\(httpBaseURL)/import.css");
                     @font-face { font-family: probe; src: url(\(httpBaseURL)/font.woff2); }
-                    .external-fill { fill: url(\(httpsBaseURL)/paint.svg#paint); font-family: probe; }
+                    @font-face {
+                      font-family: rejected-custom-probe;
+                      src: url(alhangeul-pdf-font://bundle/NotAllowed.woff2);
+                    }
+                    .external-fill {
+                      fill: url(\(httpsBaseURL)/paint.svg#paint);
+                      font-family: probe, rejected-custom-probe;
+                    }
                   </style>
                   <rect width="200" height="300" fill="white" />
                   <text x="20" y="40" font-size="18" fill="black" class="external-fill">NETWORK-BLOCKED</text>
@@ -263,7 +606,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
 
         var completionCount = 0
         let document = try await withCheckedThrowingContinuation { continuation in
-            let renderer = RhwpStudioPagePDFRenderer()
+            let renderer = makeRenderer()
             renderer.render(payload: payload) { [renderer] result in
                 _ = renderer
                 completionCount += 1
@@ -344,7 +687,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             pageCount: 1,
             pages: [svg(width: 200, height: 300, text: "Terminated")]
         )
-        let renderer = RhwpStudioPagePDFRenderer()
+        let renderer = makeRenderer()
         var completionResult: Result<PDFDocument, Error>?
 
         renderer.render(payload: payload) { result in
@@ -368,7 +711,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             pageCount: 1,
             pages: [svg(width: 200, height: 300, text: "Timeout")]
         )
-        let renderer = RhwpStudioPagePDFRenderer(pageRenderTimeoutNanoseconds: 0)
+        let renderer = makeRenderer(pageRenderTimeoutNanoseconds: 0)
         var results: [Result<PDFDocument, Error>] = []
 
         let firstCompletion = expectation(description: "first timeout")
@@ -393,12 +736,55 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
 
     private func render(_ payload: RhwpStudioPagePayload) async throws -> PDFDocument {
         try await withCheckedThrowingContinuation { continuation in
-            let renderer = RhwpStudioPagePDFRenderer()
+            let renderer = makeRenderer()
             renderer.render(payload: payload) { [renderer] result in
                 _ = renderer
                 continuation.resume(with: result)
             }
         }
+    }
+
+    private func makeRenderer(
+        pageRenderTimeoutNanoseconds: UInt64? = nil
+    ) -> RhwpStudioPagePDFRenderer {
+        if let pageRenderTimeoutNanoseconds {
+            return RhwpStudioPagePDFRenderer(
+                pageRenderTimeoutNanoseconds: pageRenderTimeoutNanoseconds,
+                fontResourceProvider: fontResourceProvider()
+            )
+        }
+        return RhwpStudioPagePDFRenderer(fontResourceProvider: fontResourceProvider())
+    }
+
+    private func fontResourceProvider() -> RhwpStudioPDFFontDirectoryResourceProvider {
+        RhwpStudioPDFFontDirectoryResourceProvider(
+            directoryURL: repositoryRootURL
+                .appendingPathComponent("Sources/HostApp/Resources/rhwp-studio/fonts", isDirectory: true)
+        )
+    }
+
+    private var repositoryRootURL: URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+    }
+
+    private func koreanMathSVG() -> String {
+        """
+        <svg xmlns="http://www.w3.org/2000/svg" width="500" height="300" viewBox="0 0 500 300">
+          <rect width="500" height="300" fill="white" />
+          <text x="40" y="70"
+                font-family="'Haansoft Dotum','Malgun Gothic','Noto Sans KR',sans-serif"
+                font-size="28" font-weight="bold">문1 함수의 값은 다음과 같다</text>
+          <text x="40" y="125"
+                font-family="'Haansoft Batang','Batang','Noto Serif KR',serif"
+                font-size="24">한글 본문과 선택지</text>
+          <text x="40" y="180"
+                font-family="'Latin Modern Math','STIX Two Math',serif"
+                font-size="28">f(x)=x²+2x+1</text>
+        </svg>
+        """
     }
 
     private func svg(width: Int, height: Int, text: String) -> String {
@@ -469,6 +855,18 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         }
 
         return Double(matchingPixels) / Double(totalPixels)
+    }
+}
+
+private struct RejectingPDFFontResourceProvider: RhwpStudioPDFFontResourceProviding {
+    let wrapped: RhwpStudioPDFFontDirectoryResourceProvider
+    let rejectedResources: Set<RhwpStudioPDFFontResource>
+
+    func data(for resource: RhwpStudioPDFFontResource) throws -> Data {
+        guard !rejectedResources.contains(resource) else {
+            throw RhwpStudioPDFFontResourceError.missingResource(resource.rawValue)
+        }
+        return try wrapped.data(for: resource)
     }
 }
 
