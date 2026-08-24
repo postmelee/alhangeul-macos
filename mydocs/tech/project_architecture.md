@@ -270,7 +270,9 @@ current editor
   -> pageCount + getPageSvg(page) 순차 수집
   -> RhwpStudioPagePayload
   -> RhwpStudioPagePDFRenderer
+       -> PDF 전용 exact custom scheme으로 허가된 Noto Sans/Serif KR 준비
        -> page SVG를 전용 WKWebView에 load
+       -> Hangul text family/weight 확인과 document.fonts readiness 대기
        -> SVG width/height/viewBox 기반 page metrics 계산
        -> page 크기로 WKPDFConfiguration.rect 설정
        -> WKWebView.createPDF
@@ -283,26 +285,50 @@ current editor
 - `RhwpStudioPrintController`는 같은 renderer 결과를 `PDFDocument.printOperation`에 전달한다. 모든 non-square page 방향이 하나로 일치할 때만 job orientation을 초기화하며, 가로·세로 혼합 문서는 job orientation을 강제하지 않고 PDFKit auto-rotate에 맡긴다.
 - Quick Look과 Thumbnail은 이 renderer를 사용하지 않는다. 두 extension은 `RhwpDocument`와 render tree 기반 `HwpPageImageRenderer`의 bitmap 경로를 유지한다.
 
+#### PDF 전용 font source, readiness와 Unicode mapping
+
+사용자용 PDF/인쇄 renderer는 원본 문서의 proprietary font binary를 포함하지 않는다. 앱 bundle의 `Resources/rhwp-studio/fonts`에 이미 포함되고 provenance와 license가 기록된 다음 네 WOFF2만 PDF 전용 font source로 재사용한다.
+
+- `NotoSansKR-Regular.woff2`
+- `NotoSansKR-Bold.woff2`
+- `NotoSerifKR-Regular.woff2`
+- `NotoSerifKR-Bold.woff2`
+
+`RhwpStudioPDFFontResource`가 이 네 filename을 exact allowlist로 고정한다. `RhwpStudioPDFFontSchemeHandler`는 `alhangeul-pdf-font://bundle/<filename>` 중 query, fragment, credential, port와 중첩 path가 없는 단일 허가 route만 응답한다. bundle font directory 밖으로 벗어난 symlink, 일반 파일이 아닌 항목, 빈 파일, 최대 크기 초과와 WOFF2 signature가 아닌 data는 거부한다.
+
+`RhwpStudioPDFFontStyle`은 Hangul/Jamo Unicode range에만 Noto Sans/Serif KR을 매핑한다. 현재 exact alias 목록은 production code가 진실 원천이며, 대표 sans alias는 `Haansoft Dotum`, `HY중고딕`, `휴먼고딕`, `Malgun Gothic`, `맑은 고딕`, 대표 serif alias는 `Haansoft Batang`, `Batang`, `바탕`, `Nanum Myeongjo`다. 수식 문단처럼 한글이 `Latin Modern Math`, STIX, Times 뒤의 generic `serif`/`sans-serif` stack에 섞이면 한글 범위에서만 각각 Noto Serif/Sans KR을 앞에 두고 수식·ASCII의 기존 family 순서는 유지한다. generic fallback도 없는 미등록 한글 family는 임의 대체하지 않는다.
+
+page가 load되면 HostApp preparation script는 먼저 `document.fonts.ready`를 기다리고, Hangul이 있는 `svg text`의 computed family와 weight를 수집한다. 필수 face마다 `document.fonts.load`를 호출한 뒤 readiness와 family/weight별 loaded face를 다시 확인하고 나서만 `createPDF`를 호출한다. 필수 family가 allowlist에 없거나 face가 해결되지 않으면 page 번호와 이유가 있는 `fontPreparationFailed`로 종료하며 system fallback 성공으로 간주하지 않는다.
+
+선택성 검증은 화면에 글자가 보이는지만으로 판정하지 않는다.
+
+1. CGPDF font resource에서 한글을 담당하는 Noto subset마다 `/ToUnicode` 존재를 확인한다.
+2. PDFKit의 `PDFPage.string`, media box rectangle selection과 `PDFDocument.findString`으로 대표 한글·수식 문자열을 확인한다.
+3. `pdffonts`의 `uni` 열과 `pdftotext -layout`을 독립 도구로 교차 확인한다.
+4. 실제 macOS 미리보기에서 드래그 선택, 복사와 검색을 확인한다.
+
+alias, font binary나 route를 바꿀 때는 WOFF2 provenance, Hangul Unicode range, CSP와 navigation 차단, font failure lifecycle, 합성 Korean/math fixture와 실제 HWP/HWPX text/raster 검증을 함께 갱신한다.
+
 #### page SVG trust boundary
 
 upstream `getPageSvg` 결과는 현재 editor에서 생성되지만 원본 문서 내용에서 유래한 markup이므로 trusted executable HTML이 아니라 비신뢰 정적 렌더 입력으로 취급한다. renderer는 SVG 문자열 자체를 범용 sanitizer로 재작성하지 않고, 전용 offscreen WebView의 실행·resource·navigation capability를 최소화한다.
 
 | 방어선 | 계약 |
 |--------|------|
-| WebView 격리 | renderer 전용 `WKWebViewConfiguration`과 `WKWebView`를 사용하고 website data store는 `.nonPersistent()`로 둔다. main editor WebView, user script, message handler와 URL scheme handler를 공유하지 않는다. |
+| WebView 격리 | renderer 전용 `WKWebViewConfiguration`과 `WKWebView`를 사용하고 website data store는 `.nonPersistent()`로 둔다. main editor WebView, user script, message handler와 resource scheme handler를 공유하지 않는다. renderer에는 PDF font exact allowlist handler만 별도로 등록한다. |
 | 문서 script 차단 | `defaultWebpagePreferences.allowsContentJavaScript = false`와 `javaScriptCanOpenWindowsAutomatically = false`를 적용한다. SVG `<script>`, event handler와 `javascript:` URL을 실행하지 않는다. |
-| app-owned metrics | page 크기 측정 script만 `WKContentWorld.defaultClient`에서 실행한다. 이 world는 page script 전역과 격리되며 DOM의 width/height, viewBox와 bounding rect만 읽는다. 실패 시 content JavaScript를 다시 켜는 fallback은 없다. |
-| subresource policy | raw SVG보다 앞에 CSP meta를 배치한다. `default-src`, script, connect, frame, object, media, worker, manifest와 font는 `'none'`이며 `base-uri`와 `form-action`도 거부한다. wrapper/SVG 표현을 위한 inline style과 실제 page bitmap을 위한 `data:` image만 허용한다. |
+| app-owned preparation·metrics | HostApp preparation script만 `WKContentWorld.defaultClient`에서 실행한다. 이 world는 page script 전역과 격리되며 허가된 Hangul font family 보정·readiness 확인과 DOM의 width/height, viewBox, bounding rect 측정만 수행한다. 실패 시 content JavaScript를 다시 켜는 fallback은 없다. |
+| subresource policy | raw SVG보다 앞에 CSP meta를 배치한다. `default-src`, script, connect, frame, object, media, worker와 manifest는 `'none'`이며 `base-uri`와 `form-action`도 거부한다. wrapper/SVG 표현용 inline style, page bitmap용 `data:` image와 exact `alhangeul-pdf-font:` source만 허용한다. |
 | navigation policy | page마다 `loadHTMLString(baseURL: nil)`이 만드는 최초 main-frame `about:blank` navigation만 한 번 허용한다. 이후 main-frame 이동, subframe, `targetFrame == nil` new-window와 HTTP/HTTPS/file/blob/custom scheme navigation은 취소한다. |
-| 실패 처리 | page load·metrics·`createPDF`를 포함한 page별 render가 30초 안에 끝나지 않으면 watchdog timeout으로 완료한다. invalid metrics, 단일-page PDF가 아닌 결과, 잘못된 media box, 최종 page count 불일치와 WebContent process 종료도 명시적 render 실패로 반환한다. 권한을 확대하거나 차단된 resource를 다시 로드하지 않는다. |
+| 실패 처리 | page load·font preparation·metrics·`createPDF`를 포함한 page별 render가 30초 안에 끝나지 않으면 watchdog timeout으로 완료한다. unresolved/unmapped Hangul font, invalid metrics, 단일-page PDF가 아닌 결과, 잘못된 media box, 최종 page count 불일치와 WebContent process 종료도 명시적 render 실패로 반환한다. 권한을 확대하거나 차단된 resource를 다시 로드하지 않는다. |
 
 navigation delegate는 모든 image, font와 CSS subresource 요청을 관측하는 경계가 아니므로 외부 resource 차단은 CSP가 담당하고 navigation policy는 frame·document 이동을 담당한다. non-persistent store는 renderer session의 website data를 영구 저장하지 않는 마지막 격리선이다. 이 세 정책 중 하나를 제거할 때는 다른 정책이 같은 범위를 대신한다고 가정하지 않고 WebKit 통합 테스트를 함께 갱신해야 한다.
 
 WebKit은 navigation policy에서 `.cancel`한 load에 `didFinish`나 `didFailProvisionalNavigation`을 보장하지 않는다. page별 watchdog은 정책이 정상 load를 취소하거나 WebKit callback이 멈춰도 renderer completion을 timeout 실패로 정확히 한 번 호출하고 다음 PDF·인쇄 요청이 재진입할 수 있게 한다. `finish`는 정상·실패·timeout 모두에서 watchdog과 WebView load를 정리한다.
 
-HostAppTests는 CSP가 없는 test-only WebView가 `127.0.0.1` 임시 listener에 실제 연결되는 양성 대조를 먼저 확인한 뒤, hardened renderer의 HTTP/HTTPS image, `<use>`, CSS paint/font/stylesheet, iframe, object, meta refresh와 new-window fixture가 연결 0건인지 검증한다. 별도 script/event sentinel은 page content가 실행되지 않으면서 HostApp metrics, searchable text, embedded data PNG와 nested data SVG raster가 유지됨을 확인한다.
+HostAppTests는 CSP가 없는 test-only WebView가 `127.0.0.1` 임시 listener에 실제 연결되는 양성 대조를 먼저 확인한 뒤, hardened renderer의 HTTP/HTTPS image, `<use>`, CSS paint/font/stylesheet, iframe, object, meta refresh와 new-window fixture가 연결 0건인지 검증한다. PDF font scheme은 허가된 네 route의 positive request와 invalid path/query/traversal·symlink·signature failure를 별도로 검증한다. 별도 script/event sentinel은 page content가 실행되지 않으면서 HostApp metrics, searchable text, embedded data PNG와 nested data SVG raster가 유지됨을 확인한다.
 
-허용된 `style-src 'unsafe-inline'`과 `img-src data:`는 현재 upstream page SVG 충실도에 필요한 최소 예외다. HTTP/HTTPS, `blob:`, file URL, 외부 font와 임의 custom scheme은 허용하지 않는다. upstream이 향후 data font나 다른 resource 계약을 추가하면 기존 예외를 넓히기 전에 대표 HWP/HWPX PDF·인쇄 회귀, script/network 차단과 deployment target WebKit 동작을 별도 변경으로 검증해야 한다.
+허용된 `style-src 'unsafe-inline'`, `img-src data:`와 `font-src alhangeul-pdf-font:`는 현재 upstream page SVG 충실도와 한글 `/ToUnicode`에 필요한 최소 예외다. HTTP/HTTPS, `blob:`, file URL, 외부 font와 그 밖의 custom scheme은 허용하지 않는다. upstream이 향후 data font나 다른 resource 계약을 추가하면 기존 예외를 넓히기 전에 대표 HWP/HWPX PDF·인쇄 회귀, script/network 차단과 deployment target WebKit 동작을 별도 변경으로 검증해야 한다.
 
 이 trust boundary는 사용자용 PDF export와 일반 인쇄의 공용 offscreen renderer에만 적용된다. main editor의 `alhangeul-studio://app` resource policy, HWP/HWPX 저장 exporter, Quick Look/Thumbnail과 Rust `rhwp` core의 실행 경계는 변경하지 않는다.
 
@@ -317,14 +343,17 @@ PDF export는 non-mutating command다.
 - editor dirty state를 clean으로 바꾸거나 `notifySaved`를 호출하지 않는다.
 - 현재 editor state에서 생성한 page SVG만 destination PDF에 반영한다.
 
-Stage 4 실제 UI smoke에서 HWP/HWPX menu와 toolbar 결과의 page count, page geometry, 추출 text와 page raster가 일치했다. KTX 가로 page는 `1123 × 794 pt`, 대표 HWP/HWPX는 upstream과 같은 9쪽 `794 × 1123 pt`를 유지했고 모든 page가 nonblank였다. macOS Preview에서 한글 text selection과 저장 전 current edit 반영도 확인했다. smoke 전후 원본 SHA-256과 수정 시각은 변하지 않았다.
+Task #484 Stage 3 실제 UI smoke에서 공개 HWP의 menu와 toolbar 결과는 21쪽, `794 × 1123 pt`, rotation 0, 7,540,583 bytes였고 추출 text와 대표 page raster가 일치했다. 한글을 담당한 Noto subset 64개는 모두 `uni=yes`였다. 대표 HWPX는 9쪽, 같은 media box, 968,865 bytes였고 Noto subset 32개가 모두 `uni=yes`였으며 모든 page가 nonblank였다. macOS 미리보기에서 `모든 항이 양수이고`를 직접 선택·복사·검색했고, smoke 전후 HWP/HWPX 원본 SHA-256과 수정 시각은 변하지 않았다.
 
 #### 잔여 제한과 실패 기준
 
 - page SVG는 순차 생성·변환하지만 bridge message와 native payload가 전체 page SVG 문자열을 보유하므로 대용량·다중-page 문서의 memory/time 비용이 남는다.
 - page별 `getPageSvg`와 native page render에는 각각 30초 timeout이 있지만 전체 document export를 포괄하는 별도 deadline은 없다.
 - SVG page metrics는 명시적 width/height, viewBox, bounding rect 순으로 해석하고 정수 point로 올림한다. 잘못되거나 0 이하인 metrics와 최종 page count 불일치는 오류로 종료한다.
-- upstream SVG는 Preview에서 선택 가능한 text layer를 유지하지만 positioned text 특성 때문에 `pdftotext -layout`에서 한글이나 편집 marker 사이에 시각 위치 기준 공백이 추가될 수 있다.
+- upstream SVG는 Preview에서 선택 가능한 text layer를 유지하지만 positioned text 특성 때문에 `pdftotext -layout`에서 한글이나 편집 marker 사이에 시각 위치 기준 공백이 추가될 수 있고 viewer마다 드래그 선택 경계가 다를 수 있다.
+- Hangul/Jamo는 허가된 Noto fallback으로 `/ToUnicode`를 보강하지만 Hanja, 수식·기호와 ASCII가 사용하는 Apple/STIX system subset에는 `uni=no`가 남을 수 있다. 모든 font resource의 완전한 선택을 보장하지 않는다.
+- 이미지·스캔과 path/도형으로 그린 글자는 PDF text layer가 아니므로 선택되지 않는다. 이 경로는 OCR이나 보이지 않는 text overlay를 생성하지 않는다.
+- page마다 font subset이 생성되므로 긴 문서는 subset 수, 생성 시간과 memory 비용이 증가한다. Task #484의 21쪽 HWP는 228개 font resource와 7,540,583-byte PDF였으며 동일 조건 v0.1.10보다 file size가 증가하지 않았다.
 - Quartz PDF metadata에는 생성 시각이 포함되므로 같은 본문을 다시 저장해도 PDF file SHA-256은 달라질 수 있다. 본문 동등성은 page count, geometry, extracted text와 raster 비교로 판정한다.
 - destination panel 취소는 output을 만들지 않는다. atomic write 실패는 partial destination을 남기지 않고 사용자 오류를 표시하며 state를 `idle`로 복구한다.
 
@@ -422,10 +451,11 @@ External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제
 
 - HostApp PDF export와 일반 인쇄는 bundled `rhwp-studio`가 현재 editor state에서 생성한 page SVG를 사용한다.
 - 문서 유래 page SVG는 비신뢰 정적 렌더 입력이다. `RhwpStudioPagePDFRenderer`는 non-persistent 전용 WKWebView에서 content JavaScript를 끄고 deny-by-default CSP, 최초 `about:blank` main-frame 1회만 허용하는 navigation policy와 page별 30초 watchdog을 적용한다.
-- HostApp의 page metrics script만 `WKContentWorld.defaultClient`에서 실행해 SVG metrics를 보존하고 `WKWebView.createPDF`를 호출한 뒤 PDFKit으로 결과 page를 합친다.
+- PDF 전용 exact custom scheme은 앱 bundle의 Noto Sans/Serif KR 4종만 제공하고, Hangul/Jamo Unicode range의 known alias와 generic serif/sans fallback에만 적용한다. 원본 proprietary font binary는 포함하지 않는다.
+- HostApp preparation script만 `WKContentWorld.defaultClient`에서 실행해 Hangul family/weight와 `document.fonts` readiness를 확인하고 SVG metrics를 보존한다. unresolved font는 page 단위 오류로 종료하며 준비가 끝난 뒤 `WKWebView.createPDF`를 호출해 PDFKit으로 결과 page를 합친다.
 - `RhwpStudioPDFExportController`는 결과를 사용자 destination에 atomic write하며, `RhwpStudioPrintController`는 같은 `PDFDocument`를 AppKit print operation에 전달한다.
 - 이 경로는 HWP/HWPX source bytes, `RhwpDocument`, render tree bitmap과 `HwpPreviewPDFRenderer`를 거치지 않는다.
-- PDF의 searchable/selectable text semantics는 upstream page SVG와 WebKit PDF 생성 결과에 따른다.
+- PDF의 searchable/selectable text semantics는 upstream page SVG와 WebKit PDF 생성 결과에 따른다. 한글 mapping은 `/ToUnicode`, PDFKit selection/search, `pdftotext`와 실제 미리보기 선택을 함께 검증한다.
 
 ### 장기 HostApp native 경로
 

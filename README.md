@@ -114,6 +114,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 - 평문 HWP3 문서는 열 수 있지만 HWP3 원형으로 다시 저장할 수는 없습니다. 저장 전 형식 변환을 알리고, 원본과 기존 파일을 덮어쓰지 않는 새 HWP5 또는 HWPX 변환 복사본만 저장합니다. 자세한 추적은 [Issue #482](https://github.com/postmelee/alhangeul-macos/issues/482)를 참조하세요.
 - 암호로 보호된 HWP/HWPX 문서는 열 수 있지만 현재 native 저장 경로는 암호 보호를 유지하거나 새 암호를 설정할 수 없습니다. 저장 전 보호 해제를 알리고 원본과 다른 새 경로의 평문 복사본만 허용합니다. 자세한 추적은 [Issue #480](https://github.com/postmelee/alhangeul-macos/issues/480)을 참조하세요.
 - HWP5/HWPX 저장은 형식별 exporter와 container signature를 확인하지만, upstream exporter가 모든 문서 요소를 의미론적으로 완전 무손실 보존한다고 보장하지 않습니다.
+- 다음 패치 릴리스 후보의 PDF/인쇄 경로는 허가된 앱 내장 Noto fallback으로 한글 text layer의 Unicode mapping을 보강합니다. 다만 positioned SVG의 읽기·드래그 선택 순서는 viewer마다 다를 수 있고, Hanja·일부 수식/기호의 system font, 이미지·스캔·도형 안 글자는 완전한 선택을 보장하지 않으며 OCR을 제공하지 않습니다.
 - 손상, 대용량, 미지원 문서 fallback은 앱과 extension이 멈추지 않도록 하는 안전장치이며, 파일 복구나 부분 렌더링을 보장하지 않습니다.
 - CoreGraphics/CoreText 기반 native renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity gap은 현재 Quick Look/Thumbnail과 fallback/diagnostic 경로에서 계속 다룹니다. HostApp 장기 native 경로는 Rust/rhwp Skia renderer와 Swift overlay를 결합하는 방향으로 분리합니다.
 
@@ -156,7 +157,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 | 표면 | v0.1 렌더링 경로 | 기준 |
 |------|------------------|------|
 | HostApp viewer/editor 화면 | `rhwp-studio` Web/WASM rendering in WKWebView | 첫 공개 배포의 기본 viewer/editor 경로 |
-| PDF 내보내기 | `rhwp-studio` page SVG + 전용 WKWebView/PDFKit native PDF 경로 | 현재 편집 상태의 전체 페이지와 searchable text 반영 |
+| PDF 내보내기 | `rhwp-studio` page SVG + 전용 WKWebView/PDFKit native PDF 경로 | 현재 편집 상태의 전체 페이지, 앱 소유 한글 fallback과 searchable text 반영 |
 | 인쇄 | PDF 내보내기와 같은 page SVG renderer + PDFKit/AppKit print operation | page geometry를 공유하고 native print panel 사용 |
 | Quick Look preview | Rust bridge + Swift CoreGraphics/CoreText render tree bitmap/PDF | Finder preview용 경로 |
 | Finder thumbnail | Rust bridge + Swift CoreGraphics/CoreText first-page bitmap/cache | Finder icon/thumbnail용 경로 |
