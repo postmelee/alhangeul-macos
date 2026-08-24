@@ -315,6 +315,16 @@ enum RhwpStudioPagePDFHTML {
     const ownedFamilies = \#(RhwpStudioPDFFontStyle.ownedFamilyNamesJSON);
     const hangulPattern = /[\u1100-\u11ff\u3130-\u318f\ua960-\ua97f\uac00-\ud7af\ud7b0-\ud7ff]/;
     const normalizeFamily = value => value.trim().replace(/^['"]|['"]$/g, "");
+    const ownedFallbackFamily = families => {
+      const normalized = families.map(family => family.toLowerCase());
+      if (normalized.includes("serif")) {
+        return "Noto Serif KR";
+      }
+      if (normalized.includes("sans-serif")) {
+        return "Noto Sans KR";
+      }
+      return null;
+    };
     const requiredFaces = new Map();
     const unmappedHangulFamilies = new Set();
     for (const textNode of document.querySelectorAll("svg text")) {
@@ -322,9 +332,24 @@ enum RhwpStudioPagePDFHTML {
       if (!sample) {
         continue;
       }
-      const style = getComputedStyle(textNode);
-      const families = style.fontFamily.split(",").map(normalizeFamily);
-      const family = families.find(candidate => ownedFamilies.includes(candidate));
+      let style = getComputedStyle(textNode);
+      let families = style.fontFamily.split(",").map(normalizeFamily);
+      let family = families.find(candidate => ownedFamilies.includes(candidate));
+      if (!family) {
+        const fallbackFamily = ownedFallbackFamily(families);
+        if (!fallbackFamily) {
+          unmappedHangulFamilies.add(style.fontFamily || "(empty)");
+          continue;
+        }
+        textNode.style.setProperty(
+          "font-family",
+          `"${fallbackFamily}", ${style.fontFamily}`,
+          "important"
+        );
+        style = getComputedStyle(textNode);
+        families = style.fontFamily.split(",").map(normalizeFamily);
+        family = families.find(candidate => ownedFamilies.includes(candidate));
+      }
       if (!family) {
         unmappedHangulFamilies.add(style.fontFamily || "(empty)");
         continue;
@@ -338,6 +363,16 @@ enum RhwpStudioPagePDFHTML {
         sample
       });
     }
+
+    await Promise.all(Array.from(requiredFaces.values()).map(required => {
+      const cssWeight = required.isBold ? 700 : 400;
+      const escapedFamily = required.family.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      return document.fonts.load(
+        `${cssWeight} 12px "${escapedFamily}"`,
+        required.sample
+      ).catch(() => []);
+    }));
+    await document.fonts.ready;
 
     const loadedFaces = Array.from(document.fonts).filter(face => face.status === "loaded");
     const faceIsBold = face => {

@@ -279,6 +279,76 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         XCTAssertTrue(koreanFontRecords.contains { $0.baseFont.contains("NotoSerifKR") })
     }
 
+    func testRendererMapsHangulInsideMathSerifStackWithoutChangingMathText() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "mixed-hangul-math-stack.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="500" height="200" viewBox="0 0 500 200">
+                  <rect width="500" height="200" fill="white" />
+                  <text x="40" y="80"
+                        font-family="'Latin Modern Math','STIX Two Text','STIX Two Math','Times New Roman',Times,serif"
+                        font-size="24">문2 함수 f(x)=x²+2x+1</text>
+                </svg>
+                """
+            ]
+        )
+
+        let document = try await render(payload)
+        let page = try XCTUnwrap(document.page(at: 0))
+        let pageText = try XCTUnwrap(page.string)
+        let fullSelection = try XCTUnwrap(
+            page.selection(for: page.bounds(for: .mediaBox))?.string
+        )
+
+        for sentinel in ["문2", "함수", "f(x)=x²+2x+1"] {
+            XCTAssertTrue(pageText.contains(sentinel), "PDFPage.string 누락: \(sentinel)")
+            XCTAssertTrue(fullSelection.contains(sentinel), "영역 선택 누락: \(sentinel)")
+            XCTAssertGreaterThan(document.findString(sentinel, withOptions: []).count, 0)
+        }
+
+        let serifKoreanFonts = CGPDFFontResourceInspector.records(in: document).filter {
+            $0.baseFont.contains("NotoSerifKR")
+        }
+        XCTAssertFalse(serifKoreanFonts.isEmpty)
+        XCTAssertTrue(serifKoreanFonts.allSatisfy(\.hasToUnicode))
+    }
+
+    func testRendererStillRejectsUnknownHangulFamilyWithoutGenericFallback() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "unknown-hangul-family.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+                  <rect width="200" height="300" fill="white" />
+                  <text x="20" y="50" font-family="'Unknown Hangul Family'"
+                        font-size="20">문1 함수의 값은</text>
+                </svg>
+                """
+            ]
+        )
+        let renderer = makeRenderer()
+
+        let result: Result<PDFDocument, Error> = await withCheckedContinuation { continuation in
+            renderer.render(payload: payload) { [renderer] result in
+                _ = renderer
+                continuation.resume(returning: result)
+            }
+        }
+
+        guard case .failure(let error) = result,
+              case .fontPreparationFailed(let page, let reason) =
+                error as? RhwpStudioPagePDFRenderError
+        else {
+            XCTFail("generic fallback 없는 미등록 한글 글꼴이 거부되지 않았습니다: \(result)")
+            return
+        }
+        XCTAssertEqual(page, 1)
+        XCTAssertTrue(reason.contains("Unknown Hangul Family"), reason)
+    }
+
     func testRendererFailsWhenRequiredKoreanFontCannotLoadExactlyOnce() async throws {
         let payload = try RhwpStudioPagePayload(
             fileName: "missing-bold-font.hwp",
