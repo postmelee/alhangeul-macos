@@ -135,6 +135,21 @@ parse_args "$@"
 [ -f "$RESOURCE_DIR/manifest.webmanifest" ] || fail "missing manifest.webmanifest"
 [ -f "$RESOURCE_DIR/alhangeul-wkwebview-overrides.css" ] || fail "missing Alhangeul WKWebView override stylesheet"
 [ -d "$RESOURCE_DIR/assets" ] || fail "missing assets directory: $RESOURCE_DIR/assets"
+[ -d "$RESOURCE_DIR/fonts" ] || fail "missing fonts directory: $RESOURCE_DIR/fonts"
+
+for pdf_font_name in \
+  NotoSansKR-Regular.woff2 \
+  NotoSansKR-Bold.woff2 \
+  NotoSerifKR-Regular.woff2 \
+  NotoSerifKR-Bold.woff2
+do
+  pdf_font_path="$RESOURCE_DIR/fonts/$pdf_font_name"
+  [ -f "$pdf_font_path" ] || fail "missing PDF font: $pdf_font_path"
+  [ ! -L "$pdf_font_path" ] || fail "PDF font must not be a symlink: $pdf_font_path"
+  pdf_font_signature="$(od -An -N4 -t x1 "$pdf_font_path" | tr -d '[:space:]')"
+  [ "$pdf_font_signature" = "774f4632" ] \
+    || fail "PDF font is not WOFF2: $pdf_font_path"
+done
 
 verify_local_override_ownership "$RESOURCE_DIR/alhangeul-wkwebview-overrides.css"
 

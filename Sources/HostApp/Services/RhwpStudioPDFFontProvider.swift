@@ -183,8 +183,27 @@ final class RhwpStudioPDFFontSchemeHandler: NSObject, WKURLSchemeHandler {
 }
 
 enum RhwpStudioPDFFontStyle {
-    static let hangulUnicodeRange =
-        "U+1100-11FF, U+3130-318F, U+A960-A97F, U+AC00-D7AF, U+D7B0-D7FF"
+    static let hangulUnicodeRanges: [ClosedRange<UInt32>] = [
+        0x1100...0x11FF,
+        0x3130...0x318F,
+        0x3200...0x321E,
+        0x3260...0x327F,
+        0xA960...0xA97F,
+        0xAC00...0xD7AF,
+        0xD7B0...0xD7FF
+    ]
+
+    static let hangulUnicodeRange = hangulUnicodeRanges
+        .map { range in
+            String(format: "U+%04X-%04X", range.lowerBound, range.upperBound)
+        }
+        .joined(separator: ", ")
+
+    static let hangulJavaScriptCharacterClass = hangulUnicodeRanges
+        .map { range in
+            String(format: "\\u%04X-\\u%04X", range.lowerBound, range.upperBound)
+        }
+        .joined()
 
     static let sansAliases = [
         "Haansoft Dotum",

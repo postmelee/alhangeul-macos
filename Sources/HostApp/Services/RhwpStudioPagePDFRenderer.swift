@@ -313,7 +313,7 @@ enum RhwpStudioPagePDFHTML {
     static let pagePreparationScript = #"""
     await document.fonts.ready;
     const ownedFamilies = \#(RhwpStudioPDFFontStyle.ownedFamilyNamesJSON);
-    const hangulPattern = /[\u1100-\u11ff\u3130-\u318f\ua960-\ua97f\uac00-\ud7af\ud7b0-\ud7ff]/;
+    const hangulPattern = /[\#(RhwpStudioPDFFontStyle.hangulJavaScriptCharacterClass)]/;
     const normalizeFamily = value => value.trim().replace(/^['"]|['"]$/g, "");
     const ownedFallbackFamily = families => {
       const normalized = families.map(family => family.toLowerCase());
@@ -326,7 +326,6 @@ enum RhwpStudioPagePDFHTML {
       return null;
     };
     const requiredFaces = new Map();
-    const unmappedHangulFamilies = new Set();
     for (const textNode of document.querySelectorAll("svg text")) {
       const sample = (textNode.textContent || "").match(hangulPattern)?.[0];
       if (!sample) {
@@ -336,11 +335,7 @@ enum RhwpStudioPagePDFHTML {
       let families = style.fontFamily.split(",").map(normalizeFamily);
       let family = families.find(candidate => ownedFamilies.includes(candidate));
       if (!family) {
-        const fallbackFamily = ownedFallbackFamily(families);
-        if (!fallbackFamily) {
-          unmappedHangulFamilies.add(style.fontFamily || "(empty)");
-          continue;
-        }
+        const fallbackFamily = ownedFallbackFamily(families) || "Noto Sans KR";
         textNode.style.setProperty(
           "font-family",
           `"${fallbackFamily}", ${style.fontFamily}`,
@@ -351,8 +346,7 @@ enum RhwpStudioPagePDFHTML {
         family = families.find(candidate => ownedFamilies.includes(candidate));
       }
       if (!family) {
-        unmappedHangulFamilies.add(style.fontFamily || "(empty)");
-        continue;
+        throw new Error(`failed to apply owned Hangul fallback: ${style.fontFamily || "(empty)"}`);
       }
       const numericWeight = Number.parseInt(style.fontWeight, 10);
       const isBold = style.fontWeight === "bold"
@@ -393,30 +387,28 @@ enum RhwpStudioPagePDFHTML {
     let fontFailureReason = null;
     if (document.fonts.status !== "loaded") {
       fontFailureReason = `document.fonts.status=${document.fonts.status}`;
-    } else if (unmappedHangulFamilies.size > 0) {
-      fontFailureReason = `unmapped Hangul families: ${Array.from(unmappedHangulFamilies).join(", ")}`;
     } else if (unresolvedFaces.length > 0) {
       fontFailureReason = `unresolved PDF fonts: ${unresolvedFaces
         .map(face => `${face.family}/${face.isBold ? "bold" : "regular"}`)
         .join(", ")}`;
     }
 
-      const svg = document.querySelector("svg");
-      const rect = svg?.getBoundingClientRect();
-      const viewBox = svg?.viewBox?.baseVal;
-      const dimension = (name, rectValue, viewBoxValue) => {
-        const attribute = svg?.getAttribute(name)?.trim() || "";
-        const resolved = svg?.[name]?.baseVal?.value;
-        if (attribute && !attribute.endsWith("%") && Number.isFinite(resolved) && resolved > 0) {
-          return resolved;
-        }
-        if (Number.isFinite(viewBoxValue) && viewBoxValue > 0) {
-          return viewBoxValue;
-        }
-        return Number.isFinite(rectValue) && rectValue > 0 ? rectValue : 0;
-      };
-      const width = Math.ceil(dimension("width", rect?.width, viewBox?.width));
-      const height = Math.ceil(dimension("height", rect?.height, viewBox?.height));
+    const svg = document.querySelector("svg");
+    const rect = svg?.getBoundingClientRect();
+    const viewBox = svg?.viewBox?.baseVal;
+    const dimension = (name, rectValue, viewBoxValue) => {
+      const attribute = svg?.getAttribute(name)?.trim() || "";
+      const resolved = svg?.[name]?.baseVal?.value;
+      if (attribute && !attribute.endsWith("%") && Number.isFinite(resolved) && resolved > 0) {
+        return resolved;
+      }
+      if (Number.isFinite(viewBoxValue) && viewBoxValue > 0) {
+        return viewBoxValue;
+      }
+      return Number.isFinite(rectValue) && rectValue > 0 ? rectValue : 0;
+    };
+    const width = Math.ceil(dimension("width", rect?.width, viewBox?.width));
+    const height = Math.ceil(dimension("height", rect?.height, viewBox?.height));
     return JSON.stringify({ width, height, fontFailureReason });
     """#
 

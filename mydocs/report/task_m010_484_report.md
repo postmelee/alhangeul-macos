@@ -11,7 +11,7 @@
 
 v0.1.10에서 `3-11월_실전_통합_2022.hwp`를 PDF로 내보냈을 때 문항 텍스트 선택·검색·복사가 불안정한 원인은 페이지 전체 bitmap화나 수식 자체가 아니었다. page SVG의 한글이 WebKit/Quartz의 system fallback인 `AppleSDGothicNeo` subset으로 들어가면서 `/ToUnicode` CMap이 생성되지 않은 글꼴 resource가 다수 생긴 것이 직접 원인이었다.
 
-PDF/인쇄 공용 renderer에 앱이 이미 보유한 Noto Sans/Serif KR WOFF2 네 종을 제공하는 좁은 custom scheme을 추가하고 Hangul/Jamo 범위에만 적용했다. font readiness와 실제 family/weight load를 확인한 뒤 PDF를 생성하며, 해결되지 않은 한글 family는 조용히 system fallback하지 않고 page 단위 오류로 종료한다. 기존의 content script·외부 resource·navigation 차단과 page geometry는 유지했다.
+PDF/인쇄 공용 renderer에 앱이 이미 보유한 Noto Sans/Serif KR WOFF2 네 종을 제공하는 좁은 custom scheme을 추가하고 Hangul/Jamo와 Enclosed/Circled Hangul 범위에 적용했다. font readiness와 실제 family/weight load를 확인한 뒤 PDF를 생성한다. known/generic family는 Sans/Serif 의미를 보존하고, family가 없거나 미등록·monospace인 한글 text는 Noto Sans KR로 보정한다. 선택된 owned face가 실제로 load되지 않으면 page 단위 오류로 종료한다. 기존의 content script·외부 resource·navigation 차단과 page geometry는 유지했다.
 
 공개 21쪽 HWP와 대표 9쪽 HWPX를 실제 앱에서 내보내고 일반 인쇄·취소까지 검증했다. 한글을 담당하는 새 Noto subset은 모두 `uni=yes`였고 macOS 미리보기에서 실제 문장을 드래그 선택·복사·검색했다. 동일 조건 v0.1.10과 비교해 줄바꿈, 수식·표·도형 배치와 페이지 크기를 유지했다.
 
@@ -24,16 +24,18 @@ PDF/인쇄 공용 renderer에 앱이 이미 보유한 Noto Sans/Serif KR WOFF2 �
 | Stage 2 | `0457756` | PDF 전용 font provider, Hangul/Jamo mapping, readiness와 CGPDF/PDFKit·보안 자동 회귀 구현 |
 | Stage 3 | `cf64b13` | 공개 21쪽 HWP·9쪽 HWPX의 PDF 선택·렌더·인쇄 통합 검증과 수식 generic stack 보정 |
 | Stage 4 | `6d8de73` | font source·Unicode mapping·보안 경계·잔여 제한 문서화와 clean 최종 검증 |
+| PR #485 리뷰 보정 | 본 보고서를 포함한 보정 커밋 | 외부 이미지 placeholder를 포함한 미분류 한글 fallback, Unicode 범위 단일화, 번들 font 자산 검증 보강 |
 
 ## 변경 파일 목록과 영향 범위
 
 | 파일 | 내용 |
 |------|------|
-| `Sources/HostApp/Services/RhwpStudioPDFFontProvider.swift` | Noto Sans/Serif KR 네 종 exact allowlist, bundle/directory provider, WOFF2 signature·크기·regular file·symlink 검증, PDF 전용 scheme handler와 Hangul/Jamo alias CSS 추가 |
-| `Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift` | PDF font scheme 등록, 한글 family·weight 수집, `document.fonts.ready/load` 검증, generic serif/sans 수식 stack 보정과 typed font error 추가 |
+| `Sources/HostApp/Services/RhwpStudioPDFFontProvider.swift` | Noto Sans/Serif KR 네 종 exact allowlist, bundle/directory provider, WOFF2 signature·크기·regular file·symlink 검증, PDF 전용 scheme handler와 Hangul Unicode 범위의 CSS/JavaScript 단일 진실 원천 추가 |
+| `Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift` | PDF font scheme 등록, 한글 family·weight 수집, `document.fonts.ready/load` 검증, known/generic Sans·Serif 보정, 미분류 한글의 Noto Sans fallback과 typed font error 추가 |
 | `Sources/HostApp/Services/RhwpStudioPDFExportController.swift` | 사용자 저장·인쇄의 공용 renderer 계약을 유지하면서 deterministic test renderer 주입 경계 보강 |
 | `Tests/HostAppTests/CGPDFFontResourceInspector.swift` | page와 nested Form XObject의 font resource·`/ToUnicode` 검사, cycle·depth 제한 추가 |
-| `Tests/HostAppTests/RhwpStudioPagePDFRendererTests.swift` | 한글·수식 selection/search/ToUnicode, exact font route, readiness failure, CSP·외부 resource·navigation과 기존 geometry/raster 회귀 검증 |
+| `Tests/HostAppTests/RhwpStudioPagePDFRendererTests.swift` | 한글·수식 selection/search/ToUnicode, exact font route와 production bundle provider, readiness failure, 실제 외부 이미지 placeholder·미분류·monospace·Enclosed/Circled Hangul, CSP·외부 resource·navigation과 기존 geometry/raster 회귀 검증 |
+| `scripts/verify-rhwp-studio-assets.sh` | source와 빌드 앱의 exact font 4종 존재·regular file·non-symlink·WOFF2 signature 검증 추가 |
 | `Tests/HostAppTests/RhwpStudioPDFExportControllerTests.swift` | 2쪽 한글 searchable PDF와 portrait/landscape export controller 회귀 보강 |
 | `project.yml`, `Alhangeul.xcodeproj/project.pbxproj` | 신규 production font provider와 test helper를 HostAppTests 구성에 포함하고 XcodeGen으로 project 재생성 |
 | `README.md` | 다음 패치 릴리스 후보의 한글 PDF mapping 개선과 positioned SVG·Hanja·수식·이미지/OCR 제한 안내 |
@@ -71,9 +73,9 @@ PDF/인쇄 공용 renderer에 앱이 이미 보유한 Noto Sans/Serif KR WOFF2 �
 | HWPX font resource | 63개, `uni=yes` 45개, `uni=no` 18개 |
 | HWPX 한글 Noto subset | 32개, 모두 `uni=yes` |
 | HWP PDFKit 검색 | `문1` 22건, `함수` 48건, `값은` 37건, `f ( x )` 50건 |
-| PDF renderer 표적 테스트 | 18개, 실패 0개 |
-| HostAppTests 전체 | 150개, 실패 0개 |
-| 최종 Task diff | 최종 보고서 커밋 전 17개 파일, 2,209줄 추가, 48줄 삭제 |
+| PDF renderer 표적 테스트 | 19개, 실패 0개 |
+| HostAppTests 전체 | 151개, 실패 0개 |
+| 최종 Task diff | PR 리뷰 보정 포함 19개 파일, 2,493줄 추가, 60줄 삭제 |
 
 ## 구현 결과
 
@@ -87,19 +89,21 @@ PDF/인쇄 공용 renderer에 앱이 이미 보유한 Noto Sans/Serif KR WOFF2 �
 - CSP `font-src`에는 전용 scheme만 추가하고 HTTP/HTTPS, file, blob과 임의 custom scheme은 계속 차단
 - main editor의 `alhangeul-studio://app` handler나 resource 표면을 공유하지 않음
 
-원본 proprietary font binary는 PDF에 새로 포함하지 않는다. known 한글 alias와 generic serif/sans stack의 Hangul/Jamo Unicode 범위만 Noto Sans/Serif KR로 연결하고 ASCII, Hanja, 수식 glyph와 기존 family 순서는 유지한다.
+원본 proprietary font binary는 PDF에 새로 포함하지 않는다. known 한글 alias와 generic serif/sans stack의 Hangul/Jamo·Enclosed/Circled Hangul Unicode 범위만 Noto Sans/Serif KR로 연결하고 ASCII, Hanja, 수식 glyph와 기존 family 순서는 유지한다. family가 없거나 분류할 수 없는 한글 text는 Noto Sans KR로 보정한다.
 
 ### font readiness와 실패 계약
 
 page가 load되면 HostApp preparation script가 `WKContentWorld.defaultClient`에서 다음 순서를 수행한다.
 
 1. `document.fonts.ready` 대기
-2. Hangul이 있는 SVG text의 computed family와 weight 수집
-3. 허가된 필수 face별 `document.fonts.load` 호출
+2. Hangul이 있는 SVG text의 computed family와 weight를 수집하고 known/generic family 또는 Noto Sans fallback 결정
+3. 결정된 허가 face별 `document.fonts.load` 호출
 4. readiness와 family/weight별 loaded face 재확인
 5. SVG page metrics 확정 뒤 `WKWebView.createPDF` 호출
 
-필수 family가 allowlist에 없거나 face를 해결하지 못하면 page 번호와 원인이 있는 `fontPreparationFailed`로 종료한다. content JavaScript를 다시 켜거나 system fallback 성공으로 간주하는 우회 경로는 없다. font 준비도 기존 page별 30초 watchdog과 exactly-once completion lifecycle 안에 포함된다.
+미분류 family 자체는 Noto Sans KR로 보정하지만, 결정된 owned face를 실제로 load하지 못하면 page 번호와 원인이 있는 `fontPreparationFailed`로 종료한다. content JavaScript를 다시 켜거나 system fallback 성공으로 간주하는 우회 경로는 없다. font 준비도 기존 page별 30초 watchdog과 exactly-once completion lifecycle 안에 포함된다.
+
+CSS `unicode-range`와 JavaScript의 Hangul 판별식은 production Swift의 동일 범위 목록에서 생성한다. 이 범위에는 `U+3200–321E` Enclosed Hangul과 `U+3260–327F` Circled Hangul도 포함된다. bundled Studio WASM이 외부 이미지를 표시할 때 만드는 family 없는 `[외부: sample.png]` text를 그대로 사용한 WebKit/PDFKit 회귀로 fallback과 선택·검색을 검증한다.
 
 ### Unicode mapping 회귀 검증
 
@@ -154,15 +158,15 @@ smoke 전후 HWP/HWPX 원본의 SHA-256과 수정 시각은 동일했다. 앱은
 | 검증 | 결과 |
 |------|------|
 | `xcodegen generate` | 통과. project 재생성 뒤 추가 diff 없음 |
-| HostAppTests | `** TEST SUCCEEDED **`, 150개, 실패 0개 |
-| `RhwpStudioPagePDFRendererTests` | 18개, 실패 0개 |
+| HostAppTests | `** TEST SUCCEEDED **`, 151개, 실패 0개 |
+| `RhwpStudioPagePDFRendererTests` | 19개, 실패 0개 |
 | HostApp Debug build | `** BUILD SUCCEEDED **` |
-| 최종 앱 bundled Studio asset | verifier 통과 |
+| source·최종 앱 bundled Studio asset | exact WOFF2 font 4종을 포함해 verifier 통과 |
 | `./scripts/check-no-appkit.sh` | 통과. shared Swift code AppKit/UIKit 직접 의존 없음 |
 | `git diff --check` | 통과 |
-| 최신 `origin/devel...HEAD` | `0 6`, 최종 보고서 커밋 전 작업 브랜치가 뒤처지지 않고 6개 commit 앞섬 |
+| 최신 `origin/devel...HEAD` | `0 8`, PR 리뷰 보정 커밋 반영 뒤 작업 브랜치가 뒤처지지 않고 8개 commit 앞섬 |
 
-WebKit 테스트 중 RunningBoard, pasteboard와 audio registrar 관련 sandbox 진단이 출력되지만 renderer 테스트와 전체 suite는 정상 완료됐다. 최초 clean test의 Sparkle dependency resolve는 sandbox DNS 제한으로 중단됐으나 허용된 host 환경에서 동일 명령을 재실행해 package resolve부터 150개 테스트까지 통과했다.
+WebKit 테스트 중 RunningBoard, pasteboard와 audio registrar 관련 sandbox 진단이 출력되지만 renderer 테스트와 전체 suite는 정상 완료됐다. 최초 clean test의 Sparkle dependency resolve는 sandbox DNS 제한으로 중단됐으나 허용된 host 환경에서 동일 명령을 재실행해 package resolve부터 151개 테스트까지 통과했다.
 
 ## 잔여 위험과 후속 작업
 
@@ -170,7 +174,7 @@ WebKit 테스트 중 RunningBoard, pasteboard와 audio registrar 관련 sandbox 
 - Hangul/Jamo의 Noto subset은 `uni=yes`지만 Hanja, 일부 수식·기호와 ASCII를 담당하는 Apple/STIX system subset에는 `uni=no`가 남을 수 있다. 모든 glyph의 완전한 선택은 이번 범위가 아니다.
 - 이미지·스캔과 path/도형으로 그린 문자는 text layer가 아니므로 선택되지 않는다. OCR이나 숨은 text overlay는 제공하지 않는다.
 - page별 font subset 때문에 장문 문서의 resource 수, 생성 시간과 memory 비용이 증가할 수 있다. 이번 21쪽 결과에서는 동일 조건 v0.1.10보다 파일 크기가 증가하지 않았다.
-- upstream page SVG가 allowlist에 없는 새 한글 family를 사용하면 page 단위 font preparation error로 종료한다. 향후 bundled Studio 동기화에서 alias drift를 함께 확인해야 한다.
+- upstream page SVG의 새 한글 family는 Noto Sans KR로 보정되므로 export 전체를 중단하지 않는다. 다만 원래 serif 의도처럼 분류할 근거가 없는 family 의미는 보존할 수 없으므로 bundled Studio 동기화에서 alias drift를 함께 확인해야 한다.
 - 실문서 HWP/HWPX smoke는 수동 회귀이며 CI는 합성 Korean/math와 보안 경계 fixture로 deterministic 회귀를 담당한다.
 - PR merge 확인 뒤 Issue #484 close, `publish/task484`/`local/task484`와 필요 없는 worktree를 정리한다.
 
