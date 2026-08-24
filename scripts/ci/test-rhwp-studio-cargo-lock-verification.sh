@@ -55,6 +55,19 @@ expect_failure() {
     "$description returned an unexpected error"
 }
 
+write_pdf_font_fixtures() {
+  local font_dir="$1"
+  mkdir -p "$font_dir"
+  for pdf_font_name in \
+    NotoSansKR-Regular.woff2 \
+    NotoSansKR-Bold.woff2 \
+    NotoSerifKR-Regular.woff2 \
+    NotoSerifKR-Bold.woff2
+  do
+    printf '\167\117\106\062' > "$font_dir/$pdf_font_name"
+  done
+}
+
 write_resource() {
   local resource_dir="$1"
   local fingerprint="${2:-}"
@@ -62,6 +75,7 @@ write_resource() {
   local fingerprint_line=""
 
   mkdir -p "$resource_dir/assets"
+  write_pdf_font_fixtures "$resource_dir/fonts"
   cat > "$resource_dir/index.html" <<'EOF'
 <!doctype html>
 <link rel="stylesheet" href="./assets/index-fixture.css">
@@ -101,6 +115,7 @@ EOF
 write_upstream_checkout() {
   local upstream_dir="$1"
   mkdir -p "$upstream_dir/pkg" "$upstream_dir/rhwp-studio/dist/assets"
+  write_pdf_font_fixtures "$upstream_dir/rhwp-studio/dist/fonts"
   printf '%s\n' 'fixture Cargo lock contents' > "$upstream_dir/Cargo.lock"
   printf '%s\n' 'fixture-rhwp-js' > "$upstream_dir/pkg/rhwp.js"
   printf '%s\n' 'fixture-rhwp-wasm' > "$upstream_dir/pkg/rhwp_bg.wasm"
@@ -139,6 +154,30 @@ write_resource "$legacy_resource"
 "$VERIFIER" --resource-dir "$legacy_resource" > "$COMMAND_STDOUT"
 assert_contains "$COMMAND_STDOUT" "rhwp-studio assets verified" \
   "legacy resource-only verification did not succeed"
+
+missing_font_resource="$TMP_ROOT/missing-font-resource"
+write_resource "$missing_font_resource"
+rm "$missing_font_resource/fonts/NotoSansKR-Regular.woff2"
+expect_failure "resource without required PDF font" \
+  "missing PDF font: $missing_font_resource/fonts/NotoSansKR-Regular.woff2" \
+  "$VERIFIER" --resource-dir "$missing_font_resource"
+
+invalid_font_resource="$TMP_ROOT/invalid-font-resource"
+write_resource "$invalid_font_resource"
+printf '%s\n' 'not-woff2' \
+  > "$invalid_font_resource/fonts/NotoSerifKR-Bold.woff2"
+expect_failure "resource with invalid PDF font signature" \
+  "PDF font is not WOFF2: $invalid_font_resource/fonts/NotoSerifKR-Bold.woff2" \
+  "$VERIFIER" --resource-dir "$invalid_font_resource"
+
+symlink_font_resource="$TMP_ROOT/symlink-font-resource"
+write_resource "$symlink_font_resource"
+rm "$symlink_font_resource/fonts/NotoSansKR-Bold.woff2"
+ln -s NotoSansKR-Regular.woff2 \
+  "$symlink_font_resource/fonts/NotoSansKR-Bold.woff2"
+expect_failure "resource with symlinked PDF font" \
+  "PDF font must not be a symlink: $symlink_font_resource/fonts/NotoSansKR-Bold.woff2" \
+  "$VERIFIER" --resource-dir "$symlink_font_resource"
 
 upstream_dir="$TMP_ROOT/upstream"
 write_upstream_checkout "$upstream_dir"

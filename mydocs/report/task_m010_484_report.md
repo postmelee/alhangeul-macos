@@ -24,7 +24,7 @@ PDF/인쇄 공용 renderer에 앱이 이미 보유한 Noto Sans/Serif KR WOFF2 �
 | Stage 2 | `0457756` | PDF 전용 font provider, Hangul/Jamo mapping, readiness와 CGPDF/PDFKit·보안 자동 회귀 구현 |
 | Stage 3 | `cf64b13` | 공개 21쪽 HWP·9쪽 HWPX의 PDF 선택·렌더·인쇄 통합 검증과 수식 generic stack 보정 |
 | Stage 4 | `6d8de73` | font source·Unicode mapping·보안 경계·잔여 제한 문서화와 clean 최종 검증 |
-| PR #485 리뷰 보정 | 본 보고서를 포함한 보정 커밋 | 외부 이미지 placeholder를 포함한 미분류 한글 fallback, Unicode 범위 단일화, 번들 font 자산 검증 보강 |
+| PR #485 리뷰 보정 | `bf15c4e` + CI fixture 보정 커밋 | 외부 이미지 placeholder를 포함한 미분류 한글 fallback, Unicode 범위 단일화, 번들 font 자산·verifier fixture 검증 보강 |
 
 ## 변경 파일 목록과 영향 범위
 
@@ -36,6 +36,7 @@ PDF/인쇄 공용 renderer에 앱이 이미 보유한 Noto Sans/Serif KR WOFF2 �
 | `Tests/HostAppTests/CGPDFFontResourceInspector.swift` | page와 nested Form XObject의 font resource·`/ToUnicode` 검사, cycle·depth 제한 추가 |
 | `Tests/HostAppTests/RhwpStudioPagePDFRendererTests.swift` | 한글·수식 selection/search/ToUnicode, exact font route와 production bundle provider, readiness failure, 실제 외부 이미지 placeholder·미분류·monospace·Enclosed/Circled Hangul, CSP·외부 resource·navigation과 기존 geometry/raster 회귀 검증 |
 | `scripts/verify-rhwp-studio-assets.sh` | source와 빌드 앱의 exact font 4종 존재·regular file·non-symlink·WOFF2 signature 검증 추가 |
+| `scripts/ci/test-rhwp-studio-cargo-lock-verification.sh` | verifier fixture에 exact WOFF2 4종을 구성하고 누락·signature 오류·symlink 거부 회귀 추가 |
 | `Tests/HostAppTests/RhwpStudioPDFExportControllerTests.swift` | 2쪽 한글 searchable PDF와 portrait/landscape export controller 회귀 보강 |
 | `project.yml`, `Alhangeul.xcodeproj/project.pbxproj` | 신규 production font provider와 test helper를 HostAppTests 구성에 포함하고 XcodeGen으로 project 재생성 |
 | `README.md` | 다음 패치 릴리스 후보의 한글 PDF mapping 개선과 positioned SVG·Hanja·수식·이미지/OCR 제한 안내 |
@@ -75,7 +76,7 @@ PDF/인쇄 공용 renderer에 앱이 이미 보유한 Noto Sans/Serif KR WOFF2 �
 | HWP PDFKit 검색 | `문1` 22건, `함수` 48건, `값은` 37건, `f ( x )` 50건 |
 | PDF renderer 표적 테스트 | 19개, 실패 0개 |
 | HostAppTests 전체 | 151개, 실패 0개 |
-| 최종 Task diff | PR 리뷰 보정 포함 19개 파일, 2,493줄 추가, 60줄 삭제 |
+| 최종 Task diff | PR 리뷰 보정 포함 20개 파일, 2,534줄 추가, 60줄 삭제 |
 
 ## 구현 결과
 
@@ -162,9 +163,10 @@ smoke 전후 HWP/HWPX 원본의 SHA-256과 수정 시각은 동일했다. 앱은
 | `RhwpStudioPagePDFRendererTests` | 19개, 실패 0개 |
 | HostApp Debug build | `** BUILD SUCCEEDED **` |
 | source·최종 앱 bundled Studio asset | exact WOFF2 font 4종을 포함해 verifier 통과 |
+| Studio verifier fixture | 정상·font 누락·잘못된 signature·symlink와 Cargo.lock fingerprint 회귀 통과 |
 | `./scripts/check-no-appkit.sh` | 통과. shared Swift code AppKit/UIKit 직접 의존 없음 |
 | `git diff --check` | 통과 |
-| 최신 `origin/devel...HEAD` | `0 8`, PR 리뷰 보정 커밋 반영 뒤 작업 브랜치가 뒤처지지 않고 8개 commit 앞섬 |
+| 최신 `origin/devel...HEAD` | `0 9`, PR 리뷰 및 CI fixture 보정 반영 뒤 작업 브랜치가 뒤처지지 않고 9개 commit 앞섬 |
 
 WebKit 테스트 중 RunningBoard, pasteboard와 audio registrar 관련 sandbox 진단이 출력되지만 renderer 테스트와 전체 suite는 정상 완료됐다. 최초 clean test의 Sparkle dependency resolve는 sandbox DNS 제한으로 중단됐으나 허용된 host 환경에서 동일 명령을 재실행해 package resolve부터 151개 테스트까지 통과했다.
 
