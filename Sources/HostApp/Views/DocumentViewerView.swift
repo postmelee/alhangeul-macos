@@ -6,6 +6,85 @@ struct DocumentViewerView: View {
     var body: some View {
         RhwpStudioContainerView(store: store, document: store.rhwpStudioDocument)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .sheet(
+                item: recoverableDocumentOpenFailure,
+                onDismiss: {
+                    store.handleRecoverableDocumentOpenFailureDismissal()
+                }
+            ) { failure in
+                RecoverableDocumentOpenFailureView(
+                    failure: failure,
+                    onDismiss: {
+                        store.dismissRecoverableDocumentOpenFailure()
+                    },
+                    onRetry: {
+                        store.retryDocumentOpen()
+                    }
+                )
+            }
+    }
+
+    private var recoverableDocumentOpenFailure: Binding<RecoverableDocumentOpenFailure?> {
+        Binding(
+            get: {
+                store.recoverableDocumentOpenFailure
+            },
+            set: { failure in
+                if failure == nil {
+                    store.dismissRecoverableDocumentOpenFailure()
+                }
+            }
+        )
+    }
+}
+
+private struct RecoverableDocumentOpenFailureView: View {
+    let failure: RecoverableDocumentOpenFailure
+    let onDismiss: () -> Void
+    let onRetry: () -> Void
+
+    @FocusState private var isRetryFocused: Bool
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "doc.badge.ellipsis")
+                .font(.system(size: 38))
+                .foregroundStyle(.orange)
+                .accessibilityHidden(true)
+
+            VStack(spacing: 8) {
+                Text(failure.title)
+                    .font(.headline)
+                Text(failure.message)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            HStack(spacing: 8) {
+                Button(role: .cancel) {
+                    onDismiss()
+                } label: {
+                    Text("닫기")
+                }
+                .keyboardShortcut(.cancelAction)
+                .accessibilityLabel("문서 열기 오류 닫기")
+
+                Button {
+                    onRetry()
+                } label: {
+                    Label("다시 시도", systemImage: "arrow.clockwise")
+                }
+                .keyboardShortcut(.defaultAction)
+                .focused($isRetryFocused)
+                .accessibilityLabel("파일 다시 선택")
+            }
+        }
+        .padding(28)
+        .frame(width: 440)
+        .onAppear {
+            isRetryFocused = true
+        }
     }
 }
 

@@ -66,11 +66,13 @@ struct DocumentOpenRecoveryState: Equatable {
     private(set) var activeLoadID = 0
     private(set) var isLoading = false
     private(set) var failure: RecoverableDocumentOpenFailure?
+    private(set) var isRetryPending = false
 
     mutating func beginLoad() -> Int {
         activeLoadID += 1
         isLoading = true
         failure = nil
+        isRetryPending = false
         return activeLoadID
     }
 
@@ -100,19 +102,31 @@ struct DocumentOpenRecoveryState: Equatable {
 
         isLoading = false
         failure = nil
+        isRetryPending = false
         return true
     }
 
     mutating func dismissFailure() {
         failure = nil
+        isRetryPending = false
     }
 
     mutating func beginRetry() -> Bool {
-        guard failure != nil else {
+        guard failure != nil, !isRetryPending else {
             return false
         }
 
         failure = nil
+        isRetryPending = true
+        return true
+    }
+
+    mutating func consumeRetry() -> Bool {
+        guard isRetryPending else {
+            return false
+        }
+
+        isRetryPending = false
         return true
     }
 }

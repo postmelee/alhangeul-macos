@@ -113,6 +113,7 @@ final class DocumentOpenRecoveryTests: XCTestCase {
 
         XCTAssertNil(state.failure)
         XCTAssertFalse(state.isLoading)
+        XCTAssertFalse(state.isRetryPending)
         XCTAssertEqual(state.activeLoadID, loadID)
     }
 
@@ -130,7 +131,43 @@ final class DocumentOpenRecoveryTests: XCTestCase {
         XCTAssertFalse(state.beginRetry())
         XCTAssertNil(state.failure)
         XCTAssertFalse(state.isLoading)
+        XCTAssertTrue(state.isRetryPending)
+        XCTAssertTrue(state.consumeRetry())
+        XCTAssertFalse(state.consumeRetry())
+        XCTAssertFalse(state.isRetryPending)
         XCTAssertEqual(state.activeLoadID, loadID)
+    }
+
+    func testDismissAndNewLoadCancelPendingRetry() {
+        var dismissedState = stateWithFailure(idSuffix: 6)
+        XCTAssertTrue(dismissedState.beginRetry())
+
+        dismissedState.dismissFailure()
+
+        XCTAssertFalse(dismissedState.isRetryPending)
+        XCTAssertFalse(dismissedState.consumeRetry())
+
+        var supersededState = stateWithFailure(idSuffix: 7)
+        XCTAssertTrue(supersededState.beginRetry())
+
+        let nextLoadID = supersededState.beginLoad()
+
+        XCTAssertFalse(supersededState.isRetryPending)
+        XCTAssertFalse(supersededState.consumeRetry())
+        XCTAssertTrue(supersededState.isCurrent(loadID: nextLoadID))
+        XCTAssertTrue(supersededState.isLoading)
+    }
+
+    private func stateWithFailure(idSuffix: UInt8) -> DocumentOpenRecoveryState {
+        var state = DocumentOpenRecoveryState()
+        let loadID = state.beginLoad()
+        XCTAssertTrue(
+            state.failLoad(
+                loadID: loadID,
+                failure: makeFailure(idSuffix: idSuffix)
+            )
+        )
+        return state
     }
 
     private func makeFailure(idSuffix: UInt8) -> RecoverableDocumentOpenFailure {

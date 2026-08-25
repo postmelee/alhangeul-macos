@@ -112,14 +112,14 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func retryDocumentOpen() {
-        guard documentOpenRecoveryState.beginRetry() else {
+        _ = documentOpenRecoveryState.beginRetry()
+    }
+
+    func handleRecoverableDocumentOpenFailureDismissal() {
+        guard documentOpenRecoveryState.consumeRetry() else {
             return
         }
-
-        Task { @MainActor [weak self] in
-            await Task.yield()
-            self?.openDocument()
-        }
+        openDocument()
     }
 
     private func loadDocument(
