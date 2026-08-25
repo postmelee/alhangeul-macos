@@ -279,9 +279,9 @@ mv "$WASM_ASSET" "$WASM_ASSET.missing"
 
 기대 결과는 문서 영역의 `웹 viewer 자산을 찾을 수 없습니다` fallback이다. 진단 정보에는 `assetPattern=assets/rhwp_bg-*.wasm`, `count=0`, 훼손한 복사본의 `directoryPath`가 보여야 한다. 다시 시도 recovery를 확인하려면 같은 복사본에서 `.missing` 파일명을 원래대로 되돌린 뒤 fallback의 `다시 시도`를 누른다.
 
-## 손상/대용량 문서 opening fallback smoke test
+## Recoverable 문서 opening smoke test
 
-문서 입력 fallback 경로를 바꾼 경우에는 사용자 원본 파일을 수정하지 않고 `build.noindex/` 아래 synthetic 파일만 사용한다. HostApp의 파일 열기 fallback은 Debug app으로 smoke할 수 있다.
+문서 입력 경로를 바꾼 경우에는 사용자 원본 파일을 수정하지 않고 `build.noindex/` 아래 synthetic 파일만 사용한다. HostApp의 파일 읽기·0-byte·미지원 signature 실패는 기존 viewer 또는 fatal fallback을 교체하지 않고 window-local recoverable sheet로 표시되어야 한다.
 
 ```bash
 mkdir -p build.noindex/task149-negative /tmp/alhangeul-ql
@@ -293,7 +293,24 @@ mkfile 51m build.noindex/task149-negative/large.hwp
 pgrep -x Alhangeul
 ```
 
-기대 결과는 앱 프로세스와 창이 유지되고, 빈 문서와 손상/미지원 문서에 대해 사용자 문구가 표시되는 것이다. HostApp에는 50 MB hard block을 두지 않는다. 50 MB 제한은 Quick Look preview와 Finder thumbnail fallback 정책이다.
+기대 결과와 권장 순서는 다음과 같다.
+
+1. 정상 HWP와 HWPX를 각각 열어 filename, page count와 toolbar 활성 상태를 확인한다.
+2. 정상 문서가 열린 같은 window에서 PDF, `empty.hwp`와 `corrupt.hwp`를 시도한다.
+3. `문서를 열 수 없습니다` sheet에 sanitize된 파일명과 원인 문구, `닫기`, `다시 시도`가 표시되는지 확인한다.
+4. 닫기 또는 Escape 뒤 기존 filename, page count와 미저장 상태가 유지되는지 확인한다.
+5. 다시 시도 또는 Return 뒤 기존 sheet가 사라지고 나서 native file panel 하나만 열리는지 확인한다.
+6. panel 취소는 기존 viewer로 돌아오고, 정상 HWP/HWPX 선택은 새 문서를 한 번만 commit해야 한다.
+7. Finder/open URL과 stale 최근 문서도 같은 sheet를 사용하되 다른 document window를 변경하지 않아야 한다.
+8. native file URL drop과 WebView bytes drop은 `끌어놓은 문서를 열 수 없습니다` 제목을 사용하고, 중복 drop callback이 한 번만 처리되는지 확인한다.
+
+실제 drag/drop smoke는 Finder file pasteboard payload가 전달되는 수동 drag로 수행한다. 좌표만 이동하고 file pasteboard를 전달하지 않는 UI 합성은 drop 성공 증거로 기록하지 않는다.
+
+smoke 전후 정상 HWP/HWPX와 PDF 입력의 SHA-256, 크기와 수정 시각을 기록한다. 앱에서 문서를 명시적으로 저장하지 않으며, 미저장 상태 확인을 위해 편집했다면 원본과 분리된 `build.noindex/` destination에만 저장한다. HostApp에는 50 MB hard block을 두지 않는다. 50 MB 제한은 Quick Look preview와 Finder thumbnail fallback 정책이다.
+
+Recoverable opening과 WebView fatal fallback은 별도 경계다. 위 입력 실패는 recoverable sheet여야 하지만, 앞 절의 asset negative copy는 `웹 viewer 자산을 찾을 수 없습니다` fatal fallback과 `assetPattern`, `count`, `directoryPath` 진단을 유지해야 한다. fatal fallback에서 잘못된 파일을 골라도 fallback이 보존되고, asset을 복원한 뒤 `다시 시도`하면 viewer로 복구되어야 한다.
+
+Debug app 실행은 LaunchServices에 개발 bundle을 남길 수 있지만 이 절에서는 Quick Look/Thumbnail을 판정하지 않는다. 수동 `lsregister` 또는 `pluginkit -a` 등록을 추가하지 말고, Finder 통합 smoke가 뒤따르면 등록 위생 helper로 환경을 먼저 확인한다.
 
 Quick Look/Thumbnail smoke는 현재 시스템에 등록된 extension 산출물 기준으로 동작한다. Debug build는 compile/link 검증에는 유효하지만 Finder/Quick Look 등록 검증의 진실 원천으로 쓰지 않는다. 설치본 기준 검증에서는 표준 smoke helper가 Release package 산출물을 `$HOME/Applications/Alhangeul.app`에 설치한 뒤 bundle 정합성, PlugInKit 등록, HWP/HWPX thumbnail 생성을 확인한다.
 
