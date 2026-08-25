@@ -4,14 +4,8 @@ struct DocumentViewerView: View {
     @ObservedObject var store: DocumentViewerStore
 
     var body: some View {
-        ZStack {
-            if let error = store.errorMessage {
-                ErrorStateView(message: error)
-            } else {
-                RhwpStudioContainerView(store: store, document: store.rhwpStudioDocument)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        RhwpStudioContainerView(store: store, document: store.rhwpStudioDocument)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -70,7 +64,7 @@ private struct RhwpStudioContainerView: View {
                     },
                     onDroppedFileURL: { url in
                         Task { @MainActor in
-                            store.loadDocument(from: url)
+                            store.loadDocument(from: url, source: .fileDrop)
                         }
                     },
                     onDocumentSaved: { savedDocument in
@@ -116,22 +110,6 @@ private struct LoadingOverlayView: View {
             .padding(.vertical, 12)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
             .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 3)
-    }
-}
-
-private struct ErrorStateView: View {
-    let message: String
-
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 40))
-                .foregroundStyle(.orange)
-            Text(message)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-        }
-        .padding(32)
     }
 }
 
