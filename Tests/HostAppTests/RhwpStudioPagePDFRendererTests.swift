@@ -238,6 +238,76 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         }
     }
 
+    func testRenderLifecycleTracksPageAndNavigationIdentityWithinGeneration() throws {
+        var lifecycle = RhwpStudioPagePDFRenderLifecycle()
+        let generation = try XCTUnwrap(lifecycle.beginRender())
+        let firstPage = try XCTUnwrap(lifecycle.beginPage(at: 0))
+        let firstNavigation = NSObject()
+
+        XCTAssertEqual(firstPage.generation, generation)
+        XCTAssertEqual(firstPage.pageIndex, 0)
+        XCTAssertTrue(lifecycle.isCurrent(firstPage))
+        XCTAssertNil(lifecycle.beginRender())
+        XCTAssertEqual(lifecycle.latestGeneration, generation)
+        XCTAssertTrue(lifecycle.isInitialMainFrameLoadPending)
+        XCTAssertTrue(
+            lifecycle.registerNavigation(ObjectIdentifier(firstNavigation), for: firstPage)
+        )
+        XCTAssertEqual(
+            lifecycle.token(forNavigation: ObjectIdentifier(firstNavigation)),
+            firstPage
+        )
+
+        let secondPage = try XCTUnwrap(lifecycle.beginPage(at: 1))
+        let secondNavigation = NSObject()
+
+        XCTAssertEqual(secondPage.generation, generation)
+        XCTAssertEqual(secondPage.pageIndex, 1)
+        XCTAssertFalse(lifecycle.isCurrent(firstPage))
+        XCTAssertNil(lifecycle.token(forNavigation: ObjectIdentifier(firstNavigation)))
+        XCTAssertFalse(
+            lifecycle.registerNavigation(ObjectIdentifier(firstNavigation), for: firstPage)
+        )
+        XCTAssertTrue(
+            lifecycle.registerNavigation(ObjectIdentifier(secondNavigation), for: secondPage)
+        )
+        XCTAssertEqual(
+            lifecycle.token(forNavigation: ObjectIdentifier(secondNavigation)),
+            secondPage
+        )
+    }
+
+    func testRenderLifecycleRejectsStaleTokenAcrossRenderGenerations() throws {
+        var lifecycle = RhwpStudioPagePDFRenderLifecycle()
+        let firstGeneration = try XCTUnwrap(lifecycle.beginRender())
+        let firstToken = try XCTUnwrap(lifecycle.beginPage(at: 0))
+
+        XCTAssertTrue(lifecycle.invalidate(firstToken))
+        let secondGeneration = try XCTUnwrap(lifecycle.beginRender())
+        let secondToken = try XCTUnwrap(lifecycle.beginPage(at: 0))
+
+        XCTAssertGreaterThan(secondGeneration, firstGeneration)
+        XCTAssertNotEqual(secondToken, firstToken)
+        XCTAssertFalse(lifecycle.isCurrent(firstToken))
+        XCTAssertFalse(lifecycle.invalidate(firstToken))
+        XCTAssertTrue(lifecycle.isCurrent(secondToken))
+        XCTAssertEqual(lifecycle.currentPageToken, secondToken)
+    }
+
+    func testRenderLifecycleScopesInitialMainFrameLoadToCurrentPage() throws {
+        var lifecycle = RhwpStudioPagePDFRenderLifecycle()
+        _ = try XCTUnwrap(lifecycle.beginRender())
+        _ = try XCTUnwrap(lifecycle.beginPage(at: 0))
+
+        XCTAssertTrue(lifecycle.isInitialMainFrameLoadPending)
+        XCTAssertTrue(lifecycle.consumeInitialMainFrameLoad())
+        XCTAssertFalse(lifecycle.isInitialMainFrameLoadPending)
+        XCTAssertFalse(lifecycle.consumeInitialMainFrameLoad())
+
+        _ = try XCTUnwrap(lifecycle.beginPage(at: 1))
+        XCTAssertTrue(lifecycle.isInitialMainFrameLoadPending)
+    }
+
     func testRendererPreservesPortraitAndLandscapePageOrientation() async throws {
         let payload = try RhwpStudioPagePayload(
             fileName: "orientation.hwp",
@@ -687,13 +757,14 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             pageCount: 1,
             pages: [svg(width: 200, height: 300, text: "Terminated")]
         )
-        let renderer = makeRenderer()
+        var ownedWebView: WKWebView?
+        let renderer = makeRenderer(webViewObserver: { ownedWebView = $0 })
         var completionResult: Result<PDFDocument, Error>?
 
         renderer.render(payload: payload) { result in
             completionResult = result
         }
-        renderer.webViewWebContentProcessDidTerminate(WKWebView())
+        renderer.webViewWebContentProcessDidTerminate(try XCTUnwrap(ownedWebView))
 
         guard case .failure(let error) = completionResult else {
             XCTFail("WebKit process 종료가 PDF 변환 실패로 완료되지 않았습니다.")
@@ -703,6 +774,63 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             error as? RhwpStudioPagePDFRenderError,
             .webContentProcessTerminated
         )
+    }
+
+    func testRendererIgnoresWebContentTerminationFromUnownedWebView() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "foreign-termination.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Foreign")]
+        )
+        let renderer = makeRenderer(pageRenderTimeoutNanoseconds: 0)
+        var result: Result<PDFDocument, Error>?
+        let completion = expectation(description: "current render timeout")
+
+        renderer.render(payload: payload) {
+            result = $0
+            completion.fulfill()
+        }
+        renderer.webViewWebContentProcessDidTerminate(WKWebView())
+
+        await fulfillment(of: [completion], timeout: 1)
+        assertPageRenderTimedOut(try XCTUnwrap(result), page: 1)
+    }
+
+    func testRendererRejectsConcurrentRenderWithoutReplacingCurrentGeneration() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "first.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "First")]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "second.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Second")]
+        )
+        let renderer = makeRenderer(pageRenderTimeoutNanoseconds: 0)
+        var firstResult: Result<PDFDocument, Error>?
+        var secondResult: Result<PDFDocument, Error>?
+        let firstCompletion = expectation(description: "first render timeout")
+
+        renderer.render(payload: firstPayload) {
+            firstResult = $0
+            firstCompletion.fulfill()
+        }
+        renderer.render(payload: secondPayload) {
+            secondResult = $0
+        }
+
+        guard case .failure(let concurrentError) = secondResult else {
+            XCTFail("진행 중 두 번째 render가 즉시 거부되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(
+            concurrentError as? RhwpStudioPagePDFRenderError,
+            .renderingInProgress
+        )
+
+        await fulfillment(of: [firstCompletion], timeout: 1)
+        assertPageRenderTimedOut(try XCTUnwrap(firstResult), page: 1)
     }
 
     func testRendererPageTimeoutFinishesExactlyOnceAndAllowsRetry() async throws {
@@ -745,15 +873,31 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
     }
 
     private func makeRenderer(
-        pageRenderTimeoutNanoseconds: UInt64? = nil
+        pageRenderTimeoutNanoseconds: UInt64? = nil,
+        webViewObserver: ((WKWebView) -> Void)? = nil
     ) -> RhwpStudioPagePDFRenderer {
+        let webViewFactory: @MainActor (WKWebViewConfiguration) -> WKWebView = { configuration in
+            let webView = WKWebView(
+                frame: NSRect(
+                    origin: .zero,
+                    size: RhwpStudioPagePDFMetrics.initialPageSize
+                ),
+                configuration: configuration
+            )
+            webViewObserver?(webView)
+            return webView
+        }
         if let pageRenderTimeoutNanoseconds {
             return RhwpStudioPagePDFRenderer(
                 pageRenderTimeoutNanoseconds: pageRenderTimeoutNanoseconds,
-                fontResourceProvider: fontResourceProvider()
+                fontResourceProvider: fontResourceProvider(),
+                webViewFactory: webViewFactory
             )
         }
-        return RhwpStudioPagePDFRenderer(fontResourceProvider: fontResourceProvider())
+        return RhwpStudioPagePDFRenderer(
+            fontResourceProvider: fontResourceProvider(),
+            webViewFactory: webViewFactory
+        )
     }
 
     private func fontResourceProvider() -> RhwpStudioPDFFontDirectoryResourceProvider {
