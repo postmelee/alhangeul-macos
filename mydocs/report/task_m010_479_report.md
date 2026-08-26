@@ -88,6 +88,15 @@ HostApp analytics runtime, payload/outbox schema, 문서 parser·renderer·저�
 
 별도 후속 이슈가 필요한 미완료 구현은 없다. Staging endpoint나 production 합성 smoke가 필요해질 때는 데이터 제거 정책과 함께 별도 이슈·승인을 받아야 한다.
 
+## PR 리뷰 보정
+
+PR #487 리뷰에서 endpoint gate가 *전송*만 막고 *적재*는 막지 않는다는 지적을 받아 보정했다.
+
+- 문제: `AppExecutionAnalyticsRuntime.prepareForLaunch()`가 endpoint 유무와 무관하게 `observer.observe()`를 먼저 호출해 event를 outbox에 적재했다. Debug와 Release는 같은 `PRODUCT_BUNDLE_IDENTIFIER`를 쓰므로 sandbox container의 `UserDefaults`와 outbox를 공유한다. 미시도 항목 보존 기간이 30일이라, Debug 실행이 남긴 event를 같은 머신의 이후 Release 실행(설치본 포함)이 production으로 flush할 수 있었다. 차단이 아니라 지연에 그치는 상태였다.
+- 보정: `AppExecutionAnalyticsCoordinator`에 `isDeliveryConfigured`를 추가하고, `prepareForLaunch()`가 delivery 미구성 시 observer를 호출하지 않고 반환하도록 했다. Endpoint 없는 실행은 `lastObservedVersion`·`pendingSparkleUpdate`·outbox를 전혀 건드리지 않는다.
+- 검증: 회귀 테스트 `testMissingEndpointDoesNotEnqueueEventForLaterConfiguredLaunch`와 `testConfiguredEndpointStillObservesLaunch`를 추가했다. 보정 전 코드에서 전자가 실패하고 보정 후 통과함을 역검증했다. 전체 HostAppTests 163/163 통과. Payload·outbox·opt-out schema와 endpoint 설정 분리는 변경하지 않았다.
+- 한계: gate는 적용 이후 실행에만 작용한다. 적용 전 Debug build가 이미 적재한 항목은 보존 기간 안에 전송될 수 있으며 payload만으로 구분되지 않는다.
+
 ## 작업지시자 승인 요청
 
 Issue #479의 세 Stage, 수용 기준과 최종 통합 검증을 모두 완료했다. `publish/task479`를 `devel` 대상으로 게시한 PR의 리뷰와 merge 승인을 요청한다. Issue는 PR merge 뒤 `pr-merge-cleanup` 절차에서 close한다.

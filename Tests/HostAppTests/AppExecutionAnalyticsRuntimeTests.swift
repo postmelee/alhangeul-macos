@@ -242,6 +242,40 @@ final class AppExecutionAnalyticsRuntimeTests: XCTestCase {
         XCTAssertEqual(stateStore.load().outbox.count, 1)
     }
 
+    func testMissingEndpointDoesNotEnqueueEventForLaterConfiguredLaunch() {
+        let runtime = makeRuntime(endpoint: nil)
+
+        runtime.prepareForLaunch(currentVersion: "0.1.10")
+
+        let state = stateStore.load()
+        XCTAssertEqual(state.outbox, [])
+        XCTAssertNil(state.lastObservedVersion)
+
+        // 같은 bundle identifier를 공유하는 Release 실행이 뒤이어 일어나도
+        // endpoint 없는 실행이 남긴 event는 존재하지 않아야 한다.
+        let configuredRuntime = makeRuntime(
+            endpoint: URL(string: "https://collector.example/v1/install-events")
+        )
+        configuredRuntime.prepareForLaunch(currentVersion: "0.1.10")
+
+        let configuredState = stateStore.load()
+        XCTAssertEqual(configuredState.outbox.count, 1)
+        XCTAssertEqual(configuredState.outbox.first?.event.toVersion, "0.1.10")
+        XCTAssertEqual(configuredState.lastObservedVersion, "0.1.10")
+    }
+
+    func testConfiguredEndpointStillObservesLaunch() {
+        let runtime = makeRuntime(
+            endpoint: URL(string: "https://collector.example/v1/install-events")
+        )
+
+        runtime.prepareForLaunch(currentVersion: "0.1.10")
+
+        let state = stateStore.load()
+        XCTAssertEqual(state.outbox.count, 1)
+        XCTAssertEqual(state.lastObservedVersion, "0.1.10")
+    }
+
     func testStartReturnsWhileConnectivityCheckIsSuspended() async {
         seed(entries: [makeEntry(index: 1)])
         let connectivityStarted = expectation(description: "connectivity suspended")
@@ -363,6 +397,26 @@ final class AppExecutionAnalyticsRuntimeTests: XCTestCase {
             [entry.event.occurredDate]
         )
         XCTAssertEqual(restoredTransport.sentEvents.map(\.id), [entry.id])
+    }
+
+    private func makeRuntime(endpoint: URL?) -> AppExecutionAnalyticsRuntime {
+        AppExecutionAnalyticsRuntime(
+            stateStore: stateStore,
+            observer: AppExecutionAnalyticsObserver(
+                stateStore: stateStore,
+                legacyEvidenceResolver: AppExecutionLegacyEvidenceResolver(
+                    userDefaults: userDefaults
+                )
+            ),
+            coordinator: AppExecutionAnalyticsCoordinator(
+                stateStore: stateStore,
+                endpoint: endpoint,
+                connectivityResolver: TestAppExecutionConnectivityResolver(result: false),
+                transportFactory: { _ in
+                    TestAppExecutionTransport(result: .response(statusCode: 202))
+                }
+            )
+        )
     }
 
     private func makeCoordinator(
