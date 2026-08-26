@@ -30,9 +30,11 @@ struct DocumentViewerView: View {
                 store.recoverableDocumentOpenFailure
             },
             set: { failure in
-                if failure == nil {
-                    store.dismissRecoverableDocumentOpenFailure()
+                guard failure == nil,
+                      store.recoverableDocumentOpenFailure != nil else {
+                    return
                 }
+                store.dismissRecoverableDocumentOpenFailure()
             }
         )
     }
@@ -68,7 +70,8 @@ private struct RecoverableDocumentOpenFailureView: View {
                     Text("닫기")
                 }
                 .keyboardShortcut(.cancelAction)
-                .accessibilityLabel("문서 열기 오류 닫기")
+                .accessibilityLabel("닫기")
+                .accessibilityHint("문서 열기 오류 안내를 닫습니다.")
 
                 Button {
                     onRetry()
@@ -77,7 +80,8 @@ private struct RecoverableDocumentOpenFailureView: View {
                 }
                 .keyboardShortcut(.defaultAction)
                 .focused($isRetryFocused)
-                .accessibilityLabel("파일 다시 선택")
+                .accessibilityLabel("다시 시도")
+                .accessibilityHint("다른 HWP 또는 HWPX 파일을 선택합니다.")
             }
         }
         .padding(28)

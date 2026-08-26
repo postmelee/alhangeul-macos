@@ -32,7 +32,7 @@
 | 파일 | 내용 |
 |------|------|
 | `Sources/HostApp/Services/DocumentOpenRecoveryState.swift` | 입력 source, sanitize된 failure presentation, generation과 retry pending을 관리하는 Foundation-only 상태 machine 추가 |
-| `Sources/HostApp/Stores/DocumentViewerStore.swift` | opening 실패의 기존 snapshot 보존, 최신 generation만 성공 commit, chooser 주입과 retry 단일 소비 연결 |
+| `Sources/HostApp/Stores/DocumentViewerStore.swift` | opening 실패의 기존 snapshot 보존, 최신 generation만 성공 commit하고 retry panel을 단일 소비 뒤 호출 |
 | `Sources/HostApp/Views/DocumentViewerView.swift` | 전체 오류 화면 대신 window-local recoverable sheet, 닫기·기본 다시 시도·접근성 label과 focus 연결 |
 | `Tests/HostAppTests/DocumentOpenRecoveryTests.swift` | 실패 mapping, stale completion, dismiss, retry, 취소와 새 load 전이 10개 회귀 검증 |
 | `project.yml`, `Alhangeul.xcodeproj/project.pbxproj` | recovery state와 테스트를 HostAppTests selected source에 포함하고 XcodeGen 결과 반영 |
@@ -120,7 +120,22 @@
 | extension registration hygiene | issue·development registration 없음 |
 | fixture SHA-256 | HWP `bc8bccbb...1accd`, HWPX `e49c69c0...2872f`, PDF `7d11c3d8...12d6` 유지 |
 | `git diff --check` | 통과 |
-| `origin/devel..HEAD` | 기준 commit이 ancestor이고 Task #372 단계 commit 6개가 앞섬 |
+| `origin/devel..HEAD` | 기준 commit이 ancestor이고 Task #372 계획·단계·최종·리뷰 보정 commit만 앞섬 |
+
+## PR #486 리뷰 보정
+
+PR 리뷰에서 지적된 sheet dismissal, WebView loading과 접근성 경계를 다음과 같이 보정했다.
+
+- sheet binding의 `nil` write-back은 Store에 현재 failure가 남아 있을 때만 명시 dismiss로 처리한다. retry가 이미 failure를 지우고 pending만 남긴 상태에서는 setter가 no-op이므로 `onDismiss`가 pending을 정상 소비한다.
+- 새 입력 validation 시작 시 기존 `isWebViewLoading`을 강제로 `false`로 만들지 않는다. 실패 뒤에도 유지된 기존 WebView가 자신의 실제 loading completion을 보고할 때까지 command gate를 열지 않는다.
+- 버튼 accessibility label을 표시 문자열인 `닫기`, `다시 시도`와 일치시키고 부가 설명은 hint로 분리했다.
+- 대체 구현을 주입하는 테스트가 없는 chooser closure는 제거하고 `DocumentOpenPanel.chooseDocumentURL()` 직접 호출로 복원했다.
+
+HostAppTests는 selected Foundation source를 직접 컴파일하므로 `DocumentViewerStore` 전체를 test target에 포함하지 않는다. 실제 제품에서 사용하는 `DocumentOpenRecoveryState`의 generation·failure·retry 전이 10개는 자동 테스트하며, Store의 payload·filename·revision·dirty·fatal 연결은 mutation이 `finishDocumentLoad`에만 있는 구조 검사와 실제 앱 negative smoke로 검증한다.
+
+Store 하나를 test target에 추가하려면 AppKit recent/bookmark, WebView 모델, save contract와 `Rhwp.xcframework` 의존을 함께 가져오거나 별도 모듈 분리가 필요하다. 현재 변경 규모와 이미 확보한 자동·수동 검증을 고려하면 이 테스트만을 위한 독립 후속 이슈의 비용 대비 가치는 낮다. 향후 Store 모듈화 또는 document lifecycle 대규모 변경이 시작될 때 통합 test host를 함께 설계하며, 이번 PR에서는 별도 이슈를 만들지 않는다.
+
+보정 뒤 `xcodegen generate`, HostAppTests 161/161과 HostApp Debug build를 다시 통과했다. 보정 Debug 앱의 accessibility tree에서 `닫기`, `다시 시도` label과 각각의 hint를 확인했다. PDF failure의 `다시 시도`는 sheet dismissal 뒤 file panel 하나만 열었고, panel 취소 뒤 viewer로 복귀했다. `닫기`는 file panel 없이 viewer로 돌아왔다. AppKit 경계, source·built asset verifier와 extension registration hygiene도 다시 통과했다.
 
 ## 잔여 위험과 후속 작업
 
@@ -129,6 +144,7 @@
 - parser `document-load-error`는 계획대로 fatal이다. signature는 맞지만 내부 구조가 손상된 입력을 recoverable로 재분류하려면 별도 범위와 회귀 검증이 필요하다.
 - Intel Mac과 deployment target macOS 12 실기기에서의 UI smoke는 수행하지 않았다. 현재 Apple Silicon macOS 환경의 Debug build와 테스트로 검증했다.
 - `build.noindex/` 아래 개발 app bundle은 등록되지 않은 상태로 남아 있다. Finder/Quick Look 판정에는 사용하지 않았고 cleanup 시 필요 없는 산출물만 정리할 수 있다.
+- Store snapshot 연결은 직접 unit test가 아니라 제품 recovery state 테스트, 단일 mutation 경계 검사와 실제 앱 smoke의 조합으로 검증한다. 이 경계가 여러 Store나 service로 분산되면 통합 test host 도입을 다시 검토해야 한다.
 
 현재 수용 기준을 막는 미해결 blocker나 별도 후속 이슈 제안은 없다. 참고 선행 이슈는 기존 opening fallback을 다룬 [#149](https://github.com/postmelee/alhangeul-macos/issues/149)다.
 

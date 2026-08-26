@@ -17,7 +17,6 @@ final class DocumentViewerStore: ObservableObject {
     private static let webViewErrorAutoDismissDelayNanoseconds: UInt64 = 5_000_000_000
 
     private let classifyDocumentProtection: @Sendable (Data) -> RhwpDocumentProtection
-    private let chooseDocumentURL: @MainActor () -> URL?
     private var webViewErrorDismissTask: Task<Void, Never>?
     private var webViewErrorDismissToken = 0
     private var webViewErrorDedupeKey: String?
@@ -26,13 +25,9 @@ final class DocumentViewerStore: ObservableObject {
     init(
         classifyDocumentProtection: @escaping @Sendable (Data) -> RhwpDocumentProtection = {
             RhwpDocumentProtection.classify(data: $0)
-        },
-        chooseDocumentURL: @escaping @MainActor () -> URL? = {
-            DocumentOpenPanel.chooseDocumentURL()
         }
     ) {
         self.classifyDocumentProtection = classifyDocumentProtection
-        self.chooseDocumentURL = chooseDocumentURL
     }
 
     var hasDocument: Bool {
@@ -56,7 +51,7 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func openDocument() {
-        guard let url = chooseDocumentURL() else {
+        guard let url = DocumentOpenPanel.chooseDocumentURL() else {
             return
         }
         loadDocument(from: url, source: .filePanel)
@@ -246,7 +241,6 @@ final class DocumentViewerStore: ObservableObject {
         documentLoadTask = nil
         let loadID = documentOpenRecoveryState.beginLoad()
         dismissWebViewError()
-        isWebViewLoading = false
         return loadID
     }
 
