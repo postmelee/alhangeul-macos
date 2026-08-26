@@ -584,7 +584,7 @@ enum RhwpStudioHostBridgeScript {
         if (item) {
           nativePDFMenuItemObserver.observe(item, {
             attributes: true,
-            attributeFilter: ["class", "aria-disabled", "title"]
+            attributeFilter: ["class", "aria-disabled", "title", "aria-label"]
           });
         }
       }

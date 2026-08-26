@@ -2,7 +2,7 @@ import AppKit
 import PDFKit
 
 @MainActor
-final class RhwpStudioPrintController {
+final class RhwpStudioPrintController: RhwpStudioPrintControlling {
     private let renderer = RhwpStudioPagePDFRenderer()
     private var completion: (() -> Void)?
     private var renderedDocument: PDFDocument?
