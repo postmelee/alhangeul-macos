@@ -41,6 +41,24 @@
 
 HTTP 요청 header는 `Content-Type: application/json`, `User-Agent: Alhangeul`, `Accept-Language: en`의 고정값만 사용한다. 앱·build·CFNetwork·Darwin version이나 사용자의 선호 언어가 기본 header로 노출되지 않도록 ephemeral session configuration에서 명시적으로 덮어쓴다. 수집 endpoint는 고정 URL이므로 HTTP redirect는 같은 host 여부와 관계없이 따르지 않는다.
 
+## 빌드 구성과 endpoint
+
+Production endpoint의 단일 편집 원본은 `project.yml`의 HostApp `ALHANGEUL_APP_EXECUTION_ENDPOINT` 설정이다. 공통 `Sources/HostApp/Info.plist`는 URL literal 대신 `$(ALHANGEUL_APP_EXECUTION_ENDPOINT)` placeholder만 참조한다.
+
+- HostApp base 값은 빈 문자열이며 Debug와 별도로 승인되지 않은 개발 configuration은 production endpoint를 얻지 않는다.
+- 표준 Release configuration만 공개 production HTTPS endpoint를 주입한다.
+- 빈 값이나 유효하지 않은 endpoint는 `AppExecutionAnalyticsEndpoint.resolve()`가 `nil`로 거부한다. Coordinator는 connectivity 확인과 transport 생성을 시작하지 않고 outbox와 앱·문서 기능을 비차단 상태로 유지한다.
+- Endpoint가 없는 실행은 event를 전송하지 않을 뿐 아니라 **생성·적재하지도 않는다**. `AppExecutionAnalyticsRuntime.prepareForLaunch()`는 delivery가 구성되지 않았으면 observer를 호출하지 않고 반환하므로 `lastObservedVersion`·`pendingSparkleUpdate`·outbox가 모두 그대로 유지된다.
+- 이 gate가 필요한 이유는 Debug와 Release가 같은 `PRODUCT_BUNDLE_IDENTIFIER`를 쓰고 따라서 같은 sandbox container의 `UserDefaults`와 outbox를 공유하기 때문이다. 전송만 막고 적재를 허용하면 Debug 실행이 남긴 event를 같은 머신의 이후 Release 실행이 production으로 flush한다. 미시도 항목 보존 기간이 30일이므로 차단이 아니라 지연에 그친다.
+- 이 구분은 Xcode build configuration 기준이지 서명·공증 상태 기준이 아니다. 로컬 unsigned Release build도 production endpoint를 포함하므로 실행·전송 smoke에 사용하지 않는다.
+- 실제 전송 검증이 필요하면 production과 분리된 staging endpoint, 데이터 제거 정책과 작업지시자 승인을 먼저 마련한다. 별도 승인 없이 production 합성 이벤트를 전송하지 않는다.
+
+Task #479의 설정 분리 이전에는 공통 plist URL이 Debug·Release에 모두 들어갈 수 있었다. 공개 `v0.1.9`에는 수집 코드가 없었지만 운영 집계에는 2026-08-04와 2026-08-12의 `0.1.9 existing_baseline` 행이 각각 1건 존재한다. 기능 병합 뒤 실행한 개발 build에서 발생한 것으로 추정되지만 현재 payload에는 build configuration이나 영구 식별자가 없으므로 사후에 이를 증명하거나 같은 version의 공개 Release 이벤트와 구분할 수 없다.
+
+따라서 설정 분리 전 수집 행을 공개 설치·사용자 수로 단정하지 않으며 기존 행을 삭제·재분류·보정하지 않는다. 설정 분리 이후 Debug는 production 전송 경로가 비활성화되지만, 이 변경이 과거 집계의 의미를 소급해 바꾸지는 않는다.
+
+이 gate는 적용 시점 이후의 실행에만 작용한다. 적용 전 Debug build가 이미 개발 머신의 outbox에 넣어 둔 항목은 남아 있고 보존 기간 안에 같은 머신에서 Release 실행이 일어나면 전송될 수 있다. 이 잔여분도 payload만으로는 구분할 수 없으므로 위와 같은 원칙으로 다룬다.
+
 ## 로컬 상태와 오프라인 동작
 
 분석 전용 `UserDefaults` state에는 공개 payload와 다음 bookkeeping만 저장한다.

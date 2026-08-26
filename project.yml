@@ -58,9 +58,13 @@ targets:
         EXECUTABLE_NAME: Alhangeul
         PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul
         INFOPLIST_FILE: Sources/HostApp/Info.plist
+        ALHANGEUL_APP_EXECUTION_ENDPOINT: ""
         CODE_SIGN_ENTITLEMENTS: Sources/HostApp/HostApp.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
+      configs:
+        Release:
+          ALHANGEUL_APP_EXECUTION_ENDPOINT: https://alhangeul-install-events.postmelee.workers.dev/v1/install-events
 
   QLExtension:
     type: app-extension
