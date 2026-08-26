@@ -302,6 +302,37 @@ current editor
 - `RhwpStudioPrintController`는 같은 renderer 결과를 `PDFDocument.printOperation`에 전달한다. 모든 non-square page 방향이 하나로 일치할 때만 job orientation을 초기화하며, 가로·세로 혼합 문서는 job orientation을 강제하지 않고 PDFKit auto-rotate에 맡긴다.
 - Quick Look과 Thumbnail은 이 renderer를 사용하지 않는다. 두 extension은 `RhwpDocument`와 render tree 기반 `HwpPageImageRenderer`의 bitmap 경로를 유지한다.
 
+#### 인쇄 ownership과 renderer lifecycle
+
+일반 인쇄의 active controller ownership은 `RhwpStudioWebView.Coordinator`가 직접 바꾸지 않고, coordinator가 유지하는 `RhwpStudioPrintLifecycle` 한 곳에서 관리한다.
+
+- `start`는 active controller가 없는지 먼저 확인한 뒤에만 controller factory를 호출한다. 인쇄 중 두 번째 요청은 기존 controller를 유지하고 factory를 호출하지 않은 채 `printingInProgress` 오류로 명시적으로 거부한다.
+- lifecycle은 새 controller를 active로 등록한 다음 `print`를 시작한다. completion은 자신이 캡처한 controller와 그 시점의 active controller가 객체 identity로 같을 때만 active ownership을 해제한다. 이전 controller의 늦거나 중복된 completion은 이후 controller를 해제하지 못한다.
+- lifecycle과 controller completion은 weak capture를 사용한다. `RhwpStudioPrintController`는 render 실패와 print operation 생성 실패를 오류로 표시한 뒤, 실제 print operation의 정상 종료나 사용자 취소를 포함한 `run` 반환 뒤 같은 `finish` 경로로 retained PDF·operation·completion을 정리한다. Production controller completion은 `didFinish` gate로 정확히 한 번 호출되며, lifecycle은 중복 completion도 ownership에 다시 적용하지 않는다.
+- controller completion 호출 중 즉시 다음 요청이 시작되어도 기존 controller 정리가 새 controller ownership을 덮어쓰지 않는다.
+
+`RhwpStudioPagePDFRenderer`는 같은 instance를 PDF 저장과 일반 인쇄의 연속 작업에 재사용할 수 있다. 이를 위해 render 전체의 단조 증가 `generation`, 현재 page의 `(generation, pageIndex)` token, `WKWebView.loadHTMLString`이 실제 반환한 `WKNavigation`의 객체 identity를 함께 추적한다.
+
+| 비동기 진입점 | current 판정 |
+|---------------|--------------|
+| `didFinish` / navigation failure | renderer 소유 WebView이고 navigation identity가 현재 page에 등록된 값과 같아야 한다. |
+| font preparation / metrics / `createPDF` / page append | 캡처한 page token이 현재 generation과 page index에 모두 일치해야 한다. |
+| page watchdog | timeout task가 취소되지 않았고 캡처한 page token이 여전히 current여야 한다. |
+| WebContent process 종료 | renderer 소유 WebView에 현재 page token이 있을 때만 현재 작업의 실패로 수렴한다. |
+| navigation policy | 현재 page의 최초 main-frame `about:blank` pending 상태를 정확히 한 번 소비한다. |
+
+stale callback은 current watchdog을 취소하거나 page index, 누적 `PDFDocument`, retained payload와 completion을 변경하지 않는다. current token과 일치하는 종료만 다음 순서로 처리한다.
+
+1. generation, page token, navigation identity와 최초 main-frame pending 상태를 먼저 무효화한다.
+2. renderer를 completed 상태로 전환하고 navigation delegate를 해제한다.
+3. page watchdog을 취소·해제하고 WebView load를 중단한다.
+4. completion, payload, 누적 PDF와 page index를 초기화한다.
+5. 보관해 둔 사용자 completion을 정확히 한 번 호출한다.
+
+무효화를 cleanup과 사용자 completion보다 먼저 수행하므로 completion call stack 안에서도 새 render가 새 generation으로 시작될 수 있다. 정상 완료뿐 아니라 navigation·font preparation·PDF encoding 실패, timeout과 WebContent process 종료 뒤에도 같은 renderer의 다음 요청이 진입할 수 있어야 한다.
+
+WebKit API가 제공하는 identity에는 한계가 있다. `WKNavigationAction`과 WebContent process 종료 callback에는 render generation이 없으므로 각각 일회성 main-frame allowlist와 renderer 소유 WebView/current token으로 범위를 제한한다. navigation callback 회귀는 `loadHTMLString`이 반환한 실제 `WKNavigation` identity로 검증하며 임의의 `WKNavigation` 생성에 의존하지 않는다. app 내부 operation seam은 production의 `callAsyncJavaScript`와 `createPDF` 진입 전후에 같은 token gate를 적용한다. 실제 printer, modal print panel과 사용자 취소의 시스템 UI 동작은 자동 테스트 범위 밖이며, protocol/factory fake로 ownership 전이와 completion 중복 내성을 검증하고 `RhwpStudioPrintController.finish`를 단일 수렴점으로 유지한다.
+
 #### PDF 전용 font source, readiness와 Unicode mapping
 
 사용자용 PDF/인쇄 renderer는 원본 문서의 proprietary font binary를 포함하지 않는다. 앱 bundle의 `Resources/rhwp-studio/fonts`에 이미 포함되고 provenance와 license가 기록된 다음 네 WOFF2만 PDF 전용 font source로 재사용한다.
@@ -345,7 +376,7 @@ upstream `getPageSvg` 결과는 현재 editor에서 생성되지만 원본 문�
 
 navigation delegate는 모든 image, font와 CSS subresource 요청을 관측하는 경계가 아니므로 외부 resource 차단은 CSP가 담당하고 navigation policy는 frame·document 이동을 담당한다. non-persistent store는 renderer session의 website data를 영구 저장하지 않는 마지막 격리선이다. 이 세 정책 중 하나를 제거할 때는 다른 정책이 같은 범위를 대신한다고 가정하지 않고 WebKit 통합 테스트를 함께 갱신해야 한다.
 
-WebKit은 navigation policy에서 `.cancel`한 load에 `didFinish`나 `didFailProvisionalNavigation`을 보장하지 않는다. page별 watchdog은 정책이 정상 load를 취소하거나 WebKit callback이 멈춰도 renderer completion을 timeout 실패로 정확히 한 번 호출하고 다음 PDF·인쇄 요청이 재진입할 수 있게 한다. `finish`는 정상·실패·timeout 모두에서 watchdog과 WebView load를 정리한다.
+WebKit은 navigation policy에서 `.cancel`한 load에 `didFinish`나 `didFailProvisionalNavigation`을 보장하지 않는다. page별 watchdog은 정책이 정상 load를 취소하거나 WebKit callback이 멈춰도 renderer completion을 timeout 실패로 정확히 한 번 호출하고 다음 PDF·인쇄 요청이 재진입할 수 있게 한다. `finish`는 current token을 먼저 무효화한 뒤 navigation delegate, watchdog, WebView load와 retained render state를 정리한다.
 
 HostAppTests는 CSP가 없는 test-only WebView가 `127.0.0.1` 임시 listener에 실제 연결되는 양성 대조를 먼저 확인한 뒤, hardened renderer의 HTTP/HTTPS image, `<use>`, CSS paint/font/stylesheet, iframe, object, meta refresh와 new-window fixture가 연결 0건인지 검증한다. PDF font scheme은 허가된 네 route의 positive request와 invalid path/query/traversal·symlink·signature failure를 별도로 검증한다. 별도 script/event sentinel은 page content가 실행되지 않으면서 HostApp metrics, searchable text, embedded data PNG와 nested data SVG raster가 유지됨을 확인한다.
 
@@ -475,6 +506,7 @@ External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제
 - PDF 전용 exact custom scheme은 앱 bundle의 Noto Sans/Serif KR 4종만 제공하고, Hangul/Jamo·Enclosed/Circled Hangul Unicode range에 적용한다. known alias와 generic serif/sans는 Sans/Serif 의미를 보존하고 그 밖의 미분류 family는 Noto Sans KR로 보정한다. 원본 proprietary font binary는 포함하지 않는다.
 - HostApp preparation script만 `WKContentWorld.defaultClient`에서 실행해 Hangul family/weight와 `document.fonts` readiness를 확인하고 SVG metrics를 보존한다. 선택한 owned face가 load되지 않으면 page 단위 오류로 종료하며 준비가 끝난 뒤 `WKWebView.createPDF`를 호출해 PDFKit으로 결과 page를 합친다.
 - `RhwpStudioPDFExportController`는 결과를 사용자 destination에 atomic write하며, `RhwpStudioPrintController`는 같은 `PDFDocument`를 AppKit print operation에 전달한다.
+- renderer는 generation, page token과 실제 `WKNavigation` identity로 current callback만 처리하며 종료 시 token을 먼저 무효화한다. 인쇄 controller ownership은 별도 lifecycle이 단일 소유하고 identity가 일치하는 completion만 해제한다.
 - 이 경로는 HWP/HWPX source bytes, `RhwpDocument`, render tree bitmap과 `HwpPreviewPDFRenderer`를 거치지 않는다.
 - PDF의 searchable/selectable text semantics는 upstream page SVG와 WebKit PDF 생성 결과에 따른다. 한글 mapping은 `/ToUnicode`, PDFKit selection/search, `pdftotext`와 실제 미리보기 선택을 함께 검증한다.
 
