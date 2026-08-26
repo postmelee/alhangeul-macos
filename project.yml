@@ -139,6 +139,7 @@ targets:
       - path: Sources/HostApp/Services/AppExecutionAnalyticsRuntime.swift
       - path: Sources/HostApp/Services/AppExecutionEvent.swift
       - path: Sources/HostApp/Services/AppExecutionOutbox.swift
+      - path: Sources/HostApp/Services/DocumentOpenRecoveryState.swift
       - path: Sources/HostApp/Services/DocumentSaveContract.swift
       - path: Sources/HostApp/Services/DocumentSaveFormat.swift
       - path: Sources/HostApp/Services/QuickLookConflictDetector.swift

@@ -157,6 +157,23 @@ HostApp은 앱 실행과 version 전환을 영구 사용자·기기·설치 식�
 17. `공유`는 active editor element를 settle한 뒤 `rhwp-studio`의 `exportHwp` response bytes를 임시 파일로 만든 뒤 `NSSharingServicePicker`로 전달한다.
 18. 최근 문서는 security-scoped bookmark와 함께 저장하고, toolbar menu에서 다시 열 수 있게 한다.
 
+### HostApp 문서 열기 복구 경계
+
+HostApp은 새 입력을 읽고 검증하는 단계의 실패와 이미 commit된 문서를 표시하는 WebView runtime 실패를 서로 다른 상태로 관리한다.
+
+| 실패 경계 | 대표 원인 | 상태·표시 | 기존 문서 snapshot |
+|----------|----------|-----------|--------------------|
+| recoverable opening | 파일 읽기 실패, 0-byte, HWP/HWPX가 아닌 signature, 최근 bookmark resolve 실패 | `DocumentOpenRecoveryState`의 window-local sheet | 유지 |
+| fatal WebView | viewer asset 누락, navigation/timeout/process 실패, Studio parser `document-load-error` | 기존 `WebViewerFallbackView` | 유지 |
+
+파일 패널, Finder/open URL, 최근 문서, native file URL drop과 WebView bytes drop은 모두 source만 구분하고 같은 `RecoverableDocumentOpenFailure` presentation 계약을 사용한다. failure에는 표시용 source, sanitize된 파일명, 제목과 사용자 문구만 보관한다. 원본 URL, bookmark, document bytes와 `Error` 객체는 장기 보관하지 않는다.
+
+새 입력은 `beginLoad`로 generation을 만들지만 현재 payload, source URL, filename, revision과 dirty 상태를 즉시 지우지 않는다. 파일 read, signature validation과 protection classification이 모두 성공하고 최신 generation임이 확인된 뒤에만 새 snapshot을 commit한다. stale completion, 실패 뒤 늦은 success와 같은 generation의 중복 completion은 commit하지 않는다. 성공 commit에서만 이전 recoverable failure와 fatal WebView failure를 해제한다.
+
+recoverable sheet의 `닫기`와 Escape는 failure와 retry pending만 해제한다. `다시 시도`와 Return default action은 failure를 retry pending으로 바꾸고, SwiftUI sheet `onDismiss`가 pending을 한 번 소비한 뒤 native file panel을 연다. 따라서 sheet와 `NSOpenPanel` modal session이 중첩되지 않으며 빠른 연속 action이나 중복 dismissal도 chooser를 두 번 열지 않는다. panel 취소는 새 load를 시작하지 않는다.
+
+외부 열기가 새 window를 만든 경우 recoverable sheet도 그 window에만 표시된다. 다른 document window의 viewer와 상태는 변경하지 않는다. WebView asset·navigation·timeout·process·parser failure는 이 opening 복구 상태로 낮추지 않으며 기존 fatal fallback과 진단 정보를 유지한다.
+
 ### HostApp HWP/HWPX 저장 경로
 
 #### 소유 경계

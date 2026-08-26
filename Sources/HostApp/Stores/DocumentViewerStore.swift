@@ -6,8 +6,7 @@ final class DocumentViewerStore: ObservableObject {
     @Published private(set) var sourceDocument: RecentDocumentItem?
     @Published private(set) var recentDocuments: [RecentDocumentItem] = RecentDocumentStore.load()
     @Published var filename: String = ""
-    @Published var errorMessage: String?
-    @Published var isLoading = false
+    @Published private var documentOpenRecoveryState = DocumentOpenRecoveryState()
     @Published private(set) var webViewErrorMessage: String?
     @Published var webViewFailure: RhwpStudioWebViewFailure?
     @Published var isWebViewLoading = false
@@ -21,7 +20,6 @@ final class DocumentViewerStore: ObservableObject {
     private var webViewErrorDismissTask: Task<Void, Never>?
     private var webViewErrorDismissToken = 0
     private var webViewErrorDedupeKey: String?
-    private var activeDocumentLoadID = 0
     private var documentLoadTask: Task<Void, Never>?
 
     init(
@@ -40,6 +38,14 @@ final class DocumentViewerStore: ObservableObject {
         sourceDocument != nil
     }
 
+    var isLoading: Bool {
+        documentOpenRecoveryState.isLoading
+    }
+
+    var recoverableDocumentOpenFailure: RecoverableDocumentOpenFailure? {
+        documentOpenRecoveryState.failure
+    }
+
     var canRunWebViewCommands: Bool {
         hasDocument && !isLoading && !isWebViewLoading && webViewFailure == nil
     }
@@ -48,12 +54,74 @@ final class DocumentViewerStore: ObservableObject {
         guard let url = DocumentOpenPanel.chooseDocumentURL() else {
             return
         }
-        loadDocument(from: url)
+        loadDocument(from: url, source: .filePanel)
     }
 
-    func loadDocument(from url: URL) {
+    func loadDocument(from url: URL, source: DocumentOpenSource = .externalOpen) {
+        let loadID = beginDocumentLoad()
+        loadDocument(from: url, source: source, loadID: loadID)
+    }
+
+    func loadDroppedDocument(data: Data, filename: String) {
         let loadID = beginDocumentLoad()
 
+        do {
+            try startDocumentLoad(
+                data: data,
+                filename: Self.sanitizedFilename(filename),
+                sourceDocument: nil,
+                loadID: loadID
+            )
+        } catch {
+            failDocumentLoad(
+                loadID: loadID,
+                source: .webViewDrop,
+                filename: filename,
+                error: error
+            )
+        }
+    }
+
+    func openRecentDocument(_ document: RecentDocumentItem) {
+        let loadID = beginDocumentLoad()
+
+        do {
+            let url = try document.resolvedURL()
+            loadDocument(
+                from: url,
+                source: .recentDocument,
+                loadID: loadID
+            )
+        } catch {
+            failDocumentLoad(
+                loadID: loadID,
+                source: .recentDocument,
+                filename: document.displayName,
+                error: error
+            )
+        }
+    }
+
+    func dismissRecoverableDocumentOpenFailure() {
+        documentOpenRecoveryState.dismissFailure()
+    }
+
+    func retryDocumentOpen() {
+        _ = documentOpenRecoveryState.beginRetry()
+    }
+
+    func handleRecoverableDocumentOpenFailureDismissal() {
+        guard documentOpenRecoveryState.consumeRetry() else {
+            return
+        }
+        openDocument()
+    }
+
+    private func loadDocument(
+        from url: URL,
+        source: DocumentOpenSource,
+        loadID: Int
+    ) {
         let didStartSecurityScope = url.startAccessingSecurityScopedResource()
         defer {
             if didStartSecurityScope {
@@ -71,47 +139,12 @@ final class DocumentViewerStore: ObservableObject {
                 loadID: loadID
             )
         } catch {
-            guard activeDocumentLoadID == loadID else {
-                return
-            }
-            errorMessage = Self.openingErrorMessage(for: error)
-            clearCurrentDocument()
-            isLoading = false
-        }
-    }
-
-    func loadDroppedDocument(data: Data, filename: String) {
-        let loadID = beginDocumentLoad()
-
-        do {
-            try startDocumentLoad(
-                data: data,
-                filename: Self.sanitizedFilename(filename),
-                sourceDocument: nil,
-                loadID: loadID
+            failDocumentLoad(
+                loadID: loadID,
+                source: source,
+                filename: url.lastPathComponent,
+                error: error
             )
-        } catch {
-            guard activeDocumentLoadID == loadID else {
-                return
-            }
-            clearCurrentDocument()
-            presentWebViewError("끌어놓은 문서를 열 수 없습니다: \(Self.openingErrorMessage(for: error))")
-            isLoading = false
-        }
-    }
-
-    func openRecentDocument(_ document: RecentDocumentItem) {
-        do {
-            let url = try document.resolvedURL()
-            let didStartSecurityScope = url.startAccessingSecurityScopedResource()
-            defer {
-                if didStartSecurityScope {
-                    url.stopAccessingSecurityScopedResource()
-                }
-            }
-            loadDocument(from: url)
-        } catch {
-            presentWebViewError("최근 문서를 읽을 수 없습니다. 파일 접근 권한 또는 위치를 확인한 뒤 다시 열어 주세요.")
         }
     }
 
@@ -204,15 +237,11 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     private func beginDocumentLoad() -> Int {
-        activeDocumentLoadID += 1
         documentLoadTask?.cancel()
         documentLoadTask = nil
-        isLoading = true
-        errorMessage = nil
+        let loadID = documentOpenRecoveryState.beginLoad()
         dismissWebViewError()
-        webViewFailure = nil
-        isWebViewLoading = false
-        return activeDocumentLoadID
+        return loadID
     }
 
     private func startDocumentLoad(
@@ -231,7 +260,7 @@ final class DocumentViewerStore: ObservableObject {
 
             guard let self,
                   !Task.isCancelled,
-                  self.activeDocumentLoadID == loadID
+                  self.documentOpenRecoveryState.isCurrent(loadID: loadID)
             else {
                 return
             }
@@ -240,7 +269,8 @@ final class DocumentViewerStore: ObservableObject {
                 data: data,
                 filename: filename,
                 sourceDocument: sourceDocument,
-                sourceProtection: Self.sourceProtection(from: protection)
+                sourceProtection: Self.sourceProtection(from: protection),
+                loadID: loadID
             )
         }
     }
@@ -249,8 +279,13 @@ final class DocumentViewerStore: ObservableObject {
         data: Data,
         filename: String,
         sourceDocument: RecentDocumentItem?,
-        sourceProtection: DocumentSourceProtection
+        sourceProtection: DocumentSourceProtection,
+        loadID: Int
     ) {
+        guard documentOpenRecoveryState.completeLoad(loadID: loadID) else {
+            return
+        }
+
         self.filename = filename
         self.sourceDocument = sourceDocument
         documentRevision += 1
@@ -264,7 +299,6 @@ final class DocumentViewerStore: ObservableObject {
         dismissWebViewError()
         webViewFailure = nil
         isWebViewLoading = false
-        isLoading = false
         documentLoadTask = nil
 
         if let sourceDocument {
@@ -272,13 +306,26 @@ final class DocumentViewerStore: ObservableObject {
         }
     }
 
-    private func clearCurrentDocument() {
-        rhwpStudioDocument = nil
-        sourceDocument = nil
-        filename = ""
-        isWebViewLoading = false
-        webViewFailure = nil
-        hasUnsavedChanges = false
+    private func failDocumentLoad(
+        loadID: Int,
+        source: DocumentOpenSource,
+        filename: String?,
+        error: Error
+    ) {
+        let failure = RecoverableDocumentOpenFailure(
+            source: source,
+            filename: filename,
+            reason: Self.openingErrorMessage(for: error)
+        )
+
+        guard documentOpenRecoveryState.failLoad(
+            loadID: loadID,
+            failure: failure
+        ) else {
+            return
+        }
+
+        documentLoadTask = nil
     }
 
     private func presentWebViewError(_ message: String, dedupeKey: String? = nil) {
