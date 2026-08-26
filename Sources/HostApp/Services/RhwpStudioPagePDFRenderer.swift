@@ -93,10 +93,44 @@ struct RhwpStudioPagePDFRenderLifecycle {
     }
 }
 
+struct RhwpStudioPagePDFWebKitOperations {
+    let preparePage: @MainActor (
+        WKWebView,
+        @escaping @MainActor @Sendable (Result<Any, Error>) -> Void
+    ) -> Void
+    let createPDF: @MainActor (
+        WKWebView,
+        WKPDFConfiguration,
+        @escaping @MainActor @Sendable (Result<Data, Error>) -> Void
+    ) -> Void
+
+    @MainActor
+    static func live() -> Self {
+        Self(
+            preparePage: { webView, completion in
+                webView.callAsyncJavaScript(
+                    RhwpStudioPagePDFHTML.pagePreparationScript,
+                    arguments: [:],
+                    in: nil,
+                    in: .defaultClient,
+                    completionHandler: completion
+                )
+            },
+            createPDF: { webView, configuration, completion in
+                webView.createPDF(
+                    configuration: configuration,
+                    completionHandler: completion
+                )
+            }
+        )
+    }
+}
+
 @MainActor
 final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
     private let webView: WKWebView
     private let pdfFontSchemeHandler: RhwpStudioPDFFontSchemeHandler
+    private let webKitOperations: RhwpStudioPagePDFWebKitOperations
     private let pageRenderTimeoutNanoseconds: UInt64
     private var completion: ((Result<PDFDocument, Error>) -> Void)?
     private var payload: RhwpStudioPagePayload?
@@ -110,6 +144,7 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         pageRenderTimeoutNanoseconds: UInt64 = 30_000_000_000,
         fontResourceProvider: RhwpStudioPDFFontResourceProviding =
             RhwpStudioPDFFontBundleResourceProvider(),
+        webKitOperations: RhwpStudioPagePDFWebKitOperations? = nil,
         webViewFactory: @MainActor (WKWebViewConfiguration) -> WKWebView = { configuration in
             WKWebView(
                 frame: NSRect(
@@ -121,6 +156,7 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         }
     ) {
         self.pageRenderTimeoutNanoseconds = pageRenderTimeoutNanoseconds
+        self.webKitOperations = webKitOperations ?? .live()
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
@@ -295,12 +331,7 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             return
         }
 
-        webView.callAsyncJavaScript(
-            RhwpStudioPagePDFHTML.pagePreparationScript,
-            arguments: [:],
-            in: nil,
-            in: .defaultClient
-        ) { [weak self] result in
+        webKitOperations.preparePage(webView) { [weak self] result in
             guard let self,
                   !self.didFinish,
                   self.renderLifecycle.isCurrent(token)
@@ -342,7 +373,10 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
 
             let configuration = WKPDFConfiguration()
             configuration.rect = NSRect(origin: .zero, size: pageSize)
-            self.webView.createPDF(configuration: configuration) { [weak self] result in
+            self.webKitOperations.createPDF(
+                self.webView,
+                configuration
+            ) { [weak self] result in
                 guard let self,
                       !self.didFinish,
                       self.renderLifecycle.isCurrent(token)

@@ -73,6 +73,38 @@ final class RhwpStudioPrintLifecycleTests: XCTestCase {
         XCTAssertEqual(controllers.map(\.printCallCount), [1, 1, 1])
     }
 
+    func testCompletionCallStackAllowsImmediateNextRequestAndKeepsItsIdentity() throws {
+        let firstController = FakePrintController()
+        let secondController = FakePrintController()
+        let thirdController = FakePrintController()
+        var controllers = [firstController, secondController, thirdController]
+        let lifecycle = RhwpStudioPrintLifecycle {
+            controllers.removeFirst()
+        }
+        let payload = try makePayload()
+        var errors: [RhwpStudioPrintLifecycleError] = []
+
+        XCTAssertTrue(lifecycle.start(payload: payload, onRejected: { errors.append($0) }))
+        firstController.complete {
+            XCTAssertTrue(
+                lifecycle.start(payload: payload, onRejected: { errors.append($0) })
+            )
+            firstController.complete()
+            XCTAssertFalse(
+                lifecycle.start(payload: payload, onRejected: { errors.append($0) })
+            )
+        }
+
+        XCTAssertEqual(firstController.printCallCount, 1)
+        XCTAssertEqual(secondController.printCallCount, 1)
+        XCTAssertEqual(thirdController.printCallCount, 0)
+        XCTAssertEqual(errors, [.printingInProgress])
+
+        secondController.complete()
+        XCTAssertTrue(lifecycle.start(payload: payload, onRejected: { errors.append($0) }))
+        XCTAssertEqual(thirdController.printCallCount, 1)
+    }
+
     func testLifecycleAndControllerDoNotRetainEachOtherAfterLifecycleRelease() throws {
         weak var weakLifecycle: RhwpStudioPrintLifecycle?
         weak var weakController: FakePrintController?
@@ -115,5 +147,10 @@ private final class FakePrintController: RhwpStudioPrintControlling {
 
     func complete() {
         completion?()
+    }
+
+    func complete(then action: () -> Void) {
+        completion?()
+        action()
     }
 }
