@@ -1302,6 +1302,7 @@
 		5C7784E5D79ACC93E7BA934D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALHANGEUL_APP_EXECUTION_ENDPOINT = "https://alhangeul-install-events.postmelee.workers.dev/v1/install-events";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Sources/HostApp/HostApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -1431,6 +1432,7 @@
 		C58CD24A2F30B2611EFE69CF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALHANGEUL_APP_EXECUTION_ENDPOINT = "";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Sources/HostApp/HostApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
