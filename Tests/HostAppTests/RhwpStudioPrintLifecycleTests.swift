@@ -73,7 +73,7 @@ final class RhwpStudioPrintLifecycleTests: XCTestCase {
         XCTAssertEqual(controllers.map(\.printCallCount), [1, 1, 1])
     }
 
-    func testCompletionCallStackAllowsImmediateNextRequestAndKeepsItsIdentity() throws {
+    func testImmediateRequestAfterCompletionKeepsNewControllerIdentity() throws {
         let firstController = FakePrintController()
         let secondController = FakePrintController()
         let thirdController = FakePrintController()
@@ -86,6 +86,8 @@ final class RhwpStudioPrintLifecycleTests: XCTestCase {
 
         XCTAssertTrue(lifecycle.start(payload: payload, onRejected: { errors.append($0) }))
         firstController.complete {
+            // The lifecycle completion returned while the controller's
+            // `complete` call remains active.
             XCTAssertTrue(
                 lifecycle.start(payload: payload, onRejected: { errors.append($0) })
             )

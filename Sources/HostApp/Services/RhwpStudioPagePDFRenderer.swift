@@ -288,6 +288,7 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
 
         guard renderingPageIndex < payload.pageCount else {
             guard let token = renderLifecycle.currentPageToken else {
+                assertionFailure("Active render completed without a current page token.")
                 return
             }
             guard renderedDocument.pageCount == payload.pageCount else {
@@ -307,6 +308,7 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         }
 
         guard let token = renderLifecycle.beginPage(at: renderingPageIndex) else {
+            assertionFailure("Active render could not begin the current page.")
             return
         }
         webView.frame = NSRect(

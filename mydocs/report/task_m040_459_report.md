@@ -33,7 +33,7 @@
 | `Sources/HostApp/Views/RhwpStudioWebView.swift` | Coordinator의 직접 controller slot을 lifecycle 위임으로 교체 |
 | `Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift` | Render generation/page/navigation state, stale callback gate, cleanup·재사용과 internal WebKit operation seam 구현 |
 | `Sources/HostApp/Services/RhwpStudioHostBridgeScript.swift` | Native PDF menu observer의 attribute filter에 `aria-label` 추가 |
-| `Tests/HostAppTests/RhwpStudioPrintLifecycleTests.swift` | 중복 거부, identity 해제, outcome별 재진입, completion 내부 즉시 재진입과 retain cycle 회귀 추가 |
+| `Tests/HostAppTests/RhwpStudioPrintLifecycleTests.swift` | 중복 거부, identity 해제, outcome별 재진입, completion 직후 즉시 재진입과 retain cycle 회귀 추가 |
 | `Tests/HostAppTests/RhwpStudioPagePDFRendererTests.swift` | Generation/navigation identity, stale async result, 모든 종료 유형 뒤 동일 renderer 재사용 회귀 추가·보강 |
 | `Tests/HostAppTests/RhwpStudioHostBridgeScriptTests.swift` | `aria-label` filter와 canonical 복원 source 계약 보강 |
 | `project.yml` | 신규 print lifecycle production source를 standalone HostAppTests source 목록에 추가 |
@@ -61,8 +61,8 @@
 | 종료 뒤 재사용 | 일부 timeout/process retry만 검증 | 정상·navigation·font·encoding·timeout·process 종료 전체 검증 |
 | 전체 HostAppTests | 163개 | 178개, 순증 15개 |
 | Test function diff | 기준 | 신규·이름 보강 16개, 기존 timeout test 1개 대체 |
-| Production Swift diff | 기준 | 5개 파일, 348줄 추가·73줄 삭제 |
-| HostAppTests Swift diff | 기준 | 3개 파일, 654줄 추가·17줄 삭제 |
+| Production Swift diff | 기준 | 5개 파일, 354줄 추가·73줄 삭제 |
+| HostAppTests Swift diff | 기준 | 3개 파일, 656줄 추가·17줄 삭제 |
 | 구현 단계 | 계획 전 | 4/4 완료 |
 
 최종 보고서 작성 전 `devel...40383f4` task diff는 18개 파일, 2,174줄 추가·91줄 삭제였다. 이 중 1,161줄 추가·1줄 삭제는 수행·구현계획, architecture와 4개 단계 보고서 등 작업 문서이며, 제품 동작은 HostApp service/view와 HostAppTests 범위에서만 변경됐다.
@@ -73,7 +73,7 @@
 |-----------|-----------|------|
 | 중복 인쇄가 기존 controller를 교체하지 않음 | Active 검사 뒤에만 factory 호출, `testDuplicateRequestKeepsActiveControllerAndReportsErrorWithoutCreatingAnother` | OK |
 | 중복 요청이 사용자에게 명시적으로 거부됨 | `.printingInProgress`와 기존 coordinator `onError`, 오류 1회 test | OK |
-| Identity가 일치하는 completion만 ownership 해제 | `testOnlyMatchingControllerCompletionReleasesCurrentController`, completion call stack 재진입 test | OK |
+| Identity가 일치하는 completion만 ownership 해제 | `testOnlyMatchingControllerCompletionReleasesCurrentController`, completion 직후 즉시 재진입 test | OK |
 | 이전 render/navigation callback이 현재 page·completion을 변경하지 않음 | Generation/page/navigation state tests, 실제 `WKNavigation` failure 재전달, stale `createPDF` result test | OK |
 | 정상·실패·timeout·process 종료 뒤 renderer 재진입 | 다중 page 정상, navigation, font, encoding, timeout, WebContent process 종료별 동일 instance 재사용 test | OK |
 | 실패·취소·정상 인쇄 completion 뒤 다음 요청 수락 | Outcome별 fake controller completion과 즉시 다음 요청 test | OK |
@@ -101,6 +101,32 @@ PR 게시 전 최종 절차에서 XcodeGen 2회, 전체 HostAppTests, HostApp De
 - 실제 print panel 통합 테스트는 OS UI·printer 환경 의존성과 유지 비용에 비해 현재 lifecycle identity 검증을 강화하는 폭이 작아 별도 후속 이슈로 분리하지 않는다. 사용자 회귀가 관측되거나 print operation을 주입 가능한 구조로 바꾸는 작업이 생길 때 재평가한다.
 
 별도 후속 이슈가 필요한 미완료 구현은 없다. Issue #459는 PR merge 뒤 `pr-merge-cleanup` 절차에서 close한다.
+
+## PR 리뷰 보정
+
+[PR #489 리뷰](https://github.com/postmelee/alhangeul-macos/pull/489#issuecomment-5434379036)의 LOW/INFO 지적을 검토해 비용 대비 가치가 있는 세 항목을 보정했다.
+
+- `renderNextPage()`의 구조상 도달 불가능한 lifecycle 불일치 두 곳에 `assertionFailure`를 추가했다. Release 상태 머신이나 사용자 오류 표면을 넓히지 않으면서 향후 내부 invariant drift를 debug 검증에서 즉시 노출한다.
+- `RhwpStudioPrintControlling.print` protocol에 성공·실패·사용자 취소 뒤 `completion`을 정확히 한 번 호출해야 한다는 구현 계약을 명시했다.
+- Print lifecycle test를 `testImmediateRequestAfterCompletionKeepsNewControllerIdentity`로 바꾸고, lifecycle completion이 반환된 직후 같은 controller `complete` 호출 스택에서 재진입한다는 실제 검증 범위로 단계·최종 보고서 표현을 좁혔다.
+
+Controller의 마지막 강한 참조 해제는 현재 모든 `finish` 진입점이 strong `self` 호출 구간에 있고 protocol completion도 weak capture이므로 구조 변경하지 않았다. `ObjectIdentifier` 주소 재사용과 `loadHTMLString` 뒤 navigation 등록은 WebKit callback lifetime·비동기 계약과 watchdog으로 제한되는 INFO 수준이라 test seam 복잡도를 늘리지 않았다. `aria-label` observer는 Issue #459 본문의 명시 범위이므로 유지했다.
+
+보정 검증 결과:
+
+| 검증 | 결과 |
+|------|------|
+| `RhwpStudioPrintLifecycleTests` | 5/5 통과 |
+| 전체 `HostAppTests` | 178/178 통과, 실패·skip 0 |
+| HostApp Debug unsigned build | 성공 |
+| XcodeGen project SHA-1 | `192e1cd7c42b3a80213fbdf7f3b8ab396a738ef0`, 추가 diff 없음 |
+| `check-no-appkit.sh` / `verify-rhwp-studio-assets.sh` | 통과 |
+| Extension registration hygiene | issue 0, development registration 0 |
+| `git diff --check` | 통과 |
+
+보정 전체 test 결과 bundle:
+
+- `build.noindex/task459-review-full/Logs/Test/Test-HostAppTests-2026.08.27_13-33-30-+0900.xcresult`
 
 ## 작업지시자 승인 요청
 

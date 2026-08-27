@@ -1,6 +1,10 @@
 import Foundation
 
 protocol RhwpStudioPrintControlling: AnyObject {
+    /// Starts one print operation.
+    ///
+    /// Implementations must invoke `completion` exactly once after success,
+    /// failure, or user cancellation.
     @MainActor
     func print(payload: RhwpStudioPagePayload, completion: @escaping () -> Void)
 }

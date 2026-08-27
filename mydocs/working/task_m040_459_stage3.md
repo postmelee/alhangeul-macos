@@ -10,7 +10,7 @@ Stage 1의 인쇄 controller ownership과 Stage 2의 renderer generation을 실�
 |------|-----------|
 | `Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift` | Production WebKit preparation·`createPDF` 호출을 그대로 기본값으로 사용하는 internal 작업 seam 추가 |
 | `Tests/HostAppTests/RhwpStudioPagePDFRendererTests.swift` | 정상·오류·process 종료·stale async result·즉시 재진입 회귀 5개 추가, timeout retry를 completion 내부 재진입으로 보강 |
-| `Tests/HostAppTests/RhwpStudioPrintLifecycleTests.swift` | controller completion call stack 안에서 다음 요청을 시작하고 이전 completion identity를 재검증하는 회귀 추가 |
+| `Tests/HostAppTests/RhwpStudioPrintLifecycleTests.swift` | controller completion 직후 같은 `complete` call stack에서 다음 요청을 시작하고 이전 completion identity를 재검증하는 회귀 추가 |
 | `mydocs/orders/20260826.md` | Stage 3 완료와 Stage 4 승인 대기 상태 반영 |
 
 `project.yml`과 generated Xcode project에는 신규 source membership이 없어 변경하지 않았다. Public API, Host bridge protocol과 PDF export state도 변경하지 않았다.
@@ -93,7 +93,7 @@ Production `RhwpStudioPrintLifecycle` source 보정은 필요하지 않았다.
 | `testRendererReentersAfterPDFEncodingFailureFromCompletion` | Invalid PDF data typed error 뒤 live WebKit render 성공 |
 | `testRendererIgnoresStaleCreatePDFResultWhileProcessTerminationRetryIsActive` | Process 종료 뒤 새 generation active 상태에서 이전 `createPDF` result 무시 |
 | `testRendererPageTimeoutFinishesExactlyOnceAndAllowsImmediateRetry` | Timeout completion 내부 즉시 retry와 generation별 exactly-once |
-| `testCompletionCallStackAllowsImmediateNextRequestAndKeepsItsIdentity` | Print completion call stack 재진입과 이전 controller identity 방어 |
+| `testImmediateRequestAfterCompletionKeepsNewControllerIdentity` | Print completion 직후 즉시 재진입과 이전 controller identity 방어 |
 
 ### 검증 결과
 

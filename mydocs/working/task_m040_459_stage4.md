@@ -55,7 +55,7 @@ Navigation 완료·실패는 renderer 소유 WebView와 current navigation ident
 |-----------|----------------|------|
 | 인쇄 중 두 번째 요청이 기존 controller를 교체하지 않고 명시적으로 거부됨 | `RhwpStudioPrintLifecycle.start`가 active 검사 뒤에만 factory를 호출하고 `.printingInProgress`를 반환한다. `testDuplicateRequestKeepsActiveControllerAndReportsErrorWithoutCreatingAnother`가 factory 추가 호출 0회와 오류 1회를 검증한다. | 충족 |
 | 이전 render/navigation 세대 callback이 현재 page나 completion을 변경하지 않음 | Generation/page/navigation token gate와 `testRenderLifecycleRejectsStaleTokenAcrossRenderGenerations`, `testRendererReentersAfterCurrentNavigationFailureAndIgnoresRepeatedFailure`, `testRendererIgnoresStaleCreatePDFResultWhileProcessTerminationRetryIsActive`가 state·completion 불변을 검증한다. | 충족 |
-| 실패·취소·정상 완료 뒤 다음 인쇄와 PDF render가 정상 진입함 | `testCompletionAllowsNextRequestForEveryControllerOutcome`, `testCompletionCallStackAllowsImmediateNextRequestAndKeepsItsIdentity`와 renderer의 정상·navigation·font·encoding·timeout·process 종료 재사용 회귀가 다음 요청 수락과 exactly-once completion을 검증한다. | 충족 |
+| 실패·취소·정상 완료 뒤 다음 인쇄와 PDF render가 정상 진입함 | `testCompletionAllowsNextRequestForEveryControllerOutcome`, `testImmediateRequestAfterCompletionKeepsNewControllerIdentity`와 renderer의 정상·navigation·font·encoding·timeout·process 종료 재사용 회귀가 다음 요청 수락과 exactly-once completion을 검증한다. | 충족 |
 | 관련 HostAppTests와 HostApp Debug build 통과 | 전체 HostAppTests 178/178, 실패·skip 0. HostApp Debug unsigned build 성공. | 충족 |
 | `project.yml`로 Xcode project 재생성 후 추가 diff 없음 | XcodeGen 2회 결과 SHA-1이 모두 `192e1cd7c42b3a80213fbdf7f3b8ab396a738ef0`이고 두 번째 생성 뒤 project diff가 없다. | 충족 |
 
