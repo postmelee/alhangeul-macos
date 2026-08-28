@@ -23,9 +23,9 @@ Task #479가 도입한 Release-only 익명 실행 이벤트 endpoint 계약을 �
 | Source 진실 원천 | `project.yml`의 HostApp Release `ALHANGEUL_APP_EXECUTION_ENDPOINT`가 전체 URL을 소유한다. | URL 편집 원본은 유지하고 verifier에 승인 origin guard를 독립적으로 둔다. |
 | Source verifier | HTTPS 절대 URL과 credential·query·fragment 부재만 확인한다. | 다른 HTTPS host 실패 fixture와 origin 비교가 필요하다. |
 | Built Release verifier | `--release-app`은 built plist 값이 `project.yml` endpoint와 exact 일치하는지 확인한다. | Exact-match 계약은 유지하되 실제 release helper에서 호출해야 한다. |
-| Built plist reader | `plutil`이 없으면 REXML로 fallback한다. | Binary plist에 동작하지 않는 fallback을 제거하고 built 옵션에서만 `plutil`을 필수화한다. |
-| Portable fixture | Ubuntu `script-checks`에서 source 정상과 실패 fixture 3개를 실행한다. | Origin failure는 portable하게 추가하고 binary built fixture는 macOS로 분리한다. |
-| macOS PR CI | Debug app을 빌드한 뒤 `--debug-app`만 실행한다. | Mac에서 test helper를 한 번 더 실행해 binary built fixture를 검증할 수 있다. |
+| Built plist reader | `plutil`이 없으면 REXML로 fallback한다. Current Release plist는 `same-as-input` XML이며 fallback으로도 읽힌다. | XML-only fallback 의도를 명시하고, `plutil` 없는 binary 입력은 명확히 실패하게 한다. |
+| Portable fixture | Ubuntu `script-checks`에서 source 정상과 실패 fixture 3개를 실행한다. | Origin failure와 XML built fixture를 portable하게 추가하고 synthetic binary fixture는 macOS로 분리한다. |
+| macOS PR CI | Debug app을 빌드한 뒤 `--debug-app`만 실행한다. | Mac에서 test helper를 한 번 더 실행해 current XML과 synthetic binary fixture를 검증한다. |
 | Public/rehearsal workflow | 둘 다 공통 `scripts/release.sh`를 호출한다. | Workflow에 build 검증 명령을 중복하지 않고 공통 helper에 pre-signing hook을 둔다. |
 | `release.sh` 순서 | `build_app` 다음에 곧바로 `sign_release_app_for_notarization`을 호출한다. | 두 호출 사이가 built endpoint preflight의 단일 위치다. |
 | 개발용 zip | `package-release.sh`도 Release app을 만든 뒤 universal slice만 검증한다. | 같은 built endpoint verifier를 복사 직후 실행해 Release zip 우회 경로도 닫는다. |
@@ -45,9 +45,10 @@ Task #479가 도입한 Release-only 익명 실행 이벤트 endpoint 계약을 �
 ### 3.2 Source와 built plist reader 경계
 
 - Source `Info.plist`는 tracked XML이므로 기존 REXML 검증을 유지한다.
-- `--debug-app` 또는 `--release-app`은 Xcode 산출물의 binary plist를 읽으므로 `plutil`을 요구한다.
+- Current `--debug-app`·`--release-app` 산출물은 `INFOPLIST_OUTPUT_FORMAT = same-as-input`에 따라 tracked source와 같은 XML이다.
+- macOS에서는 XML·binary 형식 모두 처리하는 `plutil`을 우선 사용한다.
+- `plutil`이 없는 환경에서는 REXML fallback으로 XML built plist만 지원하고, binary 입력은 명확한 오류로 종료한다.
 - Built 옵션이 없으면 Ubuntu source fixture는 `plutil` 없이 계속 실행돼야 한다.
-- Built 옵션이 있는데 `plutil`이 없으면 명확한 오류로 종료한다. XML-only fallback이나 조용한 skip은 허용하지 않는다.
 - 오류 메시지는 secret이나 문서 정보를 포함하지 않고 설정 이름, 예상 origin과 대상 app path 정도만 제공한다.
 
 ### 3.3 Release preflight 실행 순서
@@ -62,7 +63,7 @@ Task #479가 도입한 Release-only 익명 실행 이벤트 endpoint 계약을 �
 ### 3.4 테스트 플랫폼 분리
 
 - Ubuntu `script-checks`: source 정상, invalid base, invalid scheme, invalid origin, invalid placeholder fixture를 실행한다.
-- macOS validation: 같은 source fixture와 `plutil`로 만든 binary Debug/Release app fixture를 실행한다.
+- macOS validation: 같은 source·XML built fixture와 `plutil`로 만든 synthetic binary Debug/Release app fixture를 실행한다.
 - 기존 실제 Debug built app `--debug-app` 검증을 유지한다.
 - 실제 Release path는 로컬 unsigned Release build와 필요 시 `release.sh --skip-notarize`로 확인한다.
 - Public release workflow와 production endpoint HTTP 요청은 테스트에 사용하지 않는다.
@@ -71,7 +72,7 @@ Task #479가 도입한 Release-only 익명 실행 이벤트 endpoint 계약을 �
 
 ### 4.1 목적
 
-제품·helper 구현을 바꾸기 전에 현재 verifier가 승인되지 않은 HTTPS origin을 통과시키고 `--release-app`이 release 경로에서 호출되지 않는 사실을 재현한다. Binary plist reader와 `release.sh`의 pre-signing 삽입 지점을 고정해 Stage 2·3의 책임 경계를 확정한다.
+제품·helper 구현을 바꾸기 전에 현재 verifier가 승인되지 않은 HTTPS origin을 통과시키고 `--release-app`이 release 경로에서 호출되지 않는 사실을 재현한다. Current plist 출력 형식과 fallback 동작, `release.sh`의 pre-signing 삽입 지점을 고정해 Stage 2·3의 책임 경계를 확정한다.
 
 ### 4.2 작업 범위
 
@@ -80,7 +81,7 @@ Task #479가 도입한 Release-only 익명 실행 이벤트 endpoint 계약을 �
 3. `rg`로 `--release-app` 호출이 verifier help 외에 없는지 확인한다.
 4. `release.sh` main 순서와 `build_app`이 copied `APP_OUTPUT`을 만드는 지점을 확인한다.
 5. `package-release.sh`의 copied app·universal 검증·zip 순서를 확인해 built endpoint gate 포함을 확정한다.
-6. Xcode built `Info.plist`가 binary 형식이며 REXML fallback이 이를 처리하지 못하는 계약 불일치를 기록한다.
+6. Xcode built `Info.plist`의 실제 출력 형식과 REXML fallback 동작을 측정하고, current XML·future binary 책임을 구분한다.
 7. Expected origin 비교 단위, `plutil` 적용 조건, Ubuntu/macOS fixture 분리를 확정한다.
 
 ### 4.3 예상 산출물
@@ -108,7 +109,7 @@ Binary plist 형식 확인에 app build가 필요하면 `build.noindex/task488-s
 - 다른 HTTPS origin이 현재 source verifier를 통과하는 재현 결과가 있다.
 - `--release-app`이 rehearsal/publish/package helper에서 호출되지 않는 현재 상태가 기록된다.
 - `release.sh`의 endpoint gate가 `build_app`과 signing 사이에 들어가야 하는 근거가 확정된다.
-- Built plist의 binary reader를 `plutil`로 제한할 근거와 portable fixture 경계가 기록된다.
+- Built plist가 current XML임을 확인하고 `plutil` 우선·XML-only fallback·binary 명시 실패 경계가 기록된다.
 - Stage 2·3의 변경 파일과 검증 명령이 구현 가능한 수준으로 확정된다.
 
 ### 4.6 커밋
@@ -119,7 +120,7 @@ Binary plist 형식 확인에 app build가 필요하면 `build.noindex/task488-s
 
 ### 5.1 목적
 
-승인되지 않은 HTTPS origin을 source gate에서 차단하고 built app 검사를 실제 binary plist 계약에 맞춘다. Portable source fixture와 macOS binary built fixture로 회귀를 자동 검증한다.
+승인되지 않은 HTTPS origin을 source gate에서 차단하고 built app 검사를 current XML·future binary plist 계약에 맞춘다. Portable source/XML fixture와 macOS synthetic binary fixture로 회귀를 자동 검증한다.
 
 ### 5.2 예상 변경 파일
 
@@ -135,12 +136,13 @@ Binary plist 형식 확인에 app build가 필요하면 `build.noindex/task488-s
 2. Expected origin 자체가 credential·query·fragment와 비-root path를 갖지 않는 유효한 HTTPS origin인지 방어적으로 검증한다.
 3. Release endpoint를 URI로 파싱한 뒤 scheme·host·effective port 기준 origin을 비교한다.
 4. 승인되지 않은 HTTPS origin에 expected/actual을 구분하는 오류를 출력한다.
-5. Built plist reader의 REXML fallback을 제거한다.
-6. Built app 옵션이 주어졌을 때만 `plutil` 존재를 확인하고 없으면 명시적으로 실패한다.
+5. Built plist reader의 REXML fallback을 XML-only로 명시하고 parse 오류를 구체화한다.
+6. `plutil`이 없는 상태에서 binary built plist가 입력되면 명시적으로 실패한다.
 7. Existing exact Release endpoint 비교와 Debug empty endpoint 검사를 유지한다.
 8. Portable fixture에 invalid HTTPS origin을 추가한다.
-9. macOS에서 synthetic binary Debug/Release app을 만들어 empty/exact/mismatch를 검증한다.
-10. PR CI macOS validation에서 test helper를 실행해 binary fixture를 활성화하고 기존 실제 Debug app 검증을 유지한다.
+9. Portable XML Debug/Release app fixture로 empty/exact/mismatch와 REXML fallback을 검증한다.
+10. macOS에서 synthetic binary Debug/Release app을 만들어 `plutil` 성공과 no-`plutil` 실패를 검증한다.
+11. PR CI macOS validation에서 test helper를 실행해 binary fixture를 활성화하고 기존 실제 Debug app 검증을 유지한다.
 
 ### 5.4 자동 회귀
 
@@ -149,11 +151,12 @@ Binary plist 형식 확인에 app build가 필요하면 `build.noindex/task488-s
 - HTTP Release endpoint 실패
 - 다른 HTTPS origin 실패
 - Source plist literal/placeholder drift 실패
-- Binary Debug empty endpoint 통과
-- Binary Release exact endpoint 통과
-- Binary Release mismatch 실패
+- XML Debug empty endpoint 통과
+- XML Release exact endpoint 통과와 mismatch 실패
+- Synthetic binary Debug/Release endpoint의 `plutil` 경로 통과
 - Source-only Ubuntu 실행에서 `plutil` 비필수
-- Built app 검사에서 `plutil` 없는 환경은 명시적 실패
+- `plutil` 없는 XML built app은 REXML fallback 통과
+- `plutil` 없는 binary built app은 명시적 실패
 
 ### 5.5 검증
 
@@ -172,8 +175,8 @@ git diff --check
 
 - `https://다른-host/...` source fixture가 HTTPS여도 실패한다.
 - 현재 production source configuration과 exact built Release fixture는 통과한다.
-- Built binary plist는 `plutil`로만 읽고 REXML fallback이 없다.
-- Ubuntu source fixture와 macOS binary fixture가 각 플랫폼에서 자동 실행된다.
+- Current XML built plist는 `plutil` 우선·REXML fallback 모두 읽고 binary plist는 `plutil` 없이 명시적으로 실패한다.
+- Ubuntu source/XML fixture와 macOS synthetic binary fixture가 각 플랫폼에서 자동 실행된다.
 - 기존 Debug endpoint 비활성과 Release exact-match 계약이 유지된다.
 
 ### 5.7 커밋
@@ -252,7 +255,7 @@ env -u ALHANGEUL_DEVELOPER_ID_APPLICATION \
 - `release.sh`가 copied built app을 signing/notarization 전에 `--release-app`으로 검증한다.
 - Rehearsal과 publish workflow가 별도 복제 없이 같은 blocking gate를 사용한다.
 - `package-release.sh`도 Release zip 생성 전에 exact built endpoint를 검증한다.
-- Origin drift, built mismatch와 binary plist fixture가 자동 실패한다.
+- Origin drift, built mismatch와 XML/binary plist fixture가 자동 실패한다.
 - Current unsigned Release app은 exact endpoint gate와 기존 universal/provenance 검증을 통과한다.
 - 운영 문서가 source origin guard와 release artifact preflight 순서를 정확히 설명한다.
 - Public release, signing/notarization과 production 네트워크 요청은 수행하지 않는다.
@@ -264,7 +267,7 @@ env -u ALHANGEUL_DEVELOPER_ID_APPLICATION \
 ## 7. 단계별 중단·승인 기준
 
 - Stage 1에서 expected origin 비교가 endpoint의 합법적 운영 변경을 과도하게 막거나 `release.sh` hook이 signing 전 copied app을 볼 수 없으면 구현을 시작하지 않고 설계를 재승인받는다.
-- Stage 2에서 Ubuntu portable fixture가 `plutil`에 의존하거나 macOS binary fixture가 실제 built plist와 다른 형식만 검증하면 단계 완료로 보지 않는다.
+- Stage 2에서 Ubuntu portable fixture가 `plutil`에 의존하거나 current XML output과 synthetic binary 미래 경계 중 하나만 검증하면 단계 완료로 보지 않는다.
 - Stage 3에서 endpoint verifier가 signing/notarization 뒤에 실행되거나 workflow별 중복 명령이 생기면 완료로 보지 않는다.
 - 어느 Stage에서도 public workflow dispatch, Developer ID/notary credential 사용 또는 production 합성 이벤트가 필요해지면 즉시 멈추고 별도 승인을 요청한다.
 - 검증 실패가 해당 단계 범위를 넘어 runtime, payload, endpoint 값 변경을 요구하면 구현계획을 보정하고 승인받는다.
@@ -272,7 +275,7 @@ env -u ALHANGEUL_DEVELOPER_ID_APPLICATION \
 ## 8. 승인 요청 사항
 
 1. Stage 1에서 우회 가능성과 release hook 위치를 먼저 재현·고정한 뒤 구현하는 순서 승인
-2. Stage 2에서 expected origin, built-only `plutil`과 Ubuntu/macOS fixture 분리를 한 묶음으로 구현하는 범위 승인
+2. Stage 2에서 expected origin, `plutil` 우선·XML-only fallback과 Ubuntu/macOS fixture 분리를 한 묶음으로 구현하는 범위 승인
 3. Stage 3에서 `release.sh`와 `package-release.sh`에 공통 verifier를 연결하고 workflow에는 중복 명령 대신 summary만 보강하는 방향 승인
 4. Public release·서명·공증·production 요청 없이 unsigned Release build와 필요 시 `--skip-notarize` rehearsal까지만 수행하는 검증 범위 승인
 5. 구현계획 승인 후 Stage 1 재현과 계약 확정 작업 시작 승인

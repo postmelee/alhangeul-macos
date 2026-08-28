@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 DEBUG_APP=""
 RELEASE_APP=""
+EXPECTED_PRODUCTION_ORIGIN="https://alhangeul-install-events.postmelee.workers.dev"
 
 usage() {
   cat <<'USAGE'
@@ -61,12 +62,12 @@ SOURCE_PLIST="$REPO_ROOT/Sources/HostApp/Info.plist"
 [[ -f "$SOURCE_PLIST" ]] || fail "missing HostApp Info.plist: $SOURCE_PLIST"
 command -v ruby >/dev/null 2>&1 || fail "ruby is required"
 
-release_endpoint="$(ruby - "$PROJECT_FILE" "$SOURCE_PLIST" <<'RUBY'
+release_endpoint="$(ruby - "$PROJECT_FILE" "$SOURCE_PLIST" "$EXPECTED_PRODUCTION_ORIGIN" <<'RUBY'
 require "psych"
 require "rexml/document"
 require "uri"
 
-project_path, plist_path = ARGV
+project_path, plist_path, expected_origin_value = ARGV
 setting_name = "ALHANGEUL_APP_EXECUTION_ENDPOINT"
 plist_key = "AlhangeulAppExecutionEndpoint"
 placeholder = "$(#{setting_name})"
@@ -74,6 +75,30 @@ placeholder = "$(#{setting_name})"
 def abort_check(message)
   warn "error: #{message}"
   exit 1
+end
+
+def normalized_origin(uri)
+  [uri.scheme.downcase, uri.host.downcase, uri.port]
+end
+
+def origin_label(uri)
+  port = uri.port == 443 ? "" : ":#{uri.port}"
+  "#{uri.scheme.downcase}://#{uri.host.downcase}#{port}"
+end
+
+begin
+  expected_origin = URI.parse(expected_origin_value)
+rescue URI::InvalidURIError => error
+  abort_check("expected production origin is invalid: #{error.message}")
+end
+unless expected_origin.is_a?(URI::HTTPS) && expected_origin.host && !expected_origin.host.empty?
+  abort_check("expected production origin must be an absolute HTTPS origin")
+end
+unless expected_origin.userinfo.nil? && expected_origin.query.nil? && expected_origin.fragment.nil?
+  abort_check("expected production origin must not contain credentials, query, or fragment")
+end
+unless expected_origin.path.nil? || expected_origin.path.empty? || expected_origin.path == "/"
+  abort_check("expected production origin must not contain a path")
 end
 
 begin
@@ -120,6 +145,11 @@ end
 if uri.userinfo || uri.query || uri.fragment
   abort_check("HostApp Release endpoint must not contain credentials, query, or fragment")
 end
+unless normalized_origin(uri) == normalized_origin(expected_origin)
+  abort_check(
+    "HostApp Release endpoint origin must be #{origin_label(expected_origin)}, got: #{origin_label(uri)}"
+  )
+end
 
 begin
   document = REXML::Document.new(File.read(plist_path))
@@ -154,20 +184,38 @@ read_built_endpoint() {
     return
   fi
 
+  # Xcode currently preserves the tracked XML plist because
+  # INFOPLIST_OUTPUT_FORMAT is same-as-input. Keep a portable XML-only reader,
+  # but never pretend that REXML can decode a binary plist without plutil.
   ruby - "$plist_path" <<'RUBY'
 require "rexml/document"
 
-document = REXML::Document.new(File.read(ARGV.fetch(0)))
+def abort_check(message)
+  warn "error: #{message}"
+  exit 1
+end
+
+plist_path = ARGV.fetch(0)
+contents = File.binread(plist_path)
+if contents.start_with?("bplist")
+  abort_check("plutil is required to read binary built Info.plist: #{plist_path}")
+end
+
+begin
+  document = REXML::Document.new(contents)
+rescue StandardError => error
+  abort_check("cannot parse XML built Info.plist without plutil: #{error.message}")
+end
 elements = document.elements.to_a("plist/dict/*")
 elements.each_with_index do |element, index|
   next unless element.name == "key" && element.text == "AlhangeulAppExecutionEndpoint"
 
   value_element = elements[index + 1]
-  abort "endpoint value is not a string" unless value_element&.name == "string"
+  abort_check("endpoint value is not a string") unless value_element&.name == "string"
   print value_element.text.to_s
   exit 0
 end
-abort "endpoint key is missing"
+abort_check("endpoint key is missing")
 RUBY
 }
 

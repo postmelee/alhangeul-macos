@@ -218,6 +218,12 @@ jobs:
           set -euo pipefail
           xcodegen generate
 
+      - name: Check analytics endpoint plist fixtures on macOS
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/test-app-execution-endpoint-config.sh
+
       - name: Build HostApp Debug
         shell: bash
         run: |
