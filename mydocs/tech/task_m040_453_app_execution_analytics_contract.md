@@ -47,6 +47,10 @@ Production endpoint의 단일 편집 원본은 `project.yml`의 HostApp `ALHANGE
 
 - HostApp base 값은 빈 문자열이며 Debug와 별도로 승인되지 않은 개발 configuration은 production endpoint를 얻지 않는다.
 - 표준 Release configuration만 공개 production HTTPS endpoint를 주입한다.
+- 검증 helper는 `project.yml`의 전체 URL과 별도로 승인된 production origin `https://alhangeul-install-events.postmelee.workers.dev`를 고정한다. Release URL의 scheme·host·port가 이 origin과 다르면 source 단계에서 실패한다.
+- production endpoint host를 의도적으로 변경할 때는 `project.yml`, 검증 helper의 승인 origin, fixture와 이 문서를 같은 변경으로 갱신하고 검토한다.
+- `scripts/release.sh`와 `scripts/package-release.sh`는 Release build를 staging으로 복사한 직후 bundle의 전체 endpoint가 `project.yml` 값과 정확히 일치하는지 검증한다. mismatch는 post-build Developer ID 재서명, 공증 제출, DMG 또는 zip 생성을 시작하기 전에 실패한다.
+- macOS에서는 built `Info.plist` 형식과 무관하게 `plutil`로 값을 읽는다. `plutil`을 쓸 수 없는 환경은 XML plist만 Ruby 표준 라이브러리로 확인하며 binary plist는 명확히 실패한다.
 - 빈 값이나 유효하지 않은 endpoint는 `AppExecutionAnalyticsEndpoint.resolve()`가 `nil`로 거부한다. Coordinator는 connectivity 확인과 transport 생성을 시작하지 않고 outbox와 앱·문서 기능을 비차단 상태로 유지한다.
 - Endpoint가 없는 실행은 event를 전송하지 않을 뿐 아니라 **생성·적재하지도 않는다**. `AppExecutionAnalyticsRuntime.prepareForLaunch()`는 delivery가 구성되지 않았으면 observer를 호출하지 않고 반환하므로 `lastObservedVersion`·`pendingSparkleUpdate`·outbox가 모두 그대로 유지된다.
 - 이 gate가 필요한 이유는 Debug와 Release가 같은 `PRODUCT_BUNDLE_IDENTIFIER`를 쓰고 따라서 같은 sandbox container의 `UserDefaults`와 outbox를 공유하기 때문이다. 전송만 막고 적재를 허용하면 Debug 실행이 남긴 event를 같은 머신의 이후 Release 실행이 production으로 flush한다. 미시도 항목 보존 기간이 30일이므로 차단이 아니라 지연에 그친다.

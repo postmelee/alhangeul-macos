@@ -9,8 +9,8 @@
 | workflow | trigger | 권한 | runner | 역할 |
 |----------|---------|------|--------|------|
 | `PR CI` | `pull_request` to `main`, `devel`, `native-viewer-editor` | `contents: read`, `pull-requests: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax/build-info fixture, 조건부 macOS build와 build-info verifier, 조건부 release helper dry-run |
-| `Release Rehearsal DMG` | `workflow_dispatch` | `contents: read`, `pull-requests: read` | macOS | core lock/build-info verifier, signed/notarized 전 universal rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
-| `Release Publish DMG` | `workflow_dispatch` | `contents: write`/`pull-requests: read` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag와 core lock/build-info 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
+| `Release Rehearsal DMG` | `workflow_dispatch` | `contents: read`, `pull-requests: read` | macOS | core lock/build-info와 built Release endpoint 검증, signed/notarized 전 universal rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
+| `Release Publish DMG` | `workflow_dispatch` | `contents: write`/`pull-requests: read` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag, core lock/build-info와 built Release endpoint 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
 | `Docs-only Pages Deploy` | `push` to `main` with `docs/**`, `workflow_dispatch` | `contents: read`, `pages: write`/`id-token: write` for Pages job, `environment: github-pages` | Ubuntu | 일반 Pages 문서 변경을 public Pages에 배포하고 기존 public appcast를 보존 |
 | `rhwp Upstream Release Check` | `workflow_dispatch`, schedule | `contents: read` | Ubuntu | upstream `rhwp` release와 `rhwp-core.lock` 비교 |
 | `rhwp Upstream Sync PR` | `workflow_dispatch`, schedule | workflow는 `contents: read`, `pull-requests: read`; PR 생성은 GitHub App token의 `contents: write`, `pull-requests: write`, `issues: write` | Ubuntu, macOS | upstream release를 감지해 `rhwp-core.lock`/RustBridge, Swift build info와 bundled `rhwp-studio`를 같은 core identity로 갱신하는 full sync 후보 PR 생성 |
@@ -110,6 +110,7 @@ rustup target add aarch64-apple-darwin x86_64-apple-darwin
 ./scripts/check-no-appkit.sh
 ./scripts/verify-rhwp-core-build-info.sh
 ./scripts/verify-rhwp-studio-assets.sh
+scripts/ci/test-app-execution-endpoint-config.sh
 xcodegen generate
 xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
@@ -193,6 +194,7 @@ rehearsal 산출물은 public GitHub Release asset이나 Homebrew Cask URL에 �
 rehearsal workflow가 만든 app bundle도 `arm64 + x86_64` universal slice 검증을 통과해야 하지만, signed/notarized public DMG와 실제 Intel Mac 실기기 smoke를 대체하지 않는다.
 release owner는 rehearsal 전후로 merge PR title/body, linked Issue, 최종 보고서 기반 `포함 PR 분석` 표를 release record에 남기고, rehearsal delta checklist는 누락 확인과 smoke 영역 점검에만 사용한다.
 rehearsal DMG build 전에는 Rust/core lock verify에 이어 `verify-rhwp-core-build-info.sh`가 tracked Swift build info 정합성을 확인한다. 이 단계에서 drift를 자동 수정하지 않는다.
+공통 `release.sh`는 build한 Release app을 staging으로 복사한 뒤 전체 analytics endpoint가 `project.yml` 값과 정확히 같고 승인된 production origin을 쓰는지 확인한다. mismatch는 선택적 post-build Developer ID 재서명과 DMG 생성을 시작하기 전에 rehearsal을 실패시킨다.
 
 ## Release Publish DMG
 
@@ -232,6 +234,7 @@ workflow가 생성하거나 게시하는 주요 산출물:
 GitHub Release body 후보는 `mydocs/release/v<version>.md`의 사용자-facing 주요 변경 사항과 직접 반영된 PR/Issue section을 기준으로 작성한다. 첫 top-level section은 `이번 버전의 주요 변경 사항`이어야 하며, 설치/지원/업데이트 안내와 상세 기록은 그 뒤에 둔다. publish workflow의 delta checklist는 마지막 누락 확인용 보조 자료이며, release note의 주요 변경 사항 원천이 아니다.
 
 signed/notarized DMG build 전에는 Rust/core lock verify에 이어 `verify-rhwp-core-build-info.sh`가 실행된다. mismatch는 signing/notarization과 public artifact 생성을 차단하며 publish workflow는 writer를 실행하지 않는다.
+같은 공통 `release.sh`의 built Release endpoint preflight도 post-build Developer ID 재서명, 공증 제출과 public DMG 생성 전에 실행된다. `project.yml`의 전체 URL 불일치 또는 승인된 production origin 이탈은 public artifact pipeline을 즉시 차단한다.
 
 ## Docs-only Pages Deploy
 

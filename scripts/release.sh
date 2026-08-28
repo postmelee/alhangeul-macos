@@ -231,6 +231,7 @@ run_preflight() {
     spctl
     shasum
     plutil
+    ruby
     sed
     security
     swift
@@ -323,6 +324,12 @@ build_app() {
   # Keep the filesystem bundle name ASCII. Localized user-facing names are
   # provided by Info.plist; a non-ASCII .app path can break ExtensionKit lookup.
   ditto "$XCODE_BUILD_DIR/$BUILD_APP_NAME" "$APP_OUTPUT"
+}
+
+verify_app_execution_endpoint() {
+  info "Verifying Release analytics endpoint"
+  "$ROOT/scripts/ci/verify-app-execution-endpoint-config.sh" \
+    --release-app "$APP_OUTPUT"
 }
 
 codesign_developer_id() {
@@ -854,6 +861,7 @@ main() {
   check_shared_code
   generate_project
   build_app
+  verify_app_execution_endpoint
   sign_release_app_for_notarization
   verify_universal_app
   verify_app_signature
