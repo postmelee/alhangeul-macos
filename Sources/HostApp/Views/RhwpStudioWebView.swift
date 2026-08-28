@@ -154,7 +154,9 @@ extension RhwpStudioWebView {
         private var currentDocument: RhwpStudioDocumentPayload?
         private var currentSourceDocument: RecentDocumentItem?
         private weak var commandWebView: WKWebView?
-        private var printController: RhwpStudioPrintController?
+        private let printLifecycle = RhwpStudioPrintLifecycle(
+            controllerFactory: { RhwpStudioPrintController() }
+        )
         private var pdfExportController: RhwpStudioPDFExportController?
         private var pendingSaveRequest: PendingSaveRequest?
         private var pendingSaveCompletion: ((RhwpStudioDocumentSaveResult) -> Void)?
@@ -925,12 +927,10 @@ extension RhwpStudioWebView {
                 return
             }
 
-            let controller = RhwpStudioPrintController()
-            printController = controller
-            controller.print(
+            printLifecycle.start(
                 payload: payload,
-                completion: { [weak self] in
-                    self?.printController = nil
+                onRejected: { [weak self] error in
+                    self?.onError(error.localizedDescription)
                 }
             )
         }

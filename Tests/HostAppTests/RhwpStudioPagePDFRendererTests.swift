@@ -238,6 +238,76 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         }
     }
 
+    func testRenderLifecycleTracksPageAndNavigationIdentityWithinGeneration() throws {
+        var lifecycle = RhwpStudioPagePDFRenderLifecycle()
+        let generation = try XCTUnwrap(lifecycle.beginRender())
+        let firstPage = try XCTUnwrap(lifecycle.beginPage(at: 0))
+        let firstNavigation = NSObject()
+
+        XCTAssertEqual(firstPage.generation, generation)
+        XCTAssertEqual(firstPage.pageIndex, 0)
+        XCTAssertTrue(lifecycle.isCurrent(firstPage))
+        XCTAssertNil(lifecycle.beginRender())
+        XCTAssertEqual(lifecycle.latestGeneration, generation)
+        XCTAssertTrue(lifecycle.isInitialMainFrameLoadPending)
+        XCTAssertTrue(
+            lifecycle.registerNavigation(ObjectIdentifier(firstNavigation), for: firstPage)
+        )
+        XCTAssertEqual(
+            lifecycle.token(forNavigation: ObjectIdentifier(firstNavigation)),
+            firstPage
+        )
+
+        let secondPage = try XCTUnwrap(lifecycle.beginPage(at: 1))
+        let secondNavigation = NSObject()
+
+        XCTAssertEqual(secondPage.generation, generation)
+        XCTAssertEqual(secondPage.pageIndex, 1)
+        XCTAssertFalse(lifecycle.isCurrent(firstPage))
+        XCTAssertNil(lifecycle.token(forNavigation: ObjectIdentifier(firstNavigation)))
+        XCTAssertFalse(
+            lifecycle.registerNavigation(ObjectIdentifier(firstNavigation), for: firstPage)
+        )
+        XCTAssertTrue(
+            lifecycle.registerNavigation(ObjectIdentifier(secondNavigation), for: secondPage)
+        )
+        XCTAssertEqual(
+            lifecycle.token(forNavigation: ObjectIdentifier(secondNavigation)),
+            secondPage
+        )
+    }
+
+    func testRenderLifecycleRejectsStaleTokenAcrossRenderGenerations() throws {
+        var lifecycle = RhwpStudioPagePDFRenderLifecycle()
+        let firstGeneration = try XCTUnwrap(lifecycle.beginRender())
+        let firstToken = try XCTUnwrap(lifecycle.beginPage(at: 0))
+
+        XCTAssertTrue(lifecycle.invalidate(firstToken))
+        let secondGeneration = try XCTUnwrap(lifecycle.beginRender())
+        let secondToken = try XCTUnwrap(lifecycle.beginPage(at: 0))
+
+        XCTAssertGreaterThan(secondGeneration, firstGeneration)
+        XCTAssertNotEqual(secondToken, firstToken)
+        XCTAssertFalse(lifecycle.isCurrent(firstToken))
+        XCTAssertFalse(lifecycle.invalidate(firstToken))
+        XCTAssertTrue(lifecycle.isCurrent(secondToken))
+        XCTAssertEqual(lifecycle.currentPageToken, secondToken)
+    }
+
+    func testRenderLifecycleScopesInitialMainFrameLoadToCurrentPage() throws {
+        var lifecycle = RhwpStudioPagePDFRenderLifecycle()
+        _ = try XCTUnwrap(lifecycle.beginRender())
+        _ = try XCTUnwrap(lifecycle.beginPage(at: 0))
+
+        XCTAssertTrue(lifecycle.isInitialMainFrameLoadPending)
+        XCTAssertTrue(lifecycle.consumeInitialMainFrameLoad())
+        XCTAssertFalse(lifecycle.isInitialMainFrameLoadPending)
+        XCTAssertFalse(lifecycle.consumeInitialMainFrameLoad())
+
+        _ = try XCTUnwrap(lifecycle.beginPage(at: 1))
+        XCTAssertTrue(lifecycle.isInitialMainFrameLoadPending)
+    }
+
     func testRendererPreservesPortraitAndLandscapePageOrientation() async throws {
         let payload = try RhwpStudioPagePayload(
             fileName: "orientation.hwp",
@@ -687,13 +757,14 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             pageCount: 1,
             pages: [svg(width: 200, height: 300, text: "Terminated")]
         )
-        let renderer = makeRenderer()
+        var ownedWebView: WKWebView?
+        let renderer = makeRenderer(webViewObserver: { ownedWebView = $0 })
         var completionResult: Result<PDFDocument, Error>?
 
         renderer.render(payload: payload) { result in
             completionResult = result
         }
-        renderer.webViewWebContentProcessDidTerminate(WKWebView())
+        renderer.webViewWebContentProcessDidTerminate(try XCTUnwrap(ownedWebView))
 
         guard case .failure(let error) = completionResult else {
             XCTFail("WebKit process 종료가 PDF 변환 실패로 완료되지 않았습니다.")
@@ -705,7 +776,370 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         )
     }
 
-    func testRendererPageTimeoutFinishesExactlyOnceAndAllowsRetry() async throws {
+    func testRendererReusesSameInstanceAfterMultiPageSuccessFromCompletion() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "first-success.hwp",
+            pageCount: 2,
+            pages: [
+                svg(width: 200, height: 300, text: "First-1"),
+                svg(width: 300, height: 200, text: "First-2")
+            ]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "second-success.hwp",
+            pageCount: 1,
+            pages: [svg(width: 210, height: 310, text: "Second")]
+        )
+        let renderer = makeRenderer()
+        var results: [Result<PDFDocument, Error>] = []
+        let secondCompletion = expectation(description: "immediate success retry")
+
+        renderer.render(payload: firstPayload) { firstResult in
+            results.append(firstResult)
+            renderer.render(payload: secondPayload) { secondResult in
+                results.append(secondResult)
+                secondCompletion.fulfill()
+            }
+        }
+
+        await fulfillment(of: [secondCompletion], timeout: 5)
+        guard results.count == 2 else {
+            XCTFail("연속 정상 render가 모두 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        let firstDocument = try results[0].get()
+        let secondDocument = try results[1].get()
+        XCTAssertEqual(firstDocument.pageCount, 2)
+        XCTAssertTrue(firstDocument.page(at: 0)?.string?.contains("First-1") == true)
+        XCTAssertTrue(firstDocument.page(at: 1)?.string?.contains("First-2") == true)
+        XCTAssertEqual(secondDocument.pageCount, 1)
+        XCTAssertTrue(secondDocument.page(at: 0)?.string?.contains("Second") == true)
+    }
+
+    func testRendererReentersAfterCurrentNavigationFailureAndIgnoresRepeatedFailure() throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "navigation-failure.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "First")]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "navigation-retry.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Navigation-Retry")]
+        )
+        let preparedMetrics = #"{"width":200,"height":300}"#
+        let renderedPageData = try makeSinglePagePDFData(
+            size: NSSize(width: 200, height: 300)
+        )
+        let operations = RhwpStudioPagePDFWebKitOperations(
+            preparePage: { _, completion in
+                completion(.success(preparedMetrics))
+            },
+            createPDF: { _, _, completion in
+                completion(.success(renderedPageData))
+            }
+        )
+        var trackingWebView: NavigationTrackingWKWebView?
+        let renderer = RhwpStudioPagePDFRenderer(
+            fontResourceProvider: fontResourceProvider(),
+            webKitOperations: operations,
+            webViewFactory: { configuration in
+                let webView = NavigationTrackingWKWebView(
+                    frame: NSRect(
+                        origin: .zero,
+                        size: RhwpStudioPagePDFMetrics.initialPageSize
+                    ),
+                    configuration: configuration
+                )
+                trackingWebView = webView
+                return webView
+            }
+        )
+        let navigationError = NSError(
+            domain: "RhwpStudioPagePDFRendererTests.Navigation",
+            code: 459
+        )
+        var results: [Result<PDFDocument, Error>] = []
+
+        renderer.render(payload: firstPayload) { firstResult in
+            results.append(firstResult)
+            renderer.render(payload: secondPayload) { secondResult in
+                results.append(secondResult)
+            }
+        }
+        let ownedWebView = try XCTUnwrap(trackingWebView)
+        let firstNavigation = try XCTUnwrap(ownedWebView.lastNavigation)
+        renderer.webView(ownedWebView, didFail: firstNavigation, withError: navigationError)
+        let secondNavigation = try XCTUnwrap(ownedWebView.lastNavigation)
+        XCTAssertNotEqual(
+            ObjectIdentifier(firstNavigation),
+            ObjectIdentifier(secondNavigation)
+        )
+        renderer.webView(ownedWebView, didFail: firstNavigation, withError: navigationError)
+        XCTAssertEqual(results.count, 1)
+        renderer.webView(ownedWebView, didFinish: secondNavigation)
+
+        guard results.count == 2 else {
+            XCTFail("navigation 실패 후 retry가 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        guard case .failure(let firstError) = results[0] else {
+            XCTFail("첫 navigation 실패가 error로 완료되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(firstError as NSError, navigationError)
+        let secondDocument = try results[1].get()
+        XCTAssertEqual(secondDocument.pageCount, 1)
+        XCTAssertEqual(
+            secondDocument.page(at: 0)?.bounds(for: .mediaBox).size,
+            NSSize(width: 200, height: 300)
+        )
+    }
+
+    func testRendererReentersAfterFontPreparationFailureFromCompletion() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "font-preparation-failure.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+                  <text x="20" y="50" font-family="'Noto Sans KR',sans-serif"
+                        font-size="20" font-weight="bold">문1 재진입</text>
+                </svg>
+                """
+            ]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "font-preparation-retry.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "ASCII-Retry")]
+        )
+        let provider = RejectingPDFFontResourceProvider(
+            wrapped: fontResourceProvider(),
+            rejectedResources: [.notoSansKRBold]
+        )
+        let renderer = RhwpStudioPagePDFRenderer(fontResourceProvider: provider)
+        var results: [Result<PDFDocument, Error>] = []
+        let secondCompletion = expectation(description: "font failure retry")
+
+        renderer.render(payload: firstPayload) { firstResult in
+            results.append(firstResult)
+            renderer.render(payload: secondPayload) { secondResult in
+                results.append(secondResult)
+                secondCompletion.fulfill()
+            }
+        }
+
+        await fulfillment(of: [secondCompletion], timeout: 5)
+        guard results.count == 2 else {
+            XCTFail("font preparation 실패 후 retry가 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        guard case .failure(let firstError) = results[0],
+              case .fontPreparationFailed(let page, _) =
+                firstError as? RhwpStudioPagePDFRenderError
+        else {
+            XCTFail("첫 font preparation 실패가 typed error로 완료되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(page, 1)
+        let secondDocument = try results[1].get()
+        XCTAssertTrue(secondDocument.page(at: 0)?.string?.contains("ASCII-Retry") == true)
+    }
+
+    func testRendererReentersAfterPDFEncodingFailureFromCompletion() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "encoding-failure.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Invalid-PDF")]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "encoding-retry.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Encoding-Retry")]
+        )
+        let liveOperations = RhwpStudioPagePDFWebKitOperations.live()
+        var createPDFCallCount = 0
+        let operations = RhwpStudioPagePDFWebKitOperations(
+            preparePage: liveOperations.preparePage,
+            createPDF: { webView, configuration, completion in
+                createPDFCallCount += 1
+                if createPDFCallCount == 1 {
+                    completion(.success(Data("not-a-pdf".utf8)))
+                } else {
+                    liveOperations.createPDF(webView, configuration, completion)
+                }
+            }
+        )
+        let renderer = RhwpStudioPagePDFRenderer(
+            fontResourceProvider: fontResourceProvider(),
+            webKitOperations: operations
+        )
+        var results: [Result<PDFDocument, Error>] = []
+        let secondCompletion = expectation(description: "PDF encoding failure retry")
+
+        renderer.render(payload: firstPayload) { firstResult in
+            results.append(firstResult)
+            renderer.render(payload: secondPayload) { secondResult in
+                results.append(secondResult)
+                secondCompletion.fulfill()
+            }
+        }
+
+        await fulfillment(of: [secondCompletion], timeout: 5)
+        XCTAssertEqual(createPDFCallCount, 2)
+        guard results.count == 2 else {
+            XCTFail("PDF encoding 실패 후 retry가 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        guard case .failure(let firstError) = results[0] else {
+            XCTFail("잘못된 PDF data가 실패로 완료되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(
+            firstError as? RhwpStudioPagePDFRenderError,
+            .pdfEncodingFailed(1)
+        )
+        let secondDocument = try results[1].get()
+        XCTAssertTrue(secondDocument.page(at: 0)?.string?.contains("Encoding-Retry") == true)
+    }
+
+    func testRendererIgnoresWebContentTerminationFromUnownedWebView() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "foreign-termination.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Foreign")]
+        )
+        let renderer = makeRenderer(pageRenderTimeoutNanoseconds: 0)
+        var result: Result<PDFDocument, Error>?
+        let completion = expectation(description: "current render timeout")
+
+        renderer.render(payload: payload) {
+            result = $0
+            completion.fulfill()
+        }
+        renderer.webViewWebContentProcessDidTerminate(WKWebView())
+
+        await fulfillment(of: [completion], timeout: 1)
+        assertPageRenderTimedOut(try XCTUnwrap(result), page: 1)
+    }
+
+    func testRendererIgnoresStaleCreatePDFResultWhileProcessTerminationRetryIsActive() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "stale-create-pdf.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Stale")]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "active-create-pdf.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Current")]
+        )
+        let firstCreatePDFCaptured = expectation(description: "first createPDF captured")
+        let secondCreatePDFReady = expectation(description: "second createPDF ready")
+        let secondCompletion = expectation(description: "process termination retry")
+        let liveOperations = RhwpStudioPagePDFWebKitOperations.live()
+        var createPDFCallCount = 0
+        var staleCompletion: (@MainActor @Sendable (Result<Data, Error>) -> Void)?
+        var currentCompletion: (@MainActor @Sendable (Result<Data, Error>) -> Void)?
+        var currentResult: Result<Data, Error>?
+        let operations = RhwpStudioPagePDFWebKitOperations(
+            preparePage: liveOperations.preparePage,
+            createPDF: { webView, configuration, completion in
+                createPDFCallCount += 1
+                if createPDFCallCount == 1 {
+                    staleCompletion = completion
+                    firstCreatePDFCaptured.fulfill()
+                    return
+                }
+
+                currentCompletion = completion
+                liveOperations.createPDF(webView, configuration) { result in
+                    currentResult = result
+                    secondCreatePDFReady.fulfill()
+                }
+            }
+        )
+        var ownedWebView: WKWebView?
+        let renderer = makeRenderer(
+            webKitOperations: operations,
+            webViewObserver: { ownedWebView = $0 }
+        )
+        var results: [Result<PDFDocument, Error>] = []
+
+        renderer.render(payload: firstPayload) { firstResult in
+            results.append(firstResult)
+            renderer.render(payload: secondPayload) { secondResult in
+                results.append(secondResult)
+                secondCompletion.fulfill()
+            }
+        }
+
+        await fulfillment(of: [firstCreatePDFCaptured], timeout: 5)
+        renderer.webViewWebContentProcessDidTerminate(try XCTUnwrap(ownedWebView))
+        await fulfillment(of: [secondCreatePDFReady], timeout: 5)
+        XCTAssertEqual(results.count, 1)
+
+        staleCompletion?(.success(Data("stale-invalid-pdf".utf8)))
+        XCTAssertEqual(results.count, 1)
+        currentCompletion?(try XCTUnwrap(currentResult))
+
+        await fulfillment(of: [secondCompletion], timeout: 5)
+        XCTAssertEqual(createPDFCallCount, 2)
+        guard results.count == 2 else {
+            XCTFail("process 종료 후 retry가 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        guard case .failure(let firstError) = results[0] else {
+            XCTFail("첫 render가 process 종료 실패로 완료되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(
+            firstError as? RhwpStudioPagePDFRenderError,
+            .webContentProcessTerminated
+        )
+        let secondDocument = try results[1].get()
+        XCTAssertTrue(secondDocument.page(at: 0)?.string?.contains("Current") == true)
+    }
+
+    func testRendererRejectsConcurrentRenderWithoutReplacingCurrentGeneration() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "first.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "First")]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "second.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Second")]
+        )
+        let renderer = makeRenderer(pageRenderTimeoutNanoseconds: 0)
+        var firstResult: Result<PDFDocument, Error>?
+        var secondResult: Result<PDFDocument, Error>?
+        let firstCompletion = expectation(description: "first render timeout")
+
+        renderer.render(payload: firstPayload) {
+            firstResult = $0
+            firstCompletion.fulfill()
+        }
+        renderer.render(payload: secondPayload) {
+            secondResult = $0
+        }
+
+        guard case .failure(let concurrentError) = secondResult else {
+            XCTFail("진행 중 두 번째 render가 즉시 거부되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(
+            concurrentError as? RhwpStudioPagePDFRenderError,
+            .renderingInProgress
+        )
+
+        await fulfillment(of: [firstCompletion], timeout: 1)
+        assertPageRenderTimedOut(try XCTUnwrap(firstResult), page: 1)
+    }
+
+    func testRendererPageTimeoutFinishesExactlyOnceAndAllowsImmediateRetry() async throws {
         let payload = try RhwpStudioPagePayload(
             fileName: "timeout.hwp",
             pageCount: 1,
@@ -715,22 +1149,22 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         var results: [Result<PDFDocument, Error>] = []
 
         let firstCompletion = expectation(description: "first timeout")
-        renderer.render(payload: payload) { result in
-            results.append(result)
-            firstCompletion.fulfill()
-        }
-        await fulfillment(of: [firstCompletion], timeout: 1)
-        renderer.webViewWebContentProcessDidTerminate(WKWebView())
-        XCTAssertEqual(results.count, 1)
-        assertPageRenderTimedOut(results[0], page: 1)
-
         let secondCompletion = expectation(description: "second timeout")
         renderer.render(payload: payload) { result in
             results.append(result)
-            secondCompletion.fulfill()
+            firstCompletion.fulfill()
+            renderer.render(payload: payload) { result in
+                results.append(result)
+                secondCompletion.fulfill()
+            }
         }
-        await fulfillment(of: [secondCompletion], timeout: 1)
-        XCTAssertEqual(results.count, 2)
+        await fulfillment(of: [firstCompletion, secondCompletion], timeout: 1)
+        renderer.webViewWebContentProcessDidTerminate(WKWebView())
+        guard results.count == 2 else {
+            XCTFail("timeout 이후 즉시 retry가 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        assertPageRenderTimedOut(results[0], page: 1)
         assertPageRenderTimedOut(results[1], page: 1)
     }
 
@@ -745,15 +1179,34 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
     }
 
     private func makeRenderer(
-        pageRenderTimeoutNanoseconds: UInt64? = nil
+        pageRenderTimeoutNanoseconds: UInt64? = nil,
+        webKitOperations: RhwpStudioPagePDFWebKitOperations? = nil,
+        webViewObserver: ((WKWebView) -> Void)? = nil
     ) -> RhwpStudioPagePDFRenderer {
+        let webViewFactory: @MainActor (WKWebViewConfiguration) -> WKWebView = { configuration in
+            let webView = WKWebView(
+                frame: NSRect(
+                    origin: .zero,
+                    size: RhwpStudioPagePDFMetrics.initialPageSize
+                ),
+                configuration: configuration
+            )
+            webViewObserver?(webView)
+            return webView
+        }
         if let pageRenderTimeoutNanoseconds {
             return RhwpStudioPagePDFRenderer(
                 pageRenderTimeoutNanoseconds: pageRenderTimeoutNanoseconds,
-                fontResourceProvider: fontResourceProvider()
+                fontResourceProvider: fontResourceProvider(),
+                webKitOperations: webKitOperations,
+                webViewFactory: webViewFactory
             )
         }
-        return RhwpStudioPagePDFRenderer(fontResourceProvider: fontResourceProvider())
+        return RhwpStudioPagePDFRenderer(
+            fontResourceProvider: fontResourceProvider(),
+            webKitOperations: webKitOperations,
+            webViewFactory: webViewFactory
+        )
     }
 
     private func fontResourceProvider() -> RhwpStudioPDFFontDirectoryResourceProvider {
@@ -812,6 +1265,18 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         return try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
     }
 
+    private func makeSinglePagePDFData(size: NSSize) throws -> Data {
+        let image = NSImage(size: size)
+        image.lockFocus()
+        NSColor.white.setFill()
+        NSRect(origin: .zero, size: size).fill()
+        image.unlockFocus()
+
+        let document = PDFDocument()
+        document.insert(try XCTUnwrap(PDFPage(image: image)), at: 0)
+        return try XCTUnwrap(document.dataRepresentation())
+    }
+
     private func assertPageRenderTimedOut(
         _ result: Result<PDFDocument, Error>,
         page: Int,
@@ -855,6 +1320,17 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         }
 
         return Double(matchingPixels) / Double(totalPixels)
+    }
+}
+
+@MainActor
+private final class NavigationTrackingWKWebView: WKWebView {
+    private(set) var lastNavigation: WKNavigation?
+
+    override func loadHTMLString(_ string: String, baseURL: URL?) -> WKNavigation? {
+        let navigation = super.loadHTMLString(string, baseURL: baseURL)
+        lastNavigation = navigation
+        return navigation
     }
 }
 

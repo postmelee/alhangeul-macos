@@ -70,8 +70,13 @@ final class RhwpStudioHostBridgeScriptTests: XCTestCase {
         XCTAssertTrue(source.contains("nativePDFMenuItemObserver.observe(item"))
         XCTAssertTrue(source.contains("attributes: true"))
         XCTAssertTrue(
-            source.contains("attributeFilter: [\"class\", \"aria-disabled\", \"title\"]")
+            source.contains(
+                "attributeFilter: [\"class\", \"aria-disabled\", \"title\", \"aria-label\"]"
+            )
         )
+        XCTAssertTrue(source.contains("item.getAttribute(\"aria-label\") !== \"PDF로 저장\""))
+        XCTAssertTrue(source.contains("item.setAttribute(\"aria-label\", \"PDF로 저장\")"))
+        XCTAssertTrue(source.contains("if (pendingHostOverridesRefresh)"))
     }
 
     private func sourceSection(from start: String, to end: String) throws -> Substring {

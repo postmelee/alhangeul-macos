@@ -156,6 +156,7 @@ targets:
       - path: Sources/HostApp/Services/RhwpStudioPDFExportState.swift
       - path: Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift
       - path: Sources/HostApp/Services/RhwpStudioPagePayload.swift
+      - path: Sources/HostApp/Services/RhwpStudioPrintLifecycle.swift
       - path: Sources/HostApp/Services/RhwpStudioPrintOrientationPolicy.swift
       - path: Sources/HostApp/Support/RhwpProvenance.swift
     settings:
