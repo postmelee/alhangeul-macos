@@ -65,7 +65,7 @@ PR CI는 외부 PR에서도 안전하게 실행할 수 있는 검증만 수행�
 | `run_macos_build` | HostApp Debug build와 shared Swift boundary 확인 필요 | `Sources/**`, `Sources/HostApp/Resources/rhwp-studio/**`, `project.yml`, `Alhangeul.xcodeproj/**`, 미분류 non-docs |
 | `run_rust_verify` | Rust bridge/core source/header/ABI lock 검증 필요 | `RustBridge/**`, `rhwp-core.lock`, `Frameworks/**`, bundled `rhwp-studio` provenance, core 관련 scripts |
 | `run_render_smoke` | native renderer smoke 필요 | `Sources/RhwpCoreBridge/**`, `Sources/Shared/**`, extension, samples, render smoke scripts |
-| `run_release_checks` | release helper dry-run 필요 | `.github/workflows/**`, `scripts/release.sh`, `scripts/ci/**`, `Sources/HostApp/Resources/rhwp-studio/**`, `Casks/**`, release manual/record |
+| `run_release_checks` | release helper dry-run과 macOS endpoint fixture 필요 | `.github/workflows/**`, `scripts/release.sh`, `scripts/ci/**`, `Sources/HostApp/Resources/rhwp-studio/**`, `Casks/**`, release manual/record |
 
 한 파일이 여러 영역에 걸치면 flag는 누적된다. 예를 들어 `Sources/RhwpCoreBridge/CGTreeRenderer.swift`는 `run_macos_build`와 `run_render_smoke`를 모두 켠다.
 
@@ -76,6 +76,8 @@ PR CI는 외부 PR에서도 안전하게 실행할 수 있는 검증만 수행�
 ### docs-only skip 기준
 
 docs-only PR에서도 `classify-changes`와 `script-checks`는 실행한다. 따라서 build-info helper fixture와 studio Cargo.lock fingerprint fixture는 항상 실행되지만 tracked Swift source verifier는 관련 변경이 `run_macos_build=true`를 켰을 때 macOS validation에서 실행한다. studio fixture는 production resource를 수정하지 않고 resource-only 하위 호환, strict commit/hash 일치, stale checkout, non-Git directory, 누락, malformed sha256, 실제 값 mismatch와 sync self-check를 독립적으로 검증한다. `run_macos_build=false`이면 `macos-validation` job은 skipped 상태가 된다. 단, release 관련 문서나 Pages/appcast 파일은 문서여도 `run_release_checks=true`가 될 수 있다.
+
+Analytics endpoint helper의 portable 분기는 Ubuntu `script-checks`에서 항상 실행한다. `scripts/ci/**` 또는 release workflow 변경으로 `run_release_checks=true`가 되면 macOS `release-checks`에서도 같은 helper를 실행해 `plutil`의 binary·key/type 분기를 검증한다. 따라서 `run_macos_build=false`인 script-only PR도 macOS endpoint fixture를 건너뛰지 않으며, 실제 HostApp Debug 산출물 검증만 `macos-validation`이 담당한다.
 
 ### PR CI 로컬 재현
 
@@ -110,7 +112,6 @@ rustup target add aarch64-apple-darwin x86_64-apple-darwin
 ./scripts/check-no-appkit.sh
 ./scripts/verify-rhwp-core-build-info.sh
 ./scripts/verify-rhwp-studio-assets.sh
-scripts/ci/test-app-execution-endpoint-config.sh
 xcodegen generate
 xcodebuild -project Alhangeul.xcodeproj \
   -scheme HostApp \
@@ -143,6 +144,7 @@ renderer/fixture 변경이 있으면 추가로 실행한다.
 release checks 재현:
 
 ```bash
+scripts/ci/test-app-execution-endpoint-config.sh
 ./scripts/release.sh --help
 scripts/ci/write-release-notes.sh 0.1.5 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef build.noindex/release/release-notes-0.1.5.md
 scripts/ci/check-release-notes-template.sh build.noindex/release/release-notes-0.1.5.md
@@ -367,7 +369,7 @@ scripts/verify-rhwp-studio-assets.sh \
 - `classify-changes` 실패: base/head ref나 변경 범위 helper 문제를 먼저 확인한다.
 - `script-checks` 실패: shell syntax, helper interface, build-info fixture 또는 studio Cargo.lock fingerprint fixture 회귀다. macOS build 전 수정한다.
 - `macos-validation` 실패: 앱 build, XcodeGen 입력, shared Swift boundary, Rust lock/build info, renderer smoke 중 하나가 깨진 것이다.
-- `release-checks` 실패: release helper, release note template, delta checklist, Sparkle appcast XML 생성 경계가 깨진 것이다.
+- `release-checks` 실패: macOS endpoint plist fixture, release helper, release note template, delta checklist, Sparkle appcast XML 생성 경계가 깨진 것이다.
 - `Release Rehearsal DMG` 실패: public release 전 core lock/build-info drift, packaging/release script 또는 ref delta 입력을 수정한다.
 - `Release Publish DMG` 실패: core lock/build-info와 public release 산출물 상태를 먼저 확인하고, 필요한 경우 GitHub Release asset/appcast/Pages/Homebrew 반영을 중단한다.
 - `Docs-only Pages Deploy` 실패: public appcast 다운로드/XML 검증 실패, Pages artifact 조립 실패, `github-pages` environment policy, 또는 `deploy-pages` 실패를 먼저 확인한다. stale `docs/appcast.xml` fallback으로 우회하지 않는다.

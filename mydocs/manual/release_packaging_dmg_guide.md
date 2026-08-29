@@ -56,9 +56,9 @@ xcodebuild -project Alhangeul.xcodeproj \
   -derivedDataPath build.noindex/DerivedDataRelease \
   CODE_SIGNING_ALLOWED=NO \
   build
-scripts/ci/verify-universal-macos-app.sh build.noindex/DerivedDataRelease/Build/Products/Release/Alhangeul.app
 scripts/ci/verify-app-execution-endpoint-config.sh \
   --release-app build.noindex/DerivedDataRelease/Build/Products/Release/Alhangeul.app
+scripts/ci/verify-universal-macos-app.sh build.noindex/DerivedDataRelease/Build/Products/Release/Alhangeul.app
 ```
 
 `v0.1.1`부터 Release configuration 산출물은 app 본체와 Quick Look/Thumbnail extension 실행 파일이 `arm64 + x86_64` slice를 모두 포함해야 한다. 이 검증은 `lipo -verify_arch arm64 x86_64` 기준이며, 실제 Intel Mac 실기기 실행 smoke를 수행하지 않았다면 성공으로 기록하지 않는다.
@@ -97,9 +97,10 @@ build.noindex/release/alhangeul-macos-<version>.zip
 - Rust bridge와 `Rhwp.xcframework` 재생성 후 source/header/ABI 기준 `rhwp-core.lock` 검증
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
+- 내부 산출물 `Alhangeul.app`을 release staging의 `Alhangeul.app`으로 복사
 - release staging으로 복사한 app의 analytics endpoint가 승인된 production origin과 `project.yml`의 전체 URL에 일치하는지 검증
 - `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
-- 내부 산출물 `Alhangeul.app`을 release staging으로 복사한 뒤 `Alhangeul.app` 이름으로 zip 압축
+- release staging의 `Alhangeul.app`을 `Alhangeul.app` 이름으로 zip 압축
 - Release staging app은 local signing과 sealed resources가 적용되어 Finder 통합 smoke test의 기준 산출물로 사용할 수 있음
 - SHA256 출력
 

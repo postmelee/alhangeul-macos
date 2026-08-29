@@ -68,7 +68,7 @@ Analytics 계약과 CI/패키징 가이드에는 다음을 기록했다.
 |------|------|-----------|
 | `bash -n scripts/release.sh scripts/package-release.sh` | OK | 구문 오류 없음 |
 | 전체 workflow `Psych.parse_file` | OK | 6개 YAML parse 성공 |
-| `scripts/ci/test-app-execution-endpoint-config.sh` | OK | Origin, XML/binary, mismatch, no-`plutil` fixture 통과 |
+| `scripts/ci/test-app-execution-endpoint-config.sh` | OK | Origin, Debug populated, XML/binary, key/type, mismatch, no-`plutil` fixture 통과 |
 | `shellcheck -e SC2054` 관련 helper | OK | 신규 진단 없음 |
 | `xcodegen generate` | OK | `Alhangeul.xcodeproj` 재생성, tracked diff 없음 |
 | unsigned Release HostApp build | OK | `** BUILD SUCCEEDED **` |

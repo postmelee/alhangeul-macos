@@ -12,15 +12,17 @@ Task #479가 도입한 Release-only 익명 실행 이벤트 endpoint 계약을 s
 
 Stage 1에서 기존 HTTPS host 우회와 release helper 미연결 상태, current XML plist 형식을 재현했다. Stage 2에서 origin guard, XML/binary reader 경계와 portable/macOS fixture를 구현했다. Stage 3에서 `release.sh`와 `package-release.sh`에 built artifact gate를 연결하고 무서명 DMG·개발 zip end-to-end 검증으로 실제 실행 순서를 확인했다.
 
+PR #490 리뷰 보정에서는 macOS fixture를 `run_release_checks` job으로 옮겨 script-only 변경에서도 실행되도록 하고, Debug populated·key 누락·non-string 음성 fixture를 추가했다. 제한 PATH는 `RbConfig.ruby`로 실제 Ruby interpreter를 연결하며, `plutil` 경로의 key/type 오류도 XML fallback과 같은 의미의 진단으로 정규화했다. 패키징 가이드는 실제 copy → endpoint → universal → zip 순서와 일치시켰다.
+
 ## 변경 파일 목록과 영향 범위
 
 | 파일 | 내용 |
 |------|------|
-| `.github/workflows/pr-ci.yml` | macOS validation에서 endpoint XML/binary fixture helper 실행 |
+| `.github/workflows/pr-ci.yml` | macOS release-checks에서 endpoint XML/binary fixture helper 실행 |
 | `.github/workflows/release-rehearsal.yml` | Rehearsal summary에 built endpoint preflight 순서 명시 |
 | `.github/workflows/release-publish.yml` | Publish summary에 재서명·공증·DMG 전 endpoint gate 명시 |
 | `scripts/ci/verify-app-execution-endpoint-config.sh` | 승인 production origin 고정, exact built endpoint와 XML/binary plist reader 계약 보강 |
-| `scripts/ci/test-app-execution-endpoint-config.sh` | Invalid origin, XML/binary built app, mismatch와 no-`plutil` fixture 추가 |
+| `scripts/ci/test-app-execution-endpoint-config.sh` | Invalid origin, Debug populated, key/type, XML/binary built app, mismatch와 no-`plutil` fixture 추가 |
 | `scripts/release.sh` | Copied Release app endpoint 검증을 post-build 재서명·공증·DMG 전에 연결 |
 | `scripts/package-release.sh` | Copied Release app endpoint 검증을 universal 검증·zip 생성 전에 연결 |
 | `mydocs/tech/task_m040_453_app_execution_analytics_contract.md` | Origin review gate, built exact-match와 plist reader 운영 계약 기록 |
@@ -42,13 +44,13 @@ Stage 1에서 기존 HTTPS host 우회와 release helper 미연결 상태, curre
 |------|---------|---------|
 | 승인 production origin guard | 없음 — 임의의 유효한 HTTPS host 허용 | `https://alhangeul-install-events.postmelee.workers.dev` scheme·host·effective port 고정 |
 | Built Release endpoint 자동 gate | Verifier option만 있고 release 경로 호출 0개 | `release.sh`, `package-release.sh` 2개 산출 경로에서 blocking 실행 |
-| Built plist fixture 분기 | 자동 fixture 없음 | XML Debug/Release/mismatch/fallback 4개 + binary Debug/Release/no-`plutil` 3개 |
+| Built plist fixture 분기 | 자동 fixture 없음 | Portable XML Debug empty/populated·Release/mismatch/fallback 5개 + macOS key/type·binary Debug/Release/no-`plutil` 5개 |
 | Release artifact end-to-end | Endpoint preflight 순서 미검증 | Universal rehearsal DMG 1개, locally signed 개발 zip 1개 생성·무결성 검증 |
 | 구현 단계/단계 보고서 | 0 | 3단계 / 3개 |
-| 최종 보고 전 Git diff | 해당 없음 | 16개 파일, 1,040줄 추가·18줄 삭제 |
-| 최종 보고 전 작업 커밋 | 0 | 계획 2개 + Stage 3개 = 5개 |
+| PR 리뷰 보정 후 Git diff | 해당 없음 | 17개 파일, 1,224줄 추가·22줄 삭제 |
+| PR 리뷰 보정 후 작업 커밋 | 0 | 계획 2개 + Stage 3개 + 최종 보고 1개 + 리뷰 보정 1개 = 7개 |
 
-Stage 1–3 계획·보고 문서는 총 851줄이다. 자동 검증은 source origin drift, XML/binary plist, 실제 Release bundle, workflow YAML과 release packaging 순서를 함께 다룬다.
+Stage 1–3 계획·단계 보고 문서는 총 860줄이고 최종 보고서는 121줄이다. 자동 검증은 source origin drift, XML/binary plist, 실제 Release bundle, workflow YAML과 release packaging 순서를 함께 다룬다.
 
 검증용 산출물 checksum은 다음과 같다.
 
@@ -68,7 +70,7 @@ Stage 1–3 계획·보고 문서는 총 851줄이다. 자동 검증은 source o
 | 다른 HTTPS origin도 source gate에서 실패 | OK | `invalid-origin` fixture가 expected/actual origin 오류로 실패 |
 | Current production source와 exact built Release endpoint 통과 | OK | Source verifier와 실제 Release app `--release-app` 성공 |
 | XML fallback과 binary `plutil` 경계 명확화 | OK | XML no-`plutil` 통과, binary no-`plutil` 명시 실패 fixture 통과 |
-| Ubuntu portable + macOS synthetic binary 자동 회귀 | OK | PR CI script-checks 유지, macOS validation에 fixture helper 추가 |
+| Ubuntu portable + macOS synthetic binary 자동 회귀 | OK | PR CI script-checks 유지, `run_release_checks` macOS job에 fixture helper 연결 |
 | `release.sh`가 signing/notarization/DMG 전에 검증 | OK | 무서명 rehearsal 로그에서 endpoint → universal/signing skip → DMG 순서 확인 |
 | `package-release.sh`가 zip 전에 검증 | OK | 전용 build root에서 endpoint → universal → zip/checksum 순서 성공 |
 | Workflow별 verifier 명령 중복 없음 | OK | Rehearsal/publish 모두 공통 `release.sh` 사용, summary만 보강 |
@@ -84,7 +86,8 @@ MISS 항목은 없다.
 | `bash -n` release/package/verifier/test helper | OK |
 | Verifier/test helper `shellcheck` | OK |
 | 전체 6개 workflow `Psych.parse_file` | OK |
-| `scripts/ci/test-app-execution-endpoint-config.sh` | OK |
+| `scripts/ci/test-app-execution-endpoint-config.sh` | OK — Debug populated, key 누락·non-string 진단 포함 |
+| `classify-pr-changes.sh origin/devel HEAD` | OK — `run_macos_build=false`, `run_release_checks=true` |
 | `xcodegen generate` | OK, tracked project diff 없음 |
 | Unsigned HostApp Release build | OK, `** BUILD SUCCEEDED **` |
 | 실제 built Release app `--release-app` | OK |

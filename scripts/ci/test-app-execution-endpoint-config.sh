@@ -47,11 +47,12 @@ RUBY
 
 make_xml_fallback_path() {
   local path="$FIXTURE_ROOT/xml-fallback-bin"
+  local ruby_path
   local tool
   local tool_path
 
   mkdir -p "$path"
-  for tool in bash dirname ruby uname; do
+  for tool in bash dirname uname; do
     tool_path="$(command -v "$tool")"
     [[ -n "$tool_path" ]] || {
       echo "error: required fallback fixture tool not found: $tool" >&2
@@ -59,6 +60,12 @@ make_xml_fallback_path() {
     }
     ln -s "$tool_path" "$path/$tool"
   done
+  ruby_path="$(ruby -rrbconfig -e 'print RbConfig.ruby')"
+  [[ -x "$ruby_path" ]] || {
+    echo "error: resolved Ruby interpreter is not executable: $ruby_path" >&2
+    exit 1
+  }
+  ln -s "$ruby_path" "$path/ruby"
   echo "$path"
 }
 
@@ -138,6 +145,12 @@ expect_failure \
 debug_xml_app="$(make_built_app debug-xml "")"
 "$VERIFIER" --root "$REPO_ROOT" --debug-app "$debug_xml_app"
 
+debug_populated_xml_app="$(make_built_app debug-populated-xml "$PRODUCTION_ENDPOINT")"
+expect_failure \
+  debug-populated-xml \
+  "Debug built endpoint must be empty" \
+  "$VERIFIER" --root "$REPO_ROOT" --debug-app "$debug_populated_xml_app"
+
 release_xml_app="$(make_built_app release-xml "$PRODUCTION_ENDPOINT")"
 "$VERIFIER" --root "$REPO_ROOT" --release-app "$release_xml_app"
 
@@ -153,6 +166,32 @@ env PATH="$xml_fallback_path" \
 echo "Verified XML built endpoint fallback without plutil."
 
 if command -v plutil >/dev/null 2>&1; then
+  missing_key_app="$(make_built_app missing-key "$PRODUCTION_ENDPOINT")"
+  plutil -remove AlhangeulAppExecutionEndpoint \
+    "$missing_key_app/Contents/Info.plist"
+  expect_failure \
+    missing-key \
+    "endpoint key is missing" \
+    "$VERIFIER" --root "$REPO_ROOT" --release-app "$missing_key_app"
+  expect_failure \
+    missing-key-xml-fallback \
+    "endpoint key is missing" \
+    env PATH="$xml_fallback_path" \
+    "$VERIFIER" --root "$REPO_ROOT" --release-app "$missing_key_app"
+
+  non_string_app="$(make_built_app non-string "$PRODUCTION_ENDPOINT")"
+  plutil -replace AlhangeulAppExecutionEndpoint -bool true \
+    "$non_string_app/Contents/Info.plist"
+  expect_failure \
+    non-string \
+    "endpoint value is not a string" \
+    "$VERIFIER" --root "$REPO_ROOT" --release-app "$non_string_app"
+  expect_failure \
+    non-string-xml-fallback \
+    "endpoint value is not a string" \
+    env PATH="$xml_fallback_path" \
+    "$VERIFIER" --root "$REPO_ROOT" --release-app "$non_string_app"
+
   debug_binary_app="$(make_built_app debug-binary "")"
   plutil -convert binary1 "$debug_binary_app/Contents/Info.plist"
   "$VERIFIER" --root "$REPO_ROOT" --debug-app "$debug_binary_app"

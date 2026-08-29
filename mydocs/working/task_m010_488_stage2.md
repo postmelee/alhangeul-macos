@@ -10,7 +10,7 @@
 |------|-----------|------|
 | `scripts/ci/verify-app-execution-endpoint-config.sh` | +53/-5 | Expected production origin 고정, URI origin 비교, XML-only fallback과 binary 오류 명시 |
 | `scripts/ci/test-app-execution-endpoint-config.sh` | +94/-11 | Invalid origin, XML/binary built app, mismatch와 no-`plutil` fixture 추가 |
-| `.github/workflows/pr-ci.yml` | +6/-0 | macOS validation에서 plist fixture helper 실행 |
+| `.github/workflows/pr-ci.yml` | +6/-0 | macOS release-checks에서 plist fixture helper 실행 |
 | `mydocs/plans/task_m010_488_impl.md` | +26/-23 | Stage 1 측정에 따라 binary 전제를 current XML·future binary 계약으로 보정 |
 | `mydocs/working/task_m010_488_stage2.md` | 신규 1개 | Stage 2 구현·검증·잔여 위험 기록 |
 | `mydocs/orders/20260828.md` | 1행 수정 | Stage 2 완료·Stage 3 승인 대기로 상태 갱신 |
@@ -68,6 +68,7 @@ Portable fixture는 다음 계약을 검증한다.
 - 다른 HTTPS origin 실패
 - Source plist placeholder drift 실패
 - XML Debug empty endpoint 통과
+- XML Debug populated endpoint 실패
 - XML Release exact endpoint 통과
 - XML Release same-origin path mismatch 실패
 - `plutil` 없는 제한 PATH에서 XML REXML fallback 통과
@@ -76,9 +77,12 @@ macOS에서 `plutil`이 있으면 추가로 다음을 검증한다.
 
 - Synthetic binary Debug empty endpoint 통과
 - Synthetic binary Release exact endpoint 통과
+- Endpoint key 누락과 non-string 값이 정규화된 진단으로 실패
 - 같은 binary Release app이 no-`plutil` 제한 PATH에서는 명시적 실패
 
-`pr-ci.yml`의 macOS validation에 동일 helper 실행 단계를 추가했다. Ubuntu `script-checks`는 기존 helper 호출을 유지해 source/XML portable 계약을 검증하고, macOS job은 binary 분기를 추가로 실행한다. 실제 Debug built app에 대한 기존 `--debug-app` gate도 유지했다.
+`pr-ci.yml`의 macOS release-checks에 동일 helper 실행 단계를 추가했다. Ubuntu `script-checks`는 기존 helper 호출을 유지해 source/XML portable 계약을 검증하고, `run_release_checks=true`인 macOS job은 binary와 `plutil` 진단 분기를 추가로 실행한다. macOS validation의 실제 Debug built app `--debug-app` gate도 유지했다.
+
+PR #490 리뷰 보정에서는 Debug endpoint가 채워진 음성 fixture, key 누락·non-string `plutil` fixture를 추가했다. 제한 PATH에 연결하는 Ruby는 shim 경로가 아니라 `RbConfig.ruby`가 가리키는 실제 interpreter로 고정했다. 또한 endpoint helper를 `run_macos_build` 조건의 macOS validation에서 `run_release_checks` 조건의 release-checks로 이동해 script-only PR에서도 macOS fixture가 실행되도록 했다.
 
 ### 4. 구현계획 보정
 
@@ -95,7 +99,7 @@ Stage 3의 `release.sh` pre-signing hook, `package-release.sh` copied app gate�
 | 검증 | 결과 | 핵심 출력 |
 |------|------|-----------|
 | `bash -n` verifier/test helper | OK | 구문 오류 없음 |
-| `scripts/ci/test-app-execution-endpoint-config.sh` | OK | Source 실패 4개, XML built, mismatch, XML fallback, binary 성공/실패 fixture 통과 |
+| `scripts/ci/test-app-execution-endpoint-config.sh` | OK | Source 실패 4개, Debug populated, XML built/mismatch/fallback, key/type, binary 성공/실패 fixture 통과 |
 | `scripts/ci/verify-app-execution-endpoint-config.sh` | OK | Current Release-only source configuration 통과 |
 | `shellcheck` 두 helper | OK | 진단 없음 |
 | `Psych.parse_file(.github/workflows/pr-ci.yml)` | OK | Workflow YAML parse 성공 |
@@ -108,9 +112,14 @@ macOS 전체 fixture의 주요 출력은 다음과 같다.
 ```text
 Verified failure fixture: invalid-origin
 Verified Debug built endpoint is disabled: .../debug-xml/Alhangeul.app
+Verified failure fixture: debug-populated-xml
 Verified Release built endpoint: .../release-xml/Alhangeul.app
 Verified failure fixture: release-mismatch-xml
 Verified XML built endpoint fallback without plutil.
+Verified failure fixture: missing-key
+Verified failure fixture: missing-key-xml-fallback
+Verified failure fixture: non-string
+Verified failure fixture: non-string-xml-fallback
 Verified Debug built endpoint is disabled: .../debug-binary/Alhangeul.app
 Verified Release built endpoint: .../release-binary/Alhangeul.app
 Verified failure fixture: release-binary-without-plutil
@@ -124,7 +133,7 @@ Local system Ruby는 미사용 `ffi-1.13.1` native extension 경고를 출력했
 - `--release-app`은 아직 `release.sh`와 `package-release.sh`에서 호출되지 않는다. 실제 artifact 자동 차단은 Stage 3 완료 전까지 없다.
 - Expected origin은 `project.yml` endpoint와 별도 상수다. 중복은 destination 변경을 명시적으로 review하기 위한 의도된 gate이며 운영 문서 설명이 Stage 3에 필요하다.
 - Current Xcode output은 XML이지만 설정 변경으로 binary가 될 수 있다. macOS `plutil` 경로는 synthetic binary fixture로 보호하고, non-macOS fallback은 binary를 지원하지 않는다.
-- PR CI의 macOS fixture 단계는 `run_macos_build` job 조건 안에서 실행된다. 실제 Release artifact의 pre-signing 순서는 Stage 3 release helper 통합 검증으로 별도 확인해야 한다.
+- PR CI의 synthetic macOS fixture는 `run_release_checks` job 조건으로 실행된다. 실제 Release artifact의 pre-signing 순서는 Stage 3 release helper 통합 검증으로 별도 확인해야 한다.
 - 같은 production origin 안의 endpoint path 변경은 origin guard가 허용한다. Source diff review와 built app의 `project.yml` exact-match가 path 계약을 담당한다.
 
 ## 다음 단계 영향

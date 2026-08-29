@@ -63,8 +63,8 @@ Task #479가 도입한 Release-only 익명 실행 이벤트 endpoint 계약을 �
 ### 3.4 테스트 플랫폼 분리
 
 - Ubuntu `script-checks`: source 정상, invalid base, invalid scheme, invalid origin, invalid placeholder fixture를 실행한다.
-- macOS validation: 같은 source·XML built fixture와 `plutil`로 만든 synthetic binary Debug/Release app fixture를 실행한다.
-- 기존 실제 Debug built app `--debug-app` 검증을 유지한다.
+- macOS release-checks: 같은 source·XML built fixture와 `plutil`로 만든 synthetic binary Debug/Release app fixture를 실행한다.
+- 기존 macOS validation의 실제 Debug built app `--debug-app` 검증을 유지한다.
 - 실제 Release path는 로컬 unsigned Release build와 필요 시 `release.sh --skip-notarize`로 확인한다.
 - Public release workflow와 production endpoint HTTP 요청은 테스트에 사용하지 않는다.
 
@@ -142,7 +142,7 @@ Binary plist 형식 확인에 app build가 필요하면 `build.noindex/task488-s
 8. Portable fixture에 invalid HTTPS origin을 추가한다.
 9. Portable XML Debug/Release app fixture로 empty/exact/mismatch와 REXML fallback을 검증한다.
 10. macOS에서 synthetic binary Debug/Release app을 만들어 `plutil` 성공과 no-`plutil` 실패를 검증한다.
-11. PR CI macOS validation에서 test helper를 실행해 binary fixture를 활성화하고 기존 실제 Debug app 검증을 유지한다.
+11. PR CI macOS release-checks에서 test helper를 실행해 script-only 변경에도 binary fixture를 활성화하고, macOS validation의 기존 실제 Debug app 검증을 유지한다.
 
 ### 5.4 자동 회귀
 

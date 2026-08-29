@@ -176,11 +176,19 @@ RUBY
 
 read_built_endpoint() {
   local app_path="$1"
+  local endpoint_type
   local plist_path="$app_path/Contents/Info.plist"
 
   [[ -f "$plist_path" ]] || fail "missing built Info.plist: $plist_path"
   if command -v plutil >/dev/null 2>&1; then
-    plutil -extract AlhangeulAppExecutionEndpoint raw -o - "$plist_path"
+    plutil -lint "$plist_path" >/dev/null 2>&1 || \
+      fail "cannot parse built Info.plist: $plist_path"
+    endpoint_type="$(
+      plutil -type AlhangeulAppExecutionEndpoint "$plist_path" 2>/dev/null
+    )" || fail "endpoint key is missing: $plist_path"
+    [[ "$endpoint_type" == "string" ]] || \
+      fail "endpoint value is not a string: $plist_path"
+    plutil -extract AlhangeulAppExecutionEndpoint raw -expect string -o - "$plist_path"
     return
   fi
 
