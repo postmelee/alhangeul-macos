@@ -312,6 +312,7 @@ jobs:
             echo
             echo "- release command: \`./scripts/release.sh \"$VERSION\"\`"
             echo "- Expected Team ID: \`${APPLE_TEAM_ID:-XH6JHKYXV8}\`"
+            echo "- The copied Release app endpoint must match the approved production endpoint before post-build Developer ID re-signing, notarization submit, and DMG creation."
             echo "- Before app notarization submit, \`release.sh\` verifies Developer ID authority, Team ID, secure timestamp, hardened runtime, \`get-task-allow\` absence, and required Sparkle nested components."
             echo "- Failure in this preflight blocks notarization submit."
           } >> "$GITHUB_STEP_SUMMARY"

@@ -56,10 +56,14 @@ xcodebuild -project Alhangeul.xcodeproj \
   -derivedDataPath build.noindex/DerivedDataRelease \
   CODE_SIGNING_ALLOWED=NO \
   build
+scripts/ci/verify-app-execution-endpoint-config.sh \
+  --release-app build.noindex/DerivedDataRelease/Build/Products/Release/Alhangeul.app
 scripts/ci/verify-universal-macos-app.sh build.noindex/DerivedDataRelease/Build/Products/Release/Alhangeul.app
 ```
 
 `v0.1.1`부터 Release configuration 산출물은 app 본체와 Quick Look/Thumbnail extension 실행 파일이 `arm64 + x86_64` slice를 모두 포함해야 한다. 이 검증은 `lipo -verify_arch arm64 x86_64` 기준이며, 실제 Intel Mac 실기기 실행 smoke를 수행하지 않았다면 성공으로 기록하지 않는다.
+
+endpoint 검증은 source configuration의 Release URL이 승인된 production origin을 사용하는지와 built app의 전체 URL이 source 값과 정확히 일치하는지를 함께 확인한다. macOS에서는 `plutil`을 사용하고, `plutil`이 없는 환경의 fallback은 XML plist에만 허용한다.
 
 ## Release pipeline preflight check
 
@@ -93,8 +97,10 @@ build.noindex/release/alhangeul-macos-<version>.zip
 - Rust bridge와 `Rhwp.xcframework` 재생성 후 source/header/ABI 기준 `rhwp-core.lock` 검증
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
+- 내부 산출물 `Alhangeul.app`을 release staging의 `Alhangeul.app`으로 복사
+- release staging으로 복사한 app의 analytics endpoint가 승인된 production origin과 `project.yml`의 전체 URL에 일치하는지 검증
 - `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
-- 내부 산출물 `Alhangeul.app`을 release staging으로 복사한 뒤 `Alhangeul.app` 이름으로 zip 압축
+- release staging의 `Alhangeul.app`을 `Alhangeul.app` 이름으로 zip 압축
 - Release staging app은 local signing과 sealed resources가 적용되어 Finder 통합 smoke test의 기준 산출물로 사용할 수 있음
 - SHA256 출력
 
@@ -140,6 +146,7 @@ build.noindex/release/alhangeul-macos-<version>.dmg.sha256
 - `scripts/check-no-appkit.sh`
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
+- release staging으로 복사한 app의 analytics endpoint를 post-build Developer ID 재서명·공증 제출·DMG 생성 전에 검증
 - `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
 - Developer ID Application signing identity 확인
 - Sparkle nested component, Quick Look extension, Thumbnail extension, app bundle을 Developer ID/timestamp/hardened runtime 기준으로 재서명
@@ -185,6 +192,7 @@ rehearsal mode가 수행하는 일:
 - Rust bridge lock verify
 - shared Swift boundary check
 - Release build
+- release staging app의 analytics endpoint를 선택적 post-build Developer ID 재서명과 DMG 생성 전에 검증
 - app/extension 실행 파일의 `arm64 + x86_64` universal 검증
 - `ALHANGEUL_DEVELOPER_ID_APPLICATION`이 제공된 signed rehearsal이면 app notarization submit 전과 같은 release signing preflight 실행
 - DMG layout 생성

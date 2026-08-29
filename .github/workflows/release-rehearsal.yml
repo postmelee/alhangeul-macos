@@ -204,6 +204,7 @@ jobs:
             echo "## Signing preflight policy"
             echo
             echo "- release command: \`./scripts/release.sh --skip-notarize \"$VERSION\"\`"
+            echo "- The copied Release app endpoint must match the approved production endpoint before optional post-build Developer ID re-signing and DMG creation."
             echo "- Default rehearsal artifacts are unsigned and skip Developer ID signing preflight."
             echo "- If \`ALHANGEUL_DEVELOPER_ID_APPLICATION\` is provided, \`release.sh\` runs the same app/extension/Sparkle signing preflight before DMG creation."
             echo "- Rehearsal artifacts are never public release or Homebrew Cask inputs."
