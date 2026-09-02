@@ -1,16 +1,16 @@
 lock_version = 2
 rhwp_repo = "https://github.com/edwardkim/rhwp.git"
 rhwp_ref_kind = "release-tag"
-rhwp_release_tag = "v0.8.4"
-rhwp_commit = "496333b27d21ddb9114ba9ae340bcb895870c9a7"
+rhwp_release_tag = "v0.8.6"
+rhwp_commit = "f1f9c6ae58344ee9368996d3543f76b9345cf227"
 rhwp_enabled_features = "native-skia"
-built_at = "2026-08-18T01:39:31Z"
+built_at = "2026-09-02T05:29:43Z"
 ffi_symbols_file = "rhwp-ffi-symbols.txt"
 
 [[artifacts]]
 path = "Frameworks/universal/librhwp.a"
-sha256 = "fccf762ad8cc7aa9fc2446a113af1a404af3acf3da8dde906ae6a0dc7569e029"
-size = 219505336
+sha256 = "25ba743d7e3774c81177e849308fba98ce0e6b7a22eff3d1b6380a11ab9f0544"
+size = 233144976
 
 [[artifacts]]
 path = "Frameworks/generated_rhwp.h"
