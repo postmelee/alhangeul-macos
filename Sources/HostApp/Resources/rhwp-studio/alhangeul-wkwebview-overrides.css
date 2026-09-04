@@ -1,7 +1,8 @@
 /*
  * Upstream rhwp-studio owns toolbar layout, responsive breakpoints, and
- * control dimensions. Keep this overlay limited to native select presentation
- * differences in macOS WKWebView so asset refreshes retain upstream layout.
+ * visible control dimensions. Keep this overlay limited to native select
+ * presentation and hidden color input anchors in macOS WKWebView so asset
+ * refreshes retain upstream layout.
  */
 @media (pointer: fine) {
   select.sb-combo,
@@ -35,5 +36,17 @@
     background-position:
       calc(100% - 10px) center,
       calc(100% - 5px) center;
+  }
+
+  /*
+   * WebKit needs a nonempty renderer rect to present the native color popover.
+   * Anchor the hidden input to its existing wrapper without intercepting the
+   * button mousedown that preserves the editor selection.
+   */
+  #text-color-picker {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
   }
 }

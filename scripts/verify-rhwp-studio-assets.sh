@@ -56,10 +56,8 @@ validate_sha256() {
 verify_local_override_ownership() {
   local override_css="$1"
   local forbidden_selector_pattern
-  local forbidden_dimension_pattern
 
   forbidden_selector_pattern='^[[:space:]]*(#style-bar|#style-name|\.sb-font-lang|\.sb-font|\.sb-size-group|\.sb-size|\.sb-size-unit|\.sb-size-arrows|\.sb-ls-group|\.sb-ls-arrows|\.sb-arrow)([[:space:]>+~,:{]|$)'
-  forbidden_dimension_pattern='^[[:space:]]*(width|height|min-height|align-items)[[:space:]]*:'
 
   grep -Eq '^[[:space:]]*select\.sb-combo[[:space:],{]' "$override_css" \
     || fail "Alhangeul WKWebView override must retain select.sb-combo presentation"
@@ -72,9 +70,93 @@ verify_local_override_ownership() {
     fail "Alhangeul WKWebView override must not own upstream toolbar layout selectors"
   fi
 
-  if grep -En "$forbidden_dimension_pattern" "$override_css"; then
-    fail "Alhangeul WKWebView override must not own upstream control dimensions"
-  fi
+  # This small local stylesheet uses only rule blocks and plain declarations.
+  # Inspect complete selectors, including multiline groups, so dimensions are
+  # exempted only inside the one exact hidden color input rule.
+  awk '
+    function trim(value) {
+      sub(/^[[:space:]]+/, "", value)
+      sub(/[[:space:]]+$/, "", value)
+      return value
+    }
+    function reject(message) {
+      print "FAIL: Alhangeul WKWebView override " message > "/dev/stderr"
+      failed = 1
+    }
+    BEGIN {
+      required["inset"] = "0"
+      required["width"] = "100%"
+      required["height"] = "100%"
+      required["pointer-events"] = "none"
+    }
+    {
+      line = $0
+      # Remove comments before inspecting selectors or declarations.
+      while (length(line)) {
+        if (in_comment) {
+          end = index(line, "*/")
+          if (!end) break
+          line = substr(line, end + 2)
+          in_comment = 0
+        } else {
+          start = index(line, "/*")
+          if (!start) {
+            pending = pending line " "
+            break
+          }
+          pending = pending substr(line, 1, start - 1) " "
+          line = substr(line, start + 2)
+          in_comment = 1
+        }
+      }
+      while (match(pending, /[{};]/)) {
+        token = trim(substr(pending, 1, RSTART - 1))
+        delimiter = substr(pending, RSTART, 1)
+        pending = substr(pending, RSTART + 1)
+        if (delimiter == "{") {
+          selector[++depth] = token
+          if (token == "#text-color-picker") {
+            picker_count++
+            media = selector[depth - 1]
+            gsub(/[[:space:]]/, "", media)
+            if (media != "@media(pointer:fine)")
+              reject("must scope the color picker anchor to pointer: fine")
+          } else if (index(token, "#text-color-picker")) {
+            reject("must use a standalone #text-color-picker selector")
+          }
+        } else if (delimiter == "}") {
+          if (token != "") reject("must terminate declarations with semicolons")
+          delete selector[depth--]
+        } else if (token != "") {
+          colon = index(token, ":")
+          if (!colon) {
+            reject("has an unsupported declaration: " token)
+            continue
+          }
+          property = trim(substr(token, 1, colon - 1))
+          value = trim(substr(token, colon + 1))
+          if (selector[depth] == "#text-color-picker") {
+            if (!(property in required) || value != required[property])
+              reject("has an unsupported color picker declaration: " token)
+            seen[property]++
+          } else if (property ~ /^(width|height|min-height|align-items)$/) {
+            reject("must not own upstream control dimensions: " token)
+          }
+        }
+      }
+    }
+    END {
+      if (in_comment || depth != 0 || trim(pending) != "")
+        reject("has an incomplete CSS block or comment")
+      if (picker_count != 1)
+        reject("must contain exactly one #text-color-picker anchor rule")
+      for (property in required) {
+        if (seen[property] != 1)
+          reject("must declare color picker " property ": " required[property] " exactly once")
+      }
+      exit failed
+    }
+  ' "$override_css" || fail "Alhangeul WKWebView color picker/ownership verification failed"
 }
 
 parse_args() {
@@ -178,6 +260,13 @@ fi
 grep -q 'src="./assets/index-' "$RESOURCE_DIR/index.html" || fail "index.html does not use relative JS asset path"
 grep -q 'href="./assets/index-' "$RESOURCE_DIR/index.html" || fail "index.html does not use relative CSS asset path"
 grep -q 'href="./alhangeul-wkwebview-overrides.css"' "$RESOURCE_DIR/index.html" || fail "index.html does not load Alhangeul WKWebView override stylesheet"
+grep -Eo '<button[[:space:]][^>]*>' "$RESOURCE_DIR/index.html" \
+  | grep -E '[[:space:]]id="btn-text-color"([[:space:]>])' > /dev/null \
+  || fail "index.html is missing the text color button required by the WKWebView override"
+grep -Eo '<input[[:space:]][^>]*>' "$RESOURCE_DIR/index.html" \
+  | grep -E '[[:space:]]id="text-color-picker"([[:space:]/>])' \
+  | grep -E '[[:space:]]type="color"([[:space:]/>])' > /dev/null \
+  || fail "index.html is missing the text color input required by the WKWebView override"
 
 if grep -q 'crossorigin' "$RESOURCE_DIR/index.html"; then
   fail "index.html contains crossorigin attributes that break WKWebView file URL asset loading"

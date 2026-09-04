@@ -81,11 +81,23 @@ write_resource() {
 <link rel="stylesheet" href="./assets/index-fixture.css">
 <link rel="stylesheet" href="./alhangeul-wkwebview-overrides.css">
 <script type="module" src="./assets/index-fixture.js"></script>
+<span class="sb-color-wrap">
+  <button id="btn-text-color">Text color</button>
+  <input id="text-color-picker" type="color" />
+</span>
 EOF
   cat > "$resource_dir/alhangeul-wkwebview-overrides.css" <<'EOF'
 select.sb-combo,
 select.sb-ls-select {
   appearance: none;
+}
+@media (pointer: fine) {
+  #text-color-picker {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
 }
 EOF
   printf '%s\n' 'console.log("fixture");' > "$resource_dir/assets/index-fixture.js"
@@ -123,6 +135,10 @@ write_upstream_checkout() {
 <!doctype html>
 <link rel="stylesheet" href="./assets/index-sync.css">
 <script type="module" crossorigin src="./assets/index-sync.js"></script>
+<span class="sb-color-wrap">
+  <button id="btn-text-color">Text color</button>
+  <input id="text-color-picker" type="color" />
+</span>
 EOF
   printf '%s\n' 'console.log("sync fixture");' \
     > "$upstream_dir/rhwp-studio/dist/assets/index-sync.js"
@@ -148,12 +164,90 @@ done
 
 production_manifest_before="$TMP_ROOT/production-manifest.before.json"
 cp "$PRODUCTION_RESOURCE/manifest.json" "$production_manifest_before"
+production_overlay_before="$TMP_ROOT/production-overlay.before.css"
+cp "$PRODUCTION_RESOURCE/alhangeul-wkwebview-overrides.css" "$production_overlay_before"
 
 legacy_resource="$TMP_ROOT/legacy-resource"
 write_resource "$legacy_resource"
 "$VERIFIER" --resource-dir "$legacy_resource" > "$COMMAND_STDOUT"
 assert_contains "$COMMAND_STDOUT" "rhwp-studio assets verified" \
   "legacy resource-only verification did not succeed"
+
+# Exercise the same ownership guard used by resource verification and sync.
+# Every mutation starts from the valid independent fixture, not production CSS.
+color_picker_resource="$TMP_ROOT/color-picker-resource"
+write_resource "$color_picker_resource"
+color_picker_css="$color_picker_resource/alhangeul-wkwebview-overrides.css"
+valid_picker_css="$legacy_resource/alhangeul-wkwebview-overrides.css"
+color_picker_checks=1
+
+cat > "$color_picker_css" <<'EOF'
+select.sb-combo,
+select.sb-ls-select {
+  appearance: none;
+}
+/* The anchor declarations may be compact or reordered. */
+@media(pointer:fine){#text-color-picker{pointer-events:none;height:100%;width:100%;inset:0;}}
+EOF
+"$VERIFIER" --resource-dir "$color_picker_resource" > "$COMMAND_STDOUT"
+assert_contains "$COMMAND_STDOUT" "rhwp-studio assets verified" \
+  "compact reordered color picker declarations did not succeed"
+color_picker_checks=$((color_picker_checks + 1))
+
+while IFS='|' read -r description expected_error transform; do
+  sed "$transform" "$valid_picker_css" > "$color_picker_css"
+  expect_failure "$description" "$expected_error" \
+    "$VERIFIER" --resource-dir "$color_picker_resource"
+  color_picker_checks=$((color_picker_checks + 1))
+done <<'EOF'
+missing inset|must declare color picker inset: 0 exactly once|/^[[:space:]]*inset:/d
+missing width|must declare color picker width: 100% exactly once|/^[[:space:]]*width:/d
+missing height|must declare color picker height: 100% exactly once|/^[[:space:]]*height:/d
+missing pointer-events|must declare color picker pointer-events: none exactly once|/^[[:space:]]*pointer-events:/d
+zero-sized anchor|unsupported color picker declaration: width: 0|s/width: 100%/width: 0/
+input intercepts pointer|unsupported color picker declaration: pointer-events: auto|s/pointer-events: none/pointer-events: auto/
+duplicate declaration|must declare color picker width: 100% exactly once|s/width: 100%;/width: 100%; width: 100%;/
+duplicate rule|exactly one #text-color-picker anchor rule|s/#text-color-picker {/#text-color-picker {} #text-color-picker {/
+missing rule|exactly one #text-color-picker anchor rule|/#text-color-picker[[:space:]]*{/,/}/d
+unexpected picker dimension|unsupported color picker declaration: min-height: 1px|s/inset: 0;/inset: 0; min-height: 1px;/
+non-picker width|must not own upstream control dimensions: width: 100%|s/appearance: none;/appearance: none; width: 100%;/
+non-picker height|must not own upstream control dimensions: height: 100%|s/appearance: none;/appearance: none; height: 100%;/
+non-picker min-height|must not own upstream control dimensions: min-height: 1px|s/appearance: none;/appearance: none; min-height: 1px;/
+non-picker alignment|must not own upstream control dimensions: align-items: center|s/appearance: none;/appearance: none; align-items: center;/
+leading grouped selector|standalone #text-color-picker selector|s/#text-color-picker {/.other, #text-color-picker {/
+trailing grouped selector|standalone #text-color-picker selector|s/#text-color-picker {/#text-color-picker, .other {/
+descendant selector|standalone #text-color-picker selector|s/#text-color-picker {/.other #text-color-picker {/
+wrong media|scope the color picker anchor to pointer: fine|s/pointer: fine/pointer: coarse/
+comment is not a declaration|must declare color picker inset: 0 exactly once|s/inset: 0;/\/\* inset: 0; \*\//
+EOF
+
+cp "$valid_picker_css" "$color_picker_css"
+printf '\n#style-bar { color: red; }\n' >> "$color_picker_css"
+expect_failure "upstream toolbar layout selector" \
+  "must not own upstream toolbar layout selectors" \
+  "$VERIFIER" --resource-dir "$color_picker_resource"
+color_picker_checks=$((color_picker_checks + 1))
+
+cp "$valid_picker_css" "$color_picker_css"
+sed 's/id="text-color-picker" type="color"/type="color" id="text-color-picker"/' \
+  "$legacy_resource/index.html" > "$color_picker_resource/index.html"
+"$VERIFIER" --resource-dir "$color_picker_resource" > "$COMMAND_STDOUT"
+assert_contains "$COMMAND_STDOUT" "rhwp-studio assets verified" \
+  "reordered color input attributes did not succeed"
+color_picker_checks=$((color_picker_checks + 1))
+
+while IFS='|' read -r description expected_error transform; do
+  sed "$transform" "$legacy_resource/index.html" > "$color_picker_resource/index.html"
+  expect_failure "$description" "$expected_error" \
+    "$VERIFIER" --resource-dir "$color_picker_resource"
+  color_picker_checks=$((color_picker_checks + 1))
+done <<'EOF'
+missing color button|missing the text color button|s/id="btn-text-color"/id="retired-text-color"/
+missing color input|missing the text color input|s/id="text-color-picker"/id="retired-color-picker"/
+wrong input type with decoy|missing the text color input|s/type="color" \/>/type="text" \/><input type="color" \/>/
+data-id is not id|missing the text color input|s/id="text-color-picker"/data-id="text-color-picker"/
+EOF
+echo "OK: rhwp-studio color picker/ownership fixtures passed ($color_picker_checks cases)"
 
 missing_font_resource="$TMP_ROOT/missing-font-resource"
 write_resource "$missing_font_resource"
@@ -285,5 +379,7 @@ assert_contains "$COMMAND_STDOUT" "rhwp-studio sync check passed" \
 "$VERIFIER" > "$COMMAND_STDOUT"
 assert_files_equal "$production_manifest_before" "$PRODUCTION_RESOURCE/manifest.json" \
   "fixture verification changed the production rhwp-studio manifest"
+assert_files_equal "$production_overlay_before" "$PRODUCTION_RESOURCE/alhangeul-wkwebview-overrides.css" \
+  "fixture verification changed the production WKWebView override"
 
 echo "OK: rhwp-studio Cargo.lock fingerprint verification fixtures passed"

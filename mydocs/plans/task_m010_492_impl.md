@@ -103,12 +103,17 @@ Stage 1에서는 사용자 문서와 tracked source를 수정하지 않았다. �
 
 글자색 color input에 유효한 native anchor 영역을 제공하고, local overlay의 좁은 소유 경계와 target DOM 계약을 asset verifier로 고정한다.
 
+### 승인된 범위 보정 (2026-09-04)
+
+기존 `scripts/ci/test-rhwp-studio-cargo-lock-verification.sh`가 최소 HTML/CSS fixture로 같은 verifier와 sync self-check를 실행한다. 새 DOM·anchor 필수 조건을 적용하면 이 fixture가 먼저 실패하므로 작업지시자 승인에 따라 해당 테스트 파일의 resource/upstream fixture와 회귀 사례를 Stage 2에 포함한다. 제품 변경은 기존 CSS overlay와 verifier에 한정하고, CI workflow·sync helper·generated asset은 변경하지 않는다.
+
 ### 대상
 
 - `Sources/HostApp/Resources/rhwp-studio/alhangeul-wkwebview-overrides.css`
 - `scripts/verify-rhwp-studio-assets.sh`
+- `scripts/ci/test-rhwp-studio-cargo-lock-verification.sh`
 - `mydocs/working/task_m010_492_stage2.md`
-- `mydocs/orders/20260903.md`
+- `mydocs/orders/20260904.md`
 
 ### 작업
 
@@ -118,14 +123,15 @@ Stage 1에서는 사용자 문서와 tracked source를 수정하지 않았다. �
 4. verifier가 `#btn-text-color`와 `#text-color-picker type=color` DOM 계약을 확인하게 한다.
 5. verifier가 네 anchor declaration을 모두 요구하게 한다.
 6. dimension ownership guard는 exact `#text-color-picker` block의 `width`와 `height`만 예외로 허용하고, 다른 upstream toolbar selector와 dimension은 계속 거부하게 한다.
-7. verifier의 성공 경로와 declaration 누락/범위 밖 dimension의 실패 경로를 task 전용 임시 사본으로 확인한다.
+7. 기존 CI fixture를 새 DOM·CSS 계약에 맞추고, verifier의 성공 경로와 declaration 누락/범위 밖 dimension/DOM 변경의 실패 경로를 task 전용 임시 사본으로 확인한다. 기존 Cargo.lock·sync 검증과 production manifest/overlay 무손실 검사도 유지한다.
 8. source와 Stage 2 보고서를 함께 검증·커밋한다.
 
 ### 검증
 
 ```bash
-bash -n scripts/verify-rhwp-studio-assets.sh
+bash -n scripts/verify-rhwp-studio-assets.sh scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
 scripts/verify-rhwp-studio-assets.sh
+scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
 git diff --check
 ```
 
@@ -136,6 +142,7 @@ task 전용 임시 resource 사본에서는 anchor declaration 하나를 제거�
 - source resource 검증이 통과한다.
 - target DOM과 네 anchor declaration이 verifier에 고정돼 있다.
 - color input 외 toolbar layout ownership guard가 약화되지 않는다.
+- 신규 color picker 회귀 사례와 기존 Cargo.lock·sync fixture가 모두 통과한다.
 - Swift, generated asset, manifest와 dependency diff가 없다.
 
 ### 커밋
@@ -225,7 +232,7 @@ PR 본문에는 다음을 포함한다.
 
 ## 구현계획 승인 요청 사항
 
-1. Stage 2를 CSS overlay와 asset verifier 두 파일의 최소 변경으로 한정하는 방향
+1. Stage 2 제품 변경은 CSS overlay와 asset verifier에 한정하고, 승인된 CI fixture 갱신·회귀 검증을 함께 반영하는 방향
 2. `#text-color-picker`에 버튼 크기의 anchor를 주고 `pointer-events: none`으로 기존 button handler를 보존하는 방식
 3. JavaScript/Swift/AppKit bridge는 이번 구현 범위에서 제외하는 판단
 4. Stage 2 완료 후 단계 보고와 승인을 거쳐 Stage 3 interaction smoke로 진행하는 순서
