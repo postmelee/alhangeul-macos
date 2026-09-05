@@ -558,11 +558,44 @@ enum RhwpStudioHostBridgeScript {
         });
       }
 
+      function positionTextColorPickerAnchor() {
+        const button = document.getElementById("btn-text-color");
+        const picker = document.getElementById("text-color-picker");
+        if (!button || !picker) {
+          return;
+        }
+
+        const buttonRect = button.getBoundingClientRect();
+        if (buttonRect.width <= 0 || buttonRect.height <= 0) {
+          return;
+        }
+
+        // macOS WKWebView resolves the hidden renderer at a vertically
+        // mirrored popover position. Pre-compensate the renderer geometry
+        // without changing the visible button or upstream picker events.
+        picker.style.position = "fixed";
+        picker.style.inset = "auto";
+        picker.style.left = `${buttonRect.left}px`;
+        picker.style.top = `${window.innerHeight - buttonRect.bottom - (2 * buttonRect.height)}px`;
+        picker.style.width = `${buttonRect.width}px`;
+        picker.style.height = `${buttonRect.height}px`;
+        picker.style.pointerEvents = "none";
+      }
+
+      function handleTextColorPickerAnchorEvent(event) {
+        const target = event.target;
+        if (!(target instanceof Element) || !target.closest("#btn-text-color")) {
+          return;
+        }
+        positionTextColorPickerAnchor();
+      }
+
       function refreshHostOverrides() {
         ensureSaveAsMenuItem();
         enableNativeCommandItems();
         overrideNativePDFMenuItem();
         rewriteShortcutLabelsForMac();
+        positionTextColorPickerAnchor();
         observeNativePDFMenuItem();
       }
 
@@ -845,8 +878,10 @@ enum RhwpStudioHostBridgeScript {
       }
 
       document.addEventListener("mousedown", scheduleHostOverridesRefresh, true);
+      document.addEventListener("mousedown", handleTextColorPickerAnchorEvent, true);
       document.addEventListener("mousedown", handlePotentialMutatingCommandEvent, true);
       document.addEventListener("mousedown", handleNativeCommandElementEvent, true);
+      document.addEventListener("click", handleTextColorPickerAnchorEvent, true);
       document.addEventListener("click", handlePotentialMutatingCommandEvent, true);
       document.addEventListener("click", handleNativeCommandElementEvent, true);
       document.addEventListener("beforeinput", () => postDocumentEdited("beforeinput"), true);
@@ -886,6 +921,8 @@ enum RhwpStudioHostBridgeScript {
         event.stopImmediatePropagation();
         window.__alhangeulHostBridgeRunNativeCommand(command);
       }, true);
+
+      window.addEventListener("resize", positionTextColorPickerAnchor);
     })();
     """
 }

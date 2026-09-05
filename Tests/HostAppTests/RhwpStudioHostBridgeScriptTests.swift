@@ -79,6 +79,55 @@ final class RhwpStudioHostBridgeScriptTests: XCTestCase {
         XCTAssertTrue(source.contains("if (pendingHostOverridesRefresh)"))
     }
 
+    func testTextColorPickerAnchorCompensatesWKWebViewCoordinates() throws {
+        let section = try sourceSection(
+            from: "function positionTextColorPickerAnchor()",
+            to: "function handleTextColorPickerAnchorEvent(event)"
+        )
+
+        XCTAssertTrue(section.contains("document.getElementById(\"btn-text-color\")"))
+        XCTAssertTrue(section.contains("document.getElementById(\"text-color-picker\")"))
+        XCTAssertTrue(section.contains("button.getBoundingClientRect()"))
+        XCTAssertTrue(section.contains("picker.style.position = \"fixed\""))
+        XCTAssertTrue(section.contains("picker.style.inset = \"auto\""))
+        XCTAssertTrue(section.contains("picker.style.left = `${buttonRect.left}px`"))
+        XCTAssertTrue(
+            section.contains(
+                "picker.style.top = `${window.innerHeight - buttonRect.bottom - (2 * buttonRect.height)}px`"
+            )
+        )
+        XCTAssertTrue(section.contains("picker.style.width = `${buttonRect.width}px`"))
+        XCTAssertTrue(section.contains("picker.style.height = `${buttonRect.height}px`"))
+        XCTAssertTrue(section.contains("picker.style.pointerEvents = \"none\""))
+    }
+
+    func testTextColorPickerAnchorRefreshesBeforeActivationAndOnResize() throws {
+        let source = RhwpStudioHostBridgeScript.source
+        let refreshSection = try sourceSection(
+            from: "function refreshHostOverrides()",
+            to: "let pendingHostOverridesRefresh"
+        )
+
+        let positionRange = try XCTUnwrap(refreshSection.range(of: "positionTextColorPickerAnchor();"))
+        let observerRange = try XCTUnwrap(refreshSection.range(of: "observeNativePDFMenuItem();"))
+        XCTAssertLessThan(positionRange.lowerBound, observerRange.lowerBound)
+        XCTAssertTrue(
+            source.contains(
+                "document.addEventListener(\"mousedown\", handleTextColorPickerAnchorEvent, true)"
+            )
+        )
+        XCTAssertTrue(
+            source.contains(
+                "document.addEventListener(\"click\", handleTextColorPickerAnchorEvent, true)"
+            )
+        )
+        XCTAssertTrue(
+            source.contains(
+                "window.addEventListener(\"resize\", positionTextColorPickerAnchor)"
+            )
+        )
+    }
+
     private func sourceSection(from start: String, to end: String) throws -> Substring {
         let source = RhwpStudioHostBridgeScript.source
         let startIndex = try XCTUnwrap(source.range(of: start)?.lowerBound)
