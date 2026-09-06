@@ -44,6 +44,22 @@ struct Stage3RenderCheck {
         }
     }
 
+    private static func verifyRenderTreeQueryBoundary(_ document: RhwpDocument) throws {
+        for invalidPage in [-1, Int(UInt32.max) + 1, document.pageCount] {
+            do {
+                _ = try document.renderPageTreeThrowing(at: invalidPage)
+                throw RenderCheckError(description: "invalid page was accepted")
+            } catch RhwpRenderTreeQueryError.invalidPageIndex {
+                guard document.renderPageTree(at: invalidPage) == nil,
+                      document.renderPageTreeJSON(at: invalidPage) == nil else {
+                    throw RenderCheckError(description: "optional query did not preserve nil failure")
+                }
+            }
+        }
+        // The raw JSON API deliberately reaches the FFI for pageCount (a valid UInt32).
+        // Its nil assertion above tests actual producer null independently of the public range error.
+    }
+
     @MainActor
     private static func render(inputPath: String, outputDir: URL) throws -> String {
         let inputURL = URL(fileURLWithPath: inputPath)
@@ -54,9 +70,8 @@ struct Stage3RenderCheck {
         }
 
         let pageIndex = 0
-        guard let tree = doc.renderPageTree(at: pageIndex) else {
-            throw RenderCheckError(description: "render tree is nil")
-        }
+        let tree = try doc.renderPageTreeThrowing(at: pageIndex)
+        try verifyRenderTreeQueryBoundary(doc)
 
         var stats = TextStats()
         collectTextStats(tree, into: &stats)
