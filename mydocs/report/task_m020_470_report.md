@@ -17,8 +17,8 @@ Known RenderNodeType payload가 손상되면 variant/schema path/cause를 가진
 
 ## PR 관계
 
-선행 #394 PR #503 리뷰 보완 head `a011a92`를 상속한다. 자신의 변경은 `a011a92..HEAD`, base는 devel이다. 앞 PR 병합 전 누적 diff가 보인다. 다음 #469가 producer golden을 추가하며, #337과 public release는 이번 범위가 아니다. 사용자 리뷰를 위해 merge하지 않는다.
+선행 #394 PR #503 리뷰 보완 head `a011a92`를 상속한다. 자신의 변경은 `a011a92..HEAD`, base는 devel이다. 앞 PR 병합 전 누적 diff가 보인다. 다음 #469가 producer golden을 추가하며, #337과 public release는 이번 범위가 아니다. 초기 게시 때는 사용자 리뷰를 위해 병합을 보류했고, 2026-09-07 명시 승인 후 PR #504를 devel에 병합했다.
 
-## 리뷰 보완과 병합 전 조건
+## 리뷰 보완과 잔여 검증
 
-[Stage 4](../working/task_m020_470_stage4.md)에서 남은 셀 usize 필드, 24종 tag의 exhaustive dispatch와 wire fixture, 다중 tag 진단, pageCount 경계를 보완했다. decoder·4문서 native smoke·HostApp build가 통과했다. macOS 12 실행 환경이 없어 최소 지원 OS runtime 검증은 미실행이며 병합 전 확인 조건으로 남아 있다. 현재 OS/CI 성공으로 대체하지 않는다.
+[Stage 4](../working/task_m020_470_stage4.md)에서 남은 셀 usize 필드, 24종 tag의 exhaustive dispatch와 wire fixture, 다중 tag 진단, pageCount 경계를 보완했다. decoder·4문서 native smoke·HostApp build가 통과했다. macOS 12 실행 환경이 없어 최소 지원 OS runtime 검증은 미실행이다. 작업지시자는 사용 가능한 환경이 없다고 확인하고 이 한계를 안내받은 뒤, 2026-09-07 네 PR의 병합과 정리를 명시 승인했다. 이에 PR #504를 병합하고 이슈 #470을 완료 처리했다. 최소 지원 OS 실행 검증은 후속 확인 사항으로 유지하며, 현재 OS/CI 성공으로 대체하지 않는다.
