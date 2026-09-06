@@ -140,6 +140,22 @@ class ContentGateTests(unittest.TestCase):
         self.commit_file("image.bin", b"\x00\x01main")
         self.gate(1, "content absent")
 
+    def test_ci_must_inspect_source_head_instead_of_merge_checkout(self):
+        self.commit_file("hotfix.txt", "main fix\n")
+        self.git("switch", "-q", "devel")
+        self.commit_file("feature.txt", "feature\n")
+        source_head = self.git("rev-parse", "HEAD")
+        self.git("switch", "-qc", "synthetic-pr-merge")
+        self.git("merge", "--no-ff", "-m", "CI merge checkout", "main")
+        self.gate(0, "already incorporated", refs=("main", "HEAD"))
+        self.gate(1, "content absent", refs=("main", source_head))
+
+    def test_actions_summary_environment(self):
+        summary = Path(self.temp.name) / "actions-summary.md"
+        self.env["GITHUB_STEP_SUMMARY"] = str(summary)
+        report = self.gate(0, "PASS")
+        self.assertEqual(summary.read_text(), report + "\n")
+
     def test_summary_records_failure(self):
         self.commit_file("hotfix.txt", "fix\n")
         summary = Path(self.temp.name) / "summary.md"

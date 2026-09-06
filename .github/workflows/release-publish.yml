@@ -82,6 +82,18 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
+      - name: Set up Python for golden contract helpers
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Verify main/devel release content invariant
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main +refs/heads/devel:refs/remotes/origin/devel
+          scripts/ci/check-main-devel-content.sh origin/main origin/devel
+
       - name: Install release validation dependencies
         shell: bash
         run: |
@@ -316,11 +328,6 @@ jobs:
             echo "- Before app notarization submit, \`release.sh\` verifies Developer ID authority, Team ID, secure timestamp, hardened runtime, \`get-task-allow\` absence, and required Sparkle nested components."
             echo "- Failure in this preflight blocks notarization submit."
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Set up Python for golden contract helpers
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
 
       - name: Verify rhwp source, header, ABI lock, and build info
         shell: bash

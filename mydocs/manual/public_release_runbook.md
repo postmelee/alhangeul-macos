@@ -149,10 +149,12 @@ find mydocs/report -maxdepth 1 -name 'task_*_<issue>_report.md' -print
 
 ## Gate 2. Source preflight
 
-release candidate source가 identity와 일치하는지 확인한다.
+release candidate source가 identity와 일치하는지 확인한다. main/devel content invariant를 먼저 확인하고 main에만 남은 실제 콘텐츠가 있으면 변경 owner의 인계 PR을 완료한다. transport-only history는 back-merge를 요구하지 않는다.
 
 ```bash
 git status --short --branch
+git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main +refs/heads/devel:refs/remotes/origin/devel
+scripts/ci/check-main-devel-content.sh origin/main origin/devel
 bash scripts/ci/read-rhwp-core-lock.sh rhwp_release_tag
 bash scripts/ci/read-rhwp-core-lock.sh rhwp_commit
 ./scripts/build-rust-macos.sh --verify-portable

@@ -57,6 +57,12 @@ PR CI는 외부 PR에서도 안전하게 실행할 수 있는 검증만 수행�
 - concurrency group은 PR 번호 기준이며 새 push가 오면 이전 PR CI를 취소한다.
 - 변경 범위는 `scripts/ci/classify-pr-changes.sh`가 분류하고, 결과는 job output과 `GITHUB_STEP_SUMMARY`에 기록한다.
 
+### main/source content gate
+
+Ubuntu script-checks는 complete history checkout에서 main/devel 대상 PR의 `github.event.pull_request.head.sha`와 fetch한 origin/main을 검사한다. merge checkout HEAD로 대체하면 미반영 콘텐츠가 이미 합쳐져 잘못 통과할 수 있다. 검사 결과는 Actions summary에 exact SHA와 함께 기록하며 content/conflict는 차단한다. 문서-only PR에도 적용하고 native-viewer-editor는 제외한다.
+
+`python3 scripts/ci/test-main-devel-content.py`는 격리 Git 이력에서 transport, non-merge/merge drift, back-merge/equivalent/net content, missing/shallow history, dirty tree/index 보존과 custom driver 거부를 검증한다. release rehearsal/publish는 빌드·서명 전에 최신 main/devel 인계를 별도 gate로 검사한다. 판정 알고리즘과 변경 owner 책임은 [Git workflow](git_workflow_guide.md)를 따른다.
+
 ### 변경 범위 flag
 
 | flag | 의미 | 켜지는 대표 변경 |
