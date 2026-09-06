@@ -2,7 +2,7 @@
 
 수행계획서: [task_m900_494.md](task_m900_494.md)
 
-2026-09-06 작업지시자가 수행계획에 이어 구현계획과 Stage 1~3 진행을 승인했다. 이 문서는 승인된 범위를 6개 Stage의 변경·검증·산출물로 구체화한다. version/workflow 변경·문서 준비·source 및 개발 package 검증 결과는 [Stage 1 보고서](../working/task_m900_494_stage1.md), [Stage 2 보고서](../working/task_m900_494_stage2.md), [Stage 3 보고서](../working/task_m900_494_stage3.md)에 기록했다. strict archive 비교와 등록 환경의 실패는 전체 성공으로 처리하지 않고 다음 signed 검증 조건과 구분했다. 이후 Stage 4 진행 승인을 받아 PR/main/tag·signed draft를 생성했으며, 설치본 HWP3 저장 오류를 재현해 현재 공개를 보류한다. 상세는 [Stage 4 중간 보고서](../working/task_m900_494_stage4.md)에 기록했다.
+2026-09-06 작업지시자가 수행계획에 이어 구현계획과 Stage 1~3 진행을 승인했다. 이 문서는 승인된 범위를 6개 Stage의 변경·검증·산출물로 구체화한다. version/workflow 변경·문서 준비·source 및 개발 package 검증 결과는 [Stage 1 보고서](../working/task_m900_494_stage1.md), [Stage 2 보고서](../working/task_m900_494_stage2.md), [Stage 3 보고서](../working/task_m900_494_stage3.md)에 기록했다. strict archive 비교와 등록 환경의 실패는 전체 성공으로 처리하지 않는다. 최초 Stage 4에서 발견한 HWP3 저장 오류는 Task #497로 수정했으며, 2026-09-07 새 공증 후보의 필수 설치 검증을 완료했다. 현재 Stage 5 공개 승인 대기이며, 상세 증거와 미실행 범위는 [Stage 4 보고서](../working/task_m900_494_stage4.md)에 기록했다.
 
 ## 기준과 공통 원칙
 
@@ -16,7 +16,7 @@
 | previous_release_ref / commit | `v0.1.10` / `fafed425d4b87162c2188d1384d618adc2211eb6` |
 | expected_rhwp_tag / commit | `v0.8.6` / `f1f9c6ae58344ee9368996d3543f76b9345cf227` |
 | 제목 / 실행 정책 | `Alhangeul v0.1.11 (rhwp v0.8.6)`, `require_latest_rhwp=true`, `include_rhwp_in_title=true` |
-| 현재 draft candidate | `f3bb7bc73510593c35c2e423323bbb01d62c3aad` (`v0.1.11`); HWP3 저장 실패로 최종 공개 후보 미승인 |
+| 현재 draft candidate | `abdf88f9846650e5920039f2807615ea1b285f91` (`v0.1.11`); 수정 공증 후보 Stage 4 검증 완료, Stage 5 공개 승인 대기 |
 | 검증 산출물 | `build.noindex/task494/` 아래 단계·산출물 종류별 디렉터리 |
 
 - 각 단계는 승인된 변경과 검증 결과를 `mydocs/working/task_m900_494_stage{N}.md`에 남기고 함께 커밋한다. 새로운 실패·수정이 없으면 통과한 검증을 반복하지 않는다.
@@ -268,9 +268,9 @@ Homebrew 반영에는 `scripts/update-cask-sha256.sh 0.1.11 <검증한-official-
 
 ## 구현계획 승인 요청
 
-위 6단계와 Stage 1~4 진행 승인을 반영했다. Stage 4의 PR #495/#496·tag·signed draft 생성은 완료했지만 HWP3 변환 저장 권한 오류로 필수 설치 gate를 보류한다. [중간 보고서](../working/task_m900_494_stage4.md)의 별도 버그 이슈·수정·회귀 검증안을 다음 승인 대상으로 준비했다. 현재 draft를 official 공개하지 않으며 수정 후보에서 본문·provenance와 signed smoke를 다시 검증한다.
+위 6단계와 Stage 1~4 진행 승인을 반영했다. 최초 HWP3 저장 오류 수정 후 PR #498/#499/#500을 병합하고, 새 main/tag의 공증 draft에서 저장 6조합·PDF·색상·열기 복구·설치 확장 검증을 완료했다. [Stage 4 보고서](../working/task_m900_494_stage4.md)의 실제 검증 범위와 원본 복원을 확인했으며 현재 Stage 5 official 공개·Pages·Sparkle·Homebrew 승인 대기다.
 
-진행 순서는 [타스크 진행 절차 매뉴얼](../manual/task_workflow_guide.md), 배포 순서는 [public release runbook](../manual/public_release_runbook.md)을 따른다. Stage 4 진행 승인은 이미 받았으며, 새로 발견한 제품 저장 결함의 수정 범위 승인을 요청한다. 기존 tag·draft는 재현 기준으로 유지하고 후보 교체 입력은 수정 commit이 준비된 뒤 확정한다.
+진행 순서는 [타스크 진행 절차 매뉴얼](../manual/task_workflow_guide.md), 배포 순서는 [public release runbook](../manual/public_release_runbook.md)을 따른다. Stage 4 복구 승인은 모두 실행했다. 현재 `v0.1.11`은 `abdf88f9846650e5920039f2807615ea1b285f91`을 가리키며, 공식 공개는 Gate 5 별도 승인 뒤 실행한다.
 
 ### Stage 4 복구 승인 — 2026-09-07
 
