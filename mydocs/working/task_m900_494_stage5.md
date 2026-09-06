@@ -40,7 +40,7 @@
 | feed hash | `f880f5047ffea8f41f5675900a3fbb5261b9c5d1015a29f007fdbd3be604f234` — 후속 docs-only 배포에서 byte 보존할 기준 |
 | 공개 본문 | Homebrew 반영 후 설치 명령 추가, template·GitHub body validator 통과와 원격 exact 본문 대조 |
 
-공식 workflow는 tag의 `docs/`를 배포하므로 public home·updates·v0.1.11 note에는 여전히 ‘공개 준비’ 또는 Homebrew v0.1.10 문구가 남아 있다. 다운로드 자산과 feed의 배포 실패로 해석하지 않으며, 문구 정리는 README와 위 세 Pages source에 준비했다. 단일 main 종료 정리 PR과 docs-only Pages 배포에서 실제 public appcast byte를 보존해 반영해야 한다. source 수정안을 공개 반영 완료로 기록하지 않는다.
+공식 workflow는 tag의 `docs/`를 배포하므로 Stage 5 배포 직후 public home·updates·v0.1.11 note에는 ‘공개 준비’ 또는 Homebrew v0.1.10 문구가 남아 있다. 다운로드 자산과 feed의 배포 실패로 해석하지 않으며, 문구 정리는 README와 위 세 Pages source에 준비했다. 후속 Stage 6 main PR #501과 docs-only Pages run 34049769039에서 public appcast byte를 보존해 반영했다. 실제 검증은 [Stage 6 보고서](task_m900_494_stage6.md)에 기록한다.
 
 ## Homebrew 검증과 원본 보존
 

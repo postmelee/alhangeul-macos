@@ -2,7 +2,7 @@
 
 ## 실행 범위
 
-작업지시자가 남은 실제 업데이트 검증과 README·Pages 최종 문구 정리를 계속 진행하도록 지시했다. Stage 5 actual Sparkle·Finder 확인과 기존 설치 복원을 완료한 뒤, 승인된 종료 정리 범위에서 공개 문구·배포 기록·최종 보고서를 단일 main PR로 묶는다. 이 문서의 merge·Pages 결과는 실제 실행 후 갱신한다.
+작업지시자가 남은 실제 업데이트 검증과 README·Pages 최종 문구 정리를 계속 진행하도록 지시했다. Stage 5 actual Sparkle·Finder 확인과 기존 설치 복원을 완료한 뒤, 승인된 종료 정리 범위에서 공개 문구·배포 기록·최종 보고서를 단일 main PR로 묶는다. main 종료 정리 PR #501 병합을 완료했으며 아래에 실제 결과를 기록한다.
 
 ## 변경
 
@@ -27,8 +27,25 @@
 
 원래 요청한 #491 외에 후보 준비 #495, 최초 main 승격 #496, 차단 오류 수정 #498, 수정 기록 #499, main 재승격 #500이 발생했다. sandbox HWP3 저장 실패의 수정·재검증이 PR 증가 원인이다. 공개 문구를 여러 PR로 나누지 않고 이 종료 정리 PR에 모으며, 이후에만 확정되는 public 배포 관찰은 devel 최종 기록에 반영한다.
 
+## main 종료 정리 PR 결과
+
+| 항목 | 결과 |
+|------|------|
+| PR | [#501](https://github.com/postmelee/alhangeul-macos/pull/501), `publish/task494 → main` |
+| 검토 head / base | `573ebc043c0451aa3f4a96fb25aae64825b24919` / `abdf88f9846650e5920039f2807615ea1b285f91` |
+| 범위 | 공개 문서·Cask·기록 14파일, 제품 source·workflow·tag 변경 없음 |
+| CI | [34049467483](https://github.com/postmelee/alhangeul-macos/actions/runs/34049467483), 분류·스크립트·release helper 3개 job success, macOS scope skip |
+| 검토 | Copilot quota로 실제 review 없음. exact head·base·body·tree diff·검증 근거 수동 확인, 변경 요청 없음 |
+| 본문 검증 | 최초 issue 번호 뒤 조사 표기 오류를 보정하고 validator 재검증·원격 body equality 확인 후 merge |
+| merge | `0272172e543d59fd87eebb11d98904ee344a4487`, 2026-09-07 02:48:53 KST |
+| Pages | [34049769039](https://github.com/postmelee/alhangeul-macos/actions/runs/34049769039), 위 merge commit의 artifact 준비·배포 두 job success |
+
 ## 현재 상태
 
-공식 배포·Homebrew·실제 Sparkle·Finder 검증과 원본 복원은 완료했다. main 공개 문구 PR 게시·CI·merge 및 Pages 실제 결과 확인, devel 최종 기록과 Issue #494 종료는 후속 실행 대상이다. 아직 실행하지 않은 결과를 완료로 표시하지 않는다.
+main 공개 문구 PR 병합과 Pages 검증을 완료했다. 02:50 KST에 public home·updates·v0.1.11·이전 v0.1.10 HTML이 repository source와 byte 동일한 것을 확인했다. 최신 세 문서에서 공개 준비 문구가 사라지고 Homebrew 명령이 반영됐다. latest·tag 고정 DMG 링크는 모두 HTTP 200, Content-Length 180206064다.
+
+public appcast는 1,167 bytes, SHA256 `f880f5047ffea8f41f5675900a3fbb5261b9c5d1015a29f007fdbd3be604f234`로 Stage 5와 byte 동일하다. official annotated tag object와 peeled commit도 유지했다. `stage6/public-after-closeout.json`과 `pages-final.json`에 결과를 보관했다.
+
+devel 최종 PR에는 main에 반영한 공개 문구·Cask와 이 실제 관찰 기록을 함께 전달한다. main 대비 추가 diff는 계획·orders·release/단계/최종 보고만이며, 공개 HTML·Cask·제품 source는 동일하다. CI와 merge를 확인한 뒤 Issue #494 완료 처리, `publish/task494`·`local/task494` 삭제와 devel 복귀를 수행한다.
 
 [최종 보고서](../report/task_m900_494_report.md)에 전체 검증과 알려진 한계를 모았다.
