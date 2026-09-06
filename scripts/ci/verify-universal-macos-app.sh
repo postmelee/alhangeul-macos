@@ -8,6 +8,7 @@ fi
 
 APP_PATH="$1"
 REQUIRED_ARCHS=(arm64 x86_64)
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
 if [ ! -d "$APP_PATH" ]; then
   echo "ERROR: missing app bundle: $APP_PATH" >&2
@@ -45,3 +46,5 @@ verify_binary() {
 verify_binary "Contents/MacOS/Alhangeul"
 verify_binary "Contents/PlugIns/AlhangeulPreview.appex/Contents/MacOS/AlhangeulPreview"
 verify_binary "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/MacOS/AlhangeulThumbnail"
+python3 "$ROOT/scripts/ci/check-spotlight-bundle.py" --app "$APP_PATH"
+verify_binary "Contents/Library/Spotlight/Alhangeul.mdimporter/Contents/MacOS/Alhangeul"

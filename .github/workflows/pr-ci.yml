@@ -119,6 +119,13 @@ jobs:
         shell: bash
         run: python3 scripts/ci/test-rust-verification-modes.py
 
+      - name: Check Spotlight bundle contract fixtures
+        shell: bash
+        run: |
+          python3 scripts/ci/check-spotlight-bundle.py
+          python3 scripts/ci/test-spotlight-bundle.py
+          python3 scripts/ci/test-spotlight-system-smoke.py
+
       - name: Check core build info helper fixtures
         shell: bash
         run: |
@@ -236,6 +243,16 @@ jobs:
             ./scripts/build-rust-macos.sh
           fi
 
+      - name: Check Rust bridge contracts
+        if: ${{ needs.classify-changes.outputs.run_rust_verify == 'true' }}
+        shell: bash
+        env:
+          MACOSX_DEPLOYMENT_TARGET: '12.0'
+        run: |
+          set -euo pipefail
+          bridge_test_target="$(rustc -vV | awk '/^host:/ {print $2}')"
+          cargo test --manifest-path RustBridge/Cargo.toml --locked --offline --release --target "$bridge_test_target"
+
       - name: Check shared Swift boundary
         shell: bash
         run: |
@@ -270,6 +287,10 @@ jobs:
             -derivedDataPath build.noindex/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             build
+
+      - name: Verify embedded Spotlight importer
+        shell: bash
+        run: scripts/verify-spotlight-importer.sh build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app
 
       - name: Verify HostApp Debug analytics endpoint
         shell: bash
