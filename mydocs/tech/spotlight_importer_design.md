@@ -41,7 +41,7 @@ MVP는 본문과 파일명에서 얻는 표시 제목, 문서 kind를 제공한�
 
 ## 추출 정책 입력
 
-구체적인 지원/순서/문자/한도/ABI 계약은 [본문 추출 계약](spotlight_text_extraction_contract.md)에서 확정한다. 해당 문서는 후속 #339 산출물이다.
+구체적인 지원/순서/문자/한도/ABI 계약은 후속 `spotlight_text_extraction_contract.md`에서 확정한다. 해당 문서는 후속 #339 산출물이다.
 
 - HWP3/HWP5/HWPX 평문을 비교 대상으로 한다. 지원은 실제 parser와 fixture로 검증한 뒤 확정한다.
 - 비밀번호·DRM·배포용 문서는 비대화형 동작과 정보 노출을 고려해 기본 제외 후보로 둔다.
