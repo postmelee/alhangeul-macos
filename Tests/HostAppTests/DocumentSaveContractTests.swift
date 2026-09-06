@@ -372,12 +372,14 @@ final class DocumentSaveContractTests: XCTestCase {
 
         let destinationURL = directoryURL.appendingPathComponent("interrupted.hwp")
         let convertedData = Data("converted-payload".utf8)
+        var writtenTemporaryURL: URL?
 
         XCTAssertThrowsError(
             try DocumentSaveWritePolicy.writeNewFileAtomically(
                 data: convertedData,
                 to: destinationURL,
                 temporaryFileWriter: { data, temporaryURL in
+                    writtenTemporaryURL = temporaryURL
                     try data.prefix(4).write(to: temporaryURL)
                     throw SimulatedWriteFailure()
                 },
@@ -390,10 +392,83 @@ final class DocumentSaveContractTests: XCTestCase {
         }
 
         XCTAssertFalse(FileManager.default.fileExists(atPath: destinationURL.path))
+        let temporaryDirectoryURL = try XCTUnwrap(writtenTemporaryURL).deletingLastPathComponent()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: temporaryDirectoryURL.path))
         XCTAssertEqual(
             try FileManager.default.contentsOfDirectory(atPath: directoryURL.path),
             []
         )
+    }
+
+    func testAtomicNewFilePublishRacePreservesCompetingDestination() throws {
+        let directoryURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directoryURL) }
+
+        let destinationURL = directoryURL.appendingPathComponent("competing.hwp")
+        let competingData = Data("another writer".utf8)
+        var writtenTemporaryURL: URL?
+        XCTAssertThrowsError(
+            try DocumentSaveWritePolicy.writeNewFileAtomically(
+                data: Data("converted document".utf8),
+                to: destinationURL,
+                temporaryFileWriter: { data, temporaryURL in
+                    writtenTemporaryURL = temporaryURL
+                    try data.write(to: temporaryURL)
+                    // 준비가 끝난 뒤 다른 writer가 destination을 선점한다.
+                    try competingData.write(to: destinationURL)
+                }
+            )
+        ) { error in
+            XCTAssertEqual((error as NSError).domain, NSPOSIXErrorDomain)
+            XCTAssertEqual((error as NSError).code, Int(EEXIST))
+        }
+        XCTAssertEqual(try Data(contentsOf: destinationURL), competingData)
+        let temporaryDirectoryURL = try XCTUnwrap(writtenTemporaryURL).deletingLastPathComponent()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: temporaryDirectoryURL.path))
+    }
+
+    func testAtomicNewFilePublishFailureCleansTemporaryDirectory() throws {
+        struct SimulatedPublishFailure: Error {}
+        let destinationURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString).hwp")
+        var writtenTemporaryURL: URL?
+        XCTAssertThrowsError(
+            try DocumentSaveWritePolicy.writeNewFileAtomically(
+                data: Data("complete document".utf8),
+                to: destinationURL,
+                temporaryFileWriter: { data, temporaryURL in
+                    writtenTemporaryURL = temporaryURL
+                    try data.write(to: temporaryURL)
+                },
+                temporaryFilePublisher: { _, _ in throw SimulatedPublishFailure() }
+            )
+        ) { error in
+            XCTAssertTrue(error is SimulatedPublishFailure)
+        }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: destinationURL.path))
+        let temporaryDirectoryURL = try XCTUnwrap(writtenTemporaryURL).deletingLastPathComponent()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: temporaryDirectoryURL.path))
+    }
+
+    func testAtomicNewFileSuccessCleansTemporaryDirectory() throws {
+        let destinationURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("\(UUID().uuidString).hwpx")
+        defer { try? FileManager.default.removeItem(at: destinationURL) }
+        let convertedData = Data("complete converted document".utf8)
+        var writtenTemporaryURL: URL?
+        try DocumentSaveWritePolicy.writeNewFileAtomically(
+            data: convertedData,
+            to: destinationURL,
+            temporaryFileWriter: { data, temporaryURL in
+                writtenTemporaryURL = temporaryURL
+                try data.write(to: temporaryURL)
+            }
+        )
+        XCTAssertEqual(try Data(contentsOf: destinationURL), convertedData)
+        let temporaryDirectoryURL = try XCTUnwrap(writtenTemporaryURL).deletingLastPathComponent()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: temporaryDirectoryURL.path))
     }
 
     func testNonPlainDocumentsRequirePlainCopyIntent() {
