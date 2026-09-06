@@ -119,17 +119,20 @@ enum DocumentSaveWritePolicy {
         data: Data,
         to destinationURL: URL,
         temporaryFileWriter: TemporaryFileWriter,
-        temporaryFilePublisher: TemporaryFilePublisher
+        temporaryFilePublisher: TemporaryFilePublisher = publishNewFileExclusively
     ) throws {
-        let temporaryURL = destinationURL
-            .deletingLastPathComponent()
-            .appendingPathComponent(
-                ".\(destinationURL.lastPathComponent).\(UUID().uuidString).tmp",
-                isDirectory: false
-            )
+        // NSSavePanel의 권한은 선택한 파일에만 적용된다. 부모 폴더의 임의
+        // sibling 파일 대신 OS가 제공하는 같은 volume의 임시 위치를 사용한다.
+        let temporaryDirectoryURL = try FileManager.default.url(
+            for: .itemReplacementDirectory,
+            in: .userDomainMask,
+            appropriateFor: destinationURL,
+            create: true
+        )
         defer {
-            try? FileManager.default.removeItem(at: temporaryURL)
+            try? FileManager.default.removeItem(at: temporaryDirectoryURL)
         }
+        let temporaryURL = temporaryDirectoryURL.appendingPathComponent("document.tmp")
 
         // 목적지는 완성된 임시 파일만 배타적으로 rename해 노출한다.
         // 중간 write 실패와 publish 직전의 destination 생성 경쟁을 모두 fail-closed로 처리한다.
