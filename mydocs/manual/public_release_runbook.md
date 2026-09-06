@@ -151,8 +151,13 @@ find mydocs/report -maxdepth 1 -name 'task_*_<issue>_report.md' -print
 
 release candidate source가 identity와 일치하는지 확인한다. main/devel content invariant를 먼저 확인하고 main에만 남은 실제 콘텐츠가 있으면 변경 owner의 인계 PR을 완료한다. transport-only history는 back-merge를 요구하지 않는다.
 
+Publish/rehearsal을 재실행할 때도 각 preflight fetch 시점의 최신 main/devel을 검사한다. 과거 tag가 한 번 통과했어도 이후 main 변경이 devel에 미인계되었다면 인계 완료 후 재실행해야 한다. 불변 배포 tag의 identity 검증과 별개 조건이며, 과거 tag tree를 최신 main과 같게 만들라는 뜻은 아니다.
+
+로컬 `release.sh` preflight는 네트워크 연결이 필요하고 `refs/remotes/origin/main`·`origin/devel`을 갱신한다. helper 자체는 fetch나 branch/index/worktree 변경을 하지 않는다. Python 3.11+ 사전 검사는 출력 초기화와 cleanup trap 전에 실행한다. native 라인의 별도 인계 정책은 [Git workflow 가이드](git_workflow_guide.md)의 main/devel 적용 범위를 따른다.
+
 ```bash
 git status --short --branch
+scripts/verify-render-tree-golden.sh --check-environment
 git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main +refs/heads/devel:refs/remotes/origin/devel
 scripts/ci/check-main-devel-content.sh origin/main origin/devel
 bash scripts/ci/read-rhwp-core-lock.sh rhwp_release_tag

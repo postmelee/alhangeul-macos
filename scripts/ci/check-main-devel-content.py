@@ -61,6 +61,8 @@ def inspect_content(repo, main_ref, source_ref):
 
     # A custom driver such as 'ours' must not manufacture a no-op result by discarding main.
     # Disable configured external drivers for this calculation; never run their shell commands.
+    # Built-in union/binary still use the tree/conflict gate: added content or conflicts block;
+    # unchanged content already represented in source can pass.
     drivers = repo.run("config", "--null", "--name-only", "--get-regexp", r"^merge\..*\.driver$", check=False)
     if drivers.returncode not in (0, 1):
         raise GateError("cannot inspect configured merge drivers")
@@ -115,6 +117,7 @@ def main():
             with args.summary_file.open("a") as stream:
                 stream.write(report + "\n")
         except OSError as error:
+            # Requested evidence is part of the gate contract, not best-effort reporting.
             print(f"ERROR: cannot write gate summary: {error}", file=sys.stderr)
             return 2
     return code

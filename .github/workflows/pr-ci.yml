@@ -60,6 +60,10 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Check Python helper syntax
+        shell: bash
+        run: python3 -m compileall -q scripts/ci
+
       - name: Check shell script syntax
         shell: bash
         run: |

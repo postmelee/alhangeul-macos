@@ -51,6 +51,8 @@ Git 2.38+와 complete history가 필요하다. shallow/missing ref/unrelated his
 
 PR CI는 main/devel 대상에만 적용하고 event의 실제 PR head SHA를 사용한다. GitHub의 merge checkout HEAD에는 main이 이미 들어갈 수 있어 판정 source로 쓰지 않는다. native-viewer-editor는 이 webview release invariant의 대상이 아니다.
 
+native 라인에 필요한 공통/release-critical 수정은 [브랜치별 배포 정책](release_policy_guide.md)에 따라 별도 PR/cherry-pick으로 동기화한다. content gate의 summary를 요청했는데 기록하지 못한 경우에는 stderr에 원인을 남기고 exit 2로 실패한다. 판정 성공을 기록 실패에도 성공 처리하는 best-effort 정책은 사용하지 않는다.
+
 ## Git 워크플로우
 
 ```

@@ -14,4 +14,6 @@ Git fixture 17개, CI env golden fixture 16개, shell/YAML/actionlint 통과. �
 
 ## 리뷰 인계
 
-리뷰·병합 순서는 #394 PR #503 → #470 PR #504 → #469 PR #505 → 이 PR이다. 선행 #469 CI 보완을 포함한 기준은 `89a7f18`이고 자신의 diff는 `89a7f18..HEAD`다. 모두 devel 대상이므로 선행 PR 병합 전 누적 diff가 보인다. 사용자 요청에 따라 PR은 merge하지 않는다. PR #462는 중첩 clipping 회귀 검증이 필요하여 현재 초안 병합 보류이며 #337은 이번 작업에서 착수하지 않았다.
+리뷰·병합 순서는 #394 PR #503 → #470 PR #504 → #469 PR #505 → 이 PR이다. 선행 #469 리뷰 보완을 포함한 기준은 `c642d92`이고 자신의 diff는 `c642d92..HEAD`다. 모두 devel 대상이므로 선행 PR 병합 전 누적 diff가 보인다. 사용자 요청에 따라 PR은 merge하지 않는다. PR #462는 중첩 clipping 회귀 검증이 필요하여 현재 초안 병합 보류이며 #337은 이번 작업에서 착수하지 않았다.
+
+[Stage 4](../working/task_m900_474_stage4.md)에서 release 재실행/네트워크 조건, built-in merge와 summary 정책 설명, Python 구문 검사를 보완했다. Git 17개·golden helper 21개와 실제 candidate content gate가 통과했다. 선행 #470의 macOS 12 runtime 미검증 조건은 여전히 남아 있다.

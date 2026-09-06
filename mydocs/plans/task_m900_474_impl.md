@@ -15,3 +15,7 @@ main hotfix·문서·workflow 변경 owner는 devel 인계 PR과 gate 회복을 
 ## Stage 3 — 실제 이력과 보고
 
 origin/main, origin/devel을 fetch하여 exact SHA를 기록한다. 두 브랜치와 현재 candidate에 gate를 실행하고 git 상태 불변을 확인한다. 기존 #446/#450/#452 merge의 두 번째 parent tree 일치도 기록한다. source/docs/최종보고서/오늘할일을 커밋하고 `publish/task474`에서 devel 대상 PR을 생성한다. 네 PR CI를 확인하고 사용자 리뷰에 인계한다.
+
+## Stage 4 — PR #506 리뷰 보완
+
+최신 branch 인계를 확인하는 release 재실행 조건, 로컬 preflight의 네트워크·remote-tracking ref 갱신을 runbook에 명시한다. native 제외와 기존 classify fetch 정책은 유지하며 근거를 코멘트에 연결한다. built-in merge 속성과 summary 기록 실패의 exit 2 정책을 설명하고 PR CI에 Python compileall을 추가한다. Git fixture·Python helper fixture·workflow syntax와 실제 candidate gate를 검증하고 보완 내용을 공개한다.
