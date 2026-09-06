@@ -2,7 +2,7 @@
 
 수행계획서: [task_m900_494.md](task_m900_494.md)
 
-2026-09-06 작업지시자가 수행계획에 이어 구현계획과 Stage 1~3 진행을 승인했다. 이 문서는 승인된 범위를 6개 Stage의 변경·검증·산출물로 구체화한다. version/workflow 변경·문서 준비·source 및 개발 package 검증 결과는 [Stage 1 보고서](../working/task_m900_494_stage1.md), [Stage 2 보고서](../working/task_m900_494_stage2.md), [Stage 3 보고서](../working/task_m900_494_stage3.md)에 기록했다. strict archive 비교와 등록 환경의 실패는 전체 성공으로 처리하지 않고 다음 signed 검증 조건과 구분했다. 이후 Stage 4 진행 승인을 받아 PR/main/tag·signed draft를 생성했으며, 설치본 HWP3 저장 오류를 재현해 현재 공개를 보류한다. 상세는 [Stage 4 중간 보고서](../working/task_m900_494_stage4.md)에 기록했다.
+2026-09-06 작업지시자가 수행계획에 이어 구현계획과 Stage 1~3 진행을 승인했다. 이 문서는 승인된 범위를 6개 Stage의 변경·검증·산출물로 구체화한다. version/workflow 변경·문서 준비·source 및 개발 package 검증 결과는 [Stage 1 보고서](../working/task_m900_494_stage1.md), [Stage 2 보고서](../working/task_m900_494_stage2.md), [Stage 3 보고서](../working/task_m900_494_stage3.md)에 기록했다. strict archive 비교와 등록 환경의 실패는 전체 성공으로 처리하지 않는다. 최초 Stage 4에서 발견한 HWP3 저장 오류는 Task #497로 수정했으며, 2026-09-07 새 공증 후보의 필수 설치 검증을 완료했다. Stage 5 승인 후 공식 공개·Homebrew 검증을 완료했으며, 상세 증거와 미실행 범위는 [Stage 4 보고서](../working/task_m900_494_stage4.md)에 기록했다.
 
 ## 기준과 공통 원칙
 
@@ -16,7 +16,7 @@
 | previous_release_ref / commit | `v0.1.10` / `fafed425d4b87162c2188d1384d618adc2211eb6` |
 | expected_rhwp_tag / commit | `v0.8.6` / `f1f9c6ae58344ee9368996d3543f76b9345cf227` |
 | 제목 / 실행 정책 | `Alhangeul v0.1.11 (rhwp v0.8.6)`, `require_latest_rhwp=true`, `include_rhwp_in_title=true` |
-| 현재 draft candidate | `f3bb7bc73510593c35c2e423323bbb01d62c3aad` (`v0.1.11`); HWP3 저장 실패로 최종 공개 후보 미승인 |
+| 최종 official candidate | `abdf88f9846650e5920039f2807615ea1b285f91` (`v0.1.11`); 수정 공증 후보 Stage 4 및 official·Homebrew 검증 완료, 실제 Sparkle·Finder 검증과 설치본 복원 완료 |
 | 검증 산출물 | `build.noindex/task494/` 아래 단계·산출물 종류별 디렉터리 |
 
 - 각 단계는 승인된 변경과 검증 결과를 `mydocs/working/task_m900_494_stage{N}.md`에 남기고 함께 커밋한다. 새로운 실패·수정이 없으면 통과한 검증을 반복하지 않는다.
@@ -268,10 +268,16 @@ Homebrew 반영에는 `scripts/update-cask-sha256.sh 0.1.11 <검증한-official-
 
 ## 구현계획 승인 요청
 
-위 6단계와 Stage 1~4 진행 승인을 반영했다. Stage 4의 PR #495/#496·tag·signed draft 생성은 완료했지만 HWP3 변환 저장 권한 오류로 필수 설치 gate를 보류한다. [중간 보고서](../working/task_m900_494_stage4.md)의 별도 버그 이슈·수정·회귀 검증안을 다음 승인 대상으로 준비했다. 현재 draft를 official 공개하지 않으며 수정 후보에서 본문·provenance와 signed smoke를 다시 검증한다.
+위 6단계와 Stage 1~4 진행 승인을 반영했다. 최초 HWP3 저장 오류 수정 후 PR #498/#499/#500을 병합하고, 새 main/tag의 공증 draft에서 저장 6조합·PDF·색상·열기 복구·설치 확장 검증을 완료했다. [Stage 4 보고서](../working/task_m900_494_stage4.md)의 실제 검증 범위와 원본 복원을 확인했으며 Stage 5 official 공개·Pages·Sparkle·Homebrew 승인을 반영했다. 공개·Homebrew 검증, 실제 Sparkle 업데이트·HWP/HWPX Finder 확인과 두 기존 설치본 복원을 완료했다.
 
-진행 순서는 [타스크 진행 절차 매뉴얼](../manual/task_workflow_guide.md), 배포 순서는 [public release runbook](../manual/public_release_runbook.md)을 따른다. Stage 4 진행 승인은 이미 받았으며, 새로 발견한 제품 저장 결함의 수정 범위 승인을 요청한다. 기존 tag·draft는 재현 기준으로 유지하고 후보 교체 입력은 수정 commit이 준비된 뒤 확정한다.
+진행 순서는 [타스크 진행 절차 매뉴얼](../manual/task_workflow_guide.md), 배포 순서는 [public release runbook](../manual/public_release_runbook.md)을 따른다. Stage 4 복구 승인은 모두 실행했다. 현재 `v0.1.11`은 `abdf88f9846650e5920039f2807615ea1b285f91`을 가리키며, 공식 공개는 Gate 5 별도 승인 뒤 실행한다.
 
 ### Stage 4 복구 승인 — 2026-09-07
 
 2026-09-07 작업지시자가 PR #498 병합 → main 반영 → 기존 v0.1.11 tag 재지정·draft 자산 교체 → 서명·공증 재검증을 승인했다. 수정 PR은 `6fac59e2f3a19d9762cece3165d1da211d094aea`로 devel에 병합했다. 새 main SHA와 tag는 병합 결과로 확정한다. `version=0.1.11`, `build=17`, `previous_release_ref=v0.1.10`, `expected_rhwp_tag=v0.8.6`, `require_latest_rhwp=true`, `include_rhwp_in_title=true`, `draft=true`, `prerelease=false`로 실행한다. 기존 draft 본문·asset·hash를 보존하고 자산 교체 후 새 결과를 검증한다. docs/** 변경 및 docs-only Pages 실행은 공식 공개 단계로 남긴다. Official 공개·Sparkle·Pages·Homebrew는 이번 승인에 포함하지 않는다.
+
+### Stage 5 공개 승인 — 2026-09-07
+
+작업지시자가 Stage 4 완료 보고 뒤 공식 공개·Pages·Sparkle·Homebrew 진행 요청에 “진행해줘”로 승인했다. 검증한 `abdf88f9846650e5920039f2807615ea1b285f91` / `v0.1.11`과 upstream latest `v0.8.6`을 재확인하고 [official run 34047148092](https://github.com/postmelee/alhangeul-macos/actions/runs/34047148092)을 `draft=false`, `prerelease=false`로 실행했다. 이 승인 범위에서 실제 업데이트, 공식 DMG 기준 Cask 배포와 검증·복원을 진행한다.
+
+실행 결과는 [Stage 5 보고서](../working/task_m900_494_stage5.md)에 기록했다. 공개 workflow·official DMG·feed Ed25519·Homebrew 검증과 tap 게시를 완료했다. Mac 잠금 때문에 기존 앱 UI를 조작하지 못해 Homebrew는 별도 appdir에 설치·제거했으며 두 기존 앱과 등록을 보존했다. 잠금 해제 후 실제 Sparkle·HWP/HWPX Finder 검증과 두 기존 설치본·등록 복원까지 완료했다. 작업지시자의 계속 진행 지시 범위에서 Stage 6 단일 main closeout과 devel 최종 기록 반영을 수행하며, [Stage 6 보고서](../working/task_m900_494_stage6.md)에 실제 PR·Pages 결과를 기록한다.
