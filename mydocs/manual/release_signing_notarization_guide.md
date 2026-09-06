@@ -82,6 +82,7 @@ Release build
 - Host app
 - Quick Look extension
 - Thumbnail extension
+- Spotlight importer (`Contents/Library/Spotlight/Alhangeul.mdimporter`)
 - Sparkle framework
 - Sparkle `XPCServices/Downloader.xpc`
 - Sparkle `XPCServices/Installer.xpc`

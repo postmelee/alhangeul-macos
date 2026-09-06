@@ -112,7 +112,8 @@ validate_source_versions() {
   for plist in \
     "$ROOT/Sources/HostApp/Info.plist" \
     "$ROOT/Sources/QLExtension/Info.plist" \
-    "$ROOT/Sources/ThumbnailExtension/Info.plist"
+    "$ROOT/Sources/ThumbnailExtension/Info.plist" \
+    "$ROOT/Sources/SpotlightImporter/Info.plist"
   do
     plist_version="$(version_from_plist "$plist")"
     if [ "$plist_version" != "$VERSION" ]; then
@@ -520,7 +521,10 @@ sign_release_app_for_notarization() {
     "$ROOT/Sources/ThumbnailExtension/ThumbnailExtension.entitlements" \
     "$STAGING_DIR/AlhangeulThumbnail.entitlements"
 
-  # Re-seal the app after changing nested framework and extension signatures.
+  info "Signing Spotlight importer for notarization"
+  codesign_developer_id "$APP_OUTPUT/Contents/Library/Spotlight/Alhangeul.mdimporter"
+
+  # Re-seal the app after changing nested framework, importer and extension signatures.
   info "Signing app bundle for notarization"
   expand_entitlements "$ROOT/Sources/HostApp/HostApp.entitlements" "com.postmelee.alhangeul" "$host_entitlements"
   codesign_developer_id "$APP_OUTPUT" "$host_entitlements"
@@ -540,6 +544,7 @@ verify_app_signature() {
   info "Verifying app code signature"
   codesign --verify --deep --strict --verbose=2 "$APP_OUTPUT"
   codesign --display --verbose=4 "$APP_OUTPUT" >/dev/null
+  codesign --verify --strict --verbose=2 "$APP_OUTPUT/Contents/Library/Spotlight/Alhangeul.mdimporter"
 
   if [ -d "$APP_OUTPUT/Contents/PlugIns" ]; then
     while IFS= read -r appex; do
@@ -645,6 +650,10 @@ verify_release_signing_preflight() {
     "Thumbnail extension" \
     "$APP_OUTPUT/Contents/PlugIns/AlhangeulThumbnail.appex" \
     "com.postmelee.alhangeul.ThumbnailExtension"
+  verify_release_component_signature \
+    "Spotlight importer" \
+    "$APP_OUTPUT/Contents/Library/Spotlight/Alhangeul.mdimporter" \
+    "com.postmelee.alhangeul.SpotlightImporter"
 
   sparkle_version_dir="$(resolve_sparkle_version_dir "$sparkle_framework")"
   verify_release_component_signature "Sparkle framework" "$sparkle_framework"

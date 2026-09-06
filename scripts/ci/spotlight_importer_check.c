@@ -38,7 +38,9 @@ int main(int argc, char **argv) {
         assert(text && CFGetTypeID(text) == CFStringGetTypeID());
         CFStringRef needle = CFStringCreateWithCString(NULL, argv[3], kCFStringEncodingUTF8);
         assert(needle && CFStringGetLength(text) > 0);
-        assert(CFStringFind(text, needle, 0).location != kCFNotFound);
+        if (CFStringGetLength(needle) > 0) {
+            assert(CFStringFind(text, needle, 0).location != kCFNotFound);
+        }
         CFRelease(needle);
         printf("PASS: factory, interface, body (%ld UTF-16 units)\n", CFStringGetLength(text));
     }
