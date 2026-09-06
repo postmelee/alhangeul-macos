@@ -9,6 +9,7 @@ fi
 VERSION="$1"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+"$ROOT/scripts/verify-render-tree-golden.sh" --check-environment
 BUILD_ROOT="${ALHANGEUL_BUILD_ROOT:-$ROOT/build.noindex}"
 BUILD_DIR="$BUILD_ROOT/release"
 XCODE_BUILD_DIR="$BUILD_DIR/xcodebuild"

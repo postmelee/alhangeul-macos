@@ -43,11 +43,13 @@
 
 ### Render tree decode 오류 계약
 
-`renderPageTree(at:) -> RenderNode?`는 기존 제품 caller를 위해 실패 시 nil을 유지한다. `renderPageTreeThrowing(at:)`와 `RenderTreeDecoder.decode`는 native smoke/CI 등 진단이 필요한 caller에서 사용한다. page 변환 범위 오류와 producer의 null JSON을 `RhwpRenderTreeQueryError`로, envelope/known payload 오류를 `RenderTreeDecodingFailure`로 구분한다.
+`renderPageTree(at:) -> RenderNode?`는 기존 제품 caller를 위해 실패 시 nil을 유지한다. `renderPageTreeThrowing(at:)`와 `RenderTreeDecoder.decode`는 native smoke/CI 등 진단이 필요한 caller에서 사용한다. UInt32 변환 범위와 `pageCount` 밖의 요청은 invalidPageIndex, 유효한 page의 producer null JSON은 producerUnavailable로 구분한다. raw JSON API는 FFI null 경로 검증을 위해 UInt32 변환만 확인한다. envelope/known payload 오류는 `RenderTreeDecodingFailure`다.
 
 Known variant의 필수 필드/형식 오류를 `.unknown` 성공으로 바꾸지 않는다. 올바른 단일 enum tag의 future variant는 `.unknown`으로 수용한다. 다중/빈 tag object와 payload variant의 unit 표현은 오류다. 추가 envelope 필드는 무시하므로 legacy `dirty` 호환은 유지한다. 하위 payload enum 전체의 정책이나 pixel parity를 보증하는 계약은 아니다.
 
 Core의 usize index metadata는 UInt로 보존하여 머리말/꼬리말의 큰 unsigned marker를 손실시키지 않는다.
+
+Known tag 목록은 CaseIterable enum에서 얻고 payload switch는 모든 case를 처리한다. 빈/다중 tag는 단일 variant를 단정하지 않으며 variant가 확정되지 않은 진단은 `unresolved`와 schema path/reason으로 표시한다. macOS 12 최소 지원은 유지하며 최신 OS/CI 성공을 최소 OS runtime 실행 증거로 대신하지 않는다.
 
 진단은 known variant, schema coding path, 원인 분류만 포함한다. Foundation이 coding path 없는 비-DecodingError를 반환하는 경우 알려진 payload 경로와 `unexpectedDecoderError`를 유지한다. 문서 값, raw JSON, Foundation debugDescription/underlyingError는 오류 객체나 제품 로그에 넣지 않는다. wrapper는 stdout/stderr를 출력하지 않고 진단을 소비하는 CLI만 명시적으로 출력한다. C JSON 문자열은 복사 후 `rhwp_free_string`으로 해제한다.
 

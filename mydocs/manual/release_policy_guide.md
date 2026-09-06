@@ -154,7 +154,7 @@ provenance 진실 원천:
 | bundled `rhwp-studio` asset | `Sources/HostApp/Resources/rhwp-studio/manifest.json` | release note에 manifest 위치와 tag/commit을 표시하고 `scripts/verify-rhwp-studio-assets.sh`로 검증한다. |
 | Third Party notices | `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`, `Sources/HostApp/Resources/Legal/*` | release note에서 canonical 문서 위치를 안내하고, public DMG 안의 app bundle `Contents/Resources/Legal/*` 사본 포함 여부와 내용 동일성을 검증한다. |
 
-CI/release와 로컬 일반 검증은 `--verify-portable`을 명시한다. staticlib byte hash/size 비교만 제외하며 repo/ref/tag/commit, Cargo.lock, generated header, FFI symbol, reference metadata를 검사한다. 기준 환경을 재현한 byte 검증은 `--verify-strict`로 실행한다. strict는 skip env로 완화할 수 없으며 검증 실패를 해결하려고 lock hash를 임의 갱신하지 않는다. legacy 호환은 [빌드 가이드](build_run_guide.md)를 따른다.
+CI/release와 로컬 일반 검증은 `--verify-portable`을 명시한다. staticlib byte hash/size 비교만 제외하며 repo/ref/tag/commit, Cargo.lock, generated header, FFI symbol, reference metadata를 검사한다. 기준 환경을 재현한 byte 검증은 `--verify-strict`로 실행한다. 현재 strict를 정기/수동 workflow로 실행하는 고정 runner job은 없고, staticlib hash/size는 자동 byte 일치 gate가 아닌 reference 기록이다. strict 자동 검증은 기준 toolchain과 archive 재현성을 확보한 뒤 별도로 도입한다. strict는 skip env로 완화할 수 없으며 검증 실패를 해결하려고 lock hash를 임의 갱신하지 않는다. legacy 호환은 [빌드 가이드](build_run_guide.md)를 따른다.
 
 `LICENSE`, `THIRD_PARTY_LICENSES.md`, `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`를 수정하면 `Sources/HostApp/Resources/Legal/*` 사본을 같은 변경 범위에서 갱신한다. Public release 전에는 signed/notarized DMG를 mount한 뒤 app bundle의 `Contents/Resources/Legal/{LICENSE,THIRD_PARTY_LICENSES.md,FONTS.md}`와 release candidate commit의 canonical 문서가 같은지 확인한다.
 

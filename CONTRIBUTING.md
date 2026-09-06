@@ -131,7 +131,7 @@ HWP/HWPX 파일이 한컴 또는 rhwp core와 다르게 렌더링되거나, Find
 공통 체크:
 
 ```bash
-./scripts/build-rust-macos.sh           # Rust bridge 빌드 + lock 검증
+./scripts/build-rust-macos.sh --verify-portable # Rust bridge 빌드 + source/header/FFI 검증
 ./scripts/check-no-appkit.sh            # 공통 계층 AppKit 의존성 검사
 xcodegen generate
 xcodebuild -project Alhangeul.xcodeproj \
