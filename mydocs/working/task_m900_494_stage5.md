@@ -2,9 +2,9 @@
 
 ## 현재 상태
 
-2026-09-07 작업지시자가 Stage 4 결과를 확인한 뒤 공식 공개·Pages·Sparkle·Homebrew 진행을 승인했다. **GitHub Release·Pages·stable appcast 공개와 공식 DMG·Homebrew 검증은 완료했다. 실제 Sparkle 업데이트는 Mac 잠금 해제 대기이므로 Stage 5 전체 완료로 판정하지 않는다.**
+2026-09-07 작업지시자가 Stage 4 결과를 확인한 뒤 공식 공개·Pages·Sparkle·Homebrew 진행을 승인했다. **GitHub Release·Pages·stable appcast 공개와 공식 DMG·Homebrew 검증은 완료했다. 잠금 해제 후 실제 Sparkle 업데이트·기본 확장 검증을 통과했다. HWP/HWPX Finder 확인과 기존 설치본·등록 복원까지 완료했다.**
 
-Mac UI 도구가 잠금을 감지했고 이후 OS 상태에서도 잠금이 유지됨을 확인했다. 작업지시자에게 잠금 해제를 요청했다. 이 대기는 공개 권한 부족이나 자동 승인 검토 거절이 아니다. 이미 승인한 업데이트·Homebrew 범위를 다시 승인받을 필요는 없다.
+최초 Mac 잠금 대기 후 작업지시자가 계속 진행을 지시했다. 실제 다운로드·설치·재실행은 성공했으며, 이후 HWPX Finder 확인에서 다시 잠금이 발생했으나 두 번째 잠금 해제 뒤 9페이지 미리보기를 확인했다. 이미 승인한 업데이트·Homebrew 범위를 반복 승인받지 않았고, 공개 문구 종료 정리도 이어서 준비했다.
 
 ## 공식 배포
 
@@ -60,11 +60,33 @@ Mac UI 도구가 잠금을 감지했고 이후 OS 상태에서도 잠금이 유�
 
 Mac 잠금 중 실행 중인 기존 앱을 건드리지 않기 위해 Homebrew의 공식 `--appdir` 옵션으로 별도 `build.noindex` 폴더에 설치했다. `/Applications` 기본 경로 설치를 이번 Homebrew 검증에서 새로 실행했다고 주장하지 않는다. 자동 Homebrew update/autoremove는 끈 상태로 검증했고 전역 trust 설정을 바꾸지 않았다. 설치 전 두 기존 앱을 ZIP으로 백업하고 ZIP 내부 각 항목을 원본 SHA256과 대조했다.
 
-## 남은 실제 업데이트와 종료 정리
+## 실제 Sparkle 업데이트 — 2026-09-07
 
-- 기존 `/Applications/Alhangeul.app`의 About에서 **v0.1.10 (16), rhwp v0.8.4**를 확인했다. 공개 완료 후 업데이트 메뉴를 조작하려는 시점에 Mac 잠금으로 중단됐다.
-- Sparkle download/install/relaunch와 기본 모드 `smoke-sparkle-extension-refresh.sh`는 **미실행**이다. feed 서명 검증이나 이전 Stage 4 설치 검증으로 이를 대체하지 않는다.
-- 잠금 해제 후 기존 앱 UI의 현재 상태부터 재확인한다. 사용자의 새 편집이 있으면 보존한다. 실제 업데이트 뒤 기본 모드 provider 검증을 먼저 하고 수동 등록 보정 결과와 구분한다.
-- 이번 Homebrew 검증은 이미 완료됐으므로 다시 설치·제거할 필요가 없다. Sparkle 검증 뒤 원래 두 설치본과 등록을 복원할 자료는 `restore/`에 있다.
-- Stage 6은 최종 보고, 준비한 공개 문구·Cask·기록의 단일 main closeout PR, appcast 보존 배포, devel 반영과 Issue #494 종료를 다룬다. 아직 최종 보고 완료나 Issue 종료로 표시하지 않는다.
-- Intel Mac/macOS 12 실기기, maintainer 직접 수동 확인과 Stage 4에 명시한 시각 정합성 한계는 여전히 별도 미실행 범위다.
+| 항목 | 결과 |
+|------|------|
+| 기존 설치본 | `/Applications/Alhangeul.app` 0.1.10 (16), 두 기존 앱이 백업 manifest와 동일한 상태에서 시작 |
+| 업데이트 발견 | 기존 앱의 업데이트 확인 메뉴에서 0.1.11 제공, 현재 버전 0.1.10 표시 |
+| 다운로드·설치 | Sparkle UI로 180.2MB 다운로드·압축 해제, ‘설치 & 재실행’ 성공 |
+| 실제 재실행 | host PID `20831`, `/Applications/Alhangeul.app` |
+| 버전·provenance | About 0.1.11 (17), rhwp v0.8.6 (f1f9c6a) |
+| binary·trust | host·Preview·Thumbnail 실행 파일이 official DMG와 byte 동일; strict 서명·staple·Gatekeeper 통과 |
+| 자연 등록 | 기존 /Applications provider가 0.1.11로 교체, 사용자 경로 0.1.8은 그대로. 사전 격리나 수동 등록·election 변경 없음 |
+| 기본 helper | `sparkle-default/20260907-022810/`, exit 0, `Registration repair used: 0` |
+| 실제 Thumbnail | PID `21138`, `/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex/Contents/MacOS/AlhangeulThumbnail` |
+| 실제 Preview | PID `21977`, `/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex/Contents/MacOS/AlhangeulPreview` |
+| 앱 HWP/HWPX | 별도 복사본 열기 1페이지 / 9페이지, 로딩 완료와 화면 확인 |
+| Finder HWP | Space 미리보기에서 KTX 지도·운임표·한글 표시 확인 |
+| Finder HWPX | 두 번째 잠금 해제 뒤 Space 미리보기에서 9페이지와 비어 있지 않은 첫 페이지 확인. `finder-sparkle-hwpx-ready` AX·화면 증거 보관 |
+
+`finder-live-processes.jsonl`로 실제 새 제공자 실행 경로를 확인했다. 기존 HOP Thumbnail default, HOP Preview ignore 및 사용자 v0.1.8 등록을 그대로 둔 상태에서 위 결과를 얻었다. Stage 4에서 필요했던 충돌 제공자 격리를 이번 업데이트에서는 사용하지 않았다. 이 결과는 해당 환경·문서의 성공이며 모든 공존 환경의 자동 선택을 보장하지 않는다.
+
+자동 다운로드·설치 체크박스는 기존 false를 유지했다. 의도적인 텍스트 편집 없이 열기·미리보기만 검증했지만 HWPX 종료 시 변경 사항 저장 확인이 표시됐다. 종료를 취소하고 `public-open-preserved.hwpx`에 다른 이름으로 저장한 뒤 정상 종료했다. 보존 사본은 399,420 bytes, ZIP 18개 항목 CRC 정상이며 원래 fixture 두 개의 SHA256은 그대로다. 이 관찰의 원인은 이번 릴리스에서 수정·확정하지 않았다. Homebrew는 앞 단계에서 완료했으므로 다시 설치·제거하지 않았다.
+
+## 종료 정리 결과와 최종 보고 인계
+
+- 02:38 KST에 검증 host 정상 종료, 실제 Preview·Thumbnail 프로세스 종료 후 기존 설치본을 복원했다. 새 v0.1.11 앱은 `restore/sparkle-updated.app`에 보존했다.
+- `/Applications` v0.1.10의 147개 항목과 사용자 v0.1.8의 146개 항목은 백업 manifest의 파일 SHA256·size·mode·symlink와 동일하고 strict 서명 검증을 통과했다.
+- 실제 bundle ID로 PlugInKit을 재조회해 두 기존 경로·버전만 등록된 것을 확인했다. 테스트 v0.1.11 및 개발 산출물 등록·프로세스는 남지 않았다. 전역 LaunchServices 잔여 목록 전체가 깨끗하다고 확대하지 않는다.
+- 원본 samples 180개의 SHA256·size·mtime와 테스트 입력 두 파일의 SHA256이 동일하다. Finder 검증 창만 닫았으며 시작 전 사용자 창이 유지됐다. 상세는 `restore/restoration-complete.json`, `restore/restoration.log`, provider 재조회 기록에 보관했다.
+- 최종 보고와 준비한 공개 문구·Cask·기록은 단일 main closeout PR로 반영한다. docs-only 배포에서 위 public appcast byte를 보존하고 공식 tag를 재지정하지 않는다.
+- Intel Mac/macOS 12 실기기, maintainer 직접 수동 확인과 Stage 4에 명시한 시각 정합성 한계는 별도 미실행 범위다.
