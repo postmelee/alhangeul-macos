@@ -126,6 +126,9 @@ class GoldenTests(unittest.TestCase):
 
     def test_golden_paths_enable_macos_contract_without_pixel_smoke(self):
         env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull)
+        # Test the stdout interface, without writing into the enclosing Actions job's files.
+        env.pop("GITHUB_STEP_SUMMARY", None)
+        env.pop("GITHUB_OUTPUT", None)
         def git(*args):
             return subprocess.check_output(["git", *args], cwd=self.root, env=env, stderr=subprocess.DEVNULL, text=True).strip()
         git("init", "-q")

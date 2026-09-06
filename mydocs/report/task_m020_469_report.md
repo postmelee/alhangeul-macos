@@ -17,3 +17,7 @@ full sync는 complete core build 뒤 writer/검증/stage/summary를 수행한다
 ## PR 관계
 
 선행 #394 PR #503, #470 PR #504를 상속한다. 자신의 commit 범위는 `d527be8..HEAD`, base는 devel이다. 앞 PR 병합 전 누적 diff가 보이며 생성된 JSON diff는 기본적으로 접히도록 표시했다. 다음 #474 완료 후 사용자 리뷰를 기다리며 merge하지 않는다.
+
+## PR CI 보완
+
+최초 CI에서 path classification fixture가 `GITHUB_STEP_SUMMARY`를 상속하여 stdout 대신 Actions summary로 출력했다. fixture subprocess에서 `GITHUB_STEP_SUMMARY`/`GITHUB_OUTPUT`을 제거해 테스트 출력 계약을 격리했다. 두 env가 설정된 실제 CI 형태로 local unittest 16개와 7종 경로 subcase 통과 및 외부 summary/output 파일을 만들지 않음을 확인했다. 제품 classifier의 Actions summary 동작은 유지한다.

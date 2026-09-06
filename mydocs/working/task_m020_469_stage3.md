@@ -10,3 +10,7 @@
 - no-AppKit, shell/Rustfmt/YAML/diff 검증 통과. core/Cargo/FFI pin과 reference artifact hash 불변.
 
 로그와 검증용 복사본은 `build.noindex/task469/`에 보관한다. 등록·설치·배포 workflow는 실행하지 않았다. CI는 PR 게시 후 확인한다.
+
+## PR CI 보완
+
+최초 CI에서 path classification fixture가 `GITHUB_STEP_SUMMARY`를 상속하여 stdout 대신 Actions summary로 출력했다. fixture subprocess에서 `GITHUB_STEP_SUMMARY`/`GITHUB_OUTPUT`을 제거해 테스트 출력 계약을 격리했다. 두 env가 설정된 실제 CI 형태로 local unittest 16개와 7종 경로 subcase 통과 및 외부 summary/output 파일을 만들지 않음을 확인했다. 제품 classifier의 Actions summary 동작은 유지한다.
