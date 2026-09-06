@@ -138,6 +138,8 @@ def owned_locations(state):
             raise ValueError("ownership marker mismatch or symlink")
     if Path(state["install_app"]) != Path(state["install_root"]) / "Alhangeul.app":
         raise ValueError("unexpected app path")
+    if Path(state["install_app"]).is_symlink():
+        raise ValueError("test app must not be a symlink")
     if Path(state["files"]) != Path(state["workspace"]) / "Files" or Path(state["files"]).is_symlink():
         raise ValueError("unexpected corpus path")
 
@@ -175,13 +177,34 @@ def launch(state):
 def stop_candidate(state):
     executable = str(Path(state["install_app"]) / "Contents/MacOS/Alhangeul")
     # 번들 ID/프로세스 이름만으로 다른 설치본까지 종료하지 않는다.
-    for line in run(["ps", "-axo", "pid=,command="]).splitlines():
-        fields = line.strip().split(maxsplit=1)
-        if len(fields) == 2 and (fields[1] == executable or fields[1].startswith(executable + " ")):
-            try:
-                os.kill(int(fields[0]), signal.SIGTERM)
-            except ProcessLookupError:
-                pass
+    def pids():
+        found = []
+        for line in run(["ps", "-axo", "pid=,command="]).splitlines():
+            fields = line.strip().split(maxsplit=1)
+            if len(fields) == 2 and (fields[1] == executable or fields[1].startswith(executable + " ")):
+                found.append(int(fields[0]))
+        return found
+    for pid in pids():
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+    deadline = time.monotonic() + 10
+    while pids():
+        if time.monotonic() >= deadline:
+            raise RuntimeError("candidate app is still running; no bundle was removed")
+        time.sleep(0.2)
+    record(state, "candidate-app-not-running")
+
+
+def restore_corpus(state):
+    fixtures, files = Path(state["fixtures"]) / "initial", Path(state["files"])
+    for source in fixtures.iterdir():
+        destination = files / source.name
+        if destination.is_symlink():
+            raise ValueError("corpus destination must not be a symlink")
+        shutil.copyfile(source, destination)
+    record(state, "restored-synthetic-corpus")
 
 
 def developer_register(state):
@@ -342,7 +365,8 @@ def cleanup(state):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["prepare", "install", "launch", "developer-register", "verify",
-                                          "index", "lifecycle", "replace-app", "cleanup", "status"])
+                                          "index", "lifecycle", "replace-app", "restore-corpus", "stop-app",
+                                          "cleanup", "status"])
     parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--app", type=Path)
     parser.add_argument("--fixtures", type=Path)
@@ -358,6 +382,8 @@ def main():
     try:
         if args.phase != "status":
             owned_locations(state)
+        if state["phase"] == "cleaned" and args.phase not in ["cleanup", "status"]:
+            raise ValueError("run was cleaned; prepare a new state")
         if args.phase == "status":
             print(json.dumps(state, ensure_ascii=False, indent=2))
         elif args.phase == "install":
@@ -378,6 +404,10 @@ def main():
             lifecycle(state, args.extraction_only)
         elif args.phase == "replace-app":
             replace_app(state)
+        elif args.phase == "restore-corpus":
+            restore_corpus(state)
+        elif args.phase == "stop-app":
+            stop_candidate(state)
         elif args.phase == "cleanup":
             cleanup(state)
     finally:
