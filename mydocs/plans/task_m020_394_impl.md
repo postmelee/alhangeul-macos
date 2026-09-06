@@ -15,3 +15,7 @@ PR CI/release rehearsal/publish와 로컬 package/release script가 `--verify-po
 ## Stage 3 — 실제 검증과 PR
 
 로컬 core build에서 portable 통과를 확인한다. strict 실행 결과는 일치 또는 reference byte mismatch로 기록하고 source/header/ABI 실패와 구분한다. `rhwp-core.lock`, Cargo pin, symbol lock 불변과 git diff를 확인한다. 최종 보고서·오늘할일을 커밋하고 `publish/task394`를 push하여 devel 대상 PR을 생성한다. merge하지 않는다.
+
+## Stage 4 — PR #503 리뷰 보완
+
+작업지시자가 리뷰 검토서의 권고 순서와 공개 보완 코멘트 게시를 승인했다. writer/verifier의 artifact 목록을 공유하고 header 우선순위를 유지한다. legacy env 검사는 legacy alias/strict에 한정하며 중복 모드는 계속 거부하되 오류를 명확히 한다. 공개 README/CONTRIBUTING과 strict 자동 job 부재를 문서화한다. 격리 CLI는 세 번째 artifact의 기록·검증과 env 비적용 경로까지 검증한다. 검증 후 보고서·오늘할일·기존 PR을 갱신하고 후속 브랜치에 전달한다.

@@ -28,7 +28,7 @@ elif name == 'stat':
 '''
 
 
-def run_case(name, flags, expected, needle, *, archive=None, legacy=None, mutation=None):
+def run_case(name, flags, expected, needle, *, archive=None, legacy=None, mutation=None, updated_artifact=None):
     with tempfile.TemporaryDirectory(prefix="rhwp-verify-test-") as tmp:
         root = Path(tmp)
         for directory in ("scripts", "RustBridge", "bin"):
@@ -59,12 +59,31 @@ def run_case(name, flags, expected, needle, *, archive=None, legacy=None, mutati
         output = result.stdout + result.stderr
         assert (result.returncode == 0) == expected, f"{name}: unexpected exit {result.returncode}\n{output}"
         assert needle in output, f"{name}: missing {needle!r}\n{output}"
-        assert before == (root / "rhwp-core.lock").read_bytes(), f"{name}: verification rewrote lock"
+        after = (root / "rhwp-core.lock").read_bytes()
+        if updated_artifact is None:
+            assert before == after, f"{name}: verification rewrote lock"
+        else:
+            assert flags == ["--update-lock"] and expected
+            data = (root / updated_artifact).read_bytes()
+            record = f'path = "{updated_artifact}"\nsha256 = "{hashlib.sha256(data).hexdigest()}"\nsize = {len(data)}'
+            assert record in after.decode(), f"{name}: writer omitted additional artifact"
+            verify_env = dict(env)
+            verify_env.pop("ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY", None)
+            verified = subprocess.run(["bash", str(root / "scripts/build-rust-macos.sh"), "--verify-strict"], env=verify_env, capture_output=True, text=True)
+            assert verified.returncode == 0, verified.stdout + verified.stderr
+            assert after == (root / "rhwp-core.lock").read_bytes(), "post-update verification rewrote lock"
         print(f"PASS: {name}")
 
 
 def replace(path, old, new):
     return lambda root: (root / path).write_text((root / path).read_text().replace(old, new))
+
+
+def add_artifact(root):
+    script = root / "scripts/build-rust-macos.sh"
+    script.write_text(script.read_text().replace('  "$STATICLIB_ARTIFACT"\n)', '  "$STATICLIB_ARTIFACT"\n  "Frameworks/extra.dat"\n)'))
+    (root / "Frameworks").mkdir()
+    (root / "Frameworks/extra.dat").write_bytes(b"extra artifact\n")
 
 
 run_case("portable matching", ["--verify-portable"], True, "Verified (portable)")
@@ -74,9 +93,13 @@ run_case("strict archive drift", ["--verify-strict"], False, "strict staticlib r
 run_case("legacy remains strict", ["--verify-lock"], False, "strict staticlib reference mismatch", archive="different bytes")
 run_case("legacy skip compatibility", ["--verify-lock"], True, "Verified (portable)", archive="different bytes", legacy="1")
 run_case("strict cannot be weakened", ["--verify-strict"], False, "conflicts with legacy", legacy="1")
-run_case("invalid env", ["--verify-portable"], False, "must be 0 or 1", legacy="true")
+run_case("invalid legacy env", ["--verify-lock"], False, "must be 0 or 1", legacy="true")
+run_case("invalid strict env", ["--verify-strict"], False, "must be 0 or 1", legacy="true")
+run_case("portable ignores legacy env", ["--verify-portable"], True, "Verified (portable)", legacy="true")
+run_case("build ignores legacy env", [], True, "Done:", legacy="true")
 run_case("mutually exclusive modes", ["--verify-strict", "--verify-portable"], False, "exactly one")
 run_case("update cannot accompany verify", ["--update-lock", "--verify-portable"], False, "exactly one")
+run_case("repeated mode rejected clearly", ["--verify-portable", "--verify-portable"], False, "duplicate or conflicting modes")
 run_case("unknown flag", ["--verify-typo"], False, "unknown option")
 run_case("portable enforces commit", ["--verify-portable"], False, "core commit differs", mutation=replace("RustBridge/Cargo.lock", COMMIT, "b" * 40))
 run_case("portable enforces features", ["--verify-portable"], False, "enabled features differ", mutation=replace("RustBridge/Cargo.toml", "native-skia", "other"))
@@ -85,4 +108,6 @@ run_case("header failure precedes archive drift", ["--verify-strict"], False, "g
 run_case("portable enforces FFI symbols", ["--verify-portable"], False, "generated FFI symbol set differs", mutation=replace("header", "rhwp_open", "rhwp_changed"))
 run_case("portable requires archive metadata", ["--verify-portable"], False, "missing or invalid lock metadata", mutation=replace("rhwp-core.lock", hashlib.sha256(ARCHIVE).hexdigest(), "bad"))
 run_case("build only remains available", [], True, "Done:", archive="different bytes")
-print("Rust verification mode fixtures passed (18 cases).")
+run_case("new artifact cannot skip verification", ["--verify-portable"], False, "missing or invalid lock metadata", mutation=add_artifact)
+run_case("writer and verifier share artifacts; update ignores legacy env", ["--update-lock"], True, "Updated:", legacy="true", mutation=add_artifact, updated_artifact="Frameworks/extra.dat")
+print("Rust verification mode fixtures passed (24 cases).")
