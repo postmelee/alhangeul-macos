@@ -12,9 +12,9 @@
 - 작업 브랜치: `local/task492`
 - 게시 브랜치: `publish/task492`
 - bundled studio: `v0.8.4` / `496333b27d21ddb9114ba9ae340bcb895870c9a7`
-- 1차 직접 원인: 글자색 `input[type=color]`의 0×0 renderer 영역이 macOS WKWebView native color popover의 유효한 anchor를 제공하지 못함
-- 2차 직접 원인: 유효한 renderer 영역을 toolbar 위치에 그대로 두면 native popover의 세로 anchor가 WKWebView 높이에 대해 반전된 위치로 표시됨
-- 구현 방식: 기존 CSS overlay로 nonempty renderer를 유지하고, 기존 HostApp bridge가 클릭 직전 button rect를 기준으로 WKWebView 전용 보정 anchor를 설정
+- 직접 원인: upstream의 영구 hidden `input[type=color]` anchor geometry가 macOS WKWebView native color popover의 표시·위치 계산과 맞지 않음. 0×0 자체는 형광펜의 정상 경로에도 존재하므로 충분 원인으로 단정하지 않는다.
+- 위치 결함: hidden input의 upstream 좌표를 그대로 사용하면 native popover가 WKWebView 높이에 대해 반전된 위치로 표시됨
+- 최종 구현 방식: 기존 HostApp bridge가 최초·글자색 button `mousedown` 직전·window `resize`에 button rect 기반 WKWebView 전용 anchor를 설정하며, geometry 소유권은 JavaScript 한 곳으로 제한
 
 ## Stage 1 재현 결과
 
@@ -42,7 +42,7 @@ source 기준 Debug HostApp과 기존 앱에서 다음을 확인했다.
 | 글자색 color well AX 활성화, 원본 CSS | 대상은 존재 | 열리지 않음 | 유효하지 않은 anchor 상태와 일치 |
 | 형광펜 `다른 색...`, 원본 CSS | 생성됨 | 정상적으로 열림 | 같은 WKWebView process의 positive control |
 
-따라서 WKWebView의 color input 미지원, user activation 소실 또는 HostApp native delegate 부재를 직접 원인으로 보지 않는다. 글자색의 영구 input도 native color well 생성까지 도달하므로 JavaScript handler와 WebKit bridge는 동작한다. 두 경로의 결정적인 차이는 native popover가 기준으로 삼을 renderer의 DOM 배치와 영역이다.
+따라서 WKWebView의 color input 미지원, user activation 소실 또는 HostApp native delegate 부재를 직접 원인으로 보지 않는다. 글자색의 영구 input도 native color well 생성까지 도달하므로 JavaScript handler와 WebKit bridge는 동작한다. 두 경로에서 확인된 차이는 native popover가 기준으로 삼을 renderer의 DOM 배치와 anchor geometry다. 형광펜 경로도 0×0 input으로 열리므로 크기 0만을 단독 원인으로 보지는 않는다.
 
 ### CSS-only A/B 실험
 
@@ -67,20 +67,20 @@ tracked source를 변경하지 않고 task 전용 Debug app bundle 사본에 다
 - 형광펜 팔레트와 `다른 색...` native popover가 그대로 동작함
 - CSS가 input의 change/input event 또는 formatting command를 변경하지 않음
 
-이 A/B 결과로 최초의 "열리지 않음" 실패 원인은 0×0/offset anchor geometry로 확정했다. 그러나 Stage 3 사용자 검증에서 표시된 popover가 toolbar가 아닌 문서 중하단에 열리는 2차 위치 결함이 확인됐으므로, CSS만으로 전체 호환성 요구를 충족한다는 판정은 철회한다.
+이 A/B 결과는 hidden input의 anchor geometry 변경이 최초의 "열리지 않음" 실패를 해소한다는 것을 확인했다. 다만 형광펜의 0×0 input도 정상 표시되므로 0×0 자체를 충분 원인으로 확정한 초기 표현은 Stage 5에서 정정한다. Stage 3 사용자 검증에서는 표시된 popover가 toolbar가 아닌 문서 중하단에 열리는 위치 결함도 확인돼 CSS만으로 전체 호환성 요구를 충족한다는 판정을 철회했다.
 
 Stage 1에서는 사용자 문서와 tracked source를 수정하지 않았다. 색상 적용 후 selection, focus와 undo/redo 계약은 승인된 구현을 넣은 뒤 disposable HWP/HWPX 사본으로 Stage 3에서 검증한다.
 
 ## 구현 원칙
 
 1. hashed `assets/index-*.js`와 `assets/index-*.css`, upstream checkout과 `rhwp-core.lock`은 수정하지 않는다.
-2. 기존 `alhangeul-wkwebview-overrides.css`는 nonempty renderer와 hit-test 계약을, 기존 `RhwpStudioHostBridgeScript`는 동적 anchor 좌표 보정을 소유한다.
+2. `#text-color-picker` geometry는 기존 `RhwpStudioHostBridgeScript`만 소유한다. `.atDocumentEnd`에서 곧 덮이는 CSS anchor rule은 유지하지 않는다.
 3. `#btn-text-color`의 upstream event listener와 `preventDefault()`는 변경하거나 중복 설치하지 않는다.
-4. input은 버튼 전체 영역을 native popover anchor로 사용하되 `pointer-events: none`으로 hit target을 visible button에 유지한다.
+4. input은 버튼 전체 영역을 native popover anchor로 사용하되 인라인 `pointer-events: none`으로 hit target을 visible button에 유지한다.
 5. upstream이 소유하는 전체 toolbar layout, breakpoint와 일반 control dimension은 계속 local overlay에서 금지한다.
 6. 형광펜의 동적 color input은 현재 정상 경로이므로 selector 적용 대상에서 제외한다.
 7. 기존 `.atDocumentEnd` HostApp bridge에는 idempotent한 좌표 보정만 추가하고, 별도 WKUserScript·AppKit `NSColorPanel` bridge는 추가하지 않는다.
-8. bundled studio 변경으로 대상 DOM id 또는 구조가 사라지면 asset verifier가 조기에 실패하도록 한다.
+8. bundled studio 변경으로 대상 DOM id 또는 type이 사라지면 asset verifier가 조기에 실패하도록 한다.
 9. UI smoke는 `build.noindex/task492/` 아래의 문서 사본으로 수행하고 원본 sample과 사용자 문서는 저장하지 않는다.
 10. upstream #6635의 수정·merge 여부를 이 타스크의 선행 조건이나 완료 조건으로 사용하지 않는다.
 
@@ -100,6 +100,8 @@ Stage 1에서는 사용자 문서와 tracked source를 수정하지 않았다. �
 | macOS/WebKit 환경 문제로 UI smoke를 판단할 수 없음 | 환경 실패로 분리하고 같은 candidate 재검증 |
 
 ## Stage 2. 최소 CSS 보정과 asset guard 구현
+
+> 이 절은 당시 승인·수행된 이력을 보존한다. Stage 5 리뷰 보완에서 CSS anchor rule과 전용 parser/27개 fixture는 최종 구조에서 제거됐고, Host bridge DOM 계약 6개와 JavaScript 단일 geometry 소유권으로 대체됐다.
 
 ### 목표
 
@@ -173,8 +175,8 @@ CSS 보정으로 열린 native popover의 잘못된 위치를 기존 HostApp com
 
 1. bridge에 `#btn-text-color`와 `#text-color-picker` 존재 여부를 확인하는 좌표 보정 함수를 추가한다.
 2. button의 최신 `getBoundingClientRect()`를 기준으로 picker를 `position: fixed`로 두고, `left = rect.left`, `top = window.innerHeight - rect.bottom - (2 * rect.height)`, button과 동일한 width/height를 설정한다. input 중심과 button 중심을 일치시켜 native popover pointer가 글자색 button을 가리키게 한다.
-3. 초기 host override refresh, button `mousedown`/`click` capture와 `resize`에서 보정을 다시 적용한다. upstream의 picker `click()`·`change` listener는 교체하거나 중복 설치하지 않는다.
-4. HostBridgeScriptTests가 대상 DOM id, 좌표식, pointer-events 보존, 초기/click/resize 갱신 계약을 고정하게 한다.
+3. 최초 1회, button `mousedown` capture와 `resize`에서 보정을 다시 적용한다. 전역 MutationObserver refresh와 별도 `click` capture에서는 실행하지 않으며 upstream의 picker `click()`·`change` listener는 교체하거나 중복 설치하지 않는다.
+4. HostBridgeScriptTests는 `JavaScriptCore`에서 production geometry helper를 정상·fractional CSS 좌표로 실행하고, 대상 DOM id·조건부 style write·초기/mousedown/resize wiring만 문자열 경계로 확인한다.
 5. HostAppTests와 HostApp Debug build를 task 전용 derived data에서 실행한다.
 6. app bundle의 `rhwp-studio` resource를 verifier로 재검증하고 source와 bundle의 override 파일이 byte-identical한지 확인한다.
 7. HWP/HWPX 사본의 작은 창과 확대 창에서 popover pointer가 글자색 button 바로 아래에 정렬되는지 확인한다.
@@ -300,9 +302,9 @@ Stage 2 커밋 `664b5aa`를 기준으로 검증했다. 제품 source는 추가 �
 
 초기 `rect.right` 후보는 900×670 작은 창과 확대 창에서 popover를 toolbar까지 이동시키고 취소 후 재실행도 가능했지만, 2026-09-06 작업지시자 화면 검증에서 pointer가 글자색 button 중앙이 아니라 오른쪽의 형광펜 button 중앙을 가리키는 것이 확인됐다. input에 button과 같은 폭을 부여하면서 시작점을 `rect.right`로 둬 input 중심이 정확히 한 button 폭 오른쪽으로 이동한 결과다. 따라서 시작점을 `rect.left`로 바꿔 input과 글자색 button의 중심을 일치시키는 후보로 교체하고 UI 검증을 다시 수행한다. 이는 현재 macOS/WKWebView 조합에서 관찰한 host compatibility 좌표 계약이며 WebKit 내부 구현의 일반 원인까지 확정하는 주장은 아니다.
 
-이 문제는 #492에서 계속 추적한다. Stage 3 보완은 기존 `RhwpStudioHostBridgeScript.source` 안에 위 좌표 계산을 idempotent하게 넣고, 초기 refresh·button capture·window resize에서만 갱신한다. 기존 CSS의 nonempty renderer와 `pointer-events: none`은 유지하며 generated studio asset, 별도 local JavaScript asset, `RhwpStudioWebView`의 주입 구성과 AppKit color bridge는 변경하지 않는다. 작업지시자 승인 전에는 제품 source 추가 수정, 완료 보고·커밋, PR 게시와 Stage 4 진입을 보류한다.
+이 문제는 #492에서 계속 추적했다. Stage 3에서는 기존 `RhwpStudioHostBridgeScript.source` 안에 위 좌표 계산을 넣고 당시 CSS nonempty renderer도 유지했다. 이 중 CSS 소유권과 갱신 lifecycle은 아래 Stage 5 리뷰 보완에서 최종 대체됐으며, generated studio asset·별도 local JavaScript asset·`RhwpStudioWebView`·AppKit color bridge는 끝까지 변경하지 않았다.
 
-### Stage 3 보완 구현·검증 진행 기록 (2026-09-06)
+### Stage 3 보완 구현·검증 진행 기록 (2026-09-06, Stage 5 이전 이력)
 
 작업지시자의 Stage 3 보완 구현 승인 후 기존 `RhwpStudioHostBridgeScript.source`에만 위치 보정을 추가했다. `#btn-text-color`의 최신 rect에서 `left = rect.left`와 세로 반전 보정값으로 `#text-color-picker`의 fixed 좌표를 계산하고 button과 같은 크기를 부여하며, 초기 host override refresh, button `mousedown`/`click` capture와 window `resize`에서 갱신한다. upstream의 picker activation·change listener와 generated studio asset은 변경하지 않았다.
 
@@ -356,15 +358,17 @@ Stage 2~3 완료 뒤 `mydocs/report/task_m010_492_report.md`를 작성하고 오
 PR 본문에는 다음을 포함한다.
 
 - `Closes #492`
-- native color well은 생성되지만 0×0 anchor에서 popover presentation만 실패한 직접 원인
+- native color well은 생성되지만 upstream hidden input anchor geometry에서 presentation·위치가 실패한 원인
 - 같은 WKWebView에서 형광펜 경로가 동작한 positive control
-- CSS nonempty renderer와 HostApp bridge 좌표 보정의 local ownership 경계
+- HostApp bridge가 geometry를 단독 소유하는 local compatibility 경계
 - 작은 창·확대 창 artifact-only 위치 A/B 결과
 - HWP/HWPX selection·focus·undo/redo smoke 결과
 - upstream generated asset과 core dependency를 변경하지 않았다는 확인
 - upstream #6635가 독립 이슈이며 선행 조건이 아니라는 설명
 
-## Stage 3 보완 구현 승인 사항
+## Stage 3 보완 구현 승인 사항 (Stage 5 이전 이력)
+
+다음은 Stage 3 당시 승인 범위다. CSS 소유와 click 갱신 항목은 Stage 5 리뷰 보완 승인으로 대체됐다.
 
 1. 기존 CSS는 nonempty renderer와 `pointer-events: none` 계약으로 유지하고, 좌표 보정만 `RhwpStudioHostBridgeScript.source`에 추가하는 방향
 2. 작은 창·확대 창에서 검증한 button rect 기반 XY 계산과 초기/click/resize 갱신 계약
@@ -372,4 +376,31 @@ PR 본문에는 다음을 포함한다.
 4. 혼합 글자색 소실은 다른 upstream 세션의 범위로 분리하고 #492 완료 조건에서 제외하는 판단
 5. generated studio asset, 별도 JavaScript asset, `RhwpStudioWebView`, AppKit color bridge와 core dependency는 변경하지 않는 경계
 
-작업지시자가 2026-09-06 같은 세션에서 진행을 승인했고, 위 범위대로 제품 source와 테스트를 변경했다. Stage 3 완료 보고·커밋과 Stage 4 진입은 남은 UI 재검증 뒤 별도 승인받는다.
+## Stage 5: PR #493 리뷰 보완 계획 (2026-09-06)
+
+PR #493의 maintainer 리뷰 코멘트에서 CSS와 Host bridge가 같은 anchor geometry를 중복 소유하고, 전역 `MutationObserver` refresh가 글자색과 무관한 DOM 변경에도 layout read/write를 수행하며, 기존 XCTest가 실제 좌표 계산을 실행하지 않는다는 문제가 확인됐다. 작업지시자는 같은 스레드에서 리뷰 보정과 보정 코멘트 게시까지 명시 승인했다.
+
+### 수용 범위
+
+1. `#text-color-picker` geometry는 `RhwpStudioHostBridgeScript` 하나만 소유한다. `.atDocumentEnd`에서 인라인 style이 적용되므로 실제 실행에서 곧 덮이는 CSS anchor rule과 이를 강제하는 CSS parser/fixture는 제거한다.
+2. asset verifier는 Host bridge가 의존하는 `#btn-text-color`와 `input#text-color-picker[type=color]` DOM 계약만 유지한다. 일반 toolbar selector/dimension 비소유 guard는 기존의 단순 검증으로 복구한다.
+3. 좌표 계산은 side effect가 없는 `textColorPickerAnchorGeometry(viewportHeight, buttonRect)`로 분리하고 실제 배치 함수가 그 결과를 사용한다. 지원 macOS/WebKit의 native popover 위치는 page JavaScript에서 관측할 수 없으므로 확인되지 않은 OS version gate는 추가하지 않는다.
+4. anchor 갱신은 최초 1회, 글자색 button `mousedown` capture, window `resize`로 제한한다. 전역 `refreshHostOverrides()`와 효과 없는 button `click` capture에서는 제거한다.
+5. 같은 style 값은 다시 쓰지 않아 resize/mousedown 반복 시 불필요한 style mutation을 피한다.
+6. HostAppTests에 `JavaScriptCore`를 연결해 production JavaScript의 순수 geometry 함수를 정상·fractional CSS 좌표 사례로 직접 실행한다. source 문자열 검사는 DOM/event wiring 경계만 확인한다.
+7. shell negative helper는 command stdin을 `/dev/null`로 격리한다. 남는 color picker DOM fixture counter는 기대 건수를 명시적으로 검사한다.
+8. 단계·최종 보고서의 직접 원인 표현을 “0×0 renderer 자체”가 아니라 “upstream hidden input의 anchor geometry”로 정정하고, CSS/JavaScript 중복 소유와 27개 CSS fixture 성과를 제거한다.
+
+### 검증 계획
+
+- `bash -n scripts/verify-rhwp-studio-assets.sh scripts/ci/test-rhwp-studio-cargo-lock-verification.sh`
+- `scripts/verify-rhwp-studio-assets.sh`
+- `scripts/ci/test-rhwp-studio-cargo-lock-verification.sh`
+- `xcodegen generate` 후 generated project diff 확인
+- `xcodebuild` HostAppTests 전체 실행
+- `xcodebuild` HostApp Debug build
+- Debug app bundle asset verifier 및 source/bundle overlay byte 비교
+- `git diff --check`
+- 기존 HWP/HWPX × 작은 창/확대 창 UI smoke는 좌표식을 변경하지 않으므로 이전 사용자 확인을 회귀 근거로 유지한다. 실행형 geometry test로 수식 결과를 추가 고정하며 native popover 위치의 최종 판정은 UI smoke 경계로 남긴다.
+
+작업지시자가 2026-09-06 같은 세션에서 리뷰 보정부터 PR 코멘트 게시까지 승인했다. 위 범위대로 source·테스트·검증 계약을 보정하고 실제 Debug 앱에서 글자색 버튼 아래에 popover pointer가 정렬되는 것을 재확인했다. Stage 5 보고서와 최종 보고서를 갱신한 뒤 PR #493 게시 브랜치에 반영한다.

@@ -138,3 +138,9 @@ Swift source, compatibility script, AppKit color panel, generated asset, manifes
 1. Stage 1 원인 분석과 CSS-only A/B 판정을 승인해 주기 바란다.
 2. 구현계획서의 Stage 2 범위대로 local CSS overlay와 asset verifier 두 파일을 수정할지 승인 요청한다.
 3. Stage 2 완료 뒤 별도 단계 보고와 승인을 거쳐 HWP/HWPX interaction smoke로 진입하는 순서를 승인 요청한다.
+
+## Stage 5 정정
+
+PR #493 리뷰에서 형광펜의 정상 `다른 색...` 경로도 0×0 color input을 사용한다는 점을 다시 대조했다. 따라서 이 보고서의 “0×0 renderer가 충분 원인”이라는 표현은 최종 결론이 아니다. 유지하는 관찰 근거는 글자색 영구 input의 DOM 배치와 anchor geometry를 바꾸면 native popover 표시가 달라진다는 A/B 결과이며, 최종 원인은 macOS WKWebView와 맞지 않는 upstream hidden input anchor geometry로 한정한다.
+
+Stage 5 최종 구조는 CSS nonempty renderer를 유지하지 않고 HostApp bridge가 geometry를 단독 소유한다. 당시 조사·승인 이력은 보존하되 현재 구현과 검증 계약은 `mydocs/working/task_m010_492_stage5.md` 및 최종 보고서를 기준으로 한다.

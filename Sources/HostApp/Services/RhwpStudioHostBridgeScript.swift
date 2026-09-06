@@ -558,6 +558,15 @@ enum RhwpStudioHostBridgeScript {
         });
       }
 
+      function textColorPickerAnchorGeometry(viewportHeight, buttonRect) {
+        return {
+          left: buttonRect.left,
+          top: viewportHeight - buttonRect.bottom - (2 * buttonRect.height),
+          width: buttonRect.width,
+          height: buttonRect.height
+        };
+      }
+
       function positionTextColorPickerAnchor() {
         const button = document.getElementById("btn-text-color");
         const picker = document.getElementById("text-color-picker");
@@ -570,16 +579,22 @@ enum RhwpStudioHostBridgeScript {
           return;
         }
 
-        // macOS WKWebView resolves the hidden renderer at a vertically
-        // mirrored popover position. Pre-compensate the renderer geometry
-        // without changing the visible button or upstream picker events.
-        picker.style.position = "fixed";
-        picker.style.inset = "auto";
-        picker.style.left = `${buttonRect.left}px`;
-        picker.style.top = `${window.innerHeight - buttonRect.bottom - (2 * buttonRect.height)}px`;
-        picker.style.width = `${buttonRect.width}px`;
-        picker.style.height = `${buttonRect.height}px`;
-        picker.style.pointerEvents = "none";
+        // The native popover position is not observable from page JavaScript.
+        // Keep the verified WKWebView compensation isolated in a pure helper.
+        const geometry = textColorPickerAnchorGeometry(window.innerHeight, buttonRect);
+        const nextStyle = {
+          position: "fixed",
+          left: `${geometry.left}px`,
+          top: `${geometry.top}px`,
+          width: `${geometry.width}px`,
+          height: `${geometry.height}px`,
+          pointerEvents: "none"
+        };
+        Object.entries(nextStyle).forEach(([property, value]) => {
+          if (picker.style[property] !== value) {
+            picker.style[property] = value;
+          }
+        });
       }
 
       function handleTextColorPickerAnchorEvent(event) {
@@ -595,7 +610,6 @@ enum RhwpStudioHostBridgeScript {
         enableNativeCommandItems();
         overrideNativePDFMenuItem();
         rewriteShortcutLabelsForMac();
-        positionTextColorPickerAnchor();
         observeNativePDFMenuItem();
       }
 
@@ -844,6 +858,7 @@ enum RhwpStudioHostBridgeScript {
       };
 
       refreshHostOverrides();
+      positionTextColorPickerAnchor();
       installDocumentLoadErrorObserver();
 
       const nativeCommandObserver = new MutationObserver(() => {
@@ -881,7 +896,6 @@ enum RhwpStudioHostBridgeScript {
       document.addEventListener("mousedown", handleTextColorPickerAnchorEvent, true);
       document.addEventListener("mousedown", handlePotentialMutatingCommandEvent, true);
       document.addEventListener("mousedown", handleNativeCommandElementEvent, true);
-      document.addEventListener("click", handleTextColorPickerAnchorEvent, true);
       document.addEventListener("click", handlePotentialMutatingCommandEvent, true);
       document.addEventListener("click", handleNativeCommandElementEvent, true);
       document.addEventListener("beforeinput", () => postDocumentEdited("beforeinput"), true);

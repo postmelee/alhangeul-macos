@@ -82,3 +82,9 @@ Stage 4에서는 Stage 2의 nonempty renderer와 Stage 3의 HostApp anchor 보�
 ## 승인 요청
 
 Stage 3 구현·검증 결과를 승인하고 Stage 4 최종 보고 및 PR 게시 준비에 진입할지 승인을 요청한다.
+
+## Stage 5 대체 사항
+
+최종 anchor 좌표식 자체는 유지하되 갱신 경로와 테스트 방식을 보완했다. 전역 `MutationObserver`가 호출하는 `refreshHostOverrides()`와 중복 `click` capture에서는 위치 계산을 제거하고, 최초 1회·글자색 button `mousedown` capture·window `resize`에서만 수행한다. 같은 style 값은 다시 쓰지 않는다.
+
+좌표 계산은 side effect가 없는 `textColorPickerAnchorGeometry`로 분리하고 `JavaScriptCore`에서 production JavaScript를 정상·fractional CSS 좌표로 직접 실행한다. Stage 3의 문자열 좌표식 테스트 2개·전체 180개 기록은 당시 결과로 보존하며, 최종 검증은 anchor 관련 9개·전체 181개 XCTest 및 Stage 5 실제 Debug 앱 UI smoke 결과를 기준으로 한다.

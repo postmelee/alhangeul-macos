@@ -48,7 +48,7 @@ expect_failure() {
   local description="$1"
   local expected_stderr="$2"
   shift 2
-  if "$@" > "$COMMAND_STDOUT" 2> "$COMMAND_STDERR"; then
+  if "$@" < /dev/null > "$COMMAND_STDOUT" 2> "$COMMAND_STDERR"; then
     fail "$description unexpectedly succeeded"
   fi
   assert_contains "$COMMAND_STDERR" "$expected_stderr" \
@@ -90,14 +90,6 @@ EOF
 select.sb-combo,
 select.sb-ls-select {
   appearance: none;
-}
-@media (pointer: fine) {
-  #text-color-picker {
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
 }
 EOF
   printf '%s\n' 'console.log("fixture");' > "$resource_dir/assets/index-fixture.js"
@@ -173,60 +165,12 @@ write_resource "$legacy_resource"
 assert_contains "$COMMAND_STDOUT" "rhwp-studio assets verified" \
   "legacy resource-only verification did not succeed"
 
-# Exercise the same ownership guard used by resource verification and sync.
-# Every mutation starts from the valid independent fixture, not production CSS.
+# Exercise the HostApp bridge DOM dependency independently from production assets.
 color_picker_resource="$TMP_ROOT/color-picker-resource"
 write_resource "$color_picker_resource"
 color_picker_css="$color_picker_resource/alhangeul-wkwebview-overrides.css"
 valid_picker_css="$legacy_resource/alhangeul-wkwebview-overrides.css"
 color_picker_checks=1
-
-cat > "$color_picker_css" <<'EOF'
-select.sb-combo,
-select.sb-ls-select {
-  appearance: none;
-}
-/* The anchor declarations may be compact or reordered. */
-@media(pointer:fine){#text-color-picker{pointer-events:none;height:100%;width:100%;inset:0;}}
-EOF
-"$VERIFIER" --resource-dir "$color_picker_resource" > "$COMMAND_STDOUT"
-assert_contains "$COMMAND_STDOUT" "rhwp-studio assets verified" \
-  "compact reordered color picker declarations did not succeed"
-color_picker_checks=$((color_picker_checks + 1))
-
-while IFS='|' read -r description expected_error transform; do
-  sed "$transform" "$valid_picker_css" > "$color_picker_css"
-  expect_failure "$description" "$expected_error" \
-    "$VERIFIER" --resource-dir "$color_picker_resource"
-  color_picker_checks=$((color_picker_checks + 1))
-done <<'EOF'
-missing inset|must declare color picker inset: 0 exactly once|/^[[:space:]]*inset:/d
-missing width|must declare color picker width: 100% exactly once|/^[[:space:]]*width:/d
-missing height|must declare color picker height: 100% exactly once|/^[[:space:]]*height:/d
-missing pointer-events|must declare color picker pointer-events: none exactly once|/^[[:space:]]*pointer-events:/d
-zero-sized anchor|unsupported color picker declaration: width: 0|s/width: 100%/width: 0/
-input intercepts pointer|unsupported color picker declaration: pointer-events: auto|s/pointer-events: none/pointer-events: auto/
-duplicate declaration|must declare color picker width: 100% exactly once|s/width: 100%;/width: 100%; width: 100%;/
-duplicate rule|exactly one #text-color-picker anchor rule|s/#text-color-picker {/#text-color-picker {} #text-color-picker {/
-missing rule|exactly one #text-color-picker anchor rule|/#text-color-picker[[:space:]]*{/,/}/d
-unexpected picker dimension|unsupported color picker declaration: min-height: 1px|s/inset: 0;/inset: 0; min-height: 1px;/
-non-picker width|must not own upstream control dimensions: width: 100%|s/appearance: none;/appearance: none; width: 100%;/
-non-picker height|must not own upstream control dimensions: height: 100%|s/appearance: none;/appearance: none; height: 100%;/
-non-picker min-height|must not own upstream control dimensions: min-height: 1px|s/appearance: none;/appearance: none; min-height: 1px;/
-non-picker alignment|must not own upstream control dimensions: align-items: center|s/appearance: none;/appearance: none; align-items: center;/
-leading grouped selector|standalone #text-color-picker selector|s/#text-color-picker {/.other, #text-color-picker {/
-trailing grouped selector|standalone #text-color-picker selector|s/#text-color-picker {/#text-color-picker, .other {/
-descendant selector|standalone #text-color-picker selector|s/#text-color-picker {/.other #text-color-picker {/
-wrong media|scope the color picker anchor to pointer: fine|s/pointer: fine/pointer: coarse/
-comment is not a declaration|must declare color picker inset: 0 exactly once|s/inset: 0;/\/\* inset: 0; \*\//
-EOF
-
-cp "$valid_picker_css" "$color_picker_css"
-printf '\n#style-bar { color: red; }\n' >> "$color_picker_css"
-expect_failure "upstream toolbar layout selector" \
-  "must not own upstream toolbar layout selectors" \
-  "$VERIFIER" --resource-dir "$color_picker_resource"
-color_picker_checks=$((color_picker_checks + 1))
 
 cp "$valid_picker_css" "$color_picker_css"
 sed 's/id="text-color-picker" type="color"/type="color" id="text-color-picker"/' \
@@ -242,12 +186,30 @@ while IFS='|' read -r description expected_error transform; do
     "$VERIFIER" --resource-dir "$color_picker_resource"
   color_picker_checks=$((color_picker_checks + 1))
 done <<'EOF'
-missing color button|missing the text color button|s/id="btn-text-color"/id="retired-text-color"/
-missing color input|missing the text color input|s/id="text-color-picker"/id="retired-color-picker"/
-wrong input type with decoy|missing the text color input|s/type="color" \/>/type="text" \/><input type="color" \/>/
-data-id is not id|missing the text color input|s/id="text-color-picker"/data-id="text-color-picker"/
+missing color button|missing the text color button required by the HostApp bridge|s/id="btn-text-color"/id="retired-text-color"/
+missing color input|missing the text color input required by the HostApp bridge|s/id="text-color-picker"/id="retired-color-picker"/
+wrong input type with decoy|missing the text color input required by the HostApp bridge|s/type="color" \/>/type="text" \/><input type="color" \/>/
+data-id is not id|missing the text color input required by the HostApp bridge|s/id="text-color-picker"/data-id="text-color-picker"/
 EOF
-echo "OK: rhwp-studio color picker/ownership fixtures passed ($color_picker_checks cases)"
+[ "$color_picker_checks" -eq 6 ] \
+  || fail "expected 6 color picker DOM checks, ran $color_picker_checks"
+echo "OK: rhwp-studio color picker DOM fixtures passed ($color_picker_checks cases)"
+
+# Retain independent coverage for the local overlay ownership boundary.
+cp "$legacy_resource/index.html" "$color_picker_resource/index.html"
+cp "$valid_picker_css" "$color_picker_css"
+printf '\n#style-bar { color: red; }\n' >> "$color_picker_css"
+expect_failure "upstream toolbar layout selector" \
+  "must not own upstream toolbar layout selectors" \
+  "$VERIFIER" --resource-dir "$color_picker_resource"
+
+cp "$valid_picker_css" "$color_picker_css"
+sed 's/appearance: none;/appearance: none;\
+  width: 100%;/' \
+  "$valid_picker_css" > "$color_picker_css"
+expect_failure "upstream control dimension" \
+  "must not own upstream control dimensions" \
+  "$VERIFIER" --resource-dir "$color_picker_resource"
 
 missing_font_resource="$TMP_ROOT/missing-font-resource"
 write_resource "$missing_font_resource"

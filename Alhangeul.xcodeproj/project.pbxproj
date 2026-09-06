@@ -29,6 +29,7 @@
 		1AB036C0755BA75BC9F750C3 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D83D8D9F6BF5014474791FB1 /* ImageIO.framework */; };
 		1C933AAE48EF8E6A19030EA9 /* DocumentPDFExportPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3445867D6FAAB95F19E2C992 /* DocumentPDFExportPanel.swift */; };
 		1D21397E46785B30EB21028D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A5315FE25D0AB65823C1D91A /* libz.tbd */; };
+		1E1F80D23A367D7E3A27A3ED /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0ACAC4E6FCA67627CCC3D324 /* JavaScriptCore.framework */; };
 		1EA44B4963FEC6D895772CCD /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D83D8D9F6BF5014474791FB1 /* ImageIO.framework */; };
 		202EAD43BD149C9874AD3E58 /* QuickLookSettingsOpenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C5A2536FE100F6D56A308CB /* QuickLookSettingsOpenerTests.swift */; };
 		227BB0B9C6B7D7C6811A4C36 /* BuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA73996BDEAF04DE10497E23 /* BuildInfo.swift */; };
@@ -269,6 +270,7 @@
 		034A145B545356520B20598D /* RhwpStudioPDFExportController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPDFExportController.swift; sourceTree = "<group>"; };
 		07F373DBDDC753FC79292E2D /* HwpPreviewProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewProvider.swift; sourceTree = "<group>"; };
 		08A3E95853FC125A982DA75C /* AppExecutionEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExecutionEventTests.swift; sourceTree = "<group>"; };
+		0ACAC4E6FCA67627CCC3D324 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		0B85D5783D864808AD59D958 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
 		0CCBBB1CE93E4840CC4CF27D /* AppExecutionOutbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExecutionOutbox.swift; sourceTree = "<group>"; };
 		0CF5F2312600B0FAE8D1D9FF /* DocumentCloseConfirmationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCloseConfirmationController.swift; sourceTree = "<group>"; };
@@ -476,6 +478,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E1F80D23A367D7E3A27A3ED /* JavaScriptCore.framework in Frameworks */,
 				A6D79A4138E263B896BB7ED4 /* Network.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -610,6 +613,7 @@
 				D2612A2057C62E35A5E751E7 /* Foundation.framework */,
 				D83D8D9F6BF5014474791FB1 /* ImageIO.framework */,
 				6A6F3480DCEB0F0A30DF06A1 /* IOSurface.framework */,
+				0ACAC4E6FCA67627CCC3D324 /* JavaScriptCore.framework */,
 				0E931CF12C8BE40BCE94DC51 /* libc++.tbd */,
 				F6DA732CC42A781180AA2F88 /* libiconv.tbd */,
 				A5315FE25D0AB65823C1D91A /* libz.tbd */,

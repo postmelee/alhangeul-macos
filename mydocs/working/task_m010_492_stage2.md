@@ -101,3 +101,9 @@ Stage 3에서는 이 Stage의 source를 기준으로 HostAppTests와 Debug app�
 ## 승인 요청
 
 Stage 2 구현과 자동 검증 결과를 검토하고, Stage 3 HostApp 빌드·테스트 및 HWP/HWPX interaction smoke 진입을 승인해 주기 바란다.
+
+## Stage 5 대체 사항
+
+이 Stage의 CSS anchor rule과 이를 강제하기 위해 추가한 전용 CSS parser 및 27개 fixture는 PR #493 리뷰 보완에서 제거했다. `.atDocumentEnd` HostApp bridge가 같은 geometry를 인라인 style로 곧 덮으므로 두 계층의 중복 소유와 dead contract를 유지할 실익이 없다는 판단이다.
+
+최종 asset verifier는 HostApp bridge가 의존하는 `#btn-text-color`와 `input#text-color-picker[type=color]` DOM 계약만 유지한다. 일반 toolbar selector·dimension 비소유 guard는 단순 검사로 복구했고, color picker DOM fixture는 기대 건수를 명시적으로 검사하는 6개 사례로 축소했다. 이 보고서는 중간 Stage 수행 이력이며 최종 구조와 검증 결과는 Stage 5 보고서를 기준으로 한다.
