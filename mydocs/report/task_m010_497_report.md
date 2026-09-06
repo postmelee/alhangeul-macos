@@ -56,3 +56,7 @@ Task #494에서 수정 PR 통합 후 release candidate를 확정하고, 기존 �
 ## 작업지시자 승인 상태
 
 2026-09-06 같은 스레드의 “진행해줘”로 별도 이슈 등록·수정·회귀 검증이 승인됐고 검토 가능한 PR 준비까지 수행했다. PR merge·issue close·release 후보 교체는 아직 수행하지 않았다.
+
+### 병합 완료 — 2026-09-07
+
+작업지시자 승인 후 [PR #498](https://github.com/postmelee/alhangeul-macos/pull/498)을 devel에 병합했다. Merge commit은 `6fac59e2f3a19d9762cece3165d1da211d094aea`다. [최종 CI](https://github.com/postmelee/alhangeul-macos/actions/runs/34041156317)는 3개 job 성공, release helper job과 native renderer smoke step은 범위에 따라 생략됐다. Issue #497 완료와 작업 branch 정리를 수행했고, 공증 후보 재검증은 Task #494 작업으로 이어간다.
