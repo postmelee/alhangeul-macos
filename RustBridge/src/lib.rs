@@ -5,6 +5,8 @@ use std::ptr;
 use rhwp::document_core::queries::rendering::PngExportOptions;
 use rhwp::wasm_api::HwpDocument;
 
+mod text;
+
 macro_rules! ffi_guard {
     ($handle:expr, $default:expr, $body:expr) => {{
         if $handle.is_null() {
