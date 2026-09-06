@@ -46,7 +46,7 @@ struct RenderTreeDecodingFailure: Error, CustomStringConvertible {
     }
 
     var description: String {
-        "render-tree decode failed: variant=\(variant ?? "envelope") path=\(path) cause=\(reason.rawValue)"
+        "render-tree decode failed: variant=\(variant ?? "unresolved") path=\(path) cause=\(reason.rawValue)"
     }
 }
 
@@ -118,84 +118,87 @@ enum RenderNodeType: Decodable {
     case footnoteMarker(FootnoteMarkerNode)
     case unknown
 
-    static let knownVariantNames: Set<String> = [
-        "Page",
-        "PageBackground",
-        "Body",
-        "Column",
-        "TextLine",
-        "TextRun",
-        "Table",
-        "TableCell",
-        "Line",
-        "Rectangle",
-        "Ellipse",
-        "Path",
-        "Image",
-        "Group",
-        "Equation",
-        "FormObject",
-        "Placeholder",
-        "RawSvg",
-        "FootnoteMarker",
-        "MasterPage",
-        "Header",
-        "Footer",
-        "FootnoteArea",
-        "TextBox",
-    ]
+    // Raw tag names and decoder dispatch share one enum; new tags require an exhaustive case.
+    enum KnownVariant: String, CaseIterable {
+        case page = "Page"
+        case pageBackground = "PageBackground"
+        case body = "Body"
+        case column = "Column"
+        case textLine = "TextLine"
+        case textRun = "TextRun"
+        case table = "Table"
+        case tableCell = "TableCell"
+        case line = "Line"
+        case rectangle = "Rectangle"
+        case ellipse = "Ellipse"
+        case path = "Path"
+        case image = "Image"
+        case group = "Group"
+        case equation = "Equation"
+        case formObject = "FormObject"
+        case placeholder = "Placeholder"
+        case rawSvg = "RawSvg"
+        case footnoteMarker = "FootnoteMarker"
+        case masterPage = "MasterPage"
+        case header = "Header"
+        case footer = "Footer"
+        case footnoteArea = "FootnoteArea"
+        case textBox = "TextBox"
+    }
+    static let knownVariantNames = Set(KnownVariant.allCases.map(\.rawValue))
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let name = try? container.decode(String.self) {
-            switch name {
-            case "MasterPage": self = .masterPage
-            case "Header": self = .header
-            case "Footer": self = .footer
-            case "FootnoteArea": self = .footnoteArea
-            case "TextBox": self = .textBox
-            default:
-                guard !Self.knownVariantNames.contains(name) else {
-                    throw RenderTreeDecodingFailure(variant: name, codingPath: decoder.codingPath,
-                                                    reason: .invalidVariantShape)
-                }
+            guard let tag = KnownVariant(rawValue: name) else {
                 self = .unknown
+                return
+            }
+            switch tag {
+            case .masterPage: self = .masterPage
+            case .header: self = .header
+            case .footer: self = .footer
+            case .footnoteArea: self = .footnoteArea
+            case .textBox: self = .textBox
+            default:
+                throw RenderTreeDecodingFailure(variant: name, codingPath: decoder.codingPath,
+                                                reason: .invalidVariantShape)
             }
             return
         }
         let keyed = try decoder.container(keyedBy: DynamicKey.self)
         guard keyed.allKeys.count == 1, let key = keyed.allKeys.first else {
-            let known = keyed.allKeys.map(\.stringValue).filter(Self.knownVariantNames.contains).sorted().first
-            throw RenderTreeDecodingFailure(variant: known, codingPath: decoder.codingPath,
+            throw RenderTreeDecodingFailure(variant: nil, codingPath: decoder.codingPath,
                                             reason: .invalidVariantShape)
         }
+        guard let tag = KnownVariant(rawValue: key.stringValue) else {
+            self = .unknown
+            return
+        }
         do {
-            switch key.stringValue {
-            case "Page": self = .page(try keyed.decode(PageNode.self, forKey: key))
-            case "PageBackground": self = .pageBackground(try keyed.decode(PageBackgroundNode.self, forKey: key))
-            case "Body": self = .body(try keyed.decode(BodyNode.self, forKey: key))
-            case "Column": self = .column(try keyed.decode(UInt16.self, forKey: key))
-            case "TextLine": self = .textLine(try keyed.decode(TextLineNode.self, forKey: key))
-            case "TextRun": self = .textRun(try keyed.decode(TextRunNode.self, forKey: key))
-            case "Table": self = .table(try keyed.decode(TableNode.self, forKey: key))
-            case "TableCell": self = .tableCell(try keyed.decode(TableCellNode.self, forKey: key))
-            case "Line": self = .line(try keyed.decode(LineNode.self, forKey: key))
-            case "Rectangle": self = .rectangle(try keyed.decode(RectangleNode.self, forKey: key))
-            case "Ellipse": self = .ellipse(try keyed.decode(EllipseNode.self, forKey: key))
-            case "Path": self = .path(try keyed.decode(PathNode.self, forKey: key))
-            case "Image": self = .image(try keyed.decode(ImageNode.self, forKey: key))
-            case "Group": self = .group(try keyed.decode(GroupNode.self, forKey: key))
-            case "Equation": self = .equation(try keyed.decode(EquationNode.self, forKey: key))
-            case "FormObject": self = .formObject(try keyed.decode(FormObjectNode.self, forKey: key))
-            case "Placeholder": self = .placeholder(try keyed.decode(PlaceholderNode.self, forKey: key))
-            case "RawSvg": self = .rawSvg(try keyed.decode(RawSvgNode.self, forKey: key))
-            case "FootnoteMarker": self = .footnoteMarker(try keyed.decode(FootnoteMarkerNode.self, forKey: key))
-            default:
-                guard !Self.knownVariantNames.contains(key.stringValue) else {
-                    throw RenderTreeDecodingFailure(variant: key.stringValue, codingPath: decoder.codingPath,
-                                                    reason: .invalidVariantShape)
-                }
-                self = .unknown
+            switch tag {
+            case .page: self = .page(try keyed.decode(PageNode.self, forKey: key))
+            case .pageBackground: self = .pageBackground(try keyed.decode(PageBackgroundNode.self, forKey: key))
+            case .body: self = .body(try keyed.decode(BodyNode.self, forKey: key))
+            case .column: self = .column(try keyed.decode(UInt16.self, forKey: key))
+            case .textLine: self = .textLine(try keyed.decode(TextLineNode.self, forKey: key))
+            case .textRun: self = .textRun(try keyed.decode(TextRunNode.self, forKey: key))
+            case .table: self = .table(try keyed.decode(TableNode.self, forKey: key))
+            case .tableCell: self = .tableCell(try keyed.decode(TableCellNode.self, forKey: key))
+            case .line: self = .line(try keyed.decode(LineNode.self, forKey: key))
+            case .rectangle: self = .rectangle(try keyed.decode(RectangleNode.self, forKey: key))
+            case .ellipse: self = .ellipse(try keyed.decode(EllipseNode.self, forKey: key))
+            case .path: self = .path(try keyed.decode(PathNode.self, forKey: key))
+            case .image: self = .image(try keyed.decode(ImageNode.self, forKey: key))
+            case .group: self = .group(try keyed.decode(GroupNode.self, forKey: key))
+            case .equation: self = .equation(try keyed.decode(EquationNode.self, forKey: key))
+            case .formObject: self = .formObject(try keyed.decode(FormObjectNode.self, forKey: key))
+            case .placeholder: self = .placeholder(try keyed.decode(PlaceholderNode.self, forKey: key))
+            case .rawSvg: self = .rawSvg(try keyed.decode(RawSvgNode.self, forKey: key))
+            case .footnoteMarker: self = .footnoteMarker(try keyed.decode(FootnoteMarkerNode.self, forKey: key))
+            case .masterPage, .header, .footer, .footnoteArea, .textBox:
+                throw RenderTreeDecodingFailure(variant: key.stringValue, codingPath: decoder.codingPath,
+                                                reason: .invalidVariantShape)
             }
         } catch let failure as RenderTreeDecodingFailure {
             throw failure
@@ -783,7 +786,7 @@ struct CharOverlapInfo: Decodable {
 }
 
 struct CellContext: Decodable {
-    let parentParaIndex: Int
+    let parentParaIndex: UInt
     let path: [CellPathEntry]
 
     enum CodingKeys: String, CodingKey {
@@ -794,8 +797,8 @@ struct CellContext: Decodable {
 
 struct CellPathEntry: Decodable {
     let controlIndex: UInt
-    let cellIndex: Int
-    let cellParaIndex: Int
+    let cellIndex: UInt
+    let cellParaIndex: UInt
     let textDirection: UInt8
 
     enum CodingKeys: String, CodingKey {

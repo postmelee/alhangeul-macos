@@ -36,6 +36,8 @@ MODULE_CACHE="$TMP_ROOT/swift-module-cache"
 BIN="$TMP_ROOT/render-tree-decoder-fixture"
 mkdir -p "$MODULE_CACHE"
 
+echo "Decoder runtime: macOS $(sw_vers -productVersion), $(uname -m)"
+
 swiftc -parse-as-library \
   -module-cache-path "$MODULE_CACHE" \
   "$ROOT/Sources/RhwpCoreBridge/RenderTree.swift" \
