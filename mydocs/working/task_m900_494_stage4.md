@@ -1,8 +1,10 @@
-# Task M900 #494 Stage 4 검증 중간 보고서
+# Task M900 #494 Stage 4 검증 보고서
 
 ## 단계 목적
 
-2026-09-06 작업지시자의 Stage 4 진행 승인에 따라 source PR, devel → main, `v0.1.11` tag와 서명·공증 draft를 생성하고 실제 설치본을 검증했다. **HWP3 변환 복사본 저장이 sandbox 권한 오류로 실패하므로 Stage 4 완료와 official 공개를 보류한다.** 이 문서는 성공한 배포 준비, 실패 재현, 복원 결과와 필요한 수정 범위를 기록한다.
+2026-09-07 수정 후보 `abdf88f9846650e5920039f2807615ea1b285f91`의 서명·공증 draft에서 HWP3 저장 4조합과 일반 저장 2조합, PDF·인쇄·색상·열기 복구, 설치한 Preview·Thumbnail 실행을 확인해 **Stage 4 필수 설치 검증을 완료했다. Official 공개는 Stage 5 별도 승인 대기다.** 최신 결과는 이 문서 마지막의 **수정 후보 검증 완료**에 기록했다.
+
+아래 최초 후보 기록은 2026-09-06의 실패 원인과 복원 근거를 보존한 이력이다. 당시 HWP3 저장 오류는 Task #497 / PR #498에서 수정했으며, 이전 후보 SHA·DMG를 현재 배포 값으로 사용하지 않는다.
 
 검증 후보는 `f3bb7bc73510593c35c2e423323bbb01d62c3aad`, tree `b370c2fd41e8f1f1da11958651225b1cbe68e22d`다. 앱은 `0.1.11 (17)`, rhwp는 `v0.8.6` / `f1f9c6ae58344ee9368996d3543f76b9345cf227`이다. 이 후보의 HWP3 저장 성공이나 최종 배포 가능 판정을 내리지 않는다.
 
@@ -90,7 +92,7 @@ PR #495 검토에서 공개 준비 페이지의 상단 다운로드 링크 3개�
 
 Stage 4는 **진행 중 / 필수 저장 smoke 실패**다. Stage 5 승인을 요청할 상태가 아니다. 버그 이슈·계획·수정·회귀 검증·PR 절차를 거친 새 후보에서 signed draft를 다시 생성하고 Gate 2/4의 본문·provenance·설치 검증을 갱신한다. 기존 v0.1.11 tag/draft는 재현 기준으로 유지한다. 후보 교체 시 tag 처리와 Publish exact 입력은 구체적인 수정 commit이 준비된 뒤 승인 범위를 확정한다.
 
-## 승인 요청
+## 최초 실패 시점의 승인 요청 이력
 
 승인 대상은 **HWP3 저장 버그의 별도 이슈 등록과 수정·회귀 검증 진행**이다. 제품 source 변경 전 승인을 요구하는 [AGENTS.md](../../AGENTS.md)와 버그 수정 task를 별도로 추적하는 [release runbook](../manual/public_release_runbook.md)을 적용한다. 기존 승인인 PR 병합·tag·draft 생성의 재승인이 아니다. 공식 공개·Pages·Sparkle·Homebrew 승인은 이번 요청에 포함하지 않는다.
 
@@ -99,3 +101,58 @@ Stage 4는 **진행 중 / 필수 저장 smoke 실패**다. Stage 5 승인을 요
 2026-09-07 작업지시자가 PR #498 병합 → main 반영 → 기존 v0.1.11 tag 재지정·draft 자산 교체 → 서명·공증 재검증을 승인했다. 수정 PR은 `6fac59e2f3a19d9762cece3165d1da211d094aea`로 devel에 병합했다. 새 main SHA와 tag는 병합 결과로 확정한다. `version=0.1.11`, `build=17`, `previous_release_ref=v0.1.10`, `expected_rhwp_tag=v0.8.6`, `require_latest_rhwp=true`, `include_rhwp_in_title=true`, `draft=true`, `prerelease=false`로 실행한다. 기존 draft 본문·asset·hash를 보존하고 자산 교체 후 새 결과를 검증한다. docs/** 변경 및 docs-only Pages 실행은 공식 공개 단계로 남긴다. Official 공개·Sparkle·Pages·Homebrew는 이번 승인에 포함하지 않는다.
 
 수정 제품 source는 `a9758e20cbb480b5338bc3f08696386027d113d1`이다. XCTest 184개, 실제 sandbox Debug 앱 저장·재열기 6조합, PR CI 3개 job 통과와 release helper job 생략을 확인했다. Copilot 검토는 할당량 초과로 미실행이었다. 수정 전 draft의 실패 증거와 위 기록은 보존하고, 새 공증 draft 결과를 후속 기록한다.
+
+## 수정 후보 검증 완료 — 2026-09-07
+
+### 후보와 배포 이력
+
+| 항목 | 검증 결과 |
+|------|-----------|
+| 수정 PR | [#498](https://github.com/postmelee/alhangeul-macos/pull/498) 병합, Issue #497 close, 작업·게시 브랜치 정리 |
+| 기록 통합 PR | [#499](https://github.com/postmelee/alhangeul-macos/pull/499), merge `80a8399a512a2afe5b64c79bd361003f23066acc`; [CI 성공](https://github.com/postmelee/alhangeul-macos/actions/runs/34042338351) |
+| main 통합 PR | [#500](https://github.com/postmelee/alhangeul-macos/pull/500), merge `abdf88f9846650e5920039f2807615ea1b285f91`; [CI 4개 job 성공](https://github.com/postmelee/alhangeul-macos/actions/runs/34042686316) |
+| tree / 제품 source | devel·main tree `80769522ed80d3a811f1779c07ac912e82012be9` 일치. Task #497 최종 검증 head `c67d3f21e99febe47514fdfdb1ba041ab343ba3f`와 제품 source 동일 |
+| tag | `v0.1.11` → main `abdf88f...`; annotated object `7c778a75d7a911615540279fb7232d8493914b6f`. 승인된 기존 tag 교체에 정확한 old-object lease 사용, 원격 peeled commit 대조 |
+| 새 draft | [34043285977](https://github.com/postmelee/alhangeul-macos/actions/runs/34043285977) 성공. 기존 release ID `383597735`의 자산 교체, draft=true / prerelease=false 유지 |
+| DMG | `alhangeul-macos-0.1.11.dmg`, **180,205,988 bytes**, SHA256 **`99fcc789d500d13fede37e6f810653a5bdaf92372dac1094a0fdba228926069b`** |
+| 공개 채널 | latest v0.1.10 유지. stable appcast·Pages 생성/배포 skip. public home·appcast가 시작 snapshot과 byte 동일. Homebrew 변경 없음 |
+| 증거 경로 | `build.noindex/task494/stage4-recovery/` — 이하 상대 경로의 기준 |
+
+PR #499/#500의 Copilot은 requester quota로 실제 검토를 수행하지 못했다. 이를 승인 review로 기록하지 않는다. 최종 head·diff·CI·inline comment 유무를 직접 대조했다. main의 `docs/**` 내용은 기존 main과 같으며 별도 Pages 실행을 만들지 않았다.
+
+### 새 signed 앱 검증
+
+| 영역 | 결과와 증거 |
+|------|-------------|
+| 자산 identity | 다운로드 파일, GitHub asset digest/size, checksum 파일, draft 본문 일치. 이전 실패 payload와 다른 SHA 확인 (`draft-audit.json`) |
+| 서명·공증 | 앱·DMG staple 및 Gatekeeper Notarized Developer ID 통과, DMG 무결성 통과. 앱·확장·Sparkle 구성요소 8개 strict 서명, Team ID, timestamp, hardened runtime, debug entitlement 부재 확인 |
+| sandbox·bundle | 실제 앱 sandbox 및 user-selected read-write 유지. App/Preview/Thumbnail 모두 0.1.11 (17), arm64/x86_64. canonical Legal·Release endpoint·Studio tag/commit/Cargo fingerprint 통과 |
+| 실제 설치본 | `~/Applications/Alhangeul.app`의 host·Preview·Thumbnail 실행 파일 hash가 새 DMG 앱과 동일. About에서 v0.1.11 (17), rhwp v0.8.6 확인 (`installed-identity.json`, `signed-about.*`) |
+| 평문 HWP3 → HWP5 | 변환 경고·취소·재진입, 새 파일 저장, Command+S, 재열기 16페이지 통과 |
+| 평문 HWP3 → HWPX | HWPX 변환 경고, 새 파일 저장, Command+S, 로딩 완료 후 재열기 16페이지 통과 |
+| 보호 HWP3 → HWP5 | 공개 fixture 암호로 24페이지 열기, 보호 해제·변환 경고와 취소·재진입, 새 저장·Command+S·무암호 재열기 24페이지 통과 |
+| 보호 HWP3 → HWPX | 보호 해제·HWPX 변환 경고, 새 저장·Command+S·무암호 재열기 24페이지 통과 |
+| 일반 HWP5/HWPX | 각각 다른 이름으로 저장 → Command+S → 재열기 1/9페이지 통과. 위 4개와 합계 **6개 저장 조합** |
+| 저장 파일 | HWP5 3개 magic과 HWPX 3개 ZIP 무결성 확인. 별도 색상 편집 저장본 2개도 형식 검증 통과 |
+| PDF·인쇄 | PDF 9페이지, 869,612 bytes, 794×1123 pt. 한글 추출 및 첫 페이지 PNG 시각 확인. 인쇄 9페이지 준비·취소 → PDF 저장 패널 재진입·취소 통과 |
+| PDF 앱 | macOS 미리보기에서 “보도자료” 1개 검색 결과, PDF 본문 선택·복사 → 검색 필드 붙여넣기 동일 한글 확인 (`preview-search.*`, `preview-selected-text.ax.txt`, `preview-copy-paste.*`) |
+| 색상 | HWP의 “KTX” 3글자만 파랑 적용·undo·redo, HWPX의 “보도” 2글자만 형광펜 적용·undo·redo를 화면으로 확인. 인접 글자는 기존 색 유지. native 색상 팝오버 표시·취소 통과. 결과는 별도 `signed-color.hwp/.hwpx` 저장 |
+| 열기 복구·종료 | 빈 파일 오류 → 다시 시도 → 선택 취소 뒤 기존 HWPX URL·9페이지 유지. 편집 복사본 저장 후 native 메뉴로 경고 없이 앱 종료 |
+| DMG 화면 | Finder 직접 열기로 설치 안내·앱 아이콘·Applications 링크·화살표 확인. 표시 항목 2개, 마운트 해제 완료 (`dmg-normal-open.*`) |
+| Finder Preview | HWP·HWPX 렌더링과 **PID 10582 / `~/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex`** 실행을 함께 확인 |
+| Finder Thumbnail | **PID 11928 / 동일 설치본의 `AlhangeulThumbnail.appex`** 확인. 표준 `qlmanage -t -x`로 HWP/HWPX 각각 PNG 생성, UTI 강제 없는 재검증도 성공 (`finder-standard-retry/`, `finder-auto-type/`, `finder-live-processes.jsonl`) |
+
+### 환경 진단과 결과의 범위
+
+- 처음 표준 Finder helper는 성공했지만 HOP Thumbnail과 기존 Preview 프로세스가 관찰됐다. 이후 구버전 앱의 등록을 일시 분리하고 HOP Thumbnail을 잠시 ignore로 설정한 환경에서 새 provider 실행을 입증했다. **충돌을 분리한 설치본 동작의 통과이며, 기존 두 앱·HOP 공존 환경의 자연 선택이나 Sparkle 실제 업데이트 성공을 뜻하지 않는다.**
+- 추가 thumbnail 진단 스크립트가 표준 helper의 `-x`를 누락해 요청이 완료되지 않았다. 진단 중 Quick Look 캐시와 해당 썸네일 서비스만 재시작했고, 표준 옵션으로 고친 요청은 정상 완료됐다. 미완료 요청의 종료 코드 0을 성공으로 세지 않는다. 서비스 자체 또는 제품 결함으로 원인을 확정하지 않는다.
+- UI 도구는 다른 화면에 있던 앱의 접근성 내용은 읽었지만 좌표 동작에서 `noWindowsAvailable`을 반환했다. 작업지시자가 검증 창을 전면으로 가져온 뒤 정상화됐다. 연결 재시작·앱 식별 진단 중 문서 없는 기존 앱을 종료했으며 원본 문서는 버리지 않았다.
+- 보호 HWP5/HWPX 별도 저장의 이번 수정 후보 GUI 재실행, 여러 창 크기와 혼합 서식의 전수 확인, Intel·macOS 12 실기기, maintainer 직접 조작, Sparkle 실제 업데이트는 미실행이다. 앞선 후보의 결과는 위 최초 기록에만 남긴다. Command+Q 안내 재표시도 해결됐다고 판단하지 않으며 이번 정상 종료 증거는 native 메뉴 경로다.
+
+### 보존·복원 및 다음 승인 대상
+
+원본 fixture 8개와 samples 180개의 hash·size(기준에 포함된 samples mtime 포함)가 모두 같다. 사용자 앱 v0.1.8 (14)을 복원해 146개 파일·링크 manifest 및 codesign을 검증했다. `/Applications` v0.1.10 파일은 수정하지 않았고 등록을 복원했다. HOP Thumbnail은 원래 default election으로 돌렸다. 최종 PlugInKit은 기존 두 버전만 표시하며 테스트 host·provider·qlmanage 프로세스와 검증 DMG 마운트는 남기지 않았다. 검증용 Finder·PDF 창을 닫고 기존 Downloads 창을 유지했다. (`originals-audit.json`, `restore/restoration-complete.json`, `finder-after-close.ax.txt`)
+
+등록 hygiene helper는 개발 등록 정리 후에도 기존 두 설치 경로와 다른 개발 경로의 LaunchServices 잔여 기록 때문에 exit 1이다. 전체 hygiene 통과로 표시하지 않는다. 공개 appcast SHA256은 `36b5d62bc9477bf6b586c19888071ba8610be0ac42a116b2a8be7bf5cee3af5a`, home은 `cd561eb20f30f0c1b7bcc3e6188681f3885d4e1f25b9f956a72bf549aede5eba`로 시작 시점과 같다.
+
+다음 승인 대상은 **Stage 5 official stable 공개와 Pages·Sparkle, 공식 자산 확인 후 Homebrew 반영**이다. `Release Publish DMG`를 `--ref v0.1.11`, `version=0.1.11`, `previous_release_ref=v0.1.10`, `expected_rhwp_tag=v0.8.6`, `require_latest_rhwp=true`, `include_rhwp_in_title=true`, **`draft=false`, `prerelease=false`**로 실행한다. 공식 실행 산출물의 새 digest·size를 다시 검증해 공개 채널과 Cask에 사용한다. 이 승인은 [public release runbook Gate 5](../manual/public_release_runbook.md#gate-5-official-stable-publish)가 요구하는 별도 공개 승인이고, 이미 완료한 merge·tag·draft 검증의 재승인이 아니다.
