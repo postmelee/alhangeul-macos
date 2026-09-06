@@ -16,7 +16,7 @@
 | previous_release_ref / commit | `v0.1.10` / `fafed425d4b87162c2188d1384d618adc2211eb6` |
 | expected_rhwp_tag / commit | `v0.8.6` / `f1f9c6ae58344ee9368996d3543f76b9345cf227` |
 | 제목 / 실행 정책 | `Alhangeul v0.1.11 (rhwp v0.8.6)`, `require_latest_rhwp=true`, `include_rhwp_in_title=true` |
-| 현재 draft candidate | `abdf88f9846650e5920039f2807615ea1b285f91` (`v0.1.11`); 수정 공증 후보 Stage 4 및 official·Homebrew 검증 완료, 실제 Sparkle 잠금 해제 대기 |
+| 최종 official candidate | `abdf88f9846650e5920039f2807615ea1b285f91` (`v0.1.11`); 수정 공증 후보 Stage 4 및 official·Homebrew 검증 완료, 실제 Sparkle·Finder 검증과 설치본 복원 완료 |
 | 검증 산출물 | `build.noindex/task494/` 아래 단계·산출물 종류별 디렉터리 |
 
 - 각 단계는 승인된 변경과 검증 결과를 `mydocs/working/task_m900_494_stage{N}.md`에 남기고 함께 커밋한다. 새로운 실패·수정이 없으면 통과한 검증을 반복하지 않는다.
@@ -268,7 +268,7 @@ Homebrew 반영에는 `scripts/update-cask-sha256.sh 0.1.11 <검증한-official-
 
 ## 구현계획 승인 요청
 
-위 6단계와 Stage 1~4 진행 승인을 반영했다. 최초 HWP3 저장 오류 수정 후 PR #498/#499/#500을 병합하고, 새 main/tag의 공증 draft에서 저장 6조합·PDF·색상·열기 복구·설치 확장 검증을 완료했다. [Stage 4 보고서](../working/task_m900_494_stage4.md)의 실제 검증 범위와 원본 복원을 확인했으며 Stage 5 official 공개·Pages·Sparkle·Homebrew 승인을 반영했다. 공개·Homebrew 검증은 완료했고 실제 Sparkle는 Mac 잠금 해제 대기다.
+위 6단계와 Stage 1~4 진행 승인을 반영했다. 최초 HWP3 저장 오류 수정 후 PR #498/#499/#500을 병합하고, 새 main/tag의 공증 draft에서 저장 6조합·PDF·색상·열기 복구·설치 확장 검증을 완료했다. [Stage 4 보고서](../working/task_m900_494_stage4.md)의 실제 검증 범위와 원본 복원을 확인했으며 Stage 5 official 공개·Pages·Sparkle·Homebrew 승인을 반영했다. 공개·Homebrew 검증, 실제 Sparkle 업데이트·HWP/HWPX Finder 확인과 두 기존 설치본 복원을 완료했다.
 
 진행 순서는 [타스크 진행 절차 매뉴얼](../manual/task_workflow_guide.md), 배포 순서는 [public release runbook](../manual/public_release_runbook.md)을 따른다. Stage 4 복구 승인은 모두 실행했다. 현재 `v0.1.11`은 `abdf88f9846650e5920039f2807615ea1b285f91`을 가리키며, 공식 공개는 Gate 5 별도 승인 뒤 실행한다.
 
@@ -280,4 +280,4 @@ Homebrew 반영에는 `scripts/update-cask-sha256.sh 0.1.11 <검증한-official-
 
 작업지시자가 Stage 4 완료 보고 뒤 공식 공개·Pages·Sparkle·Homebrew 진행 요청에 “진행해줘”로 승인했다. 검증한 `abdf88f9846650e5920039f2807615ea1b285f91` / `v0.1.11`과 upstream latest `v0.8.6`을 재확인하고 [official run 34047148092](https://github.com/postmelee/alhangeul-macos/actions/runs/34047148092)을 `draft=false`, `prerelease=false`로 실행했다. 이 승인 범위에서 실제 업데이트, 공식 DMG 기준 Cask 배포와 검증·복원을 진행한다.
 
-실행 결과는 [Stage 5 보고서](../working/task_m900_494_stage5.md)에 기록했다. 공개 workflow·official DMG·feed Ed25519·Homebrew 검증과 tap 게시를 완료했다. Mac 잠금 때문에 기존 앱 UI를 조작하지 못해 Homebrew는 별도 appdir에 설치·제거했으며 두 기존 앱과 등록을 보존했다. 실제 Sparkle와 단일 main closeout은 남아 있다.
+실행 결과는 [Stage 5 보고서](../working/task_m900_494_stage5.md)에 기록했다. 공개 workflow·official DMG·feed Ed25519·Homebrew 검증과 tap 게시를 완료했다. Mac 잠금 때문에 기존 앱 UI를 조작하지 못해 Homebrew는 별도 appdir에 설치·제거했으며 두 기존 앱과 등록을 보존했다. 잠금 해제 후 실제 Sparkle·HWP/HWPX Finder 검증과 두 기존 설치본·등록 복원까지 완료했다. 작업지시자의 계속 진행 지시 범위에서 Stage 6 단일 main closeout과 devel 최종 기록 반영을 수행하며, [Stage 6 보고서](../working/task_m900_494_stage6.md)에 실제 PR·Pages 결과를 기록한다.
