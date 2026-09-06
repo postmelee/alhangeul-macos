@@ -2,7 +2,7 @@
 
 수행계획서: [task_m900_494.md](task_m900_494.md)
 
-2026-09-06 작업지시자가 수행계획을 승인하고 구현계획서 작성을 지시했다. 이 문서는 승인된 범위를 6개 Stage의 변경·검증·산출물로 구체화한다. 현재 작업은 구현계획 작성이며, Stage 1의 실제 version/workflow 변경은 다음 진행 승인 후 시작한다.
+2026-09-06 작업지시자가 수행계획에 이어 구현계획과 Stage 1 진행을 승인했다. 이 문서는 승인된 범위를 6개 Stage의 변경·검증·산출물로 구체화한다. Stage 1의 version/workflow 변경과 검증을 완료했으며 결과는 [Stage 1 보고서](../working/task_m900_494_stage1.md)에 기록했다.
 
 ## 기준과 공통 원칙
 
@@ -268,6 +268,6 @@ Homebrew 반영에는 `scripts/update-cask-sha256.sh 0.1.11 <검증한-official-
 
 ## 구현계획 승인 요청
 
-위 6단계와 검증 기준을 승인하고 **Stage 1: release context 확인 및 세 target version/build·두 workflow 입력 정렬**을 진행한다. 이 요청에는 릴리스 게시나 tag 생성이 포함되지 않는다.
+위 6단계와 검증 기준, Stage 1 진행 승인을 반영했다. 다음 승인 대상은 **Stage 2: 포함 PR 분석과 공개 문서 준비**다. 이 요청에는 릴리스 게시나 tag 생성이 포함되지 않는다.
 
-진행 순서는 [타스크 진행 절차 매뉴얼](../manual/task_workflow_guide.md), 배포 순서는 [public release runbook](../manual/public_release_runbook.md)을 따른다. 수행계획 승인은 반영됐으며, 이번 구현계획의 다음 단계 진행 지시를 받은 뒤 Stage 1을 시작한다.
+진행 순서는 [타스크 진행 절차 매뉴얼](../manual/task_workflow_guide.md), 배포 순서는 [public release runbook](../manual/public_release_runbook.md)을 따른다. Stage 1 결과 검토와 다음 단계 진행 지시를 받은 뒤 Stage 2를 시작한다.
