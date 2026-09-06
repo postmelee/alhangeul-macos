@@ -31,8 +31,9 @@
 ## 기본 명령
 
 ```bash
-./scripts/build-rust-macos.sh
-./scripts/build-rust-macos.sh --verify-lock
+./scripts/build-rust-macos.sh                   # build-only
+./scripts/build-rust-macos.sh --verify-portable # 일반 source/header/FFI 검증
+./scripts/build-rust-macos.sh --verify-strict   # 기준 환경 staticlib byte까지 비교
 ./scripts/build-rust-macos.sh --update-lock
 ```
 

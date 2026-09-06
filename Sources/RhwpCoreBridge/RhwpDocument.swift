@@ -267,7 +267,7 @@ class RhwpDocument {
     }
 
     func renderPageTreeThrowing(at page: Int) throws -> RenderNode {
-        guard UInt32(exactly: page) != nil else {
+        guard UInt32(exactly: page) != nil, page < pageCount else {
             throw RhwpRenderTreeQueryError.invalidPageIndex
         }
         guard let json = renderPageTreeJSON(at: page) else {

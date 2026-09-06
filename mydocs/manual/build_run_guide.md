@@ -89,7 +89,7 @@ core 업데이트는 다음 형태로 분리한다.
 
 `Cargo.lock mismatch`/`Cargo.toml mismatch`는 source 계약, `generated header ABI artifact mismatch`/FFI symbol 오류는 ABI, `strict staticlib reference mismatch`는 나머지 검증 후 reference byte 비교 실패다. 검증은 lock을 수정하지 않는다. 승인된 기준 artifact 갱신은 별도 `--update-lock` 작업이다.
 
-`--verify-lock`은 기존 strict alias를 유지한다. 이 legacy 명령에 한해 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 portable 동작을 유지하고 전환 경고를 출력한다. 새 호출은 명시 모드를 사용한다. `--verify-strict`와 skip env=1 조합, 잘못된 env 값, 중복 모드는 build 전에 실패한다. 무옵션은 기존 build-only 동작이다.
+`--verify-lock`은 기존 strict alias를 유지한다. 이 legacy 명령에 한해 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 portable 동작을 유지하고 전환 경고를 출력한다. 새 호출은 명시 모드를 사용한다. legacy alias/strict에서 잘못된 env 값, strict와 skip env=1 조합, 같은 옵션을 포함한 중복 모드는 build 전에 실패한다. 무옵션 build-only, 명시 portable, update-lock은 legacy env를 무시한다.
 
 ## Producer golden 검증
 

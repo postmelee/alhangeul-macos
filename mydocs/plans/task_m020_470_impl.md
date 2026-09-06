@@ -19,3 +19,9 @@ KTX/request 실제 core 출력의 TextLine `para_index`는 `usize::MAX - i` mark
 ## Stage 3 — 통합 검증·PR
 
 no-AppKit, xcodegen/HostApp Debug build, native smoke와 diff 검증을 정리한다. 개발 산출물은 build.noindex에 둔다. 소스 변경으로 실제 앱 등록 검증을 요구하지 않는다. 계획/단계/최종보고서와 오늘할일을 완료하고 `publish/task470`에서 devel 대상으로 PR을 생성한다. 본문에 선행 PR #503 및 자신의 commit 범위를 명시한다.
+
+## Stage 4 — PR #504 리뷰 보완
+
+작업지시자 승인에 따라 CellContext의 남은 usize 필드를 UInt로 정렬하고 큰 정수/음수 경계를 검증한다. known tag는 CaseIterable enum과 exhaustive switch로 연결하고 모든 24종의 valid payload와 잘못된 표현을 검증한다. 다중 tag는 variant를 임의 선택하지 않으며 nil variant 진단을 중립적으로 표시한다. throwing API는 pageCount 경계도 invalid index로 분류하고 실제 FFI null 경로는 raw JSON API로 독립 검증한다.
+
+strict known 오류 전파와 macOS 12 deploymentTarget은 유지한다. 작업지시자가 사용할 macOS 12 기기/VM이 없음을 확인했고 self-hosted runner도 없다. 현재 OS/CI 검증과 최소 OS 실행 검증을 구분하여 보고하며 macOS 12 미검증을 병합 전 잔여 조건으로 공개 코멘트에 남긴다.

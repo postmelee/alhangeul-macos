@@ -45,7 +45,7 @@ struct Stage3RenderCheck {
     }
 
     private static func verifyRenderTreeQueryBoundary(_ document: RhwpDocument) throws {
-        for invalidPage in [-1, Int(UInt32.max) + 1] {
+        for invalidPage in [-1, Int(UInt32.max) + 1, document.pageCount] {
             do {
                 _ = try document.renderPageTreeThrowing(at: invalidPage)
                 throw RenderCheckError(description: "invalid page was accepted")
@@ -56,12 +56,8 @@ struct Stage3RenderCheck {
                 }
             }
         }
-        do {
-            _ = try document.renderPageTreeThrowing(at: document.pageCount)
-            throw RenderCheckError(description: "out-of-range producer query was accepted")
-        } catch RhwpRenderTreeQueryError.producerUnavailable {
-            // A valid UInt32 outside the document tests the real FFI null-output path.
-        }
+        // The raw JSON API deliberately reaches the FFI for pageCount (a valid UInt32).
+        // Its nil assertion above tests actual producer null independently of the public range error.
     }
 
     @MainActor
