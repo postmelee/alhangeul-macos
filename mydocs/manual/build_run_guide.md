@@ -91,6 +91,10 @@ core 업데이트는 다음 형태로 분리한다.
 
 `--verify-lock`은 기존 strict alias를 유지한다. 이 legacy 명령에 한해 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 portable 동작을 유지하고 전환 경고를 출력한다. 새 호출은 명시 모드를 사용한다. `--verify-strict`와 skip env=1 조합, 잘못된 env 값, 중복 모드는 build 전에 실패한다. 무옵션은 기존 build-only 동작이다.
 
+## Producer golden 검증
+
+Python 3.11+와 macOS Swift/Rust toolchain에서 `scripts/verify-render-tree-golden.sh`를 실행한다. 실제 pinned native core 출력, source/sample provenance와 Swift decoder를 검사하고 tracked fixture를 자동 수정하지 않는다. 갱신 시점과 계약은 [core dependency 운영 가이드](core_dependency_operation_guide.md)의 producer golden 절을 따른다.
+
 ## Xcode 프로젝트 생성
 
 ```bash

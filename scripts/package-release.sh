@@ -28,6 +28,7 @@ rm -rf "$BUILD_DIR"/Alhangeul*.appex "$BUILD_DIR"/Alhangeul*.appex.dSYM "$BUILD_
 rm -rf "$BUILD_DIR/include" "$BUILD_DIR/librhwp.a"
 
 "$ROOT/scripts/build-rust-macos.sh" --verify-portable
+"$ROOT/scripts/verify-render-tree-golden.sh"
 
 cd "$ROOT"
 xcodegen generate

@@ -277,6 +277,7 @@ reset_output() {
 build_rust_bridge() {
   info "Verifying Rust bridge artifacts"
   "$ROOT/scripts/build-rust-macos.sh" --verify-portable
+  "$ROOT/scripts/verify-render-tree-golden.sh"
 }
 
 generate_project() {

@@ -45,6 +45,25 @@
 
 로컬·CI·release workflow의 일반 검증은 `--verify-portable`을 사용한다. staticlib byte hash/size 비교만 제외하고 source provenance, Cargo.lock, header, FFI symbol과 reference metadata 검증은 유지한다. 기준 환경 byte 검증은 명시 `--verify-strict`를 사용한다. 환경 차이를 이유로 lock을 자동 갱신하지 않는다. legacy 옵션 호환과 실패 분류는 [build_run_guide.md](build_run_guide.md)를 따른다.
 
+### Producer 기반 render tree golden
+
+`RhwpCoreBuildInfo`와 별도로 `scripts/ci/fixtures/render-tree/request-page0.json`에 실제 core 출력과 provenance를 보존한다. 입력은 저장소 request sample의 page 0이며 전체 tree를 저장한다. canonical 처리는 key 정렬과 공백으로 제한하고 필드·배열 순서·큰 unsigned 정수를 제거하거나 반올림하지 않는다. 모든 node 또는 pixel parity를 보증하는 fixture는 아니다.
+
+도구에는 Python 3.11+, Rust toolchain, Swift compiler가 필요하다. native arm64/x86_64 producer는 `cargo run --release --locked --target <host> --example render_tree_golden`을 사용하므로 stale Frameworks를 읽지 않고 현재 Cargo pin으로 빌드한다. core repo/ref/tag/commit/features와 Cargo 계약, sample SHA256/page/recipe/tree hash, 실제 출력 byte와 Swift decode를 검사한다.
+
+```bash
+# 일반 PR / release source preflight: drift는 실패하며 tracked 파일을 수정하지 않는다.
+scripts/verify-render-tree-golden.sh
+
+# 승인된 core update/full sync: complete core build 뒤 명시 갱신한다.
+scripts/update-render-tree-golden.sh
+scripts/verify-render-tree-golden.sh
+```
+
+Writer는 producer·Swift decode 성공 후 metadata와 tree를 한 파일로 atomic 교체한다. 실패하면 이전 golden을 보존한다. full sync workflow는 core build 다음 writer/검증을 실행하고 fixture를 candidate에 stage한다. 일반 PR/release workflow와 로컬 package/release helper는 verifier만 실행한다. core 또는 sample 변경 시 stale failure를 무시하지 말고 원인을 검토한 뒤 명시 writer 결과를 같은 PR에서 리뷰한다.
+
+수동 minimal decoder fixture는 빠른 current/legacy/known-error gate로 유지하고, producer golden은 실제 core/Swift 통합 계약 gate로 사용한다. 격리 helper 검증은 `python3 scripts/ci/test-render-tree-golden.py`로 실행한다.
+
 ### Swift build info mirror
 
 `Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift`는 별도 진실 원천이 아니다. 완성된 `rhwp-core.lock`에서 `scripts/update-rhwp-core-build-info.sh`로 생성하고 `scripts/verify-rhwp-core-build-info.sh`로 일치를 확인한다.

@@ -131,6 +131,8 @@ Rust/core 변경이 있으면 `./scripts/build-rust-macos.sh` 대신 다음 lock
 
 PR CI와 release workflow는 `--verify-portable`을 명시하고 summary에 모드를 기록한다. staticlib byte hash/size 비교만 제외하며 source/Cargo.lock, generated header, FFI symbol과 reference metadata는 실패 가능한 gate다. 별도 skip env는 필요 없다. `test-rust-verification-modes.py`는 Ubuntu에서 fake toolchain으로 CLI 경계 18개를 검사한다. 기준 환경 byte 비교에는 `--verify-strict`를 사용한다.
 
+Producer golden helper fixture는 Python 3.12의 Ubuntu script-checks에서 실행한다. macOS validation은 Python 3.12를 설치하고 universal build 전에 native producer golden/Swift 계약을 검증한다. golden 또는 helper 경로 변경도 이 macOS gate를 켠다. full sync만 core build 뒤 명시 writer를 호출하며 PR/release는 verifier만 사용한다. stale golden은 자동 수정 없이 차단한다.
+
 Build-info fixture와 studio Cargo.lock fingerprint fixture는 Ubuntu `script-checks`에서 먼저 실행해 canonical drift와 provenance verifier 회귀를 Rust build 전에 차단한다. tracked build-info verifier는 macOS validation에서도 다시 실행한다. Build-info verifier는 `rhwp-core.lock`에서 canonical `RhwpCoreBuildInfo.swift` 전체를 생성해 tracked source와 byte 비교하며 파일을 자동 수정하지 않는다. 존재하는 빈 `rhwp_enabled_features`는 유효하지만 key 누락, malformed token, source member/comment 누락·여분은 실패한다.
 
 `RustBridge/examples/*` 같은 benchmark/helper 변경은 macOS build는 요구할 수 있지만 lock-level `run_rust_verify`는 켜지 않는다.

@@ -7,6 +7,8 @@ import io
 from pathlib import Path
 import tempfile
 import sys
+import os
+import subprocess
 
 sys.dont_write_bytecode = True
 import unittest
@@ -121,6 +123,31 @@ class GoldenTests(unittest.TestCase):
         self.replace("RustBridge/Cargo.lock", "tag=v1.2.3", "rev=" + "a" * 40)
         self.run_mode("update")
         self.run_mode("verify")
+
+    def test_golden_paths_enable_macos_contract_without_pixel_smoke(self):
+        env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull)
+        def git(*args):
+            return subprocess.check_output(["git", *args], cwd=self.root, env=env, stderr=subprocess.DEVNULL, text=True).strip()
+        git("init", "-q")
+        git("config", "user.name", "Fixture")
+        git("config", "user.email", "fixture@example.invalid")
+        git("add", ".")
+        git("commit", "-qm", "base")
+        helper = Path(__file__).with_name("classify-pr-changes.sh").resolve()
+        for path in [golden.GOLDEN.as_posix(), "scripts/update-render-tree-golden.sh",
+                     "scripts/verify-render-tree-golden.sh", "scripts/ci/render-tree-golden.py",
+                     "scripts/ci/render_tree_golden_check.swift", "scripts/ci/test-render-tree-golden.py",
+                     "RustBridge/examples/render_tree_golden.rs"]:
+            with self.subTest(path=path):
+                base = git("rev-parse", "HEAD")
+                target = self.root / path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("classification fixture\n")
+                git("add", path)
+                git("commit", "-qm", "change")
+                output = subprocess.check_output(["bash", str(helper), base, "HEAD"], cwd=self.root, env=env, text=True)
+                self.assertIn("| run_macos_build | `true` |", output)
+                self.assertIn("| run_render_smoke | `false` |", output)
 
     def test_nonfinite_number_rejected(self):
         with self.assertRaises(ValueError):

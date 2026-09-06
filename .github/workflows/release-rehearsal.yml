@@ -188,6 +188,7 @@ jobs:
             echo "## Rust bridge lock policy"
             echo
             echo "- lock command: \`./scripts/build-rust-macos.sh --verify-portable\`"
+            echo "- golden command: \`./scripts/verify-render-tree-golden.sh\` (verify only)"
             echo "- build info command: \`./scripts/verify-rhwp-core-build-info.sh\`"
             echo "- verification mode: portable (explicit --verify-portable)"
             echo "- Portable mode excludes only staticlib byte hash/size comparison; reference metadata remains required."
@@ -209,12 +210,18 @@ jobs:
             echo "- Rehearsal artifacts are never public release or Homebrew Cask inputs."
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Set up Python for golden contract helpers
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
       - name: Verify rhwp source, header, ABI lock, and build info
         shell: bash
         run: |
           set -euo pipefail
           ./scripts/build-rust-macos.sh --verify-portable
           ./scripts/verify-rhwp-core-build-info.sh
+          ./scripts/verify-render-tree-golden.sh
 
       - name: Build rehearsal DMG
         shell: bash
