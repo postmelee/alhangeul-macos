@@ -10,7 +10,7 @@ import Foundation
 // debugDescription/underlyingError는 저장·출력하지 않는다.
 struct RenderTreeDecodingFailure: Error, CustomStringConvertible {
     enum Reason: String {
-        case keyNotFound, typeMismatch, valueNotFound, dataCorrupted, invalidVariantShape
+        case keyNotFound, typeMismatch, valueNotFound, dataCorrupted, invalidVariantShape, unexpectedDecoderError
     }
 
     let variant: String?
@@ -30,7 +30,7 @@ struct RenderTreeDecodingFailure: Error, CustomStringConvertible {
         self.reason = reason
     }
 
-    init(_ error: Error, variant: String? = nil) {
+    init(_ error: Error, variant: String? = nil, fallbackPath: [CodingKey] = []) {
         switch error {
         case DecodingError.keyNotFound(let key, let context):
             self.init(variant: variant, codingPath: context.codingPath + [key], reason: .keyNotFound)
@@ -41,7 +41,7 @@ struct RenderTreeDecodingFailure: Error, CustomStringConvertible {
         case DecodingError.dataCorrupted(let context):
             self.init(variant: variant, codingPath: context.codingPath, reason: .dataCorrupted)
         default:
-            self.init(variant: variant, codingPath: [], reason: .dataCorrupted)
+            self.init(variant: variant, codingPath: fallbackPath, reason: .unexpectedDecoderError)
         }
     }
 
@@ -200,18 +200,22 @@ enum RenderNodeType: Decodable {
         } catch let failure as RenderTreeDecodingFailure {
             throw failure
         } catch {
-            throw RenderTreeDecodingFailure(error, variant: key.stringValue)
+            throw RenderTreeDecodingFailure(error, variant: key.stringValue, fallbackPath: decoder.codingPath + [key])
         }
     }
 }
 
 // MARK: - 노드 데이터 타입
 
+// Core의 usize index metadata는 UInt로 보존한다(macOS 지원 아키텍처는 64-bit).
+// 머리말/꼬리말 para_index의 usize::MAX - i 같은 producer marker도 유효하다.
+// signed Int 변환이나 nil 치환은 이 metadata를 손실시키므로 하지 않는다.
+
 struct PageNode: Decodable {
     let pageIndex: UInt32
     let width: Double
     let height: Double
-    let sectionIndex: Int
+    let sectionIndex: UInt
 
     enum CodingKeys: String, CodingKey {
         case pageIndex = "page_index"
@@ -244,8 +248,8 @@ struct BodyNode: Decodable {
 struct TextLineNode: Decodable {
     let lineHeight: Double
     let baseline: Double
-    let sectionIndex: Int?
-    let paraIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
 
     enum CodingKeys: String, CodingKey {
         case lineHeight = "line_height"
@@ -260,9 +264,9 @@ struct TextRunNode: Decodable {
     let style: TextStyle
     let charShapeId: UInt32?
     let paraShapeId: UInt32?
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let charStart: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let charStart: UInt?
     let cellContext: CellContext?
     let isParaEnd: Bool
     let isLineBreakEnd: Bool
@@ -296,9 +300,9 @@ struct TableNode: Decodable {
     let rowCount: UInt16
     let colCount: UInt16
     let borderFillId: UInt16
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
 
     enum CodingKeys: String, CodingKey {
         case rowCount = "row_count"
@@ -336,9 +340,9 @@ struct LineNode: Decodable {
     let x2: Double
     let y2: Double
     let style: LineStyle
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
     let transform: ShapeTransform
 
     enum CodingKeys: String, CodingKey {
@@ -353,9 +357,9 @@ struct RectangleNode: Decodable {
     let cornerRadius: Double
     let style: ShapeStyle
     let gradient: GradientFillInfo?
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
     let transform: ShapeTransform
 
     enum CodingKeys: String, CodingKey {
@@ -370,9 +374,9 @@ struct RectangleNode: Decodable {
 struct EllipseNode: Decodable {
     let style: ShapeStyle
     let gradient: GradientFillInfo?
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
     let transform: ShapeTransform
 
     enum CodingKeys: String, CodingKey {
@@ -387,9 +391,9 @@ struct PathNode: Decodable {
     let commands: [PathCommand]
     let style: ShapeStyle
     let gradient: GradientFillInfo?
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
     let transform: ShapeTransform
     let lineStyle: LineStyle?
     let connectorEndpoints: [[Double]]?
@@ -406,9 +410,9 @@ struct PathNode: Decodable {
 
 struct ImageNode: Decodable {
     let binDataId: UInt16
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
     let fillMode: String?
     let originalSize: [Double]?
     let originalSizeHU: [Double]?
@@ -433,9 +437,9 @@ struct ImageNode: Decodable {
 }
 
 struct GroupNode: Decodable {
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
 
     enum CodingKeys: String, CodingKey {
         case sectionIndex = "section_index"
@@ -789,7 +793,7 @@ struct CellContext: Decodable {
 }
 
 struct CellPathEntry: Decodable {
-    let controlIndex: Int
+    let controlIndex: UInt
     let cellIndex: Int
     let cellParaIndex: Int
     let textDirection: UInt8

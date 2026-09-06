@@ -44,6 +44,26 @@ struct Stage3RenderCheck {
         }
     }
 
+    private static func verifyRenderTreeQueryBoundary(_ document: RhwpDocument) throws {
+        for invalidPage in [-1, Int(UInt32.max) + 1] {
+            do {
+                _ = try document.renderPageTreeThrowing(at: invalidPage)
+                throw RenderCheckError(description: "invalid page was accepted")
+            } catch RhwpRenderTreeQueryError.invalidPageIndex {
+                guard document.renderPageTree(at: invalidPage) == nil,
+                      document.renderPageTreeJSON(at: invalidPage) == nil else {
+                    throw RenderCheckError(description: "optional query did not preserve nil failure")
+                }
+            }
+        }
+        do {
+            _ = try document.renderPageTreeThrowing(at: document.pageCount)
+            throw RenderCheckError(description: "out-of-range producer query was accepted")
+        } catch RhwpRenderTreeQueryError.producerUnavailable {
+            // A valid UInt32 outside the document tests the real FFI null-output path.
+        }
+    }
+
     @MainActor
     private static func render(inputPath: String, outputDir: URL) throws -> String {
         let inputURL = URL(fileURLWithPath: inputPath)
@@ -54,9 +74,8 @@ struct Stage3RenderCheck {
         }
 
         let pageIndex = 0
-        guard let tree = doc.renderPageTree(at: pageIndex) else {
-            throw RenderCheckError(description: "render tree is nil")
-        }
+        let tree = try doc.renderPageTreeThrowing(at: pageIndex)
+        try verifyRenderTreeQueryBoundary(doc)
 
         var stats = TextStats()
         collectTextStats(tree, into: &stats)

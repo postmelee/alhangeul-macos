@@ -41,6 +41,16 @@
 - node type, transform, clipping, image, text style 해석을 바꿨다면 문제 샘플에서 `render-debug-compare.sh`를 실행해 core SVG와 native PNG 차이를 확인한다.
 - core SVG와 native PNG가 다르면 [`render_core_native_compare_guide.md`](render_core_native_compare_guide.md)의 판단 흐름에 따라 Swift renderer 문제와 core 문제를 분리한다.
 
+### Render tree decode 오류 계약
+
+`renderPageTree(at:) -> RenderNode?`는 기존 제품 caller를 위해 실패 시 nil을 유지한다. `renderPageTreeThrowing(at:)`와 `RenderTreeDecoder.decode`는 native smoke/CI 등 진단이 필요한 caller에서 사용한다. page 변환 범위 오류와 producer의 null JSON을 `RhwpRenderTreeQueryError`로, envelope/known payload 오류를 `RenderTreeDecodingFailure`로 구분한다.
+
+Known variant의 필수 필드/형식 오류를 `.unknown` 성공으로 바꾸지 않는다. 올바른 단일 enum tag의 future variant는 `.unknown`으로 수용한다. 다중/빈 tag object와 payload variant의 unit 표현은 오류다. 추가 envelope 필드는 무시하므로 legacy `dirty` 호환은 유지한다. 하위 payload enum 전체의 정책이나 pixel parity를 보증하는 계약은 아니다.
+
+Core의 usize index metadata는 UInt로 보존하여 머리말/꼬리말의 큰 unsigned marker를 손실시키지 않는다.
+
+진단은 known variant, schema coding path, 원인 분류만 포함한다. Foundation이 coding path 없는 비-DecodingError를 반환하는 경우 알려진 payload 경로와 `unexpectedDecoderError`를 유지한다. 문서 값, raw JSON, Foundation debugDescription/underlyingError는 오류 객체나 제품 로그에 넣지 않는다. wrapper는 stdout/stderr를 출력하지 않고 진단을 소비하는 CLI만 명시적으로 출력한다. C JSON 문자열은 복사 후 `rhwp_free_string`으로 해제한다.
+
 ## extension 특화 규칙
 
 - Quick Look/Thumbnail은 메모리 사용량을 보수적으로 관리한다.

@@ -172,6 +172,27 @@ private func expectDecodeFailure(_ data: Data, variant: String?, path: String,
     }
 }
 
+private func verifyUnsignedCoreIndexMetadata() throws {
+    // JSONSerialization의 Double 변환을 거치지 않고 producer의 usize marker를 재현한다.
+    let textLine = #"{"id":1,"node_type":{"TextLine":{"line_height":20,"baseline":17,"section_index":0,"para_index":18446744073709551615}},"bbox":{"x":0,"y":0,"width":100,"height":20},"children":[],"visible":true}"#
+    let root = try RenderTreeDecoder.decode(Data(textLine.utf8))
+    guard case .textLine(let line) = root.nodeType else {
+        throw RenderTreeDecoderFixtureError.assertion("core marker TextLine was not decoded")
+    }
+    try require(line.paraIndex == UInt.max, "unsigned producer marker was lost")
+    do {
+        _ = try RenderTreeDecoder.decode(Data(textLine.replacingOccurrences(of: "18446744073709551615", with: "-1").utf8))
+        throw RenderTreeDecoderFixtureError.assertion("negative unsigned index was accepted")
+    } catch let failure as RenderTreeDecodingFailure {
+        // Foundation versions differ: integer overflow may lack a DecodingError codingPath.
+        try require(failure.variant == "TextLine", "numeric failure lost known variant")
+        try require(failure.path.hasPrefix("$.node_type.TextLine"), "numeric failure lost payload path")
+        try require(failure.reason == .dataCorrupted || failure.reason == .unexpectedDecoderError,
+                    "unexpected numeric failure classification")
+    }
+    print("OK: UInt.max core index marker preserved; negative index rejected")
+}
+
 private func verifyStrictKnownAndUnknownPolicy() throws {
     let original = try JSONSerialization.jsonObject(with: Data(textRunPayloadJSON.utf8)) as! [String: Any]
     let tagged = original["node_type"] as! [String: Any]
@@ -227,6 +248,7 @@ private struct RenderTreeDecoderFixture {
             try verifyFixture(named: "legacy-with-dirty", json: legacyJSON)
             try verifyTextRunPayloadFixture()
             try verifyStrictKnownAndUnknownPolicy()
+            try verifyUnsignedCoreIndexMetadata()
             print(
                 "OK: render tree decoder preserves current/legacy/future variants and diagnoses malformed known/envelope payloads"
             )
