@@ -17,7 +17,7 @@
 
 | 버전 | 상태 | GitHub Release | Pages 릴리즈 노트 | 내부 기록 |
 |------|------|----------------|-------------------|-----------|
-| `v0.1.11` | 공개 준비 — Stage 3 source/package 결과·예외 기록, signed 검증 대기 | [게시 예정](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.11) | [로컬 문서 후보](../../docs/updates/v0.1.11.html) | [`v0.1.11.md`](v0.1.11.md) |
+| `v0.1.11` | 공개 보류 — signed draft HWP3 변환 저장 실패, 수정 승인 대기 | [검증 실패 draft](https://github.com/postmelee/alhangeul-macos/releases/tag/untagged-9fe71ba4d0e2e4372b1b) | [로컬 문서 후보](../../docs/updates/v0.1.11.html) | [`v0.1.11.md`](v0.1.11.md) |
 | `v0.1.10` | 공개·Homebrew·문구 closeout 완료 | [Alhangeul v0.1.10 (rhwp v0.8.4)](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.10) | [v0.1.10](https://postmelee.github.io/alhangeul-macos/updates/v0.1.10.html) | [`v0.1.10.md`](v0.1.10.md) |
 | `v0.1.9` | 공개 완료 | [Alhangeul v0.1.9](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.9) | [v0.1.9](https://postmelee.github.io/alhangeul-macos/updates/v0.1.9.html) | [`v0.1.9.md`](v0.1.9.md) |
 | `v0.1.8` | 공개 완료 | [Alhangeul v0.1.8](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.8) | [v0.1.8](https://postmelee.github.io/alhangeul-macos/updates/v0.1.8.html) | [`v0.1.8.md`](v0.1.8.md) |
