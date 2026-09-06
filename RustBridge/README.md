@@ -24,7 +24,7 @@
 
 ## Core dependency 기준
 
-현재 `rhwp-core.lock`과 `RustBridge/Cargo.toml`은 release tag `v0.8.4`, resolved commit `496333b27d21ddb9114ba9ae340bcb895870c9a7`, feature `native-skia`를 기준으로 한다. Stable 기준은 release tag와 resolved commit을 함께 고정하며 branch/floating ref는 사용하지 않는다.
+현재 `rhwp-core.lock`과 `RustBridge/Cargo.toml`은 release tag `v0.8.6`, resolved commit `f1f9c6ae58344ee9368996d3543f76b9345cf227`, feature `native-skia`를 기준으로 한다. Stable 기준은 release tag와 resolved commit을 함께 고정하며 branch/floating ref는 사용하지 않는다.
 
 채널별 dependency 기준, lock 필드, compatibility gate 상세는 [`core_release_compatibility.md`](../mydocs/tech/core_release_compatibility.md)를 참조한다.
 
@@ -79,6 +79,18 @@ RustBridge는 external image 파일을 직접 찾거나 읽지 않는다. Swift/
 알 수 없는 status와 판정 실패는 Swift에서 `invalidOrUnknown`으로 fail-closed 처리한다. 이 probe는 문서를 복호화하지 않으며 기존 `rhwp_open`의 parse 실패 계약을 변경하지 않는다.
 
 pinned public API에는 embedded/external/missing/injected 전체 image 상태를 반환하는 함수가 없어 `rhwp_image_state_json`은 제공하지 않는다. External 상태는 refs JSON의 `loaded`로 전달하고 renderer missing/decode diagnostic은 downstream renderer 이슈에서 별도로 다룬다.
+
+## Spotlight UTF-8 본문 ABI
+
+`rhwp_extract_text_utf8(data, len, out_data, out_len)`은 문서 handle 없이 평문 HWP3/HWP5/HWPX를 파싱하고 검색용 본문을 반환한다. `RhwpTextStatus`는 완전/빈/부분 추출과 입력·보호·형식·파싱·panic 실패를 구분한다. `RHWP_TEXT_MAX_INPUT_BYTES`는 32 MiB다. 파싱 후 1 MiB UTF-8, 200,000 방문 단위, 깊이 64 한도를 적용한다.
+
+반환 bytes는 NUL 종단이 아니다. 호출자가 `out_len`만큼 복사한 뒤 `rhwp_free_bytes(out_data, out_len)`로 한 번 해제한다. 유효한 output slot은 시작 시 NULL/0으로 초기화된다. 입력은 호출 중 읽기 가능해야 하며 output slots는 서로 겹치지 않는 정렬된 writable 영역이어야 한다. 파일·외부 자원·비밀번호 저장소·레이아웃을 사용하지 않는다. HWP5는 256-byte 보호 헤더만 먼저 검사한 후 본문을 한 번 파싱한다.
+
+[검색 본문 계약](../mydocs/tech/spotlight_text_extraction_contract.md)에 포함/제외, Unicode·delimiter, 상태 번호와 자원 한계가 있다. 이 API는 parser 전체 CPU/RSS/abort를 제한하는 격리 장치가 아니다.
+
+```sh
+MACOSX_DEPLOYMENT_TARGET=12.0 cargo test --manifest-path RustBridge/Cargo.toml --locked --offline --release --target aarch64-apple-darwin
+```
 
 ## 경계 규칙
 
