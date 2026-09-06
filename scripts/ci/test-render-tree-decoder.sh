@@ -10,7 +10,8 @@ Usage: $0
 
 Compiles RenderTree.swift with an isolated fixture and verifies both current
 JSON without the retired dirty field, legacy JSON that still contains it,
-and a complete TextRun/TextStyle payload.
+a complete TextRun/TextStyle payload, strict known-variant failures, unknown
+future variants, malformed envelopes and sanitized nested diagnostics.
 EOF
 }
 

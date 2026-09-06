@@ -154,6 +154,71 @@ private func verifyTextRunPayloadFixture() throws {
     }
 }
 
+private func jsonData(_ object: [String: Any]) throws -> Data {
+    try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
+}
+
+private func expectDecodeFailure(_ data: Data, variant: String?, path: String,
+                                 reason: RenderTreeDecodingFailure.Reason) throws {
+    do {
+        _ = try RenderTreeDecoder.decode(data)
+        throw RenderTreeDecoderFixtureError.assertion("malformed known/envelope unexpectedly accepted")
+    } catch let failure as RenderTreeDecodingFailure {
+        try require(failure.variant == variant, "unexpected diagnostic variant: \(failure)")
+        try require(failure.path == path, "unexpected diagnostic path: \(failure)")
+        try require(failure.reason == reason, "unexpected diagnostic cause: \(failure)")
+        try require(!failure.description.contains("PRIVATE_DOCUMENT"), "diagnostic leaked document value")
+        print("OK: \(failure)")
+    }
+}
+
+private func verifyStrictKnownAndUnknownPolicy() throws {
+    let original = try JSONSerialization.jsonObject(with: Data(textRunPayloadJSON.utf8)) as! [String: Any]
+    let tagged = original["node_type"] as! [String: Any]
+    let payload = tagged["TextRun"] as! [String: Any]
+    var root = original
+    var missing = payload
+    missing.removeValue(forKey: "text")
+    root["node_type"] = ["TextRun": missing]
+    try expectDecodeFailure(try jsonData(root), variant: "TextRun", path: "$.node_type.TextRun.text", reason: .keyNotFound)
+    var bad = payload
+    bad["text"] = ["PRIVATE_DOCUMENT": "/private/PRIVATE_DOCUMENT.hwp"]
+    root["node_type"] = ["TextRun": bad]
+    try expectDecodeFailure(try jsonData(root), variant: "TextRun", path: "$.node_type.TextRun.text", reason: .typeMismatch)
+    root["node_type"] = ["TextRun": NSNull()]
+    try expectDecodeFailure(try jsonData(root), variant: "TextRun", path: "$.node_type.TextRun", reason: .valueNotFound)
+
+    var parent = try JSONSerialization.jsonObject(with: Data(currentJSON.utf8)) as! [String: Any]
+    root["node_type"] = ["TextRun": missing]
+    parent["children"] = [root]
+    try expectDecodeFailure(try jsonData(parent), variant: "TextRun", path: "$.children[0].node_type.TextRun.text", reason: .keyNotFound)
+
+    for value: Any in ["Future_PRIVATE_DOCUMENT", ["Future_PRIVATE_DOCUMENT": ["text": "PRIVATE_DOCUMENT"]]] {
+        root = original
+        root["node_type"] = value
+        let decoded = try RenderTreeDecoder.decode(jsonData(root))
+        guard case .unknown = decoded.nodeType else {
+            throw RenderTreeDecoderFixtureError.assertion("future variant must remain unknown")
+        }
+    }
+    for value: Any in ["TextRun", ["Header": NSNull()], ["TextRun": payload, "Future_PRIVATE_DOCUMENT": true]] {
+        root = original
+        root["node_type"] = value
+        let variant = (value as? [String: Any])?["Header"] != nil ? "Header" : "TextRun"
+        try expectDecodeFailure(try jsonData(root), variant: variant, path: "$.node_type", reason: .invalidVariantShape)
+    }
+    root = original
+    root["node_type"] = [String: Any]()
+    try expectDecodeFailure(try jsonData(root), variant: nil, path: "$.node_type", reason: .invalidVariantShape)
+    root = original
+    root.removeValue(forKey: "bbox")
+    try expectDecodeFailure(try jsonData(root), variant: nil, path: "$.bbox", reason: .keyNotFound)
+    root = original
+    root["visible"] = "PRIVATE_DOCUMENT"
+    try expectDecodeFailure(try jsonData(root), variant: nil, path: "$.visible", reason: .typeMismatch)
+    try expectDecodeFailure(Data("{PRIVATE_DOCUMENT".utf8), variant: nil, path: "$", reason: .dataCorrupted)
+}
+
 @main
 private struct RenderTreeDecoderFixture {
     static func main() {
@@ -161,8 +226,9 @@ private struct RenderTreeDecoderFixture {
             try verifyFixture(named: "current-without-dirty", json: currentJSON)
             try verifyFixture(named: "legacy-with-dirty", json: legacyJSON)
             try verifyTextRunPayloadFixture()
+            try verifyStrictKnownAndUnknownPolicy()
             print(
-                "OK: render tree decoder accepts current/legacy envelopes and TextRun payload"
+                "OK: render tree decoder preserves current/legacy/future variants and diagnoses malformed known/envelope payloads"
             )
         } catch {
             let message = "ERROR: render tree decoder fixture failed: \(error)\n"

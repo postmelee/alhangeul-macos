@@ -6,6 +6,62 @@
 
 import Foundation
 
+// 오류에는 schema 위치와 분류만 보존한다. 문서 값이나 Foundation의
+// debugDescription/underlyingError는 저장·출력하지 않는다.
+struct RenderTreeDecodingFailure: Error, CustomStringConvertible {
+    enum Reason: String {
+        case keyNotFound, typeMismatch, valueNotFound, dataCorrupted, invalidVariantShape
+    }
+
+    let variant: String?
+    let path: String
+    let reason: Reason
+
+    init(variant: String?, codingPath: [CodingKey], reason: Reason) {
+        self.variant = variant.flatMap { RenderNodeType.knownVariantNames.contains($0) ? $0 : nil }
+        self.path = "$" + codingPath.map { key in
+            if let index = key.intValue { return "[\(index)]" }
+            // DynamicKey comes from enum tags; arbitrary future names must not enter diagnostics.
+            if key is DynamicKey && !RenderNodeType.knownVariantNames.contains(key.stringValue) {
+                return ".<tag>"
+            }
+            return "." + key.stringValue
+        }.joined()
+        self.reason = reason
+    }
+
+    init(_ error: Error, variant: String? = nil) {
+        switch error {
+        case DecodingError.keyNotFound(let key, let context):
+            self.init(variant: variant, codingPath: context.codingPath + [key], reason: .keyNotFound)
+        case DecodingError.typeMismatch(_, let context):
+            self.init(variant: variant, codingPath: context.codingPath, reason: .typeMismatch)
+        case DecodingError.valueNotFound(_, let context):
+            self.init(variant: variant, codingPath: context.codingPath, reason: .valueNotFound)
+        case DecodingError.dataCorrupted(let context):
+            self.init(variant: variant, codingPath: context.codingPath, reason: .dataCorrupted)
+        default:
+            self.init(variant: variant, codingPath: [], reason: .dataCorrupted)
+        }
+    }
+
+    var description: String {
+        "render-tree decode failed: variant=\(variant ?? "envelope") path=\(path) cause=\(reason.rawValue)"
+    }
+}
+
+enum RenderTreeDecoder {
+    static func decode(_ data: Data) throws -> RenderNode {
+        do {
+            return try JSONDecoder().decode(RenderNode.self, from: data)
+        } catch let failure as RenderTreeDecodingFailure {
+            throw failure
+        } catch {
+            throw RenderTreeDecodingFailure(error)
+        }
+    }
+}
+
 // MARK: - 렌더 노드
 
 // Upstream에서 제거된 필드는 모델에 남기지 않는다. JSONDecoder는 구버전 JSON의
@@ -62,42 +118,90 @@ enum RenderNodeType: Decodable {
     case footnoteMarker(FootnoteMarkerNode)
     case unknown
 
+    static let knownVariantNames: Set<String> = [
+        "Page",
+        "PageBackground",
+        "Body",
+        "Column",
+        "TextLine",
+        "TextRun",
+        "Table",
+        "TableCell",
+        "Line",
+        "Rectangle",
+        "Ellipse",
+        "Path",
+        "Image",
+        "Group",
+        "Equation",
+        "FormObject",
+        "Placeholder",
+        "RawSvg",
+        "FootnoteMarker",
+        "MasterPage",
+        "Header",
+        "Footer",
+        "FootnoteArea",
+        "TextBox",
+    ]
+
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        // Unit variant: "MasterPage" 등
-        if let str = try? container.decode(String.self) {
-            switch str {
+        if let name = try? container.decode(String.self) {
+            switch name {
             case "MasterPage": self = .masterPage
             case "Header": self = .header
             case "Footer": self = .footer
             case "FootnoteArea": self = .footnoteArea
             case "TextBox": self = .textBox
-            default: self = .unknown
+            default:
+                guard !Self.knownVariantNames.contains(name) else {
+                    throw RenderTreeDecodingFailure(variant: name, codingPath: decoder.codingPath,
+                                                    reason: .invalidVariantShape)
+                }
+                self = .unknown
             }
             return
         }
-        // Newtype/Struct variant: {"Page": {...}} 등
         let keyed = try decoder.container(keyedBy: DynamicKey.self)
-        if let v = try? keyed.decode(PageNode.self, forKey: .init("Page")) { self = .page(v); return }
-        if let v = try? keyed.decode(PageBackgroundNode.self, forKey: .init("PageBackground")) { self = .pageBackground(v); return }
-        if let v = try? keyed.decode(BodyNode.self, forKey: .init("Body")) { self = .body(v); return }
-        if let v = try? keyed.decode(UInt16.self, forKey: .init("Column")) { self = .column(v); return }
-        if let v = try? keyed.decode(TextLineNode.self, forKey: .init("TextLine")) { self = .textLine(v); return }
-        if let v = try? keyed.decode(TextRunNode.self, forKey: .init("TextRun")) { self = .textRun(v); return }
-        if let v = try? keyed.decode(TableNode.self, forKey: .init("Table")) { self = .table(v); return }
-        if let v = try? keyed.decode(TableCellNode.self, forKey: .init("TableCell")) { self = .tableCell(v); return }
-        if let v = try? keyed.decode(LineNode.self, forKey: .init("Line")) { self = .line(v); return }
-        if let v = try? keyed.decode(RectangleNode.self, forKey: .init("Rectangle")) { self = .rectangle(v); return }
-        if let v = try? keyed.decode(EllipseNode.self, forKey: .init("Ellipse")) { self = .ellipse(v); return }
-        if let v = try? keyed.decode(PathNode.self, forKey: .init("Path")) { self = .path(v); return }
-        if let v = try? keyed.decode(ImageNode.self, forKey: .init("Image")) { self = .image(v); return }
-        if let v = try? keyed.decode(GroupNode.self, forKey: .init("Group")) { self = .group(v); return }
-        if let v = try? keyed.decode(EquationNode.self, forKey: .init("Equation")) { self = .equation(v); return }
-        if let v = try? keyed.decode(FormObjectNode.self, forKey: .init("FormObject")) { self = .formObject(v); return }
-        if let v = try? keyed.decode(PlaceholderNode.self, forKey: .init("Placeholder")) { self = .placeholder(v); return }
-        if let v = try? keyed.decode(RawSvgNode.self, forKey: .init("RawSvg")) { self = .rawSvg(v); return }
-        if let v = try? keyed.decode(FootnoteMarkerNode.self, forKey: .init("FootnoteMarker")) { self = .footnoteMarker(v); return }
-        self = .unknown
+        guard keyed.allKeys.count == 1, let key = keyed.allKeys.first else {
+            let known = keyed.allKeys.map(\.stringValue).filter(Self.knownVariantNames.contains).sorted().first
+            throw RenderTreeDecodingFailure(variant: known, codingPath: decoder.codingPath,
+                                            reason: .invalidVariantShape)
+        }
+        do {
+            switch key.stringValue {
+            case "Page": self = .page(try keyed.decode(PageNode.self, forKey: key))
+            case "PageBackground": self = .pageBackground(try keyed.decode(PageBackgroundNode.self, forKey: key))
+            case "Body": self = .body(try keyed.decode(BodyNode.self, forKey: key))
+            case "Column": self = .column(try keyed.decode(UInt16.self, forKey: key))
+            case "TextLine": self = .textLine(try keyed.decode(TextLineNode.self, forKey: key))
+            case "TextRun": self = .textRun(try keyed.decode(TextRunNode.self, forKey: key))
+            case "Table": self = .table(try keyed.decode(TableNode.self, forKey: key))
+            case "TableCell": self = .tableCell(try keyed.decode(TableCellNode.self, forKey: key))
+            case "Line": self = .line(try keyed.decode(LineNode.self, forKey: key))
+            case "Rectangle": self = .rectangle(try keyed.decode(RectangleNode.self, forKey: key))
+            case "Ellipse": self = .ellipse(try keyed.decode(EllipseNode.self, forKey: key))
+            case "Path": self = .path(try keyed.decode(PathNode.self, forKey: key))
+            case "Image": self = .image(try keyed.decode(ImageNode.self, forKey: key))
+            case "Group": self = .group(try keyed.decode(GroupNode.self, forKey: key))
+            case "Equation": self = .equation(try keyed.decode(EquationNode.self, forKey: key))
+            case "FormObject": self = .formObject(try keyed.decode(FormObjectNode.self, forKey: key))
+            case "Placeholder": self = .placeholder(try keyed.decode(PlaceholderNode.self, forKey: key))
+            case "RawSvg": self = .rawSvg(try keyed.decode(RawSvgNode.self, forKey: key))
+            case "FootnoteMarker": self = .footnoteMarker(try keyed.decode(FootnoteMarkerNode.self, forKey: key))
+            default:
+                guard !Self.knownVariantNames.contains(key.stringValue) else {
+                    throw RenderTreeDecodingFailure(variant: key.stringValue, codingPath: decoder.codingPath,
+                                                    reason: .invalidVariantShape)
+                }
+                self = .unknown
+            }
+        } catch let failure as RenderTreeDecodingFailure {
+            throw failure
+        } catch {
+            throw RenderTreeDecodingFailure(error, variant: key.stringValue)
+        }
     }
 }
 
