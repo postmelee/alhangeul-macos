@@ -32,6 +32,12 @@ targets:
         embed: true
       - target: ThumbnailExtension
         embed: true
+      - target: SpotlightImporter
+        embed: true
+        link: false
+        copy:
+          destination: wrapper
+          subpath: Contents/Library/Spotlight
       - framework: Frameworks/Rhwp.xcframework
         embed: false
       - sdk: CoreFoundation.framework
@@ -133,6 +139,34 @@ targets:
         INFOPLIST_FILE: Sources/ThumbnailExtension/Info.plist
         CODE_SIGN_ENTITLEMENTS: Sources/ThumbnailExtension/ThumbnailExtension.entitlements
         CODE_SIGN_STYLE: Automatic
+
+  SpotlightImporter:
+    type: bundle
+    platform: macOS
+    sources:
+      - path: Sources/SpotlightImporter
+    dependencies:
+      - framework: Frameworks/Rhwp.xcframework
+        embed: false
+      - sdk: CoreFoundation.framework
+      - sdk: CoreServices.framework
+      - sdk: CoreText.framework
+      - sdk: CoreGraphics.framework
+      - sdk: ImageIO.framework
+      - sdk: Security.framework
+      - sdk: libc++.tbd
+      - sdk: libiconv.tbd
+      - sdk: libz.tbd
+    settings:
+      base:
+        PRODUCT_NAME: Alhangeul
+        EXECUTABLE_NAME: Alhangeul
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.SpotlightImporter
+        WRAPPER_EXTENSION: mdimporter
+        INFOPLIST_FILE: Sources/SpotlightImporter/Info.plist
+        GCC_C_LANGUAGE_STANDARD: c11
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
 
   HostAppTests:
     type: bundle.unit-test
