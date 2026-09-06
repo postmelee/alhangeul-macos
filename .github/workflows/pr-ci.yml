@@ -84,6 +84,7 @@ jobs:
           bash scripts/ci/read-rhwp-core-lock.sh --help
           bash scripts/ci/test-render-tree-decoder.sh --help
           bash scripts/ci/update-release-version-notices.sh --help
+          bash scripts/ci/verify-app-execution-endpoint-config.sh --help
           bash scripts/ci/write-rhwp-full-sync-pr-body.sh --help
           bash scripts/ci/write-rhwp-studio-sync-pr-body.sh --help
           bash scripts/ci/write-sparkle-appcast.sh --help
@@ -103,6 +104,12 @@ jobs:
         run: |
           set -euo pipefail
           scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
+
+      - name: Check analytics endpoint configuration fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/test-app-execution-endpoint-config.sh
 
       - name: Verify tracked core build info
         shell: bash
@@ -222,6 +229,13 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build
 
+      - name: Verify HostApp Debug analytics endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/verify-app-execution-endpoint-config.sh \
+            --debug-app build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app
+
       - name: Run native renderer smoke
         if: ${{ needs.classify-changes.outputs.run_render_smoke == 'true' }}
         shell: bash
@@ -249,6 +263,12 @@ jobs:
           if ! command -v rg >/dev/null 2>&1; then
             brew install ripgrep
           fi
+
+      - name: Check analytics endpoint plist fixtures on macOS
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/test-app-execution-endpoint-config.sh
 
       - name: Fetch release tags
         shell: bash

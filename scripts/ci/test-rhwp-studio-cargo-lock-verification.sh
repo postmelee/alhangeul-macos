@@ -48,11 +48,24 @@ expect_failure() {
   local description="$1"
   local expected_stderr="$2"
   shift 2
-  if "$@" > "$COMMAND_STDOUT" 2> "$COMMAND_STDERR"; then
+  if "$@" < /dev/null > "$COMMAND_STDOUT" 2> "$COMMAND_STDERR"; then
     fail "$description unexpectedly succeeded"
   fi
   assert_contains "$COMMAND_STDERR" "$expected_stderr" \
     "$description returned an unexpected error"
+}
+
+write_pdf_font_fixtures() {
+  local font_dir="$1"
+  mkdir -p "$font_dir"
+  for pdf_font_name in \
+    NotoSansKR-Regular.woff2 \
+    NotoSansKR-Bold.woff2 \
+    NotoSerifKR-Regular.woff2 \
+    NotoSerifKR-Bold.woff2
+  do
+    printf '\167\117\106\062' > "$font_dir/$pdf_font_name"
+  done
 }
 
 write_resource() {
@@ -62,11 +75,16 @@ write_resource() {
   local fingerprint_line=""
 
   mkdir -p "$resource_dir/assets"
+  write_pdf_font_fixtures "$resource_dir/fonts"
   cat > "$resource_dir/index.html" <<'EOF'
 <!doctype html>
 <link rel="stylesheet" href="./assets/index-fixture.css">
 <link rel="stylesheet" href="./alhangeul-wkwebview-overrides.css">
 <script type="module" src="./assets/index-fixture.js"></script>
+<span class="sb-color-wrap">
+  <button id="btn-text-color">Text color</button>
+  <input id="text-color-picker" type="color" />
+</span>
 EOF
   cat > "$resource_dir/alhangeul-wkwebview-overrides.css" <<'EOF'
 select.sb-combo,
@@ -101,6 +119,7 @@ EOF
 write_upstream_checkout() {
   local upstream_dir="$1"
   mkdir -p "$upstream_dir/pkg" "$upstream_dir/rhwp-studio/dist/assets"
+  write_pdf_font_fixtures "$upstream_dir/rhwp-studio/dist/fonts"
   printf '%s\n' 'fixture Cargo lock contents' > "$upstream_dir/Cargo.lock"
   printf '%s\n' 'fixture-rhwp-js' > "$upstream_dir/pkg/rhwp.js"
   printf '%s\n' 'fixture-rhwp-wasm' > "$upstream_dir/pkg/rhwp_bg.wasm"
@@ -108,6 +127,10 @@ write_upstream_checkout() {
 <!doctype html>
 <link rel="stylesheet" href="./assets/index-sync.css">
 <script type="module" crossorigin src="./assets/index-sync.js"></script>
+<span class="sb-color-wrap">
+  <button id="btn-text-color">Text color</button>
+  <input id="text-color-picker" type="color" />
+</span>
 EOF
   printf '%s\n' 'console.log("sync fixture");' \
     > "$upstream_dir/rhwp-studio/dist/assets/index-sync.js"
@@ -133,12 +156,84 @@ done
 
 production_manifest_before="$TMP_ROOT/production-manifest.before.json"
 cp "$PRODUCTION_RESOURCE/manifest.json" "$production_manifest_before"
+production_overlay_before="$TMP_ROOT/production-overlay.before.css"
+cp "$PRODUCTION_RESOURCE/alhangeul-wkwebview-overrides.css" "$production_overlay_before"
 
 legacy_resource="$TMP_ROOT/legacy-resource"
 write_resource "$legacy_resource"
 "$VERIFIER" --resource-dir "$legacy_resource" > "$COMMAND_STDOUT"
 assert_contains "$COMMAND_STDOUT" "rhwp-studio assets verified" \
   "legacy resource-only verification did not succeed"
+
+# Exercise the HostApp bridge DOM dependency independently from production assets.
+color_picker_resource="$TMP_ROOT/color-picker-resource"
+write_resource "$color_picker_resource"
+color_picker_css="$color_picker_resource/alhangeul-wkwebview-overrides.css"
+valid_picker_css="$legacy_resource/alhangeul-wkwebview-overrides.css"
+color_picker_checks=1
+
+cp "$valid_picker_css" "$color_picker_css"
+sed 's/id="text-color-picker" type="color"/type="color" id="text-color-picker"/' \
+  "$legacy_resource/index.html" > "$color_picker_resource/index.html"
+"$VERIFIER" --resource-dir "$color_picker_resource" > "$COMMAND_STDOUT"
+assert_contains "$COMMAND_STDOUT" "rhwp-studio assets verified" \
+  "reordered color input attributes did not succeed"
+color_picker_checks=$((color_picker_checks + 1))
+
+while IFS='|' read -r description expected_error transform; do
+  sed "$transform" "$legacy_resource/index.html" > "$color_picker_resource/index.html"
+  expect_failure "$description" "$expected_error" \
+    "$VERIFIER" --resource-dir "$color_picker_resource"
+  color_picker_checks=$((color_picker_checks + 1))
+done <<'EOF'
+missing color button|missing the text color button required by the HostApp bridge|s/id="btn-text-color"/id="retired-text-color"/
+missing color input|missing the text color input required by the HostApp bridge|s/id="text-color-picker"/id="retired-color-picker"/
+wrong input type with decoy|missing the text color input required by the HostApp bridge|s/type="color" \/>/type="text" \/><input type="color" \/>/
+data-id is not id|missing the text color input required by the HostApp bridge|s/id="text-color-picker"/data-id="text-color-picker"/
+EOF
+[ "$color_picker_checks" -eq 6 ] \
+  || fail "expected 6 color picker DOM checks, ran $color_picker_checks"
+echo "OK: rhwp-studio color picker DOM fixtures passed ($color_picker_checks cases)"
+
+# Retain independent coverage for the local overlay ownership boundary.
+cp "$legacy_resource/index.html" "$color_picker_resource/index.html"
+cp "$valid_picker_css" "$color_picker_css"
+printf '\n#style-bar { color: red; }\n' >> "$color_picker_css"
+expect_failure "upstream toolbar layout selector" \
+  "must not own upstream toolbar layout selectors" \
+  "$VERIFIER" --resource-dir "$color_picker_resource"
+
+cp "$valid_picker_css" "$color_picker_css"
+sed 's/appearance: none;/appearance: none;\
+  width: 100%;/' \
+  "$valid_picker_css" > "$color_picker_css"
+expect_failure "upstream control dimension" \
+  "must not own upstream control dimensions" \
+  "$VERIFIER" --resource-dir "$color_picker_resource"
+
+missing_font_resource="$TMP_ROOT/missing-font-resource"
+write_resource "$missing_font_resource"
+rm "$missing_font_resource/fonts/NotoSansKR-Regular.woff2"
+expect_failure "resource without required PDF font" \
+  "missing PDF font: $missing_font_resource/fonts/NotoSansKR-Regular.woff2" \
+  "$VERIFIER" --resource-dir "$missing_font_resource"
+
+invalid_font_resource="$TMP_ROOT/invalid-font-resource"
+write_resource "$invalid_font_resource"
+printf '%s\n' 'not-woff2' \
+  > "$invalid_font_resource/fonts/NotoSerifKR-Bold.woff2"
+expect_failure "resource with invalid PDF font signature" \
+  "PDF font is not WOFF2: $invalid_font_resource/fonts/NotoSerifKR-Bold.woff2" \
+  "$VERIFIER" --resource-dir "$invalid_font_resource"
+
+symlink_font_resource="$TMP_ROOT/symlink-font-resource"
+write_resource "$symlink_font_resource"
+rm "$symlink_font_resource/fonts/NotoSansKR-Bold.woff2"
+ln -s NotoSansKR-Regular.woff2 \
+  "$symlink_font_resource/fonts/NotoSansKR-Bold.woff2"
+expect_failure "resource with symlinked PDF font" \
+  "PDF font must not be a symlink: $symlink_font_resource/fonts/NotoSansKR-Bold.woff2" \
+  "$VERIFIER" --resource-dir "$symlink_font_resource"
 
 upstream_dir="$TMP_ROOT/upstream"
 write_upstream_checkout "$upstream_dir"
@@ -246,5 +341,7 @@ assert_contains "$COMMAND_STDOUT" "rhwp-studio sync check passed" \
 "$VERIFIER" > "$COMMAND_STDOUT"
 assert_files_equal "$production_manifest_before" "$PRODUCTION_RESOURCE/manifest.json" \
   "fixture verification changed the production rhwp-studio manifest"
+assert_files_equal "$production_overlay_before" "$PRODUCTION_RESOURCE/alhangeul-wkwebview-overrides.css" \
+  "fixture verification changed the production WKWebView override"
 
 echo "OK: rhwp-studio Cargo.lock fingerprint verification fixtures passed"

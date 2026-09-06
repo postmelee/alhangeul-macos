@@ -20,22 +20,189 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             "form-action 'none'",
             "style-src 'unsafe-inline'",
             "img-src data:",
-            "font-src 'none'"
+            "font-src alhangeul-pdf-font:"
         ].joined(separator: "; ") + ";"
         XCTAssertEqual(RhwpStudioPagePDFHTML.contentSecurityPolicy, expectedPolicy)
         XCTAssertFalse(RhwpStudioPagePDFHTML.contentSecurityPolicy.contains("font-src data:"))
         XCTAssertFalse(RhwpStudioPagePDFHTML.contentSecurityPolicy.contains("http:"))
         XCTAssertFalse(RhwpStudioPagePDFHTML.contentSecurityPolicy.contains("https:"))
         XCTAssertFalse(RhwpStudioPagePDFHTML.contentSecurityPolicy.contains("blob:"))
+        XCTAssertFalse(RhwpStudioPagePDFHTML.contentSecurityPolicy.contains("file:"))
 
         let svg = "<svg id=\"document-svg\" xmlns=\"http://www.w3.org/2000/svg\"></svg>"
         let html = RhwpStudioPagePDFHTML.pageHTML(for: svg)
         let cspRange = try XCTUnwrap(
             html.range(of: "<meta http-equiv=\"Content-Security-Policy\"")
         )
+        let fontFaceRange = try XCTUnwrap(html.range(of: "@font-face"))
         let svgRange = try XCTUnwrap(html.range(of: "<svg id=\"document-svg\""))
         XCTAssertLessThan(cspRange.lowerBound, svgRange.lowerBound)
+        XCTAssertLessThan(fontFaceRange.lowerBound, svgRange.lowerBound)
         XCTAssertTrue(html.contains("content=\"\(expectedPolicy)\""))
+        XCTAssertTrue(html.contains(RhwpStudioPDFFontStyle.hangulUnicodeRange))
+        XCTAssertTrue(html.contains("U+3200-321E"))
+        XCTAssertTrue(html.contains("U+3260-327F"))
+        XCTAssertTrue(RhwpStudioPagePDFHTML.pagePreparationScript.contains(
+            "const hangulPattern = /[\(RhwpStudioPDFFontStyle.hangulJavaScriptCharacterClass)]/;"
+        ))
+        XCTAssertTrue(html.contains(
+            "alhangeul-pdf-font://bundle/NotoSansKR-Regular.woff2"
+        ))
+        XCTAssertTrue(html.contains(
+            "alhangeul-pdf-font://bundle/NotoSerifKR-Bold.woff2"
+        ))
+        XCTAssertFalse(html.contains("LatinModernMath-Regular.woff2"))
+    }
+
+    func testPDFFontRouteAllowsOnlyExactAllowlistedBundleURLs() throws {
+        for resource in RhwpStudioPDFFontResource.allCases {
+            let url = try XCTUnwrap(URL(string:
+                "alhangeul-pdf-font://bundle/\(resource.rawValue)"
+            ))
+            XCTAssertEqual(try RhwpStudioPDFFontRoute.resource(for: url), resource)
+        }
+
+        let rejectedValues: [String?] = [
+            nil,
+            "alhangeul-pdf-font://bundle/Unknown.woff2",
+            "alhangeul-pdf-font://bundle/fonts/NotoSansKR-Regular.woff2",
+            "alhangeul-pdf-font://bundle/%4eotoSansKR-Regular.woff2",
+            "alhangeul-pdf-font://bundle/NotoSansKR-Regular.woff2?cache=1",
+            "alhangeul-pdf-font://bundle/NotoSansKR-Regular.woff2#fragment",
+            "alhangeul-pdf-font://user@bundle/NotoSansKR-Regular.woff2",
+            "alhangeul-pdf-font://bundle:443/NotoSansKR-Regular.woff2",
+            "alhangeul-pdf-font://other/NotoSansKR-Regular.woff2",
+            "https://bundle/NotoSansKR-Regular.woff2"
+        ]
+
+        for value in rejectedValues {
+            XCTAssertThrowsError(try RhwpStudioPDFFontRoute.resource(
+                for: value.flatMap(URL.init(string:))
+            ), "URL이 거부되어야 합니다: \(value ?? "nil")")
+        }
+    }
+
+    func testPDFFontProviderResolvesOnlyRegularFilesWithinSizeLimit() throws {
+        let provider = fontResourceProvider()
+        for resource in RhwpStudioPDFFontResource.allCases {
+            let data = try provider.data(for: resource)
+            XCTAssertFalse(data.isEmpty)
+            XCTAssertLessThanOrEqual(
+                data.count,
+                RhwpStudioPDFFontResource.maximumByteCount
+            )
+        }
+
+        let fixtureDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("rhwp-pdf-font-provider-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: fixtureDirectory,
+            withIntermediateDirectories: true
+        )
+        defer { try? FileManager.default.removeItem(at: fixtureDirectory) }
+
+        let oversizedURL = fixtureDirectory.appendingPathComponent(
+            RhwpStudioPDFFontResource.notoSansKRRegular.rawValue
+        )
+        try Data(
+            repeating: 0,
+            count: RhwpStudioPDFFontResource.maximumByteCount + 1
+        ).write(to: oversizedURL)
+
+        let invalidDirectoryURL = fixtureDirectory.appendingPathComponent(
+            RhwpStudioPDFFontResource.notoSansKRBold.rawValue,
+            isDirectory: true
+        )
+        try FileManager.default.createDirectory(
+            at: invalidDirectoryURL,
+            withIntermediateDirectories: false
+        )
+        let invalidFormatURL = fixtureDirectory.appendingPathComponent(
+            RhwpStudioPDFFontResource.notoSerifKRBold.rawValue
+        )
+        try Data([0x00, 0x01, 0x02, 0x03]).write(to: invalidFormatURL)
+
+        let invalidProvider = RhwpStudioPDFFontDirectoryResourceProvider(
+            directoryURL: fixtureDirectory
+        )
+        XCTAssertThrowsError(try invalidProvider.data(for: .notoSansKRRegular)) { error in
+            guard case .resourceTooLarge = error as? RhwpStudioPDFFontResourceError else {
+                XCTFail("과대 글꼴 오류가 아닙니다: \(error)")
+                return
+            }
+        }
+        XCTAssertThrowsError(try invalidProvider.data(for: .notoSansKRBold)) { error in
+            XCTAssertEqual(
+                error as? RhwpStudioPDFFontResourceError,
+                .invalidResourceFile(RhwpStudioPDFFontResource.notoSansKRBold.rawValue)
+            )
+        }
+        XCTAssertThrowsError(try invalidProvider.data(for: .notoSerifKRRegular)) { error in
+            XCTAssertEqual(
+                error as? RhwpStudioPDFFontResourceError,
+                .missingResource(RhwpStudioPDFFontResource.notoSerifKRRegular.rawValue)
+            )
+        }
+        XCTAssertThrowsError(try invalidProvider.data(for: .notoSerifKRBold)) { error in
+            XCTAssertEqual(
+                error as? RhwpStudioPDFFontResourceError,
+                .invalidResourceFormat(RhwpStudioPDFFontResource.notoSerifKRBold.rawValue)
+            )
+        }
+
+        try FileManager.default.removeItem(at: invalidDirectoryURL)
+        try FileManager.default.createSymbolicLink(
+            at: invalidDirectoryURL,
+            withDestinationURL: oversizedURL
+        )
+        XCTAssertThrowsError(try invalidProvider.data(for: .notoSansKRBold)) { error in
+            XCTAssertEqual(
+                error as? RhwpStudioPDFFontResourceError,
+                .invalidResourceFile(RhwpStudioPDFFontResource.notoSansKRBold.rawValue)
+            )
+        }
+    }
+
+    func testPDFFontBundleProviderResolvesAllProductionResources() throws {
+        let fileManager = FileManager.default
+        let bundleURL = fileManager.temporaryDirectory
+            .appendingPathComponent("RhwpStudioPDFFonts-\(UUID().uuidString).bundle")
+        let contentsURL = bundleURL.appendingPathComponent("Contents", isDirectory: true)
+        let resourceDirectoryURL = contentsURL
+            .appendingPathComponent("Resources/rhwp-studio/fonts", isDirectory: true)
+        try fileManager.createDirectory(
+            at: resourceDirectoryURL,
+            withIntermediateDirectories: true
+        )
+        defer { try? fileManager.removeItem(at: bundleURL) }
+
+        let infoData = try PropertyListSerialization.data(
+            fromPropertyList: [
+                "CFBundleIdentifier": "com.postmelee.alhangeul.tests.pdf-fonts.\(UUID().uuidString)",
+                "CFBundleName": "RhwpStudioPDFFonts",
+                "CFBundlePackageType": "BNDL",
+                "CFBundleVersion": "1"
+            ],
+            format: .xml,
+            options: 0
+        )
+        try infoData.write(to: contentsURL.appendingPathComponent("Info.plist"))
+
+        let sourceProvider = fontResourceProvider()
+        for resource in RhwpStudioPDFFontResource.allCases {
+            try sourceProvider.data(for: resource).write(
+                to: resourceDirectoryURL.appendingPathComponent(resource.rawValue)
+            )
+        }
+
+        let bundle = try XCTUnwrap(Bundle(url: bundleURL))
+        let provider = RhwpStudioPDFFontBundleResourceProvider(bundle: bundle)
+        for resource in RhwpStudioPDFFontResource.allCases {
+            XCTAssertEqual(
+                try provider.data(for: resource),
+                try sourceProvider.data(for: resource)
+            )
+        }
     }
 
     func testNavigationPolicyAllowsOnlyPendingInitialAboutBlankMainFrame() {
@@ -55,6 +222,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             (URL(string: "https://127.0.0.1/resource"), true, true),
             (URL(fileURLWithPath: "/tmp/resource"), true, true),
             (URL(string: "blob:https://example.invalid/resource"), true, true),
+            (URL(string: "alhangeul-pdf-font://bundle/NotoSansKR-Regular.woff2"), true, true),
             (URL(string: "custom:resource"), true, true),
             (nil, true, true)
         ]
@@ -68,6 +236,76 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
                 )
             )
         }
+    }
+
+    func testRenderLifecycleTracksPageAndNavigationIdentityWithinGeneration() throws {
+        var lifecycle = RhwpStudioPagePDFRenderLifecycle()
+        let generation = try XCTUnwrap(lifecycle.beginRender())
+        let firstPage = try XCTUnwrap(lifecycle.beginPage(at: 0))
+        let firstNavigation = NSObject()
+
+        XCTAssertEqual(firstPage.generation, generation)
+        XCTAssertEqual(firstPage.pageIndex, 0)
+        XCTAssertTrue(lifecycle.isCurrent(firstPage))
+        XCTAssertNil(lifecycle.beginRender())
+        XCTAssertEqual(lifecycle.latestGeneration, generation)
+        XCTAssertTrue(lifecycle.isInitialMainFrameLoadPending)
+        XCTAssertTrue(
+            lifecycle.registerNavigation(ObjectIdentifier(firstNavigation), for: firstPage)
+        )
+        XCTAssertEqual(
+            lifecycle.token(forNavigation: ObjectIdentifier(firstNavigation)),
+            firstPage
+        )
+
+        let secondPage = try XCTUnwrap(lifecycle.beginPage(at: 1))
+        let secondNavigation = NSObject()
+
+        XCTAssertEqual(secondPage.generation, generation)
+        XCTAssertEqual(secondPage.pageIndex, 1)
+        XCTAssertFalse(lifecycle.isCurrent(firstPage))
+        XCTAssertNil(lifecycle.token(forNavigation: ObjectIdentifier(firstNavigation)))
+        XCTAssertFalse(
+            lifecycle.registerNavigation(ObjectIdentifier(firstNavigation), for: firstPage)
+        )
+        XCTAssertTrue(
+            lifecycle.registerNavigation(ObjectIdentifier(secondNavigation), for: secondPage)
+        )
+        XCTAssertEqual(
+            lifecycle.token(forNavigation: ObjectIdentifier(secondNavigation)),
+            secondPage
+        )
+    }
+
+    func testRenderLifecycleRejectsStaleTokenAcrossRenderGenerations() throws {
+        var lifecycle = RhwpStudioPagePDFRenderLifecycle()
+        let firstGeneration = try XCTUnwrap(lifecycle.beginRender())
+        let firstToken = try XCTUnwrap(lifecycle.beginPage(at: 0))
+
+        XCTAssertTrue(lifecycle.invalidate(firstToken))
+        let secondGeneration = try XCTUnwrap(lifecycle.beginRender())
+        let secondToken = try XCTUnwrap(lifecycle.beginPage(at: 0))
+
+        XCTAssertGreaterThan(secondGeneration, firstGeneration)
+        XCTAssertNotEqual(secondToken, firstToken)
+        XCTAssertFalse(lifecycle.isCurrent(firstToken))
+        XCTAssertFalse(lifecycle.invalidate(firstToken))
+        XCTAssertTrue(lifecycle.isCurrent(secondToken))
+        XCTAssertEqual(lifecycle.currentPageToken, secondToken)
+    }
+
+    func testRenderLifecycleScopesInitialMainFrameLoadToCurrentPage() throws {
+        var lifecycle = RhwpStudioPagePDFRenderLifecycle()
+        _ = try XCTUnwrap(lifecycle.beginRender())
+        _ = try XCTUnwrap(lifecycle.beginPage(at: 0))
+
+        XCTAssertTrue(lifecycle.isInitialMainFrameLoadPending)
+        XCTAssertTrue(lifecycle.consumeInitialMainFrameLoad())
+        XCTAssertFalse(lifecycle.isInitialMainFrameLoadPending)
+        XCTAssertFalse(lifecycle.consumeInitialMainFrameLoad())
+
+        _ = try XCTUnwrap(lifecycle.beginPage(at: 1))
+        XCTAssertTrue(lifecycle.isInitialMainFrameLoadPending)
     }
 
     func testRendererPreservesPortraitAndLandscapePageOrientation() async throws {
@@ -116,6 +354,174 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
                 autoRotate: true
             )
         )
+    }
+
+    func testRendererEmbedsSelectableKoreanFontsWithToUnicode() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "korean-math.hwp",
+            pageCount: 1,
+            pages: [koreanMathSVG()]
+        )
+
+        let document = try await render(payload)
+        let page = try XCTUnwrap(document.page(at: 0))
+        let pageText = try XCTUnwrap(page.string)
+        let fullSelection = try XCTUnwrap(
+            page.selection(for: page.bounds(for: .mediaBox))?.string
+        )
+
+        for sentinel in ["문1", "함수", "값은"] {
+            XCTAssertTrue(pageText.contains(sentinel), "PDFPage.string 누락: \(sentinel)")
+            XCTAssertTrue(fullSelection.contains(sentinel), "영역 선택 누락: \(sentinel)")
+            XCTAssertGreaterThan(
+                document.findString(sentinel, withOptions: []).count,
+                0,
+                "PDF 검색 누락: \(sentinel)"
+            )
+        }
+        XCTAssertTrue(pageText.contains("f(x)"))
+        XCTAssertTrue(fullSelection.contains("f(x)"))
+        XCTAssertGreaterThan(document.findString("f(x)", withOptions: []).count, 0)
+
+        let fontRecords = CGPDFFontResourceInspector.records(in: document)
+        let koreanFontRecords = fontRecords.filter {
+            $0.baseFont.contains("NotoSansKR") || $0.baseFont.contains("NotoSerifKR")
+        }
+        XCTAssertFalse(koreanFontRecords.isEmpty, "Noto 한글 PDF font resource가 없습니다.")
+        XCTAssertTrue(
+            koreanFontRecords.allSatisfy(\.hasToUnicode),
+            "ToUnicode 없는 Noto resource: \(koreanFontRecords)"
+        )
+        XCTAssertTrue(koreanFontRecords.contains { $0.baseFont.contains("NotoSansKR") })
+        XCTAssertTrue(koreanFontRecords.contains { $0.baseFont.contains("NotoSerifKR") })
+    }
+
+    func testRendererMapsHangulInsideMathSerifStackWithoutChangingMathText() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "mixed-hangul-math-stack.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="500" height="200" viewBox="0 0 500 200">
+                  <rect width="500" height="200" fill="white" />
+                  <text x="40" y="80"
+                        font-family="'Latin Modern Math','STIX Two Text','STIX Two Math','Times New Roman',Times,serif"
+                        font-size="24">문2 함수 f(x)=x²+2x+1</text>
+                </svg>
+                """
+            ]
+        )
+
+        let document = try await render(payload)
+        let page = try XCTUnwrap(document.page(at: 0))
+        let pageText = try XCTUnwrap(page.string)
+        let fullSelection = try XCTUnwrap(
+            page.selection(for: page.bounds(for: .mediaBox))?.string
+        )
+
+        for sentinel in ["문2", "함수", "f(x)=x²+2x+1"] {
+            XCTAssertTrue(pageText.contains(sentinel), "PDFPage.string 누락: \(sentinel)")
+            XCTAssertTrue(fullSelection.contains(sentinel), "영역 선택 누락: \(sentinel)")
+            XCTAssertGreaterThan(document.findString(sentinel, withOptions: []).count, 0)
+        }
+
+        let serifKoreanFonts = CGPDFFontResourceInspector.records(in: document).filter {
+            $0.baseFont.contains("NotoSerifKR")
+        }
+        XCTAssertFalse(serifKoreanFonts.isEmpty)
+        XCTAssertTrue(serifKoreanFonts.allSatisfy(\.hasToUnicode))
+    }
+
+    func testRendererMapsUnclassifiedAndEnclosedHangulWithOwnedSansFallback() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "unclassified-hangul-family.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="500" height="300" viewBox="0 0 500 300">
+                  <rect width="500" height="300" fill="white" />
+                  <text x="250" y="50" text-anchor="middle" fill="#666666"
+                        font-size="20">[외부: sample.png]</text>
+                  <text x="20" y="110" font-family="monospace"
+                        font-size="20">모노스페이스 한글</text>
+                  <text x="20" y="170" font-family="'Unknown Hangul Family'"
+                        font-size="20">미등록 글꼴 한글</text>
+                  <text x="20" y="230" font-size="20">㈀ 원문자 ㉠ 한글</text>
+                </svg>
+                """
+            ]
+        )
+
+        let document = try await render(payload)
+        let page = try XCTUnwrap(document.page(at: 0))
+        let pageText = try XCTUnwrap(page.string)
+        let fullSelection = try XCTUnwrap(
+            page.selection(for: page.bounds(for: .mediaBox))?.string
+        )
+
+        for sentinel in ["외부", "모노스페이스", "미등록", "㈀", "㉠"] {
+            XCTAssertTrue(pageText.contains(sentinel), "PDFPage.string 누락: \(sentinel)")
+            XCTAssertTrue(fullSelection.contains(sentinel), "영역 선택 누락: \(sentinel)")
+            XCTAssertGreaterThan(document.findString(sentinel, withOptions: []).count, 0)
+        }
+
+        let sansKoreanFonts = CGPDFFontResourceInspector.records(in: document).filter {
+            $0.baseFont.contains("NotoSansKR")
+        }
+        XCTAssertFalse(sansKoreanFonts.isEmpty)
+        XCTAssertTrue(sansKoreanFonts.allSatisfy(\.hasToUnicode))
+    }
+
+    func testRendererFailsWhenRequiredKoreanFontCannotLoadExactlyOnce() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "missing-bold-font.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+                  <rect width="200" height="300" fill="white" />
+                  <text x="20" y="50" font-family="'Haansoft Dotum','Noto Sans KR',sans-serif"
+                        font-size="20" font-weight="bold">문1 함수의 값은</text>
+                </svg>
+                """
+            ]
+        )
+        let provider = RejectingPDFFontResourceProvider(
+            wrapped: fontResourceProvider(),
+            rejectedResources: [.notoSansKRBold]
+        )
+        let renderer = RhwpStudioPagePDFRenderer(fontResourceProvider: provider)
+        var completionCount = 0
+
+        let result: Result<PDFDocument, Error> = await withCheckedContinuation { continuation in
+            renderer.render(payload: payload) { [renderer] result in
+                _ = renderer
+                completionCount += 1
+                if completionCount == 1 {
+                    continuation.resume(returning: result)
+                }
+            }
+        }
+
+        try await Task.sleep(nanoseconds: 300_000_000)
+        XCTAssertEqual(completionCount, 1)
+        guard case .failure(let error) = result,
+              case .fontPreparationFailed(let page, let reason) =
+                error as? RhwpStudioPagePDFRenderError
+        else {
+            XCTFail("필수 한글 글꼴 누락이 typed error로 완료되지 않았습니다: \(result)")
+            return
+        }
+        XCTAssertEqual(page, 1)
+        XCTAssertTrue(reason.contains("Haansoft Dotum/bold"), reason)
+    }
+
+    func testCGPDFFontInspectorTraversalRejectsCyclesAndExcessDepth() {
+        var traversal = CGPDFResourceTraversalState(maximumDepth: 2)
+        XCTAssertTrue(traversal.shouldVisit(dictionaryAddress: 1, depth: 0))
+        XCTAssertFalse(traversal.shouldVisit(dictionaryAddress: 1, depth: 1))
+        XCTAssertTrue(traversal.shouldVisit(dictionaryAddress: 2, depth: 2))
+        XCTAssertFalse(traversal.shouldVisit(dictionaryAddress: 3, depth: 3))
     }
 
     func testRendererDoesNotExecuteDocumentScriptsOrEventHandlers() async throws {
@@ -243,7 +649,14 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
                   <style>
                     @import url("\(httpBaseURL)/import.css");
                     @font-face { font-family: probe; src: url(\(httpBaseURL)/font.woff2); }
-                    .external-fill { fill: url(\(httpsBaseURL)/paint.svg#paint); font-family: probe; }
+                    @font-face {
+                      font-family: rejected-custom-probe;
+                      src: url(alhangeul-pdf-font://bundle/NotAllowed.woff2);
+                    }
+                    .external-fill {
+                      fill: url(\(httpsBaseURL)/paint.svg#paint);
+                      font-family: probe, rejected-custom-probe;
+                    }
                   </style>
                   <rect width="200" height="300" fill="white" />
                   <text x="20" y="40" font-size="18" fill="black" class="external-fill">NETWORK-BLOCKED</text>
@@ -263,7 +676,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
 
         var completionCount = 0
         let document = try await withCheckedThrowingContinuation { continuation in
-            let renderer = RhwpStudioPagePDFRenderer()
+            let renderer = makeRenderer()
             renderer.render(payload: payload) { [renderer] result in
                 _ = renderer
                 completionCount += 1
@@ -344,13 +757,14 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             pageCount: 1,
             pages: [svg(width: 200, height: 300, text: "Terminated")]
         )
-        let renderer = RhwpStudioPagePDFRenderer()
+        var ownedWebView: WKWebView?
+        let renderer = makeRenderer(webViewObserver: { ownedWebView = $0 })
         var completionResult: Result<PDFDocument, Error>?
 
         renderer.render(payload: payload) { result in
             completionResult = result
         }
-        renderer.webViewWebContentProcessDidTerminate(WKWebView())
+        renderer.webViewWebContentProcessDidTerminate(try XCTUnwrap(ownedWebView))
 
         guard case .failure(let error) = completionResult else {
             XCTFail("WebKit process 종료가 PDF 변환 실패로 완료되지 않았습니다.")
@@ -362,43 +776,468 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         )
     }
 
-    func testRendererPageTimeoutFinishesExactlyOnceAndAllowsRetry() async throws {
+    func testRendererReusesSameInstanceAfterMultiPageSuccessFromCompletion() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "first-success.hwp",
+            pageCount: 2,
+            pages: [
+                svg(width: 200, height: 300, text: "First-1"),
+                svg(width: 300, height: 200, text: "First-2")
+            ]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "second-success.hwp",
+            pageCount: 1,
+            pages: [svg(width: 210, height: 310, text: "Second")]
+        )
+        let renderer = makeRenderer()
+        var results: [Result<PDFDocument, Error>] = []
+        let secondCompletion = expectation(description: "immediate success retry")
+
+        renderer.render(payload: firstPayload) { firstResult in
+            results.append(firstResult)
+            renderer.render(payload: secondPayload) { secondResult in
+                results.append(secondResult)
+                secondCompletion.fulfill()
+            }
+        }
+
+        await fulfillment(of: [secondCompletion], timeout: 5)
+        guard results.count == 2 else {
+            XCTFail("연속 정상 render가 모두 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        let firstDocument = try results[0].get()
+        let secondDocument = try results[1].get()
+        XCTAssertEqual(firstDocument.pageCount, 2)
+        XCTAssertTrue(firstDocument.page(at: 0)?.string?.contains("First-1") == true)
+        XCTAssertTrue(firstDocument.page(at: 1)?.string?.contains("First-2") == true)
+        XCTAssertEqual(secondDocument.pageCount, 1)
+        XCTAssertTrue(secondDocument.page(at: 0)?.string?.contains("Second") == true)
+    }
+
+    func testRendererReentersAfterCurrentNavigationFailureAndIgnoresRepeatedFailure() throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "navigation-failure.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "First")]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "navigation-retry.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Navigation-Retry")]
+        )
+        let preparedMetrics = #"{"width":200,"height":300}"#
+        let renderedPageData = try makeSinglePagePDFData(
+            size: NSSize(width: 200, height: 300)
+        )
+        let operations = RhwpStudioPagePDFWebKitOperations(
+            preparePage: { _, completion in
+                completion(.success(preparedMetrics))
+            },
+            createPDF: { _, _, completion in
+                completion(.success(renderedPageData))
+            }
+        )
+        var trackingWebView: NavigationTrackingWKWebView?
+        let renderer = RhwpStudioPagePDFRenderer(
+            fontResourceProvider: fontResourceProvider(),
+            webKitOperations: operations,
+            webViewFactory: { configuration in
+                let webView = NavigationTrackingWKWebView(
+                    frame: NSRect(
+                        origin: .zero,
+                        size: RhwpStudioPagePDFMetrics.initialPageSize
+                    ),
+                    configuration: configuration
+                )
+                trackingWebView = webView
+                return webView
+            }
+        )
+        let navigationError = NSError(
+            domain: "RhwpStudioPagePDFRendererTests.Navigation",
+            code: 459
+        )
+        var results: [Result<PDFDocument, Error>] = []
+
+        renderer.render(payload: firstPayload) { firstResult in
+            results.append(firstResult)
+            renderer.render(payload: secondPayload) { secondResult in
+                results.append(secondResult)
+            }
+        }
+        let ownedWebView = try XCTUnwrap(trackingWebView)
+        let firstNavigation = try XCTUnwrap(ownedWebView.lastNavigation)
+        renderer.webView(ownedWebView, didFail: firstNavigation, withError: navigationError)
+        let secondNavigation = try XCTUnwrap(ownedWebView.lastNavigation)
+        XCTAssertNotEqual(
+            ObjectIdentifier(firstNavigation),
+            ObjectIdentifier(secondNavigation)
+        )
+        renderer.webView(ownedWebView, didFail: firstNavigation, withError: navigationError)
+        XCTAssertEqual(results.count, 1)
+        renderer.webView(ownedWebView, didFinish: secondNavigation)
+
+        guard results.count == 2 else {
+            XCTFail("navigation 실패 후 retry가 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        guard case .failure(let firstError) = results[0] else {
+            XCTFail("첫 navigation 실패가 error로 완료되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(firstError as NSError, navigationError)
+        let secondDocument = try results[1].get()
+        XCTAssertEqual(secondDocument.pageCount, 1)
+        XCTAssertEqual(
+            secondDocument.page(at: 0)?.bounds(for: .mediaBox).size,
+            NSSize(width: 200, height: 300)
+        )
+    }
+
+    func testRendererReentersAfterFontPreparationFailureFromCompletion() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "font-preparation-failure.hwp",
+            pageCount: 1,
+            pages: [
+                """
+                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+                  <text x="20" y="50" font-family="'Noto Sans KR',sans-serif"
+                        font-size="20" font-weight="bold">문1 재진입</text>
+                </svg>
+                """
+            ]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "font-preparation-retry.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "ASCII-Retry")]
+        )
+        let provider = RejectingPDFFontResourceProvider(
+            wrapped: fontResourceProvider(),
+            rejectedResources: [.notoSansKRBold]
+        )
+        let renderer = RhwpStudioPagePDFRenderer(fontResourceProvider: provider)
+        var results: [Result<PDFDocument, Error>] = []
+        let secondCompletion = expectation(description: "font failure retry")
+
+        renderer.render(payload: firstPayload) { firstResult in
+            results.append(firstResult)
+            renderer.render(payload: secondPayload) { secondResult in
+                results.append(secondResult)
+                secondCompletion.fulfill()
+            }
+        }
+
+        await fulfillment(of: [secondCompletion], timeout: 5)
+        guard results.count == 2 else {
+            XCTFail("font preparation 실패 후 retry가 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        guard case .failure(let firstError) = results[0],
+              case .fontPreparationFailed(let page, _) =
+                firstError as? RhwpStudioPagePDFRenderError
+        else {
+            XCTFail("첫 font preparation 실패가 typed error로 완료되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(page, 1)
+        let secondDocument = try results[1].get()
+        XCTAssertTrue(secondDocument.page(at: 0)?.string?.contains("ASCII-Retry") == true)
+    }
+
+    func testRendererReentersAfterPDFEncodingFailureFromCompletion() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "encoding-failure.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Invalid-PDF")]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "encoding-retry.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Encoding-Retry")]
+        )
+        let liveOperations = RhwpStudioPagePDFWebKitOperations.live()
+        var createPDFCallCount = 0
+        let operations = RhwpStudioPagePDFWebKitOperations(
+            preparePage: liveOperations.preparePage,
+            createPDF: { webView, configuration, completion in
+                createPDFCallCount += 1
+                if createPDFCallCount == 1 {
+                    completion(.success(Data("not-a-pdf".utf8)))
+                } else {
+                    liveOperations.createPDF(webView, configuration, completion)
+                }
+            }
+        )
+        let renderer = RhwpStudioPagePDFRenderer(
+            fontResourceProvider: fontResourceProvider(),
+            webKitOperations: operations
+        )
+        var results: [Result<PDFDocument, Error>] = []
+        let secondCompletion = expectation(description: "PDF encoding failure retry")
+
+        renderer.render(payload: firstPayload) { firstResult in
+            results.append(firstResult)
+            renderer.render(payload: secondPayload) { secondResult in
+                results.append(secondResult)
+                secondCompletion.fulfill()
+            }
+        }
+
+        await fulfillment(of: [secondCompletion], timeout: 5)
+        XCTAssertEqual(createPDFCallCount, 2)
+        guard results.count == 2 else {
+            XCTFail("PDF encoding 실패 후 retry가 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        guard case .failure(let firstError) = results[0] else {
+            XCTFail("잘못된 PDF data가 실패로 완료되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(
+            firstError as? RhwpStudioPagePDFRenderError,
+            .pdfEncodingFailed(1)
+        )
+        let secondDocument = try results[1].get()
+        XCTAssertTrue(secondDocument.page(at: 0)?.string?.contains("Encoding-Retry") == true)
+    }
+
+    func testRendererIgnoresWebContentTerminationFromUnownedWebView() async throws {
+        let payload = try RhwpStudioPagePayload(
+            fileName: "foreign-termination.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Foreign")]
+        )
+        let renderer = makeRenderer(pageRenderTimeoutNanoseconds: 0)
+        var result: Result<PDFDocument, Error>?
+        let completion = expectation(description: "current render timeout")
+
+        renderer.render(payload: payload) {
+            result = $0
+            completion.fulfill()
+        }
+        renderer.webViewWebContentProcessDidTerminate(WKWebView())
+
+        await fulfillment(of: [completion], timeout: 1)
+        assertPageRenderTimedOut(try XCTUnwrap(result), page: 1)
+    }
+
+    func testRendererIgnoresStaleCreatePDFResultWhileProcessTerminationRetryIsActive() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "stale-create-pdf.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Stale")]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "active-create-pdf.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Current")]
+        )
+        let firstCreatePDFCaptured = expectation(description: "first createPDF captured")
+        let secondCreatePDFReady = expectation(description: "second createPDF ready")
+        let secondCompletion = expectation(description: "process termination retry")
+        let liveOperations = RhwpStudioPagePDFWebKitOperations.live()
+        var createPDFCallCount = 0
+        var staleCompletion: (@MainActor @Sendable (Result<Data, Error>) -> Void)?
+        var currentCompletion: (@MainActor @Sendable (Result<Data, Error>) -> Void)?
+        var currentResult: Result<Data, Error>?
+        let operations = RhwpStudioPagePDFWebKitOperations(
+            preparePage: liveOperations.preparePage,
+            createPDF: { webView, configuration, completion in
+                createPDFCallCount += 1
+                if createPDFCallCount == 1 {
+                    staleCompletion = completion
+                    firstCreatePDFCaptured.fulfill()
+                    return
+                }
+
+                currentCompletion = completion
+                liveOperations.createPDF(webView, configuration) { result in
+                    currentResult = result
+                    secondCreatePDFReady.fulfill()
+                }
+            }
+        )
+        var ownedWebView: WKWebView?
+        let renderer = makeRenderer(
+            webKitOperations: operations,
+            webViewObserver: { ownedWebView = $0 }
+        )
+        var results: [Result<PDFDocument, Error>] = []
+
+        renderer.render(payload: firstPayload) { firstResult in
+            results.append(firstResult)
+            renderer.render(payload: secondPayload) { secondResult in
+                results.append(secondResult)
+                secondCompletion.fulfill()
+            }
+        }
+
+        await fulfillment(of: [firstCreatePDFCaptured], timeout: 5)
+        renderer.webViewWebContentProcessDidTerminate(try XCTUnwrap(ownedWebView))
+        await fulfillment(of: [secondCreatePDFReady], timeout: 5)
+        XCTAssertEqual(results.count, 1)
+
+        staleCompletion?(.success(Data("stale-invalid-pdf".utf8)))
+        XCTAssertEqual(results.count, 1)
+        currentCompletion?(try XCTUnwrap(currentResult))
+
+        await fulfillment(of: [secondCompletion], timeout: 5)
+        XCTAssertEqual(createPDFCallCount, 2)
+        guard results.count == 2 else {
+            XCTFail("process 종료 후 retry가 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        guard case .failure(let firstError) = results[0] else {
+            XCTFail("첫 render가 process 종료 실패로 완료되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(
+            firstError as? RhwpStudioPagePDFRenderError,
+            .webContentProcessTerminated
+        )
+        let secondDocument = try results[1].get()
+        XCTAssertTrue(secondDocument.page(at: 0)?.string?.contains("Current") == true)
+    }
+
+    func testRendererRejectsConcurrentRenderWithoutReplacingCurrentGeneration() async throws {
+        let firstPayload = try RhwpStudioPagePayload(
+            fileName: "first.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "First")]
+        )
+        let secondPayload = try RhwpStudioPagePayload(
+            fileName: "second.hwp",
+            pageCount: 1,
+            pages: [svg(width: 200, height: 300, text: "Second")]
+        )
+        let renderer = makeRenderer(pageRenderTimeoutNanoseconds: 0)
+        var firstResult: Result<PDFDocument, Error>?
+        var secondResult: Result<PDFDocument, Error>?
+        let firstCompletion = expectation(description: "first render timeout")
+
+        renderer.render(payload: firstPayload) {
+            firstResult = $0
+            firstCompletion.fulfill()
+        }
+        renderer.render(payload: secondPayload) {
+            secondResult = $0
+        }
+
+        guard case .failure(let concurrentError) = secondResult else {
+            XCTFail("진행 중 두 번째 render가 즉시 거부되지 않았습니다.")
+            return
+        }
+        XCTAssertEqual(
+            concurrentError as? RhwpStudioPagePDFRenderError,
+            .renderingInProgress
+        )
+
+        await fulfillment(of: [firstCompletion], timeout: 1)
+        assertPageRenderTimedOut(try XCTUnwrap(firstResult), page: 1)
+    }
+
+    func testRendererPageTimeoutFinishesExactlyOnceAndAllowsImmediateRetry() async throws {
         let payload = try RhwpStudioPagePayload(
             fileName: "timeout.hwp",
             pageCount: 1,
             pages: [svg(width: 200, height: 300, text: "Timeout")]
         )
-        let renderer = RhwpStudioPagePDFRenderer(pageRenderTimeoutNanoseconds: 0)
+        let renderer = makeRenderer(pageRenderTimeoutNanoseconds: 0)
         var results: [Result<PDFDocument, Error>] = []
 
         let firstCompletion = expectation(description: "first timeout")
-        renderer.render(payload: payload) { result in
-            results.append(result)
-            firstCompletion.fulfill()
-        }
-        await fulfillment(of: [firstCompletion], timeout: 1)
-        renderer.webViewWebContentProcessDidTerminate(WKWebView())
-        XCTAssertEqual(results.count, 1)
-        assertPageRenderTimedOut(results[0], page: 1)
-
         let secondCompletion = expectation(description: "second timeout")
         renderer.render(payload: payload) { result in
             results.append(result)
-            secondCompletion.fulfill()
+            firstCompletion.fulfill()
+            renderer.render(payload: payload) { result in
+                results.append(result)
+                secondCompletion.fulfill()
+            }
         }
-        await fulfillment(of: [secondCompletion], timeout: 1)
-        XCTAssertEqual(results.count, 2)
+        await fulfillment(of: [firstCompletion, secondCompletion], timeout: 1)
+        renderer.webViewWebContentProcessDidTerminate(WKWebView())
+        guard results.count == 2 else {
+            XCTFail("timeout 이후 즉시 retry가 완료되지 않았습니다: \(results.count)")
+            return
+        }
+        assertPageRenderTimedOut(results[0], page: 1)
         assertPageRenderTimedOut(results[1], page: 1)
     }
 
     private func render(_ payload: RhwpStudioPagePayload) async throws -> PDFDocument {
         try await withCheckedThrowingContinuation { continuation in
-            let renderer = RhwpStudioPagePDFRenderer()
+            let renderer = makeRenderer()
             renderer.render(payload: payload) { [renderer] result in
                 _ = renderer
                 continuation.resume(with: result)
             }
         }
+    }
+
+    private func makeRenderer(
+        pageRenderTimeoutNanoseconds: UInt64? = nil,
+        webKitOperations: RhwpStudioPagePDFWebKitOperations? = nil,
+        webViewObserver: ((WKWebView) -> Void)? = nil
+    ) -> RhwpStudioPagePDFRenderer {
+        let webViewFactory: @MainActor (WKWebViewConfiguration) -> WKWebView = { configuration in
+            let webView = WKWebView(
+                frame: NSRect(
+                    origin: .zero,
+                    size: RhwpStudioPagePDFMetrics.initialPageSize
+                ),
+                configuration: configuration
+            )
+            webViewObserver?(webView)
+            return webView
+        }
+        if let pageRenderTimeoutNanoseconds {
+            return RhwpStudioPagePDFRenderer(
+                pageRenderTimeoutNanoseconds: pageRenderTimeoutNanoseconds,
+                fontResourceProvider: fontResourceProvider(),
+                webKitOperations: webKitOperations,
+                webViewFactory: webViewFactory
+            )
+        }
+        return RhwpStudioPagePDFRenderer(
+            fontResourceProvider: fontResourceProvider(),
+            webKitOperations: webKitOperations,
+            webViewFactory: webViewFactory
+        )
+    }
+
+    private func fontResourceProvider() -> RhwpStudioPDFFontDirectoryResourceProvider {
+        RhwpStudioPDFFontDirectoryResourceProvider(
+            directoryURL: repositoryRootURL
+                .appendingPathComponent("Sources/HostApp/Resources/rhwp-studio/fonts", isDirectory: true)
+        )
+    }
+
+    private var repositoryRootURL: URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+    }
+
+    private func koreanMathSVG() -> String {
+        """
+        <svg xmlns="http://www.w3.org/2000/svg" width="500" height="300" viewBox="0 0 500 300">
+          <rect width="500" height="300" fill="white" />
+          <text x="40" y="70"
+                font-family="'Haansoft Dotum','Malgun Gothic','Noto Sans KR',sans-serif"
+                font-size="28" font-weight="bold">문1 함수의 값은 다음과 같다</text>
+          <text x="40" y="125"
+                font-family="'Haansoft Batang','Batang','Noto Serif KR',serif"
+                font-size="24">한글 본문과 선택지</text>
+          <text x="40" y="180"
+                font-family="'Latin Modern Math','STIX Two Math',serif"
+                font-size="28">f(x)=x²+2x+1</text>
+        </svg>
+        """
     }
 
     private func svg(width: Int, height: Int, text: String) -> String {
@@ -424,6 +1263,18 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         let tiffData = try XCTUnwrap(image.tiffRepresentation)
         let bitmap = try XCTUnwrap(NSBitmapImageRep(data: tiffData))
         return try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
+    }
+
+    private func makeSinglePagePDFData(size: NSSize) throws -> Data {
+        let image = NSImage(size: size)
+        image.lockFocus()
+        NSColor.white.setFill()
+        NSRect(origin: .zero, size: size).fill()
+        image.unlockFocus()
+
+        let document = PDFDocument()
+        document.insert(try XCTUnwrap(PDFPage(image: image)), at: 0)
+        return try XCTUnwrap(document.dataRepresentation())
     }
 
     private func assertPageRenderTimedOut(
@@ -469,6 +1320,29 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         }
 
         return Double(matchingPixels) / Double(totalPixels)
+    }
+}
+
+@MainActor
+private final class NavigationTrackingWKWebView: WKWebView {
+    private(set) var lastNavigation: WKNavigation?
+
+    override func loadHTMLString(_ string: String, baseURL: URL?) -> WKNavigation? {
+        let navigation = super.loadHTMLString(string, baseURL: baseURL)
+        lastNavigation = navigation
+        return navigation
+    }
+}
+
+private struct RejectingPDFFontResourceProvider: RhwpStudioPDFFontResourceProviding {
+    let wrapped: RhwpStudioPDFFontDirectoryResourceProvider
+    let rejectedResources: Set<RhwpStudioPDFFontResource>
+
+    func data(for resource: RhwpStudioPDFFontResource) throws -> Data {
+        guard !rejectedResources.contains(resource) else {
+            throw RhwpStudioPDFFontResourceError.missingResource(resource.rawValue)
+        }
+        return try wrapped.data(for: resource)
     }
 }
 

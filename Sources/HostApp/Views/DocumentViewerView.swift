@@ -4,14 +4,91 @@ struct DocumentViewerView: View {
     @ObservedObject var store: DocumentViewerStore
 
     var body: some View {
-        ZStack {
-            if let error = store.errorMessage {
-                ErrorStateView(message: error)
-            } else {
-                RhwpStudioContainerView(store: store, document: store.rhwpStudioDocument)
+        RhwpStudioContainerView(store: store, document: store.rhwpStudioDocument)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .sheet(
+                item: recoverableDocumentOpenFailure,
+                onDismiss: {
+                    store.handleRecoverableDocumentOpenFailureDismissal()
+                }
+            ) { failure in
+                RecoverableDocumentOpenFailureView(
+                    failure: failure,
+                    onDismiss: {
+                        store.dismissRecoverableDocumentOpenFailure()
+                    },
+                    onRetry: {
+                        store.retryDocumentOpen()
+                    }
+                )
+            }
+    }
+
+    private var recoverableDocumentOpenFailure: Binding<RecoverableDocumentOpenFailure?> {
+        Binding(
+            get: {
+                store.recoverableDocumentOpenFailure
+            },
+            set: { failure in
+                guard failure == nil,
+                      store.recoverableDocumentOpenFailure != nil else {
+                    return
+                }
+                store.dismissRecoverableDocumentOpenFailure()
+            }
+        )
+    }
+}
+
+private struct RecoverableDocumentOpenFailureView: View {
+    let failure: RecoverableDocumentOpenFailure
+    let onDismiss: () -> Void
+    let onRetry: () -> Void
+
+    @FocusState private var isRetryFocused: Bool
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "doc.badge.ellipsis")
+                .font(.system(size: 38))
+                .foregroundStyle(.orange)
+                .accessibilityHidden(true)
+
+            VStack(spacing: 8) {
+                Text(failure.title)
+                    .font(.headline)
+                Text(failure.message)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            HStack(spacing: 8) {
+                Button(role: .cancel) {
+                    onDismiss()
+                } label: {
+                    Text("닫기")
+                }
+                .keyboardShortcut(.cancelAction)
+                .accessibilityLabel("닫기")
+                .accessibilityHint("문서 열기 오류 안내를 닫습니다.")
+
+                Button {
+                    onRetry()
+                } label: {
+                    Label("다시 시도", systemImage: "arrow.clockwise")
+                }
+                .keyboardShortcut(.defaultAction)
+                .focused($isRetryFocused)
+                .accessibilityLabel("다시 시도")
+                .accessibilityHint("다른 HWP 또는 HWPX 파일을 선택합니다.")
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(28)
+        .frame(width: 440)
+        .onAppear {
+            isRetryFocused = true
+        }
     }
 }
 
@@ -70,12 +147,12 @@ private struct RhwpStudioContainerView: View {
                     },
                     onDroppedFileURL: { url in
                         Task { @MainActor in
-                            store.loadDocument(from: url)
+                            store.loadDocument(from: url, source: .fileDrop)
                         }
                     },
-                    onDocumentSaved: { url in
+                    onDocumentSaved: { savedDocument in
                         Task { @MainActor in
-                            store.recordSavedDocument(at: url)
+                            store.recordSavedDocument(savedDocument)
                         }
                     },
                     onDocumentEdited: {
@@ -84,6 +161,7 @@ private struct RhwpStudioContainerView: View {
                         }
                     }
                 )
+                .allowsHitTesting(!store.isLoading)
 
                 if store.isLoading || store.isWebViewLoading {
                     LoadingOverlayView(message: store.isLoading ? "불러오는 중..." : "웹 viewer 로딩 중...")
@@ -115,22 +193,6 @@ private struct LoadingOverlayView: View {
             .padding(.vertical, 12)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
             .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 3)
-    }
-}
-
-private struct ErrorStateView: View {
-    let message: String
-
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 40))
-                .foregroundStyle(.orange)
-            Text(message)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-        }
-        .padding(32)
     }
 }
 

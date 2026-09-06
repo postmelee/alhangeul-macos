@@ -135,6 +135,21 @@ parse_args "$@"
 [ -f "$RESOURCE_DIR/manifest.webmanifest" ] || fail "missing manifest.webmanifest"
 [ -f "$RESOURCE_DIR/alhangeul-wkwebview-overrides.css" ] || fail "missing Alhangeul WKWebView override stylesheet"
 [ -d "$RESOURCE_DIR/assets" ] || fail "missing assets directory: $RESOURCE_DIR/assets"
+[ -d "$RESOURCE_DIR/fonts" ] || fail "missing fonts directory: $RESOURCE_DIR/fonts"
+
+for pdf_font_name in \
+  NotoSansKR-Regular.woff2 \
+  NotoSansKR-Bold.woff2 \
+  NotoSerifKR-Regular.woff2 \
+  NotoSerifKR-Bold.woff2
+do
+  pdf_font_path="$RESOURCE_DIR/fonts/$pdf_font_name"
+  [ -f "$pdf_font_path" ] || fail "missing PDF font: $pdf_font_path"
+  [ ! -L "$pdf_font_path" ] || fail "PDF font must not be a symlink: $pdf_font_path"
+  pdf_font_signature="$(od -An -N4 -t x1 "$pdf_font_path" | tr -d '[:space:]')"
+  [ "$pdf_font_signature" = "774f4632" ] \
+    || fail "PDF font is not WOFF2: $pdf_font_path"
+done
 
 verify_local_override_ownership "$RESOURCE_DIR/alhangeul-wkwebview-overrides.css"
 
@@ -163,6 +178,13 @@ fi
 grep -q 'src="./assets/index-' "$RESOURCE_DIR/index.html" || fail "index.html does not use relative JS asset path"
 grep -q 'href="./assets/index-' "$RESOURCE_DIR/index.html" || fail "index.html does not use relative CSS asset path"
 grep -q 'href="./alhangeul-wkwebview-overrides.css"' "$RESOURCE_DIR/index.html" || fail "index.html does not load Alhangeul WKWebView override stylesheet"
+grep -Eo '<button[[:space:]][^>]*>' "$RESOURCE_DIR/index.html" \
+  | grep -E '[[:space:]]id="btn-text-color"([[:space:]>])' > /dev/null \
+  || fail "index.html is missing the text color button required by the HostApp bridge"
+grep -Eo '<input[[:space:]][^>]*>' "$RESOURCE_DIR/index.html" \
+  | grep -E '[[:space:]]id="text-color-picker"([[:space:]/>])' \
+  | grep -E '[[:space:]]type="color"([[:space:]/>])' > /dev/null \
+  || fail "index.html is missing the text color input required by the HostApp bridge"
 
 if grep -q 'crossorigin' "$RESOURCE_DIR/index.html"; then
   fail "index.html contains crossorigin attributes that break WKWebView file URL asset loading"

@@ -17,12 +17,42 @@
 | signed draft | [run `31806721517`](https://github.com/postmelee/alhangeul-macos/actions/runs/31806721517) |
 | official Publish | [run `31812500336`](https://github.com/postmelee/alhangeul-macos/actions/runs/31812500336) |
 | Homebrew tap | [`postmelee/homebrew-tap` commit `f712c88`](https://github.com/postmelee/homebrew-tap/commit/f712c88e7e468395aeb09210cb6e24503dfb7d4f) |
-| main closeout | draft PR [#477](https://github.com/postmelee/alhangeul-macos/pull/477) |
+| main closeout | PR [#477](https://github.com/postmelee/alhangeul-macos/pull/477) merge `7162a80`, [Pages run `31975531842`](https://github.com/postmelee/alhangeul-macos/actions/runs/31975531842) 성공 |
 | 단계 | 수행계획, 구현계획, Stage 1~6 |
 
 `v0.1.10` release source와 communication을 upstream `rhwp v0.8.4` 기준으로 정렬하고 source preflight, unsigned Rehearsal, signed/notarized draft 차단 gate를 거쳐 official stable release를 게시했다. public DMG, Pages, stable Sparkle appcast, 실제 `v0.1.9 -> v0.1.10` 업데이트와 app/Finder provider를 확인한 뒤 같은 official DMG를 maintainer Homebrew tap에도 배포했다.
 
-Stage 6에서는 release identity와 public surface를 다시 조회하고 repository Cask, README, Pages source와 GitHub Release body의 Homebrew 대기 문구를 closeout 대상으로 확정했다. source 변경, appcast 보존 Pages artifact와 Release body 후보를 검증했고, 작업지시자 승인 뒤 공개 GitHub Release 본문을 후보와 일치하도록 보정하고 main closeout draft PR [#477](https://github.com/postmelee/alhangeul-macos/pull/477)을 게시했다. CI/merge와 Pages 재배포는 아직 대기한다.
+Stage 6에서는 release identity와 public surface를 다시 조회하고 repository Cask, README, Pages source와 GitHub Release body의 Homebrew 대기 문구를 closeout 대상으로 확정했다. source 변경, appcast 보존 Pages artifact와 Release body 후보를 검증했고, 작업지시자 승인 뒤 공개 GitHub Release 본문을 후보와 일치하도록 보정했다. main closeout PR [#477](https://github.com/postmelee/alhangeul-macos/pull/477)은 merge commit `7162a80...`으로 반영됐고 docs-only Pages run `31975531842` 성공 뒤 public Homebrew 문구와 stable appcast byte 보존을 재확인했다.
+
+## 변경 파일 목록과 영향 범위
+
+| 파일 | 내용 |
+|------|------|
+| `Casks/alhangeul.rb` | public v0.1.10 DMG version/SHA256과 repository Cask 정렬 |
+| `README.md` | 현재 Homebrew 설치 명령 반영 |
+| `docs/index.html` | public 홈의 v0.1.10 Homebrew 안내 반영 |
+| `docs/updates/index.html` | 업데이트 목록의 v0.1.10 및 Homebrew 안내 반영 |
+| `docs/updates/v0.1.10.html` | 버전별 설치 안내 반영 |
+| `mydocs/orders/20260813.md` | Stage 5/6 이력 상태 반영 |
+| `mydocs/orders/20260816.md` | closeout source와 최종 보고 준비 완료 기록 |
+| `mydocs/orders/20260817.md` | PR #477 merge·Pages 확인과 devel 최종 handoff 완료 기록 |
+| `mydocs/release/index.md` | v0.1.10 closeout 완료 상태 반영 |
+| `mydocs/release/v0.1.10.md` | release, Homebrew, main closeout과 public 재검증 장기 기록 |
+| `mydocs/report/task_m900_472_report.md` | Task #472 최종 결과와 종료 조건 기록 |
+| `mydocs/working/task_m900_472_stage4.md` | signed candidate 차단 gate 결과 기록 |
+| `mydocs/working/task_m900_472_stage5.md` | official publish와 Homebrew 검증 결과 기록 |
+
+최종 `devel` PR은 위 release/public 문서와 운영 기록 13파일만 변경하며 제품 `Sources/`, Xcode project, workflow와 이미 게시된 v0.1.10 release tag tree에는 영향을 주지 않는다.
+
+## 변경 전·후 정량 비교
+
+| 항목 | closeout 전 | closeout 후 |
+|------|-------------|-------------|
+| repository Cask | `0.1.9`, 이전 SHA256 | `0.1.10`, public DMG SHA256 `800ea0df...e5dafd0e` |
+| public Homebrew 안내 | Release/Pages에 배포 전 문구 잔존 | GitHub Release와 Pages 3화면에 현재 설치 명령 반영 |
+| stable appcast | `0.1.10 (16)`, SHA256 `36b5d62b...af5a` | 동일 version/SHA256 및 byte content 보존 |
+| main closeout | 미반영 12파일 | PR #477 merge commit `7162a80...`, Pages run `31975531842` 성공 |
+| devel 최종 PR 범위 | closeout 미반영 | 운영/문서 13파일, 제품 source/project/workflow 0파일 |
 
 ## 단계별 결과
 
@@ -39,6 +69,7 @@ Stage 6에서는 release identity와 public surface를 다시 조회하고 repos
 | Stage 5.1 | `870fa90` | repository/tap Cask 게시, audit/install/uninstall과 설치본 복구 |
 | Stage 6 | `43390f2` | public communication closeout source, 최종 release record와 최종 보고 준비 |
 | Stage 6.1 | `2f62314` | GitHub Release body 보정, 공개 본문 재검증과 closeout 기록 갱신 |
+| Stage 6.2 | `12234b6` | main closeout PR #477 게시 결과와 exact diff 기록 |
 
 Stage 1~3 변경은 PR [#473](https://github.com/postmelee/alhangeul-macos/pull/473)으로 `devel` merge commit `447b31b...`에 반영했다. PR [#475](https://github.com/postmelee/alhangeul-macos/pull/475)는 history-only back-merge 생략 판정을 `devel` merge commit `34ba512...`에 반영했고, PR [#476](https://github.com/postmelee/alhangeul-macos/pull/476)은 같은 tree를 `main` release commit `fafed425...`으로 승격했다.
 
@@ -54,6 +85,8 @@ Stage 1~3 변경은 PR [#473](https://github.com/postmelee/alhangeul-macos/pull/
 | tag peeled commit | `fafed425d4b87162c2188d1384d618adc2211eb6` |
 | Stage 6 `origin/main` / `origin/devel` | `fafed425...` / `34ba512...` |
 | Stage 6 left/right | `origin/main...origin/devel` = `4 0` |
+| closeout `origin/main` / `origin/devel` | `7162a80...` / `34ba512...` |
+| closeout left/right | `origin/main...origin/devel` = `12 0`, 기존 transport 4 + closeout head 7 + merge commit 1 |
 
 `main` 전용 네 commit은 이전 release transport PR #446, #450, #452와 현재 release PR #476 merge다. 각 release merge tree는 대응 `devel` source parent tree와 같고 main 전용 non-merge 제품 content가 없으므로 history-only back-merge를 만들지 않았다. 이 판정을 반복 가능한 정책과 자동 gate로 만드는 후속은 Issue [#474](https://github.com/postmelee/alhangeul-macos/issues/474)로 분리했다.
 
@@ -128,25 +161,25 @@ public 설치본에서 HWP/HWPX 앱 열기, Quick Look와 Thumbnail을 다시 �
 
 tap의 기존 `Untrusted` 상태를 바꾸지 않았고 `brew trust` 같은 전역 신뢰 변경도 하지 않았다. smoke 중 Homebrew 자체는 `6.0.15`에서 `6.0.17`로 자동 갱신됐지만 다른 formula/cask는 변경하지 않았다. 종료 시 Homebrew Cask는 미설치 상태이며 기존 Sparkle 설치본 `/Applications/Alhangeul.app` `0.1.10 (16)`과 사용자 경로 v0.1.8 provider 등록을 복원했다.
 
-## Stage 6 Closeout 준비
+## Stage 6 Closeout 완료
 
-2026-08-16 live 재확인 결과는 다음과 같다.
+2026-08-16~17 live 재확인 결과는 다음과 같다.
 
-| surface | 현재 live 상태 | closeout 준비 |
-|---------|----------------|---------------|
-| GitHub Release/DMG | v0.1.10 stable/latest와 exact asset 유지, Homebrew 설치 명령 반영 | 검증된 후보와 공개 본문 일치 확인 |
-| Homebrew tap | public v0.1.10 Cask 제공 | repository `Casks/alhangeul.rb`를 같은 version/SHA256으로 정렬 |
-| Pages home/update | 다운로드와 appcast는 v0.1.10, Homebrew 대기 문구 잔존 | 세 화면과 v0.1.10 note를 현재 설치 명령으로 보정 |
-| stable appcast | `0.1.10 (16)`, SHA256 `36b5d62b...af5a` | docs-only artifact에서 byte-identical 보존 |
-| release record | `main`에는 publish 직전 상태 | public/Homebrew/closeout 실제 결과로 보정 |
+| surface | 최종 live 상태 | 검증 결과 |
+|---------|----------------|-----------|
+| GitHub Release/DMG | v0.1.10 stable/latest와 exact asset 유지, Homebrew 설치 명령 반영 | 검증된 후보와 공개 본문 일치 |
+| Homebrew tap | public v0.1.10 Cask 제공 | repository Cask와 같은 version/SHA256 |
+| Pages home/update | v0.1.10 다운로드, 릴리즈 노트와 Homebrew 설치 명령 제공 | run `31975531842` 성공 뒤 세 화면 직접 확인 |
+| stable appcast | `0.1.10 (16)`, SHA256 `36b5d62b...af5a` | closeout 전 public appcast와 byte-identical |
+| release record | public/Homebrew/closeout 실제 결과 반영 | devel 최종 보고 handoff 준비 |
 
 준비한 public source diff는 `README.md`, `docs/index.html`, `docs/updates/index.html`, `docs/updates/v0.1.10.html`의 Homebrew 문구다. repository Cask, release index/record, Stage 4~5 기록과 이 최종 보고서를 함께 release closeout 기록으로 유지한다.
 
-`scripts/ci/update-release-version-notices.sh --check`, release note template check, GitHub body validator와 prepared Pages artifact가 통과했다. prepared artifact의 `appcast.xml`은 현재 public appcast와 byte-identical하다. GitHub Release body는 검증된 후보 파일로 수정한 뒤 후보와의 전체 본문 일치, 현재 Homebrew 명령 포함과 이전 대기 문구 제거를 재확인했다.
+`scripts/ci/update-release-version-notices.sh --updates-dir docs/updates --check`, release note template check, GitHub body validator와 prepared Pages artifact가 통과했다. prepared artifact와 closeout 뒤 public `appcast.xml`은 기존 public appcast와 byte-identical하다. GitHub Release body는 검증된 후보 파일과 전체 본문이 일치하고 현재 Homebrew 명령을 포함하며 이전 대기 문구가 제거됐다.
 
-Stage 6 head를 `origin/main`과 `origin/devel`에 각각 비교한 tree diff는 같은 12파일이다. Cask, README, 네 Pages/공개 문서, 두 작업일 기록, release index/record, Stage 4~5 보고서와 최종 보고서만 포함하며 `Sources/`, project, workflow와 release tag 제품 tree는 바꾸지 않는다. 따라서 main closeout과 devel 운영 기록 PR을 분리해도 불필요한 제품 diff는 생기지 않는다.
+PR #477 게시 시점의 Stage 6 head를 당시 `origin/main`과 `origin/devel`에 각각 비교한 tree diff는 같은 12파일이었다. main closeout merge 뒤 devel 최종 후보에는 2026-08-17 오늘할일 기록을 더한 13파일만 남으며 `Sources/`, project, workflow와 release tag 제품 tree는 바꾸지 않는다.
 
-main closeout draft PR [#477](https://github.com/postmelee/alhangeul-macos/pull/477)은 `main` 대상 exact 12파일로 게시했다. PR merge와 docs-only Pages workflow는 후속 외부 mutation이므로 별도 지시 전에는 실행하지 않고, 그 전에는 public Pages의 대기 문구를 완료 상태로 기록하지 않는다.
+main closeout PR [#477](https://github.com/postmelee/alhangeul-macos/pull/477)은 `main` 대상 exact 12파일로 merge됐다. merge commit `7162a80...`에서 실행된 docs-only Pages workflow도 성공했고 public 홈, 업데이트 목록, v0.1.10 note와 stable appcast를 직접 재검증했다.
 
 ## 승인 이력과 주요 결정
 
@@ -159,6 +192,18 @@ main closeout draft PR [#477](https://github.com/postmelee/alhangeul-macos/pull/
 - Stage 6 closeout source와 최종 보고 작성은 2026-08-16 별도 승인으로 진행했다.
 - 검증된 body file을 사용한 GitHub Release Homebrew 문구 보정과 공개 본문 재검증은 2026-08-16 후속 승인으로 진행했다.
 - main closeout branch push와 draft PR #477 게시도 같은 후속 승인 범위에서 진행했다.
+- PR #477 merge, public Pages 재검증, devel 최종 PR 게시·merge와 cleanup은 2026-08-17 작업지시자가 승인했다.
+
+## 최종 수용 기준 검증
+
+| 수용 기준 | 결과 | 상태 |
+|-----------|------|------|
+| release record/최종 보고 실제 값 | public DMG, run, commit, appcast와 Homebrew 값을 placeholder 없이 기록 | OK |
+| public/repository communication 일치 | GitHub Release, Pages 3화면, Cask와 설치 명령 일치 | OK |
+| main closeout 단일 PR | PR #477 exact 12파일 merge와 Pages 성공 | OK |
+| devel 최종 PR exact diff | 오늘할일 포함 문서/운영 13파일, 제품 변경 없음 | OK |
+| 오늘할일 완료 | `mydocs/orders/20260817.md`, 완료 시각 `07:12` | OK |
+| cleanup 대상 확정 | Issue #472, `publish/task472`, `local/task472`, 분리 worktree 없음 | OK |
 
 ## 미실행 항목과 잔여 위험
 
@@ -173,7 +218,6 @@ main closeout draft PR [#477](https://github.com/postmelee/alhangeul-macos/pull/
 | known payload decode 진단 | 미구현 | Issue #470 |
 | main/devel content gate | 규칙·자동화 미구현 | Issue #474 |
 | 비활성 개발 LaunchServices record | 일부 잔존 | 활성 provider와 무관, 전역 reset 미사용 |
-| public Homebrew 문구 | GitHub Release 반영, Pages source 준비 | main closeout merge·Pages 성공 뒤 화면 확인 |
 
 ## 최종 결론
 
@@ -181,12 +225,12 @@ main closeout draft PR [#477](https://github.com/postmelee/alhangeul-macos/pull/
 
 strict local static archive, Intel Mac/macOS 12 실기기, 일부 renderer/lifecycle 후속과 비활성 LaunchServices record는 실제 결과와 분리해 잔여 위험으로 기록했다. 어느 항목도 public v0.1.10 identity, signing/notarization, 실제 Apple Silicon 설치·업데이트·Finder 또는 Homebrew smoke를 실패시키는 blocker로 재현되지 않았다.
 
-Task #472의 release 준비, official publish, Homebrew 배포 실행과 GitHub Release 본문 보정 목표는 달성했다. 다만 repository `main`과 public Pages의 Homebrew closeout은 아직 source 후보 상태이므로 Issue #472는 자동으로 닫지 않는다.
+Task #472의 release 준비, official publish, Homebrew 배포 실행, GitHub Release 본문 보정과 repository `main`/public Pages closeout 목표를 모두 달성했다. 남은 절차는 이 최종 기록을 `devel`에 merge하고 Issue #472와 작업 브랜치를 정리하는 운영 종료뿐이다.
 
-## 게시와 종료 조건
+## 작업지시자 승인 및 종료 조건
 
-1. draft PR #477의 review/CI를 확인한다.
-2. 별도 승인으로 main closeout PR을 merge한다.
-3. docs-only Pages workflow 성공, public Homebrew 문구와 stable appcast byte 보존을 확인한다.
-4. 명시적인 `task-final-report` 절차로 Task #472 `devel` 최종 PR을 게시한다.
-5. 위 공개 반영과 필요한 PR merge 뒤 Issue #472를 close하고 `publish/task472`, closeout branch, `local/task472`과 임시 worktree를 `pr-merge-cleanup` 절차로 정리한다.
+2026-08-17 작업지시자가 `devel` 최종 PR 생성·merge와 `pr-merge-cleanup`까지 명시 승인했다.
+
+1. Task #472 최종 기록 PR을 `devel` 대상으로 게시하고 CI를 확인한다.
+2. merge commit 방식으로 PR을 merge해 단계별 커밋 의미를 보존한다.
+3. Issue #472를 close하고 `publish/task472`, `local/task472`과 임시 worktree를 정리한다.

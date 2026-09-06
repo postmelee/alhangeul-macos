@@ -210,6 +210,10 @@ final class AppExecutionAnalyticsCoordinator {
         self.transportFactory = transportFactory
     }
 
+    var isDeliveryConfigured: Bool {
+        endpoint != nil
+    }
+
     func startIfNeeded() {
         lock.withLock {
             guard !didStart else {
@@ -282,6 +286,12 @@ final class AppExecutionAnalyticsRuntime {
     }
 
     func prepareForLaunch(currentVersion: String) {
+        // Debug·개발 구성처럼 endpoint가 없는 빌드는 event를 만들지도 않는다.
+        // Debug와 Release는 같은 bundle identifier의 UserDefaults를 공유하므로
+        // 여기서 enqueue하면 이후 Release 실행이 그 event를 production으로 전송한다.
+        guard coordinator.isDeliveryConfigured else {
+            return
+        }
         observer.observe(currentVersion: currentVersion)
         coordinator.startIfNeeded()
     }

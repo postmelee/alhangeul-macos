@@ -1,4 +1,5 @@
 rhwp_close
+rhwp_document_protection
 rhwp_external_image_refs_json
 rhwp_extract_thumbnail
 rhwp_free_bytes

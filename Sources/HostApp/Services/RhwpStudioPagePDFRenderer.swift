@@ -2,36 +2,176 @@ import AppKit
 import PDFKit
 import WebKit
 
+struct RhwpStudioPagePDFRenderToken: Equatable {
+    let generation: UInt64
+    let pageIndex: Int
+}
+
+struct RhwpStudioPagePDFRenderLifecycle {
+    private(set) var latestGeneration: UInt64 = 0
+    private(set) var activeGeneration: UInt64?
+    private(set) var currentPageToken: RhwpStudioPagePDFRenderToken?
+    private(set) var currentNavigationIdentity: ObjectIdentifier?
+    private(set) var isInitialMainFrameLoadPending = false
+
+    var isActive: Bool {
+        activeGeneration != nil
+    }
+
+    mutating func beginRender() -> UInt64? {
+        guard activeGeneration == nil else {
+            return nil
+        }
+
+        latestGeneration += 1
+        activeGeneration = latestGeneration
+        currentPageToken = nil
+        currentNavigationIdentity = nil
+        isInitialMainFrameLoadPending = false
+        return latestGeneration
+    }
+
+    mutating func beginPage(at pageIndex: Int) -> RhwpStudioPagePDFRenderToken? {
+        guard pageIndex >= 0, let activeGeneration else {
+            return nil
+        }
+
+        let token = RhwpStudioPagePDFRenderToken(
+            generation: activeGeneration,
+            pageIndex: pageIndex
+        )
+        currentPageToken = token
+        currentNavigationIdentity = nil
+        isInitialMainFrameLoadPending = true
+        return token
+    }
+
+    mutating func registerNavigation(
+        _ navigationIdentity: ObjectIdentifier,
+        for token: RhwpStudioPagePDFRenderToken
+    ) -> Bool {
+        guard isCurrent(token) else {
+            return false
+        }
+
+        currentNavigationIdentity = navigationIdentity
+        return true
+    }
+
+    func token(
+        forNavigation navigationIdentity: ObjectIdentifier
+    ) -> RhwpStudioPagePDFRenderToken? {
+        guard currentNavigationIdentity == navigationIdentity else {
+            return nil
+        }
+        return currentPageToken
+    }
+
+    func isCurrent(_ token: RhwpStudioPagePDFRenderToken) -> Bool {
+        currentPageToken == token && activeGeneration == token.generation
+    }
+
+    mutating func consumeInitialMainFrameLoad() -> Bool {
+        guard currentPageToken != nil, isInitialMainFrameLoadPending else {
+            return false
+        }
+
+        isInitialMainFrameLoadPending = false
+        return true
+    }
+
+    mutating func invalidate(_ token: RhwpStudioPagePDFRenderToken) -> Bool {
+        guard isCurrent(token) else {
+            return false
+        }
+
+        activeGeneration = nil
+        currentPageToken = nil
+        currentNavigationIdentity = nil
+        isInitialMainFrameLoadPending = false
+        return true
+    }
+}
+
+struct RhwpStudioPagePDFWebKitOperations {
+    let preparePage: @MainActor (
+        WKWebView,
+        @escaping @MainActor @Sendable (Result<Any, Error>) -> Void
+    ) -> Void
+    let createPDF: @MainActor (
+        WKWebView,
+        WKPDFConfiguration,
+        @escaping @MainActor @Sendable (Result<Data, Error>) -> Void
+    ) -> Void
+
+    @MainActor
+    static func live() -> Self {
+        Self(
+            preparePage: { webView, completion in
+                webView.callAsyncJavaScript(
+                    RhwpStudioPagePDFHTML.pagePreparationScript,
+                    arguments: [:],
+                    in: nil,
+                    in: .defaultClient,
+                    completionHandler: completion
+                )
+            },
+            createPDF: { webView, configuration, completion in
+                webView.createPDF(
+                    configuration: configuration,
+                    completionHandler: completion
+                )
+            }
+        )
+    }
+}
+
 @MainActor
 final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
-    private static let defaultPageRenderTimeoutNanoseconds: UInt64 = 30_000_000_000
-
     private let webView: WKWebView
+    private let pdfFontSchemeHandler: RhwpStudioPDFFontSchemeHandler
+    private let webKitOperations: RhwpStudioPagePDFWebKitOperations
     private let pageRenderTimeoutNanoseconds: UInt64
     private var completion: ((Result<PDFDocument, Error>) -> Void)?
     private var payload: RhwpStudioPagePayload?
     private var renderedDocument = PDFDocument()
     private var renderingPageIndex = 0
     private var didFinish = true
-    private var isInitialMainFrameLoadPending = false
+    private var renderLifecycle = RhwpStudioPagePDFRenderLifecycle()
     private var pageRenderTimeoutTask: Task<Void, Never>?
 
     init(
-        pageRenderTimeoutNanoseconds: UInt64 = RhwpStudioPagePDFRenderer
-            .defaultPageRenderTimeoutNanoseconds
+        pageRenderTimeoutNanoseconds: UInt64 = 30_000_000_000,
+        fontResourceProvider: RhwpStudioPDFFontResourceProviding =
+            RhwpStudioPDFFontBundleResourceProvider(),
+        webKitOperations: RhwpStudioPagePDFWebKitOperations? = nil,
+        webViewFactory: @MainActor (WKWebViewConfiguration) -> WKWebView = { configuration in
+            WKWebView(
+                frame: NSRect(
+                    origin: .zero,
+                    size: RhwpStudioPagePDFMetrics.initialPageSize
+                ),
+                configuration: configuration
+            )
+        }
     ) {
         self.pageRenderTimeoutNanoseconds = pageRenderTimeoutNanoseconds
+        self.webKitOperations = webKitOperations ?? .live()
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
         configuration.defaultWebpagePreferences.allowsContentJavaScript = false
-
-        webView = WKWebView(
-            frame: NSRect(origin: .zero, size: RhwpStudioPagePDFMetrics.initialPageSize),
-            configuration: configuration
+        let pdfFontSchemeHandler = RhwpStudioPDFFontSchemeHandler(
+            resourceProvider: fontResourceProvider
         )
+        configuration.setURLSchemeHandler(
+            pdfFontSchemeHandler,
+            forURLScheme: RhwpStudioPDFFontRoute.scheme
+        )
+        self.pdfFontSchemeHandler = pdfFontSchemeHandler
+
+        webView = webViewFactory(configuration)
         super.init()
-        webView.navigationDelegate = self
     }
 
     deinit {
@@ -42,11 +182,14 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         payload: RhwpStudioPagePayload,
         completion: @escaping (Result<PDFDocument, Error>) -> Void
     ) {
-        guard self.completion == nil else {
+        guard self.completion == nil,
+              renderLifecycle.beginRender() != nil
+        else {
             completion(.failure(RhwpStudioPagePDFRenderError.renderingInProgress))
             return
         }
 
+        webView.navigationDelegate = self
         self.completion = completion
         self.payload = payload
         renderedDocument = PDFDocument()
@@ -56,7 +199,16 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        renderCurrentPagePDF()
+        guard webView === self.webView,
+              let navigation,
+              let token = renderLifecycle.token(
+                forNavigation: ObjectIdentifier(navigation)
+              )
+        else {
+            return
+        }
+
+        renderCurrentPagePDF(for: token)
     }
 
     func webView(
@@ -64,13 +216,18 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
+        guard webView === self.webView else {
+            decisionHandler(.cancel)
+            return
+        }
+
         let shouldAllow = RhwpStudioPagePDFNavigationPolicy.allowsNavigation(
             to: navigationAction.request.url,
             targetFrameIsMainFrame: navigationAction.targetFrame?.isMainFrame,
-            initialMainFrameLoadPending: isInitialMainFrameLoadPending
+            initialMainFrameLoadPending: renderLifecycle.isInitialMainFrameLoadPending
         )
         if shouldAllow {
-            isInitialMainFrameLoadPending = false
+            _ = renderLifecycle.consumeInitialMainFrameLoad()
             decisionHandler(.allow)
         } else {
             decisionHandler(.cancel)
@@ -82,7 +239,16 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         didFail navigation: WKNavigation!,
         withError error: Error
     ) {
-        finish(.failure(error))
+        guard webView === self.webView,
+              let navigation,
+              let token = renderLifecycle.token(
+                forNavigation: ObjectIdentifier(navigation)
+              )
+        else {
+            return
+        }
+
+        finish(.failure(error), for: token)
     }
 
     func webView(
@@ -90,76 +256,117 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         didFailProvisionalNavigation navigation: WKNavigation!,
         withError error: Error
     ) {
-        finish(.failure(error))
+        guard webView === self.webView,
+              let navigation,
+              let token = renderLifecycle.token(
+                forNavigation: ObjectIdentifier(navigation)
+              )
+        else {
+            return
+        }
+
+        finish(.failure(error), for: token)
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-        finish(.failure(RhwpStudioPagePDFRenderError.webContentProcessTerminated))
+        guard webView === self.webView,
+              let token = renderLifecycle.currentPageToken
+        else {
+            return
+        }
+
+        finish(
+            .failure(RhwpStudioPagePDFRenderError.webContentProcessTerminated),
+            for: token
+        )
     }
 
     private func renderNextPage() {
-        guard !didFinish, let payload else {
+        guard !didFinish, renderLifecycle.isActive, let payload else {
             return
         }
 
         guard renderingPageIndex < payload.pageCount else {
-            guard renderedDocument.pageCount == payload.pageCount else {
-                finish(.failure(
-                    RhwpStudioPagePDFRenderError.finalPageCountMismatch(
-                        expected: payload.pageCount,
-                        actual: renderedDocument.pageCount
-                    )
-                ))
+            guard let token = renderLifecycle.currentPageToken else {
+                assertionFailure("Active render completed without a current page token.")
                 return
             }
-            finish(.success(renderedDocument))
+            guard renderedDocument.pageCount == payload.pageCount else {
+                finish(
+                    .failure(
+                        RhwpStudioPagePDFRenderError.finalPageCountMismatch(
+                            expected: payload.pageCount,
+                            actual: renderedDocument.pageCount
+                        )
+                    ),
+                    for: token
+                )
+                return
+            }
+            finish(.success(renderedDocument), for: token)
             return
         }
 
+        guard let token = renderLifecycle.beginPage(at: renderingPageIndex) else {
+            assertionFailure("Active render could not begin the current page.")
+            return
+        }
         webView.frame = NSRect(
             origin: .zero,
             size: RhwpStudioPagePDFMetrics.initialPageSize
         )
-        startPageRenderTimeout(pageNumber: renderingPageIndex + 1)
-        isInitialMainFrameLoadPending = true
-        webView.loadHTMLString(
+        startPageRenderTimeout(for: token)
+        let navigation = webView.loadHTMLString(
             RhwpStudioPagePDFHTML.pageHTML(for: payload.pages[renderingPageIndex]),
             baseURL: nil
         )
+        if let navigation {
+            _ = renderLifecycle.registerNavigation(
+                ObjectIdentifier(navigation),
+                for: token
+            )
+        }
     }
 
-    private func renderCurrentPagePDF() {
-        guard !didFinish else {
+    private func renderCurrentPagePDF(for token: RhwpStudioPagePDFRenderToken) {
+        guard !didFinish, renderLifecycle.isCurrent(token) else {
             return
         }
 
-        webView.evaluateJavaScript(
-            RhwpStudioPagePDFHTML.pageMetricsScript,
-            in: nil,
-            in: .defaultClient
-        ) { [weak self] result in
-            guard let self, !self.didFinish else {
+        webKitOperations.preparePage(webView) { [weak self] result in
+            guard let self,
+                  !self.didFinish,
+                  self.renderLifecycle.isCurrent(token)
+            else {
                 return
             }
 
-            let metrics: Any
+            let preparation: Any?
             switch result {
             case .success(let value):
-                metrics = value
+                preparation = value
             case .failure(let error):
-                self.finish(.failure(error))
+                self.finish(
+                    .failure(
+                        RhwpStudioPagePDFRenderError.fontPreparationFailed(
+                            page: token.pageIndex + 1,
+                            reason: error.localizedDescription
+                        )
+                    ),
+                    for: token
+                )
                 return
             }
 
-            let pageNumber = self.renderingPageIndex + 1
+            let pageNumber = token.pageIndex + 1
             let pageSize: NSSize
             do {
-                pageSize = try RhwpStudioPagePDFMetrics.size(
-                    fromMetrics: metrics,
+                pageSize = try RhwpStudioPagePDFPreparation.pageSize(
+                    from: preparation,
                     pageNumber: pageNumber
                 )
             } catch {
-                self.finish(.failure(error))
+                self.finish(.failure(error), for: token)
                 return
             }
 
@@ -168,38 +375,62 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
 
             let configuration = WKPDFConfiguration()
             configuration.rect = NSRect(origin: .zero, size: pageSize)
-            self.webView.createPDF(configuration: configuration) { [weak self] result in
-                guard let self, !self.didFinish else {
+            self.webKitOperations.createPDF(
+                self.webView,
+                configuration
+            ) { [weak self] result in
+                guard let self,
+                      !self.didFinish,
+                      self.renderLifecycle.isCurrent(token)
+                else {
                     return
                 }
 
                 switch result {
                 case .success(let data):
-                    self.appendPDFPage(data)
+                    self.appendPDFPage(data, for: token)
                 case .failure(let error):
-                    self.finish(.failure(error))
+                    self.finish(.failure(error), for: token)
                 }
             }
         }
     }
 
-    private func appendPDFPage(_ data: Data) {
-        let pageNumber = renderingPageIndex + 1
+    private func appendPDFPage(
+        _ data: Data,
+        for token: RhwpStudioPagePDFRenderToken
+    ) {
+        guard renderLifecycle.isCurrent(token),
+              renderingPageIndex == token.pageIndex
+        else {
+            return
+        }
+
+        let pageNumber = token.pageIndex + 1
         guard let pageDocument = PDFDocument(data: data) else {
-            finish(.failure(RhwpStudioPagePDFRenderError.pdfEncodingFailed(pageNumber)))
+            finish(
+                .failure(RhwpStudioPagePDFRenderError.pdfEncodingFailed(pageNumber)),
+                for: token
+            )
             return
         }
         guard pageDocument.pageCount == 1 else {
-            finish(.failure(
-                RhwpStudioPagePDFRenderError.unexpectedPDFPageCount(
-                    page: pageNumber,
-                    actual: pageDocument.pageCount
-                )
-            ))
+            finish(
+                .failure(
+                    RhwpStudioPagePDFRenderError.unexpectedPDFPageCount(
+                        page: pageNumber,
+                        actual: pageDocument.pageCount
+                    )
+                ),
+                for: token
+            )
             return
         }
         guard let page = pageDocument.page(at: 0) else {
-            finish(.failure(RhwpStudioPagePDFRenderError.pdfEncodingFailed(pageNumber)))
+            finish(
+                .failure(RhwpStudioPagePDFRenderError.pdfEncodingFailed(pageNumber)),
+                for: token
+            )
             return
         }
 
@@ -209,7 +440,10 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
               bounds.width > 0,
               bounds.height > 0
         else {
-            finish(.failure(RhwpStudioPagePDFRenderError.invalidPDFPageBounds(pageNumber)))
+            finish(
+                .failure(RhwpStudioPagePDFRenderError.invalidPDFPageBounds(pageNumber)),
+                for: token
+            )
             return
         }
 
@@ -218,9 +452,8 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         renderNextPage()
     }
 
-    private func startPageRenderTimeout(pageNumber: Int) {
+    private func startPageRenderTimeout(for token: RhwpStudioPagePDFRenderToken) {
         pageRenderTimeoutTask?.cancel()
-        let expectedPageIndex = renderingPageIndex
         let timeoutNanoseconds = pageRenderTimeoutNanoseconds
         pageRenderTimeoutTask = Task { @MainActor [weak self] in
             do {
@@ -232,23 +465,27 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             guard !Task.isCancelled,
                   let self,
                   !self.didFinish,
-                  self.renderingPageIndex == expectedPageIndex
+                  self.renderLifecycle.isCurrent(token)
             else {
                 return
             }
 
             self.finish(.failure(
-                RhwpStudioPagePDFRenderError.pageRenderTimedOut(pageNumber)
-            ))
+                RhwpStudioPagePDFRenderError.pageRenderTimedOut(token.pageIndex + 1)
+            ), for: token)
         }
     }
 
-    private func finish(_ result: Result<PDFDocument, Error>) {
-        guard !didFinish else {
+    private func finish(
+        _ result: Result<PDFDocument, Error>,
+        for token: RhwpStudioPagePDFRenderToken
+    ) {
+        guard !didFinish, renderLifecycle.invalidate(token) else {
             return
         }
 
         didFinish = true
+        webView.navigationDelegate = nil
         pageRenderTimeoutTask?.cancel()
         pageRenderTimeoutTask = nil
         webView.stopLoading()
@@ -257,7 +494,6 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         payload = nil
         renderedDocument = PDFDocument()
         renderingPageIndex = 0
-        isInitialMainFrameLoadPending = false
         completion?(result)
     }
 }
@@ -293,33 +529,110 @@ enum RhwpStudioPagePDFHTML {
         "form-action 'none'",
         "style-src 'unsafe-inline'",
         "img-src data:",
-        "font-src 'none'"
+        "font-src \(RhwpStudioPDFFontRoute.scheme):"
     ].joined(separator: "; ") + ";"
 
-    static let pageMetricsScript = """
-    (() => {
-      const svg = document.querySelector("svg");
-      if (!svg) {
-        return null;
+    static let pagePreparationScript = #"""
+    await document.fonts.ready;
+    const ownedFamilies = \#(RhwpStudioPDFFontStyle.ownedFamilyNamesJSON);
+    const hangulPattern = /[\#(RhwpStudioPDFFontStyle.hangulJavaScriptCharacterClass)]/;
+    const normalizeFamily = value => value.trim().replace(/^['"]|['"]$/g, "");
+    const ownedFallbackFamily = families => {
+      const normalized = families.map(family => family.toLowerCase());
+      if (normalized.includes("serif")) {
+        return "Noto Serif KR";
       }
-      const rect = svg?.getBoundingClientRect();
-      const viewBox = svg.viewBox?.baseVal;
-      const dimension = (name, rectValue, viewBoxValue) => {
-        const attribute = svg.getAttribute(name)?.trim() || "";
-        const resolved = svg[name]?.baseVal?.value;
-        if (attribute && !attribute.endsWith("%") && Number.isFinite(resolved) && resolved > 0) {
-          return resolved;
-        }
-        if (Number.isFinite(viewBoxValue) && viewBoxValue > 0) {
-          return viewBoxValue;
-        }
-        return Number.isFinite(rectValue) && rectValue > 0 ? rectValue : 0;
-      };
-      const width = Math.ceil(dimension("width", rect?.width, viewBox?.width));
-      const height = Math.ceil(dimension("height", rect?.height, viewBox?.height));
-      return { width, height };
-    })()
-    """
+      if (normalized.includes("sans-serif")) {
+        return "Noto Sans KR";
+      }
+      return null;
+    };
+    const requiredFaces = new Map();
+    for (const textNode of document.querySelectorAll("svg text")) {
+      const sample = (textNode.textContent || "").match(hangulPattern)?.[0];
+      if (!sample) {
+        continue;
+      }
+      let style = getComputedStyle(textNode);
+      let families = style.fontFamily.split(",").map(normalizeFamily);
+      let family = families.find(candidate => ownedFamilies.includes(candidate));
+      if (!family) {
+        const fallbackFamily = ownedFallbackFamily(families) || "Noto Sans KR";
+        textNode.style.setProperty(
+          "font-family",
+          `"${fallbackFamily}", ${style.fontFamily}`,
+          "important"
+        );
+        style = getComputedStyle(textNode);
+        families = style.fontFamily.split(",").map(normalizeFamily);
+        family = families.find(candidate => ownedFamilies.includes(candidate));
+      }
+      if (!family) {
+        throw new Error(`failed to apply owned Hangul fallback: ${style.fontFamily || "(empty)"}`);
+      }
+      const numericWeight = Number.parseInt(style.fontWeight, 10);
+      const isBold = style.fontWeight === "bold"
+        || (Number.isFinite(numericWeight) && numericWeight >= 500);
+      requiredFaces.set(`${family}|${isBold ? "bold" : "regular"}`, {
+        family,
+        isBold,
+        sample
+      });
+    }
+
+    await Promise.all(Array.from(requiredFaces.values()).map(required => {
+      const cssWeight = required.isBold ? 700 : 400;
+      const escapedFamily = required.family.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      return document.fonts.load(
+        `${cssWeight} 12px "${escapedFamily}"`,
+        required.sample
+      ).catch(() => []);
+    }));
+    await document.fonts.ready;
+
+    const loadedFaces = Array.from(document.fonts).filter(face => face.status === "loaded");
+    const faceIsBold = face => {
+      const weights = (face.weight || "").match(/\d+/g)?.map(Number) || [];
+      return weights.length > 0 && weights[0] >= 500;
+    };
+    const unresolvedFaces = Array.from(requiredFaces.values()).filter(required => {
+      const hasLoadedFace = loadedFaces.some(face =>
+        normalizeFamily(face.family) === required.family
+          && faceIsBold(face) === required.isBold
+      );
+      const cssWeight = required.isBold ? 700 : 400;
+      const escapedFamily = required.family.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      return !hasLoadedFace
+        || !document.fonts.check(`${cssWeight} 12px "${escapedFamily}"`, required.sample);
+    });
+
+    let fontFailureReason = null;
+    if (document.fonts.status !== "loaded") {
+      fontFailureReason = `document.fonts.status=${document.fonts.status}`;
+    } else if (unresolvedFaces.length > 0) {
+      fontFailureReason = `unresolved PDF fonts: ${unresolvedFaces
+        .map(face => `${face.family}/${face.isBold ? "bold" : "regular"}`)
+        .join(", ")}`;
+    }
+
+    const svg = document.querySelector("svg");
+    const rect = svg?.getBoundingClientRect();
+    const viewBox = svg?.viewBox?.baseVal;
+    const dimension = (name, rectValue, viewBoxValue) => {
+      const attribute = svg?.getAttribute(name)?.trim() || "";
+      const resolved = svg?.[name]?.baseVal?.value;
+      if (attribute && !attribute.endsWith("%") && Number.isFinite(resolved) && resolved > 0) {
+        return resolved;
+      }
+      if (Number.isFinite(viewBoxValue) && viewBoxValue > 0) {
+        return viewBoxValue;
+      }
+      return Number.isFinite(rectValue) && rectValue > 0 ? rectValue : 0;
+    };
+    const width = Math.ceil(dimension("width", rect?.width, viewBox?.width));
+    const height = Math.ceil(dimension("height", rect?.height, viewBox?.height));
+    return JSON.stringify({ width, height, fontFailureReason });
+    """#
 
     static func pageHTML(for svg: String) -> String {
         """
@@ -329,6 +642,7 @@ enum RhwpStudioPagePDFHTML {
           <meta charset="utf-8">
           <meta http-equiv="Content-Security-Policy" content="\(contentSecurityPolicy)">
           <style>
+            \(RhwpStudioPDFFontStyle.fontFaceCSS)
             * { box-sizing: border-box; }
             html, body {
               margin: 0;
@@ -346,6 +660,33 @@ enum RhwpStudioPagePDFHTML {
         </body>
         </html>
         """
+    }
+}
+
+enum RhwpStudioPagePDFPreparation {
+    static func pageSize(from value: Any?, pageNumber: Int) throws -> NSSize {
+        guard let json = value as? String,
+              let data = json.data(using: .utf8),
+              let dictionary = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        else {
+            throw RhwpStudioPagePDFRenderError.fontPreparationFailed(
+                page: pageNumber,
+                reason: "글꼴 준비 결과를 해석할 수 없습니다."
+            )
+        }
+
+        if let reason = dictionary["fontFailureReason"] as? String,
+           !reason.isEmpty {
+            throw RhwpStudioPagePDFRenderError.fontPreparationFailed(
+                page: pageNumber,
+                reason: reason
+            )
+        }
+
+        return try RhwpStudioPagePDFMetrics.size(
+            fromMetrics: dictionary,
+            pageNumber: pageNumber
+        )
     }
 }
 
@@ -385,6 +726,7 @@ enum RhwpStudioPagePDFRenderError: LocalizedError, Equatable {
     case renderingInProgress
     case pageRenderTimedOut(Int)
     case webContentProcessTerminated
+    case fontPreparationFailed(page: Int, reason: String)
     case invalidPageMetrics(Int)
     case pdfEncodingFailed(Int)
     case unexpectedPDFPageCount(page: Int, actual: Int)
@@ -399,6 +741,8 @@ enum RhwpStudioPagePDFRenderError: LocalizedError, Equatable {
             "\(page)페이지 PDF 변환 시간이 초과됐습니다."
         case .webContentProcessTerminated:
             "PDF 페이지 변환 중 WebKit 프로세스가 종료됐습니다."
+        case .fontPreparationFailed(let page, let reason):
+            "\(page)페이지 PDF 글꼴을 준비할 수 없습니다: \(reason)"
         case .invalidPageMetrics(let page):
             "\(page)페이지 크기를 확인할 수 없습니다."
         case .pdfEncodingFailed(let page):

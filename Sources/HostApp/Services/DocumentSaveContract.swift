@@ -1,4 +1,338 @@
+import Darwin
 import Foundation
+
+enum DocumentSourceFormatIdentity: Equatable {
+    private static let hwp3MagicPrefix = Data("HWP Document File".utf8)
+
+    case hwp3
+    case other
+
+    static func identify(_ data: Data) -> Self {
+        data.starts(with: hwp3MagicPrefix) ? .hwp3 : .other
+    }
+}
+
+enum DocumentSourceProtection: Equatable {
+    case plain
+    case passwordProtected
+    case unsupportedProtection
+    case invalidOrUnknown
+
+    var requiresPlainCopyWarning: Bool {
+        self != .plain
+    }
+}
+
+enum DocumentSaveOutputProtectionIntent: Equatable {
+    case preserveSourceProtection
+    case plainCopy
+}
+
+enum DocumentSaveConversionIntent: Equatable {
+    case none
+    case hwp3ToHwp5
+    case hwp3ToHwpx
+
+    static func resolve(
+        sourceFormat: DocumentSourceFormatIdentity,
+        outputFormat: DocumentSaveFormat
+    ) -> Self {
+        guard sourceFormat == .hwp3 else {
+            return .none
+        }
+
+        switch outputFormat {
+        case .hwp:
+            return .hwp3ToHwp5
+        case .hwpx:
+            return .hwp3ToHwpx
+        }
+    }
+
+    var requiresNewDestination: Bool {
+        self != .none
+    }
+}
+
+enum DocumentSaveWarningIntent: Equatable {
+    case none
+    case conversionCopy
+    case plainCopy
+    case plainConversionCopy
+
+    static func resolve(
+        sourceProtection: DocumentSourceProtection,
+        conversionIntent: DocumentSaveConversionIntent
+    ) -> Self {
+        switch (
+            sourceProtection.requiresPlainCopyWarning,
+            conversionIntent != .none
+        ) {
+        case (false, false):
+            return .none
+        case (false, true):
+            return .conversionCopy
+        case (true, false):
+            return .plainCopy
+        case (true, true):
+            return .plainConversionCopy
+        }
+    }
+
+    var requiresConfirmation: Bool {
+        self != .none
+    }
+}
+
+enum DocumentSaveWritePolicy {
+    typealias TemporaryFileWriter = (Data, URL) throws -> Void
+    typealias TemporaryFilePublisher = (URL, URL) throws -> Void
+
+    static func write(
+        data: Data,
+        to destinationURL: URL,
+        allowOverwrite: Bool
+    ) throws {
+        if allowOverwrite {
+            try data.write(to: destinationURL, options: .atomic)
+            return
+        }
+
+        try writeNewFileAtomically(data: data, to: destinationURL)
+    }
+
+    private static func writeNewFileAtomically(
+        data: Data,
+        to destinationURL: URL
+    ) throws {
+        try writeNewFileAtomically(
+            data: data,
+            to: destinationURL,
+            temporaryFileWriter: { data, temporaryURL in
+                try data.write(to: temporaryURL, options: .atomic)
+            },
+            temporaryFilePublisher: publishNewFileExclusively
+        )
+    }
+
+    static func writeNewFileAtomically(
+        data: Data,
+        to destinationURL: URL,
+        temporaryFileWriter: TemporaryFileWriter,
+        temporaryFilePublisher: TemporaryFilePublisher
+    ) throws {
+        let temporaryURL = destinationURL
+            .deletingLastPathComponent()
+            .appendingPathComponent(
+                ".\(destinationURL.lastPathComponent).\(UUID().uuidString).tmp",
+                isDirectory: false
+            )
+        defer {
+            try? FileManager.default.removeItem(at: temporaryURL)
+        }
+
+        // 목적지는 완성된 임시 파일만 배타적으로 rename해 노출한다.
+        // 중간 write 실패와 publish 직전의 destination 생성 경쟁을 모두 fail-closed로 처리한다.
+        try temporaryFileWriter(data, temporaryURL)
+        try temporaryFilePublisher(temporaryURL, destinationURL)
+    }
+
+    private static func publishNewFileExclusively(
+        at temporaryURL: URL,
+        to destinationURL: URL
+    ) throws {
+        let result: Int32 = temporaryURL.withUnsafeFileSystemRepresentation { temporaryPath in
+            guard let temporaryPath else {
+                errno = EINVAL
+                return Int32(-1)
+            }
+            return destinationURL.withUnsafeFileSystemRepresentation { destinationPath in
+                guard let destinationPath else {
+                    errno = EINVAL
+                    return Int32(-1)
+                }
+                return renameatx_np(
+                    AT_FDCWD,
+                    temporaryPath,
+                    AT_FDCWD,
+                    destinationPath,
+                    UInt32(RENAME_EXCL)
+                )
+            }
+        }
+
+        guard result == 0 else {
+            let errorCode = errno
+            throw NSError(
+                domain: NSPOSIXErrorDomain,
+                code: Int(errorCode),
+                userInfo: [NSFilePathErrorKey: destinationURL.path]
+            )
+        }
+    }
+}
+
+enum DocumentSaveProtectionPolicyError: Error, Equatable, LocalizedError {
+    case documentChanged
+    case protectedSourceRequiresPlainCopy(DocumentSourceProtection)
+    case plainSourceRequiresPreserveIntent
+    case plainCopyMustUseDifferentDestination
+    case plainCopyRequiresNewDestination
+    case conversionIntentMismatch
+    case hwp3ConversionMustUseDifferentDestination
+    case hwp3ConversionRequiresNewDestination
+
+    var errorDescription: String? {
+        switch self {
+        case .documentChanged:
+            return "저장 요청 뒤 다른 문서가 열렸거나 보호 상태 또는 원본 형식이 변경되었습니다."
+        case .protectedSourceRequiresPlainCopy:
+            return "보호된 문서는 현재 원본 보호를 유지한 채 저장할 수 없습니다."
+        case .plainSourceRequiresPreserveIntent:
+            return "평문 문서의 저장 보호 의도가 올바르지 않습니다."
+        case .plainCopyMustUseDifferentDestination:
+            return "보호를 해제한 복사본은 원본과 다른 위치에 저장해야 합니다."
+        case .plainCopyRequiresNewDestination:
+            return "원본 위치를 확인할 수 없는 보호 문서는 기존 파일을 덮어쓸 수 없습니다. 새 파일 이름을 선택해 주세요."
+        case .conversionIntentMismatch:
+            return "원본 형식과 저장 형식의 변환 상태가 일치하지 않습니다."
+        case .hwp3ConversionMustUseDifferentDestination:
+            return "HWP3 변환 복사본은 원본과 다른 새 파일에 저장해야 합니다."
+        case .hwp3ConversionRequiresNewDestination:
+            return "HWP3 변환 복사본은 기존 파일을 덮어쓸 수 없습니다. 새 파일 이름을 선택해 주세요."
+        }
+    }
+}
+
+enum DocumentSaveProtectionPolicy {
+    static func validateCurrentDocument(
+        requestRevision: Int,
+        requestProtection: DocumentSourceProtection,
+        requestSourceFormat: DocumentSourceFormatIdentity,
+        currentRevision: Int?,
+        currentProtection: DocumentSourceProtection?,
+        currentSourceFormat: DocumentSourceFormatIdentity?
+    ) throws {
+        guard currentRevision == requestRevision,
+              currentProtection == requestProtection,
+              currentSourceFormat == requestSourceFormat
+        else {
+            throw DocumentSaveProtectionPolicyError.documentChanged
+        }
+    }
+
+    static func allowsInPlaceSave(
+        sourceProtection: DocumentSourceProtection,
+        sourceFormat: DocumentSourceFormatIdentity
+    ) -> Bool {
+        sourceProtection == .plain && sourceFormat != .hwp3
+    }
+
+    static func outputIntent(
+        for sourceProtection: DocumentSourceProtection
+    ) -> DocumentSaveOutputProtectionIntent {
+        sourceProtection == .plain ? .preserveSourceProtection : .plainCopy
+    }
+
+    static func resultingProtection(
+        sourceProtection: DocumentSourceProtection,
+        for outputIntent: DocumentSaveOutputProtectionIntent
+    ) -> DocumentSourceProtection {
+        switch outputIntent {
+        case .preserveSourceProtection:
+            return sourceProtection
+        case .plainCopy:
+            return .plain
+        }
+    }
+
+    static func validateRequest(
+        sourceProtection: DocumentSourceProtection,
+        outputIntent: DocumentSaveOutputProtectionIntent,
+        sourceFormat: DocumentSourceFormatIdentity,
+        outputFormat: DocumentSaveFormat,
+        conversionIntent: DocumentSaveConversionIntent,
+        sourceURL: URL?,
+        destinationURL: URL
+    ) throws {
+        guard conversionIntent == DocumentSaveConversionIntent.resolve(
+            sourceFormat: sourceFormat,
+            outputFormat: outputFormat
+        ) else {
+            throw DocumentSaveProtectionPolicyError.conversionIntentMismatch
+        }
+
+        switch (sourceProtection, outputIntent) {
+        case (.plain, .preserveSourceProtection):
+            break
+        case (.plain, .plainCopy):
+            throw DocumentSaveProtectionPolicyError.plainSourceRequiresPreserveIntent
+        case (_, .preserveSourceProtection):
+            throw DocumentSaveProtectionPolicyError.protectedSourceRequiresPlainCopy(
+                sourceProtection
+            )
+        case (_, .plainCopy):
+            break
+        }
+
+        if conversionIntent.requiresNewDestination {
+            if let sourceURL, sameFile(sourceURL, destinationURL) {
+                throw DocumentSaveProtectionPolicyError
+                    .hwp3ConversionMustUseDifferentDestination
+            }
+            guard !FileManager.default.fileExists(atPath: destinationURL.path) else {
+                throw DocumentSaveProtectionPolicyError.hwp3ConversionRequiresNewDestination
+            }
+            return
+        }
+
+        if outputIntent == .plainCopy {
+            guard let sourceURL else {
+                guard !FileManager.default.fileExists(atPath: destinationURL.path) else {
+                    throw DocumentSaveProtectionPolicyError.plainCopyRequiresNewDestination
+                }
+                return
+            }
+            if sameFile(sourceURL, destinationURL) {
+                throw DocumentSaveProtectionPolicyError.plainCopyMustUseDifferentDestination
+            }
+        }
+    }
+
+    static func suggestedFilename(
+        for filename: String,
+        format: DocumentSaveFormat,
+        outputIntent: DocumentSaveOutputProtectionIntent,
+        conversionIntent: DocumentSaveConversionIntent
+    ) -> String {
+        let normalizedFilename = format.normalizedFilename(filename)
+        let suffix: String? = switch (
+            outputIntent,
+            conversionIntent.requiresNewDestination
+        ) {
+        case (.preserveSourceProtection, false):
+            nil
+        case (.preserveSourceProtection, true):
+            "변환 복사본"
+        case (.plainCopy, false):
+            "평문 복사본"
+        case (.plainCopy, true):
+            "평문 변환 복사본"
+        }
+        guard let suffix else {
+            return normalizedFilename
+        }
+
+        let stem = (normalizedFilename as NSString).deletingPathExtension
+        return format.normalizedFilename("\(stem) (\(suffix))")
+    }
+
+    private static func sameFile(_ lhs: URL, _ rhs: URL) -> Bool {
+        let lhsURL = lhs.standardizedFileURL.resolvingSymlinksInPath()
+        let rhsURL = rhs.standardizedFileURL.resolvingSymlinksInPath()
+        return lhsURL.path.compare(rhsURL.path, options: .caseInsensitive) == .orderedSame
+    }
+}
 
 enum DocumentSaveCommand: String, CaseIterable {
     case save = "file:save"

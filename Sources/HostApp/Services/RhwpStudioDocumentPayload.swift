@@ -4,6 +4,11 @@ struct RhwpStudioDocumentPayload {
     let data: Data
     let filename: String
     let revision: Int
+    let sourceProtection: DocumentSourceProtection
+
+    var sourceFormatIdentity: DocumentSourceFormatIdentity {
+        DocumentSourceFormatIdentity.identify(data)
+    }
 }
 
 enum RhwpStudioDocumentRoute {

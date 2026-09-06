@@ -58,9 +58,13 @@ targets:
         EXECUTABLE_NAME: Alhangeul
         PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul
         INFOPLIST_FILE: Sources/HostApp/Info.plist
+        ALHANGEUL_APP_EXECUTION_ENDPOINT: ""
         CODE_SIGN_ENTITLEMENTS: Sources/HostApp/HostApp.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
+      configs:
+        Release:
+          ALHANGEUL_APP_EXECUTION_ENDPOINT: https://alhangeul-install-events.postmelee.workers.dev/v1/install-events
 
   QLExtension:
     type: app-extension
@@ -139,6 +143,7 @@ targets:
       - path: Sources/HostApp/Services/AppExecutionAnalyticsRuntime.swift
       - path: Sources/HostApp/Services/AppExecutionEvent.swift
       - path: Sources/HostApp/Services/AppExecutionOutbox.swift
+      - path: Sources/HostApp/Services/DocumentOpenRecoveryState.swift
       - path: Sources/HostApp/Services/DocumentSaveContract.swift
       - path: Sources/HostApp/Services/DocumentSaveFormat.swift
       - path: Sources/HostApp/Services/QuickLookConflictDetector.swift
@@ -147,9 +152,11 @@ targets:
       - path: Sources/HostApp/Services/QuickLookSettingsOpener.swift
       - path: Sources/HostApp/Services/RhwpStudioHostBridgeScript.swift
       - path: Sources/HostApp/Services/RhwpStudioPDFExportController.swift
+      - path: Sources/HostApp/Services/RhwpStudioPDFFontProvider.swift
       - path: Sources/HostApp/Services/RhwpStudioPDFExportState.swift
       - path: Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift
       - path: Sources/HostApp/Services/RhwpStudioPagePayload.swift
+      - path: Sources/HostApp/Services/RhwpStudioPrintLifecycle.swift
       - path: Sources/HostApp/Services/RhwpStudioPrintOrientationPolicy.swift
       - path: Sources/HostApp/Support/RhwpProvenance.swift
     settings:
@@ -157,6 +164,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.HostAppTests
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
+      - sdk: JavaScriptCore.framework
       - sdk: Network.framework
 
   ExternalImageTests:
@@ -166,6 +174,7 @@ targets:
       - path: Tests/ExternalImageTests
       - path: Sources/Shared/HwpExternalImageResolver.swift
       - path: Sources/RhwpCoreBridge/RhwpDocument.swift
+      - path: Sources/RhwpCoreBridge/RhwpDocumentProtection.swift
       - path: Sources/RhwpCoreBridge/RenderTree.swift
     dependencies:
       - framework: Frameworks/Rhwp.xcframework

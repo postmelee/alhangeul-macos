@@ -2,9 +2,9 @@
   "name": "rhwp-studio",
   "source_repository": "https://github.com/edwardkim/rhwp.git",
   "source_ref_kind": "release-tag",
-  "source_release_tag": "v0.8.4",
-  "source_resolved_commit": "496333b27d21ddb9114ba9ae340bcb895870c9a7",
-  "source_cargo_lock_sha256": "217783dc2ee85525ff8eaefd3ae6b44a8523d0a38daaf6031f3cc277de16b893",
+  "source_release_tag": "v0.8.6",
+  "source_resolved_commit": "f1f9c6ae58344ee9368996d3543f76b9345cf227",
+  "source_cargo_lock_sha256": "a094d90fbf3d1f312eb746468334cce5d862ad147dc2eb276062fc3e49cbc373",
   "wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "recommended_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "actual_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
@@ -17,24 +17,24 @@
     "alhangeul-wkwebview-overrides.css",
     "fonts/FONTS.md"
   ],
-  "copied_file_count": 61,
-  "copied_total_bytes": 41102101,
+  "copied_file_count": 62,
+  "copied_total_bytes": 43710777,
   "entrypoints": {
     "index_html": {
       "path": "index.html",
-      "sha256": "31286720083e3f60ee7883f10662ec00005d9a1ca4a082dc2e2c718d091b1005"
+      "sha256": "5c2908fd3ac68dea677664511cf8392cdc7d8065e554ec651b1ca92274910a87"
     },
     "main_js": {
-      "path": "assets/index-2K8l69fn.js",
-      "sha256": "b17fec4714d2bb07655c6d493bdfc66b1ae8182f926a48354c9deeed2ee0866c"
+      "path": "assets/index-DYLUfso_.js",
+      "sha256": "cd70753f45f8798ccce8f57a6a7cdf9121cd7a05177002e09fcef5dffce7dec0"
     },
     "main_css": {
-      "path": "assets/index-RCGbZ9bS.css",
-      "sha256": "11698afc6ca3891a72ff881e80a6a77139afb157e0ed6f60a001af7ea741efee"
+      "path": "assets/index-CTuzrDj-.css",
+      "sha256": "99079bd4ba8b26741430215cab64683928eb6a7e545c965bdfa3fb2e9b68d02f"
     },
     "wasm": {
-      "path": "assets/rhwp_bg-CKllGEX8.wasm",
-      "sha256": "865544531ebafa21a8e2b6da7dd2e0b8c52e381130a86159495f50b18e071ca8"
+      "path": "assets/rhwp_bg-MVy1tBea.wasm",
+      "sha256": "d9f5000578b82349289ee85c3f680c7050dfc9b6af1605707560c21ee988f9b4"
     }
   }
 }

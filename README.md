@@ -51,19 +51,21 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 > 기존 `devel`에 있던 native viewer/editor 장기 작업은 `native-viewer-editor` 브랜치로 보존했습니다. 이 브랜치는 이제 Swift native macOS shell, Rust/rhwp Skia renderer 연동, Swift 편집 UI/오버레이 실험 라인으로 취급합니다. `devel-webview`는 퇴역한 legacy alias이며 신규 PR 대상이나 자동화 기준으로 사용하지 않습니다.
 
-## 최신 공개 릴리즈
+## 릴리즈 안내
 
-### v0.1.10
+### v0.1.11 (공개 준비)
 
-`v0.1.10`은 HWP와 HWPX를 형식에 맞는 macOS 저장 패널로 저장하고 다시 여는 경로를 연결하며, 현재 편집 상태의 전체 페이지를 searchable PDF와 인쇄로 내보내는 patch release입니다. PDF·인쇄용 문서 SVG는 전용 WebView에서 script, 외부 resource와 navigation을 차단하면서 page geometry와 text를 유지합니다. upstream `rhwp v0.8.4`의 암호 문서, 중첩 표 조판·선택·복사, 특수 글리프와 대형 문서 처리 보강을 포함하고, 새 render tree schema를 native Quick Look/Thumbnail 경로에서도 수용합니다. 설정의 개인정보 화면에서는 영구 사용자·기기 식별자 없이 수집되는 익명 실행·업데이트 추이 공유를 끌 수 있습니다.
+`v0.1.11 (17)`은 `rhwp v0.8.6`의 문서 조판·저장 호환성과 한글 입력·표 편집 개선을 반영하는 패치 릴리즈 후보입니다. 암호 문서·HWP3 원본 덮어쓰기 차단, PDF 한글 선택·검색·복사, PDF·인쇄 재실행, 파일 열기 실패 복구와 글자색·형광펜 선택기 표시·위치 보정을 포함합니다. 암호를 유지하는 저장·새 암호 설정과 HWP3 원형 저장은 지원하지 않으며, 안내 뒤 새 평문 또는 변환 복사본으로만 저장합니다.
 
-- GitHub Release: [Alhangeul v0.1.10](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.10)
-- 업데이트 페이지: [알한글 v0.1.10](https://postmelee.github.io/alhangeul-macos/updates/v0.1.10.html)
-- Homebrew Cask: `brew install --cask postmelee/tap/alhangeul`로 같은 signed/notarized universal DMG 설치
-- 포함된 `rhwp`: [`v0.8.4`](https://github.com/edwardkim/rhwp/releases/tag/v0.8.4) (`rhwp-core.lock`, bundled `rhwp-studio` manifest 기준)
-- Sparkle update 기준: short version은 `0.1.10`, build는 `16`입니다.
+- 포함된 `rhwp`: [`v0.8.6`](https://github.com/edwardkim/rhwp/releases/tag/v0.8.6), core·bundled Studio commit `f1f9c6ae58344ee9368996d3543f76b9345cf227`
+- 후보 기록: [v0.1.11 릴리즈 기록](mydocs/release/v0.1.11.md), [배포용 업데이트 문서](docs/updates/v0.1.11.html)
+- 배포 예정: [GitHub Release v0.1.11](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.11). 아직 공개되지 않았으며 앱·서명 설치본 검증을 진행할 예정입니다.
 
-과거 릴리즈 상세와 검증 기록은 `mydocs/release/`의 릴리즈별 문서와 [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)에 누적합니다. 사용자용 릴리즈 노트 목록은 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다. README에는 최신 공개 릴리즈 1개만 요약하고, bundled `rhwp` provenance는 한 줄 요약만 표시합니다.
+현재 최신 공개 릴리즈와 Homebrew Cask는 [v0.1.10 (16)](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.1.10)입니다. HWP/HWPX 형식별 저장, 전체 페이지 PDF·인쇄와 `rhwp v0.8.4`를 포함합니다.
+
+> **현재 공개 v0.1.10 저장 주의:** HWP3 저장 시 원본이 HWP5 bytes로 바뀌거나, 보호 문서 저장 시 보호가 제거된 평문으로 원본을 덮어쓸 수 있습니다([#482](https://github.com/postmelee/alhangeul-macos/issues/482), [#480](https://github.com/postmelee/alhangeul-macos/issues/480)). v0.1.11 공개 전까지 HWP3·암호 문서는 먼저 사본을 만들고 native 저장을 사용하지 마세요.
+
+과거 릴리즈와 검증 기록은 [릴리즈 인덱스](mydocs/release/index.md), [GitHub Releases](https://github.com/postmelee/alhangeul-macos/releases)와 [업데이트 페이지](https://postmelee.github.io/alhangeul-macos/updates/)에서 확인할 수 있습니다.
 
 ## 이정표
 
@@ -83,7 +85,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 
 ## v0.1.x 구현 범위
 
-현재 공개 릴리즈 라인에서 제공하는 기능과 알려진 제약입니다.
+공개 릴리즈 라인의 기능과 개발 브랜치의 v0.1.11 후보에 반영된 저장 보호·PDF 개선을 함께 설명합니다. 현재 설치 가능한 공개 버전의 차이는 위 릴리즈 안내를 확인하세요.
 
 ### 제공 기능
 
@@ -94,7 +96,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 - [x] Finder 또는 다른 앱에서 HWP/HWPX 파일 열기
 - [x] Finder에서 viewer 영역으로 끌어와서 열기
 - [x] 최근 문서 목록과 security-scoped bookmark 기반 재열기
-- [x] HWP/HWPX 형식별 저장과 다른 이름으로 저장
+- [x] 평문 HWP5/HWPX 형식별 저장과 다른 이름으로 저장, HWP3 변환 복사본 저장
 - [x] PDF 내보내기
 - [x] native 인쇄 flow 연결
 - [x] macOS 공유 sheet
@@ -108,7 +110,10 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 
 - 앱 화면의 viewer/editor와 Finder Quick Look/thumbnail, PDF 내보내기, 인쇄는 서로 다른 렌더링 경로를 사용할 수 있습니다.
 - Quick Look/Thumbnail smoke 통과는 extension 등록과 기본 렌더 성공을 뜻하며, 모든 문서가 앱 화면과 같은 시각 결과로 보인다는 보장은 아닙니다.
-- HWP/HWPX 저장은 형식별 exporter와 container signature를 확인하지만, upstream exporter가 모든 문서 요소를 의미론적으로 완전 무손실 보존한다고 보장하지 않습니다.
+- 평문 HWP3 문서는 열 수 있지만 HWP3 원형으로 다시 저장할 수는 없습니다. 저장 전 형식 변환을 알리고, 원본과 기존 파일을 덮어쓰지 않는 새 HWP5 또는 HWPX 변환 복사본만 저장합니다. 자세한 추적은 [Issue #482](https://github.com/postmelee/alhangeul-macos/issues/482)를 참조하세요.
+- 암호로 보호된 HWP/HWPX 문서는 열 수 있지만 현재 native 저장 경로는 암호 보호를 유지하거나 새 암호를 설정할 수 없습니다. 저장 전 보호 해제를 알리고 원본과 다른 새 경로의 평문 복사본만 허용합니다. 자세한 추적은 [Issue #480](https://github.com/postmelee/alhangeul-macos/issues/480)을 참조하세요.
+- HWP5/HWPX 저장은 형식별 exporter와 container signature를 확인하지만, upstream exporter가 모든 문서 요소를 의미론적으로 완전 무손실 보존한다고 보장하지 않습니다.
+- v0.1.11 후보의 PDF/인쇄 경로는 허가된 앱 내장 Noto fallback으로 한글 text layer의 Unicode mapping을 보강합니다. 다만 positioned SVG의 읽기·드래그 선택 순서는 viewer마다 다를 수 있고, Hanja·일부 수식/기호의 system font, 이미지·스캔·도형 안 글자는 완전한 선택을 보장하지 않으며 OCR을 제공하지 않습니다.
 - 손상, 대용량, 미지원 문서 fallback은 앱과 extension이 멈추지 않도록 하는 안전장치이며, 파일 복구나 부분 렌더링을 보장하지 않습니다.
 - CoreGraphics/CoreText 기반 native renderer의 style, image effect/fill, text layout, RawSvg/OLE 등 parity gap은 현재 Quick Look/Thumbnail과 fallback/diagnostic 경로에서 계속 다룹니다. HostApp 장기 native 경로는 Rust/rhwp Skia renderer와 Swift overlay를 결합하는 방향으로 분리합니다.
 
@@ -126,7 +131,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 ### WKWebView Viewer (MVP 뷰어)
 
 - macOS SwiftUI 기반 HostApp shell과 WKWebView
-- `edwardkim/rhwp` `v0.8.4`의 `rhwp-studio` viewer/editor 통합
+- 개발 브랜치 기준 `edwardkim/rhwp` `v0.8.6`의 `rhwp-studio` viewer/editor 통합
 - HWP/HWPX 파일 열기
 - WebView 내부 찾기, 복사, 기본 편집 UI
 - Finder 또는 다른 앱에서 파일 열기 요청 수신
@@ -138,7 +143,9 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 ### Document Actions (문서 작업)
 
 - 파일 메뉴와 `Command+O/S/Shift+S/P` 단축키를 native 열기, 저장, 다른 이름으로 저장, 인쇄 flow에 연결
-- HWP/HWPX 형식별 저장과 다른 이름으로 저장, 저장 결과 재열기
+- 평문 HWP5/HWPX 형식별 저장과 다른 이름으로 저장, 저장 결과 재열기
+- 평문 HWP3는 원본을 보존하고 새 HWP5/HWPX 변환 복사본으로만 저장
+- 암호 문서는 열 수 있지만 native 저장에서는 암호 보호를 유지하지 않으며, 사용자 확인 뒤 새 평문 복사본으로만 저장
 - PDF로 내보내기 후 저장된 PDF를 Finder에서 표시
 - macOS 공유 sheet로 현재 문서 공유
 - 원본 URL이 있는 문서를 Finder에서 보기
@@ -149,7 +156,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 | 표면 | v0.1 렌더링 경로 | 기준 |
 |------|------------------|------|
 | HostApp viewer/editor 화면 | `rhwp-studio` Web/WASM rendering in WKWebView | 첫 공개 배포의 기본 viewer/editor 경로 |
-| PDF 내보내기 | `rhwp-studio` page SVG + 전용 WKWebView/PDFKit native PDF 경로 | 현재 편집 상태의 전체 페이지와 searchable text 반영 |
+| PDF 내보내기 | `rhwp-studio` page SVG + 전용 WKWebView/PDFKit native PDF 경로 | 현재 편집 상태의 전체 페이지, 앱 소유 한글 fallback과 searchable text 반영 |
 | 인쇄 | PDF 내보내기와 같은 page SVG renderer + PDFKit/AppKit print operation | page geometry를 공유하고 native print panel 사용 |
 | Quick Look preview | Rust bridge + Swift CoreGraphics/CoreText render tree bitmap/PDF | Finder preview용 경로 |
 | Finder thumbnail | Rust bridge + Swift CoreGraphics/CoreText first-page bitmap/cache | Finder icon/thumbnail용 경로 |
