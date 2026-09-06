@@ -16,10 +16,9 @@ Outputs:
   run_release_checks
 
 Notes:
-  run_rust_verify=true means PR CI should run build-rust-macos.sh --verify-lock
-  for source/core/header/ABI verification. The macOS validation workflow may
-  separately skip only librhwp.a byte hash verification with
-  ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1.
+  run_rust_verify=true means PR CI should run build-rust-macos.sh --verify-portable
+  for source/core/header/ABI verification. Portable mode excludes only
+  librhwp.a byte hash/size comparison while retaining reference metadata checks.
 EOF
 }
 
@@ -232,8 +231,8 @@ print_rust_verify_policy() {
   echo "### Rust verify policy"
   echo
   if [ "$run_rust_verify" = "true" ]; then
-    echo "- \`run_rust_verify=true\` runs \`./scripts/build-rust-macos.sh --verify-lock\` in macOS validation."
-    echo "- PR macOS validation may set \`ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1\`, which skips only \`Frameworks/universal/librhwp.a\` byte hash/size comparison."
+    echo "- \`run_rust_verify=true\` runs \`./scripts/build-rust-macos.sh --verify-portable\` in macOS validation."
+    echo "- Portable verification excludes staticlib byte hash/size comparison; source/header/ABI gates remain enforced."
     echo "- Source provenance, Cargo lock, generated header, and FFI symbol checks remain part of Rust verify."
   else
     echo "- \`run_rust_verify=false\`; macOS validation rebuilds Rust bridge artifacts without lock comparison."

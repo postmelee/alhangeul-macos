@@ -43,7 +43,7 @@
 
 `Frameworks/universal/librhwp.a` hash/size는 reference artifact metadata로 유지한다. 이 값은 기준 환경에서 생성한 Rust bridge static archive 식별자로 유용하지만, Rust compiler, Xcode, macOS runner image, archive tool, build path 차이에 따라 source와 ABI가 같아도 byte-for-byte 값이 달라질 수 있다.
 
-GitHub-hosted CI/release workflow는 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 `librhwp.a` byte hash/size 비교만 제외할 수 있다. 이 경우에도 source provenance, `RustBridge/Cargo.lock`, generated header, FFI symbol 검증은 유지한다. strict staticlib byte hash를 필수 release gate로 복귀하려면 toolchain/runner/build path 또는 CI 기준 lock 생성 환경을 먼저 고정한다.
+로컬·CI·release workflow의 일반 검증은 `--verify-portable`을 사용한다. staticlib byte hash/size 비교만 제외하고 source provenance, Cargo.lock, header, FFI symbol과 reference metadata 검증은 유지한다. 기준 환경 byte 검증은 명시 `--verify-strict`를 사용한다. 환경 차이를 이유로 lock을 자동 갱신하지 않는다. legacy 옵션 호환과 실패 분류는 [build_run_guide.md](build_run_guide.md)를 따른다.
 
 ### Swift build info mirror
 
@@ -67,7 +67,7 @@ Demo/Preview commit pin:
 ./scripts/build-rust-macos.sh --update-lock
 ./scripts/update-rhwp-core-build-info.sh
 ./scripts/verify-rhwp-core-build-info.sh
-./scripts/build-rust-macos.sh --verify-lock
+./scripts/build-rust-macos.sh --verify-portable
 ./scripts/check-no-appkit.sh
 xcodegen generate
 xcodebuild -project Alhangeul.xcodeproj \
@@ -86,7 +86,7 @@ Stable release tag:
 ./scripts/build-rust-macos.sh --update-lock
 ./scripts/update-rhwp-core-build-info.sh
 ./scripts/verify-rhwp-core-build-info.sh
-./scripts/build-rust-macos.sh --verify-lock
+./scripts/build-rust-macos.sh --verify-portable
 ./scripts/check-no-appkit.sh
 xcodegen generate
 xcodebuild -project Alhangeul.xcodeproj \
