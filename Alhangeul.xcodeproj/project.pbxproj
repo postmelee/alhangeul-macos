@@ -1559,7 +1559,9 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				EXECUTABLE_NAME = Alhangeul;
+				EXPORTED_SYMBOLS_FILE = Sources/SpotlightImporter/ExportedSymbols.txt;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Frameworks\"",
@@ -1583,7 +1585,9 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				EXECUTABLE_NAME = Alhangeul;
+				EXPORTED_SYMBOLS_FILE = Sources/SpotlightImporter/ExportedSymbols.txt;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Frameworks\"",

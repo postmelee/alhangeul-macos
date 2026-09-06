@@ -145,6 +145,8 @@ targets:
     platform: macOS
     sources:
       - path: Sources/SpotlightImporter
+        excludes:
+          - ExportedSymbols.txt
     dependencies:
       - framework: Frameworks/Rhwp.xcframework
         embed: false
@@ -165,6 +167,8 @@ targets:
         WRAPPER_EXTENSION: mdimporter
         INFOPLIST_FILE: Sources/SpotlightImporter/Info.plist
         GCC_C_LANGUAGE_STANDARD: c11
+        EXPORTED_SYMBOLS_FILE: Sources/SpotlightImporter/ExportedSymbols.txt
+        DEAD_CODE_STRIPPING: YES
         CODE_SIGN_STYLE: Automatic
         SKIP_INSTALL: YES
 

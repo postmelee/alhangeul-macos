@@ -18,9 +18,12 @@ xcrun clang -mmacosx-version-min=12.0 "$ROOT/scripts/ci/spotlight_importer_check
   -framework CoreFoundation -framework CoreServices -o "$CHECKER"
 "$CHECKER" "$IMPORTER" "$ROOT/samples/re-05-mixed-koen-hancom.hwp" 한글
 "$CHECKER" "$IMPORTER" "$ROOT/samples/hwpx/ref/ref_text.hwpx" ""
+"$CHECKER" "$IMPORTER" "$ROOT/samples/hwpx/ref/ref_empty.hwpx" --no-text
 "$CHECKER" "$IMPORTER" "$SPOTLIGHT_TEST_DIR/missing.hwp" --no-text
 printf 'invalid synthetic file' > "$SPOTLIGHT_TEST_DIR/invalid.hwp"
 "$CHECKER" "$IMPORTER" "$SPOTLIGHT_TEST_DIR/invalid.hwp" --no-text
+printf '\233 DRMONE  synthetic fixture' > "$SPOTLIGHT_TEST_DIR/protected.hwp"
+"$CHECKER" "$IMPORTER" "$SPOTLIGHT_TEST_DIR/protected.hwp" --no-text
 : > "$SPOTLIGHT_TEST_DIR/empty.hwp"
 "$CHECKER" "$IMPORTER" "$SPOTLIGHT_TEST_DIR/empty.hwp" --no-text
 "$CHECKER" "$IMPORTER" "$SPOTLIGHT_TEST_DIR" --no-text
