@@ -138,6 +138,15 @@ classify_path() {
   esac
 
   case "$path" in
+    RustBridge/examples/render_tree_golden.rs|scripts/update-render-tree-golden.sh|scripts/verify-render-tree-golden.sh|scripts/ci/render-tree-golden.py|scripts/ci/render_tree_golden_check.swift|scripts/ci/test-render-tree-golden.py|scripts/ci/fixtures/render-tree/*)
+      enable_macos_build "$path affects the pinned producer/Swift golden contract"
+      matched=1
+      ;;
+  esac
+
+  case "$path" in
+    RustBridge/examples/render_tree_golden.rs)
+      ;; # The dedicated golden case already records this helper's macOS reason.
     RustBridge/examples/*)
       enable_macos_build "$path affects Rust benchmark/helper sources"
       matched=1

@@ -53,6 +53,11 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Set up Python for golden contract helpers
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
       - name: Check shell script syntax
         shell: bash
         run: |
@@ -91,7 +96,13 @@ jobs:
           bash scripts/sync-rhwp-studio.sh --help
           bash scripts/update-rhwp-core-build-info.sh --help
           bash scripts/verify-rhwp-core-build-info.sh --help
+          bash scripts/update-render-tree-golden.sh --help
+          bash scripts/verify-render-tree-golden.sh --help
           bash scripts/verify-rhwp-studio-assets.sh --help
+
+      - name: Check render tree golden helper fixtures
+        shell: bash
+        run: python3 scripts/ci/test-render-tree-golden.py
 
       - name: Check Rust verification mode fixtures
         shell: bash
@@ -154,6 +165,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Python for golden contract helpers
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
       - name: Verify render tree decoder compatibility
         shell: bash
         run: |
@@ -183,6 +199,10 @@ jobs:
             echo "- Portable mode excludes only staticlib byte hash/size comparison; reference metadata remains required."
             echo "- Source provenance, Cargo lock, generated header, and FFI symbol checks still run."
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify pinned producer golden and Swift decoder
+        shell: bash
+        run: scripts/verify-render-tree-golden.sh
 
       - name: Prepare Rust bridge artifacts
         shell: bash

@@ -544,6 +544,11 @@ jobs:
           cp -a "$artifact_dir/pkg" "$upstream_dir/pkg"
           cp -a "$artifact_dir/rhwp-studio/dist" "$upstream_dir/rhwp-studio/dist"
 
+      - name: Set up Python for golden contract helpers
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
       - name: Apply full sync and create PR
         id: create_pr
         shell: bash
@@ -577,6 +582,9 @@ jobs:
           scripts/build-rust-macos.sh --update-lock
           scripts/update-rhwp-core-build-info.sh
           scripts/verify-rhwp-core-build-info.sh
+          scripts/update-render-tree-golden.sh
+          scripts/verify-render-tree-golden.sh
+          scripts/ci/test-render-tree-decoder.sh
           scripts/check-no-appkit.sh
 
           scripts/sync-rhwp-studio.sh \
@@ -598,6 +606,9 @@ jobs:
             echo "\`scripts/build-rust-macos.sh --update-lock\`: OK"
             echo "\`scripts/update-rhwp-core-build-info.sh\`: OK"
             echo "\`scripts/verify-rhwp-core-build-info.sh\`: OK"
+            echo "\`scripts/update-render-tree-golden.sh\`: producer-backed golden updated after core build"
+            echo "\`scripts/verify-render-tree-golden.sh\`: producer/Swift contract OK"
+            echo "\`scripts/ci/test-render-tree-decoder.sh\`: minimal current/legacy/error fixtures OK"
             echo "\`scripts/check-no-appkit.sh\`: OK"
             echo "\`scripts/sync-rhwp-studio.sh --tag $target_tag --commit $target_commit\`: OK"
             echo "\`scripts/verify-rhwp-studio-assets.sh --tag $target_tag --commit $target_commit --upstream-dir <target-checkout>\`: Cargo.lock fingerprint match OK"
@@ -616,6 +627,7 @@ jobs:
 
           git add \
             Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift \
+            scripts/ci/fixtures/render-tree/request-page0.json \
             Sources/HostApp/Resources/rhwp-studio \
             RustBridge/Cargo.toml \
             RustBridge/Cargo.lock \

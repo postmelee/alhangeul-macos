@@ -128,6 +128,7 @@
 - [ ] release owner가 delta checklist를 누락/과잉 확인용 보조 자료로 보정
 - [ ] `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock` 정합성 확인
 - [ ] `./scripts/build-rust-macos.sh --verify-portable` 통과 (portable 모드와 source/header/ABI·reference metadata 검증 확인)
+- [ ] Python 3.11+에서 `scripts/verify-render-tree-golden.sh` 통과; source/sample/actual producer/Swift 계약 drift를 writer로 자동 보정하지 않음
 - [ ] `RhwpCoreBuildInfo.swift`의 release baseline, commit, enabled features가 `rhwp-core.lock`과 일치
 - [ ] `./scripts/verify-rhwp-core-build-info.sh` 통과하고 release workflow가 writer로 drift를 자동 보정하지 않았는지 확인
 - [ ] `scripts/verify-rhwp-studio-assets.sh` 통과

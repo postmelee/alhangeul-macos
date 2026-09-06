@@ -36,6 +36,8 @@ Public release environment:
   ALHANGEUL_BUILD_ROOT                 Optional build root. Defaults to build.noindex.
 
 Examples:
+  Requires Python 3.11+ selected as python3 in PATH before any output cleanup/build.
+
   ALHANGEUL_DEVELOPER_ID_APPLICATION="Developer ID Application: ..." \\
   ALHANGEUL_NOTARY_PROFILE="alhangeul-notary" \\
   $0 0.1.3
@@ -220,6 +222,7 @@ cleanup() {
 run_preflight() {
   local required_tools
   required_tools=(
+    python3
     git
     xcodegen
     xcodebuild
@@ -277,6 +280,7 @@ reset_output() {
 build_rust_bridge() {
   info "Verifying Rust bridge artifacts"
   "$ROOT/scripts/build-rust-macos.sh" --verify-portable
+  "$ROOT/scripts/verify-render-tree-golden.sh"
 }
 
 generate_project() {
@@ -853,6 +857,8 @@ write_checksum() {
 
 main() {
   parse_args "$@"
+  # Check before output preparation/cleanup traps so a missing runtime preserves old artifacts.
+  "$ROOT/scripts/verify-render-tree-golden.sh" --check-environment
   prepare_paths
   trap cleanup EXIT
   run_preflight

@@ -9,6 +9,7 @@ fi
 VERSION="$1"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+"$ROOT/scripts/verify-render-tree-golden.sh" --check-environment
 BUILD_ROOT="${ALHANGEUL_BUILD_ROOT:-$ROOT/build.noindex}"
 BUILD_DIR="$BUILD_ROOT/release"
 XCODE_BUILD_DIR="$BUILD_DIR/xcodebuild"
@@ -28,6 +29,7 @@ rm -rf "$BUILD_DIR"/Alhangeul*.appex "$BUILD_DIR"/Alhangeul*.appex.dSYM "$BUILD_
 rm -rf "$BUILD_DIR/include" "$BUILD_DIR/librhwp.a"
 
 "$ROOT/scripts/build-rust-macos.sh" --verify-portable
+"$ROOT/scripts/verify-render-tree-golden.sh"
 
 cd "$ROOT"
 xcodegen generate

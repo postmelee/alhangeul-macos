@@ -156,6 +156,7 @@ git status --short --branch
 bash scripts/ci/read-rhwp-core-lock.sh rhwp_release_tag
 bash scripts/ci/read-rhwp-core-lock.sh rhwp_commit
 ./scripts/build-rust-macos.sh --verify-portable
+scripts/verify-render-tree-golden.sh
 scripts/verify-rhwp-studio-assets.sh
 ./scripts/check-no-appkit.sh
 xcodegen generate
