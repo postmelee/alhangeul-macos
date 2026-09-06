@@ -102,6 +102,7 @@ def produce(root):
 
 
 def consume(root, trees):
+    # Intentionally compile the Foundation-only model in isolation; update this input list if its types move.
     build_root = root / "build.noindex"
     build_root.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="render-tree-contract-", dir=build_root) as directory:
@@ -129,6 +130,7 @@ def run_contract(mode, root, golden, *, producer=produce, consumer=consume):
         recorded_hash = tracked_metadata.pop("tree_sha256")
         if tracked_metadata != metadata:
             raise ContractError("stale golden provenance/sample/recipe; verifier does not update files")
+        # This hash diagnoses edited tree data before rebuilding the producer; final file bytes remain authoritative.
         if recorded_hash != digest(canonical(tracked["tree"])):
             # Decode corrupted known payloads before reporting hash drift, preserving useful diagnostics.
             consumer(root, [tracked["tree"]])

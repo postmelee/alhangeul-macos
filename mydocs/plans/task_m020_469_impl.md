@@ -15,3 +15,7 @@ upstream full sync의 build 이후 writer/decoder 검증 및 golden stage/summar
 ## Stage 3 — 통합 검증과 PR
 
 실제 `update` 재실행 후 tracked golden byte 불변, `verify` 성공, stale fixture nonzero 및 파일 불변, 최소 decoder와 native smoke를 확인한다. 실제 Rust producer build는 source pin에 고정되며 staticlib reference hash를 갱신하지 않는다. 보고서·오늘할일을 커밋하고 `publish/task469`에서 devel 대상 PR을 생성한다. 선행 PR #503/#504와 자신의 `d527be8..HEAD` 범위를 명시하고 merge하지 않는다.
+
+## Stage 4 — PR #505 리뷰 보완
+
+Python 3.11+ 존재/버전 검사를 verifier의 check-environment 모드로 공용화하여 local release/package의 출력 초기화·cleanup trap·Rust build 전에 실패시킨다. 격리 fixture로 missing/old Python 차단과 기존 staging 보존을 검증한다. 단일 파일 Swift consumer, tree hash의 진단 역할, feature 순서 provenance, 15종 실제 coverage와 미포함 variant 한계를 문서화하고 classifier의 example 중복 사유를 없앤다. producer-before-universal 순서는 실제 CI의 host build 재사용 근거에 따라 유지한다. 보완 후 실제 golden 검증과 관련 fixture를 실행하고 결과 코멘트를 게시한다.

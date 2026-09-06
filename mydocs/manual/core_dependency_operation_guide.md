@@ -51,6 +51,12 @@
 
 도구에는 Python 3.11+, Rust toolchain, Swift compiler가 필요하다. native arm64/x86_64 producer는 `cargo run --release --locked --target <host> --example render_tree_golden`을 사용하므로 stale Frameworks를 읽지 않고 현재 Cargo pin으로 빌드한다. core repo/ref/tag/commit/features와 Cargo 계약, sample SHA256/page/recipe/tree hash, 실제 출력 byte와 Swift decode를 검사한다.
 
+`scripts/verify-render-tree-golden.sh --check-environment`는 Python 3.11+ 존재/버전만 확인하고 Rust/Swift를 빌드하지 않는다. 로컬 release/package는 출력 초기화와 cleanup trap보다 먼저 이 검사를 수행한다. PATH의 python3가 해당 버전이어야 한다.
+
+현재 Cargo feature 배열 순서는 lock writer/source verifier와 golden provenance에 공통으로 보존된다. 의미가 같은 feature라도 순서를 임의 재배열하면 검증이 실패한다. 순서 정규화가 필요하면 세 경로를 함께 변경해야 한다. tree_sha256은 편집/손상 원인의 조기 분류를 위한 값이고 최종 producer 파일 byte 검사를 대체하지 않는다.
+
+Swift consumer는 TextRun/Table/TextLine 존재만 확인하는 것이 아니라 전체 tree를 decode한다. 현재 request 0쪽에는 Image·Header·Footer를 포함한 15종이 있고, Path/Equation/FootnoteMarker처럼 없는 variant의 변화는 이 golden의 byte 비교로도 검출하지 못한다. 단일 sample은 #469의 의도된 범위이며 전체 decoder corpus 확장은 별도 범위로 결정한다. #259의 Skia visual/performance/package 검증과 자동으로 동일시하지 않는다.
+
 ```bash
 # 일반 PR / release source preflight: drift는 실패하며 tracked 파일을 수정하지 않는다.
 scripts/verify-render-tree-golden.sh

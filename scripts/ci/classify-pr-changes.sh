@@ -145,6 +145,8 @@ classify_path() {
   esac
 
   case "$path" in
+    RustBridge/examples/render_tree_golden.rs)
+      ;; # The dedicated golden case already records this helper's macOS reason.
     RustBridge/examples/*)
       enable_macos_build "$path affects Rust benchmark/helper sources"
       matched=1

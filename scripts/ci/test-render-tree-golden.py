@@ -9,6 +9,8 @@ import tempfile
 import sys
 import os
 import subprocess
+import shutil
+import shlex
 
 sys.dont_write_bytecode = True
 import unittest
@@ -151,10 +153,71 @@ class GoldenTests(unittest.TestCase):
                 output = subprocess.check_output(["bash", str(helper), base, "HEAD"], cwd=self.root, env=env, text=True)
                 self.assertIn("| run_macos_build | `true` |", output)
                 self.assertIn("| run_render_smoke | `false` |", output)
+                if path == "RustBridge/examples/render_tree_golden.rs":
+                    self.assertEqual(sum(line.startswith("- " + path + " affects") for line in output.splitlines()), 1)
 
     def test_nonfinite_number_rejected(self):
         with self.assertRaises(ValueError):
             golden.canonical({"value": float("nan")})
+
+
+class PythonPreflightTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix="golden-python-preflight-")
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.bin = self.root / "bin"
+        self.bin.mkdir()
+        (self.bin / "dirname").symlink_to(shutil.which("dirname"))
+        self.scripts = self.root / "scripts"
+        self.scripts.mkdir()
+        for name in ["verify-render-tree-golden.sh", "update-render-tree-golden.sh", "release.sh", "package-release.sh"]:
+            shutil.copy2(golden.ROOT / "scripts" / name, self.scripts / name)
+        self.env = dict(os.environ, PATH=str(self.bin), ALHANGEUL_BUILD_ROOT=str(self.root / "build.noindex"))
+
+    def python_version(self, minor):
+        # Execute the actual version-check expression with only the interpreter version varied.
+        command = f'import sys; sys.version_info=(3,{minor}); exec(sys.argv[1])'
+        path = self.bin / "python3"
+        path.write_text(f'#!/bin/sh\nexec {shlex.quote(sys.executable)} -c {shlex.quote(command)} "$2"\n')
+        path.chmod(0o755)
+
+    def run_script(self, name, *args):
+        return subprocess.run(["/bin/bash", str(self.scripts / name), *args], env=self.env, capture_output=True, text=True)
+
+    def test_missing_python_has_actionable_error(self):
+        result = self.run_script("verify-render-tree-golden.sh", "--check-environment")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("python3 was not found in PATH", result.stderr)
+
+    def test_python_310_rejected(self):
+        self.python_version(10)
+        result = self.run_script("verify-render-tree-golden.sh", "--check-environment")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("requires Python 3.11 or later", result.stderr)
+
+    def test_python_311_accepted_without_build_tools(self):
+        self.python_version(11)
+        result = self.run_script("verify-render-tree-golden.sh", "--check-environment")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("prerequisite satisfied", result.stdout)
+
+    def test_preflight_rejects_extra_arguments(self):
+        self.python_version(11)
+        result = self.run_script("verify-render-tree-golden.sh", "--check-environment", "unexpected")
+        self.assertEqual(result.returncode, 2)
+
+    def test_release_and_package_fail_before_artifact_cleanup(self):
+        self.python_version(10)
+        staging = self.root / "build.noindex/release/staging/keep"
+        staging.parent.mkdir(parents=True)
+        staging.write_text("previous artifact")
+        for name in ["release.sh", "package-release.sh", "update-render-tree-golden.sh"]:
+            with self.subTest(script=name):
+                result = self.run_script(name, "0.1.11")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("requires Python 3.11 or later", result.stderr)
+                self.assertEqual(staging.read_text(), "previous artifact")
 
 
 if __name__ == "__main__":
