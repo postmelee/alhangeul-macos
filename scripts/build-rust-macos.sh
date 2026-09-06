@@ -17,8 +17,9 @@ GENERATED_SYMBOLS="$OUT/generated_rhwp_symbols.txt"
 UNIVERSAL_LIB="$OUT/universal/librhwp.a"
 STATICLIB_ARTIFACT="Frameworks/universal/librhwp.a"
 LOCK_ARTIFACTS=(
-  "$STATICLIB_ARTIFACT"
+  # Writer and verifier share this ordered list; report header failures before archive drift.
   "Frameworks/generated_rhwp.h"
+  "$STATICLIB_ARTIFACT"
 )
 VERIFY_MODE="none"
 VERIFY_LOCK=0
@@ -37,7 +38,7 @@ Options:
                      Use only with the reference toolchain and build environment.
   --verify-lock      Legacy strict alias; legacy skip env remains supported.
   --update-lock      Build artifacts, then explicitly write reference metadata.
-  (no option)       Build artifacts without lock comparison.
+  (no option)        Build artifacts without lock comparison.
 
 Legacy environment (only --verify-lock):
   ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1 selects portable verification.
@@ -58,12 +59,16 @@ while [ "$#" -gt 0 ]; do
 done
 
 if [ "$MODE_COUNT" -gt 1 ]; then
-  echo "ERROR: choose exactly one build/verification mode" >&2
+  echo "ERROR: duplicate or conflicting modes; choose exactly one build/verification mode" >&2
   exit 1
 fi
-case "$LEGACY_SKIP" in
-  0|1) ;;
-  *) echo "ERROR: ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY must be 0 or 1" >&2; exit 1 ;;
+case "$VERIFY_MODE" in
+  verify-lock|verify-strict)
+    case "$LEGACY_SKIP" in
+      0|1) ;;
+      *) echo "ERROR: ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY must be 0 or 1" >&2; exit 1 ;;
+    esac
+    ;;
 esac
 case "$VERIFY_MODE" in
   update-lock) UPDATE_LOCK=1 ;;
@@ -563,7 +568,7 @@ verify_lock_file() {
   fi
 
   local artifact_path
-  for artifact_path in "Frameworks/generated_rhwp.h" "$STATICLIB_ARTIFACT"; do
+  for artifact_path in "${LOCK_ARTIFACTS[@]}"; do
     require_artifact "$artifact_path"
 
     local abs_path

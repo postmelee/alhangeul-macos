@@ -12,6 +12,10 @@ portable은 staticlib byte hash/size 비교만 제외한다. source/Cargo 계약
 
 상세: [Stage 1](../working/task_m020_394_stage1.md), [Stage 2](../working/task_m020_394_stage2.md), [Stage 3](../working/task_m020_394_stage3.md).
 
+## 리뷰 보완
+
+[Stage 4](../working/task_m020_394_stage4.md)에서 artifact 목록 공유, legacy env 적용 범위, 중복 옵션 진단과 공개 문서를 보완했다. 격리 CLI는 24개로 확장해 통과했다. 현재 strict 자동 runner가 없으며 staticlib hash/size는 reference 기록이라는 정책을 명시했다.
+
 ## 선행 PR #462 판정과 후속
 
 PR #462는 현재 초안 병합 보류다. 합성 중첩 트리에서 depth 12 방문 수가 12,286 → 169로 감소했지만 채워진 픽셀이 10,000 → 6,000으로 달라졌다. 깊이 1은 동등하고 깊이 2부터 내부 clipping 결과가 바뀐다. 실제 문서의 정답을 이 fixture만으로 결정하지 않으며 중첩 overflow 의미·기대 출력 회귀가 필요하다. [Stage 1](../working/task_m020_394_stage1.md)에 재현 조건을 기록했다. PR code/state/public comment는 변경하지 않았다.
