@@ -271,3 +271,7 @@ Homebrew 반영에는 `scripts/update-cask-sha256.sh 0.1.11 <검증한-official-
 위 6단계와 Stage 1~4 진행 승인을 반영했다. Stage 4의 PR #495/#496·tag·signed draft 생성은 완료했지만 HWP3 변환 저장 권한 오류로 필수 설치 gate를 보류한다. [중간 보고서](../working/task_m900_494_stage4.md)의 별도 버그 이슈·수정·회귀 검증안을 다음 승인 대상으로 준비했다. 현재 draft를 official 공개하지 않으며 수정 후보에서 본문·provenance와 signed smoke를 다시 검증한다.
 
 진행 순서는 [타스크 진행 절차 매뉴얼](../manual/task_workflow_guide.md), 배포 순서는 [public release runbook](../manual/public_release_runbook.md)을 따른다. Stage 4 진행 승인은 이미 받았으며, 새로 발견한 제품 저장 결함의 수정 범위 승인을 요청한다. 기존 tag·draft는 재현 기준으로 유지하고 후보 교체 입력은 수정 commit이 준비된 뒤 확정한다.
+
+### Stage 4 복구 승인 — 2026-09-07
+
+2026-09-07 작업지시자가 PR #498 병합 → main 반영 → 기존 v0.1.11 tag 재지정·draft 자산 교체 → 서명·공증 재검증을 승인했다. 수정 PR은 `6fac59e2f3a19d9762cece3165d1da211d094aea`로 devel에 병합했다. 새 main SHA와 tag는 병합 결과로 확정한다. `version=0.1.11`, `build=17`, `previous_release_ref=v0.1.10`, `expected_rhwp_tag=v0.8.6`, `require_latest_rhwp=true`, `include_rhwp_in_title=true`, `draft=true`, `prerelease=false`로 실행한다. 기존 draft 본문·asset·hash를 보존하고 자산 교체 후 새 결과를 검증한다. docs/** 변경 및 docs-only Pages 실행은 공식 공개 단계로 남긴다. Official 공개·Sparkle·Pages·Homebrew는 이번 승인에 포함하지 않는다.

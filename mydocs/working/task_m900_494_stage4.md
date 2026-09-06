@@ -93,3 +93,9 @@ Stage 4는 **진행 중 / 필수 저장 smoke 실패**다. Stage 5 승인을 요
 ## 승인 요청
 
 승인 대상은 **HWP3 저장 버그의 별도 이슈 등록과 수정·회귀 검증 진행**이다. 제품 source 변경 전 승인을 요구하는 [AGENTS.md](../../AGENTS.md)와 버그 수정 task를 별도로 추적하는 [release runbook](../manual/public_release_runbook.md)을 적용한다. 기존 승인인 PR 병합·tag·draft 생성의 재승인이 아니다. 공식 공개·Pages·Sparkle·Homebrew 승인은 이번 요청에 포함하지 않는다.
+
+### 복구 진행 — 2026-09-07
+
+2026-09-07 작업지시자가 PR #498 병합 → main 반영 → 기존 v0.1.11 tag 재지정·draft 자산 교체 → 서명·공증 재검증을 승인했다. 수정 PR은 `6fac59e2f3a19d9762cece3165d1da211d094aea`로 devel에 병합했다. 새 main SHA와 tag는 병합 결과로 확정한다. `version=0.1.11`, `build=17`, `previous_release_ref=v0.1.10`, `expected_rhwp_tag=v0.8.6`, `require_latest_rhwp=true`, `include_rhwp_in_title=true`, `draft=true`, `prerelease=false`로 실행한다. 기존 draft 본문·asset·hash를 보존하고 자산 교체 후 새 결과를 검증한다. docs/** 변경 및 docs-only Pages 실행은 공식 공개 단계로 남긴다. Official 공개·Sparkle·Pages·Homebrew는 이번 승인에 포함하지 않는다.
+
+수정 제품 source는 `a9758e20cbb480b5338bc3f08696386027d113d1`이다. XCTest 184개, 실제 sandbox Debug 앱 저장·재열기 6조합, PR CI 3개 job 통과와 release helper job 생략을 확인했다. Copilot 검토는 할당량 초과로 미실행이었다. 수정 전 draft의 실패 증거와 위 기록은 보존하고, 새 공증 draft 결과를 후속 기록한다.
