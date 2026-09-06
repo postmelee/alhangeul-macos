@@ -558,6 +558,53 @@ enum RhwpStudioHostBridgeScript {
         });
       }
 
+      function textColorPickerAnchorGeometry(viewportHeight, buttonRect) {
+        return {
+          left: buttonRect.left,
+          top: viewportHeight - buttonRect.bottom - (2 * buttonRect.height),
+          width: buttonRect.width,
+          height: buttonRect.height
+        };
+      }
+
+      function positionTextColorPickerAnchor() {
+        const button = document.getElementById("btn-text-color");
+        const picker = document.getElementById("text-color-picker");
+        if (!button || !picker) {
+          return;
+        }
+
+        const buttonRect = button.getBoundingClientRect();
+        if (buttonRect.width <= 0 || buttonRect.height <= 0) {
+          return;
+        }
+
+        // The native popover position is not observable from page JavaScript.
+        // Keep the verified WKWebView compensation isolated in a pure helper.
+        const geometry = textColorPickerAnchorGeometry(window.innerHeight, buttonRect);
+        const nextStyle = {
+          position: "fixed",
+          left: `${geometry.left}px`,
+          top: `${geometry.top}px`,
+          width: `${geometry.width}px`,
+          height: `${geometry.height}px`,
+          pointerEvents: "none"
+        };
+        Object.entries(nextStyle).forEach(([property, value]) => {
+          if (picker.style[property] !== value) {
+            picker.style[property] = value;
+          }
+        });
+      }
+
+      function handleTextColorPickerAnchorEvent(event) {
+        const target = event.target;
+        if (!(target instanceof Element) || !target.closest("#btn-text-color")) {
+          return;
+        }
+        positionTextColorPickerAnchor();
+      }
+
       function refreshHostOverrides() {
         ensureSaveAsMenuItem();
         enableNativeCommandItems();
@@ -811,6 +858,7 @@ enum RhwpStudioHostBridgeScript {
       };
 
       refreshHostOverrides();
+      positionTextColorPickerAnchor();
       installDocumentLoadErrorObserver();
 
       const nativeCommandObserver = new MutationObserver(() => {
@@ -845,6 +893,7 @@ enum RhwpStudioHostBridgeScript {
       }
 
       document.addEventListener("mousedown", scheduleHostOverridesRefresh, true);
+      document.addEventListener("mousedown", handleTextColorPickerAnchorEvent, true);
       document.addEventListener("mousedown", handlePotentialMutatingCommandEvent, true);
       document.addEventListener("mousedown", handleNativeCommandElementEvent, true);
       document.addEventListener("click", handlePotentialMutatingCommandEvent, true);
@@ -886,6 +935,8 @@ enum RhwpStudioHostBridgeScript {
         event.stopImmediatePropagation();
         window.__alhangeulHostBridgeRunNativeCommand(command);
       }, true);
+
+      window.addEventListener("resize", positionTextColorPickerAnchor);
     })();
     """
 }

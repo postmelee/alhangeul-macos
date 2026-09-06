@@ -1,3 +1,4 @@
+import JavaScriptCore
 import XCTest
 
 final class RhwpStudioHostBridgeScriptTests: XCTestCase {
@@ -79,6 +80,112 @@ final class RhwpStudioHostBridgeScriptTests: XCTestCase {
         XCTAssertTrue(source.contains("if (pendingHostOverridesRefresh)"))
     }
 
+    func testTextColorPickerAnchorGeometryExecutesVerifiedCoordinates() throws {
+        let section = try sourceSection(
+            from: "function textColorPickerAnchorGeometry(viewportHeight, buttonRect)",
+            to: "function positionTextColorPickerAnchor()"
+        )
+        let context = try XCTUnwrap(JSContext())
+        _ = context.evaluateScript(String(section))
+
+        let cases = [
+            (
+                viewportHeight: 670.0,
+                left: 914.0,
+                bottom: 179.0,
+                width: 32.0,
+                height: 32.0,
+                expectedTop: 427.0
+            ),
+            (
+                viewportHeight: 713.5,
+                left: 410.25,
+                bottom: 142.75,
+                width: 28.5,
+                height: 28.5,
+                expectedTop: 513.75
+            )
+        ]
+
+        for testCase in cases {
+            let result = context.evaluateScript(
+                """
+                JSON.stringify(textColorPickerAnchorGeometry(
+                  \(testCase.viewportHeight),
+                  {
+                    left: \(testCase.left),
+                    bottom: \(testCase.bottom),
+                    width: \(testCase.width),
+                    height: \(testCase.height)
+                  }
+                ))
+                """
+            )
+            let json = try XCTUnwrap(result?.toString())
+            let data = try XCTUnwrap(json.data(using: .utf8))
+            let geometry = try JSONDecoder().decode(TextColorPickerAnchorGeometry.self, from: data)
+
+            XCTAssertEqual(geometry.left, testCase.left, accuracy: 0.0001)
+            XCTAssertEqual(geometry.top, testCase.expectedTop, accuracy: 0.0001)
+            XCTAssertEqual(geometry.width, testCase.width, accuracy: 0.0001)
+            XCTAssertEqual(geometry.height, testCase.height, accuracy: 0.0001)
+        }
+    }
+
+    func testTextColorPickerAnchorUsesGeometryWithoutDuplicateWrites() throws {
+        let section = try sourceSection(
+            from: "function positionTextColorPickerAnchor()",
+            to: "function handleTextColorPickerAnchorEvent(event)"
+        )
+
+        XCTAssertTrue(section.contains("document.getElementById(\"btn-text-color\")"))
+        XCTAssertTrue(section.contains("document.getElementById(\"text-color-picker\")"))
+        XCTAssertTrue(section.contains("button.getBoundingClientRect()"))
+        XCTAssertTrue(
+            section.contains(
+                "textColorPickerAnchorGeometry(window.innerHeight, buttonRect)"
+            )
+        )
+        XCTAssertTrue(section.contains("if (picker.style[property] !== value)"))
+        XCTAssertTrue(section.contains("picker.style[property] = value"))
+    }
+
+    func testTextColorPickerAnchorRefreshesBeforeActivationAndOnResize() throws {
+        let source = RhwpStudioHostBridgeScript.source
+        let refreshSection = try sourceSection(
+            from: "function refreshHostOverrides()",
+            to: "let pendingHostOverridesRefresh"
+        )
+        let initializationSection = try sourceSection(
+            from: "window.__alhangeulHostBridgeRunNativeCommand = (command) => {",
+            to: "const nativeCommandObserver"
+        )
+
+        XCTAssertFalse(refreshSection.contains("positionTextColorPickerAnchor();"))
+        let refreshRange = try XCTUnwrap(
+            initializationSection.range(of: "refreshHostOverrides();")
+        )
+        let positionRange = try XCTUnwrap(
+            initializationSection.range(of: "positionTextColorPickerAnchor();")
+        )
+        XCTAssertLessThan(refreshRange.lowerBound, positionRange.lowerBound)
+        XCTAssertTrue(
+            source.contains(
+                "document.addEventListener(\"mousedown\", handleTextColorPickerAnchorEvent, true)"
+            )
+        )
+        XCTAssertFalse(
+            source.contains(
+                "document.addEventListener(\"click\", handleTextColorPickerAnchorEvent, true)"
+            )
+        )
+        XCTAssertTrue(
+            source.contains(
+                "window.addEventListener(\"resize\", positionTextColorPickerAnchor)"
+            )
+        )
+    }
+
     private func sourceSection(from start: String, to end: String) throws -> Substring {
         let source = RhwpStudioHostBridgeScript.source
         let startIndex = try XCTUnwrap(source.range(of: start)?.lowerBound)
@@ -86,5 +193,12 @@ final class RhwpStudioHostBridgeScriptTests: XCTestCase {
             source.range(of: end, range: startIndex..<source.endIndex)?.lowerBound
         )
         return source[startIndex..<endIndex]
+    }
+
+    private struct TextColorPickerAnchorGeometry: Decodable {
+        let left: Double
+        let top: Double
+        let width: Double
+        let height: Double
     }
 }

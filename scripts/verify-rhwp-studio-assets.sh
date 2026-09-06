@@ -178,6 +178,13 @@ fi
 grep -q 'src="./assets/index-' "$RESOURCE_DIR/index.html" || fail "index.html does not use relative JS asset path"
 grep -q 'href="./assets/index-' "$RESOURCE_DIR/index.html" || fail "index.html does not use relative CSS asset path"
 grep -q 'href="./alhangeul-wkwebview-overrides.css"' "$RESOURCE_DIR/index.html" || fail "index.html does not load Alhangeul WKWebView override stylesheet"
+grep -Eo '<button[[:space:]][^>]*>' "$RESOURCE_DIR/index.html" \
+  | grep -E '[[:space:]]id="btn-text-color"([[:space:]>])' > /dev/null \
+  || fail "index.html is missing the text color button required by the HostApp bridge"
+grep -Eo '<input[[:space:]][^>]*>' "$RESOURCE_DIR/index.html" \
+  | grep -E '[[:space:]]id="text-color-picker"([[:space:]/>])' \
+  | grep -E '[[:space:]]type="color"([[:space:]/>])' > /dev/null \
+  || fail "index.html is missing the text color input required by the HostApp bridge"
 
 if grep -q 'crossorigin' "$RESOURCE_DIR/index.html"; then
   fail "index.html contains crossorigin attributes that break WKWebView file URL asset loading"

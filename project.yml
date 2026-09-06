@@ -164,6 +164,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.HostAppTests
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
+      - sdk: JavaScriptCore.framework
       - sdk: Network.framework
 
   ExternalImageTests:
