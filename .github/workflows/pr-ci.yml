@@ -52,11 +52,17 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Python for golden contract helpers
         uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+
+      - name: Check Python helper syntax
+        shell: bash
+        run: python3 -m compileall -q scripts/ci
 
       - name: Check shell script syntax
         shell: bash
@@ -83,6 +89,7 @@ jobs:
         run: |
           set -euo pipefail
           bash scripts/ci/classify-pr-changes.sh --help
+          bash scripts/ci/check-main-devel-content.sh --help
           bash scripts/ci/check-rhwp-upstream-release.sh --help
           bash scripts/ci/detect-rhwp-studio-impact.sh --help
           bash scripts/ci/prepare-pages-artifact.sh --help
@@ -99,6 +106,10 @@ jobs:
           bash scripts/update-render-tree-golden.sh --help
           bash scripts/verify-render-tree-golden.sh --help
           bash scripts/verify-rhwp-studio-assets.sh --help
+
+      - name: Check main/devel content gate fixtures
+        shell: bash
+        run: python3 scripts/ci/test-main-devel-content.py
 
       - name: Check render tree golden helper fixtures
         shell: bash
@@ -152,6 +163,16 @@ jobs:
             echo "| run_render_smoke | \`${{ needs.classify-changes.outputs.run_render_smoke }}\` |"
             echo "| run_release_checks | \`${{ needs.classify-changes.outputs.run_release_checks }}\` |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify main content is incorporated in the PR source
+        if: ${{ github.base_ref == 'main' || github.base_ref == 'devel' }}
+        shell: bash
+        env:
+          PR_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+          scripts/ci/check-main-devel-content.sh origin/main "$PR_SOURCE_SHA"
 
   macos-validation:
     name: macOS validation

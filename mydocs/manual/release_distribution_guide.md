@@ -102,6 +102,12 @@
 13. Homebrew 배포를 진행할 경우 Issue #209 작업에서 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 `postmelee/homebrew-tap`에 Cask를 반영하고 tap context 검증을 수행한다.
 14. [`mydocs/release/v<version>.md`](../release/)와 최종 release report에 실제 결과와 잔여 위험을 기록한다.
 
+## main/devel 인계 gate
+
+release PR과 candidate 확정 전에 [Git workflow의 content invariant](git_workflow_guide.md)를 검증한다. transport-only 이력은 허용하지만 main에만 남은 실제 hotfix·문서·workflow 콘텐츠는 변경 owner가 devel 인계 PR로 해결한다. 인계 완료 전 다음 release를 진행하지 않는다.
+
+Release rehearsal/publish와 local `release.sh` preflight는 main/devel을 fetch하고 `scripts/ci/check-main-devel-content.sh origin/main origin/devel`을 실행한다. helper는 자동 back-merge나 history rewrite를 하지 않는다. public tag는 불변 release source이고 branch invariant는 최신 main/devel의 인계 상태이므로 별도로 검사한다. tag 재실행 시 최신 main과 오래된 tag tree의 동일성을 요구하지 않는다. release PR CI는 event의 실제 PR head로 candidate의 main 반영 여부를 검사한다.
+
 ## public release 전 확정 항목
 
 - release version과 release candidate commit
@@ -116,6 +122,7 @@
 
 - [ ] 릴리스 버전 확정
 - [ ] 릴리스 기준 branch/commit 확정
+- [ ] main/devel content gate 통과, main hotfix·문서 변경의 devel 인계 완료, 비교한 exact SHA 기록
 - [ ] `mydocs/release/v<version>.md` 릴리즈 상세 기록 초안 작성
 - [ ] `previous_release_ref..candidate_ref` 범위의 merge PR 목록 생성
 - [ ] 각 PR의 title/body, linked Issue, `mydocs/report/task_*_report.md` 후보 확인

@@ -265,6 +265,11 @@ run_preflight() {
     fi
   fi
 
+  (
+    cd "$ROOT"
+    git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main +refs/heads/devel:refs/remotes/origin/devel
+    "$ROOT/scripts/ci/check-main-devel-content.sh" origin/main origin/devel
+  )
   validate_source_versions
 }
 
