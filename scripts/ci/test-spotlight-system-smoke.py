@@ -74,6 +74,27 @@ class SmokeTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "text missing"):
                 smoke.verify(state)
 
+    def test_stale_catalog_does_not_report_full_cleanup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            state = {"install_app": str(root / "install/Alhangeul.app"), "install_root": str(root / "install"),
+                     "workspace": str(root / "corpus"), "files": str(root / "corpus/Files"),
+                     "evidence": directory, "original_apps": {}, "providers_before": {}, "results": []}
+            Path(state["install_root"]).mkdir()
+            Path(state["workspace"]).mkdir()
+            now = [0]
+            def sleep(seconds): now[0] += seconds
+            def command(args, *unused, **kwargs):
+                return str(Path(state["install_app"]) / smoke.PLUGIN) if args[0] == "mdimport" else ""
+            with patch.object(smoke, "run", side_effect=command), patch.object(smoke, "providers", return_value={}), \
+                 patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), patch.object(smoke.time, "sleep", side_effect=sleep):
+                with self.assertRaisesRegex(RuntimeError, "catalog is stale"):
+                    smoke.cleanup(state)
+            self.assertEqual(state["phase"], "cleanup-pending-index")
+            self.assertFalse(Path(state["install_root"]).exists())
+            self.assertFalse(Path(state["workspace"]).exists())
+            self.assertEqual(state["results"][-1]["result"], "MISS")
+
 
 if __name__ == "__main__":
     unittest.main()

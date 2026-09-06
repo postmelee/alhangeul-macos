@@ -166,7 +166,7 @@ python3 scripts/ci/spotlight-system-smoke.py index --state build.noindex/spotlig
 python3 scripts/ci/spotlight-system-smoke.py cleanup --state build.noindex/spotlight-state.json
 ```
 
-Intel Mac은 Rust target을 `x86_64-apple-darwin`으로 바꾼다. fixture 디렉터리와 state 파일은 새 경로여야 한다. state를 보존하면 실패 후에도 cleanup을 다시 실행할 수 있다. 준비 단계에서 기록한 소유 표시와 정확한 경로를 확인한 뒤 시험 앱/문서만 제거한다. 원래 설치본 Info.plist·실행 파일 hash 및 Preview/Thumbnail provider 선택·경로를 비교하고 Quick Look cache를 정리한다.
+Intel Mac은 Rust target을 `x86_64-apple-darwin`으로 바꾼다. fixture 디렉터리와 state 파일은 새 경로여야 한다. state를 보존하면 실패 후에도 cleanup을 다시 실행할 수 있다. 준비 단계에서 기록한 소유 표시와 정확한 경로를 확인한 뒤 시험 앱/문서만 제거한다. 원래 설치본 Info.plist·실행 파일 hash 및 Preview/Thumbnail provider 선택·경로를 비교하고 Quick Look cache를 정리한다. 삭제한 importer가 목록에 계속 남으면 최대 60초 후 cleanup은 nonzero로 끝나고 `cleanup-pending-index`를 기록한다. 이는 파일·기존 앱 보존 결과와 별개인 목록/색인 정리 미완료 상태다. 시스템 환경을 확인한 뒤 같은 cleanup을 재실행하며, 성공처럼 보고하거나 전체 index를 자동 초기화하지 않는다.
 
 `verify`는 `mdimport -t -d3 -o`가 실제 후보 importer를 사용했는지와 metadata 본문을 검사한다. `-o`는 기존 파일에 이어 쓰므로 출력 파일을 먼저 비운다. `index`는 일반 txt 양성 대조군과 파일명에 없는 본문 단어가 정확한 경로 집합을 반환하는지 각각 최대 60초 기다린다. `mdutil -s /`만 정상이어도 실제 데이터 볼륨의 색인이 작동한다고 가정하지 않는다. txt 대조도 실패하면 환경 문제로 기록하고 전역 index reset이나 daemon kill을 하지 않는다.
 

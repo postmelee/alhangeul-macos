@@ -207,6 +207,15 @@ def restore_corpus(state):
     record(state, "restored-synthetic-corpus")
 
 
+def unregister_app(app):
+    for extension in EXTENSIONS:
+        run(["pluginkit", "-r", app / "Contents/PlugIns" / extension], check=False)
+    # 재귀 개발 등록은 Sparkle의 Updater.app도 등록한다. 소유 bundle 내부만 정리한다.
+    for nested in sorted(app.rglob("*.app"), reverse=True):
+        run([LSREGISTER, "-u", nested], check=False)
+    run([LSREGISTER, "-u", app], check=False)
+
+
 def developer_register(state):
     # Xcode 개발 등록과 같은 비교 시험이다. 일반 설치/공증 배포 성공으로 기록하지 않는다.
     os.utime(Path(state["install_app"]) / PLUGIN, None)
@@ -313,9 +322,7 @@ def lifecycle(state, extraction_only=False):
 def replace_app(state):
     stop_candidate(state)
     app = Path(state["install_app"])
-    for extension in EXTENSIONS:
-        run(["pluginkit", "-r", app / "Contents/PlugIns" / extension], check=False)
-    run([LSREGISTER, "-u", app], check=False)
+    unregister_app(app)
     previous = (app / PLUGIN).stat().st_mtime_ns
     shutil.rmtree(app)
     run(["ditto", state["source_app"], app], timeout=60)
@@ -336,9 +343,7 @@ def cleanup(state):
     workspace = Path(state["workspace"])
     stop_candidate(state)
     if app.exists():
-        for extension in EXTENSIONS:
-            run(["pluginkit", "-r", app / "Contents/PlugIns" / extension], check=False)
-        run([LSREGISTER, "-u", app], check=False)
+        unregister_app(app)
         run(["qlmanage", "-r", "cache"], Path(state["evidence"]) / "quicklook-cache-cleanup.txt")
     if root.exists():
         shutil.rmtree(root)
@@ -351,13 +356,19 @@ def cleanup(state):
     before = json.loads(json.dumps(state["providers_before"]))
     if json.loads(json.dumps(after)) != before:
         raise RuntimeError("original extension provider set was not restored")
-    if str(app / PLUGIN) in run(["mdimport", "-L"], Path(state["evidence"]) / "importers-cleanup.txt"):
-        raise RuntimeError("test importer registration remains")
+    record(state, "cleanup-original-apps-providers")
+    state["phase"] = "cleanup-pending-index"
     if state.get("index_environment") == "available":
         expect_paths(state, state["token"], [], "cleanup-index")
     else:
         record(state, "cleanup-index", "MISS", reason="index environment unavailable")
-    record(state, "cleanup-original-apps-providers")
+    deadline = time.monotonic() + 60
+    while str(app / PLUGIN) in run(["mdimport", "-L"], Path(state["evidence"]) / "importers-cleanup.txt"):
+        if time.monotonic() >= deadline:
+            record(state, "cleanup-importer-catalog", "MISS", reason="deleted test bundle path still listed")
+            raise RuntimeError("owned files removed and original apps/providers preserved, but importer catalog is stale")
+        time.sleep(2)
+    record(state, "cleanup-importer-catalog")
     state["phase"] = "cleaned"
     print("PASS: owned files removed; original app hashes and provider selections preserved", flush=True)
 
@@ -382,7 +393,7 @@ def main():
     try:
         if args.phase != "status":
             owned_locations(state)
-        if state["phase"] == "cleaned" and args.phase not in ["cleanup", "status"]:
+        if state["phase"] in ["cleaned", "cleanup-pending-index"] and args.phase not in ["cleanup", "status"]:
             raise ValueError("run was cleaned; prepare a new state")
         if args.phase == "status":
             print(json.dumps(state, ensure_ascii=False, indent=2))
