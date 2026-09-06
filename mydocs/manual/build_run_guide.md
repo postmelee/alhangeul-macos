@@ -72,32 +72,24 @@ core 업데이트는 다음 형태로 분리한다.
 ./scripts/build-rust-macos.sh --update-lock
 ```
 
-lock과 현재 산출물의 일치 여부만 확인할 때는 verify 모드를 사용한다.
+로컬·CI에서 source와 ABI 계약을 검증할 때는 portable 모드를 사용한다.
 
 ```bash
-./scripts/build-rust-macos.sh --verify-lock
+./scripts/build-rust-macos.sh --verify-portable
 ```
 
-검증 대상:
+| 검증 | portable | strict |
+|------|----------|--------|
+| Cargo dependency와 lock의 repo/ref/tag/commit/features | 필수 | 필수 |
+| generated header hash/size와 FFI symbol set | 필수 | 필수 |
+| staticlib 존재와 lock reference metadata 형식 | 필수 | 필수 |
+| staticlib reference hash/size 일치 | 제외 | 필수 |
 
-- `RustBridge/Cargo.toml`의 `rhwp` repo/ref
-- `RustBridge/Cargo.lock`의 `rhwp` source commit
-- `rhwp-core.lock`의 repo/ref kind/release tag/commit
-- `Frameworks/universal/librhwp.a` sha256/size
-- `Frameworks/generated_rhwp.h` sha256/size
+기준 환경의 byte 일치 검증은 `./scripts/build-rust-macos.sh --verify-strict`로 실행한다. Rust compiler, Xcode, macOS, archive tool, build path가 달라지면 source와 ABI가 같아도 static archive byte가 달라질 수 있다. strict 실패는 원인이 환경 차이임을 입증하지 않으므로 필요한 경우 기준 환경을 재현한다. 로컬 차이를 수용하기 위해 lock을 자동 갱신하지 않는다.
 
-불일치 유형은 `Cargo.lock mismatch`, `artifact hash mismatch`, `FFI symbol diff`로 분리해 기록한다.
+`Cargo.lock mismatch`/`Cargo.toml mismatch`는 source 계약, `generated header ABI artifact mismatch`/FFI symbol 오류는 ABI, `strict staticlib reference mismatch`는 나머지 검증 후 reference byte 비교 실패다. 검증은 lock을 수정하지 않는다. 승인된 기준 artifact 갱신은 별도 `--update-lock` 작업이다.
 
-`Frameworks/universal/librhwp.a`는 Rust static archive라 Rust compiler, Xcode, macOS runner image, archive tool, build path 차이에 따라 source와 ABI가 같아도 byte hash가 달라질 수 있다. 로컬 strict 검증은 기본적으로 `librhwp.a`와 generated header hash/size를 모두 비교한다. GitHub-hosted CI/release workflow에서는 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`을 설정해 `librhwp.a` byte hash/size 비교만 제외할 수 있다.
-
-이 skip이 켜져도 다음 검증은 계속 유지한다.
-
-- `rhwp` repo/ref/tag/commit source provenance
-- `RustBridge/Cargo.lock` resolved commit
-- `Frameworks/generated_rhwp.h` hash/size
-- `rhwp-ffi-symbols.txt`와 generated FFI symbol set 비교
-
-strict staticlib byte hash를 release gate로 되돌리려면 Rust toolchain, Xcode, macOS runner image, archive tool, build path 또는 CI 기준 lock 생성 환경을 먼저 고정한다.
+`--verify-lock`은 기존 strict alias를 유지한다. 이 legacy 명령에 한해 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 portable 동작을 유지하고 전환 경고를 출력한다. 새 호출은 명시 모드를 사용한다. legacy alias/strict에서 잘못된 env 값, strict와 skip env=1 조합, 같은 옵션을 포함한 중복 모드는 build 전에 실패한다. 무옵션 build-only, 명시 portable, update-lock은 legacy env를 무시한다.
 
 ## Xcode 프로젝트 생성
 

@@ -22,6 +22,6 @@ Workflow and verification:
 - PRs normally target `devel`; native shell, Skia viewport, and Swift editing work targets `native-viewer-editor`. Retired `devel-webview` is not a PR target. Maintainer PR heads use `publish/taskN` with a GitHub Issue and Korean `mydocs/` task docs.
 - PR descriptions should use `.github/pull_request_template.md`, separate target task from related context, link each Stage summary to its report and commit, and list only verification actually run.
 - For `mydocs/plans/**`, `mydocs/working/**`, and `mydocs/report/**`, apply `.github/instructions/hyperfall-documents.instructions.md`; use this file for branch, build, architecture, and release-risk checks.
-- When a change touches RustBridge, core dependency, FFI, or generated bridge artifacts, expect `./scripts/build-rust-macos.sh` or `--verify-lock`, `./scripts/check-no-appkit.sh`, `xcodegen generate`, and HostApp `xcodebuild` as applicable.
+- When a change touches RustBridge, core dependency, FFI, or generated bridge artifacts, expect `./scripts/build-rust-macos.sh` or `--verify-portable`, `./scripts/check-no-appkit.sh`, `xcodegen generate`, and HostApp `xcodebuild` as applicable.
 - When rendering behavior changes, expect `./scripts/validate-stage3-render.sh`; for visual differences or renderer bug fixes, expect `./scripts/render-debug-compare.sh` on relevant samples.
 - Do not request release, signing, notarization, or Homebrew Cask work unless the PR is explicitly about distribution.
