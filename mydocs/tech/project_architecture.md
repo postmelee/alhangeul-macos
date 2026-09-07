@@ -6,13 +6,14 @@
 
 ## 상위 구조
 
-`alhangeul-macos`는 Mac 사용자를 위한 HWP/HWPX 파일 시스템 통합 유틸리티를 지향한다. 현재 v0.1 구현은 Quick Look preview, Finder thumbnail, 읽기 전용 HostApp viewer, Rust bridge를 소유하며, 제품 코드는 `Sources/` 아래에서 타깃별로 시작하고 공통 Swift 계층과 Rust bridge는 제품 타깃이 함께 쓰는 하위 기반으로 둔다.
+`alhangeul-macos`는 Mac 사용자를 위한 HWP/HWPX 파일 시스템 통합 유틸리티를 지향한다. v0.1 공개 라인은 Quick Look preview, Finder thumbnail, WKWebView HostApp viewer/editor와 Rust bridge를 소유한다. 개발 중인 Spotlight importer는 별도 본문 추출 경로를 사용한다. 제품 코드는 `Sources/` 아래에서 타깃별로 시작하고 공통 Swift 계층과 Rust bridge는 제품 타깃이 함께 쓰는 하위 기반으로 둔다.
 
 ```text
 Sources/
 ├── HostApp/                  # 사용자가 직접 여는 macOS WKWebView viewer app
 ├── QLExtension/              # Finder Quick Look preview extension
 ├── ThumbnailExtension/       # Finder thumbnail extension
+├── SpotlightImporter/        # 파일 metadata CFPlugIn, 개발 중인 본문 검색 경로
 ├── Shared/                   # HostApp/extension 공통 macOS helper
 └── RhwpCoreBridge/           # AppKit/UIKit 없는 Swift FFI wrapper + render tree renderer
 
@@ -38,7 +39,7 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - HostApp titlebar toolbar는 macOS 공유, Finder에서 보기, PDF로 내보내기, 최근 문서 접근을 제공한다. 공유 picker는 toolbar 버튼에 심은 `NSViewRepresentable` anchor view를 기준으로 표시한다.
 - HostApp MVP viewer의 zoom/page/search 조작은 `rhwp-studio` 내부 UI가 소유한다.
 - `project.yml` 기준으로 `Sources/Shared`, `Sources/RhwpCoreBridge`, `Frameworks/Rhwp.xcframework`를 포함하지만, MVP viewer 화면과 사용자용 PDF export는 native render tree 경로를 호출하지 않는다. PDF export와 일반 인쇄는 현재 editor의 upstream page SVG를 HostApp 전용 `RhwpStudioPagePDFRenderer`가 `WKWebView.createPDF`로 변환하는 경로를 공유한다.
-- `QLExtension`과 `ThumbnailExtension`을 app bundle 안에 embed한다.
+- `QLExtension`과 `ThumbnailExtension`을 app bundle 안에 embed한다. Spotlight importer는 `Contents/Library/Spotlight`에 별도로 포함한다.
 
 ### QLExtension
 
@@ -58,6 +59,12 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - `HwpThumbnailRenderCache`로 같은 파일과 크기 요청의 중복 렌더링을 줄인다.
 - `Shared/HwpPageImageRenderer`를 사용해 첫 페이지 bitmap을 만들고, 요청 크기에 맞춰 aspect-fit으로 그린다.
 - 50 MB를 초과하는 파일은 단순 fallback 타일을 반환한다.
+
+### SpotlightImporter
+
+`Sources/SpotlightImporter`는 `.appex`가 아닌 CFPlugIn metadata importer다. 파일 크기/종류/읽기 중 변경을 검사한 뒤 `rhwp_extract_text_utf8`를 호출하고 반환 bytes를 CFString으로 복사해 해제한다. `kMDItemTextContent`와 파일명 기반 제목/종류를 제공한다. HostApp 실행이나 WKWebView, Swift renderer, AppKit에 의존하지 않는다.
+
+본문은 parser 모델을 순회하며 페이지 layout이나 그림 OCR을 생성하지 않는다. 보호·실패 시 이전 본문 제거 metadata를 제출한다. 지원 한도와 수명은 [추출 계약](spotlight_text_extraction_contract.md), 실제 검색 검증은 [설치 smoke](../report/task_m020_342_report.md)를 따른다.
 
 ## 공통 Swift 계층
 
@@ -93,11 +100,10 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 
 ### Demo/Preview와 Stable 기준
 
-- 현재 v0.1.0 목표는 Demo/Preview release다.
 - Demo/Preview 배포는 필요한 bridge API가 포함된 resolved commit을 `rev`로 고정하는 commit-pinned git dependency를 허용한다.
 - Stable 안정 기준은 `edwardkim/rhwp` release tag와 resolved commit을 함께 고정하는 것이다.
-- 현재 lock은 `v0.8.4` Stable release tag pin 상태다. `rhwp-core.lock`은 release tag `v0.8.4`와 resolved commit `496333b27d21ddb9114ba9ae340bcb895870c9a7`를 함께 기록한다.
-- `v0.8.4`에는 현재 `RustBridge`가 사용하는 page/render/image API, typed parser error와 `set_file_name`, `get_external_image_references`, `inject_external_image_by_key` external image context API가 포함되어 있다.
+- 현재 lock은 `v0.8.6` Stable release tag pin 상태다. `rhwp-core.lock`은 release tag `v0.8.6`와 resolved commit `f1f9c6ae58344ee9368996d3543f76b9345cf227`를 함께 기록한다.
+- `v0.8.6`에는 현재 `RustBridge`가 사용하는 page/render/image API, typed parser error와 `set_file_name`, `get_external_image_references`, `inject_external_image_by_key` external image context API가 포함되어 있다.
 - branch/floating ref는 배포 기준으로 사용하지 않는다.
 
 ### RustBridge
@@ -448,6 +454,7 @@ Task #484 Stage 3 실제 UI smoke에서 공개 HWP의 menu와 toolbar 결과는 
 - `rhwp_render_page_png`
 - `rhwp_image_data`
 - `rhwp_extract_thumbnail`
+- `rhwp_extract_text_utf8`
 - `rhwp_free_string`
 - `rhwp_free_bytes`
 
@@ -460,6 +467,7 @@ Task #484 Stage 3 실제 UI smoke에서 공개 HWP의 menu와 toolbar 결과는 
 - `rhwp_render_page_tree`: 상세 render tree JSON 반환
 - `rhwp_image_data`: `bin_data_id`에 대응하는 이미지 바이트 조회
 - `rhwp_extract_thumbnail`: embedded thumbnail 바이트와 메타데이터 조회
+- `rhwp_extract_text_utf8`: 문서 handle 없이 평문 본문을 UTF-8 bytes/상태로 반환
 - `rhwp_set_file_name_utf8`: filename context를 document에 설정
 - `rhwp_external_image_refs_json`: external image reference와 loaded 상태를 upstream JSON 배열로 조회
 - `rhwp_inject_external_image_by_key`: Swift/macOS shell이 읽은 image bytes를 reference key로 주입
@@ -482,6 +490,7 @@ External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제
 - `rhwp_image_data`가 반환한 non-null pointer는 caller-owned allocation이다. Swift에서는 즉시 `Data`로 복사하고 반환받은 동일 pointer와 length를 `rhwp_free_bytes`로 정확히 한 번 해제한다.
 - `rhwp_image_data` allocation은 document handle과 독립이며 `rhwp_free_bytes` 호출 전까지 유효하다. free 뒤 pointer를 보관하거나 재사용하지 않는다.
 - `rhwp_extract_thumbnail`이 반환한 byte buffer도 Swift에서 복사 후 `rhwp_free_bytes`로 해제한다.
+- `rhwp_extract_text_utf8`의 non-null bytes는 명시 길이만큼 읽고 `rhwp_free_bytes`로 한 번 해제한다. NUL 종단 문자열이 아니며 빈/실패 출력은 NULL/0이다.
 - 이미지 조회의 `bin_data_id`는 1-indexed 규칙을 유지한다.
 
 ## 렌더링 구조

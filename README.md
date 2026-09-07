@@ -41,6 +41,8 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 장기 방향은 WebView fallback을 유지하면서 native macOS viewer/editor shell로 점진적으로 옮겨가는 것입니다. 이 경로는 Swift가 HWP renderer 전체를 재구현하는 것이 아니라, Rust/rhwp Skia renderer와 Swift 편집 UI/오버레이를 결합하는 방향으로 둡니다. 세부 구현 제약과 날짜가 필요한 판단은 [제품 로드맵 메모](mydocs/tech/product_roadmap_notes.md)에 분리해 둡니다.
 
+다음 `v0.2.0`을 목표로 [Spotlight 문서 본문 검색](https://github.com/postmelee/alhangeul-macos/issues/337)을 개발 중입니다. 평문 HWP3/HWP5/HWPX에서 추출한 본문을 macOS 검색 색인에 제공하는 기능이며 **현재 공개 v0.1.11에는 포함되지 않습니다.** importer 추출은 확인했지만 실제 검색·수정/삭제 전파와 배포 환경 검증이 남아 있습니다. [지원 범위·제한 안내](mydocs/manual/spotlight_search_guide.md)와 [미공개 릴리스 초안](mydocs/release/v0.2.0.md)을 참고하세요.
+
 > [!NOTE]
 > **메인테이너 현재 결정(2026-06-01)**: 당분간 새 편집 기능을 빠르게 넓히기보다 upstream `rhwp` Skia renderer의 시각 정합성을 높이고, 그 결과를 Quick Look/Thumbnail/PDF/native viewer preview 정확도로 연결하는 것으로 결정했습니다. 앱의 기본 preview 경로는 안정성 gate가 통과될 때까지 현행 fallback을 유지하며, Skia 경로는 visual diff와 성능 검증을 거쳐 단계적으로 확대합니다. 다만 이는 앱 배포나 upstream `rhwp` release 반영을 멈춘다는 뜻이 아니며, 안정적인 `rhwp` release tag가 나오면 core, bundled `rhwp-studio`, provenance, smoke 검증을 맞춰 계속 반영하고 필요한 patch release도 이어갑니다. 자세한 배경과 기여 방향은 [Discussion #325](https://github.com/postmelee/alhangeul-macos/discussions/325)에 정리했습니다.
 

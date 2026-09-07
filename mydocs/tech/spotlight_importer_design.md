@@ -41,10 +41,10 @@ MVP는 본문과 파일명에서 얻는 표시 제목, 문서 kind를 제공한�
 
 ## 추출 정책 입력
 
-구체적인 지원/순서/문자/한도/ABI 계약은 후속 `spotlight_text_extraction_contract.md`에서 확정한다. 해당 문서는 후속 #339 산출물이다.
+구체적인 지원/순서/문자/한도/ABI는 [본문 추출 계약](spotlight_text_extraction_contract.md)을 따른다. 사용자 안내는 [Spotlight 검색 안내](../manual/spotlight_search_guide.md), 실제 시험과 미검증 범위는 [설치 smoke 보고서](../report/task_m020_342_report.md)에 있다.
 
-- HWP3/HWP5/HWPX 평문을 비교 대상으로 한다. 지원은 실제 parser와 fixture로 검증한 뒤 확정한다.
-- 비밀번호·DRM·배포용 문서는 비대화형 동작과 정보 노출을 고려해 기본 제외 후보로 둔다.
+- 평문 HWP3/HWP5/HWPX를 지원 대상으로 하며 세 형식의 실제 importer 추출을 확인했다. 실제 색인 검색의 검증 상태는 추출 성공과 별도로 관리한다.
+- 비밀번호·DRM·배포용 문서는 본문 추출에서 제외한다.
 - 표·글상자·중첩·각주·머리말·양식·메모·숨은 글의 포함 여부와 순회를 명시한다. 화면 표시 결과와 모델 전체를 같다고 가정하지 않는다.
 - DocumentCore의 전체 layout을 무조건 재사용하지 않고 parse-only 후보를 우선 비교한다.
 - 입력 bytes, 출력 UTF-8 bytes, 순회 node 수·깊이를 제한하고 절단을 호출자에게 명시한다. parser 내부의 모든 CPU/메모리를 중단할 수 있다는 보장은 별도 근거가 없으면 하지 않는다.
