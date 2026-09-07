@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema version="1.0" xmlns="http://www.apple.com/metadata">
+  <types>
+    <type name="com.postmelee.alhangeul.hwp">
+      <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
+    </type>
+    <type name="com.postmelee.alhangeul.hwpx">
+      <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
+    </type>
+    <type name="net.golbin.hop.hwp">
+      <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
+    </type>
+    <type name="net.golbin.hop.hwpx">
+      <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
+    </type>
+    <type name="com.hancom.hwp">
+      <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
+    </type>
+    <type name="com.hancom.hwpx">
+      <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
+    </type>
+    <type name="com.haansoft.hancomofficeviewer.mac.hwp">
+      <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
+    </type>
+    <type name="com.haansoft.hancomofficeviewer.mac.hwpx">
+      <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
+    </type>
+    <type name="org.libreoffice.hwp-document">
+      <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
+    </type>
+  </types>
+</schema>

@@ -141,6 +141,39 @@ xcodebuild -project Alhangeul.xcodeproj \
   build
 ```
 
+## Spotlight 설치·색인 smoke
+
+`python3 scripts/ci/spotlight-system-smoke.py --help`를 진입점으로 사용한다. 이 표준 절차 안에서만 새 `~/Applications/AlhangeulSpotlightSmoke-{id}/Alhangeul.app`을 등록한다. 기존 두 표준 설치 경로는 덮어쓰지 않는다. 시험 문서는 `~/Documents/AlhangeulSpotlightSmoke-{id}/Files`에 두며 원본 사용자 문서를 사용하지 않는다.
+
+```bash
+MACOSX_DEPLOYMENT_TARGET=12.0 cargo run --manifest-path RustBridge/Cargo.toml \
+  --locked --offline --release --target aarch64-apple-darwin \
+  --example spotlight_fixtures -- build.noindex/spotlight-fixtures AlhangeulSpotlightProbe
+python3 scripts/ci/spotlight-system-smoke.py prepare \
+  --state build.noindex/spotlight-state.json \
+  --app build.noindex/release/Alhangeul.app --fixtures build.noindex/spotlight-fixtures
+python3 scripts/ci/spotlight-system-smoke.py install --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py launch --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py verify --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py index --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py lifecycle --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py replace-app --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py restore-corpus --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py stop-app --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py verify --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py index --state build.noindex/spotlight-state.json
+# 성공/실패와 관계없이 마지막에 반드시 실행한다.
+python3 scripts/ci/spotlight-system-smoke.py cleanup --state build.noindex/spotlight-state.json
+```
+
+Intel Mac은 Rust target을 `x86_64-apple-darwin`으로 바꾼다. fixture 디렉터리와 state 파일은 새 경로여야 한다. state를 보존하면 실패 후에도 cleanup을 다시 실행할 수 있다. 준비 단계에서 기록한 소유 표시와 정확한 경로를 확인한 뒤 시험 앱/문서만 제거한다. 원래 설치본 Info.plist·실행 파일 hash 및 Preview/Thumbnail provider 선택·경로를 비교하고 Quick Look cache를 정리한다. 삭제한 importer가 목록에 계속 남으면 최대 60초 후 cleanup은 nonzero로 끝나고 `cleanup-pending-index`를 기록한다. 이는 파일·기존 앱 보존 결과와 별개인 목록/색인 정리 미완료 상태다. 시스템 환경을 확인한 뒤 같은 cleanup을 재실행하며, 성공처럼 보고하거나 전체 index를 자동 초기화하지 않는다.
+
+`verify`는 `mdimport -t -d3 -o`가 실제 후보 importer를 사용했는지와 metadata 본문을 검사한다. `-o`는 기존 파일에 이어 쓰므로 출력 파일을 먼저 비운다. `index`는 일반 txt 양성 대조군과 파일명에 없는 본문 단어가 정확한 경로 집합을 반환하는지 각각 최대 60초 기다린다. `mdutil -s /`만 정상이어도 실제 데이터 볼륨의 색인이 작동한다고 가정하지 않는다. txt 대조도 실패하면 환경 문제로 기록하고 전역 index reset이나 daemon kill을 하지 않는다.
+
+일반 설치/첫 실행에서 발견되지 않은 개발용 ad-hoc 후보는 `developer-register`로 Xcode와 같은 `lsregister -f -R -trusted` 및 timestamp 갱신을 **별도 비교**할 수 있다. 이것을 일반 설치나 공증 배포 성공으로 기록하지 않는다. 색인 환경이 막혔을 때 `lifecycle --extraction-only`는 metadata 전환만 확인하고 검색·삭제 전파를 모두 MISS로 남긴다. `replace-app`은 동일 버전 로컬 복사·timestamp·첫 실행 시험이며 공개 Sparkle 업데이트를 대신하지 않는다. 교체 후에는 restore-corpus로 합성 원본을 복원하고 stop-app으로 후보 앱을 종료한 뒤 verify/index를 다시 수행한다.
+
+`build.noindex/`도 importer 발견 자체를 막지 못할 수 있다. Xcode가 자동 등록한 이번 작업의 앱은 검사 전에 `pluginkit -r`/`lsregister -u`로 정리하고 `mdimport -L`을 확인한다. 앱이 존재하는 동안 importer 목록이 남으면 승인된 이번 작업의 중간 `.app`만 제거하거나 더 이상 쓰지 않는 산출물로 정리한다. 다른 작업자의 앱·worktree는 건드리지 않는다. 종료 후 `scripts/check-extension-registration-hygiene.sh --check-only`와 `mdimport -L`로 잔존 등록을 점검한다.
+
 ## 렌더링 smoke test
 
 ```bash
