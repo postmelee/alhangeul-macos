@@ -1,0 +1,41 @@
+{
+  "observed_date": "2026-09-09",
+  "source_commit": "48aa7e12231731b757a6599001a245028381b2ab",
+  "kind": "latest local universal Release ad-hoc candidate; no public distribution",
+  "package_zip_sha256": "7dcb44030e9bdead09b8fa1e226bcf2a72f2ab26eb5af5bb0ce50ec522ac7c87",
+  "app_binary_sha256": "3908b2a880fa7b0ca82c357039459405e4baa2e7b9cd73a07bd81076715ec236",
+  "importer_binary_sha256": "716fbf428f1c0a4fb9edc991941095b8d3665f4a307e441031430ab8ea6d49e6",
+  "build": "PASS",
+  "portable_source_abi": "PASS",
+  "callback_cases": 13,
+  "callback": "PASS",
+  "operational_tests": 23,
+  "bundle_tests": 5,
+  "environment_text_control": "FAIL after 60 seconds",
+  "automatic_installation": "NOT RUN: text control prerequisite failed",
+  "automatic_existing_document_search": "NOT RUN",
+  "cleanup": "PASS",
+  "original_apps_and_providers_preserved": true,
+  "phases": [
+    {
+      "phase": "prepare",
+      "exit_code": 0,
+      "elapsed_seconds": 0.98
+    },
+    {
+      "phase": "environment",
+      "exit_code": 1,
+      "elapsed_seconds": 61.65
+    },
+    {
+      "phase": "stop-app",
+      "exit_code": 0,
+      "elapsed_seconds": 0.21
+    },
+    {
+      "phase": "cleanup",
+      "exit_code": 0,
+      "elapsed_seconds": 0.42
+    }
+  ]
+}

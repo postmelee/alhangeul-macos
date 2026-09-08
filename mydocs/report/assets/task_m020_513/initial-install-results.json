@@ -1,0 +1,804 @@
+{
+  "status": "일반 최초 설치 미완료; 검증 도구와 조사 결과 제출",
+  "platform": {
+    "macOS": "26.5.2",
+    "architecture": "arm64"
+  },
+  "source_commit": "489f5339820ea38602cfec49af949cd907cfd078",
+  "app_sha256": "4c198d77a558b7523c9d2a935442c47b5d2feaef8e4ff21ebed3978c9b9034b5",
+  "importer_sha256": "c3230cad403408f060d23b7841b10354279cd0e47f420ce3e1bec26ec31fd3d8",
+  "runs": [
+    {
+      "case": "A",
+      "condition": "기존 수동 baseline 색인/일반 등록/60초 대기 후 첫 실행",
+      "phase": "cleaned",
+      "assisted_actions": [],
+      "launch_requests": null,
+      "results": [
+        {
+          "case": "environment-text-control",
+          "query": "SpotlightEnvironmentControlOnly",
+          "result": "PASS",
+          "paths_filenames": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS"
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS"
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "MISS"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulSpotlightProbe",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "query": "UpdatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "query": "나비",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "query": "바다",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "query": "TruncatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "query": "호랑이",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "query": "OmittedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "case": "B",
+      "condition": "원본 bytes/mtime, 새 중첩 경로의 복사/첫 실행; 이후 신규 파일 진단",
+      "phase": "cleaned",
+      "assisted_actions": [
+        "new-document-after-discovery"
+      ],
+      "launch_requests": 1,
+      "results": [
+        {
+          "case": "environment-text-control",
+          "query": "SpotlightEnvironmentControlOnly",
+          "result": "PASS",
+          "paths_filenames": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS"
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "PASS",
+          "elapsed_seconds": 36.28
+        },
+        {
+          "case": "automatic-discovery",
+          "result": "PASS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "environment-text-control",
+          "query": "SpotlightEnvironmentControlOnly",
+          "result": "PASS",
+          "paths_filenames": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "control_ok": true,
+          "result": "FAIL",
+          "expected_filenames": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ],
+          "actual_filenames": []
+        },
+        {
+          "case": "metadata-document-a.hwp",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+          "utf8_bytes": 58
+        },
+        {
+          "case": "metadata-document-b.hwpx",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx",
+          "utf8_bytes": 58
+        },
+        {
+          "case": "metadata-document-c.hwp",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+          "utf8_bytes": 36
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "delayed-automatic-body-search",
+          "control_ok": true,
+          "result": "FAIL",
+          "expected_filenames": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ],
+          "actual_filenames": []
+        },
+        {
+          "case": "new-file-automatic-search",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": [
+            "after-discovery.hwp"
+          ]
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulSpotlightProbe",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "query": "UpdatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "query": "나비",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "query": "바다",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "query": "TruncatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "query": "호랑이",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "query": "OmittedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "MISS"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "MISS"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "MISS"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "MISS"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "case": "C",
+      "condition": "초기 direct root 선생성 혼입 있음; 이어 재등록/시각 변경/재실행 누적 진단",
+      "phase": "cleaned",
+      "assisted_actions": [
+        "post-launch-register-only",
+        "touch-installed-importer-only",
+        "touch-installed-app-after-importer"
+      ],
+      "launch_requests": 2,
+      "results": [
+        {
+          "case": "environment-text-control",
+          "query": "SpotlightEnvironmentControlOnly",
+          "result": "PASS",
+          "paths_filenames": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "pre-install-body-absent",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS"
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 60.71
+        },
+        {
+          "case": "automatic-discovery",
+          "result": "MISS",
+          "elapsed_seconds": 60.77
+        },
+        {
+          "case": "diagnostic-post-launch-register-only",
+          "result": "PASS"
+        },
+        {
+          "case": "discovery-after-register-only",
+          "result": "MISS",
+          "elapsed_seconds": 60.58
+        },
+        {
+          "case": "diagnostic-touch-importer-only",
+          "result": "PASS"
+        },
+        {
+          "case": "discovery-after-importer-touch-only",
+          "result": "MISS",
+          "elapsed_seconds": 60.64
+        },
+        {
+          "case": "diagnostic-touch-app-after-importer",
+          "result": "PASS"
+        },
+        {
+          "case": "discovery-after-app-touch",
+          "result": "PASS",
+          "elapsed_seconds": 14.16
+        },
+        {
+          "case": "metadata-document-a.hwp",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+          "utf8_bytes": 58
+        },
+        {
+          "case": "metadata-document-b.hwpx",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx",
+          "utf8_bytes": 58
+        },
+        {
+          "case": "metadata-document-c.hwp",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+          "utf8_bytes": 36
+        },
+        {
+          "case": "environment-text-control",
+          "query": "SpotlightEnvironmentControlOnly",
+          "result": "PASS",
+          "paths_filenames": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "control_ok": true,
+          "result": "FAIL",
+          "expected_filenames": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ],
+          "actual_filenames": []
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS"
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "PASS",
+          "elapsed_seconds": 0.02
+        },
+        {
+          "case": "environment-text-control",
+          "query": "SpotlightEnvironmentControlOnly",
+          "result": "PASS",
+          "paths_filenames": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "control_ok": true,
+          "result": "FAIL",
+          "expected_filenames": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ],
+          "actual_filenames": []
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulSpotlightProbe",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "query": "UpdatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "query": "나비",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "query": "바다",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "query": "TruncatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "query": "호랑이",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "query": "OmittedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "MISS"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "MISS"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "case": "D",
+      "condition": "소스 importer 디렉터리 시각만 갱신한 진단 사본; 일반 최초 설치 수용 기준 제외",
+      "phase": "cleaned",
+      "assisted_actions": [
+        "source-importer-mtime-only"
+      ],
+      "launch_requests": 1,
+      "results": [
+        {
+          "case": "environment-text-control",
+          "query": "SpotlightEnvironmentControlOnly",
+          "result": "PASS",
+          "paths_filenames": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "pre-install-body-absent",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS",
+          "launch_number": 1
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 60.63
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulSpotlightProbe",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "query": "UpdatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "query": "나비",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "query": "바다",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "query": "TruncatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "query": "호랑이",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "query": "OmittedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "case": "E",
+      "condition": "D 소스에 앱 디렉터리 시각만 추가 갱신한 진단 사본; 일반 최초 설치 수용 기준 제외",
+      "phase": "cleaned",
+      "assisted_actions": [
+        "source-app-and-importer-mtime"
+      ],
+      "launch_requests": 1,
+      "results": [
+        {
+          "case": "environment-text-control",
+          "query": "SpotlightEnvironmentControlOnly",
+          "result": "PASS",
+          "paths_filenames": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "pre-install-body-absent",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS",
+          "launch_number": 1
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 60.7
+        },
+        {
+          "case": "verify-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "extended-first-launch-discovery",
+          "result": "MISS",
+          "elapsed_seconds": 180.03
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulSpotlightProbe",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "query": "UpdatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "query": "나비",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "query": "바다",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "query": "TruncatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "query": "호랑이",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "query": "OmittedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ]
+    },
+    {
+      "case": "F",
+      "condition": "수정한 direct 경로: 원본 bytes/디렉터리 시각 보존, 수동 등록·색인 없는 첫 실행",
+      "phase": "cleaned",
+      "assisted_actions": [],
+      "launch_requests": 1,
+      "results": [
+        {
+          "case": "environment-text-control",
+          "query": "SpotlightEnvironmentControlOnly",
+          "result": "PASS",
+          "paths_filenames": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "pre-install-body-absent",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS",
+          "launch_number": 1
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 60.68
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulSpotlightProbe",
+          "query": "AlhangeulSpotlightProbe",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "query": "UpdatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "query": "나비",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "query": "바다",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "query": "TruncatedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "query": "호랑이",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "query": "OmittedDocumentMarker",
+          "result": "PASS",
+          "paths_filenames": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ]
+    }
+  ]
+}
