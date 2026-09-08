@@ -4,6 +4,7 @@ import argparse
 import os
 from pathlib import Path
 import plistlib
+import re
 import sys
 import uuid
 import xml.etree.ElementTree as ET
@@ -25,7 +26,17 @@ def require(condition, message):
         raise ValueError(message)
 
 
-def validate(info, schema, host, executable=None):
+def source_factory_uuid(source):
+    match = re.search(r"static CFUUIDRef FactoryID\(void\)\s*\{\s*return "
+                      r"CFUUIDGetConstantUUIDWithBytes\(NULL,([^;]+)\);\s*\}", source)
+    require(match is not None, "missing factory UUID source declaration")
+    tokens = [token.strip() for token in match.group(1).split(",")]
+    require(len(tokens) == 16 and all(re.fullmatch(r"0x[0-9A-Fa-f]{2}", token) for token in tokens),
+            "factory UUID source must contain 16 bytes")
+    return uuid.UUID(bytes=bytes(int(token, 16) for token in tokens))
+
+
+def validate(info, schema, host, executable=None, *, factory_source=None, exported_symbols=None):
     types = info["CFBundleDocumentTypes"]
     require(len(types) == 1 and types[0]["CFBundleTypeRole"] == "MDImporter", "MDImporter role mismatch")
     utis = types[0]["LSItemContentTypes"]
@@ -35,8 +46,11 @@ def validate(info, schema, host, executable=None):
     factories = info["CFPlugInFactories"]
     require(len(factories) == 1, "one factory is required")
     factory, function = next(iter(factories.items()))
-    uuid.UUID(factory)
     require(function == "AlhangeulImporterFactory", "factory entrypoint mismatch")
+    source = (factory_source or ROOT / "Sources/SpotlightImporter/Importer.m").read_text()
+    require(uuid.UUID(factory) == source_factory_uuid(source), "factory UUID source mismatch")
+    exports = (exported_symbols or ROOT / "Sources/SpotlightImporter/ExportedSymbols.txt").read_text().split()
+    require(exports == ["_" + function], "factory exported symbol mismatch")
     require(info["CFPlugInTypes"] == {IMPORTER_TYPE: [factory]}, "factory type mismatch")
     require(info["CFBundlePackageType"] == "BNDL", "package type mismatch")
     for key in ("CFBundleShortVersionString", "CFBundleVersion"):

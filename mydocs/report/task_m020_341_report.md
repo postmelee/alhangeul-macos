@@ -25,7 +25,7 @@
 |---|---|
 | HostApp Debug/Release | OK |
 | 4개 실행 파일 arm64/x86_64 | OK |
-| bundle UTI/factory/schema/version과 음성 fixtures | OK — 3 suite |
+| bundle UTI/factory/schema/version과 음성 fixtures | OK — 5 tests (2026-09-09 리뷰 보완) |
 | 실제 CFPlugIn 직접 호출 | OK — 최종 11사례, Debug/Release |
 | 파일 한도/특수 파일/DRM/실패/빈 결과 제거 | OK — 직접 callback |
 | 실행 파일 최소 target 및 의존성 | OK — 두 slice minos 12.0, 직접 AppKit/Swift 없음 |
@@ -42,3 +42,7 @@
 ## 리뷰 인계
 
 PR은 devel 대상, 계획/Stage/commit/최종 보고를 SHA 링크로 연결한다. 내부 bundle 추가 자체는 독립 UI가 없어 합성 screenshot을 만들지 않았다. 실제 검색 증거는 #342 작업에서 제공한다. PR merge·버전 상향·공개 배포는 사용자 리뷰 후 별도로 진행한다.
+
+## 리뷰 보완 — 2026-09-09
+
+[Stage 4](../working/task_m020_341_stage4.md)에서 factory 소스 UUID·plist·export 선언을 대조하고, C 검증기의 assert를 항상 실행되는 REQUIRE로 바꿨다. NDEBUG 빌드에서도 정상 본문을 통과하고 없는 needle을 실패 처리한다. 단독 실행용 build.noindex 생성도 보완했다. 소스 계약 5개 회귀와 기존 Release 패키지의 직접 callback 11개 및 NDEBUG 양성/음성 검증이 통과했다. importer 제품 코드·시스템 등록·공개 서명은 변경하지 않았다.

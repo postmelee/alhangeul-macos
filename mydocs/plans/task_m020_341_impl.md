@@ -15,3 +15,7 @@ HostApp Debug/Release universal build와 실제 CFPlugIn factory/QueryInterface/
 ## 수용 기준
 
 앱 내부 importer의 위치/실행 파일/식별자/UTI/factory와 두 architecture가 일치한다. 본문·경로를 제품 로그에 남기지 않는다. AppKit/UI/네트워크/외부 파일/비밀번호 저장소에 의존하지 않는다. build.noindex 산출물을 자동 등록하지 않고 현재 설치본을 유지한다. macOS 12 runtime과 공개 서명/공증은 미실행으로 보고한다.
+
+## Stage 4: 리뷰 지적의 검증기 강화
+
+factory UUID 소스·plist 및 export 선언을 자동 대조하고 불일치 회귀를 추가한다. C callback checker는 NDEBUG에도 동작하는 명시 검사로 바꾸고 잘못된 needle의 실패를 직접 확인한다. 단독 실행에 필요한 build.noindex를 생성한다. importer 제품 코드는 유지하고 소스 계약·Python 회귀·기존 Release package direct callback으로 검증한다.
