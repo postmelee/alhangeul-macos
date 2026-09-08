@@ -1,0 +1,203 @@
+{
+  "환경": "macOS 26.5.2 / Xcode 26.6 / arm64 / ad-hoc Release package",
+  "종료상태": "cleaned",
+  "색인환경": "unavailable",
+  "결과": [
+    {
+      "case": "before-install",
+      "query": "AlhangeulSpotlightProbe",
+      "paths": [],
+      "result": "OBSERVED",
+      "detail": "0건 관찰만 의미하며 색인 환경의 정상 판정이 아님"
+    },
+    {
+      "case": "discovery-before-first-launch",
+      "result": "MISS",
+      "detail": "lsregister -f, mdimport -i app, mdimport -r did not discover importer within 60 seconds"
+    },
+    {
+      "case": "development-registration-timestamp",
+      "result": "PASS",
+      "detail": "own bundle timestamp refresh and Xcode-equivalent lsregister -f -R -trusted; not ordinary installation proof"
+    },
+    {
+      "case": "metadata-document-a.hwp",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+      "utf8_bytes": 70
+    },
+    {
+      "case": "metadata-document-b.hwpx",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx",
+      "utf8_bytes": 70
+    },
+    {
+      "case": "metadata-document-c.hwp",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+      "utf8_bytes": 36
+    },
+    {
+      "case": "environment-text-control",
+      "expected": [
+        "<HOME>/Documents/AlhangeulSpotlightSmoke-751114a4c86b/Files/index-control.txt"
+      ],
+      "actual": [],
+      "result": "FAIL"
+    },
+    {
+      "case": "deleted-original-documents",
+      "result": "MISS",
+      "reason": "explicit extraction-only run; actual index not tested"
+    },
+    {
+      "case": "modified-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "modified-old-word-removed",
+      "result": "MISS",
+      "reason": "explicit extraction-only run; actual index not tested"
+    },
+    {
+      "case": "modified-new-word",
+      "result": "MISS",
+      "reason": "explicit extraction-only run; actual index not tested"
+    },
+    {
+      "case": "protected-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "protected-old-word-removed",
+      "result": "MISS",
+      "reason": "explicit extraction-only run; actual index not tested"
+    },
+    {
+      "case": "empty-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "empty-old-word-removed",
+      "result": "MISS",
+      "reason": "explicit extraction-only run; actual index not tested"
+    },
+    {
+      "case": "invalid-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "invalid-old-word-removed",
+      "result": "MISS",
+      "reason": "explicit extraction-only run; actual index not tested"
+    },
+    {
+      "case": "drm-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "drm-old-word-removed",
+      "result": "MISS",
+      "reason": "explicit extraction-only run; actual index not tested"
+    },
+    {
+      "case": "distribution-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "distribution-old-word-removed",
+      "result": "MISS",
+      "reason": "explicit extraction-only run; actual index not tested"
+    },
+    {
+      "case": "large-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "large-old-word-removed",
+      "result": "MISS",
+      "reason": "explicit extraction-only run; actual index not tested"
+    },
+    {
+      "case": "truncated-metadata",
+      "result": "PASS",
+      "utf8_bytes": 1048575
+    },
+    {
+      "case": "deleted-final-documents",
+      "result": "MISS",
+      "reason": "explicit extraction-only run; actual index not tested"
+    },
+    {
+      "case": "first-launch-requested",
+      "result": "PASS"
+    },
+    {
+      "case": "discovery-after-first-launch",
+      "result": "PASS",
+      "importer": "<HOME>/Applications/AlhangeulSpotlightSmoke-751114a4c86b/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter"
+    },
+    {
+      "case": "local-app-replacement",
+      "result": "PASS",
+      "old_timestamp_ns": 1788737838208999000,
+      "new_timestamp_ns": 1788738236081242000
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS"
+    },
+    {
+      "case": "restored-synthetic-corpus",
+      "result": "PASS"
+    },
+    {
+      "case": "metadata-document-a.hwp",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+      "utf8_bytes": 70
+    },
+    {
+      "case": "metadata-document-b.hwpx",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx",
+      "utf8_bytes": 70
+    },
+    {
+      "case": "metadata-document-c.hwp",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+      "utf8_bytes": 36
+    },
+    {
+      "case": "environment-text-control",
+      "expected": [
+        "<HOME>/Documents/AlhangeulSpotlightSmoke-751114a4c86b/Files/index-control.txt"
+      ],
+      "actual": [],
+      "result": "FAIL"
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS"
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS"
+    },
+    {
+      "case": "cleanup-original-apps-providers",
+      "result": "PASS"
+    },
+    {
+      "case": "cleanup-index",
+      "result": "MISS",
+      "reason": "index environment unavailable"
+    },
+    {
+      "case": "cleanup-importer-catalog",
+      "result": "PASS"
+    }
+  ]
+}
