@@ -16,6 +16,21 @@ spec.loader.exec_module(smoke)
 
 
 class SmokeTests(unittest.TestCase):
+    def test_phase_failure_is_saved_for_evidence_and_cleanup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            path.write_text(json.dumps({"phase": "installed", "results": []}))
+            with patch.object(sys, "argv", ["smoke", "verify", "--state", str(path)]), \
+                 patch.object(smoke, "owned_locations"), \
+                 patch.object(smoke, "verify", side_effect=RuntimeError("synthetic missing importer")):
+                with self.assertRaisesRegex(RuntimeError, "missing importer"):
+                    smoke.main()
+            saved = json.loads(path.read_text())
+            self.assertEqual(saved["phase"], "installed")
+            self.assertEqual(saved["results"][-1]["case"], "verify-failed")
+            self.assertEqual(saved["results"][-1]["result"], "FAIL")
+            self.assertIn("missing importer", saved["results"][-1]["reason"])
+
     def test_automatic_install_requires_pre_install_control(self):
         with patch.object(smoke, "run") as command:
             with self.assertRaisesRegex(ValueError, "environment before"):

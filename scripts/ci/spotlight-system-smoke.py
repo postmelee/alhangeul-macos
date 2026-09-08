@@ -606,6 +606,9 @@ def main():
             stop_candidate(state)
         elif args.phase == "cleanup":
             cleanup(state)
+    except Exception as error:
+        record(state, args.phase + "-failed", "FAIL", reason=str(error))
+        raise
     finally:
         save(args.state, state)
 
