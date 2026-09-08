@@ -15,3 +15,7 @@ Rust 전체 tests, 두 architecture staticlib와 portable ABI/artifact 확인, n
 ## 수용 기준
 
 계약의 본문 포함·제외와 9개 상태, null/길이/UTF-8/한도/해제 조건을 실증한다. 앱/renderer API와 core pin 변화는 없어야 한다. macOS 12 runtime은 미실행으로 남긴다.
+
+## Stage 4: 공개 샘플 회귀의 실질 단언 보완
+
+2026-09-09 작업지시자가 리뷰 보완 순서대로 구현·검증·코멘트 게시를 승인했다. 공개 샘플의 표·글상자 안 표·수식·HWPX에서 실제 고유 본문을 확인해 빈 needle을 제거한다. 실물 field 샘플의 본문 포함과 숨은 도움말 제외를 함께 단언한다. 메모 전용 payload는 기존 합성 모델 테스트를 유지한다. 합성 모델 회귀 및 ABI는 유지하며 locked/offline Rust 전체 테스트로 검증한다.

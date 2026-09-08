@@ -51,4 +51,4 @@ importer는 로컬 원본을 읽기 전용으로 열고 추출 본문을 macOS S
 
 maintainer는 [표준 Spotlight smoke](build_run_guide.md#spotlight-설치색인-smoke)로 실제 importer 선택, metadata, 본문 검색, 전환·교체·정리를 분리해 확인합니다. `mdls` 본문 출력이나 Quick Look/Thumbnail provider 성공을 본문 색인 성공의 근거로 사용하지 않습니다. 일반 색인이 정상인 환경, 최소 지원 OS와 공개 서명·공증 설치본에서도 결과를 기록해야 합니다.
 
-상세 추출 순서와 ABI는 [본문 추출 계약](../tech/spotlight_text_extraction_contract.md), 실제 시험 범위와 화면은 [설치 smoke 보고서](../report/task_m020_342_report.md)를 참조하세요.
+상세 추출 순서와 ABI는 [본문 추출 계약](../tech/spotlight_text_extraction_contract.md)을 참조하세요.

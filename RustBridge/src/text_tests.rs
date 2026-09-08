@@ -163,11 +163,21 @@ fn hwp3_synthetic_plain_and_password_header() {
 fn public_corpus_remains_searchable() {
     for (path, needle) in [
         ("samples/re-05-mixed-koen-hancom.hwp", "한글"),
-        ("samples/inner-table-01.hwp", ""),
-        ("samples/table-in-tbox.hwp", ""),
-        ("samples/eq-01.hwp", ""),
-        ("samples/hwpx/ref/ref_text.hwpx", ""),
+        // 중첩 표의 셀에만 있는 요구사항 번호.
+        ("samples/inner-table-01.hwp", "SFR-SAAS-009"),
+        // 글상자 안 표의 검사 항목 셀.
+        (
+            "samples/table-in-tbox.hwp",
+            "잔류염소, pH, 탁도, 철, 동, 온도",
+        ),
+        // 일반 문단이 아닌 수식 control의 script.
+        ("samples/eq-01.hwp", "{최저입찰가격} over {해당입찰가격}"),
+        ("samples/hwpx/ref/ref_text.hwpx", "안녕 Hello 123"),
     ] {
+        assert!(
+            !needle.is_empty(),
+            "공개 샘플은 실질 본문 단언이 필요하다: {path}"
+        );
         let bytes = std::fs::read(
             std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
                 .join("..")
@@ -179,4 +189,28 @@ fn public_corpus_remains_searchable() {
         assert!(!output.is_empty(), "{path}");
         assert!(output.contains(needle), "{path}");
     }
+}
+
+#[test]
+fn public_field_sample_keeps_body_but_excludes_hidden_help() {
+    use rhwp::model::control::Control;
+    let path =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../samples/field-01-memo.hwp");
+    let bytes = std::fs::read(path).unwrap();
+    let doc = rhwp::parser::parse_document(&bytes).unwrap();
+    let hidden = "회사명은 회사이름입니다. 반드시 거래업체 등록된 정식 명칭을 사용해야 합니다.";
+    // 파일명만으로 메모라고 가정하지 않는다. 실제 모델의 Field HelpState를 확인한다.
+    assert!(doc
+        .sections
+        .iter()
+        .flat_map(|s| &s.paragraphs)
+        .flat_map(|p| &p.controls)
+        .any(|c| matches!(c, Control::Field(f) if f.command.contains(hidden))));
+    let (status, output) = extract(&bytes);
+    assert_eq!(status, RHWP_TEXT_OK);
+    assert!(output.contains("회사명 : 여기에 입력"));
+    assert!(output.contains("03 목차 입력"));
+    assert!(!output.contains(hidden));
+    assert!(!output.contains("HelpState"));
+    assert!(!output.contains("Clickhere:set"));
 }

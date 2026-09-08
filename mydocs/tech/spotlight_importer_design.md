@@ -2,6 +2,8 @@
 
 ## 목적과 소유 경계
 
+이 문서의 구현·검증 언급은 설계 인계 시점의 요약이다. 최신 실행 결과는 설치 smoke 보고서에서 관리하며 재검증 시 지원 범위가 달라지면 이 요약도 함께 점검한다.
+
 사용자가 파일명에 없는 문서 단어로 HWP/HWPX 파일을 찾게 한다. macOS의 파일 색인용 CFPlugIn `.mdimporter`가 파일 bytes를 읽고 RustBridge 본문 추출 API를 호출하여 `kMDItemTextContent`를 전달한다. HostApp의 WKWebView, Core Spotlight 앱 색인, 페이지 bitmap/Quick Look 응답은 이 데이터 경로에 포함하지 않는다.
 
 Apple의 [CSImportExtension 안내](https://developer.apple.com/documentation/corespotlight/csimportextension)는 macOS custom file에 Spotlight importer plugin을 사용하도록 명시한다. [MDImporter](https://developer.apple.com/documentation/coreservices/file_metadata/mdimporter)의 callback은 앱이 실행되어 있거나 window server/UI가 준비됐다는 가정을 하지 않는다. 현재 SDK 헤더를 기준으로 구현하며 보관 문서의 오래된 CLI 예는 현재 도움말과 대조한다.
@@ -26,6 +28,8 @@ Apple의 [CSImportExtension 안내](https://developer.apple.com/documentation/co
 - Swift/AppKit UI 계층을 링크하지 않는다. Rust 정적 링크가 요구하는 SDK 라이브러리는 명시하고 최종 binary의 의존성과 크기를 검사한다. Skia 포함 staticlib가 실제 importer 전체 크기를 의미한다고 단정하지 않는다.
 
 ## UTI와 metadata
+
+UTI 선언의 진실 원천은 HostApp Info.plist다. 후속 [PR #510](https://github.com/postmelee/alhangeul-macos/pull/510)의 `scripts/ci/check-spotlight-bundle.py`가 HostApp·importer Info.plist·schema를 자동 대조한다. 아래 목록은 설계 시점의 설명용 사본이며 UTI 변경 시 함께 점검한다.
 
 앱의 기존 document type 9종을 지원 목록의 입력으로 사용한다. importer schema와 Info.plist 목록이 앱 선언에 맞는지 검사한다. 확장자가 같더라도 다른 앱의 exported type이 선택될 수 있으므로 실제 파일 content type과 importer 경로를 증거로 남긴다.
 
