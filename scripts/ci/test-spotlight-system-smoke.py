@@ -15,6 +15,116 @@ spec.loader.exec_module(smoke)
 
 
 class SmokeTests(unittest.TestCase):
+    def test_automatic_install_requires_pre_install_control(self):
+        with patch.object(smoke, "run") as command:
+            with self.assertRaisesRegex(ValueError, "environment before"):
+                smoke.install({"automatic": True})
+            command.assert_not_called()
+
+    def test_registration_comparison_marks_run_assisted_without_touch_or_launch(self):
+        state = {"phase": "installed", "install_app": "/synthetic/app", "results": []}
+        with patch.object(smoke, "run") as command, patch.object(smoke.os, "utime") as touch:
+            smoke.diagnostic_register(state)
+        command.assert_called_once_with([smoke.LSREGISTER, "-f", "/synthetic/app"])
+        touch.assert_not_called()
+        self.assertEqual(state["assisted_actions"], ["diagnostic-register"])
+        state["launch_count"] = 1
+        with self.assertRaises(ValueError): smoke.diagnostic_register(state)
+
+    def test_automatic_install_does_not_register_or_reindex(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = {"id": "test", "automatic": True, "pre_install_environment_verified": True,
+                     "install_root": directory + "/install",
+                     "source_app": "/source/Alhangeul.app", "install_app": directory + "/install/Alhangeul.app"}
+            def copy(args, **kwargs):
+                if args[0] == "ditto":
+                    (Path(args[2]) / smoke.PLUGIN).mkdir(parents=True)
+                return ""
+            with patch.object(smoke, "run", side_effect=copy) as command, \
+                 patch.object(smoke, "discover", return_value=False):
+                smoke.install(state)
+            self.assertEqual([call.args[0][0] for call in command.call_args_list], ["ditto", "codesign"])
+
+    def test_direct_copy_does_not_precreate_app_and_tracks_partial_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            app = Path(directory) / "Owned.app"
+            state = {"automatic": True, "pre_install_environment_verified": True,
+                     "install_layout": "direct", "install_root": str(app), "install_app": str(app),
+                     "source_app": "/source/Alhangeul.app"}
+            def failed_copy(args, **kwargs):
+                self.assertEqual(args[0], "ditto")
+                self.assertFalse(app.exists(), "precreated app changes ditto mtime semantics")
+                app.mkdir()
+                raise RuntimeError("partial copy")
+            with patch.object(smoke, "run", side_effect=failed_copy):
+                with self.assertRaisesRegex(RuntimeError, "partial copy"):
+                    smoke.install(state)
+            self.assertEqual(state["install_identity"], [app.stat().st_dev, app.stat().st_ino])
+
+    def test_automatic_index_uses_existing_index_without_mdimport_i(self):
+        state = {"automatic": True, "files": "/synthetic/Files", "evidence": "/synthetic",
+                 "token": "BodyToken", "results": []}
+        with patch.object(smoke, "run") as command, patch.object(smoke, "expect_paths"):
+            smoke.index(state)
+        command.assert_not_called()
+        self.assertEqual(state["phase"], "searchable")
+
+    def test_automatic_search_rejects_assisted_or_relaunched_runs(self):
+        valid = {"automatic": True, "launch_count": 1, "before_install_paths": [], "results": [],
+                 "prepared_corpus": {"sample.hwp": [10, 123, "sha256"]}}
+        for change in [{"automatic": False}, {"assisted_actions": ["replace-app"]},
+                       {"launch_count": 2}, {"before_install_paths": ["old.hwp"]}]:
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                smoke.automatic_search(dict(valid, **change))
+        with patch.object(smoke, "corpus_snapshot", return_value=valid["prepared_corpus"]), \
+             patch.object(smoke, "discover", return_value=False), \
+             patch.object(smoke, "index") as indexing:
+            with self.assertRaisesRegex(RuntimeError, "discovery failed"):
+                smoke.automatic_search(valid)
+            indexing.assert_not_called()
+        with patch.object(smoke, "corpus_snapshot", return_value={"new.hwp": []}):
+            with self.assertRaisesRegex(ValueError, "unchanged pre-install corpus"):
+                smoke.automatic_search(valid)
+
+    def test_direct_app_cleanup_requires_exact_path_and_directory_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            workspace = home / "Documents/AlhangeulSpotlightSmoke-abc123"
+            app = home / "Applications/AlhangeulSpotlightSmoke-abc123.app"
+            workspace.mkdir(parents=True)
+            app.mkdir(parents=True)
+            (workspace / ".spotlight-smoke-owner").write_text("abc123")
+            state = {"id": "abc123", "workspace": str(workspace), "files": str(workspace / "Files"),
+                     "install_layout": "direct", "install_root": str(app), "install_app": str(app),
+                     "install_identity": [app.stat().st_dev, app.stat().st_ino]}
+            with patch.object(smoke.Path, "home", return_value=home):
+                smoke.owned_locations(state)
+                state["install_identity"][1] += 1
+                with self.assertRaisesRegex(ValueError, "identity mismatch"):
+                    smoke.owned_locations(state)
+                state["install_root"] = str(home / "Applications/Alhangeul.app")
+                with self.assertRaisesRegex(ValueError, "exact owned test location"):
+                    smoke.owned_locations(state)
+
+    def test_automatic_search_requires_real_index_before_metadata_diagnostics(self):
+        state = {"automatic": True, "launch_count": 1, "before_install_paths": [], "results": [],
+                 "prepared_corpus": {"sample.hwp": [10, 123, "sha256"]}}
+        events = []
+        with patch.object(smoke, "corpus_snapshot", return_value=state["prepared_corpus"]), \
+             patch.object(smoke, "discover", return_value=True), \
+             patch.object(smoke, "index", side_effect=lambda _: events.append("index")), \
+             patch.object(smoke, "verify", side_effect=lambda _: events.append("metadata")):
+            smoke.automatic_search(state)
+        self.assertEqual(events, ["index", "metadata"])
+        state["results"] = []
+        with patch.object(smoke, "corpus_snapshot", return_value=state["prepared_corpus"]), \
+             patch.object(smoke, "discover", return_value=True), \
+             patch.object(smoke, "index", side_effect=RuntimeError("no indexed documents")), \
+             patch.object(smoke, "verify") as metadata:
+            with self.assertRaises(RuntimeError): smoke.automatic_search(state)
+            metadata.assert_not_called()
+        self.assertEqual(state["results"], [])
+
     def test_korean_query_filters_scope_and_normalizes_data_alias(self):
         state = {"files": "/Users/test/Documents/Owned/Files"}
         document = state["files"] + "/document.hwp"

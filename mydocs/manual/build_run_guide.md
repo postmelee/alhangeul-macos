@@ -167,6 +167,12 @@ python3 scripts/ci/spotlight-system-smoke.py index --state build.noindex/spotlig
 python3 scripts/ci/spotlight-system-smoke.py cleanup --state build.noindex/spotlight-state.json
 ```
 
+일반 최초 설치를 판정할 때는 위 수동 등록/재색인 진단과 구분하여 새 state의 `prepare`에 `--automatic`을 지정한다. `environment → install → launch → automatic-search → stop-app → automatic-search → cleanup` 순서로 실행한다. 자동 모드는 `lsregister -f`와 `mdimport -i`를 호출하지 않고, 실제 본문 검색을 먼저 확인한 뒤 `mdimport -t`로 후보 경로를 검사한다. 설치 전 corpus의 hash/수정 시각 유지, 첫 실행 1회, 설치 전 본문 검색 0건을 확인하며, `diagnostic-register`, `developer-register`, `replace-app`, `restore-corpus`, `lifecycle` 이후에는 최초 자동 설치 통과를 거부한다. 발견 대기나 검색 timeout은 실패/미발견으로 기록하고 반복 실행 결과와 구분한다.
+
+사전 등록 조건만 비교할 때는 자동 모드의 `install`과 `launch` 사이에서 `diagnostic-register`를 실행한다. 이 단계는 변경 시각 갱신이나 재복사 없이 일반 `lsregister -f`만 호출하며, 해당 실행을 자동 최초 설치 판정에서 제외한다.
+
+설치 위치 비교는 `prepare --install-layout direct`로 Applications 바로 아래의 고유 `AlhangeulSpotlightSmoke-{id}.app`을 사용할 수 있다. 기본 `nested`는 기존 중첩 경로다. direct 모드도 기존 `Alhangeul.app`을 사용하지 않으며, 소유 Documents marker와 정확한 앱 경로, 디렉터리의 device/inode를 확인한 뒤에만 정리한다. 시험마다 새 state를 만들고 이전 시험 cleanup을 완료한다. 설치 경로가 달라도 동일 bundle ID의 기존 사용자 앱이 남아 있으므로 완전히 새 사용자 환경 검증으로 해석하지 않는다.
+
 Intel Mac은 Rust target을 `x86_64-apple-darwin`으로 바꾼다. fixture 디렉터리와 state 파일은 새 경로여야 한다. state를 보존하면 실패 후에도 cleanup을 다시 실행할 수 있다. 준비 단계에서 기록한 소유 표시와 정확한 경로를 확인한 뒤 시험 앱/문서만 제거한다. 원래 설치본 Info.plist·실행 파일 hash 및 Preview/Thumbnail provider 선택·경로를 비교하고 Quick Look cache를 정리한다. 삭제한 importer가 목록에 계속 남으면 최대 60초 후 cleanup은 nonzero로 끝나고 `cleanup-pending-index`를 기록한다. 이는 파일·기존 앱 보존 결과와 별개인 목록/색인 정리 미완료 상태다. 시스템 환경을 확인한 뒤 같은 cleanup을 재실행하며, 성공처럼 보고하거나 전체 index를 자동 초기화하지 않는다.
 
 `environment`는 앱 등록 전에 일반 txt 양성 대조를 확인하고 실패 시 corpus/전체 볼륨 상태와 txt metadata를 기록한다. 실패하면 설치 단계를 진행하지 않고 진단 후 cleanup한다. `verify`는 `mdimport -t -d3 -o`가 실제 후보 importer를 사용했는지와 metadata 본문을 검사한다. `-o`는 기존 파일에 이어 쓰므로 출력 파일을 먼저 비운다. `index`는 txt 대조를 다시 확인한 뒤 파일명에 없는 영문/한글 본문 단어의 정확한 경로 집합을 각각 최대 60초 기다린다. `mdutil -s /`만 정상이어도 실제 데이터 볼륨의 색인이 작동한다고 가정하지 않는다. txt 대조도 실패하면 환경 문제로 기록하고 전역 index reset이나 daemon kill을 하지 않는다.

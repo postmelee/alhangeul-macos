@@ -16,3 +16,5 @@
 ## 다음 조사
 
 기존 helper는 prepare/index에서 수동 재색인하고 install에서 수동 등록한다. 이 결과는 순수 자동 최초 설치 판정과 구분해야 한다. 자동 모드에서 수동 명령을 제거하고, 동일 bytes/새 경로로 등록 순서·위치·timestamp를 각각 분리한다. [Apple 문서](https://developer.apple.com/library/archive/documentation/Carbon/Conceptual/MDImporters/Concepts/Troubleshooting.html)는 첫 실행 시 발견과 업데이트 시 변경 시각의 중요성을 설명하지만, 이 관찰만으로 touch를 제품 해결책으로 채택하지 않는다.
+
+재현 A의 최종 cleanup은 문서 표식 제거 7종, 기존 앱 hash/provider 보존, 후보 프로세스와 importer catalog 제거를 모두 통과했고 cleaned 상태다.

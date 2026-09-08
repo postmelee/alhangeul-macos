@@ -37,7 +37,7 @@ def run(args, log=None, check=True, timeout=30):
 
 
 def record(state, label, result="PASS", **details):
-    state["results"].append({"case": label, "result": result, **details})
+    state["results"].append({"case": label, "result": result, "observed_at": time.time(), **details})
     print(f"{result}: {label}", flush=True)
 
 
@@ -125,6 +125,8 @@ def prepare(args):
     key = uuid.uuid4().hex[:12]
     workspace = Path.home() / "Documents" / ("AlhangeulSpotlightSmoke-" + key)
     install_root = Path.home() / "Applications" / ("AlhangeulSpotlightSmoke-" + key)
+    if args.install_layout == "direct":
+        install_root = install_root.with_suffix(".app")
     evidence = args.state.parent / ("evidence-" + key)
     evidence.mkdir(parents=True)
     state = {"id": key, "source_app": str(app), "fixtures": str(fixtures), "workspace": str(workspace),
@@ -133,6 +135,14 @@ def prepare(args):
              "token": args.token, "replacement": manifest["replacement"],
              "results": [], "phase": "preparing", "original_apps": {},
              "providers_before": providers()}
+    state["automatic"] = args.automatic
+    state["source_bundle_dates_ns"] = {"app": app.stat().st_mtime_ns,
+                                        "importer": (app / PLUGIN).stat().st_mtime_ns}
+    state["source_app_hashes"] = fingerprint(app)
+    state["source_importer_hashes"] = fingerprint(app / PLUGIN)
+    state["install_layout"] = args.install_layout
+    if args.install_layout == "direct":
+        state["install_app"] = str(install_root)
     for existing in [Path("/Applications/Alhangeul.app"), Path.home() / "Applications/Alhangeul.app"]:
         if existing.is_dir():
             state["original_apps"][str(existing)] = fingerprint(existing)
@@ -146,7 +156,9 @@ def prepare(args):
     workspace.mkdir()
     (workspace / ".spotlight-smoke-owner").write_text(key)
     shutil.copytree(fixtures / "initial", workspace / "Files")
-    run(["mdimport", "-i", workspace / "Files"], evidence / "baseline-import.txt")
+    state["prepared_corpus"] = corpus_snapshot(state)
+    if not state["automatic"]:
+        run(["mdimport", "-i", workspace / "Files"], evidence / "baseline-import.txt")
     # 0건만으로 색인 환경 정상이라고 결론 내리지 않는다. index 단계의 txt 양성 대조가 필수다.
     state["before_install_paths"] = query(state, args.token)
     state["phase"] = "prepared"
@@ -157,11 +169,23 @@ def prepare(args):
 def owned_locations(state):
     for key, parent in [("install_root", Path.home() / "Applications"), ("workspace", Path.home() / "Documents")]:
         owned = Path(state[key])
-        if owned.parent != parent or owned.name != "AlhangeulSpotlightSmoke-" + state["id"]:
+        direct = key == "install_root" and state.get("install_layout") == "direct"
+        name = "AlhangeulSpotlightSmoke-" + state["id"] + (".app" if direct else "")
+        if owned.parent != parent or owned.name != name:
             raise ValueError("path is outside the exact owned test location")
-        if owned.is_symlink() or (owned.exists() and (owned / ".spotlight-smoke-owner").read_text() != state["id"]):
+        if owned.is_symlink():
             raise ValueError("ownership marker mismatch or symlink")
-    if Path(state["install_app"]) != Path(state["install_root"]) / "Alhangeul.app":
+        if owned.exists():
+            if direct:
+                identity = [owned.stat().st_dev, owned.stat().st_ino]
+                if state.get("install_identity") != identity:
+                    raise ValueError("direct app identity mismatch")
+            elif (owned / ".spotlight-smoke-owner").read_text() != state["id"]:
+                raise ValueError("ownership marker mismatch or symlink")
+    expected_app = Path(state["install_root"])
+    if state.get("install_layout") != "direct":
+        expected_app /= "Alhangeul.app"
+    if Path(state["install_app"]) != expected_app:
         raise ValueError("unexpected app path")
     if Path(state["install_app"]).is_symlink():
         raise ValueError("test app must not be a symlink")
@@ -171,32 +195,66 @@ def owned_locations(state):
 
 def discover(state, label, timeout=60):
     expected = str(Path(state["install_app"]) / PLUGIN)
-    deadline = time.monotonic() + timeout
+    started = time.monotonic()
+    deadline = started + timeout
     while True:
         found = expected in run(["mdimport", "-L"], Path(state["evidence"]) / (label + ".txt"))
         if found or time.monotonic() >= deadline:
-            record(state, label, "PASS" if found else "MISS", importer=expected)
+            record(state, label, "PASS" if found else "MISS", importer=expected,
+                   elapsed_seconds=round(time.monotonic() - started, 2))
             return found
         time.sleep(2)
 
 
 def install(state):
+    if state.get("automatic") and not state.get("pre_install_environment_verified"):
+        raise ValueError("automatic install requires environment before installation")
     root = Path(state["install_root"])
-    root.mkdir()
-    (root / ".spotlight-smoke-owner").write_text(state["id"])
-    run(["ditto", state["source_app"], state["install_app"]], timeout=60)
+    if state.get("install_layout") == "direct":
+        if root.exists():
+            raise ValueError("direct installation destination already exists")
+    else:
+        root.mkdir()
+        (root / ".spotlight-smoke-owner").write_text(state["id"])
+    copy_candidate(state)
     run(["codesign", "--verify", "--deep", "--strict", state["install_app"]])
-    run([LSREGISTER, "-f", state["install_app"]])
+    app = Path(state["install_app"])
+    state["installed_bundle_dates_ns"] = {"app": app.stat().st_mtime_ns,
+                                           "importer": (app / PLUGIN).stat().st_mtime_ns}
+    for key, bundle in [("source_app_hashes", app), ("source_importer_hashes", app / PLUGIN)]:
+        if key in state and fingerprint(bundle) != state[key]:
+            raise RuntimeError("installed app/importer differs from prepared source")
+    if (state.get("automatic") and "source_bundle_dates_ns" in state
+            and state["installed_bundle_dates_ns"] != state["source_bundle_dates_ns"]):
+        raise RuntimeError("automatic installation changed source bundle dates")
+    if not state.get("automatic"):
+        run([LSREGISTER, "-f", state["install_app"]])
     state["phase"] = "installed"
-    discover(state, "discovery-before-first-launch")
+    state["installed_at"] = time.time()
+    discover(state, "discovery-before-first-launch", timeout=0 if state.get("automatic") else 60)
+
+
+def copy_candidate(state):
+    # ditto는 기존 destination 디렉터리의 mtime을 보존한다. direct 앱을 미리
+    # mkdir하면 복사 자체가 timestamp 비교를 오염시키므로 새 경로로 복사한다.
+    app = Path(state["install_app"])
+    try:
+        run(["ditto", state["source_app"], app], timeout=60)
+    finally:
+        # 부분 복사 실패에서도 소유한 새 앱만 cleanup할 수 있게 식별값을 보존한다.
+        if state.get("install_layout") == "direct" and app.is_dir() and not app.is_symlink():
+            state["install_identity"] = [app.stat().st_dev, app.stat().st_ino]
 
 
 def launch(state):
     # NSArgumentDomain은 이 프로세스에만 적용된다. 사용자 defaults를 쓰지 않는다.
     run(["open", "-n", "-a", state["install_app"], "--args",
          "-alhangeul.analytics.enabled.v1", "NO", "-SUEnableAutomaticChecks", "NO"])
-    record(state, "first-launch-requested")
-    discover(state, "discovery-after-first-launch")
+    state["launch_count"] = state.get("launch_count", 0) + 1
+    first = state["launch_count"] == 1
+    record(state, "first-launch-requested" if first else "candidate-relaunch-requested",
+           launch_number=state["launch_count"])
+    discover(state, "discovery-after-first-launch" if first else "discovery-after-relaunch")
 
 
 def stop_candidate(state):
@@ -251,6 +309,15 @@ def developer_register(state):
     state["development_registration"] = True
 
 
+def diagnostic_register(state):
+    """변경 시각·재복사 없이 사전 일반 등록 한 조건만 비교한다."""
+    if state.get("phase") != "installed" or state.get("launch_count", 0):
+        raise ValueError("diagnostic registration requires an installed, never-launched candidate")
+    state.setdefault("assisted_actions", []).append("diagnostic-register")
+    run([LSREGISTER, "-f", state["install_app"]])
+    record(state, "diagnostic-register-only")
+
+
 def metadata_test(state, path, label):
     evidence = Path(state["evidence"])
     log = evidence / (label + "-mdimport.txt")
@@ -283,7 +350,8 @@ def verify(state):
 def environment(state):
     files = Path(state["files"])
     evidence = Path(state["evidence"])
-    run(["mdimport", "-i", files / "index-control.txt"], evidence / "control-index.txt")
+    if not state.get("automatic"):
+        run(["mdimport", "-i", files / "index-control.txt"], evidence / "control-index.txt")
     try:
         expect_paths(state, CONTROL, ["index-control.txt"], "environment-text-control")
     except RuntimeError:
@@ -293,14 +361,42 @@ def environment(state):
         run(["mdls", files / "index-control.txt"], evidence / "control-index-metadata.txt", check=False)
         raise RuntimeError("plain-text control is not searchable; system indexing environment unavailable")
     state["index_environment"] = "available"
+    if state.get("automatic") and state.get("phase") == "prepared":
+        expect_paths(state, state["token"], [], "pre-install-body-absent")
+        state["before_install_paths"] = query(state, state["token"])
+        state["pre_install_environment_verified"] = True
 
 
 def index(state):
     environment(state)
-    run(["mdimport", "-i", state["files"]], Path(state["evidence"]) / "initial-index.txt")
+    if not state.get("automatic"):
+        run(["mdimport", "-i", state["files"]], Path(state["evidence"]) / "initial-index.txt")
     expect_paths(state, state["token"], ["document-a.hwp", "document-b.hwpx", "document-c.hwp"], "body-only-search")
     expect_paths(state, KOREAN, ["document-a.hwp", "document-b.hwpx"], "korean-body-only-search")
     state["phase"] = "searchable"
+
+
+def automatic_search(state):
+    """수동 재색인·등록 없는 최초 설치 판정. metadata 진단보다 실제 검색을 먼저 본다."""
+    if not state.get("automatic") or state.get("assisted_actions"):
+        raise ValueError("automatic search requires an unassisted automatic run")
+    if state.get("launch_count") != 1 or state.get("before_install_paths"):
+        raise ValueError("automatic search requires one launch and no pre-install body matches")
+    if not state.get("prepared_corpus") or corpus_snapshot(state) != state["prepared_corpus"]:
+        raise ValueError("automatic search requires unchanged pre-install corpus")
+    if not discover(state, "automatic-discovery"):
+        raise RuntimeError("automatic importer discovery failed")
+    index(state)
+    verify(state)
+    record(state, "automatic-first-install-search")
+    state["phase"] = "searchable"
+
+
+def corpus_snapshot(state):
+    """본문/수정 시각이 바뀐 문서를 설치 전부터 있던 문서로 오인하지 않는다."""
+    return {path.name: [path.stat().st_size, path.stat().st_mtime_ns,
+                        hashlib.sha256(path.read_bytes()).hexdigest()]
+            for path in Path(state["files"]).iterdir() if path.is_file()}
 
 
 def lifecycle(state, extraction_only=False):
@@ -369,7 +465,7 @@ def replace_app(state):
     unregister_app(app)
     previous = (app / PLUGIN).stat().st_mtime_ns
     shutil.rmtree(app)
-    run(["ditto", state["source_app"], app], timeout=60)
+    copy_candidate(state)
     os.utime(app / PLUGIN, None)
     os.utime(app, None)
     run(["codesign", "--verify", "--deep", "--strict", app])
@@ -433,13 +529,17 @@ def cleanup(state):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("phase", choices=["prepare", "install", "launch", "developer-register", "verify",
-                                          "environment", "index", "lifecycle", "replace-app", "restore-corpus", "stop-app",
+    parser.add_argument("phase", choices=["prepare", "install", "launch", "developer-register", "diagnostic-register", "verify",
+                                          "environment", "index", "automatic-search", "lifecycle", "replace-app", "restore-corpus", "stop-app",
                                           "cleanup", "status"])
     parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--app", type=Path)
     parser.add_argument("--fixtures", type=Path)
     parser.add_argument("--token", default="AlhangeulSpotlightProbe")
+    parser.add_argument("--automatic", action="store_true",
+                        help="prepare에서 저장: 수동 lsregister/mdimport -i 없이 복사·첫 실행·자동 검색 비교")
+    parser.add_argument("--install-layout", choices=["nested", "direct"], default="nested",
+                        help="prepare에서 저장: 중첩 폴더 또는 Applications 바로 아래 고유 소유 앱 비교")
     parser.add_argument("--extraction-only", action="store_true",
                         help="lifecycle의 실제 색인 검증을 MISS로 남기고 metadata만 검증")
     args = parser.parse_args()
@@ -466,16 +566,24 @@ def main():
             index(state)
         elif args.phase == "environment":
             environment(state)
+        elif args.phase == "automatic-search":
+            automatic_search(state)
         elif args.phase == "launch":
             launch(state)
         elif args.phase == "developer-register":
+            state.setdefault("assisted_actions", []).append(args.phase)
             developer_register(state)
+        elif args.phase == "diagnostic-register":
+            diagnostic_register(state)
         elif args.phase == "lifecycle":
             if not args.extraction_only and state["phase"] != "searchable": raise ValueError("index required")
+            state.setdefault("assisted_actions", []).append(args.phase)
             lifecycle(state, args.extraction_only)
         elif args.phase == "replace-app":
+            state.setdefault("assisted_actions", []).append(args.phase)
             replace_app(state)
         elif args.phase == "restore-corpus":
+            state.setdefault("assisted_actions", []).append(args.phase)
             restore_corpus(state)
         elif args.phase == "stop-app":
             stop_candidate(state)
