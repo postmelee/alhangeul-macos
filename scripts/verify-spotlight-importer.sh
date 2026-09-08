@@ -49,7 +49,7 @@ if "$NDEBUG_CHECKER" "$IMPORTER" "$ROOT/samples/re-05-mixed-koen-hancom.hwp" \
   echo "ERROR: NDEBUG checker accepted a missing body needle" >&2
   exit 1
 fi
-if ! rg -q 'FAIL:.*CFStringFind' "$SPOTLIGHT_TEST_DIR/negative.txt"; then
+if ! /usr/bin/grep -Eq 'FAIL:.*CFStringFind' "$SPOTLIGHT_TEST_DIR/negative.txt"; then
   echo "ERROR: NDEBUG checker did not fail at the body assertion" >&2
   cat "$SPOTLIGHT_TEST_DIR/negative.txt" >&2
   exit 1
