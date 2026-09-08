@@ -1,6 +1,7 @@
 rhwp_close
 rhwp_document_protection
 rhwp_external_image_refs_json
+rhwp_extract_text_utf8
 rhwp_extract_thumbnail
 rhwp_free_bytes
 rhwp_free_string

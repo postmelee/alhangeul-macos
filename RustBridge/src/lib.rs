@@ -5,6 +5,86 @@ use std::ptr;
 use rhwp::document_core::queries::rendering::PngExportOptions;
 use rhwp::wasm_api::HwpDocument;
 
+mod text;
+#[cfg(test)]
+mod text_tests;
+
+/// Spotlight 파일 읽기와 ABI가 공유하는 원본 bytes 상한.
+pub const RHWP_TEXT_MAX_INPUT_BYTES: usize = 32 * 1024 * 1024;
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum RhwpTextStatus {
+    RHWP_TEXT_OK = 0,
+    RHWP_TEXT_EMPTY = 1,
+    RHWP_TEXT_TRUNCATED = 2,
+    RHWP_TEXT_INVALID_INPUT = 3,
+    RHWP_TEXT_UNSUPPORTED = 4,
+    RHWP_TEXT_PROTECTED = 5,
+    RHWP_TEXT_INPUT_TOO_LARGE = 6,
+    RHWP_TEXT_PARSE_ERROR = 7,
+    RHWP_TEXT_PANIC = 8,
+}
+
+/// 문서의 검색용 UTF-8 bytes를 추출한다. NUL 종단이 아니며 rhwp_free_bytes로 해제한다.
+/// 입력은 호출 중 읽기 가능해야 하고 output slots는 정렬된 별개 writable 영역이어야 한다.
+/// 각 유효한 output slot은 실패에도 NULL/0으로 초기화된다. 빈/실패 출력은 해제 불필요.
+#[no_mangle]
+pub extern "C" fn rhwp_extract_text_utf8(
+    data: *const u8,
+    len: usize,
+    out_data: *mut *mut u8,
+    out_len: *mut usize,
+) -> RhwpTextStatus {
+    use RhwpTextStatus::*;
+    unsafe {
+        if !out_data.is_null() {
+            *out_data = ptr::null_mut();
+        }
+        if !out_len.is_null() {
+            *out_len = 0;
+        }
+    }
+    if data.is_null() || len == 0 || out_data.is_null() || out_len.is_null() {
+        return RHWP_TEXT_INVALID_INPUT;
+    }
+    // slice를 만들기 전에 검사한다. 이 상한은 isize::MAX보다 작다.
+    if len > RHWP_TEXT_MAX_INPUT_BYTES {
+        return RHWP_TEXT_INPUT_TOO_LARGE;
+    }
+    let result = text_guard(|| {
+        let bytes = unsafe { std::slice::from_raw_parts(data, len) };
+        let extraction = text::from_bytes(bytes)?;
+        let status = if extraction.truncated {
+            RHWP_TEXT_TRUNCATED
+        } else if extraction.text.is_empty() {
+            RHWP_TEXT_EMPTY
+        } else {
+            RHWP_TEXT_OK
+        };
+        Ok((status, extraction.text.into_bytes().into_boxed_slice()))
+    });
+    match result {
+        Ok((status, bytes)) => {
+            if !bytes.is_empty() {
+                unsafe {
+                    *out_len = bytes.len();
+                    *out_data = Box::into_raw(bytes) as *mut u8;
+                }
+            }
+            status
+        }
+        Err(status) => status,
+    }
+}
+
+fn text_guard<T>(
+    operation: impl FnOnce() -> Result<T, RhwpTextStatus>,
+) -> Result<T, RhwpTextStatus> {
+    catch_unwind(AssertUnwindSafe(operation)).unwrap_or(Err(RhwpTextStatus::RHWP_TEXT_PANIC))
+}
+
 macro_rules! ffi_guard {
     ($handle:expr, $default:expr, $body:expr) => {{
         if $handle.is_null() {

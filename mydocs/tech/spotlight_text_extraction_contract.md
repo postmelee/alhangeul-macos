@@ -13,7 +13,7 @@ Task #339, core v0.8.6 (`f1f9c6ae58344ee9368996d3543f76b9345cf227`) 기준이다
 
 ## 지원과 본문 범위
 
-평문 HWP3/HWP5/HWPX를 지원 대상으로 한다. extension만 신뢰하지 않고 bytes로 판별한다. HML과 다른 형식은 UNSUPPORTED다. 암호·DRM·배포용은 PROTECTED이며 본문을 반환하지 않는다. 암호 입력 UI, 저장된 비밀번호, 외부 이미지/URL/파일 로드는 사용하지 않는다. parser의 암호 오류와 파싱한 header의 배포용 flag를 이용하며 보호 확인만을 위한 두 번째 파싱을 하지 않는다.
+평문 HWP3/HWP5/HWPX를 지원 대상으로 한다. extension만 신뢰하지 않고 bytes로 판별한다. HML과 다른 형식은 UNSUPPORTED다. 암호·DRM·배포용은 PROTECTED이며 본문을 반환하지 않는다. 암호 입력 UI, 저장된 비밀번호, 외부 이미지/URL/파일 로드는 사용하지 않는다. HWP5는 최대 256-byte FileHeader를 strict/lenient CFB reader로 먼저 검사해 암호·배포용을 거부한다. 그 외 parser의 암호 오류와 파싱한 header flag를 이용한다. container/header 사전 확인은 수행하지만 전체 본문을 두 번 파싱하지 않는다.
 
 | 모델 요소 | 검색 정책 |
 |---|---|
