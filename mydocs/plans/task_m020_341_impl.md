@@ -19,3 +19,7 @@ HostApp Debug/Release universal build와 실제 CFPlugIn factory/QueryInterface/
 ## Stage 4: 리뷰 지적의 검증기 강화
 
 factory UUID 소스·plist 및 export 선언을 자동 대조하고 불일치 회귀를 추가한다. C callback checker는 NDEBUG에도 동작하는 명시 검사로 바꾸고 잘못된 needle의 실패를 직접 확인한다. 단독 실행에 필요한 build.noindex를 생성한다. importer 제품 코드는 유지하고 소스 계약·Python 회귀·기존 Release package direct callback으로 검증한다.
+
+## Stage 5: macOS CI 기본 도구 호환성 보완
+
+CI의 macOS runner에 rg가 없어 NDEBUG 음성 검사 결과 확인이 실패했다. 외부 도구 의존을 기본 제공 /usr/bin/grep -E로 교체한다. rg 없는 PATH에서 기존 Release 패키지의 직접 callback 13사례를 확인하고 변경을 후속 PR에 전파한 뒤 새 head CI를 확인한다. 제품 importer 및 시스템 등록은 변경하지 않는다.
