@@ -2,6 +2,7 @@
 """운영 smoke의 경로 소유권, 환경 대조, 반복 추출 판정 회귀 검사."""
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 import sys
 import tempfile
@@ -15,6 +16,42 @@ spec.loader.exec_module(smoke)
 
 
 class SmokeTests(unittest.TestCase):
+    def test_command_failure_without_log_retains_diagnostic(self):
+        with self.assertRaisesRegex(RuntimeError, "synthetic failure detail") as caught:
+            smoke.run([sys.executable, "-c", "import sys; print('synthetic failure detail', file=sys.stderr); sys.exit(7)"])
+        self.assertIn("command failed (7)", str(caught.exception))
+        self.assertNotIn("see None", str(caught.exception))
+
+    def test_failure_excerpt_is_bounded_but_log_is_complete(self):
+        output = "start\n" + "x" * 4000 + "\nlast diagnostic"
+        with tempfile.TemporaryDirectory() as directory:
+            log = Path(directory) / "failure.txt"
+            result = subprocess.CompletedProcess(["synthetic"], 1, output, "")
+            with patch.object(smoke.subprocess, "run", return_value=result):
+                with self.assertRaisesRegex(RuntimeError, "last diagnostic") as caught:
+                    smoke.run(["synthetic"], log)
+            self.assertEqual(log.read_text(), output)
+            self.assertLess(len(str(caught.exception)), 2300)
+
+    def test_timeout_keeps_partial_bytes_and_log(self):
+        error = subprocess.TimeoutExpired(["synthetic"], 30, output=b"partial output\n", stderr=b"partial error")
+        with tempfile.TemporaryDirectory() as directory:
+            log = Path(directory) / "timeout.txt"
+            with patch.object(smoke.subprocess, "run", side_effect=error):
+                with self.assertRaisesRegex(RuntimeError, "timed out after 30s") as caught:
+                    smoke.run(["synthetic"], log)
+            self.assertIn("partial error", str(caught.exception))
+            self.assertEqual(log.read_text(), "partial output\npartial error")
+
+    def test_absent_providers_are_valid_but_service_errors_fail(self):
+        empty = subprocess.CompletedProcess(["pluginkit"], 0, "  (no matches)\n", "")
+        with patch.object(smoke.subprocess, "run", return_value=empty):
+            self.assertEqual(smoke.providers(), {identifier: [] for identifier in smoke.IDS})
+        unavailable = subprocess.CompletedProcess(["pluginkit"], 1, "", "service unavailable")
+        with patch.object(smoke.subprocess, "run", return_value=unavailable):
+            with self.assertRaisesRegex(RuntimeError, "service unavailable"):
+                smoke.providers()
+
     def test_korean_query_filters_scope_and_normalizes_data_alias(self):
         state = {"files": "/Users/test/Documents/Owned/Files"}
         document = state["files"] + "/document.hwp"
