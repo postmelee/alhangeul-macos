@@ -15,6 +15,38 @@ spec.loader.exec_module(smoke)
 
 
 class SmokeTests(unittest.TestCase):
+    def test_korean_query_filters_scope_and_normalizes_data_alias(self):
+        state = {"files": "/Users/test/Documents/Owned/Files"}
+        document = state["files"] + "/document.hwp"
+        with patch.object(smoke, "run", return_value="/unrelated/document.hwp\n" + document + "\n/System/Volumes/Data" + document) as command:
+            self.assertEqual(smoke.query(state, "은빛나비검색"), [document])
+            self.assertEqual(command.call_args.args[0][2], "/Users/test/Documents")
+            self.assertIn("은빛나비검색", command.call_args.args[0][3])
+        for token in ["", 'word" OR true', "*", "a\\b"]:
+            with self.assertRaises(ValueError): smoke.query(state, token)
+
+    def test_empty_results_require_live_control_and_stable_absence(self):
+        state = {"files": "/synthetic/Files", "results": []}
+        now = [0]
+        def sleep(seconds): now[0] += seconds
+        with patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+             patch.object(smoke.time, "sleep", side_effect=sleep):
+            with patch.object(smoke, "query", return_value=[]):
+                with self.assertRaises(RuntimeError):
+                    smoke.expect_paths(state, "OldWord", [], "service-unavailable", timeout=4)
+            self.assertEqual(state["results"][-1]["result"], "FAIL")
+            self.assertFalse(state["results"][-1]["control_ok"])
+            now[0] = 0
+            responses = iter([[], ["/synthetic/Files/index-control.txt"],
+                              ["/synthetic/Files/document.hwp"], ["/synthetic/Files/index-control.txt"],
+                              [], ["/synthetic/Files/index-control.txt"],
+                              [], ["/synthetic/Files/index-control.txt"],
+                              [], ["/synthetic/Files/index-control.txt"]])
+            with patch.object(smoke, "query", side_effect=lambda *args: next(responses)):
+                smoke.expect_paths(state, "OldWord", [], "settled-deletion", timeout=10)
+            self.assertEqual(now[0], 8)
+            self.assertEqual(state["results"][-1]["result"], "PASS")
+
     def test_cleanup_refuses_unowned_or_symlinked_locations(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
@@ -94,6 +126,32 @@ class SmokeTests(unittest.TestCase):
             self.assertFalse(Path(state["install_root"]).exists())
             self.assertFalse(Path(state["workspace"]).exists())
             self.assertEqual(state["results"][-1]["result"], "MISS")
+
+    def test_index_cleanup_failure_still_removes_files_without_claiming_success(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            state = {"install_app": str(root / "install/Alhangeul.app"), "install_root": str(root / "install"),
+                     "workspace": str(root / "corpus"), "files": str(root / "corpus/Files"),
+                     "evidence": directory, "original_apps": {}, "providers_before": {}, "results": [],
+                     "index_environment": "available", "token": "OldWord", "replacement": "NewWord"}
+            Path(state["install_root"]).mkdir()
+            files = Path(state["files"])
+            files.mkdir(parents=True)
+            (files / "index-control.txt").write_text(smoke.CONTROL)
+            (files / "document.hwp").write_bytes(b"synthetic")
+            def fail(*args):
+                self.assertTrue((files / "index-control.txt").exists())
+                self.assertFalse((files / "document.hwp").exists())
+                raise RuntimeError("stale indexed path")
+            with patch.object(smoke, "run", return_value=""), patch.object(smoke, "providers", return_value={}), \
+                 patch.object(smoke, "expect_paths", side_effect=fail):
+                with self.assertRaisesRegex(RuntimeError, "new smoke run"):
+                    smoke.cleanup(state)
+            self.assertFalse(Path(state["workspace"]).exists())
+            self.assertFalse(Path(state["install_root"]).exists())
+            self.assertEqual(state["phase"], "cleanup-pending-index")
+            self.assertIn("cleanup-original-apps-providers", [item["case"] for item in state["results"]])
+            self.assertFalse(state.get("cleanup_index_verified", False))
 
 
 if __name__ == "__main__":

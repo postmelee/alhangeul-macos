@@ -2,6 +2,8 @@
 
 ## 작업 요약
 
+**2026-09-08 현재: 미완료, 실제 검색 검증 재개 중.** Stage 4의 검증 스크립트 보완과 회귀 검사는 통과했지만 새 txt 양성 대조는 여전히 실패했다. 관리자 색인 상태 조회 결과를 기다리며 Stage 5를 진행한다. 아래 기존 실행 결과와 PR 생성은 #342 전체 완료를 의미하지 않는다.
+
 합성 문서로 설치·추출·색인·전환·앱 교체·정리를 재현하는 Spotlight smoke를 추가했다. 실제 후보 importer의 metadata 추출과 앱 교체/미실행 및 시험 정리는 통과했다. 현재 Mac의 일반 txt 색인 대조가 실패해 실제 본문 검색과 수정/삭제 전파는 검증하지 못했다. 이 한계는 출시 전 남은 관문이다.
 
 ## 변경 파일과 영향
@@ -36,7 +38,7 @@ macOS 26.5.2, Xcode 26.6, Apple Silicon, min target 12.0. core v0.8.6 pin을 유
 | 원래 앱 hash와 provider 선택/경로 보존 | OK |
 | 시험 앱/문서/프로세스·importer 목록 정리 | OK — 비동기 대기 후 cleaned |
 | 전체 등록 위생 helper | MISS — 기존 두 설치본 및 과거 개발 등록 레코드 |
-| 운영 회귀 / bundle 회귀 | OK — 5 / 3 tests |
+| 운영 회귀 / bundle 회귀 | OK — 8 / 3 tests (2026-09-08 보완) |
 | no-AppKit / core build info / YAML / diff | OK |
 | macOS 12·Intel runtime / 공개 공증·Sparkle 업데이트 | MISS |
 
@@ -49,6 +51,8 @@ macOS 26.5.2, Xcode 26.6, Apple Silicon, min target 12.0. core v0.8.6 pin을 유
 | ![설치 전](assets/task_m020_342/finder-before.png) | ![설치 후](assets/task_m020_342/finder-after.png) |
 
 ## 남은 위험과 리뷰 인계
+
+재개 진단과 보완 사항은 [Stage 4 보고서](../working/task_m020_342_stage4.md)에 있다. 한글 검색, 수정 후 새 단어 삭제, txt 대조가 유지되는 안정적인 0건 판정, 잘림 문서의 앞/뒤 표식 검색을 추가했다. 기존 Documents 색인은 조회돼 Data 볼륨 전체 불능으로 단정하지 않으며 새 파일 반영 실패의 원인은 아직 확인 중이다.
 
 현재 환경의 검색 실패를 importer 코드 성공/실패로 단정할 수 없다. 정상 색인 환경에서 일반 설치, 실제 본문 검색과 오래된 단어/삭제 전파를 다시 확인해야 한다. macOS 12 실행 환경이 없으며 공개 서명·공증과 실제 Sparkle 업데이트는 별도 릴리스 검증이다. 기존 설치 두 개의 선택을 보존했으므로 전체 환경이 단일 provider라는 보장은 하지 않는다.
 

@@ -98,7 +98,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::File::create(root.join("variants/large.hwp"))?.set_len(32 * 1024 * 1024 + 1)?;
     fs::write(
         root.join("variants/truncated.hwpx"),
-        serializer::hwpx::serialize_hwpx(&model(&"가".repeat(400_000)))?,
+        serializer::hwpx::serialize_hwpx(&model(&format!(
+            "잘림문서검색 TruncatedDocumentMarker {} OmittedDocumentMarker",
+            "가".repeat(400_000)
+        )))?,
     )?;
     println!("합성 Spotlight corpus 생성 완료");
     Ok(())
