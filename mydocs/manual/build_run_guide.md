@@ -169,7 +169,7 @@ python3 scripts/ci/spotlight-system-smoke.py index --state build.noindex/spotlig
 python3 scripts/ci/spotlight-system-smoke.py cleanup --state build.noindex/spotlight-state.json
 ```
 
-일반 최초 설치를 판정할 때는 위 수동 등록/재색인 진단과 구분하여 새 state의 `prepare`에 `--automatic`을 지정한다. `environment → install → launch → automatic-search → stop-app → automatic-search → cleanup` 순서로 실행한다. 자동 모드는 `lsregister -f`와 `mdimport -i`를 호출하지 않고, 실제 본문 검색을 먼저 확인한 뒤 `mdimport -t`로 후보 경로를 검사한다. 설치 전 corpus의 hash/수정 시각 유지, 첫 실행 1회, 설치 전 본문 검색 0건을 확인하며, `diagnostic-register`, `developer-register`, `replace-app`, `restore-corpus`, `lifecycle` 이후에는 최초 자동 설치 통과를 거부한다. 발견 대기나 검색 timeout은 실패/미발견으로 기록하고 반복 실행 결과와 구분한다.
+일반 최초 설치를 판정할 때는 위 수동 등록/재색인 진단과 구분하여 새 state의 `prepare`에 `--automatic`을 지정한다. `environment → install → launch → automatic-search → stop-app → automatic-search → cleanup` 순서로 실행한다. 자동 모드는 `lsregister -f`와 `mdimport -i`를 호출하지 않고, 실제 본문 검색을 먼저 확인한 뒤 `mdimport -t`로 후보 경로를 검사한다. 관찰 전후 설치본 hash/시각과 설치 전 corpus의 hash/수정 시각 유지, 첫 실행 1회, 설치 전 본문 검색 0건을 확인하며, `diagnostic-register`, `developer-register`, `replace-app`, `restore-corpus`, `lifecycle` 이후에는 최초 자동 설치 통과를 거부한다. 발견 대기나 검색 timeout은 실패/미발견으로 기록하고 반복 실행 결과와 구분한다.
 
 사전 등록 조건만 비교할 때는 자동 모드의 `install`과 `launch` 사이에서 `diagnostic-register`를 실행한다. 이 단계는 변경 시각 갱신이나 재복사 없이 일반 `lsregister -f`만 호출하며, 해당 실행을 자동 최초 설치 판정에서 제외한다.
 

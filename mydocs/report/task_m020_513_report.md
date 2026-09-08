@@ -9,7 +9,7 @@
 ## 변경 범위
 
 - `spotlight-system-smoke.py`: automatic 모드, 실제 검색과 추출 진단의 순서 분리, 설치 전 txt 대조·본문 부재, corpus hash/수정 시각 유지, 첫 실행 횟수와 진단 조작 이력 검사.
-- 동일 source의 앱/importer hash·디렉터리 시각을 복사 후 검증한다. direct 위치는 앱을 미리 만들지 않고 복사해 ditto 시각 조건을 보존하고 device/inode로 소유권을 검사한다. 부분 복사 실패에서도 소유 정리 식별값을 보존한다.
+- 동일 source의 앱/importer hash·디렉터리 시각을 복사 후 검증하고 자동 검색의 대기 전후에도 다시 대조한다. 관찰 중 corpus 변경과 이력에 없는 외부 touch/교체도 통과를 막는다. direct 위치는 앱을 미리 만들지 않고 복사해 ditto 시각 조건을 보존하고 device/inode로 소유권을 검사한다. 부분 복사 실패에서도 소유 정리 식별값을 보존한다.
 - `diagnostic-register`는 시각 변경·재복사 없이 일반 사전 등록 한 조건만 비교한다. 진단/교체/문서 변경 이후의 결과는 일반 최초 설치 통과로 인정하지 않는다.
 - 발견 경과 시간, 실행 횟수, 단계 예외를 state에 남긴다. #511 실패/timeout 출력 보존 보완과 신규 회귀 4개를 재사용했다.
 - 빌드 가이드, 계획/단계 보고서와 합성 결과를 갱신했다. 앱·Rust 추출 구현, 버전과 서명 정책은 변경하지 않았다.
@@ -37,7 +37,7 @@ A와 B는 사전 등록 외에 baseline 수동 색인 및 실행 전 대기도 �
 
 ## 정리와 검증
 
-- 운영 회귀: 21 tests PASS (#342 기존/보완 12 + #513 9).
+- 운영 회귀: 23 tests PASS (#342 기존/보완 12 + #513 11).
 - bundle 회귀: 최종 선행 통합 후 5 tests PASS, source bundle 계약 PASS.
 - Python 구문과 `git diff --check`: PASS.
 - A/B/C/D/E/F: 소유 앱/문서/프로세스·LaunchServices·catalog 제거와 원래 앱 hash/provider 보존 PASS, 최종 cleaned.

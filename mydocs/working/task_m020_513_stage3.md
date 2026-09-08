@@ -27,3 +27,7 @@ F의 수정된 direct 복사에서 원본 앱/importer hash와 두 디렉터리 
 A–F 여섯 실행 모두 cleaned다. 소유 앱/문서/프로세스·LaunchServices·mdimport catalog 부재를 별도 최종 조회로 확인했다. 기존 앱 hash/provider 보존은 각 cleanup에서 통과했고, 실제 HWP/HWPX UTI의 현재 기본 연결도 인계와 동일한 한컴 뷰어다. 별도 등록이 없는 소유 source 진단 사본은 제거했으며 원본 package/fixture는 유지했다.
 
 운영 21개·bundle 5개 회귀, source bundle 계약과 Python 구문/diff 검사를 통과했다. 이 단계는 검증 도구 개선과 원인 분리 조사 결과를 제출하는 범위다. 일반 최초 설치 수용 기준과 제품 통합/OS 등록 이력의 원인 구분은 미완료이며 #513/상위 #337은 열린 상태로 유지한다. 최종 리뷰 보완으로 새로 만든 후보, 신규 설치 이력 환경, 서명·공증 배포 후보와 macOS 12/Intel 실행 관문을 구분해 남긴다.
+
+## PR 검토 중 판정 보완
+
+자동 검색 시작 후 외부 touch/교체 또는 corpus 수정이 발생해도 최초 설치로 통과할 수 있던 여지를 차단했다. 설치본 hash/시각과 설치 provenance를 관찰 전후에 대조하고 corpus snapshot도 관찰 후 재확인한다. 이력에 없는 bundle 변경과 대기 중 corpus 변경 회귀를 추가해 운영 23 tests PASS다. 실제 A–F 결과는 진단 조작 이력을 명시했으므로 판정이 달라지지 않는다.

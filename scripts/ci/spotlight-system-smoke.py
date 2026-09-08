@@ -401,12 +401,28 @@ def automatic_search(state):
         raise ValueError("automatic search requires one launch and no pre-install body matches")
     if not state.get("prepared_corpus") or corpus_snapshot(state) != state["prepared_corpus"]:
         raise ValueError("automatic search requires unchanged pre-install corpus")
+    assert_automatic_candidate_unchanged(state)
     if not discover(state, "automatic-discovery"):
         raise RuntimeError("automatic importer discovery failed")
     index(state)
     verify(state)
+    assert_automatic_candidate_unchanged(state)
+    if corpus_snapshot(state) != state["prepared_corpus"]:
+        raise ValueError("pre-install corpus changed during automatic observation")
     record(state, "automatic-first-install-search")
     state["phase"] = "searchable"
+
+
+def assert_automatic_candidate_unchanged(state):
+    """helper 밖에서 실행한 touch/교체도 일반 최초 설치 판정에 섞지 않는다."""
+    if not all(state.get(key) for key in ["installed_bundle_dates_ns", "source_app_hashes", "source_importer_hashes"]):
+        raise ValueError("automatic search requires recorded installation provenance")
+    app = Path(state["install_app"])
+    dates = {"app": app.stat().st_mtime_ns, "importer": (app / PLUGIN).stat().st_mtime_ns}
+    if (dates != state["installed_bundle_dates_ns"]
+            or fingerprint(app) != state["source_app_hashes"]
+            or fingerprint(app / PLUGIN) != state["source_importer_hashes"]):
+        raise ValueError("automatic search requires unchanged installed app/importer")
 
 
 def corpus_snapshot(state):

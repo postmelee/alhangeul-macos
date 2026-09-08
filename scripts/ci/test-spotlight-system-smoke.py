@@ -16,6 +16,42 @@ spec.loader.exec_module(smoke)
 
 
 class SmokeTests(unittest.TestCase):
+    def test_corpus_changed_during_search_cannot_pass_automatic_observation(self):
+        original = {"sample.hwp": [10, 123, "sha256"]}
+        state = {"automatic": True, "launch_count": 1, "before_install_paths": [],
+                 "prepared_corpus": original, "results": []}
+        with patch.object(smoke, "corpus_snapshot", side_effect=[original, {"sample.hwp": [10, 456, "sha256"]}]), \
+             patch.object(smoke, "assert_automatic_candidate_unchanged"), \
+             patch.object(smoke, "discover", return_value=True), \
+             patch.object(smoke, "index"), patch.object(smoke, "verify"):
+            with self.assertRaisesRegex(ValueError, "changed during"):
+                smoke.automatic_search(state)
+        self.assertEqual(state["results"], [])
+
+    def test_unrecorded_bundle_touch_or_replacement_cannot_pass_automatic_search(self):
+        with tempfile.TemporaryDirectory() as directory:
+            app = Path(directory) / "Candidate.app"
+            plugin = app / smoke.PLUGIN
+            for bundle in [app, plugin]:
+                (bundle / "Contents/MacOS").mkdir(parents=True)
+                (bundle / "Contents/Info.plist").write_text("synthetic info")
+                (bundle / "Contents/MacOS/Alhangeul").write_bytes(b"synthetic executable")
+            state = {"install_app": str(app), "source_app_hashes": smoke.fingerprint(app),
+                     "source_importer_hashes": smoke.fingerprint(plugin),
+                     "installed_bundle_dates_ns": {"app": app.stat().st_mtime_ns,
+                                                   "importer": plugin.stat().st_mtime_ns}}
+            smoke.assert_automatic_candidate_unchanged(state)
+            original = plugin.stat().st_mtime_ns
+            smoke.os.utime(plugin, ns=(original, original + 1_000_000_000))
+            with self.assertRaisesRegex(ValueError, "unchanged installed"):
+                smoke.assert_automatic_candidate_unchanged(state)
+            smoke.os.utime(plugin, ns=(original, original))
+            (plugin / "Contents/MacOS/Alhangeul").write_bytes(b"different executable")
+            with self.assertRaisesRegex(ValueError, "unchanged installed"):
+                smoke.assert_automatic_candidate_unchanged(state)
+            with self.assertRaisesRegex(ValueError, "installation provenance"):
+                smoke.assert_automatic_candidate_unchanged({})
+
     def test_phase_failure_is_saved_for_evidence_and_cleanup(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "state.json"
@@ -93,6 +129,7 @@ class SmokeTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 smoke.automatic_search(dict(valid, **change))
         with patch.object(smoke, "corpus_snapshot", return_value=valid["prepared_corpus"]), \
+             patch.object(smoke, "assert_automatic_candidate_unchanged"), \
              patch.object(smoke, "discover", return_value=False), \
              patch.object(smoke, "index") as indexing:
             with self.assertRaisesRegex(RuntimeError, "discovery failed"):
@@ -127,6 +164,7 @@ class SmokeTests(unittest.TestCase):
                  "prepared_corpus": {"sample.hwp": [10, 123, "sha256"]}}
         events = []
         with patch.object(smoke, "corpus_snapshot", return_value=state["prepared_corpus"]), \
+             patch.object(smoke, "assert_automatic_candidate_unchanged"), \
              patch.object(smoke, "discover", return_value=True), \
              patch.object(smoke, "index", side_effect=lambda _: events.append("index")), \
              patch.object(smoke, "verify", side_effect=lambda _: events.append("metadata")):
@@ -134,6 +172,7 @@ class SmokeTests(unittest.TestCase):
         self.assertEqual(events, ["index", "metadata"])
         state["results"] = []
         with patch.object(smoke, "corpus_snapshot", return_value=state["prepared_corpus"]), \
+             patch.object(smoke, "assert_automatic_candidate_unchanged"), \
              patch.object(smoke, "discover", return_value=True), \
              patch.object(smoke, "index", side_effect=RuntimeError("no indexed documents")), \
              patch.object(smoke, "verify") as metadata:
