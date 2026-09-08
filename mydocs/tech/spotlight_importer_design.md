@@ -2,6 +2,8 @@
 
 ## 목적과 소유 경계
 
+이 문서의 구현·검증 언급은 설계 인계 시점의 요약이다. 최신 실행 결과는 설치 smoke 보고서에서 관리하며 재검증 시 지원 범위가 달라지면 이 요약도 함께 점검한다.
+
 사용자가 파일명에 없는 문서 단어로 HWP/HWPX 파일을 찾게 한다. macOS의 파일 색인용 CFPlugIn `.mdimporter`가 파일 bytes를 읽고 RustBridge 본문 추출 API를 호출하여 `kMDItemTextContent`를 전달한다. HostApp의 WKWebView, Core Spotlight 앱 색인, 페이지 bitmap/Quick Look 응답은 이 데이터 경로에 포함하지 않는다.
 
 Apple의 [CSImportExtension 안내](https://developer.apple.com/documentation/corespotlight/csimportextension)는 macOS custom file에 Spotlight importer plugin을 사용하도록 명시한다. [MDImporter](https://developer.apple.com/documentation/coreservices/file_metadata/mdimporter)의 callback은 앱이 실행되어 있거나 window server/UI가 준비됐다는 가정을 하지 않는다. 현재 SDK 헤더를 기준으로 구현하며 보관 문서의 오래된 CLI 예는 현재 도움말과 대조한다.
