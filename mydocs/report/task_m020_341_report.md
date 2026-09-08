@@ -46,3 +46,7 @@ PR은 devel 대상, 계획/Stage/commit/최종 보고를 SHA 링크로 연결한
 ## 리뷰 보완 — 2026-09-09
 
 [Stage 4](../working/task_m020_341_stage4.md)에서 factory 소스 UUID·plist·export 선언을 대조하고, C 검증기의 assert를 항상 실행되는 REQUIRE로 바꿨다. NDEBUG 빌드에서도 정상 본문을 통과하고 없는 needle을 실패 처리한다. 단독 실행용 build.noindex 생성도 보완했다. 소스 계약 5개 회귀와 기존 Release 패키지의 직접 callback 11개 및 NDEBUG 양성/음성 검증이 통과했다. importer 제품 코드·시스템 등록·공개 서명은 변경하지 않았다.
+
+## CI 후속 보완 — 2026-09-09
+
+[Stage 5](../working/task_m020_341_stage5.md)에서 macOS CI의 rg 미설치로 생긴 음성 검사 결과 확인 실패를 수정했다. 기본 제공 grep으로 같은 패턴을 확인하며 rg 없는 PATH에서 callback 13사례가 통과했다. 새 head의 GitHub CI는 병합 전에 별도로 확인한다.
