@@ -27,6 +27,8 @@ Apple의 [CSImportExtension 안내](https://developer.apple.com/documentation/co
 
 ## UTI와 metadata
 
+UTI 선언의 진실 원천은 HostApp Info.plist다. 후속 [PR #510](https://github.com/postmelee/alhangeul-macos/pull/510)의 `scripts/ci/check-spotlight-bundle.py`가 HostApp·importer Info.plist·schema를 자동 대조한다. 아래 목록은 설계 시점의 설명용 사본이며 UTI 변경 시 함께 점검한다.
+
 앱의 기존 document type 9종을 지원 목록의 입력으로 사용한다. importer schema와 Info.plist 목록이 앱 선언에 맞는지 검사한다. 확장자가 같더라도 다른 앱의 exported type이 선택될 수 있으므로 실제 파일 content type과 importer 경로를 증거로 남긴다.
 
 - `com.postmelee.alhangeul.hwp`, `com.postmelee.alhangeul.hwpx`
