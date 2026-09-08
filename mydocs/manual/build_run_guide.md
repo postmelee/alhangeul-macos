@@ -152,6 +152,7 @@ MACOSX_DEPLOYMENT_TARGET=12.0 cargo run --manifest-path RustBridge/Cargo.toml \
 python3 scripts/ci/spotlight-system-smoke.py prepare \
   --state build.noindex/spotlight-state.json \
   --app build.noindex/release/Alhangeul.app --fixtures build.noindex/spotlight-fixtures
+python3 scripts/ci/spotlight-system-smoke.py environment --state build.noindex/spotlight-state.json
 python3 scripts/ci/spotlight-system-smoke.py install --state build.noindex/spotlight-state.json
 python3 scripts/ci/spotlight-system-smoke.py launch --state build.noindex/spotlight-state.json
 python3 scripts/ci/spotlight-system-smoke.py verify --state build.noindex/spotlight-state.json
@@ -168,7 +169,11 @@ python3 scripts/ci/spotlight-system-smoke.py cleanup --state build.noindex/spotl
 
 Intel Mac은 Rust target을 `x86_64-apple-darwin`으로 바꾼다. fixture 디렉터리와 state 파일은 새 경로여야 한다. state를 보존하면 실패 후에도 cleanup을 다시 실행할 수 있다. 준비 단계에서 기록한 소유 표시와 정확한 경로를 확인한 뒤 시험 앱/문서만 제거한다. 원래 설치본 Info.plist·실행 파일 hash 및 Preview/Thumbnail provider 선택·경로를 비교하고 Quick Look cache를 정리한다. 삭제한 importer가 목록에 계속 남으면 최대 60초 후 cleanup은 nonzero로 끝나고 `cleanup-pending-index`를 기록한다. 이는 파일·기존 앱 보존 결과와 별개인 목록/색인 정리 미완료 상태다. 시스템 환경을 확인한 뒤 같은 cleanup을 재실행하며, 성공처럼 보고하거나 전체 index를 자동 초기화하지 않는다.
 
-`verify`는 `mdimport -t -d3 -o`가 실제 후보 importer를 사용했는지와 metadata 본문을 검사한다. `-o`는 기존 파일에 이어 쓰므로 출력 파일을 먼저 비운다. `index`는 일반 txt 양성 대조군과 파일명에 없는 본문 단어가 정확한 경로 집합을 반환하는지 각각 최대 60초 기다린다. `mdutil -s /`만 정상이어도 실제 데이터 볼륨의 색인이 작동한다고 가정하지 않는다. txt 대조도 실패하면 환경 문제로 기록하고 전역 index reset이나 daemon kill을 하지 않는다.
+`environment`는 앱 등록 전에 일반 txt 양성 대조를 확인하고 실패 시 corpus/전체 볼륨 상태와 txt metadata를 기록한다. 실패하면 설치 단계를 진행하지 않고 진단 후 cleanup한다. `verify`는 `mdimport -t -d3 -o`가 실제 후보 importer를 사용했는지와 metadata 본문을 검사한다. `-o`는 기존 파일에 이어 쓰므로 출력 파일을 먼저 비운다. `index`는 txt 대조를 다시 확인한 뒤 파일명에 없는 영문/한글 본문 단어의 정확한 경로 집합을 각각 최대 60초 기다린다. `mdutil -s /`만 정상이어도 실제 데이터 볼륨의 색인이 작동한다고 가정하지 않는다. txt 대조도 실패하면 환경 문제로 기록하고 전역 index reset이나 daemon kill을 하지 않는다.
+
+삭제·이전 단어 제거 판정은 txt 대조가 계속 검색되는 상태에서 4초 이상 연속으로 0건이어야 통과한다. 수정된 새 단어의 삭제, 한글 단어의 삭제, 출력 한도 내 앞부분 검색과 한도 밖 뒷부분 미검색도 검사한다. 최신 generator로 새 fixture를 만들어야 잘림 문서의 앞/뒤 검색 표식이 포함된다. 조회는 삭제 뒤에도 존재하는 Documents를 범위로 삼고 결과를 해당 시험의 Files 경로로 제한한다. cleanup은 txt를 마지막까지 보존해 본문 제거를 검사하며 실패하더라도 소유 파일을 제거한다. 제거 판정 실패 시 `cleanup-pending-index`를 유지하고 새 smoke가 필요하다고 알린다.
+
+한글 양성 대조에는 파일명에 없는 독립 단어 `나비`, 수정 후 `바다`, 출력 잘림 앞부분의 `호랑이`를 사용한다. 임의 연결어 전체가 부분 문자열 검색될 것이라고 가정하지 않는다. 연결어 검색이 실패하면 같은 본문의 일반 txt와 비교해 importer 누락과 Spotlight 검색 방식을 구분한다. 관찰 결과를 모든 한글 연결어에 일반화하지 않는다.
 
 일반 설치/첫 실행에서 발견되지 않은 개발용 ad-hoc 후보는 `developer-register`로 Xcode와 같은 `lsregister -f -R -trusted` 및 timestamp 갱신을 **별도 비교**할 수 있다. 이것을 일반 설치나 공증 배포 성공으로 기록하지 않는다. 색인 환경이 막혔을 때 `lifecycle --extraction-only`는 metadata 전환만 확인하고 검색·삭제 전파를 모두 MISS로 남긴다. `replace-app`은 동일 버전 로컬 복사·timestamp·첫 실행 시험이며 공개 Sparkle 업데이트를 대신하지 않는다. 교체 후에는 restore-corpus로 합성 원본을 복원하고 stop-app으로 후보 앱을 종료한 뒤 verify/index를 다시 수행한다.
 

@@ -43,8 +43,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::create_dir(root.join("initial"))?;
     fs::create_dir(root.join("variants"))?;
     let token = &args[1];
-    let original = model(&format!("은빛나비검색 {token} 문서 본문 검색 검증"));
-    let changed = model(&format!("새벽바다검색 {replacement} 수정 후 검색 검증"));
+    let original = model(&format!("나비 {token} 문서 본문 검색 검증"));
+    let changed = model(&format!("바다 {replacement} 수정 후 검색 검증"));
     fs::write(
         root.join("manifest.json"),
         serde_json::to_vec_pretty(
@@ -98,7 +98,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::File::create(root.join("variants/large.hwp"))?.set_len(32 * 1024 * 1024 + 1)?;
     fs::write(
         root.join("variants/truncated.hwpx"),
-        serializer::hwpx::serialize_hwpx(&model(&"가".repeat(400_000)))?,
+        serializer::hwpx::serialize_hwpx(&model(&format!(
+            "호랑이 TruncatedDocumentMarker {} OmittedDocumentMarker",
+            "가".repeat(400_000)
+        )))?,
     )?;
     println!("합성 Spotlight corpus 생성 완료");
     Ok(())

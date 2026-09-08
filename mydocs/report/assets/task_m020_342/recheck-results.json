@@ -1,0 +1,91 @@
+{
+  "id": "77b579b6c39c",
+  "source_app": "<HOME>/Documents/projects/rhwp-mac/build.noindex/spotlight-work/package/release/Alhangeul.app",
+  "fixtures": "<HOME>/Documents/projects/rhwp-mac/build.noindex/spotlight-work/task342-fixtures-v2",
+  "workspace": "<HOME>/Documents/AlhangeulSpotlightSmoke-77b579b6c39c",
+  "files": "<HOME>/Documents/AlhangeulSpotlightSmoke-77b579b6c39c/Files",
+  "install_root": "<HOME>/Applications/AlhangeulSpotlightSmoke-77b579b6c39c",
+  "install_app": "<HOME>/Applications/AlhangeulSpotlightSmoke-77b579b6c39c/Alhangeul.app",
+  "evidence": "<HOME>/Documents/projects/rhwp-mac/build.noindex/spotlight-work/evidence-77b579b6c39c",
+  "token": "AlhangeulSpotlightProbe",
+  "replacement": "UpdatedDocumentMarker",
+  "results": [
+    {
+      "case": "environment-text-control",
+      "expected": [
+        "<HOME>/Documents/AlhangeulSpotlightSmoke-77b579b6c39c/Files/index-control.txt"
+      ],
+      "actual": [],
+      "control_ok": true,
+      "result": "FAIL"
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS"
+    },
+    {
+      "case": "cleanup-original-apps-providers",
+      "result": "PASS"
+    },
+    {
+      "case": "cleanup-index",
+      "result": "MISS",
+      "reason": "index environment unavailable"
+    },
+    {
+      "case": "cleanup-importer-catalog",
+      "result": "PASS"
+    }
+  ],
+  "phase": "cleaned",
+  "original_apps": {
+    "/Applications/Alhangeul.app": {
+      "Contents/Info.plist": "7499fce12482f291daf4ae326e03b383db181f11b201946242f3aba4a70deb24",
+      "Contents/MacOS/Alhangeul": "89a23f2a55d9f38c1c1675dc8154b455a8cfb995502a4d01df997b28390e2b49"
+    },
+    "<HOME>/Applications/Alhangeul.app": {
+      "Contents/Info.plist": "3e0b8bb97628e0c86a78ef7b0c8cf85d1d0e93baa022b2654a8413eef1b6436e",
+      "Contents/MacOS/Alhangeul": "a9a37bce16fdd2bb0064e04acf4e8882fcb6ae8eb626213d9b4d2f7b23b35b40"
+    }
+  },
+  "providers_before": {
+    "com.postmelee.alhangeul.QLExtension": [
+      [
+        "+    com.postmelee.alhangeul.QLExtension(0.1.10)",
+        "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex"
+      ],
+      [
+        "+    com.postmelee.alhangeul.QLExtension(0.1.8)",
+        "<HOME>/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex"
+      ]
+    ],
+    "com.postmelee.alhangeul.ThumbnailExtension": [
+      [
+        "+    com.postmelee.alhangeul.ThumbnailExtension(0.1.10)",
+        "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+      ],
+      [
+        "+    com.postmelee.alhangeul.ThumbnailExtension(0.1.8)",
+        "<HOME>/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+      ]
+    ]
+  },
+  "fixture_hashes": {
+    "manifest.json": "6dba3603432c176cab3331280ee494742c00a558bfc646e35ad901a8a33f85b7",
+    "variants/empty.hwpx": "7b1aba15404c957100250b051a4898d00a717faf731ba7d0662c2de1ebd335f7",
+    "variants/truncated.hwpx": "c1b323308540c116db18c142672a1d3e0d363f694d5052eaeb7bc24ed4e6d7ca",
+    "variants/drm.hwp": "7c5e947991d1773bfece56dea0059334ebd48c5f893b33a3f1538b5152d46a94",
+    "variants/distribution.hwp": "5f54b848c5af0b506c483c46c957829ceea2674f963a1aeb8fec58759e5ad51c",
+    "variants/large.hwp": "bdf7fbb54387c24608fd757a1b31c32cabcd7b6bee8ff3345c897139fffc072a",
+    "variants/protected.hwpx": "e83452c5ba9121e550876b7fdfe807a98c4c79bc5e10f5f91a456c606982582c",
+    "variants/modified.hwp": "858a203635e41ac36b01de3f202bfb6eea30dadc1ea8aabdbfca73a255584319",
+    "variants/invalid.hwp": "6dda1524c96123bdeaba431bb8bcf4eaae977606559d411919ffdda50edf3efe",
+    "initial/document-b.hwpx": "6031913d16672adea70ce2cd92d4a8ac337a08284d24e2bd2a192ac9c3d37abf",
+    "initial/index-control.txt": "7bec3b71651f74ca19837ef26353e10525ef4a5297e5af2aad82e996039d1809",
+    "initial/document-c.hwp": "9ceb41f15e647a62e43ffceca674ec1402afd5f86ac3ce0bcc6533cd6e1ed7a9",
+    "initial/document-a.hwp": "b84cf88e9b42c09da99c3d5b547f3cf0bf30f40f3f88dfdd40b1f26cccdeea94",
+    "initial/control.hwpx": "ed3ed2e89825a6506eb146338601334b63ea3f80dea60a462fd7a32b23cd6558"
+  },
+  "before_install_paths": [],
+  "index_environment": "unavailable"
+}

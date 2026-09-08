@@ -19,6 +19,12 @@ PLUGIN = "Contents/Library/Spotlight/Alhangeul.mdimporter"
 EXTENSIONS = ["AlhangeulPreview.appex", "AlhangeulThumbnail.appex"]
 IDS = ["com.postmelee.alhangeul.QLExtension", "com.postmelee.alhangeul.ThumbnailExtension"]
 CONTROL = "SpotlightEnvironmentControlOnly"
+# Spotlight는 본문을 단어로 색인한다. 임의 연결어의 부분 문자열 검색을 가정하지 않는다.
+KOREAN = "나비"
+UPDATED_KOREAN = "바다"
+TRUNCATED_KOREAN = "호랑이"
+TRUNCATED = "TruncatedDocumentMarker"
+OMITTED = "OmittedDocumentMarker"
 
 
 def run(args, log=None, check=True, timeout=30):
@@ -61,23 +67,42 @@ def providers():
 
 
 def query(state, token):
-    if not re.fullmatch(r"[A-Za-z0-9]+", token):
-        raise ValueError("query token must be alphanumeric")
-    output = run(["mdfind", "-onlyin", state["files"], f'kMDItemTextContent == "*{token}*"cd'])
-    return sorted(line for line in output.splitlines() if line.startswith(state["files"] + "/"))
+    # 한글을 허용하되 Spotlight query의 따옴표/연산자는 허용하지 않는다.
+    if not token or not token.isalnum():
+        raise ValueError("query token must be Unicode alphanumeric")
+    # Files 삭제 후에도 존재하는 Documents 범위에서 조회하고 소유 경로로 제한한다.
+    scope = str(Path(state["files"]).parent.parent)
+    output = run(["mdfind", "-onlyin", scope, f'kMDItemTextContent == "*{token}*"cd'])
+    paths = set()
+    for line in output.splitlines():
+        if line.startswith("/System/Volumes/Data/Users/"):
+            line = line.removeprefix("/System/Volumes/Data")
+        if line.startswith(state["files"] + "/"):
+            paths.add(line)
+    return sorted(paths)
 
 
 def expect_paths(state, token, names, label, timeout=60):
     expected = sorted(str(Path(state["files"]) / name) for name in names)
     deadline = time.monotonic() + timeout
+    stable_since = None
     while True:
         actual = query(state, token)
-        if actual == expected:
+        # 일시적인 빈 응답이나 색인 서비스 중단을 삭제 성공으로 오인하지 않는다.
+        control_ok = bool(expected) or query(state, CONTROL) == [str(Path(state["files"]) / "index-control.txt")]
+        now = time.monotonic()
+        if actual == expected and control_ok:
+            if stable_since is None:
+                stable_since = now
+        else:
+            stable_since = None
+        if stable_since is not None and (expected or now - stable_since >= 4):
             state["results"].append({"case": label, "query": token, "paths": actual, "result": "PASS"})
             print(f"PASS: {label} ({len(actual)} files)", flush=True)
             return
-        if time.monotonic() >= deadline:
-            state["results"].append({"case": label, "expected": expected, "actual": actual, "result": "FAIL"})
+        if now >= deadline:
+            state["results"].append({"case": label, "expected": expected, "actual": actual,
+                                     "control_ok": control_ok, "result": "FAIL"})
             raise RuntimeError(f"Spotlight query timeout: {label}")
         time.sleep(2)
 
@@ -255,18 +280,26 @@ def verify(state):
     state["phase"] = "extracted"
 
 
-def index(state):
+def environment(state):
     files = Path(state["files"])
     evidence = Path(state["evidence"])
-    run(["mdimport", "-i", files], evidence / "initial-index.txt")
+    run(["mdimport", "-i", files / "index-control.txt"], evidence / "control-index.txt")
     try:
         expect_paths(state, CONTROL, ["index-control.txt"], "environment-text-control")
     except RuntimeError:
         state["index_environment"] = "unavailable"
         run(["mdutil", "-s", files], evidence / "corpus-index-state.txt", check=False)
+        run(["mdutil", "-as"], evidence / "volumes-index-state.txt", check=False)
+        run(["mdls", files / "index-control.txt"], evidence / "control-index-metadata.txt", check=False)
         raise RuntimeError("plain-text control is not searchable; system indexing environment unavailable")
     state["index_environment"] = "available"
+
+
+def index(state):
+    environment(state)
+    run(["mdimport", "-i", state["files"]], Path(state["evidence"]) / "initial-index.txt")
     expect_paths(state, state["token"], ["document-a.hwp", "document-b.hwpx", "document-c.hwp"], "body-only-search")
+    expect_paths(state, KOREAN, ["document-a.hwp", "document-b.hwpx"], "korean-body-only-search")
     state["phase"] = "searchable"
 
 
@@ -297,12 +330,17 @@ def lifecycle(state, extraction_only=False):
         search(token, [], label + "-old-word-removed")
         if needle:
             search(needle, [destination], label + "-new-word")
+            search(UPDATED_KOREAN, [destination], label + "-new-korean-word")
         (files / destination).unlink()
+        if needle:
+            search(needle, [], label + "-deleted-new-word")
+            search(UPDATED_KOREAN, [], label + "-deleted-new-korean-word")
 
     # 사례마다 문서 하나로 판정한다. 원래 합성 문서는 fixture에 보존한다.
     for name in ["document-a.hwp", "document-b.hwpx", "document-c.hwp", "control.hwpx"]:
         (files / name).unlink(missing_ok=True)
     search(token, [], "deleted-original-documents")
+    search(KOREAN, [], "deleted-original-korean-word")
     replace("modified.hwp", "document-a.hwp", "modified", replacement)
     for variant in ["protected.hwpx", "empty.hwpx"]:
         replace(variant, "document-b.hwpx", variant.split(".")[0])
@@ -311,10 +349,16 @@ def lifecycle(state, extraction_only=False):
     shutil.copyfile(fixtures / "variants/truncated.hwpx", files / "document-b.hwpx")
     data = metadata_test(state, files / "document-b.hwpx", "truncated")
     body = data.get("kMDItemTextContent", "")
-    if not body or len(body.encode("utf-8")) > 1024 * 1024 or len(body) >= 400_000:
+    if (not body or len(body.encode("utf-8")) > 1024 * 1024 or len(body) >= 400_000
+            or TRUNCATED not in body or OMITTED in body):
         raise RuntimeError("truncated UTF-8 output limit mismatch")
     record(state, "truncated-metadata", utf8_bytes=len(body.encode("utf-8")))
+    run(["mdimport", "-i", files / "document-b.hwpx"])
+    search(TRUNCATED, ["document-b.hwpx"], "truncated-prefix-search")
+    search(TRUNCATED_KOREAN, ["document-b.hwpx"], "truncated-korean-prefix-search")
+    search(OMITTED, [], "truncated-tail-not-indexed")
     (files / "document-b.hwpx").unlink()
+    search(TRUNCATED, [], "deleted-truncated-document")
     search(token, [], "deleted-final-documents")
     state["phase"] = "lifecycle-extraction-only" if extraction_only else "lifecycle-verified"
 
@@ -347,7 +391,21 @@ def cleanup(state):
         run(["qlmanage", "-r", "cache"], Path(state["evidence"]) / "quicklook-cache-cleanup.txt")
     if root.exists():
         shutil.rmtree(root)
-    if workspace.exists():
+    state["phase"] = "cleanup-pending-index"
+    if workspace.exists() and state.get("index_environment") == "available":
+        # 대조 txt는 검색 제거 판정이 끝날 때까지 남긴다. 실패해도 소유 파일은 정리한다.
+        try:
+            for path in Path(state["files"]).iterdir():
+                if path.name != "index-control.txt":
+                    path.unlink()
+            for token in [state["token"], state["replacement"], KOREAN, UPDATED_KOREAN, TRUNCATED, TRUNCATED_KOREAN, OMITTED]:
+                expect_paths(state, token, [], "cleanup-index-" + token)
+            state["cleanup_index_verified"] = True
+        except RuntimeError as error:
+            record(state, "cleanup-index", "FAIL", reason=str(error))
+        finally:
+            shutil.rmtree(workspace)
+    elif workspace.exists():
         shutil.rmtree(workspace)
     for path, original in state["original_apps"].items():
         if fingerprint(Path(path)) != original:
@@ -358,9 +416,7 @@ def cleanup(state):
         raise RuntimeError("original extension provider set was not restored")
     record(state, "cleanup-original-apps-providers")
     state["phase"] = "cleanup-pending-index"
-    if state.get("index_environment") == "available":
-        expect_paths(state, state["token"], [], "cleanup-index")
-    else:
+    if state.get("index_environment") != "available":
         record(state, "cleanup-index", "MISS", reason="index environment unavailable")
     deadline = time.monotonic() + 60
     while str(app / PLUGIN) in run(["mdimport", "-L"], Path(state["evidence"]) / "importers-cleanup.txt"):
@@ -369,6 +425,8 @@ def cleanup(state):
             raise RuntimeError("owned files removed and original apps/providers preserved, but importer catalog is stale")
         time.sleep(2)
     record(state, "cleanup-importer-catalog")
+    if state.get("index_environment") == "available" and not state.get("cleanup_index_verified"):
+        raise RuntimeError("owned files removed but index cleanup was not verified; a new smoke run is required")
     state["phase"] = "cleaned"
     print("PASS: owned files removed; original app hashes and provider selections preserved", flush=True)
 
@@ -376,7 +434,7 @@ def cleanup(state):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["prepare", "install", "launch", "developer-register", "verify",
-                                          "index", "lifecycle", "replace-app", "restore-corpus", "stop-app",
+                                          "environment", "index", "lifecycle", "replace-app", "restore-corpus", "stop-app",
                                           "cleanup", "status"])
     parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--app", type=Path)
@@ -406,6 +464,8 @@ def main():
         elif args.phase == "index":
             if state["phase"] != "extracted": raise ValueError("verify required")
             index(state)
+        elif args.phase == "environment":
+            environment(state)
         elif args.phase == "launch":
             launch(state)
         elif args.phase == "developer-register":

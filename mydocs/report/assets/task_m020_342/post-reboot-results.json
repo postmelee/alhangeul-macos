@@ -1,0 +1,442 @@
+{
+  "date": "2026-09-09",
+  "candidate": "universal Release ad-hoc, existing #341 implementation",
+  "phase": "cleaned",
+  "initial_install": "MISS; same-path replacement precedes positive search",
+  "results": [
+    {
+      "case": "environment-text-control",
+      "query": "SpotlightEnvironmentControlOnly",
+      "result": "PASS",
+      "files": [
+        "index-control.txt"
+      ]
+    },
+    {
+      "case": "discovery-before-first-launch",
+      "result": "MISS"
+    },
+    {
+      "case": "first-launch-requested",
+      "result": "PASS"
+    },
+    {
+      "case": "discovery-after-first-launch",
+      "result": "MISS"
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS"
+    },
+    {
+      "case": "first-launch-requested",
+      "result": "PASS"
+    },
+    {
+      "case": "discovery-after-first-launch",
+      "result": "PASS"
+    },
+    {
+      "case": "local-app-replacement",
+      "result": "PASS"
+    },
+    {
+      "case": "metadata-document-a.hwp",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+      "utf8_bytes": 58
+    },
+    {
+      "case": "metadata-document-b.hwpx",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx",
+      "utf8_bytes": 58
+    },
+    {
+      "case": "metadata-document-c.hwp",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+      "utf8_bytes": 36
+    },
+    {
+      "case": "environment-text-control",
+      "query": "SpotlightEnvironmentControlOnly",
+      "result": "PASS",
+      "files": [
+        "index-control.txt"
+      ]
+    },
+    {
+      "case": "body-only-search",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp",
+        "document-b.hwpx",
+        "document-c.hwp"
+      ]
+    },
+    {
+      "case": "korean-body-only-search",
+      "query": "나비",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp",
+        "document-b.hwpx"
+      ]
+    },
+    {
+      "case": "deleted-original-documents",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "deleted-original-korean-word",
+      "query": "나비",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "modified-restored",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp"
+      ]
+    },
+    {
+      "case": "modified-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "modified-old-word-removed",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "modified-new-word",
+      "query": "UpdatedDocumentMarker",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp"
+      ]
+    },
+    {
+      "case": "modified-new-korean-word",
+      "query": "바다",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp"
+      ]
+    },
+    {
+      "case": "modified-deleted-new-word",
+      "query": "UpdatedDocumentMarker",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "modified-deleted-new-korean-word",
+      "query": "바다",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "protected-restored",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": [
+        "document-b.hwpx"
+      ]
+    },
+    {
+      "case": "protected-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "protected-old-word-removed",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "empty-restored",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": [
+        "document-b.hwpx"
+      ]
+    },
+    {
+      "case": "empty-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "empty-old-word-removed",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "invalid-restored",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp"
+      ]
+    },
+    {
+      "case": "invalid-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "invalid-old-word-removed",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "drm-restored",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp"
+      ]
+    },
+    {
+      "case": "drm-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "drm-old-word-removed",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "distribution-restored",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp"
+      ]
+    },
+    {
+      "case": "distribution-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "distribution-old-word-removed",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "large-restored",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp"
+      ]
+    },
+    {
+      "case": "large-metadata",
+      "result": "PASS"
+    },
+    {
+      "case": "large-old-word-removed",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "truncated-metadata",
+      "result": "PASS",
+      "utf8_bytes": 1048576
+    },
+    {
+      "case": "truncated-prefix-search",
+      "query": "TruncatedDocumentMarker",
+      "result": "PASS",
+      "files": [
+        "document-b.hwpx"
+      ]
+    },
+    {
+      "case": "truncated-korean-prefix-search",
+      "query": "호랑이",
+      "result": "PASS",
+      "files": [
+        "document-b.hwpx"
+      ]
+    },
+    {
+      "case": "truncated-tail-not-indexed",
+      "query": "OmittedDocumentMarker",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "deleted-truncated-document",
+      "query": "TruncatedDocumentMarker",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "deleted-final-documents",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS"
+    },
+    {
+      "case": "first-launch-requested",
+      "result": "PASS"
+    },
+    {
+      "case": "discovery-after-first-launch",
+      "result": "PASS"
+    },
+    {
+      "case": "local-app-replacement",
+      "result": "PASS"
+    },
+    {
+      "case": "restored-synthetic-corpus",
+      "result": "PASS"
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS"
+    },
+    {
+      "case": "metadata-document-a.hwp",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+      "utf8_bytes": 58
+    },
+    {
+      "case": "metadata-document-b.hwpx",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx",
+      "utf8_bytes": 58
+    },
+    {
+      "case": "metadata-document-c.hwp",
+      "result": "PASS",
+      "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+      "utf8_bytes": 36
+    },
+    {
+      "case": "environment-text-control",
+      "query": "SpotlightEnvironmentControlOnly",
+      "result": "PASS",
+      "files": [
+        "index-control.txt"
+      ]
+    },
+    {
+      "case": "body-only-search",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp",
+        "document-b.hwpx",
+        "document-c.hwp"
+      ]
+    },
+    {
+      "case": "korean-body-only-search",
+      "query": "나비",
+      "result": "PASS",
+      "files": [
+        "document-a.hwp",
+        "document-b.hwpx"
+      ]
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS"
+    },
+    {
+      "case": "cleanup-index-AlhangeulSpotlightProbe",
+      "query": "AlhangeulSpotlightProbe",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "cleanup-index-UpdatedDocumentMarker",
+      "query": "UpdatedDocumentMarker",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "cleanup-index-나비",
+      "query": "나비",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "cleanup-index-바다",
+      "query": "바다",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "cleanup-index-TruncatedDocumentMarker",
+      "query": "TruncatedDocumentMarker",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "cleanup-index-호랑이",
+      "query": "호랑이",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "cleanup-index-OmittedDocumentMarker",
+      "query": "OmittedDocumentMarker",
+      "result": "PASS",
+      "files": []
+    },
+    {
+      "case": "cleanup-original-apps-providers",
+      "result": "PASS"
+    },
+    {
+      "case": "cleanup-importer-catalog",
+      "result": "MISS"
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS"
+    },
+    {
+      "case": "cleanup-original-apps-providers",
+      "result": "PASS"
+    },
+    {
+      "case": "cleanup-importer-catalog",
+      "result": "PASS"
+    }
+  ],
+  "ui": {
+    "ascii": [
+      "document-c.hwp",
+      "document-a.hwp",
+      "document-b.hwpx"
+    ],
+    "ascii_and_korean": [
+      "document-a.hwp",
+      "document-b.hwpx"
+    ],
+    "opened": "document-a.hwp, existing default viewer"
+  },
+  "original_apps_and_providers": "preserved"
+}
