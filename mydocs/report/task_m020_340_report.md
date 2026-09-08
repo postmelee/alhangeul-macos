@@ -23,7 +23,7 @@
 
 | 수용 기준 | 결과 |
 |---|---|
-| Rust 전체 회귀 | OK — 19 passed, 0 failed |
+| Rust 전체 회귀 | OK — 20 passed, 0 failed (2026-09-09 리뷰 보완) |
 | 한글/emoji/중첩/메모 제외/한도/소유권 | OK — 합성 모델 및 실제 직렬화 bytes |
 | HWP3/HWP5/HWPX, 보호·DRM·손상 | OK — 성공 및 본문 없는 실패 상태 구분 |
 | arm64/x86_64 및 portable ABI/reference | OK |
@@ -40,3 +40,7 @@
 ## 리뷰 인계
 
 사용자 지시에 따라 단계 승인 없이 구현·검증하고 devel 대상 PR로 제출한다. PR에 계획/Stage/commit/최종 보고서를 SHA로 연결한다. 이번 API 변경은 독립 UI가 없어 공개 screenshot을 만들지 않았으며 #342 실제 검색 화면을 수집한다. 병합과 공개 배포는 사용자 리뷰 후 별도로 결정한다.
+
+## 리뷰 보완 — 2026-09-09
+
+[Stage 4](../working/task_m020_340_stage4.md)에서 공개 샘플의 빈 needle 4개를 중첩 표·글상자 안 표·수식·HWPX의 실제 본문으로 대체했다. field-01-memo.hwp의 숨은 도움말이 실제 모델에 존재하고 추출 본문에서는 제외됨을 확인했다. 메모 payload 제외는 합성 회귀로 별도 검증한다. Rust 전체 20개 테스트와 format/diff 검사를 통과했다. 제품 코드·ABI·core pin은 변경하지 않았다.

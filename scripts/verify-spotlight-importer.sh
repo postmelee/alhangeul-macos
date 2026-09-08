@@ -10,6 +10,7 @@ if [ "$#" -ne 1 ] || [ "${1:-}" = "--help" ]; then
 fi
 APP_PATH="$(cd "$1" && pwd)"
 python3 "$ROOT/scripts/ci/check-spotlight-bundle.py" --app "$APP_PATH"
+mkdir -p "$ROOT/build.noindex"
 SPOTLIGHT_TEST_DIR="$(mktemp -d "$ROOT/build.noindex/spotlight-check.XXXXXX")"
 trap 'rm -rf "$SPOTLIGHT_TEST_DIR"' EXIT
 CHECKER="$SPOTLIGHT_TEST_DIR/checker"
@@ -37,3 +38,20 @@ with open(sys.argv[1], 'wb') as stream:
     stream.truncate(32 * 1024 * 1024 + 1)
 PY
 "$CHECKER" "$IMPORTER" "$SPOTLIGHT_TEST_DIR/large.hwp" --no-text
+
+# NDEBUG에서도 callback과 실패 판정이 실행돼야 한다. 잘못된 needle의 거짓 PASS를 거부한다.
+NDEBUG_CHECKER="$SPOTLIGHT_TEST_DIR/checker-ndebug"
+xcrun clang -DNDEBUG -mmacosx-version-min=12.0 "$ROOT/scripts/ci/spotlight_importer_check.c" \
+  -framework CoreFoundation -framework CoreServices -o "$NDEBUG_CHECKER"
+"$NDEBUG_CHECKER" "$IMPORTER" "$ROOT/samples/re-05-mixed-koen-hancom.hwp" 한글
+if "$NDEBUG_CHECKER" "$IMPORTER" "$ROOT/samples/re-05-mixed-koen-hancom.hwp" \
+  AbsentSpotlightCheckerNeedle20260909 >"$SPOTLIGHT_TEST_DIR/negative.txt" 2>&1; then
+  echo "ERROR: NDEBUG checker accepted a missing body needle" >&2
+  exit 1
+fi
+if ! rg -q 'FAIL:.*CFStringFind' "$SPOTLIGHT_TEST_DIR/negative.txt"; then
+  echo "ERROR: NDEBUG checker did not fail at the body assertion" >&2
+  cat "$SPOTLIGHT_TEST_DIR/negative.txt" >&2
+  exit 1
+fi
+echo "PASS: NDEBUG checker rejects an absent body needle"

@@ -46,6 +46,28 @@ class BundleContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "UTI mismatch"):
             CHECK.validate(self.info, self.schema, self.host)
 
+    def test_valid_but_different_factory_uuid_is_rejected(self):
+        other = "11111111-2222-4333-8444-555555555555"
+        self.info["CFPlugInFactories"] = {other: "AlhangeulImporterFactory"}
+        self.info["CFPlugInTypes"] = {CHECK.IMPORTER_TYPE: [other]}
+        with self.assertRaisesRegex(ValueError, "UUID source mismatch"):
+            CHECK.validate(self.info, self.schema, self.host)
+
+    def test_source_uuid_and_export_drift_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "Importer.m"
+            original = (CHECK.ROOT / "Sources/SpotlightImporter/Importer.m").read_text()
+            source.write_text(original.replace("0x0B,", "0x0C,", 1))
+            with self.assertRaisesRegex(ValueError, "UUID source mismatch"):
+                CHECK.validate(self.info, self.schema, self.host, factory_source=source)
+            source.write_text(original.replace("0x0B,", "", 1))
+            with self.assertRaisesRegex(ValueError, "16 bytes"):
+                CHECK.validate(self.info, self.schema, self.host, factory_source=source)
+            exports = Path(directory) / "ExportedSymbols.txt"
+            exports.write_text("_WrongFactory\n")
+            with self.assertRaisesRegex(ValueError, "exported symbol mismatch"):
+                CHECK.validate(self.info, self.schema, self.host, exported_symbols=exports)
+
     def test_schema_mismatch_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             schema = Path(directory) / "schema.xml"

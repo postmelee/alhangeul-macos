@@ -39,8 +39,10 @@ UTF-8 원문을 유지한다. CP949 변환·수치 참조·NFC/NFD 재정규화�
 |---|---|
 | 원본 파일 | 최대 32 MiB; importer는 읽기 전 fstat와 bounded read, ABI는 slice 생성 전에 검사; 초과 INPUT_TOO_LARGE |
 | 출력 | 최대 1 MiB UTF-8 bytes; scalar 중간 절단 금지, 초과 TRUNCATED |
-| 순회 | 최대 200,000개 방문 단위(section/paragraph/control/cell/shape), 최대 64개 중첩 frame; 초과 TRUNCATED |
+| 순회 | 최대 200,000개 방문 단위(section/paragraph/control/cell/shape), 루트 section의 깊이는 0이며 깊이 64 초과 시 TRUNCATED |
 | 시간/메모리 | parser 내부 및 압축 해제의 전체 CPU/RSS 상한을 보장하지 않음; core 자체 제한 적용 |
+
+바이트·방문 수·깊이 중 어느 한도든 초과하면 **문서 전체의 이후 순회를 중단**하고 이미 방문한 앞부분만 반환한다. 깊이 초과 가지 이후의 형제 노드도 읽지 않는다. 부분 가지를 건너뛰고 이후 본문을 이어 붙이는 방식은 현재 계약에 포함하지 않는다.
 
 출력/순회 한도는 **파싱 후** 적용된다. 큰 압축 파일이나 병적인 파싱을 강제 중단하는 timeout으로 해석하면 안 된다. OOM/abort는 catch_unwind로 복구할 수 없다. 실제 CPU/RSS는 대표 corpus로 관찰하되 공개 릴리스 전 대형 악성 입력 격리 정책의 잔여 위험을 검토한다.
 
