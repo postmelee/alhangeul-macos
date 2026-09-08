@@ -16,12 +16,14 @@ Spotlight의 지원 범위와 실제 검증 상태를 README·사용자 안내·
 
 ## 검증
 
-문서 상대 링크 96개, 지원 형식/한도/제외 정책과 전체 symbol 이름 대조 PASS. CLI 옵션을 실제 helper와 확인했고 git diff --check가 통과했다. source Info.plist 4개·project.yml·core/Cargo lock·Pages/appcast는 #342 완료 시점과 동일하다. 문서 변경이므로 앱 재빌드·시스템 재등록은 실행하지 않았다.
+문서 상대 링크 96개, 지원 형식/한도/제외 정책과 전체 symbol 이름 대조 PASS. CLI 옵션을 실제 helper와 확인했고 git diff --check가 통과했다. source Info.plist 4개·project.yml·core/Cargo lock·Pages/appcast는 #342 선행 구현과 동일하다. 문서 변경이므로 앱 재빌드·시스템 재등록은 실행하지 않았다.
 
 ## 중요한 검증 한계
 
-#342에서 실제 mdimport 추출/전환, 앱 교체·미실행 추출, 시험 제거·기존 앱/provider 보존은 통과했다. 일반 txt 색인 대조가 실패하여 실제 본문 검색·수정/보호/삭제 전파는 검증하지 못했다. macOS 12와 Intel runtime, 일반 최초 설치·공개 서명/공증·Sparkle 업데이트도 남아 있다. 문서와 PR 완료가 v0.2.0 출시 준비 완료를 의미하지 않는다.
+2026-09-09 #342 작업에서 일반 txt 대조, 실제 본문 검색·수정/보호/삭제 전파, 앱 교체·종료 후 검색과 Spotlight 결과 열기가 통과했다. 시험 앱·문서·등록 정리와 기존 앱/provider 보존도 확인했다. 새 경로 최초 설치 importer 발견은 실패하여 계속 검증 중이다. macOS 12와 Intel runtime, 일반 최초 설치·공개 서명/공증·Sparkle 업데이트도 남아 있다. 문서와 PR 완료가 v0.2.0 출시 준비 완료를 의미하지 않는다.
 
 ## 인계
 
-6개 하위 PR의 사용자 리뷰 후 정상 색인 환경 검증과 출시 판단을 진행한다. 목표 v0.2.0의 build 번호·candidate·tag·공개 DMG는 아직 확정하지 않았다. 실제 화면은 [#342 보고서](task_m020_342_report.md)에 연결하며 합성 이미지는 만들지 않았다.
+6개 하위 PR의 사용자 리뷰와 최초 설치 검증 후 출시 판단을 진행한다. 목표 v0.2.0의 build 번호·candidate·tag·공개 DMG는 아직 확정하지 않았다. 실제 화면은 [#342 보고서](task_m020_342_report.md)에 연결하며 합성 이미지는 만들지 않았다.
+
+2026-09-09 후속 정렬은 [Stage 4 보고서](../working/task_m020_343_stage4.md)에 있다. 실제 검색 성공을 공개 배포 완료와 구분해 README와 릴리스 초안을 갱신했다.
