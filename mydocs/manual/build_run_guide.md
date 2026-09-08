@@ -143,6 +143,8 @@ xcodebuild -project Alhangeul.xcodeproj \
 
 ## Spotlight 설치·색인 smoke
 
+maintainer는 [설치 smoke 보고서](../report/task_m020_342_report.md)에서 실행별 결과와 실제 화면을 확인한다. 과거 실행의 FAIL/MISS와 최신 재실행의 판정을 구분한다.
+
 `python3 scripts/ci/spotlight-system-smoke.py --help`를 진입점으로 사용한다. 이 표준 절차 안에서만 새 `~/Applications/AlhangeulSpotlightSmoke-{id}/Alhangeul.app`을 등록한다. 기존 두 표준 설치 경로는 덮어쓰지 않는다. 시험 문서는 `~/Documents/AlhangeulSpotlightSmoke-{id}/Files`에 두며 원본 사용자 문서를 사용하지 않는다.
 
 ```bash
