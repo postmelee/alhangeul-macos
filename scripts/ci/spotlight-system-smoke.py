@@ -19,8 +19,10 @@ PLUGIN = "Contents/Library/Spotlight/Alhangeul.mdimporter"
 EXTENSIONS = ["AlhangeulPreview.appex", "AlhangeulThumbnail.appex"]
 IDS = ["com.postmelee.alhangeul.QLExtension", "com.postmelee.alhangeul.ThumbnailExtension"]
 CONTROL = "SpotlightEnvironmentControlOnly"
-KOREAN = "은빛나비검색"
-UPDATED_KOREAN = "새벽바다검색"
+# Spotlight는 본문을 단어로 색인한다. 임의 연결어의 부분 문자열 검색을 가정하지 않는다.
+KOREAN = "나비"
+UPDATED_KOREAN = "바다"
+TRUNCATED_KOREAN = "호랑이"
 TRUNCATED = "TruncatedDocumentMarker"
 OMITTED = "OmittedDocumentMarker"
 
@@ -353,7 +355,7 @@ def lifecycle(state, extraction_only=False):
     record(state, "truncated-metadata", utf8_bytes=len(body.encode("utf-8")))
     run(["mdimport", "-i", files / "document-b.hwpx"])
     search(TRUNCATED, ["document-b.hwpx"], "truncated-prefix-search")
-    search("잘림문서검색", ["document-b.hwpx"], "truncated-korean-prefix-search")
+    search(TRUNCATED_KOREAN, ["document-b.hwpx"], "truncated-korean-prefix-search")
     search(OMITTED, [], "truncated-tail-not-indexed")
     (files / "document-b.hwpx").unlink()
     search(TRUNCATED, [], "deleted-truncated-document")
@@ -396,7 +398,7 @@ def cleanup(state):
             for path in Path(state["files"]).iterdir():
                 if path.name != "index-control.txt":
                     path.unlink()
-            for token in [state["token"], state["replacement"], KOREAN, UPDATED_KOREAN, TRUNCATED, "잘림문서검색", OMITTED]:
+            for token in [state["token"], state["replacement"], KOREAN, UPDATED_KOREAN, TRUNCATED, TRUNCATED_KOREAN, OMITTED]:
                 expect_paths(state, token, [], "cleanup-index-" + token)
             state["cleanup_index_verified"] = True
         except RuntimeError as error:
