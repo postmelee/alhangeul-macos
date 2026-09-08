@@ -28,12 +28,30 @@ OMITTED = "OmittedDocumentMarker"
 
 
 def run(args, log=None, check=True, timeout=30):
-    result = subprocess.run([str(a) for a in args], capture_output=True, text=True, timeout=timeout)
-    if log:
-        Path(log).write_text(result.stdout + result.stderr)
+    def output_text(stdout, stderr):
+        # TimeoutExpired는 text=True에서도 캡처 결과를 bytes로 제공할 수 있다.
+        def decode(value):
+            return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else (value or "")
+        return decode(stdout) + decode(stderr)
+
+    def failure(message, output):
+        if log:
+            Path(log).write_text(output)
+        tail = "\n".join(output.splitlines()[-8:])[-2000:] or "(no output captured)"
+        location = f"; log: {log}" if log else ""
+        return RuntimeError(f"{message}{location}\n{tail}")
+
+    try:
+        result = subprocess.run([str(a) for a in args], capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired as error:
+        raise failure(f"command timed out after {timeout}s: {args[0]}",
+                      output_text(error.stdout, error.stderr)) from error
+    output = output_text(result.stdout, result.stderr)
     if check and result.returncode:
-        raise RuntimeError(f"command failed ({result.returncode}): {args[0]}; see {log}")
-    return result.stdout + result.stderr
+        raise failure(f"command failed ({result.returncode}): {args[0]}", output)
+    if log:
+        Path(log).write_text(output)
+    return output
 
 
 def record(state, label, result="PASS", **details):
@@ -336,7 +354,6 @@ def metadata_test(state, path, label):
 
 def verify(state):
     files = Path(state["files"])
-    evidence = Path(state["evidence"])
     token = state["token"]
     for name in ["document-a.hwp", "document-b.hwpx", "document-c.hwp"]:
         data = metadata_test(state, files / name, "initial-" + name)

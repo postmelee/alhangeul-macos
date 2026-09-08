@@ -2,7 +2,7 @@
 
 ## 작업 요약
 
-**2026-09-09 현재: 실제 본문 검색·변경·삭제 검증 통과, 최초 설치 자동 발견 검증은 미완료.** Stage 5에서 일반 txt 대조, HWP3/HWP5/HWPX 실제 검색과 Spotlight 화면·결과 열기를 확인했다. 동일 경로 앱 교체 후 후보 앱을 종료한 상태에서도 검색됐다. 새 경로 최초 설치에서 importer가 발견되지 않은 문제가 남아 Stage 6에서 계속 추적한다. #342 전체 완료와 v0.2.0 출시 완료를 의미하지 않는다.
+**2026-09-09 현재: 실제 본문 검색·변경·삭제 검증 통과, 최초 설치 자동 발견 검증은 미완료.** Stage 5에서 일반 txt 대조, HWP3/HWP5/HWPX 실제 검색과 Spotlight 화면·결과 열기를 확인했다. 동일 경로 앱 교체 후 후보 앱을 종료한 상태에서도 검색됐다. 새 경로 최초 설치 문제는 [#513](https://github.com/postmelee/alhangeul-macos/issues/513)으로 이관했다. 이 PR은 완료된 smoke·검색·전파 검증 범위로 리뷰를 기다리며 v0.2.0 출시 완료를 의미하지 않는다.
 
 최신 판정은 [Stage 5 보고서](../working/task_m020_342_stage5.md)와 [검색 결과 JSON](assets/task_m020_342/post-reboot-results.json)에 있다. 아래 기존 실행의 실패 관찰과 화면은 당시 기록으로 보존한다.
 
@@ -16,6 +16,23 @@
 | mydocs/manual/build_run_guide.md | 실제 설치본 판정과 실패 후에도 수행할 표준 cleanup |
 | 계획/Stage/증거/orders | 검증 결과, 실제 화면과 사용자 리뷰 인계 |
 
+## 최신 검증 결과 — 2026-09-09 재실행 기준
+
+근거: [Stage 5](../working/task_m020_342_stage5.md), [post-reboot-results.json](assets/task_m020_342/post-reboot-results.json). 동일 후보의 로컬 교체 후 결과이며 일반 최초 설치 검증은 별도다.
+
+| 검증 | 최신 결과 |
+|---|---|
+| 일반 txt 실제 색인 대조 | PASS |
+| HWP3/HWP5/HWPX 본문 표식 검색 | PASS — 3개 |
+| 한글 독립 단어 검색 | PASS — HWP5/HWPX 2개 |
+| 수정·보호·빈·손상·크기 전환 및 삭제 전파 | PASS |
+| 잘림 앞부분 검색·뒷부분 미검색 및 삭제 | PASS |
+| 같은 경로 앱 교체·앱 종료 후 재검색 | PASS |
+| Spotlight 실제 화면과 결과 문서 열기 | PASS — 기존 기본 연결 앱 |
+| 소유 앱/문서/catalog 정리 및 기존 앱/provider 보존 | PASS |
+| 새 경로 최초 설치 자동 발견 | MISS — #513 후속 작업으로 이관 |
+| macOS 12/Intel·공개 서명/공증/Sparkle | 미실행 — 별도 출시 관문 |
+
 ## 기존 실행 기록 (2026-09-07~08)
 
 macOS 26.5.2, Xcode 26.6, Apple Silicon, min target 12.0. core v0.8.6 pin을 유지했다. #341 작업의 universal Release 개발 패키지를 임의 식별자 하위 폴더에 설치했다. 기존 앱은 덮어쓰지 않았다.
@@ -24,7 +41,9 @@ macOS 26.5.2, Xcode 26.6, Apple Silicon, min target 12.0. core v0.8.6 pin을 유
 
 재현 명령은 [빌드·실행 가이드](../manual/build_run_guide.md#spotlight-설치색인-smoke), 기계 판정은 [결과 JSON](assets/task_m020_342/results.json)에 있다.
 
-## 기존 검증 결과
+## 과거 검증 결과 — 2026-09-07~08 실행
+
+아래 FAIL/MISS는 당시 관찰 기록이다. 현재 검색 판정에는 위의 2026-09-09 재실행 표를 적용한다. 과거 실패를 삭제하거나 성공으로 바꾸지 않는다.
 
 | 검증 | 결과 |
 |---|---|
@@ -67,3 +86,7 @@ macOS 26.5.2, Xcode 26.6, Apple Silicon, min target 12.0. core v0.8.6 pin을 유
 개발용 ad-hoc 후보의 새 경로 최초 발견 실패가 남아 있다. 동일 경로 교체 후 성공을 일반 최초 설치나 공개 Sparkle 업데이트의 성공으로 간주하지 않는다. macOS 12 실행 환경이 없으며 공개 서명·공증과 실제 Sparkle 업데이트는 별도 릴리스 검증이다. 기존 설치 두 개의 선택을 보존했으므로 전체 환경이 단일 provider라는 보장은 하지 않는다.
 
 PR은 devel 대상이며 선행 PR 미병합으로 누적 diff를 포함한다. PR merge·이슈 close·v0.2.0 상향·공개 배포는 수행하지 않았다.
+
+## 리뷰 보완 — 2026-09-09
+
+[Stage 6](../working/task_m020_342_stage6.md)에서 명령 실패와 timeout의 진단을 보존하고, 제한된 오류 요약과 전체 로그를 구분했다. 서비스 오류를 빈 provider 집합으로 바꾸지 않으며 회귀 12개가 통과했다. 과거/최신 검증 표의 기준일과 증거를 분리했다. 이번 단계는 시스템 등록이나 재색인을 실행하지 않았다.
