@@ -48,6 +48,12 @@ A와 B는 사전 등록 외에 baseline 수동 색인 및 실행 전 대기도 �
 
 실행 바이너리 기준은 `489f5339820ea38602cfec49af949cd907cfd078`에 포함된 #341 패키지다. 앱 SHA-256은 `4c198d77a558b7523c9d2a935442c47b5d2feaef8e4ff21ebed3978c9b9034b5`, importer는 `c3230cad403408f060d23b7841b10354279cd0e47f420ce3e1bec26ec31fd3d8`이다. 두 원본 package 사본의 bytes와 strict 서명을 확인했다. source 시각 진단 사본도 bytes/서명은 동일하다.
 
-#511 오류 진단 보완 `9930fa649b91bfcc0d6278cd1052dec64bb26f64`를 `07e1503`으로 cherry-pick했다. 최종 선행 #512 head `b3b1009bd75e1ca787d0adcf775f92fa350a0874`를 `91e2e12`로 통합했다. GitHub 재확인 시 #511/#512는 OPEN, devel은 `1a5eefb50db4aef01fc82bdb61eabeabf94b19ed`였다. 코드 변경분은 최종 선행 head와 분리해 비교할 수 있다. 실행 후보는 조사 조건을 고정한 이전 bytes이므로 최종 리뷰 보완과 최신 devel로 새로 만든 후보는 후속 PR 병합 전에 재검증해야 한다. 기존 수정/삭제/교체의 광범위한 본문 검증은 #342 근거를 재사용하며 이번 자동 최초 설치 통과를 대신하지 않는다.
+#511 오류 진단 보완 `9930fa649b91bfcc0d6278cd1052dec64bb26f64`를 `07e1503`으로 cherry-pick했다. 최종 선행 #512 head `b3b1009bd75e1ca787d0adcf775f92fa350a0874`를 `91e2e12`로 통합했다. GitHub 재확인 시 #511/#512는 OPEN, devel은 `1a5eefb50db4aef01fc82bdb61eabeabf94b19ed`였다. 코드 변경분은 최종 선행 head와 분리해 비교할 수 있다. A–F 실행 후보는 조사 조건을 고정한 이전 bytes였다. 병합 전 최신 개발 후보의 재검증은 아래 Stage 4에서 별도로 수행했다. 기존 수정/삭제/교체의 광범위한 본문 검증은 #342 근거를 재사용하며 이번 자동 최초 설치 통과를 대신하지 않는다.
 
 새로운 설치 이력이 없는 환경과 최종 서명·공증 배포 후보의 일반 설치 검증이 남는다. macOS 12/Intel runtime은 미실행이다. 사용자 기존 앱/등록 이력을 제거하거나 공개 서명·공증·배포, Sparkle 업데이트, 버전 상향, PR merge 또는 이슈 close를 하지 않았다. 지원 문구와 출시 판단은 최초 설치 미해결 상태를 유지한다.
+
+## 병합 전 최신 후보 재검증 — 2026-09-09
+
+[Stage 4](../working/task_m020_513_stage4.md)에서 CI rg 의존 제거와 최종 보완 코드를 통합한 universal Release 개발 패키지를 새로 만들었다. portable source/ABI·빌드·strict ad-hoc 서명·직접 callback 13개·운영 23개·bundle 5개 검증은 통과했다.
+
+새 direct 격리 시험에서는 일반 TXT 대조가 60초 내 자동 검색되지 않아 환경 전제에서 중단했다. 앱 설치·첫 실행·기존 문서 자동 검색은 미실행이며 importer 실패 또는 최초 설치 성공으로 해석하지 않는다. 시험 경로·프로세스·catalog 정리와 기존 앱/provider 보존은 통과했다. [최신 후보 결과 JSON](assets/task_m020_513/pre-merge-candidate-results.json)에 실행 기준과 결과를 분리했다. #514 조사 PR 병합은 이 도구·기록의 통합이며 #513 및 #337 이슈의 해결 판정은 아니다.
