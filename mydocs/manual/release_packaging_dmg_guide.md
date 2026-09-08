@@ -99,8 +99,9 @@ build.noindex/release/alhangeul-macos-<version>.zip
 - Release configuration으로 HostApp 빌드
 - 내부 산출물 `Alhangeul.app`을 release staging의 `Alhangeul.app`으로 복사
 - release staging으로 복사한 app의 analytics endpoint가 승인된 production origin과 `project.yml`의 전체 URL에 일치하는지 검증
-- `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
+- `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex`, `Alhangeul.mdimporter` 실행 파일의 `arm64 + x86_64` universal 검증
 - release staging의 `Alhangeul.app`을 `Alhangeul.app` 이름으로 zip 압축
+- `scripts/verify-spotlight-importer.sh`로 앱 내부 CFPlugIn factory/본문/실패 후 제거를 직접 검사한다. 시스템 등록·실제 색인은 별도 설치 smoke로 확인한다.
 - Release staging app은 local signing과 sealed resources가 적용되어 Finder 통합 smoke test의 기준 산출물로 사용할 수 있음
 - SHA256 출력
 
@@ -147,7 +148,7 @@ build.noindex/release/alhangeul-macos-<version>.dmg.sha256
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
 - release staging으로 복사한 app의 analytics endpoint를 post-build Developer ID 재서명·공증 제출·DMG 생성 전에 검증
-- `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
+- `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex`, `Alhangeul.mdimporter` 실행 파일의 `arm64 + x86_64` universal 검증
 - Developer ID Application signing identity 확인
 - Sparkle nested component, Quick Look extension, Thumbnail extension, app bundle을 Developer ID/timestamp/hardened runtime 기준으로 재서명
 - app code signature 검증

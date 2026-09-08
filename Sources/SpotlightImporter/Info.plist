@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>ko</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Alhangeul Spotlight Importer</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1.11</string>
+	<key>CFBundleVersion</key>
+	<string>17</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>CFPlugInDynamicRegistration</key>
+	<string>NO</string>
+	<key>CFPlugInFactories</key>
+	<dict>
+		<key>0B1601BF-0340-4A83-9924-E1485E2DDD55</key>
+		<string>AlhangeulImporterFactory</string>
+	</dict>
+	<key>CFPlugInTypes</key>
+	<dict>
+		<key>8B08C4BF-415B-11D8-B3F9-0003936726FC</key>
+		<array>
+			<string>0B1601BF-0340-4A83-9924-E1485E2DDD55</string>
+		</array>
+	</dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>한글 문서</string>
+			<key>CFBundleTypeRole</key>
+			<string>MDImporter</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.postmelee.alhangeul.hwp</string>
+				<string>com.postmelee.alhangeul.hwpx</string>
+				<string>net.golbin.hop.hwp</string>
+				<string>net.golbin.hop.hwpx</string>
+				<string>com.hancom.hwp</string>
+				<string>com.hancom.hwpx</string>
+				<string>com.haansoft.hancomofficeviewer.mac.hwp</string>
+				<string>com.haansoft.hancomofficeviewer.mac.hwpx</string>
+				<string>org.libreoffice.hwp-document</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

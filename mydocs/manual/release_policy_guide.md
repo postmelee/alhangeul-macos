@@ -182,6 +182,7 @@ release note와 release report에서 smoke 결과를 쓸 때는 실제 실행한
 - `Sources/HostApp/Info.plist`
 - `Sources/QLExtension/Info.plist`
 - `Sources/ThumbnailExtension/Info.plist`
+- `Sources/SpotlightImporter/Info.plist`
 - `Casks/alhangeul-macos.rb`
 - Git tag: `v<version>`
 - GitHub Release 제목과 파일명

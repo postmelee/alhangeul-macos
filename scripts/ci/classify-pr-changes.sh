@@ -188,6 +188,13 @@ classify_path() {
   esac
 
   case "$path" in
+    scripts/verify-spotlight-importer.sh|scripts/ci/spotlight_importer_check.c|scripts/ci/check-spotlight-bundle.py|scripts/ci/test-spotlight-bundle.py)
+      enable_macos_build "$path affects the embedded Spotlight importer contract"
+      matched=1
+      ;;
+  esac
+
+  case "$path" in
     .github/workflows/*|scripts/release.sh|scripts/package-release.sh|scripts/create-dmg-background.swift|scripts/ci/*|scripts/update-cask-sha256.sh|Casks/*)
       set_non_docs "$path affects CI/release automation"
       enable_release_checks "$path affects release scripts, workflows, or Cask automation"

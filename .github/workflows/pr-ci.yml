@@ -119,6 +119,12 @@ jobs:
         shell: bash
         run: python3 scripts/ci/test-rust-verification-modes.py
 
+      - name: Check Spotlight bundle contract fixtures
+        shell: bash
+        run: |
+          python3 scripts/ci/check-spotlight-bundle.py
+          python3 scripts/ci/test-spotlight-bundle.py
+
       - name: Check core build info helper fixtures
         shell: bash
         run: |
@@ -280,6 +286,10 @@ jobs:
             -derivedDataPath build.noindex/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             build
+
+      - name: Verify embedded Spotlight importer
+        shell: bash
+        run: scripts/verify-spotlight-importer.sh build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app
 
       - name: Verify HostApp Debug analytics endpoint
         shell: bash
