@@ -12,6 +12,8 @@ final class DocumentViewerStore: ObservableObject {
     @Published var isWebViewLoading = false
     @Published private(set) var documentRevision: Int = 0
     @Published private(set) var webViewReloadToken: Int = 0
+    @Published private(set) var webViewLoadID: Int = 0
+    @Published private(set) var editorSession: RhwpStudioEditorSession?
     @Published private(set) var hasUnsavedChanges = false
 
     private static let webViewErrorAutoDismissDelayNanoseconds: UInt64 = 5_000_000_000
@@ -31,7 +33,7 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     var hasDocument: Bool {
-        rhwpStudioDocument != nil
+        editorSession?.snapshot.ready == true
     }
 
     var canRevealInFinder: Bool {
@@ -178,11 +180,23 @@ final class DocumentViewerStore: ObservableObject {
         clearUnsavedChanges()
     }
 
-    func markDocumentEdited() {
-        guard hasDocument, !hasUnsavedChanges else {
-            return
+    func updateEditorSession(_ reported: RhwpStudioEditorSession) {
+        guard webViewFailure == nil,
+              let session = RhwpStudioEditorSession.accepting(
+                reported.snapshot, after: editorSession, loadID: webViewLoadID,
+                hasNativeDocument: rhwpStudioDocument != nil
+              )
+        else { return }
+        let isReplacement = editorSession?.snapshot.documentEpoch != session.snapshot.documentEpoch
+        editorSession = session
+        hasUnsavedChanges = session.snapshot.dirty
+        if session.sourceBinding == .editorOnly {
+            rhwpStudioDocument = nil
+            sourceDocument = nil
+            if isReplacement {
+                filename = "새 문서.\(session.snapshot.format)"
+            }
         }
-        hasUnsavedChanges = true
     }
 
     func clearUnsavedChanges() {
@@ -210,6 +224,7 @@ final class DocumentViewerStore: ObservableObject {
         isWebViewLoading = false
 
         if failure.isFatal {
+            editorSession = nil
             webViewFailure = failure
             dismissWebViewError()
         } else {
@@ -226,6 +241,8 @@ final class DocumentViewerStore: ObservableObject {
         dismissWebViewError()
         isWebViewLoading = false
         webViewReloadToken += 1
+        webViewLoadID += 1
+        editorSession = nil
     }
 
     func dismissWebViewError() {
@@ -289,6 +306,8 @@ final class DocumentViewerStore: ObservableObject {
         self.filename = filename
         self.sourceDocument = sourceDocument
         documentRevision += 1
+        webViewLoadID += 1
+        editorSession = nil
         hasUnsavedChanges = false
         rhwpStudioDocument = RhwpStudioDocumentPayload(
             data: data,

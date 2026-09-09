@@ -84,6 +84,8 @@
 - `document-edited`를 새 문서에서도 처리하되, 준비 대기·다른 세션·단순 내보내기 이벤트는 잘못 dirty로 처리하지 않는다.
 - 새로운 순수 상태 모델은 `HostAppTests`에 직접 포함하고, 필요한 경우 `project.yml`의 source 목록을 추가한다. Store/Coordinator의 실제 연결은 WKWebView 통합 검증으로 보완한다.
 
+Stage 2에서 공개 `getSelectionContext`의 epoch·changeSeq를 실제로 확인하여 일반 상태 갱신에 사용했다. `getDocumentState`의 전체 export/SHA는 첫 등록·epoch 교체에만 수행한다. 고정 bundle의 렌더 준비 표시를 `ready`로 분리했으며 이는 source·보호 분류의 근거가 아니다. 상세 구현·검증과 `editorOnly`의 후속 저장 계약은 [Stage 2 보고서](../working/task_m010_516_stage2.md)를 따른다.
+
 ### 검증과 완료 기준
 
 - 초기 생성 이벤트가 구독 전/후에 발생하는 두 경우 모두 문서가 한 번 등록된다.
@@ -194,4 +196,4 @@ Stage 5 승인 후 `task-final-report` 절차에서 최종 결과보고서, 오�
 
 ## 승인 요청 사항
 
-2026-09-10 승인된 Stage 1 재현과 계약 확정을 완료했다. [Stage 1 보고서](../working/task_m010_516_stage1.md)를 검토한 뒤 Stage 2 새 문서 세션·편집 상태 동기화 구현 진입 승인을 요청한다. 제품 소스는 아직 변경하지 않았다.
+2026-09-10 같은 스레드의 “진행해줘” 승인에 따라 Stage 2 새 문서 세션·편집 상태 동기화를 구현·검증했다. [Stage 2 보고서](../working/task_m010_516_stage2.md)를 검토한 뒤 Stage 3 최초 저장·후속 저장과 native 문서 명령 연결 진입 승인을 요청한다.

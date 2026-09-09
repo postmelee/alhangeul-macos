@@ -143,11 +143,7 @@ enum RhwpStudioHostBridgeScript {
       }
 
       function postDocumentEdited(reason, command = null) {
-        const message = { type: "document-edited", reason };
-        if (command) {
-          message.command = command;
-        }
-        postNative(message);
+        scheduleEditorSessionCheck();
       }
 
       function isDocumentMutatingCommand(command) {
@@ -337,7 +333,10 @@ enum RhwpStudioHostBridgeScript {
         }
 
         element.dataset[documentLoadErrorObserverFlag] = "true";
-        const observer = new MutationObserver(reportDocumentLoadErrorIfNeeded);
+        const observer = new MutationObserver(() => {
+          reportDocumentLoadErrorIfNeeded();
+          scheduleEditorSessionCheck();
+        });
         observer.observe(element, {
           childList: true,
           characterData: true,
@@ -383,6 +382,8 @@ enum RhwpStudioHostBridgeScript {
           }, "*");
         });
       }
+
+      \(RhwpStudioEditorSessionScript.source)
 
       function encodeBytesToBase64(bytes) {
         const chunkSize = 0x8000;

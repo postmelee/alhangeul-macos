@@ -23,6 +23,8 @@ struct RhwpStudioWebView: NSViewRepresentable {
     let document: RhwpStudioDocumentPayload?
     let sourceDocument: RecentDocumentItem?
     let reloadToken: Int
+    let loadID: Int
+    let onEditorSessionChange: (RhwpStudioEditorSession) -> Void
     let onLoadStateChange: (Bool) -> Void
     let onError: (String?) -> Void
     let onFailure: (RhwpStudioWebViewFailure) -> Void
@@ -30,24 +32,26 @@ struct RhwpStudioWebView: NSViewRepresentable {
     let onDroppedDocument: (RhwpStudioDroppedDocument) -> Void
     let onDroppedFileURL: (URL) -> Void
     let onDocumentSaved: (RhwpStudioSavedDocument) -> Void
-    let onDocumentEdited: () -> Void
 
     init(
         document: RhwpStudioDocumentPayload?,
         sourceDocument: RecentDocumentItem? = nil,
         reloadToken: Int = 0,
+        loadID: Int,
+        onEditorSessionChange: @escaping (RhwpStudioEditorSession) -> Void = { _ in },
         onLoadStateChange: @escaping (Bool) -> Void = { _ in },
         onError: @escaping (String?) -> Void = { _ in },
         onFailure: @escaping (RhwpStudioWebViewFailure) -> Void = { _ in },
         onOpenDocument: @escaping () -> Void = {},
         onDroppedDocument: @escaping (RhwpStudioDroppedDocument) -> Void = { _ in },
         onDroppedFileURL: @escaping (URL) -> Void = { _ in },
-        onDocumentSaved: @escaping (RhwpStudioSavedDocument) -> Void = { _ in },
-        onDocumentEdited: @escaping () -> Void = {}
+        onDocumentSaved: @escaping (RhwpStudioSavedDocument) -> Void = { _ in }
     ) {
         self.document = document
         self.sourceDocument = sourceDocument
         self.reloadToken = reloadToken
+        self.loadID = loadID
+        self.onEditorSessionChange = onEditorSessionChange
         self.onLoadStateChange = onLoadStateChange
         self.onError = onError
         self.onFailure = onFailure
@@ -55,7 +59,6 @@ struct RhwpStudioWebView: NSViewRepresentable {
         self.onDroppedDocument = onDroppedDocument
         self.onDroppedFileURL = onDroppedFileURL
         self.onDocumentSaved = onDocumentSaved
-        self.onDocumentEdited = onDocumentEdited
     }
 
     func makeCoordinator() -> Coordinator {
@@ -74,11 +77,12 @@ struct RhwpStudioWebView: NSViewRepresentable {
         context.coordinator.onDroppedDocument = onDroppedDocument
         context.coordinator.onDroppedFileURL = onDroppedFileURL
         context.coordinator.onDocumentSaved = onDocumentSaved
-        context.coordinator.onDocumentEdited = onDocumentEdited
+        context.coordinator.onEditorSessionChange = onEditorSessionChange
         context.coordinator.update(
             document: document,
             sourceDocument: sourceDocument,
             reloadToken: reloadToken,
+            loadID: loadID,
             in: webView
         )
     }
@@ -93,7 +97,6 @@ extension RhwpStudioWebView {
         var onDroppedDocument: (RhwpStudioDroppedDocument) -> Void = { _ in }
         var onDroppedFileURL: (URL) -> Void = { _ in }
         var onDocumentSaved: (RhwpStudioSavedDocument) -> Void = { _ in }
-        var onDocumentEdited: () -> Void = {}
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
         private static let nativeDropSuppressionInterval: TimeInterval = 2
@@ -103,11 +106,6 @@ extension RhwpStudioWebView {
         ]
         private static let recoverableRuntimeAssetPathPrefix = "/assets/index-"
         private static let recoverableRuntimeAssetLine = 1
-
-        private enum LoadIdentity: Equatable {
-            case empty(reloadToken: Int)
-            case document(revision: Int, reloadToken: Int)
-        }
 
         private enum SaveDestination {
             case source(RecentDocumentItem)
@@ -150,7 +148,10 @@ extension RhwpStudioWebView {
         private lazy var documentSchemeHandler = RhwpStudioDocumentSchemeHandler(
             documentProvider: documentProvider
         )
-        private var loadedIdentity: LoadIdentity?
+        private var loadedIdentity: Int?
+        private var editorLoadToken = UUID().uuidString
+        private var editorSession: RhwpStudioEditorSession?
+        var onEditorSessionChange: (RhwpStudioEditorSession) -> Void = { _ in }
         private var currentDocument: RhwpStudioDocumentPayload?
         private var currentSourceDocument: RecentDocumentItem?
         private weak var commandWebView: WKWebView?
@@ -175,20 +176,6 @@ extension RhwpStudioWebView {
 
         func makeWebView() -> WKWebView {
             let configuration = WKWebViewConfiguration()
-            configuration.userContentController.addUserScript(
-                WKUserScript(
-                    source: RhwpStudioHostBridgeScript.runtimeErrorSource,
-                    injectionTime: .atDocumentStart,
-                    forMainFrameOnly: true
-                )
-            )
-            configuration.userContentController.addUserScript(
-                WKUserScript(
-                    source: RhwpStudioHostBridgeScript.source,
-                    injectionTime: .atDocumentEnd,
-                    forMainFrameOnly: true
-                )
-            )
             configuration.userContentController.add(
                 self,
                 name: RhwpStudioHostBridgeScript.messageHandlerName
@@ -234,22 +221,26 @@ extension RhwpStudioWebView {
             document: RhwpStudioDocumentPayload?,
             sourceDocument: RecentDocumentItem?,
             reloadToken: Int,
+            loadID: Int,
             in webView: WKWebView
         ) {
-            currentDocument = document
-            currentSourceDocument = sourceDocument
             currentReloadToken = reloadToken
-            documentProvider.setDocument(document)
-
-            let nextIdentity: LoadIdentity = if let document {
-                .document(revision: document.revision, reloadToken: reloadToken)
-            } else {
-                .empty(reloadToken: reloadToken)
-            }
-
-            guard nextIdentity != loadedIdentity else {
+            // 명시적인 파일 열기·재시도 요청만 WebView를 reload한다.
+            guard loadID != loadedIdentity else {
+                // 내부 생성 후 늦게 도착한 SwiftUI의 이전 source를 복원하지 않는다.
+                if editorSession?.sourceBinding != .editorOnly {
+                    currentDocument = document
+                    currentSourceDocument = sourceDocument
+                    documentProvider.setDocument(document)
+                }
                 return
             }
+            currentDocument = document
+            currentSourceDocument = sourceDocument
+            documentProvider.setDocument(document)
+            editorSession = nil
+            editorLoadToken = UUID().uuidString
+            installUserScripts(in: webView, loadID: loadID)
 
             pdfExportState.invalidatePendingRequestForDocumentChange()
             if pendingSaveRequest != nil {
@@ -258,7 +249,7 @@ extension RhwpStudioWebView {
 
             do {
                 let loadURL = try RhwpStudioResourceLocator.loadURL(for: document)
-                loadedIdentity = nextIdentity
+                loadedIdentity = loadID
                 hasCompletedCurrentLoad = false
                 onError(nil)
                 onLoadStateChange(true)
@@ -269,18 +260,58 @@ extension RhwpStudioWebView {
                 loadedIdentity = nil
                 hasCompletedCurrentLoad = false
                 finishLoading()
-                onFailure(.resourcePreflight(error))
+                reportFailure(.resourcePreflight(error))
             } catch let failure as RhwpStudioWebViewFailure {
                 loadedIdentity = nil
                 hasCompletedCurrentLoad = false
                 finishLoading()
-                onFailure(failure)
+                reportFailure(failure)
             } catch {
                 loadedIdentity = nil
                 hasCompletedCurrentLoad = false
                 finishLoading()
-                onFailure(.navigation(error: error, fallbackURL: webView.url))
+                reportFailure(.navigation(error: error, fallbackURL: webView.url))
             }
+        }
+
+        private func installUserScripts(in webView: WKWebView, loadID: Int) {
+            let controller = webView.configuration.userContentController
+            controller.removeAllUserScripts()
+            let context = "window.__alhangeulEditorLoad = {loadID: \(loadID), token: \(Self.javaScriptStringLiteral(editorLoadToken))};"
+            controller.addUserScript(WKUserScript(
+                source: context + RhwpStudioHostBridgeScript.runtimeErrorSource,
+                injectionTime: .atDocumentStart, forMainFrameOnly: true
+            ))
+            controller.addUserScript(WKUserScript(
+                source: RhwpStudioHostBridgeScript.source,
+                injectionTime: .atDocumentEnd, forMainFrameOnly: true
+            ))
+        }
+
+        private func handleEditorSession(_ body: [String: Any]) {
+            guard body["token"] as? String == editorLoadToken,
+                  let loadID = loadedIdentity,
+                  let data = try? JSONSerialization.data(withJSONObject: body),
+                  let snapshot = try? JSONDecoder().decode(RhwpStudioEditorSnapshot.self, from: data),
+                  let session = RhwpStudioEditorSession.accepting(
+                    snapshot, after: editorSession, loadID: loadID,
+                    hasNativeDocument: currentDocument != nil
+                  )
+            else { return }
+            let previous = editorSession
+            editorSession = session
+            if session.sourceBinding == .editorOnly {
+                currentDocument = nil
+                currentSourceDocument = nil
+                documentProvider.setDocument(nil)
+            }
+            if let previous, previous.snapshot.documentEpoch != snapshot.documentEpoch {
+                pdfExportState.invalidatePendingRequestForDocumentChange()
+                if pendingSaveRequest != nil {
+                    completePendingSave(.failed("문서가 변경되어 진행 중이던 저장을 취소했습니다."))
+                }
+            }
+            onEditorSessionChange(session)
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -300,7 +331,7 @@ extension RhwpStudioWebView {
             pdfExportState.invalidatePendingRequestForDocumentChange()
             hasCompletedCurrentLoad = false
             finishLoading()
-            onFailure(
+            reportFailure(
                 .processTerminated(
                     lastURL: webView.url,
                     document: currentDocument,
@@ -333,7 +364,7 @@ extension RhwpStudioWebView {
                 decisionHandler(.cancel)
                 hasCompletedCurrentLoad = false
                 finishLoading()
-                onFailure(.blockedNavigation(to: url))
+                reportFailure(.blockedNavigation(to: url))
             }
         }
 
@@ -343,7 +374,7 @@ extension RhwpStudioWebView {
                 return
             }
             hasCompletedCurrentLoad = false
-            onFailure(.from(error: error, fallbackURL: webView?.url))
+            reportFailure(.from(error: error, fallbackURL: webView?.url))
         }
 
         private func startLoadTimeout(_ loadID: Int, webView: WKWebView) {
@@ -360,7 +391,7 @@ extension RhwpStudioWebView {
                 let loadingURL = webView?.url
                 self.hasCompletedCurrentLoad = false
                 self.finishLoading()
-                self.onFailure(
+                self.reportFailure(
                     .timeout(
                         loadingURL: loadingURL,
                         document: self.currentDocument,
@@ -437,24 +468,27 @@ extension RhwpStudioWebView {
                 handleRuntimeError(body)
             case "document-load-error":
                 handleDocumentLoadError(body)
-            case "document-edited":
-                handleDocumentEdited()
+            case "editor-session":
+                if message.frameInfo.isMainFrame {
+                    handleEditorSession(body)
+                }
             default:
                 break
             }
         }
 
-        private func handleDocumentEdited() {
-            guard currentDocument != nil else {
-                return
+        private func reportFailure(_ failure: RhwpStudioWebViewFailure) {
+            if failure.isFatal {
+                editorSession = nil
+                editorLoadToken = UUID().uuidString
             }
-            onDocumentEdited()
+            onFailure(failure)
         }
 
         private func handleDocumentLoadError(_ body: [String: Any]) {
             hasCompletedCurrentLoad = false
             finishLoading()
-            onFailure(
+            reportFailure(
                 .documentLoadError(
                     message: body["message"] as? String,
                     document: currentDocument,
@@ -478,7 +512,7 @@ extension RhwpStudioWebView {
             )
 
             finishLoading()
-            onFailure(
+            reportFailure(
                 .runtime(
                     message: message,
                     sourceURL: sourceURL,
