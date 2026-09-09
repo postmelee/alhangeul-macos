@@ -26,11 +26,39 @@ Apple의 [importer 안내](https://developer.apple.com/library/archive/documenta
 - App Sandbox entitlement, 원본 문서, 기본 앱 연결, 전체 볼륨 색인은 바꾸지 않는다. 임시 명령 출력은 앱의 임시 위치에만 저장하고 제거하며 제품 로그에는 본문/경로를 넣지 않는다.
 - automatic lifecycle에서 외부 `mdimport -i` 호출을 제거했다. 기존 진단 모드는 유지한다. 발견 대기 시간은 prepare의 `--discovery-timeout`으로 기록하며 기본 60초, 180초 후보와 최종 600초 후보를 구분한다. 과거 60초 실패를 소급 변경하지 않는다.
 
-## 검증 진행
+## 검증 결과
 
 - Swift 요청 정책/경로 파싱 7 tests PASS.
 - 운영 회귀 24 tests 및 bundle 회귀 5 tests PASS.
 - universal Release 빌드, portable/golden, strict ad-hoc, importer callback 검증 PASS.
 - 180초 후보의 재실행 후 실제 제품 자동 요청, 앱 종료 상태의 영문/한글 검색과 automatic lifecycle 전체 PASS. 수정·보호·빈·손상·DRM·배포용·입력 크기·출력 잘림·삭제를 외부 mdimport -i 없이 확인했다.
-- 최종 600초 후보의 새 경로 첫 실행 및 정리 결과는 다음 검증에서 확정한다.
+- 최종 600초 후보는 새 direct 경로에 복사 후 한 번 실행하여 발견(launch 단계 477.52초) 및 자동 검색/후보 선택(8.25초) PASS. 설치 전 corpus 및 앱/importer hash·변경 시각 보존, 외부 등록/재색인/touch 없음. 정리 결과는 아래에 기록한다.
 - CLI index 호출 2회는 verify 선행 요구로 거부됐다. 순서를 보정한 검증은 통과했으며 제품 실패와 구분한다.
+
+## 정리 경계
+
+180초 후보는 파일·문서·프로세스 제거와 원래 앱/provider 보존 후에도 삭제된 importer 경로가 목록에 남아 cleanup이 세 차례 MISS였다. 삭제 경로에 대한 NSWorkspace 변경 알림을 정리 진단으로 보냈으나 즉시 제거되지 않았다. 이후 별도 확인에서 소유 파일/프로세스 없음과 LaunchServices 경로 일치 0건을 확인했고, 최종 mdimport 목록에서도 제거되어 같은 cleanup이 PASS/cleaned가 됐다. 알림을 제거의 단독 원인으로 해석하지 않는다. 다음 최종 후보는 이 정리가 완료된 뒤 준비했다. 전역 초기화나 daemon 종료는 하지 않았다.
+
+## 최종 후보의 첫 실행 결과
+
+소스 기준은 `fa925292092a1dd9abbb5d617b966a9db3b2c6fd`이며 최종 개발 ZIP SHA-256은 `349df950c775733a45c613bc19d570de352540e954c26c5f1686d27faf874603`이다. 직전 시험의 catalog 정리까지 완료한 뒤 새 corpus/설치 경로를 준비했다.
+
+- TXT 양성 대조 및 설치 전 본문 부재 PASS.
+- 앱 복사·첫 실행 1회만 수행. importer가 약 7분 58초 뒤 발견됐고 앱의 재색인 요청 후 HWP3/HWP5/HWPX 영문 본문, HWP5/HWPX 한글 독립 단어 검색 및 대조군 제외 PASS.
+- 실제 metadata 진단은 검색 성공 후 수행했고 세 형식 모두 새 후보 importer를 선택했다. `mdimport -t`를 색인 성공의 대체 근거로 사용하지 않았다.
+- 앱 종료 후에도 같은 자동 검색·후보 선택 검증 PASS. 외부 등록·재색인·touch·재실행을 사용하지 않았으며 최초 corpus와 번들 hash/변경 시각이 관찰 전후 동일했다.
+- 이 결과는 기존 설치/등록 이력이 있는 현재 Mac의 새 경로 첫 실행이다. 발견 지연 자체의 OS/설치 이력 원인은 확정하지 못했다. 별도 초기 계정/VM 및 공개 후보 검증의 대체가 아니다.
+
+
+## 같은 경로 교체와 재개 검증 — 2026-09-10
+
+최초 실행 state를 launch count 1, assisted action 없음으로 별도 고정한 뒤 같은 경로 교체를 시험했다. 표준 교체 helper의 시각 변경·일반 등록이 포함되므로 최초 설치 또는 공개 Sparkle 성공으로 합치지 않는다. 변경된 importer 시각에 대해 제품이 재색인 요청을 다시 접수한 로그를 확인했고 실제 후보 선택과 영문/한글 검색이 통과했다. 다음 날 재개 시 시험 앱이 실행 중이지 않음을 확인하고 `verify` → `index` 순서로 세 형식 추출·영문 3개·한글 2개 검색을 재확인했다.
+
+이번 최종 후보의 Spotlight 양성 스크린샷은 확보하지 못했다. 닫힌 Spotlight 창 연결은 timeout이었고 Finder 대체 확인도 UI 상태 변경으로 완료되지 않았다. 이전 후보의 미검색 화면이나 선행 작업의 양성 화면을 이번 최초 실행 성공 화면으로 재사용하지 않는다. 첫 실행의 실제 검색·후보 선택 결과는 별도 보존한 state와 합성 JSON이 근거다.
+
+
+## 최종 정리와 인계
+
+2026-09-10 표준 cleanup에서 합성 검색 단어 7종의 소유 결과 0개, 원래 앱 hash/Quick Look·Thumbnail provider 보존, 시험 importer catalog 제거가 모두 PASS였다. 최종 상태는 cleaned이며 모든 Stage 5 시험 설치본과 corpus를 정리했다. HWP/HWPX 기본 연결도 기존 한컴 뷰어로 유지됐다. 공개 결과 JSON에는 합성 파일명과 판정만 남기고 계정 경로·원시 시스템 로그는 제외했다.
+
+구현·개발 후보 검증은 리뷰 가능한 상태다. 공개 서명·공증 후보, 설치 이력이 없는 환경 및 macOS 12/Intel은 별도 출시 관문으로 남기고 #513 및 #337 이슈를 닫지 않는다.
