@@ -21,6 +21,8 @@ enum LaunchMaintenanceService {
     @discardableResult
     static func runIfNeeded(userDefaults: UserDefaults = .standard) -> LaunchMaintenanceResult {
         let buildIdentifier = BuildInfo.launchMaintenanceBuildIdentifier
+        // 기존 Quick Look 유지보수 완료 기록과 Spotlight의 최초 재색인 요청을 분리한다.
+        SpotlightReindexService.start(appBundleURL: Bundle.main.bundleURL, buildIdentifier: buildIdentifier)
         guard userDefaults.string(forKey: completedBuildKey) != buildIdentifier else {
             logger.debug("Launch maintenance skipped build=\(buildIdentifier, privacy: .public)")
             return LaunchMaintenanceResult(

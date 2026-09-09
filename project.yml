@@ -188,6 +188,7 @@ targets:
       - path: Sources/HostApp/Services/QuickLookConflictNoticePolicy.swift
       - path: Sources/HostApp/Services/QuickLookConflictPresentation.swift
       - path: Sources/HostApp/Services/QuickLookSettingsOpener.swift
+      - path: Sources/HostApp/Services/SpotlightReindexService.swift
       - path: Sources/HostApp/Services/RhwpStudioHostBridgeScript.swift
       - path: Sources/HostApp/Services/RhwpStudioPDFExportController.swift
       - path: Sources/HostApp/Services/RhwpStudioPDFFontProvider.swift

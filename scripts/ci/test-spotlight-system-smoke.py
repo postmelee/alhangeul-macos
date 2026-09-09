@@ -16,6 +16,38 @@ spec.loader.exec_module(smoke)
 
 
 class SmokeTests(unittest.TestCase):
+    def test_lifecycle_only_requests_manual_import_in_diagnostic_mode(self):
+        for automatic in [True, False]:
+            with self.subTest(automatic=automatic), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                files, fixtures = root / "Files", root / "Fixtures"
+                files.mkdir()
+                (fixtures / "initial").mkdir(parents=True)
+                (fixtures / "variants").mkdir()
+                for name in ["document-a.hwp", "document-b.hwpx", "document-c.hwp", "control.hwpx"]:
+                    (fixtures / "initial" / name).write_bytes(b"original")
+                    (files / name).write_bytes(b"original")
+                for name in ["modified.hwp", "protected.hwpx", "empty.hwpx", "invalid.hwp", "drm.hwp",
+                             "distribution.hwp", "large.hwp", "truncated.hwpx"]:
+                    (fixtures / "variants" / name).write_bytes(b"variant")
+                state = {"automatic": automatic, "files": str(files), "fixtures": str(fixtures),
+                         "token": "OriginalToken", "replacement": "ReplacementToken", "results": []}
+                def metadata(_state, _path, label):
+                    if label == "modified":
+                        return {"kMDItemTextContent": state["replacement"]}
+                    if label == "truncated":
+                        return {"kMDItemTextContent": smoke.TRUNCATED}
+                    return {}
+                with patch.object(smoke, "run") as command, patch.object(smoke, "expect_paths"), \
+                     patch.object(smoke, "metadata_test", side_effect=metadata), patch.object(smoke, "record"):
+                    smoke.lifecycle(state)
+                self.assertEqual(state["phase"], "lifecycle-verified")
+                if automatic:
+                    command.assert_not_called()
+                else:
+                    self.assertEqual(command.call_count, 15)
+                    self.assertTrue(all(call.args[0][:2] == ["mdimport", "-i"] for call in command.call_args_list))
+
     def test_corpus_changed_during_search_cannot_pass_automatic_observation(self):
         original = {"sample.hwp": [10, 123, "sha256"]}
         state = {"automatic": True, "launch_count": 1, "before_install_paths": [],

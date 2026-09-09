@@ -154,6 +154,7 @@ def prepare(args):
              "results": [], "phase": "preparing", "original_apps": {},
              "providers_before": providers()}
     state["automatic"] = args.automatic
+    state["discovery_timeout"] = args.discovery_timeout
     state["source_bundle_dates_ns"] = {"app": app.stat().st_mtime_ns,
                                         "importer": (app / PLUGIN).stat().st_mtime_ns}
     state["source_app_hashes"] = fingerprint(app)
@@ -211,7 +212,9 @@ def owned_locations(state):
         raise ValueError("unexpected corpus path")
 
 
-def discover(state, label, timeout=60):
+def discover(state, label, timeout=None):
+    if timeout is None:
+        timeout = state.get("discovery_timeout", 60)
     expected = str(Path(state["install_app"]) / PLUGIN)
     started = time.monotonic()
     deadline = started + timeout
@@ -444,7 +447,8 @@ def lifecycle(state, extraction_only=False):
     def replace(variant, destination, label, needle=None):
         # 원래 정상 본문을 먼저 복원해 stale-text 제거를 검증한다.
         shutil.copyfile(fixtures / "initial" / destination, files / destination)
-        run(["mdimport", "-i", files / destination])
+        if not state.get("automatic"):
+            run(["mdimport", "-i", files / destination])
         if not extraction_only:
             expect_paths(state, token, [destination], label + "-restored")
         shutil.copyfile(fixtures / "variants" / variant, files / destination)
@@ -455,7 +459,8 @@ def lifecycle(state, extraction_only=False):
         if needle is not None and (not isinstance(body, str) or needle not in body or token in body):
             raise RuntimeError(f"changed body mismatch: {label}")
         record(state, label + "-metadata")
-        run(["mdimport", "-i", files / destination])
+        if not state.get("automatic"):
+            run(["mdimport", "-i", files / destination])
         search(token, [], label + "-old-word-removed")
         if needle:
             search(needle, [destination], label + "-new-word")
@@ -482,7 +487,8 @@ def lifecycle(state, extraction_only=False):
             or TRUNCATED not in body or OMITTED in body):
         raise RuntimeError("truncated UTF-8 output limit mismatch")
     record(state, "truncated-metadata", utf8_bytes=len(body.encode("utf-8")))
-    run(["mdimport", "-i", files / "document-b.hwpx"])
+    if not state.get("automatic"):
+        run(["mdimport", "-i", files / "document-b.hwpx"])
     search(TRUNCATED, ["document-b.hwpx"], "truncated-prefix-search")
     search(TRUNCATED_KOREAN, ["document-b.hwpx"], "truncated-korean-prefix-search")
     search(OMITTED, [], "truncated-tail-not-indexed")
@@ -573,6 +579,8 @@ def main():
                         help="prepare에서 저장: 수동 lsregister/mdimport -i 없이 복사·첫 실행·자동 검색 비교")
     parser.add_argument("--install-layout", choices=["nested", "direct"], default="nested",
                         help="prepare에서 저장: 중첩 폴더 또는 Applications 바로 아래 고유 소유 앱 비교")
+    parser.add_argument("--discovery-timeout", type=int, choices=range(1, 601), default=60, metavar="SECONDS",
+                        help="prepare에서 저장: 발견 대기 초(1–600, 기본 60); 검색 timeout과 별개")
     parser.add_argument("--extraction-only", action="store_true",
                         help="lifecycle의 실제 색인 검증을 MISS로 남기고 metadata만 검증")
     args = parser.parse_args()

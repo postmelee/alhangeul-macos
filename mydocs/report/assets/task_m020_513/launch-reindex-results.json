@@ -1,0 +1,702 @@
+{
+  "issue": 513,
+  "parent_issue": 337,
+  "os": "macOS 26.5.2",
+  "architecture": "arm64",
+  "artifact": "universal Release ad-hoc 0.1.11 (17)",
+  "limitations": [
+    "기존 사용자 설치본과 등록 이력 보존",
+    "별도 초기 계정/VM 없음",
+    "macOS 12 및 Intel 실행 미검증",
+    "Developer ID 서명·공증 공개 후보 미검증"
+  ],
+  "unit_tests": {
+    "swift": 7,
+    "python_system_smoke": 24,
+    "python_bundle": 5,
+    "importer_callback": 13
+  },
+  "runs": {
+    "baseline_and_assisted_probe": {
+      "phase": "cleaned",
+      "automatic_mode": true,
+      "launch_count": 1,
+      "discovery_timeout_seconds": 60,
+      "assisted_actions": [
+        "external-LSRegisterURL-after-discovery",
+        "sandbox-probe-mdimport-r",
+        "sandbox-probe-with-info-mdimport-r"
+      ],
+      "app_sha256": "3908b2a880fa7b0ca82c357039459405e4baa2e7b9cd73a07bd81076715ec236",
+      "importer_sha256": "716fbf428f1c0a4fb9edc991941095b8d3665f4a307e441031430ab8ea6d49e6",
+      "cases": [
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "pre-install-body-absent",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS",
+          "launch_number": 1
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "PASS",
+          "elapsed_seconds": 12.13
+        },
+        {
+          "case": "automatic-discovery",
+          "result": "PASS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "result": "FAIL",
+          "expected": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ],
+          "actual": []
+        },
+        {
+          "case": "automatic-search-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "external-registration-existing-body",
+          "result": "FAIL",
+          "expected": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ],
+          "actual": []
+        },
+        {
+          "case": "sandbox-reimport-existing-body",
+          "result": "FAIL",
+          "expected": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ],
+          "actual": []
+        },
+        {
+          "case": "sandbox-reimport-with-info-existing-body",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ]
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ]
+        },
+        {
+          "case": "korean-body-only-search",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "metadata-document-a.hwp",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+          "utf8_bytes": 61
+        },
+        {
+          "case": "metadata-document-b.hwpx",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx",
+          "utf8_bytes": 61
+        },
+        {
+          "case": "metadata-document-c.hwp",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+          "utf8_bytes": 39
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "assisted-app-exited-body",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ]
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulStageFive20260909",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ],
+      "diagnostic_note": "첫 샌드박스 probe는 Info.plist 식별 정보 누락으로 main 진입 전 종료했다. 식별 정보 보완 후의 probe 결과만 유효하다."
+    },
+    "request_before_discovery": {
+      "phase": "cleaned",
+      "automatic_mode": true,
+      "launch_count": 1,
+      "discovery_timeout_seconds": 60,
+      "assisted_actions": [],
+      "app_sha256": "1dcb01384acaaa31aa6f2f2d471fc825aebb26d09292e506cdfbf8b2f664836c",
+      "importer_sha256": "a360becece291a1d2f7f49196685bbcb247c3e9ac9030dceae8c92199cbbacfe",
+      "cases": [
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "pre-install-body-absent",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS",
+          "launch_number": 1
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 60.83
+        },
+        {
+          "case": "automatic-discovery",
+          "result": "PASS",
+          "elapsed_seconds": 56.75
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "result": "FAIL",
+          "expected": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ],
+          "actual": []
+        },
+        {
+          "case": "automatic-search-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulAutomatic20260909",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "MISS"
+        },
+        {
+          "case": "cleanup-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ]
+    },
+    "wait_180_seconds_and_relaunch": {
+      "phase": "lifecycle-verified",
+      "automatic_mode": true,
+      "launch_count": 2,
+      "discovery_timeout_seconds": 180,
+      "assisted_actions": [
+        "lifecycle"
+      ],
+      "app_sha256": "73633161a834ea9ccd75f0d42445d0760bc0108c42e733c780a5668fe98d349d",
+      "importer_sha256": "b21d1ea6deb63a8acbde890d267d0932571f77be5209b7a95e6d61b5e1121d78",
+      "cases": [
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "pre-install-body-absent",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS",
+          "launch_number": 1
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 180.53
+        },
+        {
+          "case": "automatic-discovery",
+          "result": "PASS",
+          "elapsed_seconds": 105.38
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "result": "FAIL",
+          "expected": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ],
+          "actual": []
+        },
+        {
+          "case": "automatic-search-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "candidate-relaunch-requested",
+          "result": "PASS",
+          "launch_number": 2
+        },
+        {
+          "case": "discovery-after-relaunch",
+          "result": "PASS",
+          "elapsed_seconds": 0.02
+        },
+        {
+          "case": "index-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "metadata-document-a.hwp",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-b.hwpx",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-c.hwp",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+          "utf8_bytes": 35
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ]
+        },
+        {
+          "case": "korean-body-only-search",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "index-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "metadata-document-a.hwp",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-b.hwpx",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-c.hwp",
+          "result": "PASS",
+          "content_type": "com.haansoft.hancomofficeviewer.mac.hwp",
+          "utf8_bytes": 35
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ]
+        },
+        {
+          "case": "korean-body-only-search",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "deleted-original-documents",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "deleted-original-korean-word",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "modified-restored",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "modified-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "modified-old-word-removed",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "modified-new-word",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "modified-new-korean-word",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "modified-deleted-new-word",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "modified-deleted-new-korean-word",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "protected-restored",
+          "result": "PASS",
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "protected-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "protected-old-word-removed",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "empty-restored",
+          "result": "PASS",
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "empty-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "empty-old-word-removed",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "invalid-restored",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "invalid-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "invalid-old-word-removed",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "drm-restored",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "drm-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "drm-old-word-removed",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "distribution-restored",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "distribution-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "distribution-old-word-removed",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "large-restored",
+          "result": "PASS",
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "large-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "large-old-word-removed",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "truncated-metadata",
+          "result": "PASS",
+          "utf8_bytes": 1048576
+        },
+        {
+          "case": "truncated-prefix-search",
+          "result": "PASS",
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "truncated-korean-prefix-search",
+          "result": "PASS",
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "truncated-tail-not-indexed",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "deleted-truncated-document",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "deleted-final-documents",
+          "result": "PASS",
+          "paths": []
+        }
+      ],
+      "invocation_note": "index-failed 2건은 verify 선행 요구에 따른 CLI 호출 순서 거부다. 순서를 보정한 추출/검색/automatic lifecycle이 통과했다."
+    }
+  },
+  "final_candidate_zip_sha256": "349df950c775733a45c613bc19d570de352540e954c26c5f1686d27faf874603"
+}
