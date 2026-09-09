@@ -6,7 +6,7 @@ import OSLog
 /// 요청 접수는 색인 완료를 의미하지 않는다. 검색 결과는 Spotlight가 비동기로 갱신한다.
 enum SpotlightReindexService {
     private static let queue = DispatchQueue(label: "com.postmelee.alhangeul.spotlight-reindex", qos: .utility)
-    private static let logger = Logger(subsystem: "com.postmelee.alhangeul", category: "SpotlightReindex")
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.postmelee.alhangeul", category: "SpotlightReindex")
     static let requestedInstallationKey = "alhangeul.spotlight.reimport.requestedInstallation"
 
     struct Installation: Equatable {
@@ -29,9 +29,20 @@ enum SpotlightReindexService {
         case failed
     }
 
-    static func start(appBundleURL: URL, buildIdentifier: String) {
-        queue.async {
-            let importerURL = appBundleURL.appendingPathComponent("Contents/Library/Spotlight/Alhangeul.mdimporter", isDirectory: true)
+    static func importerURL(in appBundleURL: URL) -> URL {
+        appBundleURL.appendingPathComponent("Contents/Library/Spotlight/Alhangeul.mdimporter", isDirectory: true)
+    }
+
+    static func start(
+        appBundleURL: URL,
+        buildIdentifier: String,
+        userDefaults: UserDefaults,
+        schedule: (@escaping () -> Void) -> Void = { queue.async(execute: $0) },
+        waitForDiscovery: @escaping (URL) -> Bool = discoverImporter,
+        submit: @escaping (URL) -> Bool = submit
+    ) {
+        schedule {
+            let importerURL = importerURL(in: appBundleURL)
             guard let values = try? importerURL.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey]),
                   values.isDirectory == true, let modificationDate = values.contentModificationDate else {
                 logger.error("Bundled Spotlight importer unavailable; request deferred until next launch")
@@ -39,7 +50,7 @@ enum SpotlightReindexService {
             }
             let installation = Installation(importerURL: importerURL, buildIdentifier: buildIdentifier, modificationDate: modificationDate)
             let result = requestIfNeeded(
-                installation: installation, userDefaults: .standard,
+                installation: installation, userDefaults: userDefaults,
                 waitForDiscovery: waitForDiscovery, submit: submit
             )
             switch result {
@@ -70,16 +81,30 @@ enum SpotlightReindexService {
         return .requested
     }
 
-    private static func waitForDiscovery(importerURL: URL) -> Bool {
+    private static func discoverImporter(importerURL: URL) -> Bool {
+        pollForDiscovery(importerURL: importerURL)
+    }
+
+    static func pollForDiscovery(
+        importerURL: URL,
+        timeout: TimeInterval = 600,
+        now: () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
+        sleep: (TimeInterval) -> Void = Thread.sleep(forTimeInterval:),
+        readCatalog: (TimeInterval) -> String? = { run(arguments: ["-L"], timeout: $0) }
+    ) -> Bool {
         // 동일 ID의 설치 이력이 있는 환경에서 발견까지 4분 이상 지연됨을 관찰했다.
-        let deadline = ProcessInfo.processInfo.systemUptime + 600
-        repeat {
-            guard let output = run(arguments: ["-L"]) else { return false }
-            if catalog(output, contains: importerURL) { return true }
-            let remaining = deadline - ProcessInfo.processInfo.systemUptime
+        let deadline = now() + timeout
+        while now() < deadline {
+            let commandTimeout = min(30, deadline - now())
+            guard commandTimeout > 0 else { return false }
+            // 일시적인 조회 실패는 남은 대기 시간을 폐기하지 않는다.
+            if let output = readCatalog(commandTimeout), now() < deadline,
+               catalog(output, contains: importerURL) { return true }
+            let remaining = deadline - now()
             if remaining <= 0 { return false }
-            Thread.sleep(forTimeInterval: min(5, remaining))
-        } while true
+            sleep(min(5, remaining))
+        }
+        return false
     }
 
     static func catalog(_ output: String, contains importerURL: URL) -> Bool {
@@ -98,7 +123,11 @@ enum SpotlightReindexService {
         run(arguments: ["-r", importerURL.path]) != nil
     }
 
-    private static func run(arguments: [String]) -> String? {
+    static func run(
+        executableURL: URL = URL(fileURLWithPath: "/usr/bin/mdimport"),
+        arguments: [String],
+        timeout: TimeInterval = 30
+    ) -> String? {
         let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("alhangeul-spotlight-\(UUID().uuidString).log")
         guard FileManager.default.createFile(atPath: outputURL.path, contents: nil) else { return nil }
         defer { try? FileManager.default.removeItem(at: outputURL) }
@@ -107,11 +136,13 @@ enum SpotlightReindexService {
             try? output.close()
         }
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/mdimport")
+        process.executableURL = executableURL
         process.arguments = arguments
         // pipe를 채운 프로세스가 종료 대기와 교착하지 않도록 컨테이너 임시 파일을 사용한다.
         process.standardOutput = output
-        process.standardError = output
+        // 진단 문장이 catalog 뒤에 섞여 OpenStep 파싱을 깨뜨리지 않게 한다.
+        // stderr를 pipe로 보관하지 않아 출력량에 따른 교착도 피한다.
+        process.standardError = FileHandle.nullDevice
         let finished = DispatchSemaphore(value: 0)
         process.terminationHandler = { _ in finished.signal() }
         do {
@@ -119,7 +150,7 @@ enum SpotlightReindexService {
         } catch {
             return nil
         }
-        guard finished.wait(timeout: .now() + 30) == .success else {
+        guard finished.wait(timeout: .now() + timeout) == .success else {
             process.terminate()
             if finished.wait(timeout: .now() + 2) == .timedOut, process.isRunning {
                 kill(process.processIdentifier, SIGKILL)

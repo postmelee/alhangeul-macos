@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """운영 smoke의 경로 소유권, 환경 대조, 반복 추출 판정 회귀 검사."""
 import importlib.util
+import argparse
 import json
 import subprocess
 from pathlib import Path
@@ -16,6 +17,23 @@ spec.loader.exec_module(smoke)
 
 
 class SmokeTests(unittest.TestCase):
+    def test_discovery_timeout_accepts_boundaries_and_rejects_invalid_values(self):
+        for value in ["1", "60", "600"]:
+            self.assertEqual(smoke.discovery_timeout(value), int(value))
+        for value in ["0", "601", "-1", "1.5", "invalid"]:
+            with self.subTest(value=value), self.assertRaises(argparse.ArgumentTypeError):
+                smoke.discovery_timeout(value)
+
+    def test_invalid_discovery_timeout_cli_error_is_concise(self):
+        result = subprocess.run(
+            [sys.executable, str(Path(smoke.__file__)), "status", "--state", "unused.json", "--discovery-timeout", "601"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("from 1 to 600 seconds", result.stderr)
+        self.assertNotIn("choose from", result.stderr)
+        self.assertLess(len(result.stderr), 1200)
+
     def test_lifecycle_only_requests_manual_import_in_diagnostic_mode(self):
         for automatic in [True, False]:
             with self.subTest(automatic=automatic), tempfile.TemporaryDirectory() as directory:

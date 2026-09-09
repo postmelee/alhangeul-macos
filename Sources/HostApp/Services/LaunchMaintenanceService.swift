@@ -19,10 +19,18 @@ enum LaunchMaintenanceService {
     )
 
     @discardableResult
-    static func runIfNeeded(userDefaults: UserDefaults = .standard) -> LaunchMaintenanceResult {
-        let buildIdentifier = BuildInfo.launchMaintenanceBuildIdentifier
+    static func runIfNeeded(
+        userDefaults: UserDefaults,
+        appBundleURL: URL,
+        buildIdentifier: String,
+        startSpotlight: (URL, String, UserDefaults) -> Void = {
+            SpotlightReindexService.start(appBundleURL: $0, buildIdentifier: $1, userDefaults: $2)
+        },
+        refreshRegistration: () -> OSStatus,
+        refreshThumbnails: () -> (refreshedCount: Int, skippedCount: Int)
+    ) -> LaunchMaintenanceResult {
         // 기존 Quick Look 유지보수 완료 기록과 Spotlight의 최초 재색인 요청을 분리한다.
-        SpotlightReindexService.start(appBundleURL: Bundle.main.bundleURL, buildIdentifier: buildIdentifier)
+        startSpotlight(appBundleURL, buildIdentifier, userDefaults)
         guard userDefaults.string(forKey: completedBuildKey) != buildIdentifier else {
             logger.debug("Launch maintenance skipped build=\(buildIdentifier, privacy: .public)")
             return LaunchMaintenanceResult(
@@ -34,8 +42,8 @@ enum LaunchMaintenanceService {
             )
         }
 
-        let registrationStatus = ExtensionSystemRegistrationRefresher.refreshCurrentBundle()
-        let refreshResult = RecentDocumentThumbnailRefresher.refreshRecentDocuments()
+        let registrationStatus = refreshRegistration()
+        let refreshResult = refreshThumbnails()
         userDefaults.set(buildIdentifier, forKey: completedBuildKey)
 
         if registrationStatus == noErr {

@@ -566,6 +566,16 @@ def cleanup(state):
     print("PASS: owned files removed; original app hashes and provider selections preserved", flush=True)
 
 
+def discovery_timeout(value):
+    try:
+        seconds = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError("discovery timeout must be an integer from 1 to 600") from None
+    if not 1 <= seconds <= 600:
+        raise argparse.ArgumentTypeError("discovery timeout must be from 1 to 600 seconds")
+    return seconds
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["prepare", "install", "launch", "developer-register", "diagnostic-register", "verify",
@@ -579,7 +589,7 @@ def main():
                         help="prepare에서 저장: 수동 lsregister/mdimport -i 없이 복사·첫 실행·자동 검색 비교")
     parser.add_argument("--install-layout", choices=["nested", "direct"], default="nested",
                         help="prepare에서 저장: 중첩 폴더 또는 Applications 바로 아래 고유 소유 앱 비교")
-    parser.add_argument("--discovery-timeout", type=int, choices=range(1, 601), default=60, metavar="SECONDS",
+    parser.add_argument("--discovery-timeout", type=discovery_timeout, default=60, metavar="SECONDS",
                         help="prepare에서 저장: 발견 대기 초(1–600, 기본 60); 검색 timeout과 별개")
     parser.add_argument("--extraction-only", action="store_true",
                         help="lifecycle의 실제 색인 검증을 MISS로 남기고 metadata만 검증")

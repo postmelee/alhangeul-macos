@@ -169,6 +169,8 @@ python3 scripts/ci/spotlight-system-smoke.py index --state build.noindex/spotlig
 python3 scripts/ci/spotlight-system-smoke.py cleanup --state build.noindex/spotlight-state.json
 ```
 
+PR CI의 `SpotlightReindexServiceTests`는 HostApp Debug를 먼저 빌드한 뒤 실행한다. 제품이 계산한 importer 경로를 같은 products 디렉터리의 실제 앱 bundle ID·실행 파일과 대조하므로 앱 산출물 없이 실행하면 실패한다. 발견 재시도와 유지보수 호출 순서는 가짜 시계·주입한 동작으로 검증하고, 출력 분리 검사는 합성 stdout/stderr만 내는 subprocess를 사용한다.
+
 일반 최초 설치를 판정할 때는 위 수동 등록/재색인 진단과 구분하여 새 state의 `prepare`에 `--automatic`을 지정한다. `environment → install → launch → automatic-search → stop-app → automatic-search → cleanup` 순서로 실행한다. 자동 모드는 `lsregister -f`와 `mdimport -i`를 호출하지 않고, 실제 본문 검색을 먼저 확인한 뒤 `mdimport -t`로 후보 경로를 검사한다. 관찰 전후 설치본 hash/시각과 설치 전 corpus의 hash/수정 시각 유지, 첫 실행 1회, 설치 전 본문 검색 0건을 확인하며, `diagnostic-register`, `developer-register`, `replace-app`, `restore-corpus`, `lifecycle` 이후에는 최초 자동 설치 통과를 거부한다. 발견 대기나 검색 timeout은 실패/미발견으로 기록하고 반복 실행 결과와 구분한다.
 
 첫 실행의 `SpotlightReindexService`는 자기 importer의 발견을 최대 600초 확인한 뒤 해당 형식의 재색인을 자동 요청한다. 이 제품 동작과 검증자가 외부 터미널에서 요청한 `mdimport -r`을 구분한다. 외부 재색인 진단은 `assisted_actions`에 남기며 최초 자동 설치 통과에 사용하지 않는다. 요청 접수 로그는 검색 성공의 대체 증거가 아니다. 설치 경로·빌드·importer 변경 시각별 접수 기록은 중복 요청을 막고 실패하면 다음 실행에 재시도한다.
