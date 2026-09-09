@@ -33,15 +33,19 @@ enum SpotlightReindexService {
         appBundleURL.appendingPathComponent("Contents/Library/Spotlight/Alhangeul.mdimporter", isDirectory: true)
     }
 
+    struct Operations {
+        var schedule: (@escaping () -> Void) -> Void = { queue.async(execute: $0) }
+        var waitForDiscovery: (URL) -> Bool = discoverImporter
+        var submit: (URL) -> Bool = SpotlightReindexService.submit
+    }
+
     static func start(
         appBundleURL: URL,
         buildIdentifier: String,
         userDefaults: UserDefaults,
-        schedule: (@escaping () -> Void) -> Void = { queue.async(execute: $0) },
-        waitForDiscovery: @escaping (URL) -> Bool = discoverImporter,
-        submit: @escaping (URL) -> Bool = submit
+        operations: Operations = Operations()
     ) {
-        schedule {
+        operations.schedule {
             let importerURL = importerURL(in: appBundleURL)
             guard let values = try? importerURL.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey]),
                   values.isDirectory == true, let modificationDate = values.contentModificationDate else {
@@ -51,7 +55,7 @@ enum SpotlightReindexService {
             let installation = Installation(importerURL: importerURL, buildIdentifier: buildIdentifier, modificationDate: modificationDate)
             let result = requestIfNeeded(
                 installation: installation, userDefaults: userDefaults,
-                waitForDiscovery: waitForDiscovery, submit: submit
+                waitForDiscovery: operations.waitForDiscovery, submit: operations.submit
             )
             switch result {
             case .alreadyRequested:

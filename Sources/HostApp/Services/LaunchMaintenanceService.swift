@@ -23,14 +23,15 @@ enum LaunchMaintenanceService {
         userDefaults: UserDefaults,
         appBundleURL: URL,
         buildIdentifier: String,
-        startSpotlight: (URL, String, UserDefaults) -> Void = {
-            SpotlightReindexService.start(appBundleURL: $0, buildIdentifier: $1, userDefaults: $2)
-        },
+        spotlightOperations: SpotlightReindexService.Operations = .init(),
         refreshRegistration: () -> OSStatus,
         refreshThumbnails: () -> (refreshedCount: Int, skippedCount: Int)
     ) -> LaunchMaintenanceResult {
         // 기존 Quick Look 유지보수 완료 기록과 Spotlight의 최초 재색인 요청을 분리한다.
-        startSpotlight(appBundleURL, buildIdentifier, userDefaults)
+        SpotlightReindexService.start(
+            appBundleURL: appBundleURL, buildIdentifier: buildIdentifier,
+            userDefaults: userDefaults, operations: spotlightOperations
+        )
         guard userDefaults.string(forKey: completedBuildKey) != buildIdentifier else {
             logger.debug("Launch maintenance skipped build=\(buildIdentifier, privacy: .public)")
             return LaunchMaintenanceResult(

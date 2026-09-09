@@ -148,17 +148,19 @@ final class SpotlightReindexServiceTests: XCTestCase {
         var events: [String] = []
         SpotlightReindexService.start(
             appBundleURL: app, buildIdentifier: "test-build", userDefaults: defaults,
-            schedule: { work = $0 },
-            waitForDiscovery: { url in
-                XCTAssertEqual(url, importer)
-                events.append("discover")
-                return true
-            },
-            submit: { url in
-                XCTAssertEqual(url, importer)
-                events.append("submit")
-                return true
-            }
+            operations: .init(
+                schedule: { work = $0 },
+                waitForDiscovery: { url in
+                    XCTAssertEqual(url, importer)
+                    events.append("discover")
+                    return true
+                },
+                submit: { url in
+                    XCTAssertEqual(url, importer)
+                    events.append("submit")
+                    return true
+                }
+            )
         )
         XCTAssertTrue(events.isEmpty)
         XCTAssertNil(defaults.object(forKey: SpotlightReindexService.requestedInstallationKey))
@@ -173,9 +175,11 @@ final class SpotlightReindexServiceTests: XCTestCase {
         let app = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".app")
         SpotlightReindexService.start(
             appBundleURL: app, buildIdentifier: "test-build", userDefaults: defaults,
-            schedule: { $0() },
-            waitForDiscovery: { _ in XCTFail("Discovery without importer"); return true },
-            submit: { _ in XCTFail("Submission without importer"); return true }
+            operations: .init(
+                schedule: { $0() },
+                waitForDiscovery: { _ in XCTFail("Discovery without importer"); return true },
+                submit: { _ in XCTFail("Submission without importer"); return true }
+            )
         )
         XCTAssertNil(defaults.object(forKey: SpotlightReindexService.requestedInstallationKey))
     }
@@ -190,34 +194,40 @@ final class SpotlightReindexServiceTests: XCTestCase {
     }
 
     @MainActor
-    func testLaunchMaintenanceStartsSpotlightEvenWithExistingReceipt() {
+    func testLaunchMaintenanceStartsSpotlightEvenWithExistingReceipt() throws {
         defaults.set("test-build", forKey: "alhangeul.launchMaintenance.completedBuild")
-        let app = URL(fileURLWithPath: "/Applications/Test.app")
+        let app = try makeTemporaryApp()
+        defer { try? FileManager.default.removeItem(at: app) }
         var started = 0
         let result = LaunchMaintenanceService.runIfNeeded(
             userDefaults: defaults, appBundleURL: app, buildIdentifier: "test-build",
-            startSpotlight: { url, build, settings in
-                started += 1
-                XCTAssertEqual(url, app)
-                XCTAssertEqual(build, "test-build")
-                XCTAssertTrue(settings === self.defaults)
-            },
+            spotlightOperations: .init(
+                schedule: { started += 1; $0() },
+                waitForDiscovery: { url in
+                    XCTAssertEqual(url, SpotlightReindexService.importerURL(in: app))
+                    return true
+                },
+                submit: { _ in true }
+            ),
             refreshRegistration: { XCTFail("Repeated registration"); return 0 },
             refreshThumbnails: { XCTFail("Repeated thumbnail refresh"); return (0, 0) }
         )
         XCTAssertEqual(started, 1)
         XCTAssertFalse(result.didRun)
+        XCTAssertEqual(defaults.dictionary(forKey: SpotlightReindexService.requestedInstallationKey)?["buildIdentifier"] as? String, "test-build")
     }
 
     @MainActor
-    func testFirstLaunchStartsSpotlightBeforeOtherMaintenance() {
+    func testFirstLaunchStartsSpotlightBeforeOtherMaintenance() throws {
+        let app = try makeTemporaryApp()
+        defer { try? FileManager.default.removeItem(at: app) }
         var events: [String] = []
         let result = LaunchMaintenanceService.runIfNeeded(
-            userDefaults: defaults, appBundleURL: URL(fileURLWithPath: "/Applications/Test.app"), buildIdentifier: "test-build",
-            startSpotlight: { _, _, settings in
-                XCTAssertTrue(settings === self.defaults)
-                events.append("spotlight")
-            },
+            userDefaults: defaults, appBundleURL: app, buildIdentifier: "test-build",
+            spotlightOperations: .init(
+                schedule: { events.append("spotlight"); $0() },
+                waitForDiscovery: { _ in true }, submit: { _ in true }
+            ),
             refreshRegistration: { events.append("registration"); return 0 },
             refreshThumbnails: { events.append("thumbnails"); return (2, 1) }
         )
@@ -226,6 +236,14 @@ final class SpotlightReindexServiceTests: XCTestCase {
         XCTAssertEqual(result.refreshedDocumentCount, 2)
         XCTAssertEqual(result.skippedDocumentCount, 1)
         XCTAssertEqual(defaults.string(forKey: "alhangeul.launchMaintenance.completedBuild"), "test-build")
+        XCTAssertEqual(defaults.dictionary(forKey: SpotlightReindexService.requestedInstallationKey)?["importerPath"] as? String,
+                       SpotlightReindexService.importerURL(in: app).standardizedFileURL.path)
+    }
+
+    private func makeTemporaryApp() throws -> URL {
+        let app = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".app")
+        try FileManager.default.createDirectory(at: SpotlightReindexService.importerURL(in: app), withIntermediateDirectories: true)
+        return app
     }
 
     private var validCatalog: String {
