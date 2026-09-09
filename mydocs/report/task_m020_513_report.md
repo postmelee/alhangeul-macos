@@ -14,7 +14,7 @@ Swift 정책/파싱 7개, Python 운영 24개·bundle 5개, importer callback 13
 
 최종 후보의 UI 양성 화면은 도구 연결 문제로 미확보다. 이전 후보 화면을 대체 첨부하지 않았다. 실제 검색 명령 결과와 최초 실행/교체 결과를 분리한 JSON을 제공한다.
 
-2026-09-10 최종 정리는 소유 검색 결과·파일·프로세스·importer catalog 제거와 기존 앱 hash/provider 보존 모두 PASS(cleaned)다. 기본 연결은 기존 한컴 뷰어로 유지됐다. 구현·개발 후보 검증을 후속 PR 리뷰 대상으로 제출하며 공개 릴리스는 아직 진행하지 않았다.
+2026-09-10 최종 정리는 소유 검색 결과·파일·프로세스·importer catalog 제거와 기존 앱 hash/provider 보존 모두 PASS(cleaned)다. 기본 연결은 기존 한컴 뷰어로 유지됐다. 구현·개발 후보 검증을 [PR #515](https://github.com/postmelee/alhangeul-macos/pull/515) 리뷰 대상으로 제출하며 공개 릴리스는 아직 진행하지 않았다.
 
 ## Stage 1–4 변경 범위
 
