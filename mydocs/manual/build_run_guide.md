@@ -173,7 +173,7 @@ PR CI의 `SpotlightReindexServiceTests`는 HostApp Debug를 먼저 빌드한 뒤
 
 일반 최초 설치를 판정할 때는 위 수동 등록/재색인 진단과 구분하여 새 state의 `prepare`에 `--automatic`을 지정한다. `environment → install → launch → automatic-search → stop-app → automatic-search → cleanup` 순서로 실행한다. 자동 모드는 `lsregister -f`와 `mdimport -i`를 호출하지 않고, 실제 본문 검색을 먼저 확인한 뒤 `mdimport -t`로 후보 경로를 검사한다. 관찰 전후 설치본 hash/시각과 설치 전 corpus의 hash/수정 시각 유지, 첫 실행 1회, 설치 전 본문 검색 0건을 확인하며, `diagnostic-register`, `developer-register`, `replace-app`, `restore-corpus`, `lifecycle` 이후에는 최초 자동 설치 통과를 거부한다. 발견 대기나 검색 timeout은 실패/미발견으로 기록하고 반복 실행 결과와 구분한다.
 
-첫 실행의 `SpotlightReindexService`는 자기 importer의 발견을 최대 600초 확인한 뒤 해당 형식의 재색인을 자동 요청한다. 이 제품 동작과 검증자가 외부 터미널에서 요청한 `mdimport -r`을 구분한다. 외부 재색인 진단은 `assisted_actions`에 남기며 최초 자동 설치 통과에 사용하지 않는다. 요청 접수 로그는 검색 성공의 대체 증거가 아니다. 설치 경로·빌드·importer 변경 시각별 접수 기록은 중복 요청을 막고 실패하면 다음 실행에 재시도한다.
+첫 실행의 `SpotlightReindexService`는 자기 importer의 발견을 최대 600초 확인한 뒤 해당 형식의 재색인을 자동 요청한다. 일시적인 조회 실패/잘못된 출력은 같은 deadline 안에서 재시도하고 각 명령의 timeout은 남은 시간으로 제한한다. stdout만 catalog로 파싱한다. 이 제품 동작과 검증자가 외부 터미널에서 요청한 `mdimport -r`을 구분한다. 외부 재색인 진단은 `assisted_actions`에 남기며 최초 자동 설치 통과에 사용하지 않는다. 요청 접수 로그는 검색 성공의 대체 증거가 아니다. 설치 경로·빌드·importer 변경 시각별 접수 기록은 중복 요청을 막고 실패하면 다음 실행에 재시도한다.
 
 `prepare --discovery-timeout 180`처럼 관찰할 발견 대기 시간을 지정할 수 있다(1–600초, 기본 60초). 값은 state에 저장되며 실제 경과 시간과 함께 보고한다. 이 값은 본문 검색 60초 timeout을 바꾸지 않는다. 최초 설치 판정 후 `lifecycle`을 실행하면 automatic 모드에서는 수정·보호·삭제 전파에도 외부 `mdimport -i`를 사용하지 않는다. 기존 진단 모드는 수동 색인을 유지한다.
 
