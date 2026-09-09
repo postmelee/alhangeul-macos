@@ -10,7 +10,8 @@
 - 기준 커밋: `56fe1ca6afda3baba1975a3cc5fda53fcf58f944`
 - 고정 의존성: rhwp / rhwp-studio `v0.8.6`, resolved commit `f1f9c6ae58344ee9368996d3543f76b9345cf227`
 - 수행계획 승인: 2026-09-10, 같은 스레드의 “진행해줘” 지시
-- 현재 단계: 구현계획서 작성·승인 대기. 아래 Stage 1~5는 미실행이다.
+- 구현계획 승인: 2026-09-10 같은 스레드의 “진행해줘” 지시
+- 현재 단계: Stage 1 완료·Stage 2 승인 대기. Stage 2~5는 미실행이다.
 
 파일 bytes를 가진 native 문서 payload와 실제 편집 중인 문서의 존재를 구분하고, 새 문서를 기존 저장 계약에 연결한다. 별도 단계에서 Word(.doc)·HTML의 브라우저 다운로드를 native 파일 저장에 연결한다. 기존 파일의 source URL·암호 보호·HWP3 변환 정책은 문서 교체와 비동기 응답 처리까지 포함해 보존한다.
 
@@ -29,7 +30,7 @@
 
 ## 문서 상태와 저장 계약
 
-이 표는 구현해야 할 동작 기준이다. 구체적인 Swift 타입과 bridge message 이름은 Stage 1에서 확정한다.
+이 표는 구현해야 할 동작 기준이다. Stage 1에서 확정한 API 근거와 상세 계약은 [Stage 1 보고서](../working/task_m010_516_stage1.md)의 “확정한 구현 계약”을 따른다. 새 모델은 `RhwpStudioEditorSession`으로 두며, native load intent와 editor 세대·dirty·source 연결을 분리한다. 자동복구 등 출처를 입증하지 못한 editor 문서는 이전 source를 계승하지 않고 `invalidOrUnknown` 복사본 정책을 적용한다.
 
 | 상태/사건 | native 문서 상태 | source 및 보호 상태 | 요구 동작 |
 |-----------|------------------|---------------------|-----------|
@@ -119,10 +120,10 @@
 
 ### 작업
 
-- Stage 1에서 확정한 exporter bridge 또는 WKDownload 경로를 전용 내보내기 서비스로 연결한다. 일반 파일 열기·PDF·공유와 요청 상태를 혼용하지 않는다.
+- Stage 1에서 검증한 WKDownload 경로를 전용 내보내기 서비스로 연결한다. `exportHtml` RPC는 고정본에 없으며, DOC/HTML Blob 모두 실제 다운로드 성공을 확인했다. 일반 파일 열기·PDF·공유와 요청 상태를 혼용하지 않는다.
 - `.doc`와 `.html`의 출력 형식, MIME, 기본 파일명과 저장 패널 확장자를 한 계약으로 묶는다. upstream의 HTML 기반 .doc 의미를 유지한다.
 - 명령 실행 시 editor 입력을 확정하고 현재 세션의 출력만 저장한다. request ID, 세션 변경, 중복 실행, WebContent 종료와 다운로드 실패를 처리한다.
-- native 파일 저장 권한과 destination 선택을 처리하고, 취소·실패 시 이번 요청의 임시 산출물만 정리한다.
+- native 파일 저장 권한과 destination 선택을 처리한다. WKDownload destination은 존재하지 않는 staging 파일을 제공하고 완료 검증 후 선택한 destination에 게시한다. 취소·실패 시 이번 요청의 임시 산출물만 정리하며 기존 destination을 먼저 삭제하지 않는다.
 - `file:export-doc`와 `file:export-html`을 비변경 명령으로 분류한다. 내보내기 성공 시 원본 source·형식·최근 문서·저장 완료 통지를 변경하지 않는다.
 - 사용 가능한 API/OS 동작이 Stage 1 가정과 다르면 경로 선택 근거와 검증 결과를 갱신한다.
 
@@ -193,4 +194,4 @@ Stage 5 승인 후 `task-final-report` 절차에서 최종 결과보고서, 오�
 
 ## 승인 요청 사항
 
-이 구현계획의 문서 상태·저장·내보내기 계약과 5단계 구성을 승인받아 Stage 1 재현 및 계약 확정을 시작한다. 현재 문서 작성 승인은 Stage 1 실행이나 제품 소스 변경 승인으로 확대하지 않는다.
+2026-09-10 승인된 Stage 1 재현과 계약 확정을 완료했다. [Stage 1 보고서](../working/task_m010_516_stage1.md)를 검토한 뒤 Stage 2 새 문서 세션·편집 상태 동기화 구현 진입 승인을 요청한다. 제품 소스는 아직 변경하지 않았다.
