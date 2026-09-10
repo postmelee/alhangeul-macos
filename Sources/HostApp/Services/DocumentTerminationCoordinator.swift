@@ -7,22 +7,26 @@ final class DocumentTerminationCoordinator {
     private var isConfirmingTermination = false
     private var didReplyToCurrentRequest = false
 
-    private init() {}
+    private let reply: @MainActor (NSApplication, Bool) -> Void
+
+    init(reply: @escaping @MainActor (NSApplication, Bool) -> Void = { $0.reply(toApplicationShouldTerminate:$1) }) {
+        self.reply = reply
+    }
 
     func applicationShouldTerminate(_ application: NSApplication) -> NSApplication.TerminateReply {
         guard !isConfirmingTermination else {
             return .terminateCancel
         }
 
-        let dirtyControllers = DocumentCloseConfirmationRegistry.dirtyControllers()
-        guard !dirtyControllers.isEmpty else {
+        let controllers = DocumentCloseConfirmationRegistry.controllersForTermination()
+        guard !controllers.isEmpty else {
             return .terminateNow
         }
 
         isConfirmingTermination = true
         didReplyToCurrentRequest = false
         confirmNext(
-            dirtyControllers,
+            controllers,
             at: 0,
             application: application
         )
@@ -40,10 +44,6 @@ final class DocumentTerminationCoordinator {
         }
 
         let controller = controllers[index]
-        guard controller.hasUnsavedChanges else {
-            confirmNext(controllers, at: index + 1, application: application)
-            return
-        }
 
         controller.confirmForTermination { [weak self, weak application] result in
             guard let self,
@@ -70,6 +70,6 @@ final class DocumentTerminationCoordinator {
 
         didReplyToCurrentRequest = true
         isConfirmingTermination = false
-        application.reply(toApplicationShouldTerminate: shouldTerminate)
+        reply(application, shouldTerminate)
     }
 }

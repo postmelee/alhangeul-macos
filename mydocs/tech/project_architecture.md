@@ -35,7 +35,7 @@ mydocs/                       # hyper-waterfall 작업 문서와 운영 매뉴�
 - 보안 범위 접근으로 원본 파일 bytes를 읽고 `rhwp-studio` WKWebView에 전달할 문서 payload와 revision을 관리한다.
 - 앱 bundle의 `Resources/rhwp-studio` 정적 asset을 `alhangeul-studio://app` 내부 resource scheme으로 제공하고, `alhangeul-document://current` 내부 document scheme으로 현재 문서 bytes를 제공한다.
 - `rhwp-studio` 파일 메뉴와 `Command/Ctrl+O/S/P` 단축키의 열기/저장/인쇄 명령은 WKUserScript, `WKScriptMessageHandler`, AppKit key equivalent fallback, SwiftUI File menu command를 통해 HostApp의 `DocumentOpenPanel`, 형식 인식형 `DocumentSavePanel`, PDF export panel과 AppKit print operation으로 연결한다.
-- HWP/HWPX 저장 메뉴와 native 저장 UX, 형식·destination 검증과 atomic write는 HostApp이 소유한다. 현재 편집 상태의 HWP/HWPX bytes 생성과 저장 성공 뒤 dirty state 정리는 bundled `rhwp-studio`의 embed RPC가 담당한다.
+- HWP/HWPX 저장 메뉴와 native 저장 UX, 형식·destination 검증과 atomic write는 HostApp이 소유한다. 편집기 문서는 파일 bytes와 별도의 세션으로 추적한다. 현재 편집 상태의 bytes 생성은 bundled exporter가, 실제 write 뒤 dirty 정리는 공개 `notifySaved`가 담당한다. Word·HTML Blob 다운로드도 HostApp이 저장 패널·WKDownload staging·게시를 소유한다.
 - HostApp titlebar toolbar는 macOS 공유, Finder에서 보기, PDF로 내보내기, 최근 문서 접근을 제공한다. 공유 picker는 toolbar 버튼에 심은 `NSViewRepresentable` anchor view를 기준으로 표시한다.
 - HostApp MVP viewer의 zoom/page/search 조작은 `rhwp-studio` 내부 UI가 소유한다.
 - `project.yml` 기준으로 `Sources/Shared`, `Sources/RhwpCoreBridge`, `Frameworks/Rhwp.xcframework`를 포함하지만, MVP viewer 화면과 사용자용 PDF export는 native render tree 경로를 호출하지 않는다. PDF export와 일반 인쇄는 현재 editor의 upstream page SVG를 HostApp 전용 `RhwpStudioPagePDFRenderer`가 `WKWebView.createPDF`로 변환하는 경로를 공유한다.
@@ -157,11 +157,26 @@ HostApp은 앱 실행과 version 전환을 영구 사용자·기기·설치 식�
 11. HostApp은 명시적 형식 command를 우선하고, 일반 저장 command는 current source URL, 현재 filename, 기본 HWP 순서로 저장 형식을 정한다.
 12. HWP 저장은 `exportHwpBase64`와 `exportHwp` fallback을, HWPX 저장은 `exportHwpx`를 사용해 현재 편집 상태의 bytes를 받는다.
 13. HostApp은 요청·응답 형식, byte count, CFB/ZIP signature와 destination 확장자를 확인한 뒤 security-scoped source 또는 native panel에서 선택한 URL에 atomic write한다.
-14. 저장 성공 뒤 current source와 최근 문서를 실제 destination으로 갱신하고 `notifySaved(fileName)`을 호출해 upstream filename, dirty state와 recovery 상태를 동기화한다.
+14. durable write 뒤 `notifySaved(fileName)`으로 filename·dirty·recovery 상태를 동기화하고, 같은 편집 세션에 저장 결과의 bytes·source·최근 문서를 연결한다. 최초 저장도 WebView reload를 요청하지 않는다. 동기화 실패는 파일 write 성공과 구분해 보고한다.
 15. `파일 > 인쇄`는 active editor state를 settle한 뒤 `pageCount`와 page별 `getPageSvg`를 순서대로 수집하고, HostApp 공용 page SVG renderer로 만든 `PDFDocument`를 PDFKit/AppKit print operation에 전달한다.
 16. 내부 `PDF로 저장…`의 `file:print-to-pdf`와 toolbar의 `file:export-pdf`는 canonical `file:export-pdf`로 합쳐진다. HostApp이 native destination panel을 먼저 표시한 뒤 현재 editor의 page SVG를 수집하고, `WKWebView.createPDF`로 page geometry와 text layer를 보존한 PDF를 만들어 atomic write한 성공 URL만 Finder에 표시한다.
 17. `공유`는 active editor element를 settle한 뒤 `rhwp-studio`의 `exportHwp` response bytes를 임시 파일로 만든 뒤 `NSSharingServicePicker`로 전달한다.
-18. 최근 문서는 security-scoped bookmark와 함께 저장하고, toolbar menu에서 다시 열 수 있게 한다.
+18. Word·HTML 메뉴는 native 저장 위치 선택 뒤 공개 exporter의 Blob을 요청별 WKDownload로 받아 검증·게시한다. PDF와 함께 원본 source·dirty를 변경하지 않는다.
+19. 최근 문서는 security-scoped bookmark와 함께 저장하고, toolbar menu에서 다시 열 수 있게 한다.
+
+### 편집 세션과 native 문서 상태
+
+파일 없이 시작해도 Studio가 만든 문서를 `RhwpStudioEditorSession`으로 등록한다. `RhwpStudioDocumentPayload`는 실제 원본/저장 bytes를 가지며, nil이라고 편집 문서가 없다는 뜻은 아니다. Store의 `hasDocument`는 현재 세션의 준비 완료 상태를 사용한다.
+
+- Store의 `webViewLoadID`는 파일 열기 성공과 명시적 retry에서 증가한다. Coordinator는 loadID 변경에서만 WebView를 reload한다. 파일명·dirty·첫 저장 metadata 갱신으로는 reload하지 않는다.
+- page별 token과 native loadID, editor의 `documentEpoch`·`changeSeq`, 메시지 `sequence`를 검증한다. 이전 page/epoch나 낮은 sequence가 현재 상태를 덮어쓰지 못한다.
+- 일반 상태 갱신은 입력·명령·상태 이벤트를 40ms로 병합하고 1초 간격으로 보완한다. `getSelectionContext`·pageCount·automation context를 사용하며 전체 export/SHA가 필요한 `getDocumentState`는 초기/epoch 변경과 저장·출력 경계에서 사용한다.
+- `nativeLoad`는 native가 읽고 분류한 bytes/source에 연결된 세션이다. native 요청 없이 epoch가 바뀐 `newDocument`/`editorOnly` 세션은 이전 source·보호 정보를 즉시 해제한다. 렌더 준비 중이어도 원본 연결을 해제하며, 늦은 SwiftUI metadata로 복원하지 않는다.
+- `newDocument`는 documentStart에 공개 automation 확장 명령의 CommandServices를 통해 `createNewDocument` 성공을 관찰하고, 당시 `documentGeneration`이 현재 세대와 같은 경우다. 첫 저장은 보호 경고 없이 일반 파일명을 사용하는 plain 정책이다. 생성 취소·실패는 새 판정을 만들지 않으며, 파일 로드·복구는 세대가 증가해 이전 생성 판정을 무효화한다. 파일명과 내용은 판정 근거가 아니다.
+- `editorOnly`에는 자동복구 등 출처 미확정 문서도 포함한다. 첫 저장은 보호 상태를 임의로 plain으로 낮추지 않고 `invalidOrUnknown` 평문 복사본 확인과 새 destination 정책을 사용한다.
+- 저장·PDF·Word/HTML은 destination 선택 전후 최신 세션을 조회한다. snapshot 생성부터 write/완료까지 입력과 문서 변경 명령을 잠그고, epoch·changeSeq·SHA로 검증한다. 저장 잠금은 60초 만료와 요청별 해제를 가지며 배경 상태 조회의 오래된 결과도 폐기한다.
+
+`DocumentCloseConfirmationController`는 창 닫기 및 앱 종료 전에 해당 창의 최신 세션을 읽는다. `DocumentTerminationCoordinator`는 native 캐시에 dirty가 없는 창도 조회하여 마지막 입력을 놓치지 않는다. 저장 선택 뒤에는 같은 load/epoch가 clean인지 다시 확인하며 취소·실패·추가 편집이면 창을 유지한다. 특정 창의 저장 명령은 다른 창으로 대체 실행하지 않는다.
 
 ### HostApp 문서 열기 복구 경계
 
@@ -170,7 +185,7 @@ HostApp은 새 입력을 읽고 검증하는 단계의 실패와 이미 commit�
 | 실패 경계 | 대표 원인 | 상태·표시 | 기존 문서 snapshot |
 |----------|----------|-----------|--------------------|
 | recoverable opening | 파일 읽기 실패, 0-byte, HWP/HWPX가 아닌 signature, 최근 bookmark resolve 실패 | `DocumentOpenRecoveryState`의 window-local sheet | 유지 |
-| fatal WebView | viewer asset 누락, navigation/timeout/process 실패, Studio parser `document-load-error` | 기존 `WebViewerFallbackView` | 유지 |
+| fatal WebView | viewer asset 누락, navigation/timeout/process 실패, Studio parser `document-load-error` | 기존 `WebViewerFallbackView`, 편집 세션·이전 요청 무효화 | 파일 snapshot 유지 |
 
 파일 패널, Finder/open URL, 최근 문서, native file URL drop과 WebView bytes drop은 모두 source만 구분하고 같은 `RecoverableDocumentOpenFailure` presentation 계약을 사용한다. failure에는 표시용 source, sanitize된 파일명, 제목과 사용자 문구만 보관한다. 원본 URL, bookmark, document bytes와 `Error` 객체는 장기 보관하지 않는다.
 
@@ -186,14 +201,14 @@ recoverable sheet의 `닫기`와 Escape는 failure와 retry pending만 해제한
 
 - HostApp은 upstream 파일 메뉴의 저장 command를 native command로 intercept하고 저장 형식 결정, `NSSavePanel`, destination, security-scoped 접근, payload 검증, atomic write, current source와 최근 문서 갱신을 소유한다.
 - bundled `rhwp-studio`는 현재 editor state를 settle하고 해당 형식 exporter를 호출하며, HWP/HWPX bytes를 HostApp에 전달한다. 로컬 파일 경로 선택과 write는 수행하지 않는다.
-- durable write 뒤 HostApp은 `notifySaved(fileName)` embed RPC를 호출한다. upstream은 filename, dirty state와 recovery draft를 정리하고 HostApp은 저장 완료 상태를 표시한다.
+- durable write 뒤 HostApp은 공개 `rhwpStudio.notifySaved(fileName)`을 호출한다. upstream은 filename, dirty state와 recovery draft를 정리하고 HostApp은 반환된 최신 snapshot을 반영한다.
 - `notifySaved` 실패는 이미 완료된 파일 write와 current source 갱신을 되돌리지 않는다. HostApp은 파일 저장과 editor state 동기화 실패를 구분해 사용자에게 알린다.
 
 #### command와 형식 결정
 
 | command | 형식 결정 | destination |
 |---------|-----------|-------------|
-| `file:save` | current source URL → 현재 filename → 기본 HWP | 같은 형식의 source가 있으면 제자리 저장, source가 없거나 write에 실패하면 같은 형식 save panel |
+| `file:save` | 최신 세션의 current source URL → 현재 filename → 기본 HWP | 같은 형식의 plain/non-HWP3 source는 제자리 저장, 그 외 native panel·보호/변환 정책 적용 |
 | `file:save-as` | current source URL → 현재 filename → 기본 HWP | 현재 형식을 유지하는 native save panel |
 | `file:save-as-hwp` | 명시적 HWP | HWP native save panel |
 | `file:save-as-hwpx` | 명시적 HWPX | HWPX native save panel |
@@ -209,15 +224,15 @@ HWP  -> exportHwpBase64 -> 미지원 시 exportHwp fallback
 HWPX -> exportHwpx -> chunked base64 encode
 ```
 
-bridge의 `save-document` response는 `format`, 정규화한 `fileName`, `base64`, `byteCount`를 포함한다. HostApp은 다음 조건을 모두 만족한 경우에만 파일을 쓴다.
+`RhwpStudioSaveBridgeScript.begin`의 async 반환값은 request ID·page token·세션 snapshot과 `format`, `fileName`, `base64`, `byteCount`를 포함한다. 이전 비상관 `save-document` 메시지로는 파일을 쓰지 않는다. HostApp은 다음 조건을 모두 만족한 경우에만 파일을 쓴다.
 
-1. destination과 format을 가진 pending save request가 존재한다.
+1. destination과 format을 가진 pending 요청이 현재 UUID·token·loadID·epoch에 대응하며, export 후와 write 직전의 세대·변경 순서·문서 SHA 검증을 통과한다.
 2. response format이 HWP/HWPX 중 하나이며 pending format과 일치한다.
 3. base64 decode 결과와 `byteCount`가 일치한다.
 4. HWP는 CFB magic, HWPX는 ZIP magic을 가진다.
 5. destination 확장자와 요청 format이 일치한다.
 
-검증 실패 시 파일, current source, 최근 문서와 clean state를 변경하지 않는다. 제자리 atomic write가 실패하면 원래 요청 format을 유지한 native save panel로 fallback한다. 저장 패널 선택이나 export가 진행 중일 때 들어온 중복 요청은 새 pending state를 만들지 않는다.
+export/검증/write 실패 시 파일, current source, 최근 문서와 clean state를 변경하지 않는다. 제자리 write 실패도 오류로 반환하고 다음 저장 명령에서 최신 snapshot으로 다시 시작한다. 이미 export한 bytes를 별도 패널로 넘기는 fallback은 사용하지 않는다. 저장·PDF·Word/HTML 중 다른 저장/출력 요청은 새 pending state를 만들지 않는다.
 
 runtime signature guard는 완전히 다른 형식의 bytes를 잘못된 확장자로 쓰는 오류를 빠르게 막는 역할만 한다. HWPX의 `mimetype`, `Contents/`, `META-INF/` entry와 실제 재열기는 별도 container/render smoke에서 확인한다.
 
@@ -243,6 +258,19 @@ RustBridge는 source bytes를 `plain`, `passwordProtected`, `unsupportedProtecti
 - HWPX exporter는 call-stack overflow를 피하도록 chunked base64 encoding하지만, JS와 Swift 양쪽에 전체 payload를 보유하는 메모리 비용은 남는다.
 - 공유는 이 저장 경로와 별개로 HWP exporter payload를 사용하는 기존 동작을 유지한다. PDF export와 일반 인쇄는 HWP/HWPX bytes exporter를 사용하지 않고 현재 editor의 page SVG를 사용한다.
 
+### HostApp Word·HTML 내보내기 경로
+
+`file:export-doc`와 `file:export-html`은 native 비변경 명령이다. `DocumentHTMLExportFormat`이 MIME·확장자·기본 파일명을, `DocumentHTMLExportPanel`이 destination 선택을 소유한다. DOC는 upstream의 HTML 기반 `.doc`이며 binary DOC/DOCX가 아니다.
+
+1. 최신 편집 세션을 확인하고 저장 위치를 선택한 뒤 같은 문서인지 재확인한다.
+2. 입력을 확정하고 잠근 상태에서 공개 automation exporter를 실행한다. `RhwpStudioHTMLExportScript`는 이 호출의 anchor 클릭을 잠시 포착해 탐색을 보류한다. upstream의 1초 URL 폐기와 별개로 Blob을 보존해 요청 전용 URL을 만들고 원래 click 함수를 복구한다.
+3. native가 정확한 URL과 요청을 등록한 뒤 전용 anchor만 클릭한다. main frame의 해당 첫 Blob 다운로드를 `.download`로 처리하고, 관련 없는 Blob 탐색은 취소하여 편집기 화면을 유지한다.
+4. `RhwpStudioHTMLDownload`는 응답 URL·MIME·확장자를 검사하고 요청별 임시 디렉터리의 존재하지 않는 파일로 WKDownload를 받는다. 완료·실패·취소 및 30초 timeout에서 해당 staging만 정리한다.
+5. 다운로드 bytes의 UTF-8 HTML 구조, destination 확장자, 현재 세션/문서 SHA 및 원본과 다른 파일인지 확인한 후 atomic write한다. 원본을 가리키는 심볼릭/하드 링크도 거부한다. 기존 destination을 먼저 삭제하지 않는다.
+6. 성공 URL만 사용자에게 표시하고 잠금과 Blob URL을 해제한다. 성공·취소·실패 모두 source·저장 형식·최근 문서·dirty를 임의로 바꾸지 않는다.
+
+native 로드·epoch 교체·WebContent 실패는 진행 중 다운로드를 취소한다. 다운로드 실패로 편집기를 다른 문서로 바꾸거나 HWP/HWPX 저장 완료를 통지하지 않는다. 전체 Blob과 다운로드 bytes의 메모리 비용은 남으며, HTML importer의 본문 확인이 실제 Word의 레이아웃/편집 호환성을 보장하지는 않는다.
+
 ### HostApp PDF 저장과 일반 인쇄 경로
 
 #### command와 native save ownership
@@ -267,8 +295,8 @@ idle
 - `DocumentPDFExportPanel`은 `choosingDestination`에서 한 번만 native sheet로 표시된다.
 - panel 취소는 page SVG를 요청하지 않고 `idle`로 복귀한다.
 - destination이 결정된 뒤에만 HostBridge의 PDF page 수집 함수를 평가한다.
-- request ID는 HostBridge의 성공·실패 message까지 왕복하며 현재 request와 일치하는 응답만 state를 전이시킨다.
-- 문서 load identity가 바뀌거나 main WebContent process가 종료되면 destination 선택·page 수집 request를 무효화하고 늦게 도착한 응답을 무시한다. 이미 독립 renderer에서 시작한 export는 해당 request completion까지 유지한다.
+- PDF page 수집은 요청에 연결된 async 결과로 받으며 request ID·page token·epoch를 확인한다. 이전 비상관 `export-pdf-document` 메시지는 파일 쓰기로 연결하지 않는다.
+- load identity·editor epoch가 바뀌거나 main WebContent process가 종료되면 이전 요청을 무효화한다. 독립 renderer의 작업은 completion까지 유지하지만 실제 write 직전에도 원래 세션/SHA를 검증하므로 다른 문서로 바뀐 결과는 게시하지 않는다.
 - page 수집, render/write 중 중복 export command는 새 panel이나 pending destination을 만들지 않는다.
 - bridge evaluation, payload 검증, render와 write의 성공·실패 completion은 request ID와 controller identity가 일치할 때만 pending controller와 state를 정리한다.
 - offscreen renderer의 WebContent process 종료는 명시적 실패 completion으로 변환해 export state가 `exporting`에 남지 않게 한다.
@@ -304,7 +332,7 @@ current editor
 
 `RhwpStudioPagePDFRenderer`는 PDF command, save panel과 파일 write를 소유하지 않는다. page별 geometry 확인과 `WKWebView.createPDF` 호출, page count 일치 검증만 담당한다.
 
-- `RhwpStudioPDFExportController`는 renderer 결과의 `%PDF` signature를 확인하고 선택한 URL에 `Data.write(.atomic)`으로 기록한다.
+- `RhwpStudioPDFExportController`는 renderer 결과의 `%PDF` signature를 확인하고 async 세션 검증 뒤 같은 MainActor 실행에서 선택한 URL에 `Data.write(.atomic)`으로 기록한다. PDF는 source·dirty 및 저장 완료 상태를 변경하지 않는다.
 - `RhwpStudioPrintController`는 같은 renderer 결과를 `PDFDocument.printOperation`에 전달한다. 모든 non-square page 방향이 하나로 일치할 때만 job orientation을 초기화하며, 가로·세로 혼합 문서는 job orientation을 강제하지 않고 PDFKit auto-rotate에 맡긴다.
 - Quick Look과 Thumbnail은 이 renderer를 사용하지 않는다. 두 extension은 `RhwpDocument`와 render tree 기반 `HwpPageImageRenderer`의 bitmap 경로를 유지한다.
 

@@ -14,6 +14,7 @@ final class RhwpStudioPDFExportController {
     func export(
         payload: RhwpStudioPagePayload,
         destinationURL: URL,
+        validateBeforeWrite: @escaping @MainActor () async throws -> Void = {},
         completion: @escaping (Result<URL, Error>) -> Void
     ) {
         guard !isExporting else {
@@ -36,25 +37,18 @@ final class RhwpStudioPDFExportController {
                     self.finish(.failure(RhwpStudioPDFExportError.pdfEncodingFailed))
                     return
                 }
-                self.write(data: data, to: destinationURL)
+                Task { @MainActor in
+                    do {
+                        try await validateBeforeWrite()
+                        // 마지막 세션 검증과 atomic write 사이 native 문서 교체를 허용하지 않는다.
+                        try data.write(to: destinationURL, options: .atomic)
+                        self.finish(.success(destinationURL))
+                    } catch {
+                        self.finish(.failure(error))
+                    }
+                }
             case .failure(let error):
                 self.finish(.failure(error))
-            }
-        }
-    }
-
-    private func write(data: Data, to destinationURL: URL) {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            let result: Result<URL, Error>
-            do {
-                try data.write(to: destinationURL, options: .atomic)
-                result = .success(destinationURL)
-            } catch {
-                result = .failure(error)
-            }
-
-            DispatchQueue.main.async {
-                self?.finish(result)
             }
         }
     }

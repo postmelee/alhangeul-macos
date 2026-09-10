@@ -14,12 +14,14 @@
 		019F90CEE25EA7F05E9993F4 /* Importer.m in Sources */ = {isa = PBXBuildFile; fileRef = 37AB29B3B3D84E39EEFED3A2 /* Importer.m */; };
 		02E1371B73A762F8E64ED8EF /* HwpPreviewPDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2512041CBA5B9CE5521537DC /* HwpPreviewPDFRenderer.swift */; };
 		040CCB72B17712A8C122529A /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F5AFC8EC56882BF138E698C /* Rhwp.xcframework */; };
+		071476E4CA4DA04037A9B7E0 /* RhwpStudioHTMLExportScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5551183B628DAA1F831CE5A /* RhwpStudioHTMLExportScript.swift */; };
 		07945116B58B7F69CEC8911A /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B49CA0DEC91C628C9B92B7A1 /* CoreFoundation.framework */; };
 		07E0FE00AA4A4A61F8B36B7A /* RhwpStudioWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCEB1E34C6235A402631964 /* RhwpStudioWebView.swift */; };
 		09D138398C713C14EB0266D1 /* RecentDocumentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C37388FB72FB052CAF01DEB2 /* RecentDocumentStore.swift */; };
 		09F8DF40F4C4C9076DAE223B /* SpotlightReindexService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6853E78B127E16F60AF259C7 /* SpotlightReindexService.swift */; };
 		0C2D44752CE924B4DE903484 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 431D649AD30D83CFC469F84A /* InfoPlist.strings */; };
 		0C995BFB192431BD85A9E720 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96DA8725B9E959FB54D06F3F /* CoreText.framework */; };
+		0C9B0D407439CF5DDB02517C /* DocumentHTMLExportFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA5AFA00641CA48894E658C /* DocumentHTMLExportFormat.swift */; };
 		105A7A63EABAD3650C9F9ACC /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96DA8725B9E959FB54D06F3F /* CoreText.framework */; };
 		14EA0DCDA1ED018ADDA22F01 /* HostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA2088B1914C461BF4EC8023 /* HostApp.swift */; };
 		14EA123C29C4E27B5515D961 /* RhwpStudioPagePDFRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F54C76110CD58588556359B /* RhwpStudioPagePDFRendererTests.swift */; };
@@ -34,9 +36,11 @@
 		1D21397E46785B30EB21028D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A5315FE25D0AB65823C1D91A /* libz.tbd */; };
 		1E1F80D23A367D7E3A27A3ED /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0ACAC4E6FCA67627CCC3D324 /* JavaScriptCore.framework */; };
 		1EA44B4963FEC6D895772CCD /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D83D8D9F6BF5014474791FB1 /* ImageIO.framework */; };
+		1F3A09345EE755BC44B63F4E /* RhwpStudioEditorSessionScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CAA96F204103F963B5F2AF /* RhwpStudioEditorSessionScript.swift */; };
 		202EAD43BD149C9874AD3E58 /* QuickLookSettingsOpenerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C5A2536FE100F6D56A308CB /* QuickLookSettingsOpenerTests.swift */; };
 		227BB0B9C6B7D7C6811A4C36 /* BuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA73996BDEAF04DE10497E23 /* BuildInfo.swift */; };
 		238B1F611758B89AC3322909 /* QuickLookConflictNoticePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4BCD7CE9E470F2AEEC114C /* QuickLookConflictNoticePresenter.swift */; };
+		265742514A1C2B1467C77F1E /* RhwpStudioEditorSessionScriptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 301C4E5F75329A53D824158D /* RhwpStudioEditorSessionScriptTests.swift */; };
 		28A062BB96C70732D9D0BBF5 /* QuickLookConflictNoticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B6CA474978D10B697EEA41 /* QuickLookConflictNoticeView.swift */; };
 		28B973E130F1355F077F3CC8 /* RhwpStudioPrintLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58FC86A407CAE868D5D8B0F3 /* RhwpStudioPrintLifecycle.swift */; };
 		2AB0C061B6D7D8147C48977B /* RhwpStudioPagePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD0C0600D4441C1E31B36FB /* RhwpStudioPagePayload.swift */; };
@@ -51,6 +55,7 @@
 		329C78D1A7232AF2B5ABFD9E /* PageOverlayImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B27A9A00D195F9031B6311 /* PageOverlayImages.swift */; };
 		32DD5646758D0ACBF3392E38 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E931CF12C8BE40BCE94DC51 /* libc++.tbd */; };
 		33364AC8201F4719F9EA44B5 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A5315FE25D0AB65823C1D91A /* libz.tbd */; };
+		33892E89694DB33017024BF5 /* RhwpStudioSaveBridgeScriptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407CD5148D1EA2CE36F6C8E8 /* RhwpStudioSaveBridgeScriptTests.swift */; };
 		3394B347EA19E7A68749F539 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E931CF12C8BE40BCE94DC51 /* libc++.tbd */; };
 		3401424C5ED6A91AB264C819 /* RhwpDocumentExternalImageBridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970F736B2F020A4F647E6138 /* RhwpDocumentExternalImageBridgeTests.swift */; };
 		364457423D706CF1C778334C /* ExtensionStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E524F7A95D1616AB85E3F2 /* ExtensionStatusModel.swift */; };
@@ -62,7 +67,9 @@
 		3D39A7C1FC8BD19A87262F9F /* RhwpStudioPDFExportState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF59584D1CC46EC28C2FBE4 /* RhwpStudioPDFExportState.swift */; };
 		40A59595E7EE4DB103A477F7 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A5315FE25D0AB65823C1D91A /* libz.tbd */; };
 		41C5D25E1060BEF211833C8A /* HwpPreviewProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F373DBDDC753FC79292E2D /* HwpPreviewProvider.swift */; };
+		435B1CE5B24897CA0F7F370A /* RhwpStudioHTMLExportScriptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE0789E51B6D1B4F1707CB7 /* RhwpStudioHTMLExportScriptTests.swift */; };
 		43A1584B860794E3A9E9FF3C /* HwpPreviewPNGRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8645A8FD6F4761F6A5BE264A /* HwpPreviewPNGRenderer.swift */; };
+		43D602B12DFC9FE654AAE509 /* RhwpStudioEditorSessionScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24CAA96F204103F963B5F2AF /* RhwpStudioEditorSessionScript.swift */; };
 		44A7FDD262CAEC1AF1F8FDAA /* RenderTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A01160D544F0F71CA0C3501 /* RenderTree.swift */; };
 		44CDAB1946DFA27A7CADCF6D /* RecentDocumentThumbnailRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4915E7318DD22D9A61F584 /* RecentDocumentThumbnailRefresher.swift */; };
 		45B51F6563B324FC8E08BB69 /* QuickLookConflictPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CC07AD7EFC4382DB0FA3159 /* QuickLookConflictPresentation.swift */; };
@@ -80,6 +87,7 @@
 		4D0C99DED184D28F3F25E30B /* RhwpStudioPrintOrientationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68AA71A85B8293FC85599FEB /* RhwpStudioPrintOrientationPolicy.swift */; };
 		4D168DDC50595656F0190D78 /* QuickLookConflictPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CC07AD7EFC4382DB0FA3159 /* QuickLookConflictPresentation.swift */; };
 		4D97135716F6E9E2F6D10CC6 /* RhwpProvenance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2953DECE3F38280938C3CE2B /* RhwpProvenance.swift */; };
+		52DCFC363EC21FBC1DD17DC6 /* DocumentHTMLExportFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C17179E08FB758E56305E95 /* DocumentHTMLExportFormatTests.swift */; };
 		532AFD31F9AAA0DD9D44FAD1 /* RhwpDocumentProtection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7F1E8C84AA206741A421FF /* RhwpDocumentProtection.swift */; };
 		539DFB38A0293062B5A01ED9 /* HwpThumbnailRenderCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 895C9E62B889A9E90C3FF8C6 /* HwpThumbnailRenderCache.swift */; };
 		53CBAE12913135F8190A88AF /* DocumentSaveContract.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FAA52954EDF090E3AA5B77 /* DocumentSaveContract.swift */; };
@@ -89,6 +97,7 @@
 		56203C730E24E54E21D91075 /* RhwpStudioPDFExportStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90F5200498C9DAA53AF9EFD2 /* RhwpStudioPDFExportStateTests.swift */; };
 		58FEED15D7979CC23FADA9D9 /* FontResourceRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC2D57719DF9672E7C311D7 /* FontResourceRegistry.swift */; };
 		59DC1D6F67C3F459AC4A8ADC /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B49CA0DEC91C628C9B92B7A1 /* CoreFoundation.framework */; };
+		5B0BD320B52314463D4B3107 /* RhwpStudioEditorSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D6618A5DDBCE9989B5B291 /* RhwpStudioEditorSessionTests.swift */; };
 		5C02265DAB27BE08F8FF4D8C /* RhwpCoreBuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7582723794D9CFE90ED759 /* RhwpCoreBuildInfo.swift */; };
 		5D0E58974DAD8BEA1E040E5A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D0ED3A363318BCA70DEA5C4C /* Assets.xcassets */; };
 		5E071C1C500CDB5723E42680 /* sample.hwpx in Resources */ = {isa = PBXBuildFile; fileRef = E4F2FDC67F5328E229845401 /* sample.hwpx */; };
@@ -96,6 +105,8 @@
 		5FFDE66E6667A8503C784D30 /* ColorSync.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B73611C892296A43FDC8B2 /* ColorSync.framework */; };
 		6180BA787D50DD6F44AB68AF /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2612A2057C62E35A5E751E7 /* Foundation.framework */; };
 		633A78D99D22FEBEA0F8C963 /* RhwpStudioHostBridgeScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E7B93D7ACFD48BF84FF1558 /* RhwpStudioHostBridgeScript.swift */; };
+		638553F6BFA68B987B74769D /* RhwpStudioHTMLExportScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5551183B628DAA1F831CE5A /* RhwpStudioHTMLExportScript.swift */; };
+		640ABAE720925A5ACACC998C /* DocumentHTMLExportPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA22F935D8D234463D04B1F1 /* DocumentHTMLExportPanel.swift */; };
 		6475910A39D8217C7E004CB8 /* RenderTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A01160D544F0F71CA0C3501 /* RenderTree.swift */; };
 		651A3AF3E4D1E7049570EFA4 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F6DA732CC42A781180AA2F88 /* libiconv.tbd */; };
 		655692EA210302EA92020E33 /* RhwpStudioPrintLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F71028FC3372C8056A37EA93 /* RhwpStudioPrintLifecycleTests.swift */; };
@@ -132,10 +143,12 @@
 		8B70E7EBA558CB14F8CBA334 /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F6DA732CC42A781180AA2F88 /* libiconv.tbd */; };
 		8BEF44A307C672C3E10078ED /* QuickLookConflictNoticePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C590E0FD428E3C3B93D182 /* QuickLookConflictNoticePolicy.swift */; };
 		8C3810D8CF462CCD0AADAA2E /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B49CA0DEC91C628C9B92B7A1 /* CoreFoundation.framework */; };
+		8C5B44AC53726E02E63ED76C /* RhwpStudioSaveBridgeScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4DA17C5BF43FA0762AA4A17 /* RhwpStudioSaveBridgeScript.swift */; };
 		8CB7876CD097AEAA46583BBE /* QuickLookConflictDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E87D97188514E1A14C30E4 /* QuickLookConflictDetector.swift */; };
 		8DD11A59269A08802E4776F4 /* AppExecutionOutboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFD8F8CDAE3C68AC47194251 /* AppExecutionOutboxTests.swift */; };
 		8E526CE4E6EC67F08A209B85 /* RhwpStudioPagePDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1116217E7FF50304A4A7EEF8 /* RhwpStudioPagePDFRenderer.swift */; };
 		90F97E295C84EDBABCA218F6 /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */; };
+		91E2EB886A546F276298F748 /* RhwpStudioSaveBridgeScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4DA17C5BF43FA0762AA4A17 /* RhwpStudioSaveBridgeScript.swift */; };
 		933FF47244EF8FA6B9EF9EA4 /* LaunchMaintenanceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F64C25EF462BA350A75A155D /* LaunchMaintenanceService.swift */; };
 		935620121A0873696D07CFF3 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D2612A2057C62E35A5E751E7 /* Foundation.framework */; };
 		9499CFEE20DAD2F23BF05520 /* HwpDocumentInputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 317B028E5037D11892BC394D /* HwpDocumentInputValidator.swift */; };
@@ -167,6 +180,7 @@
 		A9B400D564A3B003F61FA5DA /* RhwpStudioPDFExportState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF59584D1CC46EC28C2FBE4 /* RhwpStudioPDFExportState.swift */; };
 		A9D512641E80997A3D087945 /* HwpNativePageCompositor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541160BFAFD7D51040244110 /* HwpNativePageCompositor.swift */; };
 		AA2BACFC130E87E5964F301C /* RhwpDocumentProtectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72A60A4645EB30FC36170123 /* RhwpDocumentProtectionTests.swift */; };
+		AC069E7BA1B6B2788F74A54D /* RhwpStudioEditorSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6BD09B33C7023A905F435F0 /* RhwpStudioEditorSession.swift */; };
 		ACA5EC231EB0D299AC1CD286 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D60B1C83682555AB978A8F1C /* InfoPlist.strings */; };
 		AD2A181F0E27738AABAD4F9E /* AppExecutionAnalyticsRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83133CD50926F4D0A93C5655 /* AppExecutionAnalyticsRuntime.swift */; };
 		ADE8964AF85BC779987510B0 /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F5AFC8EC56882BF138E698C /* Rhwp.xcframework */; };
@@ -192,6 +206,7 @@
 		C7EFB9E16C858AA631F49332 /* HwpExternalImageResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E95E4CD2871B8BED8B5F72D /* HwpExternalImageResolver.swift */; };
 		C898F0CA6BE3F209145CAC28 /* HwpPageImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C316C5FBCECA08C309CF9 /* HwpPageImageRenderer.swift */; };
 		C901149FC913B3E2A4E45DD9 /* HwpExternalImageResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E95E4CD2871B8BED8B5F72D /* HwpExternalImageResolver.swift */; };
+		C9EB80C2E982EFC7A1926507 /* RhwpStudioHTMLDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4028318D3528C32AF9BC09 /* RhwpStudioHTMLDownload.swift */; };
 		CA8C7485777C36EDD0DB8C52 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1309795C091DEE3BD8E9EA7D /* CoreGraphics.framework */; };
 		CBA752EF3B48128C0886001B /* Rhwp.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F5AFC8EC56882BF138E698C /* Rhwp.xcframework */; };
 		CD864F15977761E62A646DE4 /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A6F3480DCEB0F0A30DF06A1 /* IOSurface.framework */; };
@@ -217,6 +232,7 @@
 		DBF2603BA09D093A91E230C9 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E931CF12C8BE40BCE94DC51 /* libc++.tbd */; };
 		DDB7AF47EFF0D5F8A6D3F4F2 /* RhwpDocumentProtection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C7F1E8C84AA206741A421FF /* RhwpDocumentProtection.swift */; };
 		DE194623702B252806CF09DF /* RhwpStudioDocumentPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16BED1B65658BC71151FB7AC /* RhwpStudioDocumentPayload.swift */; };
+		E158CEA19A8122BF8F381609 /* RhwpStudioEditorSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6BD09B33C7023A905F435F0 /* RhwpStudioEditorSession.swift */; };
 		E209FF4CC62FC20D4DC368AD /* RhwpCoreBuildInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7582723794D9CFE90ED759 /* RhwpCoreBuildInfo.swift */; };
 		E31F1F5AF648803FDDC2E893 /* DocumentSavePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CD083E83BB7DFA8089562B5 /* DocumentSavePanel.swift */; };
 		E43FD55B17594AA74B85F04D /* RhwpStudioPDFExportControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB8264B14637282EAB9EB25 /* RhwpStudioPDFExportControllerTests.swift */; };
@@ -239,6 +255,7 @@
 		F1111861DDCA7703FC7F496C /* RhwpStudioDocumentSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB3292BAE195A15E4FDE311 /* RhwpStudioDocumentSchemeHandler.swift */; };
 		F24FA4E12F54E4B550A4788E /* Legal in Resources */ = {isa = PBXBuildFile; fileRef = C1A69E945E4D859F3B581701 /* Legal */; };
 		F302D89D0A4823F5453DF142 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D03050B560F60198F4CBBB0 /* Metal.framework */; };
+		F3698CF77DCA255D0DBE7825 /* DocumentHTMLExportFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA5AFA00641CA48894E658C /* DocumentHTMLExportFormat.swift */; };
 		F4095C620D43A19AC1283542 /* LaunchMaintenanceService+App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54E070F772C83780E579F518 /* LaunchMaintenanceService+App.swift */; };
 		F54A770FB4099DED72888A21 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6870F9FC321B27386359E2E /* QuartzCore.framework */; };
 		F55E519E2E4E4FA7D39A9E90 /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A6F3480DCEB0F0A30DF06A1 /* IOSurface.framework */; };
@@ -328,6 +345,7 @@
 		20E87D97188514E1A14C30E4 /* QuickLookConflictDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookConflictDetector.swift; sourceTree = "<group>"; };
 		22C7FCB985EBD7C94DD90E03 /* DocumentSaveFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSaveFormatTests.swift; sourceTree = "<group>"; };
 		23F35BCAF2E4A2B5A3AF9DC0 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		24CAA96F204103F963B5F2AF /* RhwpStudioEditorSessionScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioEditorSessionScript.swift; sourceTree = "<group>"; };
 		2512041CBA5B9CE5521537DC /* HwpPreviewPDFRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPreviewPDFRenderer.swift; sourceTree = "<group>"; };
 		26979062297C483B463918BA /* AboutWindowPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutWindowPresenter.swift; sourceTree = "<group>"; };
 		27EB9FF4728E67B683789ECF /* DocumentTerminationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTerminationCoordinator.swift; sourceTree = "<group>"; };
@@ -336,6 +354,7 @@
 		2C9543624DAA07DE76E6E954 /* SharePresentationAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharePresentationAnchor.swift; sourceTree = "<group>"; };
 		2CC07AD7EFC4382DB0FA3159 /* QuickLookConflictPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookConflictPresentation.swift; sourceTree = "<group>"; };
 		2E61A1530D3A8D7AF3DEE02C /* QLExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QLExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		301C4E5F75329A53D824158D /* RhwpStudioEditorSessionScriptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioEditorSessionScriptTests.swift; sourceTree = "<group>"; };
 		317B028E5037D11892BC394D /* HwpDocumentInputValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpDocumentInputValidator.swift; sourceTree = "<group>"; };
 		31E6E9BA1CB73D521E17B5D0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		3445867D6FAAB95F19E2C992 /* DocumentPDFExportPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPDFExportPanel.swift; sourceTree = "<group>"; };
@@ -345,8 +364,10 @@
 		374B3DC439891F2F5D4643AC /* rhwp-studio */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "rhwp-studio"; path = "Sources/HostApp/Resources/rhwp-studio"; sourceTree = SOURCE_ROOT; };
 		37AB29B3B3D84E39EEFED3A2 /* Importer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Importer.m; sourceTree = "<group>"; };
 		3B2EF7B163D45E8EFD21CDDF /* RhwpStudioPrintOrientationPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPrintOrientationPolicyTests.swift; sourceTree = "<group>"; };
+		3BA5AFA00641CA48894E658C /* DocumentHTMLExportFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentHTMLExportFormat.swift; sourceTree = "<group>"; };
 		3F33B7AA294D0DC689399E16 /* ThumbnailExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ThumbnailExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F54C76110CD58588556359B /* RhwpStudioPagePDFRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPagePDFRendererTests.swift; sourceTree = "<group>"; };
+		407CD5148D1EA2CE36F6C8E8 /* RhwpStudioSaveBridgeScriptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioSaveBridgeScriptTests.swift; sourceTree = "<group>"; };
 		40D1C342C644D062423ACFF9 /* QuickLookConflictDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookConflictDetectorTests.swift; sourceTree = "<group>"; };
 		423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpDocument.swift; sourceTree = "<group>"; };
 		46111B2C92166FABDD64FF11 /* AppExecutionAnalyticsSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExecutionAnalyticsSettingsView.swift; sourceTree = "<group>"; };
@@ -373,6 +394,7 @@
 		6A01160D544F0F71CA0C3501 /* RenderTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderTree.swift; sourceTree = "<group>"; };
 		6A6F3480DCEB0F0A30DF06A1 /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = System/Library/Frameworks/IOSurface.framework; sourceTree = SDKROOT; };
 		6B275F79003550F284393EFD /* HostAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HostAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6C17179E08FB758E56305E95 /* DocumentHTMLExportFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentHTMLExportFormatTests.swift; sourceTree = "<group>"; };
 		713E7D036CB6C9C6E6CB7E6B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		72A60A4645EB30FC36170123 /* RhwpDocumentProtectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpDocumentProtectionTests.swift; sourceTree = "<group>"; };
 		74575C9AC5A808EDE3C1BA5D /* QuickLookConflictPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookConflictPresentationTests.swift; sourceTree = "<group>"; };
@@ -403,11 +425,13 @@
 		A1BA85C7A51A97F8EDF455E7 /* HostApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HostApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A5315FE25D0AB65823C1D91A /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		A8E9CC5E34BCCA387A0B385E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		B3D6618A5DDBCE9989B5B291 /* RhwpStudioEditorSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioEditorSessionTests.swift; sourceTree = "<group>"; };
 		B49CA0DEC91C628C9B92B7A1 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		B7117AC630958C9A5DAE6545 /* HwpThumbnailPolicyResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpThumbnailPolicyResolver.swift; sourceTree = "<group>"; };
 		B74C6D69DBD1D9B163C9A247 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		B85C87F3CD3C8EFD709842FF /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = System/Library/Frameworks/ApplicationServices.framework; sourceTree = SDKROOT; };
 		B8FAA52954EDF090E3AA5B77 /* DocumentSaveContract.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSaveContract.swift; sourceTree = "<group>"; };
+		BA22F935D8D234463D04B1F1 /* DocumentHTMLExportPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentHTMLExportPanel.swift; sourceTree = "<group>"; };
 		BE85DDA9C343C68E96445A56 /* SpotlightImporter.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpotlightImporter.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		BED96A22509C493BF3039CEC /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
 		BEF59584D1CC46EC28C2FBE4 /* RhwpStudioPDFExportState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPDFExportState.swift; sourceTree = "<group>"; };
@@ -415,8 +439,10 @@
 		C1A69E945E4D859F3B581701 /* Legal */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Legal; path = Sources/HostApp/Resources/Legal; sourceTree = SOURCE_ROOT; };
 		C37388FB72FB052CAF01DEB2 /* RecentDocumentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentDocumentStore.swift; sourceTree = "<group>"; };
 		C375E470253AFC726A840E9E /* ExternalImageTestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalImageTestSupport.swift; sourceTree = "<group>"; };
+		C6BD09B33C7023A905F435F0 /* RhwpStudioEditorSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioEditorSession.swift; sourceTree = "<group>"; };
 		D0ED3A363318BCA70DEA5C4C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D2612A2057C62E35A5E751E7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		D5551183B628DAA1F831CE5A /* RhwpStudioHTMLExportScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioHTMLExportScript.swift; sourceTree = "<group>"; };
 		D62C393AC91AA8C9B6C503F0 /* QuickLookSettingsOpener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookSettingsOpener.swift; sourceTree = "<group>"; };
 		D83D8D9F6BF5014474791FB1 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		D8E524F7A95D1616AB85E3F2 /* ExtensionStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionStatusModel.swift; sourceTree = "<group>"; };
@@ -427,6 +453,8 @@
 		DCF11065A3E3439B4C5B8DD7 /* FontFallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontFallback.swift; sourceTree = "<group>"; };
 		DDC162C2D50B780F7B113E42 /* AppExecutionAnalyticsRuntimeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExecutionAnalyticsRuntimeTests.swift; sourceTree = "<group>"; };
 		DEC2D57719DF9672E7C311D7 /* FontResourceRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontResourceRegistry.swift; sourceTree = "<group>"; };
+		DEE0789E51B6D1B4F1707CB7 /* RhwpStudioHTMLExportScriptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioHTMLExportScriptTests.swift; sourceTree = "<group>"; };
+		DF4028318D3528C32AF9BC09 /* RhwpStudioHTMLDownload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioHTMLDownload.swift; sourceTree = "<group>"; };
 		DFF4DDF1732036183EA2DEE9 /* CGPDFFontResourceInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPDFFontResourceInspector.swift; sourceTree = "<group>"; };
 		E366184AF5B6B9EAB46F352A /* HwpExternalImageResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpExternalImageResolverTests.swift; sourceTree = "<group>"; };
 		E4457E7F57DA695C2D4A7757 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -435,6 +463,7 @@
 		EA2088B1914C461BF4EC8023 /* HostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostApp.swift; sourceTree = "<group>"; };
 		EC5D4F52776B873F6AB20372 /* DocumentFileActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentFileActions.swift; sourceTree = "<group>"; };
 		ED7582723794D9CFE90ED759 /* RhwpCoreBuildInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpCoreBuildInfo.swift; sourceTree = "<group>"; };
+		F4DA17C5BF43FA0762AA4A17 /* RhwpStudioSaveBridgeScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioSaveBridgeScript.swift; sourceTree = "<group>"; };
 		F64C25EF462BA350A75A155D /* LaunchMaintenanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchMaintenanceService.swift; sourceTree = "<group>"; };
 		F6870F9FC321B27386359E2E /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		F6DA732CC42A781180AA2F88 /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
@@ -585,6 +614,7 @@
 				08A3E95853FC125A982DA75C /* AppExecutionEventTests.swift */,
 				BFD8F8CDAE3C68AC47194251 /* AppExecutionOutboxTests.swift */,
 				DFF4DDF1732036183EA2DEE9 /* CGPDFFontResourceInspector.swift */,
+				6C17179E08FB758E56305E95 /* DocumentHTMLExportFormatTests.swift */,
 				60E89F17240F575C1BFDA50E /* DocumentOpenRecoveryTests.swift */,
 				623CE04A42DB529EA5AC5477 /* DocumentSaveContractTests.swift */,
 				22C7FCB985EBD7C94DD90E03 /* DocumentSaveFormatTests.swift */,
@@ -592,13 +622,17 @@
 				5633998CAA235F39FA96056D /* QuickLookConflictNoticePolicyTests.swift */,
 				74575C9AC5A808EDE3C1BA5D /* QuickLookConflictPresentationTests.swift */,
 				1C5A2536FE100F6D56A308CB /* QuickLookSettingsOpenerTests.swift */,
+				301C4E5F75329A53D824158D /* RhwpStudioEditorSessionScriptTests.swift */,
+				B3D6618A5DDBCE9989B5B291 /* RhwpStudioEditorSessionTests.swift */,
 				531B81FC1D06E1AE2C3F2CDB /* RhwpStudioHostBridgeScriptTests.swift */,
+				DEE0789E51B6D1B4F1707CB7 /* RhwpStudioHTMLExportScriptTests.swift */,
 				47F24A33AAA897A046A60EBA /* RhwpStudioPagePayloadTests.swift */,
 				3F54C76110CD58588556359B /* RhwpStudioPagePDFRendererTests.swift */,
 				1BB8264B14637282EAB9EB25 /* RhwpStudioPDFExportControllerTests.swift */,
 				90F5200498C9DAA53AF9EFD2 /* RhwpStudioPDFExportStateTests.swift */,
 				F71028FC3372C8056A37EA93 /* RhwpStudioPrintLifecycleTests.swift */,
 				3B2EF7B163D45E8EFD21CDDF /* RhwpStudioPrintOrientationPolicyTests.swift */,
+				407CD5148D1EA2CE36F6C8E8 /* RhwpStudioSaveBridgeScriptTests.swift */,
 				091E0D0C089D4D11FD2B25C6 /* SpotlightReindexServiceTests.swift */,
 			);
 			name = HostAppTests;
@@ -809,6 +843,8 @@
 				0CCBBB1CE93E4840CC4CF27D /* AppExecutionOutbox.swift */,
 				0CF5F2312600B0FAE8D1D9FF /* DocumentCloseConfirmationController.swift */,
 				EC5D4F52776B873F6AB20372 /* DocumentFileActions.swift */,
+				3BA5AFA00641CA48894E658C /* DocumentHTMLExportFormat.swift */,
+				BA22F935D8D234463D04B1F1 /* DocumentHTMLExportPanel.swift */,
 				9765F0524B38ED7EFD56BC48 /* DocumentOpenPanel.swift */,
 				93685264EA62BC6FB7DDF975 /* DocumentOpenRecoveryState.swift */,
 				34F4546426B7A9CF2CC1B9D5 /* DocumentOpenRouter.swift */,
@@ -832,7 +868,11 @@
 				9D4915E7318DD22D9A61F584 /* RecentDocumentThumbnailRefresher.swift */,
 				16BED1B65658BC71151FB7AC /* RhwpStudioDocumentPayload.swift */,
 				1EB3292BAE195A15E4FDE311 /* RhwpStudioDocumentSchemeHandler.swift */,
+				C6BD09B33C7023A905F435F0 /* RhwpStudioEditorSession.swift */,
+				24CAA96F204103F963B5F2AF /* RhwpStudioEditorSessionScript.swift */,
 				9E7B93D7ACFD48BF84FF1558 /* RhwpStudioHostBridgeScript.swift */,
+				DF4028318D3528C32AF9BC09 /* RhwpStudioHTMLDownload.swift */,
+				D5551183B628DAA1F831CE5A /* RhwpStudioHTMLExportScript.swift */,
 				DCD0C0600D4441C1E31B36FB /* RhwpStudioPagePayload.swift */,
 				1116217E7FF50304A4A7EEF8 /* RhwpStudioPagePDFRenderer.swift */,
 				034A145B545356520B20598D /* RhwpStudioPDFExportController.swift */,
@@ -843,6 +883,7 @@
 				68AA71A85B8293FC85599FEB /* RhwpStudioPrintOrientationPolicy.swift */,
 				FEAC07979C76F049103FFFDF /* RhwpStudioResourceLocator.swift */,
 				5D6D965AEFE52537281289A1 /* RhwpStudioResourceSchemeHandler.swift */,
+				F4DA17C5BF43FA0762AA4A17 /* RhwpStudioSaveBridgeScript.swift */,
 				2C9543624DAA07DE76E6E954 /* SharePresentationAnchor.swift */,
 				6853E78B127E16F60AF259C7 /* SpotlightReindexService.swift */,
 				4D19355F771E9D7C6E9E068F /* UpdateController.swift */,
@@ -1109,6 +1150,8 @@
 				979D708081AD7DEA8C3F4F67 /* ContentView.swift in Sources */,
 				B8431077BFAC5321EB89E5AD /* DocumentCloseConfirmationController.swift in Sources */,
 				B20E66185823D980E1A1DC3B /* DocumentFileActions.swift in Sources */,
+				F3698CF77DCA255D0DBE7825 /* DocumentHTMLExportFormat.swift in Sources */,
+				640ABAE720925A5ACACC998C /* DocumentHTMLExportPanel.swift in Sources */,
 				D21941D098EFE607821C67D4 /* DocumentOpenPanel.swift in Sources */,
 				EB1DF2E8CFCF70EBB3A8FFDC /* DocumentOpenRecoveryState.swift in Sources */,
 				A155D58D6F716FCFDAC1675C /* DocumentOpenRouter.swift in Sources */,
@@ -1150,6 +1193,10 @@
 				9E7FC8AC6078A6BD9975CD4E /* RhwpProvenance.swift in Sources */,
 				DE194623702B252806CF09DF /* RhwpStudioDocumentPayload.swift in Sources */,
 				F1111861DDCA7703FC7F496C /* RhwpStudioDocumentSchemeHandler.swift in Sources */,
+				AC069E7BA1B6B2788F74A54D /* RhwpStudioEditorSession.swift in Sources */,
+				1F3A09345EE755BC44B63F4E /* RhwpStudioEditorSessionScript.swift in Sources */,
+				C9EB80C2E982EFC7A1926507 /* RhwpStudioHTMLDownload.swift in Sources */,
+				638553F6BFA68B987B74769D /* RhwpStudioHTMLExportScript.swift in Sources */,
 				EBE69DDDE71CB04F706ED4D7 /* RhwpStudioHostBridgeScript.swift in Sources */,
 				D291CC60D4A2C1256CE2B41E /* RhwpStudioPDFExportController.swift in Sources */,
 				A9B400D564A3B003F61FA5DA /* RhwpStudioPDFExportState.swift in Sources */,
@@ -1161,6 +1208,7 @@
 				4D0C99DED184D28F3F25E30B /* RhwpStudioPrintOrientationPolicy.swift in Sources */,
 				8601FBB00A129F727E6FA20B /* RhwpStudioResourceLocator.swift in Sources */,
 				7A30B489C04C957C050AB78F /* RhwpStudioResourceSchemeHandler.swift in Sources */,
+				8C5B44AC53726E02E63ED76C /* RhwpStudioSaveBridgeScript.swift in Sources */,
 				07E0FE00AA4A4A61F8B36B7A /* RhwpStudioWebView.swift in Sources */,
 				8B2A1E6744CC44217E4F1EE8 /* SharePresentationAnchor.swift in Sources */,
 				09F8DF40F4C4C9076DAE223B /* SpotlightReindexService.swift in Sources */,
@@ -1228,6 +1276,8 @@
 				C2825BC28D62BA0B03566637 /* AppExecutionOutbox.swift in Sources */,
 				8DD11A59269A08802E4776F4 /* AppExecutionOutboxTests.swift in Sources */,
 				7FD351A0548A6EAFDAE39A5E /* CGPDFFontResourceInspector.swift in Sources */,
+				0C9B0D407439CF5DDB02517C /* DocumentHTMLExportFormat.swift in Sources */,
+				52DCFC363EC21FBC1DD17DC6 /* DocumentHTMLExportFormatTests.swift in Sources */,
 				E917C836DA201B85C2BD1C0F /* DocumentOpenRecoveryState.swift in Sources */,
 				9A824CFA2AD9DAD074A39BF1 /* DocumentOpenRecoveryTests.swift in Sources */,
 				53CBAE12913135F8190A88AF /* DocumentSaveContract.swift in Sources */,
@@ -1244,6 +1294,12 @@
 				D88159AB100BF7CA262545FD /* QuickLookSettingsOpener.swift in Sources */,
 				202EAD43BD149C9874AD3E58 /* QuickLookSettingsOpenerTests.swift in Sources */,
 				4D97135716F6E9E2F6D10CC6 /* RhwpProvenance.swift in Sources */,
+				E158CEA19A8122BF8F381609 /* RhwpStudioEditorSession.swift in Sources */,
+				43D602B12DFC9FE654AAE509 /* RhwpStudioEditorSessionScript.swift in Sources */,
+				265742514A1C2B1467C77F1E /* RhwpStudioEditorSessionScriptTests.swift in Sources */,
+				5B0BD320B52314463D4B3107 /* RhwpStudioEditorSessionTests.swift in Sources */,
+				071476E4CA4DA04037A9B7E0 /* RhwpStudioHTMLExportScript.swift in Sources */,
+				435B1CE5B24897CA0F7F370A /* RhwpStudioHTMLExportScriptTests.swift in Sources */,
 				633A78D99D22FEBEA0F8C963 /* RhwpStudioHostBridgeScript.swift in Sources */,
 				A0FA39F8ABB03F42756C8EDE /* RhwpStudioHostBridgeScriptTests.swift in Sources */,
 				9D1FAFB9909FDC2FF5D804A0 /* RhwpStudioPDFExportController.swift in Sources */,
@@ -1259,6 +1315,8 @@
 				655692EA210302EA92020E33 /* RhwpStudioPrintLifecycleTests.swift in Sources */,
 				EFF55FAB8D59B3638F545D3E /* RhwpStudioPrintOrientationPolicy.swift in Sources */,
 				B544AA3D8829D8CE8EA9B863 /* RhwpStudioPrintOrientationPolicyTests.swift in Sources */,
+				91E2EB886A546F276298F748 /* RhwpStudioSaveBridgeScript.swift in Sources */,
+				33892E89694DB33017024BF5 /* RhwpStudioSaveBridgeScriptTests.swift in Sources */,
 				6B0998D6ED626E6F2A8AEEE8 /* SpotlightReindexService.swift in Sources */,
 				77453A10DF3C8A0D13A1C311 /* SpotlightReindexServiceTests.swift in Sources */,
 			);

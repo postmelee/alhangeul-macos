@@ -117,6 +117,12 @@ private struct RhwpStudioContainerView: View {
                     document: document,
                     sourceDocument: store.sourceDocument,
                     reloadToken: store.webViewReloadToken,
+                    loadID: store.webViewLoadID,
+                    onEditorSessionChange: { session in
+                        Task { @MainActor in
+                            store.updateEditorSession(session)
+                        }
+                    },
                     onLoadStateChange: { isLoading in
                         Task { @MainActor in
                             store.setWebViewLoading(isLoading)
@@ -153,11 +159,6 @@ private struct RhwpStudioContainerView: View {
                     onDocumentSaved: { savedDocument in
                         Task { @MainActor in
                             store.recordSavedDocument(savedDocument)
-                        }
-                    },
-                    onDocumentEdited: {
-                        Task { @MainActor in
-                            store.markDocumentEdited()
                         }
                     }
                 )
