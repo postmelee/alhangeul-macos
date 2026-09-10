@@ -1,0 +1,53 @@
+name: Install environment assessment
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['publish/task*']
+    paths:
+      - '.github/workflows/install-environment-probe.yml'
+      - 'scripts/ci/install-environment-probe.py'
+  pull_request:
+    branches: [devel, main]
+    paths:
+      - '.github/workflows/install-environment-probe.yml'
+      - 'scripts/ci/install-environment-probe.py'
+
+permissions:
+  contents: read
+
+jobs:
+  assess:
+    name: Assess ${{ matrix.runner }} (not a release gate)
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Measure unmodified runner environment
+        run: python3 scripts/ci/install-environment-probe.py --assessment --output build.noindex/install-environment.json
+      - name: Record assessment
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          p = Path('build.noindex/install-environment.json')
+          data = json.loads(p.read_text()) if p.exists() else {'status': 'HARNESS_ERROR', 'reason': 'No result'}
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write('## 설치 환경 조사\n\n후보 미실행. 이 job의 성공은 릴리스 승인 근거가 아닙니다.\n\n```json\n')
+              f.write(json.dumps({k: v for k,v in data.items() if k != 'commands'}, ensure_ascii=False, indent=2))
+              f.write('\n```\n')
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: install-environment-${{ matrix.runner }}-${{ github.run_attempt }}
+          path: build.noindex/install-environment.json
+          if-no-files-found: error
+          retention-days: 30
