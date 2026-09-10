@@ -61,7 +61,8 @@
 - `scripts/verify-rhwp-studio-assets.sh`: bundled `rhwp-studio` manifest와 entrypoint asset 검증
 - `.github/workflows/pr-ci.yml`: PR 생성/갱신 시 기본 gate와 조건부 macOS/release helper 검증
 - `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성
-- `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성
+- `.github/workflows/release-publish.yml`: signed/notarized draft DMG, 포함 PR 분석 및 delta artifact 생성
+- `.github/workflows/release-promote.yml`: 양 아키텍처 검증을 통과한 동일 DMG 공개와 stable appcast/Pages 배포
 - `.github/workflows/pages-docs-deploy.yml`: `main`의 `docs/**` 변경을 public Pages에 배포하고 기존 public appcast를 보존
 - `.github/workflows/rhwp-upstream-check.yml`: upstream `rhwp` release와 `rhwp-core.lock` 비교
 - `.github/workflows/rhwp-upstream-sync-pr.yml`: upstream release를 감지해 core lock/RustBridge와 bundled `rhwp-studio`를 같은 tag로 갱신하는 full sync 후보 PR 생성

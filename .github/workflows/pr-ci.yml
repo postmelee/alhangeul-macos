@@ -126,6 +126,7 @@ jobs:
           python3 scripts/ci/test-spotlight-bundle.py
           python3 scripts/ci/test-spotlight-system-smoke.py
           python3 scripts/ci/test-release-install-smoke.py
+          python3 scripts/ci/test-release-promotion.py
 
       - name: Check core build info helper fixtures
         shell: bash
