@@ -55,9 +55,9 @@ def probe(timeout=180):
         documents = Path.home() / "Documents"
         documents.mkdir(exist_ok=True)
         root = Path(tempfile.mkdtemp(prefix="AlhangeulInstallProbe-", dir=documents))
-        state = read(["/usr/bin/mdutil", "-s", str(root)])
-        if "Indexing enabled" not in state:
-            raise Unavailable("시험 문서 위치의 자동 색인이 활성 상태가 아님")
+        # mdutil은 임의 하위 폴더에서 unknown을 반환할 수 있어 볼륨을 조회한다.
+        result['volume_states'] = read(['/usr/bin/mdutil', '-as'])
+        # 상태 문자열만으로 판정하지 않고 실제 TXT 자동 검색을 양성 대조로 쓴다.
         token = "InstallEnvironment" + uuid.uuid4().hex
         control = root / "control.txt"
         control.write_text(token + '\n')
