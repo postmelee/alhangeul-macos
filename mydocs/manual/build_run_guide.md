@@ -321,6 +321,35 @@ mv "$WASM_ASSET" "$WASM_ASSET.missing"
 
 기대 결과는 문서 영역의 `웹 viewer 자산을 찾을 수 없습니다` fallback이다. 진단 정보에는 `assetPattern=assets/rhwp_bg-*.wasm`, `count=0`, 훼손한 복사본의 `directoryPath`가 보여야 한다. 다시 시도 recovery를 확인하려면 같은 복사본에서 `.missing` 파일명을 원래대로 되돌린 뒤 fallback의 `다시 시도`를 누른다.
 
+## 새 문서 저장·내보내기 smoke test
+
+문서 세션·저장·Word/HTML/PDF 연결을 변경할 때는 설치된 앱의 사용자 문서를 쓰지 않고 현재 worktree의 개발 앱 또는 고유 bundle ID의 진단 앱에서 합성 입력을 사용한다. 산출물은 실행별 `build.noindex/` 디렉터리에 둔다. 개발 앱/진단 앱의 등록은 종료 후 소유 경로만 해제하며, 기존 설치본과 기본 연결·전역 인덱스를 변경하지 않는다.
+
+| 순서 | 조작 | 확인 |
+|------|------|------|
+| 1 | 파일 없이 실행해 준비 완료 후 `ㅇㅇ` 입력 | 문서 도구 활성화, dirty 상태 등록 |
+| 2 | Command+S → 최초 저장 확인 → HWP 저장 패널 | 현재 세션에 파일 등록, 입력·페이지 유지, reload 없음 |
+| 3 | 추가 입력 → Command+S | 패널 없이 같은 경로·형식으로 갱신 |
+| 4 | Command+Shift+S → 패널 취소 | 입력·dirty·source 유지 |
+| 5 | HWPX 형식으로 저장 → 재열기 → 재편집·저장 | 컨테이너·페이지 수·본문과 후속 경로 확인 |
+| 6 | 새 문서로 교체 후 저장 | 이전 원본 bytes/SHA 불변, 이전 보호/source 미계승 |
+| 7 | 편집 후 PDF·Word(.doc)·HTML 각각 내보내기 | 마지막 한글·대표 서식/페이지 포함, source·dirty 유지 |
+| 8 | 출력 패널 취소·쓰기 실패·다운로드 실패 | 기존 destination을 먼저 삭제하지 않음, 입력·창 보존, 재시도 가능 |
+| 9 | 창 닫기·앱 종료의 저장/취소/저장하지 않음 | 저장 실패·취소는 창 유지, 버리기는 원본에 쓰지 않고 종료 |
+| 10 | 정상 문서에서 0-byte/미지원 파일 열기 실패 | 기존 세션·본문·dirty 보존 |
+
+`editorOnly` 문서는 자동복구 등 출처를 확정할 수 없는 경우도 포함한다. 현재 최초 저장에 보호 상태 미확정 평문 복사본 확인이 나타나는 것은 보수적인 저장 정책이다. 취소를 저장 성공으로 기록하지 않는다. 기존 원본과 같은 위치 또는 기존 파일을 덮어쓰는 복사본 제한도 검사한다.
+
+본문 검증은 파일 존재·크기만으로 통과시키지 않는다. HWP/HWPX는 고정 core 재열기/본문 추출과 컨테이너를 확인하고, PDF는 page count와 text layer를 확인한다. core SVG는 글자별 `<text>` 요소를 사용할 수 있으므로 문장 문자열 포함 검사만으로 내용 누락을 판정하지 않는다. DOC는 HTML 기반 형식이며 binary DOC/DOCX가 아니다. HTML 구조·서식 검사와 실제 Word 앱 호환성을 구분한다. macOS HTML importer를 사용할 때는 다음처럼 형식을 명시하고 stdout뿐 아니라 stderr도 확인한다.
+
+```bash
+textutil -format html -convert txt -stdout build.noindex/example.doc
+```
+
+실제 NSSavePanel을 조작한 검증과 destination callback 주입을 구분한다. `NSTextInputClient.setMarkedText`를 사용한 조합 검증은 compositionstart/update/end와 최종 출력 내용을 함께 확인하며 물리 키보드·특정 IME 검증으로 일반화하지 않는다. M1/Tahoe 제보 환경, 최소 지원 macOS, sandbox 권한 및 실제 WebContent crash 실행 여부도 별도로 기록한다.
+
+#516의 단계별 증거는 [Stage 3](../working/task_m010_516_stage3.md), [Stage 4](../working/task_m010_516_stage4.md), [Stage 5](../working/task_m010_516_stage5.md)를 따른다. 일회성 진단 runner·합성 산출물은 task 전용 `build.noindex/`에 보존하고 Git에는 넣지 않는다. 이미 최종 제품 소스로 통과한 자동 테스트와 회귀는 재사용하고, 변경·실패·남은 경계에 필요한 검증만 추가한다.
+
 ## Recoverable 문서 opening smoke test
 
 문서 입력 경로를 바꾼 경우에는 사용자 원본 파일을 수정하지 않고 `build.noindex/` 아래 synthetic 파일만 사용한다. HostApp의 파일 읽기·0-byte·미지원 signature 실패는 기존 viewer 또는 fatal fallback을 교체하지 않고 window-local recoverable sheet로 표시되어야 한다.
