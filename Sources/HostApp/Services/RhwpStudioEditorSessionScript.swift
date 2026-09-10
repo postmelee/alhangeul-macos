@@ -9,6 +9,7 @@ enum RhwpStudioEditorSessionScript {
     let sessionCheckTimer = null;
     let sessionCheckRunning = false;
     let sessionCheckAgain = false;
+    let sessionReadVersion = 0;
 
     function scheduleEditorSessionCheck() {
       if (!sessionLoad) return;
@@ -25,7 +26,8 @@ enum RhwpStudioEditorSessionScript {
     }
 
     async function refreshEditorSession() {
-      if (sessionCheckRunning || !sessionLoad) return;
+      if (sessionCheckRunning || !sessionLoad || window.__alhangeulSaveLock) return;
+      const readVersion = sessionReadVersion;
       sessionCheckRunning = true;
       try {
         const automation = window.rhwpStudio?.automation;
@@ -53,6 +55,7 @@ enum RhwpStudioEditorSessionScript {
             !Number.isSafeInteger(state.changeSeq) || state.changeSeq < 0 ||
             !Number.isSafeInteger(state.pageCount) || state.pageCount < 1 ||
             typeof state.dirty !== "boolean") return;
+        if (readVersion !== sessionReadVersion || window.__alhangeulSaveLock) return;
         const next = {
           // 고정 bundle의 렌더 준비 표시다. source/protection 식별에는 사용하지 않는다.
           ready: !document.documentElement.classList.contains("rhwp-busy"),

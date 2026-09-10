@@ -164,20 +164,24 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func recordSavedDocument(_ savedDocument: RhwpStudioSavedDocument) {
+        guard let current = editorSession,
+              savedDocument.session.snapshot.loadID == webViewLoadID,
+              savedDocument.session.snapshot.documentEpoch == current.snapshot.documentEpoch
+        else { return }
+        let snapshot = current.snapshot.sequence > savedDocument.session.snapshot.sequence
+            ? current.snapshot : savedDocument.session.snapshot
+        editorSession = RhwpStudioEditorSession(snapshot:snapshot, sourceBinding:.nativeLoad)
         let url = savedDocument.url
-        let sourceDocument = RecentDocumentItem.make(for: url)
+        let source = RecentDocumentItem.make(for:url)
         filename = url.lastPathComponent
-        self.sourceDocument = sourceDocument
-        recentDocuments = RecentDocumentStore.record(sourceDocument)
-        if let document = rhwpStudioDocument {
-            rhwpStudioDocument = RhwpStudioDocumentPayload(
-                data: savedDocument.data,
-                filename: url.lastPathComponent,
-                revision: document.revision,
-                sourceProtection: savedDocument.sourceProtection
-            )
-        }
-        clearUnsavedChanges()
+        sourceDocument = source
+        recentDocuments = RecentDocumentStore.record(source)
+        rhwpStudioDocument = RhwpStudioDocumentPayload(
+            data:savedDocument.data, filename:filename,
+            revision:rhwpStudioDocument?.revision ?? documentRevision,
+            sourceProtection:savedDocument.sourceProtection
+        )
+        hasUnsavedChanges = snapshot.dirty
     }
 
     func updateEditorSession(_ reported: RhwpStudioEditorSession) {

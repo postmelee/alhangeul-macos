@@ -384,6 +384,7 @@ enum RhwpStudioHostBridgeScript {
       }
 
       \(RhwpStudioEditorSessionScript.source)
+      \(RhwpStudioSaveBridgeScript.source)
 
       function encodeBytesToBase64(bytes) {
         const chunkSize = 0x8000;
@@ -462,7 +463,9 @@ enum RhwpStudioHostBridgeScript {
 
       function waitForAnimationFrame() {
         return new Promise((resolve) => {
-          requestAnimationFrame(() => resolve());
+          // 비활성 창의 rAF 정지를 피한다. 화면이 활성 상태면 rAF가 먼저 완료된다.
+          const timer = setTimeout(resolve, 100);
+          requestAnimationFrame(() => { clearTimeout(timer); resolve(); });
         });
       }
 
