@@ -2,7 +2,7 @@
 
 ## 결과와 범위
 
-v0.2.0/18 후보 준비와 검증한 동일 DMG를 공개하는 자동화를 구현했다. **준비 PR 결과이며 릴리스 완료 보고가 아니다.** 최종 후보 SHA/tag, 서명·공증 DMG와 실제 최초 설치 결과는 아직 없다. #520, #513, #337 은 열어 둔다.
+[PR #521](https://github.com/postmelee/alhangeul-macos/pull/521)에서 v0.2.0/18 후보 준비와 검증한 동일 DMG를 공개하는 자동화를 구현했다. **준비 PR 결과이며 릴리스 완료 보고가 아니다.** 최종 후보 SHA/tag, 서명·공증 DMG와 실제 최초 설치 결과는 아직 없다. #520, #513, #337 은 열어 둔다.
 
 기준은 devel 41efb1770ae7a464c9cf766fe001c2da79a95823, 직전 공개 v0.1.11/17이다. core/Studio v0.8.6은 유지하며 PR #517 까지 포함한다. 변경 근거와 사용자 문구는 [v0.2.0 기록](../release/v0.2.0.md)에 정리했다.
 
@@ -19,13 +19,13 @@ v0.2.0/18 후보 준비와 검증한 동일 DMG를 공개하는 자동화를 구
 | 검증 | 결과 |
 |---|---|
 | 최초 설치 helper 회귀 | 11 tests PASS |
-| 승격 gate 회귀 | 11 tests PASS — 후보/회차/증거/자산 교체와 재시도 포함 |
+| 승격 gate 회귀 | 12 tests PASS — 후보/회차/증거/자산 교체·재시도와 모의 GitHub API/실제 ZIP CLI 연결 포함 |
 | actionlint 전체 workflow | PASS |
 | 4 bundle contract/version | PASS, 0.2.0/18 |
 | v0.2.0 release notes 생성/template/body | PASS, 검증용 가상 hash 사용 |
 | Pages artifact/XML/banner 검사 | PASS, 공개 실행 없음 |
 | 브라우저 실제 페이지 | DOM/viewport 확인, 아래 캡처 |
-| PR CI macOS build/release helper | PR 생성 후 확인 예정 |
+| PR CI macOS build/release helper | [PR #521 Checks](https://github.com/postmelee/alhangeul-macos/pull/521/checks)와 PR 본문에서 최종 head 결과를 추적한다. 실제 배포 검증과 구분한다 |
 
 ![v0.2.0 릴리스 페이지 후보](assets/task_m900_520/release-notes-preview.png)
 

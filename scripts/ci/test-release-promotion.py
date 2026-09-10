@@ -164,6 +164,99 @@ class PromotionTests(unittest.TestCase):
                             self.assertEqual(mutation.call_args.args[0][1:3], ['release', 'edit'])
                         self.assertTrue((root / 'published-release.json').exists())
 
+    def test_cli_round_trip_with_immutable_artifacts(self):
+        # Exercise real CLI, JSON/ZIP reads and gh argument wiring; never contact GitHub.
+        import os
+        import sys
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dmg = root / 'dmg'
+            dmg.write_bytes(b'synthetic notarized-candidate bytes; no app execution')
+            candidate = dict(self.c, dmg_sha256=p.smoke.sha256(dmg))
+            name = 'alhangeul-macos-0.2.0.dmg'
+            checksum = root / 'checksum'
+            checksum.write_text(candidate['dmg_sha256'] + '  ' + name + '\n')
+            source_zip = root / 'candidate.zip'
+            with zipfile.ZipFile(source_zip, 'w') as z:
+                z.write(dmg, name)
+                z.write(checksum, name + '.sha256')
+            fixture = fixtures.CandidateTests()
+            fixture.setUp()
+            base = 'repos/postmelee/alhangeul-macos'
+            routes = {}
+
+            def route(endpoint, value):
+                path = root / f'response-{len(routes)}.json'
+                path.write_text(json.dumps(value))
+                routes[endpoint] = str(path)
+                return path
+
+            route(base + '/actions/runs/123', fixture.run)
+            route(base + '/actions/artifacts/456', fixture.artifact)
+            routes[base + '/actions/artifacts/456/zip'] = str(source_zip)
+            route(base + '/actions/runs/789', self.run)
+            evidence_artifacts = []
+            for index, (runner, arch) in enumerate(p.RUNNERS.items(), 700):
+                evidence = copy.deepcopy(self.e)
+                evidence['verify-result.json']['candidate'] = candidate
+                evidence['verify-result.json']['environment']['architecture'] = arch
+                archive = root / f'{runner}.zip'
+                with zipfile.ZipFile(archive, 'w') as z:
+                    for filename, data in evidence.items():
+                        z.writestr(filename, json.dumps(data))
+                artifact = dict(self.a, id=index, name=f'first-install-evidence-{runner}-789-2',
+                                size_in_bytes=archive.stat().st_size)
+                evidence_artifacts.append(artifact)
+                route(base + f'/actions/artifacts/{index}', artifact)
+                routes[base + f'/actions/artifacts/{index}/zip'] = str(archive)
+            route(base + '/actions/runs/789/artifacts?per_page=100', [{'artifacts': evidence_artifacts}])
+            release = copy.deepcopy(self.release)
+            release['assets'][0]['size'] = dmg.stat().st_size
+            release['assets'][1]['size'] = checksum.stat().st_size
+            release_path = route(base + '/releases/tags/v0.2.0', release)
+            route(base + '/releases/latest', {'tag_name': 'v0.1.11'})
+            routes[base + '/releases/assets/1'] = str(dmg)
+            routes[base + '/releases/assets/2'] = str(checksum)
+            db = root / 'routes.json'
+            db.write_text(json.dumps(routes))
+            gh = root / 'gh'
+            gh.write_text('''#!/usr/bin/env python3
+import json, os, sys
+from pathlib import Path
+args=sys.argv[1:]
+routes=json.loads(Path(os.environ['FAKE_GH_ROUTES']).read_text())
+if args[0]=='api':
+    endpoint=args[-1] if '--paginate' in args else args[1]
+    sys.stdout.buffer.write(Path(routes[endpoint]).read_bytes())
+elif args[:2]==['release','edit']:
+    assert args[2]=='v0.2.0' and '--draft=false' in args and '--latest' in args
+    target=Path(os.environ['FAKE_RELEASE_PATH'])
+    release=json.loads(target.read_text())
+    release['draft']=False
+    target.write_text(json.dumps(release))
+else:
+    raise RuntimeError('Unexpected mutation: '+repr(args))
+''')
+            gh.chmod(0o755)
+            env = dict(os.environ, PATH=str(root) + os.pathsep + os.environ['PATH'],
+                       FAKE_GH_ROUTES=str(db), FAKE_RELEASE_PATH=str(release_path),
+                       GITHUB_REPOSITORY=candidate['repository'], VALIDATION_RUN_ID='789')
+            env.update({key.upper(): value for key, value in candidate.items() if key != 'repository'})
+            cli = [sys.executable, str(Path(p.__file__).resolve())]
+            output = root / 'output'
+            for phase in ('verify', 'publish'):
+                result = p.subprocess.run(cli + [phase, '--output', str(output)], env=env,
+                                          text=True, capture_output=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse(json.loads(release_path.read_text())['draft'])
+            proof = json.loads((output / 'promotion-proof.json').read_text())
+            self.assertEqual(proof['candidate']['dmg_sha256'], p.smoke.sha256(dmg))
+            # A rebuilt public file cannot use old PASS evidence on a fresh retry.
+            dmg.write_bytes(b'rebuilt and different')
+            result = p.subprocess.run(cli + ['verify', '--output', str(root/'retry')], env=env,
+                                      text=True, capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+
     def test_pages_public_gate_rejects_draft_and_prerelease(self):
         # Execute the actual workflow predicate so authenticated draft visibility cannot regress.
         workflow = Path('.github/workflows/pages-docs-deploy.yml').read_text()

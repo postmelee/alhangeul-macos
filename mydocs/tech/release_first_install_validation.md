@@ -4,7 +4,7 @@
 
 릴리스 후보를 빌드한 VM과 설치를 시험하는 VM을 분리한다. GitHub-hosted macOS의 각 job은 새 VM이지만 개발 도구와 자동화 설정이 포함된 이미지다. 따라서 결과 명칭은 `새 GitHub-hosted VM 최초 설치`이며 순정 사용자 OS/실제 사용자 GUI 검증을 모두 대체하지 않는다.
 
-자동화 구축은 #518, Spotlight 최초 설치 수용은 #513, v0.2.0 기능·출시 판단은 #337, 공개 배포 실행은 별도 릴리스 작업이 소유한다.
+자동화 구축은 #518, Spotlight 최초 설치 수용은 #513, v0.2.0 기능·출시 판단은 #337, 동일 DMG 공개 승격과 v0.2.0 배포 실행은 #520 이 소유한다.
 
 ## 흐름
 
@@ -30,9 +30,9 @@
 
 ## 배포와 결과 유효성
 
-같은 소스라도 재서명·재공증·재패키징한 파일은 다른 후보다. 공개할 DMG SHA256과 검증 결과 SHA256이 일치해야 한다. 현재 publish workflow는 실행마다 다시 빌드하므로 draft PASS를 다음 public 실행에 그대로 재사용할 수 없다. 실제 공개 흐름에 gate를 연결할 때는 검증된 bytes 승격 또는 공개 직전 새 산출물의 재검증을 먼저 구현해야 한다. 이 작업만으로 기존 publish 경로에 자동 차단이 설치되었다고 주장하지 않는다.
+같은 소스라도 재서명·재공증·재패키징한 파일은 다른 후보다. 공개할 DMG SHA256과 검증 결과 SHA256이 일치해야 한다. #520 의 release-publish는 stable draft 생성만 허용하고 release-promote가 검증된 기존 bytes를 공개한다.
 
-유효한 자동 검사 결과 외에도 실제 Spotlight 화면, Finder/Quick Look/Thumbnail, Gatekeeper 다운로드 경험, 공개 Sparkle 업데이트, 최소 OS 검증 공백과 출시 승인을 별도로 기록한다. 기본 CI에는 signing credential을 주입하지 않는다.
+현재 승격 입력은 같은 tag/SHA에서 수동 dispatch한 최신 validation attempt다. 양 runner의 후보 identity/PASS와 실제 최초·앱 종료 후 검색/33개 lifecycle/cleanup을 대조한다. draft DMG/checksum을 다운로드해 검증하고, Sparkle/Pages 준비 후 회차·tag·Release 자산이 그대로인지 재확인한다. 재빌드/DMG 업로드 없이 공개하며 동일 public bytes의 Pages 복구는 허용한다. 실행 절차와 최종 공개 승인은 [runbook](../manual/public_release_runbook.md#gate-5-official-stable-publish)을 따른다.
 
 ## 근거
 

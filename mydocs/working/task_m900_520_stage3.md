@@ -12,7 +12,9 @@ Pages 홈/업데이트/버전 문구를 준비했으며 표준 helper로 이전 
 - release notes 0.2.0 writer → template/body 검사 PASS. 첫 실행에서 `보정합니다`가 템플릿의 미확정 문구 검사에 걸려 확정된 변경 설명으로 수정했다.
 - Pages artifact helper, appcast XML, 이전 버전 banner --check PASS. 이때 사용한 저장소 appcast는 helper 검증용이며 v0.2.0 공개 feed가 아니다.
 - Browser로 새 페이지 DOM과 실제 viewport를 확인했다. full-page 캡처의 중복 stitching을 피하고 실제 viewport 화면을 첨부했다. [페이지 캡처](../report/assets/task_m900_520/release-notes-preview.png).
-- GitHub PR CI의 macOS build/release helper 결과는 준비 PR 생성 후 확인한다. 실제 signed v0.2.0 설치, Finder/Spotlight GUI, Sparkle 업데이트는 이 단계에 포함하지 않았다.
+- 승격 CLI를 모의 GitHub 응답과 실제 ZIP으로 연결한 회귀까지 총 12 tests PASS. 같은 hash의 상태 변경과 공개 bytes 변경 시 거부를 확인했다.
+- 홈/업데이트 목록의 Homebrew는 현재 0.1.11로 명시하고, 기존 최초 설치 설계 문서도 새 승격 절차로 정렬했다.
+- GitHub PR CI의 macOS build/release helper 최종 head 결과는 [PR #521 Checks](https://github.com/postmelee/alhangeul-macos/pull/521/checks)와 PR 본문에 기록한다. 실제 signed v0.2.0 설치, Finder/Spotlight GUI, Sparkle 업데이트는 이 단계에 포함하지 않았다.
 
 ## 다음 단계
 
