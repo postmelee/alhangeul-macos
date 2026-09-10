@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """운영 smoke의 경로 소유권, 환경 대조, 반복 추출 판정 회귀 검사."""
 import importlib.util
+import argparse
 import json
 import subprocess
 from pathlib import Path
@@ -16,6 +17,122 @@ spec.loader.exec_module(smoke)
 
 
 class SmokeTests(unittest.TestCase):
+    def test_discovery_timeout_accepts_boundaries_and_rejects_invalid_values(self):
+        for value in ["1", "60", "600"]:
+            self.assertEqual(smoke.discovery_timeout(value), int(value))
+        for value in ["0", "601", "-1", "1.5", "invalid"]:
+            with self.subTest(value=value), self.assertRaises(argparse.ArgumentTypeError):
+                smoke.discovery_timeout(value)
+
+    def test_invalid_discovery_timeout_cli_error_is_concise(self):
+        result = subprocess.run(
+            [sys.executable, str(Path(smoke.__file__)), "status", "--state", "unused.json", "--discovery-timeout", "601"],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("from 1 to 600 seconds", result.stderr)
+        self.assertNotIn("choose from", result.stderr)
+        self.assertLess(len(result.stderr), 1200)
+
+    def test_search_timeout_cli_range_and_label(self):
+        for value in ["0", "601", "invalid"]:
+            result = subprocess.run(
+                [sys.executable, smoke.__file__, "status", "--state", "unused.json", "--search-timeout", value],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("search timeout must", result.stderr)
+
+    def test_late_search_records_saved_limit_and_elapsed_time(self):
+        state = {"files": "/synthetic/Files", "results": [], "search_timeout": 120}
+        now = [0]
+        def sleep(seconds): now[0] += seconds
+        def query(_state, token, timeout=30):
+            if token == smoke.CONTROL: return ["/synthetic/Files/index-control.txt"]
+            return ["/synthetic/Files/document.hwp"] if now[0] >= 80 else []
+        with patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+             patch.object(smoke.time, "sleep", side_effect=sleep), patch.object(smoke, "query", side_effect=query):
+            smoke.expect_paths(state, "Word", ["document.hwp"], "late-search")
+        self.assertEqual(state["results"][-1]["elapsed_seconds"], 80)
+        self.assertEqual(state["results"][-1]["timeout_seconds"], 120)
+
+    def test_positive_search_timeout_reports_actual_missing_control(self):
+        state = {"files": "/synthetic/Files", "results": [], "search_timeout": 120}
+        now = [0]
+        def sleep(seconds): now[0] += seconds
+        with patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+             patch.object(smoke.time, "sleep", side_effect=sleep), patch.object(smoke, "query", return_value=[]):
+            with self.assertRaises(RuntimeError):
+                smoke.expect_paths(state, "Word", ["document.hwp"], "missing", timeout=4)
+        self.assertFalse(state["results"][-1]["control_ok"])
+        self.assertEqual(state["results"][-1]["elapsed_seconds"], 4)
+        self.assertEqual(state["results"][-1]["timeout_seconds"], 4)
+        self.assertFalse(any(row["case"].endswith("query-error") for row in state["results"]))
+
+    def test_query_failure_retries_and_caps_command_to_remaining_observation(self):
+        state = {"files": "/synthetic/Files", "results": [], "search_timeout": 8}
+        now, calls = [0], []
+        def sleep(seconds): now[0] += seconds
+        def query(_state, token, timeout=30):
+            calls.append(timeout)
+            if len(calls) == 1:
+                now[0] += 3
+                raise RuntimeError("synthetic temporary query timeout")
+            return ["/synthetic/Files/document.hwp"] if token == "Word" else ["/synthetic/Files/index-control.txt"]
+        with patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+             patch.object(smoke.time, "sleep", side_effect=sleep), patch.object(smoke, "query", side_effect=query):
+            smoke.expect_paths(state, "Word", ["document.hwp"], "recovered")
+        self.assertEqual(calls, [8, 3, 3])
+        self.assertEqual([r["result"] for r in state["results"]], ["FAIL", "PASS"])
+        self.assertEqual(state["results"][-1]["elapsed_seconds"], 5)
+
+    def test_persistent_query_failure_cannot_pass_absence(self):
+        state = {"files": "/synthetic/Files", "results": [], "search_timeout": 4}
+        now = [0]
+        def sleep(seconds): now[0] += seconds
+        with patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+             patch.object(smoke.time, "sleep", side_effect=sleep), \
+             patch.object(smoke, "query", side_effect=RuntimeError("query unavailable")) as query:
+            with self.assertRaises(RuntimeError):
+                smoke.expect_paths(state, "Word", [], "unavailable")
+        self.assertEqual(query.call_count, 2)
+        self.assertEqual(sum(row["case"].endswith("query-error") for row in state["results"]), 2)
+        self.assertEqual(state["results"][-1]["result"], "FAIL")
+        self.assertFalse(state["results"][-1]["control_ok"])
+        self.assertEqual(now[0], 4)
+
+    def test_lifecycle_only_requests_manual_import_in_diagnostic_mode(self):
+        for automatic in [True, False]:
+            with self.subTest(automatic=automatic), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                files, fixtures = root / "Files", root / "Fixtures"
+                files.mkdir()
+                (fixtures / "initial").mkdir(parents=True)
+                (fixtures / "variants").mkdir()
+                for name in ["document-a.hwp", "document-b.hwpx", "document-c.hwp", "control.hwpx"]:
+                    (fixtures / "initial" / name).write_bytes(b"original")
+                    (files / name).write_bytes(b"original")
+                for name in ["modified.hwp", "protected.hwpx", "empty.hwpx", "invalid.hwp", "drm.hwp",
+                             "distribution.hwp", "large.hwp", "truncated.hwpx"]:
+                    (fixtures / "variants" / name).write_bytes(b"variant")
+                state = {"automatic": automatic, "files": str(files), "fixtures": str(fixtures),
+                         "token": "OriginalToken", "replacement": "ReplacementToken", "results": []}
+                def metadata(_state, _path, label):
+                    if label == "modified":
+                        return {"kMDItemTextContent": state["replacement"]}
+                    if label == "truncated":
+                        return {"kMDItemTextContent": smoke.TRUNCATED}
+                    return {}
+                with patch.object(smoke, "run") as command, patch.object(smoke, "expect_paths"), \
+                     patch.object(smoke, "metadata_test", side_effect=metadata), patch.object(smoke, "record"):
+                    smoke.lifecycle(state)
+                self.assertEqual(state["phase"], "lifecycle-verified")
+                if automatic:
+                    command.assert_not_called()
+                else:
+                    self.assertEqual(command.call_count, 15)
+                    self.assertTrue(all(call.args[0][:2] == ["mdimport", "-i"] for call in command.call_args_list))
+
     def test_corpus_changed_during_search_cannot_pass_automatic_observation(self):
         original = {"sample.hwp": [10, 123, "sha256"]}
         state = {"automatic": True, "launch_count": 1, "before_install_paths": [],
@@ -243,7 +360,7 @@ class SmokeTests(unittest.TestCase):
                               [], ["/synthetic/Files/index-control.txt"],
                               [], ["/synthetic/Files/index-control.txt"],
                               [], ["/synthetic/Files/index-control.txt"]])
-            with patch.object(smoke, "query", side_effect=lambda *args: next(responses)):
+            with patch.object(smoke, "query", side_effect=lambda *args, **kwargs: next(responses)):
                 smoke.expect_paths(state, "OldWord", [], "settled-deletion", timeout=10)
             self.assertEqual(now[0], 8)
             self.assertEqual(state["results"][-1]["result"], "PASS")

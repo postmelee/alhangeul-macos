@@ -84,13 +84,13 @@ def providers():
     return result
 
 
-def query(state, token):
+def query(state, token, timeout=30):
     # 한글을 허용하되 Spotlight query의 따옴표/연산자는 허용하지 않는다.
     if not token or not token.isalnum():
         raise ValueError("query token must be Unicode alphanumeric")
     # Files 삭제 후에도 존재하는 Documents 범위에서 조회하고 소유 경로로 제한한다.
     scope = str(Path(state["files"]).parent.parent)
-    output = run(["mdfind", "-onlyin", scope, f'kMDItemTextContent == "*{token}*"cd'])
+    output = run(["mdfind", "-onlyin", scope, f'kMDItemTextContent == "*{token}*"cd'], timeout=timeout)
     paths = set()
     for line in output.splitlines():
         if line.startswith("/System/Volumes/Data/Users/"):
@@ -100,29 +100,52 @@ def query(state, token):
     return sorted(paths)
 
 
-def expect_paths(state, token, names, label, timeout=60):
+def expect_paths(state, token, names, label, timeout=None):
+    if timeout is None:
+        timeout = state.get("search_timeout", 60)
+    started = time.monotonic()
     expected = sorted(str(Path(state["files"]) / name) for name in names)
-    deadline = time.monotonic() + timeout
+    deadline = started + timeout
     stable_since = None
+    actual, control_ok = [], False
     while True:
-        actual = query(state, token)
-        # 일시적인 빈 응답이나 색인 서비스 중단을 삭제 성공으로 오인하지 않는다.
-        control_ok = bool(expected) or query(state, CONTROL) == [str(Path(state["files"]) / "index-control.txt")]
+        query_succeeded = False
+        def read(term):
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("search observation deadline reached")
+            return query(state, term, timeout=min(30, remaining))
+        try:
+            actual = read(token)
+            # 대조를 실제 조회한다. 양성 검색의 실패에서도 서비스 상태를 추정하지 않는다.
+            control_paths = actual if token == CONTROL else read(CONTROL)
+            control_ok = control_paths == [str(Path(state["files"]) / "index-control.txt")]
+            query_succeeded = True
+        except TimeoutError:
+            # 관찰 시간 만료는 조회 명령 자체의 실패와 구분한다.
+            stable_since, control_ok = None, False
+        except RuntimeError as error:
+            record(state, label + "-query-error", "FAIL", reason=str(error),
+                   elapsed_seconds=round(time.monotonic() - started, 2), timeout_seconds=timeout)
+            stable_since, control_ok = None, False
         now = time.monotonic()
-        if actual == expected and control_ok:
+        if query_succeeded and now <= deadline and actual == expected and (bool(expected) or control_ok):
             if stable_since is None:
                 stable_since = now
         else:
             stable_since = None
         if stable_since is not None and (expected or now - stable_since >= 4):
-            state["results"].append({"case": label, "query": token, "paths": actual, "result": "PASS"})
+            state["results"].append({"case": label, "query": token, "paths": actual, "result": "PASS",
+                                     "elapsed_seconds": round(now - started, 2), "timeout_seconds": timeout,
+                                     "control_ok": control_ok})
             print(f"PASS: {label} ({len(actual)} files)", flush=True)
             return
         if now >= deadline:
             state["results"].append({"case": label, "expected": expected, "actual": actual,
-                                     "control_ok": control_ok, "result": "FAIL"})
+                                     "control_ok": control_ok, "result": "FAIL",
+                                     "elapsed_seconds": round(now - started, 2), "timeout_seconds": timeout})
             raise RuntimeError(f"Spotlight query timeout: {label}")
-        time.sleep(2)
+        time.sleep(min(2, max(0, deadline - now)))
 
 
 def prepare(args):
@@ -154,6 +177,8 @@ def prepare(args):
              "results": [], "phase": "preparing", "original_apps": {},
              "providers_before": providers()}
     state["automatic"] = args.automatic
+    state["discovery_timeout"] = args.discovery_timeout
+    state["search_timeout"] = args.search_timeout
     state["source_bundle_dates_ns"] = {"app": app.stat().st_mtime_ns,
                                         "importer": (app / PLUGIN).stat().st_mtime_ns}
     state["source_app_hashes"] = fingerprint(app)
@@ -211,7 +236,9 @@ def owned_locations(state):
         raise ValueError("unexpected corpus path")
 
 
-def discover(state, label, timeout=60):
+def discover(state, label, timeout=None):
+    if timeout is None:
+        timeout = state.get("discovery_timeout", 60)
     expected = str(Path(state["install_app"]) / PLUGIN)
     started = time.monotonic()
     deadline = started + timeout
@@ -444,7 +471,8 @@ def lifecycle(state, extraction_only=False):
     def replace(variant, destination, label, needle=None):
         # 원래 정상 본문을 먼저 복원해 stale-text 제거를 검증한다.
         shutil.copyfile(fixtures / "initial" / destination, files / destination)
-        run(["mdimport", "-i", files / destination])
+        if not state.get("automatic"):
+            run(["mdimport", "-i", files / destination])
         if not extraction_only:
             expect_paths(state, token, [destination], label + "-restored")
         shutil.copyfile(fixtures / "variants" / variant, files / destination)
@@ -455,7 +483,8 @@ def lifecycle(state, extraction_only=False):
         if needle is not None and (not isinstance(body, str) or needle not in body or token in body):
             raise RuntimeError(f"changed body mismatch: {label}")
         record(state, label + "-metadata")
-        run(["mdimport", "-i", files / destination])
+        if not state.get("automatic"):
+            run(["mdimport", "-i", files / destination])
         search(token, [], label + "-old-word-removed")
         if needle:
             search(needle, [destination], label + "-new-word")
@@ -482,7 +511,8 @@ def lifecycle(state, extraction_only=False):
             or TRUNCATED not in body or OMITTED in body):
         raise RuntimeError("truncated UTF-8 output limit mismatch")
     record(state, "truncated-metadata", utf8_bytes=len(body.encode("utf-8")))
-    run(["mdimport", "-i", files / "document-b.hwpx"])
+    if not state.get("automatic"):
+        run(["mdimport", "-i", files / "document-b.hwpx"])
     search(TRUNCATED, ["document-b.hwpx"], "truncated-prefix-search")
     search(TRUNCATED_KOREAN, ["document-b.hwpx"], "truncated-korean-prefix-search")
     search(OMITTED, [], "truncated-tail-not-indexed")
@@ -560,6 +590,16 @@ def cleanup(state):
     print("PASS: owned files removed; original app hashes and provider selections preserved", flush=True)
 
 
+def discovery_timeout(value, label="discovery"):
+    try:
+        seconds = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"{label} timeout must be an integer from 1 to 600") from None
+    if not 1 <= seconds <= 600:
+        raise argparse.ArgumentTypeError(f"{label} timeout must be from 1 to 600 seconds")
+    return seconds
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["prepare", "install", "launch", "developer-register", "diagnostic-register", "verify",
@@ -573,6 +613,11 @@ def main():
                         help="prepare에서 저장: 수동 lsregister/mdimport -i 없이 복사·첫 실행·자동 검색 비교")
     parser.add_argument("--install-layout", choices=["nested", "direct"], default="nested",
                         help="prepare에서 저장: 중첩 폴더 또는 Applications 바로 아래 고유 소유 앱 비교")
+    parser.add_argument("--discovery-timeout", type=discovery_timeout, default=60, metavar="SECONDS",
+                        help="prepare에서 저장: 발견 대기 초(1–600, 기본 60); 검색 timeout과 별개")
+    parser.add_argument("--search-timeout", type=lambda value: discovery_timeout(value, label="search"),
+                        default=60, metavar="SECONDS",
+                        help="prepare에서 저장: 각 검색 관찰 초(1–600, 기본 60); 경과 시간과 함께 기록")
     parser.add_argument("--extraction-only", action="store_true",
                         help="lifecycle의 실제 색인 검증을 MISS로 남기고 metadata만 검증")
     args = parser.parse_args()
