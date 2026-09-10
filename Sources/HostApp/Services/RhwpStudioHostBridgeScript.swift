@@ -108,7 +108,9 @@ enum RhwpStudioHostBridgeScript {
         "file:print",
         "file:print-to-pdf",
         "file:share",
-        "file:export-pdf"
+        "file:export-pdf",
+        "file:export-doc",
+        "file:export-html"
       ]);
       const nonMutatingCommands = new Set([
         "file:open",
@@ -120,6 +122,8 @@ enum RhwpStudioHostBridgeScript {
         "file:print-to-pdf",
         "file:share",
         "file:export-pdf",
+        "file:export-doc",
+        "file:export-html",
         "file:about",
         "edit:copy",
         "edit:select-all",
@@ -385,6 +389,7 @@ enum RhwpStudioHostBridgeScript {
 
       \(RhwpStudioEditorSessionScript.source)
       \(RhwpStudioSaveBridgeScript.source)
+      \(RhwpStudioHTMLExportScript.source)
 
       function encodeBytesToBase64(bytes) {
         const chunkSize = 0x8000;
@@ -792,7 +797,9 @@ enum RhwpStudioHostBridgeScript {
             canonicalCommand === "file:save-as" ||
             canonicalCommand === "file:save-as-hwp" ||
             canonicalCommand === "file:save-as-hwpx" ||
-            canonicalCommand === "file:export-pdf") {
+            canonicalCommand === "file:export-pdf" ||
+            canonicalCommand === "file:export-doc" ||
+            canonicalCommand === "file:export-html") {
           postNative({
             type: "command",
             command: canonicalCommand,

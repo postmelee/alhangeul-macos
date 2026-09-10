@@ -183,6 +183,13 @@ extension RhwpStudioWebView {
             await DocumentPDFExportPanel.chooseDestinationURL(suggestedFilename:$0, presentingWindow:$1)
         }
         var onPDFExported: (URL) -> Void = { DocumentFileActions.revealInFinder($0) }
+        private var htmlExportID: String?
+        private var htmlDownload: RhwpStudioHTMLDownload?
+        var chooseHTMLDestination: (DocumentHTMLExportFormat, String, NSWindow?) async -> URL? = {
+            await DocumentHTMLExportPanel.chooseDestinationURL(format:$0, suggestedFilename:$1, presentingWindow:$2)
+        }
+        var writeHTMLData: (Data, URL) throws -> Void = { try DocumentSavePanel.write(data:$0, to:$1) }
+        var onHTMLExported: (URL) -> Void = { DocumentFileActions.revealInFinder($0) }
         private var activeLoadID = 0
         private var loadTimeoutTask: Task<Void, Never>?
         private var recentNativeDrop: NativeDropMarker?
@@ -269,6 +276,7 @@ extension RhwpStudioWebView {
             editorLoadToken = UUID().uuidString
             installUserScripts(in: webView, loadID: loadID)
 
+            htmlDownload?.cancel()
             pdfExportState.invalidatePendingRequestForDocumentChange()
             activeSaveID = nil
             pendingSaveRequest = nil
@@ -332,6 +340,7 @@ extension RhwpStudioWebView {
                 documentProvider.setDocument(nil)
             }
             if let previous, previous.snapshot.documentEpoch != snapshot.documentEpoch {
+                htmlDownload?.cancel()
                 pdfExportState.invalidatePendingRequestForDocumentChange()
                 if let activeSaveEpoch, activeSaveEpoch != snapshot.documentEpoch {
                     activeSaveID = nil
@@ -355,6 +364,7 @@ extension RhwpStudioWebView {
         }
 
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+            htmlDownload?.cancel()
             pdfExportState.invalidatePendingRequestForDocumentChange()
             hasCompletedCurrentLoad = false
             finishLoading()
@@ -385,6 +395,16 @@ extension RhwpStudioWebView {
                 return
             }
 
+            if url.scheme == "blob" {
+                if navigationAction.sourceFrame.isMainFrame, navigationAction.shouldPerformDownload,
+                   htmlDownload?.claimNavigation(url) == true {
+                    decisionHandler(.download)
+                } else {
+                    decisionHandler(.cancel)
+                }
+                return
+            }
+
             if isAllowedNavigation(to: url) {
                 decisionHandler(.allow)
             } else {
@@ -393,6 +413,11 @@ extension RhwpStudioWebView {
                 finishLoading()
                 reportFailure(.blockedNavigation(to: url))
             }
+        }
+
+        func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+            guard let htmlDownload else { download.cancel { _ in }; return }
+            htmlDownload.receive(download, url:navigationAction.request.url)
         }
 
         private func handleNavigationError(_ error: Error, webView: WKWebView? = nil) {
@@ -505,6 +530,7 @@ extension RhwpStudioWebView {
 
         private func reportFailure(_ failure: RhwpStudioWebViewFailure) {
             if failure.isFatal {
+                htmlDownload?.cancel()
                 activeSaveID = nil
                 pendingSaveRequest = nil
                 editorSession = nil
@@ -660,6 +686,11 @@ extension RhwpStudioWebView {
                 return
             }
 
+            if let format = DocumentHTMLExportFormat.allCases.first(where: { $0.command == command }),
+               let webView = commandWebView {
+                requestHTMLExport(format:format, in:webView)
+                return
+            }
             if let saveCommand = DocumentSaveCommand(rawValue: command) {
                 guard let webView = commandWebView else {
                     onError("저장할 viewer를 찾을 수 없습니다.")
@@ -899,6 +930,10 @@ extension RhwpStudioWebView {
         }
 
         private func runNativeCommand(_ command: String, in webView: WKWebView) {
+            if let format = DocumentHTMLExportFormat.allCases.first(where: { $0.command == command }) {
+                requestHTMLExport(format:format, in:webView)
+                return
+            }
             if let saveCommand = DocumentSaveCommand(rawValue: command) {
                 let format: DocumentSaveFormat? = saveCommand == .saveAsHwp ? .hwp : saveCommand == .saveAsHwpx ? .hwpx : nil
                 if saveCommand.usesSavePanel {
@@ -957,7 +992,7 @@ extension RhwpStudioWebView {
             forcePanel: Bool,
             completion: ((RhwpStudioDocumentSaveResult) -> Void)?
         ) {
-            guard activeSaveID == nil, pdfExportState.isIdle, !isPDFPreparing else {
+            guard activeSaveID == nil, htmlExportID == nil, pdfExportState.isIdle, !isPDFPreparing else {
                 completion?(.failed("이미 저장이 진행 중입니다."))
                 return
             }
@@ -1156,8 +1191,75 @@ extension RhwpStudioWebView {
             (try? sourceDocument.resolvedURL()) ?? sourceDocument.url
         }
 
+        private func requestHTMLExport(format: DocumentHTMLExportFormat, in webView: WKWebView) {
+            guard htmlExportID == nil, activeSaveID == nil, pdfExportState.isIdle, !isPDFPreparing else {
+                onError("저장 또는 내보내기가 이미 진행 중입니다.")
+                return
+            }
+            let id = UUID().uuidString
+            let token = editorLoadToken
+            htmlExportID = id
+            Task { @MainActor [weak self, weak webView] in
+                guard let self, let webView else { return }
+                do {
+                    let initial = try await self.readEditorSession(in:webView)
+                    try self.requireHTMLExport(id, token:token, epoch:initial.snapshot.documentEpoch)
+                    guard let destination = await self.chooseHTMLDestination(
+                        format, self.currentDocument?.filename ?? "새 문서.hwp", webView.window
+                    ) else { throw SaveOperationCancelled() }
+                    let fresh = try await self.readEditorSession(in:webView)
+                    try self.requireHTMLExport(id, token:token, epoch:initial.snapshot.documentEpoch)
+                    guard fresh.snapshot.documentEpoch == initial.snapshot.documentEpoch else {
+                        throw DocumentSaveProtectionPolicyError.documentChanged
+                    }
+                    let source = self.currentSourceDocument.map(self.resolvedSourceURL)
+                    let body = try await self.bridgeObject(
+                        "return await window.__alhangeulHostBridgeSave.begin(id, token, epoch, format);",
+                        arguments:["id":id, "token":token, "epoch":initial.snapshot.documentEpoch, "format":format.rawValue], in:webView
+                    )
+                    try self.requireHTMLExport(id, token:token, epoch:initial.snapshot.documentEpoch)
+                    guard body["requestID"] as? String == id, body["token"] as? String == token,
+                          let urlString = body["downloadURL"] as? String, let blobURL = URL(string:urlString), blobURL.scheme == "blob",
+                          let filename = body["downloadFileName"] as? String
+                    else { throw DocumentHTMLExportError.invalidDownload }
+                    try format.validateResponse(mime:body["mimeType"] as? String, filename:filename)
+                    let download = try RhwpStudioHTMLDownload(blobURL:blobURL, format:format)
+                    self.htmlDownload = download
+                    _ = try await webView.callAsyncJavaScript(
+                        "return window.__alhangeulHostBridgeStartHTMLDownload(id);", arguments:["id":id], in:nil, contentWorld:.page
+                    )
+                    let data = try await download.data()
+                    _ = try await self.bridgeObject(
+                        "return await window.__alhangeulHostBridgeSave.validate(id);", arguments:["id":id], in:webView
+                    )
+                    try self.requireHTMLExport(id, token:token, epoch:initial.snapshot.documentEpoch)
+                    try format.validate(data:data, destination:destination, source:source)
+                    try self.writeHTMLData(data, destination)
+                    self.onHTMLExported(destination)
+                } catch is SaveOperationCancelled {
+                    // 저장 위치 선택 취소는 원본을 변경하지 않는다.
+                } catch {
+                    self.onError("문서를 내보낼 수 없습니다: \(error.localizedDescription)")
+                }
+                self.htmlDownload?.cancel()
+                self.htmlDownload = nil
+                if self.editorLoadToken == token {
+                    _ = try? await webView.callAsyncJavaScript(
+                        "window.__alhangeulHostBridgeSave?.release(id);", arguments:["id":id], in:nil, contentWorld:.page
+                    )
+                }
+                if self.htmlExportID == id { self.htmlExportID = nil }
+            }
+        }
+
+        private func requireHTMLExport(_ id: String, token: String, epoch: Int) throws {
+            guard htmlExportID == id, editorLoadToken == token,
+                  editorSession?.snapshot.documentEpoch == epoch, editorSession?.snapshot.ready == true
+            else { throw DocumentSaveProtectionPolicyError.documentChanged }
+        }
+
         private func requestPDFExport(in webView: WKWebView, suggestedFilename: String? = nil) {
-            guard !isPDFPreparing, pdfExportState.isIdle, activeSaveID == nil else {
+            guard !isPDFPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
                 onError("저장 또는 PDF 내보내기가 이미 진행 중입니다.")
                 return
             }

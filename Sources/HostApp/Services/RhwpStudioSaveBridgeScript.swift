@@ -8,6 +8,7 @@ enum RhwpStudioSaveBridgeScript {
       for (const type of ["keydown", "beforeinput", "input", "mousedown", "click", "paste", "cut", "drop", "compositionstart"]) {
         window.addEventListener(type, event => {
           if (!window.__alhangeulSaveLock) return;
+          if (type === "click" && event.target === window.__alhangeulSaveLock.downloadAnchor) return;
           event.preventDefault();
           event.stopImmediatePropagation();
         }, true);
@@ -23,6 +24,7 @@ enum RhwpStudioSaveBridgeScript {
     """
 
     static let source = """
+    let executeForExport = null;
     function emitNativeSession(state) {
       const next = {
         ready: !document.documentElement.classList.contains("rhwp-busy"),
@@ -60,6 +62,7 @@ enum RhwpStudioSaveBridgeScript {
       const lock = window.__alhangeulSaveLock;
       if (!lock || lock.id !== id) return;
       clearTimeout(lock.timer);
+      if (lock.downloadURL) URL.revokeObjectURL(lock.downloadURL);
       window.__alhangeulSaveLock = null;
       scheduleEditorSessionCheck();
     }
@@ -92,6 +95,7 @@ enum RhwpStudioSaveBridgeScript {
         const automation = window.rhwpStudio.automation;
         if (!automation.__alhangeulSaveGuard) {
           const execute = automation.execute;
+          executeForExport = (...args) => execute.apply(automation, args);
           automation.execute = function(...args) {
             if (window.__alhangeulSaveLock) return Promise.resolve({ok:false, error:"문서 저장 중입니다."});
             return execute.apply(this, args);
@@ -106,7 +110,9 @@ enum RhwpStudioSaveBridgeScript {
             throw new Error("저장할 문서가 변경되었거나 준비 중입니다.");
           }
           lock.state = state;
-          const payload = format === "pdf" ? await documentPages() : await requestSaveExportPayload(format);
+          const payload = format === "pdf" ? await documentPages()
+            : (format === "doc" || format === "html") ? await captureHTMLDownload(format, executeForExport, id)
+            : await requestSaveExportPayload(format);
           await validateSaveLock(id);
           return {requestID:id, token, snapshot:emitNativeSession(state), format,
             fileName:fileNameForSaveFormat(format), ...payload};

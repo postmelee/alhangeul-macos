@@ -11,7 +11,7 @@
 - 고정 의존성: rhwp / rhwp-studio `v0.8.6`, resolved commit `f1f9c6ae58344ee9368996d3543f76b9345cf227`
 - 수행계획 승인: 2026-09-10, 같은 스레드의 “진행해줘” 지시
 - 구현계획 승인: 2026-09-10 같은 스레드의 “진행해줘” 지시
-- 현재 단계: 같은 스레드의 “진행해줘” 승인으로 Stage 1~3 완료, Stage 4 승인 대기. Stage 4~5는 미실행이다.
+- 현재 단계: 같은 스레드의 “진행해줘” 승인으로 Stage 1~4 완료, Stage 5 승인 대기. Stage 5는 미실행이다.
 
 파일 bytes를 가진 native 문서 payload와 실제 편집 중인 문서의 존재를 구분하고, 새 문서를 기존 저장 계약에 연결한다. 별도 단계에서 Word(.doc)·HTML의 브라우저 다운로드를 native 파일 저장에 연결한다. 기존 파일의 source URL·암호 보호·HWP3 변환 정책은 문서 교체와 비동기 응답 처리까지 포함해 보존한다.
 
@@ -129,6 +129,8 @@ Stage 2에서 공개 `getSelectionContext`의 epoch·changeSeq를 실제로 확�
 - `file:export-doc`와 `file:export-html`을 비변경 명령으로 분류한다. 내보내기 성공 시 원본 source·형식·최근 문서·저장 완료 통지를 변경하지 않는다.
 - 사용 가능한 API/OS 동작이 Stage 1 가정과 다르면 경로 선택 근거와 검증 결과를 갱신한다.
 
+Stage 4에서는 공개 exporter의 anchor 클릭을 잠시 포착해 Blob을 보존하고, native에 정확한 URL을 등록한 뒤 다운로드를 시작했다. WKDownload 완료 후 원본·출력 검증과 atomic 게시를 수행한다. 구체적인 계약, 조합 입력과 실패 검증은 [Stage 4 보고서](../working/task_m010_516_stage4.md)를 따른다.
+
 ### 검증과 완료 기준
 
 - 새 문서와 기존 HWP/HWPX에서 각각 Word·HTML 출력이 생성되고 현재 텍스트·대표 서식이 포함된다.
@@ -192,8 +194,8 @@ git diff --check
 
 각 Stage 완료 후 검증 결과와 해당 `_stageN.md`를 소스·문서와 함께 커밋하고 다음 Stage 승인을 요청한다. 실패가 있으면 같은 단계에서 원인을 해결하거나 범위·환경 제한을 보고하며 완료로 표시하지 않는다.
 
-Stage 5 승인 후 `task-final-report` 절차에서 최종 결과보고서, 오늘할일 완료 처리와 `publish/task516` 대상 게시 및 `devel` PR을 준비한다. 현재 이슈는 구현 준비 단계이므로 close하지 않으며 public release는 별도 절차로 진행한다.
+Stage 5 완료 승인 후 `task-final-report` 절차에서 최종 결과보고서, 오늘할일 완료 처리와 `publish/task516` 대상 게시 및 `devel` PR을 준비한다. 현재 이슈는 구현·검증 진행 중이므로 close하지 않으며 public release는 별도 절차로 진행한다.
 
 ## 승인 요청 사항
 
-2026-09-10 같은 스레드의 “진행해줘” 승인에 따라 Stage 3 첫 저장·후속 저장 및 PDF·종료 확인을 구현·검증했다. [Stage 3 보고서](../working/task_m010_516_stage3.md)를 검토한 뒤 Stage 4 Word·HTML native 내보내기 연결 진입 승인을 요청한다.
+2026-09-10 같은 스레드의 “진행해줘” 승인에 따라 Stage 4 Word·HTML native 내보내기를 구현·검증했다. [Stage 4 보고서](../working/task_m010_516_stage4.md)를 검토한 뒤 Stage 5 통합 회귀와 문서 정리 진입 승인을 요청한다.
