@@ -15,6 +15,10 @@
 | `rhwp Upstream Release Check` | `workflow_dispatch`, schedule | `contents: read` | Ubuntu | upstream `rhwp` release와 `rhwp-core.lock` 비교 |
 | `rhwp Upstream Sync PR` | `workflow_dispatch`, schedule | workflow는 `contents: read`, `pull-requests: read`; PR 생성은 GitHub App token의 `contents: write`, `pull-requests: write`, `issues: write` | Ubuntu, macOS | upstream release를 감지해 `rhwp-core.lock`/RustBridge, Swift build info와 bundled `rhwp-studio`를 같은 core identity로 갱신하는 full sync 후보 PR 생성 |
 
+## 최초 설치 검증 workflow
+
+`Install environment assessment`는 새 VM의 기존 등록·GUI 세션·TXT 자동 검색을 측정한다. 환경 조사 성공은 배포 후보의 설치 PASS가 아니다. `Release first install validation`은 workflow_dispatch/workflow_call로 서명·공증된 특정 artifact를 받고, 별도 fixture job과 새 arm64/Intel 설치 VM에서 후보·검색·정리를 확인한다. 권한은 contents/actions read이며 signing secret은 전달하지 않는다. [입력·판정·릴리스 인계 절차](release_first_install_guide.md)를 따른다.
+
 ## JavaScript action runtime 기준
 
 GitHub Actions에서 JavaScript action runtime deprecation annotation이 발생하면, 먼저 repository workflow의 `uses:` action과 해당 action의 `action.yml` runtime을 확인한다. 기본 대응은 official action의 지원 runtime major로 갱신하는 것이며, runner 환경변수로 runtime을 강제하거나 deprecated runtime을 허용하는 방식은 임시 진단 외 기본 대응책으로 쓰지 않는다.

@@ -50,7 +50,7 @@ def probe(timeout=180):
         lsregister = "/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister"
         registrations = read([lsregister, "-dump"])
         if any(name in (catalog + registrations).lower() for name in
-               ("alhangeul", "rhwp mac", "rhwp.app", "rhwp-mac.app")):
+               ("alhangeul", "rhwpmac", "알한글", "rhwp.app", "rhwp-mac.app")):
             raise Unavailable("기존 알한글/importer 등록이 있음")
         if existing_installations():
             raise Unavailable("기존 알한글 설치본이 있음")

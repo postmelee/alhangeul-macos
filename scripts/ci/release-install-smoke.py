@@ -18,6 +18,42 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 MAX_ARCHIVE = 2 * 1024**3
 
+LIFECYCLE_REQUIRED = frozenset("""
+deleted-original-documents
+deleted-original-korean-word
+modified-restored
+modified-metadata
+modified-old-word-removed
+modified-new-word
+modified-new-korean-word
+modified-deleted-new-word
+modified-deleted-new-korean-word
+protected-restored
+protected-metadata
+protected-old-word-removed
+empty-restored
+empty-metadata
+empty-old-word-removed
+invalid-restored
+invalid-metadata
+invalid-old-word-removed
+drm-restored
+drm-metadata
+drm-old-word-removed
+distribution-restored
+distribution-metadata
+distribution-old-word-removed
+large-restored
+large-metadata
+large-old-word-removed
+truncated-metadata
+truncated-prefix-search
+truncated-korean-prefix-search
+truncated-tail-not-indexed
+deleted-truncated-document
+deleted-final-documents
+""".split())
+
 
 def module(name, filename):
     spec = importlib.util.spec_from_file_location(name, ROOT / 'scripts/ci' / filename)
@@ -130,8 +166,7 @@ def require_complete(first, stopped, final):
     if any(r['result'] != 'PASS' and r['case'] not in allowed_miss for r in final.get('results', [])):
         raise ValueError('미실행/발견 실패가 남음')
     cases = {r['case'] for r in final['results']}
-    if not {'deleted-final-documents', 'modified-new-word', 'modified-old-word-removed',
-            'modified-deleted-new-word', 'cleanup-importer-catalog'} <= cases:
+    if not (LIFECYCLE_REQUIRED | {'cleanup-importer-catalog'}) <= cases:
         raise ValueError('필수 lifecycle/정리 증거 누락')
 
 
@@ -209,6 +244,8 @@ def verify(output, candidate, fixtures, result):
         try:
             if state_path.exists():
                 state = json.loads(state_path.read_text())
+                if state.get('index_environment') == 'unavailable':
+                    result['status'] = 'ENVIRONMENT_UNAVAILABLE'
                 try:
                     smoke.owned_locations(state)
                     smoke.cleanup(state)

@@ -81,8 +81,7 @@ class CandidateTests(unittest.TestCase):
         stopped['results'].append({'case': 'candidate-app-not-running', 'result': 'PASS'})
         final = {'phase': 'cleaned', 'cleanup_index_verified': True, 'assisted_actions': ['lifecycle'],
                  'results': [{'case': c, 'result': 'PASS'} for c in
-                 ('deleted-final-documents', 'modified-new-word', 'modified-old-word-removed',
-                  'modified-deleted-new-word', 'cleanup-importer-catalog')]}
+                 sorted(smoke.LIFECYCLE_REQUIRED | {'cleanup-importer-catalog'})]}
         return first, stopped, final
 
     def test_complete_evidence(self):

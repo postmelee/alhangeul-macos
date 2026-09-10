@@ -145,6 +145,7 @@ Release rehearsal/publish와 local `release.sh` preflight는 main/devel을 fetch
 - [ ] Finder Quick Look smoke test 완료
 - [ ] Finder thumbnail smoke test 완료
 - [ ] Spotlight importer가 포함된 후보는 [표준 Spotlight smoke](build_run_guide.md#spotlight-설치색인-smoke)로 일반 설치/첫 실행, 실제 importer 선택, txt 대조 및 본문 검색, 수정·보호·삭제 전파, 앱 교체 후 재색인과 cleanup 확인
+- [ ] [최초 설치 자동 검증](release_first_install_guide.md) 결과의 후보 DMG SHA256과 실제 공개할 DMG SHA256 일치 확인 (재빌드 시 재검증)
 - [ ] Spotlight 추출 PASS를 실제 검색 PASS로 확대하지 않고 최소 OS·Intel runtime·공증 설치본 및 공개 업데이트의 실행 결과/미실행 사유 기록
 - [ ] 기존 public 설치본에서 Sparkle 업데이트 후 `scripts/smoke-sparkle-extension-refresh.sh --expected-version <version> --expected-build <build>` 기본 모드 통과
 - [ ] 개발용 zip 산출물 생성

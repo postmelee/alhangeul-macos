@@ -304,6 +304,12 @@ workflow가 확인해야 하는 것:
 - draft/prerelease 실행인데 stable appcast 또는 Pages deployment가 갱신됐다.
 - draft DMG SHA256이 workflow summary, asset, release record 입력과 일치하지 않는다.
 
+자동 최초 설치 smoke:
+
+- [릴리스 후보 최초 설치 검증](release_first_install_guide.md)으로 draft 실행·artifact·소스 SHA·DMG SHA256을 고정하고 새 VM 검증 결과를 기록한다.
+- 환경 조사 job 성공과 후보 PASS를 구분한다. 자동 검증은 아래 maintainer GUI 확인과 공개 업데이트 검증을 대체하지 않는다.
+- 다음 publish 실행이 DMG를 다시 만들면 이전 PASS를 재사용하지 않는다. 검증 파일과 게시 파일의 동일성 또는 새 파일의 공개 전 재검증을 먼저 확보한다.
+
 maintainer smoke:
 
 - draft release asset 또는 Actions artifact DMG를 release machine에 내려받는다.
