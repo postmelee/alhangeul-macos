@@ -6,11 +6,11 @@ on:
       version:
         description: App version to build as a rehearsal DMG.
         required: true
-        default: "0.1.11"
+        default: "0.2.0"
       previous_release_ref:
         description: Git ref for the previous public release used to draft the release PR analysis and delta checklist.
         required: true
-        default: "v0.1.10"
+        default: "v0.1.11"
       expected_rhwp_tag:
         description: Optional rhwp release tag that must match rhwp-core.lock.
         required: false

@@ -10,7 +10,8 @@
 |----------|---------|------|--------|------|
 | `PR CI` | `pull_request` to `main`, `devel`, `native-viewer-editor` | `contents: read`, `pull-requests: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax/build-info fixture, 조건부 macOS build와 build-info verifier, 조건부 release helper dry-run |
 | `Release Rehearsal DMG` | `workflow_dispatch` | `contents: read`, `pull-requests: read` | macOS | core lock/build-info와 built Release endpoint 검증, signed/notarized 전 universal rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
-| `Release Publish DMG` | `workflow_dispatch` | `contents: write`/`pull-requests: read` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag, core lock/build-info와 built Release endpoint 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
+| `Release Publish DMG` | `workflow_dispatch` | `contents: write`, `pull-requests: read`, `environment: release` | macOS | tag/core/endpoint 검증, signed/notarized stable draft DMG, 분석/검증용 artifact 생성 |
+| `Release Promote Verified DMG` | `workflow_dispatch` | 승격 job: `contents: write`, `actions: read`, `environment: release`; Pages job: `pages: write`, `id-token: write`, `environment: github-pages` | macOS, Ubuntu | 양 VM 검증을 통과한 동일 DMG 공개, Sparkle/Pages 배포 |
 | `Docs-only Pages Deploy` | `push` to `main` with `docs/**`, `workflow_dispatch` | `contents: read`, `pages: write`/`id-token: write` for Pages job, `environment: github-pages` | Ubuntu | 일반 Pages 문서 변경을 public Pages에 배포하고 기존 public appcast를 보존 |
 | `rhwp Upstream Release Check` | `workflow_dispatch`, schedule | `contents: read` | Ubuntu | upstream `rhwp` release와 `rhwp-core.lock` 비교 |
 | `rhwp Upstream Sync PR` | `workflow_dispatch`, schedule | workflow는 `contents: read`, `pull-requests: read`; PR 생성은 GitHub App token의 `contents: write`, `pull-requests: write`, `issues: write` | Ubuntu, macOS | upstream release를 감지해 `rhwp-core.lock`/RustBridge, Swift build info와 bundled `rhwp-studio`를 같은 core identity로 갱신하는 full sync 후보 PR 생성 |
@@ -212,38 +213,13 @@ rehearsal DMG build 전에는 Rust/core lock verify에 이어 `verify-rhwp-core-
 
 ## Release Publish DMG
 
-`Release Publish DMG`는 공식 public DMG를 만드는 보호 workflow다. publish 전에 release record의 `포함 PR 분석` 표, 사용자-facing 판단, 해결된 Issue와 관련 Issue 구분이 완료되어 있어야 한다.
+`Release Publish DMG`는 서명·공증된 stable draft 후보를 만드는 보호 workflow다. release record의 포함 PR 분석과 사용자 문구를 먼저 준비한다. `environment: release`, contents write, tag/HEAD 일치와 Developer ID/notary 보호를 유지한다. `version`, `previous_release_ref`, `expected_rhwp_tag`, `require_latest_rhwp`, `include_rhwp_in_title`로 후보를 확정하며 `draft=true`, `prerelease=false`만 허용한다.
 
-유지해야 하는 보호 조건:
+산출물은 DMG/checksum/Release 본문과 PR 분석/delta artifact다. 기존 Release가 있으면 교체하지 않는다. 실패 후보 철회와 새 후보 생성은 소유자가 별도 판단하며, 새 bytes는 다시 검증한다.
 
-- `workflow_dispatch` 수동 실행
-- `publish-dmg` job의 `environment: release`
-- `publish-dmg` job의 `contents: write`
-- `deploy-pages` job의 `environment: github-pages`
-- `deploy-pages` job의 `pages: write`, `id-token: write`
-- `deploy-pages` job의 `concurrency.group: pages-deploy`, `cancel-in-progress: false`
-- tag `v<version>`에서 실행되고 checkout HEAD가 해당 tag commit과 일치해야 함
-- Developer ID certificate, notarization credential, Sparkle EdDSA private key는 GitHub Actions secret/environment variable로만 사용
+`Release Promote Verified DMG`는 별도 승인 후 같은 tag에서 version/build, source run/artifact, validation run과 DMG hash를 받는다. 성공한 최신 두 runner의 PASS와 원본 검색/lifecycle/cleanup, 기존 Release 자산 bytes를 검사하고 동일 DMG로 Sparkle 서명과 Pages artifact를 만든 뒤 공개한다. 앱 build, 공증, DMG 재업로드는 수행하지 않는다.
 
-입력:
-
-- `version`: publish version
-- `previous_release_ref`: 직전 public release ref. 기본값은 `v0.1.0`
-- `expected_rhwp_tag`: `rhwp-core.lock`의 release tag와 일치해야 하는 upstream tag
-- `require_latest_rhwp`: upstream latest release와 lock tag 일치 여부 확인
-- `draft`, `prerelease`: GitHub Release 상태. 둘 다 `false`일 때만 stable Sparkle appcast와 Pages deployment를 실행
-
-workflow가 생성하거나 게시하는 주요 산출물:
-
-- signed/notarized universal `alhangeul-macos-<version>.dmg`
-- DMG `.sha256`
-- GitHub Release body 후보
-- `pr-analysis-<version>.md`
-- `delta-checklist-<version>.md`
-- stable release일 때 generated `appcast.xml`
-- stable release일 때 `docs/` + generated `appcast.xml` Pages artifact
-- stable release일 때 `deploy-pages` deployment URL
-- workflow summary의 release ref, release PR analysis, delta checklist, core lock, public artifact, GitHub Release state, Sparkle appcast, Pages artifact, GitHub Pages deployment 섹션
+승격 job은 `environment: release`, contents write/actions read, Pages job은 github-pages와 pages write/id-token write를 사용한다. workflow 전체의 `pages-deploy` 잠금으로 docs-only 배포와 확인부터 배포까지 직렬화한다. 공개 후 재실행은 동일 자산 Pages 복구만 허용한다. 정확한 수용 조건과 실행은 [최초 설치 가이드](release_first_install_guide.md)와 [runbook Gate 5](public_release_runbook.md#gate-5-official-stable-publish)를 따른다.
 
 GitHub Release body 후보는 `mydocs/release/v<version>.md`의 사용자-facing 주요 변경 사항과 직접 반영된 PR/Issue section을 기준으로 작성한다. 첫 top-level section은 `이번 버전의 주요 변경 사항`이어야 하며, 설치/지원/업데이트 안내와 상세 기록은 그 뒤에 둔다. publish workflow의 delta checklist는 마지막 누락 확인용 보조 자료이며, release note의 주요 변경 사항 원천이 아니다.
 

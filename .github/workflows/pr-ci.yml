@@ -373,6 +373,16 @@ jobs:
           scripts/validate-github-body.sh \
             build.noindex/release/release-notes-0.1.5.md
 
+      - name: Verify current v0.2.0 release wording
+        shell: bash
+        run: |
+          set -euo pipefail
+          scripts/ci/write-release-notes.sh 0.2.0 \
+            0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef \
+            build.noindex/release/release-notes-0.2.0.md
+          scripts/ci/check-release-notes-template.sh build.noindex/release/release-notes-0.2.0.md
+          scripts/validate-github-body.sh build.noindex/release/release-notes-0.2.0.md
+
       - name: Verify release PR analysis helper
         shell: bash
         env:
