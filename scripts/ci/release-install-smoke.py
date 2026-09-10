@@ -104,6 +104,7 @@ def validate_origin(candidate, run, artifact):
 
 def extract_archive(archive, output, version):
     expected = f'alhangeul-macos-{version}.dmg'
+    allowed_names = {expected, expected + '.sha256', f'release-notes-{version}.md'}
     if archive.stat().st_size > MAX_ARCHIVE:
         raise ValueError('archive 크기 초과')
     with zipfile.ZipFile(archive) as z:
@@ -116,8 +117,7 @@ def extract_archive(archive, output, version):
             p = Path(entry.filename)
             mode = entry.external_attr >> 16
             if (p.name != entry.filename or entry.is_dir() or stat.S_ISLNK(mode)
-                    or not entry.filename.startswith(f'alhangeul-macos-{version}')
-                    or p.suffix not in ('.dmg', '.sha256', '.md')):
+                    or entry.filename not in allowed_names):
                 raise ValueError('허용하지 않은 archive 경로/형식')
         if output.exists():
             raise ValueError('추출 경로가 이미 있음')

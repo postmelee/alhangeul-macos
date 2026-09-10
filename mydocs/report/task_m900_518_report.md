@@ -21,7 +21,7 @@
 | 후보/증거 판정 회귀 | 11 PASS |
 | 기존 Spotlight smoke 회귀 | 31 PASS |
 | Python 구문·actionlint·git diff --check | PASS |
-| 최종 PR CI | 게시 후 결과 보정 |
+| 최종 PR CI | [PR #519 checks](https://github.com/postmelee/alhangeul-macos/pull/519/checks)에서 현재 head 판정 확인 |
 | 서명·공증 후보 설치 전체 실행 | 미실행 — 별도 릴리스 후보 필요 |
 
 [보존한 환경 결과](assets/task_m900_518/environment-assessment.json), [Stage 1](../working/task_m900_518_stage1.md), [Stage 2](../working/task_m900_518_stage2.md), [Stage 3](../working/task_m900_518_stage3.md).
@@ -35,3 +35,5 @@
 현재 공개 workflow는 재실행하면 DMG를 다시 만들므로 draft PASS를 다음 공개 파일에 그대로 적용할 수 없다. 검증 파일 승격 또는 새 DMG의 공개 전 검증을 별도 릴리스 통합에서 확보해야 한다. 이 PR은 기존 publish workflow의 자동 차단을 변경하지 않는다.
 
 일반 Applications 아래 소유한 고유 `.app` 경로를 검증하며 시스템 `/Applications/Alhangeul.app` 직접 설치 및 사용자 Finder 설치 경험과 구분한다. macOS 12, 실제 Spotlight 화면, Quick Look/Thumbnail GUI, 공개 Sparkle 업데이트는 이 자동화 결과로 대체하지 않는다. 후보 전체 실행 결과가 없으므로 #513 / #337 은 OPEN 유지한다. 공개 서명·공증 실행, 버전·tag·Release·Pages·appcast 변경은 하지 않았다.
+
+최종 자체 검토에서 public artifact의 실제 `release-notes-<version>.md` 파일명도 정확한 허용 목록에 포함하도록 보정하고, DMG/checksum/notes 세 파일을 함께 추출하는 회귀를 통과했다.

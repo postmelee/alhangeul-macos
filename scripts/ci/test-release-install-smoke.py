@@ -56,6 +56,8 @@ class CandidateTests(unittest.TestCase):
             root = Path(tmp)
             with zipfile.ZipFile(root/'a.zip', 'w') as z:
                 z.writestr('alhangeul-macos-0.2.0.dmg', b'sample')
+                z.writestr('alhangeul-macos-0.2.0.dmg.sha256', b'hash')
+                z.writestr('release-notes-0.2.0.md', b'notes')
             result = smoke.extract_archive(root/'a.zip', root/'out', '0.2.0')
             self.assertEqual(result.read_bytes(), b'sample')
 
