@@ -113,7 +113,7 @@ def expect_paths(state, token, names, label, timeout=None):
         def read(term):
             remaining = deadline - time.monotonic()
             if remaining <= 0:
-                raise RuntimeError("search observation deadline reached")
+                raise TimeoutError("search observation deadline reached")
             return query(state, term, timeout=min(30, remaining))
         try:
             actual = read(token)
@@ -121,6 +121,9 @@ def expect_paths(state, token, names, label, timeout=None):
             control_paths = actual if token == CONTROL else read(CONTROL)
             control_ok = control_paths == [str(Path(state["files"]) / "index-control.txt")]
             query_succeeded = True
+        except TimeoutError:
+            # 관찰 시간 만료는 조회 명령 자체의 실패와 구분한다.
+            stable_since, control_ok = None, False
         except RuntimeError as error:
             record(state, label + "-query-error", "FAIL", reason=str(error),
                    elapsed_seconds=round(time.monotonic() - started, 2), timeout_seconds=timeout)

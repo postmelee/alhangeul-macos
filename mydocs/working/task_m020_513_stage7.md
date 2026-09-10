@@ -64,3 +64,7 @@ Finder의 시험 폴더 범위 검색에서 파일명에 없는 `AlhangeulFinal2
 - [최신 합성 JSON](../report/assets/task_m020_513/final-scenario-results.json)
 - [최종 보고서](../report/task_m020_513_report.md)
 - 운영 회귀 31개 PASS, 문서 상대 링크 36개·공개 JSON 경로 비노출·공개 본문 형식·git diff --check PASS.
+
+### Stage 7.1 최종 코드 검토
+
+관찰 한도 만료와 실제 조회 명령 오류의 기록을 분리했다. 한도에 도달해 명령을 실행하지 않은 경우에는 최종 검색 timeout만 기록하며 `query-error`를 만들지 않는다. 영속 오류는 실제 호출 횟수만큼 기록되는지, 단순 미검색은 명령 오류로 기록되지 않는지 기존 회귀를 강화했다. 운영 31개가 다시 PASS했다. 완료된 두 lifecycle은 명령 오류/관찰 한도 만료가 없어 이 보정의 관찰 결과는 변경되지 않는다. 제품 bytes도 동일하다.

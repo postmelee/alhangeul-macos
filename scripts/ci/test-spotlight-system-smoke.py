@@ -67,6 +67,7 @@ class SmokeTests(unittest.TestCase):
         self.assertFalse(state["results"][-1]["control_ok"])
         self.assertEqual(state["results"][-1]["elapsed_seconds"], 4)
         self.assertEqual(state["results"][-1]["timeout_seconds"], 4)
+        self.assertFalse(any(row["case"].endswith("query-error") for row in state["results"]))
 
     def test_query_failure_retries_and_caps_command_to_remaining_observation(self):
         state = {"files": "/synthetic/Files", "results": [], "search_timeout": 8}
@@ -95,6 +96,7 @@ class SmokeTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 smoke.expect_paths(state, "Word", [], "unavailable")
         self.assertEqual(query.call_count, 2)
+        self.assertEqual(sum(row["case"].endswith("query-error") for row in state["results"]), 2)
         self.assertEqual(state["results"][-1]["result"], "FAIL")
         self.assertFalse(state["results"][-1]["control_ok"])
         self.assertEqual(now[0], 4)
