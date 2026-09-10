@@ -292,6 +292,19 @@ jobs:
         shell: bash
         run: scripts/verify-spotlight-importer.sh build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app
 
+      - name: Test Spotlight launch reindex policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -project Alhangeul.xcodeproj \
+            -scheme HostAppTests \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath build.noindex/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            -only-testing:HostAppTests/SpotlightReindexServiceTests \
+            test
+
       - name: Verify HostApp Debug analytics endpoint
         shell: bash
         run: |
