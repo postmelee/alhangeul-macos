@@ -22,6 +22,11 @@ def command(args, timeout=30):
             "stdout": result.stdout, "stderr": result.stderr}
 
 
+def existing_installations():
+    return [str(p) for p in (Path('/Applications/Alhangeul.app'),
+                            Path.home() / 'Applications/Alhangeul.app') if p.exists()]
+
+
 def probe(timeout=180):
     result = {"schema_version": 1, "status": "HARNESS_ERROR", "release_eligible": False,
               "os": platform.platform(), "architecture": platform.machine(),
@@ -47,9 +52,8 @@ def probe(timeout=180):
         if any(name in (catalog + registrations).lower() for name in
                ("alhangeul", "rhwp mac", "rhwp.app", "rhwp-mac.app")):
             raise Unavailable("기존 알한글/importer 등록이 있음")
-        for path in [Path('/Applications/Alhangeul.app'), Path.home() / 'Applications/Alhangeul.app']:
-            if path.exists():
-                raise Unavailable("기존 알한글 설치본이 있음")
+        if existing_installations():
+            raise Unavailable("기존 알한글 설치본이 있음")
         read(["/bin/launchctl", "print", f"gui/{os.getuid()}"])
         result["gui_session_present"] = True
         documents = Path.home() / "Documents"

@@ -1,0 +1,180 @@
+name: Release first install validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: 서명·공증 DMG를 만든 성공한 Release Publish DMG 실행 ID
+        required: true
+        type: string
+      source_artifact_id:
+        description: 해당 실행의 public-dmg artifact ID
+        required: true
+        type: string
+      source_sha:
+        description: 후보 소스의 정확한 40자리 commit SHA
+        required: true
+        type: string
+      dmg_sha256:
+        description: 검증할 DMG의 64자리 SHA256
+        required: true
+        type: string
+      expected_version:
+        description: "예상 앱 버전 (예: 0.2.0)"
+        required: true
+        type: string
+      expected_build:
+        description: 예상 앱 빌드 번호
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      source_run_id:
+        description: 서명·공증 DMG를 만든 성공한 Release Publish DMG 실행 ID
+        required: true
+        type: string
+      source_artifact_id:
+        description: 해당 실행의 public-dmg artifact ID
+        required: true
+        type: string
+      source_sha:
+        description: 후보 소스의 정확한 40자리 commit SHA
+        required: true
+        type: string
+      dmg_sha256:
+        description: 검증할 DMG의 64자리 SHA256
+        required: true
+        type: string
+      expected_version:
+        description: "예상 앱 버전 (예: 0.2.0)"
+        required: true
+        type: string
+      expected_build:
+        description: 예상 앱 빌드 번호
+        required: true
+        type: string
+    outputs:
+      release_eligible:
+        description: 이 DMG의 자동 설치 검증 통과 여부 (공개 승인 아님)
+        value: ${{ jobs.verdict.outputs.release_eligible }}
+      validated_dmg_sha256:
+        description: 통과한 DMG SHA256
+        value: ${{ jobs.verdict.outputs.validated_dmg_sha256 }}
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: first-install-${{ github.workflow }}-${{ inputs.source_artifact_id }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fixtures:
+    name: Prepare synthetic documents outside installation VM
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Generate synthetic corpus (no application build or launch)
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/build.noindex/cargo
+        run: |
+          mkdir -p build.noindex
+          cargo run --locked --manifest-path RustBridge/Cargo.toml --example spotlight_fixtures -- \
+            "$PWD/build.noindex/install-fixtures" ReleaseInstallDocumentMarker
+      - uses: actions/upload-artifact@v7
+        with:
+          name: first-install-fixtures-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build.noindex/install-fixtures
+          if-no-files-found: error
+          retention-days: 14
+
+  install:
+    name: First install on ${{ matrix.runner }}
+    needs: fixtures
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    env:
+      SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+      SOURCE_ARTIFACT_ID: ${{ inputs.source_artifact_id }}
+      SOURCE_SHA: ${{ inputs.source_sha }}
+      DMG_SHA256: ${{ inputs.dmg_sha256 }}
+      EXPECTED_VERSION: ${{ inputs.expected_version }}
+      EXPECTED_BUILD: ${{ inputs.expected_build }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v8
+        with:
+          name: first-install-fixtures-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build.noindex/install-fixtures
+      - name: Validate origin and download exact candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/ci/release-install-smoke.py fetch --output build.noindex/install-check
+      - name: Validate signed candidate and automatic indexing
+        run: |
+          python3 scripts/ci/release-install-smoke.py verify \
+            --output build.noindex/install-check --fixtures build.noindex/install-fixtures
+      - name: Preserve summary even on failure
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path('build.noindex/install-check')
+          root.mkdir(parents=True, exist_ok=True)
+          result = root / 'verify-result.json'
+          if not result.exists():
+              result.write_text(json.dumps({'schema_version': 1, 'status': 'HARNESS_ERROR',
+                                           'release_eligible': False, 'reason': 'Candidate verification not completed'}))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write('## 최초 설치 자동 검증\n\n이 결과는 공개 승인/실제 GUI/Sparkle 검증을 대체하지 않습니다.\n\n```json\n')
+              f.write(result.read_text())
+              f.write('\n```\n')
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: first-install-evidence-${{ matrix.runner }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build.noindex/install-check/**/*.json
+            build.noindex/install-check/**/*.log
+            build.noindex/install-check/**/*.txt
+            build.noindex/install-check/**/*.plist
+          if-no-files-found: error
+          retention-days: 30
+
+  verdict:
+    name: Candidate installation verdict
+    if: always()
+    needs: [fixtures, install]
+    runs-on: ubuntu-latest
+    outputs:
+      release_eligible: ${{ steps.verdict.outputs.release_eligible }}
+      validated_dmg_sha256: ${{ steps.verdict.outputs.validated_dmg_sha256 }}
+    steps:
+      - id: verdict
+        env:
+          FIXTURE_RESULT: ${{ needs.fixtures.result }}
+          INSTALL_RESULT: ${{ needs.install.result }}
+          EXPECTED_HASH: ${{ inputs.dmg_sha256 }}
+        run: |
+          echo 'release_eligible=false' >> "$GITHUB_OUTPUT"
+          if [ "$FIXTURE_RESULT" != success ] || [ "$INSTALL_RESULT" != success ]; then
+            echo 'Installation gate failed or was not executed.' >&2
+            exit 1
+          fi
+          echo 'release_eligible=true' >> "$GITHUB_OUTPUT"
+          echo "validated_dmg_sha256=$EXPECTED_HASH" >> "$GITHUB_OUTPUT"
