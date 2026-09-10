@@ -1,0 +1,2230 @@
+{
+  "issue": 513,
+  "pr": 515,
+  "source_commit": "3aa2722937be50fdf094170d7cce95521e410d54",
+  "zip_sha256": "f9134bb199236fd0e9076270bd937008790f99d0266beb8aea74a813dacefa8d",
+  "os": "macOS 26.5.2",
+  "architecture": "arm64",
+  "artifact": "universal Release ad-hoc 0.1.11 (17)",
+  "python_smoke_tests": 31,
+  "runs": {
+    "trial1": {
+      "phase": "cleaned",
+      "automatic": true,
+      "launch_count": 0,
+      "search_timeout": 60,
+      "assisted_actions": [
+        "diagnostic-mdimport-i-owned-text-only"
+      ],
+      "cases": [
+        {
+          "case": "environment-text-control",
+          "result": "FAIL",
+          "control_ok": true,
+          "expected": [
+            "index-control.txt"
+          ],
+          "actual": []
+        },
+        {
+          "case": "environment-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "late-environment-control",
+          "result": "FAIL",
+          "control_ok": true,
+          "expected": [
+            "index-control.txt"
+          ],
+          "actual": []
+        },
+        {
+          "case": "continued-trial-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "pre-install-body-absent",
+          "result": "FAIL",
+          "control_ok": true,
+          "expected": [],
+          "actual": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ]
+        },
+        {
+          "case": "diagnostic-trial-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulReview20260910",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "result": "PASS",
+          "paths": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ],
+      "phase_timings": [
+        {
+          "phase": "prepare",
+          "exit": 0,
+          "elapsed_seconds": 0.95
+        },
+        {
+          "phase": "environment",
+          "exit": 1,
+          "elapsed_seconds": 61.01
+        }
+      ],
+      "interpretation": "후보 설치 전 다른 작업 Debug importer 선택 및 본문 검색으로 전제 실패. TXT 수동 요청은 이미 자동 검색된 뒤 실행했으며 회복 원인 증거 아님."
+    },
+    "trial2": {
+      "phase": "cleaned",
+      "automatic": true,
+      "launch_count": 1,
+      "search_timeout": 600,
+      "assisted_actions": [
+        "lifecycle",
+        "diagnostic-new-live-text-control",
+        "lifecycle"
+      ],
+      "cases": [
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "elapsed_seconds": 3.09,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "pre-install-body-absent",
+          "result": "PASS",
+          "elapsed_seconds": 7.25,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 0.03
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS",
+          "launch_number": 1
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "PASS",
+          "elapsed_seconds": 101.23
+        },
+        {
+          "case": "automatic-discovery",
+          "result": "PASS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "elapsed_seconds": 0.53,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "result": "PASS",
+          "elapsed_seconds": 4.47,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ]
+        },
+        {
+          "case": "korean-body-only-search",
+          "result": "PASS",
+          "elapsed_seconds": 1.03,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "metadata-document-a.hwp",
+          "result": "PASS",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-b.hwpx",
+          "result": "PASS",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-c.hwp",
+          "result": "PASS",
+          "utf8_bytes": 35
+        },
+        {
+          "case": "automatic-first-install-search",
+          "result": "PASS"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "automatic-discovery",
+          "result": "PASS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "elapsed_seconds": 0.52,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "result": "PASS",
+          "elapsed_seconds": 1.06,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ]
+        },
+        {
+          "case": "korean-body-only-search",
+          "result": "PASS",
+          "elapsed_seconds": 1.02,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "metadata-document-a.hwp",
+          "result": "PASS",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-b.hwpx",
+          "result": "PASS",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-c.hwp",
+          "result": "PASS",
+          "utf8_bytes": 35
+        },
+        {
+          "case": "automatic-first-install-search",
+          "result": "PASS"
+        },
+        {
+          "case": "deleted-original-documents",
+          "result": "PASS",
+          "elapsed_seconds": 7.25,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "deleted-original-korean-word",
+          "result": "PASS",
+          "elapsed_seconds": 7.1,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "lifecycle-failed",
+          "result": "FAIL"
+        },
+        {
+          "case": "late-restored-search-read-only",
+          "result": "PASS",
+          "observed_after_creation_seconds": 263.56
+        },
+        {
+          "case": "deleted-original-documents",
+          "result": "PASS",
+          "elapsed_seconds": 7.24,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "deleted-original-korean-word",
+          "result": "PASS",
+          "elapsed_seconds": 7.21,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "modified-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.2,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "modified-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "modified-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.37,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "modified-new-word",
+          "result": "PASS",
+          "elapsed_seconds": 1.06,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "modified-new-korean-word",
+          "result": "PASS",
+          "elapsed_seconds": 1.32,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "modified-deleted-new-word",
+          "result": "PASS",
+          "elapsed_seconds": 7.27,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "modified-deleted-new-korean-word",
+          "result": "PASS",
+          "elapsed_seconds": 7.28,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "protected-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.19,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "protected-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "protected-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.42,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "empty-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.19,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "empty-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "empty-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.34,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "invalid-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.18,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "invalid-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "invalid-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.38,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "drm-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.2,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "drm-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "drm-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.43,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "distribution-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.19,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "distribution-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "distribution-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.43,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "large-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.21,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "large-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "large-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.42,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "truncated-metadata",
+          "result": "PASS",
+          "utf8_bytes": 1048576
+        },
+        {
+          "case": "truncated-prefix-search",
+          "result": "PASS",
+          "elapsed_seconds": 7.35,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "truncated-korean-prefix-search",
+          "result": "PASS",
+          "elapsed_seconds": 1.07,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "truncated-tail-not-indexed",
+          "result": "PASS",
+          "elapsed_seconds": 7.37,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "deleted-truncated-document",
+          "result": "PASS",
+          "elapsed_seconds": 7.3,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "deleted-final-documents",
+          "result": "PASS",
+          "elapsed_seconds": 7.33,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulFinal20260910",
+          "result": "PASS",
+          "elapsed_seconds": 7.27,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "result": "PASS",
+          "elapsed_seconds": 7.25,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "result": "PASS",
+          "elapsed_seconds": 7.19,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "result": "PASS",
+          "elapsed_seconds": 7.3,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "result": "PASS",
+          "elapsed_seconds": 7.23,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "result": "PASS",
+          "elapsed_seconds": 7.14,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "result": "PASS",
+          "elapsed_seconds": 7.28,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ],
+      "phase_timings": [
+        {
+          "phase": "prepare",
+          "exit": 0,
+          "elapsed_seconds": 0.86
+        },
+        {
+          "phase": "environment",
+          "exit": 0,
+          "elapsed_seconds": 10.91
+        },
+        {
+          "phase": "install",
+          "exit": 0,
+          "elapsed_seconds": 0.7
+        },
+        {
+          "phase": "launch",
+          "exit": 0,
+          "elapsed_seconds": 101.4
+        },
+        {
+          "phase": "automatic-search",
+          "exit": 0,
+          "elapsed_seconds": 6.4
+        },
+        {
+          "phase": "stop-app",
+          "exit": 0,
+          "elapsed_seconds": 0.09
+        },
+        {
+          "phase": "automatic-search",
+          "exit": 0,
+          "elapsed_seconds": 2.82
+        },
+        {
+          "phase": "lifecycle",
+          "exit": 1,
+          "elapsed_seconds": 94.71
+        }
+      ],
+      "first_launch_snapshot": {
+        "phase": "searchable",
+        "automatic": true,
+        "launch_count": 1,
+        "search_timeout": 600,
+        "assisted_actions": [],
+        "cases": [
+          {
+            "case": "environment-text-control",
+            "result": "PASS",
+            "elapsed_seconds": 3.09,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "index-control.txt"
+            ]
+          },
+          {
+            "case": "pre-install-body-absent",
+            "result": "PASS",
+            "elapsed_seconds": 7.25,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "discovery-before-first-launch",
+            "result": "MISS",
+            "elapsed_seconds": 0.03
+          },
+          {
+            "case": "first-launch-requested",
+            "result": "PASS",
+            "launch_number": 1
+          },
+          {
+            "case": "discovery-after-first-launch",
+            "result": "PASS",
+            "elapsed_seconds": 101.23
+          },
+          {
+            "case": "automatic-discovery",
+            "result": "PASS",
+            "elapsed_seconds": 0.01
+          },
+          {
+            "case": "environment-text-control",
+            "result": "PASS",
+            "elapsed_seconds": 0.53,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "index-control.txt"
+            ]
+          },
+          {
+            "case": "body-only-search",
+            "result": "PASS",
+            "elapsed_seconds": 4.47,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp",
+              "document-b.hwpx",
+              "document-c.hwp"
+            ]
+          },
+          {
+            "case": "korean-body-only-search",
+            "result": "PASS",
+            "elapsed_seconds": 1.03,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp",
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "metadata-document-a.hwp",
+            "result": "PASS",
+            "utf8_bytes": 57
+          },
+          {
+            "case": "metadata-document-b.hwpx",
+            "result": "PASS",
+            "utf8_bytes": 57
+          },
+          {
+            "case": "metadata-document-c.hwp",
+            "result": "PASS",
+            "utf8_bytes": 35
+          },
+          {
+            "case": "automatic-first-install-search",
+            "result": "PASS"
+          },
+          {
+            "case": "candidate-app-not-running",
+            "result": "PASS"
+          },
+          {
+            "case": "automatic-discovery",
+            "result": "PASS",
+            "elapsed_seconds": 0.01
+          },
+          {
+            "case": "environment-text-control",
+            "result": "PASS",
+            "elapsed_seconds": 0.52,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "index-control.txt"
+            ]
+          },
+          {
+            "case": "body-only-search",
+            "result": "PASS",
+            "elapsed_seconds": 1.06,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp",
+              "document-b.hwpx",
+              "document-c.hwp"
+            ]
+          },
+          {
+            "case": "korean-body-only-search",
+            "result": "PASS",
+            "elapsed_seconds": 1.02,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp",
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "metadata-document-a.hwp",
+            "result": "PASS",
+            "utf8_bytes": 57
+          },
+          {
+            "case": "metadata-document-b.hwpx",
+            "result": "PASS",
+            "utf8_bytes": 57
+          },
+          {
+            "case": "metadata-document-c.hwp",
+            "result": "PASS",
+            "utf8_bytes": 35
+          },
+          {
+            "case": "automatic-first-install-search",
+            "result": "PASS"
+          }
+        ]
+      },
+      "completed_lifecycle": {
+        "phase": "lifecycle-verified",
+        "automatic": true,
+        "launch_count": 1,
+        "search_timeout": 600,
+        "assisted_actions": [
+          "lifecycle",
+          "diagnostic-new-live-text-control",
+          "lifecycle"
+        ],
+        "cases": [
+          {
+            "case": "deleted-original-documents",
+            "result": "PASS",
+            "elapsed_seconds": 7.24,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "deleted-original-korean-word",
+            "result": "PASS",
+            "elapsed_seconds": 7.21,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "modified-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.2,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "modified-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "modified-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.37,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "modified-new-word",
+            "result": "PASS",
+            "elapsed_seconds": 1.06,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "modified-new-korean-word",
+            "result": "PASS",
+            "elapsed_seconds": 1.32,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "modified-deleted-new-word",
+            "result": "PASS",
+            "elapsed_seconds": 7.27,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "modified-deleted-new-korean-word",
+            "result": "PASS",
+            "elapsed_seconds": 7.28,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "protected-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.19,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "protected-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "protected-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.42,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "empty-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.19,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "empty-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "empty-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.34,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "invalid-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.18,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "invalid-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "invalid-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.38,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "drm-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.2,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "drm-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "drm-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.43,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "distribution-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.19,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "distribution-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "distribution-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.43,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "large-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.21,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "large-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "large-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.42,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "truncated-metadata",
+            "result": "PASS",
+            "utf8_bytes": 1048576
+          },
+          {
+            "case": "truncated-prefix-search",
+            "result": "PASS",
+            "elapsed_seconds": 7.35,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "truncated-korean-prefix-search",
+            "result": "PASS",
+            "elapsed_seconds": 1.07,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "truncated-tail-not-indexed",
+            "result": "PASS",
+            "elapsed_seconds": 7.37,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "deleted-truncated-document",
+            "result": "PASS",
+            "elapsed_seconds": 7.3,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "deleted-final-documents",
+            "result": "PASS",
+            "elapsed_seconds": 7.33,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          }
+        ]
+      }
+    },
+    "trial3": {
+      "phase": "cleaned",
+      "automatic": true,
+      "launch_count": 1,
+      "search_timeout": 600,
+      "assisted_actions": [
+        "lifecycle"
+      ],
+      "cases": [
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "elapsed_seconds": 3.09,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "pre-install-body-absent",
+          "result": "PASS",
+          "elapsed_seconds": 7.27,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "discovery-before-first-launch",
+          "result": "MISS",
+          "elapsed_seconds": 0.03
+        },
+        {
+          "case": "first-launch-requested",
+          "result": "PASS",
+          "launch_number": 1
+        },
+        {
+          "case": "discovery-after-first-launch",
+          "result": "PASS",
+          "elapsed_seconds": 273.17
+        },
+        {
+          "case": "automatic-discovery",
+          "result": "PASS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "elapsed_seconds": 0.54,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "result": "PASS",
+          "elapsed_seconds": 4.19,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ]
+        },
+        {
+          "case": "korean-body-only-search",
+          "result": "PASS",
+          "elapsed_seconds": 24.7,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "metadata-document-a.hwp",
+          "result": "PASS",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-b.hwpx",
+          "result": "PASS",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-c.hwp",
+          "result": "PASS",
+          "utf8_bytes": 35
+        },
+        {
+          "case": "automatic-first-install-search",
+          "result": "PASS"
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "automatic-discovery",
+          "result": "PASS",
+          "elapsed_seconds": 0.01
+        },
+        {
+          "case": "environment-text-control",
+          "result": "PASS",
+          "elapsed_seconds": 0.54,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "index-control.txt"
+          ]
+        },
+        {
+          "case": "body-only-search",
+          "result": "PASS",
+          "elapsed_seconds": 26.34,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx",
+            "document-c.hwp"
+          ]
+        },
+        {
+          "case": "korean-body-only-search",
+          "result": "PASS",
+          "elapsed_seconds": 1.02,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp",
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "metadata-document-a.hwp",
+          "result": "PASS",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-b.hwpx",
+          "result": "PASS",
+          "utf8_bytes": 57
+        },
+        {
+          "case": "metadata-document-c.hwp",
+          "result": "PASS",
+          "utf8_bytes": 35
+        },
+        {
+          "case": "automatic-first-install-search",
+          "result": "PASS"
+        },
+        {
+          "case": "deleted-original-documents",
+          "result": "PASS",
+          "elapsed_seconds": 7.75,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "deleted-original-korean-word",
+          "result": "PASS",
+          "elapsed_seconds": 7.18,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "modified-restored",
+          "result": "PASS",
+          "elapsed_seconds": 40.65,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "modified-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "modified-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.4,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "modified-new-word",
+          "result": "PASS",
+          "elapsed_seconds": 1.07,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "modified-new-korean-word",
+          "result": "PASS",
+          "elapsed_seconds": 1.31,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "modified-deleted-new-word",
+          "result": "PASS",
+          "elapsed_seconds": 7.27,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "modified-deleted-new-korean-word",
+          "result": "PASS",
+          "elapsed_seconds": 7.31,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "protected-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.19,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "protected-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "protected-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.43,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "empty-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.21,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "empty-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "empty-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.54,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "invalid-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.21,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "invalid-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "invalid-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.54,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "drm-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.25,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "drm-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "drm-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.54,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "distribution-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.28,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "distribution-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "distribution-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.49,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "large-restored",
+          "result": "PASS",
+          "elapsed_seconds": 4.25,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-a.hwp"
+          ]
+        },
+        {
+          "case": "large-metadata",
+          "result": "PASS"
+        },
+        {
+          "case": "large-old-word-removed",
+          "result": "PASS",
+          "elapsed_seconds": 10.47,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "truncated-metadata",
+          "result": "PASS",
+          "utf8_bytes": 1048576
+        },
+        {
+          "case": "truncated-prefix-search",
+          "result": "PASS",
+          "elapsed_seconds": 7.45,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "truncated-korean-prefix-search",
+          "result": "PASS",
+          "elapsed_seconds": 1.06,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": [
+            "document-b.hwpx"
+          ]
+        },
+        {
+          "case": "truncated-tail-not-indexed",
+          "result": "PASS",
+          "elapsed_seconds": 7.4,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "deleted-truncated-document",
+          "result": "PASS",
+          "elapsed_seconds": 7.32,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "deleted-final-documents",
+          "result": "PASS",
+          "elapsed_seconds": 7.35,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "candidate-app-not-running",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-index-AlhangeulFinal20260910",
+          "result": "PASS",
+          "elapsed_seconds": 7.3,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-UpdatedDocumentMarker",
+          "result": "PASS",
+          "elapsed_seconds": 7.35,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-나비",
+          "result": "PASS",
+          "elapsed_seconds": 7.24,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-바다",
+          "result": "PASS",
+          "elapsed_seconds": 7.35,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-TruncatedDocumentMarker",
+          "result": "PASS",
+          "elapsed_seconds": 7.31,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-호랑이",
+          "result": "PASS",
+          "elapsed_seconds": 7.19,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-index-OmittedDocumentMarker",
+          "result": "PASS",
+          "elapsed_seconds": 7.37,
+          "timeout_seconds": 600,
+          "control_ok": true,
+          "paths": []
+        },
+        {
+          "case": "cleanup-original-apps-providers",
+          "result": "PASS"
+        },
+        {
+          "case": "cleanup-importer-catalog",
+          "result": "PASS"
+        }
+      ],
+      "phase_timings": [
+        {
+          "phase": "prepare",
+          "exit": 0,
+          "elapsed_seconds": 0.87
+        },
+        {
+          "phase": "environment",
+          "exit": 0,
+          "elapsed_seconds": 10.93
+        },
+        {
+          "phase": "install",
+          "exit": 0,
+          "elapsed_seconds": 0.71
+        },
+        {
+          "phase": "launch",
+          "exit": 0,
+          "elapsed_seconds": 273.35
+        },
+        {
+          "phase": "automatic-search",
+          "exit": 0,
+          "elapsed_seconds": 29.89
+        },
+        {
+          "phase": "stop-app",
+          "exit": 0,
+          "elapsed_seconds": 0.1
+        },
+        {
+          "phase": "automatic-search",
+          "exit": 0,
+          "elapsed_seconds": 28.16
+        }
+      ],
+      "first_launch_snapshot": {
+        "phase": "searchable",
+        "automatic": true,
+        "launch_count": 1,
+        "search_timeout": 600,
+        "assisted_actions": [],
+        "cases": [
+          {
+            "case": "environment-text-control",
+            "result": "PASS",
+            "elapsed_seconds": 3.09,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "index-control.txt"
+            ]
+          },
+          {
+            "case": "pre-install-body-absent",
+            "result": "PASS",
+            "elapsed_seconds": 7.27,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "discovery-before-first-launch",
+            "result": "MISS",
+            "elapsed_seconds": 0.03
+          },
+          {
+            "case": "first-launch-requested",
+            "result": "PASS",
+            "launch_number": 1
+          },
+          {
+            "case": "discovery-after-first-launch",
+            "result": "PASS",
+            "elapsed_seconds": 273.17
+          },
+          {
+            "case": "automatic-discovery",
+            "result": "PASS",
+            "elapsed_seconds": 0.01
+          },
+          {
+            "case": "environment-text-control",
+            "result": "PASS",
+            "elapsed_seconds": 0.54,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "index-control.txt"
+            ]
+          },
+          {
+            "case": "body-only-search",
+            "result": "PASS",
+            "elapsed_seconds": 4.19,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp",
+              "document-b.hwpx",
+              "document-c.hwp"
+            ]
+          },
+          {
+            "case": "korean-body-only-search",
+            "result": "PASS",
+            "elapsed_seconds": 24.7,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp",
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "metadata-document-a.hwp",
+            "result": "PASS",
+            "utf8_bytes": 57
+          },
+          {
+            "case": "metadata-document-b.hwpx",
+            "result": "PASS",
+            "utf8_bytes": 57
+          },
+          {
+            "case": "metadata-document-c.hwp",
+            "result": "PASS",
+            "utf8_bytes": 35
+          },
+          {
+            "case": "automatic-first-install-search",
+            "result": "PASS"
+          },
+          {
+            "case": "candidate-app-not-running",
+            "result": "PASS"
+          },
+          {
+            "case": "automatic-discovery",
+            "result": "PASS",
+            "elapsed_seconds": 0.01
+          },
+          {
+            "case": "environment-text-control",
+            "result": "PASS",
+            "elapsed_seconds": 0.54,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "index-control.txt"
+            ]
+          },
+          {
+            "case": "body-only-search",
+            "result": "PASS",
+            "elapsed_seconds": 26.34,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp",
+              "document-b.hwpx",
+              "document-c.hwp"
+            ]
+          },
+          {
+            "case": "korean-body-only-search",
+            "result": "PASS",
+            "elapsed_seconds": 1.02,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp",
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "metadata-document-a.hwp",
+            "result": "PASS",
+            "utf8_bytes": 57
+          },
+          {
+            "case": "metadata-document-b.hwpx",
+            "result": "PASS",
+            "utf8_bytes": 57
+          },
+          {
+            "case": "metadata-document-c.hwp",
+            "result": "PASS",
+            "utf8_bytes": 35
+          },
+          {
+            "case": "automatic-first-install-search",
+            "result": "PASS"
+          }
+        ]
+      },
+      "completed_lifecycle": {
+        "phase": "lifecycle-verified",
+        "automatic": true,
+        "launch_count": 1,
+        "search_timeout": 600,
+        "assisted_actions": [
+          "lifecycle"
+        ],
+        "cases": [
+          {
+            "case": "deleted-original-documents",
+            "result": "PASS",
+            "elapsed_seconds": 7.75,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "deleted-original-korean-word",
+            "result": "PASS",
+            "elapsed_seconds": 7.18,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "modified-restored",
+            "result": "PASS",
+            "elapsed_seconds": 40.65,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "modified-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "modified-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.4,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "modified-new-word",
+            "result": "PASS",
+            "elapsed_seconds": 1.07,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "modified-new-korean-word",
+            "result": "PASS",
+            "elapsed_seconds": 1.31,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "modified-deleted-new-word",
+            "result": "PASS",
+            "elapsed_seconds": 7.27,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "modified-deleted-new-korean-word",
+            "result": "PASS",
+            "elapsed_seconds": 7.31,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "protected-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.19,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "protected-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "protected-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.43,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "empty-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.21,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "empty-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "empty-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.54,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "invalid-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.21,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "invalid-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "invalid-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.54,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "drm-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.25,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "drm-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "drm-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.54,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "distribution-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.28,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "distribution-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "distribution-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.49,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "large-restored",
+            "result": "PASS",
+            "elapsed_seconds": 4.25,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-a.hwp"
+            ]
+          },
+          {
+            "case": "large-metadata",
+            "result": "PASS"
+          },
+          {
+            "case": "large-old-word-removed",
+            "result": "PASS",
+            "elapsed_seconds": 10.47,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "truncated-metadata",
+            "result": "PASS",
+            "utf8_bytes": 1048576
+          },
+          {
+            "case": "truncated-prefix-search",
+            "result": "PASS",
+            "elapsed_seconds": 7.45,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "truncated-korean-prefix-search",
+            "result": "PASS",
+            "elapsed_seconds": 1.06,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": [
+              "document-b.hwpx"
+            ]
+          },
+          {
+            "case": "truncated-tail-not-indexed",
+            "result": "PASS",
+            "elapsed_seconds": 7.4,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "deleted-truncated-document",
+            "result": "PASS",
+            "elapsed_seconds": 7.32,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          },
+          {
+            "case": "deleted-final-documents",
+            "result": "PASS",
+            "elapsed_seconds": 7.35,
+            "timeout_seconds": 600,
+            "control_ok": true,
+            "paths": []
+          }
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "기존 사용자 설치/등록 이력 있음",
+    "깨끗한 계정/VM 및 macOS 12/Intel 미검증",
+    "공개 서명·공증 후보 아님"
+  ],
+  "screenshots": [
+    "final-finder-body-search.png",
+    "final-finder-korean-search.png"
+  ],
+  "text_comparison": {
+    "started_at": 1789009297.753623,
+    "cases": [
+      {
+        "elapsed_seconds": 1.03,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 7.31,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 13.7,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 19.85,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 26.8,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 34.02,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 40.11,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 47.07,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 54.54,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 61.17,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 67.96,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 75.1,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 83.06,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 90.4,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 97.88,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 104.77,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 110.92,
+        "direct": [],
+        "copied": []
+      },
+      {
+        "elapsed_seconds": 117.07,
+        "direct": [
+          "direct.txt"
+        ],
+        "copied": [
+          "copy2.txt",
+          "copyfile.txt"
+        ]
+      }
+    ]
+  },
+  "lifecycle_new_text_control": {
+    "created_at": 1789010055.14876,
+    "cases": [
+      {
+        "elapsed_seconds": 0.53,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 11.09,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 21.66,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 32.22,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 42.79,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 53.35,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 63.9,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 74.45,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 85.01,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 95.55,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 106.12,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 116.68,
+        "paths": []
+      },
+      {
+        "elapsed_seconds": 127.23,
+        "paths": [
+          "live-control.txt"
+        ]
+      }
+    ]
+  },
+  "coordination": "작업지시자 승인 후 #516 빌드·실행 보류 및 소유 개발 등록 해제, catalog 제거 확인 후 trial2 시작"
+}

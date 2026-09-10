@@ -34,6 +34,71 @@ class SmokeTests(unittest.TestCase):
         self.assertNotIn("choose from", result.stderr)
         self.assertLess(len(result.stderr), 1200)
 
+    def test_search_timeout_cli_range_and_label(self):
+        for value in ["0", "601", "invalid"]:
+            result = subprocess.run(
+                [sys.executable, smoke.__file__, "status", "--state", "unused.json", "--search-timeout", value],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("search timeout must", result.stderr)
+
+    def test_late_search_records_saved_limit_and_elapsed_time(self):
+        state = {"files": "/synthetic/Files", "results": [], "search_timeout": 120}
+        now = [0]
+        def sleep(seconds): now[0] += seconds
+        def query(_state, token, timeout=30):
+            if token == smoke.CONTROL: return ["/synthetic/Files/index-control.txt"]
+            return ["/synthetic/Files/document.hwp"] if now[0] >= 80 else []
+        with patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+             patch.object(smoke.time, "sleep", side_effect=sleep), patch.object(smoke, "query", side_effect=query):
+            smoke.expect_paths(state, "Word", ["document.hwp"], "late-search")
+        self.assertEqual(state["results"][-1]["elapsed_seconds"], 80)
+        self.assertEqual(state["results"][-1]["timeout_seconds"], 120)
+
+    def test_positive_search_timeout_reports_actual_missing_control(self):
+        state = {"files": "/synthetic/Files", "results": [], "search_timeout": 120}
+        now = [0]
+        def sleep(seconds): now[0] += seconds
+        with patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+             patch.object(smoke.time, "sleep", side_effect=sleep), patch.object(smoke, "query", return_value=[]):
+            with self.assertRaises(RuntimeError):
+                smoke.expect_paths(state, "Word", ["document.hwp"], "missing", timeout=4)
+        self.assertFalse(state["results"][-1]["control_ok"])
+        self.assertEqual(state["results"][-1]["elapsed_seconds"], 4)
+        self.assertEqual(state["results"][-1]["timeout_seconds"], 4)
+
+    def test_query_failure_retries_and_caps_command_to_remaining_observation(self):
+        state = {"files": "/synthetic/Files", "results": [], "search_timeout": 8}
+        now, calls = [0], []
+        def sleep(seconds): now[0] += seconds
+        def query(_state, token, timeout=30):
+            calls.append(timeout)
+            if len(calls) == 1:
+                now[0] += 3
+                raise RuntimeError("synthetic temporary query timeout")
+            return ["/synthetic/Files/document.hwp"] if token == "Word" else ["/synthetic/Files/index-control.txt"]
+        with patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+             patch.object(smoke.time, "sleep", side_effect=sleep), patch.object(smoke, "query", side_effect=query):
+            smoke.expect_paths(state, "Word", ["document.hwp"], "recovered")
+        self.assertEqual(calls, [8, 3, 3])
+        self.assertEqual([r["result"] for r in state["results"]], ["FAIL", "PASS"])
+        self.assertEqual(state["results"][-1]["elapsed_seconds"], 5)
+
+    def test_persistent_query_failure_cannot_pass_absence(self):
+        state = {"files": "/synthetic/Files", "results": [], "search_timeout": 4}
+        now = [0]
+        def sleep(seconds): now[0] += seconds
+        with patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+             patch.object(smoke.time, "sleep", side_effect=sleep), \
+             patch.object(smoke, "query", side_effect=RuntimeError("query unavailable")) as query:
+            with self.assertRaises(RuntimeError):
+                smoke.expect_paths(state, "Word", [], "unavailable")
+        self.assertEqual(query.call_count, 2)
+        self.assertEqual(state["results"][-1]["result"], "FAIL")
+        self.assertFalse(state["results"][-1]["control_ok"])
+        self.assertEqual(now[0], 4)
+
     def test_lifecycle_only_requests_manual_import_in_diagnostic_mode(self):
         for automatic in [True, False]:
             with self.subTest(automatic=automatic), tempfile.TemporaryDirectory() as directory:
@@ -293,7 +358,7 @@ class SmokeTests(unittest.TestCase):
                               [], ["/synthetic/Files/index-control.txt"],
                               [], ["/synthetic/Files/index-control.txt"],
                               [], ["/synthetic/Files/index-control.txt"]])
-            with patch.object(smoke, "query", side_effect=lambda *args: next(responses)):
+            with patch.object(smoke, "query", side_effect=lambda *args, **kwargs: next(responses)):
                 smoke.expect_paths(state, "OldWord", [], "settled-deletion", timeout=10)
             self.assertEqual(now[0], 8)
             self.assertEqual(state["results"][-1]["result"], "PASS")
