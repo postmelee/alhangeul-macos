@@ -171,7 +171,8 @@ HostApp은 앱 실행과 version 전환을 영구 사용자·기기·설치 식�
 - Store의 `webViewLoadID`는 파일 열기 성공과 명시적 retry에서 증가한다. Coordinator는 loadID 변경에서만 WebView를 reload한다. 파일명·dirty·첫 저장 metadata 갱신으로는 reload하지 않는다.
 - page별 token과 native loadID, editor의 `documentEpoch`·`changeSeq`, 메시지 `sequence`를 검증한다. 이전 page/epoch나 낮은 sequence가 현재 상태를 덮어쓰지 못한다.
 - 일반 상태 갱신은 입력·명령·상태 이벤트를 40ms로 병합하고 1초 간격으로 보완한다. `getSelectionContext`·pageCount·automation context를 사용하며 전체 export/SHA가 필요한 `getDocumentState`는 초기/epoch 변경과 저장·출력 경계에서 사용한다.
-- `nativeLoad`는 native가 읽고 분류한 bytes/source에 연결된 세션이다. native 요청 없이 epoch가 바뀐 `editorOnly` 세션은 이전 source·보호 정보를 즉시 해제한다. 렌더 준비 중이어도 원본 연결을 해제하며, 늦은 SwiftUI metadata로 복원하지 않는다.
+- `nativeLoad`는 native가 읽고 분류한 bytes/source에 연결된 세션이다. native 요청 없이 epoch가 바뀐 `newDocument`/`editorOnly` 세션은 이전 source·보호 정보를 즉시 해제한다. 렌더 준비 중이어도 원본 연결을 해제하며, 늦은 SwiftUI metadata로 복원하지 않는다.
+- `newDocument`는 documentStart에 공개 automation 확장 명령의 CommandServices를 통해 `createNewDocument` 성공을 관찰하고, 당시 `documentGeneration`이 현재 세대와 같은 경우다. 첫 저장은 보호 경고 없이 일반 파일명을 사용하는 plain 정책이다. 생성 취소·실패는 새 판정을 만들지 않으며, 파일 로드·복구는 세대가 증가해 이전 생성 판정을 무효화한다. 파일명과 내용은 판정 근거가 아니다.
 - `editorOnly`에는 자동복구 등 출처 미확정 문서도 포함한다. 첫 저장은 보호 상태를 임의로 plain으로 낮추지 않고 `invalidOrUnknown` 평문 복사본 확인과 새 destination 정책을 사용한다.
 - 저장·PDF·Word/HTML은 destination 선택 전후 최신 세션을 조회한다. snapshot 생성부터 write/완료까지 입력과 문서 변경 명령을 잠그고, epoch·changeSeq·SHA로 검증한다. 저장 잠금은 60초 만료와 요청별 해제를 가지며 배경 상태 조회의 오래된 결과도 폐기한다.
 

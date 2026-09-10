@@ -78,4 +78,36 @@ final class RhwpStudioEditorSessionTests: XCTestCase {
         )
         XCTAssertEqual(reload?.sourceBinding, .nativeLoad)
     }
+    func testConfirmedCreationUsesNewBindingAndRecoveryRemovesIt() throws {
+        var created = snapshot()
+        created.createdByEditor = true
+        let initial = try XCTUnwrap(RhwpStudioEditorSession.accepting(
+            created, after:nil, loadID:3, hasNativeDocument:false))
+        XCTAssertEqual(initial.sourceBinding, .newDocument)
+        var typed = snapshot(sequence:2, changeSeq:1, dirty:true)
+        typed.createdByEditor = true
+        let edited = try XCTUnwrap(RhwpStudioEditorSession.accepting(
+            typed, after:initial, loadID:3, hasNativeDocument:false))
+        XCTAssertEqual(edited.sourceBinding, .newDocument)
+        let recovered = RhwpStudioEditorSession.accepting(
+            snapshot(sequence:3, epoch:2, changeSeq:1, dirty:true), after:edited,
+            loadID:3, hasNativeDocument:false)
+        XCTAssertEqual(recovered?.sourceBinding, .editorOnly)
+        let saved = RhwpStudioEditorSession(snapshot:created, sourceBinding:.nativeLoad)
+        XCTAssertEqual(RhwpStudioEditorSession.accepting(typed, after:saved, loadID:3,
+            hasNativeDocument:true)?.sourceBinding, .nativeLoad)
+    }
+
+    func testConfirmedReplacementClearsNativeBindingAndLostObservationIsConservative() throws {
+        let file = RhwpStudioEditorSession(snapshot:snapshot(), sourceBinding:.nativeLoad)
+        var created = snapshot(sequence:2, epoch:2)
+        created.createdByEditor = true
+        let new = try XCTUnwrap(RhwpStudioEditorSession.accepting(created, after:file,
+            loadID:3, hasNativeDocument:true))
+        XCTAssertEqual(new.sourceBinding, .newDocument)
+        let unknown = RhwpStudioEditorSession.accepting(snapshot(sequence:3, epoch:2), after:new,
+            loadID:3, hasNativeDocument:true)
+        XCTAssertEqual(unknown?.sourceBinding, .editorOnly)
+    }
+
 }

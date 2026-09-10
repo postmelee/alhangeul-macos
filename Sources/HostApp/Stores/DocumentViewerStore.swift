@@ -194,7 +194,7 @@ final class DocumentViewerStore: ObservableObject {
         let isReplacement = editorSession?.snapshot.documentEpoch != session.snapshot.documentEpoch
         editorSession = session
         hasUnsavedChanges = session.snapshot.dirty
-        if session.sourceBinding == .editorOnly {
+        if session.sourceBinding != .nativeLoad {
             rhwpStudioDocument = nil
             sourceDocument = nil
             if isReplacement {

@@ -13,6 +13,7 @@ final class RhwpStudioSaveBridgeScriptTests: XCTestCase {
         var messages=[],notifyCalls=0,changeAfterExport=false;
         function postNative(message){messages.push(message)}
         function setTimeout(){return 1} function clearTimeout(){}
+        function readDocumentOrigin(){return {generation:null,createdByEditor:false}}
         function scheduleEditorSessionCheck(){} function rememberCurrentFileName(){}
         function showTemporaryStatusMessage(){} function fileNameForSaveFormat(){return 'new.hwp'}
         async function settleEditorState(){}

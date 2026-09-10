@@ -29,7 +29,8 @@ enum RhwpStudioSaveBridgeScript {
       const next = {
         ready: !document.documentElement.classList.contains("rhwp-busy"),
         documentEpoch: state.documentEpoch, changeSeq: state.changeSeq,
-        dirty: state.dirty, pageCount: state.pageCount, format: state.format
+        dirty: state.dirty, pageCount: state.pageCount, format: state.format,
+        createdByEditor: window.__alhangeulDocumentOrigin?.().createdByEditor === true
       };
       sessionSnapshot = next;
       const message = {type: "editor-session", token: sessionLoad.token,
@@ -41,9 +42,11 @@ enum RhwpStudioSaveBridgeScript {
     async function readNativeSession(settle = true) {
       const readVersion = ++sessionReadVersion;
       if (settle) await settleEditorState();
+      const origin = readDocumentOrigin();
       const state = await requestRhwp("getDocumentState");
       const fence = await requestRhwp("getSelectionContext");
       if (readVersion !== sessionReadVersion ||
+          origin.generation !== readDocumentOrigin().generation ||
           state.documentEpoch !== fence.documentEpoch || state.changeSeq !== fence.changeSeq) {
         throw new Error("문서가 변경되었습니다. 다시 시도해 주세요.");
       }

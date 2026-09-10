@@ -262,7 +262,7 @@ extension RhwpStudioWebView {
             // 명시적인 파일 열기·재시도 요청만 WebView를 reload한다.
             guard loadID != loadedIdentity else {
                 // 내부 생성 후 늦게 도착한 SwiftUI의 이전 source를 복원하지 않는다.
-                if editorSession?.sourceBinding != .editorOnly {
+                if editorSession == nil || editorSession?.sourceBinding == .nativeLoad {
                     currentDocument = document
                     currentSourceDocument = sourceDocument
                     documentProvider.setDocument(document)
@@ -313,7 +313,7 @@ extension RhwpStudioWebView {
             controller.removeAllUserScripts()
             let context = "window.__alhangeulEditorLoad = {loadID: \(loadID), token: \(Self.javaScriptStringLiteral(editorLoadToken))};"
             controller.addUserScript(WKUserScript(
-                source: context + RhwpStudioSaveBridgeScript.guardSource + RhwpStudioHostBridgeScript.runtimeErrorSource,
+                source: context + RhwpStudioEditorSessionScript.provenanceSource + RhwpStudioSaveBridgeScript.guardSource + RhwpStudioHostBridgeScript.runtimeErrorSource,
                 injectionTime: .atDocumentStart, forMainFrameOnly: true
             ))
             controller.addUserScript(WKUserScript(
@@ -334,7 +334,7 @@ extension RhwpStudioWebView {
             else { return }
             let previous = editorSession
             editorSession = session
-            if session.sourceBinding == .editorOnly {
+            if session.sourceBinding != .nativeLoad {
                 currentDocument = nil
                 currentSourceDocument = nil
                 documentProvider.setDocument(nil)
@@ -1015,7 +1015,7 @@ extension RhwpStudioWebView {
                         sourceURL: self.currentSourceDocument?.url,
                         filename: suggestedFilename ?? self.currentDocument?.filename ?? "새 문서.\(session.snapshot.format)"
                     )
-                    let protection = self.currentDocument?.sourceProtection ?? .invalidOrUnknown
+                    let protection = self.currentSaveProtection
                     let sourceFormat = self.currentDocument?.sourceFormatIdentity ?? .other
                     let outputIntent = DocumentSaveProtectionPolicy.outputIntent(for: protection)
                     let conversion = DocumentSaveConversionIntent.resolve(sourceFormat: sourceFormat, outputFormat: format)
@@ -1171,12 +1171,17 @@ extension RhwpStudioWebView {
             return session
         }
 
+        private var currentSaveProtection: DocumentSourceProtection {
+            currentDocument?.sourceProtection ??
+                (editorSession?.sourceBinding == .newDocument ? .plain : .invalidOrUnknown)
+        }
+
         private func validatePendingSaveRequest(_ request: PendingSaveRequest) throws {
             try requireSave(request.id, token:request.token, epoch:request.documentEpoch)
             try DocumentSaveProtectionPolicy.validateCurrentDocument(
                 requestRevision: request.documentRevision, requestProtection: request.sourceProtection,
                 requestSourceFormat: request.sourceFormat, currentRevision: currentDocument?.revision ?? 0,
-                currentProtection: currentDocument?.sourceProtection ?? .invalidOrUnknown,
+                currentProtection: currentSaveProtection,
                 currentSourceFormat: currentDocument?.sourceFormatIdentity ?? .other
             )
             try DocumentSaveProtectionPolicy.validateRequest(

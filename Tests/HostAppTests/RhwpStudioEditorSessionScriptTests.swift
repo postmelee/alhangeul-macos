@@ -93,4 +93,44 @@ final class RhwpStudioEditorSessionScriptTests: XCTestCase {
         await runCheck(context)
         XCTAssertEqual(context.evaluateScript("messages[0].documentEpoch")?.toInt32(), 2)
     }
+    func testCreationObserverDistinguishesCreateLoadCancelAndFailure() throws {
+        let context = try XCTUnwrap(JSContext())
+        context.exceptionHandler = { _, error in XCTFail(error?.toString() ?? "JavaScript error") }
+        context.evaluateScript("""
+        var window = {}, registered = new Map();
+        var wasm = {documentGeneration: 1, fail: false, noOp: false,
+          createNewDocument() {
+            if (this.fail) throw new Error('create failed');
+            if (!this.noOp) this.documentGeneration++;
+            return {pageCount:1};
+          }};
+        \(RhwpStudioEditorSessionScript.provenanceSource)
+        window.rhwpStudio = {};
+        window.rhwpStudio.automation = {
+          registerCommand(def) {registered.set(def.id,def)},
+          execute(id) {registered.get(id).execute({wasm});return {ok:true}},
+          unregisterCommand(id) {registered.delete(id)}
+        };
+        var before = window.__alhangeulDocumentOrigin();
+        wasm.createNewDocument();
+        var created = window.__alhangeulDocumentOrigin();
+        // 파일/복구 로드는 이름과 무관하게 documentGeneration을 증가시킨다.
+        wasm.documentGeneration++;
+        var loaded = window.__alhangeulDocumentOrigin();
+        wasm.fail = true;try {wasm.createNewDocument()} catch {}
+        var failed = window.__alhangeulDocumentOrigin();
+        wasm.fail = false;wasm.noOp = true;wasm.createNewDocument();
+        var cancelled = window.__alhangeulDocumentOrigin();
+        wasm.noOp = false;wasm.createNewDocument();
+        var second = window.__alhangeulDocumentOrigin();
+        """)
+        for name in ["before", "loaded", "failed", "cancelled"] {
+            XCTAssertFalse(context.evaluateScript("\(name).createdByEditor")?.toBool() == true, name)
+        }
+        for name in ["created", "second"] {
+            XCTAssertTrue(context.evaluateScript("\(name).createdByEditor")?.toBool() == true, name)
+        }
+        XCTAssertEqual(context.evaluateScript("registered.size")?.toInt32(), 0)
+    }
+
 }

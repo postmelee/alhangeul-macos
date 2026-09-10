@@ -10,6 +10,7 @@ struct RhwpStudioEditorSnapshot: Codable, Equatable {
     let ready: Bool
     let pageCount: Int
     let format: String
+    var createdByEditor: Bool? = nil
 
     var isValid: Bool {
         loadID >= 0 && sequence > 0 && documentEpoch > 0 && changeSeq >= 0 &&
@@ -20,7 +21,8 @@ struct RhwpStudioEditorSnapshot: Codable, Equatable {
 struct RhwpStudioEditorSession: Equatable {
     enum SourceBinding: Equatable {
         case nativeLoad
-        // 복구·내부 열기도 여기에 포함한다. 새 문서처럼 보여도 평문으로 단정하지 않는다.
+        case newDocument
+        // 복구·내부 열기 또는 생성 관찰 실패. 새 문서처럼 보여도 평문으로 단정하지 않는다.
         case editorOnly
     }
 
@@ -34,6 +36,7 @@ struct RhwpStudioEditorSession: Equatable {
         hasNativeDocument: Bool
     ) -> Self? {
         guard snapshot.isValid, snapshot.loadID == loadID else { return nil }
+        let editorBinding: SourceBinding = snapshot.createdByEditor == true ? .newDocument : .editorOnly
         if let previous, previous.snapshot.loadID == loadID {
             guard snapshot.sequence > previous.snapshot.sequence,
                   snapshot.documentEpoch >= previous.snapshot.documentEpoch,
@@ -42,10 +45,11 @@ struct RhwpStudioEditorSession: Equatable {
             else { return nil }
             return Self(
                 snapshot: snapshot,
-                sourceBinding: snapshot.documentEpoch == previous.snapshot.documentEpoch
-                    ? previous.sourceBinding : .editorOnly
+                sourceBinding: snapshot.documentEpoch == previous.snapshot.documentEpoch &&
+                    previous.sourceBinding == .nativeLoad ? .nativeLoad : editorBinding
             )
         }
-        return Self(snapshot: snapshot, sourceBinding: hasNativeDocument ? .nativeLoad : .editorOnly)
+        return Self(snapshot: snapshot, sourceBinding: hasNativeDocument && snapshot.createdByEditor != true
+                    ? .nativeLoad : editorBinding)
     }
 }

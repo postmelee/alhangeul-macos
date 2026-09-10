@@ -3,7 +3,7 @@
 ## 작업 요약
 
 - 이슈: [#516 — 새 문서 저장 실패와 Word·HTML 내보내기 연결 누락 수정](https://github.com/postmelee/alhangeul-macos/issues/516)
-- 마일스톤: `M010` / `v0.1`, 구현 단계 5개 완료
+- 마일스톤: `M010` / `v0.1`, 구현 단계 5개 및 Stage 6 사용자 피드백 보완 완료
 - 브랜치: `local/task516` → `publish/task516`, PR 대상 `devel`
 - 승인: 같은 스레드에서 각 단계 승인 및 최종 보고·PR 게시와 사용자 테스트용 앱 실행 지시
 - 계획: [수행계획서](../plans/task_m010_516.md), [구현계획서](../plans/task_m010_516_impl.md)
@@ -36,7 +36,7 @@
 | 시작 문서의 HWP/HWPX 저장 | native 문서 없음으로 거부 | 현재 편집 세션을 저장하고 재열기 본문 확인 |
 | 기존 파일 → 새 문서 | 이전 source와 편집 문서 상태 혼동 가능 | epoch 교체 시 이전 source·보호 상태 해제 |
 | Word/HTML 출력 | native 저장 경로 없음 | 두 형식의 실제 WKDownload·저장 패널·본문 확인 |
-| 최종 자동 테스트 | Stage 4: 201개 통과 | 최신 devel 통합 후 218개 통과, 실패 0 |
+| 최종 자동 테스트 | Stage 4: 201개 통과 | 최신 devel 통합 후 218개, 사용자 피드백 보완 후 221개 통과, 실패 0 |
 | 회귀 증거 | Stage 1 실패 재현 | 저장/PDF/종료 59개, Word/HTML 50개와 조합 이벤트 2개 통과 |
 
 ## 검증 결과
@@ -58,7 +58,7 @@
 ```text
 xcodegen generate: 성공
 HostApp Debug build: BUILD SUCCEEDED
-HostAppTests: 218 tests, 0 failures / TEST SUCCEEDED
+HostAppTests: 221 tests, 0 failures / TEST SUCCEEDED
 check-no-appkit.sh: OK
 verify-rhwp-studio-assets.sh: source / 최종 앱 모두 OK
 git diff --check 및 문서 상대 링크: 통과
@@ -68,9 +68,15 @@ git diff --check 및 문서 상대 링크: 통과
 
 Stage 3/4 회귀와 Stage 5 실제 패널 결과는 [Stage 3](../working/task_m010_516_stage3.md), [Stage 4](../working/task_m010_516_stage4.md), [Stage 5](../working/task_m010_516_stage5.md)를 따른다. 실제 패널 실행은 HWP/HWPX/PDF/DOC/HTML 출력과 원본 보존을 확인한 뒤, 진단 코드의 닫힌 창 재부착에서 종료됐다. 이 실행을 전체 성공으로 합산하지 않으며 종료 버리기는 별도 정상 종료 runner로 보완했다. 초기 패널 API 직접 조작의 WebKit 종료 역시 UI 성공과 구분해 보존했다.
 
+## 사용자 피드백 보완 결과
+
+[Stage 6 보고서](../working/task_m010_516_stage6.md)에 첫 저장 경고 보완을 기록했다. 공개 확장 명령으로 실제 생성 성공과 현재 documentGeneration의 일치를 확인한 문서만 newDocument로 분류한다. 시작·새로 만들기 문서는 경고 없이 일반 파일명으로 저장하며, 출처 미확정 문서·복구·기존 보호 문서의 정책은 유지한다.
+
+최종 보완 소스에서 221개 테스트·앱 빌드, 실제 출처/저장 16개 검사, Word/HTML 50개와 조합 이벤트 2개가 통과했다. 생성 함수 관찰이 설치되기 전의 문서를 소급해서 새 문서로 취급하지 않는다. 실제 패널 재조작 대신 경고 callback 횟수와 exporter·원본 보존·재열기를 확인했으며, 초기 진단 인자/비활성 메뉴 실패와 최종 성공을 구분했다. 근거는 `build.noindex/task516/revision1/`에 보존한다.
+
 ## 잔여 위험과 후속 작업
 
-- 출처를 입증할 수 없는 editor 문서는 첫 저장에 `invalidOrUnknown` 평문 복사본 확인을 적용한다. 빈 문서도 출처를 임의로 plain으로 낮추지 않는다.
+- 출처를 입증할 수 없는 editor 문서는 첫 저장에 `invalidOrUnknown` 평문 복사본 확인을 적용한다. 생성 성공과 현재 문서 세대를 확인한 새 문서는 보호 경고 없이 일반 저장한다. 파일명이나 dirty만으로 분류하지 않는다.
 - DOC는 upstream의 HTML 기반 `.doc`다. macOS HTML importer에서 한글 본문을 확인했으나 실제 Word의 레이아웃·편집 호환성은 미검증이다.
 - 물리 한글 IME, 서명된 sandbox 앱의 권한, 실제 WebContent process crash 복구, 대형 문서 성능은 별도 실기 범위다.
 - 닫힌 동일 창에 controller를 재부착하면 기존 delegate가 자신을 가리키는 경계는 별도 보완 후보다. 관련 attach/detach 코드는 작업 기준에도 존재하며 일반 닫기와 구분한다.
