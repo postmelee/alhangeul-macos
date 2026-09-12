@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-13",
+  "version": "0.2.0",
+  "build": "18",
+  "candidate_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+  "file": "discard-review-20260913.hwpx",
+  "edit_observed": "paragraph line spacing 160% to 190%; intended text insertion not verified",
+  "close_action": "native window close button then do not save",
+  "file_sha256_before": "b73c163cb9a0874528b0bb31d4382ba7fdee1868199c6aadbc6d9a2fafe89ead",
+  "file_sha256_after": "b73c163cb9a0874528b0bb31d4382ba7fdee1868199c6aadbc6d9a2fafe89ead",
+  "recovery_candidate_visible": true,
+  "process_exit_measured": false,
+  "recovery_executed": false,
+  "dismissed_with": "나중에",
+  "status": "REPRODUCED_FILE_PRESERVED",
+  "followup_issue": 525,
+  "screenshot": "discard-recovery-reproduced.jpg",
+  "release_acceptance": "PENDING_OWNER_DECISION"
+}

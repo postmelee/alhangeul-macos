@@ -99,7 +99,7 @@
 9. maintainer가 draft release asset 또는 Actions artifact DMG를 내려받아 app/extension universal slice, Gatekeeper, DMG layout, Finder Quick Look, Finder thumbnail smoke를 확인한다.
 10. draft smoke 통과 후 [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 포함 PR 분석, release note, delta checklist를 실제 SHA256/provenance로 보정한다.
 11. 양 아키텍처 최초 설치와 maintainer smoke 통과 및 작업지시자 공개 승인 후 `Release Promote Verified DMG`를 실행한다. 검사한 기존 DMG bytes를 재빌드 없이 공개한다.
-12. GitHub Release asset, Pages deployment URL, Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 post-publish public surface로 확인한다.
+12. GitHub Release asset, Pages deployment URL, Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 post-publish public surface로 확인한다. [runbook Gate 8](public_release_runbook.md#gate-8-최초-설치와-실제-sparkle-업데이트-수용)에 따라 최초 설치 증거와 public 다운로드 hash를 연결하고, 이전 공개 버전에서 실제 Sparkle 다운로드·설치·재실행 및 검색/확장을 검증한다.
 13. Homebrew 배포를 진행할 경우 Issue #209 작업에서 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 `postmelee/homebrew-tap`에 Cask를 반영하고 tap context 검증을 수행한다.
 14. [`mydocs/release/v<version>.md`](../release/)와 최종 release report에 실제 결과와 잔여 위험을 기록한다.
 
@@ -149,6 +149,7 @@ Release rehearsal/publish와 local `release.sh` preflight는 main/devel을 fetch
 - [ ] [최초 설치 자동 검증](release_first_install_guide.md) 결과의 후보 DMG SHA256과 실제 공개할 DMG SHA256 일치 확인 (재빌드 시 재검증)
 - [ ] Spotlight 추출 PASS를 실제 검색 PASS로 확대하지 않고 최소 OS·Intel runtime·공증 설치본 및 공개 업데이트의 실행 결과/미실행 사유 기록
 - [ ] 기존 public 설치본에서 Sparkle 업데이트 후 `scripts/smoke-sparkle-extension-refresh.sh --expected-version <version> --expected-build <build>` 기본 모드 통과
+- [ ] 최초 DMG 설치와 이전 공개 버전 → 대상 버전의 실제 Sparkle 다운로드·설치·재실행을 각각 기록; 후보/공개 다운로드 hash·버전/빌드·본문 검색·앱 종료 후 검색·Finder 결과를 [Gate 8](public_release_runbook.md#gate-8-최초-설치와-실제-sparkle-업데이트-수용) 표로 보존
 - [ ] 개발용 zip 산출물 생성
 - [ ] pre-public signed/notarized draft DMG 산출물 생성
 - [ ] draft DMG 안의 app/extension 실행 파일 `arm64 + x86_64` universal 검증

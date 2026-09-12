@@ -1,0 +1,119 @@
+{
+  "candidate_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+  "dmg_sha256": "1fce404263d342de23f76f7b74485e56f87b783c976eba82eb041e329588e321",
+  "version": "0.2.0",
+  "build": "18",
+  "os": "macOS 26.5.2 (25F84)",
+  "architecture": "arm64",
+  "installation_scope": "기존 앱 두 개의 등록 해제·격리 후 재설치; 문서·설정·OS 색인 이력 보존",
+  "first_launch_at": "2026-09-13T00:42:38+09:00",
+  "initial_user_search": "영문·한글 미검색",
+  "automatic_search_first_observed_at": "2026-09-13T00:46:20.526054+09:00",
+  "first_success_observation_seconds": 222.53,
+  "manual_registration_or_reindex": false,
+  "dmg_ejected_after_launch": true,
+  "user_results": {
+    "install_and_about": {
+      "status": "PASS_USER",
+      "version": "0.2.0",
+      "build": "18",
+      "reported_at": "2026-09-12T15:43:47.696973+00:00"
+    },
+    "spotlight_english": {
+      "status": "PASS_USER",
+      "reported_at": "2026-09-12T15:49:09.674918+00:00"
+    },
+    "spotlight_korean": {
+      "status": "PASS_USER",
+      "reported_at": "2026-09-12T15:49:09.674918+00:00"
+    },
+    "spotlight_app_quit": {
+      "status": "PASS_USER",
+      "reported_at": "2026-09-12T15:49:09.674918+00:00"
+    },
+    "save_hwp": {
+      "status": "PASS_USER",
+      "reported_at": "2026-09-12T15:47:42.658473+00:00",
+      "scope": "새 한글 문서 저장 및 재열기 내용 유지"
+    },
+    "save_hwpx": {
+      "status": "PASS_USER",
+      "reported_at": "2026-09-12T15:47:42.658473+00:00",
+      "scope": "새 한글 문서 저장 및 재열기 내용 유지"
+    },
+    "export_word": {
+      "status": "PASS_USER",
+      "reported_at": "2026-09-12T15:52:19.860487+00:00",
+      "scope": "파일 생성·본문 확인·취소 후 원래 문서 유지, 실제 Word 앱 배치 검증 여부는 별도"
+    },
+    "export_html": {
+      "status": "PASS_USER",
+      "reported_at": "2026-09-12T15:52:19.860487+00:00",
+      "scope": "파일 생성·본문 확인·취소 후 원래 문서 유지, 실제 Word 앱 배치 검증 여부는 별도"
+    },
+    "export_pdf": {
+      "status": "PASS_USER",
+      "reported_at": "2026-09-12T15:52:19.860487+00:00",
+      "scope": "파일 생성·본문 확인·취소 후 원래 문서 유지, 실제 Word 앱 배치 검증 여부는 별도"
+    },
+    "unsaved_close": {
+      "status": "PARTIAL_PASS_RECOVERY_OBSERVATION",
+      "time": "2026-09-12T16:02:13.163700+00:00",
+      "copy": "close-behavior-check.hwpx",
+      "cancel": "경고에서 취소 후 창과 추가 본문 유지",
+      "save": "저장 후 창 닫힘, HWPX XML 및 실제 재열기 화면에서 추가 본문 유지",
+      "discard": "추가 본문/문단 변경 후 미저장 경고에서 저장하지 않음 선택, 저장본 전체 hash 불변",
+      "saved_sha256": "b73c163cb9a0874528b0bb31d4382ba7fdee1868199c6aadbc6d9a2fafe89ead",
+      "original_user_document_edited": false,
+      "keyboard_shortcut_close": "미검증 — 자동화의 단축키 입력은 닫기를 실행하지 못해 창 닫기 버튼으로 판정",
+      "recovery_observation": "저장하지 않음 후 컴퓨터 도구가 앱 상태를 다시 읽으면서 표시된 새 문서 화면에 close-behavior-check.hwpx 복구 후보가 나타남. 원본 파일 hash는 저장본과 일치. 자동 재실행/복구 처리 의도 확인 필요."
+    },
+    "finder_preview": {
+      "status": "PASS_COMPUTER_USE",
+      "time": "2026-09-12T16:10:56.455909+00:00",
+      "files": [
+        "preview-hwp.hwp",
+        "preview-hwpx.hwpx"
+      ],
+      "scope": "Finder Space로 첫 페이지·한글 확인, /Applications 후보 Preview 실행 경로 확인"
+    },
+    "finder_thumbnail": {
+      "status": "PASS_COMPUTER_USE_AND_CLI",
+      "time": "2026-09-12T16:10:56.455909+00:00",
+      "files": [
+        "preview-hwp.hwp",
+        "preview-hwpx.hwpx"
+      ],
+      "scope": "Finder 아이콘 보기 실제 썸네일, qlmanage -t -x 각각 PNG 생성"
+    },
+    "spotlight_result_open": {
+      "status": "PASS_USER_DEFAULT_APP",
+      "app": "Hancom Viewer",
+      "default_app_changed": false,
+      "reported_at": "2026-09-12T15:49:09.674918+00:00"
+    }
+  },
+  "importer_selection": "자동 검색 후 mdimport -t 진단에서 세 형식 모두 /Applications/Alhangeul.app 내부 importer 선택",
+  "default_application": "Hancom Viewer 유지",
+  "word_application_layout": "미확인",
+  "clean_os_acceptance": false,
+  "later_gui_tests_delegated_to_agent": true,
+  "initial_install_launched_by_user": true,
+  "screenshots": [
+    "finder-hwp-preview.jpg",
+    "finder-hwpx-preview.jpg",
+    "finder-thumbnails.jpg",
+    "unsaved-close-dialog.jpg",
+    "unsaved-close-saved-reopen.jpg",
+    "discard-recovery-observed.jpg"
+  ],
+  "registration_hygiene": {
+    "status": "MISS_STALE_LAUNCHSERVICES_RECORDS",
+    "count": 41,
+    "all_paths_missing": true,
+    "candidate_provider_root": "/Applications/Alhangeul.app",
+    "scoped_unregister": "각 경로 -10814 반환, 잔존 기록 유지",
+    "global_reset": false,
+    "timing": "일반 설치·자동 검색·Finder 시각 확인 이후"
+  }
+}

@@ -5,6 +5,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import plistlib
 import re
 import stat
 import subprocess
@@ -20,6 +21,55 @@ MAX_EVIDENCE = 64 * 1024**2
 
 def api(endpoint):
     return json.loads(subprocess.check_output(['gh', 'api', endpoint], timeout=60))
+
+
+def validate_source(candidate, workflow_ref, tooling_sha, root=None):
+    """불변 후보와 main의 운영 보완을 구분하되 제품·공개 문구 변경은 거부한다."""
+    tag = 'v' + candidate['expected_version']
+    if workflow_ref not in ('refs/heads/main', 'refs/tags/' + tag):
+        raise ValueError('후보 tag 또는 검토된 main에서만 승격할 수 있음')
+    if not re.fullmatch(r'[0-9a-f]{40}', tooling_sha):
+        raise ValueError('배포 도구 SHA 누락/오류')
+
+    def git(*args):
+        return subprocess.check_output(['git', *args], cwd=root, timeout=60).decode().rstrip('\n')
+
+    if git('rev-parse', 'HEAD') != tooling_sha:
+        raise ValueError('checkout과 배포 도구 SHA 불일치')
+    if git('status', '--porcelain', '--untracked-files=all'):
+        raise ValueError('배포 도구 checkout에 기록되지 않은 변경이 있음')
+    if git('rev-parse', f'refs/tags/{tag}^{{commit}}') != candidate['source_sha']:
+        raise ValueError('후보 tag와 입력 소스 SHA 불일치')
+    if workflow_ref.startswith('refs/tags/') and tooling_sha != candidate['source_sha']:
+        raise ValueError('tag 실행의 후보/도구 SHA 불일치')
+    git('merge-base', '--is-ancestor', candidate['source_sha'], tooling_sha)
+    changed = git('diff', '--no-renames', '--name-only', '-z', candidate['source_sha'], tooling_sha).split('\0')
+    if any(path and not path.startswith(('.github/', 'scripts/', 'mydocs/')) for path in changed):
+        raise ValueError('후보 이후 제품·의존성·공개 문구 변경이 있어 도구 보완으로 승격할 수 없음')
+    for name in ('HostApp', 'QLExtension', 'ThumbnailExtension', 'SpotlightImporter'):
+        data = subprocess.check_output(['git', 'show', f"{candidate['source_sha']}:Sources/{name}/Info.plist"],
+                                       cwd=root, timeout=60)
+        info = plistlib.loads(data)
+        if (info['CFBundleShortVersionString'] != candidate['expected_version']
+                or str(info['CFBundleVersion']) != candidate['expected_build']):
+            raise ValueError('후보의 bundle version/build 불일치')
+    return {'candidate_sha': candidate['source_sha'], 'tooling_sha': tooling_sha,
+            'workflow_ref': workflow_ref, 'tooling_only_changes': [path for path in changed if path]}
+
+
+def find_release(candidate):
+    # tag endpoint는 published Release 전용이므로 인증된 draft도 404일 수 있다.
+    base = f"repos/{candidate['repository']}/releases"
+    pages = json.loads(subprocess.check_output(
+        ['gh', 'api', '--paginate', '--slurp', base + '?per_page=100'], timeout=60))
+    matches = [release for page in pages for release in page
+               if release.get('tag_name') == 'v' + candidate['expected_version']]
+    if len(matches) != 1 or type(matches[0].get('id')) is not int or matches[0]['id'] < 1:
+        raise ValueError('승격 대상 Release가 없거나 중복/잘못된 ID임')
+    release = api(f"{base}/{matches[0]['id']}")
+    if release.get('id') != matches[0]['id']:
+        raise ValueError('Release ID 조회 결과 불일치')
+    return release
 
 
 def download(endpoint, path, limit, accept=None):
@@ -126,7 +176,7 @@ def check_latest(candidate, latest):
 
 def verify_release(candidate, output):
     base = f"repos/{candidate['repository']}"
-    release = api(f"{base}/releases/tags/v{candidate['expected_version']}")
+    release = find_release(candidate)
     check_latest(candidate, api(f'{base}/releases/latest'))
     assets = release_assets(candidate, release)
     for name, asset in assets.items():
@@ -206,7 +256,7 @@ def main():
                             '--repo', candidate['repository'], '--draft=false', '--prerelease=false', '--latest',
                             '--verify-tag'], check=True, timeout=60)
         # 공개 후 재실행은 같은 자산을 확인한 뒤 Pages 복구만 허용한다.
-        published = api(f"repos/{candidate['repository']}/releases/tags/v{candidate['expected_version']}")
+        published = api(f"repos/{candidate['repository']}/releases/{release['id']}")
         if published['draft'] or published['prerelease'] or asset_identity(candidate, published) != asset_identity(candidate, release):
             raise ValueError('공개 후 Release 상태/자산 불일치')
         (output / 'published-release.json').write_text(json.dumps(published, indent=2))

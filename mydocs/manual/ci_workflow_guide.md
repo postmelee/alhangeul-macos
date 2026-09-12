@@ -217,7 +217,7 @@ rehearsal DMG build 전에는 Rust/core lock verify에 이어 `verify-rhwp-core-
 
 산출물은 DMG/checksum/Release 본문과 PR 분석/delta artifact다. 기존 Release가 있으면 교체하지 않는다. 실패 후보 철회와 새 후보 생성은 소유자가 별도 판단하며, 새 bytes는 다시 검증한다.
 
-`Release Promote Verified DMG`는 별도 승인 후 같은 tag에서 version/build, source run/artifact, validation run과 DMG hash를 받는다. 성공한 최신 두 runner의 PASS와 원본 검색/lifecycle/cleanup, 기존 Release 자산 bytes를 검사하고 동일 DMG로 Sparkle 서명과 Pages artifact를 만든 뒤 공개한다. 앱 build, 공증, DMG 재업로드는 수행하지 않는다.
+`Release Promote Verified DMG`는 별도 승인 후 같은 tag에서 version/build, source run/artifact, validation run과 DMG hash를 받는다. 후보 생성 후 운영 도구 보완이 필요하면 검토·병합된 main과 선택 입력 `source_sha`로 기존 후보를 지정한다. 현재 tag와 입력 SHA 일치, 후보/main 포함, 4개 bundle version/build를 검사하며 후보 이후 `.github/`, `scripts/`, `mydocs/` 밖의 변경은 거부한다. `source-proof.json`에는 후보/도구 SHA를 구분한다. 성공한 최신 두 runner의 PASS와 원본 검색/lifecycle/cleanup, 기존 Release 자산 bytes를 검사하고 동일 DMG로 Sparkle 서명과 Pages artifact를 만든 뒤 공개한다. 비공개 Release는 인증된 전체 목록에서 정확한 tag의 유일한 ID를 선택해 조회한다. 앱 build, 공증, DMG 재업로드는 수행하지 않는다.
 
 승격 job은 `environment: release`, contents write/actions read, Pages job은 github-pages와 pages write/id-token write를 사용한다. workflow 전체의 `pages-deploy` 잠금으로 docs-only 배포와 확인부터 배포까지 직렬화한다. 공개 후 재실행은 동일 자산 Pages 복구만 허용한다. 정확한 수용 조건과 실행은 [최초 설치 가이드](release_first_install_guide.md)와 [runbook Gate 5](public_release_runbook.md#gate-5-official-stable-publish)를 따른다.
 
