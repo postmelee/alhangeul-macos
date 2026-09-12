@@ -61,7 +61,8 @@
 - `scripts/verify-rhwp-studio-assets.sh`: bundled `rhwp-studio` manifest와 entrypoint asset 검증
 - `.github/workflows/pr-ci.yml`: PR 생성/갱신 시 기본 gate와 조건부 macOS/release helper 검증
 - `.github/workflows/release-rehearsal.yml`: rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성
-- `.github/workflows/release-publish.yml`: signed/notarized DMG, GitHub Release asset, stable appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성
+- `.github/workflows/release-publish.yml`: signed/notarized draft DMG, 포함 PR 분석 및 delta artifact 생성
+- `.github/workflows/release-promote.yml`: 양 아키텍처 검증을 통과한 동일 DMG 공개와 stable appcast/Pages 배포
 - `.github/workflows/pages-docs-deploy.yml`: `main`의 `docs/**` 변경을 public Pages에 배포하고 기존 public appcast를 보존
 - `.github/workflows/rhwp-upstream-check.yml`: upstream `rhwp` release와 `rhwp-core.lock` 비교
 - `.github/workflows/rhwp-upstream-sync-pr.yml`: upstream release를 감지해 core lock/RustBridge와 bundled `rhwp-studio`를 같은 tag로 갱신하는 full sync 후보 PR 생성
@@ -97,7 +98,7 @@
 8. release tag 생성 후 `Release Publish DMG` workflow를 `draft=true`, `prerelease=false`로 실행해 pre-public signed/notarized DMG를 생성한다.
 9. maintainer가 draft release asset 또는 Actions artifact DMG를 내려받아 app/extension universal slice, Gatekeeper, DMG layout, Finder Quick Look, Finder thumbnail smoke를 확인한다.
 10. draft smoke 통과 후 [`release_github_pages_sparkle_guide.md`](release_github_pages_sparkle_guide.md)의 포함 PR 분석, release note, delta checklist를 실제 SHA256/provenance로 보정한다.
-11. 작업지시자 별도 승인 후 `Release Publish DMG` workflow를 `draft=false`, `prerelease=false` official stable release 기준으로 실행한다.
+11. 양 아키텍처 최초 설치와 maintainer smoke 통과 및 작업지시자 공개 승인 후 `Release Promote Verified DMG`를 실행한다. 검사한 기존 DMG bytes를 재빌드 없이 공개한다.
 12. GitHub Release asset, Pages deployment URL, Pages 업데이트 페이지, latest DMG link, stable Sparkle appcast를 post-publish public surface로 확인한다.
 13. Homebrew 배포를 진행할 경우 Issue #209 작업에서 [`release_homebrew_cask_guide.md`](release_homebrew_cask_guide.md)에 따라 `postmelee/homebrew-tap`에 Cask를 반영하고 tap context 검증을 수행한다.
 14. [`mydocs/release/v<version>.md`](../release/)와 최종 release report에 실제 결과와 잔여 위험을 기록한다.
@@ -184,7 +185,7 @@ Release rehearsal/publish와 local `release.sh` preflight는 main/devel을 fetch
 - [ ] `github-pages` environment가 docs-only `main` branch와 release tag ref `v*`를 허용하는지 확인
 - [ ] release workflow와 docs-only workflow가 `pages-deploy` concurrency group으로 Pages deployment를 취소 없이 직렬화하는지 확인
 - [ ] draft/prerelease 실행에서 stable appcast와 Pages deployment가 skip된 것을 pre-public 검증 단계의 정상 동작으로 확인
-- [ ] `Release Publish DMG` workflow를 공식 release 기준 `draft=false`, `prerelease=false`로 실행
+- [ ] 같은 tag의 최초 설치 run/attempt와 DMG hash를 기록하고 승인된 `Release Promote Verified DMG` 실행
 - [ ] official stable public DMG 산출물과 SHA256 기록
 - [ ] `deploy-pages` job이 성공하고 `page_url`이 `https://postmelee.github.io/alhangeul-macos/`를 가리키는지 확인
 - [ ] public `https://postmelee.github.io/alhangeul-macos/appcast.xml`이 새 stable item과 Sparkle EdDSA signature를 제공하는지 확인
