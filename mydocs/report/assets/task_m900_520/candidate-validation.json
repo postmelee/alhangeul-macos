@@ -11,17 +11,16 @@
   "candidate_attempt": 2,
   "draft_release_id": 387608761,
   "local_signature_check": "PASS",
-  "app_launched_by_agent": false,
   "first_install_run_id": "34701708901",
-  "first_install_attempt": 1,
+  "first_install_attempt": 3,
   "arm64": {
     "schema_version": 1,
-    "status": "ENVIRONMENT_UNAVAILABLE",
-    "release_eligible": false,
+    "status": "PASS",
+    "release_eligible": true,
     "phase": "verify",
     "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
     "run_id": "34701708901",
-    "run_attempt": "1",
+    "run_attempt": "3",
     "candidate": {
       "source_run_id": "34699689421",
       "source_artifact_id": "10300043814",
@@ -33,23 +32,22 @@
     },
     "environment": {
       "schema_version": 1,
-      "status": "ENVIRONMENT_UNAVAILABLE",
+      "status": "ENVIRONMENT_READY",
       "release_eligible": false,
       "os": "macOS-15.7.9-arm64-arm-64bit",
       "architecture": "arm64",
       "image_os": "macos15",
       "image_version": "20260907.0337.1",
       "run_id": "34701708901",
-      "run_attempt": "1",
+      "run_attempt": "3",
       "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
       "gui_session_present": true,
       "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
-      "reason": "TXT 자동 검색이 180초 안에 확인되지 않음",
+      "txt_automatic_search": true,
       "owned_files_removed": true,
-      "elapsed_seconds": 186.0
+      "elapsed_seconds": 24.56
     },
-    "reason": "검증 VM의 설치 전제 불충족",
-    "elapsed_seconds": 186.28
+    "elapsed_seconds": 347.11
   },
   "intel": {
     "schema_version": 1,
@@ -58,7 +56,7 @@
     "phase": "verify",
     "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
     "run_id": "34701708901",
-    "run_attempt": "1",
+    "run_attempt": "3",
     "candidate": {
       "source_run_id": "34699689421",
       "source_artifact_id": "10300043814",
@@ -77,17 +75,17 @@
       "image_os": "macos15",
       "image_version": "20260824.0482.1",
       "run_id": "34701708901",
-      "run_attempt": "1",
+      "run_attempt": "3",
       "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
       "gui_session_present": true,
       "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
       "txt_automatic_search": true,
       "owned_files_removed": true,
-      "elapsed_seconds": 186.93
+      "elapsed_seconds": 16.12
     },
-    "elapsed_seconds": 652.63
+    "elapsed_seconds": 376.85
   },
-  "manual_gui": "PENDING_USER",
+  "manual_gui": "Spotlight/저장/내보내기/Finder PASS; 닫기는 저장하지 않음 후 복구 후보 잔존 관찰",
   "public_approved": false,
   "promotion_lookup": {
     "candidate": {
@@ -124,13 +122,6 @@
     "status": "PASS",
     "mutation": false
   },
-  "first_install_attempt1_verdict": "FAILURE",
-  "first_install_retry": {
-    "attempt": 2,
-    "scope": "all jobs",
-    "status": "IN_PROGRESS",
-    "candidate_unchanged": true
-  },
   "local_reinstallation_preparation": {
     "original_apps_preserved": true,
     "versions": [
@@ -142,5 +133,170 @@
     "alhangeul_importer_absent": true,
     "preferences_and_history_preserved": true,
     "clean_os": false
+  },
+  "first_install_history": [
+    {
+      "attempt": 1,
+      "arm64": {
+        "schema_version": 1,
+        "status": "ENVIRONMENT_UNAVAILABLE",
+        "release_eligible": false,
+        "phase": "verify",
+        "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+        "run_id": "34701708901",
+        "run_attempt": "1",
+        "candidate": {
+          "source_run_id": "34699689421",
+          "source_artifact_id": "10300043814",
+          "source_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+          "dmg_sha256": "1fce404263d342de23f76f7b74485e56f87b783c976eba82eb041e329588e321",
+          "expected_version": "0.2.0",
+          "expected_build": "18",
+          "repository": "postmelee/alhangeul-macos"
+        },
+        "environment": {
+          "schema_version": 1,
+          "status": "ENVIRONMENT_UNAVAILABLE",
+          "release_eligible": false,
+          "os": "macOS-15.7.9-arm64-arm-64bit",
+          "architecture": "arm64",
+          "image_os": "macos15",
+          "image_version": "20260907.0337.1",
+          "run_id": "34701708901",
+          "run_attempt": "1",
+          "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+          "gui_session_present": true,
+          "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+          "reason": "TXT 자동 검색이 180초 안에 확인되지 않음",
+          "owned_files_removed": true,
+          "elapsed_seconds": 186.0
+        },
+        "reason": "검증 VM의 설치 전제 불충족",
+        "elapsed_seconds": 186.28
+      },
+      "intel": {
+        "schema_version": 1,
+        "status": "PASS",
+        "release_eligible": true,
+        "phase": "verify",
+        "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+        "run_id": "34701708901",
+        "run_attempt": "1",
+        "candidate": {
+          "source_run_id": "34699689421",
+          "source_artifact_id": "10300043814",
+          "source_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+          "dmg_sha256": "1fce404263d342de23f76f7b74485e56f87b783c976eba82eb041e329588e321",
+          "expected_version": "0.2.0",
+          "expected_build": "18",
+          "repository": "postmelee/alhangeul-macos"
+        },
+        "environment": {
+          "schema_version": 1,
+          "status": "ENVIRONMENT_READY",
+          "release_eligible": false,
+          "os": "macOS-15.7.9-x86_64-i386-64bit",
+          "architecture": "x86_64",
+          "image_os": "macos15",
+          "image_version": "20260824.0482.1",
+          "run_id": "34701708901",
+          "run_attempt": "1",
+          "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+          "gui_session_present": true,
+          "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+          "txt_automatic_search": true,
+          "owned_files_removed": true,
+          "elapsed_seconds": 186.93
+        },
+        "elapsed_seconds": 652.63
+      },
+      "verdict": "FAILURE"
+    },
+    {
+      "arm64": {
+        "schema_version": 1,
+        "status": "ENVIRONMENT_UNAVAILABLE",
+        "release_eligible": false,
+        "phase": "verify",
+        "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+        "run_id": "34701708901",
+        "run_attempt": "2",
+        "candidate": {
+          "source_run_id": "34699689421",
+          "source_artifact_id": "10300043814",
+          "source_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+          "dmg_sha256": "1fce404263d342de23f76f7b74485e56f87b783c976eba82eb041e329588e321",
+          "expected_version": "0.2.0",
+          "expected_build": "18",
+          "repository": "postmelee/alhangeul-macos"
+        },
+        "environment": {
+          "schema_version": 1,
+          "status": "ENVIRONMENT_UNAVAILABLE",
+          "release_eligible": false,
+          "os": "macOS-15.7.9-arm64-arm-64bit",
+          "architecture": "arm64",
+          "image_os": "macos15",
+          "image_version": "20260907.0337.1",
+          "run_id": "34701708901",
+          "run_attempt": "2",
+          "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+          "gui_session_present": true,
+          "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+          "reason": "TXT 자동 검색이 180초 안에 확인되지 않음",
+          "owned_files_removed": true,
+          "elapsed_seconds": 186.14
+        },
+        "reason": "검증 VM의 설치 전제 불충족",
+        "elapsed_seconds": 186.48
+      },
+      "intel": {
+        "schema_version": 1,
+        "status": "PASS",
+        "release_eligible": true,
+        "phase": "verify",
+        "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+        "run_id": "34701708901",
+        "run_attempt": "2",
+        "candidate": {
+          "source_run_id": "34699689421",
+          "source_artifact_id": "10300043814",
+          "source_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+          "dmg_sha256": "1fce404263d342de23f76f7b74485e56f87b783c976eba82eb041e329588e321",
+          "expected_version": "0.2.0",
+          "expected_build": "18",
+          "repository": "postmelee/alhangeul-macos"
+        },
+        "environment": {
+          "schema_version": 1,
+          "status": "ENVIRONMENT_READY",
+          "release_eligible": false,
+          "os": "macOS-15.7.9-x86_64-i386-64bit",
+          "architecture": "x86_64",
+          "image_os": "macos15",
+          "image_version": "20260824.0482.1",
+          "run_id": "34701708901",
+          "run_attempt": "2",
+          "harness_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+          "gui_session_present": true,
+          "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+          "txt_automatic_search": true,
+          "owned_files_removed": true,
+          "elapsed_seconds": 28.76
+        },
+        "elapsed_seconds": 445.63
+      },
+      "verdict": "FAILURE",
+      "intel_require_complete": "PASS",
+      "attempt": 2
+    }
+  ],
+  "initial_install_launched_by_user": true,
+  "later_gui_tests_delegated_to_agent": true,
+  "first_install_verdict": "SUCCESS",
+  "require_complete": "PASS_BOTH",
+  "accepted_evidence_artifacts": {
+    "arm64": 10301451917,
+    "intel": 10300562792
   }
 }
