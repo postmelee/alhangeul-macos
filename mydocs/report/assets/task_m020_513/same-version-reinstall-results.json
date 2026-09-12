@@ -2,7 +2,7 @@
   "schema_version": 1,
   "issue": 513,
   "candidate": {
-    "source_sha": "b48a6bc",
+    "source_sha": "b48a6bcdca12aeeb248e3edf18f673ef1bfd0679",
     "version": "0.2.0",
     "build": "18",
     "signature": "ad-hoc development candidate",
