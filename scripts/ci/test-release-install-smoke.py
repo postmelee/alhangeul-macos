@@ -154,38 +154,105 @@ class CandidateTests(unittest.TestCase):
                 self.assertFalse((root/'out').exists())
 
     def states(self):
-        first = {'launch_count': 1, 'phase': 'searchable', 'pre_install_environment_verified': True,
+        first = {'id': 'owned-test', 'automatic': True, 'install_app': '/candidate.app',
+                 'source_app_hashes': {'app': 'hash'}, 'source_importer_hashes': {'importer': 'hash'},
+                 'installed_bundle_dates_ns': {'app': 1, 'importer': 1}, 'installed_object': [1, 2, 3],
+                 'prepared_corpus': {'document-a.hwp': [1, 2, 'hash']},
+                 'launch_count': 1, 'phase': 'searchable', 'pre_install_environment_verified': True,
                  'before_install_paths': [], 'results': [{'case': c, 'result': 'PASS'} for c in
                  ('automatic-first-install-search', 'body-only-search', 'korean-body-only-search')]}
         stopped = copy.deepcopy(first)
         stopped['results'].append({'case': 'candidate-app-not-running', 'result': 'PASS'})
-        final = {'phase': 'cleaned', 'cleanup_index_verified': True, 'assisted_actions': ['lifecycle'],
-                 'results': [{'case': c, 'result': 'PASS'} for c in
-                 sorted(smoke.LIFECYCLE_REQUIRED | {'cleanup-importer-catalog'})]}
-        return first, stopped, final
+        stopped['initial_receipt'] = {'importerPath': '/candidate.app/Contents/Library/Spotlight/Alhangeul.mdimporter',
+                                      'buildIdentifier': '0.2.1-19', 'modificationDate': 'same',
+                                      'installationIdentifier': 'old-object'}
+        reinstalled = copy.deepcopy(stopped)
+        reinstalled.update(launch_count=2, installed_object=[1, 4, 5])
+        reinstalled['reinstall'] = {'phase': 'searchable', 'before_receipt': stopped['initial_receipt'],
+                                   'after_receipt': dict(stopped['initial_receipt'], installationIdentifier='new-object'),
+                                   'before_object': first['installed_object'], 'after_object': [1, 4, 5],
+                                   'prepared_corpus': first['prepared_corpus']}
+        reinstalled['results'].extend({'case': c, 'result': 'PASS'} for c in
+                                     ('reinstall-old-body-removed', 'reinstall-old-korean-removed',
+                                      'before-reinstall-body-absent', 'before-reinstall-korean-absent',
+                                      'same-version-reinstall-prepared', 'reinstall-body-still-absent',
+                                      'same-version-reinstall-launched', 'body-only-search',
+                                      'korean-body-only-search', 'automatic-same-version-reinstall-search'))
+        restopped = copy.deepcopy(reinstalled)
+        restopped['results'].extend({'case': c, 'result': 'PASS'} for c in
+                                   ('candidate-app-not-running', 'body-only-search', 'korean-body-only-search',
+                                    'automatic-same-version-reinstall-search'))
+        final = copy.deepcopy(restopped)
+        final.update(phase='cleaned', cleanup_index_verified=True, assisted_actions=['lifecycle'])
+        final['results'].extend({'case': c, 'result': 'PASS'} for c in
+                               sorted(smoke.LIFECYCLE_REQUIRED | {'cleanup-importer-catalog'}))
+        return tuple(copy.deepcopy(state) for state in (first, stopped, final, reinstalled, restopped))
 
     def test_complete_evidence(self):
         smoke.require_complete(*self.states())
+
+    def test_first_install_only_is_not_release_eligible(self):
+        with self.assertRaisesRegex(ValueError, 'snapshot'):
+            smoke.require_complete(*self.states()[:3])
+
+    def test_invalid_reinstall_evidence_rejected(self):
+        mutations = [
+            (3, ('launch_count',), 3),
+            (3, ('assisted_actions',), ['diagnostic-register']),
+            (3, ('source_app_hashes',), {'other': 'candidate'}),
+            (3, ('reinstall', 'before_receipt', 'installationIdentifier'), 'reset-record'),
+            (3, ('reinstall', 'after_receipt', 'installationIdentifier'), 'old-object'),
+            (3, ('reinstall', 'after_receipt', 'buildIdentifier'), 'different-version'),
+            (3, ('reinstall', 'after_receipt', 'modificationDate'), 'touched'),
+            (3, ('reinstall', 'after_object'), [1, 2, 3]),
+            (3, ('reinstall', 'prepared_corpus'), {'edited': [1, 2, 'other']}),
+            (4, ('launch_count',), 3),
+            (4, ('installed_object',), [1, 9, 9]),
+            (2, ('reinstall', 'before_receipt'), {}),
+        ]
+        for index, keys, value in mutations:
+            states = self.states()
+            target = states[index]
+            for key in keys[:-1]:
+                target = target[key]
+            target[keys[-1]] = value
+            with self.subTest(index=index, keys=keys), self.assertRaises(ValueError):
+                smoke.require_complete(*states)
+
+    def test_first_stop_cannot_replace_reinstall_stop(self):
+        states = list(self.states())
+        states[4] = copy.deepcopy(states[3])
+        states[2]['results'] = states[4]['results'] + [
+            {'case': c, 'result': 'PASS'} for c in sorted(smoke.LIFECYCLE_REQUIRED | {'cleanup-importer-catalog'})]
+        with self.assertRaisesRegex(ValueError, '종료 후 검색'):
+            smoke.require_complete(*states)
+
+    def test_missing_pre_reinstall_absence_rejected_even_with_later_pass(self):
+        states = self.states()
+        for state in (states[3], states[4], states[2]):
+            state['results'] = [r for r in state['results'] if r['case'] != 'before-reinstall-body-absent']
+        with self.assertRaisesRegex(ValueError, '사전 미검색'):
+            smoke.require_complete(*states)
 
     def test_relaunch_assistance_missing_search_rejected(self):
         for key, value in [('launch_count', 2), ('assisted_actions', ['developer-register']),
                            ('results', []), ('before_install_paths', ['/old.hwp']),
                            ('pre_install_environment_verified', False)]:
-            first, stopped, final = self.states()
+            first, stopped, final, reinstalled, restopped = self.states()
             first[key] = value
             with self.subTest(key=key), self.assertRaises(ValueError):
-                smoke.require_complete(first, stopped, final)
+                smoke.require_complete(first, stopped, final, reinstalled, restopped)
 
     def test_stop_cleanup_miss_and_failure_rejected(self):
         for kind in ('stop', 'cleanup', 'failure', 'miss', 'lifecycle'):
-            first, stopped, final = self.states()
+            first, stopped, final, reinstalled, restopped = self.states()
             if kind == 'stop': stopped['results'].pop()
             if kind == 'cleanup': final['phase'] = 'cleanup-pending-index'
             if kind == 'failure': final['results'].append({'case': 'query-error', 'result': 'FAIL'})
             if kind == 'miss': final['results'].append({'case': 'automatic-discovery', 'result': 'MISS'})
             if kind == 'lifecycle': final['results'].pop(0)
             with self.subTest(kind=kind), self.assertRaises(ValueError):
-                smoke.require_complete(first, stopped, final)
+                smoke.require_complete(first, stopped, final, reinstalled, restopped)
 
     def test_environment_never_qualifies_release(self):
         with patch.object(probe.platform, 'system', return_value='Linux'):
