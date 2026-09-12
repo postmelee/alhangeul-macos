@@ -309,6 +309,7 @@ workflow가 확인해야 하는 것:
 - [릴리스 후보 최초 설치 검증](release_first_install_guide.md)으로 draft 실행·artifact·소스 SHA·DMG SHA256을 고정하고 새 VM 검증 결과를 기록한다.
 - 환경 조사 job 성공과 후보 PASS를 구분한다. 자동 검증은 아래 maintainer GUI 확인과 공개 업데이트 검증을 대체하지 않는다.
 - 다음 publish 실행이 DMG를 다시 만들면 이전 PASS를 재사용하지 않는다. 검증 파일과 게시 파일의 동일성 또는 새 파일의 공개 전 재검증을 먼저 확보한다.
+- 매 릴리스에서 양 아키텍처의 새 VM 최초 설치를 필수로 실행한다. 공개 후 Gate 6의 public URL 다운로드 hash가 같은 후보와 일치해야 이 결과를 공개 DMG의 설치 근거로 연결할 수 있다. GitHub-hosted VM과 실제 Mac GUI, 앱만 제거한 기존 Mac과 설치 이력 없는 환경을 구분해 기록한다.
 
 maintainer smoke:
 
@@ -358,6 +359,10 @@ gh workflow run "Release Promote Verified DMG" \
 
 workflow는 최신 main/devel 콘텐츠, tag SHA, 4개 bundle version/build, 후보 artifact 출처, 양 아키텍처의 최신 실행 회차와 원본 검색/lifecycle/cleanup 결과, draft DMG/checksum bytes를 확인한다. 검증 PASS만으로 공개 승인을 대체하지 않는다.
 
+후보 tag 생성 후 승격 도구만 보완한 경우에는 검토·병합된 `main`에서 `--ref main -f source_sha=<기존-candidate-40자리-SHA>`를 위 명령에 적용한다. `source_sha`를 생략하는 tag 실행은 기존과 같다. main 실행도 후보 tag의 현재 원격 SHA, main 포함, 후보 version/build와 DMG/검증 identity를 검사한다. 후보 이후 checkout 변경이 `.github/`, `scripts/`, `mydocs/` 밖에 있으면 거부한다. 앱·의존성·공개 Pages 문구를 바꾼 소스로 기존 후보를 승격할 수 없다. 후보 tag를 이동하거나 DMG를 다시 만들지 않으며, 후보 SHA와 배포 도구 SHA를 `source-proof.json`에 각각 보존한다.
+
+비공개 Release는 tag 조회 API에서 404가 반환될 수 있다. 승격 도구는 인증된 Release 목록의 모든 페이지에서 정확한 tag의 유일한 ID를 찾고 ID로 draft/public 자산을 조회한다. 조회 실패를 후보 부재나 자산 재생성 허가로 해석하지 않는다.
+
 같은 DMG로 Sparkle 서명과 Pages artifact를 먼저 준비한 뒤 tag·검증 회차·Release 자산을 다시 대조하고 기존 draft를 공개한다. DMG를 재빌드·재공증·재업로드하지 않는다. Pages 잠금은 확인부터 배포까지 유지해 docs-only 배포가 예전 appcast를 뒤늦게 덮지 못하게 한다.
 
 실패와 재시도:
@@ -369,7 +374,7 @@ workflow는 최신 main/devel 콘텐츠, tag SHA, 4개 bundle version/build, 후
 
 ## Gate 6. Public artifact 확인
 
-workflow 완료 후 다음을 확인한다.
+workflow 완료 후 인증 없는 public DMG URL과 checksum URL에서 새 디렉터리로 직접 내려받는다. 캐시된 후보나 Actions artifact만 검사하여 public 다운로드 PASS로 기록하지 않는다. 내려받은 DMG SHA256이 Gate 4의 검증 후보 SHA256과 같아야 한다. 아래 명령의 경로는 그 공개 다운로드 파일과 그 안에서 추출한 앱으로 바꾼다.
 
 ```bash
 gh release view v<version> --repo postmelee/alhangeul-macos \
@@ -382,7 +387,7 @@ spctl --assess --type execute --verbose build.noindex/release/Alhangeul.app
 spctl --assess --type open --context context:primary-signature --verbose build.noindex/release/alhangeul-macos-<version>.dmg
 ```
 
-GitHub-hosted workflow에서만 산출물이 있는 경우에는 workflow artifact와 step summary를 기준으로 확인하고, 가능한 항목은 release machine에서 다시 내려받아 검증한다.
+workflow artifact와 step summary는 보조 증거다. public 다운로드를 확인하지 못하면 이 gate는 미완료다. hash가 다르면 기존 최초 설치 PASS를 적용하지 말고 공개 중단/복구 절차로 전환한다.
 
 record에 남길 값:
 
@@ -416,11 +421,20 @@ official stable release일 때만 수행한다.
 
 docs-only Pages workflow는 Sparkle appcast를 새로 만들지 않는다. release 직후 docs-only Pages 배포가 필요하면 public appcast 보존 기준을 확인한다.
 
-## Gate 8. 설치본과 Finder smoke
+## Gate 8. 최초 설치와 실제 Sparkle 업데이트 수용
 
-실제 설치본 기준 smoke는 release record에 실행 여부를 명확히 남긴다.
+두 경로는 매 릴리스의 필수 수용 조건이다. 최초 설치 성공이나 appcast XML 검사를 실제 Sparkle 업데이트 성공으로 대신하지 않는다. Gate 4에서 같은 후보의 새 VM 및 실제 Mac 설치를 확인했고 Gate 6의 public 다운로드 hash도 같다면 해당 최초 설치 증거를 연결한다. 공개 URL 설치를 별도로 재실행했는지도 구분한다.
 
-기본 확인:
+| 경로 | 시점 | 필수 결과 |
+|---|---|---|
+| 최초 DMG 설치 | 공개 전 Gate 4 + 공개 후 Gate 6 | 새 VM 양 아키텍처의 자동 발견·본문 검색·앱 종료 후 검색·lifecycle·cleanup, 실제 Mac의 `/Applications` 복사·DMG 꺼내기·첫 실행·About·문서/Finder UI, public 다운로드 hash 동일성 |
+| 이전 공개 버전의 Sparkle 업데이트 | Gate 7 appcast 배포 후 | 이전 버전/빌드 확인 → `업데이트 확인...` → 새 버전 발견 → 실제 다운로드·설치·재실행 → 새 버전/빌드·기존 문서 열기·Spotlight/Finder 확인 |
+
+Sparkle 시험은 보존된 이전 공개 설치본과 사용자 문서·설정을 준비하고, 실행 중인 미저장 문서를 정리한 뒤 진행한다. 업데이트는 Sparkle UI로 수행한다. DMG 수동 덮어쓰기, 동일 버전의 업데이트 없음 표시, 서명 검사만으로 업데이트 PASS를 판정하지 않는다. 실제 Mac에 이전 버전을 복원할 때에는 현재 앱을 백업하고 기존 사용자 문서·설정과 파일 연결을 유지한다.
+
+두 경로 모두 파일명에 없는 영문/한글 본문 검색, 실제 사용 importer 경로, 앱 종료 후 검색, HWP/HWPX 문서 열기·Quick Look·썸네일을 기록한다. 첫 실행부터 최초 검색 성공 관찰까지의 시간과 최초 미검색도 보존한다. 수동 importer 등록·재색인 명령을 수행한 경우 자동 설치/업데이트 PASS와 분리한다. 검색 결과 열기는 기존 기본 앱을 기록하며 알한글로 기본 연결을 강제하지 않는다.
+
+각 설치 경로 뒤의 보조 확인:
 
 ```bash
 scripts/smoke-finder-integration.sh --version <version>
@@ -429,7 +443,7 @@ scripts/smoke-sparkle-extension-refresh.sh \
   --expected-build <build>
 ```
 
-수동 확인 후보:
+실제 Mac 필수 UI 확인:
 
 - DMG mount layout
 - `/Applications` 복사 후 첫 실행
@@ -438,8 +452,16 @@ scripts/smoke-sparkle-extension-refresh.sh \
 - `.hwpx` Quick Look preview
 - Finder icon view thumbnail
 - 문서 열기와 기본 viewer 동작
-- Sparkle `업데이트 확인...`
-- Intel Mac 실기기 smoke
+- 실제 Sparkle 다운로드·설치·재실행 (업데이트 경로)
+
+릴리스 기록에는 아래 표를 복사해 실제 값과 증거 링크를 채운다. 새 VM은 순정 OS나 Intel 실기기 GUI를 대신하지 않으므로 최소 OS·Intel 실기기 공백도 별도로 기록한다.
+
+| 경로 | 실행 시각·OS·아키텍처·설치 이력 | 이전 → 대상 버전/빌드 | 후보/공개 URL·DMG SHA256 | 검색 대기·종료 후 검색·importer | 문서·Finder UI | 결과·증거·남은 항목 |
+|---|---|---|---|---|---|---|
+| 최초 설치 | 미실행 | 없음 → 대상 | 미확인 | 미확인 | 미확인 | 미완료 |
+| Sparkle 업데이트 | 미실행 | 이전 공개 → 대상 | 미확인 | 미확인 | 미확인 | 미완료 |
+
+실패·미실행을 PASS로 바꾸지 않는다. 두 경로가 미완료이면 릴리스 전체 완료와 관련 설치/업데이트 이슈 종료를 선언하지 않는다. 환경 제약을 감수하는 예외는 release owner의 명시 판단과 후속 이슈를 기록하고 해당 항목은 미검증으로 유지한다.
 
 주의:
 
