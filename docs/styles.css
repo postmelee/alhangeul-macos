@@ -1300,6 +1300,65 @@ video {
   word-break: normal;
 }
 
+.updates-page #homebrew {
+  scroll-margin-top: calc(var(--header-height) + 20px);
+}
+
+.updates-page .command-block {
+  margin-top: 24px;
+  min-width: 0;
+}
+
+.updates-page .command-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.updates-page .command-heading h3 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 600;
+  word-break: keep-all;
+}
+
+.updates-page .command-copy {
+  flex-shrink: 0;
+  min-width: 64px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--accent);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.updates-page .command-copy:hover {
+  background: #f7f8fa;
+}
+
+.updates-page .command-copy:focus-visible,
+.updates-page .command-block .code-panel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.updates-page .command-block .code-panel {
+  margin: 8px 0 0;
+}
+
+.updates-page .command-status {
+  min-height: 1.65em;
+  margin: 6px 0 0;
+  font-size: 13px;
+  word-break: keep-all;
+}
+
 .release-note-list {
   display: grid;
   gap: 10px;
