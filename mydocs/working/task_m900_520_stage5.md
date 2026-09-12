@@ -86,3 +86,5 @@ Computer Use로 About 0.1.11(17), 실제 업데이트 제안, 다운로드, 설�
 ## 공개 문구와 문서 검증
 
 GitHub Release 본문에 같은 버전 제거·재설치 시 이전 요청 기록의 영향을 알려진 제한으로 추가했다. 수정 후 Release ID/tag/draft/prerelease/published_at와 자산 ID/name/size/digest/state가 모두 그대로이고 요청한 본문과 일치함을 확인했다. release note template와 GitHub 참조 토큰 검사, 변경 문서의 실제 로컬 링크·JSON/버전/hash/검색 결과 정합성과 `git diff --check`가 PASS다. 초기 링크 검사에서 매뉴얼 예제의 `[...](URL)`을 실제 파일로 오인한 것은 검사 대상을 보정했다. 이미지들은 직접 캡처한 About·업데이트 UI·소유 합성 문서와 저장소 샘플이며 사용자 문서 원문은 게시하지 않는다.
+
+PR #528 최초 CI의 release wording 검사가 `GitHub Release 본문 구조 후보`라는 기존 섹션 제목을 고정 참조해 실패했다. 제목을 계약대로 유지하고 공개 여부는 상태 절에서 설명하도록 보정했다. 앱·workflow·배포 자산 변경 없이 문서 계약만 복원했다.
