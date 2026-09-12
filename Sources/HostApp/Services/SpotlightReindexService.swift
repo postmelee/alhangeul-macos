@@ -13,12 +13,14 @@ enum SpotlightReindexService {
         let importerURL: URL
         let buildIdentifier: String
         let modificationDate: Date
+        let installationIdentifier: String
 
         var receipt: [String: String] {
             [
                 "importerPath": importerURL.standardizedFileURL.path,
                 "buildIdentifier": buildIdentifier,
-                "modificationDate": String(modificationDate.timeIntervalSinceReferenceDate)
+                "modificationDate": String(modificationDate.timeIntervalSinceReferenceDate),
+                "installationIdentifier": installationIdentifier
             ]
         }
     }
@@ -31,6 +33,26 @@ enum SpotlightReindexService {
 
     static func importerURL(in appBundleURL: URL) -> URL {
         appBundleURL.appendingPathComponent("Contents/Library/Spotlight/Alhangeul.mdimporter", isDirectory: true)
+    }
+
+    static func installation(importerURL: URL, buildIdentifier: String) -> Installation? {
+        // DMG의 변경/생성 시각은 복사 후에도 같을 수 있다. 새 디렉터리의 inode로
+        // 같은 버전 재설치를 구분하며, inode 재사용에 대비해 생성 시각도 포함한다.
+        var info = stat()
+        let status = importerURL.withUnsafeFileSystemRepresentation { path in
+            path.map { lstat($0, &info) } ?? -1
+        }
+        guard status == 0, info.st_mode & S_IFMT == S_IFDIR else { return nil }
+        let volume = (try? importerURL.resourceValues(forKeys: [.volumeUUIDStringKey]))?.volumeUUIDString
+        // UUID를 제공하지 않는 볼륨에서는 장치 식별자로 보수적으로 비교한다.
+        // 재마운트로 장치 번호가 바뀌면 한 번 더 요청할 수 있지만 누락시키지 않는다.
+        let volumeIdentifier = volume ?? "device-\(info.st_dev)"
+        let identifier = "\(volumeIdentifier):\(info.st_ino):\(info.st_birthtimespec.tv_sec):\(info.st_birthtimespec.tv_nsec)"
+        let modified = TimeInterval(info.st_mtimespec.tv_sec) + TimeInterval(info.st_mtimespec.tv_nsec) / 1_000_000_000
+        return Installation(
+            importerURL: importerURL, buildIdentifier: buildIdentifier,
+            modificationDate: Date(timeIntervalSince1970: modified), installationIdentifier: identifier
+        )
     }
 
     struct Operations {
@@ -47,12 +69,10 @@ enum SpotlightReindexService {
     ) {
         operations.schedule {
             let importerURL = importerURL(in: appBundleURL)
-            guard let values = try? importerURL.resourceValues(forKeys: [.isDirectoryKey, .contentModificationDateKey]),
-                  values.isDirectory == true, let modificationDate = values.contentModificationDate else {
+            guard let installation = installation(importerURL: importerURL, buildIdentifier: buildIdentifier) else {
                 logger.error("Bundled Spotlight importer unavailable; request deferred until next launch")
                 return
             }
-            let installation = Installation(importerURL: importerURL, buildIdentifier: buildIdentifier, modificationDate: modificationDate)
             let result = requestIfNeeded(
                 installation: installation, userDefaults: userDefaults,
                 waitForDiscovery: operations.waitForDiscovery, submit: operations.submit

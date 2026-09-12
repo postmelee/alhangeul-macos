@@ -175,7 +175,11 @@ PR CI의 `SpotlightReindexServiceTests`는 HostApp Debug를 먼저 빌드한 뒤
 
 검색 관찰 시간은 `prepare --search-timeout 600`처럼 1–600초로 명시할 수 있다(기본 60초). 설정은 state에 고정되며 성공·실패 모두 실제 경과 시간과 관찰 한도를 기록한다. 60초를 넘긴 성공은 60초 내 성공으로 보고하지 않는다. 발견 대기 및 제품의 요청 정책은 이 옵션으로 변경되지 않는다. 조회 명령이 실패하면 오류 기록을 보존하며 남은 관찰 시간 안에서 재시도한다. 명령당 timeout은 30초와 남은 시간 중 작은 값이다. 실패 기록의 TXT 대조는 양성 결과를 기대한다는 이유로 정상 처리하지 않고 실제 조회 결과를 사용한다. 동시 작업의 개발 importer가 등록돼 있으면 설치 전 본문 검색 및 실제 후보 선택이 오염될 수 있으므로, 해당 작업과 등록 정리를 조율한 후 새 시험을 시작한다.
 
-첫 실행의 `SpotlightReindexService`는 자기 importer의 발견을 최대 600초 확인한 뒤 해당 형식의 재색인을 자동 요청한다. 일시적인 조회 실패/잘못된 출력은 같은 deadline 안에서 재시도하고 각 명령의 timeout은 남은 시간으로 제한한다. stdout만 catalog로 파싱한다. 이 제품 동작과 검증자가 외부 터미널에서 요청한 `mdimport -r`을 구분한다. 외부 재색인 진단은 `assisted_actions`에 남기며 최초 자동 설치 통과에 사용하지 않는다. 요청 접수 로그는 검색 성공의 대체 증거가 아니다. 설치 경로·빌드·importer 변경 시각별 접수 기록은 중복 요청을 막고 실패하면 다음 실행에 재시도한다.
+첫 실행의 `SpotlightReindexService`는 자기 importer의 발견을 최대 600초 확인한 뒤 해당 형식의 재색인을 자동 요청한다. 일시적인 조회 실패/잘못된 출력은 같은 deadline 안에서 재시도하고 각 명령의 timeout은 남은 시간으로 제한한다. stdout만 catalog로 파싱한다. 이 제품 동작과 검증자가 외부 터미널에서 요청한 `mdimport -r`을 구분한다. 외부 재색인 진단은 `assisted_actions`에 남기며 최초 자동 설치 통과에 사용하지 않는다. 요청 접수 로그는 검색 성공의 대체 증거가 아니다. 설치 경로·빌드·importer 변경 시각과 설치 객체(볼륨·inode·생성 시각)별 접수 기록은 중복 요청을 막고 실패하면 다음 실행에 재시도한다. 이전 형식의 접수 기록은 한 번 재요청한 뒤 전환한다. 이 설치 객체 구분은 #513 후속 구현이며 공개 v0.2.0에는 포함되지 않았다.
+
+같은 버전 재설치는 최초 설치와 별도로 `prepare-reinstall → reinstall-app → reinstall-search → stop-app → reinstall-search`로 검증한다. 최초 `automatic-search`와 앱 종료 후 검색까지 통과한 state, 실제 후보 sandbox의 preferences plist가 필요하다. `prepare-reinstall --receipt-plist <경로>`는 요청 키만 읽어 후보 경로와 대조하고 기록을 변경하지 않는다. 소유 앱·이전 합성 문서 제거 후 새 corpus의 사전 미검색을 확인한다. 공개 앱 등 다른 importer가 먼저 색인하면 환경 전제를 충족하지 못하므로 성공 판정을 하지 않는다.
+
+`reinstall-app`은 같은 소스 bytes/mtime를 순수 복사하고 설치 객체 변화·이전 receipt 유지·두 번째 설치의 첫 실행을 확인한다. `reinstall-search`는 원본 corpus 보존, 실제 importer 선택, 기존 경로/버전/mtime와 새 설치 식별자로 바뀐 요청 기록, 영문/한글 본문 검색을 모두 요구한다. helper는 외부 등록·재색인·touch·설정 초기화를 수행하지 않는다. 실패해도 기존 `cleanup`으로 소유 파일/등록을 정리한다. 공개 문구에는 전체 preferences나 개인 경로를 포함하지 않으며, 일반 최초 설치와 같은 버전 재설치의 결과를 합치지 않는다.
 
 `prepare --discovery-timeout 180`처럼 관찰할 발견 대기 시간을 지정할 수 있다(1–600초, 기본 60초). 값은 state에 저장되며 실제 경과 시간과 함께 보고한다. 이 값은 본문 검색 60초 timeout을 바꾸지 않는다. 최초 설치 판정 후 `lifecycle`을 실행하면 automatic 모드에서는 수정·보호·삭제 전파에도 외부 `mdimport -i`를 사용하지 않는다. 기존 진단 모드는 수동 색인을 유지한다.
 

@@ -15,7 +15,8 @@ spec = importlib.util.spec_from_file_location('install_smoke', Path(__file__).wi
 smoke = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(smoke)
 RUNNERS = {'macos-15': 'arm64', 'macos-15-intel': 'x86_64'}
-EVIDENCE_FILES = {'verify-result.json', 'first-launch.json', 'stopped-search.json', 'state.json'}
+EVIDENCE_FILES = {'verify-result.json', 'first-launch.json', 'stopped-search.json', 'state.json',
+                  'reinstall-search.json', 'reinstall-stopped-search.json'}
 MAX_EVIDENCE = 64 * 1024**2
 
 
@@ -120,7 +121,7 @@ def read_evidence(archive):
 def validate_evidence(candidate, run, runner, evidence):
     result = evidence['verify-result.json']
     env = result.get('environment', {})
-    if (result.get('schema_version') != 1 or result.get('status') != 'PASS'
+    if (result.get('schema_version') != 2 or result.get('status') != 'PASS'
             or result.get('release_eligible') is not True or result.get('phase') != 'verify'
             or result.get('candidate') != candidate or result.get('harness_sha') != candidate['source_sha']
             or str(result.get('run_id')) != str(run['id'])
@@ -128,7 +129,8 @@ def validate_evidence(candidate, run, runner, evidence):
             or env.get('status') != 'ENVIRONMENT_READY'
             or env.get('architecture') != RUNNERS[runner]):
         raise ValueError('후보 identity·최신 회차·아키텍처·PASS 불일치')
-    smoke.require_complete(evidence['first-launch.json'], evidence['stopped-search.json'], evidence['state.json'])
+    smoke.require_complete(evidence['first-launch.json'], evidence['stopped-search.json'], evidence['state.json'],
+                           evidence.get('reinstall-search.json'), evidence.get('reinstall-stopped-search.json'))
 
 
 def release_assets(candidate, release):

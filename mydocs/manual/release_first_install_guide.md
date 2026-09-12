@@ -2,7 +2,7 @@
 
 ## 목적과 적용 범위
 
-이미 서명·공증된 DMG를 새 GitHub-hosted macOS VM에 설치하여 실제 Spotlight 본문 검색을 확인한다. 빌드와 설치 job을 분리하며 결과는 해당 DMG SHA256에만 유효하다. runner 이미지는 개발 도구가 포함된 환경이므로 순정 macOS, 실제 Spotlight GUI, Finder/Quick Look/Thumbnail 또는 Sparkle 업데이트 성공으로 확대하지 않는다.
+이미 서명·공증된 DMG를 새 GitHub-hosted macOS VM에 설치하고, 요청 기록을 유지한 같은 버전 제거·재설치까지 실제 Spotlight 본문 검색을 확인한다. 빌드와 설치 job을 분리하며 결과는 해당 DMG SHA256에만 유효하다. runner 이미지는 개발 도구가 포함된 환경이므로 순정 macOS, 실제 Spotlight GUI, Finder/Quick Look/Thumbnail 또는 Sparkle 업데이트 성공으로 확대하지 않는다.
 
 workflow는 공개 서명·공증을 발급하거나 tag/Release/Pages/appcast를 변경하지 않는다. 실제 후보 실행은 릴리스 담당자가 승인한 배포 전 검증 단계에서 수행한다.
 
@@ -39,16 +39,18 @@ gh workflow run release-first-install.yml --ref v<version> \
 - 읽기 전용 DMG에서 build.noindex staging으로 복사하고 mount를 해제한 뒤 corpus를 준비한다. 원본/설치 앱과 importer의 bytes/디렉터리 시각, 설치 전 corpus를 보존한다.
 - 소유한 `~/Applications/AlhangeulSpotlightSmoke-<id>.app` 경로에 복사하고 한 번 실행한다. `/Applications/Alhangeul.app` 설치 경로의 직접 검증과는 구분한다.
 - HWP3/HWP5/HWPX 영문 및 HWP5/HWPX 한글 본문 검색, 실제 선택 importer, 앱 종료 후 검색을 확인한다.
-- 최초 상태를 별도 보존한 후 수정·삭제·보호·손상·한도 전환 33개 판정과 소유 파일/등록 정리를 확인한다.
+- 최초 실행/종료 후 snapshot을 보존하고 후보 sandbox 요청 키를 읽는다. bundle ID 또는 container metadata로 찾은 실제 plist의 importerPath를 대조하며, 없거나 여러 기록이 일치하면 중단한다. 전체 preferences 복사나 설정 초기화는 하지 않는다.
+- 같은 후보 bytes·경로·빌드·mtime와 기존 요청 기록을 유지한 제거·재설치를 실행한다. 원본 합성 문서를 재준비해 사전 본문 미검색/TXT 대조를 확인한 뒤 두 번째 설치에서 한 번 실행한다. 새 설치 객체·새 요청 식별자, 영문/한글 검색·실제 importer 및 종료 후 검색을 별도 snapshot으로 보존한다.
+- 재설치 상태에서 수정·삭제·보호·손상·한도 전환 33개 판정과 소유 파일/등록 정리를 확인한다.
 
 ## 결과와 공개 전 확인
 
-`first-install-evidence-*` artifact에 후보 식별, 환경 JSON, 최초/종료 후 snapshot, lifecycle·cleanup state 및 명령 로그를 보존한다. 실패/누락/정리 실패/중간 조회 실패가 남으면 PASS가 아니다. 취소·job timeout으로 증거 업로드가 불가능했던 실행 역시 유효한 검사 결과가 아니다.
+`first-install-evidence-*` artifact에 후보 식별, 환경 JSON, 최초/종료 후 및 재설치/종료 후 snapshot, lifecycle·cleanup state 및 명령 로그를 보존한다. 실패/누락/정리 실패/중간 조회 실패가 남으면 PASS가 아니다. 취소·job timeout으로 증거 업로드가 불가능했던 실행 역시 유효한 검사 결과가 아니다.
 
-후보 검증은 양쪽 아키텍처의 install job 및 verdict가 성공하고 `verify-result.json`이 PASS/release_eligible=true여야 한다. 환경 조사 결과나 단순 mdimport 추출 성공을 대신 사용하지 않는다.
+후보 검증은 양쪽 아키텍처의 install job 및 verdict가 성공하고 `verify-result.json`이 schema 2, PASS/release_eligible=true여야 한다. `reinstall-search.json`과 `reinstall-stopped-search.json`이 필수이며 최초 설치만 있는 구형 증거는 현재 승격 gate에서 거부한다. 과거 공개 결과나 tag를 새 schema에 맞춰 고쳐 쓰지 않는다. 환경 조사 결과나 단순 mdimport 추출 성공을 대신 사용하지 않는다.
 
-**공개할 DMG SHA256과 검사한 DMG SHA256이 반드시 같아야 한다.** `Release Publish DMG`는 stable draft 생성만 허용한다. 공개 승인을 받은 뒤 `Release Promote Verified DMG`에 후보 run/artifact, validation run, version/build/hash를 전달한다. 양 아키텍처의 최신 run attempt, 실제 검색·33개 lifecycle·cleanup 증거와 기존 draft 자산 hash를 대조한다. 빌드·공증·DMG 업로드 없이 같은 파일을 공개하고 Sparkle/Pages를 배포한다. 상세 실행/재시도는 [runbook Gate 5](public_release_runbook.md#gate-5-official-stable-publish)를 따른다.
+**공개할 DMG SHA256과 검사한 DMG SHA256이 반드시 같아야 한다.** `Release Publish DMG`는 stable draft 생성만 허용한다. 공개 승인을 받은 뒤 `Release Promote Verified DMG`에 후보 run/artifact, validation run, version/build/hash를 전달한다. 양 아키텍처의 최신 run attempt, 최초/재설치의 실제 검색·종료 후 검색·33개 lifecycle·cleanup 증거와 기존 draft 자산 hash를 대조한다. 빌드·공증·DMG 업로드 없이 같은 파일을 공개하고 Sparkle/Pages를 배포한다. 상세 실행/재시도는 [runbook Gate 5](public_release_runbook.md#gate-5-official-stable-publish)를 따른다.
 
 실제 서명 후보 end-to-end를 실행한 결과와 GUI/업데이트/최소 OS 공백을 릴리스 기록에 남긴 뒤 공개 여부를 판단한다. 설치 자동화 PASS가 릴리스 승인 자체를 대신하지 않는다.
 
-매 릴리스의 완료 조건은 [runbook Gate 8](public_release_runbook.md#gate-8-최초-설치와-실제-sparkle-업데이트-수용)의 두 경로를 따른다. 이 workflow PASS에 공개 URL에서 새로 받은 DMG의 hash 동일성을 연결하고, 이전 공개 버전에서 실제 Sparkle 다운로드·설치·재실행과 검색/확장을 별도로 검증한다. 해당 업데이트 경로는 이 workflow가 실행하지 않는다.
+매 릴리스의 완료 조건은 [runbook Gate 8](public_release_runbook.md#gate-8-최초-설치와-실제-sparkle-업데이트-수용)의 최초 설치·같은 버전 재설치·실제 Sparkle 세 경로를 따른다. 이 workflow PASS에 공개 URL에서 새로 받은 DMG의 hash 동일성을 연결하고, 이전 공개 버전에서 실제 Sparkle 다운로드·설치·재실행과 검색/확장을 별도로 검증한다. 해당 업데이트 경로는 이 workflow가 실행하지 않는다.

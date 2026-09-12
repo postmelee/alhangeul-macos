@@ -26,12 +26,13 @@ class PromotionTests(unittest.TestCase):
         fixture.setUp()
         self.c = fixture.candidate
         self.run = dict(fixture.run, id=789, path='.github/workflows/release-first-install.yml', run_attempt=2)
-        first, stopped, final = fixture.states()
-        self.e = {'verify-result.json': {'schema_version': 1, 'status': 'PASS', 'phase': 'verify',
+        first, stopped, final, reinstalled, restopped = fixture.states()
+        self.e = {'verify-result.json': {'schema_version': 2, 'status': 'PASS', 'phase': 'verify',
                     'release_eligible': True, 'candidate': self.c, 'harness_sha': self.c['source_sha'],
                     'run_id': '789', 'run_attempt': '2',
                     'environment': {'status': 'ENVIRONMENT_READY', 'architecture': 'arm64'}},
-                  'first-launch.json': first, 'stopped-search.json': stopped, 'state.json': final}
+                  'first-launch.json': first, 'stopped-search.json': stopped, 'state.json': final,
+                  'reinstall-search.json': reinstalled, 'reinstall-stopped-search.json': restopped}
         self.a = {'id': 42, 'name': 'first-install-evidence-macos-15-789-2', 'expired': False,
                   'workflow_run': {'id': 789, 'head_sha': self.c['source_sha']}, 'size_in_bytes': 1234}
         name = 'alhangeul-macos-0.2.0.dmg'
@@ -61,7 +62,7 @@ class PromotionTests(unittest.TestCase):
                 p.validate_evidence_artifact(self.c, self.run, dict(self.a, **{key: value}), 'macos-15')
 
     def test_result_identity_or_missing_gate(self):
-        mutations = [('status', 'ENVIRONMENT_READY'), ('release_eligible', False), ('phase', 'fetch'),
+        mutations = [('schema_version', 1), ('status', 'ENVIRONMENT_READY'), ('release_eligible', False), ('phase', 'fetch'),
                      ('candidate', dict(self.c, dmg_sha256='c'*64)), ('candidate', dict(self.c, expected_build='17')),
                      ('candidate', dict(self.c, source_artifact_id='999')), ('harness_sha', 'c'*40),
                      ('run_id', '790'), ('run_attempt', '1'),
@@ -98,6 +99,20 @@ class PromotionTests(unittest.TestCase):
                         p.read_evidence(archive)
                 else:
                     self.assertEqual(p.read_evidence(archive), self.e)
+
+    def test_reinstall_snapshot_omission_blocks_promotion(self):
+        for missing in ('reinstall-search.json', 'reinstall-stopped-search.json'):
+            evidence = copy.deepcopy(self.e)
+            del evidence[missing]
+            with self.subTest(missing=missing), self.assertRaises(ValueError):
+                p.validate_evidence(self.c, self.run, 'macos-15', evidence)
+            with tempfile.TemporaryDirectory() as tmp:
+                archive = Path(tmp) / 'evidence.zip'
+                with zipfile.ZipFile(archive, 'w') as z:
+                    for name, value in evidence.items():
+                        z.writestr(name, json.dumps(value))
+                with self.assertRaisesRegex(ValueError, '누락'):
+                    p.read_evidence(archive)
 
     def test_release_asset_and_checksum(self):
         with tempfile.TemporaryDirectory() as tmp:
