@@ -1,0 +1,420 @@
+{
+  "status": "public promotion PASS; reconstructed previous-version Sparkle acceptance PASS; same-version reinstall follow-up OPEN",
+  "version": "0.2.0",
+  "build": "18",
+  "release_id": 387608761,
+  "published_at": "2026-09-12T17:43:58Z",
+  "promotion_run": 34709043904,
+  "public": {
+    "time": "2026-09-13T02:47:04.991664+09:00",
+    "anonymous_download": true,
+    "url": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.0/alhangeul-macos-0.2.0.dmg",
+    "sha256": "1fce404263d342de23f76f7b74485e56f87b783c976eba82eb041e329588e321",
+    "bytes": 192864126,
+    "appcast_sha256": "e2ae654de6acd5e56db769e4e5415fa30beed2756f588b3d9a0aa1947d0ae48b",
+    "version": "0.2.0",
+    "build": "18",
+    "enclosure": {
+      "url": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.0/alhangeul-macos-0.2.0.dmg",
+      "length": "192864126",
+      "type": "application/octet-stream",
+      "{http://www.andymatuschak.org/xml-namespaces/sparkle}edSignature": "iIEyOgRrSLL9kvlTiaBbqyGrzghYs4qtv4EXNzHusevInlXjk0WkndsjF9IfhXfv0H1hJFfqSlR3wNmKrywgAQ=="
+    },
+    "pages_reachable": true,
+    "status": "PASS",
+    "initial_probe_correction": "version/build are item child elements, not enclosure attributes; corrected local assertion after reading actual XML"
+  },
+  "candidate_sha": "aa986e5ae59732a2423324eb3b415a06c67c8a68",
+  "tool_sha": "c942230b0625bc30eff894373fc3af5e205e8d8b",
+  "host": "macOS 26.5.2 arm64; same candidate had previously been installed; previous app bytes restored; preferences preserved",
+  "sparkle": {
+    "before_version": "0.1.11",
+    "before_build": "17",
+    "before_pid": 72949,
+    "relaunch_observations": [
+      {
+        "time": "2026-09-13T02:49:46.024010+09:00",
+        "version": "0.2.0",
+        "build": "18",
+        "pids": [
+          "73422"
+        ]
+      }
+    ],
+    "relaunch_evidence": "new process observed by CLI before any UI get_app_state call could launch app",
+    "download_install_relaunch_about": "PASS",
+    "codesign_gatekeeper": "PASS",
+    "hwp_hwpx_open": "PASS",
+    "finder_preview_thumbnail": "PASS",
+    "extension_helper": "PASS, --repair-registration not used; helper imports only its separate preview samples, not search corpus"
+  },
+  "search": {
+    "token": "AlhangeulSparkle20260913",
+    "korean": "나비",
+    "before": {
+      "time": "2026-09-13T02:46:24.387606+09:00",
+      "phase": "before_sparkle",
+      "results": {
+        "english": {
+          "returncode": 0,
+          "files": []
+        },
+        "korean": {
+          "returncode": 0,
+          "files": []
+        },
+        "txt": {
+          "returncode": 0,
+          "files": [
+            "index-control.txt"
+          ]
+        }
+      }
+    },
+    "observations": [
+      {
+        "time": "2026-09-13T02:50:12.405935+09:00",
+        "phase": "after_sparkle",
+        "results": {
+          "english": {
+            "returncode": 0,
+            "files": []
+          },
+          "korean": {
+            "returncode": 0,
+            "files": []
+          },
+          "txt": {
+            "returncode": 0,
+            "files": [
+              "index-control.txt"
+            ]
+          }
+        }
+      },
+      {
+        "time": "2026-09-13T02:53:51.642256+09:00",
+        "english": [],
+        "korean": [],
+        "txt": [],
+        "excluded_reason": "sandboxed query: TXT control missing; not a product verdict"
+      },
+      {
+        "time": "2026-09-13T02:54:18.305658+09:00",
+        "execution": "unsandboxed",
+        "english": [],
+        "korean": [],
+        "txt": [
+          "index-control.txt"
+        ]
+      },
+      {
+        "time": "2026-09-13T02:58:10.469292+09:00",
+        "execution": "unsandboxed",
+        "english": [
+          "document-b.hwpx",
+          "document-a.hwp"
+        ],
+        "korean": [
+          "document-b.hwpx",
+          "document-a.hwp"
+        ],
+        "txt": [
+          "index-control.txt"
+        ]
+      },
+      {
+        "time": "2026-09-13T03:00:35.090704+09:00",
+        "execution": "unsandboxed",
+        "english": [
+          "document-b.hwpx",
+          "document-a.hwp"
+        ],
+        "korean": [
+          "document-b.hwpx",
+          "document-a.hwp"
+        ],
+        "txt": [
+          "index-control.txt"
+        ]
+      },
+      {
+        "time": "2026-09-13T03:02:53.527013+09:00",
+        "execution": "unsandboxed",
+        "english": [
+          "document-b.hwpx",
+          "document-a.hwp",
+          "post-update-control/document-a.hwp",
+          "post-update-control/document-b.hwpx",
+          "post-update-control/document-c.hwp"
+        ],
+        "korean": [
+          "document-b.hwpx",
+          "document-a.hwp",
+          "post-update-control/document-a.hwp",
+          "post-update-control/document-b.hwpx"
+        ],
+        "txt": [
+          "index-control.txt",
+          "post-update-control/index-control.txt"
+        ]
+      },
+      {
+        "time": "2026-09-13T03:05:41.190747+09:00",
+        "execution": "unsandboxed",
+        "english": [
+          "document-b.hwpx",
+          "document-a.hwp",
+          "post-update-control/document-a.hwp",
+          "post-update-control/document-b.hwpx",
+          "post-update-control/document-c.hwp"
+        ],
+        "korean": [
+          "document-b.hwpx",
+          "document-a.hwp",
+          "post-update-control/document-a.hwp",
+          "post-update-control/document-b.hwpx"
+        ],
+        "txt": [
+          "index-control.txt",
+          "post-update-control/index-control.txt"
+        ]
+      }
+    ],
+    "app_quit": {
+      "time": "2026-09-13T03:06:38.362629+09:00",
+      "execution": "unsandboxed",
+      "appProcess": [],
+      "english": [
+        "document-b.hwpx",
+        "document-a.hwp",
+        "post-update-control/document-a.hwp",
+        "post-update-control/document-b.hwpx",
+        "post-update-control/document-c.hwp"
+      ],
+      "korean": [
+        "document-b.hwpx",
+        "document-a.hwp",
+        "post-update-control/document-a.hwp",
+        "post-update-control/document-b.hwpx"
+      ],
+      "txt": [
+        "index-control.txt",
+        "post-update-control/index-control.txt"
+      ]
+    },
+    "additional_launch": {
+      "time": "2026-09-13T03:08:42.977297+09:00",
+      "phase": "after_additional_app_launch",
+      "execution": "unsandboxed",
+      "english": [
+        "document-b.hwpx",
+        "document-a.hwp",
+        "post-update-control/document-a.hwp",
+        "post-update-control/document-b.hwpx",
+        "post-update-control/document-c.hwp"
+      ],
+      "korean": [
+        "document-b.hwpx",
+        "document-a.hwp",
+        "post-update-control/document-a.hwp",
+        "post-update-control/document-b.hwpx"
+      ],
+      "txt": [
+        "index-control.txt",
+        "post-update-control/index-control.txt"
+      ]
+    },
+    "pre_update_corpus": "HWP3 missing; HWP5/HWPX observed after app open; not automatic pre-existing corpus PASS",
+    "post_update_corpus": "new copies same bytes: English 3 and Korean 2, app-quit search PASS",
+    "manual_index_registration": false,
+    "diagnostic_extraction": "mdimport -t selected /Applications/Alhangeul.app importer and returned text in all 3 formats; no index write",
+    "receipt": "After delayed read completed, actual sandbox receipt matched current build/path/timestamp. Same-candidate re-request suppression is a cause candidate; controlled single-key diagnostic follows.",
+    "actual_sandbox_receipt": {
+      "receipt": {
+        "buildIdentifier": "0.2.0-18",
+        "modificationDate": "810918478.0",
+        "importerPath": "/Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter"
+      },
+      "maintenance": "0.2.0-18"
+    },
+    "spotlight_ui": "English: existing 2 + new 3 documents. Korean AND unique English marker: existing 2 + new 2. Selected new HWP opened in existing Hancom Viewer; default association unchanged."
+  },
+  "open_issues": [
+    520,
+    513,
+    337,
+    525
+  ],
+  "limitations": [
+    "macOS 12 execution not tested; release accepted with limitation",
+    "same-candidate restoration history; cannot claim ordinary upgrade environment",
+    "full old LaunchServices registration hygiene remains historical MISS",
+    "Homebrew excluded from deployment scope"
+  ],
+  "controlled_receipt_diagnosis": {
+    "reset": {
+      "time": "2026-09-13T03:15:18.663359+09:00",
+      "original_receipt": {
+        "buildIdentifier": "0.2.0-18",
+        "modificationDate": "810918478.0",
+        "importerPath": "/Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter"
+      },
+      "removed_only_receipt": true,
+      "all_other_preferences_preserved": true,
+      "purpose": "controlled same-candidate repeated-install diagnosis; not untouched Sparkle upgrade acceptance"
+    },
+    "search": {
+      "time": "2026-09-13T03:15:41.793079+09:00",
+      "phase": "after_receipt_only_reset_and_launch",
+      "execution": "unsandboxed",
+      "english": [
+        "document-b.hwpx",
+        "document-c.hwp",
+        "document-a.hwp",
+        "post-update-control/document-a.hwp",
+        "post-update-control/document-b.hwpx",
+        "post-update-control/document-c.hwp"
+      ],
+      "korean": [
+        "document-b.hwpx",
+        "document-a.hwp",
+        "post-update-control/document-a.hwp",
+        "post-update-control/document-b.hwpx"
+      ],
+      "txt": [
+        "index-control.txt",
+        "post-update-control/index-control.txt"
+      ],
+      "receipt": null
+    },
+    "receipt_recreated": {
+      "time": "2026-09-13T03:16:19.307776+09:00",
+      "receipt": {
+        "buildIdentifier": "0.2.0-18",
+        "modificationDate": "810918478.0",
+        "importerPath": "/Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter"
+      }
+    },
+    "result": "original HWP3 recovered without opening/touch/manual indexing after only target receipt removal + normal launch; not original untouched upgrade PASS"
+  },
+  "sparkle_repeat": {
+    "baseline": {
+      "time": "2026-09-13T03:16:57.593651+09:00",
+      "from": "0.1.11 (17)",
+      "target": "0.2.0 (18)",
+      "current_candidate_preserved": "build.noindex/release-v020-validation/displaced-installations/system-v020-before-sparkle-repeat/Alhangeul.app",
+      "preference_normalization": "removed only target-version reindex receipt created during previous tests; all other preferences preserved",
+      "manual_registration_or_indexing": false
+    },
+    "before": {
+      "time": "2026-09-13T03:18:41.800271+09:00",
+      "phase": "before_sparkle_repeat",
+      "execution": "unsandboxed",
+      "english": [],
+      "korean": [],
+      "txt": [
+        "/Users/melee/Documents/Alhangeul-v020-Sparkle-Retest-20260913/index-control.txt"
+      ],
+      "receipt": null
+    },
+    "before_pid": {
+      "time": "2026-09-13T03:19:05.200810+09:00",
+      "pid": "3524",
+      "before": "0.1.11 (17)"
+    },
+    "relaunch": [
+      {
+        "time": "2026-09-13T03:20:28.251467+09:00",
+        "version": "0.2.0",
+        "build": "18",
+        "pids": [
+          "3848"
+        ]
+      }
+    ],
+    "startup": {
+      "time": "2026-09-13T03:21:15.561296+09:00",
+      "receipt": {
+        "buildIdentifier": "0.2.0-18",
+        "modificationDate": "810918478.0",
+        "importerPath": "/Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter"
+      },
+      "catalog_contains_installed_importer": true
+    },
+    "observations": [
+      {
+        "time": "2026-09-13T03:20:40.110409+09:00",
+        "processes": [
+          "3848 /Applications/Alhangeul.app/Contents/MacOS/Alhangeul"
+        ],
+        "english": [],
+        "korean": [],
+        "txt": [
+          "index-control.txt"
+        ],
+        "hash_mtime_preserved": true,
+        "all_search_pass": false
+      },
+      {
+        "time": "2026-09-13T03:21:51.049082+09:00",
+        "processes": [
+          "3848 /Applications/Alhangeul.app/Contents/MacOS/Alhangeul"
+        ],
+        "english": [
+          "document-a.hwp",
+          "document-b.hwpx",
+          "document-c.hwp"
+        ],
+        "korean": [
+          "document-a.hwp",
+          "document-b.hwpx"
+        ],
+        "txt": [
+          "index-control.txt"
+        ],
+        "hash_mtime_preserved": true,
+        "all_search_pass": true
+      },
+      {
+        "time": "2026-09-13T03:24:31.441923+09:00",
+        "processes": [],
+        "english": [
+          "document-a.hwp",
+          "document-b.hwpx",
+          "document-c.hwp"
+        ],
+        "korean": [
+          "document-a.hwp",
+          "document-b.hwpx"
+        ],
+        "txt": [
+          "index-control.txt"
+        ],
+        "hash_mtime_preserved": true,
+        "all_search_pass": true
+      }
+    ],
+    "first_success_seconds_after_observed_relaunch": 82.797615,
+    "actual_importer": {
+      "document-a.hwp": {
+        "exit": 0,
+        "actual_importer_selected": true,
+        "text_returned": true
+      },
+      "document-b.hwpx": {
+        "exit": 0,
+        "actual_importer_selected": true,
+        "text_returned": true
+      },
+      "document-c.hwp": {
+        "exit": 0,
+        "actual_importer_selected": true,
+        "text_returned": true
+      }
+    },
+    "extension_default_mode": "PASS; registration repair 0",
+    "gui": "first run same public app: HWP/HWPX open, Finder preview/thumbnail, Spotlight result/open PASS; repeat run About 0.2.0/18 PASS; repeat-corpus GUI not repeated because Mac locked after final CLI checks",
+    "verdict": "PASS for previous-version state reconstructed by removing only target-version receipt; not a clean OS, not unchanged previous test"
+  }
+}
