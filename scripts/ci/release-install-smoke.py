@@ -226,6 +226,8 @@ def require_reinstall(first, stopped, final, reinstalled, restopped):
         if current.get('results', [])[:len(history)] != history:
             raise ValueError('설치 검증 이력 누락 또는 다른 시험 snapshot')
     old = stopped.get('initial_receipt', {})
+    if any(state.get('reinstall') != reinstalled.get('reinstall') for state in (restopped, final)):
+        raise ValueError('재설치 검색 이후 설치 객체/요청 기록 변경')
     for state in (reinstalled, restopped, final):
         trial = state.get('reinstall', {})
         new = trial.get('after_receipt', {})
@@ -258,12 +260,22 @@ def require_reinstall(first, stopped, final, reinstalled, restopped):
                     'same-version-reinstall-launched', 'automatic-same-version-reinstall-search'}
         if not required <= set(cases):
             raise ValueError('재설치 사전 미검색/실행/본문 검색 증거 누락')
+    search_cases = {'body-only-search', 'korean-body-only-search', 'metadata-document-a.hwp',
+                    'metadata-document-b.hwpx', 'metadata-document-c.hwp',
+                    'automatic-same-version-reinstall-search'}
+    new_results = reinstalled['results'][len(stopped['results']):]
+    cases = [r['case'] for r in new_results if r['result'] == 'PASS']
+    launched = cases.index('same-version-reinstall-launched')
+    if not search_cases <= set(cases[launched + 1:]):
+        raise ValueError('재설치 실행 이후 본문 검색/실제 importer 증거 누락')
     # 최초 설치 종료 기록을 재설치 종료 기록으로 재사용하지 않는다.
     after_first_search = restopped['results'][len(reinstalled['results']):]
     cases = [r['case'] for r in after_first_search if r['result'] == 'PASS']
     if ('candidate-app-not-running' not in cases or 'automatic-same-version-reinstall-search' not in cases
             or cases.index('candidate-app-not-running') > cases.index('automatic-same-version-reinstall-search')):
         raise ValueError('재설치 앱 종료 후 검색 증거 누락')
+    if not search_cases <= set(cases[cases.index('candidate-app-not-running') + 1:]):
+        raise ValueError('재설치 앱 종료 후 본문 검색/실제 importer 증거 누락')
 
 
 def require_complete(first, stopped, final, reinstalled=None, restopped=None):

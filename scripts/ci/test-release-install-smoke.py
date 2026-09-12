@@ -177,10 +177,13 @@ class CandidateTests(unittest.TestCase):
                                       'before-reinstall-body-absent', 'before-reinstall-korean-absent',
                                       'same-version-reinstall-prepared', 'reinstall-body-still-absent',
                                       'same-version-reinstall-launched', 'body-only-search',
-                                      'korean-body-only-search', 'automatic-same-version-reinstall-search'))
+                                      'korean-body-only-search', 'metadata-document-a.hwp',
+                                      'metadata-document-b.hwpx', 'metadata-document-c.hwp',
+                                      'automatic-same-version-reinstall-search'))
         restopped = copy.deepcopy(reinstalled)
         restopped['results'].extend({'case': c, 'result': 'PASS'} for c in
                                    ('candidate-app-not-running', 'body-only-search', 'korean-body-only-search',
+                                    'metadata-document-a.hwp', 'metadata-document-b.hwpx', 'metadata-document-c.hwp',
                                     'automatic-same-version-reinstall-search'))
         final = copy.deepcopy(restopped)
         final.update(phase='cleaned', cleanup_index_verified=True, assisted_actions=['lifecycle'])
@@ -232,6 +235,21 @@ class CandidateTests(unittest.TestCase):
         for state in (states[3], states[4], states[2]):
             state['results'] = [r for r in state['results'] if r['case'] != 'before-reinstall-body-absent']
         with self.assertRaisesRegex(ValueError, '사전 미검색'):
+            smoke.require_complete(*states)
+
+    def test_original_search_cannot_replace_reinstall_search(self):
+        states = self.states()
+        for state in (states[3], states[4], states[2]):
+            start = len(states[1]['results'])
+            state['results'] = state['results'][:start] + [
+                r for r in state['results'][start:] if r['case'] != 'body-only-search']
+        with self.assertRaisesRegex(ValueError, '실행 이후 본문 검색'):
+            smoke.require_complete(*states)
+
+    def test_reinstall_receipt_cannot_change_after_search(self):
+        states = self.states()
+        states[4]['reinstall']['after_receipt']['installationIdentifier'] = 'third-installation'
+        with self.assertRaisesRegex(ValueError, '검색 이후'):
             smoke.require_complete(*states)
 
     def test_relaunch_assistance_missing_search_rejected(self):
