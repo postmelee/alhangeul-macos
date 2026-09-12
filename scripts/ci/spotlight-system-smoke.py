@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import plistlib
 import re
 import shutil
 import signal
@@ -266,6 +267,7 @@ def install(state):
     app = Path(state["install_app"])
     state["installed_bundle_dates_ns"] = {"app": app.stat().st_mtime_ns,
                                            "importer": (app / PLUGIN).stat().st_mtime_ns}
+    state["installed_object"] = installation_object(app)
     for key, bundle in [("source_app_hashes", app), ("source_importer_hashes", app / PLUGIN)]:
         if key in state and fingerprint(bundle) != state[key]:
             raise RuntimeError("installed app/importer differs from prepared source")
@@ -450,6 +452,8 @@ def assert_automatic_candidate_unchanged(state):
             or fingerprint(app) != state["source_app_hashes"]
             or fingerprint(app / PLUGIN) != state["source_importer_hashes"]):
         raise ValueError("automatic search requires unchanged installed app/importer")
+    if state.get("installed_object") and installation_object(app) != state["installed_object"]:
+        raise ValueError("automatic search requires the original installation object")
 
 
 def corpus_snapshot(state):
@@ -540,6 +544,107 @@ def replace_app(state):
     state["phase"] = "replaced"
 
 
+def installation_object(app):
+    info = (app / PLUGIN).stat()
+    return [info.st_dev, info.st_ino, getattr(info, "st_birthtime", None)]
+
+
+def reindex_receipt(path):
+    # 요청 키만 비교한다. 전체 사용자 설정을 state/공개 증거로 복사하지 않는다.
+    receipt = plistlib.loads(Path(path).read_bytes()).get("alhangeul.spotlight.reimport.requestedInstallation")
+    if not isinstance(receipt, dict) or not receipt.get("installationIdentifier"):
+        raise ValueError("current installation receipt unavailable; no reinstall verdict")
+    return receipt
+
+
+def prepare_reinstall(state, receipt_plist):
+    """기존 요청 기록을 그대로 둔 채 소유 앱을 제거하고 새 사전 corpus를 준비한다."""
+    owned_locations(state)
+    if (not state.get("automatic") or state.get("assisted_actions")
+            or state.get("phase") != "searchable" or state.get("launch_count") != 1
+            or not any(r["case"] == "automatic-first-install-search" and r["result"] == "PASS"
+                       for r in state["results"])):
+        raise ValueError("reinstall requires a verified unassisted first installation")
+    if not receipt_plist:
+        raise ValueError("prepare-reinstall requires --receipt-plist for the candidate sandbox")
+    stop_candidate(state)
+    assert_automatic_candidate_unchanged(state)
+    app, files = Path(state["install_app"]), Path(state["files"])
+    receipt = reindex_receipt(receipt_plist)
+    if receipt.get("importerPath") != str(app / PLUGIN):
+        raise ValueError("receipt does not belong to the owned candidate")
+    state["reinstall"] = {"receipt_plist": str(Path(receipt_plist).resolve()), "before_receipt": receipt,
+                          "before_object": installation_object(app), "phase": "removing"}
+    # touch/lsregister/mdimport/defaults 변경 없이 소유 설치본과 합성 문서만 제거한다.
+    shutil.rmtree(app)
+    for path in files.iterdir():
+        if path.name != "index-control.txt":
+            path.unlink()
+    expect_paths(state, state["token"], [], "reinstall-old-body-removed")
+    expect_paths(state, KOREAN, [], "reinstall-old-korean-removed")
+    for source in (Path(state["fixtures"]) / "initial").iterdir():
+        if source.name != "index-control.txt":
+            shutil.copy2(source, files / source.name)
+    expect_paths(state, state["token"], [], "before-reinstall-body-absent")
+    expect_paths(state, KOREAN, [], "before-reinstall-korean-absent")
+    state["reinstall"]["prepared_corpus"] = corpus_snapshot(state)
+    state["reinstall"]["phase"] = "prepared"
+    state["phase"] = "reinstall-prepared"
+    record(state, "same-version-reinstall-prepared")
+
+
+def reinstall_app(state):
+    owned_locations(state)
+    trial = state.get("reinstall", {})
+    app = Path(state["install_app"])
+    if state.get("phase") != "reinstall-prepared" or trial.get("phase") != "prepared" or app.exists():
+        raise ValueError("prepare-reinstall and an absent owned app are required")
+    if reindex_receipt(trial["receipt_plist"]) != trial["before_receipt"]:
+        raise ValueError("receipt changed before reinstall")
+    if corpus_snapshot(state) != trial["prepared_corpus"]:
+        raise ValueError("reinstall corpus changed before installation")
+    expect_paths(state, state["token"], [], "reinstall-body-still-absent")
+    copy_candidate(state)
+    run(["codesign", "--verify", "--deep", "--strict", app])
+    trial["after_object"] = installation_object(app)
+    if trial["after_object"] == trial["before_object"]:
+        raise ValueError("reinstall did not create a new installation object")
+    state["installed_object"] = trial["after_object"]
+    assert_automatic_candidate_unchanged(state)
+    if reindex_receipt(trial["receipt_plist"]) != trial["before_receipt"]:
+        raise ValueError("receipt changed before candidate launch")
+    trial["installed_at"] = time.time()
+    launch(state)
+    trial["phase"] = "launched"
+    state["phase"] = "reinstalled"
+    record(state, "same-version-reinstall-launched")
+
+
+def reinstall_search(state):
+    trial = state.get("reinstall", {})
+    if (not state.get("automatic") or state.get("assisted_actions") or state.get("launch_count") != 2
+            or trial.get("phase") not in ["launched", "searchable"]):
+        raise ValueError("reinstall search requires the unassisted second installation launch")
+    if corpus_snapshot(state) != trial["prepared_corpus"]:
+        raise ValueError("reinstall corpus changed before observation")
+    assert_automatic_candidate_unchanged(state)
+    index(state)
+    verify(state)
+    receipt = reindex_receipt(trial["receipt_plist"])
+    for key in ["importerPath", "buildIdentifier", "modificationDate"]:
+        if receipt.get(key) != trial["before_receipt"].get(key):
+            raise ValueError("reinstall changed path, build or modification date")
+    if receipt["installationIdentifier"] == trial["before_receipt"]["installationIdentifier"]:
+        raise ValueError("new installation request was not recorded")
+    assert_automatic_candidate_unchanged(state)
+    if corpus_snapshot(state) != trial["prepared_corpus"]:
+        raise ValueError("reinstall corpus changed during observation")
+    trial["after_receipt"] = receipt
+    trial["phase"] = "searchable"
+    record(state, "automatic-same-version-reinstall-search")
+    state["phase"] = "searchable"
+
+
 def cleanup(state):
     app = Path(state["install_app"])
     root = Path(state["install_root"])
@@ -604,10 +709,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["prepare", "install", "launch", "developer-register", "diagnostic-register", "verify",
                                           "environment", "index", "automatic-search", "lifecycle", "replace-app", "restore-corpus", "stop-app",
-                                          "cleanup", "status"])
+                                          "prepare-reinstall", "reinstall-app", "reinstall-search", "cleanup", "status"])
     parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--app", type=Path)
     parser.add_argument("--fixtures", type=Path)
+    parser.add_argument("--receipt-plist", type=Path,
+                        help="prepare-reinstall: 실제 후보 sandbox preferences plist (요청 키만 읽고 수정하지 않음)")
     parser.add_argument("--token", default="AlhangeulSpotlightProbe")
     parser.add_argument("--automatic", action="store_true",
                         help="prepare에서 저장: 수동 lsregister/mdimport -i 없이 복사·첫 실행·자동 검색 비교")
@@ -660,6 +767,12 @@ def main():
         elif args.phase == "replace-app":
             state.setdefault("assisted_actions", []).append(args.phase)
             replace_app(state)
+        elif args.phase == "prepare-reinstall":
+            prepare_reinstall(state, args.receipt_plist)
+        elif args.phase == "reinstall-app":
+            reinstall_app(state)
+        elif args.phase == "reinstall-search":
+            reinstall_search(state)
         elif args.phase == "restore-corpus":
             state.setdefault("assisted_actions", []).append(args.phase)
             restore_corpus(state)

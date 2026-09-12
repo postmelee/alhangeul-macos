@@ -36,6 +36,63 @@ final class SpotlightReindexServiceTests: XCTestCase {
         XCTAssertEqual(request(installation()) { _ in true }, .requested)
     }
 
+    func testLegacyReceiptRequestsOnceAndPreservesOtherPreferences() {
+        let current = installation()
+        var legacy = current.receipt
+        legacy.removeValue(forKey: "installationIdentifier")
+        defaults.set(legacy, forKey: SpotlightReindexService.requestedInstallationKey)
+        defaults.set("keep", forKey: "unrelated.preference")
+        XCTAssertEqual(request(current) { _ in true }, .requested)
+        XCTAssertEqual(request(current) { _ in XCTFail("Repeated migration"); return true }, .alreadyRequested)
+        XCTAssertEqual(defaults.string(forKey: "unrelated.preference"), "keep")
+    }
+
+    func testFailedLegacyMigrationRetainsReceiptAndRetries() {
+        let current = installation()
+        var legacy = current.receipt
+        legacy.removeValue(forKey: "installationIdentifier")
+        defaults.set(legacy, forKey: SpotlightReindexService.requestedInstallationKey)
+        XCTAssertEqual(request(current) { _ in false }, .failed)
+        XCTAssertEqual(defaults.dictionary(forKey: SpotlightReindexService.requestedInstallationKey) as? [String: String], legacy)
+        XCTAssertEqual(request(current) { _ in true }, .requested)
+    }
+
+    func testSamePathVersionAndTimestampReinstallRequestsAgainWithoutResettingReceipt() throws {
+        let app = try makeTemporaryApp()
+        let source = app.appendingPathExtension("source")
+        defer {
+            try? FileManager.default.removeItem(at: app)
+            try? FileManager.default.removeItem(at: source)
+        }
+        let importer = SpotlightReindexService.importerURL(in: app)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: 1234)], ofItemAtPath: importer.path)
+        try FileManager.default.copyItem(at: app, to: source)
+        var submitted = 0
+        let operations = SpotlightReindexService.Operations(
+            schedule: { $0() }, waitForDiscovery: { _ in true }, submit: { _ in submitted += 1; return true }
+        )
+        func launch() {
+            SpotlightReindexService.start(appBundleURL: app, buildIdentifier: "same-version", userDefaults: defaults, operations: operations)
+        }
+        let original = try XCTUnwrap(SpotlightReindexService.installation(importerURL: importer, buildIdentifier: "same-version"))
+        launch()
+        launch()
+        XCTAssertEqual(submitted, 1)
+        // 파일만 제거/재복사한다. 성공 receipt와 다른 설정은 그대로 유지한다.
+        try FileManager.default.removeItem(at: app)
+        try FileManager.default.copyItem(at: source, to: app)
+        let replaced = try XCTUnwrap(SpotlightReindexService.installation(importerURL: importer, buildIdentifier: "same-version"))
+        XCTAssertEqual(original.importerURL, replaced.importerURL)
+        XCTAssertEqual(original.buildIdentifier, replaced.buildIdentifier)
+        XCTAssertEqual(original.modificationDate, replaced.modificationDate)
+        XCTAssertNotEqual(original.installationIdentifier, replaced.installationIdentifier)
+        launch()
+        XCTAssertEqual(submitted, 2)
+        launch()
+        XCTAssertEqual(submitted, 2)
+        XCTAssertEqual(defaults.dictionary(forKey: SpotlightReindexService.requestedInstallationKey) as? [String: String], replaced.receipt)
+    }
+
     func testMovedAppAndUpdatedBuildAndImporterEachRequestAgain() {
         let original = installation()
         let moved = installation(path: "/Applications/Moved.app/Contents/Library/Spotlight/Alhangeul.mdimporter")
@@ -261,6 +318,6 @@ final class SpotlightReindexServiceTests: XCTestCase {
         build: String = "0.1.11-17",
         date: Date = Date(timeIntervalSince1970: 1)
     ) -> SpotlightReindexService.Installation {
-        .init(importerURL: URL(fileURLWithPath: path), buildIdentifier: build, modificationDate: date)
+        .init(importerURL: URL(fileURLWithPath: path), buildIdentifier: build, modificationDate: date, installationIdentifier: "test-volume:123:1:0")
     }
 }

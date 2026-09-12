@@ -3,6 +3,8 @@
 import importlib.util
 import argparse
 import json
+import plistlib
+import shutil
 import subprocess
 from pathlib import Path
 import sys
@@ -17,6 +19,114 @@ spec.loader.exec_module(smoke)
 
 
 class SmokeTests(unittest.TestCase):
+    def reinstall_fixture(self, directory):
+        home = Path(directory)
+        workspace = home / "Documents/AlhangeulSpotlightSmoke-repeat"
+        root = home / "Applications/AlhangeulSpotlightSmoke-repeat"
+        app = root / "Alhangeul.app"
+        source = home / "source.noindex/Alhangeul.app"
+        fixtures = home / "fixtures"
+        for owned in [workspace, root]:
+            owned.mkdir(parents=True)
+            (owned / ".spotlight-smoke-owner").write_text("repeat")
+        for bundle in [app, app / smoke.PLUGIN]:
+            (bundle / "Contents/MacOS").mkdir(parents=True)
+            (bundle / "Contents/Info.plist").write_text("synthetic")
+            (bundle / "Contents/MacOS/Alhangeul").write_text("synthetic")
+        shutil.copytree(app, source)
+        (fixtures / "initial").mkdir(parents=True)
+        for name in ["document-a.hwp", "document-b.hwpx", "document-c.hwp", "index-control.txt"]:
+            (fixtures / "initial" / name).write_text("synthetic")
+        shutil.copytree(fixtures / "initial", workspace / "Files")
+        receipt = {"importerPath": str(app / smoke.PLUGIN), "buildIdentifier": "same-version",
+                   "modificationDate": "preserved", "installationIdentifier": "old-object"}
+        plist = home / "preferences.plist"
+        plist.write_bytes(plistlib.dumps({"alhangeul.spotlight.reimport.requestedInstallation": receipt,
+                                         "unrelated": "preserved"}))
+        state = {"id": "repeat", "automatic": True, "phase": "searchable", "launch_count": 1,
+                 "workspace": str(workspace), "files": str(workspace / "Files"), "install_root": str(root),
+                 "install_app": str(app), "source_app": str(source), "fixtures": str(fixtures),
+                 "token": "SyntheticWord", "results": [{"case": "automatic-first-install-search", "result": "PASS"}],
+                 "source_app_hashes": smoke.fingerprint(source), "source_importer_hashes": smoke.fingerprint(source / smoke.PLUGIN),
+                 "installed_bundle_dates_ns": {"app": app.stat().st_mtime_ns, "importer": (app / smoke.PLUGIN).stat().st_mtime_ns}}
+        return state, plist
+
+    def test_reinstall_preserves_receipt_and_copy_dates_without_registration_or_touch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state, plist = self.reinstall_fixture(directory)
+            before = plist.read_bytes()
+            def run(argv, **kwargs):
+                if argv[0] == "ditto": shutil.copytree(argv[1], argv[2])
+                else: self.assertEqual(argv[0], "codesign")
+                return ""
+            def launch(current): current["launch_count"] += 1
+            with patch.object(smoke.Path, "home", return_value=Path(directory)), \
+                 patch.object(smoke, "stop_candidate"), patch.object(smoke, "expect_paths"), \
+                 patch.object(smoke, "run", side_effect=run) as commands, patch.object(smoke, "launch", side_effect=launch):
+                smoke.prepare_reinstall(state, plist)
+                self.assertFalse(Path(state["install_app"]).exists())
+                self.assertEqual(plist.read_bytes(), before)
+                smoke.reinstall_app(state)
+                self.assertEqual(plist.read_bytes(), before)
+                self.assertEqual(state["launch_count"], 2)
+                self.assertNotEqual(state["reinstall"]["before_object"], state["reinstall"]["after_object"])
+                self.assertEqual([c.args[0][0] for c in commands.call_args_list], ["ditto", "codesign"])
+                smoke.assert_automatic_candidate_unchanged(state)
+                with self.assertRaisesRegex(ValueError, "one launch"):
+                    smoke.automatic_search(state)
+
+    def test_reinstall_refuses_receipt_change_before_copy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state, plist = self.reinstall_fixture(directory)
+            with patch.object(smoke.Path, "home", return_value=Path(directory)), \
+                 patch.object(smoke, "stop_candidate"), patch.object(smoke, "expect_paths"):
+                smoke.prepare_reinstall(state, plist)
+                data = plistlib.loads(plist.read_bytes())
+                data["alhangeul.spotlight.reimport.requestedInstallation"]["installationIdentifier"] = "changed"
+                plist.write_bytes(plistlib.dumps(data))
+                with patch.object(smoke, "copy_candidate") as copy, self.assertRaisesRegex(ValueError, "receipt changed"):
+                    smoke.reinstall_app(state)
+                copy.assert_not_called()
+
+    def test_unrecorded_identical_copy_is_not_a_first_install_observation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state, _ = self.reinstall_fixture(directory)
+            app = Path(state["install_app"])
+            state["installed_object"] = smoke.installation_object(app)
+            shutil.rmtree(app)
+            shutil.copytree(state["source_app"], app)
+            with self.assertRaisesRegex(ValueError, "original installation object"):
+                smoke.assert_automatic_candidate_unchanged(state)
+
+    def test_reinstall_requires_owned_candidate_receipt_before_removing_app(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state, plist = self.reinstall_fixture(directory)
+            data = plistlib.loads(plist.read_bytes())
+            data["alhangeul.spotlight.reimport.requestedInstallation"]["importerPath"] = "/Applications/Other.app"
+            plist.write_bytes(plistlib.dumps(data))
+            with patch.object(smoke.Path, "home", return_value=Path(directory)), patch.object(smoke, "stop_candidate"):
+                with self.assertRaisesRegex(ValueError, "owned candidate"):
+                    smoke.prepare_reinstall(state, plist)
+            self.assertTrue(Path(state["install_app"]).exists())
+
+    def test_reinstall_search_requires_new_request_and_unchanged_corpus(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state, plist = self.reinstall_fixture(directory)
+            state["launch_count"] = 2
+            state["reinstall"] = {"phase": "launched", "receipt_plist": str(plist),
+                                  "before_receipt": smoke.reindex_receipt(plist), "prepared_corpus": smoke.corpus_snapshot(state)}
+            with patch.object(smoke, "index"), patch.object(smoke, "verify"):
+                with self.assertRaisesRegex(ValueError, "not recorded"):
+                    smoke.reinstall_search(state)
+                data = plistlib.loads(plist.read_bytes())
+                data["alhangeul.spotlight.reimport.requestedInstallation"]["installationIdentifier"] = "new-object"
+                plist.write_bytes(plistlib.dumps(data))
+                smoke.reinstall_search(state)
+                self.assertEqual(state["results"][-1]["case"], "automatic-same-version-reinstall-search")
+                (Path(state["files"]) / "document-a.hwp").write_text("edited")
+                with self.assertRaisesRegex(ValueError, "corpus changed"):
+                    smoke.reinstall_search(state)
+
     def test_discovery_timeout_accepts_boundaries_and_rejects_invalid_values(self):
         for value in ["1", "60", "600"]:
             self.assertEqual(smoke.discovery_timeout(value), int(value))
