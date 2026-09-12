@@ -361,7 +361,7 @@ workflow는 최신 main/devel 콘텐츠, tag SHA, 4개 bundle version/build, 후
 
 후보 tag 생성 후 승격 도구만 보완한 경우에는 검토·병합된 `main`에서 `--ref main -f source_sha=<기존-candidate-40자리-SHA>`를 위 명령에 적용한다. `source_sha`를 생략하는 tag 실행은 기존과 같다. main 실행도 후보 tag의 현재 원격 SHA, main 포함, 후보 version/build와 DMG/검증 identity를 검사한다. 후보 이후 checkout 변경이 `.github/`, `scripts/`, `mydocs/` 밖에 있으면 거부한다. 앱·의존성·공개 Pages 문구를 바꾼 소스로 기존 후보를 승격할 수 없다. 후보 tag를 이동하거나 DMG를 다시 만들지 않으며, 후보 SHA와 배포 도구 SHA를 `source-proof.json`에 각각 보존한다.
 
-비공개 Release는 tag 조회 API에서 404가 반환될 수 있다. 승격 도구는 인증된 Release 목록의 모든 페이지에서 정확한 tag의 유일한 ID를 찾고 ID로 draft/public 자산을 조회한다. 조회 실패를 후보 부재나 자산 재생성 허가로 해석하지 않는다.
+비공개 Release는 tag 조회 API에서 404가 반환될 수 있다. 승격 도구는 인증된 Release 목록의 모든 페이지에서 정확한 tag의 유일한 ID를 찾고 ID로 draft/public 자산을 조회한다. 조회 실패를 후보 부재나 자산 재생성 허가로 해석하지 않는다. Release 본문만 수정한 경우에도 응답의 tag·draft/prerelease·Release ID와 자산 ID/hash가 의도대로 유지됐는지 다시 조회한다. Git tag와 Release의 tag_name을 별도로 확인한다.
 
 같은 DMG로 Sparkle 서명과 Pages artifact를 먼저 준비한 뒤 tag·검증 회차·Release 자산을 다시 대조하고 기존 draft를 공개한다. DMG를 재빌드·재공증·재업로드하지 않는다. Pages 잠금은 확인부터 배포까지 유지해 docs-only 배포가 예전 appcast를 뒤늦게 덮지 못하게 한다.
 
@@ -430,7 +430,7 @@ docs-only Pages workflow는 Sparkle appcast를 새로 만들지 않는다. relea
 | 최초 DMG 설치 | 공개 전 Gate 4 + 공개 후 Gate 6 | 새 VM 양 아키텍처의 자동 발견·본문 검색·앱 종료 후 검색·lifecycle·cleanup, 실제 Mac의 `/Applications` 복사·DMG 꺼내기·첫 실행·About·문서/Finder UI, public 다운로드 hash 동일성 |
 | 이전 공개 버전의 Sparkle 업데이트 | Gate 7 appcast 배포 후 | 이전 버전/빌드 확인 → `업데이트 확인...` → 새 버전 발견 → 실제 다운로드·설치·재실행 → 새 버전/빌드·기존 문서 열기·Spotlight/Finder 확인 |
 
-Sparkle 시험은 보존된 이전 공개 설치본과 사용자 문서·설정을 준비하고, 실행 중인 미저장 문서를 정리한 뒤 진행한다. 업데이트는 Sparkle UI로 수행한다. DMG 수동 덮어쓰기, 동일 버전의 업데이트 없음 표시, 서명 검사만으로 업데이트 PASS를 판정하지 않는다. 실제 Mac에 이전 버전을 복원할 때에는 현재 앱을 백업하고 기존 사용자 문서·설정과 파일 연결을 유지한다.
+Sparkle 시험은 보존된 이전 공개 설치본과 사용자 문서·설정을 준비하고, 실행 중인 미저장 문서를 정리한 뒤 진행한다. 업데이트는 Sparkle UI로 수행한다. DMG 수동 덮어쓰기, 동일 버전의 업데이트 없음 표시, 서명 검사만으로 업데이트 PASS를 판정하지 않는다. 실제 Mac에 이전 버전을 복원할 때에는 현재 앱을 백업하고 기존 사용자 문서·설정과 파일 연결을 유지한다. 이미 대상 후보를 설치했던 Mac은 해당 후보의 재색인 요청 기록이 남아 있을 수 있다. 이전 앱 bytes만 복원한 시험을 대상 버전 설치 이력이 없는 업그레이드로 기록하지 않는다. 기존 문서와 업데이트 후 새 문서를 분리하고, 재색인 기록을 확인하지 못했다면 요청 생략을 원인으로 단정하지 않는다. 설정 초기화·파일 열기·재실행을 추가한 결과는 최초 자동 재실행의 결과와 구분한다.
 
 두 경로 모두 파일명에 없는 영문/한글 본문 검색, 실제 사용 importer 경로, 앱 종료 후 검색, HWP/HWPX 문서 열기·Quick Look·썸네일을 기록한다. 첫 실행부터 최초 검색 성공 관찰까지의 시간과 최초 미검색도 보존한다. 수동 importer 등록·재색인 명령을 수행한 경우 자동 설치/업데이트 PASS와 분리한다. 검색 결과 열기는 기존 기본 앱을 기록하며 알한글로 기본 연결을 강제하지 않는다.
 
