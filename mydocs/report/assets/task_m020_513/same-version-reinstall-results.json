@@ -1,0 +1,589 @@
+{
+  "schema_version": 1,
+  "issue": 513,
+  "candidate": {
+    "source_sha": "b48a6bc",
+    "version": "0.2.0",
+    "build": "18",
+    "signature": "ad-hoc development candidate",
+    "architectures": [
+      "arm64",
+      "x86_64"
+    ],
+    "executed_architecture": "arm64",
+    "macos": "26.5.2",
+    "zip_sha256": "25153d77deb1eb84ee29a53e19fa30f9a1bfbbdc33f00c9139f419ae683ba07a",
+    "public_release_unchanged": true
+  },
+  "coexistence": {
+    "status": "EXCLUDED",
+    "reason": "공개 importer가 후보 설치 전에 본문을 색인함",
+    "results": [
+      {
+        "case": "environment-text-control",
+        "result": "PASS",
+        "elapsed_seconds": 0.68,
+        "timeout_seconds": 60,
+        "control_ok": true,
+        "file_names": [
+          "index-control.txt"
+        ]
+      },
+      {
+        "case": "pre-install-body-absent",
+        "result": "FAIL",
+        "elapsed_seconds": 60.0,
+        "timeout_seconds": 60,
+        "control_ok": false
+      },
+      {
+        "case": "environment-failed",
+        "result": "FAIL",
+        "observed_at": 1789240242.958384
+      },
+      {
+        "case": "candidate-app-not-running",
+        "result": "PASS",
+        "observed_at": 1789240305.429034
+      },
+      {
+        "case": "cleanup-index-ReinstallSeptember20260913",
+        "result": "PASS",
+        "elapsed_seconds": 8.04,
+        "timeout_seconds": 60,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-UpdatedDocumentMarker",
+        "result": "PASS",
+        "elapsed_seconds": 8.08,
+        "timeout_seconds": 60,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-나비",
+        "result": "PASS",
+        "elapsed_seconds": 7.94,
+        "timeout_seconds": 60,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-바다",
+        "result": "PASS",
+        "elapsed_seconds": 7.97,
+        "timeout_seconds": 60,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-TruncatedDocumentMarker",
+        "result": "PASS",
+        "elapsed_seconds": 8.01,
+        "timeout_seconds": 60,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-호랑이",
+        "result": "PASS",
+        "elapsed_seconds": 7.95,
+        "timeout_seconds": 60,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-OmittedDocumentMarker",
+        "result": "PASS",
+        "elapsed_seconds": 8.13,
+        "timeout_seconds": 60,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-original-apps-providers",
+        "result": "PASS",
+        "observed_at": 1789240361.65951
+      },
+      {
+        "case": "cleanup-importer-catalog",
+        "result": "PASS",
+        "observed_at": 1789240361.6694322
+      }
+    ]
+  },
+  "isolated_first_install": {
+    "status": "PASS",
+    "launch_count": 1,
+    "launch_to_verified_search_seconds": 118.18,
+    "results": [
+      {
+        "case": "environment-text-control",
+        "result": "PASS",
+        "elapsed_seconds": 3.36,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "index-control.txt"
+        ]
+      },
+      {
+        "case": "pre-install-body-absent",
+        "result": "PASS",
+        "elapsed_seconds": 8.0,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "discovery-before-first-launch",
+        "result": "MISS",
+        "elapsed_seconds": 0.01,
+        "observed_at": 1789240435.486617
+      },
+      {
+        "case": "first-launch-requested",
+        "result": "PASS",
+        "observed_at": 1789240435.561067,
+        "launch_number": 1
+      },
+      {
+        "case": "discovery-after-first-launch",
+        "result": "PASS",
+        "elapsed_seconds": 111.14,
+        "observed_at": 1789240546.6999218
+      },
+      {
+        "case": "automatic-discovery",
+        "result": "PASS",
+        "elapsed_seconds": 0.01,
+        "observed_at": 1789240546.779423
+      },
+      {
+        "case": "environment-text-control",
+        "result": "PASS",
+        "elapsed_seconds": 0.68,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "index-control.txt"
+        ]
+      },
+      {
+        "case": "body-only-search",
+        "result": "PASS",
+        "elapsed_seconds": 4.68,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "document-a.hwp",
+          "document-b.hwpx",
+          "document-c.hwp"
+        ]
+      },
+      {
+        "case": "korean-body-only-search",
+        "result": "PASS",
+        "elapsed_seconds": 1.36,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "document-a.hwp",
+          "document-b.hwpx"
+        ]
+      },
+      {
+        "case": "metadata-document-a.hwp",
+        "result": "PASS",
+        "observed_at": 1789240553.6357481,
+        "utf8_bytes": 61,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwp"
+      },
+      {
+        "case": "metadata-document-b.hwpx",
+        "result": "PASS",
+        "observed_at": 1789240553.6563761,
+        "utf8_bytes": 61,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx"
+      },
+      {
+        "case": "metadata-document-c.hwp",
+        "result": "PASS",
+        "observed_at": 1789240553.673281,
+        "utf8_bytes": 39,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwp"
+      },
+      {
+        "case": "automatic-first-install-search",
+        "result": "PASS",
+        "observed_at": 1789240553.7363179
+      },
+      {
+        "case": "candidate-app-not-running",
+        "result": "PASS",
+        "observed_at": 1789240553.8603258
+      },
+      {
+        "case": "automatic-discovery",
+        "result": "PASS",
+        "elapsed_seconds": 0.03,
+        "observed_at": 1789240553.972436
+      },
+      {
+        "case": "environment-text-control",
+        "result": "PASS",
+        "elapsed_seconds": 0.7,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "index-control.txt"
+        ]
+      },
+      {
+        "case": "body-only-search",
+        "result": "PASS",
+        "elapsed_seconds": 1.33,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "document-a.hwp",
+          "document-b.hwpx",
+          "document-c.hwp"
+        ]
+      },
+      {
+        "case": "korean-body-only-search",
+        "result": "PASS",
+        "elapsed_seconds": 1.28,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "document-a.hwp",
+          "document-b.hwpx"
+        ]
+      },
+      {
+        "case": "metadata-document-a.hwp",
+        "result": "PASS",
+        "observed_at": 1789240557.303541,
+        "utf8_bytes": 61,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwp"
+      },
+      {
+        "case": "metadata-document-b.hwpx",
+        "result": "PASS",
+        "observed_at": 1789240557.322807,
+        "utf8_bytes": 61,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx"
+      },
+      {
+        "case": "metadata-document-c.hwp",
+        "result": "PASS",
+        "observed_at": 1789240557.340148,
+        "utf8_bytes": 39,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwp"
+      },
+      {
+        "case": "automatic-first-install-search",
+        "result": "PASS",
+        "observed_at": 1789240557.4092648
+      }
+    ]
+  },
+  "same_version_reinstall": {
+    "status": "PASS",
+    "total_launch_count": 2,
+    "launch_to_verified_search_seconds": 42.09,
+    "same_path_build_mtime": true,
+    "installation_object_changed": true,
+    "request_identifier_changed": true,
+    "receipt_reset_during_trial": false,
+    "manual_registration_or_indexing_during_trial": false,
+    "corpus_hash_and_mtime_preserved": true,
+    "app_quit_search": "PASS",
+    "results": [
+      {
+        "case": "candidate-app-not-running",
+        "result": "PASS",
+        "observed_at": 1789240557.495094
+      },
+      {
+        "case": "reinstall-old-body-removed",
+        "result": "PASS",
+        "elapsed_seconds": 8.08,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "reinstall-old-korean-removed",
+        "result": "PASS",
+        "elapsed_seconds": 7.87,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "before-reinstall-body-absent",
+        "result": "PASS",
+        "elapsed_seconds": 8.14,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "before-reinstall-korean-absent",
+        "result": "PASS",
+        "elapsed_seconds": 6.62,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "same-version-reinstall-prepared",
+        "result": "PASS",
+        "observed_at": 1789240588.301216
+      },
+      {
+        "case": "reinstall-body-still-absent",
+        "result": "PASS",
+        "elapsed_seconds": 8.36,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "candidate-relaunch-requested",
+        "result": "PASS",
+        "observed_at": 1789240597.330581,
+        "launch_number": 2
+      },
+      {
+        "case": "discovery-after-relaunch",
+        "result": "PASS",
+        "elapsed_seconds": 0.01,
+        "observed_at": 1789240597.339948
+      },
+      {
+        "case": "same-version-reinstall-launched",
+        "result": "PASS",
+        "observed_at": 1789240597.3399758
+      },
+      {
+        "case": "environment-text-control",
+        "result": "PASS",
+        "elapsed_seconds": 0.97,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "index-control.txt"
+        ]
+      },
+      {
+        "case": "body-only-search",
+        "result": "PASS",
+        "elapsed_seconds": 39.5,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "document-a.hwp",
+          "document-b.hwpx",
+          "document-c.hwp"
+        ]
+      },
+      {
+        "case": "korean-body-only-search",
+        "result": "PASS",
+        "elapsed_seconds": 1.3,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "document-a.hwp",
+          "document-b.hwpx"
+        ]
+      },
+      {
+        "case": "metadata-document-a.hwp",
+        "result": "PASS",
+        "observed_at": 1789240639.283676,
+        "utf8_bytes": 61,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwp"
+      },
+      {
+        "case": "metadata-document-b.hwpx",
+        "result": "PASS",
+        "observed_at": 1789240639.30246,
+        "utf8_bytes": 61,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx"
+      },
+      {
+        "case": "metadata-document-c.hwp",
+        "result": "PASS",
+        "observed_at": 1789240639.318475,
+        "utf8_bytes": 39,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwp"
+      },
+      {
+        "case": "automatic-same-version-reinstall-search",
+        "result": "PASS",
+        "observed_at": 1789240639.4221172
+      },
+      {
+        "case": "candidate-app-not-running",
+        "result": "PASS",
+        "observed_at": 1789240639.470061
+      },
+      {
+        "case": "environment-text-control",
+        "result": "PASS",
+        "elapsed_seconds": 1.04,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "index-control.txt"
+        ]
+      },
+      {
+        "case": "body-only-search",
+        "result": "PASS",
+        "elapsed_seconds": 1.35,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "document-a.hwp",
+          "document-b.hwpx",
+          "document-c.hwp"
+        ]
+      },
+      {
+        "case": "korean-body-only-search",
+        "result": "PASS",
+        "elapsed_seconds": 1.29,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": [
+          "document-a.hwp",
+          "document-b.hwpx"
+        ]
+      },
+      {
+        "case": "metadata-document-a.hwp",
+        "result": "PASS",
+        "observed_at": 1789240643.2329652,
+        "utf8_bytes": 61,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwp"
+      },
+      {
+        "case": "metadata-document-b.hwpx",
+        "result": "PASS",
+        "observed_at": 1789240643.249397,
+        "utf8_bytes": 61,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwpx"
+      },
+      {
+        "case": "metadata-document-c.hwp",
+        "result": "PASS",
+        "observed_at": 1789240643.265289,
+        "utf8_bytes": 39,
+        "content_type": "com.haansoft.hancomofficeviewer.mac.hwp"
+      },
+      {
+        "case": "automatic-same-version-reinstall-search",
+        "result": "PASS",
+        "observed_at": 1789240643.331908
+      }
+    ]
+  },
+  "cleanup": {
+    "first_attempt_results": [
+      {
+        "case": "cleanup-index-ReinstallSeptember20260913",
+        "result": "PASS",
+        "elapsed_seconds": 8.05,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-UpdatedDocumentMarker",
+        "result": "PASS",
+        "elapsed_seconds": 8.72,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-나비",
+        "result": "PASS",
+        "elapsed_seconds": 8.01,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-바다",
+        "result": "PASS",
+        "elapsed_seconds": 7.96,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-TruncatedDocumentMarker",
+        "result": "PASS",
+        "elapsed_seconds": 8.07,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-호랑이",
+        "result": "PASS",
+        "elapsed_seconds": 7.95,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-index-OmittedDocumentMarker",
+        "result": "PASS",
+        "elapsed_seconds": 8.17,
+        "timeout_seconds": 180,
+        "control_ok": true,
+        "file_names": []
+      },
+      {
+        "case": "cleanup-original-apps-providers",
+        "result": "PASS",
+        "observed_at": 1789240700.423328
+      },
+      {
+        "case": "cleanup-importer-catalog",
+        "result": "MISS",
+        "observed_at": 1789240760.9983768
+      }
+    ],
+    "followup": {
+      "candidate_catalog_removed": true,
+      "elapsed_seconds": 0.01,
+      "candidate_bundle_absent": true,
+      "candidate_documents_absent": true,
+      "action": "정확한 소유 경로의 등록 해제 재확인; 전역 초기화 없음"
+    },
+    "public_restoration": {
+      "public_bytes_preserved": true,
+      "public_preferences_restored": true,
+      "providers_restored": true,
+      "validation_error": null,
+      "preferences_restore_note": "defaults import가 제거하지 않은 후보 전용 새 창 위치 키 1개를 제거한 뒤 전체 dictionary 일치 확인",
+      "verified_at": 1789240884.507829
+    }
+  },
+  "limits": [
+    "설치 이력이 있는 현재 Mac에서 공개 앱을 잠시 보존·격리한 개발 후보 검증이다. 깨끗한 OS 검증이 아니다.",
+    "공개 v0.2.0 DMG에는 이 수정이 없다. 새 서명·공증 후보의 설치/업데이트 검증은 후속 릴리스에서 수행한다.",
+    "macOS 12 및 Intel 실기기 실행, 이번 재설치의 실제 Spotlight GUI 캡처는 미실행이다."
+  ]
+}
