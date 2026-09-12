@@ -215,13 +215,28 @@ Pages는 사용자용 릴리즈 안내 표면이다. GitHub Release body의 긴 
 - `알한글 앱 변화` section이 workflow, README, release record 정렬 같은 운영 항목보다 HostApp, Quick Look preview, Finder thumbnail, 설치/업데이트 경로의 사용자-visible 변화를 우선하는가
 - 실제 public DMG SHA256이 아직 확정되지 않은 문서는 release candidate 또는 #188 handoff 상태를 명확히 표시하는가
 
-Pages 다운로드 버튼은 사용자를 위한 latest DMG URL을 사용한다.
+최신 다운로드 버튼은 실제 최신 공개 DMG 파일명을 포함한 latest URL을 사용한다. 이전 상세 노트의 본문 다운로드는 해당 버전의 `releases/download/v<version>/...` 고정 URL을 사용하며, 전역 헤더의 최신 다운로드와 구분한다. 최신 공개 버전이 바뀌면 헤더의 latest URL과 파일명도 함께 확인한다.
 
 ```text
 https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-<version>.dmg
 ```
 
 이전 버전 안내 banner는 수동으로 버전마다 고치지 않는다. `scripts/ci/update-release-version-notices.sh --updates-dir docs/updates`가 `docs/updates/v*.html` 중 가장 높은 semantic version을 최신 릴리즈 노트로 보고, 이전 버전 페이지의 banner를 삽입/갱신하며 최신 버전 페이지의 banner를 제거한다. PR CI는 `--check` 모드로 source가 정규화되어 있는지 확인하고, `prepare-pages-artifact.sh`는 Pages artifact를 만들 때 같은 helper를 한 번 더 실행한다.
+
+### 소개·공개 정보·설치 안내 작성 규칙
+
+- 업데이트 홈과 상세 노트의 hero 소개는 한 문단으로 유지한다. 버튼과 겹치는 다운로드·업데이트 설명이나 같은 크기의 최신 버전 강조 문단을 추가하지 않는다.
+- 상세 공개일은 `.release-meta`와 `<time datetime="YYYY-MM-DD">`을 사용한 작은 중앙 정렬 보조 정보로 표시한다. 기존 공개일을 바꾸거나 미공개 후보의 날짜를 추정하지 않는다. 후보 상태도 같은 보조 정보 위치에 표시하고, 전역 헤더 아래 띠는 이전 버전 안내 용도로 유지한다.
+- 앱 업데이트·Homebrew 제목 옆 `.version-badge`는 아이콘만 사용하지 않고 읽을 수 있는 버전 텍스트를 넣는다. 앱 배지는 실제 public appcast, Homebrew 배지는 실제 tap의 Cask 버전을 각각 확인한다. 두 경로가 다르면 값을 억지로 맞추지 말고 현재 제공 버전과 설치 경로를 짧게 안내한다.
+- 배지는 확인된 정적 값으로 작성한다. 조회 시각과 근거는 타스크·릴리즈 기록에 남기고, 공개 직전에 Release·feed·tap을 다시 확인한다. 저장소의 후보 버전이나 높은 문서 파일명만으로 최신 공개 버전을 판단하지 않는다.
+- 앱 안내는 “메뉴 막대에서 알한글 → 업데이트 확인…을 선택하세요.”로 간결하게 작성한다. 과거 상세 노트의 Homebrew 안내는 업데이트 홈의 `#homebrew`로 연결해 현재 제공 버전을 확인할 수 있게 한다.
+- Homebrew는 `처음 설치 | 업데이트` 탭과 현재 명령용 복사 버튼을 사용한다. 최초 설치는 `brew install --cask postmelee/tap/alhangeul`, Homebrew 설치본 업데이트는 `brew update` 다음 줄에 `brew upgrade --cask postmelee/tap/alhangeul`을 안내한다. 업데이트 설명에 Homebrew로 설치한 앱이 대상임을 명시한다.
+- `docs/updates.js`는 표시된 `<code>`의 원문만 복사한다. 제목·버튼·shell prompt·들여쓰기를 복사값에 포함하지 않는다. 탭 전환 시 완료·실패 안내를 초기화하며, 전환 전에 시작한 비동기 복사의 늦은 응답이 새 탭 상태를 덮어쓰지 않게 한다.
+- 탭은 `tablist`·`tab`·`tabpanel`, 선택 상태와 연결 관계를 유지한다. 좌우 방향키·Home/End로 전환하고 Tab으로 복사 버튼·코드 영역에 접근할 수 있어야 한다. 숨긴 패널은 접근성 트리와 포커스 순서에서도 제외한다.
+- 코드 영역은 두 줄 높이를 확보해 탭 전환 시 아래 콘텐츠가 움직이지 않게 하고, 모바일에서는 코드 블록 내부에서 가로 스크롤한다. 복사 성공·실패를 상태 영역으로 알리고 포커스를 유지한다. JavaScript 미실행 시 두 명령을 모두 표시하고 수동 선택·복사를 허용한다.
+- 수정 시 데스크톱·모바일 소개 위계, 탭 전환 높이, 실제 붙여넣기 값, 실패·지연 응답, 리소스·다운로드 링크와 이전 배너를 검증한다. 공유 CSS·JavaScript를 바꾸면 해당 HTML의 리소스 버전 키도 갱신한다.
+
+배너 helper는 공개 여부를 조회하지 않는다. 준비 문서가 가장 높은 버전이면 helper 검사 통과만으로 공개 준비 완료라고 판단하지 않으며, 실제 공개 승격과 Pages 반영 순서를 별도로 확인한다.
 
 ### Pages 배포 모델
 
@@ -259,6 +274,8 @@ appcast 보존 기준:
 - repository의 `docs/appcast.xml`은 stale copy일 수 있으므로 docs-only 배포 source로 사용하지 않는다.
 - public appcast 다운로드 또는 XML 검증이 실패하면 Pages deployment를 중단한다.
 - stale `docs/appcast.xml` fallback은 허용하지 않는다.
+- 공개 배포 전후 appcast 원본의 bytes·SHA-256을 비교하고, 로컬 artifact 조립 시에도 입력과 산출물의 `appcast.xml`이 같은지 확인한다. XML을 다시 직렬화하거나 이전 검증에서 받은 파일을 배포 입력으로 재사용하지 않는다.
+- 릴리스와 겹치는 docs 변경은 릴리스 Pages 배포 완료 후 최신 main의 공개 문구·DMG·feed·tap 상태에 맞춰 정렬한다. `main`의 docs 변경이 자동 배포를 유발함을 승인 자료에 명시한다. 동시 릴리스 배포로 feed가 바뀌면 그 완료 후 비교 기준을 다시 잡고 기록한다.
 
 ## Sparkle appcast
 
