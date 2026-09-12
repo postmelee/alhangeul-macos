@@ -144,7 +144,142 @@ def fetch(output, candidate):
     archive.unlink()
 
 
-def require_complete(first, stopped, final):
+def candidate_receipt(smoke, state, timeout=30):
+    """후보 컨테이너의 요청 키만 읽는다. 설정을 쓰거나 전체 plist를 복사하지 않는다."""
+    bundle_id = 'com.postmelee.alhangeul'
+    containers = Path.home() / 'Library/Containers'
+    expected = str(Path(state['install_app']) / smoke.PLUGIN)
+    deadline = time.monotonic() + timeout
+    while True:
+        candidates = set()
+        if containers.is_dir():
+            for container in containers.iterdir():
+                if container.name != bundle_id:
+                    metadata = container / '.com.apple.containermanagerd.metadata.plist'
+                    if not metadata.is_file():
+                        continue
+                    try:
+                        values = plistlib.loads(metadata.read_bytes())
+                        identifier = values.get('MCMMetadataIdentifier') if isinstance(values, dict) else None
+                    except (OSError, ValueError, plistlib.InvalidFileException):
+                        continue
+                    if identifier != bundle_id:
+                        continue
+                path = container / 'Data/Library/Preferences' / (bundle_id + '.plist')
+                if path.is_file():
+                    candidates.add(path.resolve())
+        matches = []
+        for path in candidates:
+            try:
+                receipt = smoke.reindex_receipt(path)
+            except (OSError, ValueError, plistlib.InvalidFileException):
+                continue
+            if receipt.get('importerPath') == expected:
+                matches.append((path, receipt))
+        if len(matches) > 1:
+            raise ValueError('후보 요청 기록이 여러 컨테이너에 있어 재설치 판정 불가')
+        if matches:
+            return matches[0]
+        if time.monotonic() >= deadline:
+            raise ValueError('후보 sandbox 요청 기록 누락; 설정 초기화 없이 검증 중단')
+        time.sleep(min(1, max(0, deadline - time.monotonic())))
+
+
+def installation_trials(smoke, state, state_path, output):
+    """최초 설치 증거를 고정한 뒤 재설치와 lifecycle을 수행한다."""
+    try:
+        for phase in ('environment', 'install', 'launch', 'automatic_search', 'stop_candidate', 'automatic_search'):
+            getattr(smoke, phase)(state)
+            smoke.save(state_path, state)
+            if phase == 'automatic_search':
+                target = 'first-launch.json' if not (output / 'first-launch.json').exists() else 'stopped-search.json'
+                smoke.save(output / target, state)
+        receipt_path, receipt = candidate_receipt(smoke, state)
+        state['initial_receipt'] = receipt
+        smoke.save(output / 'stopped-search.json', state)
+        smoke.prepare_reinstall(state, receipt_path)
+        smoke.save(state_path, state)
+        smoke.reinstall_app(state)
+        smoke.save(state_path, state)
+        smoke.reinstall_search(state)
+        smoke.save(output / 'reinstall-search.json', state)
+        smoke.stop_candidate(state)
+        smoke.reinstall_search(state)
+        smoke.save(output / 'reinstall-stopped-search.json', state)
+        state.setdefault('assisted_actions', []).append('lifecycle')
+        smoke.lifecycle(state)
+        smoke.save(output / 'lifecycle.json', state)
+    finally:
+        # 실패한 재설치도 외부 finally의 표준 cleanup에 같은 state를 전달한다.
+        smoke.save(state_path, state)
+
+
+def require_reinstall(first, stopped, final, reinstalled, restopped):
+    snapshots = (first, stopped, reinstalled, restopped, final)
+    if any(not isinstance(state, dict) for state in snapshots):
+        raise ValueError('재설치/종료 후 필수 snapshot 누락')
+    for key in ('id', 'install_app', 'source_app_hashes', 'source_importer_hashes', 'installed_bundle_dates_ns'):
+        if not first.get(key) or any(state.get(key) != first[key] for state in snapshots[1:]):
+            raise ValueError('최초 설치와 재설치 후보/소유 식별 불일치')
+    for previous, current in zip(snapshots, snapshots[1:]):
+        history = previous.get('results', [])
+        if current.get('results', [])[:len(history)] != history:
+            raise ValueError('설치 검증 이력 누락 또는 다른 시험 snapshot')
+    old = stopped.get('initial_receipt', {})
+    if any(state.get('reinstall') != reinstalled.get('reinstall') for state in (restopped, final)):
+        raise ValueError('재설치 검색 이후 설치 객체/요청 기록 변경')
+    for state in (reinstalled, restopped, final):
+        trial = state.get('reinstall', {})
+        new = trial.get('after_receipt', {})
+        if (state.get('automatic') is not True or state.get('launch_count') != 2
+                or trial.get('phase') != 'searchable' or trial.get('before_receipt') != old
+                or not old.get('installationIdentifier') or not new.get('installationIdentifier')
+                or old['installationIdentifier'] == new['installationIdentifier']):
+            raise ValueError('기존 요청 기록을 유지한 두 번째 설치의 새 요청 증거 누락')
+        for key in ('importerPath', 'buildIdentifier', 'modificationDate'):
+            if not old.get(key) or new.get(key) != old[key]:
+                raise ValueError('재설치 경로/빌드/변경 시각 불일치')
+        expected_importer = str(Path(first['install_app']) / 'Contents/Library/Spotlight/Alhangeul.mdimporter')
+        if old['importerPath'] != expected_importer:
+            raise ValueError('다른 앱의 재설치 요청 기록')
+        if (not first.get('installed_object') or stopped.get('installed_object') != first['installed_object']
+                or trial.get('before_object') != first['installed_object']
+                or not trial.get('after_object') or trial['after_object'] == trial['before_object']
+                or state.get('installed_object') != trial['after_object']):
+            raise ValueError('같은 후보의 설치 객체 교체 증거 누락')
+        if (not first.get('prepared_corpus') or not trial.get('prepared_corpus')
+                or trial['prepared_corpus'] != first['prepared_corpus']):
+            raise ValueError('같은 원본 corpus 보존 증거 누락')
+    for state in (reinstalled, restopped):
+        if state.get('phase') != 'searchable' or state.get('assisted_actions'):
+            raise ValueError('재설치 자동 검색 수용 조건 누락')
+        cases = [r['case'] for r in state.get('results', []) if r['result'] == 'PASS']
+        required = {'reinstall-old-body-removed', 'reinstall-old-korean-removed',
+                    'before-reinstall-body-absent', 'before-reinstall-korean-absent',
+                    'reinstall-body-still-absent', 'same-version-reinstall-prepared',
+                    'same-version-reinstall-launched', 'automatic-same-version-reinstall-search'}
+        if not required <= set(cases):
+            raise ValueError('재설치 사전 미검색/실행/본문 검색 증거 누락')
+    search_cases = {'body-only-search', 'korean-body-only-search', 'metadata-document-a.hwp',
+                    'metadata-document-b.hwpx', 'metadata-document-c.hwp',
+                    'automatic-same-version-reinstall-search'}
+    new_results = reinstalled['results'][len(stopped['results']):]
+    cases = [r['case'] for r in new_results if r['result'] == 'PASS']
+    launched = cases.index('same-version-reinstall-launched')
+    if not search_cases <= set(cases[launched + 1:]):
+        raise ValueError('재설치 실행 이후 본문 검색/실제 importer 증거 누락')
+    # 최초 설치 종료 기록을 재설치 종료 기록으로 재사용하지 않는다.
+    after_first_search = restopped['results'][len(reinstalled['results']):]
+    cases = [r['case'] for r in after_first_search if r['result'] == 'PASS']
+    if ('candidate-app-not-running' not in cases or 'automatic-same-version-reinstall-search' not in cases
+            or cases.index('candidate-app-not-running') > cases.index('automatic-same-version-reinstall-search')):
+        raise ValueError('재설치 앱 종료 후 검색 증거 누락')
+    if not search_cases <= set(cases[cases.index('candidate-app-not-running') + 1:]):
+        raise ValueError('재설치 앱 종료 후 본문 검색/실제 importer 증거 누락')
+
+
+def require_complete(first, stopped, final, reinstalled=None, restopped=None):
+    require_reinstall(first, stopped, final, reinstalled, restopped)
     for state in (first, stopped):
         if (state.get('launch_count') != 1 or state.get('assisted_actions')
                 or state.get('phase') != 'searchable'
@@ -228,18 +363,7 @@ def verify(output, candidate, fixtures, result):
                                   automatic=True, install_layout='direct', discovery_timeout=600, search_timeout=180)
         smoke.prepare(args)
         state = json.loads(state_path.read_text())
-        try:
-            for phase in ('environment', 'install', 'launch', 'automatic_search', 'stop_candidate', 'automatic_search'):
-                getattr(smoke, phase)(state)
-                smoke.save(state_path, state)
-                if phase == 'automatic_search':
-                    target = 'first-launch.json' if not (output / 'first-launch.json').exists() else 'stopped-search.json'
-                    smoke.save(output / target, state)
-            state.setdefault('assisted_actions', []).append('lifecycle')
-            smoke.lifecycle(state)
-            smoke.save(output / 'lifecycle.json', state)
-        finally:
-            smoke.save(state_path, state)
+        installation_trials(smoke, state, state_path, output)
     finally:
         try:
             if state_path.exists():
@@ -261,7 +385,9 @@ def verify(output, candidate, fixtures, result):
     first = json.loads((output / 'first-launch.json').read_text())
     stopped = json.loads((output / 'stopped-search.json').read_text())
     final = json.loads(state_path.read_text())
-    require_complete(first, stopped, final)
+    reinstalled = json.loads((output / 'reinstall-search.json').read_text())
+    restopped = json.loads((output / 'reinstall-stopped-search.json').read_text())
+    require_complete(first, stopped, final, reinstalled, restopped)
     result.update(status='PASS', release_eligible=True)
 
 
@@ -273,7 +399,7 @@ def main():
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    result = {'schema_version': 1, 'status': 'CANDIDATE_FAILED', 'release_eligible': False,
+    result = {'schema_version': 2, 'status': 'CANDIDATE_FAILED', 'release_eligible': False,
               'phase': args.phase, 'harness_sha': os.environ.get('GITHUB_SHA'),
               'run_id': os.environ.get('GITHUB_RUN_ID'), 'run_attempt': os.environ.get('GITHUB_RUN_ATTEMPT')}
     started = time.monotonic()
