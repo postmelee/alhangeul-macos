@@ -144,6 +144,76 @@ def fetch(output, candidate):
     archive.unlink()
 
 
+def candidate_receipt(smoke, state, timeout=30):
+    """후보 컨테이너의 요청 키만 읽는다. 설정을 쓰거나 전체 plist를 복사하지 않는다."""
+    bundle_id = 'com.postmelee.alhangeul'
+    containers = Path.home() / 'Library/Containers'
+    expected = str(Path(state['install_app']) / smoke.PLUGIN)
+    deadline = time.monotonic() + timeout
+    while True:
+        candidates = set()
+        if containers.is_dir():
+            for container in containers.iterdir():
+                if container.name != bundle_id:
+                    metadata = container / '.com.apple.containermanagerd.metadata.plist'
+                    if not metadata.is_file():
+                        continue
+                    try:
+                        values = plistlib.loads(metadata.read_bytes())
+                        identifier = values.get('MCMMetadataIdentifier') if isinstance(values, dict) else None
+                    except (OSError, ValueError, plistlib.InvalidFileException):
+                        continue
+                    if identifier != bundle_id:
+                        continue
+                path = container / 'Data/Library/Preferences' / (bundle_id + '.plist')
+                if path.is_file():
+                    candidates.add(path.resolve())
+        matches = []
+        for path in candidates:
+            try:
+                receipt = smoke.reindex_receipt(path)
+            except (OSError, ValueError, plistlib.InvalidFileException):
+                continue
+            if receipt.get('importerPath') == expected:
+                matches.append((path, receipt))
+        if len(matches) > 1:
+            raise ValueError('후보 요청 기록이 여러 컨테이너에 있어 재설치 판정 불가')
+        if matches:
+            return matches[0]
+        if time.monotonic() >= deadline:
+            raise ValueError('후보 sandbox 요청 기록 누락; 설정 초기화 없이 검증 중단')
+        time.sleep(min(1, max(0, deadline - time.monotonic())))
+
+
+def installation_trials(smoke, state, state_path, output):
+    """최초 설치 증거를 고정한 뒤 재설치와 lifecycle을 수행한다."""
+    try:
+        for phase in ('environment', 'install', 'launch', 'automatic_search', 'stop_candidate', 'automatic_search'):
+            getattr(smoke, phase)(state)
+            smoke.save(state_path, state)
+            if phase == 'automatic_search':
+                target = 'first-launch.json' if not (output / 'first-launch.json').exists() else 'stopped-search.json'
+                smoke.save(output / target, state)
+        receipt_path, receipt = candidate_receipt(smoke, state)
+        state['initial_receipt'] = receipt
+        smoke.save(output / 'stopped-search.json', state)
+        smoke.prepare_reinstall(state, receipt_path)
+        smoke.save(state_path, state)
+        smoke.reinstall_app(state)
+        smoke.save(state_path, state)
+        smoke.reinstall_search(state)
+        smoke.save(output / 'reinstall-search.json', state)
+        smoke.stop_candidate(state)
+        smoke.reinstall_search(state)
+        smoke.save(output / 'reinstall-stopped-search.json', state)
+        state.setdefault('assisted_actions', []).append('lifecycle')
+        smoke.lifecycle(state)
+        smoke.save(output / 'lifecycle.json', state)
+    finally:
+        # 실패한 재설치도 외부 finally의 표준 cleanup에 같은 state를 전달한다.
+        smoke.save(state_path, state)
+
+
 def require_complete(first, stopped, final):
     for state in (first, stopped):
         if (state.get('launch_count') != 1 or state.get('assisted_actions')
@@ -228,18 +298,7 @@ def verify(output, candidate, fixtures, result):
                                   automatic=True, install_layout='direct', discovery_timeout=600, search_timeout=180)
         smoke.prepare(args)
         state = json.loads(state_path.read_text())
-        try:
-            for phase in ('environment', 'install', 'launch', 'automatic_search', 'stop_candidate', 'automatic_search'):
-                getattr(smoke, phase)(state)
-                smoke.save(state_path, state)
-                if phase == 'automatic_search':
-                    target = 'first-launch.json' if not (output / 'first-launch.json').exists() else 'stopped-search.json'
-                    smoke.save(output / target, state)
-            state.setdefault('assisted_actions', []).append('lifecycle')
-            smoke.lifecycle(state)
-            smoke.save(output / 'lifecycle.json', state)
-        finally:
-            smoke.save(state_path, state)
+        installation_trials(smoke, state, state_path, output)
     finally:
         try:
             if state_path.exists():

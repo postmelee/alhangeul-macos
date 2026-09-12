@@ -4,10 +4,12 @@ import copy
 import importlib.util
 import json
 from pathlib import Path
+import plistlib
 import stat
 import tempfile
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 import zipfile
 
 spec = importlib.util.spec_from_file_location('release_smoke', Path(__file__).with_name('release-install-smoke.py'))
@@ -17,6 +19,82 @@ probe = smoke.module('probe_test', 'install-environment-probe.py')
 
 
 class CandidateTests(unittest.TestCase):
+    def receipt_fixture(self, home, name, identifier='com.postmelee.alhangeul', importer='/candidate.app/importer'):
+        root = home / 'Library/Containers' / name
+        root.mkdir(parents=True)
+        (root / '.com.apple.containermanagerd.metadata.plist').write_bytes(
+            plistlib.dumps({'MCMMetadataIdentifier': identifier}))
+        path = root / 'Data/Library/Preferences/com.postmelee.alhangeul.plist'
+        path.parent.mkdir(parents=True)
+        path.write_bytes(plistlib.dumps({'alhangeul.spotlight.reimport.requestedInstallation':
+                                        {'importerPath': importer, 'installationIdentifier': 'old'},
+                                        'unrelated-private-preference': 'must-not-copy'}))
+        return path
+
+    def test_receipt_uuid_container_alias_and_no_preference_mutation(self):
+        system = smoke.module('receipt_system', 'spotlight-system-smoke.py')
+        with tempfile.TemporaryDirectory() as tmp, patch.object(smoke.Path, 'home', return_value=Path(tmp)):
+            home = Path(tmp)
+            app = '/candidate.app'
+            path = self.receipt_fixture(home, 'container-uuid', importer=app + '/' + system.PLUGIN)
+            before = path.read_bytes()
+            (home / 'Library/Containers/com.postmelee.alhangeul').symlink_to(path.parents[3], target_is_directory=True)
+            found, receipt = smoke.candidate_receipt(system, {'install_app': app}, timeout=0)
+            self.assertEqual(found, path.resolve())
+            self.assertEqual(set(receipt), {'importerPath', 'installationIdentifier'})
+            self.assertEqual(path.read_bytes(), before)
+
+    def test_missing_foreign_and_ambiguous_receipts_rejected(self):
+        system = smoke.module('receipt_reject_system', 'spotlight-system-smoke.py')
+        for kind in ('missing', 'foreign-container', 'foreign-app', 'duplicate'):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as tmp, \
+                    patch.object(smoke.Path, 'home', return_value=Path(tmp)):
+                home = Path(tmp)
+                if kind != 'missing':
+                    self.receipt_fixture(home, 'uuid-one',
+                                         identifier='other.app' if kind == 'foreign-container' else 'com.postmelee.alhangeul',
+                                         importer='/other.app' if kind == 'foreign-app' else '/candidate.app/' + system.PLUGIN)
+                if kind == 'duplicate':
+                    self.receipt_fixture(home, 'uuid-two', importer='/candidate.app/' + system.PLUGIN)
+                with self.assertRaises(ValueError):
+                    smoke.candidate_receipt(system, {'install_app': '/candidate.app'}, timeout=0)
+
+    def test_trial_order_snapshots_and_failed_state_preserved(self):
+        for fail in (False, True):
+            with self.subTest(fail=fail), tempfile.TemporaryDirectory() as tmp:
+                output = Path(tmp)
+                calls = []
+                state = {'launch_count': 0}
+                def operation(name):
+                    def execute(current, *args):
+                        calls.append(name)
+                        current['last_operation'] = name
+                        if name in ('launch', 'reinstall_app'):
+                            current['launch_count'] += 1
+                        if fail and name == 'reinstall_app':
+                            raise ValueError('copy failure')
+                    return execute
+                names = ('environment', 'install', 'launch', 'automatic_search', 'stop_candidate',
+                         'prepare_reinstall', 'reinstall_app', 'reinstall_search', 'lifecycle')
+                system = SimpleNamespace(**{name: operation(name) for name in names},
+                                         save=lambda path, value: path.write_text(json.dumps(value)))
+                with patch.object(smoke, 'candidate_receipt', return_value=(output / 'private.plist', {'request': 'old'})):
+                    if fail:
+                        with self.assertRaisesRegex(ValueError, 'copy failure'):
+                            smoke.installation_trials(system, state, output / 'state.json', output)
+                        self.assertNotIn('lifecycle', calls)
+                        self.assertEqual(json.loads((output / 'state.json').read_text())['last_operation'], 'reinstall_app')
+                    else:
+                        smoke.installation_trials(system, state, output / 'state.json', output)
+                        self.assertEqual(calls, ['environment', 'install', 'launch', 'automatic_search',
+                                                'stop_candidate', 'automatic_search', 'prepare_reinstall',
+                                                'reinstall_app', 'reinstall_search', 'stop_candidate',
+                                                'reinstall_search', 'lifecycle'])
+                        self.assertEqual(json.loads((output / 'reinstall-stopped-search.json').read_text())['launch_count'], 2)
+                        self.assertEqual(state['assisted_actions'], ['lifecycle'])
+                    self.assertEqual(json.loads((output / 'first-launch.json').read_text())['launch_count'], 1)
+                    self.assertEqual(json.loads((output / 'stopped-search.json').read_text())['initial_receipt'], {'request': 'old'})
+
     def setUp(self):
         self.env = {'SOURCE_RUN_ID': '123', 'SOURCE_ARTIFACT_ID': '456', 'SOURCE_SHA': 'a'*40,
                     'DMG_SHA256': 'b'*64, 'EXPECTED_VERSION': '0.2.0', 'EXPECTED_BUILD': '18',
