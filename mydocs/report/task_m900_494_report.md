@@ -16,7 +16,7 @@ PR #491을 병합하고 rhwp v0.8.6 기반 알한글 **v0.1.11 (17)**을 공식 
 | annotated tag object | `7c778a75d7a911615540279fb7232d8493914b6f` |
 | official Publish | [run 34047148092](https://github.com/postmelee/alhangeul-macos/actions/runs/34047148092), publish·Pages 성공 |
 | Homebrew tap | [commit 6f4abf8](https://github.com/postmelee/homebrew-tap/commit/6f4abf8ff3fa8db64a0dfa27c0c22f50b86e2153) |
-| 최종 정리 | 공개 문구·Cask·검증 기록을 단일 main PR로 준비 완료. merge·Pages 결과와 devel 인계는 Stage 6에서 확인 |
+| 최종 정리 | [main PR #501](https://github.com/postmelee/alhangeul-macos/pull/501) merge `0272172e543d59fd87eebb11d98904ee344a4487`, [Pages 34049769039](https://github.com/postmelee/alhangeul-macos/actions/runs/34049769039) 성공·public byte 검증 완료 |
 
 ## 사용자에게 보이는 변화
 
@@ -46,7 +46,7 @@ PR #491을 병합하고 rhwp v0.8.6 기반 알한글 **v0.1.11 (17)**을 공식 
 | [Stage 3](../working/task_m900_494_stage3.md) | `09ff64b` | source·ABI·Rust/Swift 테스트, Debug/Release·native renderer·package 검증 |
 | [Stage 4](../working/task_m900_494_stage4.md) | `f1c633f`, `5753205`, `32428ad`, `9f2323b`, `92092b8` | 최초 signed 실패 기록, Task #497 수정 후보 재생성·저장 6조합·GUI·Finder 검증과 복원 |
 | [Stage 5](../working/task_m900_494_stage5.md) | `9159e1f`, `58194a6` | 공식 공개·Homebrew·실제 Sparkle 업데이트와 자연 등록 Finder 검증, 원본 설치 복원 |
-| [Stage 6](../working/task_m900_494_stage6.md) | 이 보고서와 함께 커밋 | 단일 main 공개 문구 종료 정리, public byte 검증과 devel 최종 기록 인계 |
+| [Stage 6](../working/task_m900_494_stage6.md) | 이 보고서와 함께 커밋 | main PR #501·Pages 성공, public byte 검증과 devel 최종 기록 인계 |
 
 이번 작업에서 생성·병합한 PR은 다음과 같다. 원래 요청한 PR #491은 기존 upstream sync PR이다.
 
@@ -58,10 +58,11 @@ PR #491을 병합하고 rhwp v0.8.6 기반 알한글 **v0.1.11 (17)**을 공식 
 | [#498](https://github.com/postmelee/alhangeul-macos/pull/498) | Task #497 차단 오류 수정, merge `6fac59e2f3a19d9762cece3165d1da211d094aea` |
 | [#499](https://github.com/postmelee/alhangeul-macos/pull/499) | 수정 후보·재검증·실패 증거 기록 devel 반영 |
 | [#500](https://github.com/postmelee/alhangeul-macos/pull/500) | 수정 후보 main 승격, 최종 official tag commit 확정 |
+| [#501](https://github.com/postmelee/alhangeul-macos/pull/501) | 단일 main 공개 문구·Cask·검증 기록 종료 정리, Pages 배포 확인 |
 
 차단 오류 때문에 수정 PR·검증 기록·main 재승격이 추가됐다. 다음 릴리스에서도 sandbox 저장은 공증 후보 설치 gate로 유지하고, 공개 이후 사용자 문구 보정은 하나의 main 종료 정리 PR에 모은다. main 배포 이후에만 알 수 있는 Pages 결과는 devel 최종 기록에 묶어 공개 문구 PR을 반복하지 않는다.
 
-PR #498~500에서 Copilot quota 메시지는 실제 코드 review나 approval로 간주하지 않았다. exact head·tree·변경 범위와 CI를 별도로 확인했다.
+PR #498~501에서 Copilot quota 메시지는 실제 코드 review나 approval로 간주하지 않았다. exact head·tree·변경 범위와 CI를 별도로 확인했다.
 
 ## 검증 결과
 
@@ -112,6 +113,10 @@ Mac 잠금으로 UI 확인이 두 차례 멈췄지만 잠금 해제 뒤 남은 �
 
 ## 최종 정리와 완료 조건
 
-단일 main PR에는 README·Pages 공개 문구, repository Cask, Stage 4~6와 최종 검증 기록을 모았다. 로컬 Pages artifact는 public appcast bytes를 보존하고 이전 버전 notice 검증을 통과했다. main PR CI·merge 뒤 docs-only Pages 성공과 public 문구·feed bytes를 확인하고, 실제 결과를 devel에 반영한 뒤 Issue #494와 작업 브랜치를 정리한다.
+main PR #501에 README·Pages 공개 문구, repository Cask, Stage 4~6와 최종 검증 기록 14파일을 모아 반영했다. PR CI 34049467483은 분류·스크립트·release helper 3개 job success, macOS scope skip이다. 02:48:53 KST merge 후 docs-only Pages 34049769039의 두 job이 성공했다.
+
+02:50 KST public home·updates·v0.1.11·이전 v0.1.10 HTML을 source와 byte 대조했고, 최신 세 페이지의 공개 준비 문구 제거와 Homebrew 명령 반영을 확인했다. latest·tag 고정 다운로드는 HTTP 200, 180206064 bytes이며 stable appcast 1,167 bytes와 SHA256은 기존과 동일하다. official tag는 다시 지정하지 않았다.
+
+이 최종 결과를 devel에 전달하는 PR은 main 공개 문구를 재수정하지 않는다. main과의 추가 차이는 운영 문서뿐이다. 관련 PR merge 확인 뒤 Issue #494 체크리스트·상태, 로컬·원격 작업 브랜치를 정리하고 devel로 복귀한다. 오늘할일은 공개·업데이트·문구 검증 완료 시각 02:50을 기록한다.
 
 실행 증거는 `build.noindex/task494/stage2/`, `stage3/`, `stage4/`, `stage5/`, `stage6/` 및 [릴리스 장기 기록](../release/v0.1.11.md)에 있다. 테스트 문서·보존 사본·기존 앱 백업은 재현을 위해 ignored 경로에 유지한다. 비밀 값은 보고서와 GitHub 본문에 기록하지 않았다.

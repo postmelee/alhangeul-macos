@@ -225,7 +225,7 @@ https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-
 
 ### Pages 배포 모델
 
-Pages/appcast 배포는 GitHub Actions Pages deployment 기준이다. repository Pages source는 `build_type=workflow`이어야 하며, `Release Publish DMG` workflow의 official stable release path가 generated `appcast.xml`을 포함한 Pages artifact를 업로드한 뒤 `deploy-pages` job으로 배포한다.
+Pages/appcast 배포는 GitHub Actions Pages deployment 기준이다. repository Pages source는 `build_type=workflow`이어야 하며, `Release Promote Verified DMG` workflow가 generated `appcast.xml`을 포함한 Pages artifact를 업로드한 뒤 `deploy-pages` job으로 배포한다.
 
 필수 repository 설정:
 
@@ -248,7 +248,8 @@ workflow 기준:
 
 역할 분리:
 
-- `Release Publish DMG`: official stable release에서 signed/notarized DMG, GitHub Release asset, generated stable appcast, Pages artifact를 함께 게시한다.
+- `Release Publish DMG`: signed/notarized draft DMG와 검증용 artifact만 생성하며 기존 자산을 덮어쓰지 않는다.
+- `Release Promote Verified DMG`: 최초 설치 검증을 통과한 동일 DMG를 공개하고 stable appcast/Pages를 배포한다.
 - `Docs-only Pages Deploy`: 이미 public Pages에 배포된 latest appcast를 보존하면서 `docs/` 정적 파일 변경만 배포한다.
 
 appcast 보존 기준:
@@ -286,29 +287,17 @@ build.noindex/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_
 
 export한 파일 내용 전체를 `SPARKLE_ED_PRIVATE_KEY` secret 값으로 등록한 뒤, 파일은 안전하게 삭제한다. 이 값은 Keychain의 “Private key for signing Sparkle updates” 항목 password와 동일한 민감 정보로 취급한다.
 
-`Release Publish DMG` workflow의 appcast 동작 기준:
+`Release Promote Verified DMG` workflow의 appcast 동작 기준:
 
-- `draft=false`이고 `prerelease=false`인 공식 release에서만 stable appcast를 갱신한다.
-- `draft=true`, `prerelease=false` 실행은 pre-public signed/notarized DMG smoke 단계다. 이 단계에서는 stable appcast를 갱신하지 않고 step summary에 skip 사유만 남긴다.
-- prerelease 실행도 stable appcast와 Pages deployment를 갱신하지 않는다.
-- official stable release에서는 workflow가 signed/notarized DMG를 GitHub Release asset으로 업로드한 뒤 `sign_update --ed-key-file - -p`로 DMG EdDSA signature를 만든다.
-- official stable release에서는 `scripts/ci/write-sparkle-appcast.sh`가 tag 고정 DMG URL과 release notes URL로 `appcast.xml`을 생성한다.
-- official stable release에서는 workflow가 generated `appcast.xml`을 Pages artifact root의 `appcast.xml`로 포함한다.
-- official stable release의 `deploy-pages` job이 성공해야 stable appcast 배포 성공으로 본다. branch push fallback을 기본 경로로 사용하지 않는다.
-
-appcast enclosure URL은 latest URL이 아니라 tag 고정 URL을 사용한다.
-
-```text
-https://github.com/postmelee/alhangeul-macos/releases/download/v<version>/alhangeul-macos-<version>.dmg
-```
-
-이 URL은 단일 universal DMG를 가리킨다. Sparkle appcast는 아키텍처별 enclosure를 나누지 않고, `scripts/release.sh`/workflow가 검증한 `arm64 + x86_64` app/extension bundle을 포함한 public DMG만 stable item으로 사용한다.
-
-Sparkle appcast의 version/build와 enclosure filename은 앱 버전만 사용한다. Bundled `rhwp` 버전은 appcast item version에 넣지 않고, release notes URL이 가리키는 GitHub Pages/GitHub Release metadata에서 확인하게 한다.
+- draft builder는 appcast/Pages를 게시하지 않는다. `draft=false`와 prerelease 입력은 거부한다.
+- 승격은 같은 tag의 성공한 후보/최초 설치 실행과 최신 양 아키텍처 증거를 요구한다.
+- 기존 DMG의 SHA256/checksum을 확인하고 그 bytes로 EdDSA signature/length를 만든다. 버전/build는 같은 tag의 bundle과 대조한다.
+- 공개 전에 Pages artifact를 준비하고, 공개 뒤 배포한다. 실패 재실행은 동일 public bytes를 확인하며 더 최신 release로부터 feed를 되돌리지 않는다.
+- appcast의 version/build는 앱 버전이다. core 버전은 release notes로 안내한다.
 
 따라서 공식 release 완료 후에는 다음을 확인한다.
 
 - `https://github.com/postmelee/alhangeul-macos/releases/latest`가 방금 게시한 non-draft, non-prerelease release를 가리키는가
-- `Release Publish DMG` workflow의 `deploy-pages` job이 성공했고 `page_url`이 `https://postmelee.github.io/alhangeul-macos/`를 가리키는가
+- `Release Promote Verified DMG` workflow의 `deploy-pages` job이 성공했고 `page_url`이 `https://postmelee.github.io/alhangeul-macos/`를 가리키는가
 - Pages 다운로드 버튼의 asset filename이 최신 public DMG 파일명과 일치하는가
 - `https://postmelee.github.io/alhangeul-macos/appcast.xml`이 새 release item과 Sparkle EdDSA signature를 포함하는가

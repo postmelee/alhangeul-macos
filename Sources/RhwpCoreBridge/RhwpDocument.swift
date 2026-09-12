@@ -2,6 +2,18 @@ import Darwin
 import Foundation
 import Rhwp
 
+enum RhwpRenderTreeQueryError: Error, CustomStringConvertible {
+    case invalidPageIndex
+    case producerUnavailable
+
+    var description: String {
+        switch self {
+        case .invalidPageIndex: return "render-tree query failed: invalid page index"
+        case .producerUnavailable: return "render-tree query failed: producer returned no JSON"
+        }
+    }
+}
+
 enum RhwpExternalImageOperationStatus: Equatable {
     case ok
     case invalidHandle
@@ -248,21 +260,30 @@ class RhwpDocument {
         return svg
     }
 
-    /// 특정 페이지의 렌더 트리를 반환한다.
+    /// 기존 제품 호출 계약을 유지한다. 진단이 필요한 caller는 throwing API를 사용한다.
+    /// 어느 경로도 문서 JSON이나 decode 오류를 자동으로 로그에 기록하지 않는다.
     func renderPageTree(at page: Int) -> RenderNode? {
-        guard let json = renderPageTreeJSON(at: page),
-              let data = json.data(using: .utf8) else { return nil }
-        return try? JSONDecoder().decode(RenderNode.self, from: data)
+        try? renderPageTreeThrowing(at: page)
     }
 
-    /// 특정 페이지의 렌더 트리 원본 JSON 문자열을 반환한다.
+    func renderPageTreeThrowing(at page: Int) throws -> RenderNode {
+        guard UInt32(exactly: page) != nil, page < pageCount else {
+            throw RhwpRenderTreeQueryError.invalidPageIndex
+        }
+        guard let json = renderPageTreeJSON(at: page) else {
+            throw RhwpRenderTreeQueryError.producerUnavailable
+        }
+        return try RenderTreeDecoder.decode(Data(json.utf8))
+    }
+
+    /// C 문자열은 Swift 소유 문자열로 복사한 뒤 모든 반환 경로에서 해제한다.
     func renderPageTreeJSON(at page: Int) -> String? {
-        guard let jsonPtr = rhwp_render_page_tree(handle, UInt32(page)) else {
+        guard let pageIndex = UInt32(exactly: page),
+              let jsonPtr = rhwp_render_page_tree(handle, pageIndex) else {
             return nil
         }
-        let json = String(cString: jsonPtr)
-        rhwp_free_string(jsonPtr)
-        return json
+        defer { rhwp_free_string(jsonPtr) }
+        return String(cString: jsonPtr)
     }
 
     /// 특정 페이지의 overlay image compact JSON 문자열을 반환한다.

@@ -6,6 +6,62 @@
 
 import Foundation
 
+// 오류에는 schema 위치와 분류만 보존한다. 문서 값이나 Foundation의
+// debugDescription/underlyingError는 저장·출력하지 않는다.
+struct RenderTreeDecodingFailure: Error, CustomStringConvertible {
+    enum Reason: String {
+        case keyNotFound, typeMismatch, valueNotFound, dataCorrupted, invalidVariantShape, unexpectedDecoderError
+    }
+
+    let variant: String?
+    let path: String
+    let reason: Reason
+
+    init(variant: String?, codingPath: [CodingKey], reason: Reason) {
+        self.variant = variant.flatMap { RenderNodeType.knownVariantNames.contains($0) ? $0 : nil }
+        self.path = "$" + codingPath.map { key in
+            if let index = key.intValue { return "[\(index)]" }
+            // DynamicKey comes from enum tags; arbitrary future names must not enter diagnostics.
+            if key is DynamicKey && !RenderNodeType.knownVariantNames.contains(key.stringValue) {
+                return ".<tag>"
+            }
+            return "." + key.stringValue
+        }.joined()
+        self.reason = reason
+    }
+
+    init(_ error: Error, variant: String? = nil, fallbackPath: [CodingKey] = []) {
+        switch error {
+        case DecodingError.keyNotFound(let key, let context):
+            self.init(variant: variant, codingPath: context.codingPath + [key], reason: .keyNotFound)
+        case DecodingError.typeMismatch(_, let context):
+            self.init(variant: variant, codingPath: context.codingPath, reason: .typeMismatch)
+        case DecodingError.valueNotFound(_, let context):
+            self.init(variant: variant, codingPath: context.codingPath, reason: .valueNotFound)
+        case DecodingError.dataCorrupted(let context):
+            self.init(variant: variant, codingPath: context.codingPath, reason: .dataCorrupted)
+        default:
+            self.init(variant: variant, codingPath: fallbackPath, reason: .unexpectedDecoderError)
+        }
+    }
+
+    var description: String {
+        "render-tree decode failed: variant=\(variant ?? "unresolved") path=\(path) cause=\(reason.rawValue)"
+    }
+}
+
+enum RenderTreeDecoder {
+    static func decode(_ data: Data) throws -> RenderNode {
+        do {
+            return try JSONDecoder().decode(RenderNode.self, from: data)
+        } catch let failure as RenderTreeDecodingFailure {
+            throw failure
+        } catch {
+            throw RenderTreeDecodingFailure(error)
+        }
+    }
+}
+
 // MARK: - 렌더 노드
 
 // Upstream에서 제거된 필드는 모델에 남기지 않는다. JSONDecoder는 구버전 JSON의
@@ -62,52 +118,107 @@ enum RenderNodeType: Decodable {
     case footnoteMarker(FootnoteMarkerNode)
     case unknown
 
+    // Raw tag names and decoder dispatch share one enum; new tags require an exhaustive case.
+    enum KnownVariant: String, CaseIterable {
+        case page = "Page"
+        case pageBackground = "PageBackground"
+        case body = "Body"
+        case column = "Column"
+        case textLine = "TextLine"
+        case textRun = "TextRun"
+        case table = "Table"
+        case tableCell = "TableCell"
+        case line = "Line"
+        case rectangle = "Rectangle"
+        case ellipse = "Ellipse"
+        case path = "Path"
+        case image = "Image"
+        case group = "Group"
+        case equation = "Equation"
+        case formObject = "FormObject"
+        case placeholder = "Placeholder"
+        case rawSvg = "RawSvg"
+        case footnoteMarker = "FootnoteMarker"
+        case masterPage = "MasterPage"
+        case header = "Header"
+        case footer = "Footer"
+        case footnoteArea = "FootnoteArea"
+        case textBox = "TextBox"
+    }
+    static let knownVariantNames = Set(KnownVariant.allCases.map(\.rawValue))
+
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        // Unit variant: "MasterPage" 등
-        if let str = try? container.decode(String.self) {
-            switch str {
-            case "MasterPage": self = .masterPage
-            case "Header": self = .header
-            case "Footer": self = .footer
-            case "FootnoteArea": self = .footnoteArea
-            case "TextBox": self = .textBox
-            default: self = .unknown
+        if let name = try? container.decode(String.self) {
+            guard let tag = KnownVariant(rawValue: name) else {
+                self = .unknown
+                return
+            }
+            switch tag {
+            case .masterPage: self = .masterPage
+            case .header: self = .header
+            case .footer: self = .footer
+            case .footnoteArea: self = .footnoteArea
+            case .textBox: self = .textBox
+            default:
+                throw RenderTreeDecodingFailure(variant: name, codingPath: decoder.codingPath,
+                                                reason: .invalidVariantShape)
             }
             return
         }
-        // Newtype/Struct variant: {"Page": {...}} 등
         let keyed = try decoder.container(keyedBy: DynamicKey.self)
-        if let v = try? keyed.decode(PageNode.self, forKey: .init("Page")) { self = .page(v); return }
-        if let v = try? keyed.decode(PageBackgroundNode.self, forKey: .init("PageBackground")) { self = .pageBackground(v); return }
-        if let v = try? keyed.decode(BodyNode.self, forKey: .init("Body")) { self = .body(v); return }
-        if let v = try? keyed.decode(UInt16.self, forKey: .init("Column")) { self = .column(v); return }
-        if let v = try? keyed.decode(TextLineNode.self, forKey: .init("TextLine")) { self = .textLine(v); return }
-        if let v = try? keyed.decode(TextRunNode.self, forKey: .init("TextRun")) { self = .textRun(v); return }
-        if let v = try? keyed.decode(TableNode.self, forKey: .init("Table")) { self = .table(v); return }
-        if let v = try? keyed.decode(TableCellNode.self, forKey: .init("TableCell")) { self = .tableCell(v); return }
-        if let v = try? keyed.decode(LineNode.self, forKey: .init("Line")) { self = .line(v); return }
-        if let v = try? keyed.decode(RectangleNode.self, forKey: .init("Rectangle")) { self = .rectangle(v); return }
-        if let v = try? keyed.decode(EllipseNode.self, forKey: .init("Ellipse")) { self = .ellipse(v); return }
-        if let v = try? keyed.decode(PathNode.self, forKey: .init("Path")) { self = .path(v); return }
-        if let v = try? keyed.decode(ImageNode.self, forKey: .init("Image")) { self = .image(v); return }
-        if let v = try? keyed.decode(GroupNode.self, forKey: .init("Group")) { self = .group(v); return }
-        if let v = try? keyed.decode(EquationNode.self, forKey: .init("Equation")) { self = .equation(v); return }
-        if let v = try? keyed.decode(FormObjectNode.self, forKey: .init("FormObject")) { self = .formObject(v); return }
-        if let v = try? keyed.decode(PlaceholderNode.self, forKey: .init("Placeholder")) { self = .placeholder(v); return }
-        if let v = try? keyed.decode(RawSvgNode.self, forKey: .init("RawSvg")) { self = .rawSvg(v); return }
-        if let v = try? keyed.decode(FootnoteMarkerNode.self, forKey: .init("FootnoteMarker")) { self = .footnoteMarker(v); return }
-        self = .unknown
+        guard keyed.allKeys.count == 1, let key = keyed.allKeys.first else {
+            throw RenderTreeDecodingFailure(variant: nil, codingPath: decoder.codingPath,
+                                            reason: .invalidVariantShape)
+        }
+        guard let tag = KnownVariant(rawValue: key.stringValue) else {
+            self = .unknown
+            return
+        }
+        do {
+            switch tag {
+            case .page: self = .page(try keyed.decode(PageNode.self, forKey: key))
+            case .pageBackground: self = .pageBackground(try keyed.decode(PageBackgroundNode.self, forKey: key))
+            case .body: self = .body(try keyed.decode(BodyNode.self, forKey: key))
+            case .column: self = .column(try keyed.decode(UInt16.self, forKey: key))
+            case .textLine: self = .textLine(try keyed.decode(TextLineNode.self, forKey: key))
+            case .textRun: self = .textRun(try keyed.decode(TextRunNode.self, forKey: key))
+            case .table: self = .table(try keyed.decode(TableNode.self, forKey: key))
+            case .tableCell: self = .tableCell(try keyed.decode(TableCellNode.self, forKey: key))
+            case .line: self = .line(try keyed.decode(LineNode.self, forKey: key))
+            case .rectangle: self = .rectangle(try keyed.decode(RectangleNode.self, forKey: key))
+            case .ellipse: self = .ellipse(try keyed.decode(EllipseNode.self, forKey: key))
+            case .path: self = .path(try keyed.decode(PathNode.self, forKey: key))
+            case .image: self = .image(try keyed.decode(ImageNode.self, forKey: key))
+            case .group: self = .group(try keyed.decode(GroupNode.self, forKey: key))
+            case .equation: self = .equation(try keyed.decode(EquationNode.self, forKey: key))
+            case .formObject: self = .formObject(try keyed.decode(FormObjectNode.self, forKey: key))
+            case .placeholder: self = .placeholder(try keyed.decode(PlaceholderNode.self, forKey: key))
+            case .rawSvg: self = .rawSvg(try keyed.decode(RawSvgNode.self, forKey: key))
+            case .footnoteMarker: self = .footnoteMarker(try keyed.decode(FootnoteMarkerNode.self, forKey: key))
+            case .masterPage, .header, .footer, .footnoteArea, .textBox:
+                throw RenderTreeDecodingFailure(variant: key.stringValue, codingPath: decoder.codingPath,
+                                                reason: .invalidVariantShape)
+            }
+        } catch let failure as RenderTreeDecodingFailure {
+            throw failure
+        } catch {
+            throw RenderTreeDecodingFailure(error, variant: key.stringValue, fallbackPath: decoder.codingPath + [key])
+        }
     }
 }
 
 // MARK: - 노드 데이터 타입
 
+// Core의 usize index metadata는 UInt로 보존한다(macOS 지원 아키텍처는 64-bit).
+// 머리말/꼬리말 para_index의 usize::MAX - i 같은 producer marker도 유효하다.
+// signed Int 변환이나 nil 치환은 이 metadata를 손실시키므로 하지 않는다.
+
 struct PageNode: Decodable {
     let pageIndex: UInt32
     let width: Double
     let height: Double
-    let sectionIndex: Int
+    let sectionIndex: UInt
 
     enum CodingKeys: String, CodingKey {
         case pageIndex = "page_index"
@@ -140,8 +251,8 @@ struct BodyNode: Decodable {
 struct TextLineNode: Decodable {
     let lineHeight: Double
     let baseline: Double
-    let sectionIndex: Int?
-    let paraIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
 
     enum CodingKeys: String, CodingKey {
         case lineHeight = "line_height"
@@ -156,9 +267,9 @@ struct TextRunNode: Decodable {
     let style: TextStyle
     let charShapeId: UInt32?
     let paraShapeId: UInt32?
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let charStart: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let charStart: UInt?
     let cellContext: CellContext?
     let isParaEnd: Bool
     let isLineBreakEnd: Bool
@@ -192,9 +303,9 @@ struct TableNode: Decodable {
     let rowCount: UInt16
     let colCount: UInt16
     let borderFillId: UInt16
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
 
     enum CodingKeys: String, CodingKey {
         case rowCount = "row_count"
@@ -232,9 +343,9 @@ struct LineNode: Decodable {
     let x2: Double
     let y2: Double
     let style: LineStyle
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
     let transform: ShapeTransform
 
     enum CodingKeys: String, CodingKey {
@@ -249,9 +360,9 @@ struct RectangleNode: Decodable {
     let cornerRadius: Double
     let style: ShapeStyle
     let gradient: GradientFillInfo?
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
     let transform: ShapeTransform
 
     enum CodingKeys: String, CodingKey {
@@ -266,9 +377,9 @@ struct RectangleNode: Decodable {
 struct EllipseNode: Decodable {
     let style: ShapeStyle
     let gradient: GradientFillInfo?
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
     let transform: ShapeTransform
 
     enum CodingKeys: String, CodingKey {
@@ -283,9 +394,9 @@ struct PathNode: Decodable {
     let commands: [PathCommand]
     let style: ShapeStyle
     let gradient: GradientFillInfo?
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
     let transform: ShapeTransform
     let lineStyle: LineStyle?
     let connectorEndpoints: [[Double]]?
@@ -302,9 +413,9 @@ struct PathNode: Decodable {
 
 struct ImageNode: Decodable {
     let binDataId: UInt16
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
     let fillMode: String?
     let originalSize: [Double]?
     let originalSizeHU: [Double]?
@@ -329,9 +440,9 @@ struct ImageNode: Decodable {
 }
 
 struct GroupNode: Decodable {
-    let sectionIndex: Int?
-    let paraIndex: Int?
-    let controlIndex: Int?
+    let sectionIndex: UInt?
+    let paraIndex: UInt?
+    let controlIndex: UInt?
 
     enum CodingKeys: String, CodingKey {
         case sectionIndex = "section_index"
@@ -675,7 +786,7 @@ struct CharOverlapInfo: Decodable {
 }
 
 struct CellContext: Decodable {
-    let parentParaIndex: Int
+    let parentParaIndex: UInt
     let path: [CellPathEntry]
 
     enum CodingKeys: String, CodingKey {
@@ -685,9 +796,9 @@ struct CellContext: Decodable {
 }
 
 struct CellPathEntry: Decodable {
-    let controlIndex: Int
-    let cellIndex: Int
-    let cellParaIndex: Int
+    let controlIndex: UInt
+    let cellIndex: UInt
+    let cellParaIndex: UInt
     let textDirection: UInt8
 
     enum CodingKeys: String, CodingKey {

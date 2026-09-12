@@ -16,10 +16,9 @@ Outputs:
   run_release_checks
 
 Notes:
-  run_rust_verify=true means PR CI should run build-rust-macos.sh --verify-lock
-  for source/core/header/ABI verification. The macOS validation workflow may
-  separately skip only librhwp.a byte hash verification with
-  ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1.
+  run_rust_verify=true means PR CI should run build-rust-macos.sh --verify-portable
+  for source/core/header/ABI verification. Portable mode excludes only
+  librhwp.a byte hash/size comparison while retaining reference metadata checks.
 EOF
 }
 
@@ -139,6 +138,15 @@ classify_path() {
   esac
 
   case "$path" in
+    RustBridge/examples/render_tree_golden.rs|scripts/update-render-tree-golden.sh|scripts/verify-render-tree-golden.sh|scripts/ci/render-tree-golden.py|scripts/ci/render_tree_golden_check.swift|scripts/ci/test-render-tree-golden.py|scripts/ci/fixtures/render-tree/*)
+      enable_macos_build "$path affects the pinned producer/Swift golden contract"
+      matched=1
+      ;;
+  esac
+
+  case "$path" in
+    RustBridge/examples/render_tree_golden.rs)
+      ;; # The dedicated golden case already records this helper's macOS reason.
     RustBridge/examples/*)
       enable_macos_build "$path affects Rust benchmark/helper sources"
       matched=1
@@ -175,6 +183,13 @@ classify_path() {
     Sources/RhwpCoreBridge/*|Sources/Shared/*|Sources/QLExtension/*|Sources/ThumbnailExtension/*|Frameworks/*|rhwp-core.lock|samples/*|scripts/ci/render_tree_decoder_fixture.swift|scripts/ci/test-render-tree-decoder.sh|scripts/stage3_render_check.swift|scripts/validate-stage3-render.sh|scripts/render-debug-compare.sh|scripts/render_debug_compare.swift)
       enable_macos_build "$path affects renderer or extension paths"
       enable_render_smoke "$path affects renderer smoke coverage"
+      matched=1
+      ;;
+  esac
+
+  case "$path" in
+    scripts/verify-spotlight-importer.sh|scripts/ci/spotlight_importer_check.c|scripts/ci/check-spotlight-bundle.py|scripts/ci/test-spotlight-bundle.py)
+      enable_macos_build "$path affects the embedded Spotlight importer contract"
       matched=1
       ;;
   esac
@@ -232,8 +247,8 @@ print_rust_verify_policy() {
   echo "### Rust verify policy"
   echo
   if [ "$run_rust_verify" = "true" ]; then
-    echo "- \`run_rust_verify=true\` runs \`./scripts/build-rust-macos.sh --verify-lock\` in macOS validation."
-    echo "- PR macOS validation may set \`ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1\`, which skips only \`Frameworks/universal/librhwp.a\` byte hash/size comparison."
+    echo "- \`run_rust_verify=true\` runs \`./scripts/build-rust-macos.sh --verify-portable\` in macOS validation."
+    echo "- Portable verification excludes staticlib byte hash/size comparison; source/header/ABI gates remain enforced."
     echo "- Source provenance, Cargo lock, generated header, and FFI symbol checks remain part of Rust verify."
   else
     echo "- \`run_rust_verify=false\`; macOS validation rebuilds Rust bridge artifacts without lock comparison."

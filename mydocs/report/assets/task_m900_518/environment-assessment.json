@@ -1,0 +1,39 @@
+{
+  "run_url": "https://github.com/postmelee/alhangeul-macos/actions/runs/34452311307",
+  "results": [
+    {
+      "schema_version": 1,
+      "status": "ENVIRONMENT_READY",
+      "release_eligible": false,
+      "os": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+      "architecture": "arm64",
+      "image_os": "macos15",
+      "image_version": "20260829.0321.1",
+      "run_id": "34452311307",
+      "run_attempt": "1",
+      "harness_sha": "958f734c60f49f7d9e07d760cd8a2f917038266b",
+      "gui_session_present": true,
+      "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+      "txt_automatic_search": true,
+      "owned_files_removed": true,
+      "elapsed_seconds": 51.34
+    },
+    {
+      "schema_version": 1,
+      "status": "ENVIRONMENT_READY",
+      "release_eligible": false,
+      "os": "macOS-15.7.9-x86_64-i386-64bit-Mach-O",
+      "architecture": "x86_64",
+      "image_os": "macos15",
+      "image_version": "20260824.0482.1",
+      "run_id": "34452311307",
+      "run_attempt": "1",
+      "harness_sha": "958f734c60f49f7d9e07d760cd8a2f917038266b",
+      "gui_session_present": true,
+      "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+      "txt_automatic_search": true,
+      "owned_files_removed": true,
+      "elapsed_seconds": 34.12
+    }
+  ]
+}

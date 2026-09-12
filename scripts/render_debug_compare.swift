@@ -133,7 +133,7 @@ struct RenderDebugCompare {
         guard let treeData = renderTreeJSON.data(using: .utf8) else {
             throw RenderDebugError(description: "render tree JSON is not UTF-8")
         }
-        let tree = try JSONDecoder().decode(RenderNode.self, from: treeData)
+        let tree = try RenderTreeDecoder.decode(treeData)
 
         guard let coreSVG = doc.renderPageSVG(at: pageIndex) else {
             throw RenderDebugError(description: "core SVG is nil")

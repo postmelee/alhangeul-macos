@@ -108,7 +108,9 @@ enum RhwpStudioHostBridgeScript {
         "file:print",
         "file:print-to-pdf",
         "file:share",
-        "file:export-pdf"
+        "file:export-pdf",
+        "file:export-doc",
+        "file:export-html"
       ]);
       const nonMutatingCommands = new Set([
         "file:open",
@@ -120,6 +122,8 @@ enum RhwpStudioHostBridgeScript {
         "file:print-to-pdf",
         "file:share",
         "file:export-pdf",
+        "file:export-doc",
+        "file:export-html",
         "file:about",
         "edit:copy",
         "edit:select-all",
@@ -143,11 +147,7 @@ enum RhwpStudioHostBridgeScript {
       }
 
       function postDocumentEdited(reason, command = null) {
-        const message = { type: "document-edited", reason };
-        if (command) {
-          message.command = command;
-        }
-        postNative(message);
+        scheduleEditorSessionCheck();
       }
 
       function isDocumentMutatingCommand(command) {
@@ -337,7 +337,10 @@ enum RhwpStudioHostBridgeScript {
         }
 
         element.dataset[documentLoadErrorObserverFlag] = "true";
-        const observer = new MutationObserver(reportDocumentLoadErrorIfNeeded);
+        const observer = new MutationObserver(() => {
+          reportDocumentLoadErrorIfNeeded();
+          scheduleEditorSessionCheck();
+        });
         observer.observe(element, {
           childList: true,
           characterData: true,
@@ -383,6 +386,10 @@ enum RhwpStudioHostBridgeScript {
           }, "*");
         });
       }
+
+      \(RhwpStudioEditorSessionScript.source)
+      \(RhwpStudioSaveBridgeScript.source)
+      \(RhwpStudioHTMLExportScript.source)
 
       function encodeBytesToBase64(bytes) {
         const chunkSize = 0x8000;
@@ -461,7 +468,9 @@ enum RhwpStudioHostBridgeScript {
 
       function waitForAnimationFrame() {
         return new Promise((resolve) => {
-          requestAnimationFrame(() => resolve());
+          // 비활성 창의 rAF 정지를 피한다. 화면이 활성 상태면 rAF가 먼저 완료된다.
+          const timer = setTimeout(resolve, 100);
+          requestAnimationFrame(() => { clearTimeout(timer); resolve(); });
         });
       }
 
@@ -788,7 +797,9 @@ enum RhwpStudioHostBridgeScript {
             canonicalCommand === "file:save-as" ||
             canonicalCommand === "file:save-as-hwp" ||
             canonicalCommand === "file:save-as-hwpx" ||
-            canonicalCommand === "file:export-pdf") {
+            canonicalCommand === "file:export-pdf" ||
+            canonicalCommand === "file:export-doc" ||
+            canonicalCommand === "file:export-html") {
           postNative({
             type: "command",
             command: canonicalCommand,

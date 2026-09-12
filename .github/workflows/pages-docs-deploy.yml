@@ -114,7 +114,7 @@ jobs:
               exit 1
             fi
 
-            if ! jq -e --arg asset "alhangeul-macos-${version}.dmg" '.assets[]? | select(.name == $asset)' "$response_file" >/dev/null; then
+            if ! jq -e --arg asset "alhangeul-macos-${version}.dmg" '(.draft == false) and (.prerelease == false) and any(.assets[]?; .name == $asset and .state == "uploaded")' "$response_file" >/dev/null; then
               missing_versions+=("$version")
             fi
 

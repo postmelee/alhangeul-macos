@@ -10,10 +10,15 @@
 |----------|---------|------|--------|------|
 | `PR CI` | `pull_request` to `main`, `devel`, `native-viewer-editor` | `contents: read`, `pull-requests: read` | Ubuntu, macOS | PR 변경 범위 분류, script syntax/build-info fixture, 조건부 macOS build와 build-info verifier, 조건부 release helper dry-run |
 | `Release Rehearsal DMG` | `workflow_dispatch` | `contents: read`, `pull-requests: read` | macOS | core lock/build-info와 built Release endpoint 검증, signed/notarized 전 universal rehearsal DMG/checksum, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
-| `Release Publish DMG` | `workflow_dispatch` | `contents: write`/`pull-requests: read` for release job, `pages: write`/`id-token: write` for Pages job, `environment: release`/`github-pages` | macOS, Ubuntu | tag, core lock/build-info와 built Release endpoint 검증, signed/notarized universal DMG, GitHub Release asset, stable Sparkle appcast, Pages deployment, 포함 PR 분석 artifact, release delta checklist artifact 생성 |
+| `Release Publish DMG` | `workflow_dispatch` | `contents: write`, `pull-requests: read`, `environment: release` | macOS | tag/core/endpoint 검증, signed/notarized stable draft DMG, 분석/검증용 artifact 생성 |
+| `Release Promote Verified DMG` | `workflow_dispatch` | 승격 job: `contents: write`, `actions: read`, `environment: release`; Pages job: `pages: write`, `id-token: write`, `environment: github-pages` | macOS, Ubuntu | 양 VM 검증을 통과한 동일 DMG 공개, Sparkle/Pages 배포 |
 | `Docs-only Pages Deploy` | `push` to `main` with `docs/**`, `workflow_dispatch` | `contents: read`, `pages: write`/`id-token: write` for Pages job, `environment: github-pages` | Ubuntu | 일반 Pages 문서 변경을 public Pages에 배포하고 기존 public appcast를 보존 |
 | `rhwp Upstream Release Check` | `workflow_dispatch`, schedule | `contents: read` | Ubuntu | upstream `rhwp` release와 `rhwp-core.lock` 비교 |
 | `rhwp Upstream Sync PR` | `workflow_dispatch`, schedule | workflow는 `contents: read`, `pull-requests: read`; PR 생성은 GitHub App token의 `contents: write`, `pull-requests: write`, `issues: write` | Ubuntu, macOS | upstream release를 감지해 `rhwp-core.lock`/RustBridge, Swift build info와 bundled `rhwp-studio`를 같은 core identity로 갱신하는 full sync 후보 PR 생성 |
+
+## 최초 설치 검증 workflow
+
+`Install environment assessment`는 새 VM의 기존 등록·GUI 세션·TXT 자동 검색을 측정한다. 환경 조사 성공은 배포 후보의 설치 PASS가 아니다. `Release first install validation`은 workflow_dispatch/workflow_call로 서명·공증된 특정 artifact를 받고, 별도 fixture job과 새 arm64/Intel 설치 VM에서 후보·검색·정리를 확인한다. 권한은 contents/actions read이며 signing secret은 전달하지 않는다. [입력·판정·릴리스 인계 절차](release_first_install_guide.md)를 따른다.
 
 ## JavaScript action runtime 기준
 
@@ -56,6 +61,12 @@ PR CI는 외부 PR에서도 안전하게 실행할 수 있는 검증만 수행�
 - repository secrets가 필요한 signing, notarization, Sparkle private key, GitHub Release publish, Pages deployment는 실행하지 않는다.
 - concurrency group은 PR 번호 기준이며 새 push가 오면 이전 PR CI를 취소한다.
 - 변경 범위는 `scripts/ci/classify-pr-changes.sh`가 분류하고, 결과는 job output과 `GITHUB_STEP_SUMMARY`에 기록한다.
+
+### main/source content gate
+
+Ubuntu script-checks는 complete history checkout에서 main/devel 대상 PR의 `github.event.pull_request.head.sha`와 fetch한 origin/main을 검사한다. merge checkout HEAD로 대체하면 미반영 콘텐츠가 이미 합쳐져 잘못 통과할 수 있다. 검사 결과는 Actions summary에 exact SHA와 함께 기록하며 content/conflict는 차단한다. 문서-only PR에도 적용하고 native-viewer-editor는 제외한다.
+
+`python3 scripts/ci/test-main-devel-content.py`는 격리 Git 이력에서 transport, non-merge/merge drift, back-merge/equivalent/net content, missing/shallow history, dirty tree/index 보존과 custom driver 거부를 검증한다. release rehearsal/publish는 빌드·서명 전에 최신 main/devel 인계를 별도 gate로 검사한다. 판정 알고리즘과 변경 owner 책임은 [Git workflow](git_workflow_guide.md)를 따른다.
 
 ### 변경 범위 flag
 
@@ -126,10 +137,12 @@ xcodebuild -project Alhangeul.xcodeproj \
 Rust/core 변경이 있으면 `./scripts/build-rust-macos.sh` 대신 다음 lock 검증을 실행한다.
 
 ```bash
-./scripts/build-rust-macos.sh --verify-lock
+./scripts/build-rust-macos.sh --verify-portable
 ```
 
-PR CI의 macOS validation은 GitHub-hosted runner/toolchain 차이를 고려해 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`을 설정한다. 이 값은 `Frameworks/universal/librhwp.a` byte hash/size 비교만 제외한다. `rhwp` source provenance, `RustBridge/Cargo.lock`, generated header hash/size, `rhwp-ffi-symbols.txt` 검증은 계속 실패 가능한 gate로 남는다.
+PR CI와 release workflow는 `--verify-portable`을 명시하고 summary에 모드를 기록한다. staticlib byte hash/size 비교만 제외하며 source/Cargo.lock, generated header, FFI symbol과 reference metadata는 실패 가능한 gate다. 별도 skip env는 필요 없다. `test-rust-verification-modes.py`는 Ubuntu에서 fake toolchain으로 CLI 경계 18개를 검사한다. 기준 환경 byte 비교에는 `--verify-strict`를 사용한다.
+
+Producer golden helper fixture는 Python 3.12의 Ubuntu script-checks에서 실행한다. macOS validation은 Python 3.12를 설치하고 universal build 전에 native producer golden/Swift 계약을 검증한다. golden 또는 helper 경로 변경도 이 macOS gate를 켠다. full sync만 core build 뒤 명시 writer를 호출하며 PR/release는 verifier만 사용한다. stale golden은 자동 수정 없이 차단한다.
 
 Build-info fixture와 studio Cargo.lock fingerprint fixture는 Ubuntu `script-checks`에서 먼저 실행해 canonical drift와 provenance verifier 회귀를 Rust build 전에 차단한다. tracked build-info verifier는 macOS validation에서도 다시 실행한다. Build-info verifier는 `rhwp-core.lock`에서 canonical `RhwpCoreBuildInfo.swift` 전체를 생성해 tracked source와 byte 비교하며 파일을 자동 수정하지 않는다. 존재하는 빈 `rhwp_enabled_features`는 유효하지만 key 누락, malformed token, source member/comment 누락·여분은 실패한다.
 
@@ -200,38 +213,13 @@ rehearsal DMG build 전에는 Rust/core lock verify에 이어 `verify-rhwp-core-
 
 ## Release Publish DMG
 
-`Release Publish DMG`는 공식 public DMG를 만드는 보호 workflow다. publish 전에 release record의 `포함 PR 분석` 표, 사용자-facing 판단, 해결된 Issue와 관련 Issue 구분이 완료되어 있어야 한다.
+`Release Publish DMG`는 서명·공증된 stable draft 후보를 만드는 보호 workflow다. release record의 포함 PR 분석과 사용자 문구를 먼저 준비한다. `environment: release`, contents write, tag/HEAD 일치와 Developer ID/notary 보호를 유지한다. `version`, `previous_release_ref`, `expected_rhwp_tag`, `require_latest_rhwp`, `include_rhwp_in_title`로 후보를 확정하며 `draft=true`, `prerelease=false`만 허용한다.
 
-유지해야 하는 보호 조건:
+산출물은 DMG/checksum/Release 본문과 PR 분석/delta artifact다. 기존 Release가 있으면 교체하지 않는다. 실패 후보 철회와 새 후보 생성은 소유자가 별도 판단하며, 새 bytes는 다시 검증한다.
 
-- `workflow_dispatch` 수동 실행
-- `publish-dmg` job의 `environment: release`
-- `publish-dmg` job의 `contents: write`
-- `deploy-pages` job의 `environment: github-pages`
-- `deploy-pages` job의 `pages: write`, `id-token: write`
-- `deploy-pages` job의 `concurrency.group: pages-deploy`, `cancel-in-progress: false`
-- tag `v<version>`에서 실행되고 checkout HEAD가 해당 tag commit과 일치해야 함
-- Developer ID certificate, notarization credential, Sparkle EdDSA private key는 GitHub Actions secret/environment variable로만 사용
+`Release Promote Verified DMG`는 별도 승인 후 같은 tag에서 version/build, source run/artifact, validation run과 DMG hash를 받는다. 성공한 최신 두 runner의 PASS와 원본 검색/lifecycle/cleanup, 기존 Release 자산 bytes를 검사하고 동일 DMG로 Sparkle 서명과 Pages artifact를 만든 뒤 공개한다. 앱 build, 공증, DMG 재업로드는 수행하지 않는다.
 
-입력:
-
-- `version`: publish version
-- `previous_release_ref`: 직전 public release ref. 기본값은 `v0.1.0`
-- `expected_rhwp_tag`: `rhwp-core.lock`의 release tag와 일치해야 하는 upstream tag
-- `require_latest_rhwp`: upstream latest release와 lock tag 일치 여부 확인
-- `draft`, `prerelease`: GitHub Release 상태. 둘 다 `false`일 때만 stable Sparkle appcast와 Pages deployment를 실행
-
-workflow가 생성하거나 게시하는 주요 산출물:
-
-- signed/notarized universal `alhangeul-macos-<version>.dmg`
-- DMG `.sha256`
-- GitHub Release body 후보
-- `pr-analysis-<version>.md`
-- `delta-checklist-<version>.md`
-- stable release일 때 generated `appcast.xml`
-- stable release일 때 `docs/` + generated `appcast.xml` Pages artifact
-- stable release일 때 `deploy-pages` deployment URL
-- workflow summary의 release ref, release PR analysis, delta checklist, core lock, public artifact, GitHub Release state, Sparkle appcast, Pages artifact, GitHub Pages deployment 섹션
+승격 job은 `environment: release`, contents write/actions read, Pages job은 github-pages와 pages write/id-token write를 사용한다. workflow 전체의 `pages-deploy` 잠금으로 docs-only 배포와 확인부터 배포까지 직렬화한다. 공개 후 재실행은 동일 자산 Pages 복구만 허용한다. 정확한 수용 조건과 실행은 [최초 설치 가이드](release_first_install_guide.md)와 [runbook Gate 5](public_release_runbook.md#gate-5-official-stable-publish)를 따른다.
 
 GitHub Release body 후보는 `mydocs/release/v<version>.md`의 사용자-facing 주요 변경 사항과 직접 반영된 PR/Issue section을 기준으로 작성한다. 첫 top-level section은 `이번 버전의 주요 변경 사항`이어야 하며, 설치/지원/업데이트 안내와 상세 기록은 그 뒤에 둔다. publish workflow의 delta checklist는 마지막 누락 확인용 보조 자료이며, release note의 주요 변경 사항 원천이 아니다.
 

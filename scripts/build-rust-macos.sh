@@ -17,54 +17,77 @@ GENERATED_SYMBOLS="$OUT/generated_rhwp_symbols.txt"
 UNIVERSAL_LIB="$OUT/universal/librhwp.a"
 STATICLIB_ARTIFACT="Frameworks/universal/librhwp.a"
 LOCK_ARTIFACTS=(
-  "$STATICLIB_ARTIFACT"
+  # Writer and verifier share this ordered list; report header failures before archive drift.
   "Frameworks/generated_rhwp.h"
+  "$STATICLIB_ARTIFACT"
 )
-SKIP_STATICLIB_HASH_VERIFY="${ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY:-0}"
-UPDATE_LOCK=0
+VERIFY_MODE="none"
 VERIFY_LOCK=0
+UPDATE_LOCK=0
+MODE_COUNT=0
+LEGACY_SKIP="${ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY:-0}"
 
 usage() {
   cat >&2 <<EOF
-Usage: $0 [--update-lock | --verify-lock]
+Usage: $0 [--verify-portable | --verify-strict | --verify-lock | --update-lock]
 
 Options:
-  --update-lock   Build artifacts, then write sha256/size to rhwp-core.lock.
-  --verify-lock   Build artifacts, then compare artifacts with rhwp-core.lock.
+  --verify-portable  Build and verify source/Cargo.lock, header and FFI symbols.
+                     Check staticlib presence/metadata, without byte hash/size comparison.
+  --verify-strict    Also require staticlib reference sha256/size to match.
+                     Use only with the reference toolchain and build environment.
+  --verify-lock      Legacy strict alias; legacy skip env remains supported.
+  --update-lock      Build artifacts, then explicitly write reference metadata.
+  (no option)        Build artifacts without lock comparison.
 
-Environment:
-  ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1
-                  With --verify-lock, skip only byte-for-byte sha256/size
-                  comparison for Frameworks/universal/librhwp.a. Source lock,
-                  Cargo.lock, generated header, and FFI symbol checks still run.
+Legacy environment (only --verify-lock):
+  ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1 selects portable verification.
+  Prefer --verify-portable. --verify-strict rejects this override.
 EOF
 }
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --update-lock)
-      UPDATE_LOCK=1
+    --verify-portable|--verify-strict|--verify-lock|--update-lock)
+      MODE_COUNT=$((MODE_COUNT + 1))
+      VERIFY_MODE="${1#--}"
       ;;
-    --verify-lock)
-      VERIFY_LOCK=1
-      ;;
-    -h|--help)
-      usage
-      exit 0
-      ;;
-    *)
-      echo "ERROR: unknown option: $1" >&2
-      usage
-      exit 1
-      ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "ERROR: unknown option: $1" >&2; usage; exit 1 ;;
   esac
   shift
 done
 
-if [ "$UPDATE_LOCK" -eq 1 ] && [ "$VERIFY_LOCK" -eq 1 ]; then
-  echo "ERROR: --update-lock and --verify-lock cannot be used together" >&2
-  usage
+if [ "$MODE_COUNT" -gt 1 ]; then
+  echo "ERROR: duplicate or conflicting modes; choose exactly one build/verification mode" >&2
   exit 1
+fi
+case "$VERIFY_MODE" in
+  verify-lock|verify-strict)
+    case "$LEGACY_SKIP" in
+      0|1) ;;
+      *) echo "ERROR: ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY must be 0 or 1" >&2; exit 1 ;;
+    esac
+    ;;
+esac
+case "$VERIFY_MODE" in
+  update-lock) UPDATE_LOCK=1 ;;
+  verify-lock)
+    if [ "$LEGACY_SKIP" = "1" ]; then VERIFY_MODE=portable; else VERIFY_MODE=strict; fi
+    echo "WARNING: --verify-lock is a legacy alias; use --verify-$VERIFY_MODE explicitly." >&2
+    VERIFY_LOCK=1
+    ;;
+  verify-portable) VERIFY_MODE=portable; VERIFY_LOCK=1 ;;
+  verify-strict)
+    if [ "$LEGACY_SKIP" = "1" ]; then
+      echo "ERROR: --verify-strict conflicts with legacy staticlib skip; unset the environment override." >&2
+      exit 1
+    fi
+    VERIFY_MODE=strict; VERIFY_LOCK=1
+    ;;
+esac
+if [ "$VERIFY_LOCK" -eq 1 ]; then
+  echo "Verification mode: $VERIFY_MODE (source, Cargo.lock, generated header, FFI symbols enforced)"
 fi
 
 require_tool() {
@@ -157,23 +180,15 @@ lock_artifact_value() {
   ' "$LOCK_FILE"
 }
 
-print_staticlib_hash_skip_warning() {
-  local artifact_path="$1"
-  cat >&2 <<EOF
-WARNING: skipping byte-for-byte hash verification for $artifact_path
-         Only the Rust static archive sha256/size comparison is skipped.
-         Source provenance, Cargo.lock, generated header, and FFI symbols remain verified.
-EOF
-}
-
 print_staticlib_hash_mismatch_note() {
   cat >&2 <<EOF
-Note: $STATICLIB_ARTIFACT is a Rust static archive. Its byte hash can differ
-      across Rust, Xcode, macOS runner, archive tool, or build path changes even
-      when source provenance and ABI checks still match. Do not update
-      rhwp-core.lock just to satisfy an unreviewed runner/toolchain difference.
-      GitHub-hosted CI/release workflows may set
-      ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1 under the documented policy.
+Strict reference artifact mismatch: source/header/ABI checks passed, but the Rust
+static archive bytes differ. Rust, Xcode, macOS, archive tools or build paths may
+cause this; this message does not establish the cause or reproducibility.
+For ordinary local/CI source and ABI verification, run:
+  ./scripts/build-rust-macos.sh --verify-portable
+For strict verification, reproduce the reference build environment.
+Do not update rhwp-core.lock merely to accept local archive bytes.
 EOF
 }
 
@@ -556,11 +571,6 @@ verify_lock_file() {
   for artifact_path in "${LOCK_ARTIFACTS[@]}"; do
     require_artifact "$artifact_path"
 
-    if [ "$artifact_path" = "$STATICLIB_ARTIFACT" ] && [ "$SKIP_STATICLIB_HASH_VERIFY" = "1" ]; then
-      print_staticlib_hash_skip_warning "$artifact_path"
-      continue
-    fi
-
     local abs_path
     local expected_sha256
     local actual_sha256
@@ -573,14 +583,23 @@ verify_lock_file() {
     actual_sha256="$(artifact_sha256 "$abs_path")"
     actual_size="$(artifact_size "$abs_path")"
 
-    if [ -z "$expected_sha256" ] || [ -z "$expected_size" ]; then
-      echo "ERROR: missing lock metadata for artifact: $artifact_path" >&2
-      echo "Run: ./scripts/build-rust-macos.sh --update-lock" >&2
+    if ! [[ "$expected_sha256" =~ ^[0-9a-f]{64}$ ]] || ! [[ "$expected_size" =~ ^[1-9][0-9]*$ ]]; then
+      echo "ERROR: missing or invalid lock metadata for artifact: $artifact_path" >&2
+      echo "Restore the reviewed lock metadata; verification never rewrites it." >&2
       exit 1
     fi
 
+    if [ "$artifact_path" = "$STATICLIB_ARTIFACT" ] && [ "$VERIFY_MODE" = "portable" ]; then
+      echo "Portable: staticlib present; reference metadata valid; byte hash/size comparison excluded."
+      continue
+    fi
+
     if [ "$expected_sha256" != "$actual_sha256" ] || [ "$expected_size" != "$actual_size" ]; then
-      echo "ERROR: artifact hash mismatch: artifact differs from $LOCK_FILE" >&2
+      if [ "$artifact_path" = "$STATICLIB_ARTIFACT" ]; then
+        echo "ERROR: strict staticlib reference mismatch" >&2
+      else
+        echo "ERROR: generated header ABI artifact mismatch" >&2
+      fi
       echo "Artifact: $artifact_path" >&2
       echo "Expected sha256: $expected_sha256" >&2
       echo "Actual sha256:   $actual_sha256" >&2
@@ -589,12 +608,12 @@ verify_lock_file() {
       if [ "$artifact_path" = "$STATICLIB_ARTIFACT" ]; then
         print_staticlib_hash_mismatch_note
       fi
-      echo "Run: ./scripts/build-rust-macos.sh --update-lock if this artifact is intentional." >&2
+      echo "Review source/ABI changes and the reference environment before any explicit lock update." >&2
       exit 1
     fi
   done
 
-  echo "Verified: $LOCK_FILE"
+  echo "Verified ($VERIFY_MODE): $LOCK_FILE"
 }
 
 require_tool cargo

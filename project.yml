@@ -32,6 +32,12 @@ targets:
         embed: true
       - target: ThumbnailExtension
         embed: true
+      - target: SpotlightImporter
+        embed: true
+        link: false
+        copy:
+          destination: wrapper
+          subpath: Contents/Library/Spotlight
       - framework: Frameworks/Rhwp.xcframework
         embed: false
       - sdk: CoreFoundation.framework
@@ -134,6 +140,38 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Sources/ThumbnailExtension/ThumbnailExtension.entitlements
         CODE_SIGN_STYLE: Automatic
 
+  SpotlightImporter:
+    type: bundle
+    platform: macOS
+    sources:
+      - path: Sources/SpotlightImporter
+        excludes:
+          - ExportedSymbols.txt
+    dependencies:
+      - framework: Frameworks/Rhwp.xcframework
+        embed: false
+      - sdk: CoreFoundation.framework
+      - sdk: CoreServices.framework
+      - sdk: CoreText.framework
+      - sdk: CoreGraphics.framework
+      - sdk: ImageIO.framework
+      - sdk: Security.framework
+      - sdk: libc++.tbd
+      - sdk: libiconv.tbd
+      - sdk: libz.tbd
+    settings:
+      base:
+        PRODUCT_NAME: Alhangeul
+        EXECUTABLE_NAME: Alhangeul
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.SpotlightImporter
+        WRAPPER_EXTENSION: mdimporter
+        INFOPLIST_FILE: Sources/SpotlightImporter/Info.plist
+        GCC_C_LANGUAGE_STANDARD: c11
+        EXPORTED_SYMBOLS_FILE: Sources/SpotlightImporter/ExportedSymbols.txt
+        DEAD_CODE_STRIPPING: YES
+        CODE_SIGN_STYLE: Automatic
+        SKIP_INSTALL: YES
+
   HostAppTests:
     type: bundle.unit-test
     platform: macOS
@@ -146,11 +184,17 @@ targets:
       - path: Sources/HostApp/Services/DocumentOpenRecoveryState.swift
       - path: Sources/HostApp/Services/DocumentSaveContract.swift
       - path: Sources/HostApp/Services/DocumentSaveFormat.swift
+      - path: Sources/HostApp/Services/LaunchMaintenanceService.swift
       - path: Sources/HostApp/Services/QuickLookConflictDetector.swift
       - path: Sources/HostApp/Services/QuickLookConflictNoticePolicy.swift
       - path: Sources/HostApp/Services/QuickLookConflictPresentation.swift
       - path: Sources/HostApp/Services/QuickLookSettingsOpener.swift
       - path: Sources/HostApp/Services/RhwpStudioHostBridgeScript.swift
+      - path: Sources/HostApp/Services/RhwpStudioEditorSession.swift
+      - path: Sources/HostApp/Services/RhwpStudioEditorSessionScript.swift
+      - path: Sources/HostApp/Services/RhwpStudioSaveBridgeScript.swift
+      - path: Sources/HostApp/Services/RhwpStudioHTMLExportScript.swift
+      - path: Sources/HostApp/Services/DocumentHTMLExportFormat.swift
       - path: Sources/HostApp/Services/RhwpStudioPDFExportController.swift
       - path: Sources/HostApp/Services/RhwpStudioPDFFontProvider.swift
       - path: Sources/HostApp/Services/RhwpStudioPDFExportState.swift
@@ -158,6 +202,7 @@ targets:
       - path: Sources/HostApp/Services/RhwpStudioPagePayload.swift
       - path: Sources/HostApp/Services/RhwpStudioPrintLifecycle.swift
       - path: Sources/HostApp/Services/RhwpStudioPrintOrientationPolicy.swift
+      - path: Sources/HostApp/Services/SpotlightReindexService.swift
       - path: Sources/HostApp/Support/RhwpProvenance.swift
     settings:
       base:

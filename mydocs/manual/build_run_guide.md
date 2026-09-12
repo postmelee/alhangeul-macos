@@ -72,32 +72,28 @@ core 업데이트는 다음 형태로 분리한다.
 ./scripts/build-rust-macos.sh --update-lock
 ```
 
-lock과 현재 산출물의 일치 여부만 확인할 때는 verify 모드를 사용한다.
+로컬·CI에서 source와 ABI 계약을 검증할 때는 portable 모드를 사용한다.
 
 ```bash
-./scripts/build-rust-macos.sh --verify-lock
+./scripts/build-rust-macos.sh --verify-portable
 ```
 
-검증 대상:
+| 검증 | portable | strict |
+|------|----------|--------|
+| Cargo dependency와 lock의 repo/ref/tag/commit/features | 필수 | 필수 |
+| generated header hash/size와 FFI symbol set | 필수 | 필수 |
+| staticlib 존재와 lock reference metadata 형식 | 필수 | 필수 |
+| staticlib reference hash/size 일치 | 제외 | 필수 |
 
-- `RustBridge/Cargo.toml`의 `rhwp` repo/ref
-- `RustBridge/Cargo.lock`의 `rhwp` source commit
-- `rhwp-core.lock`의 repo/ref kind/release tag/commit
-- `Frameworks/universal/librhwp.a` sha256/size
-- `Frameworks/generated_rhwp.h` sha256/size
+기준 환경의 byte 일치 검증은 `./scripts/build-rust-macos.sh --verify-strict`로 실행한다. Rust compiler, Xcode, macOS, archive tool, build path가 달라지면 source와 ABI가 같아도 static archive byte가 달라질 수 있다. strict 실패는 원인이 환경 차이임을 입증하지 않으므로 필요한 경우 기준 환경을 재현한다. 로컬 차이를 수용하기 위해 lock을 자동 갱신하지 않는다.
 
-불일치 유형은 `Cargo.lock mismatch`, `artifact hash mismatch`, `FFI symbol diff`로 분리해 기록한다.
+`Cargo.lock mismatch`/`Cargo.toml mismatch`는 source 계약, `generated header ABI artifact mismatch`/FFI symbol 오류는 ABI, `strict staticlib reference mismatch`는 나머지 검증 후 reference byte 비교 실패다. 검증은 lock을 수정하지 않는다. 승인된 기준 artifact 갱신은 별도 `--update-lock` 작업이다.
 
-`Frameworks/universal/librhwp.a`는 Rust static archive라 Rust compiler, Xcode, macOS runner image, archive tool, build path 차이에 따라 source와 ABI가 같아도 byte hash가 달라질 수 있다. 로컬 strict 검증은 기본적으로 `librhwp.a`와 generated header hash/size를 모두 비교한다. GitHub-hosted CI/release workflow에서는 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`을 설정해 `librhwp.a` byte hash/size 비교만 제외할 수 있다.
+`--verify-lock`은 기존 strict alias를 유지한다. 이 legacy 명령에 한해 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 portable 동작을 유지하고 전환 경고를 출력한다. 새 호출은 명시 모드를 사용한다. legacy alias/strict에서 잘못된 env 값, strict와 skip env=1 조합, 같은 옵션을 포함한 중복 모드는 build 전에 실패한다. 무옵션 build-only, 명시 portable, update-lock은 legacy env를 무시한다.
 
-이 skip이 켜져도 다음 검증은 계속 유지한다.
+## Producer golden 검증
 
-- `rhwp` repo/ref/tag/commit source provenance
-- `RustBridge/Cargo.lock` resolved commit
-- `Frameworks/generated_rhwp.h` hash/size
-- `rhwp-ffi-symbols.txt`와 generated FFI symbol set 비교
-
-strict staticlib byte hash를 release gate로 되돌리려면 Rust toolchain, Xcode, macOS runner image, archive tool, build path 또는 CI 기준 lock 생성 환경을 먼저 고정한다.
+Python 3.11+와 macOS Swift/Rust toolchain에서 `scripts/verify-render-tree-golden.sh`를 실행한다. 실제 pinned native core 출력, source/sample provenance와 Swift decoder를 검사하고 tracked fixture를 자동 수정하지 않는다. 갱신 시점과 계약은 [core dependency 운영 가이드](core_dependency_operation_guide.md)의 producer golden 절을 따른다.
 
 ## Xcode 프로젝트 생성
 
@@ -144,6 +140,60 @@ xcodebuild -project Alhangeul.xcodeproj \
   CODE_SIGNING_ALLOWED=NO \
   build
 ```
+
+## Spotlight 설치·색인 smoke
+
+maintainer는 [설치 smoke 보고서](../report/task_m020_342_report.md)에서 실행별 결과와 실제 화면을 확인한다. 과거 실행의 FAIL/MISS와 최신 재실행의 판정을 구분한다.
+
+`python3 scripts/ci/spotlight-system-smoke.py --help`를 진입점으로 사용한다. 이 표준 절차 안에서만 새 `~/Applications/AlhangeulSpotlightSmoke-{id}/Alhangeul.app`을 등록한다. 기존 두 표준 설치 경로는 덮어쓰지 않는다. 시험 문서는 `~/Documents/AlhangeulSpotlightSmoke-{id}/Files`에 두며 원본 사용자 문서를 사용하지 않는다.
+
+```bash
+MACOSX_DEPLOYMENT_TARGET=12.0 cargo run --manifest-path RustBridge/Cargo.toml \
+  --locked --offline --release --target aarch64-apple-darwin \
+  --example spotlight_fixtures -- build.noindex/spotlight-fixtures AlhangeulSpotlightProbe
+python3 scripts/ci/spotlight-system-smoke.py prepare \
+  --state build.noindex/spotlight-state.json \
+  --app build.noindex/release/Alhangeul.app --fixtures build.noindex/spotlight-fixtures
+python3 scripts/ci/spotlight-system-smoke.py environment --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py install --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py launch --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py verify --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py index --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py lifecycle --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py replace-app --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py restore-corpus --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py stop-app --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py verify --state build.noindex/spotlight-state.json
+python3 scripts/ci/spotlight-system-smoke.py index --state build.noindex/spotlight-state.json
+# 성공/실패와 관계없이 마지막에 반드시 실행한다.
+python3 scripts/ci/spotlight-system-smoke.py cleanup --state build.noindex/spotlight-state.json
+```
+
+PR CI의 `SpotlightReindexServiceTests`는 HostApp Debug를 먼저 빌드한 뒤 실행한다. 제품이 계산한 importer 경로를 같은 products 디렉터리의 실제 앱 bundle ID·실행 파일과 대조하므로 앱 산출물 없이 실행하면 실패한다. 발견 재시도와 유지보수 호출 순서는 가짜 시계·주입한 동작으로 검증하고, 출력 분리 검사는 합성 stdout/stderr만 내는 subprocess를 사용한다.
+
+일반 최초 설치를 판정할 때는 위 수동 등록/재색인 진단과 구분하여 새 state의 `prepare`에 `--automatic`을 지정한다. `environment → install → launch → automatic-search → stop-app → automatic-search → cleanup` 순서로 실행한다. 자동 모드는 `lsregister -f`와 `mdimport -i`를 호출하지 않고, 실제 본문 검색을 먼저 확인한 뒤 `mdimport -t`로 후보 경로를 검사한다. 관찰 전후 설치본 hash/시각과 설치 전 corpus의 hash/수정 시각 유지, 첫 실행 1회, 설치 전 본문 검색 0건을 확인하며, `diagnostic-register`, `developer-register`, `replace-app`, `restore-corpus`, `lifecycle` 이후에는 최초 자동 설치 통과를 거부한다. 발견 대기나 검색 timeout은 실패/미발견으로 기록하고 반복 실행 결과와 구분한다.
+
+검색 관찰 시간은 `prepare --search-timeout 600`처럼 1–600초로 명시할 수 있다(기본 60초). 설정은 state에 고정되며 성공·실패 모두 실제 경과 시간과 관찰 한도를 기록한다. 60초를 넘긴 성공은 60초 내 성공으로 보고하지 않는다. 발견 대기 및 제품의 요청 정책은 이 옵션으로 변경되지 않는다. 조회 명령이 실패하면 오류 기록을 보존하며 남은 관찰 시간 안에서 재시도한다. 명령당 timeout은 30초와 남은 시간 중 작은 값이다. 실패 기록의 TXT 대조는 양성 결과를 기대한다는 이유로 정상 처리하지 않고 실제 조회 결과를 사용한다. 동시 작업의 개발 importer가 등록돼 있으면 설치 전 본문 검색 및 실제 후보 선택이 오염될 수 있으므로, 해당 작업과 등록 정리를 조율한 후 새 시험을 시작한다.
+
+첫 실행의 `SpotlightReindexService`는 자기 importer의 발견을 최대 600초 확인한 뒤 해당 형식의 재색인을 자동 요청한다. 일시적인 조회 실패/잘못된 출력은 같은 deadline 안에서 재시도하고 각 명령의 timeout은 남은 시간으로 제한한다. stdout만 catalog로 파싱한다. 이 제품 동작과 검증자가 외부 터미널에서 요청한 `mdimport -r`을 구분한다. 외부 재색인 진단은 `assisted_actions`에 남기며 최초 자동 설치 통과에 사용하지 않는다. 요청 접수 로그는 검색 성공의 대체 증거가 아니다. 설치 경로·빌드·importer 변경 시각별 접수 기록은 중복 요청을 막고 실패하면 다음 실행에 재시도한다.
+
+`prepare --discovery-timeout 180`처럼 관찰할 발견 대기 시간을 지정할 수 있다(1–600초, 기본 60초). 값은 state에 저장되며 실제 경과 시간과 함께 보고한다. 이 값은 본문 검색 60초 timeout을 바꾸지 않는다. 최초 설치 판정 후 `lifecycle`을 실행하면 automatic 모드에서는 수정·보호·삭제 전파에도 외부 `mdimport -i`를 사용하지 않는다. 기존 진단 모드는 수동 색인을 유지한다.
+
+사전 등록 조건만 비교할 때는 자동 모드의 `install`과 `launch` 사이에서 `diagnostic-register`를 실행한다. 이 단계는 변경 시각 갱신이나 재복사 없이 일반 `lsregister -f`만 호출하며, 해당 실행을 자동 최초 설치 판정에서 제외한다.
+
+설치 위치 비교는 `prepare --install-layout direct`로 Applications 바로 아래의 고유 `AlhangeulSpotlightSmoke-{id}.app`을 사용할 수 있다. 기본 `nested`는 기존 중첩 경로다. direct 모드도 기존 `Alhangeul.app`을 사용하지 않으며, 소유 Documents marker와 정확한 앱 경로, 디렉터리의 device/inode를 확인한 뒤에만 정리한다. 시험마다 새 state를 만들고 이전 시험 cleanup을 완료한다. 설치 경로가 달라도 동일 bundle ID의 기존 사용자 앱이 남아 있으므로 완전히 새 사용자 환경 검증으로 해석하지 않는다.
+
+Intel Mac은 Rust target을 `x86_64-apple-darwin`으로 바꾼다. fixture 디렉터리와 state 파일은 새 경로여야 한다. state를 보존하면 실패 후에도 cleanup을 다시 실행할 수 있다. 준비 단계에서 기록한 소유 표시와 정확한 경로를 확인한 뒤 시험 앱/문서만 제거한다. 원래 설치본 Info.plist·실행 파일 hash 및 Preview/Thumbnail provider 선택·경로를 비교하고 Quick Look cache를 정리한다. 삭제한 importer가 목록에 계속 남으면 최대 60초 후 cleanup은 nonzero로 끝나고 `cleanup-pending-index`를 기록한다. 이는 파일·기존 앱 보존 결과와 별개인 목록/색인 정리 미완료 상태다. 시스템 환경을 확인한 뒤 같은 cleanup을 재실행하며, 성공처럼 보고하거나 전체 index를 자동 초기화하지 않는다.
+
+`environment`는 앱 등록 전에 일반 txt 양성 대조를 확인하고 실패 시 corpus/전체 볼륨 상태와 txt metadata를 기록한다. 실패하면 설치 단계를 진행하지 않고 진단 후 cleanup한다. `verify`는 `mdimport -t -d3 -o`가 실제 후보 importer를 사용했는지와 metadata 본문을 검사한다. `-o`는 기존 파일에 이어 쓰므로 출력 파일을 먼저 비운다. `index`는 txt 대조를 다시 확인한 뒤 파일명에 없는 영문/한글 본문 단어의 정확한 경로 집합을 각각 최대 60초 기다린다. `mdutil -s /`만 정상이어도 실제 데이터 볼륨의 색인이 작동한다고 가정하지 않는다. txt 대조도 실패하면 환경 문제로 기록하고 전역 index reset이나 daemon kill을 하지 않는다.
+
+삭제·이전 단어 제거 판정은 txt 대조가 계속 검색되는 상태에서 4초 이상 연속으로 0건이어야 통과한다. 수정된 새 단어의 삭제, 한글 단어의 삭제, 출력 한도 내 앞부분 검색과 한도 밖 뒷부분 미검색도 검사한다. 최신 generator로 새 fixture를 만들어야 잘림 문서의 앞/뒤 검색 표식이 포함된다. 조회는 삭제 뒤에도 존재하는 Documents를 범위로 삼고 결과를 해당 시험의 Files 경로로 제한한다. cleanup은 txt를 마지막까지 보존해 본문 제거를 검사하며 실패하더라도 소유 파일을 제거한다. 제거 판정 실패 시 `cleanup-pending-index`를 유지하고 새 smoke가 필요하다고 알린다.
+
+한글 양성 대조에는 파일명에 없는 독립 단어 `나비`, 수정 후 `바다`, 출력 잘림 앞부분의 `호랑이`를 사용한다. 임의 연결어 전체가 부분 문자열 검색될 것이라고 가정하지 않는다. 연결어 검색이 실패하면 같은 본문의 일반 txt와 비교해 importer 누락과 Spotlight 검색 방식을 구분한다. 관찰 결과를 모든 한글 연결어에 일반화하지 않는다.
+
+일반 설치/첫 실행에서 발견되지 않은 개발용 ad-hoc 후보는 `developer-register`로 Xcode와 같은 `lsregister -f -R -trusted` 및 timestamp 갱신을 **별도 비교**할 수 있다. 이것을 일반 설치나 공증 배포 성공으로 기록하지 않는다. 색인 환경이 막혔을 때 `lifecycle --extraction-only`는 metadata 전환만 확인하고 검색·삭제 전파를 모두 MISS로 남긴다. `replace-app`은 동일 버전 로컬 복사·timestamp·첫 실행 시험이며 공개 Sparkle 업데이트를 대신하지 않는다. 교체 후에는 restore-corpus로 합성 원본을 복원하고 stop-app으로 후보 앱을 종료한 뒤 verify/index를 다시 수행한다.
+
+`build.noindex/`도 importer 발견 자체를 막지 못할 수 있다. Xcode가 자동 등록한 이번 작업의 앱은 검사 전에 `pluginkit -r`/`lsregister -u`로 정리하고 `mdimport -L`을 확인한다. 앱이 존재하는 동안 importer 목록이 남으면 승인된 이번 작업의 중간 `.app`만 제거하거나 더 이상 쓰지 않는 산출물로 정리한다. 다른 작업자의 앱·worktree는 건드리지 않는다. 종료 후 `scripts/check-extension-registration-hygiene.sh --check-only`와 `mdimport -L`로 잔존 등록을 점검한다.
 
 ## 렌더링 smoke test
 
@@ -278,6 +328,35 @@ mv "$WASM_ASSET" "$WASM_ASSET.missing"
 ```
 
 기대 결과는 문서 영역의 `웹 viewer 자산을 찾을 수 없습니다` fallback이다. 진단 정보에는 `assetPattern=assets/rhwp_bg-*.wasm`, `count=0`, 훼손한 복사본의 `directoryPath`가 보여야 한다. 다시 시도 recovery를 확인하려면 같은 복사본에서 `.missing` 파일명을 원래대로 되돌린 뒤 fallback의 `다시 시도`를 누른다.
+
+## 새 문서 저장·내보내기 smoke test
+
+문서 세션·저장·Word/HTML/PDF 연결을 변경할 때는 설치된 앱의 사용자 문서를 쓰지 않고 현재 worktree의 개발 앱 또는 고유 bundle ID의 진단 앱에서 합성 입력을 사용한다. 산출물은 실행별 `build.noindex/` 디렉터리에 둔다. 개발 앱/진단 앱의 등록은 종료 후 소유 경로만 해제하며, 기존 설치본과 기본 연결·전역 인덱스를 변경하지 않는다.
+
+| 순서 | 조작 | 확인 |
+|------|------|------|
+| 1 | 파일 없이 실행해 준비 완료 후 `ㅇㅇ` 입력 | 문서 도구 활성화, dirty 상태 등록 |
+| 2 | Command+S → 보호 경고 없이 HWP 저장 패널 | 현재 세션에 파일 등록, 입력·페이지 유지, reload 없음 |
+| 3 | 추가 입력 → Command+S | 패널 없이 같은 경로·형식으로 갱신 |
+| 4 | Command+Shift+S → 패널 취소 | 입력·dirty·source 유지 |
+| 5 | HWPX 형식으로 저장 → 재열기 → 재편집·저장 | 컨테이너·페이지 수·본문과 후속 경로 확인 |
+| 6 | 새 문서로 교체 후 저장 | 이전 원본 bytes/SHA 불변, 이전 보호/source 미계승 |
+| 7 | 편집 후 PDF·Word(.doc)·HTML 각각 내보내기 | 마지막 한글·대표 서식/페이지 포함, source·dirty 유지 |
+| 8 | 출력 패널 취소·쓰기 실패·다운로드 실패 | 기존 destination을 먼저 삭제하지 않음, 입력·창 보존, 재시도 가능 |
+| 9 | 창 닫기·앱 종료의 저장/취소/저장하지 않음 | 저장 실패·취소는 창 유지, 버리기는 원본에 쓰지 않고 종료 |
+| 10 | 정상 문서에서 0-byte/미지원 파일 열기 실패 | 기존 세션·본문·dirty 보존 |
+
+`editorOnly` 문서는 자동복구 등 출처를 확정할 수 없는 경우도 포함한다. 이 경우에만 최초 저장의 보호 상태 미확정 평문 복사본 확인을 유지한다. 생성 성공을 관찰한 `newDocument`는 이 확인 없이 일반 파일명으로 저장 패널을 열어야 한다. 취소를 저장 성공으로 기록하지 않는다. 기존 원본과 같은 위치 또는 기존 파일을 덮어쓰는 복사본 제한도 검사한다.
+
+본문 검증은 파일 존재·크기만으로 통과시키지 않는다. HWP/HWPX는 고정 core 재열기/본문 추출과 컨테이너를 확인하고, PDF는 page count와 text layer를 확인한다. core SVG는 글자별 `<text>` 요소를 사용할 수 있으므로 문장 문자열 포함 검사만으로 내용 누락을 판정하지 않는다. DOC는 HTML 기반 형식이며 binary DOC/DOCX가 아니다. HTML 구조·서식 검사와 실제 Word 앱 호환성을 구분한다. macOS HTML importer를 사용할 때는 다음처럼 형식을 명시하고 stdout뿐 아니라 stderr도 확인한다.
+
+```bash
+textutil -format html -convert txt -stdout build.noindex/example.doc
+```
+
+실제 NSSavePanel을 조작한 검증과 destination callback 주입을 구분한다. `NSTextInputClient.setMarkedText`를 사용한 조합 검증은 compositionstart/update/end와 최종 출력 내용을 함께 확인하며 물리 키보드·특정 IME 검증으로 일반화하지 않는다. M1/Tahoe 제보 환경, 최소 지원 macOS, sandbox 권한 및 실제 WebContent crash 실행 여부도 별도로 기록한다.
+
+#516의 단계별 증거는 [Stage 3](../working/task_m010_516_stage3.md), [Stage 4](../working/task_m010_516_stage4.md), [Stage 5](../working/task_m010_516_stage5.md)를 따른다. 일회성 진단 runner·합성 산출물은 task 전용 `build.noindex/`에 보존하고 Git에는 넣지 않는다. 이미 최종 제품 소스로 통과한 자동 테스트와 회귀는 재사용하고, 변경·실패·남은 경계에 필요한 검증만 추가한다.
 
 ## Recoverable 문서 opening smoke test
 

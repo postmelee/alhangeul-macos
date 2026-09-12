@@ -9,6 +9,7 @@ fi
 VERSION="$1"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+"$ROOT/scripts/verify-render-tree-golden.sh" --check-environment
 BUILD_ROOT="${ALHANGEUL_BUILD_ROOT:-$ROOT/build.noindex}"
 BUILD_DIR="$BUILD_ROOT/release"
 XCODE_BUILD_DIR="$BUILD_DIR/xcodebuild"
@@ -27,7 +28,8 @@ rm -rf "${BUILD_DIR:?}/$BUILD_APP_NAME" "${BUILD_DIR:?}/$BUILD_APP_NAME.dSYM"
 rm -rf "$BUILD_DIR"/Alhangeul*.appex "$BUILD_DIR"/Alhangeul*.appex.dSYM "$BUILD_DIR"/Alhangeul*.swiftmodule
 rm -rf "$BUILD_DIR/include" "$BUILD_DIR/librhwp.a"
 
-"$ROOT/scripts/build-rust-macos.sh" --verify-lock
+"$ROOT/scripts/build-rust-macos.sh" --verify-portable
+"$ROOT/scripts/verify-render-tree-golden.sh"
 
 cd "$ROOT"
 xcodegen generate
@@ -54,6 +56,7 @@ echo "Verifying Release analytics endpoint"
 "$ROOT/scripts/ci/verify-app-execution-endpoint-config.sh" \
   --release-app "$BUILD_DIR/$APP_NAME"
 "$ROOT/scripts/ci/verify-universal-macos-app.sh" "$BUILD_DIR/$APP_NAME"
+"$ROOT/scripts/verify-spotlight-importer.sh" "$BUILD_DIR/$APP_NAME"
 if [ -x "$LSREGISTER" ]; then
   "$LSREGISTER" -u "$XCODE_BUILD_DIR/$BUILD_APP_NAME" >/dev/null 2>&1 || true
 fi

@@ -1,0 +1,157 @@
+name: Release Promote Verified DMG
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Validated version; run from the identical v<version> tag
+        required: true
+        type: string
+        default: '0.2.0'
+      expected_build:
+        description: Validated CFBundleVersion
+        required: true
+        type: string
+        default: '18'
+      source_run_id:
+        description: Successful Release Publish DMG run ID
+        required: true
+        type: string
+      source_artifact_id:
+        description: Validated public-dmg artifact ID
+        required: true
+        type: string
+      validation_run_id:
+        description: Successful Release first install validation run ID (latest attempt)
+        required: true
+        type: string
+      dmg_sha256:
+        description: Approved and validated DMG SHA256
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# Hold through verification, publication and Pages deployment so docs-only jobs cannot
+# capture an older feed then deploy it after this promotion.
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: macos-15
+    timeout-minutes: 45
+    environment: release
+    concurrency:
+      group: release-publish-${{ inputs.version }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      actions: read
+    env:
+      EXPECTED_VERSION: ${{ inputs.version }}
+      EXPECTED_BUILD: ${{ inputs.expected_build }}
+      SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+      SOURCE_ARTIFACT_ID: ${{ inputs.source_artifact_id }}
+      SOURCE_SHA: ${{ github.sha }}
+      VALIDATION_RUN_ID: ${{ inputs.validation_run_id }}
+      DMG_SHA256: ${{ inputs.dmg_sha256 }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify release tag, versions and integration
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import importlib.util, os, plistlib
+          from pathlib import Path
+          spec = importlib.util.spec_from_file_location('smoke', 'scripts/ci/release-install-smoke.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          candidate = module.identity(os.environ)
+          if os.environ['GITHUB_REF'] != 'refs/tags/v' + candidate['expected_version']:
+              raise ValueError('Run this workflow from the candidate tag')
+          for path in ('HostApp', 'QLExtension', 'ThumbnailExtension', 'SpotlightImporter'):
+              info = plistlib.loads(Path(f'Sources/{path}/Info.plist').read_bytes())
+              if (info['CFBundleShortVersionString'] != candidate['expected_version']
+                      or str(info['CFBundleVersion']) != candidate['expected_build']):
+                  raise ValueError('Version/build differs from the checked-out candidate')
+          PY
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main +refs/heads/devel:refs/remotes/origin/devel
+          git merge-base --is-ancestor "$SOURCE_SHA" origin/main
+          scripts/ci/check-main-devel-content.sh origin/main origin/devel
+      - name: Verify both VM results and exact draft bytes
+        run: python3 scripts/ci/release-promotion.py verify --output build.noindex/promotion
+      - name: Resolve pinned Sparkle signing tool (no app build)
+        id: sparkle
+        run: |
+          set -euo pipefail
+          derived="$PWD/build.noindex/SparkleToolsDerivedData"
+          xcodebuild -resolvePackageDependencies -project Alhangeul.xcodeproj -scheme HostApp \
+            -derivedDataPath "$derived" -onlyUsePackageVersionsFromResolvedFile
+          tool="$derived/SourcePackages/artifacts/sparkle/Sparkle/bin/sign_update"
+          test -x "$tool"
+          echo "tool=$tool" >> "$GITHUB_OUTPUT"
+      - name: Prepare same-DMG Sparkle feed and Pages
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+          SIGN_TOOL: ${{ steps.sparkle.outputs.tool }}
+        run: |
+          set -euo pipefail
+          test -n "$SPARKLE_ED_PRIVATE_KEY"
+          dmg="$PWD/build.noindex/promotion/verify/alhangeul-macos-$EXPECTED_VERSION.dmg"
+          signature="$(printf '%s' "$SPARKLE_ED_PRIVATE_KEY" | "$SIGN_TOOL" --ed-key-file - -p "$dmg")"
+          test -n "$signature"
+          minimum="$(plutil -extract LSMinimumSystemVersion raw -o - Sources/HostApp/Info.plist)"
+          notes_url="https://postmelee.github.io/alhangeul-macos/updates/v$EXPECTED_VERSION.html"
+          test -f "docs/updates/v$EXPECTED_VERSION.html"
+          scripts/ci/write-sparkle-appcast.sh --version "$EXPECTED_VERSION" --build "$EXPECTED_BUILD" \
+            --dmg-url "https://github.com/$GITHUB_REPOSITORY/releases/download/v$EXPECTED_VERSION/alhangeul-macos-$EXPECTED_VERSION.dmg" \
+            --length "$(stat -f%z "$dmg")" --ed-signature "$signature" --release-notes-url "$notes_url" \
+            --pub-date "$(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S +0000')" \
+            --minimum-system-version "$minimum" --output build.noindex/promotion/appcast.xml
+          scripts/ci/prepare-pages-artifact.sh --docs-dir docs --appcast build.noindex/promotion/appcast.xml \
+            --output-dir build.noindex/promotion/pages
+          xmllint --noout build.noindex/promotion/pages/appcast.xml
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: build.noindex/promotion/pages
+          retention-days: 14
+      - name: Recheck tag and publish existing assets without rebuilding
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "refs/tags/v$EXPECTED_VERSION"
+          test "$(git rev-parse 'FETCH_HEAD^{commit}')" = "$SOURCE_SHA"
+          python3 scripts/ci/release-promotion.py publish --output build.noindex/promotion
+      - name: Preserve promotion proof
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-promotion-${{ inputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build.noindex/promotion/**/*.json
+            build.noindex/promotion/appcast.xml
+          if-no-files-found: warn
+          retention-days: 30
+
+  deploy-pages:
+    needs: promote
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v5
+        id: deployment

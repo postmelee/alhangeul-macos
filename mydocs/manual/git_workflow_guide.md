@@ -32,6 +32,27 @@
 | `local/task{num}` | 타스크별 작업 |
 | `publish/task{num}` | 통합 브랜치 대상 PR 생성을 위한 원격 게시 브랜치. PR merge 후 삭제 |
 
+## main/devel 콘텐츠 불변 조건
+
+`main`에는 release merge를 운반하는 이력이 추가될 수 있으므로 `main`의 모든 commit이 `devel`의 ancestor일 필요는 없다. 두 parent를 가진 main-only merge의 tree가 두 번째 parent(source)와 같으면 transport-only로 분류한다. 이력만 싣는 back-merge PR을 만들지 않는다.
+
+반면 main hotfix·문서·workflow 등 실제 변경은 다음 일반 개발 또는 release 전에 devel로 인계해야 한다. main 변경을 게시한 maintainer가 인계 PR과 검증을 책임진다. 일반적으로 main → devel back-merge PR로 반영하고, 이미 동등한 변경이 반영되어 있다면 content gate로 입증한다. release owner는 candidate 확정 전에 gate와 main 변경 owner의 인계 상태를 확인한다.
+
+```bash
+git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main +refs/heads/devel:refs/remotes/origin/devel
+scripts/ci/check-main-devel-content.sh origin/main origin/devel
+# release PR을 준비할 때 실제 source commit도 확인한다.
+scripts/ci/check-main-devel-content.sh origin/main HEAD
+```
+
+helper는 ref를 commit으로 고정하고 `git merge-tree --write-tree source main`으로 예상 결과를 계산한다. 충돌 없이 결과 tree가 source tree와 같아야 통과한다. main/source 전체 tree가 서로 다른 것은 devel-only 기능 때문일 수 있어 단독 실패 기준이 아니다. non-merge와 source parent와 다른 merge는 content 후보이며, 실제 back-merge·동등 patch·net content 반영은 결과 tree로 판단한다. patch-id 유사성만으로 승인하지 않으므로 충돌이 남으면 실제 인계/해결이 필요하다.
+
+Git 2.38+와 complete history가 필요하다. shallow/missing ref/unrelated history/tool 오류는 exit 2, 미반영 content/conflict는 exit 1, 통과는 exit 0이다. custom external merge driver가 main 내용을 버려 통과시키지 못하도록 계산 중 비활성화하며 실제 Git config는 변경하지 않는다. helper는 fetch, branch/index/worktree 변경을 하지 않고 tree/blob object만 만들 수 있다. summary에 비교 SHA, transport/content 후보와 차이 경로를 남긴다.
+
+PR CI는 main/devel 대상에만 적용하고 event의 실제 PR head SHA를 사용한다. GitHub의 merge checkout HEAD에는 main이 이미 들어갈 수 있어 판정 source로 쓰지 않는다. native-viewer-editor는 이 webview release invariant의 대상이 아니다.
+
+native 라인에 필요한 공통/release-critical 수정은 [브랜치별 배포 정책](release_policy_guide.md)에 따라 별도 PR/cherry-pick으로 동기화한다. content gate의 summary를 요청했는데 기록하지 못한 경우에는 stderr에 원인을 남기고 exit 2로 실패한다. 판정 성공을 기록 실패에도 성공 처리하는 best-effort 정책은 사용하지 않는다.
+
 ## Git 워크플로우
 
 ```

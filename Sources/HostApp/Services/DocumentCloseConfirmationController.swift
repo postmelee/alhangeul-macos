@@ -64,23 +64,37 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
     }
 
     func confirmForTermination(completion: @escaping (DocumentCloseConfirmationResult) -> Void) {
-        guard let window,
-              let store,
-              store.hasUnsavedChanges
-        else {
-            completion(.confirmed)
-            return
-        }
+        guard let window, let store else { completion(.confirmed); return }
+        prepareConfirmation(window:window, store:store, completion:completion)
+    }
 
-        guard !isPresentingConfirmation else {
-            completion(.cancelled)
-            return
-        }
-
+    private func prepareConfirmation(
+        window: NSWindow, store: DocumentViewerStore,
+        completion: @escaping (DocumentCloseConfirmationResult) -> Void
+    ) {
+        guard !isPresentingConfirmation else { completion(.cancelled); return }
         isPresentingConfirmation = true
-        NSApp.activate(ignoringOtherApps: true)
-        window.makeKeyAndOrderFront(nil)
-        presentConfirmation(for: window, store: store, completion: completion)
+        let prepared: (RhwpStudioEditorSession?) -> Void = { [weak self, weak window] session in
+            Task { @MainActor in
+                guard let self, let window else { completion(.cancelled); return }
+                if let session { store.updateEditorSession(session) }
+                else if store.hasDocument {
+                    self.isPresentingConfirmation = false
+                    store.setWebViewError("편집 상태를 확인할 수 없어 창을 유지합니다. 다시 시도해 주세요.")
+                    completion(.cancelled)
+                    return
+                }
+                guard store.hasUnsavedChanges else {
+                    self.isPresentingConfirmation = false
+                    completion(.confirmed)
+                    return
+                }
+                NSApp.activate(ignoringOtherApps:true)
+                window.makeKeyAndOrderFront(nil)
+                self.presentConfirmation(for:window, store:store, completion:completion)
+            }
+        }
+        if !RhwpStudioNativeCommandDispatcher.refreshSession(in:window, completion:prepared) { prepared(nil) }
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
@@ -93,25 +107,10 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
             return false
         }
 
-        guard let store,
-              store.hasUnsavedChanges
-        else {
-            return true
-        }
-
-        guard !isPresentingConfirmation else {
-            return false
-        }
-
-        isPresentingConfirmation = true
-        presentConfirmation(for: sender, store: store) { [weak self] result in
-            guard let self else {
-                return
-            }
-
-            if case .confirmed = result {
-                self.closeWithoutPrompt()
-            }
+        guard let store else { return true }
+        guard !isPresentingConfirmation else { return false }
+        prepareConfirmation(window:sender, store:store) { [weak self] result in
+            if case .confirmed = result { self?.closeWithoutPrompt() }
         }
         return false
     }
@@ -194,19 +193,35 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
         store: DocumentViewerStore,
         completion: @escaping (DocumentCloseConfirmationResult) -> Void
     ) {
+        let closingSession = store.editorSession?.snapshot
         let didStartSave = RhwpStudioNativeCommandDispatcher.saveDocument(in: window) { [weak self, weak window] result in
             Task { @MainActor in
                 guard let self else {
                     return
                 }
 
-                self.isPresentingConfirmation = false
                 switch result {
                 case .saved:
-                    completion(.confirmed)
+                    let refreshed: (RhwpStudioEditorSession?) -> Void = { [weak self] session in
+                        Task { @MainActor in
+                            self?.isPresentingConfirmation = false
+                            guard let session,
+                                  session.snapshot.loadID == closingSession?.loadID,
+                                  session.snapshot.documentEpoch == closingSession?.documentEpoch
+                            else { completion(.cancelled); return }
+                            store.updateEditorSession(session)
+                            completion(session.snapshot.dirty ? .cancelled : .confirmed)
+                        }
+                    }
+                    if !RhwpStudioNativeCommandDispatcher.refreshSession(in:window, completion:refreshed) {
+                        self.isPresentingConfirmation = false
+                        completion(.cancelled)
+                    }
                 case .cancelled:
+                    self.isPresentingConfirmation = false
                     completion(.cancelled)
                 case .failed(let message):
+                    self.isPresentingConfirmation = false
                     store.setWebViewError(message)
                     window?.makeKeyAndOrderFront(nil)
                     completion(.cancelled)
@@ -237,7 +252,7 @@ enum DocumentCloseConfirmationRegistry {
         cleanup()
     }
 
-    static func dirtyControllers() -> [DocumentCloseConfirmationController] {
+    static func controllersForTermination() -> [DocumentCloseConfirmationController] {
         cleanup()
 
         let orderedControllers = NSApp.windows.compactMap { window in
@@ -248,8 +263,7 @@ enum DocumentCloseConfirmationRegistry {
             .compactMap(\.controller)
             .filter { !orderedIDs.contains(ObjectIdentifier($0)) }
 
-        return (orderedControllers + remainingControllers)
-            .filter(\.hasUnsavedChanges)
+        return orderedControllers + remainingControllers
     }
 
     private static func cleanup() {

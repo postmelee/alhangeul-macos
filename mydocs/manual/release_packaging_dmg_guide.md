@@ -17,7 +17,7 @@
 ```bash
 git status --short --branch
 cat rhwp-core.lock
-./scripts/build-rust-macos.sh --verify-lock
+./scripts/build-rust-macos.sh --verify-portable
 scripts/verify-rhwp-studio-assets.sh
 ```
 
@@ -25,7 +25,7 @@ scripts/verify-rhwp-studio-assets.sh
 
 - 작업 브랜치와 릴리스 기준 브랜치가 명확해야 한다.
 - `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`, `rhwp-core.lock`의 repo/ref/commit 기준이 일치해야 한다.
-- GitHub-hosted workflow에서는 `ALHANGEUL_SKIP_RHWP_STATICLIB_HASH_VERIFY=1`로 `Frameworks/universal/librhwp.a` byte hash/size 비교만 제외할 수 있다.
+- 로컬·workflow는 `--verify-portable`로 source/header/ABI와 reference metadata를 검사한다. 기준 환경 staticlib byte 비교가 필요하면 `--verify-strict`를 별도로 실행한다.
 - `Frameworks/generated_rhwp.h`의 hash/size는 `rhwp-core.lock`과 일치해야 한다.
 - `rhwp-ffi-symbols.txt`와 generated FFI symbol set이 일치해야 한다.
 - `Sources/HostApp/Resources/rhwp-studio/manifest.json`의 release tag/commit과 bundled entrypoint hash가 현재 resource tree와 일치해야 한다.
@@ -35,7 +35,7 @@ scripts/verify-rhwp-studio-assets.sh
 ## 기본 검증
 
 ```bash
-./scripts/build-rust-macos.sh --verify-lock
+./scripts/build-rust-macos.sh --verify-portable
 ./scripts/check-no-appkit.sh
 xcodegen generate
 xcodebuild -project Alhangeul.xcodeproj \
@@ -99,8 +99,9 @@ build.noindex/release/alhangeul-macos-<version>.zip
 - Release configuration으로 HostApp 빌드
 - 내부 산출물 `Alhangeul.app`을 release staging의 `Alhangeul.app`으로 복사
 - release staging으로 복사한 app의 analytics endpoint가 승인된 production origin과 `project.yml`의 전체 URL에 일치하는지 검증
-- `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
+- `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex`, `Alhangeul.mdimporter` 실행 파일의 `arm64 + x86_64` universal 검증
 - release staging의 `Alhangeul.app`을 `Alhangeul.app` 이름으로 zip 압축
+- `scripts/verify-spotlight-importer.sh`로 앱 내부 CFPlugIn factory/본문/실패 후 제거를 직접 검사한다. 시스템 등록·실제 색인은 별도 설치 smoke로 확인한다.
 - Release staging app은 local signing과 sealed resources가 적용되어 Finder 통합 smoke test의 기준 산출물로 사용할 수 있음
 - SHA256 출력
 
@@ -147,7 +148,7 @@ build.noindex/release/alhangeul-macos-<version>.dmg.sha256
 - `xcodegen generate`
 - Release configuration으로 HostApp 빌드
 - release staging으로 복사한 app의 analytics endpoint를 post-build Developer ID 재서명·공증 제출·DMG 생성 전에 검증
-- `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex` 실행 파일의 `arm64 + x86_64` universal 검증
+- `Alhangeul.app`, `AlhangeulPreview.appex`, `AlhangeulThumbnail.appex`, `Alhangeul.mdimporter` 실행 파일의 `arm64 + x86_64` universal 검증
 - Developer ID Application signing identity 확인
 - Sparkle nested component, Quick Look extension, Thumbnail extension, app bundle을 Developer ID/timestamp/hardened runtime 기준으로 재서명
 - app code signature 검증
