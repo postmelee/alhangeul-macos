@@ -70,7 +70,7 @@ Stage 4 전체 수용은 진행 중이다. PR #521 과 main PR #522 를 병합�
 
 기존 사용자 결과를 복사한 `close-behavior-check.hwpx`에서만 수정했다. 닫기 버튼 → 취소에서 새 본문이 유지되고, 닫기 → 저장 이후 재열기 화면과 XML에서 추가 본문이 확인됐다. 다시 본문/문단을 변경하고 닫기 → 저장하지 않음을 선택한 뒤 파일 전체 SHA256은 저장 직후와 같았다. 그러나 Computer Use가 앱 상태를 다시 조회하며 나타난 새 문서 화면에서 같은 복사본의 복구 후보가 표시됐다. `나중에`로 닫았으며 복구 후보나 사용자 데이터를 삭제하지 않았다.
 
-[DocumentCloseConfirmationController](../../Sources/HostApp/Services/DocumentCloseConfirmationController.swift)의 저장하지 않음 분기는 `clearUnsavedChanges()` 후 닫기 완료를 전달하고, [DocumentViewerStore](../../Sources/HostApp/Stores/DocumentViewerStore.swift)는 native 미저장 bool만 해제한다. 복구 저장소 정리와의 연결 부재가 원인 후보이나, 제품 수정·추가 재현은 아직 하지 않았다. 복구 안내에 폐기 의사가 반영돼야 하는지 별도 수용 판단/후속 수정 대상으로 남긴다. 원본 저장 내용 손실이나 Spotlight 실패로 분류하지 않는다. 자동화의 ⌘W 입력은 닫기를 실행하지 못해 창 닫기 버튼으로 판정했으며 단축키 통과를 주장하지 않는다.
+[DocumentCloseConfirmationController](../../Sources/HostApp/Services/DocumentCloseConfirmationController.swift)의 저장하지 않음 분기는 `clearUnsavedChanges()` 후 닫기 완료를 전달하고, [DocumentViewerStore](../../Sources/HostApp/Stores/DocumentViewerStore.swift)는 native 미저장 bool만 해제한다. 최초 관찰 당시에는 복구 저장소 정리와의 연결 부재를 원인 후보로 남겼으며, 아래 Stage 4.2에서 추가 재현했다. 제품 코드는 수정하지 않았다. 복구 안내에 폐기 의사가 반영돼야 하는지 별도 수용 판단/후속 수정 대상으로 남긴다. 원본 저장 내용 손실이나 Spotlight 실패로 분류하지 않는다. 자동화의 ⌘W 입력은 닫기를 실행하지 못해 창 닫기 버튼으로 판정했으며 단축키 통과를 주장하지 않는다.
 
 ![HWP 실제 Finder 미리보기](../report/assets/task_m900_520/finder-hwp-preview.jpg)
 ![HWPX 실제 Finder 미리보기](../report/assets/task_m900_520/finder-hwpx-preview.jpg)
@@ -78,3 +78,23 @@ Stage 4 전체 수용은 진행 중이다. PR #521 과 main PR #522 를 병합�
 ![미저장 닫기 경고](../report/assets/task_m900_520/unsaved-close-dialog.jpg)
 ![저장 후 재열기](../report/assets/task_m900_520/unsaved-close-saved-reopen.jpg)
 ![저장하지 않음 이후 복구 후보 관찰](../report/assets/task_m900_520/discard-recovery-observed.jpg)
+
+## Stage 4.2 — PR 검토·수용 기준 보강과 복구 재현
+
+2026-09-13 작업지시자 진행 승인 후 #524 전체 승격 경로를 검토했다. 공개 전 필요한 코드 수정 사항은 추가로 발견하지 않았다. 후보 tag/SHA와 도구 SHA 분리, clean checkout, 보호 경로 이동의 차단, 원격 tag·main 포함 재검사, 최신 단일 검증 회차의 양 VM 원본 판정, draft asset hash/ID 고정과 공개 직전 재검사가 연결돼 있다. 허용 경로에 있는 도구 자체의 정당성은 코드 리뷰 책임이며 경로 검사만으로 자동 보증하지 않는다.
+
+`gh release edit`의 draft 지원도 확인했다. 현재 gh 2.89.0의 [FetchRelease](https://github.com/cli/cli/blob/v2.89.0/pkg/cmd/release/shared/fetch.go)는 published tag REST와 draft GraphQL/ID 조회를 함께 사용한다. 실제 `gh release view v0.2.0`도 ID 387608761 / draft=true / prerelease=false를 반환했다. 조회 회귀 해결과 실제 공개 명령의 성공은 구분하며 `publish`는 실행하지 않았다. GitHub의 두 COMMENTED review는 Copilot 할당량 초과 알림으로 실질 코드 검토가 아니었다.
+
+- 승격 회귀 14개, 최초 설치 회귀 11개, release-promote actionlint PASS. 이 변경은 문서/증거만 추가하며 후보 앱을 다시 빌드하지 않았다.
+- runbook Gate 4·6·8과 최초 설치/배포 가이드에 두 경로를 필수 수용 조건으로 명시했다. 공개 URL 신규 다운로드와 hash 동일성, 실제 Sparkle 발견·다운로드·설치·재실행 후 버전/검색/확장을 따로 기록한다. 미실행 경로가 있으면 릴리스 전체 완료로 쓰지 않는다.
+- 기능 안내·릴리스 본문 후보에 첫 실행 중 대기 안내와 지속 미검색의 진단을 보강했다. 222.53초는 한 번의 성공 관찰이며 보장 시간이 아니다. 공개 Pages 설치 문단은 #523 과 공개 후 정렬하고 현재 후보 이후 docs 변경 금지를 유지한다.
+
+### 복구 재현 판정
+
+`build.noindex/release-v020-validation/discard-review-20260913.hwpx`라는 독립 시험 복사본을 열어 문단 줄 간격 160% → 190%를 AX에서 확인한 뒤 창 닫기 → 저장하지 않음을 선택했다. 텍스트 입력 자동화가 문단 서식을 바꿨으므로 본문 입력 재현으로 주장하지 않는다. 이후 Computer Use의 앱 상태 조회가 연 새 문서 화면에서 해당 이름/시각(01:46:26)의 복구 후보가 나타났다. 최초 `close-behavior-check.hwpx` 관찰과 별개 파일에서 재현한 결과다. 앱의 완전 종료 시점 자체는 측정하지 않았다.
+
+시험 파일 전체 SHA256은 닫기 전후 `b73c163cb9a0874528b0bb31d4382ba7fdee1868199c6aadbc6d9a2fafe89ead`로 같다. 복구 화면은 원본 자동 덮어쓰기 없이 직접 저장해야 한다고 안내한다. 복구는 실행하지 않고 `나중에`로 닫았다. 사용자 원본·다른 복구 후보는 보존했다.
+
+[#525](https://github.com/postmelee/alhangeul-macos/issues/525)에 재현·원인 후보·수명/경쟁 처리·다른 문서 보존·회귀 수용 조건을 등록했다. 현재 증거에 따라 P2 후속 수정으로 분리하는 것을 권고한다. 저장 파일 손상이나 Spotlight 실패를 확인한 것은 아니지만 폐기 의사와 복구 안내의 불일치는 버그이며 전체 닫기 PASS로 보정하지 않는다. release owner의 알려진 동작 수용 결정 전 공개하지 않는다.
+
+![독립 시험 복사본에서도 남는 복구 후보](../report/assets/task_m900_520/discard-recovery-reproduced.jpg)

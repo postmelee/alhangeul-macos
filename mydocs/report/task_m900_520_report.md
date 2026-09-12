@@ -32,6 +32,8 @@
 
 ## 남은 작업과 종료 조건
 
+PR #524 재검토에서 추가 차단 코드 문제는 발견하지 않았고 14개 승격/11개 최초 설치 회귀와 workflow 정적 검사가 통과했다. [Stage 4.2](../working/task_m900_520_stage4.md#stage-42--pr-검토수용-기준-보강과-복구-재현)에 반복 릴리스의 두 경로 필수 수용, Spotlight 대기 안내, 별도 복사본 복구 재현을 추가했다. [#525](https://github.com/postmelee/alhangeul-macos/issues/525) 후속 수정 권고이며 알려진 동작 수용은 최종 공개 판단에 남긴다. 공개 Pages 문구 강조는 #523 에서 승격 후 정렬한다.
+
 1. 준비 PR #521 / main PR #522 병합과 최종 main/tag SHA 확정은 완료했다. 실제 draft ID 조회와 불변 후보를 유지하는 도구 보완 PR의 검토·병합이 필요하다.
 2. 공증 draft와 run/artifact/hash는 고정했다. 같은 tag의 양 macOS 15 최초 설치는 동일 3차 회차 전체 PASS이며 이전 환경 실패를 기록으로 보존했다.
 3. 실제 Mac의 Spotlight 화면/Finder/Thumbnail은 동일 서명 후보로 확인했다. 저장하지 않음 후 복구 후보 잔존의 수용 판단과 공개 업데이트 검증을 위한 기존 설치본 복원은 남아 있다. macOS 12 환경 부재는 별도 출시 판단이 필요하다.
