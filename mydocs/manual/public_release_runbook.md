@@ -358,6 +358,10 @@ gh workflow run "Release Promote Verified DMG" \
 
 workflow는 최신 main/devel 콘텐츠, tag SHA, 4개 bundle version/build, 후보 artifact 출처, 양 아키텍처의 최신 실행 회차와 원본 검색/lifecycle/cleanup 결과, draft DMG/checksum bytes를 확인한다. 검증 PASS만으로 공개 승인을 대체하지 않는다.
 
+후보 tag 생성 후 승격 도구만 보완한 경우에는 검토·병합된 `main`에서 `--ref main -f source_sha=<기존-candidate-40자리-SHA>`를 위 명령에 적용한다. `source_sha`를 생략하는 tag 실행은 기존과 같다. main 실행도 후보 tag의 현재 원격 SHA, main 포함, 후보 version/build와 DMG/검증 identity를 검사한다. 후보 이후 checkout 변경이 `.github/`, `scripts/`, `mydocs/` 밖에 있으면 거부한다. 앱·의존성·공개 Pages 문구를 바꾼 소스로 기존 후보를 승격할 수 없다. 후보 tag를 이동하거나 DMG를 다시 만들지 않으며, 후보 SHA와 배포 도구 SHA를 `source-proof.json`에 각각 보존한다.
+
+비공개 Release는 tag 조회 API에서 404가 반환될 수 있다. 승격 도구는 인증된 Release 목록의 모든 페이지에서 정확한 tag의 유일한 ID를 찾고 ID로 draft/public 자산을 조회한다. 조회 실패를 후보 부재나 자산 재생성 허가로 해석하지 않는다.
+
 같은 DMG로 Sparkle 서명과 Pages artifact를 먼저 준비한 뒤 tag·검증 회차·Release 자산을 다시 대조하고 기존 draft를 공개한다. DMG를 재빌드·재공증·재업로드하지 않는다. Pages 잠금은 확인부터 배포까지 유지해 docs-only 배포가 예전 appcast를 뒤늦게 덮지 못하게 한다.
 
 실패와 재시도:
