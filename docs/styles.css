@@ -1304,23 +1304,70 @@ video {
   scroll-margin-top: calc(var(--header-height) + 20px);
 }
 
-.updates-page .command-block {
+.updates-page .command-switcher {
   margin-top: 24px;
   min-width: 0;
 }
 
-.updates-page .command-heading {
+.updates-page .command-toolbar:not([hidden]) {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.updates-page .command-heading h3 {
+.updates-page .command-panel h3 {
   margin: 0;
   font-size: 16px;
   line-height: 1.5;
   font-weight: 600;
+  word-break: keep-all;
+}
+
+.updates-page .command-panel + .command-panel {
+  margin-top: 20px;
+}
+
+.updates-page .is-enhanced .command-panel {
+  margin-top: 0;
+}
+
+.updates-page .is-enhanced .command-panel h3 {
+  display: none;
+}
+
+.updates-page .command-tabs {
+  display: flex;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f7f8fa;
+}
+
+.updates-page .command-tabs [role="tab"] {
+  min-height: 38px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.updates-page .command-tabs [aria-selected="true"] {
+  background: #ffffff;
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.updates-page .command-description {
+  margin: 12px 0 0;
+  font-size: 13px;
   word-break: keep-all;
 }
 
@@ -1343,13 +1390,15 @@ video {
 }
 
 .updates-page .command-copy:focus-visible,
-.updates-page .command-block .code-panel:focus-visible {
+.updates-page .command-tabs [role="tab"]:focus-visible,
+.updates-page .command-panel .code-panel:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
-.updates-page .command-block .code-panel {
+.updates-page .command-panel .code-panel {
   margin: 8px 0 0;
+  min-height: 72px;
 }
 
 .updates-page .command-status {

@@ -14,8 +14,8 @@
   <title>알한글 업데이트</title>
   <link rel="icon" href="../assets/logo-256@2x.png" />
   <link rel="apple-touch-icon" href="../assets/logo-256@2x.png" />
-  <link rel="stylesheet" href="../styles.css?v=20260913-updates" />
-  <script src="../updates.js?v=20260913" defer></script>
+  <link rel="stylesheet" href="../styles.css?v=20260913-command-tabs" />
+  <script src="../updates.js?v=20260913-command-tabs" defer></script>
 </head>
 
 <body>
@@ -70,21 +70,25 @@
 
       <section id="homebrew" class="updates-section" aria-labelledby="homebrew-title">
         <h2 id="homebrew-title" class="updates-heading">Homebrew Cask <span class="version-badge">v0.1.11</span></h2>
-        <div class="command-block" data-command-block>
-          <div class="command-heading">
+        <div class="command-switcher" data-command-switcher>
+          <div class="command-toolbar" hidden>
+            <div class="command-tabs" role="tablist" aria-label="Homebrew 설치 방법">
+              <button type="button" id="brew-install-tab" role="tab" aria-controls="brew-install-panel" aria-selected="true">처음 설치</button>
+              <button type="button" id="brew-upgrade-tab" role="tab" aria-controls="brew-upgrade-panel" aria-selected="false" tabindex="-1">업데이트</button>
+            </div>
+            <button type="button" class="command-copy" data-command-copy aria-label="설치 명령어 복사">복사</button>
+          </div>
+          <section id="brew-install-panel" class="command-panel" data-copy-label="설치 명령어 복사">
             <h3 id="brew-install-title">처음 설치</h3>
-            <button type="button" class="command-copy" data-command-copy aria-label="설치 명령어 복사" hidden>복사</button>
-          </div>
-          <pre class="code-panel" tabindex="0" aria-labelledby="brew-install-title"><code>brew install --cask postmelee/tap/alhangeul</code></pre>
-          <p class="command-status" role="status" aria-live="polite" aria-atomic="true"></p>
-        </div>
-        <div class="command-block" data-command-block>
-          <div class="command-heading">
+            <p class="command-description">Homebrew로 알한글을 처음 설치합니다.</p>
+            <pre class="code-panel" tabindex="0" aria-labelledby="brew-install-title"><code>brew install --cask postmelee/tap/alhangeul</code></pre>
+          </section>
+          <section id="brew-upgrade-panel" class="command-panel" data-copy-label="업데이트 명령어 복사">
             <h3 id="brew-upgrade-title">Homebrew로 설치한 앱 업데이트</h3>
-            <button type="button" class="command-copy" data-command-copy aria-label="업데이트 명령어 복사" hidden>복사</button>
-          </div>
-          <pre class="code-panel" tabindex="0" aria-labelledby="brew-upgrade-title"><code>brew update
+            <p class="command-description">Homebrew로 설치한 앱을 업데이트합니다.</p>
+            <pre class="code-panel" tabindex="0" aria-labelledby="brew-upgrade-title"><code>brew update
 brew upgrade --cask postmelee/tap/alhangeul</code></pre>
+          </section>
           <p class="command-status" role="status" aria-live="polite" aria-atomic="true"></p>
         </div>
       </section>
