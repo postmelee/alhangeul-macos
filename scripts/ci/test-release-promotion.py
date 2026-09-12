@@ -3,8 +3,13 @@
 import copy
 import importlib.util
 import json
+import os
 from pathlib import Path
+import plistlib
+import subprocess
+import sys
 import tempfile
+import textwrap
 import unittest
 from unittest.mock import patch
 import zipfile
@@ -114,6 +119,81 @@ class PromotionTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 p.release_assets(self.c, dict(self.release, **{key: value}))
 
+    def test_draft_release_lookup_pages_and_ambiguity(self):
+        pages = [[{'id': 9, 'tag_name': 'v0.1.11'}], [self.release]]
+        with patch.object(p.subprocess, 'check_output', return_value=json.dumps(pages).encode()) as cli, \
+             patch.object(p, 'api', return_value=self.release) as api:
+            self.assertEqual(p.find_release(self.c), self.release)
+            self.assertIn('--paginate', cli.call_args.args[0])
+            api.assert_called_once_with('repos/postmelee/alhangeul-macos/releases/101')
+        for entries in ([], [self.release, self.release], [dict(self.release, id=None)]):
+            with self.subTest(entries=entries), \
+                 patch.object(p.subprocess, 'check_output', return_value=json.dumps([entries]).encode()), \
+                 patch.object(p, 'api') as api, self.assertRaises(ValueError):
+                p.find_release(self.c)
+            api.assert_not_called()
+
+    def test_immutable_candidate_with_reviewed_tooling(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+
+            def git(*args):
+                return subprocess.check_output(['git', '-c', 'user.name=Release fixture',
+                    '-c', 'user.email=release@example.invalid', '-c', 'commit.gpgsign=false',
+                    '-c', 'core.hooksPath=/dev/null', *args], cwd=root, stderr=subprocess.DEVNULL).decode().strip()
+
+            git('init', '-b', 'main')
+            for name in ('HostApp', 'QLExtension', 'ThumbnailExtension', 'SpotlightImporter'):
+                path = root / f'Sources/{name}/Info.plist'
+                path.parent.mkdir(parents=True)
+                path.write_bytes(plistlib.dumps({'CFBundleShortVersionString': '0.2.0', 'CFBundleVersion': '18'}))
+            (root / '.gitignore').write_text('build.noindex/\n')
+            ci = root / 'scripts/ci'; ci.mkdir(parents=True)
+            for name in ('release-promotion.py', 'release-install-smoke.py'):
+                (ci / name).write_bytes(Path(__file__).with_name(name).read_bytes())
+            git('add', '.'); git('commit', '-m', 'candidate')
+            sha = git('rev-parse', 'HEAD'); git('tag', 'v0.2.0')
+            candidate = dict(self.c, source_sha=sha)
+            p.validate_source(candidate, 'refs/tags/v0.2.0', sha, root)
+            scripts = root / 'scripts'; (scripts / 'repair.py').write_text('# reviewed fix\n')
+            git('add', '.'); git('commit', '-m', 'tooling repair')
+            tooling = git('rev-parse', 'HEAD')
+            proof = p.validate_source(candidate, 'refs/heads/main', tooling, root)
+            self.assertEqual(proof['candidate_sha'], sha)
+            self.assertEqual(proof['tooling_sha'], tooling)
+            workflow = Path('.github/workflows/release-promote.yml').read_text()
+            self.assertIn("PYTHONDONTWRITEBYTECODE: '1'", workflow)
+            code = textwrap.dedent(workflow.split("python3 - <<'PY'\n", 1)[1].split('\n          PY', 1)[0])
+            env = dict(os.environ, GITHUB_REPOSITORY=candidate['repository'], GITHUB_REF='refs/heads/main',
+                       GITHUB_SHA=tooling, PYTHONDONTWRITEBYTECODE='1')
+            env.update({key.upper(): value for key, value in candidate.items() if key != 'repository'})
+            result = subprocess.run([sys.executable, '-c', code], cwd=root, env=env, text=True, capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads((root/'build.noindex/promotion/source-proof.json').read_text()), proof)
+            self.assertFalse(list(root.rglob('__pycache__')))
+            dirty = root / 'docs/extra.html'; dirty.parent.mkdir(); dirty.write_text('unreviewed')
+            with self.assertRaises(ValueError):
+                p.validate_source(candidate, 'refs/heads/main', tooling, root)
+            dirty.unlink()
+            for ref, tool, item in [('refs/heads/publish/task520', tooling, candidate),
+                                    ('refs/tags/v0.2.0', tooling, candidate),
+                                    ('refs/heads/main', sha, candidate),
+                                    ('refs/heads/main', tooling, dict(candidate, source_sha=tooling)),
+                                    ('refs/heads/main', tooling, dict(candidate, expected_build='19'))]:
+                with self.subTest(ref=ref, tool=tool, item=item), self.assertRaises(ValueError):
+                    p.validate_source(item, ref, tool, root)
+            for path in ('Sources/new.swift', 'docs/index.html', 'RustBridge/Cargo.lock', ' .github/hidden.yml'):
+                target = root / path; target.parent.mkdir(parents=True, exist_ok=True); target.write_text('changed')
+                git('add', '.'); git('commit', '-m', 'product change')
+                with self.subTest(path=path), self.assertRaises(ValueError):
+                    p.validate_source(candidate, 'refs/heads/main', git('rev-parse', 'HEAD'), root)
+                git('reset', '--hard', tooling)
+            # A protected file renamed into an allowed folder is still a product change.
+            git('mv', 'Sources/HostApp/Info.plist', 'scripts/moved.plist')
+            git('commit', '-m', 'move protected file')
+            with self.assertRaises(ValueError):
+                p.validate_source(candidate, 'refs/heads/main', git('rev-parse', 'HEAD'), root)
+
     def test_retry_same_public_bytes_and_no_downgrade(self):
         public = copy.deepcopy(self.release)
         public['draft'] = False
@@ -213,7 +293,9 @@ class PromotionTests(unittest.TestCase):
             release = copy.deepcopy(self.release)
             release['assets'][0]['size'] = dmg.stat().st_size
             release['assets'][1]['size'] = checksum.stat().st_size
-            release_path = route(base + '/releases/tags/v0.2.0', release)
+            # Drafts have no published tag endpoint. The real CLI must find their ID.
+            route(base + '/releases?per_page=100', [[{'id': 101, 'tag_name': 'v0.2.0'}]])
+            release_path = route(base + '/releases/101', release)
             route(base + '/releases/latest', {'tag_name': 'v0.1.11'})
             routes[base + '/releases/assets/1'] = str(dmg)
             routes[base + '/releases/assets/2'] = str(checksum)

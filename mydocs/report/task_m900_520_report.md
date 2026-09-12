@@ -2,7 +2,7 @@
 
 ## 결과와 범위
 
-[PR #521](https://github.com/postmelee/alhangeul-macos/pull/521)에서 v0.2.0/18 후보 준비와 검증한 동일 DMG를 공개하는 자동화를 구현했다. **준비 PR 결과이며 릴리스 완료 보고가 아니다.** 최종 후보 SHA/tag, 서명·공증 DMG와 실제 최초 설치 결과는 아직 없다. #520, #513, #337 은 열어 둔다.
+[PR #521](https://github.com/postmelee/alhangeul-macos/pull/521)에서 v0.2.0/18 후보 준비와 검증한 동일 DMG를 공개하는 자동화를 구현했다. **준비 PR 결과이며 릴리스 완료 보고가 아니다.** 2026-09-13에는 main/tag와 서명·공증 draft 후보를 확보했다. 실제 최초 설치는 attempt 1·2의 arm64 환경 실패를 보존하고 같은 attempt 3의 arm64·Intel 모두 전체 통과했다. 현재 Mac의 Spotlight·종료 후 검색·저장·내보내기·Finder도 통과했다. 닫기의 취소·저장·버리기 파일 보존은 확인했지만 저장하지 않음 후 복구 후보가 남는 관찰은 수용 판단이 필요하다. 실제 파일이 없는 과거 LaunchServices 등록 41개로 전체 등록 위생은 MISS다. [Stage 4 진행 및 도구 보완](../working/task_m900_520_stage4.md)에 현재 근거를 기록했다. #520, #513, #337 은 열어 둔다.
 
 기준은 devel 41efb1770ae7a464c9cf766fe001c2da79a95823, 직전 공개 v0.1.11/17이다. core/Studio v0.8.6은 유지하며 PR #517 까지 포함한다. 변경 근거와 사용자 문구는 [v0.2.0 기록](../release/v0.2.0.md)에 정리했다.
 
@@ -19,7 +19,8 @@
 | 검증 | 결과 |
 |---|---|
 | 최초 설치 helper 회귀 | 11 tests PASS |
-| 승격 gate 회귀 | 12 tests PASS — 후보/회차/증거/자산 교체·재시도와 모의 GitHub API/실제 ZIP CLI 연결 포함 |
+| 준비 PR 승격 gate 회귀 | 12 tests PASS — 후보/회차/증거/자산 교체·재시도와 모의 GitHub API/실제 ZIP CLI 연결 포함 |
+| Stage 4.1 승격 도구 회귀 | 14 tests PASS — 실제 workflow preflight·clean checkout·고정 후보/도구 분리·draft ID 조회 포함 |
 | actionlint 전체 workflow | PASS |
 | 4 bundle contract/version | PASS, 0.2.0/18 |
 | v0.2.0 release notes 생성/template/body | PASS, 검증용 가상 hash 사용 |
@@ -31,9 +32,11 @@
 
 ## 남은 작업과 종료 조건
 
-1. 준비 PR 리뷰·병합 후 최종 main/tag SHA와 포함 PR 분석을 확정한다.
-2. 승인된 draft 생성과 같은 tag에서 양 macOS 15 최초 설치를 실행한다. source run/artifact, validation run/attempt, DMG hash와 version/build를 고정한다.
-3. 실제 Mac의 Spotlight 화면/Finder/Thumbnail을 동일 서명 후보로 확인하고 기존 설치본을 보존·복원한다. macOS 12 환경 부재는 별도 출시 판단이 필요하다.
+PR #524 재검토에서 추가 차단 코드 문제는 발견하지 않았고 14개 승격/11개 최초 설치 회귀와 workflow 정적 검사가 통과했다. [Stage 4.2](../working/task_m900_520_stage4.md#stage-42--pr-검토수용-기준-보강과-복구-재현)에 반복 릴리스의 두 경로 필수 수용, Spotlight 대기 안내, 별도 복사본 복구 재현을 추가했다. [#525](https://github.com/postmelee/alhangeul-macos/issues/525) 후속 수정 권고이며 알려진 동작 수용은 최종 공개 판단에 남긴다. 공개 Pages 문구 강조는 #523 에서 승격 후 정렬한다.
+
+1. 준비 PR #521 / main PR #522 병합과 최종 main/tag SHA 확정은 완료했다. 실제 draft ID 조회와 불변 후보를 유지하는 도구 보완 PR의 검토·병합이 필요하다.
+2. 공증 draft와 run/artifact/hash는 고정했다. 같은 tag의 양 macOS 15 최초 설치는 동일 3차 회차 전체 PASS이며 이전 환경 실패를 기록으로 보존했다.
+3. 실제 Mac의 Spotlight 화면/Finder/Thumbnail은 동일 서명 후보로 확인했다. 저장하지 않음 후 복구 후보 잔존의 수용 판단과 공개 업데이트 검증을 위한 기존 설치본 복원은 남아 있다. macOS 12 환경 부재는 별도 출시 판단이 필요하다.
 4. 위 증거와 공개할 정확한 DMG를 제시한 뒤 최종 공개 승인을 받아 승격한다. 공개 다운로드/appcast/Pages와 실제 Sparkle 업데이트 후 본문 검색·확장을 확인한다.
 5. 이 결과로 #513 / #337 종료를 판단하고 README/Cask/릴리스 기록의 공개 기준을 정렬한다. 준비 PR 병합만으로 이슈를 닫지 않는다.
 

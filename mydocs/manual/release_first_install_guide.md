@@ -15,7 +15,7 @@ workflow는 공개 서명·공증을 발급하거나 tag/Release/Pages/appcast�
 ## 후보 준비와 실행
 
 1. 별도 승인된 `Release Publish DMG`의 draft 실행이 완료된 후 실행 ID, head SHA, `alhangeul-macos-<version>-public-dmg` artifact ID와 DMG SHA256을 확보한다. artifact는 14일 뒤 만료되므로 검증은 보존 기간 안에 수행한다.
-2. 공개 승격에 사용할 검증은 후보와 동일한 `v<version>` tag에서 수동 dispatch한다. 검증 도구 SHA와 후보 SHA를 별도로 기록하고 일치시킨다. 조사용 다른 ref나 reusable 호출 결과는 현재 승격 gate의 입력이 아니다. 수동 dispatch는 workflow가 기본 브랜치에 등록된 이후 가능하며, 병합 전 새 파일을 바로 dispatch할 수 있다고 가정하지 않는다.
+2. 공개 승격에 사용할 최초 설치 검증은 후보와 동일한 `v<version>` tag에서 수동 dispatch한다. 설치 검증 도구 SHA와 후보 SHA를 별도로 기록하고 일치시킨다. 조사용 다른 ref나 reusable 호출 결과는 현재 승격 gate의 입력이 아니다. 후보 검증 이후 승격 도구만 고치는 경우의 main 실행은 [runbook Gate 5](public_release_runbook.md#gate-5-official-stable-publish)를 따른다. 이 예외는 최초 설치 결과의 SHA 일치 조건을 바꾸지 않는다. 수동 dispatch는 workflow가 기본 브랜치에 등록된 이후 가능하며, 병합 전 새 파일을 바로 dispatch할 수 있다고 가정하지 않는다.
 3. 실행 예시의 값을 실제 후보 값으로 바꾼다. 임의 URL, PR 산출물, 다른 저장소 artifact는 받지 않는다.
 
 ```bash
@@ -50,3 +50,5 @@ gh workflow run release-first-install.yml --ref v<version> \
 **공개할 DMG SHA256과 검사한 DMG SHA256이 반드시 같아야 한다.** `Release Publish DMG`는 stable draft 생성만 허용한다. 공개 승인을 받은 뒤 `Release Promote Verified DMG`에 후보 run/artifact, validation run, version/build/hash를 전달한다. 양 아키텍처의 최신 run attempt, 실제 검색·33개 lifecycle·cleanup 증거와 기존 draft 자산 hash를 대조한다. 빌드·공증·DMG 업로드 없이 같은 파일을 공개하고 Sparkle/Pages를 배포한다. 상세 실행/재시도는 [runbook Gate 5](public_release_runbook.md#gate-5-official-stable-publish)를 따른다.
 
 실제 서명 후보 end-to-end를 실행한 결과와 GUI/업데이트/최소 OS 공백을 릴리스 기록에 남긴 뒤 공개 여부를 판단한다. 설치 자동화 PASS가 릴리스 승인 자체를 대신하지 않는다.
+
+매 릴리스의 완료 조건은 [runbook Gate 8](public_release_runbook.md#gate-8-최초-설치와-실제-sparkle-업데이트-수용)의 두 경로를 따른다. 이 workflow PASS에 공개 URL에서 새로 받은 DMG의 hash 동일성을 연결하고, 이전 공개 버전에서 실제 Sparkle 다운로드·설치·재실행과 검색/확장을 별도로 검증한다. 해당 업데이트 경로는 이 workflow가 실행하지 않는다.

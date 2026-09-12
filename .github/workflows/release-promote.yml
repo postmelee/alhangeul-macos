@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Validated version; run from the identical v<version> tag
+        description: Validated version; run from its tag or main with reviewed tooling-only fixes
         required: true
         type: string
         default: '0.2.0'
@@ -16,6 +16,10 @@ on:
       source_run_id:
         description: Successful Release Publish DMG run ID
         required: true
+        type: string
+      source_sha:
+        description: Immutable candidate commit SHA; required when main differs from the candidate tag
+        required: false
         type: string
       source_artifact_id:
         description: Validated public-dmg artifact ID
@@ -51,11 +55,12 @@ jobs:
       contents: write
       actions: read
     env:
+      PYTHONDONTWRITEBYTECODE: '1'
       EXPECTED_VERSION: ${{ inputs.version }}
       EXPECTED_BUILD: ${{ inputs.expected_build }}
       SOURCE_RUN_ID: ${{ inputs.source_run_id }}
       SOURCE_ARTIFACT_ID: ${{ inputs.source_artifact_id }}
-      SOURCE_SHA: ${{ github.sha }}
+      SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
       VALIDATION_RUN_ID: ${{ inputs.validation_run_id }}
       DMG_SHA256: ${{ inputs.dmg_sha256 }}
       GH_TOKEN: ${{ github.token }}
@@ -71,21 +76,21 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import importlib.util, os, plistlib
+          import importlib.util, json, os
           from pathlib import Path
-          spec = importlib.util.spec_from_file_location('smoke', 'scripts/ci/release-install-smoke.py')
+          spec = importlib.util.spec_from_file_location('promotion', 'scripts/ci/release-promotion.py')
           module = importlib.util.module_from_spec(spec)
           spec.loader.exec_module(module)
-          candidate = module.identity(os.environ)
-          if os.environ['GITHUB_REF'] != 'refs/tags/v' + candidate['expected_version']:
-              raise ValueError('Run this workflow from the candidate tag')
-          for path in ('HostApp', 'QLExtension', 'ThumbnailExtension', 'SpotlightImporter'):
-              info = plistlib.loads(Path(f'Sources/{path}/Info.plist').read_bytes())
-              if (info['CFBundleShortVersionString'] != candidate['expected_version']
-                      or str(info['CFBundleVersion']) != candidate['expected_build']):
-                  raise ValueError('Version/build differs from the checked-out candidate')
+          candidate = module.smoke.identity(os.environ)
+          proof = module.validate_source(candidate, os.environ['GITHUB_REF'], os.environ['GITHUB_SHA'])
+          path = Path('build.noindex/promotion/source-proof.json')
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_text(json.dumps(proof, indent=2) + '\n')
           PY
           git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main +refs/heads/devel:refs/remotes/origin/devel
+          git fetch --no-tags origin "refs/tags/v$EXPECTED_VERSION"
+          test "$(git rev-parse 'FETCH_HEAD^{commit}')" = "$SOURCE_SHA"
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
           git merge-base --is-ancestor "$SOURCE_SHA" origin/main
           scripts/ci/check-main-devel-content.sh origin/main origin/devel
       - name: Verify both VM results and exact draft bytes
