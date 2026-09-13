@@ -337,6 +337,14 @@ mv "$WASM_ASSET" "$WASM_ASSET.missing"
 
 문서 세션·저장·Word/HTML/PDF 연결을 변경할 때는 설치된 앱의 사용자 문서를 쓰지 않고 현재 worktree의 개발 앱 또는 고유 bundle ID의 진단 앱에서 합성 입력을 사용한다. 산출물은 실행별 `build.noindex/` 디렉터리에 둔다. 개발 앱/진단 앱의 등록은 종료 후 소유 경로만 해제하며, 기존 설치본과 기본 연결·전역 인덱스를 변경하지 않는다.
 
+문서 생명주기 회귀는 Coordinator 단독 실행에 더해 실제 SwiftUI `ContentView`를 포함한다. 기존 파일에서 새 문서 생성·첫 저장·반복 저장 시 WKWebView 객체와 native/Studio 세션이 유지되고, 명시적 재열기는 새로운 loadID로 처리되는지 확인한다. 로그인된 macOS에서 다음 명령으로 HWP/HWPX 저장·취소·실패·닫기·종료를 검증한다. Rust bridge 산출물이 필요하며 PR의 macOS CI에서도 실행한다.
+
+```bash
+python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-font-dotum-empty-hancom.hwp
+```
+
+입력 fixture는 읽기 전용이고 출력·진단 앱은 고유 `build.noindex/studio-lifecycle-*`에 생성한다. 실제 제품 Store/Coordinator/SwiftUI/종료 controller와 bundled Studio를 사용하되 입력·저장 위치·NSAlert 응답과 앱 종료 reply는 주입한다. 실제 창 닫힘 및 core 재열기 본문을 검사하며, NSSavePanel UI·물리 IME·서명된 배포 후보의 수용을 대체하지 않는다. 실패 로그와 소유 앱 등록 해제 결과도 남긴다.
+
 | 순서 | 조작 | 확인 |
 |------|------|------|
 | 1 | 파일 없이 실행해 준비 완료 후 `ㅇㅇ` 입력 | 문서 도구 활성화, dirty 상태 등록 |

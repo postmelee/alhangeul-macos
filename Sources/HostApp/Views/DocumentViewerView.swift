@@ -180,7 +180,8 @@ private struct RhwpStudioContainerView: View {
                 }
             }
         }
-        .id(document?.revision ?? 0)
+        // Studio 내부 생성·저장의 bytes 변경은 같은 편집 세션이다.
+        // WebView 교체로 epoch/sequence를 초기화하지 않고 명시적 loadID로만 로드한다.
         .background(Color(nsColor: .windowBackgroundColor))
     }
 }
