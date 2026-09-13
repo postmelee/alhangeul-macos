@@ -174,7 +174,10 @@ class SmokeTests(unittest.TestCase):
             state["reinstall"] = {"phase": "launched", "receipt_plist": str(plist),
                                   "before_receipt": smoke.reindex_receipt(plist), "prepared_corpus": smoke.corpus_snapshot(state),
                                   "before_launch_search": {"mode": "absent"}}
-            with patch.object(smoke, "index"), patch.object(smoke, "verify"):
+            now = [0]
+            with patch.object(smoke, "index"), patch.object(smoke, "verify"), \
+                    patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+                    patch.object(smoke.time, "sleep", side_effect=lambda seconds: now.__setitem__(0, now[0] + seconds)):
                 with self.assertRaisesRegex(ValueError, "not recorded"):
                     smoke.reinstall_search(state)
                 data = plistlib.loads(plist.read_bytes())
@@ -185,6 +188,57 @@ class SmokeTests(unittest.TestCase):
                 (Path(state["files"]) / "document-a.hwp").write_text("edited")
                 with self.assertRaisesRegex(ValueError, "corpus changed"):
                     smoke.reinstall_search(state)
+
+    def test_reinstall_receipt_waits_for_async_update_without_writes(self):
+        old = dict(importerPath='/owned/importer', buildIdentifier='0.2.2-20',
+                   modificationDate='same', installationIdentifier='old')
+        new = dict(old, installationIdentifier='new')
+        state = {'results': [], 'reinstall': {'receipt_plist': '/owned/preferences', 'before_receipt': old}}
+        now = [0]
+        with patch.object(smoke.time, 'monotonic', side_effect=lambda: now[0]), \
+                patch.object(smoke.time, 'sleep', side_effect=lambda seconds: now.__setitem__(0, now[0] + seconds)), \
+                patch.object(smoke, 'reindex_receipt', side_effect=[old, old, new]) as read, \
+                patch.object(smoke, 'run') as command:
+            self.assertEqual(smoke.wait_for_reinstall_receipt(state), new)
+        self.assertEqual(read.call_count, 3)
+        self.assertEqual(state['results'][-1]['elapsed_seconds'], 2)
+        self.assertEqual(state['results'][-1]['timeout_seconds'], 30)
+        self.assertEqual(state['results'][-1]['result'], 'PASS')
+        command.assert_not_called()
+
+    def test_reinstall_receipt_rejects_wrong_identity_fields_and_read_errors(self):
+        old = dict(importerPath='/owned/importer', buildIdentifier='0.2.2-20',
+                   modificationDate='same', installationIdentifier='old')
+        cases = [dict(old, **{key: 'different'}, installationIdentifier='new')
+                 for key in ('importerPath', 'buildIdentifier', 'modificationDate')]
+        cases += [OSError('read failed'), plistlib.InvalidFileException('malformed'), ValueError('missing receipt')]
+        for observed in cases:
+            state = {'results': [], 'reinstall': {'receipt_plist': '/owned/preferences', 'before_receipt': old}}
+            with self.subTest(observed=observed), patch.object(smoke, 'reindex_receipt', side_effect=[observed]), \
+                    patch.object(smoke.time, 'sleep') as sleep:
+                with self.assertRaises((OSError, ValueError, plistlib.InvalidFileException)):
+                    smoke.wait_for_reinstall_receipt(state)
+                sleep.assert_not_called()
+                self.assertEqual(state['results'][-1]['result'], 'FAIL')
+
+    def test_reinstall_receipt_rejects_timeout_and_late_success(self):
+        old = dict(importerPath='/owned/importer', buildIdentifier='0.2.2-20',
+                   modificationDate='same', installationIdentifier='old')
+        for late in (False, True):
+            state = {'results': [], 'reinstall': {'receipt_plist': '/owned/preferences', 'before_receipt': old}}
+            now = [0]
+            def read(_path):
+                if late:
+                    now[0] = 31
+                    return dict(old, installationIdentifier='new')
+                return old
+            with self.subTest(late=late), patch.object(smoke.time, 'monotonic', side_effect=lambda: now[0]), \
+                    patch.object(smoke.time, 'sleep', side_effect=lambda seconds: now.__setitem__(0, now[0] + seconds)), \
+                    patch.object(smoke, 'reindex_receipt', side_effect=read):
+                with self.assertRaisesRegex(ValueError, 'not recorded'):
+                    smoke.wait_for_reinstall_receipt(state)
+                self.assertEqual(state['results'][-1]['result'], 'FAIL')
+                self.assertGreaterEqual(state['results'][-1]['elapsed_seconds'], 30)
 
     def test_discovery_timeout_accepts_boundaries_and_rejects_invalid_values(self):
         for value in ["1", "60", "600"]:
