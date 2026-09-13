@@ -218,7 +218,7 @@ def require_reinstall(first, stopped, final, reinstalled, restopped):
     snapshots = (first, stopped, reinstalled, restopped, final)
     if any(not isinstance(state, dict) for state in snapshots):
         raise ValueError('재설치/종료 후 필수 snapshot 누락')
-    for key in ('id', 'install_app', 'source_app_hashes', 'source_importer_hashes', 'installed_bundle_dates_ns'):
+    for key in ('id', 'install_app', 'files', 'source_app_hashes', 'source_importer_hashes', 'installed_bundle_dates_ns'):
         if not first.get(key) or any(state.get(key) != first[key] for state in snapshots[1:]):
             raise ValueError('최초 설치와 재설치 후보/소유 식별 불일치')
     for previous, current in zip(snapshots, snapshots[1:]):
@@ -250,16 +250,17 @@ def require_reinstall(first, stopped, final, reinstalled, restopped):
         if (not first.get('prepared_corpus') or not trial.get('prepared_corpus')
                 or trial['prepared_corpus'] != first['prepared_corpus']):
             raise ValueError('같은 원본 corpus 보존 증거 누락')
+        require_reinstall_baselines(state, len(stopped.get('results', [])))
     for state in (reinstalled, restopped):
         if state.get('phase') != 'searchable' or state.get('assisted_actions'):
             raise ValueError('재설치 자동 검색 수용 조건 누락')
         cases = [r['case'] for r in state.get('results', []) if r['result'] == 'PASS']
         required = {'reinstall-old-body-removed', 'reinstall-old-korean-removed',
-                    'before-reinstall-body-absent', 'before-reinstall-korean-absent',
-                    'reinstall-body-still-absent', 'same-version-reinstall-prepared',
+                    'before-reinstall-search-state', 'before-reinstall-launch-search-state',
+                    'same-version-reinstall-prepared',
                     'same-version-reinstall-launched', 'automatic-same-version-reinstall-search'}
         if not required <= set(cases):
-            raise ValueError('재설치 사전 미검색/실행/본문 검색 증거 누락')
+            raise ValueError('재설치 사전 상태/실행/본문 검색 증거 누락')
     search_cases = {'body-only-search', 'korean-body-only-search', 'metadata-document-a.hwp',
                     'metadata-document-b.hwpx', 'metadata-document-c.hwp',
                     'automatic-same-version-reinstall-search'}
@@ -276,6 +277,43 @@ def require_reinstall(first, stopped, final, reinstalled, restopped):
         raise ValueError('재설치 앱 종료 후 검색 증거 누락')
     if not search_cases <= set(cases[cases.index('candidate-app-not-running') + 1:]):
         raise ValueError('재설치 앱 종료 후 본문 검색/실제 importer 증거 누락')
+
+
+def require_reinstall_baselines(state, start):
+    trial = state.get('reinstall', {})
+    results = state.get('results', [])[start:]
+    cases = [r.get('case') for r in results]
+    previous = -1
+    for case in ('reinstall-old-body-removed', 'reinstall-old-korean-removed',
+                 'before-reinstall-search-state', 'same-version-reinstall-prepared',
+                 'before-reinstall-launch-search-state', 'same-version-reinstall-launched'):
+        if cases.count(case) != 1 or cases.index(case) <= previous:
+            raise ValueError('재설치 사전 상태 관찰/실행 순서 누락 또는 중복')
+        previous = cases.index(case)
+    full = sorted(str(Path(state['files']) / name)
+                  for name in ('document-a.hwp', 'document-b.hwpx', 'document-c.hwp'))
+    control = [str(Path(state['files']) / 'index-control.txt')]
+    for field, case in (('before_copy_search', 'before-reinstall-search-state'),
+                        ('before_launch_search', 'before-reinstall-launch-search-state')):
+        observation = trial.get(field, {})
+        row = results[cases.index(case)]
+        mode = observation.get('mode')
+        if (mode not in ('absent', 'searchable') or row.get('result') != 'PASS'
+                or observation.get('english_paths') != (full if mode == 'searchable' else [])
+                or observation.get('korean_paths') != (full[:2] if mode == 'searchable' else [])
+                or observation.get('control_paths') != control
+                or any(row.get(key) != value for key, value in observation.items())):
+            raise ValueError('재설치 사전 상태/TXT 대조 증거 불일치')
+        stable, elapsed, limit = (observation.get(key) for key in
+                                  ('stable_seconds', 'elapsed_seconds', 'timeout_seconds'))
+        if (any(type(v) not in (int, float) for v in (stable, elapsed, limit))
+                or not 4 <= stable <= elapsed <= limit <= 600):
+            raise ValueError('재설치 사전 상태 안정 관찰 시간 누락')
+    expected = 'maintained' if trial['before_launch_search']['mode'] == 'searchable' else 'recovered'
+    searches = [r for r in results if r.get('case') == 'automatic-same-version-reinstall-search']
+    if (trial.get('search_outcome') != expected or not searches
+            or any(r.get('search_outcome') != expected for r in searches)):
+        raise ValueError('재설치 검색 유지/복구 분류 불일치')
 
 
 def require_complete(first, stopped, final, reinstalled=None, restopped=None):
@@ -419,7 +457,7 @@ def main():
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    result = {'schema_version': 2, 'status': 'CANDIDATE_FAILED', 'release_eligible': False,
+    result = {'schema_version': 3, 'status': 'CANDIDATE_FAILED', 'release_eligible': False,
               'phase': args.phase, 'harness_sha': os.environ.get('GITHUB_SHA'),
               'run_id': os.environ.get('GITHUB_RUN_ID'), 'run_attempt': os.environ.get('GITHUB_RUN_ATTEMPT')}
     started = time.monotonic()

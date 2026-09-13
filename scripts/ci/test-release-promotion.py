@@ -27,7 +27,7 @@ class PromotionTests(unittest.TestCase):
         self.c = fixture.candidate
         self.run = dict(fixture.run, id=789, path='.github/workflows/release-first-install.yml', run_attempt=2)
         first, stopped, final, reinstalled, restopped = fixture.states()
-        self.e = {'verify-result.json': {'schema_version': 2, 'status': 'PASS', 'phase': 'verify',
+        self.e = {'verify-result.json': {'schema_version': 3, 'status': 'PASS', 'phase': 'verify',
                     'release_eligible': True, 'candidate': self.c, 'harness_sha': self.c['source_sha'],
                     'run_id': '789', 'run_attempt': '2',
                     'environment': {'status': 'ENVIRONMENT_READY', 'architecture': 'arm64'}},
@@ -62,7 +62,7 @@ class PromotionTests(unittest.TestCase):
                 p.validate_evidence_artifact(self.c, self.run, dict(self.a, **{key: value}), 'macos-15')
 
     def test_result_identity_or_missing_gate(self):
-        mutations = [('schema_version', 1), ('status', 'ENVIRONMENT_READY'), ('release_eligible', False), ('phase', 'fetch'),
+        mutations = [('schema_version', 2), ('schema_version', 1), ('status', 'ENVIRONMENT_READY'), ('release_eligible', False), ('phase', 'fetch'),
                      ('candidate', dict(self.c, dmg_sha256='c'*64)), ('candidate', dict(self.c, expected_build='17')),
                      ('candidate', dict(self.c, source_artifact_id='999')), ('harness_sha', 'c'*40),
                      ('run_id', '790'), ('run_attempt', '1'),

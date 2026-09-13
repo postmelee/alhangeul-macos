@@ -177,7 +177,7 @@ class CandidateTests(unittest.TestCase):
                 self.assertFalse((root/'out').exists())
 
     def states(self):
-        first = {'id': 'owned-test', 'automatic': True, 'install_app': '/candidate.app',
+        first = {'id': 'owned-test', 'automatic': True, 'install_app': '/candidate.app', 'files': '/owned/Files',
                  'source_app_hashes': {'app': 'hash'}, 'source_importer_hashes': {'importer': 'hash'},
                  'installed_bundle_dates_ns': {'app': 1, 'importer': 1}, 'installed_object': [1, 2, 3],
                  'prepared_corpus': {'document-a.hwp': [1, 2, 'hash']},
@@ -194,20 +194,31 @@ class CandidateTests(unittest.TestCase):
         reinstalled['reinstall'] = {'phase': 'searchable', 'before_receipt': stopped['initial_receipt'],
                                    'after_receipt': dict(stopped['initial_receipt'], installationIdentifier='new-object'),
                                    'before_object': first['installed_object'], 'after_object': [1, 4, 5],
-                                   'prepared_corpus': first['prepared_corpus']}
+                                   'prepared_corpus': first['prepared_corpus'], 'search_outcome': 'recovered'}
+        baseline = {'mode': 'absent', 'english_paths': [], 'korean_paths': [],
+                    'control_paths': ['/owned/Files/index-control.txt'],
+                    'stable_seconds': 4, 'elapsed_seconds': 4, 'timeout_seconds': 60}
+        reinstalled['reinstall'].update(before_copy_search=copy.deepcopy(baseline),
+                                        before_launch_search=copy.deepcopy(baseline))
         reinstalled['results'].extend({'case': c, 'result': 'PASS'} for c in
                                      ('reinstall-old-body-removed', 'reinstall-old-korean-removed',
-                                      'before-reinstall-body-absent', 'before-reinstall-korean-absent',
-                                      'same-version-reinstall-prepared', 'reinstall-body-still-absent',
+                                      'before-reinstall-search-state', 'same-version-reinstall-prepared',
+                                      'before-reinstall-launch-search-state',
                                       'same-version-reinstall-launched', 'body-only-search',
                                       'korean-body-only-search', 'metadata-document-a.hwp',
                                       'metadata-document-b.hwpx', 'metadata-document-c.hwp',
                                       'automatic-same-version-reinstall-search'))
+        for row in reinstalled['results']:
+            if row['case'] in ('before-reinstall-search-state', 'before-reinstall-launch-search-state'):
+                row.update(copy.deepcopy(baseline))
+            if row['case'] == 'automatic-same-version-reinstall-search':
+                row['search_outcome'] = 'recovered'
         restopped = copy.deepcopy(reinstalled)
         restopped['results'].extend({'case': c, 'result': 'PASS'} for c in
                                    ('candidate-app-not-running', 'body-only-search', 'korean-body-only-search',
                                     'metadata-document-a.hwp', 'metadata-document-b.hwpx', 'metadata-document-c.hwp',
                                     'automatic-same-version-reinstall-search'))
+        restopped['results'][-1]['search_outcome'] = 'recovered'
         final = copy.deepcopy(restopped)
         final.update(phase='cleaned', cleanup_index_verified=True, assisted_actions=['lifecycle'])
         final['results'].extend({'case': c, 'result': 'PASS'} for c in
@@ -216,6 +227,39 @@ class CandidateTests(unittest.TestCase):
 
     def test_complete_evidence(self):
         smoke.require_complete(*self.states())
+
+    def test_retained_search_is_accepted_only_as_maintained(self):
+        states = self.states()
+        baseline = {'mode': 'searchable', 'english_paths': ['/owned/Files/' + name for name in
+                     ('document-a.hwp', 'document-b.hwpx', 'document-c.hwp')],
+                    'korean_paths': ['/owned/Files/document-a.hwp', '/owned/Files/document-b.hwpx'],
+                    'control_paths': ['/owned/Files/index-control.txt'],
+                    'stable_seconds': 4, 'elapsed_seconds': 6, 'timeout_seconds': 60}
+        for state in (states[3], states[4], states[2]):
+            state['reinstall'].update(before_copy_search=copy.deepcopy(baseline),
+                                      before_launch_search=copy.deepcopy(baseline), search_outcome='maintained')
+            for row in state['results']:
+                if row['case'] in ('before-reinstall-search-state', 'before-reinstall-launch-search-state'):
+                    row.update(baseline)
+                if row['case'] == 'automatic-same-version-reinstall-search':
+                    row['search_outcome'] = 'maintained'
+        smoke.require_complete(*states)
+        for state in (states[3], states[4], states[2]):
+            state['reinstall']['search_outcome'] = 'recovered'
+        with self.assertRaisesRegex(ValueError, '분류'):
+            smoke.require_complete(*states)
+
+    def test_incomplete_or_fabricated_baseline_rejected(self):
+        for field, value in [('control_paths', []), ('english_paths', ['/owned/Files/document-a.hwp']),
+                             ('stable_seconds', 0), ('elapsed_seconds', 601), ('mode', 'partial')]:
+            states = self.states()
+            for state in (states[3], states[4], states[2]):
+                state['reinstall']['before_launch_search'][field] = value
+                for row in state['results']:
+                    if row['case'] == 'before-reinstall-launch-search-state':
+                        row[field] = value
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                smoke.require_complete(*states)
 
     def test_first_install_only_is_not_release_eligible(self):
         with self.assertRaisesRegex(ValueError, 'snapshot'):
@@ -253,11 +297,11 @@ class CandidateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '종료 후 검색'):
             smoke.require_complete(*states)
 
-    def test_missing_pre_reinstall_absence_rejected_even_with_later_pass(self):
+    def test_missing_pre_reinstall_baseline_rejected_even_with_later_pass(self):
         states = self.states()
         for state in (states[3], states[4], states[2]):
-            state['results'] = [r for r in state['results'] if r['case'] != 'before-reinstall-body-absent']
-        with self.assertRaisesRegex(ValueError, '사전 미검색'):
+            state['results'] = [r for r in state['results'] if r['case'] != 'before-reinstall-search-state']
+        with self.assertRaisesRegex(ValueError, '사전 상태'):
             smoke.require_complete(*states)
 
     def test_original_search_cannot_replace_reinstall_search(self):

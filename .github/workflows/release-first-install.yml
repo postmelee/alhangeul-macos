@@ -137,7 +137,7 @@ jobs:
           root.mkdir(parents=True, exist_ok=True)
           result = root / 'verify-result.json'
           if not result.exists():
-              result.write_text(json.dumps({'schema_version': 2, 'status': 'HARNESS_ERROR',
+              result.write_text(json.dumps({'schema_version': 3, 'status': 'HARNESS_ERROR',
                                            'release_eligible': False, 'reason': 'Candidate verification not completed'}))
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
               f.write('## 최초 설치·동일 버전 재설치 자동 검증\n\n이 결과는 공개 승인/실제 GUI/Sparkle 검증을 대체하지 않습니다.\n\n```json\n')

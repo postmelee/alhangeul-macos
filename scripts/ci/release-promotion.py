@@ -121,7 +121,7 @@ def read_evidence(archive):
 def validate_evidence(candidate, run, runner, evidence):
     result = evidence['verify-result.json']
     env = result.get('environment', {})
-    if (result.get('schema_version') != 2 or result.get('status') != 'PASS'
+    if (result.get('schema_version') != 3 or result.get('status') != 'PASS'
             or result.get('release_eligible') is not True or result.get('phase') != 'verify'
             or result.get('candidate') != candidate or result.get('harness_sha') != candidate['source_sha']
             or str(result.get('run_id')) != str(run['id'])

@@ -570,6 +570,51 @@ def reindex_receipt(path):
     return receipt
 
 
+def observe_reinstall_baseline(state, label):
+    """복사/실행 전 검색 상태를 관찰한다. 부분 검색이나 대조 실패는 수용하지 않는다."""
+    started = time.monotonic()
+    timeout = state.get('search_timeout', 60)
+    deadline = started + timeout
+    full_english = sorted(str(Path(state['files']) / name)
+                          for name in ('document-a.hwp', 'document-b.hwpx', 'document-c.hwp'))
+    full_korean = full_english[:2]
+    control = [str(Path(state['files']) / 'index-control.txt')]
+    stable_since, previous_mode = None, None
+    observation = {}
+    while True:
+        mode = None
+        try:
+            english = query_before_deadline(state, state['token'], deadline)
+            korean = query_before_deadline(state, KOREAN, deadline)
+            actual_control = query_before_deadline(state, CONTROL, deadline)
+            observation = {'english_paths': english, 'korean_paths': korean, 'control_paths': actual_control}
+            if actual_control == control:
+                if not english and not korean:
+                    mode = 'absent'
+                elif english == full_english and korean == full_korean:
+                    mode = 'searchable'
+        except TimeoutError:
+            pass
+        except RuntimeError as error:
+            record(state, label + '-query-error', 'FAIL', reason=str(error))
+            raise
+        now = time.monotonic()
+        if mode is None or now > deadline:
+            stable_since = None
+        elif mode != previous_mode or stable_since is None:
+            stable_since = now
+        previous_mode = mode
+        if stable_since is not None and now - stable_since >= 4:
+            observation.update(mode=mode, stable_seconds=round(now - stable_since, 2),
+                               elapsed_seconds=round(now - started, 2), timeout_seconds=timeout)
+            record(state, label, **observation)
+            return observation
+        if now >= deadline:
+            record(state, label, 'FAIL', reason='no stable complete/absent baseline with TXT control', **observation)
+            raise RuntimeError(f'Spotlight reinstall baseline timeout: {label}')
+        time.sleep(min(2, max(0, deadline - now)))
+
+
 def prepare_reinstall(state, receipt_plist):
     """기존 요청 기록을 그대로 둔 채 소유 앱을 제거하고 새 사전 corpus를 준비한다."""
     owned_locations(state)
@@ -598,8 +643,7 @@ def prepare_reinstall(state, receipt_plist):
     for source in (Path(state["fixtures"]) / "initial").iterdir():
         if source.name != "index-control.txt":
             shutil.copy2(source, files / source.name)
-    expect_paths(state, state["token"], [], "before-reinstall-body-absent")
-    expect_paths(state, KOREAN, [], "before-reinstall-korean-absent")
+    state["reinstall"]["before_copy_search"] = observe_reinstall_baseline(state, 'before-reinstall-search-state')
     state["reinstall"]["prepared_corpus"] = corpus_snapshot(state)
     state["reinstall"]["phase"] = "prepared"
     state["phase"] = "reinstall-prepared"
@@ -616,7 +660,6 @@ def reinstall_app(state):
         raise ValueError("receipt changed before reinstall")
     if corpus_snapshot(state) != trial["prepared_corpus"]:
         raise ValueError("reinstall corpus changed before installation")
-    expect_paths(state, state["token"], [], "reinstall-body-still-absent")
     copy_candidate(state)
     run(["codesign", "--verify", "--deep", "--strict", app])
     trial["after_object"] = installation_object(app)
@@ -626,6 +669,12 @@ def reinstall_app(state):
     assert_automatic_candidate_unchanged(state)
     if reindex_receipt(trial["receipt_plist"]) != trial["before_receipt"]:
         raise ValueError("receipt changed before candidate launch")
+    trial['before_launch_search'] = observe_reinstall_baseline(state, 'before-reinstall-launch-search-state')
+    if corpus_snapshot(state) != trial['prepared_corpus']:
+        raise ValueError('reinstall corpus changed before launch')
+    assert_automatic_candidate_unchanged(state)
+    if reindex_receipt(trial['receipt_plist']) != trial['before_receipt']:
+        raise ValueError('receipt changed during pre-launch observation')
     trial["installed_at"] = time.time()
     launch(state)
     trial["phase"] = "launched"
@@ -654,7 +703,8 @@ def reinstall_search(state):
         raise ValueError("reinstall corpus changed during observation")
     trial["after_receipt"] = receipt
     trial["phase"] = "searchable"
-    record(state, "automatic-same-version-reinstall-search")
+    trial['search_outcome'] = 'maintained' if trial['before_launch_search']['mode'] == 'searchable' else 'recovered'
+    record(state, "automatic-same-version-reinstall-search", search_outcome=trial['search_outcome'])
     state["phase"] = "searchable"
 
 
