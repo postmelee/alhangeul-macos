@@ -307,6 +307,20 @@ jobs:
             -only-testing:HostAppTests/SpotlightReindexServiceTests \
             test
 
+      - name: Test SwiftUI Studio document lifecycle
+        run: python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-font-dotum-empty-hancom.hwp
+
+      - name: Preserve Studio lifecycle diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: studio-document-lifecycle
+          path: |
+            build.noindex/studio-lifecycle-*/build.log
+            build.noindex/studio-lifecycle-*/run.log
+            build.noindex/studio-lifecycle-*/cleanup.log
+          if-no-files-found: ignore
+
       - name: Verify HostApp Debug analytics endpoint
         shell: bash
         run: |
