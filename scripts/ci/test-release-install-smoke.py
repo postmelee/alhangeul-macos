@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import plistlib
 import stat
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -16,9 +17,81 @@ spec = importlib.util.spec_from_file_location('release_smoke', Path(__file__).wi
 smoke = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(smoke)
 probe = smoke.module('probe_test', 'install-environment-probe.py')
+source_policy = smoke.module('source_policy_test', 'release-install-source.py')
+
+
+def source_repository(root):
+    def git(*args):
+        return subprocess.check_output(['git', '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+            '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', *args],
+            cwd=root, stderr=subprocess.DEVNULL).decode().strip()
+    git('init', '-b', 'main')
+    (root / '.gitignore').write_text('build.noindex/\n')
+    for name in ('HostApp', 'QLExtension', 'ThumbnailExtension', 'SpotlightImporter'):
+        path = root / f'Sources/{name}/Info.plist'
+        path.parent.mkdir(parents=True)
+        path.write_bytes(plistlib.dumps({'CFBundleShortVersionString': '0.2.0', 'CFBundleVersion': '18'}))
+    git('add', '.'); git('commit', '-m', 'candidate')
+    sha = git('rev-parse', 'HEAD')
+    git('tag', 'v0.2.0')
+    git('update-ref', 'refs/remotes/origin/main', sha)
+    return git, sha
 
 
 class CandidateTests(unittest.TestCase):
+    def test_trial_state_save_cannot_replace_primary_failure(self):
+        def fail_verification(state):
+            raise ValueError('original environment failure')
+        def fail_save(*args):
+            raise OSError('disk full')
+        system = SimpleNamespace(environment=fail_verification, save=fail_save)
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            with self.assertRaisesRegex(ValueError, 'original environment failure') as raised:
+                smoke.installation_trials(system, {}, output / 'state.json', output)
+            self.assertIn('disk full', raised.exception.__notes__[0])
+
+    def test_reviewed_install_harness_source_and_product_boundaries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            git, sha = source_repository(root)
+            candidate = dict(self.candidate, source_sha=sha)
+            original = source_policy.prove(candidate, 'refs/tags/v0.2.0', sha, root, checkout=True)
+            self.assertEqual(original['fixture_source_sha'], sha)
+            path = root / 'scripts/ci/release-install-smoke.py'
+            path.parent.mkdir(parents=True); path.write_text('# reviewed fix')
+            git('add', '.'); git('commit', '-m', 'harness fix')
+            head = git('rev-parse', 'HEAD')
+            # Branch naming alone cannot qualify unmerged tooling.
+            with self.assertRaises(subprocess.CalledProcessError):
+                source_policy.prove(candidate, 'refs/heads/main', head, root)
+            git('update-ref', 'refs/remotes/origin/main', head)
+            proof = source_policy.prove(candidate, 'refs/heads/main', head, root, checkout=True)
+            self.assertEqual(proof['tooling_only_changes'], ['scripts/ci/release-install-smoke.py'])
+            for ref in ('refs/tags/v0.2.0', 'refs/heads/publish/task535', 'refs/tags/main'):
+                with self.subTest(ref=ref), self.assertRaises(ValueError):
+                    source_policy.prove(candidate, ref, head, root)
+            path.write_text('dirty')
+            with self.assertRaises(ValueError):
+                source_policy.prove(candidate, 'refs/heads/main', head, root, checkout=True)
+            git('reset', '--hard', head)
+            for changed in ('Sources/HostApp/Info.plist', 'RustBridge/examples/spotlight_fixtures.rs',
+                            'rhwp-core.lock', 'scripts/ci/verify-universal-macos-app.sh',
+                            '.github/actions/new/action.yml', 'docs/index.html'):
+                path = root / changed; path.parent.mkdir(parents=True, exist_ok=True); path.write_text('changed')
+                git('add', '.'); git('commit', '-m', 'forbidden change')
+                tool = git('rev-parse', 'HEAD'); git('update-ref', 'refs/remotes/origin/main', tool)
+                with self.subTest(changed=changed), self.assertRaises(ValueError):
+                    source_policy.prove(candidate, 'refs/heads/main', tool, root)
+                git('reset', '--hard', head)
+            git('update-ref', 'refs/remotes/origin/main', head)
+            for value in ('19', 'missing'):
+                with self.assertRaises(ValueError):
+                    source_policy.prove(dict(candidate, expected_build=value), 'refs/heads/main', head, root)
+            git('tag', '-f', 'v0.2.0', head)
+            with self.assertRaises(ValueError):
+                source_policy.prove(candidate, 'refs/heads/main', head, root)
+
     def test_primary_cleanup_and_detach_failures_are_preserved(self):
         for primary in (None, ValueError('reinstall baseline failed')):
             with self.subTest(primary=primary), tempfile.TemporaryDirectory() as tmp:

@@ -65,6 +65,15 @@ permissions:
   contents: read
   actions: read
 
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+  SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+  SOURCE_ARTIFACT_ID: ${{ inputs.source_artifact_id }}
+  SOURCE_SHA: ${{ inputs.source_sha }}
+  DMG_SHA256: ${{ inputs.dmg_sha256 }}
+  EXPECTED_VERSION: ${{ inputs.expected_version }}
+  EXPECTED_BUILD: ${{ inputs.expected_build }}
+
 concurrency:
   group: first-install-${{ github.workflow }}-${{ inputs.source_artifact_id }}-${{ github.ref }}
   cancel-in-progress: false
@@ -77,13 +86,21 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify candidate and reviewed harness provenance
+        run: python3 scripts/ci/release-install-smoke.py provenance --output build.noindex/install-proof
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_sha }}
+          path: build.noindex/fixture-source
           persist-credentials: false
       - name: Generate synthetic corpus (no application build or launch)
         env:
           CARGO_TARGET_DIR: ${{ github.workspace }}/build.noindex/cargo
         run: |
           mkdir -p build.noindex
-          cargo run --locked --manifest-path RustBridge/Cargo.toml --example spotlight_fixtures -- \
+          cargo run --locked --manifest-path build.noindex/fixture-source/RustBridge/Cargo.toml --example spotlight_fixtures -- \
             "$PWD/build.noindex/install-fixtures" ReleaseInstallDocumentMarker
       - uses: actions/upload-artifact@v7
         with:
@@ -101,16 +118,10 @@ jobs:
         runner: [macos-15, macos-15-intel]
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 90
-    env:
-      SOURCE_RUN_ID: ${{ inputs.source_run_id }}
-      SOURCE_ARTIFACT_ID: ${{ inputs.source_artifact_id }}
-      SOURCE_SHA: ${{ inputs.source_sha }}
-      DMG_SHA256: ${{ inputs.dmg_sha256 }}
-      EXPECTED_VERSION: ${{ inputs.expected_version }}
-      EXPECTED_BUILD: ${{ inputs.expected_build }}
     steps:
       - uses: actions/checkout@v6
         with:
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-python@v6
         with:

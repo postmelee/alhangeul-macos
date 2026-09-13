@@ -187,6 +187,7 @@ def candidate_receipt(smoke, state, timeout=30):
 
 def installation_trials(smoke, state, state_path, output):
     """최초 설치 증거를 고정한 뒤 재설치와 lifecycle을 수행한다."""
+    primary_error = None
     try:
         for phase in ('environment', 'install', 'launch', 'automatic_search', 'stop_candidate', 'automatic_search'):
             getattr(smoke, phase)(state)
@@ -209,9 +210,19 @@ def installation_trials(smoke, state, state_path, output):
         state.setdefault('assisted_actions', []).append('lifecycle')
         smoke.lifecycle(state)
         smoke.save(output / 'lifecycle.json', state)
+    except Exception as error:
+        primary_error = error
+        raise
     finally:
         # 실패한 재설치도 외부 finally의 표준 cleanup에 같은 state를 전달한다.
-        smoke.save(state_path, state)
+        try:
+            smoke.save(state_path, state)
+        except Exception as error:
+            if primary_error is None:
+                raise
+            # 외부 cleanup에서 상태 저장을 다시 시도한다. 그 오류가 최초 검증
+            # 실패를 대체하지 않도록 보존하며 Python traceback에도 둘 다 남긴다.
+            primary_error.add_note(f'state save also failed: {error}')
 
 
 def require_reinstall(first, stopped, final, reinstalled, restopped):
@@ -451,7 +462,7 @@ def verify(output, candidate, fixtures, result):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('phase', choices=['fetch', 'verify'])
+    parser.add_argument('phase', choices=['provenance', 'fetch', 'verify'])
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--fixtures', type=Path)
     args = parser.parse_args()
@@ -464,7 +475,12 @@ def main():
     try:
         candidate = identity(os.environ)
         result['candidate'] = candidate
-        if args.phase == 'fetch':
+        source = module('install_source', 'release-install-source.py')
+        result['source_proof'] = source.prove(candidate, os.environ.get('GITHUB_REF', ''),
+                                              os.environ.get('GITHUB_SHA', ''), checkout=True)
+        if args.phase == 'provenance':
+            result['status'] = 'SOURCE_VERIFIED'
+        elif args.phase == 'fetch':
             fetch(output, candidate)
             result['status'] = 'CANDIDATE_DOWNLOADED'
         else:
@@ -484,7 +500,7 @@ def main():
         result['elapsed_seconds'] = round(time.monotonic()-started, 2)
         (output / f'{args.phase}-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
         print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0 if result['status'] in ('PASS', 'CANDIDATE_DOWNLOADED') else 1
+    return 0 if result['status'] in ('PASS', 'CANDIDATE_DOWNLOADED', 'SOURCE_VERIFIED') else 1
 
 
 if __name__ == '__main__':

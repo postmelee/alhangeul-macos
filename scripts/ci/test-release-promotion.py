@@ -25,11 +25,20 @@ class PromotionTests(unittest.TestCase):
         fixture = fixtures.CandidateTests()
         fixture.setUp()
         self.c = fixture.candidate
-        self.run = dict(fixture.run, id=789, path='.github/workflows/release-first-install.yml', run_attempt=2)
+        self.run = dict(fixture.run, id=789, head_branch='v0.2.0', path='.github/workflows/release-first-install.yml', run_attempt=2)
+        self.source_proof = {'schema_version': 1, 'candidate_sha': self.c['source_sha'],
+                             'harness_sha': self.c['source_sha'], 'fixture_source_sha': self.c['source_sha'],
+                             'workflow_ref': 'refs/tags/v0.2.0', 'tooling_only_changes': []}
+        def prove(candidate, ref, sha):
+            if candidate != self.c or ref != 'refs/tags/v0.2.0' or sha != self.c['source_sha']:
+                raise ValueError('untrusted source fixture')
+            return self.source_proof
+        policy = patch.object(p.install_source, 'prove', side_effect=prove)
+        policy.start(); self.addCleanup(policy.stop)
         first, stopped, final, reinstalled, restopped = fixture.states()
         self.e = {'verify-result.json': {'schema_version': 3, 'status': 'PASS', 'phase': 'verify',
                     'release_eligible': True, 'candidate': self.c, 'harness_sha': self.c['source_sha'],
-                    'run_id': '789', 'run_attempt': '2',
+                    'run_id': '789', 'run_attempt': '2', 'source_proof': self.source_proof,
                     'environment': {'status': 'ENVIRONMENT_READY', 'architecture': 'arm64'}},
                   'first-launch.json': first, 'stopped-search.json': stopped, 'state.json': final,
                   'reinstall-search.json': reinstalled, 'reinstall-stopped-search.json': restopped}
@@ -54,6 +63,34 @@ class PromotionTests(unittest.TestCase):
                            ('head_repository', {'full_name': 'fork/repo'})]:
             with self.subTest(key=key), self.assertRaises(ValueError):
                 p.validate_run(self.c, dict(self.run, **{key: value}), '789')
+
+    def test_reviewed_main_harness_bound_to_run_artifact_and_result(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            git, sha = fixtures.source_repository(root)
+            path = root / 'scripts/ci/release-install-smoke.py'
+            path.parent.mkdir(parents=True); path.write_text('# reviewed harness')
+            git('add', '.'); git('commit', '-m', 'harness')
+            head = git('rev-parse', 'HEAD'); git('update-ref', 'refs/remotes/origin/main', head)
+            candidate = dict(self.c, source_sha=sha)
+            run = dict(self.run, head_branch='main', head_sha=head)
+            def prove(item, ref, tool):
+                return fixtures.source_policy.prove(item, ref, tool, root)
+            with patch.object(p.install_source, 'prove', side_effect=prove):
+                proof = p.validate_run(candidate, run, '789')
+                artifact = dict(self.a, workflow_run={'id': 789, 'head_sha': head})
+                p.validate_evidence_artifact(candidate, run, artifact, 'macos-15')
+                evidence = copy.deepcopy(self.e)
+                evidence['verify-result.json'].update(candidate=candidate, harness_sha=head, source_proof=proof)
+                p.validate_evidence(candidate, run, 'macos-15', evidence)
+                with self.assertRaises(ValueError):
+                    p.validate_evidence_artifact(candidate, run, self.a, 'macos-15')
+                for key, value in (('harness_sha', sha), ('source_proof', {}),
+                                   ('source_proof', dict(proof, fixture_source_sha=head))):
+                    changed = copy.deepcopy(evidence)
+                    changed['verify-result.json'][key] = value
+                    with self.subTest(key=key), self.assertRaises(ValueError):
+                        p.validate_evidence(candidate, run, 'macos-15', changed)
 
     def test_stale_or_foreign_artifact(self):
         for key, value in [('name', 'first-install-evidence-macos-15-789-1'), ('expired', True),
@@ -164,7 +201,7 @@ class PromotionTests(unittest.TestCase):
                 path.write_bytes(plistlib.dumps({'CFBundleShortVersionString': '0.2.0', 'CFBundleVersion': '18'}))
             (root / '.gitignore').write_text('build.noindex/\n')
             ci = root / 'scripts/ci'; ci.mkdir(parents=True)
-            for name in ('release-promotion.py', 'release-install-smoke.py'):
+            for name in ('release-promotion.py', 'release-install-smoke.py', 'release-install-source.py'):
                 (ci / name).write_bytes(Path(__file__).with_name(name).read_bytes())
             git('add', '.'); git('commit', '-m', 'candidate')
             sha = git('rev-parse', 'HEAD'); git('tag', 'v0.2.0')
@@ -233,7 +270,7 @@ class PromotionTests(unittest.TestCase):
         for mode in ('draft', 'public', 'rerun', 'replacement'):
             with self.subTest(mode=mode), tempfile.TemporaryDirectory() as tmp:
                 root = Path(tmp)
-                proof = {'candidate': self.c, 'validation': {'run': self.run, 'artifacts': [self.a]},
+                proof = {'candidate': self.c, 'validation': {'run': self.run, 'artifacts': [self.a], 'source_proof': self.source_proof},
                          'release': self.release}
                 (root / 'promotion-proof.json').write_text(json.dumps(proof))
                 current = copy.deepcopy(self.release)
@@ -265,9 +302,12 @@ class PromotionTests(unittest.TestCase):
         import sys
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
+            git, sha = fixtures.source_repository(root)
+            run = dict(self.run, head_sha=sha)
+            artifact = dict(self.a, workflow_run={'id': 789, 'head_sha': sha})
             dmg = root / 'dmg'
             dmg.write_bytes(b'synthetic notarized-candidate bytes; no app execution')
-            candidate = dict(self.c, dmg_sha256=p.smoke.sha256(dmg))
+            candidate = dict(self.c, source_sha=sha, dmg_sha256=p.smoke.sha256(dmg))
             name = 'alhangeul-macos-0.2.0.dmg'
             checksum = root / 'checksum'
             checksum.write_text(candidate['dmg_sha256'] + '  ' + name + '\n')
@@ -286,20 +326,23 @@ class PromotionTests(unittest.TestCase):
                 routes[endpoint] = str(path)
                 return path
 
-            route(base + '/actions/runs/123', fixture.run)
-            route(base + '/actions/artifacts/456', fixture.artifact)
+            route(base + '/actions/runs/123', dict(fixture.run, head_sha=sha))
+            route(base + '/actions/artifacts/456', dict(fixture.artifact, workflow_run={'id': 123, 'head_sha': sha}))
             routes[base + '/actions/artifacts/456/zip'] = str(source_zip)
-            route(base + '/actions/runs/789', self.run)
+            route(base + '/actions/runs/789', run)
             evidence_artifacts = []
             for index, (runner, arch) in enumerate(p.RUNNERS.items(), 700):
                 evidence = copy.deepcopy(self.e)
                 evidence['verify-result.json']['candidate'] = candidate
+                evidence['verify-result.json']['harness_sha'] = sha
+                evidence['verify-result.json']['source_proof'] = fixtures.source_policy.prove(
+                    candidate, 'refs/tags/v0.2.0', sha, root)
                 evidence['verify-result.json']['environment']['architecture'] = arch
                 archive = root / f'{runner}.zip'
                 with zipfile.ZipFile(archive, 'w') as z:
                     for filename, data in evidence.items():
                         z.writestr(filename, json.dumps(data))
-                artifact = dict(self.a, id=index, name=f'first-install-evidence-{runner}-789-2',
+                artifact = dict(artifact, id=index, name=f'first-install-evidence-{runner}-789-2',
                                 size_in_bytes=archive.stat().st_size)
                 evidence_artifacts.append(artifact)
                 route(base + f'/actions/artifacts/{index}', artifact)
@@ -339,11 +382,11 @@ else:
                        FAKE_GH_ROUTES=str(db), FAKE_RELEASE_PATH=str(release_path),
                        GITHUB_REPOSITORY=candidate['repository'], VALIDATION_RUN_ID='789')
             env.update({key.upper(): value for key, value in candidate.items() if key != 'repository'})
-            cli = [sys.executable, str(Path(p.__file__).resolve())]
+            cli = [sys.executable, '-B', str(Path(p.__file__).resolve())]
             output = root / 'output'
             for phase in ('verify', 'publish'):
                 result = p.subprocess.run(cli + [phase, '--output', str(output)], env=env,
-                                          text=True, capture_output=True)
+                                          text=True, capture_output=True, cwd=root)
                 self.assertEqual(result.returncode, 0, result.stderr)
             self.assertFalse(json.loads(release_path.read_text())['draft'])
             proof = json.loads((output / 'promotion-proof.json').read_text())
@@ -351,7 +394,7 @@ else:
             # A rebuilt public file cannot use old PASS evidence on a fresh retry.
             dmg.write_bytes(b'rebuilt and different')
             result = p.subprocess.run(cli + ['verify', '--output', str(root/'retry')], env=env,
-                                      text=True, capture_output=True)
+                                      text=True, capture_output=True, cwd=root)
             self.assertNotEqual(result.returncode, 0)
 
     def test_pages_public_gate_rejects_draft_and_prerelease(self):
