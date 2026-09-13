@@ -14,6 +14,7 @@ import zipfile
 spec = importlib.util.spec_from_file_location('install_smoke', Path(__file__).with_name('release-install-smoke.py'))
 smoke = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(smoke)
+install_source = smoke.module('install_source', 'release-install-source.py')
 RUNNERS = {'macos-15': 'arm64', 'macos-15-intel': 'x86_64'}
 EVIDENCE_FILES = {'verify-result.json', 'first-launch.json', 'stopped-search.json', 'state.json',
                   'reinstall-search.json', 'reinstall-stopped-search.json'}
@@ -84,21 +85,24 @@ def download(endpoint, path, limit, accept=None):
 
 
 def validate_run(candidate, run, run_id):
-    if (str(run.get('id')) != run_id or run.get('head_sha') != candidate['source_sha']
+    if (str(run.get('id')) != run_id
             or run.get('repository', {}).get('full_name') != candidate['repository']
             or run.get('head_repository', {}).get('full_name') != candidate['repository']
             or run.get('path') != '.github/workflows/release-first-install.yml'
             or run.get('event') != 'workflow_dispatch'
             or run.get('status') != 'completed' or run.get('conclusion') != 'success'
             or type(run.get('run_attempt')) is not int or run['run_attempt'] < 1):
-        raise ValueError('같은 tag SHA의 성공한 최초 설치 실행이 아님')
+        raise ValueError('검토된 도구의 성공한 최초 설치 실행이 아님')
+    branch = run.get('head_branch')
+    ref = 'refs/heads/main' if branch == 'main' else 'refs/tags/' + str(branch)
+    return install_source.prove(candidate, ref, run.get('head_sha', ''))
 
 
 def validate_evidence_artifact(candidate, run, artifact, runner):
     expected = f"first-install-evidence-{runner}-{run['id']}-{run['run_attempt']}"
     if (artifact.get('name') != expected or artifact.get('expired') is not False
             or artifact.get('workflow_run', {}).get('id') != run['id']
-            or artifact.get('workflow_run', {}).get('head_sha') != candidate['source_sha']
+            or artifact.get('workflow_run', {}).get('head_sha') != run.get('head_sha')
             or not 0 < artifact.get('size_in_bytes', 0) <= MAX_EVIDENCE):
         raise ValueError('최신 검증 회차의 증거 artifact가 아님')
 
@@ -118,12 +122,15 @@ def read_evidence(archive):
         return {name: json.loads(z.read(name)) for name in EVIDENCE_FILES}
 
 
-def validate_evidence(candidate, run, runner, evidence):
+def validate_evidence(candidate, run, runner, evidence, source_proof=None):
+    if source_proof is None:
+        source_proof = validate_run(candidate, run, str(run['id']))
     result = evidence['verify-result.json']
     env = result.get('environment', {})
-    if (result.get('schema_version') != 2 or result.get('status') != 'PASS'
+    if (result.get('schema_version') != 3 or result.get('status') != 'PASS'
             or result.get('release_eligible') is not True or result.get('phase') != 'verify'
-            or result.get('candidate') != candidate or result.get('harness_sha') != candidate['source_sha']
+            or result.get('candidate') != candidate or result.get('harness_sha') != run.get('head_sha')
+            or result.get('source_proof') != source_proof
             or str(result.get('run_id')) != str(run['id'])
             or str(result.get('run_attempt')) != str(run['run_attempt'])
             or env.get('status') != 'ENVIRONMENT_READY'
@@ -194,7 +201,7 @@ def verify_release(candidate, output):
 def validate_all(candidate, run_id, output):
     base = f"repos/{candidate['repository']}/actions"
     run = api(f'{base}/runs/{run_id}')
-    validate_run(candidate, run, run_id)
+    source_proof = validate_run(candidate, run, run_id)
     # --paginate --slurp preserves all pages; a rerun can leave prior-attempt artifacts.
     pages = json.loads(subprocess.check_output(
         ['gh', 'api', '--paginate', '--slurp', f'{base}/runs/{run_id}/artifacts?per_page=100'], timeout=60))
@@ -211,11 +218,11 @@ def validate_all(candidate, run_id, output):
         archive = output / f'{runner}.zip'
         download(f"{base}/artifacts/{artifact['id']}/zip", archive, MAX_EVIDENCE)
         evidence = read_evidence(archive)
-        validate_evidence(candidate, run, runner, evidence)
+        validate_evidence(candidate, run, runner, evidence, source_proof)
         (output / f'{runner}.json').write_text(json.dumps(evidence, ensure_ascii=False, indent=2))
         archive.unlink()
         selected.append(artifact)
-    return {'run': run, 'artifacts': selected}
+    return {'run': run, 'artifacts': selected, 'source_proof': source_proof}
 
 
 def main():
@@ -243,7 +250,9 @@ def main():
             raise ValueError('승격 직전 입력 변경')
         # Pages 준비 중 rerun/자산 교체/tag 이동이 발생했는지 다시 확인한다.
         run = api(f"repos/{candidate['repository']}/actions/runs/{run_id}")
-        validate_run(candidate, run, run_id)
+        current_source_proof = validate_run(candidate, run, run_id)
+        if current_source_proof != proof['validation'].get('source_proof'):
+            raise ValueError('검증 도구 출처가 승격 준비 이후 변경됨')
         if run['run_attempt'] != proof['validation']['run']['run_attempt']:
             raise ValueError('검증 run이 재실행됨; 전체 승격 검증을 다시 실행할 것')
         for artifact in proof['validation']['artifacts']:

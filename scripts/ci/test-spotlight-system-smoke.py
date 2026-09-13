@@ -19,6 +19,62 @@ spec.loader.exec_module(smoke)
 
 
 class SmokeTests(unittest.TestCase):
+    def test_reinstall_baseline_requires_stable_complete_or_absent_search_and_control(self):
+        for mode in ('absent', 'searchable', 'partial', 'no-control', 'query-error'):
+            state = {'files': '/owned/Files', 'token': 'Word', 'results': [], 'search_timeout': 8}
+            now = [0]
+            def sleep(seconds): now[0] += seconds
+            def query(_state, term, timeout):
+                if mode == 'query-error': raise RuntimeError('mdfind unavailable')
+                if term == smoke.CONTROL:
+                    return [] if mode == 'no-control' else ['/owned/Files/index-control.txt']
+                if mode == 'absent': return []
+                names = ['document-a.hwp', 'document-b.hwpx', 'document-c.hwp']
+                if term == smoke.KOREAN: names = names[:2]
+                if mode == 'partial': names = names[:1]
+                return ['/owned/Files/' + name for name in names]
+            with self.subTest(mode=mode), patch.object(smoke.time, 'monotonic', side_effect=lambda: now[0]), \
+                    patch.object(smoke.time, 'sleep', side_effect=sleep), patch.object(smoke, 'query', side_effect=query):
+                if mode in ('absent', 'searchable'):
+                    result = smoke.observe_reinstall_baseline(state, 'baseline')
+                    self.assertEqual(result['mode'], mode)
+                    self.assertEqual(result['stable_seconds'], 4)
+                else:
+                    with self.assertRaises(RuntimeError):
+                        smoke.observe_reinstall_baseline(state, 'baseline')
+                    self.assertFalse(any(r['result'] == 'PASS' for r in state['results']))
+
+    def test_observation_deadline_timeout_is_not_command_failure(self):
+        for seconds, failure in ((0.126, TimeoutError), (30, smoke.CommandTimeout)):
+            now = [0]
+            def timed_out(*args, timeout):
+                now[0] += timeout
+                raise smoke.CommandTimeout("mdfind timed out")
+            with self.subTest(seconds=seconds), patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), \
+                    patch.object(smoke, "query", side_effect=timed_out), self.assertRaises(failure):
+                smoke.query_before_deadline({}, "Word", seconds)
+
+    def test_cleanup_unregisters_owned_app_after_failed_reinstall_removal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state, _ = self.reinstall_fixture(directory)
+            state.update(evidence=directory, original_apps={}, providers_before={})
+            app = Path(state['install_app'])
+            shutil.rmtree(app)
+            with patch.object(smoke.Path, 'home', return_value=Path(directory)), \
+                    patch.object(smoke, 'stop_candidate'), patch.object(smoke, 'providers', return_value={}), \
+                    patch.object(smoke, 'run', return_value='') as command:
+                smoke.cleanup(state)
+            self.assertIn([smoke.LSREGISTER, '-u', app], [c.args[0] for c in command.call_args_list])
+            self.assertFalse(Path(state['workspace']).exists())
+            self.assertFalse(Path(state['install_root']).exists())
+            self.assertFalse(any('-kill' in c.args[0] for c in command.call_args_list))
+
+    def test_cleanup_checks_ownership_before_unregistering_missing_app(self):
+        state = {'id': 'test', 'install_root': '/Applications/Alhangeul.app'}
+        with patch.object(smoke, 'unregister_app') as unregister, self.assertRaises(ValueError):
+            smoke.cleanup(state)
+        unregister.assert_not_called()
+
     def reinstall_fixture(self, directory):
         home = Path(directory)
         workspace = home / "Documents/AlhangeulSpotlightSmoke-repeat"
@@ -62,6 +118,7 @@ class SmokeTests(unittest.TestCase):
             def launch(current): current["launch_count"] += 1
             with patch.object(smoke.Path, "home", return_value=Path(directory)), \
                  patch.object(smoke, "stop_candidate"), patch.object(smoke, "expect_paths"), \
+                 patch.object(smoke, "observe_reinstall_baseline", return_value={"mode": "absent"}), \
                  patch.object(smoke, "run", side_effect=run) as commands, patch.object(smoke, "launch", side_effect=launch):
                 smoke.prepare_reinstall(state, plist)
                 self.assertFalse(Path(state["install_app"]).exists())
@@ -79,7 +136,8 @@ class SmokeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             state, plist = self.reinstall_fixture(directory)
             with patch.object(smoke.Path, "home", return_value=Path(directory)), \
-                 patch.object(smoke, "stop_candidate"), patch.object(smoke, "expect_paths"):
+                 patch.object(smoke, "stop_candidate"), patch.object(smoke, "expect_paths"), \
+                 patch.object(smoke, "observe_reinstall_baseline", return_value={"mode": "absent"}):
                 smoke.prepare_reinstall(state, plist)
                 data = plistlib.loads(plist.read_bytes())
                 data["alhangeul.spotlight.reimport.requestedInstallation"]["installationIdentifier"] = "changed"
@@ -114,7 +172,8 @@ class SmokeTests(unittest.TestCase):
             state, plist = self.reinstall_fixture(directory)
             state["launch_count"] = 2
             state["reinstall"] = {"phase": "launched", "receipt_plist": str(plist),
-                                  "before_receipt": smoke.reindex_receipt(plist), "prepared_corpus": smoke.corpus_snapshot(state)}
+                                  "before_receipt": smoke.reindex_receipt(plist), "prepared_corpus": smoke.corpus_snapshot(state),
+                                  "before_launch_search": {"mode": "absent"}}
             with patch.object(smoke, "index"), patch.object(smoke, "verify"):
                 with self.assertRaisesRegex(ValueError, "not recorded"):
                     smoke.reinstall_search(state)
@@ -546,7 +605,7 @@ class SmokeTests(unittest.TestCase):
             def sleep(seconds): now[0] += seconds
             def command(args, *unused, **kwargs):
                 return str(Path(state["install_app"]) / smoke.PLUGIN) if args[0] == "mdimport" else ""
-            with patch.object(smoke, "run", side_effect=command), patch.object(smoke, "providers", return_value={}), \
+            with patch.object(smoke, "owned_locations"), patch.object(smoke, "run", side_effect=command), patch.object(smoke, "providers", return_value={}), \
                  patch.object(smoke.time, "monotonic", side_effect=lambda: now[0]), patch.object(smoke.time, "sleep", side_effect=sleep):
                 with self.assertRaisesRegex(RuntimeError, "catalog is stale"):
                     smoke.cleanup(state)
@@ -571,7 +630,7 @@ class SmokeTests(unittest.TestCase):
                 self.assertTrue((files / "index-control.txt").exists())
                 self.assertFalse((files / "document.hwp").exists())
                 raise RuntimeError("stale indexed path")
-            with patch.object(smoke, "run", return_value=""), patch.object(smoke, "providers", return_value={}), \
+            with patch.object(smoke, "owned_locations"), patch.object(smoke, "run", return_value=""), patch.object(smoke, "providers", return_value={}), \
                  patch.object(smoke, "expect_paths", side_effect=fail):
                 with self.assertRaisesRegex(RuntimeError, "new smoke run"):
                     smoke.cleanup(state)

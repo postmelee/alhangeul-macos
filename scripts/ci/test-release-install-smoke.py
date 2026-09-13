@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import plistlib
 import stat
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -16,9 +17,104 @@ spec = importlib.util.spec_from_file_location('release_smoke', Path(__file__).wi
 smoke = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(smoke)
 probe = smoke.module('probe_test', 'install-environment-probe.py')
+source_policy = smoke.module('source_policy_test', 'release-install-source.py')
+
+
+def source_repository(root):
+    def git(*args):
+        return subprocess.check_output(['git', '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+            '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', *args],
+            cwd=root, stderr=subprocess.DEVNULL).decode().strip()
+    git('init', '-b', 'main')
+    (root / '.gitignore').write_text('build.noindex/\n')
+    for name in ('HostApp', 'QLExtension', 'ThumbnailExtension', 'SpotlightImporter'):
+        path = root / f'Sources/{name}/Info.plist'
+        path.parent.mkdir(parents=True)
+        path.write_bytes(plistlib.dumps({'CFBundleShortVersionString': '0.2.0', 'CFBundleVersion': '18'}))
+    git('add', '.'); git('commit', '-m', 'candidate')
+    sha = git('rev-parse', 'HEAD')
+    git('tag', 'v0.2.0')
+    git('update-ref', 'refs/remotes/origin/main', sha)
+    return git, sha
 
 
 class CandidateTests(unittest.TestCase):
+    def test_trial_state_save_cannot_replace_primary_failure(self):
+        def fail_verification(state):
+            raise ValueError('original environment failure')
+        def fail_save(*args):
+            raise OSError('disk full')
+        system = SimpleNamespace(environment=fail_verification, save=fail_save)
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)
+            with self.assertRaisesRegex(ValueError, 'original environment failure') as raised:
+                smoke.installation_trials(system, {}, output / 'state.json', output)
+            self.assertIn('disk full', raised.exception.__notes__[0])
+
+    def test_reviewed_install_harness_source_and_product_boundaries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            git, sha = source_repository(root)
+            candidate = dict(self.candidate, source_sha=sha)
+            original = source_policy.prove(candidate, 'refs/tags/v0.2.0', sha, root, checkout=True)
+            self.assertEqual(original['fixture_source_sha'], sha)
+            path = root / 'scripts/ci/release-install-smoke.py'
+            path.parent.mkdir(parents=True); path.write_text('# reviewed fix')
+            git('add', '.'); git('commit', '-m', 'harness fix')
+            head = git('rev-parse', 'HEAD')
+            # Branch naming alone cannot qualify unmerged tooling.
+            with self.assertRaises(subprocess.CalledProcessError):
+                source_policy.prove(candidate, 'refs/heads/main', head, root)
+            git('update-ref', 'refs/remotes/origin/main', head)
+            proof = source_policy.prove(candidate, 'refs/heads/main', head, root, checkout=True)
+            self.assertEqual(proof['tooling_only_changes'], ['scripts/ci/release-install-smoke.py'])
+            for ref in ('refs/tags/v0.2.0', 'refs/heads/publish/task535', 'refs/tags/main'):
+                with self.subTest(ref=ref), self.assertRaises(ValueError):
+                    source_policy.prove(candidate, ref, head, root)
+            path.write_text('dirty')
+            with self.assertRaises(ValueError):
+                source_policy.prove(candidate, 'refs/heads/main', head, root, checkout=True)
+            git('reset', '--hard', head)
+            for changed in ('Sources/HostApp/Info.plist', 'RustBridge/examples/spotlight_fixtures.rs',
+                            'rhwp-core.lock', 'scripts/ci/verify-universal-macos-app.sh',
+                            '.github/actions/new/action.yml', 'docs/index.html'):
+                path = root / changed; path.parent.mkdir(parents=True, exist_ok=True); path.write_text('changed')
+                git('add', '.'); git('commit', '-m', 'forbidden change')
+                tool = git('rev-parse', 'HEAD'); git('update-ref', 'refs/remotes/origin/main', tool)
+                with self.subTest(changed=changed), self.assertRaises(ValueError):
+                    source_policy.prove(candidate, 'refs/heads/main', tool, root)
+                git('reset', '--hard', head)
+            git('update-ref', 'refs/remotes/origin/main', head)
+            for value in ('19', 'missing'):
+                with self.assertRaises(ValueError):
+                    source_policy.prove(dict(candidate, expected_build=value), 'refs/heads/main', head, root)
+            git('tag', '-f', 'v0.2.0', head)
+            with self.assertRaises(ValueError):
+                source_policy.prove(candidate, 'refs/heads/main', head, root)
+
+    def test_primary_cleanup_and_detach_failures_are_preserved(self):
+        for primary in (None, ValueError('reinstall baseline failed')):
+            with self.subTest(primary=primary), tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / 'state.json'
+                path.write_text('{}')
+                def cleanup(state):
+                    state['phase'] = 'cleanup-pending-index'
+                    raise RuntimeError('catalog stale')
+                def detach(*args):
+                    raise RuntimeError('detach failed')
+                system = SimpleNamespace(cleanup=cleanup, save=lambda p, s: p.write_text(json.dumps(s)))
+                result = {}
+                if primary is None:
+                    with self.assertRaisesRegex(RuntimeError, 'catalog stale'):
+                        smoke.finish_trial(system, path, True, Path(tmp), detach, result, primary)
+                else:
+                    smoke.finish_trial(system, path, True, Path(tmp), detach, result, primary)
+                    self.assertEqual(result['verification_error'], str(primary))
+                self.assertEqual(result['cleanup_error'], 'catalog stale')
+                self.assertEqual(result['detach_error'], 'detach failed')
+                self.assertEqual(result['status'], 'HARNESS_ERROR')
+                self.assertEqual(json.loads(path.read_text())['phase'], 'cleanup-pending-index')
+
     def receipt_fixture(self, home, name, identifier='com.postmelee.alhangeul', importer='/candidate.app/importer'):
         root = home / 'Library/Containers' / name
         root.mkdir(parents=True)
@@ -154,7 +250,7 @@ class CandidateTests(unittest.TestCase):
                 self.assertFalse((root/'out').exists())
 
     def states(self):
-        first = {'id': 'owned-test', 'automatic': True, 'install_app': '/candidate.app',
+        first = {'id': 'owned-test', 'automatic': True, 'install_app': '/candidate.app', 'files': '/owned/Files',
                  'source_app_hashes': {'app': 'hash'}, 'source_importer_hashes': {'importer': 'hash'},
                  'installed_bundle_dates_ns': {'app': 1, 'importer': 1}, 'installed_object': [1, 2, 3],
                  'prepared_corpus': {'document-a.hwp': [1, 2, 'hash']},
@@ -171,20 +267,31 @@ class CandidateTests(unittest.TestCase):
         reinstalled['reinstall'] = {'phase': 'searchable', 'before_receipt': stopped['initial_receipt'],
                                    'after_receipt': dict(stopped['initial_receipt'], installationIdentifier='new-object'),
                                    'before_object': first['installed_object'], 'after_object': [1, 4, 5],
-                                   'prepared_corpus': first['prepared_corpus']}
+                                   'prepared_corpus': first['prepared_corpus'], 'search_outcome': 'recovered'}
+        baseline = {'mode': 'absent', 'english_paths': [], 'korean_paths': [],
+                    'control_paths': ['/owned/Files/index-control.txt'],
+                    'stable_seconds': 4, 'elapsed_seconds': 4, 'timeout_seconds': 60}
+        reinstalled['reinstall'].update(before_copy_search=copy.deepcopy(baseline),
+                                        before_launch_search=copy.deepcopy(baseline))
         reinstalled['results'].extend({'case': c, 'result': 'PASS'} for c in
                                      ('reinstall-old-body-removed', 'reinstall-old-korean-removed',
-                                      'before-reinstall-body-absent', 'before-reinstall-korean-absent',
-                                      'same-version-reinstall-prepared', 'reinstall-body-still-absent',
+                                      'before-reinstall-search-state', 'same-version-reinstall-prepared',
+                                      'before-reinstall-launch-search-state',
                                       'same-version-reinstall-launched', 'body-only-search',
                                       'korean-body-only-search', 'metadata-document-a.hwp',
                                       'metadata-document-b.hwpx', 'metadata-document-c.hwp',
                                       'automatic-same-version-reinstall-search'))
+        for row in reinstalled['results']:
+            if row['case'] in ('before-reinstall-search-state', 'before-reinstall-launch-search-state'):
+                row.update(copy.deepcopy(baseline))
+            if row['case'] == 'automatic-same-version-reinstall-search':
+                row['search_outcome'] = 'recovered'
         restopped = copy.deepcopy(reinstalled)
         restopped['results'].extend({'case': c, 'result': 'PASS'} for c in
                                    ('candidate-app-not-running', 'body-only-search', 'korean-body-only-search',
                                     'metadata-document-a.hwp', 'metadata-document-b.hwpx', 'metadata-document-c.hwp',
                                     'automatic-same-version-reinstall-search'))
+        restopped['results'][-1]['search_outcome'] = 'recovered'
         final = copy.deepcopy(restopped)
         final.update(phase='cleaned', cleanup_index_verified=True, assisted_actions=['lifecycle'])
         final['results'].extend({'case': c, 'result': 'PASS'} for c in
@@ -193,6 +300,39 @@ class CandidateTests(unittest.TestCase):
 
     def test_complete_evidence(self):
         smoke.require_complete(*self.states())
+
+    def test_retained_search_is_accepted_only_as_maintained(self):
+        states = self.states()
+        baseline = {'mode': 'searchable', 'english_paths': ['/owned/Files/' + name for name in
+                     ('document-a.hwp', 'document-b.hwpx', 'document-c.hwp')],
+                    'korean_paths': ['/owned/Files/document-a.hwp', '/owned/Files/document-b.hwpx'],
+                    'control_paths': ['/owned/Files/index-control.txt'],
+                    'stable_seconds': 4, 'elapsed_seconds': 6, 'timeout_seconds': 60}
+        for state in (states[3], states[4], states[2]):
+            state['reinstall'].update(before_copy_search=copy.deepcopy(baseline),
+                                      before_launch_search=copy.deepcopy(baseline), search_outcome='maintained')
+            for row in state['results']:
+                if row['case'] in ('before-reinstall-search-state', 'before-reinstall-launch-search-state'):
+                    row.update(baseline)
+                if row['case'] == 'automatic-same-version-reinstall-search':
+                    row['search_outcome'] = 'maintained'
+        smoke.require_complete(*states)
+        for state in (states[3], states[4], states[2]):
+            state['reinstall']['search_outcome'] = 'recovered'
+        with self.assertRaisesRegex(ValueError, '분류'):
+            smoke.require_complete(*states)
+
+    def test_incomplete_or_fabricated_baseline_rejected(self):
+        for field, value in [('control_paths', []), ('english_paths', ['/owned/Files/document-a.hwp']),
+                             ('stable_seconds', 0), ('elapsed_seconds', 601), ('mode', 'partial')]:
+            states = self.states()
+            for state in (states[3], states[4], states[2]):
+                state['reinstall']['before_launch_search'][field] = value
+                for row in state['results']:
+                    if row['case'] == 'before-reinstall-launch-search-state':
+                        row[field] = value
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                smoke.require_complete(*states)
 
     def test_first_install_only_is_not_release_eligible(self):
         with self.assertRaisesRegex(ValueError, 'snapshot'):
@@ -230,11 +370,11 @@ class CandidateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '종료 후 검색'):
             smoke.require_complete(*states)
 
-    def test_missing_pre_reinstall_absence_rejected_even_with_later_pass(self):
+    def test_missing_pre_reinstall_baseline_rejected_even_with_later_pass(self):
         states = self.states()
         for state in (states[3], states[4], states[2]):
-            state['results'] = [r for r in state['results'] if r['case'] != 'before-reinstall-body-absent']
-        with self.assertRaisesRegex(ValueError, '사전 미검색'):
+            state['results'] = [r for r in state['results'] if r['case'] != 'before-reinstall-search-state']
+        with self.assertRaisesRegex(ValueError, '사전 상태'):
             smoke.require_complete(*states)
 
     def test_original_search_cannot_replace_reinstall_search(self):
