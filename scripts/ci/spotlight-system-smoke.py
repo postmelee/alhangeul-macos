@@ -28,6 +28,10 @@ TRUNCATED = "TruncatedDocumentMarker"
 OMITTED = "OmittedDocumentMarker"
 
 
+class CommandTimeout(RuntimeError):
+    """명령 timeout과 전체 검색 관찰 기한을 구분하기 위한 오류."""
+
+
 def run(args, log=None, check=True, timeout=30):
     def output_text(stdout, stderr):
         # TimeoutExpired는 text=True에서도 캡처 결과를 bytes로 제공할 수 있다.
@@ -35,18 +39,18 @@ def run(args, log=None, check=True, timeout=30):
             return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else (value or "")
         return decode(stdout) + decode(stderr)
 
-    def failure(message, output):
+    def failure(message, output, error_type=RuntimeError):
         if log:
             Path(log).write_text(output)
         tail = "\n".join(output.splitlines()[-8:])[-2000:] or "(no output captured)"
         location = f"; log: {log}" if log else ""
-        return RuntimeError(f"{message}{location}\n{tail}")
+        return error_type(f"{message}{location}\n{tail}")
 
     try:
         result = subprocess.run([str(a) for a in args], capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired as error:
         raise failure(f"command timed out after {timeout}s: {args[0]}",
-                      output_text(error.stdout, error.stderr)) from error
+                      output_text(error.stdout, error.stderr), CommandTimeout) from error
     output = output_text(result.stdout, result.stderr)
     if check and result.returncode:
         raise failure(f"command failed ({result.returncode}): {args[0]}", output)
@@ -112,10 +116,7 @@ def expect_paths(state, token, names, label, timeout=None):
     while True:
         query_succeeded = False
         def read(term):
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                raise TimeoutError("search observation deadline reached")
-            return query(state, term, timeout=min(30, remaining))
+            return query_before_deadline(state, term, deadline)
         try:
             actual = read(token)
             # 대조를 실제 조회한다. 양성 검색의 실패에서도 서비스 상태를 추정하지 않는다.
@@ -147,6 +148,18 @@ def expect_paths(state, token, names, label, timeout=None):
                                      "elapsed_seconds": round(now - started, 2), "timeout_seconds": timeout})
             raise RuntimeError(f"Spotlight query timeout: {label}")
         time.sleep(min(2, max(0, deadline - now)))
+
+
+def query_before_deadline(state, term, deadline):
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise TimeoutError("search observation deadline reached")
+    try:
+        return query(state, term, timeout=min(30, remaining))
+    except CommandTimeout as error:
+        if remaining < 30 and time.monotonic() >= deadline:
+            raise TimeoutError("search observation deadline reached during query") from error
+        raise
 
 
 def prepare(args):
@@ -646,13 +659,15 @@ def reinstall_search(state):
 
 
 def cleanup(state):
+    owned_locations(state)
     app = Path(state["install_app"])
     root = Path(state["install_root"])
     workspace = Path(state["workspace"])
     stop_candidate(state)
-    if app.exists():
-        unregister_app(app)
-        run(["qlmanage", "-r", "cache"], Path(state["evidence"]) / "quicklook-cache-cleanup.txt")
+    # 재설치 준비 실패는 이미 앱을 지운 상태일 수 있다. 소유 경로를 확인한 후
+    # 파일 존재 여부와 무관하게 그 경로의 등록 해제를 요청한다.
+    unregister_app(app)
+    run(["qlmanage", "-r", "cache"], Path(state["evidence"]) / "quicklook-cache-cleanup.txt")
     if root.exists():
         shutil.rmtree(root)
     state["phase"] = "cleanup-pending-index"

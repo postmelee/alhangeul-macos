@@ -19,6 +19,29 @@ probe = smoke.module('probe_test', 'install-environment-probe.py')
 
 
 class CandidateTests(unittest.TestCase):
+    def test_primary_cleanup_and_detach_failures_are_preserved(self):
+        for primary in (None, ValueError('reinstall baseline failed')):
+            with self.subTest(primary=primary), tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / 'state.json'
+                path.write_text('{}')
+                def cleanup(state):
+                    state['phase'] = 'cleanup-pending-index'
+                    raise RuntimeError('catalog stale')
+                def detach(*args):
+                    raise RuntimeError('detach failed')
+                system = SimpleNamespace(cleanup=cleanup, save=lambda p, s: p.write_text(json.dumps(s)))
+                result = {}
+                if primary is None:
+                    with self.assertRaisesRegex(RuntimeError, 'catalog stale'):
+                        smoke.finish_trial(system, path, True, Path(tmp), detach, result, primary)
+                else:
+                    smoke.finish_trial(system, path, True, Path(tmp), detach, result, primary)
+                    self.assertEqual(result['verification_error'], str(primary))
+                self.assertEqual(result['cleanup_error'], 'catalog stale')
+                self.assertEqual(result['detach_error'], 'detach failed')
+                self.assertEqual(result['status'], 'HARNESS_ERROR')
+                self.assertEqual(json.loads(path.read_text())['phase'], 'cleanup-pending-index')
+
     def receipt_fixture(self, home, name, identifier='com.postmelee.alhangeul', importer='/candidate.app/importer'):
         root = home / 'Library/Containers' / name
         root.mkdir(parents=True)

@@ -305,6 +305,38 @@ def require_complete(first, stopped, final, reinstalled=None, restopped=None):
         raise ValueError('필수 lifecycle/정리 증거 누락')
 
 
+def finish_trial(smoke, state_path, mounted, mount, run, result, primary_error):
+    """정리 실패를 보존하되 이미 발생한 검증 오류를 덮어쓰지 않는다."""
+    errors = []
+    if primary_error is not None:
+        result['verification_error'] = str(primary_error)
+    state = None
+    try:
+        if state_path.exists():
+            state = json.loads(state_path.read_text())
+            if state.get('index_environment') == 'unavailable':
+                result['status'] = 'ENVIRONMENT_UNAVAILABLE'
+            smoke.cleanup(state)
+    except Exception as error:
+        errors.append(('cleanup_error', error))
+    finally:
+        if state is not None:
+            try:
+                smoke.save(state_path, state)
+            except Exception as error:
+                errors.append(('state_save_error', error))
+        if mounted:
+            try:
+                run(['hdiutil', 'detach', str(mount)])
+            except Exception as error:
+                errors.append(('detach_error', error))
+    if errors:
+        result['status'] = 'HARNESS_ERROR'
+        result.update({key: str(error) for key, error in errors})
+        if primary_error is None:
+            raise errors[0][1]
+
+
 def verify(output, candidate, fixtures, result):
     probe = module('install_probe', 'install-environment-probe.py')
     env = probe.probe()
@@ -332,6 +364,7 @@ def verify(output, candidate, fixtures, result):
         counter += 1
         return smoke.run(argv, output / f'command-{counter:02d}.log', timeout=timeout)
 
+    primary_error = None
     try:
         run(['xcrun', 'stapler', 'validate', str(dmg)])
         run(['spctl', '--assess', '--type', 'open', '--context', 'context:primary-signature', '--verbose', str(dmg)])
@@ -364,24 +397,11 @@ def verify(output, candidate, fixtures, result):
         smoke.prepare(args)
         state = json.loads(state_path.read_text())
         installation_trials(smoke, state, state_path, output)
+    except Exception as error:
+        primary_error = error
+        raise
     finally:
-        try:
-            if state_path.exists():
-                state = json.loads(state_path.read_text())
-                if state.get('index_environment') == 'unavailable':
-                    result['status'] = 'ENVIRONMENT_UNAVAILABLE'
-                try:
-                    smoke.owned_locations(state)
-                    smoke.cleanup(state)
-                except Exception as error:
-                    result['cleanup_error'] = str(error)
-                    result['status'] = 'HARNESS_ERROR'
-                    raise
-                finally:
-                    smoke.save(state_path, state)
-        finally:
-            if mounted:
-                run(['hdiutil', 'detach', str(mount)])
+        finish_trial(smoke, state_path, mounted, mount, run, result, primary_error)
     first = json.loads((output / 'first-launch.json').read_text())
     stopped = json.loads((output / 'stopped-search.json').read_text())
     final = json.loads(state_path.read_text())
