@@ -11,3 +11,7 @@
 ## Stage 3 — 불변 후보의 도구 출처·문서·PR
 
 tag 또는 검토된 main에서만 실행하고 별도 도구 SHA는 후보 descendant이며 검증/운영 허용 파일만 바뀌어야 한다. fixture는 후보 소스에서 생성한다. 실행 API head SHA, artifact head SHA, 결과 harness SHA와 출처 증거를 대조하고 승격 시 Git 이력에서 재계산한다. 실패한 attempt와 새 증거를 분리하는 runbook, 릴리즈 기록, 최종 보고서를 갱신한다. 관련 회귀·workflow 구문·diff 검사를 통과한 PR을 작성한다. 실제 VM PASS나 공개 완료로 기록하지 않는다.
+
+## Stage 4 — 비동기 재설치 요청 기록 관찰
+
+30초 한도의 읽기 전용 receipt 관찰을 추가하고 대기 경과·한도·관찰 횟수를 기록한다. 오래된 기록→새 기록, 기록 미갱신, 경로/빌드/mtime 불일치, malformed/읽기 오류, deadline 초과 회귀를 검증한다. 같은 corpus·원래 후보 불변 검사를 관찰 전후 유지한다. 새 VM 검증은 PR/main 인계 뒤 수행하며 ARM 실패와 Intel PASS를 각각 보고한다.
