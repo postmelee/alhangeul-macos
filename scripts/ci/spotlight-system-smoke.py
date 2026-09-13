@@ -682,6 +682,36 @@ def reinstall_app(state):
     record(state, "same-version-reinstall-launched")
 
 
+def wait_for_reinstall_receipt(state, timeout=30):
+    """이미 검색되더라도 비동기 worker의 새 요청 기록이 보일 때까지 관찰한다."""
+    trial = state["reinstall"]
+    started = time.monotonic()
+    deadline = started + timeout
+    attempts = 0
+    while True:
+        attempts += 1
+        try:
+            receipt = reindex_receipt(trial["receipt_plist"])
+            for key in ["importerPath", "buildIdentifier", "modificationDate"]:
+                if receipt.get(key) != trial["before_receipt"].get(key):
+                    raise ValueError("reinstall changed path, build or modification date")
+        except (OSError, ValueError, plistlib.InvalidFileException) as error:
+            record(state, "reinstall-request-receipt", "FAIL", reason=type(error).__name__,
+                   elapsed_seconds=round(time.monotonic() - started, 2), timeout_seconds=timeout,
+                   attempts=attempts)
+            raise
+        now = time.monotonic()
+        if now <= deadline and receipt["installationIdentifier"] != trial["before_receipt"]["installationIdentifier"]:
+            record(state, "reinstall-request-receipt", elapsed_seconds=round(now - started, 2),
+                   timeout_seconds=timeout, attempts=attempts)
+            return receipt
+        if now >= deadline:
+            record(state, "reinstall-request-receipt", "FAIL", reason="new installation request was not recorded",
+                   elapsed_seconds=round(now - started, 2), timeout_seconds=timeout, attempts=attempts)
+            raise ValueError("new installation request was not recorded within receipt observation timeout")
+        time.sleep(min(1, deadline - now))
+
+
 def reinstall_search(state):
     trial = state.get("reinstall", {})
     if (not state.get("automatic") or state.get("assisted_actions") or state.get("launch_count") != 2
@@ -692,12 +722,7 @@ def reinstall_search(state):
     assert_automatic_candidate_unchanged(state)
     index(state)
     verify(state)
-    receipt = reindex_receipt(trial["receipt_plist"])
-    for key in ["importerPath", "buildIdentifier", "modificationDate"]:
-        if receipt.get(key) != trial["before_receipt"].get(key):
-            raise ValueError("reinstall changed path, build or modification date")
-    if receipt["installationIdentifier"] == trial["before_receipt"]["installationIdentifier"]:
-        raise ValueError("new installation request was not recorded")
+    receipt = wait_for_reinstall_receipt(state)
     assert_automatic_candidate_unchanged(state)
     if corpus_snapshot(state) != trial["prepared_corpus"]:
         raise ValueError("reinstall corpus changed during observation")
