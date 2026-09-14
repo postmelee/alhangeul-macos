@@ -1,0 +1,93 @@
+{
+  "release": "v0.2.2",
+  "build": "20",
+  "source_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+  "dmg_sha256": "8d8b8cbd24376fcd2c7ebd48343be44edc1f0f154a1e75282714798806ed4b90",
+  "dmg_size": 192864948,
+  "published_at": "2026-09-14T13:18:49Z",
+  "promotion_run_id": 34848336828,
+  "validation_run_id": 34780410801,
+  "validation_attempt": 1,
+  "validation_harness_sha": "bcdcd72cbda642af052b6ae985f2aa5fdae0fd06",
+  "vm_artifacts": {
+    "arm64": 10324414484,
+    "intel": 10325031688
+  },
+  "public_surfaces": {
+    "result": "PASS",
+    "dmg_sha256": "8d8b8cbd24376fcd2c7ebd48343be44edc1f0f154a1e75282714798806ed4b90",
+    "size": 192864948,
+    "appcast_version": "20",
+    "appcast_enclosure": {
+      "url": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.2/alhangeul-macos-0.2.2.dmg",
+      "length": "192864948",
+      "type": "application/octet-stream",
+      "{http://www.andymatuschak.org/xml-namespaces/sparkle}edSignature": "gG2CB3ikicsvIoVC6z8vVvteLfFxjHiSEfQw4McBsa26wRIATXNC9G3+A0DZyceSpr8a0zE4VCzTX1K3O180Cg=="
+    },
+    "pages_version": "0.2.2"
+  },
+  "sparkle": {
+    "environment": "macOS 26.5.2 (25F84), prior target installation; preferences and receipts preserved",
+    "from_version": "0.2.0 (18)",
+    "to_version": "0.2.2 (20)",
+    "automatic_relaunch": {
+      "result": "PASS",
+      "old_pid": 38964,
+      "new_pid": 41039,
+      "observed_at": "2026-09-14T22:23:52.017851+09:00",
+      "ui_did_not_launch_app_before_process_probe": true
+    },
+    "installed_fingerprint_matches_candidate": true,
+    "new_receipt_after_sparkle": true,
+    "existing_corpus_classification": "maintained",
+    "fresh_corpus_first_complete_observation_seconds": 11.49,
+    "search_counts": {
+      "before_update": {
+        "english": 3,
+        "korean": 2,
+        "txt": 1
+      },
+      "existing_after_update": {
+        "english": 3,
+        "korean": 2,
+        "txt": 1
+      },
+      "fresh_initial": {
+        "english": 0,
+        "korean": 0,
+        "txt": 0
+      },
+      "fresh_after_update": {
+        "english": 3,
+        "korean": 2,
+        "txt": 1
+      }
+    },
+    "manual_import_or_registration_before_search": false,
+    "app_stopped": true,
+    "stopped_search_existing_and_fresh": "PASS (each 3/2/1)",
+    "actual_importer": "/Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+    "document_ui": {
+      "hwp": "PASS",
+      "hwpx": "PASS"
+    },
+    "finder_ui": {
+      "hwp_preview": "PASS",
+      "hwpx_preview": "PASS",
+      "thumbnails": "PASS",
+      "active_preview_process": "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex/Contents/MacOS/AlhangeulPreview",
+      "registration_hygiene": "PASS",
+      "registration_repair_after_update": false
+    },
+    "standard_extension_helper": "PASS; registration repair 0; separate samples after natural search/Finder observations",
+    "spotlight_gui": "PENDING"
+  },
+  "limitations": [
+    "macOS 12 runtime unavailable",
+    "Existing Mac is not clean OS or causal recovery evidence",
+    "11.49 seconds is one observation, not a latency guarantee",
+    "Actual write-failure injection not performed; #538 automated failure contract passed",
+    "#525 recovery candidates remains separate",
+    "Homebrew remains 0.1.11"
+  ]
+}

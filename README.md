@@ -41,7 +41,7 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 장기 방향은 WebView fallback을 유지하면서 native macOS viewer/editor shell로 점진적으로 옮겨가는 것입니다. 이 경로는 Swift가 HWP renderer 전체를 재구현하는 것이 아니라, Rust/rhwp Skia renderer와 Swift 편집 UI/오버레이를 결합하는 방향으로 둡니다. 세부 구현 제약과 날짜가 필요한 판단은 [제품 로드맵 메모](mydocs/tech/product_roadmap_notes.md)에 분리해 둡니다.
 
-`v0.2.0`부터 평문 HWP3/HWP5/HWPX의 본문을 [Spotlight에서 검색](https://github.com/postmelee/alhangeul-macos/issues/337)할 수 있습니다. **Applications에 설치하고 한 번 실행한 뒤 검색 준비와 문서 색인에 시간이 걸릴 수 있습니다.** 동일 버전을 제거·재설치한 검증에서 이전 요청 기록에 따른 기존 문서 자동 색인 누락이 관찰되어 [#513](https://github.com/postmelee/alhangeul-macos/issues/513)에서 조사 중입니다. 계속 검색되지 않으면 단순 지연으로 단정하지 말고 [지원 범위·문제 구분 안내](mydocs/manual/spotlight_search_guide.md)를 확인해 주세요. 검증 환경과 결과는 [릴리스 기록](mydocs/release/v0.2.0.md)에 구분해 두었습니다.
+`v0.2.0`부터 평문 HWP3/HWP5/HWPX의 본문을 [Spotlight에서 검색](https://github.com/postmelee/alhangeul-macos/issues/337)할 수 있습니다. **Applications에 설치하고 한 번 실행한 뒤 검색 준비와 문서 색인에 시간이 걸릴 수 있습니다.** `v0.2.2`에서는 동일 버전을 제거·재설치해도 새 설치로 인식하여 기존 문서의 검색 준비를 다시 요청하도록 보완했습니다. 계속 검색되지 않으면 단순 지연으로 단정하지 말고 [지원 범위·문제 구분 안내](mydocs/manual/spotlight_search_guide.md)를 확인해 주세요. 검증 환경과 결과는 [릴리스 기록](mydocs/release/v0.2.2.md)에 구분해 두었습니다.
 
 > [!NOTE]
 > **메인테이너 현재 결정(2026-06-01)**: 당분간 새 편집 기능을 빠르게 넓히기보다 upstream `rhwp` Skia renderer의 시각 정합성을 높이고, 그 결과를 Quick Look/Thumbnail/PDF/native viewer preview 정확도로 연결하는 것으로 결정했습니다. 앱의 기본 preview 경로는 안정성 gate가 통과될 때까지 현행 fallback을 유지하며, Skia 경로는 visual diff와 성능 검증을 거쳐 단계적으로 확대합니다. 다만 이는 앱 배포나 upstream `rhwp` release 반영을 멈춘다는 뜻이 아니며, 안정적인 `rhwp` release tag가 나오면 core, bundled `rhwp-studio`, provenance, smoke 검증을 맞춰 계속 반영하고 필요한 patch release도 이어갑니다. 자세한 배경과 기여 방향은 [Discussion #325](https://github.com/postmelee/alhangeul-macos/discussions/325)에 정리했습니다.
@@ -55,16 +55,16 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 ## 릴리즈 안내
 
-### v0.2.0
+### v0.2.2
 
-`v0.2.0 (18)`은 한글 문서의 Spotlight 본문 검색, 새 문서의 첫 저장 오류 수정, Word(.doc)·HTML 내보내기 창 보완을 포함합니다. 문서 처리 엔진과 편집 화면은 직전 버전과 같은 `rhwp v0.8.6`을 사용합니다.
+`v0.2.2 (20)`은 새 문서를 저장한 뒤 닫기·앱 종료 시 미저장 경고가 반복되는 문제를 수정하고, 동일 버전 재설치 후 Spotlight 검색 준비를 보완했습니다. 문서 처리 엔진과 편집 화면은 직전 버전과 같은 `rhwp v0.8.6`을 사용합니다.
 
 - 포함된 `rhwp`: [`v0.8.6`](https://github.com/edwardkim/rhwp/releases/tag/v0.8.6), core·bundled Studio commit `f1f9c6ae58344ee9368996d3543f76b9345cf227`
-- 릴리스 기록: [v0.2.0 검증·제한 사항](mydocs/release/v0.2.0.md), [업데이트 문서](https://postmelee.github.io/alhangeul-macos/updates/v0.2.0.html)
-- 다운로드: [GitHub Release v0.2.0](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.0). macOS 12 이상을 대상으로 하는 Intel·Apple Silicon 공용 서명·공증 DMG입니다. 이번 최소 macOS 12 실행 검증은 환경 부재로 수행하지 못했습니다.
+- 릴리스 기록: [v0.2.2 검증·제한 사항](mydocs/release/v0.2.2.md), [업데이트 문서](https://postmelee.github.io/alhangeul-macos/updates/v0.2.2.html)
+- 다운로드: [GitHub Release v0.2.2](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.2). macOS 12 이상을 대상으로 하는 Intel·Apple Silicon 공용 서명·공증 DMG입니다. 이번 최소 macOS 12 실행 검증은 환경 부재로 수행하지 못했습니다.
 - 기존 앱: `알한글 → 업데이트 확인...`에서 업데이트할 수 있습니다.
 
-GitHub Release와 Sparkle의 최신 공개 버전은 `v0.2.0 (18)`입니다. **Homebrew Cask는 별도 배포 전까지 `v0.1.11 (17)`을 유지합니다.** `brew install --cask postmelee/tap/alhangeul`의 배포 버전과 직접 다운로드 버전을 구분해 주세요.
+GitHub Release와 Sparkle의 최신 공개 버전은 `v0.2.2 (20)`입니다. **Homebrew Cask는 별도 배포 전까지 `v0.1.11 (17)`을 유지합니다.** `brew install --cask postmelee/tap/alhangeul`의 배포 버전과 직접 다운로드 버전을 구분해 주세요.
 
 > **이전 v0.1.10 저장 주의:** HWP3 저장 시 원본이 HWP5 bytes로 바뀌거나, 보호 문서 저장 시 보호가 제거된 평문으로 원본을 덮어쓸 수 있습니다([#482](https://github.com/postmelee/alhangeul-macos/issues/482), [#480](https://github.com/postmelee/alhangeul-macos/issues/480)). v0.1.10을 계속 사용하는 경우 HWP3·암호 문서는 먼저 사본을 만들고 native 저장을 사용하지 마세요. 원본 보호가 적용된 최신 버전으로 업데이트하세요.
 
@@ -88,7 +88,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 
 ## 현재 구현 범위
 
-현재 공개 릴리즈 v0.2.0의 제공 기능과 제한 사항입니다.
+현재 공개 릴리즈 v0.2.2의 제공 기능과 제한 사항입니다.
 
 ### 제공 기능
 
