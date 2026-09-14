@@ -1,6 +1,6 @@
-# Task M900 #539 Stage 4.1 — 불변 후보와 실제 Mac 수용 중간 기록
+# Task M900 #539 Stage 4 — 불변 후보와 실제 Mac 수용 기록
 
-## 판정
+## Stage 4.1 당시 판정
 
 v0.2.2(20) signed/notarized draft DMG의 양 VM 재시험, 실제 Mac 저장 후 종료·취소·내보내기·Finder 미리보기/썸네일·명령 본문 검색을 확인했다. **Spotlight GUI의 이번 후보 검색 화면·결과 열기, 공개 배포와 실제 Sparkle 업데이트는 아직 완료하지 않았다.** Stage 4 전체 완료나 릴리즈 완료 보고가 아니다.
 
@@ -50,3 +50,28 @@ macOS 26.5.2의 기존 설치·반복 등록 이력이 있는 Mac에서 동일 D
 ## 다음 판정
 
 Spotlight GUI 확인 후 공개할 정확한 hash·수용 결과·한계를 제시해 별도 공개 승인을 받는다. 승인된 같은 DMG만 승격하고 공개 URL hash·Pages/appcast·실제 0.2.0 → 0.2.2 Sparkle 다운로드/설치/자동 재실행·검색/Finder를 확인한다. #539/#535/#532/#520/#513/#337은 각 종료 판단까지 열린 상태를 유지한다.
+
+
+## Stage 4.2 — Spotlight GUI 수용 완료 (2026-09-14 21:33 KST)
+
+작업지시자가 Spotlight 창을 연 뒤 Computer Use로 확인했다. 앞선 Stage 4.1의 GUI 미판정은 이 후속 관찰로 해소됐다.
+
+- `AlhangeulCheck20260914v022`: document-a.hwp / document-b.hwpx / document-c.hwp 세 파일이 화면에 표시됐다. 파일명에는 영문 표식이 없다.
+- `나비` 단독 검색에는 다른 파일 결과가 많았다. 한컴뷰어 앱 필터는 결과 없음이어서 수용 근거로 사용하지 않았다. 앱 필터를 제거하고 `나비 name:document`로 범위를 좁히자 이번 시험 폴더의 document-a.hwp / document-b.hwpx가 최상단에 표시됐다. 이전 시험 문서 결과와 경로를 구분했다. 파일명에는 ‘나비’가 없다.
+- 이번 후보의 document-a.hwp 결과를 Return으로 열어 실제 본문 `나비 AlhangeulCheck20260914v022 문서 본문 검색 검증`을 확인했다. 기존 연결 앱인 한컴뷰어로 열렸으며 기본 앱 설정을 변경하지 않았다.
+- 알한글이 종료된 상태의 GUI 검색이다. 검색 후 sandbox 밖 `pgrep -x Alhangeul`의 종료 상태도 확인했다. 따라서 앱 종료 후 실제 화면 검색과 결과 열기를 수용한다.
+- Spotlight의 인덱싱 진행 표시가 관찰됐으나 시험 결과는 표시됐다. 시스템 전체 색인 완료나 모든 문서의 검색 완료를 주장하지 않는다.
+
+[GUI 관찰 결과](../report/assets/task_m900_539/spotlight-gui-result.json)를 보존했다.
+
+| 영문 본문 검색 | 한글 본문 + 파일명 조건 |
+|---|---|
+| ![영문 검색 세 문서](../report/assets/task_m900_539/spotlight-english.png) | ![한글 본문 검색 두 문서](../report/assets/task_m900_539/spotlight-korean.png) |
+
+![검색 결과 열기와 본문](../report/assets/task_m900_539/spotlight-opened-result.png)
+
+## 공개 전 최종 판정
+
+고정된 v0.2.2(20) DMG는 양 VM 설치/재설치/종료 후 검색/lifecycle/cleanup, 실제 Mac의 저장 후 종료/취소/재열기/내보내기/Finder/Spotlight GUI, 읽기 전용 승격 검증을 통과했다. 이 관찰 범위에서 공개를 권고한다. macOS 12·순정 OS 실제 실행, 실제 Mac 저장 실패 주입·Word 앱 시각 확인은 미실행이고 기존 환경의 색인 활성화 개입도 그대로 기록한다. 저장 실패 계약은 #538 자동 회귀 검증 범위다.
+
+공개 승인 전 draft를 유지한다. 승인 후 동일 SHA256의 DMG를 승격하고 공개 URL 재다운로드 hash·Pages/appcast·실제 0.2.0(18) → 0.2.2(20) Sparkle 수용을 진행한다. 이슈 #539/#513/#337 및 관련 운영 이슈는 이 공개 후 수용과 종료 판단 전까지 유지한다.

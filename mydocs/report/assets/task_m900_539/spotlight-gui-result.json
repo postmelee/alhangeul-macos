@@ -1,0 +1,21 @@
+{
+  "observed_at": "2026-09-14T21:33:37.375457+09:00",
+  "app_stopped": true,
+  "english_query": "AlhangeulCheck20260914v022",
+  "english_gui_results": [
+    "document-a.hwp",
+    "document-b.hwpx",
+    "document-c.hwp"
+  ],
+  "korean_query": "나비 name:document",
+  "korean_gui_results_in_current_test_directory": [
+    "document-a.hwp",
+    "document-b.hwpx"
+  ],
+  "unfiltered_korean_note": "다른 파일 결과가 많아 파일명 조건으로 시험 문서를 좁힘",
+  "hancom_app_filter": "결과 없음; 이 필터 결과를 본문 검색 실패/성공 근거로 사용하지 않음",
+  "opened_result": "document-a.hwp",
+  "opened_application": "com.haansoft.HancomOfficeViewer.Mac",
+  "visible_body": "나비 AlhangeulCheck20260914v022 문서 본문 검색 검증",
+  "result": "PASS"
+}
