@@ -1,0 +1,121 @@
+{
+  "candidate": {
+    "source_run_id": "34777048199",
+    "source_artifact_id": "10323358774",
+    "source_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+    "dmg_sha256": "8d8b8cbd24376fcd2c7ebd48343be44edc1f0f154a1e75282714798806ed4b90",
+    "expected_version": "0.2.2",
+    "expected_build": "20",
+    "repository": "postmelee/alhangeul-macos"
+  },
+  "validation_run_id": 34780410801,
+  "validation_attempt": 1,
+  "harness_sha": "bcdcd72cbda642af052b6ae985f2aa5fdae0fd06",
+  "evidence_artifacts": {
+    "arm64": 10324414484,
+    "x86_64": 10325031688
+  },
+  "verify_command": "python3 -B scripts/ci/release-promotion.py verify",
+  "verify_result": "PASS",
+  "draft_release_id": 388010212,
+  "draft": true,
+  "public_promotion_performed": false,
+  "vm_results": [
+    {
+      "schema_version": 3,
+      "status": "PASS",
+      "release_eligible": true,
+      "candidate": {
+        "source_run_id": "34777048199",
+        "source_artifact_id": "10323358774",
+        "source_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+        "dmg_sha256": "8d8b8cbd24376fcd2c7ebd48343be44edc1f0f154a1e75282714798806ed4b90",
+        "expected_version": "0.2.2",
+        "expected_build": "20",
+        "repository": "postmelee/alhangeul-macos"
+      },
+      "source_proof": {
+        "schema_version": 1,
+        "candidate_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+        "harness_sha": "bcdcd72cbda642af052b6ae985f2aa5fdae0fd06",
+        "workflow_ref": "refs/heads/main",
+        "fixture_source_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+        "tooling_only_changes": [
+          "mydocs/orders/20260914.md",
+          "mydocs/plans/task_m900_535.md",
+          "mydocs/plans/task_m900_535_impl.md",
+          "mydocs/report/task_m900_535_report.md",
+          "mydocs/working/task_m900_535_stage4.md",
+          "scripts/ci/spotlight-system-smoke.py",
+          "scripts/ci/test-spotlight-system-smoke.py"
+        ]
+      },
+      "environment": {
+        "schema_version": 1,
+        "status": "ENVIRONMENT_READY",
+        "release_eligible": false,
+        "os": "macOS-15.7.9-arm64-arm-64bit",
+        "architecture": "arm64",
+        "image_os": "macos15",
+        "image_version": "20260907.0337.1",
+        "run_id": "34780410801",
+        "run_attempt": "1",
+        "harness_sha": "bcdcd72cbda642af052b6ae985f2aa5fdae0fd06",
+        "gui_session_present": true,
+        "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+        "txt_automatic_search": true,
+        "owned_files_removed": true,
+        "elapsed_seconds": 35.92
+      },
+      "elapsed_seconds": 338.57
+    },
+    {
+      "schema_version": 3,
+      "status": "PASS",
+      "release_eligible": true,
+      "candidate": {
+        "source_run_id": "34777048199",
+        "source_artifact_id": "10323358774",
+        "source_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+        "dmg_sha256": "8d8b8cbd24376fcd2c7ebd48343be44edc1f0f154a1e75282714798806ed4b90",
+        "expected_version": "0.2.2",
+        "expected_build": "20",
+        "repository": "postmelee/alhangeul-macos"
+      },
+      "source_proof": {
+        "schema_version": 1,
+        "candidate_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+        "harness_sha": "bcdcd72cbda642af052b6ae985f2aa5fdae0fd06",
+        "workflow_ref": "refs/heads/main",
+        "fixture_source_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+        "tooling_only_changes": [
+          "mydocs/orders/20260914.md",
+          "mydocs/plans/task_m900_535.md",
+          "mydocs/plans/task_m900_535_impl.md",
+          "mydocs/report/task_m900_535_report.md",
+          "mydocs/working/task_m900_535_stage4.md",
+          "scripts/ci/spotlight-system-smoke.py",
+          "scripts/ci/test-spotlight-system-smoke.py"
+        ]
+      },
+      "environment": {
+        "schema_version": 1,
+        "status": "ENVIRONMENT_READY",
+        "release_eligible": false,
+        "os": "macOS-15.7.9-x86_64-i386-64bit",
+        "architecture": "x86_64",
+        "image_os": "macos15",
+        "image_version": "20260824.0482.1",
+        "run_id": "34780410801",
+        "run_attempt": "1",
+        "harness_sha": "bcdcd72cbda642af052b6ae985f2aa5fdae0fd06",
+        "gui_session_present": true,
+        "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+        "txt_automatic_search": true,
+        "owned_files_removed": true,
+        "elapsed_seconds": 100.53
+      },
+      "elapsed_seconds": 614.05
+    }
+  ]
+}
