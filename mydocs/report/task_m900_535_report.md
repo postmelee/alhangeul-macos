@@ -37,3 +37,8 @@
 [Stage 4](../working/task_m900_535_stage4.md)에서 비동기 재설치 요청 기록을 최대 30초 관찰하도록 보완했다. system 43개·install 25개·promotion 16개(총 84개) 회귀 PASS. 기록이 없거나 다른 후보의 기록이면 계속 실패한다.
 
 새 후보 [실행 34778130781](https://github.com/postmelee/alhangeul-macos/actions/runs/34778130781)은 Intel 전체 PASS, ARM 재설치 요청 기록 판정 및 cleanup 실패다. 전체 성공으로 해석하지 않는다. 이 후속 PR의 main 인계 뒤 고정된 v0.2.2(20) DMG로 새 실행이 필요하며 #535/#539/#513/#337은 열린 상태를 유지한다.
+
+
+## 최신 수용 결과 — 2026-09-14
+
+위 새 실행 대기는 완료됐다. #542/#543 검토·병합 후 같은 v0.2.2(20) DMG의 [34780410801 attempt 1](https://github.com/postmelee/alhangeul-macos/actions/runs/34780410801)이 양 VM 모두 schema 3 PASS/release_eligible=true다. 재설치 검색은 양쪽 `maintained`, 새 요청·종료 후 검색·lifecycle 33개·cleanup도 통과했다. ARM의 새 요청은 약 5.59초 뒤 관찰됐으며 원본 실패 실행은 보존한다. 읽기 전용 공개 승격 검증도 PASS다. 후보 식별자·artifact·한계는 [#539 Stage 4.1](../working/task_m900_539_stage4.md)에 연결한다. 공개와 실제 Sparkle 수용 완료를 의미하지 않으며 이슈 종료는 별도 판단한다.
