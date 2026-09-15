@@ -46,11 +46,19 @@ macOS 26.5.2(25F84)의 현재 0.2.2를 백업하고 보존한 공식 0.2.0(18)�
 
 `scripts/check-extension-registration-hygiene.sh --check-only` PASS. 자연 상태의 검색/Finder 확인 뒤 `scripts/smoke-sparkle-extension-refresh.sh --expected-version 0.2.2 --expected-build 20` 기본 모드도 PASS(Registration repair used: 0). 이 helper의 Quick Look 캐시 초기화와 별도 sample 색인은 앞선 corpus 자동 검색·실제 Finder 관찰 뒤 실행한 추가 진단이며, 최초 관찰의 전제에 포함하지 않는다.
 
-**업데이트 후 Spotlight GUI는 창 열기 응답 대기다.** 공개 전 동일 후보의 GUI PASS와 공개 후 명령 검색 PASS를 구분한다. 아직 미완료 화면을 PASS로 합산하지 않는다.
+**2026-09-15 12:46–12:48 KST, 업데이트 후 Spotlight GUI PASS.** 사용자가 연 창에서 `AlhangeulCheck20260914v022`로 before-update/after-update 각각 HWP3/HWP5/HWPX 세 문서를 확인했다. 한글 `나비 name:document`는 저장소 문서도 함께 검색돼 `나비 name:document-a.hwp`, `나비 name:document-b.hwpx`로 좁혔고 두 폴더의 HWP/HWPX가 모두 표시됐다. 검색 단어는 파일명에 없다.
+
+앱 종료 상태에서 after-update의 HWPX 결과를 선택해 Return으로 기존 기본 한컴뷰어에서 열었고, `나비 AlhangeulCheck20260914v022 문서 본문 검색 검증`이 실제 페이지에 표시됐다. 이 GUI 관찰은 전날 자동 검색 명령·Finder·기본 helper 뒤 다음 날 이어서 한 검증이다. 최초 반영 시간이나 깨끗한 OS의 성공으로 확대하지 않는다. 관찰 전후 알한글 프로세스는 없었다.
+
+| 영문 결과의 HWPX | 한글 본문 검색 |
+|---|---|
+| ![영문 검색의 업데이트 전후 HWPX](../report/assets/task_m900_539/sparkle-spotlight-english-hwpx.jpg) | ![한글 검색의 업데이트 전후 HWPX](../report/assets/task_m900_539/sparkle-spotlight-korean-hwpx.jpg) |
+
+![검색 결과로 연 실제 문서 본문](../report/assets/task_m900_539/sparkle-spotlight-opened-result.jpg)
 
 ## 완료 판정과 한계
 
-공개 및 핵심 Sparkle 경로는 통과했다. 마지막 GUI 확인 후 아래 종료 판단과 최종 기록 PR 병합을 진행한다.
+공개·실제 Sparkle·최종 GUI 수용까지 통과하여 아래 이슈의 종료 조건을 충족했다. PR #547 의 최종 기록 검토·CI·병합과 main 인계 뒤 근거별로 종료한다.
 
 | 이슈 | 종료 근거와 경계 |
 |---|---|

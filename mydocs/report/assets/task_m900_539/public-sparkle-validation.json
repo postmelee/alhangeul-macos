@@ -80,7 +80,31 @@
       "registration_repair_after_update": false
     },
     "standard_extension_helper": "PASS; registration repair 0; separate samples after natural search/Finder observations",
-    "spotlight_gui": "PENDING"
+    "spotlight_gui": {
+      "result": "PASS",
+      "observed_at": "2026-09-15T12:46:36+09:00/2026-09-15T12:48:41+09:00",
+      "app_stopped_before_and_after": true,
+      "english_query": "AlhangeulCheck20260914v022",
+      "english_before_update": [
+        "document-a.hwp",
+        "document-b.hwpx",
+        "document-c.hwp"
+      ],
+      "english_after_update": [
+        "document-a.hwp",
+        "document-b.hwpx",
+        "document-c.hwp"
+      ],
+      "korean_queries": [
+        "나비 name:document-a.hwp",
+        "나비 name:document-b.hwpx"
+      ],
+      "korean_before_and_after_update": "HWP and HWPX visible with folder names",
+      "opened_result": "after-update/document-b.hwpx",
+      "default_app": "com.haansoft.HancomOfficeViewer.Mac",
+      "visible_body": "나비 AlhangeulCheck20260914v022 문서 본문 검색 검증",
+      "notes": "Broad Korean query also matched repository/older trial documents; filename condition narrowed results without putting body word in filename."
+    }
   },
   "limitations": [
     "macOS 12 runtime unavailable",
