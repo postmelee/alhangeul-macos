@@ -60,6 +60,18 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Set up Node for news contract checks
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Verify news collection and Pages integration
+        run: |
+          node --check docs/news.js
+          node --test scripts/ci/test-news-ui.cjs
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-threads-news.py
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-news-pages.py
+
       - name: Check Python helper syntax
         shell: bash
         run: python3 -m compileall -q scripts/ci

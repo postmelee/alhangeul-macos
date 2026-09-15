@@ -13,12 +13,26 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  refresh-pages:
+    name: Refresh news and deploy Pages
+    if: >-
+      github.repository == 'postmelee/alhangeul-macos' &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'schedule' && vars.THREADS_NEWS_ENABLED == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages-docs-deploy.yml
+    secrets:
+      THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+
   validate-snapshot:
     name: Validate Threads snapshot (dry-run)
     if: >-
       github.repository == 'postmelee/alhangeul-macos' &&
       github.ref == 'refs/heads/main' &&
-      (github.event_name == 'workflow_dispatch' || vars.THREADS_NEWS_ENABLED == 'true')
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -40,16 +54,23 @@ jobs:
           THREADS_TOKEN_EXPIRES_AT: ${{ vars.THREADS_TOKEN_EXPIRES_AT }}
         run: python3 scripts/ci/threads-news.py token-status
 
-      # Stage 2는 조회·검증만 수행한다. Pages 연결은 Stage 4에서 별도 구현한다.
+      # 수동 실행은 dry-run만 허용하며 schedule만 재사용 Pages workflow를 호출한다.
       - name: Collect and validate without writing or publishing
         env:
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
           THREADS_TOKEN_EXPIRES_AT: ${{ vars.THREADS_TOKEN_EXPIRES_AT }}
           THREADS_EXPECTED_USER_ID: ${{ vars.THREADS_EXPECTED_USER_ID }}
+          THREADS_NEWS_EXCLUDED_URLS: ${{ vars.THREADS_NEWS_EXCLUDED_URLS }}
         run: |
           set -euo pipefail
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          (Path(os.environ['RUNNER_TEMP']) / 'threads-excluded.json').write_text(os.environ.get('THREADS_NEWS_EXCLUDED_URLS') or '[]')
+          PY
           python3 scripts/ci/threads-news.py sync \
             --expected-user-id "$THREADS_EXPECTED_USER_ID" \
+            --exclude-file "$RUNNER_TEMP/threads-excluded.json" \
             --dry-run > "$RUNNER_TEMP/threads-news-summary.json"
 
       - name: Record counts and renewal status

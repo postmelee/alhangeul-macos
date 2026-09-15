@@ -10,7 +10,7 @@
 - 시작 기준: `c0b0468c6dbfdfd2f3e3d1d9c5ccf993e7bd8a3b`, 수행계획 커밋: `8a44fc1`
 - 수행계획 승인: 2026-09-15 같은 스레드의 “진행해줘.” 지시.
 - 구현계획 승인: 2026-09-15 같은 스레드의 “진행해줘.” 지시.
-- 현재 단계: Stage 3 제품 페이지 구현·검증 완료. Stage 2 보고 후 같은 스레드의 “진행해줘.” 지시로 진입했으며, [Stage 3 보고서](../working/task_m010_555_stage3.md)와 함께 Stage 4 진입 승인을 요청한다.
+- 현재 단계: Stage 4 Pages 통합·운영 검증 완료. [Stage 3 보고서](../working/task_m010_555_stage3.md) 후 같은 스레드의 “진행해줘.” 지시로 진입했다. [Stage 4 보고서](../working/task_m010_555_stage4.md)를 최종 보고·PR 절차로 인계한다.
 - 방향 보정: 사용자가 자동 연결 가능 여부 설명 뒤 “진행해줘.”라고 지시하여 자동 선별·공식 임베드의 기술 검증과 계획 보정을 진행했다. 본문 복제·Git 데이터 브랜치를 제거한 보정안에 따라 Stage 2 진행 승인을 받았다. 공개 활성화 게이트는 유지한다.
 - Stage 2 결과: [단계 보고서](../working/task_m010_555_stage2.md). 43개 fixture 검사, 실계정 7페이지·263개·대상/임베드 6개, 로컬 재생성 검증을 통과했다.
 - Stage 1 근거: [API 계약과 최초 연결 안내](../tech/task_m010_555.md). `threads_basic`의 URL 선별과 공개 oEmbed를 조합한 전체 사용 사례에 대한 Meta의 승인·유권해석을 확보한 것은 아니다. 구현은 비활성 상태로 검증하며, 이 사용 목적 확인은 공개 활성화 게이트로 남긴다.
@@ -139,6 +139,7 @@
 ### 변경 파일과 작업
 
 - `scripts/ci/prepare-news-data.py`: 비활성 seed/활성 fresh snapshot의 진입점. 과거 Git 데이터와 artifact를 가져오지 않는다.
+- fresh 조립 기준: 생성 후 15분 이내·미만료 snapshot만 허용한다. 활성인데 입력이 없으면 실패하며 비활성은 코드가 생성한 빈 초기값만 배치한다. 브라우저 표시 기한 48시간과 조립 시 신선도 검사를 구분한다.
 - `scripts/ci/prepare-pages-artifact.sh`: `--news-data`의 검증된 파일을 `data/news.json`에 배치한다. 네트워크 호출은 조립 밖에서 끝낸다. 기존 appcast 처리 보존.
 - `.github/workflows/pages-docs-deploy.yml`: `workflow_call`을 추가하고 `pages-deploy` 잠금 안에서 fresh snapshot 생성과 현 공개 appcast 보존을 연결한다. secret은 조회 step에만 전달하고 업로드·배포에는 전달하지 않는다.
 - `.github/workflows/threads-news-sync.yml`: main의 재사용 Pages workflow 호출을 연결한다. 수집 실패 시 배포하지 않으며 다음 실행은 fresh 생성부터 재시도한다. 서로 같은 잠금을 잡고 호출하는 교착을 만들지 않는다.
@@ -172,7 +173,7 @@ git diff --check
 
 ## 6. 단계 보고·최종 보고·공개 활성화
 
-- 각 단계의 소스와 보고서를 묶어 커밋하고 다음 단계 승인을 받는다. 이번 보정안에서 아직 구현하지 않은 Stage 2~4를 완료로 기록하지 않는다.
+- 각 단계의 소스와 보고서를 묶어 커밋하고 다음 단계 승인을 받는다. Stage 1~4의 구현·검증 근거와 실제 공개 활성화 여부를 구분하여 보고한다.
 - 모든 단계 검증 후 최종 보고서와 오늘할일을 갱신하고 승인된 절차에 따라 `publish/task555` → `devel` Open PR을 만든다.
 - 공개 활성화 전: API 사용 목적의 허용 범위 확인, 실제 토큰 만료 확인과 secret 등록, main에 호환 소스 반영, 개인정보 안내, 중단·삭제·재배포 절차 검증을 마친다. 그 후 `NEWS_DATA_ENABLED` 활성화와 최초 수동 배포, 마지막으로 `THREADS_NEWS_ENABLED` 예약 실행 활성화를 승인받는다.
 - 전체 사용 사례에 대한 Meta의 별도 확인은 아직 없다. 기술 검증 결과나 개발 진행 지시가 Meta의 정책 승인을 대신하지 않는다. 원격 서비스는 비활성 상태로 구현·검증하며 확인 결과가 달라지면 공개 활성화 전에 범위를 보정한다.

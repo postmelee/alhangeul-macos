@@ -1,6 +1,10 @@
 name: Docs-only Pages Deploy
 
 on:
+  workflow_call:
+    secrets:
+      THREADS_ACCESS_TOKEN:
+        required: false
   workflow_dispatch:
   push:
     branches:
@@ -31,7 +35,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+          if [ "$GITHUB_REF" != "refs/heads/main" ] || [ "$GITHUB_REPOSITORY" != "postmelee/alhangeul-macos" ]; then
             echo "ERROR: docs-only Pages deployment must run from refs/heads/main; got $GITHUB_REF" >&2
             exit 1
           fi
@@ -45,6 +49,13 @@ jobs:
 
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
 
       - name: Install XML tools
         shell: bash
@@ -170,10 +181,23 @@ jobs:
             echo "- fallback: disabled; stale repository \`docs/appcast.xml\` is not used"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Collect fresh news snapshot
+        if: steps.release_asset_gate.outputs.deploy == 'true'
+        env:
+          THREADS_NEWS_ENABLED: ${{ vars.THREADS_NEWS_ENABLED }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          THREADS_TOKEN_EXPIRES_AT: ${{ vars.THREADS_TOKEN_EXPIRES_AT }}
+          THREADS_EXPECTED_USER_ID: ${{ vars.THREADS_EXPECTED_USER_ID }}
+          THREADS_NEWS_EXCLUDED_URLS: ${{ vars.THREADS_NEWS_EXCLUDED_URLS }}
+        run: |
+          python3 scripts/ci/prepare-news-data.py collect --output "$RUNNER_TEMP/threads-news.json"
+
       - name: Prepare Pages artifact
         id: pages_artifact
         if: steps.release_asset_gate.outputs.deploy == 'true'
         shell: bash
+        env:
+          THREADS_NEWS_ENABLED: ${{ vars.THREADS_NEWS_ENABLED }}
         run: |
           set -euo pipefail
           pages_artifact_dir="$GITHUB_WORKSPACE/build.noindex/release/pages-artifact"
@@ -181,6 +205,8 @@ jobs:
           scripts/ci/prepare-pages-artifact.sh \
             --docs-dir docs \
             --appcast "${{ steps.appcast.outputs.public_appcast_path }}" \
+            --news-enabled "${THREADS_NEWS_ENABLED:-false}" \
+            --news-data "$RUNNER_TEMP/threads-news.json" \
             --output-dir "$pages_artifact_dir"
 
           test -f "$pages_artifact_dir/index.html"
@@ -205,7 +231,7 @@ jobs:
         uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ steps.pages_artifact.outputs.pages_artifact_dir }}
-          retention-days: 14
+          retention-days: 1
 
   deploy-pages:
     name: Deploy GitHub Pages
