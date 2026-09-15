@@ -1,0 +1,9 @@
+{
+  "release_body_verified": true,
+  "appcast_before_sha256": "8b0face06819d65f60cc6e3675244eaa1cccead997927c1f27c131d523313140",
+  "pages_artifact_appcast_preserved": true,
+  "release_template": "PASS",
+  "version_notices": "PASS",
+  "html_and_upgrade_instructions": "PASS",
+  "post_merge_pages_verification": "pending; final receipt in issue #549"
+}

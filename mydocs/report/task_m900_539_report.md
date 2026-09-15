@@ -6,7 +6,7 @@ v0.2.2(20)의 버전·문구·검증 계획을 준비했다. #536/#538 이 반�
 
 네 bundle 및 rehearsal/publish/promotion 입력을 맞췄다. [릴리즈 기록](../release/v0.2.2.md)에 포함 PR, 저장 후 종료/재설치 검색 변화, 설치 색인 지연, 알려진 한계와 경로별 수용 표를 작성했다. #537 개발용 회귀 PASS와 새 signed DMG 수용을 구분했다.
 
-미공개 v0.2.1은 tag/source/DMG를 보존하고 페이지는 후보 안내로 변경했다. 작동하지 않는 v0.2.1 DMG 링크는 제거했다. v0.2.2 Pages 후보는 public asset gate로 공개 전에 배포되지 않는다. 공개 앱/사이트/appcast는 0.2.2/20이며 Homebrew는 0.1.11이다.
+미공개 v0.2.1은 tag/source/DMG를 보존하고 페이지는 후보 안내로 변경했다. 작동하지 않는 v0.2.1 DMG 링크는 제거했다. v0.2.2 Pages 후보는 public asset gate로 공개 전에 배포되지 않는다. 이 보고서 작성 당시 공개 앱/사이트/appcast는 0.2.2/20이며 Homebrew는 0.1.11이었다. 이후 [#549 보고서](task_m900_549_report.md)에서 Homebrew 0.2.2 설치·업데이트까지 수용했다.
 
 ## 검증
 
