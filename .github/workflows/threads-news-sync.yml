@@ -1,0 +1,88 @@
+name: Threads News Sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 */6 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: threads-news-sync
+  cancel-in-progress: false
+
+jobs:
+  refresh-pages:
+    name: Refresh news and deploy Pages
+    if: >-
+      github.repository == 'postmelee/alhangeul-macos' &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'schedule' && vars.THREADS_NEWS_ENABLED == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages-docs-deploy.yml
+    secrets:
+      THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+
+  validate-snapshot:
+    name: Validate Threads snapshot (dry-run)
+    if: >-
+      github.repository == 'postmelee/alhangeul-macos' &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Verify fixtures
+        run: PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-threads-news.py
+
+      - name: Check recorded token expiry
+        env:
+          THREADS_TOKEN_EXPIRES_AT: ${{ vars.THREADS_TOKEN_EXPIRES_AT }}
+        run: python3 scripts/ci/threads-news.py token-status
+
+      # 수동 실행은 dry-run만 허용하며 schedule만 재사용 Pages workflow를 호출한다.
+      - name: Collect and validate without writing or publishing
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          THREADS_TOKEN_EXPIRES_AT: ${{ vars.THREADS_TOKEN_EXPIRES_AT }}
+          THREADS_EXPECTED_USER_ID: ${{ vars.THREADS_EXPECTED_USER_ID }}
+          THREADS_NEWS_EXCLUDED_URLS: ${{ vars.THREADS_NEWS_EXCLUDED_URLS }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          (Path(os.environ['RUNNER_TEMP']) / 'threads-excluded.json').write_text(os.environ.get('THREADS_NEWS_EXCLUDED_URLS') or '[]')
+          PY
+          python3 scripts/ci/threads-news.py sync \
+            --expected-user-id "$THREADS_EXPECTED_USER_ID" \
+            --exclude-file "$RUNNER_TEMP/threads-excluded.json" \
+            --dry-run > "$RUNNER_TEMP/threads-news-summary.json"
+
+      - name: Record counts and renewal status
+        shell: python
+        run: |
+          import json, os
+          from pathlib import Path
+          result = json.loads((Path(os.environ['RUNNER_TEMP']) / 'threads-news-summary.json').read_text())
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as stream:
+              stream.write('## Threads 수집 검증\n\n')
+              stream.write(f"- 조회: {result['unique_posts']}개 / {result['pages']}페이지\n")
+              stream.write(f"- 표시 대상: {result['item_count']}개\n")
+              stream.write('- 결과: dry-run 완료, 파일 교체·공개 배포 없음\n')
+          if result['token']['renewal_required']:
+              print('::warning::Threads 토큰이 14일 이내에 만료됩니다. 수동 갱신이 필요합니다.')

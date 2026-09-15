@@ -15,6 +15,8 @@ Required inputs:
   --output-dir   New output directory for the Pages artifact contents.
 
 Options:
+  --news-enabled true|false  Require a fresh snapshot when true (default false).
+  --news-data    Validated snapshot from this run; never a previous artifact.
   -h, --help     Show this help.
 EOF
 }
@@ -41,6 +43,8 @@ real_file() {
 DOCS_DIR=""
 APPCAST_FILE=""
 OUTPUT_DIR=""
+NEWS_ENABLED="false"
+NEWS_DATA=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -58,6 +62,16 @@ while [ "$#" -gt 0 ]; do
       shift
       [ "$#" -gt 0 ] || fail "--output-dir requires a value"
       OUTPUT_DIR="$1"
+      ;;
+    --news-enabled)
+      shift
+      [ "$#" -gt 0 ] || fail "--news-enabled requires a value"
+      NEWS_ENABLED="$1"
+      ;;
+    --news-data)
+      shift
+      [ "$#" -gt 0 ] || fail "--news-data requires a value"
+      NEWS_DATA="$1"
       ;;
     -h|--help)
       usage
@@ -125,6 +139,12 @@ cp -R "$DOCS_REAL"/. "$TMP_DIR"/
 find "$TMP_DIR" -name .DS_Store -type f -delete
 "$SCRIPT_DIR/update-release-version-notices.sh" --updates-dir "$TMP_DIR/updates"
 cp "$APPCAST_REAL" "$TMP_DIR/appcast.xml"
+mkdir -p "$TMP_DIR/data"
+news_args=(prepare --enabled "$NEWS_ENABLED" --output "$TMP_DIR/data/news.json")
+if [ -n "$NEWS_DATA" ]; then
+  news_args+=(--input "$NEWS_DATA")
+fi
+python3 "$SCRIPT_DIR/prepare-news-data.py" "${news_args[@]}"
 
 [ -f "$TMP_DIR/index.html" ] || fail "prepared artifact is missing index.html"
 [ -f "$TMP_DIR/updates/index.html" ] || fail "prepared artifact is missing updates/index.html"
