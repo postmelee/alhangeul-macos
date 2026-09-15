@@ -1114,6 +1114,43 @@ video {
   margin-top: 30px;
 }
 
+.updates-hero .release-meta {
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.updates-page .updates-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.updates-page .version-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #f7f8fa;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.updates-page .updates-instruction {
+  word-break: keep-all;
+}
+
+.updates-page .updates-menu-path {
+  color: var(--text);
+  font-weight: 500;
+}
+
 .page-action-button,
 .page-secondary-link {
   display: inline-flex;
@@ -1261,6 +1298,114 @@ video {
   white-space: inherit;
   overflow-wrap: normal;
   word-break: normal;
+}
+
+.updates-page #homebrew {
+  scroll-margin-top: calc(var(--header-height) + 20px);
+}
+
+.updates-page .command-switcher {
+  margin-top: 24px;
+  min-width: 0;
+}
+
+.updates-page .command-toolbar:not([hidden]) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.updates-page .command-panel h3 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 600;
+  word-break: keep-all;
+}
+
+.updates-page .command-panel + .command-panel {
+  margin-top: 20px;
+}
+
+.updates-page .is-enhanced .command-panel {
+  margin-top: 0;
+}
+
+.updates-page .is-enhanced .command-panel h3 {
+  display: none;
+}
+
+.updates-page .command-tabs {
+  display: flex;
+  min-width: 0;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f7f8fa;
+}
+
+.updates-page .command-tabs [role="tab"] {
+  min-height: 38px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.updates-page .command-tabs [aria-selected="true"] {
+  background: #ffffff;
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.updates-page .command-description {
+  margin: 12px 0 0;
+  font-size: 13px;
+  word-break: keep-all;
+}
+
+.updates-page .command-copy {
+  flex-shrink: 0;
+  min-width: 64px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--accent);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.updates-page .command-copy:hover {
+  background: #f7f8fa;
+}
+
+.updates-page .command-copy:focus-visible,
+.updates-page .command-tabs [role="tab"]:focus-visible,
+.updates-page .command-panel .code-panel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.updates-page .command-panel .code-panel {
+  margin: 8px 0 0;
+  min-height: 72px;
+}
+
+.updates-page .command-status {
+  min-height: 1.65em;
+  margin: 6px 0 0;
+  font-size: 13px;
+  word-break: keep-all;
 }
 
 .release-note-list {
