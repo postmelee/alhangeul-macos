@@ -22,10 +22,14 @@
   }
 
   function validateNews(data, now = Date.now()) {
-    exactKeys(data, ['schema_version', 'updated_at', 'expires_at', 'items']);
-    requireValue(data.schema_version === 2 && Array.isArray(data.items) && data.items.length <= MAX_ITEMS);
+    const curated = data?.schema_version === 3;
+    exactKeys(data, curated ? ['schema_version', 'mode', 'items'] : ['schema_version', 'updated_at', 'expires_at', 'items']);
+    requireValue((curated ? data.mode === 'manual' : data.schema_version === 2)
+      && Array.isArray(data.items) && data.items.length <= MAX_ITEMS);
     let expiresAt = null;
-    if (data.updated_at === null) {
+    if (curated) {
+      // 수동 목록은 자동 수집 snapshot의 시각·48시간 만료와 별개다.
+    } else if (data.updated_at === null) {
       requireValue(data.expires_at === null && data.items.length === 0);
     } else {
       const updatedAt = utcTime(data.updated_at);
@@ -41,7 +45,8 @@
       seen.add(match[1]);
       return { platform: 'threads', permalink: item.permalink };
     });
-    const state = expiresAt === null ? 'inactive' : expiresAt <= now ? 'expired' : items.length ? 'ready' : 'empty';
+    const state = curated ? (items.length ? 'ready' : 'empty')
+      : expiresAt === null ? 'inactive' : expiresAt <= now ? 'expired' : items.length ? 'ready' : 'empty';
     return { state, expiresAt, items };
   }
 
@@ -363,7 +368,7 @@
           return;
         }
         items = isFeed ? data.items : data.items.slice(0, 1);
-        expiryTimer = setTimeout(expire, Math.max(0, expiresAt - Date.now()));
+        if (expiresAt !== null) expiryTimer = setTimeout(expire, Math.max(0, expiresAt - Date.now()));
         busy = false;
         await loadNext();
         if (manual && current === epoch) posts.querySelector('article')?.focus({ preventScroll: true });

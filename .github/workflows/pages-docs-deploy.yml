@@ -190,7 +190,7 @@ jobs:
           THREADS_EXPECTED_USER_ID: ${{ vars.THREADS_EXPECTED_USER_ID }}
           THREADS_NEWS_EXCLUDED_URLS: ${{ vars.THREADS_NEWS_EXCLUDED_URLS }}
         run: |
-          python3 scripts/ci/prepare-news-data.py collect --output "$RUNNER_TEMP/threads-news.json"
+          python3 scripts/ci/prepare-news-data.py collect --manual-input docs/data/news-manual.json --output "$RUNNER_TEMP/threads-news.json"
 
       - name: Prepare Pages artifact
         id: pages_artifact

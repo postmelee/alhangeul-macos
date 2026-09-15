@@ -102,7 +102,7 @@ jobs:
           THREADS_TOKEN_EXPIRES_AT: ${{ vars.THREADS_TOKEN_EXPIRES_AT }}
           THREADS_EXPECTED_USER_ID: ${{ vars.THREADS_EXPECTED_USER_ID }}
           THREADS_NEWS_EXCLUDED_URLS: ${{ vars.THREADS_NEWS_EXCLUDED_URLS }}
-        run: python3 scripts/ci/prepare-news-data.py collect --output "$RUNNER_TEMP/threads-news.json"
+        run: python3 scripts/ci/prepare-news-data.py collect --manual-input docs/data/news-manual.json --output "$RUNNER_TEMP/threads-news.json"
       - name: Resolve pinned Sparkle signing tool (no app build)
         id: sparkle
         run: |

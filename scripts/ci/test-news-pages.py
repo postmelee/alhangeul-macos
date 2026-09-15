@@ -59,6 +59,48 @@ class PagesNewsTests(unittest.TestCase):
             self.assertEqual(result['status'], 'disabled')
             self.assertEqual(json.loads(self.source.read_text()), p.SEED)
 
+    def test_manual_collection_and_assembly_without_credentials_or_network(self):
+        manual = {'schema_version': 3, 'mode': 'manual', 'items': self.data['items']}
+        path = self.docs / 'data/news-manual.json'
+        path.write_text(json.dumps(manual))
+        with patch.object(p.news, 'ThreadsClient') as client, patch.object(p.news, 'OEmbedClient') as embed:
+            result = p.collect(False, self.source, environment={}, manual_input=path)
+            client.assert_not_called(); embed.assert_not_called()
+        self.assertEqual(result['status'], 'manual')
+        self.assertEqual(p.prepare(False, self.source, manual_input=path), manual)
+        for name in ('manual-docs', 'manual-release'):
+            output = self.root / name
+            result = self.assemble(output, '--news-data', self.source)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads((output / 'data/news.json').read_text()), manual)
+            self.assertEqual((output / 'appcast.xml').read_bytes(), self.appcast.read_bytes())
+        with self.assertRaises(p.news.NewsError): p.prepare(False, self.source)
+        with self.assertRaises(p.news.NewsError): p.prepare(True, self.source, manual_input=path)
+        manual['items'] = []
+        path.write_text(json.dumps(manual))
+        with self.assertRaises(p.news.NewsError): p.prepare(False, self.source, manual_input=path)
+        p.collect(False, self.source, environment={}, manual_input=path)
+        self.assertEqual(p.prepare(False, self.source, manual_input=path), manual)
+
+    def test_invalid_manual_data_fails_without_replacing_output(self):
+        valid = {'schema_version': 3, 'mode': 'manual', 'items': self.data['items']}
+        path = self.root / 'manual.json'
+        bad = [dict(valid, mode='auto'), dict(valid, updated_at=self.data['updated_at']),
+               dict(valid, expires_at=None), dict(valid, items=valid['items'] * 2),
+               dict(valid, items=[{'platform': 'threads', 'permalink': 'https://evil.test/post/One'}]),
+               dict(valid, items=[dict(valid['items'][0], text='body')]), dict(valid, items=None)]
+        before = self.source.read_bytes()
+        for data in bad:
+            path.write_text(json.dumps(data))
+            with self.assertRaises(p.news.NewsError): p.collect(False, self.source, environment={}, manual_input=path)
+            self.assertEqual(self.source.read_bytes(), before)
+        with self.assertRaises(OSError): p.collect(False, self.source, environment={}, manual_input=self.root/'missing')
+        # 자동 모드는 수동 파일이 있어도 인증 실패를 수동 결과로 대체하지 않는다.
+        path.write_text(json.dumps(valid))
+        with self.assertRaises(p.news.NewsError): p.collect(True, self.source, environment={}, manual_input=path)
+        self.assertEqual(self.source.read_bytes(), before)
+        self.assertEqual(p.prepare(True, self.source, manual_input=path), self.data)
+
     def test_missing_credentials_and_expiry_fail_before_clients(self):
         for key in self.env:
             env = dict(self.env); del env[key]

@@ -91,3 +91,23 @@ test('누락 필드·알 수 없는 필드·초과 크기·다른 스키마 거�
   assert.throws(() => validateNews(fixture(10001), now));
   assert.throws(() => validateNews(null, now));
 });
+
+
+test('수동 목록은 시간 경과 후에도 표시하고 자동 만료와 구분한다', () => {
+  for (const count of [0, 1, 6]) {
+    const data = { schema_version: 3, mode: 'manual', items: fixture(count).items };
+    for (const time of [now, now + 365 * 86400000]) {
+      const result = validateNews(data, time);
+      assert.equal(result.state, count ? 'ready' : 'empty');
+      assert.equal(result.expiresAt, null);
+      assert.deepEqual(result.items, data.items);
+    }
+    for (const change of [{mode: 'auto'}, {updated_at: null}, {expires_at: null},
+                          {items: [{...fixture().items[0], text: '본문'}]},
+                          {items: [{platform: 'x', permalink: fixture().items[0].permalink}]}]) {
+      assert.throws(() => validateNews({...data, ...change}, now));
+    }
+  }
+  const items = fixture().items;
+  assert.throws(() => validateNews({schema_version: 3, mode: 'manual', items: [...items, ...items]}, now));
+});
