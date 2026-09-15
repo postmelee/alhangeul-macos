@@ -15,8 +15,8 @@ Required inputs:
   --output-dir   New output directory for the Pages artifact contents.
 
 Options:
-  --news-enabled true|false  Require a fresh snapshot when true (default false).
-  --news-data    Validated snapshot from this run; never a previous artifact.
+  --news-enabled true|false  Fresh automatic snapshot if true; manual list/seed if false.
+  --news-data    Output of this run's collection; never a previous artifact.
   -h, --help     Show this help.
 EOF
 }
@@ -141,6 +141,9 @@ find "$TMP_DIR" -name .DS_Store -type f -delete
 cp "$APPCAST_REAL" "$TMP_DIR/appcast.xml"
 mkdir -p "$TMP_DIR/data"
 news_args=(prepare --enabled "$NEWS_ENABLED" --output "$TMP_DIR/data/news.json")
+if [ -f "$DOCS_REAL/data/news-manual.json" ]; then
+  news_args+=(--manual-input "$DOCS_REAL/data/news-manual.json")
+fi
 if [ -n "$NEWS_DATA" ]; then
   news_args+=(--input "$NEWS_DATA")
 fi

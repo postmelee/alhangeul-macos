@@ -2,7 +2,18 @@
 
 알한글 제품 페이지는 `@postmelee` 본인 글 중 실제 `알한글` 주제 태그가 있는 글을 선별하여 공식 임베드로 표시한다. 본문·사진·영상·oEmbed HTML을 별도로 보관하지 않는다. 최초 연결 근거는 [API 조사](../tech/task_m010_555.md), 구현·검증은 [구현계획](../plans/task_m010_555_impl.md)에 있다.
 
-## 활성화 전 조건
+## 수동 목록으로 표시
+
+자동 수집이 꺼져 있을 때는 `docs/data/news-manual.json`에 운영자가 선택한 공개 원문을 순서대로 기록한다. 계약은 `schema_version: 3`, `mode: manual`, `items`이며 항목에는 `platform`, `permalink`만 둔다. 맨 위 항목이 홈에 표시된다.
+
+- 새 글 추가·순서 변경·제거는 수동 파일을 수정하고 기존 PR/Pages 절차로 반영한다. 공개 원문의 작성자·태그·임베드 지원을 확인한다.
+- 수동 모드는 사용자 토큰과 수집 API를 사용하지 않는다. 자동 갱신 시각·48시간 만료를 주장하지 않고, 원문 내용은 공식 Threads 임베드가 제공한다.
+- 원문 삭제·비공개 시 임베드가 표시되지 않을 수 있다. 운영자가 수동 목록에서도 해당 URL을 제거한다. 게시물 본문과 미디어를 백업하는 기능은 아니다.
+- `THREADS_NEWS_ENABLED=true`는 수동 목록보다 우선하며, 실패 시 수동 목록으로 대신 배포하지 않는다. 자동 비활성 상태에서 수동 파일이 없으면 기존 빈 seed가 사용된다.
+- 두 Pages 경로 모두 현재 수동 파일을 검증한다. 잘못된 URL·중복·추가 필드·조립 입력 불일치는 새 배포를 중단한다.
+- 전체 표시 중단은 자동 수집을 `false`로 두고 수동 목록의 `items`를 `[]`로 바꾼 후 재배포한다. `false` 설정만으로 수동 목록이 사라지지는 않는다.
+
+## 자동 수집 활성화 전 조건
 
 현재 구현은 비활성 상태로 검증했다. 아래 조건을 확인한 뒤 작업지시자의 공개 활성화 지시에 따라 설정한다.
 
@@ -25,12 +36,12 @@
 
 - **Threads News Sync 수동 실행**: `main`에서 실제 조회·검증만 하는 dry-run이다. 공개 사이트를 바꾸지 않는다. 토큰 만료 시각 설정이 필요하다.
 - **예약 수집**: 6시간마다 UTC 분 23에 실행한다. `THREADS_NEWS_ENABLED=true`, 본 저장소·`main`일 때만 Pages workflow를 호출한다. GitHub 일정은 지연될 수 있으므로 정시 갱신을 보장하지 않는다.
-- **Docs-only Pages Deploy**: `main`의 `docs/**` 변경 또는 명시적인 수동 실행이다. 링크된 공개 DMG 존재를 확인하고 현재 공개 appcast를 보존하며, 해당 실행에서 소식을 완전 재수집한다. 비활성은 외부 조회 없이 seed를 만든다.
+- **Docs-only Pages Deploy**: `main`의 `docs/**` 변경 또는 명시적인 수동 실행이다. 링크된 공개 DMG 존재를 확인하고 현재 공개 appcast를 보존하며, 자동 활성 상태에서 해당 실행의 소식을 완전 재수집한다. 자동 비활성은 외부 조회 없이 수동 목록을 사용하며, 수동 입력이 없으면 seed를 만든다.
 - **Release Promote Verified DMG**: 기존 양 VM·DMG 검증 뒤, 서명·공개 부작용 전에 소식을 수집한다. 새 appcast와 소식을 함께 조립한다. DMG 검증·승격·공개 승인 절차는 기존 [릴리스 안내](release_github_pages_sparkle_guide.md)를 따른다.
 
 두 Pages 경로는 workflow 전체에 `pages-deploy` 잠금을 유지한다. 예약 호출자는 다른 잠금을 사용하여 호출자와 피호출자가 같은 잠금을 기다리는 상황을 피한다. appcast 준비·수집·조립·배포를 같은 잠금 안에서 수행하며 이전 실행의 snapshot/artifact를 가져오지 않는다.
 
-공개 JSON은 `schema_version`, `updated_at`, `expires_at`, `items`를 갖고 각 항목은 `platform`, `permalink`만 포함한다. 수집 후 15분 이내·미만료인 결과만 새 Pages 산출물에 삽입한다. 48시간은 브라우저의 표시 기한이며, 열린 탭에서도 기한을 지나면 소식을 제거하고 갱신 지연 안내를 표시한다. 정상 대상 0개와 수집 실패를 구분한다.
+자동 수집 공개 JSON(v2)은 `schema_version`, `updated_at`, `expires_at`, `items`를 갖고 각 항목은 `platform`, `permalink`만 포함한다. 수집 후 15분 이내·미만료인 결과만 새 Pages 산출물에 삽입한다. 48시간은 브라우저의 표시 기한이며, 열린 탭에서도 기한을 지나면 소식을 제거하고 갱신 지연 안내를 표시한다. 정상 대상 0개와 수집 실패를 구분한다.
 
 ## 로컬 검증 명령
 
@@ -51,7 +62,7 @@ scripts/ci/prepare-pages-artifact.sh --docs-dir docs --appcast <검증된-appcas
   --output-dir build.noindex/news-check/pages
 ```
 
-`collect`의 비활성 기본값은 seed 생성이다. 잘못된 활성화 값, 활성 상태의 토큰·만료 정보 누락, 불완전 조회, oEmbed 실패는 실패로 종료한다. `prepare`는 네트워크 없이 조립 입력을 검증한다. stdout은 개수·시각·갱신 필요 여부이며 원문 본문과 토큰을 출력하지 않는다.
+`collect`에 `--manual-input docs/data/news-manual.json`을 주면 자동 비활성 상태에서 해당 목록을 사용한다. 수동 입력 없는 비활성 기본값은 seed 생성이다. 잘못된 활성화 값, 활성 상태의 토큰·만료 정보 누락, 불완전 조회, oEmbed 실패는 실패로 종료한다. `prepare`는 네트워크 없이 조립 입력을 검증한다. stdout은 개수·시각·갱신 필요 여부이며 원문 본문과 토큰을 출력하지 않는다.
 
 ## 토큰 갱신·만료
 
@@ -75,8 +86,8 @@ python3 scripts/ci/threads-news.py refresh-token --token-file <현재-보호파�
 
 ## 제외·중단·삭제 요청
 
-1. 특정 글의 즉시 제외는 승인된 정규 URL을 `THREADS_NEWS_EXCLUDED_URLS` 배열에 넣고 `main`의 Docs-only Pages Deploy를 실행한다. 제외를 해제할 때도 현재 목록을 다시 수집한다.
-2. 전체 중단은 `THREADS_NEWS_ENABLED=false`로 바꾼 뒤 Docs-only Pages Deploy를 실행하여 빈 seed를 공개한다. variable 변경만으로 기존 사이트나 열린 iframe이 즉시 사라지지는 않는다. 기존 탭은 새로고침 또는 표시 기한 만료 때 변경을 반영한다.
+1. 수동 모드는 수동 목록에서 해당 URL을 제거한 뒤 재배포한다. 자동 모드에서 특정 글의 즉시 제외는 승인된 정규 URL을 `THREADS_NEWS_EXCLUDED_URLS` 배열에 넣고 `main`의 Docs-only Pages Deploy를 실행한다. 제외를 해제할 때도 현재 목록을 다시 수집한다.
+2. 전체 중단은 `THREADS_NEWS_ENABLED=false`로 바꾸고 수동 목록의 `items`도 `[]`로 변경한 뒤 Docs-only Pages Deploy를 실행한다. variable 변경만으로 기존 사이트나 열린 iframe이 즉시 사라지지는 않는다. 수동 목록을 이미 연 탭은 새로고침해야 변경을 반영한다. 자동 목록은 새로고침 또는 표시 기한 만료 때 반영한다.
 3. 삭제 요청 시 현재 사이트 재배포와 이전 뉴스 포함 Pages artifact 삭제를 함께 처리한다. 관련 성공·실패 run의 `github-pages` artifact를 확인한다. [GitHub artifact 삭제 안내](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/remove-workflow-artifacts)
 4. 뉴스가 포함된 Pages artifact의 보존 기간은 1일이다. release 증빙 30일 보존은 유지하되 `promotion/pages/**`를 제외하여 소식 JSON이 증빙에 포함되지 않게 한다. 실제 수집 snapshot은 `RUNNER_TEMP`에만 둔다. [공식 Pages artifact action](https://github.com/actions/upload-pages-artifact)
-5. API 사용 중단이 필요하면 권한을 철회하고 secret을 제거한다. 수집 실패로 전체 Pages 갱신이 막히지 않게 비활성 설정과 seed 배포를 먼저 확인한다. 재개는 활성화 전 조건부터 다시 검증한다.
+5. API 사용 중단이 필요하면 권한을 철회하고 secret을 제거한다. 수집 실패로 전체 Pages 갱신이 막히지 않게 비활성 설정과 수동 목록 또는 빈 목록 배포를 먼저 확인한다. 재개는 활성화 전 조건부터 다시 검증한다.
