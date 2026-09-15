@@ -1,6 +1,6 @@
 cask "alhangeul" do
-  version "0.1.11"
-  sha256 "12f3263ab7a44e87f4b61dc1157590cc3a480e2cd1eabdfd78e5708836bf1e75"
+  version "0.2.2"
+  sha256 "8d8b8cbd24376fcd2c7ebd48343be44edc1f0f154a1e75282714798806ed4b90"
 
   url "https://github.com/postmelee/alhangeul-macos/releases/download/v#{version}/alhangeul-macos-#{version}.dmg"
   name "알한글"
@@ -11,5 +11,5 @@ cask "alhangeul" do
 
   app "Alhangeul.app"
 
-  caveats "앱을 한 번 실행하면 Quick Look 및 Thumbnail 확장이 등록됩니다."
+  caveats "앱을 한 번 실행한 뒤 Spotlight 색인과 미리보기 준비에 시간이 걸릴 수 있습니다."
 end

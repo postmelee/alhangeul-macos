@@ -1,0 +1,169 @@
+{
+  "root": "/Users/melee/Documents/projects/rhwp-mac",
+  "candidates": [
+    {
+      "path": "build.noindex/DerivedData",
+      "allocated_bytes": 816533504,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/cargo",
+      "allocated_bytes": 1730269184,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/pr-merge-cleanup-20260907",
+      "allocated_bytes": 159744,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/pr-review-comments",
+      "allocated_bytes": 34193408,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/release-v020-validation",
+      "allocated_bytes": 4642263040,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/release-v020-work",
+      "allocated_bytes": 59076608,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/spotlight-issue-assessment",
+      "allocated_bytes": 155648,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-8nj4vcr7",
+      "allocated_bytes": 107700224,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-_7ih1cho",
+      "allocated_bytes": 43864064,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-gh8a4i9_",
+      "allocated_bytes": 107708416,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-l2fxnv07",
+      "allocated_bytes": 107732992,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/studio-smoke-module-cache",
+      "allocated_bytes": 71286784,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task394",
+      "allocated_bytes": 16384,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task469",
+      "allocated_bytes": 36864,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task470",
+      "allocated_bytes": 96616448,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task474",
+      "allocated_bytes": 1777664,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task513-hygiene",
+      "allocated_bytes": 380928,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task513-hygiene.log",
+      "allocated_bytes": 8192,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task513-reinstall",
+      "allocated_bytes": 639479808,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task513-stage8-build.log",
+      "allocated_bytes": 258048,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task513-stage8-tests.log",
+      "allocated_bytes": 73728,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task513-stage9-bundle-regression.log",
+      "allocated_bytes": 4096,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task513-stage9-fixtures.log",
+      "allocated_bytes": 4096,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task513-stage9-package.log",
+      "allocated_bytes": 507904,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task513-stage9-python.log",
+      "allocated_bytes": 4096,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task513-stage9-release-regression.log",
+      "allocated_bytes": 4096,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task532",
+      "allocated_bytes": 1790631936,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task537",
+      "allocated_bytes": 180060160,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/task539",
+      "allocated_bytes": 3184881664,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    },
+    {
+      "path": "build.noindex/worktrees",
+      "allocated_bytes": 0,
+      "kind": "reproducible-release-or-completed-task-artifact"
+    }
+  ],
+  "total_allocated_bytes": 13615689728,
+  "preserve": [
+    "mydocs/report/assets",
+    "user Documents",
+    "local/task523 worktree",
+    "native-viewer-editor",
+    "public tags and release assets"
+  ],
+  "pending": [
+    "task549 own temporary files after evidence preservation",
+    "completed task513 detached worktree",
+    "merged PR515/517 local review branches",
+    "new Homebrew core tap introduced by audit"
+  ]
+}

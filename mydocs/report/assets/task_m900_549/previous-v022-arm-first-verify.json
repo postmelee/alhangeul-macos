@@ -1,0 +1,47 @@
+{
+  "schema_version": 3,
+  "status": "HARNESS_ERROR",
+  "release_eligible": false,
+  "phase": "verify",
+  "harness_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+  "run_id": "34778130781",
+  "run_attempt": "1",
+  "candidate": {
+    "source_run_id": "34777048199",
+    "source_artifact_id": "10323358774",
+    "source_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+    "dmg_sha256": "8d8b8cbd24376fcd2c7ebd48343be44edc1f0f154a1e75282714798806ed4b90",
+    "expected_version": "0.2.2",
+    "expected_build": "20",
+    "repository": "postmelee/alhangeul-macos"
+  },
+  "source_proof": {
+    "schema_version": 1,
+    "candidate_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+    "harness_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+    "workflow_ref": "refs/tags/v0.2.2",
+    "fixture_source_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+    "tooling_only_changes": []
+  },
+  "environment": {
+    "schema_version": 1,
+    "status": "ENVIRONMENT_READY",
+    "release_eligible": false,
+    "os": "macOS-15.7.9-arm64-arm-64bit",
+    "architecture": "arm64",
+    "image_os": "macos15",
+    "image_version": "20260907.0337.1",
+    "run_id": "34778130781",
+    "run_attempt": "1",
+    "harness_sha": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+    "gui_session_present": true,
+    "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+    "txt_automatic_search": true,
+    "owned_files_removed": true,
+    "elapsed_seconds": 19.89
+  },
+  "verification_error": "new installation request was not recorded",
+  "cleanup_error": "owned files removed and original apps/providers preserved, but importer catalog is stale",
+  "reason": "new installation request was not recorded",
+  "elapsed_seconds": 299.6
+}

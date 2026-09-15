@@ -1,0 +1,60 @@
+{
+  "started_at": "2026-09-15T13:19:03.351488+09:00",
+  "original_app": "/Applications/Alhangeul.app",
+  "backup": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task549/before-homebrew.noindex/Alhangeul.app",
+  "original_fingerprint": {
+    "Contents/Info.plist": "41f64c73e4d2848e2b8d34d4b3a1954e0645121072074f5d299929b5d52279a7",
+    "Contents/MacOS/Alhangeul": "3ff1fd86151a658ef3d955c5a9b551bde9c98c050d0e2800452c710c670bf60f"
+  },
+  "original_version": "0.2.2 (20)",
+  "brew_before": null,
+  "baseline_install": {
+    "result": "PASS",
+    "version": "0.1.11",
+    "build": "17",
+    "brew_receipt": "0.1.11",
+    "strict_signature": "PASS",
+    "cache": "task549/brew-cache"
+  },
+  "tap_commit": "5844bad4bdf6c3b314957a337d53957ce33284e3",
+  "upgrade": {
+    "result": "PASS",
+    "from": "0.1.11 (17)",
+    "to": "0.2.2 (20)",
+    "brew_receipt": "0.2.2",
+    "strict_signature": "PASS",
+    "fingerprint_matches_original": true
+  },
+  "uninstall": {
+    "result": "PASS",
+    "app_removed": true,
+    "zap": false
+  },
+  "fresh_brew_install": {
+    "result": "PASS",
+    "version": "0.2.2",
+    "build": "20",
+    "brew_receipt": "0.2.2",
+    "strict_signature": "PASS",
+    "fingerprint_matches_original": true,
+    "clean_os": false
+  },
+  "cask_validation": {
+    "style": "PASS",
+    "audit": "PASS",
+    "audit_new_reference": "PASS",
+    "public_dmg_sha256": "8d8b8cbd24376fcd2c7ebd48343be44edc1f0f154a1e75282714798806ed4b90"
+  },
+  "runtime": {
+    "about": "0.2.2 (20), rhwp v0.8.6 (f1f9c6a)",
+    "preview_provider": "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+    "thumbnail_provider": "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+    "actual_importer": "/Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+    "hygiene": "PASS (no development registration)",
+    "english_existing_search_count": 6,
+    "korean_existing_search_count": 4,
+    "search_scope": "before-update + after-update; existing indexed documents",
+    "mdimport_L": "Does not enumerate Alhangeul; mdimport -t selects installed Alhangeul importer",
+    "clean_os": false
+  }
+}
