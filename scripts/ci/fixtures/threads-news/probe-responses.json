@@ -1,0 +1,24 @@
+{
+  "profile": {"id": "1234567", "username": "postmelee"},
+  "pages": [
+    {
+      "data": [
+        {
+          "id": "1001", "media_product_type": "THREADS", "media_type": "TEXT_POST",
+          "owner": {"id": "1234567"}, "username": "postmelee",
+          "text": "실제 게시물이 아닌 테스트 본문입니다.", "topic_tag": "알한글",
+          "timestamp": "2026-09-14T00:00:00+0000", "shortcode": "SyntheticOnly",
+          "permalink": "https://www.threads.com/@postmelee/post/SyntheticOnly", "is_quote_post": false
+        },
+        {
+          "id": "1002", "media_product_type": "THREADS", "media_type": "TEXT_POST",
+          "owner": {"id": "1234567"}, "username": "postmelee", "text": "본문에만 알한글이 있는 테스트",
+          "timestamp": "2026-09-13T00:00:00+0000", "shortcode": "SyntheticNoTag",
+          "permalink": "https://www.threads.com/@postmelee/post/SyntheticNoTag", "is_quote_post": false
+        }
+      ],
+      "paging": {"cursors": {"after": "synthetic-after"}}
+    },
+    {"data": []}
+  ]
+}
