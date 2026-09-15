@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Stage 1: 실제 네트워크 없이 비밀 보호와 데이터/API 조사 계약을 검증한다."""
+"""실제 네트워크 없이 조사·동기화·비밀 보호·토큰 운영 계약을 검증한다."""
 
 import copy
+from datetime import datetime, timedelta, timezone
 from http.client import IncompleteRead
 import importlib.util
 import io
@@ -12,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, urlsplit
 
@@ -260,6 +262,267 @@ class NewsTests(unittest.TestCase):
             result = subprocess.run([sys.executable, str(HELPER), "validate", str(path)], text=True, capture_output=True)
             self.assertEqual(result.returncode, 1)
             self.assertNotIn("synthetic-secret", result.stderr)
+
+
+class Embeds:
+    def __init__(self, fail=False):
+        self.calls, self.fail = [], fail
+
+    def check(self, url):
+        self.calls.append(url)
+        if self.fail: raise news.NewsError("oEmbed 실패")
+        return {"platform": "threads", "permalink": url}
+
+
+class SyncTests(unittest.TestCase):
+    def setUp(self):
+        self.fixture = news.read_json(FIXTURES / "probe-responses.json")
+        self.now = datetime(2026, 9, 15, tzinfo=timezone.utc)
+        self.root = tempfile.TemporaryDirectory()
+        self.addCleanup(self.root.cleanup)
+        self.output = Path(self.root.name) / "news.json"
+        self.previous = b'{"previous":"must remain byte-for-byte on failure"}\n'
+        self.output.write_bytes(self.previous)
+
+    def run_sync(self, fixture=None, embeds=None, **overrides):
+        kwargs = dict(expected_user_id="1234567", output=self.output,
+                      expires_at="2026-11-01T00:00:00Z", now=lambda: self.now)
+        kwargs.update(overrides)
+        return news.sync(FakeClient(fixture or self.fixture), embeds or Embeds(), **kwargs)
+
+    def test_success_atomic_replacement_and_private_minimal_query(self):
+        client = FakeClient(self.fixture)
+        result = news.sync(client, Embeds(), expected_user_id="1234567", output=self.output,
+                           expires_at="2026-11-01T00:00:00Z", now=lambda: self.now)
+        manifest = news.read_json(self.output)
+        self.assertEqual(result['status'], 'sync_complete')
+        self.assertFalse(result['published'])
+        self.assertEqual(len(manifest['items']), 1)
+        self.assertEqual(manifest['expires_at'], '2026-09-17T00:00:00+00:00')
+        self.assertEqual(self.output.stat().st_mode & 0o777, 0o600)
+        fields = set(client.calls[1][1]['fields'].split(','))
+        self.assertTrue({'owner', 'topic_tag', 'is_quote_post'} <= fields)
+        self.assertTrue(fields.isdisjoint({'text', 'media_url', 'children', 'thumbnail_url', 'text_attachment'}))
+        self.assertNotIn('테스트 본문', self.output.read_text())
+
+    def test_no_merge_retains_removed_or_retagged_posts(self):
+        self.run_sync()
+        self.fixture['pages'][0]['data'][0]['topic_tag'] = '다른 태그'
+        self.run_sync()
+        self.assertEqual(news.read_json(self.output)['items'], [])
+        self.fixture['pages'] = [{'data': []}]
+        self.run_sync()
+        empty = news.read_json(self.output)
+        self.assertEqual(empty['items'], [])
+        self.assertIsNotNone(empty['updated_at'])
+
+    def test_partial_and_embed_failure_keep_original_bytes(self):
+        for kwargs in ({'max_pages': 1}, {'embeds': Embeds(fail=True)}):
+            with self.subTest(kwargs=kwargs), self.assertRaises(news.NewsError): self.run_sync(**kwargs)
+            self.assertEqual(self.output.read_bytes(), self.previous)
+
+    def test_later_page_network_failure_never_writes(self):
+        client = FakeClient(self.fixture)
+        original_get = client.get
+        def get(endpoint, params):
+            if 'after' in params: raise news.NewsError('API timeout')
+            return original_get(endpoint, params)
+        client.get = get
+        embeds = Embeds()
+        with self.assertRaises(news.NewsError):
+            news.sync(client, embeds, expected_user_id='1234567', output=self.output,
+                      expires_at='2026-11-01T00:00:00Z', now=lambda: self.now)
+        self.assertEqual(embeds.calls, [])
+        self.assertEqual(self.output.read_bytes(), self.previous)
+
+    def test_uncertain_identity_quote_and_missing_link_stop_collection(self):
+        for field in ('owner', 'username', 'is_quote_post', 'permalink'):
+            fixture = copy.deepcopy(self.fixture)
+            del fixture['pages'][0]['data'][0][field]
+            with self.subTest(field=field), self.assertRaises(news.NewsError): self.run_sync(fixture)
+            self.assertEqual(self.output.read_bytes(), self.previous)
+
+    def test_malformed_cursor_and_conflicting_duplicates_stop_collection(self):
+        for after in ('', False, 0, [], {}):
+            fixture = copy.deepcopy(self.fixture)
+            fixture['pages'][0]['paging']['cursors']['after'] = after
+            with self.subTest(after=after), self.assertRaises(news.NewsError): self.run_sync(fixture)
+        fixture = copy.deepcopy(self.fixture)
+        changed = copy.deepcopy(fixture['pages'][0]['data'][0]); changed['topic_tag'] = '변경됨'
+        fixture['pages'][1] = {'data': [changed]}
+        with self.assertRaisesRegex(news.NewsError, '충돌'): self.run_sync(fixture)
+        self.assertEqual(self.output.read_bytes(), self.previous)
+
+    def test_identical_overlap_deduplicates_and_numeric_tie_sort_is_stable(self):
+        row = self.fixture['pages'][0]['data'][0]
+        other = copy.deepcopy(row)
+        row['id'] = '9'
+        other.update(id='10', shortcode='SameTime', permalink='https://www.threads.com/@postmelee/post/SameTime')
+        self.fixture['pages'][0]['data'] = [row, other, copy.deepcopy(row)]
+        result = self.run_sync()
+        self.assertEqual(result['classification_counts']['duplicate'], 1)
+        self.assertEqual([i['permalink'].rsplit('/', 1)[-1] for i in news.read_json(self.output)['items']],
+                         ['SameTime', 'SyntheticOnly'])
+
+    def test_operator_exclusion_is_explicit_and_validated_before_fetch(self):
+        url = self.fixture['pages'][0]['data'][0]['permalink']
+        embeds = Embeds()
+        result = self.run_sync(embeds=embeds, excluded_urls=[url])
+        self.assertEqual(result['classification_counts']['operator_excluded'], 1)
+        self.assertEqual(embeds.calls, [])
+        self.assertEqual(news.read_json(self.output)['items'], [])
+        for values in ([url, url], ['https://evil.test/post'], {'permalink': url}):
+            with self.subTest(values=values), self.assertRaises(news.NewsError): self.run_sync(excluded_urls=values)
+
+    def test_dry_run_never_writes_and_allows_unknown_expiry(self):
+        result = self.run_sync(dry_run=True, expires_at=None)
+        self.assertEqual(result['token']['status'], 'unknown')
+        self.assertEqual(self.output.read_bytes(), self.previous)
+        self.output.unlink()
+        self.run_sync(dry_run=True, expires_at=None)
+        self.assertFalse(self.output.exists())
+
+    def test_expired_unknown_and_expiry_during_collection_preserve_file(self):
+        for expires in (None, '2026-09-15T00:00:00Z', '2026-09-14T00:00:00Z'):
+            with self.subTest(expires=expires), self.assertRaises(news.NewsError): self.run_sync(expires_at=expires)
+        times = iter([self.now, self.now, self.now + timedelta(minutes=2)])
+        with self.assertRaisesRegex(news.NewsError, '만료'):
+            self.run_sync(expires_at='2026-09-15T00:01:00Z', now=lambda: next(times))
+        self.assertEqual(self.output.read_bytes(), self.previous)
+
+    def test_token_expiry_warning_boundary(self):
+        for delta, expected in [(timedelta(), 'expired'), (timedelta(seconds=1), 'renewal_due'),
+                                (timedelta(days=14), 'renewal_due'),
+                                (timedelta(days=14, seconds=1), 'valid')]:
+            with self.subTest(delta=delta):
+                self.assertEqual(news.token_status((self.now + delta).isoformat(), now=self.now)['status'], expected)
+
+    def test_disk_failure_and_symlink_do_not_change_previous_output(self):
+        for operation in ('fsync', 'replace'):
+            with patch.object(news.os, operation, side_effect=OSError('synthetic failure')):
+                with self.assertRaises(OSError): self.run_sync()
+            self.assertEqual(self.output.read_bytes(), self.previous)
+            self.assertEqual(list(self.output.parent.glob('.threads-news-*')), [])
+        link = self.output.parent / 'linked.json'; link.symlink_to(self.output)
+        with self.assertRaises(news.NewsError): self.run_sync(output=link)
+        self.assertEqual(self.output.read_bytes(), self.previous)
+
+    def test_secret_in_valid_url_never_reaches_output(self):
+        row = self.fixture['pages'][0]['data'][0]
+        row.update(shortcode='synthetic-secret', permalink='https://www.threads.com/@postmelee/post/synthetic-secret')
+        with self.assertRaises(news.NewsError): self.run_sync(token='synthetic-secret')
+        self.assertEqual(self.output.read_bytes(), self.previous)
+
+
+class RetryTests(unittest.TestCase):
+    class Opener:
+        def __init__(self, responses): self.responses, self.calls = iter(responses), []
+        def open(self, request, timeout):
+            self.calls.append((request, timeout))
+            value = next(self.responses)
+            if isinstance(value, Exception): raise value
+            class Response(io.BytesIO): status = 200
+            return Response(json.dumps(value).encode())
+
+    def error(self, code, retry=None):
+        return HTTPError('https://private.test/?access_token=synthetic-secret', code,
+                         'synthetic-secret', {'Retry-After': retry} if retry else {}, io.BytesIO(b'synthetic-secret'))
+
+    def test_retry_after_then_success_for_both_clients(self):
+        for kind in ('threads', 'embed'):
+            payload = {'id': '1234567'} if kind == 'threads' else news.read_json(FIXTURES / 'oembed-response.json')
+            opener = self.Opener([self.error(429, '3'), self.error(503), payload])
+            elapsed, delays = [0], []
+            def sleep(delay): delays.append(delay); elapsed[0] += delay
+            options = dict(opener=opener, attempts=3, clock=lambda: elapsed[0], sleep=sleep)
+            if kind == 'threads': news.ThreadsClient('synthetic-secret', **options).get('me', {})
+            else: news.OEmbedClient(**options).check('https://www.threads.com/@postmelee/post/SyntheticOnly')
+            self.assertEqual(delays, [3, 2]); self.assertEqual(len(opener.calls), 3)
+            if kind == 'embed':
+                self.assertTrue(all('access_token' not in req.full_url for req, _ in opener.calls))
+
+    def test_authentication_never_retries_and_exhaustion_redacts(self):
+        for code in (400, 401, 403, 429, 503):
+            opener = self.Opener([self.error(code) for _ in range(3)])
+            with self.assertRaises(news.NewsError) as caught:
+                news.ThreadsClient('synthetic-secret', opener=opener, attempts=3, sleep=lambda _: None).get('me', {})
+            self.assertNotIn('synthetic-secret', str(caught.exception))
+            self.assertEqual(len(opener.calls), 3 if code in (429, 503) else 1)
+
+    def test_server_delay_is_not_shortened_past_budget(self):
+        opener = self.Opener([self.error(429, '100')])
+        delays = []
+        with self.assertRaisesRegex(news.NewsError, '대기 시간'):
+            news.ThreadsClient('synthetic-secret', opener=opener, attempts=3,
+                               deadline_seconds=10, clock=lambda: 0, sleep=delays.append).get('me', {})
+        self.assertEqual(delays, [])
+
+    def test_http_date_invalid_header_and_total_deadline(self):
+        now = datetime(2026, 9, 15, tzinfo=timezone.utc)
+        self.assertEqual(news.retry_delay('Tue, 15 Sep 2026 00:00:05 GMT', 1, now=now), 5)
+        self.assertEqual(news.retry_delay('not a date', 2, now=now), 2)
+        elapsed = [0]
+        opener = self.Opener([{'id': '1234567'}])
+        client = news.ThreadsClient('synthetic-secret', opener=opener, deadline_seconds=10, clock=lambda: elapsed[0])
+        client.get('me', {}); elapsed[0] = 11
+        with self.assertRaisesRegex(news.NewsError, '시간 제한'): client.get('me', {})
+        self.assertEqual(len(opener.calls), 1)
+
+
+class TokenRenewalTests(unittest.TestCase):
+    def setUp(self):
+        self.root = tempfile.TemporaryDirectory(); self.addCleanup(self.root.cleanup)
+        self.output = Path(self.root.name) / 'new-token'
+        self.now = datetime(2026, 9, 15, tzinfo=timezone.utc)
+        self.payload = {'access_token': 'new-synthetic-secret', 'token_type': 'bearer', 'expires_in': 5184000}
+
+    def renew(self, payload=None, **kwargs):
+        opener = RetryTests.Opener([self.payload if payload is None else payload])
+        self.opener = opener
+        options = dict(expires_at='2026-10-01T00:00:00Z', output=self.output,
+                       issued_at='2026-09-14T00:00:00Z', now=lambda: self.now,
+                       transport=news.JsonTransport(opener=opener))
+        options.update(kwargs)
+        return news.renew_token('old-synthetic-secret', **options)
+
+    def test_refresh_saves_only_private_file_and_prints_metadata(self):
+        result = self.renew()
+        self.assertEqual(news.read_token(self.output), 'new-synthetic-secret')
+        self.assertEqual(self.output.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(result['expires_at'], '2026-11-14T00:00:00+00:00')
+        self.assertNotIn('synthetic-secret', json.dumps(result))
+        self.assertFalse(result['secret_updated'])
+        request = self.opener.calls[0][0]
+        parsed = urlsplit(request.full_url)
+        self.assertEqual((parsed.hostname, parsed.path), ('graph.threads.net', '/refresh_access_token'))
+        self.assertNotIn('client_secret', parse_qs(parsed.query))
+
+    def test_exchange_uses_separate_fixed_endpoint(self):
+        self.assertEqual(self.renew(app_secret='synthetic-app-secret')['status'], 'token_exchanged')
+        parsed = urlsplit(self.opener.calls[0][0].full_url)
+        self.assertEqual(parsed.path, '/access_token')
+        self.assertEqual(parse_qs(parsed.query)['grant_type'], ['th_exchange_token'])
+
+    def test_early_expired_existing_and_unprotected_targets_stop_before_request(self):
+        for kwargs in ({'issued_at': '2026-09-14T00:00:01Z'}, {'expires_at': '2026-09-15T00:00:00Z'}):
+            with self.subTest(kwargs=kwargs), self.assertRaises(news.NewsError): self.renew(**kwargs)
+            self.assertEqual(self.opener.calls, [])
+        self.output.write_text('previous')
+        with self.assertRaises(news.NewsError): self.renew()
+        self.assertEqual(self.output.read_text(), 'previous'); self.output.unlink()
+        self.output.parent.chmod(0o755)
+        with self.assertRaises(news.NewsError): self.renew()
+        self.output.parent.chmod(0o700)
+
+    def test_bad_response_and_write_failure_leave_no_token_file(self):
+        for field, value in [('access_token', 'bad\nsecret'), ('expires_in', True),
+                             ('expires_in', 0), ('token_type', 123)]:
+            payload = dict(self.payload); payload[field] = value
+            with self.subTest(field=field), self.assertRaises(news.NewsError): self.renew(payload)
+            self.assertFalse(self.output.exists())
+        with patch.object(news.os, 'fsync', side_effect=OSError('disk failure')):
+            with self.assertRaises(OSError): self.renew()
+        self.assertFalse(self.output.exists())
 
 
 if __name__ == "__main__":
