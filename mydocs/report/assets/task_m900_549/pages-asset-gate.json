@@ -1,0 +1,22 @@
+{
+  "skipped_pages_run": 34930122727,
+  "cause": "v0.2.0 header linked draft v0.2.1 DMG",
+  "additional_fix": "v0.1.11 header latest/download URL pinned to its own public version",
+  "public_asset_gate_after_fix": {
+    "0.1.0": "PASS",
+    "0.1.1": "PASS",
+    "0.1.10": "PASS",
+    "0.1.11": "PASS",
+    "0.1.2": "PASS",
+    "0.1.3": "PASS",
+    "0.1.4": "PASS",
+    "0.1.5": "PASS",
+    "0.1.6": "PASS",
+    "0.1.7": "PASS",
+    "0.1.8": "PASS",
+    "0.1.9": "PASS",
+    "0.2.0": "PASS",
+    "0.2.2": "PASS"
+  },
+  "v021_preserved_as_draft": true
+}
