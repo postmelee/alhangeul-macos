@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import plistlib
 import re
 import shutil
 import signal
@@ -27,6 +28,10 @@ TRUNCATED = "TruncatedDocumentMarker"
 OMITTED = "OmittedDocumentMarker"
 
 
+class CommandTimeout(RuntimeError):
+    """명령 timeout과 전체 검색 관찰 기한을 구분하기 위한 오류."""
+
+
 def run(args, log=None, check=True, timeout=30):
     def output_text(stdout, stderr):
         # TimeoutExpired는 text=True에서도 캡처 결과를 bytes로 제공할 수 있다.
@@ -34,18 +39,18 @@ def run(args, log=None, check=True, timeout=30):
             return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else (value or "")
         return decode(stdout) + decode(stderr)
 
-    def failure(message, output):
+    def failure(message, output, error_type=RuntimeError):
         if log:
             Path(log).write_text(output)
         tail = "\n".join(output.splitlines()[-8:])[-2000:] or "(no output captured)"
         location = f"; log: {log}" if log else ""
-        return RuntimeError(f"{message}{location}\n{tail}")
+        return error_type(f"{message}{location}\n{tail}")
 
     try:
         result = subprocess.run([str(a) for a in args], capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired as error:
         raise failure(f"command timed out after {timeout}s: {args[0]}",
-                      output_text(error.stdout, error.stderr)) from error
+                      output_text(error.stdout, error.stderr), CommandTimeout) from error
     output = output_text(result.stdout, result.stderr)
     if check and result.returncode:
         raise failure(f"command failed ({result.returncode}): {args[0]}", output)
@@ -111,10 +116,7 @@ def expect_paths(state, token, names, label, timeout=None):
     while True:
         query_succeeded = False
         def read(term):
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                raise TimeoutError("search observation deadline reached")
-            return query(state, term, timeout=min(30, remaining))
+            return query_before_deadline(state, term, deadline)
         try:
             actual = read(token)
             # 대조를 실제 조회한다. 양성 검색의 실패에서도 서비스 상태를 추정하지 않는다.
@@ -146,6 +148,18 @@ def expect_paths(state, token, names, label, timeout=None):
                                      "elapsed_seconds": round(now - started, 2), "timeout_seconds": timeout})
             raise RuntimeError(f"Spotlight query timeout: {label}")
         time.sleep(min(2, max(0, deadline - now)))
+
+
+def query_before_deadline(state, term, deadline):
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise TimeoutError("search observation deadline reached")
+    try:
+        return query(state, term, timeout=min(30, remaining))
+    except CommandTimeout as error:
+        if remaining < 30 and time.monotonic() >= deadline:
+            raise TimeoutError("search observation deadline reached during query") from error
+        raise
 
 
 def prepare(args):
@@ -266,6 +280,7 @@ def install(state):
     app = Path(state["install_app"])
     state["installed_bundle_dates_ns"] = {"app": app.stat().st_mtime_ns,
                                            "importer": (app / PLUGIN).stat().st_mtime_ns}
+    state["installed_object"] = installation_object(app)
     for key, bundle in [("source_app_hashes", app), ("source_importer_hashes", app / PLUGIN)]:
         if key in state and fingerprint(bundle) != state[key]:
             raise RuntimeError("installed app/importer differs from prepared source")
@@ -450,6 +465,8 @@ def assert_automatic_candidate_unchanged(state):
             or fingerprint(app) != state["source_app_hashes"]
             or fingerprint(app / PLUGIN) != state["source_importer_hashes"]):
         raise ValueError("automatic search requires unchanged installed app/importer")
+    if state.get("installed_object") and installation_object(app) != state["installed_object"]:
+        raise ValueError("automatic search requires the original installation object")
 
 
 def corpus_snapshot(state):
@@ -540,14 +557,192 @@ def replace_app(state):
     state["phase"] = "replaced"
 
 
+def installation_object(app):
+    info = (app / PLUGIN).stat()
+    return [info.st_dev, info.st_ino, getattr(info, "st_birthtime", None)]
+
+
+def reindex_receipt(path):
+    # 요청 키만 비교한다. 전체 사용자 설정을 state/공개 증거로 복사하지 않는다.
+    receipt = plistlib.loads(Path(path).read_bytes()).get("alhangeul.spotlight.reimport.requestedInstallation")
+    if not isinstance(receipt, dict) or not receipt.get("installationIdentifier"):
+        raise ValueError("current installation receipt unavailable; no reinstall verdict")
+    return receipt
+
+
+def observe_reinstall_baseline(state, label):
+    """복사/실행 전 검색 상태를 관찰한다. 부분 검색이나 대조 실패는 수용하지 않는다."""
+    started = time.monotonic()
+    timeout = state.get('search_timeout', 60)
+    deadline = started + timeout
+    full_english = sorted(str(Path(state['files']) / name)
+                          for name in ('document-a.hwp', 'document-b.hwpx', 'document-c.hwp'))
+    full_korean = full_english[:2]
+    control = [str(Path(state['files']) / 'index-control.txt')]
+    stable_since, previous_mode = None, None
+    observation = {}
+    while True:
+        mode = None
+        try:
+            english = query_before_deadline(state, state['token'], deadline)
+            korean = query_before_deadline(state, KOREAN, deadline)
+            actual_control = query_before_deadline(state, CONTROL, deadline)
+            observation = {'english_paths': english, 'korean_paths': korean, 'control_paths': actual_control}
+            if actual_control == control:
+                if not english and not korean:
+                    mode = 'absent'
+                elif english == full_english and korean == full_korean:
+                    mode = 'searchable'
+        except TimeoutError:
+            pass
+        except RuntimeError as error:
+            record(state, label + '-query-error', 'FAIL', reason=str(error))
+            raise
+        now = time.monotonic()
+        if mode is None or now > deadline:
+            stable_since = None
+        elif mode != previous_mode or stable_since is None:
+            stable_since = now
+        previous_mode = mode
+        if stable_since is not None and now - stable_since >= 4:
+            observation.update(mode=mode, stable_seconds=round(now - stable_since, 2),
+                               elapsed_seconds=round(now - started, 2), timeout_seconds=timeout)
+            record(state, label, **observation)
+            return observation
+        if now >= deadline:
+            record(state, label, 'FAIL', reason='no stable complete/absent baseline with TXT control', **observation)
+            raise RuntimeError(f'Spotlight reinstall baseline timeout: {label}')
+        time.sleep(min(2, max(0, deadline - now)))
+
+
+def prepare_reinstall(state, receipt_plist):
+    """기존 요청 기록을 그대로 둔 채 소유 앱을 제거하고 새 사전 corpus를 준비한다."""
+    owned_locations(state)
+    if (not state.get("automatic") or state.get("assisted_actions")
+            or state.get("phase") != "searchable" or state.get("launch_count") != 1
+            or not any(r["case"] == "automatic-first-install-search" and r["result"] == "PASS"
+                       for r in state["results"])):
+        raise ValueError("reinstall requires a verified unassisted first installation")
+    if not receipt_plist:
+        raise ValueError("prepare-reinstall requires --receipt-plist for the candidate sandbox")
+    stop_candidate(state)
+    assert_automatic_candidate_unchanged(state)
+    app, files = Path(state["install_app"]), Path(state["files"])
+    receipt = reindex_receipt(receipt_plist)
+    if receipt.get("importerPath") != str(app / PLUGIN):
+        raise ValueError("receipt does not belong to the owned candidate")
+    state["reinstall"] = {"receipt_plist": str(Path(receipt_plist).resolve()), "before_receipt": receipt,
+                          "before_object": installation_object(app), "phase": "removing"}
+    # touch/lsregister/mdimport/defaults 변경 없이 소유 설치본과 합성 문서만 제거한다.
+    shutil.rmtree(app)
+    for path in files.iterdir():
+        if path.name != "index-control.txt":
+            path.unlink()
+    expect_paths(state, state["token"], [], "reinstall-old-body-removed")
+    expect_paths(state, KOREAN, [], "reinstall-old-korean-removed")
+    for source in (Path(state["fixtures"]) / "initial").iterdir():
+        if source.name != "index-control.txt":
+            shutil.copy2(source, files / source.name)
+    state["reinstall"]["before_copy_search"] = observe_reinstall_baseline(state, 'before-reinstall-search-state')
+    state["reinstall"]["prepared_corpus"] = corpus_snapshot(state)
+    state["reinstall"]["phase"] = "prepared"
+    state["phase"] = "reinstall-prepared"
+    record(state, "same-version-reinstall-prepared")
+
+
+def reinstall_app(state):
+    owned_locations(state)
+    trial = state.get("reinstall", {})
+    app = Path(state["install_app"])
+    if state.get("phase") != "reinstall-prepared" or trial.get("phase") != "prepared" or app.exists():
+        raise ValueError("prepare-reinstall and an absent owned app are required")
+    if reindex_receipt(trial["receipt_plist"]) != trial["before_receipt"]:
+        raise ValueError("receipt changed before reinstall")
+    if corpus_snapshot(state) != trial["prepared_corpus"]:
+        raise ValueError("reinstall corpus changed before installation")
+    copy_candidate(state)
+    run(["codesign", "--verify", "--deep", "--strict", app])
+    trial["after_object"] = installation_object(app)
+    if trial["after_object"] == trial["before_object"]:
+        raise ValueError("reinstall did not create a new installation object")
+    state["installed_object"] = trial["after_object"]
+    assert_automatic_candidate_unchanged(state)
+    if reindex_receipt(trial["receipt_plist"]) != trial["before_receipt"]:
+        raise ValueError("receipt changed before candidate launch")
+    trial['before_launch_search'] = observe_reinstall_baseline(state, 'before-reinstall-launch-search-state')
+    if corpus_snapshot(state) != trial['prepared_corpus']:
+        raise ValueError('reinstall corpus changed before launch')
+    assert_automatic_candidate_unchanged(state)
+    if reindex_receipt(trial['receipt_plist']) != trial['before_receipt']:
+        raise ValueError('receipt changed during pre-launch observation')
+    trial["installed_at"] = time.time()
+    launch(state)
+    trial["phase"] = "launched"
+    state["phase"] = "reinstalled"
+    record(state, "same-version-reinstall-launched")
+
+
+def wait_for_reinstall_receipt(state, timeout=30):
+    """이미 검색되더라도 비동기 worker의 새 요청 기록이 보일 때까지 관찰한다."""
+    trial = state["reinstall"]
+    started = time.monotonic()
+    deadline = started + timeout
+    attempts = 0
+    while True:
+        attempts += 1
+        try:
+            receipt = reindex_receipt(trial["receipt_plist"])
+            for key in ["importerPath", "buildIdentifier", "modificationDate"]:
+                if receipt.get(key) != trial["before_receipt"].get(key):
+                    raise ValueError("reinstall changed path, build or modification date")
+        except (OSError, ValueError, plistlib.InvalidFileException) as error:
+            record(state, "reinstall-request-receipt", "FAIL", reason=type(error).__name__,
+                   elapsed_seconds=round(time.monotonic() - started, 2), timeout_seconds=timeout,
+                   attempts=attempts)
+            raise
+        now = time.monotonic()
+        if now <= deadline and receipt["installationIdentifier"] != trial["before_receipt"]["installationIdentifier"]:
+            record(state, "reinstall-request-receipt", elapsed_seconds=round(now - started, 2),
+                   timeout_seconds=timeout, attempts=attempts)
+            return receipt
+        if now >= deadline:
+            record(state, "reinstall-request-receipt", "FAIL", reason="new installation request was not recorded",
+                   elapsed_seconds=round(now - started, 2), timeout_seconds=timeout, attempts=attempts)
+            raise ValueError("new installation request was not recorded within receipt observation timeout")
+        time.sleep(min(1, deadline - now))
+
+
+def reinstall_search(state):
+    trial = state.get("reinstall", {})
+    if (not state.get("automatic") or state.get("assisted_actions") or state.get("launch_count") != 2
+            or trial.get("phase") not in ["launched", "searchable"]):
+        raise ValueError("reinstall search requires the unassisted second installation launch")
+    if corpus_snapshot(state) != trial["prepared_corpus"]:
+        raise ValueError("reinstall corpus changed before observation")
+    assert_automatic_candidate_unchanged(state)
+    index(state)
+    verify(state)
+    receipt = wait_for_reinstall_receipt(state)
+    assert_automatic_candidate_unchanged(state)
+    if corpus_snapshot(state) != trial["prepared_corpus"]:
+        raise ValueError("reinstall corpus changed during observation")
+    trial["after_receipt"] = receipt
+    trial["phase"] = "searchable"
+    trial['search_outcome'] = 'maintained' if trial['before_launch_search']['mode'] == 'searchable' else 'recovered'
+    record(state, "automatic-same-version-reinstall-search", search_outcome=trial['search_outcome'])
+    state["phase"] = "searchable"
+
+
 def cleanup(state):
+    owned_locations(state)
     app = Path(state["install_app"])
     root = Path(state["install_root"])
     workspace = Path(state["workspace"])
     stop_candidate(state)
-    if app.exists():
-        unregister_app(app)
-        run(["qlmanage", "-r", "cache"], Path(state["evidence"]) / "quicklook-cache-cleanup.txt")
+    # 재설치 준비 실패는 이미 앱을 지운 상태일 수 있다. 소유 경로를 확인한 후
+    # 파일 존재 여부와 무관하게 그 경로의 등록 해제를 요청한다.
+    unregister_app(app)
+    run(["qlmanage", "-r", "cache"], Path(state["evidence"]) / "quicklook-cache-cleanup.txt")
     if root.exists():
         shutil.rmtree(root)
     state["phase"] = "cleanup-pending-index"
@@ -604,10 +799,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["prepare", "install", "launch", "developer-register", "diagnostic-register", "verify",
                                           "environment", "index", "automatic-search", "lifecycle", "replace-app", "restore-corpus", "stop-app",
-                                          "cleanup", "status"])
+                                          "prepare-reinstall", "reinstall-app", "reinstall-search", "cleanup", "status"])
     parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--app", type=Path)
     parser.add_argument("--fixtures", type=Path)
+    parser.add_argument("--receipt-plist", type=Path,
+                        help="prepare-reinstall: 실제 후보 sandbox preferences plist (요청 키만 읽고 수정하지 않음)")
     parser.add_argument("--token", default="AlhangeulSpotlightProbe")
     parser.add_argument("--automatic", action="store_true",
                         help="prepare에서 저장: 수동 lsregister/mdimport -i 없이 복사·첫 실행·자동 검색 비교")
@@ -660,6 +857,12 @@ def main():
         elif args.phase == "replace-app":
             state.setdefault("assisted_actions", []).append(args.phase)
             replace_app(state)
+        elif args.phase == "prepare-reinstall":
+            prepare_reinstall(state, args.receipt_plist)
+        elif args.phase == "reinstall-app":
+            reinstall_app(state)
+        elif args.phase == "reinstall-search":
+            reinstall_search(state)
         elif args.phase == "restore-corpus":
             state.setdefault("assisted_actions", []).append(args.phase)
             restore_corpus(state)

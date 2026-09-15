@@ -1,0 +1,12 @@
++    com.postmelee.alhangeul.QLExtension(0.2.2)
+	            Path = /Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex
+	            UUID = B03D5B4C-E23D-40BE-BB61-6B7B1561CD77
+	       Timestamp = 2026-09-15 04:30:40 +0000
+	             SDK = com.apple.quicklook.preview
+	   Parent Bundle = /Applications/Alhangeul.app
+	    Display Name = Alhangeul Preview
+	      Short Name = Alhangeul Preview
+	     Parent Name = 알한글
+	        Platform = macOS
+
+ (1 plug-in)
