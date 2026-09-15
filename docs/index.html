@@ -26,18 +26,19 @@
   <script>
     document.documentElement.classList.add("reveal-ready");
   </script>
-  <link rel="stylesheet" href="./styles.css?v=20260721-philosophy-balanced" />
+  <link rel="stylesheet" href="./styles.css?v=20260915-news" />
 </head>
 
 <body>
   <a class="skip-link" href="#main">본문으로 이동</a>
-  <header class="site-header" aria-label="주요 탐색">
+  <header class="site-header has-news-nav" aria-label="주요 탐색">
     <div class="site-header-inner">
       <a class="brand-link" href="./" aria-label="알한글 홈">
         <img src="./assets/logo-256@2x.png" width="28" height="28" alt="" />
         <span>알한글</span>
       </a>
       <nav class="header-actions" aria-label="주요 링크">
+        <a class="header-link" href="./news/">최신 소식</a>
         <a class="header-link" href="./updates/" aria-label="업데이트 안내로 이동">
           업데이트
         </a>
@@ -263,6 +264,24 @@
         </p>
       </div>
     </section>
+
+    <section class="news-home news-view" id="latest-news" aria-labelledby="latest-news-title"
+      data-news data-news-mode="single" data-news-source="./data/news.json">
+      <div class="news-heading">
+        <h2 id="latest-news-title">최신 소식</h2>
+        <p>새로운 기능과 개발 이야기를 전합니다.</p>
+      </div>
+      <div class="news-single">
+        <div class="news-message" data-news-message hidden></div>
+        <div data-news-posts></div>
+        <div class="news-load-controls" data-news-sentinel>
+          <p class="news-load-status" role="status" aria-live="polite" data-news-status><span class="news-loading-label"></span></p>
+        </div>
+        <noscript><p class="news-message">소식을 표시하려면 JavaScript를 켜 주세요. <a href="https://www.threads.com/@postmelee" target="_blank" rel="noopener noreferrer">Threads에서 소식 확인하기</a></p></noscript>
+        <div class="news-cta"><a class="news-more" href="./news/">소식 더 보기 <span aria-hidden="true">→</span></a></div>
+        <p class="news-privacy">Threads에서 제공하는 소식입니다. <a href="./news/#news-privacy">외부 콘텐츠 안내</a></p>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -278,6 +297,7 @@
 
   <noscript>FAQ 아코디언은 JavaScript 없이도 브라우저 기본 동작으로 열고 닫을 수 있습니다.</noscript>
   <script src="./script.js?v=20260626-feedback-copy"></script>
+  <script src="./news.js?v=20260915-news" defer></script>
 </body>
 
 </html>
