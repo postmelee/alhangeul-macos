@@ -50,3 +50,7 @@
 PR #527 최종 head의 CI를 확인하고 승인된 devel 병합을 수행한다. 그 후 main 대상 별도 Pages 반영 PR에서 전체 diff에 앱/릴리즈 변경이 섞이지 않는지 확인하고 CI·main/source content gate를 통과한 head를 병합한다. main docs push는 자동 배포를 실행한다.
 
 배포 직전에 새 공개 feed를 받아 bytes/hash를 기록하고 Release·tap을 재확인한다. 배포 후 공개 feed 동일성, 공개 HTML·CSS·JavaScript와 배포 소스의 일치, 탭·복사·최신/과거/후보 화면을 확인한다. 실제 PR·배포 run·최종 결과는 해당 PR 본문과 #523 완료 기록에 연결한다. 완료 전까지 이슈는 열린 상태로 유지한다.
+
+## 공개 완료
+
+2026-09-15 15:31 KST에 PR #527 / #553 병합과 [Pages 배포](https://github.com/postmelee/alhangeul-macos/actions/runs/34937144308) 후 공개 소스 일치·실제 복사·appcast 보존을 확인했다. 공개 feed 1,161바이트, SHA-256 `8b0face06819d65f60cc6e3675244eaa1cccead997927c1f27c131d523313140`로 배포 전후 동일하다. 최종 상태는 [최종 보고서](../report/task_m900_523_report.md)를 따른다.
