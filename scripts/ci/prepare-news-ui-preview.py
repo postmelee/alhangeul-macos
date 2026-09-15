@@ -45,6 +45,7 @@ def main():
         for name in ['styles.css', 'news.js']:
             revision = (REPO / 'docs' / name).stat().st_mtime_ns
             html = html.replace(f'{name}?v=20260915-news', f'{name}?v={revision}')
+            html = html.replace(f'{name}?v=20260915-manual', f'{name}?v={revision}')
         html = html.replace('</head>', f'<script src="../../../../test-bootstrap.js?case={case}"></script>\n</head>')
         (case_root / 'news/index.html').write_text(html)
     print('로컬 실제 소식·격리 fixture 검증 사이트 생성 완료')

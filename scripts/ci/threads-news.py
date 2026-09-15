@@ -118,6 +118,21 @@ def validate_news(data):
     else:
         updated, expires = utc_time(data["updated_at"]), utc_time(data["expires_at"])
         require(timedelta(0) < expires - updated <= timedelta(hours=48), "표시 유효기간은 최대 48시간")
+    validate_items(items)
+    return {"status": "valid", "schema_version": 2, "item_count": len(items), "live_verified": False}
+
+
+def validate_manual_news(data):
+    """운영자가 직접 선택한 원문 참조. 자동 조회 시각이나 만료를 주장하지 않는다."""
+    exact_keys(data, {"schema_version", "mode", "items"})
+    require(type(data["schema_version"]) is int and data["schema_version"] == 3
+            and data["mode"] == "manual", "수동 소식 계약 오류")
+    validate_items(data["items"])
+    return data
+
+
+def validate_items(items):
+    require(isinstance(items, list) and len(items) <= MAX_ITEMS, "게시물 배열 또는 크기 오류")
     seen = set()
     for item in items:
         exact_keys(item, {"platform", "permalink"})
@@ -127,7 +142,6 @@ def validate_news(data):
         key = (item["platform"], urlsplit(item["permalink"]).path.rstrip("/").rsplit("/", 1)[-1])
         require(key not in seen, "중복 게시물")
         seen.add(key)
-    return {"status": "valid", "schema_version": 2, "item_count": len(items), "live_verified": False}
 
 
 def validate_embed(data, permalink):
