@@ -1,0 +1,16 @@
+==> Would upgrade 1 outdated package
+postmelee/tap/alhangeul 0.1.11 -> 0.2.2
+==> Fetching downloads for: postmelee/tap/alhangeul
+✔︎ Cask alhangeul (0.2.2)
+==> Upgrading alhangeul
+  0.1.11 -> 0.2.2
+==> Caveats
+앱을 한 번 실행한 뒤 Spotlight 색인과 미리보기 준비에 시간이 걸릴 수 있습니다.
+
+==> Backing up App 'Alhangeul.app' to '/opt/homebrew/Caskroom/alhangeul/0.1.11/Alhangeul.app'
+==> Removing App '/Applications/Alhangeul.app'
+==> Moving App 'Alhangeul.app' to '/Applications/Alhangeul.app'
+==> Purging files for version 0.1.11 of Cask alhangeul
+🍺  alhangeul was successfully upgraded!
+==> Upgraded 1 outdated package
+postmelee/tap/alhangeul 0.1.11 -> 0.2.2

@@ -1,0 +1,4 @@
+==> Uninstalling Cask alhangeul
+==> Backing up App 'Alhangeul.app' to '/opt/homebrew/Caskroom/alhangeul/0.2.2/Alhangeul.app'
+==> Removing App '/Applications/Alhangeul.app'
+==> Purging files for version 0.2.2 of Cask alhangeul

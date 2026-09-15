@@ -1,0 +1,6 @@
+/Users/melee/Documents/Alhangeul-v022-Sparkle-20260914/before-update/document-b.hwpx
+/Users/melee/Documents/Alhangeul-v022-Sparkle-20260914/before-update/document-c.hwp
+/Users/melee/Documents/Alhangeul-v022-Sparkle-20260914/before-update/document-a.hwp
+/Users/melee/Documents/Alhangeul-v022-Sparkle-20260914/after-update/document-b.hwpx
+/Users/melee/Documents/Alhangeul-v022-Sparkle-20260914/after-update/document-c.hwp
+/Users/melee/Documents/Alhangeul-v022-Sparkle-20260914/after-update/document-a.hwp
