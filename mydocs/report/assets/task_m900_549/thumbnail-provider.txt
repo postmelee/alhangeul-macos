@@ -1,0 +1,12 @@
++    com.postmelee.alhangeul.ThumbnailExtension(0.2.2)
+	            Path = /Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex
+	            UUID = ECD609B2-0253-4EE7-AC28-E729D551CF53
+	       Timestamp = 2026-09-15 04:30:40 +0000
+	             SDK = com.apple.quicklook.thumbnail
+	   Parent Bundle = /Applications/Alhangeul.app
+	    Display Name = Alhangeul Thumbnail
+	      Short Name = Alhangeul Thumbnail
+	     Parent Name = 알한글
+	        Platform = macOS
+
+ (1 plug-in)

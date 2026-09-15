@@ -508,6 +508,7 @@ brew uninstall --cask alhangeul
 - `sha256 :no_check`를 public 배포 완료로 간주하지 않는다.
 - `brew audit --cask --new`는 upstream Homebrew 제출 수준 참고 검증이며, maintainer tap 공개 gate와 구분한다.
 - Homebrew 안내 문구는 tap context 검증이 끝난 뒤 README, Pages, GitHub Release/릴리즈 노트에 일관되게 반영한다.
+- 기존 tap 설치본이 있으면 공개 tap을 갱신한 뒤 `brew upgrade --cask postmelee/tap/alhangeul`도 검증한다. 이전/이후 앱 버전·빌드와 Homebrew receipt, 서명을 기록하고, 제거·신규 설치 후 최종 공개 버전으로 복원한다. `--zap`으로 사용자 문서·설정을 초기화하지 않는다.
 
 ## Gate 10. Release record와 최종 보고
 

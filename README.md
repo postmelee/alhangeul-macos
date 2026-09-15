@@ -64,7 +64,7 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 - 다운로드: [GitHub Release v0.2.2](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.2). macOS 12 이상을 대상으로 하는 Intel·Apple Silicon 공용 서명·공증 DMG입니다. 이번 최소 macOS 12 실행 검증은 환경 부재로 수행하지 못했습니다.
 - 기존 앱: `알한글 → 업데이트 확인...`에서 업데이트할 수 있습니다.
 
-GitHub Release와 Sparkle의 최신 공개 버전은 `v0.2.2 (20)`입니다. **Homebrew Cask는 별도 배포 전까지 `v0.1.11 (17)`을 유지합니다.** `brew install --cask postmelee/tap/alhangeul`의 배포 버전과 직접 다운로드 버전을 구분해 주세요.
+GitHub Release, Sparkle, Homebrew Cask의 최신 공개 버전은 모두 `v0.2.2 (20)`이며 같은 signed/notarized universal DMG를 사용합니다.
 
 > **이전 v0.1.10 저장 주의:** HWP3 저장 시 원본이 HWP5 bytes로 바뀌거나, 보호 문서 저장 시 보호가 제거된 평문으로 원본을 덮어쓸 수 있습니다([#482](https://github.com/postmelee/alhangeul-macos/issues/482), [#480](https://github.com/postmelee/alhangeul-macos/issues/480)). v0.1.10을 계속 사용하는 경우 HWP3·암호 문서는 먼저 사본을 만들고 native 저장을 사용하지 마세요. 원본 보호가 적용된 최신 버전으로 업데이트하세요.
 
@@ -200,6 +200,8 @@ Homebrew Cask를 사용하는 경우 아래 명령으로 같은 signed/notarized
 ```bash
 brew install --cask postmelee/tap/alhangeul
 ```
+
+기존 Homebrew 설치본은 `brew update` 후 `brew upgrade --cask postmelee/tap/alhangeul`로 업데이트할 수 있습니다. 설치 후 한 번 실행하고 검색 색인이 반영될 때까지 잠시 기다려 주세요.
 
 Homebrew가 untrusted tap 정책으로 설치를 거부하면 `brew trust --cask postmelee/tap/alhangeul`을 한 번 실행한 뒤 다시 설치하세요.
 
