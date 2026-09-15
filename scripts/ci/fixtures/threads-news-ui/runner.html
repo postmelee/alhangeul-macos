@@ -1,0 +1,128 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><title>소식 UI 로컬 검증</title>
+<style>body{font:15px system-ui;padding:24px;background:#eee}iframe{height:720px;display:block;border:1px solid #aaa;background:white}button,select{padding:10px;margin:6px}pre{white-space:pre-wrap}label{margin-right:20px}</style>
+<h1>소식 UI 로컬 검증</h1>
+<button id="run">전체 회귀 검증</button>
+<label>화면 너비 <select id="width"><option>1440</option><option>768</option><option>390</option><option>320</option></select></label>
+<button id="live">실제 소식 화면</button>
+<pre id="result" aria-live="polite">검증 대기</pre>
+<iframe id="viewport" title="소식 페이지 검증 화면" width="1440"></iframe>
+<script>
+const frame = document.querySelector('#viewport'), result = document.querySelector('#result');
+const width = document.querySelector('#width');
+width.onchange = () => frame.width = width.value;
+document.querySelector('#live').onclick = async () => {
+  result.textContent = '실제 소식 반응형 검증 중';
+  try {
+    const results = [];
+    for (const pixels of [1440, 768, 390, 320]) {
+      frame.width = pixels;
+      await new Promise(resolve => { frame.onload = resolve; frame.src = `./alhangeul-macos/news/?width=${pixels}`; });
+      await until(() => count('.news-post iframe') === 5 && settled(), '실제 카드 준비 timeout', 25000);
+      await pause(800);
+      const html = doc().documentElement;
+      assert(html.scrollWidth <= html.clientWidth, `${pixels}px 가로 넘침`);
+      for (const embed of doc().querySelectorAll('.news-post iframe')) {
+        assert(embed.getBoundingClientRect().width <= embed.parentElement.getBoundingClientRect().width, `${pixels}px 임베드 넘침`);
+      }
+      assert(count('.is-failed') === 0, '카드 로딩 실패');
+      results.push(`PASS 실제 글 ${pixels}px: 카드 ${count('.news-post iframe')}개, 가로 넘침 없음`);
+    }
+    width.value = '320';
+    frame.contentWindow.scrollTo({ top: 0, behavior: 'instant' });
+    result.textContent = results.join('\n');
+    frame.scrollIntoView({ block: 'start', behavior: 'instant' });
+  } catch (error) { result.textContent = `FAIL ${error.message}`; }
+};
+const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+function assert(condition, message) { if (!condition) throw new Error(message); }
+async function until(predicate, label, limit = 5000) {
+  const start = Date.now();
+  while (!predicate()) { if (Date.now() - start > limit) throw new Error(label); await pause(25); }
+}
+function doc() { return frame.contentDocument; }
+function count(selector) { return doc().querySelectorAll(selector).length; }
+function settled() { return !doc().querySelector('[data-news-status]')?.classList.contains('is-loading') && !count('.news-post.is-revealing'); }
+async function openCase(name, pixels = 768) {
+  frame.width = pixels;
+  await new Promise(resolve => { frame.onload = resolve; frame.src = `./cases/${name}/alhangeul-macos/news/?run=${Date.now()}`; });
+  await until(() => !!doc().querySelector('[data-news]'), '페이지 준비 timeout');
+}
+async function nearEnd() {
+  // 중첩 iframe에서는 부모 viewport의 clipping도 적용되므로 감지 대상을 실제로 노출한다.
+  frame.scrollIntoView({ block: 'start', behavior: 'instant' });
+  frame.contentWindow.scrollTo({ top: doc().documentElement.scrollHeight, behavior: 'instant' });
+}
+document.querySelector('#run').onclick = async () => {
+  document.querySelector('#run').disabled = true;
+  const results = [];
+  const check = async (name, fn) => {
+    try { await fn(); results.push(`PASS ${name}`); }
+    catch (error) { results.push(`FAIL ${name}: ${error.message}`); }
+    result.textContent = results.join('\n');
+  };
+  for (const total of [0, 1, 5, 6, 10, 11]) await check(`${total}개 / 5개 단위 자동 로딩`, async () => {
+    await openCase(String(total));
+    await until(settled, '초기 로딩 timeout');
+    assert(count('.news-post') === Math.min(total, 5), '초기 카드 수');
+    for (let shown = 5; shown < total; shown += 5) {
+      await nearEnd();
+      await until(() => count('.news-post') === Math.min(total, shown + 5) && settled(), '추가 로딩 timeout');
+    }
+    assert(count('.news-post iframe') === total, '최종 iframe 수');
+    assert(new Set([...doc().querySelectorAll('.news-post')].map(p => p.dataset.permalink)).size === total, '중복 카드');
+    assert(count('script[src="https://www.threads.com/embed.js"]') <= 1, 'script 중복');
+    assert(count('.news-skeleton') === 0, '스켈레톤 잔존');
+  });
+  for (const scenario of ['inactive', 'expired', 'invalid']) await check(`${scenario}에서 외부 임베드 차단`, async () => {
+    await openCase(scenario); await until(settled, '상태 timeout');
+    assert(!doc().querySelector('[data-news-message]').hidden, '안내 누락');
+    assert(count('.news-post iframe') === 0 && count('script[src="https://www.threads.com/embed.js"]') === 0, '불필요한 외부 요청');
+  });
+  await check('JSON 실패 후 재시도', async () => {
+    await openCase('json-retry'); await until(settled, '실패 표시 timeout');
+    doc().querySelector('[data-news-message] button').click();
+    await until(() => count('.news-post iframe') === 5 && settled(), '재시도 timeout');
+    assert(doc().documentElement.dataset.fixtureFetches === '2', 'JSON 요청 횟수');
+  });
+  for (const scenario of ['script-retry', 'script-timeout', 'embed-retry']) await check(`${scenario} 복구`, async () => {
+    await openCase(scenario); await until(() => count('.is-failed') > 0 && settled(), '실패 표시 timeout');
+    while (count('.is-failed')) {
+      doc().querySelector('.is-failed button').click();
+      await until(() => !count('.news-post.is-loading') && !count('.is-revealing'), '카드 재시도 timeout');
+    }
+    assert(count('.news-post iframe') === 5, '복구 후 iframe 수');
+    assert(count('script[src="https://www.threads.com/embed.js"]') === 1, '복구 script 중복');
+  });
+  for (const scenario of ['expires-open', 'expires-loading']) await check(`${scenario} 중 만료`, async () => {
+    await openCase(scenario);
+    await until(() => !doc().querySelector('[data-news-message]').hidden, '만료 안내 timeout');
+    await pause(450);
+    assert(count('.news-post') === 0, '만료 후 늦은 결과 재삽입');
+  });
+  await check('자동 감지 없는 환경 / 수동 추가·연속 클릭·포커스', async () => {
+    await openCase('no-observer'); await until(settled, '초기 timeout');
+    const button = doc().querySelector('[data-news-more]');
+    for (const expected of [10, 11]) {
+      button.focus(); button.click(); button.click();
+      await until(() => count('.news-post') === expected && settled(), '수동 로딩 timeout');
+      assert(doc().activeElement.classList.contains('news-post'), '추가 카드 포커스');
+    }
+  });
+  await check('전환 완료 / 동작 줄이기', async () => {
+    await openCase('reduced'); await until(settled, '동작 줄이기 timeout');
+    assert(count('.news-skeleton') === 0 && count('.is-revealing') === 0, '전환 상태 잔존');
+    for (const post of doc().querySelectorAll('.news-post')) assert(!post.style.height, '높이 고정 잔존');
+  });
+  for (const pixels of [1440, 768, 390, 320]) await check(`${pixels}px 반응형 / 전체 스크롤`, async () => {
+    await openCase('6', pixels); await until(settled, '반응형 timeout');
+    const html = doc().documentElement;
+    assert(html.scrollWidth <= html.clientWidth, `가로 넘침 ${html.scrollWidth}/${html.clientWidth}, body ${frame.contentWindow.getComputedStyle(doc().body).width}/${frame.contentWindow.getComputedStyle(doc().body).minWidth}: ` + [...doc().querySelectorAll('body *')].filter(e => e.getBoundingClientRect().right > html.clientWidth + 1).slice(0, 8).map(e => `${e.tagName}.${e.className}`).join(', '));
+    const nav = doc().querySelector('.header-actions').getBoundingClientRect();
+    assert(nav.left >= 0 && nav.right <= pixels, '헤더 넘침');
+    assert(frame.contentWindow.getComputedStyle(doc().querySelector('.news-feed')).overflowY === 'visible', '내부 스크롤');
+  });
+  result.dataset.outcome = results.every(line => line.startsWith('PASS')) ? 'passed' : 'failed';
+  result.textContent += `\n${results.filter(line => line.startsWith('PASS')).length}/${results.length} PASS`;
+  document.querySelector('#run').disabled = false;
+};
+</script></html>
