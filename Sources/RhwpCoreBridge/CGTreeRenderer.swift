@@ -55,6 +55,7 @@ class CGTreeRenderer {
     private var pageBounds: BBox?
     private var pageHeight: Double = 0
     private var renderMode: CGTreeRenderMode = .complete
+    private var isReplayingBodyOverflowControls = false
 
     private struct BuiltPath {
         let path: CGPath
@@ -421,6 +422,7 @@ class CGTreeRenderer {
         renderChildren(node, in: ctx)
         ctx.restoreGState()
 
+        guard !isReplayingBodyOverflowControls else { return }
         renderBodyOverflowControls(node, bodyClip: clip, in: ctx)
     }
 
@@ -428,12 +430,17 @@ class CGTreeRenderer {
         let candidates = bodyOverflowReplayCandidates(in: bodyNode, bodyClip: bodyClip)
         guard !candidates.isEmpty else { return }
 
+        let wasReplayingBodyOverflowControls = isReplayingBodyOverflowControls
+        isReplayingBodyOverflowControls = true
         ctx.saveGState()
+        defer {
+            ctx.restoreGState()
+            isReplayingBodyOverflowControls = wasReplayingBodyOverflowControls
+        }
         ctx.clip(to: bodyOverflowReplayClipRect(bodyClip))
         for candidate in candidates {
             renderNode(candidate, in: ctx)
         }
-        ctx.restoreGState()
     }
 
     private func bodyOverflowReplayCandidates(in bodyNode: RenderNode, bodyClip: BBox) -> [RenderNode] {
