@@ -9,7 +9,8 @@ fi
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/build.noindex/font-library-container-probe"
 APP="$OUT/FontLibraryContainerProbe.app"
-mkdir -p "$APP/Contents/MacOS" "$OUT/module-cache"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$OUT/module-cache"
+cp "$ROOT/Tests/FontLibraryTests/Fixtures/regular.ttf" "$APP/Contents/Resources/regular.ttf"
 python3 - "$ROOT" "$APP" <<'PY'
 import plistlib
 import sys
@@ -29,8 +30,8 @@ probe_info = dict(CFBundleIdentifier='com.postmelee.alhangeul.FontLibraryContain
     'com.apple.security.application-groups': [group],
 }))
 PY
-swiftc -target "$(uname -m)-apple-macosx12.0" -module-cache-path "$OUT/module-cache" \
-  "$ROOT/Sources/Shared/FontLibrary/FontLibraryLocation.swift" \
+swiftc -parse-as-library -target "$(uname -m)-apple-macosx12.0" -module-cache-path "$OUT/module-cache" \
+  "$ROOT"/Sources/Shared/FontLibrary/*.swift \
   "$ROOT/Tests/FontLibraryContainerProbe/main.swift" \
   -o "$APP/Contents/MacOS/FontLibraryContainerProbe"
 codesign --force --options runtime --timestamp=none --sign "$1" \

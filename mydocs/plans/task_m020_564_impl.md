@@ -4,8 +4,8 @@
 - 이슈: [#564](https://github.com/postmelee/alhangeul-macos/issues/564), 상위 #562
 - 기준 설계: [font_migration_design.md](../tech/font_migration_design.md)
 - 브랜치: `local/task564` → `devel` / 마일스톤: M020, v0.2 계열
-- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인 및 구현계획 작성 진입. 이후 같은 날 “진행해줘”로 구현계획 승인 및 Stage 1 착수.
-- 상태: Stage 1 구현·검증 완료, Stage 2 승인 대기. [Stage 1 보고](../working/task_m020_564_stage1.md).
+- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인 및 구현계획 작성 진입. 이후 같은 날 “진행해줘”로 구현계획 승인 및 Stage 1 착수. Stage 1 보고 후 같은 날 “진행해줘”로 Stage 2 착수 승인.
+- 상태: Stage 2 구현·검증 완료, Stage 3 승인 대기. [Stage 1 보고](../working/task_m020_564_stage1.md), [Stage 2 보고](../working/task_m020_564_stage2.md).
 
 ## 1. 구현 경계와 파일 배치
 
@@ -83,6 +83,8 @@
 ## 5. Stage 2 — 가져오기·원자적 저장·중복 및 충돌
 
 산출물: 파일 시스템 adapter, store의 import/list/select, schema와 transaction 처리.
+
+Stage 2 확정: 프로세스 내 공통 직렬 큐와 프로세스 간 flock을 함께 사용한다. staging 생성은 writer 잠금 안에서 수행하여 다음 단계의 정리가 실행 중 transaction을 지우지 않도록 한다. 파일의 동기화와 디렉터리 게시 뒤 장치 flush를 요청한다. 결과에는 원본 읽기 실패와 다른 `storageFailure`, 그리고 `notPublished` / `durable` / `visibleDurabilityUnconfirmed`를 추가해 게시 후 내구성 미확인을 숨기지 않는다.
 
 - Stage 1 검증 결과의 bytes만 저장한다. 원본을 다시 열어 다른 내용을 복사하지 않는다.
 - 동일 hash·동명 다른 hash·스타일별 항목, 세대가 지난 선택 요청, 일부 실패·취소를 결과에 반영한다.
