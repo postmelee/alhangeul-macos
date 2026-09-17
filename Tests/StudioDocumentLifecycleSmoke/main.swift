@@ -134,18 +134,26 @@ import WebKit
         coordinator.writeSaveData = { _, _, _ in throw Failure(description: "injected close save failure") }
         window.performClose(nil)
         try await answer(window, .alertFirstButtonReturn)
-        try await wait("close save failure") { store.webViewErrorMessage != nil }
+        // Coordinator의 onError는 JS save lock 해제와 close completion보다 먼저 온다.
+        // 오류 표시만 기다리면 다음 종료가 진행 중인 확인 요청에 의해 취소될 수 있다.
+        try await wait("close save failure completed") {
+            store.webViewErrorMessage != nil && !close.isPresentingConfirmation
+        }
         try check(window.isVisible && store.hasUnsavedChanges, "close save failure keeps dirty window")
         store.dismissWebViewError()
         coordinator.writeSaveData = { try DocumentSavePanel.write(data: $0, to: $1, allowOverwrite: $2) }
         var reply: Bool?
         let termination = DocumentTerminationCoordinator { _, result in reply = result }
-        _ = termination.applicationShouldTerminate(NSApp)
+        try check(termination.applicationShouldTerminate(NSApp) == .terminateLater,
+            "termination cancellation request awaits confirmation")
+        try check(reply == nil, "termination cancellation is not rejected before confirmation")
         try await answer(window, .alertThirdButtonReturn)
         try await wait("termination cancelled") { reply != nil }
         try check(reply == false && store.hasUnsavedChanges, "termination cancellation preserves document")
         reply = nil
-        _ = termination.applicationShouldTerminate(NSApp)
+        try check(termination.applicationShouldTerminate(NSApp) == .terminateLater,
+            "termination save request awaits confirmation")
+        try check(reply == nil, "termination save is not rejected before confirmation")
         try await answer(window, .alertFirstButtonReturn)
         try await wait("termination saved") { reply != nil }
         try check(reply == true && !store.hasUnsavedChanges, "save permits app termination")
