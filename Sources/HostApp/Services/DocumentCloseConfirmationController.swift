@@ -10,7 +10,7 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
     private weak var window: NSWindow?
     private weak var store: DocumentViewerStore?
     private weak var previousDelegate: NSWindowDelegate?
-    private var isPresentingConfirmation = false
+    private(set) var isPresentingConfirmation = false
     private var bypassNextClose = false
 
     func attach(window: NSWindow, store: DocumentViewerStore) {

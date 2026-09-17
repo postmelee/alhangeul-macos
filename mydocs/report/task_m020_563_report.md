@@ -64,3 +64,12 @@ Stage 3의 최종 실행 `build.noindex/task563-font-migration/run-68pxsn4y/summ
 | 4 | [#569 통합 검증·안내](https://github.com/postmelee/alhangeul-macos/issues/569) | 실제 제품별 이전·원본 부재 수용, Mac/Windows 단계 안내 |
 
 2026-09-17 작업지시자의 “진행해줘”로 최종 보고와 PR 게시를 승인받았다. `publish/task563`에서 `devel` 대상 PR을 게시한다. merge 확인 또는 별도 승인 전에는 #563 이슈를 닫지 않는다. 다음 제품 구현은 #564 의 자체 수행계획·구현계획 승인부터 시작한다. 공개 릴리스·웹페이지 배포는 별도 지시에 따른다.
+
+
+## PR #570 CI 보완 — 저장 실패 완료 대기
+
+- 작업지시자의 CI 실패 제보에 따라 기존 문서 lifecycle smoke를 진단했다. [실패 실행](https://github.com/postmelee/alhangeul-macos/actions/runs/35201102610)의 macOS validation은 HWPX의 close save failure 뒤 `timeout: confirmation sheet`로 종료됐다. Script syntax checks는 통과했다.
+- 기존 테스트는 `webViewErrorMessage != nil`만 기다렸다. 실제 Coordinator는 `onError` → 비동기 JS save lock 해제 → 저장 completion 순서로 실행하므로 오류 표시가 close controller의 확인 처리 완료를 보장하지 않는다. 그 사이 termination 요청은 진행 중 확인으로 인해 즉시 취소될 수 있다.
+- controller의 `isPresentingConfirmation`을 내부 읽기 전용으로 노출하고, smoke에서 오류와 확인 처리 완료를 함께 기다리도록 변경했다. 상태 전이·저장·종료의 제품 동작은 변경하지 않는다. 다음 termination 요청의 `.terminateLater`와 즉시 취소되지 않았음도 명시적으로 검증한다. timeout 증대·테스트 제외는 하지 않았다.
+- 로컬 독립 진단은 실제 `DocumentCloseConfirmationController`/`DocumentTerminationCoordinator`와 500ms 지연 저장 callback을 사용했다. 기존 오류-only 조건의 즉시 취소를 재현하고, 새 완료 조건 이후 실제 NSAlert sheet 표시·취소·dirty 보존을 통과했다. 이는 mock Store/dispatcher 진단이며 전체 Studio 통합 실행을 대신하지 않는다. 경고 없는 Swift 컴파일 및 출력은 `build.noindex/task563-close-race/result.log`에 있다.
+- 동일 구 head의 실패 job 재실행도 시작했지만 근본 경합이 코드·독립 진단에서 확인돼 보완 커밋을 별도로 게시한다. 최종 전체 macOS/Studio 결과는 보완 head의 PR CI를 기준으로 확인한다.
