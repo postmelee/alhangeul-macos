@@ -3,7 +3,7 @@
 - 관련: [상위 #562](https://github.com/postmelee/alhangeul-macos/issues/562), [조사·설계 #563](https://github.com/postmelee/alhangeul-macos/issues/563)
 - 마일스톤: M020 / 글꼴 마이그레이션 / v0.2 계열
 - 확인일: 2026-09-17
-- 현재 범위: Stage 1–4 조사·설계·독립 실험·후속 인계 완료. 최종 보고 승인/PR 대기이며 제품 통합은 후속 이슈 범위다.
+- 현재 범위: Stage 1–4 조사·설계·독립 실험·후속 인계 완료. 최종 보고·PR 게시를 승인받았으며 제품 통합은 후속 이슈 범위다.
 
 ## 1. 조사 결론
 

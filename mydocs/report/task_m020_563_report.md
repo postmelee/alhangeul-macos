@@ -4,7 +4,7 @@
 - 이슈: [#563](https://github.com/postmelee/alhangeul-macos/issues/563), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562)
 - 마일스톤: [글꼴 마이그레이션](https://github.com/postmelee/alhangeul-macos/milestone/22) / M020 / v0.2 계열
 - 작업 브랜치: `local/task563`, PR 대상: `devel`
-- 상태: 조사·설계·독립 실험·GitHub 인계 완료, 최종 승인/PR 대기
+- 상태: 조사·설계·독립 실험·GitHub 인계 완료, 2026-09-17 최종 보고·PR 게시 승인, PR 검토/통합 단계
 
 ## 결과
 
@@ -63,4 +63,4 @@ Stage 3의 최종 실행 `build.noindex/task563-font-migration/run-68pxsn4y/summ
 | 3 | [#568 출력·확장](https://github.com/postmelee/alhangeul-macos/issues/568) | 전용 PDF·실인쇄·signed 공유·native 공급/캐시 |
 | 4 | [#569 통합 검증·안내](https://github.com/postmelee/alhangeul-macos/issues/569) | 실제 제품별 이전·원본 부재 수용, Mac/Windows 단계 안내 |
 
-이 보고서 승인 후 `publish/task563`에서 `devel` 대상 PR을 게시한다. merge 확인 또는 별도 승인 전에는 #563 이슈를 닫지 않는다. 다음 제품 구현은 #564 의 자체 수행계획·구현계획 승인부터 시작한다. 공개 릴리스·웹페이지 배포는 별도 지시에 따른다.
+2026-09-17 작업지시자의 “진행해줘”로 최종 보고와 PR 게시를 승인받았다. `publish/task563`에서 `devel` 대상 PR을 게시한다. merge 확인 또는 별도 승인 전에는 #563 이슈를 닫지 않는다. 다음 제품 구현은 #564 의 자체 수행계획·구현계획 승인부터 시작한다. 공개 릴리스·웹페이지 배포는 별도 지시에 따른다.
