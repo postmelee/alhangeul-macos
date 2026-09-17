@@ -172,6 +172,26 @@ targets:
         CODE_SIGN_STYLE: Automatic
         SKIP_INSTALL: YES
 
+  FontLibraryTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/FontLibraryTests
+        excludes:
+          - Fixtures
+      - path: Tests/FontLibraryTests/Fixtures
+        type: folder
+      - path: Sources/Shared
+        includes:
+          - FontLibrary/**
+    dependencies:
+      - sdk: CoreText.framework
+      - sdk: Security.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.FontLibraryTests
+        GENERATE_INFOPLIST_FILE: YES
+
   HostAppTests:
     type: bundle.unit-test
     platform: macOS

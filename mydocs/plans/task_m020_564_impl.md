@@ -4,8 +4,8 @@
 - 이슈: [#564](https://github.com/postmelee/alhangeul-macos/issues/564), 상위 #562
 - 기준 설계: [font_migration_design.md](../tech/font_migration_design.md)
 - 브랜치: `local/task564` → `devel` / 마일스톤: M020, v0.2 계열
-- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인 및 구현계획 작성 진입.
-- 상태: 구현계획 승인 대기. 제품 소스 변경 전.
+- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인 및 구현계획 작성 진입. 이후 같은 날 “진행해줘”로 구현계획 승인 및 Stage 1 착수.
+- 상태: Stage 1 구현·검증 완료, Stage 2 승인 대기. [Stage 1 보고](../working/task_m020_564_stage1.md).
 
 ## 1. 구현 경계와 파일 배치
 
@@ -113,7 +113,7 @@
 
 - UI와 renderer 연결 없이 후속 Mac/Windows 입력이 호출할 진입점을 구성한다. 취소·권한 수명·오류 매핑을 통합 검증한다.
 - `scripts/test-font-library.sh`에서 독립 XCTest와 subprocess 회귀를 실행하고 기존 PR CI에 연결한다. fixture는 공개 사용 가능한 자산과 출처/라이선스/hash를 고정하며 사용자 Fonts 설치 상태에 의존하지 않는다.
-- `xcodegen generate`, 독립 테스트 스킴의 `xcodebuild test`, HostApp 빌드 및 `scripts/check-no-appkit.sh`를 실행한다. 정확한 스킴명·옵션은 테스트 타깃과 함께 고정하고 보고서에 실행 명령을 남긴다.
+- `xcodegen generate`, 독립 테스트 스킴의 `xcodebuild test`, HostApp 빌드 및 `scripts/check-no-appkit.sh`를 실행한다. Stage 1에서 `FontLibraryTests` 스킴을 고정했다. 로컬 Xcode testmanager의 번들 로드 오류 때문에 재현 스크립트는 `build-for-testing` 후 `xcrun xctest`로 동일 XCTest를 실행한다. 별도 `xcodebuild test-without-building` 성공 증거와 실행 환경 제약은 Stage 1 보고서에 기록한다. CI 연결 시 실행 환경에 맞는 경로를 검증한다.
 - HostApp 빌드에 필요한 core framework는 빌드 가이드대로 준비한다. 독립 테스트 통과만으로 제품 compile/link를 통과했다고 기록하지 않는다.
 - 서명된 HostApp 컨테이너 접근, entitlement, 재실행을 확인한다. macOS 12 컴파일과 실제 macOS 12 실행 결과를 구분한다. 자격/환경 부족으로 남은 수용 조건은 최종 승인 전에 명시한다. 릴리스·공증·배포는 실행하지 않는다.
 - 기존 저장·종료 lifecycle 등 영향받는 회귀 및 최종 PR CI 결과를 확인한다. `.app`/`.appex`는 `build.noindex/`에만 생성한다.
