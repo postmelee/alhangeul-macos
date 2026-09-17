@@ -3,14 +3,14 @@
 - 관련: [상위 #562](https://github.com/postmelee/alhangeul-macos/issues/562), [조사·설계 #563](https://github.com/postmelee/alhangeul-macos/issues/563)
 - 마일스톤: M020 / 글꼴 마이그레이션 / v0.2 계열
 - 확인일: 2026-09-17
-- 현재 범위: Stage 1 조사 및 Stage 2 설계 완료. 실제 화면·PDF 실험은 Stage 3 승인 후 수행한다.
+- 현재 범위: Stage 1 조사·Stage 2 설계 및 Stage 3 독립 화면·PDF 실험 완료. 제품 통합은 후속 이슈 범위다.
 
 ## 1. 조사 결론
 
 1. 같은 Mac에서도 **OS 설치 글꼴**과 **한컴 앱 내부 글꼴**은 별개다. CoreText 목록만으로 한컴 앱 내부 글꼴을 모두 찾을 수 없다.
 2. 설치된 한컴 **뷰어**에서 문서용 TTF 9개를 확인했다. 편집기 공식 안내의 `TTF/Hwp`와 달리 이 뷰어는 `TTF/Install`에 보관한다. 제품·버전별 후보 경로와 수동 선택 대안이 필요하다.
 3. 조사 도구의 실행 제한에 따라 설치 글꼴 목록이 달라졌다. CLI 읽기 성공은 실제 알한글 sandbox·WebContent의 접근 성공을 의미하지 않는다.
-4. 로컬 TTF·OTF·TTC 및 가변 TTF의 메타데이터 조회는 가능했다. 실제 앱 적용·PDF·다른 Mac/Windows 버전의 호환성은 아직 검증하지 않았다.
+4. TTF·OTF regular/bold와 가변 TTF의 wght 400/700은 독립 WebView에서 원본 부재 후 재실행·화면·PDF 공급을 확인했다. TTC는 메타데이터 두 face 조회에 성공했지만 raw bytes만 공급하면 bold 요청에도 첫 regular face가 표시됐다. 제품 앱·다른 OS의 호환성을 대신하는 결과는 아니다. 상세는 16절을 따른다.
 5. 한컴 제거 후 독립 사용에는 가져온 파일의 수명뿐 아니라 사용·복사 조건 확인이 필요하다. `fsType`은 임베딩 정보이며 영구 복사·재배포 권한의 충분한 근거가 아니다.
 
 ## 2. 확인 환경과 측정 경계
@@ -278,7 +278,7 @@ PDF 작업 중 font 변경이 발생하면 진행 중 출력은 기존 snapshot�
 
 ## 14. Stage 3 구체 실험·판정표
 
-이 단계에서는 아래 실험을 설계만 했으며 코드는 작성하거나 실행하지 않았다.
+아래는 Stage 2에서 승인 요청한 실험표다. Stage 3의 실제 수행 범위·결과·미검증 항목은 16절과 단계 보고서에 기록했다.
 
 | 실험 | 입력·실행 | 관측·합격 기준 |
 |------|-----------|----------------|
@@ -299,6 +299,39 @@ PDF 작업 중 font 변경이 발생하면 진행 중 출력은 기존 snapshot�
 ## 15. Stage 2 수용 검토와 잔여 조건
 
 - 설계 검토 완료: 원본 부재, 동명 버전 충돌, 부분 실패, 게시 도중 종료, 출력 중 삭제, 프로세스별 등록, Studio CSS/CanvasKit 차이, PDF Noto 보정, Skia 빈 font_paths, 외부 캐시를 각각 계약에 연결했다.
-- 아직 실행하지 않은 것: App Group 설정, importer/renderer 구현, 파일 복사, 시스템 등록, PDF 생성, 성능 측정.
+- Stage 2 종료 시 미실행 항목: App Group 설정, importer/renderer 구현, 파일 복사, 시스템 등록, PDF 생성, 성능 측정. 이후 독립 복사·PDF 실험 결과는 16절을 따른다.
 - Stage 3 핵심 검증: 독립 bytes 공급과 새 프로세스의 화면·PDF 선택. 여기서 실패하면 원인을 반영해 설계를 수정하고 성공으로 넘기지 않는다.
 - 제품 구현 전 조건: group ID·서명·macOS 12 접근, TTC/가변 공급 지원, CoreText 동명 등록 충돌, Skia의 명시 글꼴 우선순위, 메모리 한도, 한컴 글꼴별 사용 조건.
+
+## 16. Stage 3 실측 — 독립 화면·PDF 공급
+
+재현 코드: [shell 진입점](../../scripts/probe-font-migration.sh), [fixture·판정 runner](../../scripts/font_migration_probe.py), [Swift WebView probe](../../scripts/font_migration_probe.swift). 실행 명령·시행착오·증거 경로는 [Stage 3 보고서](../working/task_m020_563_stage3.md)에 있다.
+
+### 확인한 범위
+
+- macOS 26.5.2에서 로그인된 host 권한으로 독립 실행 파일을 실행했다. Swift는 macOS 12 target으로 경고 없이 컴파일했지만 macOS 12 runtime·sandbox 배포 검증은 아니다.
+- OFL Spoqa Neo TTF / Pretendard OTF regular·bold를 고유한 `Task563<실행 ID>TTF/OTF` 내부 이름으로 파생했다. name table과 CFF 내부 이름을 함께 변경하고 고지를 보존했다. 사용자 원본은 수정하지 않았다.
+- 가변 글꼴은 [공식 v1.3.9 TTF](https://github.com/orioncactus/pretendard/blob/v1.3.9/packages/pretendard/dist/public/variable/PretendardVariable.ttf) 및 [같은 태그의 OFL](https://github.com/orioncactus/pretendard/blob/v1.3.9/LICENSE)을 확보했다. resolved commit `5c41199ea0024a9e0b2cb31735265056e5472d76`, 원본 SHA-256 `3090ccde0442bb347aa7685d9ba8b17436a60682df6e8f92a9a670de14056e22`. 내부 family·PS·fvar instance 이름을 고유하게 변경했다.
+- 각 프로세스의 CoreText 설치 목록에 파생 PS가 없음을 먼저 검사했다. process/global 글꼴 등록을 하지 않고 manifest의 관리 파일만 읽어 hash와 descriptor를 확인한 뒤 custom scheme의 ID allowlist로 공급했다.
+- A 정상 공급 → 종료 → 실험용 원본 디렉터리 제거 → B 새 프로세스 → 관리 경로를 비운 C 새 프로세스를 비교했다. 사용자 한컴 앱과 원본 폰트는 보존했다. B의 native 코드는 원본 경로를 탐색하지 않으며, OS 전체 파일 접근을 tracing한 결과로 주장하지 않는다.
+- 별도 D 실행에서는 관리 파일을 잘라 hash 불일치를 주입했다. WebView/PDF 생성 전 거부됐으며 원래 관리 bytes로 복구했다.
+
+| 항목 | 실측·판정 |
+|------|-----------|
+| static TTF·OTF 일반/굵게 | 공급 hash·선택 PS 확인, 화면 PNG/글리프·측정 및 PDF 리소스 확인. A/B 동일, C와 구별 — 독립 실험 통과 |
+| 가변 TTF | sfnt face 1개, wght 범위 45–930, named instance 9개. 400/700 렌더·PDF PS 및 재실행 통과. 다른 축·임의 가변 폰트는 미검증 |
+| TTC | 합성 collection header 2 faces 및 CoreText 이름 2개 확인. raw TTC를 서로 다른 CSS ID로 공급해도 bold 요청은 regular로 표시 — 개별 face 선택 미입증 |
+| PDF 텍스트 | 한글·영문 표본 8행 정확 추출, 실제 파생 PS의 임베딩 및 비 MacRoman subset ToUnicode 확인 |
+| 원본 부재 | A/B 화면 snapshot, 행별 Canvas raster·폭, PDF raster가 정확히 같음. PDF 파일 자체는 생성 메타데이터 때문에 byte 일치를 요구하지 않음 |
+| 관리 파일 부재 | C에서 8개 font load 모두 rejected, 공급 성공 0개, PDF의 파생 PS 없음. 시스템 fallback의 글리프·폭은 A/B와 다름 |
+| 중복·충돌·잘린 파일 | 같은 hash와 같은 PS/다른 hash fixture 구별, fontTools 잘린 파일 거부, native 공급 hash 불일치 거부. 정식 importer/UI 검증은 아님 |
+| 한글·영문 이름 해석 | 별도 CSS ID에 명시적으로 연결한 실험. 실제 한글 별칭 resolver·HWP/HWPX 저장 이름 유지·동명 시스템 등록 충돌은 미검증 |
+| HFT | 실제 자산·decoder 실험 없음. 초기 미지원 방침 유지 |
+
+### 설계에 반영할 조건
+
+1. TTF·OTF 관리 복사와 bytes 공급은 기술적으로 가능한 것으로 확인했다. 한컴 제거 안내는 실제 한컴 자산의 조건 및 signed 제품 통합 수용을 완료한 뒤에 한다.
+2. TTC는 목록에서 두 face를 찾았다는 이유로 가져오기 완료/적용 성공 처리하지 않는다. face-aware 공급 또는 허용되는 경우 개별 SFNT로 파생하는 방안을 #564 · #567 · #568 이슈에서 검증한다. 이번에는 원래 개별 TTF의 regular/bold 렌더가 비교 기준이며, 제품 TTC 분리기를 구현한 것은 아니다.
+3. 가변 폰트는 file/face와 axes/named instance를 계속 구분한다. 같은 bytes여도 weight에 따라 raster·PDF PS가 달라졌으므로 snapshot/cache key에 선택 axes를 포함한다.
+4. PDF는 전체 subset에 ToUnicode가 있어야 한다는 단순 검사 대신 임베딩·subset encoding·한글 매핑과 전체 추출을 함께 검사한다. 이번 WebKit은 TTF의 MacRoman subset에는 ToUnicode를 만들지 않고 비 MacRoman subset에는 만들었다. 사용자 문서 전반의 검색·복사 회귀는 별도 수용 대상이다.
+5. signed App Group 공유, 제품 Studio CSS/CanvasKit, 전용 PDF의 Noto 우선순위, CoreGraphics/Skia·Quick Look/Thumbnail, Windows ZIP, 실인쇄·최소 OS는 아직 연결·검증하지 않았다. 기존 12절의 소유 경계가 유지된다.

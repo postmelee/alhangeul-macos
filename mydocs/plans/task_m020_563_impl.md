@@ -5,7 +5,7 @@
 - 이슈: [#563](https://github.com/postmelee/alhangeul-macos/issues/563), 상위: [#562](https://github.com/postmelee/alhangeul-macos/issues/562)
 - 마일스톤: 글꼴 마이그레이션 / M020 / v0.2 계열
 - 브랜치: `local/task563` → `devel`
-- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인. 이후 같은 날 “진행해줘”로 구현계획과 Stage 1 진입 승인. 같은 날 Stage 1 보고 승인 후 Stage 2 설계를 완료했으며 Stage 3 승인 대기다.
+- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인. 이후 같은 날 “진행해줘”로 구현계획과 Stage 1 진입 승인. Stage 1·2 보고 후 각각 “진행해줘”로 다음 단계 승인. Stage 3 독립 실험 완료, Stage 4 승인 대기다.
 
 ## 1. 실행 목표와 경계
 
@@ -71,6 +71,7 @@ Mac에 설치된 글꼴을 독립 보관한 뒤 한컴 한글이 없는 환경�
 ### 실험 구현 범위
 
 - 신규 진입점 `scripts/probe-font-migration.sh`, 독립 Swift 실험 코드 `scripts/font_migration_probe.swift`를 필요 범위에서 작성한다.
+- Stage 3 실행 시 fixture 준비·프로세스 재실행·증거 판정을 `scripts/font_migration_probe.py`로 분리했다. shell 진입점에서 호출하며 제품 importer나 dependency에는 편입하지 않는다.
 - 진입점은 `--help`, 명시적 글꼴 입력·출력 디렉터리를 제공한다. 출력은 기본적으로 `build.noindex/task563-font-migration/` 아래에 둔다.
 - 실험 코드·재현 방법만 버전 관리하고 글꼴 bytes, PDF, 이미지, 임시 앱은 실험 출력 디렉터리에 둔다.
 - 기존 `RhwpStudioPagePDFRendererTests.swift`와 `CGPDFFontResourceInspector.swift`를 읽어 PDF 검사 방식을 참고한다. 변경 없는 기존 테스트를 통과한 것으로 새 기능을 입증하지 않는다.
