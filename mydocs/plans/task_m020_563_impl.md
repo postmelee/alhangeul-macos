@@ -5,7 +5,7 @@
 - 이슈: [#563](https://github.com/postmelee/alhangeul-macos/issues/563), 상위: [#562](https://github.com/postmelee/alhangeul-macos/issues/562)
 - 마일스톤: 글꼴 마이그레이션 / M020 / v0.2 계열
 - 브랜치: `local/task563` → `devel`
-- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인. 이후 같은 날 “진행해줘”로 구현계획과 Stage 1 진입 승인. Stage 1 완료·Stage 2 승인 대기다.
+- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인. 이후 같은 날 “진행해줘”로 구현계획과 Stage 1 진입 승인. 같은 날 Stage 1 보고 승인 후 Stage 2 설계를 완료했으며 Stage 3 승인 대기다.
 
 ## 1. 실행 목표와 경계
 

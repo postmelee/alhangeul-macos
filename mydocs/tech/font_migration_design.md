@@ -3,7 +3,7 @@
 - 관련: [상위 #562](https://github.com/postmelee/alhangeul-macos/issues/562), [조사·설계 #563](https://github.com/postmelee/alhangeul-macos/issues/563)
 - 마일스톤: M020 / 글꼴 마이그레이션 / v0.2 계열
 - 확인일: 2026-09-17
-- 현재 범위: Stage 1 조사 결과. 독립 저장 계약과 화면·PDF 실험은 Stage 2·3에서 진행한다.
+- 현재 범위: Stage 1 조사 및 Stage 2 설계 완료. 실제 화면·PDF 실험은 Stage 3 승인 후 수행한다.
 
 ## 1. 조사 결론
 
@@ -149,3 +149,156 @@ App Group은 앱과 확장이 데이터를 공유하는 공식 수단이다. 현
 - 한컴의 글꼴별 사용 조건과 편집기 버전별 실측을 출시 전 어떤 자료로 보완할 것인가?
 
 이 문서의 Stage 1 완료는 조사·후속 조건 정리를 뜻하며 마이그레이션 구현 또는 제거 후 사용 검증 완료를 뜻하지 않는다.
+
+## 9. Stage 2 결정 — 독립 저장과 소유 경계
+
+2026-09-17 Stage 1 승인 후 작성한 **구현 전 설계 계약**이다. 아래 API·저장 형식·제한값은 제안이며 실제 적용 성공은 Stage 3 및 후속 제품 구현에서 검증한다.
+
+### 저장 방식
+
+- 원본을 계속 참조하는 방식 대신 **사용자가 선택한 지원 파일을 앱 관리 영역으로 복사**한다. 원본 위치·bookmark는 출처 표시와 명시적인 재가져오기 보조에만 사용한다. 렌더링은 원본 경로나 한컴 앱의 존재에 의존하지 않는다.
+- HostApp·Quick Look·Thumbnail이 사용할 영구 저장소는 App Group container의 `Library/Application Support/FontLibrary/v1/`을 우선안으로 한다. group identifier는 실제 개발팀·서명 설정 확인 후 #564 / #568 이슈에서 확정하고 placeholder 식별자를 제품에 넣지 않는다.
+- App Group entitlement가 없는 상태에서 호스트 전용 저장소를 공유 저장소라고 취급하거나 확장이 다른 container를 직접 탐색하게 하지 않는다. group 접근 불가 시 가져오기 커밋을 실패시키고 기존 글꼴 목록을 유지한다.
+- 폰트를 OS 글꼴 디렉터리에 설치하거나 한컴 bundle을 수정하지 않는다. 시스템 설치와 별개로 앱만의 수명을 가진다.
+- 영구 라이브러리는 cache 디렉터리에 두지 않는다. 삭제/재설치로 앱 관리 데이터까지 제거하면 복사본도 사라질 수 있다는 사용자 안내는 별도 필요하다. 여기서 보장할 목표는 **한컴 앱의 제거와 무관한 수명**이다.
+
+```text
+FontLibrary/v1/
+  library.lock                  # 프로세스 간 manifest/lease 변경 조정
+  current.json                  # schemaVersion, generation, 활성 face·충돌 선택
+  objects/<sha256>.font          # 검증한 원본 bytes, 불변 객체
+  licenses/<notice-id>.txt       # 확보된 라이선스·출처 고지
+  staging/<transaction-id>/      # 미완료 작업; 렌더러 접근 불가
+  leases/<session-id>.json       # 사용 중 snapshot의 객체 보존 정보
+```
+
+`objects`의 파일 확장자는 사용자 원본 확장자와 독립적이며 실제 signature로 형식을 판정한다. 구현에서는 ASCII 이름의 관리 파일만 만들고 원본 파일명은 표시용 metadata로 보존한다.
+
+### 쓰기·복구·삭제
+
+1. HostApp 내 단일 writer가 파일을 읽기 전용으로 열고 같은 handle에서 bytes를 복사하며 hash·길이·구조를 검증한다. scan 때의 경로/크기만 믿지 않는다. 파일이 변경됐거나 끝까지 읽지 못하면 해당 항목을 실패시킨다.
+2. staging에서 메타데이터와 객체를 준비한다. 디스크 부족·취소·개별 파일 실패는 기존 manifest를 변경하지 않는다. 정상 항목만 반영하는 부분 성공은 결과 목록으로 명확히 알린다.
+3. 프로세스 간 lock을 잡고 최신 generation을 다시 읽어 중복/충돌을 재판정한다. 객체를 먼저 같은 volume의 최종 경로에 게시하고 마지막에 새 manifest를 atomic replace한다. crash 내구성이 필요한 파일/디렉터리 동기화와 손상 복구를 #564 이슈에서 검증한다.
+4. 재실행 시 manifest가 참조하는 객체의 존재·형식을 확인하고, 손상 객체는 사용할 수 없음으로 표시한다. 남은 staging과 manifest에 없는 객체는 활성 lease를 확인한 뒤 정리한다. 알 수 없는 schema는 덮어쓰지 않고 명시적으로 실패시킨다.
+5. 사용자 삭제는 먼저 active 목록에서 제거하고 generation을 증가시킨다. 이미 렌더링 중인 snapshot은 끝까지 기존 bytes를 사용한다. 새 문서·새 출력은 새 목록을 사용한다.
+6. 물리 삭제는 어떤 활성 lease도 참조하지 않는 객체에만 수행한다. 시간 경과만으로 활성 여부를 판단하지 않는다. 프로세스 시작 식별자와 종료 여부 확인이 불확실하면 보존한다. stale lease 회수의 정확성과 저장 한도는 #564 이슈에서 검증한다.
+7. 프로세스 간 lock에서 manifest 선택과 lease 생성을 함께 수행해 삭제 경쟁을 막는다. renderer는 해당 lease의 font set만 사용하고 성공·실패·취소 시 해제한다. WebContent가 종료해도 HostApp이 소유한 렌더 세션이 lease를 정리한다.
+
+## 10. 메타데이터·중복·결과 계약
+
+### 최소 모델
+
+| 모델 | 필수 정보·의미 |
+|------|---------------|
+| FontObject | sha256, byteCount, signatureFormat, collectionFaceCount, validationVersion; 원본 경로 없음 |
+| FontFace | objectHash + sfntFaceIndex, 이름 레코드, PostScript 이름, weight/width/slant, coverage 요약, version 문자열, axes/instances, fsType 원값 |
+| NameRecord | nameID, platformID, encodingID, languageID/tag, decodedValue; 원래 구분을 보존 |
+| SourceReceipt | Mac 앱 / OS 설치 / Windows 묶음 / 수동 폴더, 표시 파일명, 확인 버전, importedAt, 선택적 로컬 bookmark; 문서·WebView로 내보내지 않음 |
+| UsageEvidence | localCopy와 embedding 조건을 분리한 상태·출처·확인 시점. 사용자가 확인했다는 사실과 공급자 라이선스 증거를 구분 |
+| ActiveSelection | 충돌 그룹별 선택 face, 활성 여부, 선택 이유; 후보들을 일괄 덮어쓰지 않음 |
+| FontSnapshot | schemaVersion, generation, resolutionPolicyVersion, 선택 face/axes/공급 상태 및 객체 집합 digest, leaseID |
+
+예: object A의 TTC face 0과 face 1은 서로 다른 FontFace다. 가변 TTF의 여러 named instance는 같은 sfnt face와 다른 axes 조합이며, CoreText descriptor 나열 순서를 face index로 쓰지 않는다. 변환이 필요한 경우 원본 hash와 별도의 파생 hash·변환 버전·라이선스 조건을 보존한다.
+
+| 상황 | 처리 |
+|------|------|
+| 동일 bytes 재가져오기 | hash로 중복 제거; 이미 있음. 새 출처 영수증은 추가 가능 |
+| 같은 family의 Regular와 Bold | 별도 face로 보존; 같은 이름의 중복으로 삭제하지 않음 |
+| 같은 PS/full name이나 같은 family+style, 다른 hash | 버전 충돌 후보. 기존 선택 유지, 사용자에게 교체/기존 유지 선택 제공 |
+| 새 버전 문자열이 더 큼 | 자동 교체 근거로 쓰지 않음. version 문자열은 표시·비교 참고 |
+| 지원 파일이나 특정 face 공급 불가 | 보관 상태와 렌더 경로별 적용 상태를 구분해 안내 |
+| 손상·signature 불일치·읽기 실패 | 해당 파일 제외, 이유와 재시도 방법 표시 |
+| 사용 조건 미확인 | 상태를 보존하고 확인 경로 안내; 파일 발견 사실을 사용 허용 판정으로 바꾸지 않음 |
+
+파일 단위 결과는 `추가됨 / 이미 있음 / 선택 필요 / 지원하지 않음 / 읽기 실패 / 취소됨`으로 구분한다. ‘가져오기 완료’와 ‘이 문서에서 적용됨’은 별도의 상태다. 충돌 상태에서는 임의의 다른 버전을 자동 선택하지 않는다.
+
+## 11. 이름 해석·선택 우선순위
+
+name ID 1/2, 4, 6, 16/17 및 언어·인코딩을 보존한다. OpenType은 기본 family와 typographic family를 구분하므로 family 문자열 하나만으로 스타일을 그룹화하지 않는다. [OpenType name 규격](https://learn.microsoft.com/en-us/typography/opentype/spec/name)
+
+1. 요청 입력은 원본 문서의 font name, weight/style, 언어와 필요한 문자다. 저장할 문서 이름을 앱 내부 공급 alias로 바꾸지 않는다.
+2. 비교 키에는 Unicode NFC, 앞뒤 공백 제거, 연속 공백 정리, locale 독립 대소문자 정규화를 사용한다. 공백·하이픈을 모두 삭제하거나 부분 문자열로 동일 글꼴을 판단하지 않는다.
+3. 사용자가 확정한 충돌 선택을 적용한 뒤 **정확한 PostScript 이름 → 정확한 full name → family/typographic family와 요청 스타일 → 검증된 명시 alias** 순서로 후보를 찾는다. 같은 순위에 후보가 둘 이상이면 충돌로 처리한다.
+4. 바탕 계열 fallback 같은 유사 글꼴 매핑은 원본 이름의 정확한 일치가 아니다. 가져온 정확한 face를 찾은 뒤에만 기존 fallback을 사용한다.
+5. 명시적인 face 이름과 요청 bold가 충돌할 때는 실제 bold face를 별도로 해석하고, 없으면 합성 또는 fallback 사실을 기록한다. synthetic bold를 원본 bold face 적용 성공으로 표시하지 않는다.
+6. 필요한 글리프가 없으면 해당 문자 run만 fallback한다. 폰트 일부만 지원할 때 전체 문서가 완전히 같은 글꼴로 재현됐다고 표시하지 않는다.
+7. 삭제·사용 불가·충돌 미선택이면 기존 renderer의 fallback을 적용하고 원인을 표시한다. `FontResolution`은 selected face, axes, alias kind, synthetic traits, fallback reason, snapshot digest를 포함한다.
+
+WebView에 쓰는 CSS family는 `AHFont_<opaque-face-id>` 같은 앱 생성 alias로 두어 내장 `@font-face`와의 동명이인 충돌을 피한다. 이는 CSS 식별자이며 사용자 font binary를 변경하는 것이 아니다. 문서의 font name → 내부 alias 변환은 렌더링에서만 사용하고 HWP/HWPX 저장·복사 경로에 역류하지 않도록 #567 이슈에서 검증한다.
+
+## 12. 공급 인터페이스와 출력 일관성
+
+### 인터페이스 제안
+
+- `FontLibrary.importCandidates(...) → ImportResult`: native HostApp 소유. 문서/페이지 JS가 임의 파일 경로로 호출할 수 없다.
+- `FontLibrary.acquireSnapshot(requests, consumer) → FontSnapshot`: 한 번의 렌더 작업에서 사용할 선택과 immutable objects를 고정한다.
+- `FontResourceProvider.read(resourceID, snapshot) → bytes + verifiedFormat`: snapshot allowlist 밖의 객체·변조 파일은 거부한다.
+- `FontResolver.resolve(request, snapshot) → FontResolution`: 선택 근거와 fallback을 반환한다.
+- `releaseSnapshot(leaseID)`: renderer lifecycle에 연결한다.
+
+이 이름은 설계용 제안이며 아직 공개 ABI나 Studio API가 아니다.
+
+| 소비자 | 공급·선택 제안 | 현재 변경 필요 지점·담당 |
+|--------|----------------|--------------------------|
+| Studio CSS/SVG/Canvas2D | 문서 font 요구를 해석해 내부 CSS alias와 `@font-face` 공급; load 완료 후 측정·렌더 캐시 갱신 | 현재 `queryLocalFonts`/존재 probe와 native 공급 목록을 합치는 정식 adapter, #567 |
+| Studio CanvasKit | 같은 snapshot의 SFNT bytes와 face/axes를 엔진에 전달 | 현재 bytes 경로가 Local Font Access API에 의존. CSS 공급만으로 완료되지 않음; #567 및 필요 upstream 변경 |
+| PDF·인쇄 | export 시작 시 현재 문서의 font snapshot 고정; 내부 alias·정확한 bytes를 전용 공급자로 전달 | Noto 강제 보정 전에 가져온 일치 face 적용. 임베딩 조건·Unicode·CSP 확인; #568 |
+| CoreGraphics Quick Look/Thumbnail | 공유 객체에서 exact face를 process-local로 생성하고 기존 fallback 앞에서 해석 | URL/descriptor 또는 bytes 기반 생성 후 실제 선택 face 검증; 동일 PS 등록 충돌에 유의; #568 |
+| Skia Quick Look/Thumbnail | 같은 snapshot의 검증된 관리 경로/bytes를 명시적으로 전달 | RustBridge `PngExportOptions.font_paths`가 현재 빈 목록. FFI 및 pinned core 선택 계약 조사·보강; #568 |
+
+`Sources/ThumbnailExtension/HwpThumbnailRenderCache.swift`의 문서 경로·mtime·크기와 renderSignature 외에 font snapshot digest / 해석 정책 버전을 반영한다. 앱 자체의 기존 캐시는 이를 통해 무효화할 수 있지만 Finder가 보관한 외부 캐시의 갱신까지 보장하는 것은 별도 실설치 검증 사항이다.
+
+PDF 작업 중 font 변경이 발생하면 진행 중 출력은 기존 snapshot으로 끝내고 다음 출력에 새 generation을 적용한다. 화면이 변경된 경우 출력 준비 때 문서 revision과 font snapshot을 함께 잡아 오래된 SVG와 새 글꼴이 혼합되지 않게 한다. export 종료·취소·WebContent 종료 시 lease를 해제한다.
+
+### WebView 리소스 경계
+
+`alhangeul-font://session/<token>/<resource-id>` 같은 전용 custom scheme을 제안한다. Native가 생성한 opaque ID와 세션 allowlist로만 해석하고 문서 유래 경로·URL을 파일 경로에 연결하지 않는다. 기존 리소스 handler를 넓혀 임의 디렉터리를 노출하지 않는다. custom scheme 처리는 현재 앱도 사용하는 WKURLSchemeHandler 경계를 따른다. [Apple API](https://developer.apple.com/documentation/webkit/wkurlschemehandler)
+
+- 기본 native snapshot provider와 main/PDF WebView의 handler 인스턴스는 분리한다. PDF의 content JavaScript 비활성화와 navigation 차단을 유지한다.
+- 필요한 `font-src`만 좁혀 허용하고 HTTP/HTTPS·file URL은 글꼴 공급에 사용하지 않는다. URL credential/query/fragment·중첩 경로·인코딩 우회는 거부한다.
+- JS bridge에 원본 경로·bookmark·전체 설치 글꼴을 넘기지 않는다. 현재 문서에 필요한 목록과 리소스 식별자만 제공한다.
+- MIME은 검증한 TTF/OTF/collection 형식에 맞춘다. TTC·가변은 WebKit/CanvasKit에서 해당 face·axes 선택을 입증하기 전까지 공급 지원으로 표시하지 않는다.
+- 임베딩이 허용되지 않는 글꼴은 PDF에 몰래 포함하지 않는다. 출력에서 대체될 글꼴을 표시하고 취소/대체 출력 선택을 제공하는 정책을 #568 이슈에서 구현한다. `fsType`을 변경하지 않는다.
+- 기대한 글꼴의 load 실패를 조용한 성공으로 처리하지 않는다. 미분류 fallback과 로드 실패를 구분하고, 현재 PDF 오류·timeout lifecycle을 보존한다.
+
+## 13. 입력·자원 제한과 실패 정책
+
+다음 값은 Stage 1에서 본 약 31 MB TTF를 수용하는 **초기 검증용 후보**다. 실제 성능·메모리 검증 전 확정된 제품 한도로 안내하지 않는다.
+
+| 대상 | 후보 한도·처리 |
+|------|----------------|
+| 개별 원본 파일 | 64 MiB; 0 byte·불완전 읽기·허용 형식 아님 거부 |
+| 가져오기 묶음 | 파일 4,096개 / 실제 해제·복사 합계 1 GiB; 취소 가능한 진행 표시 |
+| ZIP 탐색 | 디렉터리 깊이 32, 절대 경로·상위 이탈·symlink·정규화 충돌 거부; 중첩 ZIP 재귀 해제 안 함 |
+| ZIP 자원 계산 | metadata만 신뢰하지 않고 실제 출력 bytes 누계로 중단; 실패 staging 정리 |
+| renderer | 필요한 글꼴만 선택, 읽기/파싱 동시성 제한; library 전체를 bytes 배열로 로드하지 않음 |
+| 디스크·내구성 | 여유 공간 확인과 게시 단계 오류 처리; manifest 성공 전 ‘추가됨’ 표시 금지 |
+
+한도를 넘는 정상 대형 글꼴도 ‘손상’이 아닌 ‘현재 크기 제한’으로 안내한다. 처리 순서가 결과를 바꾸지 않도록 충돌 선택과 부분 성공을 transaction 결과에 기록한다.
+
+## 14. Stage 3 구체 실험·판정표
+
+이 단계에서는 아래 실험을 설계만 했으며 코드는 작성하거나 실행하지 않았다.
+
+| 실험 | 입력·실행 | 관측·합격 기준 |
+|------|-----------|----------------|
+| 준비 | OFL Spoqa Neo TTF / Pretendard OTF Regular·Bold를 전용 임시 영역에 복사. fontTools는 전용 환경에 준비 | 원본 hash·LICENSE 보존, name 1/2/4/6/16/17을 실제 파생 이름으로 조정, CFF 내부 이름도 일관되게 처리 |
+| 설치본 오인 방지 | 파생 family는 `Task563ProbeSans`·`Task563ProbeSerif` 등 RFN 없는 고유 이름. 같은 이름이 시스템 목록에 없음을 host 권한에서 확인 | 파일 이름만 변경하지 않음. 원본 font 파일은 수정하지 않음 |
+| A: 정상 공급 | 관리 객체에서 custom scheme으로 표본 공급. 한글/영문과 regular/bold | requested resource hash·선택 face·화면 raster/측정·PDF font resource·추출 텍스트 기록 |
+| B: 원본 부재 | 프로세스 종료 → 실험 원본 위치 분리 → 새 프로세스가 관리 객체만 읽음 | A와 같은 resource hash·face·텍스트, 허용 오차 내 raster/측정. 원본 경로 접근 0 |
+| C: 관리 객체도 없음 | 별도 새 프로세스, 미설치 파생 이름 요청, 리소스는 명시적으로 실패 | A/B와 같은 성공으로 판정하지 않음. load 실패·fallback 검출; 사용자 시스템 폰트는 변경하지 않음 |
+| D: 굵기·이름 | regular/bold와 한글 별칭 요청을 같은 snapshot에 연결 | 실제 공급 face·weight가 요청과 일치. CSS alias가 사용자 문서 이름과 혼동되지 않음 |
+| E: TTC | OFL TTF 두 face를 고유 이름으로 생성한 TTC로 묶어 header count와 face별 이름 확인 | header face index 기준으로 선택. 실패하면 읽기 지원과 공급 미지원 구분 |
+| F: 가변 | 공식 Pretendard release의 variable 자산·LICENSE·hash 확보 후 고유 파생 이름 사용 | 하나의 sfnt face와 axes/named instance를 분리하고 두 weight를 실제 비교. 미확보 시 미검증으로 유지 |
+| G: 충돌·손상 | 동일 bytes 2개, 같은 이름 다른 hash, 잘린 실험 복사본 | duplicate / conflict / invalid의 서로 다른 판정; 잘못된 버전을 자동 선택하지 않음 |
+
+스크립트 출력은 `build.noindex/task563-font-migration/`에 두고 `summary.json`, font manifest, 요청 로그, 화면 PNG, PDF·추출 텍스트로 구분한다. `.app`이 필요하면 같은 `build.noindex/` 아래에 두며 제품 target·Quick Look 등록을 변경하지 않는다.
+
+실험은 resource bytes와 렌더 결과의 연결을 입증하는 범위다. 실제 HWP/HWPX 편집·저장, signed sandbox 앱·공유 container·확장, 실인쇄와 한컴 제거 시나리오 전체 수용은 #567 ~ #569 이슈에서 검증한다.
+
+## 15. Stage 2 수용 검토와 잔여 조건
+
+- 설계 검토 완료: 원본 부재, 동명 버전 충돌, 부분 실패, 게시 도중 종료, 출력 중 삭제, 프로세스별 등록, Studio CSS/CanvasKit 차이, PDF Noto 보정, Skia 빈 font_paths, 외부 캐시를 각각 계약에 연결했다.
+- 아직 실행하지 않은 것: App Group 설정, importer/renderer 구현, 파일 복사, 시스템 등록, PDF 생성, 성능 측정.
+- Stage 3 핵심 검증: 독립 bytes 공급과 새 프로세스의 화면·PDF 선택. 여기서 실패하면 원인을 반영해 설계를 수정하고 성공으로 넘기지 않는다.
+- 제품 구현 전 조건: group ID·서명·macOS 12 접근, TTC/가변 공급 지원, CoreText 동명 등록 충돌, Skia의 명시 글꼴 우선순위, 메모리 한도, 한컴 글꼴별 사용 조건.
