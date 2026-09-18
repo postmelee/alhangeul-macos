@@ -5,7 +5,7 @@
 - 기준 설계: [font_migration_design.md](../tech/font_migration_design.md)
 - 브랜치: `local/task564` → `devel` / 마일스톤: M020, v0.2 계열
 - 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인 및 구현계획 작성 진입. 이후 같은 날 “진행해줘”로 구현계획 승인 및 Stage 1 착수. Stage 1 보고 후 같은 날 “진행해줘”로 Stage 2 착수 승인. Stage 2 보고 후 2026-09-18 “진행해줘”로 Stage 3 착수 승인. Stage 3 보고 후 같은 날 “진행해줘”로 Stage 4 착수 승인.
-- 상태: Stage 4 구현·검증 완료, 최종 결과보고서 작성 승인 대기. [Stage 1 보고](../working/task_m020_564_stage1.md), [Stage 2 보고](../working/task_m020_564_stage2.md), [Stage 3 보고](../working/task_m020_564_stage3.md), [Stage 4 보고](../working/task_m020_564_stage4.md).
+- 상태: Stage 4 구현·검증 완료, [최종 결과보고서](../report/task_m020_564_report.md) 작성 완료, 결과·PR 게시 승인 대기. [Stage 1 보고](../working/task_m020_564_stage1.md), [Stage 2 보고](../working/task_m020_564_stage2.md), [Stage 3 보고](../working/task_m020_564_stage3.md), [Stage 4 보고](../working/task_m020_564_stage4.md).
 
 ## 1. 구현 경계와 파일 배치
 
