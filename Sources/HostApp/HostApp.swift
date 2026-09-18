@@ -182,7 +182,13 @@ private struct HostAppCommands: Commands {
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    // 후속 가져오기 UI는 이 결과를 통해 App Group 구성 실패를 안내한다.
+    lazy var fontLibraryService: Result<FontLibraryService, Error> = Result { try FontLibraryService() }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
+#if DEBUG
+        if FontLibraryHostProbe.runIfRequested() { return }
+#endif
         // Keep analytics first: the following services write legacy-evidence keys
         // that distinguish an existing installation from a genuine first launch.
         AppExecutionAnalyticsRuntime.shared.prepareForLaunch(

@@ -229,6 +229,10 @@ jobs:
             brew install cbindgen
           fi
 
+      - name: Test font library and HostApp service
+        shell: bash
+        run: scripts/test-font-library.sh
+
       - name: Record Rust bridge lock policy
         shell: bash
         run: |

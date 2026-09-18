@@ -4,8 +4,8 @@
 - 이슈: [#564](https://github.com/postmelee/alhangeul-macos/issues/564), 상위 #562
 - 기준 설계: [font_migration_design.md](../tech/font_migration_design.md)
 - 브랜치: `local/task564` → `devel` / 마일스톤: M020, v0.2 계열
-- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인 및 구현계획 작성 진입. 이후 같은 날 “진행해줘”로 구현계획 승인 및 Stage 1 착수. Stage 1 보고 후 같은 날 “진행해줘”로 Stage 2 착수 승인. Stage 2 보고 후 2026-09-18 “진행해줘”로 Stage 3 착수 승인.
-- 상태: Stage 3 구현·검증 완료, Stage 4 승인 대기. [Stage 1 보고](../working/task_m020_564_stage1.md), [Stage 2 보고](../working/task_m020_564_stage2.md), [Stage 3 보고](../working/task_m020_564_stage3.md).
+- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인 및 구현계획 작성 진입. 이후 같은 날 “진행해줘”로 구현계획 승인 및 Stage 1 착수. Stage 1 보고 후 같은 날 “진행해줘”로 Stage 2 착수 승인. Stage 2 보고 후 2026-09-18 “진행해줘”로 Stage 3 착수 승인. Stage 3 보고 후 같은 날 “진행해줘”로 Stage 4 착수 승인.
+- 상태: Stage 4 구현·검증 완료, 최종 결과보고서 작성 승인 대기. [Stage 1 보고](../working/task_m020_564_stage1.md), [Stage 2 보고](../working/task_m020_564_stage2.md), [Stage 3 보고](../working/task_m020_564_stage3.md), [Stage 4 보고](../working/task_m020_564_stage4.md).
 
 ## 1. 구현 경계와 파일 배치
 
@@ -122,6 +122,8 @@ Stage 2 확정: 프로세스 내 공통 직렬 큐와 프로세스 간 flock을 
 - 후속 #565 ~ #568 이슈에 입력 계약, 충돌 결과, 제한 형식, snapshot/lease, bytes 공급 예시를 인계한다. 실제 제품 글꼴 적용과 확장 공유는 미완료 상태로 구분한다.
 
 완료 기준: 관련 테스트/빌드 통과, 사용 가능한 환경의 signed 접근 증거, 환경상 미검증 수용 조건 및 후속 범위의 명확한 인계.
+
+2026-09-18 완료 기록: HostApp 서비스/권한 수명/취소/배치·오류 전달 및 CI 연결 완료. XCTest 54개, 실제 HostApp Debug 빌드, Studio lifecycle 39개, arm64/x86_64 macOS 12 typecheck, Rust portable 검증 통과. 사용자 OS 인증 후 Debug dylib 서명 순서를 보완해 실제 signed HostApp create/reopen도 통과했다. [후속 연동 계약](../tech/font_library_integration.md)과 [Stage 4 보고](../working/task_m020_564_stage4.md)에 검증/복구 경과 및 미확인 조건을 기록했다. macOS 12 실제 실행·원격 PR CI는 별도 미확인이다.
 
 커밋: `Task #564 Stage 4: 글꼴 관리 서비스 통합 검증과 후속 계약 정리`
 

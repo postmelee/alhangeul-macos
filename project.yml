@@ -198,6 +198,9 @@ targets:
       - path: Sources/Shared
         includes:
           - FontLibrary/**
+      - path: Sources/HostApp
+        includes:
+          - Services/FontLibraryService.swift
     dependencies:
       - target: FontLibraryProcessProbe
         link: false
