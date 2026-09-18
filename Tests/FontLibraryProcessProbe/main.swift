@@ -25,6 +25,18 @@ struct FontLibraryProcessProbe {
                 let results = await store.importCandidates([.init(sourceURL: URL(fileURLWithPath: args[3]))])
                 print(try String(decoding: JSONEncoder().encode(results), as: UTF8.self))
                 if results[0].status == .storageFailure { exit(2) }
+            } else if command == "reader", args.count >= 5 {
+                let snapshot = try await store.acquireSnapshot()
+                guard let resource = snapshot.resources.first else { exit(3) }
+                let gate = args[3]
+                try Data([1]).write(to: URL(fileURLWithPath: gate + ".ready"))
+                while !FileManager.default.fileExists(atPath: gate) { usleep(10_000) }
+                if args[4] == "crash" { _exit(72) }
+                let data = try await store.readResource(resource.id, snapshot: snapshot)
+                try data.write(to: URL(fileURLWithPath: gate + ".bytes"))
+                try JSONEncoder().encode(resource.face).write(to: URL(fileURLWithPath: gate + ".face"))
+                try await store.releaseSnapshot(snapshot)
+                print("PASS: reader")
             } else { exit(64) }
         } catch {
             print("FAIL: \(error)")

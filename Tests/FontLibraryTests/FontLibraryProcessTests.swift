@@ -26,8 +26,12 @@ final class FontLibraryProcessTests: XCTestCase {
     private func finish(_ value: (Process, Pipe), expected: Int32 = 0) throws -> Data {
         let deadline = Date().addingTimeInterval(10)
         while value.0.isRunning && Date() < deadline { usleep(10_000) }
-        if value.0.isRunning { value.0.terminate(); XCTFail("probe 시간 초과") }
-        value.0.waitUntilExit()
+        if value.0.isRunning {
+            value.0.terminate()
+            throw NSError(domain: "FontLibraryProcessTests.timeout", code: 1)
+        }
+        // async 테스트는 launch와 다른 스레드에서 재개될 수 있다.
+        // 종료를 확인한 뒤 waitUntilExit의 스레드별 RunLoop 대기를 다시 호출하지 않는다.
         let data = value.1.fileHandleForReading.readDataToEndOfFile()
         XCTAssertEqual(value.0.terminationStatus, expected, String(decoding: data, as: UTF8.self))
         return data
@@ -47,6 +51,10 @@ final class FontLibraryProcessTests: XCTestCase {
                 XCTAssertEqual(try Data(contentsOf: root.appendingPathComponent("objects/\(entry.object.sha256).font")),
                                try Data(contentsOf: fixture("regular.ttf")))
             }
+            let recovery = try await FontLibraryStore(rootURL: root).recover()
+            let orphanPhases: [FontLibraryWritePhase] = [.objectPublished, .objectDirectorySynced, .manifestWritten, .manifestSynced]
+            XCTAssertEqual(recovery.removedObjects, orphanPhases.contains(phase) ? 1 : 0, phase.rawValue)
+            XCTAssertEqual(recovery.removedTransactions, 1, phase.rawValue)
             let retry = try finish(launch(["import", root.path, fixture("regular.ttf").path]))
             let results = try JSONDecoder().decode([FontImportItemResult].self, from: retry)
             XCTAssertEqual(results[0].status, committed ? .alreadyPresent : .added, phase.rawValue)
@@ -87,4 +95,42 @@ final class FontLibraryProcessTests: XCTestCase {
             XCTAssertEqual(manifest.entries.count, 2)
         }
     }
+    func testSeparateReaderSurvivesDeletionAndCrashReleasesLease() async throws {
+        for crash in [false, true] {
+            let root = temporary.appendingPathComponent(crash ? "crashed-reader" : "reader")
+            let source = temporary.appendingPathComponent(UUID().uuidString + ".ttf")
+            try FileManager.default.copyItem(at: fixture("regular.ttf"), to: source)
+            let store = FontLibraryStore(rootURL: root)
+            _ = await store.importCandidates([.init(sourceURL: source)])
+            let manifest = try await store.list()
+            let entry = try XCTUnwrap(manifest.entries.first)
+            try FileManager.default.removeItem(at: source)
+            let gate = temporary.appendingPathComponent(UUID().uuidString)
+            let reader = try launch(["reader", root.path, gate.path, crash ? "crash" : "release"])
+            defer { if reader.0.isRunning { reader.0.terminate() } }
+            let deadline = Date().addingTimeInterval(10)
+            while !FileManager.default.fileExists(atPath: gate.path + ".ready") && reader.0.isRunning && Date() < deadline {
+                usleep(10_000)
+            }
+            XCTAssertTrue(FileManager.default.fileExists(atPath: gate.path + ".ready"))
+            _ = try await store.remove(objectHash: entry.object.sha256, expectedGeneration: manifest.generation)
+            let fresh = try await store.acquireSnapshot()
+            XCTAssertTrue(fresh.resources.isEmpty)
+            let held = try await store.recover()
+            XCTAssertEqual(held.removedObjects, 0)
+            try Data([1]).write(to: gate)
+            _ = try finish(reader, expected: crash ? 72 : 0)
+            if !crash {
+                XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: gate.path + ".bytes")),
+                               try Data(contentsOf: fixture("regular.ttf")))
+                let face = try JSONDecoder().decode(FontFace.self,
+                    from: Data(contentsOf: URL(fileURLWithPath: gate.path + ".face")))
+                XCTAssertEqual(face, entry.faces[0])
+            }
+            let collected = try await FontLibraryStore(rootURL: root).recover()
+            XCTAssertEqual(collected.removedObjects, 1)
+            try await store.releaseSnapshot(fresh)
+        }
+    }
+
 }

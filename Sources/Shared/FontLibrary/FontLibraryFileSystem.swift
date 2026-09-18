@@ -137,6 +137,35 @@ final class FontLibraryDirectory {
         guard fsync(fd) == 0 else { throw FontLibraryError.directoryIO(operation: "sync", code: errno) }
     }
 
+    func existingChild(_ name: String) throws -> FontLibraryDirectory {
+        try validate(name)
+        let fd = openat(descriptor, name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC)
+        guard fd >= 0 else { throw FontLibraryError.io(errno) }
+        return FontLibraryDirectory(descriptor: fd)
+    }
+
+    func names(limit: Int = 16384) throws -> [String] {
+        let copy = dup(descriptor)
+        guard copy >= 0 else { throw FontLibraryError.io(errno) }
+        guard let stream = fdopendir(copy) else { close(copy); throw FontLibraryError.io(errno) }
+        defer { closedir(stream) }
+        rewinddir(stream)
+        var result: [String] = []
+        while true {
+            errno = 0
+            guard let entry = readdir(stream) else {
+                guard errno == 0 else { throw FontLibraryError.io(errno) }
+                return result.sorted()
+            }
+            let name = withUnsafePointer(to: &entry.pointee.d_name) {
+                $0.withMemoryRebound(to: CChar.self, capacity: Int(MAXNAMLEN) + 1) { String(cString: $0) }
+            }
+            if name == "." || name == ".." { continue }
+            guard result.count < limit else { throw FontLibraryError.capacityExceeded }
+            result.append(name)
+        }
+    }
+
     func isEmpty() throws -> Bool {
         let copy = dup(descriptor)
         guard copy >= 0 else { throw FontLibraryError.io(errno) }

@@ -316,3 +316,97 @@ final class FontLibraryStore: Sendable {
         }
     }
 }
+
+extension FontLibraryStore {
+    func remove(objectHash: String, expectedGeneration: UInt64) async throws -> FontLibraryManifest {
+        try await perform {
+            let fs = try FontLibraryFileSystem(rootURL: self.rootURL)
+            return try fs.withLock {
+                var manifest = try self.load(fs)
+                guard manifest.generation == expectedGeneration else { throw FontLibraryError.staleGeneration }
+                guard manifest.entries.contains(where: { $0.object.sha256 == objectHash }) else {
+                    throw FontLibraryError.invalidSelection
+                }
+                manifest.entries.removeAll { $0.object.sha256 == objectHash }
+                for index in manifest.conflictGroups.indices {
+                    manifest.conflictGroups[index].members.removeAll { $0.objectHash == objectHash }
+                }
+                manifest.conflictGroups.removeAll { $0.members.isEmpty }
+                // 삭제된 활성 항목을 다른 버전으로 자동 대체하지 않는다.
+                manifest.activeSelections.removeAll { $0.faceID.objectHash == objectHash }
+                try self.advance(&manifest)
+                try self.publish(manifest, bytes: nil, object: nil, fs: fs, cancelled: { false })
+                return manifest
+            }
+        }
+    }
+
+    func acquireSnapshot() async throws -> FontLibrarySnapshot {
+        try await perform {
+            let fs = try FontLibraryFileSystem(rootURL: self.rootURL)
+            return try fs.withLock {
+                let manifest = try self.load(fs)
+                var resources: [FontSnapshotResource] = []
+                let entries = Dictionary(uniqueKeysWithValues: manifest.entries.map { ($0.object.sha256, $0) })
+                for selection in manifest.activeSelections {
+                    guard let entry = entries[selection.faceID.objectHash],
+                          let face = entry.faces.first(where: { $0.id == selection.faceID }) else {
+                        throw FontLibraryError.corruptManifest
+                    }
+                    try self.verifyObject(entry.object, fs: fs)
+                    let resource = FontSnapshotResource(id: "font-\(entry.object.sha256)-\(face.id.sfntIndex)",
+                        object: entry.object, face: face, axes: selection.axes, usageEvidence: entry.usageEvidence)
+                    if !resources.contains(resource) { resources.append(resource) }
+                }
+                resources.sort { $0.id < $1.id }
+                let leases = try fs.leaseDirectory()
+                guard try leases.names().count < 4096 else { throw FontLibraryError.capacityExceeded }
+                let session = UUID(), name = session.uuidString + ".json"
+                let record = FontLeaseRecord(schemaVersion: 1, sessionID: session,
+                    objectHashes: Array(Set(resources.map { $0.object.sha256 })).sorted())
+                try leases.writeNew(name, data: JSONEncoder().encode(record))
+                let fd = try leases.openFile(name, flags: O_RDONLY)
+                do {
+                    guard flock(fd, LOCK_EX | LOCK_NB) == 0 else { throw FontLibraryError.io(errno) }
+                    try leases.sync(); try fs.syncPublication()
+                    return try FontLibrarySnapshot(generation: manifest.generation, resources: resources,
+                        rootPath: self.rootURL.standardizedFileURL.path, descriptor: fd)
+                } catch { close(fd); throw error }
+            }
+        }
+    }
+
+    func readResource(_ resourceID: String, snapshot: FontLibrarySnapshot) async throws -> Data {
+        try await perform {
+            try snapshot.withLease(rootPath: self.rootURL.standardizedFileURL.path) {
+                guard let resource = snapshot.resources.first(where: { $0.id == resourceID }) else {
+                    throw FontLibraryError.invalidResource
+                }
+                let fs = try FontLibraryFileSystem(rootURL: self.rootURL)
+                return try fs.withLock {
+                    guard let data = try fs.objects.read(resource.object.sha256 + ".font", limit: resource.object.byteCount),
+                          data.count == resource.object.byteCount, Self.hash(data) == resource.object.sha256 else {
+                        throw FontLibraryError.corruptObject
+                    }
+                    return data
+                }
+            }
+        }
+    }
+
+    func releaseSnapshot(_ snapshot: FontLibrarySnapshot) async throws {
+        try await perform { try snapshot.release(rootPath: self.rootURL.standardizedFileURL.path) }
+    }
+
+    func recover() async throws -> FontLibraryRecoveryResult {
+        try await perform {
+            let fs = try FontLibraryFileSystem(rootURL: self.rootURL)
+            return try fs.withLock {
+                let manifest = try self.load(fs)
+                // 유효 manifest의 객체 변조/유실을 먼저 드러내며 그 상태에서 GC하지 않는다.
+                for entry in manifest.entries { try self.verifyObject(entry.object, fs: fs) }
+                return try FontLibraryRecovery.collect(fs, manifest: manifest)
+            }
+        }
+    }
+}

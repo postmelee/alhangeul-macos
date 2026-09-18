@@ -197,6 +197,7 @@ enum FontLibraryError: Error, Equatable, Sendable {
     case directoryIO(operation: String, code: Int32)
     case corruptManifest, unsupportedSchema, missingManifest, corruptObject
     case staleGeneration, invalidSelection, unsupportedSelection, capacityExceeded
+    case invalidResource, releasedSnapshot, snapshotLibraryMismatch, corruptLease
     case publicationUncertain
 }
 

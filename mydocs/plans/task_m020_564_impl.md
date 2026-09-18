@@ -4,8 +4,8 @@
 - 이슈: [#564](https://github.com/postmelee/alhangeul-macos/issues/564), 상위 #562
 - 기준 설계: [font_migration_design.md](../tech/font_migration_design.md)
 - 브랜치: `local/task564` → `devel` / 마일스톤: M020, v0.2 계열
-- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인 및 구현계획 작성 진입. 이후 같은 날 “진행해줘”로 구현계획 승인 및 Stage 1 착수. Stage 1 보고 후 같은 날 “진행해줘”로 Stage 2 착수 승인.
-- 상태: Stage 2 구현·검증 완료, Stage 3 승인 대기. [Stage 1 보고](../working/task_m020_564_stage1.md), [Stage 2 보고](../working/task_m020_564_stage2.md).
+- 승인 이력: 2026-09-17 작업지시자의 “진행해줘”로 수행계획 승인 및 구현계획 작성 진입. 이후 같은 날 “진행해줘”로 구현계획 승인 및 Stage 1 착수. Stage 1 보고 후 같은 날 “진행해줘”로 Stage 2 착수 승인. Stage 2 보고 후 2026-09-18 “진행해줘”로 Stage 3 착수 승인.
+- 상태: Stage 3 구현·검증 완료, Stage 4 승인 대기. [Stage 1 보고](../working/task_m020_564_stage1.md), [Stage 2 보고](../working/task_m020_564_stage2.md), [Stage 3 보고](../working/task_m020_564_stage3.md).
 
 ## 1. 구현 경계와 파일 배치
 
@@ -63,7 +63,7 @@
 - manifest가 없을 때의 신규 초기화와 기존 manifest 손상/미지원 schema를 구분한다. 손상·미지원이면 자동 빈 저장소 생성이나 객체 삭제를 하지 않고 복구 필요로 반환한다.
 - manifest 게시 전 남은 객체는 고아 후보이며 활성 transaction·manifest·lease 참조가 모두 없을 때만 제거한다. 현재 목록에서 사라져도 진행 중 snapshot이 읽는 객체는 보존한다.
 - snapshot 생성 시 잠금 안에서 참조 객체와 lease를 함께 확정한다. digest는 정렬된 객체·face·axes·정책 버전을 사용하여 같은 선택에 결정적으로 생성한다.
-- lease는 PID와 프로세스 시작 식별, 세션 ID, 참조 객체를 기록한다. PID 재사용을 구분하며 권한/식별 실패·손상 lease·생존 불확실 상황은 보존한다. 시간 초과만으로 회수하지 않는다.
+- Stage 3에서 lease 생존 판정은 PID/시작 시각 조회 대신 세션별 파일의 kernel flock으로 확정했다. snapshot이 FD를 소유하고 해제·프로세스 종료 시 잠금이 풀린다. 세션 UUID와 참조 객체를 기록하며, 회수자가 배타 잠금을 얻은 경우에만 미사용으로 판정한다. PID 재사용에 의존하지 않고, 권한/잠금 확인 실패·손상/미지원 lease는 보존한다. 시간 초과만으로 회수하지 않는다.
 - resource ID는 외부가 파일 경로를 조립할 수 없는 값이다. 읽을 때 허용 집합·길이·해시를 확인하며 변조 시 bytes를 공급하지 않는다.
 
 ## 4. Stage 1 — 모델·형식 검증·컨테이너 접근
@@ -102,7 +102,7 @@ Stage 2 확정: 프로세스 내 공통 직렬 큐와 프로세스 간 flock을 
 
 - 원본을 격리하고 새 프로세스에서 관리 객체를 읽어 hash와 metadata를 비교한다.
 - reader가 lease를 가진 상태에서 다른 프로세스가 삭제해도 기존 reader가 읽을 수 있고 새 snapshot에는 삭제된 선택이 없음을 확인한다.
-- lease 해제 뒤 참조 없는 객체만 제거되는지, PID 재사용/권한 거부/손상 lease에서 보수적으로 유지되는지 확인한다.
+- lease 해제 뒤 참조 없는 객체만 제거되는지, PID 조회 없이 실제 FD 소유를 판정하며 권한 거부/손상 lease에서 보수적으로 유지되는지 확인한다.
 - 관리 bytes 변조, 잘못된 resource ID, 해제된 snapshot, 손상·미지원 schema, 재시작과 원본 권한 상실을 검증한다.
 
 완료 기준: 관리 복사본의 원본 독립성, 진행 중 reader 보호, 무결성 실패의 명시적 반환, 재실행 시 상태 일관성.
