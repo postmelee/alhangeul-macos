@@ -172,6 +172,45 @@ targets:
         CODE_SIGN_STYLE: Automatic
         SKIP_INSTALL: YES
 
+  FontLibraryProcessProbe:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Tests/FontLibraryProcessProbe
+      - path: Sources/Shared
+        includes:
+          - FontLibrary/**
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.FontLibraryProcessProbe
+        SKIP_INSTALL: YES
+        OTHER_SWIFT_FLAGS: "$(inherited) -parse-as-library"
+
+  FontLibraryTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/FontLibraryTests
+        excludes:
+          - Fixtures
+      - path: Tests/FontLibraryTests/Fixtures
+        type: folder
+      - path: Sources/Shared
+        includes:
+          - FontLibrary/**
+      - path: Sources/HostApp
+        includes:
+          - Services/FontLibraryService.swift
+    dependencies:
+      - target: FontLibraryProcessProbe
+        link: false
+      - sdk: CoreText.framework
+      - sdk: Security.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.FontLibraryTests
+        GENERATE_INFOPLIST_FILE: YES
+
   HostAppTests:
     type: bundle.unit-test
     platform: macOS

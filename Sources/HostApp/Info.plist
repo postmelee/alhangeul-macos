@@ -22,6 +22,8 @@
 	<string>20</string>
 	<key>AlhangeulAppExecutionEndpoint</key>
 	<string>$(ALHANGEUL_APP_EXECUTION_ENDPOINT)</string>
+	<key>AlhangeulFontLibraryGroupIdentifier</key>
+	<string>XH6JHKYXV8.com.postmelee.alhangeul.font-library</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>12.0</string>
 	<key>LSHasLocalizedDisplayName</key>
