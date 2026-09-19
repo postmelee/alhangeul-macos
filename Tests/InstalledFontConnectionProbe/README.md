@@ -15,7 +15,7 @@ RHWP_PROBE_CORE=/absolute/path/to/pinned/rhwp scripts/probe-installed-font-conne
 
 같은 명령을 다시 실행하면 `results/snapshot.json`을 새 프로세스에서 복원한다. `FONT_CONNECTION_RESULTS`로 새 결과 폴더를 지정하면 cold 실행을 분리할 수 있다. `PROBE_APP_SUFFIX=-adhoc`으로 앱 산출물 이름을 구분할 수 있다. 결과는 `build.noindex/task565-stage3` 아래 JSON·렌더링 PNG로 기록한다.
 
-signed sandbox는 `PROBE_SIGN_ID`에 사용자가 승인한 로컬 코드 서명 인증서 이름을 추가한다. App Sandbox entitlement만 사용하며 공증·제품 배포·Quick Look 등록을 하지 않는다. 이 모드의 결과는 probe 자체 sandbox의 Application Support/Task565ConnectionProbe에 저장된다. 키체인 인증은 사용자가 수행한다.
+signed sandbox는 `PROBE_SIGN_ID`에 사용자가 승인한 로컬 코드 서명 인증서 이름을 추가한다. 제품에도 있는 App Sandbox와 network.client entitlement를 사용하며 공증·제품 배포·Quick Look 등록을 하지 않는다. 이 모드의 결과는 probe 자체 sandbox의 Application Support/Task565ConnectionProbe에 저장된다. 키체인 인증은 사용자가 수행한다. App Sandbox 단독 실험은 이 환경에서 WebKit 시작 실패로 timeout됐으며, network.client 추가 후 정상 실행을 확인했다. 외부 font 경로 읽기 예외는 부여하지 않는다.
 
 ## 측정 경계
 

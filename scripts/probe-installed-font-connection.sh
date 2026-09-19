@@ -42,7 +42,7 @@ swiftc -warnings-as-errors -target "$(uname -m)-apple-macosx12.0" -module-cache-
  "$ROOT/Tests/InstalledFontConnectionProbe/main.swift" -o "$APP/Contents/MacOS/InstalledFontConnectionProbe"
 if [[ -n "${PROBE_SIGN_ID:-}" ]]; then
   cat > "$OUT/sandbox.entitlements" <<'XML'
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>com.apple.security.app-sandbox</key><true/></dict></plist>
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>com.apple.security.app-sandbox</key><true/><key>com.apple.security.network.client</key><true/></dict></plist>
 XML
   codesign --force --options runtime --timestamp=none --sign "$PROBE_SIGN_ID" --entitlements "$OUT/sandbox.entitlements" "$APP"
   codesign --verify --strict "$APP"

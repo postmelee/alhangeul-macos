@@ -2,7 +2,7 @@
 
 - 수행일: 2026-09-20
 - 승인: 수정 계획 제시 후 작업지시자의 “진행해줘”로 Stage 3 착수
-- 상태: **독립 연결·재실행 실험 통과, signed sandbox 검증 대기**. Stage 4 미착수.
+- 상태: **독립 연결·재실행 및 signed sandbox 검증 완료**. Stage 4 승인 대기.
 - 기준: [구현계획](../plans/task_m020_565_impl.md)
 
 ## 1. 결과
@@ -64,8 +64,15 @@ CoreText 원본 PS와 hash → 기존 resolver의 PS/faceKey → renderer가 실
 
 ## 5. 남은 검증과 승인 경계
 
-App Sandbox entitlement만 가진 probe를 로컬 Developer ID 인증서로 서명하려 했으나 `codesign`이 대기 중이다. 일반 ad-hoc 실행 성공을 signed sandbox 성공으로 보고하지 않는다. 키체인 창 확인을 시도했으나 Computer Use가 SecurityAgent 접근을 제한했으므로 사용자에게 직접 확인·승인을 요청했다. 인증 정보 입력·보안 설정 변경·우회는 하지 않았다.
+사용자의 키체인 허용 후 인증서 서명이 완료됐다. 최초 App Sandbox 단독 실행(PID 81781)은 WebKit 하위 프로세스 시작 실패로 timeout되어 글꼴 공급까지 도달하지 못했다. 제품 HostApp에도 있는 `com.apple.security.network.client`를 실험 앱에 추가한 대조에서는 최종 소스의 WebKit 실행·글꼴 공급이 통과했다. 외부 원본 읽기용 임시 예외나 파일 권한은 추가하지 않았다. 제품 entitlement는 변경하지 않았다.
 
-서명 완료 후 sandbox cold/재실행과 `/Library/Fonts` 접근을 확인하고 이 보고서에 결과를 반영한다. 서명된 실험 앱은 현재 서명 착수 시점의 probe이며, 이후 추가한 중복 메타데이터 대조·계측 변경까지 동일하게 검증하려면 최종 소스로 다시 빌드/서명한다. Stage 3을 완료로 선언하거나 Stage 4를 시작하지 않는다.
+| 최종 signed sandbox 실행 | PID | 감지 호출 | 첫 렌더 읽기 | warm 추가 읽기 |
+|--------------------------|-----|----------|--------------|----------------|
+| cold | 82664 | 1 | 2 | 0 |
+| 새 프로세스 복원 | 82758 | 0 | 2 | 0 |
+
+최종 소스의 중복 메타데이터 대조·원본 지문·실제 local 객체 선택·동시 요청 병합·실패 fallback·복구까지 두 실행 모두 검증했다. Developer ID 서명과 App Sandbox/network.client entitlement를 확인했다. 결과는 probe 자체 컨테이너에 저장했고, 검토용 JSON/PNG를 `build.noindex/task565-stage3/signed-final-results/`에 복사했다. 초기 timeout도 별도 결과로 보존했다.
+
+이 검증은 macOS 26.5.2의 공용 `/Library/Fonts` 2종에 한정한다. 이 환경에서는 사용자 파일 선택/bookmark 없이 읽었지만, 사용자 Fonts·외부 폴더·최소 OS·확장에서도 같은 권한이 보장된다는 뜻은 아니다. Stage 3 최소 연결 실험은 완료했고 Stage 4는 별도 승인을 받는다.
 
 Stage 4에는 활성 catalog·메타데이터·설정·권한 지속·generation을, #567 에는 정식 Studio adapter와 열린 문서 캐시 무효화를, #568 에는 소비자별 원본 접근·실제 선택·출력 검증을 인계한다. 배포나 이슈 close는 수행하지 않았다.

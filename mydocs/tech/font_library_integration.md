@@ -15,7 +15,7 @@ Mac 기본 목표는 **활성 설치 글꼴 자동 사용**으로 변경됐다. 
 
 ## 설치 참조 adapter — Stage 3 실험 인계
 
-[최소 연결 실험](../working/task_m020_565_stage3.md)에서 실제 활성 static face 2종의 기존 rhwp 매칭·CanvasKit 적용을 확인했다. 제품 통합 및 signed sandbox는 미완료다.
+[최소 연결 실험](../working/task_m020_565_stage3.md)에서 실제 활성 static face 2종의 기존 rhwp 매칭·CanvasKit 적용을 확인했다. 공용 설치 글꼴 2종은 signed sandbox의 최초 실행·재실행까지 확인했다. 제품 통합·다른 원본 위치·최소 OS 검증은 남아 있다.
 
 - catalog 열거와 bytes 요청을 분리한다. 기존 감지의 blob 이름 보강에 전체 파일을 무조건 공급하지 않는다.
 - PS만으로 원본·버전을 식별하지 않는다. native identity/face/style/축·generation을 보존하며 모호한 입력을 임의로 합치지 않는다.
