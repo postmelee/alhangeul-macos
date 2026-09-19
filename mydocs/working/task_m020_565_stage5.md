@@ -49,3 +49,11 @@ UI snapshot은 단일 updates 스트림 순서로만 반영한다. 개별 작업
 Stage 5는 설정 UI와 공급 DTO까지다. Studio 제품 메시지 handler·매칭·렌더 캐시 연결은 #567, PDF/인쇄/native/Quick Look/썸네일은 #568, 전체 수용과 웹 안내는 #569다. 체크박스를 켠 것만으로 문서가 설치 글꼴을 사용한다고 주장하지 않는다.
 
 다음 승인 대상은 Stage 6 기반 회귀·signed sandbox 재실행 및 소비자별 인계다. 이슈 close·PR·merge·배포는 수행하지 않았다.
+
+## 사용자 피드백 반영 — Stage 5 UI 보완
+
+작업지시자의 “다듬고 내가 직접 조작할 수 있게 창을 띄워줘” 승인으로 제목 중복과 정상 항목의 기술적 설명을 제거했다. family별 스타일을 묶고 검색·펼치기·스크롤을 제공한다. 체크박스는 사용 설정 아래로 옮겼으며 현재 설정만 저장됨을 명시한다. 권한 버튼은 해당 face 옆에 두고 선택창을 원본 폴더에서 시작하도록 했다.
+
+실제 Mac 목록을 격리 저장소로 확인하는 `--live` probe를 추가했다. 실제 목록 232개 family에서 검색·펼치기·스크롤을 확인했다. List의 macOS 런타임 경고를 확인하여 ScrollView/LazyVStack으로 변경 후 동일 동작을 재검증했다. macOS 12 대상 warnings-as-errors 컴파일·ad-hoc 서명 검증, 공용 Swift 의존 및 diff 검사를 통과했다. 이번 보완은 UI와 probe 변경으로 기존 89개 service 테스트 결과와 구분한다.
+
+최신 화면은 `build.noindex/task565-stage5/screenshots/refined-search.jpeg`다. 사용자 조작을 위해 실제 목록 테스트 창을 열어 둔다. 제품 앱 설정 및 글꼴 원본은 변경하지 않았으며 문서 렌더러 연결과 Stage 6은 여전히 후속 범위다.

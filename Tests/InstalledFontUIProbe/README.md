@@ -9,3 +9,7 @@
 - macOS 12 대상으로 warnings-as-errors 컴파일하고 ad-hoc 서명/검증한다. 제품 sandbox와 macOS 12 실제 실행 검증을 대신하지 않는다.
 - 최종 화면: `build.noindex/task565-stage5/screenshots/light.jpeg`, `dark.jpeg`.
 - Finder 확장을 포함하지 않으며 시스템 글꼴 등록도 하지 않는다. 창의 닫기 버튼으로 종료한다.
+
+## 실제 Mac 목록 확인
+
+`scripts/probe-installed-font-ui.sh --live`는 실제 CoreText 활성 목록을 표시하고 설정은 `ui-data/installed-live`에 격리한다. 실제 글꼴 bytes 복사나 시스템 설치는 하지 않는다. 이 모드에서 사용자가 폴더 접근을 허용하면 해당 테스트 저장소에 읽기 bookmark를 저장하므로, 화면 확인만 할 때는 폴더 선택을 취소한다. 검색·family 펼치기·스크롤을 직접 확인할 수 있다.
