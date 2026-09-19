@@ -5,7 +5,7 @@
 - 기반 계약: [font_library_integration.md](../tech/font_library_integration.md)
 - 브랜치: `local/task565` → `devel` / M020, v0.2 계열
 - 승인 이력: 2026-09-20 작업지시자의 “진행해줘”로 수행계획 승인 및 구현계획 작성 진입
-- 상태: 구현계획 작성 완료, Stage 1 착수 승인 대기
+- 상태: 2026-09-20 “진행해줘”로 구현계획 승인, [Stage 1](../working/task_m020_565_stage1.md) 구현·검증 완료, Stage 2 승인 대기
 
 ## 1. 구현 경계
 

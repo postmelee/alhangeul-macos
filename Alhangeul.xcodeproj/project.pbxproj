@@ -35,6 +35,7 @@
 		17457D69FA2D2E16E266066C /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4457E7F57DA695C2D4A7757 /* CoreServices.framework */; };
 		1811D715136A996768A0C009 /* RhwpStudioPagePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCD0C0600D4441C1E31B36FB /* RhwpStudioPagePayload.swift */; };
 		187BD036B336DB87EB4EC8C0 /* FontResourceRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC2D57719DF9672E7C311D7 /* FontResourceRegistry.swift */; };
+		18AD574D402F9202EF427B9A /* FontImportSourceSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0527615F359F3A67007CCDC /* FontImportSourceSession.swift */; };
 		192D504459A57A245974959F /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F6DA732CC42A781180AA2F88 /* libiconv.tbd */; };
 		1AB036C0755BA75BC9F750C3 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D83D8D9F6BF5014474791FB1 /* ImageIO.framework */; };
 		1C933AAE48EF8E6A19030EA9 /* DocumentPDFExportPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3445867D6FAAB95F19E2C992 /* DocumentPDFExportPanel.swift */; };
@@ -87,6 +88,7 @@
 		461CC73228EC10F1C6BC2B1C /* AppExecutionEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08A3E95853FC125A982DA75C /* AppExecutionEventTests.swift */; };
 		465F0A3FEA28C1754040A6CD /* QuickLookConflictDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E87D97188514E1A14C30E4 /* QuickLookConflictDetector.swift */; };
 		477B4C8AC6A0370182751D8F /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */; };
+		481B4DDA8F4CC59FF53B9F07 /* MacFontDiscoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16759C8AACAF57124DB1D268 /* MacFontDiscoveryTests.swift */; };
 		486A85BA7D024451AE9AC3F9 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96DA8725B9E959FB54D06F3F /* CoreText.framework */; };
 		489D108470FB68CE748C1754 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 38D5D75909600E595A19BBDF /* InfoPlist.strings */; };
 		4944C9B4A1E0B31D08CC4067 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D83D8D9F6BF5014474791FB1 /* ImageIO.framework */; };
@@ -96,6 +98,7 @@
 		4BA55AC7AE885CA2527383E4 /* AppExecutionAnalyticsRuntimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC162C2D50B780F7B113E42 /* AppExecutionAnalyticsRuntimeTests.swift */; };
 		4D0C99DED184D28F3F25E30B /* RhwpStudioPrintOrientationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68AA71A85B8293FC85599FEB /* RhwpStudioPrintOrientationPolicy.swift */; };
 		4D168DDC50595656F0190D78 /* QuickLookConflictPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CC07AD7EFC4382DB0FA3159 /* QuickLookConflictPresentation.swift */; };
+		4D60944148594BBBF31786E3 /* FontImportSourceSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0527615F359F3A67007CCDC /* FontImportSourceSession.swift */; };
 		4D97135716F6E9E2F6D10CC6 /* RhwpProvenance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2953DECE3F38280938C3CE2B /* RhwpProvenance.swift */; };
 		4F43092D1BA54A958A1EA988 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B74C6D69DBD1D9B163C9A247 /* Security.framework */; };
 		52DCFC363EC21FBC1DD17DC6 /* DocumentHTMLExportFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C17179E08FB758E56305E95 /* DocumentHTMLExportFormatTests.swift */; };
@@ -137,6 +140,7 @@
 		6E4C6A5D3BD6110054B0D517 /* FontLibraryModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396316FB6521468554816381 /* FontLibraryModels.swift */; };
 		6F495DA70BD2EEDC08EB4A81 /* DocumentSaveContract.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FAA52954EDF090E3AA5B77 /* DocumentSaveContract.swift */; };
 		6F52D2D80F34C3536128E12B /* FontLibrarySnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56D85A35783CAFFB59F45E9 /* FontLibrarySnapshot.swift */; };
+		71DE0C19C76D921756544695 /* MacFontDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F3D9F9D13680005C7BAF707 /* MacFontDiscovery.swift */; };
 		721965E788F8B67D8F7851A2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1309795C091DEE3BD8E9EA7D /* CoreGraphics.framework */; };
 		7291708FE7C4B4C49E3548FB /* CGTreeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B69400B5B8A2851995C68DE /* CGTreeRenderer.swift */; };
 		72BDAE6714CD21F62B6547CB /* DocumentTerminationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27EB9FF4728E67B683789ECF /* DocumentTerminationCoordinator.swift */; };
@@ -173,6 +177,7 @@
 		8CB7876CD097AEAA46583BBE /* QuickLookConflictDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E87D97188514E1A14C30E4 /* QuickLookConflictDetector.swift */; };
 		8DD11A59269A08802E4776F4 /* AppExecutionOutboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFD8F8CDAE3C68AC47194251 /* AppExecutionOutboxTests.swift */; };
 		8E526CE4E6EC67F08A209B85 /* RhwpStudioPagePDFRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1116217E7FF50304A4A7EEF8 /* RhwpStudioPagePDFRenderer.swift */; };
+		903D63D0D6E94E3B121C3FF4 /* MacFontDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F3D9F9D13680005C7BAF707 /* MacFontDiscovery.swift */; };
 		90F97E295C84EDBABCA218F6 /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */; };
 		91E2EB886A546F276298F748 /* RhwpStudioSaveBridgeScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4DA17C5BF43FA0762AA4A17 /* RhwpStudioSaveBridgeScript.swift */; };
 		922F181921946B5EA89721A2 /* FontLibraryLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E4158080B6A350B668DA8F8 /* FontLibraryLocation.swift */; };
@@ -392,6 +397,7 @@
 		1309795C091DEE3BD8E9EA7D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		133475D84BB02E4940904336 /* FontLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontLibraryService.swift; sourceTree = "<group>"; };
 		135DD98A93BE9921CD44BBAB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		16759C8AACAF57124DB1D268 /* MacFontDiscoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacFontDiscoveryTests.swift; sourceTree = "<group>"; };
 		16BED1B65658BC71151FB7AC /* RhwpStudioDocumentPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioDocumentPayload.swift; sourceTree = "<group>"; };
 		18685923F2E4ACD1644DD83D /* QuickLookConflictNoticeCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookConflictNoticeCoordinator.swift; sourceTree = "<group>"; };
 		1A0E726A1E03A5D6891045C8 /* RhwpStudioPrintController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPrintController.swift; sourceTree = "<group>"; };
@@ -439,6 +445,7 @@
 		4B5C316C5FBCECA08C309CF9 /* HwpPageImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpPageImageRenderer.swift; sourceTree = "<group>"; };
 		4D19355F771E9D7C6E9E068F /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
 		4E95E4CD2871B8BED8B5F72D /* HwpExternalImageResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpExternalImageResolver.swift; sourceTree = "<group>"; };
+		4F3D9F9D13680005C7BAF707 /* MacFontDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacFontDiscovery.swift; sourceTree = "<group>"; };
 		531B81FC1D06E1AE2C3F2CDB /* RhwpStudioHostBridgeScriptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioHostBridgeScriptTests.swift; sourceTree = "<group>"; };
 		541160BFAFD7D51040244110 /* HwpNativePageCompositor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpNativePageCompositor.swift; sourceTree = "<group>"; };
 		54E070F772C83780E579F518 /* LaunchMaintenanceService+App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LaunchMaintenanceService+App.swift"; sourceTree = "<group>"; };
@@ -528,6 +535,7 @@
 		DEE0789E51B6D1B4F1707CB7 /* RhwpStudioHTMLExportScriptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioHTMLExportScriptTests.swift; sourceTree = "<group>"; };
 		DF4028318D3528C32AF9BC09 /* RhwpStudioHTMLDownload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioHTMLDownload.swift; sourceTree = "<group>"; };
 		DFF4DDF1732036183EA2DEE9 /* CGPDFFontResourceInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPDFFontResourceInspector.swift; sourceTree = "<group>"; };
+		E0527615F359F3A67007CCDC /* FontImportSourceSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontImportSourceSession.swift; sourceTree = "<group>"; };
 		E366184AF5B6B9EAB46F352A /* HwpExternalImageResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HwpExternalImageResolverTests.swift; sourceTree = "<group>"; };
 		E4457E7F57DA695C2D4A7757 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		E4F2FDC67F5328E229845401 /* sample.hwpx */ = {isa = PBXFileReference; path = sample.hwpx; sourceTree = "<group>"; };
@@ -955,6 +963,7 @@
 				BA04F3F2F462B2C2CDC9B455 /* FontLibraryServiceTests.swift */,
 				1C3C3C8E07DD2D93A3822909 /* FontLibrarySnapshotTests.swift */,
 				ECBD1B27158620636097EFA5 /* FontLibraryStoreTests.swift */,
+				16759C8AACAF57124DB1D268 /* MacFontDiscoveryTests.swift */,
 			);
 			name = FontLibraryTests;
 			path = Tests/FontLibraryTests;
@@ -983,9 +992,11 @@
 				27EB9FF4728E67B683789ECF /* DocumentTerminationCoordinator.swift */,
 				D8E524F7A95D1616AB85E3F2 /* ExtensionStatusModel.swift */,
 				62E51D4DC8276BF1D36E5FEC /* ExtensionSystemRegistrationRefresher.swift */,
+				E0527615F359F3A67007CCDC /* FontImportSourceSession.swift */,
 				133475D84BB02E4940904336 /* FontLibraryService.swift */,
 				F64C25EF462BA350A75A155D /* LaunchMaintenanceService.swift */,
 				54E070F772C83780E579F518 /* LaunchMaintenanceService+App.swift */,
+				4F3D9F9D13680005C7BAF707 /* MacFontDiscovery.swift */,
 				20E87D97188514E1A14C30E4 /* QuickLookConflictDetector.swift */,
 				18685923F2E4ACD1644DD83D /* QuickLookConflictNoticeCoordinator.swift */,
 				34C590E0FD428E3C3B93D182 /* QuickLookConflictNoticePolicy.swift */,
@@ -1342,6 +1353,7 @@
 				308D4855D7022391FEF9CCD8 /* ExtensionSystemRegistrationRefresher.swift in Sources */,
 				4B73A1FAB9A42EC0FCCF51EF /* FontFallback.swift in Sources */,
 				ABAD3E01FE5D284A7CC4969C /* FontFileInspector.swift in Sources */,
+				18AD574D402F9202EF427B9A /* FontImportSourceSession.swift in Sources */,
 				146D65801886934CED4B31BD /* FontLibraryFileSystem.swift in Sources */,
 				54DE01A5735B80514B30324D /* FontLibraryHostProbe.swift in Sources */,
 				922F181921946B5EA89721A2 /* FontLibraryLocation.swift in Sources */,
@@ -1360,6 +1372,7 @@
 				A174DAE4D877346E0350AF02 /* HwpPreviewPNGRenderer.swift in Sources */,
 				F4095C620D43A19AC1283542 /* LaunchMaintenanceService+App.swift in Sources */,
 				55993B1F9BBFFBBA62397829 /* LaunchMaintenanceService.swift in Sources */,
+				71DE0C19C76D921756544695 /* MacFontDiscovery.swift in Sources */,
 				329C78D1A7232AF2B5ABFD9E /* PageOverlayImages.swift in Sources */,
 				465F0A3FEA28C1754040A6CD /* QuickLookConflictDetector.swift in Sources */,
 				7DA9E5F99C2DE1907259C09B /* QuickLookConflictNoticeCoordinator.swift in Sources */,
@@ -1452,6 +1465,7 @@
 			files = (
 				32AB2B3C54C09E52AFD259C9 /* FontFileInspector.swift in Sources */,
 				CD494054D5EFF29521AFC722 /* FontFileInspectorTests.swift in Sources */,
+				4D60944148594BBBF31786E3 /* FontImportSourceSession.swift in Sources */,
 				D0632A9409CC431244721848 /* FontLibraryFileSystem.swift in Sources */,
 				5F90886BDEEAD08D2133B06A /* FontLibraryLocation.swift in Sources */,
 				D3B4E0F36F9AB1ED0F0D8A37 /* FontLibraryLocationTests.swift in Sources */,
@@ -1464,6 +1478,8 @@
 				27EC745E47E84BF06E0D652F /* FontLibrarySnapshotTests.swift in Sources */,
 				1730D43E21A5FC20EEC51CFE /* FontLibraryStore.swift in Sources */,
 				A727FB68460914CF3A1CAE96 /* FontLibraryStoreTests.swift in Sources */,
+				903D63D0D6E94E3B121C3FF4 /* MacFontDiscovery.swift in Sources */,
+				481B4DDA8F4CC59FF53B9F07 /* MacFontDiscoveryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

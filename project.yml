@@ -201,6 +201,8 @@ targets:
       - path: Sources/HostApp
         includes:
           - Services/FontLibraryService.swift
+          - Services/MacFontDiscovery.swift
+          - Services/FontImportSourceSession.swift
     dependencies:
       - target: FontLibraryProcessProbe
         link: false
