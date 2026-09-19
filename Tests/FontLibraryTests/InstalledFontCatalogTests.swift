@@ -285,3 +285,58 @@ final class InstalledFontCatalogTests: XCTestCase {
     }
 
 }
+
+extension InstalledFontCatalogTests {
+    @MainActor
+    func testSettingsUsesOrderedUpdatesAndCancelledSelectionPreservesPermission() async throws {
+        let state = InstalledFontTestState(); state.records = [record()]
+        let catalog = try service(state)
+        let model = InstalledFontSettingsModel(makeService: { catalog })
+        await model.prepare()
+        await model.setEnabled(true)
+        await model.selectLocation(nil)
+        for _ in 0..<100 where model.snapshot?.enabled != true { await Task.yield() }
+        XCTAssertEqual(model.snapshot?.enabled, true)
+        XCTAssertNil(model.message)
+        XCTAssertFalse(model.busy)
+        let saved = try JSONDecoder().decode(InstalledFontSavedState.self, from: XCTUnwrap(state.stored))
+        XCTAssertTrue(saved.enabled)
+        XCTAssertTrue(saved.grants.isEmpty)
+        XCTAssertEqual(state.reads, 0)
+        // 외부 변경도 같은 stream 순서로 반영된다.
+        _ = try await catalog.setEnabled(false)
+        for _ in 0..<100 where model.snapshot?.enabled != false { await Task.yield() }
+        XCTAssertEqual(model.snapshot?.enabled, false)
+    }
+
+    @MainActor
+    func testSettingsSaveFailureDoesNotShowEnabledSuccess() async throws {
+        let state = InstalledFontTestState(); state.records = [record()]
+        let catalog = try service(state)
+        let model = InstalledFontSettingsModel(makeService: { catalog })
+        await model.prepare()
+        state.locked { $0.writesFail = true }
+        await model.setEnabled(true)
+        for _ in 0..<100 where model.snapshot == nil { await Task.yield() }
+        XCTAssertEqual(model.snapshot?.enabled, false)
+        XCTAssertNotNil(model.message)
+        state.locked { $0.writesFail = false }
+        await model.setEnabled(true)
+        for _ in 0..<100 where model.snapshot?.enabled != true { await Task.yield() }
+        XCTAssertEqual(model.snapshot?.enabled, true)
+        XCTAssertNil(model.message)
+    }
+
+    func testSupplyContractDoesNotExposeSourceOrPermission() throws {
+        let source = record()
+        let snapshot = InstalledFontSnapshot(generation: UUID(), enabled: true, records: [source],
+            grantIssues: [.init(id: UUID(), failure: .stalePermission)], refreshFailure: nil, omittedFaceCount: 0)
+        let data = try JSONEncoder().encode(InstalledFontSupplyCatalog(snapshot))
+        let text = String(decoding: data, as: UTF8.self)
+        XCTAssertFalse(text.contains(source.sourceURL.path))
+        XCTAssertFalse(text.contains("bookmark"))
+        XCTAssertFalse(text.contains("sourceURL"))
+        XCTAssertTrue(text.contains(source.id))
+        XCTAssertTrue(text.contains(snapshot.generation.uuidString))
+    }
+}

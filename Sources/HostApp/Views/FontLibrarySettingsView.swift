@@ -8,7 +8,7 @@ struct FontLibrarySettingsView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("가져온 글꼴").font(.title2.weight(.semibold))
-                    Text("기존 한글과 Mac의 글꼴을 알한글에 보관합니다.")
+                    Text("별도로 가져온 글꼴의 복사본을 알한글에 보관합니다.")
                         .foregroundStyle(.secondary)
                 }
                 Spacer()

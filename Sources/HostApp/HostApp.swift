@@ -7,6 +7,7 @@ struct AlHangeulMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var updateController = UpdateController()
     @StateObject private var analyticsSettingsModel = AppExecutionAnalyticsSettingsModel()
+    @StateObject private var installedFonts = InstalledFontSettingsModel.shared
     @StateObject private var fontSettingsModel = FontLibrarySettingsModel()
 
     var body: some Scene {
@@ -18,7 +19,7 @@ struct AlHangeulMacApp: App {
         }
 
         Settings {
-            AppSettingsView(analytics: analyticsSettingsModel, fonts: fontSettingsModel)
+            AppSettingsView(analytics: analyticsSettingsModel, fonts: fontSettingsModel, installedFonts: installedFonts)
         }
     }
 }
@@ -190,6 +191,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 #if DEBUG
         if FontLibraryHostProbe.runIfRequested() { return }
 #endif
+        Task { await InstalledFontSettingsModel.shared.prepare() }
         // Keep analytics first: the following services write legacy-evidence keys
         // that distinguish an existing installation from a genuine first launch.
         AppExecutionAnalyticsRuntime.shared.prepareForLaunch(

@@ -205,6 +205,7 @@ targets:
           - Services/MacFontDiscovery.swift
           - Services/FontImportSourceSession.swift
           - Views/FontLibrarySettingsModel.swift
+          - Views/InstalledFontSettingsModel.swift
     dependencies:
       - target: FontLibraryProcessProbe
         link: false

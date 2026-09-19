@@ -41,6 +41,16 @@ let resource = try await service.readResource(id, expectedGeneration: snapshot.g
 - 권한 재선택은 NSOpenPanel의 선택 URL로 `grantAccess`를 호출한다. stale/resolve 문제는 `grantIssues`로 안내하고 `replacing` ID로 교체한다. 저장된 grant 제거가 OS 세션 권한을 강제 철회한다고 안내하지 않는다.
 - 준비 전 `notPrepared`, refresh 전체 실패, `omittedFaceCount`를 빈 목록/완전 탐색 성공과 구분한다. 조회된 레코드는 비활성 tombstone을 포함할 수 있다.
 
+## 설치 참조 UI·공급 DTO — Stage 5 계약
+
+`InstalledFontSettingsModel.shared`가 앱 시작과 설정 화면에서 같은 service를 사용한다. 생성은 detached task, 목록/설정 작업은 service actor에서 수행한다. 기본 사용 설정과 새로고침은 import를 호출하지 않는다. UI는 단일 `updates()` 스트림만 적용하여 오래된 작업 반환값으로 최신 목록을 덮어쓰지 않는다. busy 동안 사용자 변경을 직렬화하고 선택창 취소는 기존 권한을 보존한다.
+
+`InstalledFontSupplyCatalog(snapshot)`은 소비자 전용 Encodable DTO다. generation, enabled, 전체 failure, omittedFaceCount, face별 opaque resourceID/PS/family/fullName/style/version/traits/axes/limitation만 포함한다. URL/bookmark/파일 stat/grant ID는 내보내지 않는다. limitation이 없다는 것은 bytes 검증과 renderer 적용 성공이 아니다. 축이 있는 face는 현재 unsupported로 표시하며 collection 여부는 필요 bytes 검증에서 확정한다.
+
+후속 #567은 이 DTO를 신뢰할 수 있는 native 메시지 경계에서 공급하고 `readResource(id, expectedGeneration:)`로 요청한다. ID 외 임의 경로나 URL을 요청 인자로 받지 않는다. 응답은 실제 검증한 face와 bytes를 함께 사용하며 단일 catalog 소유권을 유지한다. DTO 추가만으로 JS handler/Studio 매칭/renderer cache 연결이 완료된 것은 아니다. 실제 bridge 인증·요청 크기·취소·fallback은 소비자 구현 시 검증한다.
+
+기본 UI는 원본 삭제/비활성 시 사용할 수 없음을 안내한다. 별도 복사본은 ‘가져온 글꼴 보관함’으로 분리했다. 현재 목록 확인·설정 저장까지 지원하고 문서 표시·출력 연결은 준비 중임을 명시한다. App Group 파일 존재를 extension 원본 접근 권한으로 해석하지 않는다.
+
 ## HostApp 입력 계층 — #565 / #566
 
 `AppDelegate.fontLibraryService`는 지연 생성한 `Result<FontLibraryService, Error>`다. 최초 사용 시 App Group 설정·현재 서명·컨테이너를 확인한다. 구성 실패는 임의의 다른 폴더로 우회하지 않는다. 호출자가 실패 원인을 안내하고, 서비스 사용 시작 때 `prepare()`로 검증·복구를 실행한다. 현재 이 서비스는 입력 UI나 앱 시작 시 자동 탐색을 실행하지 않는다.
