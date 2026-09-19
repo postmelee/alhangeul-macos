@@ -1,8 +1,78 @@
 # 공통 글꼴 관리 계층 연동 계약
 
+## 2026-09-20 현재 적용 기준
+
+Mac 기본 목표는 **활성 설치 글꼴 자동 사용**으로 변경됐다. [#565 수정 계획](../plans/task_m020_565_impl.md)을 현재 기준으로 삼는다. 메타데이터·설정·필요한 권한을 지속하고 필요한 bytes만 읽으며 기존 rhwp 매칭/fallback을 재사용한다. 원본 삭제·비활성·권한 상실 시 계속 사용을 보장하지 않는다. 한컴 앱 내부에만 있는 글꼴 자동 추출은 기본 범위에서 제외한다.
+
+아래 독립 복사·import·manifest·snapshot 계약과 기존 조사 결과는 **별도 Windows ZIP/외부 파일 가져오기 및 관리 자산**에 유효하다. 이를 Mac 설치 참조의 필수 경로로 적용하지 않는다. 설치 참조의 지속 권한·활성 상태·generation/캐시 무효화 계약은 #565 실험 뒤 확정한다. OS 설치나 fsType은 외부 사용 허가의 증명이 아니다.
+
+기존 #563/#564 및 #565 Stage 1–2 결과는 보존한다. Studio 제품 연결은 #567, PDF·인쇄·native·확장은 #568, 전체 수용·웹 안내는 #569 범위다. 최소 연결 probe는 이 소비자들의 완료를 대신하지 않는다.
+
+
 - 범위: [#564](https://github.com/postmelee/alhangeul-macos/issues/564), M020
 - 기반 설계: [글꼴 마이그레이션 설계](font_migration_design.md)
 - 구현: `Sources/Shared/FontLibrary/`, `Sources/HostApp/Services/FontLibraryService.swift`
+
+## 설치 참조 adapter — Stage 3 실험 인계
+
+[최소 연결 실험](../working/task_m020_565_stage3.md)에서 실제 활성 static face 2종의 기존 rhwp 매칭·CanvasKit 적용을 확인했다. 공용 설치 글꼴 2종은 signed sandbox의 최초 실행·재실행까지 확인했다. 제품 통합·다른 원본 위치·최소 OS 검증은 남아 있다.
+
+- catalog 열거와 bytes 요청을 분리한다. 기존 감지의 blob 이름 보강에 전체 파일을 무조건 공급하지 않는다.
+- PS만으로 원본·버전을 식별하지 않는다. native identity/face/style/축·generation을 보존하며 모호한 입력을 임의로 합치지 않는다.
+- 변경 시 renderer의 이미 준비된 local 객체와 실패 캐시까지 무효화한다. 목록만 갱신하면 오래된 렌더 객체가 남는다.
+- 바이트 검증 실패는 공급 전에 거부하고 정상 fallback으로 연결한다. 손상 데이터로 생성된 FontMgr 객체의 존재를 준비 성공으로 취급하지 않는다.
+- 실험용 queryLocalFonts/chrome.storage shim은 제품 API가 아니다. #567 에서 native provenance·메타데이터/alias·opaque ID·필요 bytes 공급 계약을 정식 연결한다.
+
+## 설치 참조 service — Stage 4 계약
+
+[Stage 4 결과](../working/task_m020_565_stage4.md)의 `InstalledFontCatalogService`를 HostApp 단위로 하나 소유한다. 초기 파일 읽기를 포함한 생성은 MainActor 밖에서 수행하고, `prepare()` 이후에만 리소스를 요청한다. UI/renderer 연결은 Stage 5 및 #567/#568 범위다.
+
+```swift
+let service = try await Task.detached { try InstalledFontCatalogService.live() }.value
+let snapshot = try await service.prepare()
+// enabled 설정은 사용자 선택을 반영한다. metadata 접근 가능이 적용 성공은 아니다.
+let resource = try await service.readResource(id, expectedGeneration: snapshot.generation)
+```
+
+- `updates()`의 최신 generation이 바뀌면 기존 renderer 객체·측정·실패 캐시를 무효화하고 필요한 글꼴만 다시 요청한다. `staleGeneration` 결과는 재조회하며 오래된 bytes를 적용하지 않는다.
+- `busy`는 동시 요청 한도에 따른 일시 상태다. caller는 최대 2개로 요청을 제한하거나 재시도하며 이를 글꼴 손상/영구 미지원으로 저장하지 않는다. 서비스는 완료된 bytes를 영구 보관하지 않는다.
+- 원본 URL·bookmark·저장 metadata는 native 전용이다. WebView에는 필요한 ID와 사용자 표시용 face 정보만 별도 DTO로 보낸다. native 모델 전체를 메시지로 노출하지 않는다.
+- 원본 부재·비활성·권한 상실·충돌·손상·미지원은 명시적 상태와 정상 fallback으로 연결한다. TTC/가변은 소비자 검증 전 지원 완료로 표시하지 않는다.
+- 권한 재선택은 NSOpenPanel의 선택 URL로 `grantAccess`를 호출한다. stale/resolve 문제는 `grantIssues`로 안내하고 `replacing` ID로 교체한다. 저장된 grant 제거가 OS 세션 권한을 강제 철회한다고 안내하지 않는다.
+- 준비 전 `notPrepared`, refresh 전체 실패, `omittedFaceCount`를 빈 목록/완전 탐색 성공과 구분한다. 성공한 스캔은 현재 감지된 레코드만 보존하고 제거된 원본의 과거 기록을 정리한다. 목록 한도는 과거 누적이 아닌 현재 목록에 적용한다. 제거된 ID의 현재 generation 요청은 inactive, 과거 generation 요청은 staleGeneration으로 거부한다. 스캔 실패 시 이전 기록을 보존하되 공급을 차단하며, 다음 정상 스캔에서 복구한다.
+
+## 설치 참조 UI·공급 DTO — Stage 5 계약
+
+`InstalledFontSettingsModel.shared`가 앱 시작과 설정 화면에서 같은 service를 사용한다. 생성은 detached task, 목록/설정 작업은 service actor에서 수행한다. 기본 사용 설정과 새로고침은 import를 호출하지 않는다. UI는 단일 `updates()` 스트림만 적용하여 오래된 작업 반환값으로 최신 목록을 덮어쓰지 않는다. busy 동안 사용자 변경을 직렬화하고 선택창 취소는 기존 권한을 보존한다.
+
+`InstalledFontSupplyCatalog(snapshot)`은 소비자 전용 Encodable DTO다. generation, enabled, 전체 failure, omittedFaceCount, face별 opaque resourceID/PS/family/fullName/style/version/traits/axes/limitation만 포함한다. URL/bookmark/파일 stat/grant ID는 내보내지 않는다. limitation이 없다는 것은 bytes 검증과 renderer 적용 성공이 아니다. 축이 있는 face는 현재 unsupported로 표시하며 collection 여부는 필요 bytes 검증에서 확정한다.
+
+후속 #567은 이 DTO를 신뢰할 수 있는 native 메시지 경계에서 공급하고 `readResource(id, expectedGeneration:)`로 요청한다. ID 외 임의 경로나 URL을 요청 인자로 받지 않는다. 응답은 실제 검증한 face와 bytes를 함께 사용하며 단일 catalog 소유권을 유지한다. DTO 추가만으로 JS handler/Studio 매칭/renderer cache 연결이 완료된 것은 아니다. 실제 bridge 인증·요청 크기·취소·fallback은 소비자 구현 시 검증한다.
+
+기본 UI는 원본 삭제/비활성 시 사용할 수 없음을 안내한다. 별도 복사본은 ‘가져온 글꼴 보관함’으로 분리했다. 현재 목록 확인·설정 저장까지 지원하고 문서 표시·출력 연결은 준비 중임을 명시한다. App Group 파일 존재를 extension 원본 접근 권한으로 해석하지 않는다.
+
+## Stage 6 소비자 인계와 수용 시나리오
+
+| 소비자 | 현재 연결 | 후속 완료 조건 |
+|--------|-----------|----------------|
+| HostApp 설정 | 활성 목록·검색·family/스타일 펼치기·설정 지속·권한 복구 UI 연결 | signed 제품 UI의 신규 권한 제출·다양한 OS 수용은 별도 검증 |
+| Studio (#567) | native DTO 및 필요 bytes API 제공, 제품 JS handler 미연결 | 같은 catalog 인스턴스 사용, 신뢰한 frame/message 제한, ID+generation 조회, 기존 이름/스타일 매칭 연결 |
+| CanvasKit (#567) | Stage 3 독립 실험만 통과 | 실제 HWP/HWPX에서 Regular/Bold 선택 증거, generation 변경 시 typeface·측정·실패 캐시 무효화 |
+| PDF·인쇄·native (#568) | 설치 참조 service 미연결 | 화면과 출력의 동일 face/버전 선택 및 출력 중 원본 변경 시 처리 검증 |
+| Quick Look·Thumbnail (#568) | 설치 참조·외부 원본 권한 미연결 | 프로세스별 권한·접근 경계 확정, App Group만으로 접근 가능하다고 가정하지 않음 |
+| Windows/외부 파일 (#566) | 복사 보관함 기반 보존, Windows ZIP UI 미구현 | ZIP 입력 검증·사용자 선택·관리 복사본 수명 연결 |
+| 수용·웹 안내 (#569) | 사용자 설명에 필요한 경계 확정 | 아래 실제 문서 시나리오 완료 후 지원 범위와 단계별 안내 게시 |
+
+#569는 다음을 실제 문서에서 확인한다.
+
+1. 설치 글꼴이 있는 Mac에서 별도 파일 복사 없이 감지·정확한 스타일 적용, 새 프로세스에서도 설정 복원.
+2. 권한 없는 원본은 해당 글꼴의 접근 허용으로 복구. 선택 취소 시 목록·설정 보존. stale 권한은 재선택으로 복구.
+3. 글꼴 갱신/비활성/삭제 또는 문서 전환 중 이전 요청이 끝나도 오래된 face를 적용하지 않음. 동명 다른 버전은 임의 선택하지 않음.
+4. 원본 읽기·검증 실패 시 정상 fallback 및 조치 안내. 목록에 존재한다는 사실만으로 화면 적용 성공을 판단하지 않음.
+5. 실제 화면·PDF·인쇄·Quick Look·썸네일에서 요청 PS/style, 선택된 face, bytes 식별 증거를 비교. 미연결 소비자를 완료로 합산하지 않음.
+6. 한컴 삭제 후 원본 글꼴도 없어지면 계속 사용을 보장하지 않음. 독립 보관은 별도 가져오기 복사본에만 해당함을 웹 안내에 반영.
+
+Stage 6의 자동 회귀와 독립 sandbox probe는 제품 전체 소비자 수용을 대신하지 않는다. 최소 OS 실제 실행, 실제 한컴 편집기 설치본, 볼륨 이동 및 OS에서의 영구 활성화/비활성화 조작은 별도 수용 환경이 필요하다.
 
 ## HostApp 입력 계층 — #565 / #566
 
@@ -72,4 +142,4 @@ lease는 PID/시간 추정 없이 파일 잠금으로 생존을 판정한다. �
 
 `scripts/test-font-library.sh`는 공개 배포 가능한 자체 fixture의 해시, App Group 설정, parser/store/process/snapshot/HostApp 서비스 XCTest를 검증한다. PR CI의 macOS validation에서 동일 스크립트를 호출한다. 로컬 서명 검증은 `probe-font-library-container.sh`와 `probe-font-library-host.py`를 사용하며 인증서/로그인 환경이 필요하므로 일반 CI에서 실행하지 않는다.
 
-이번 작업은 공통 저장·공급 기반이다. 자동 Mac 폴더 탐색/버튼, Windows ZIP, Studio의 실제 이름 해석·렌더러 공급, PDF/인쇄·확장 공유, 제품 웹페이지 안내는 각각 #565~#569에 남아 있다. macOS 12 target 컴파일은 실제 macOS 12 실행 검증을 대신하지 않는다.
+이번 작업은 공통 저장·공급 기반이다. Mac 설치 목록·설정 UI는 #565에서 구현했다. Windows ZIP, Studio의 실제 이름 해석·렌더러 공급, PDF/인쇄·확장 공유, 제품 웹페이지 안내는 각각 #566~#569에 남아 있다. macOS 12 target 컴파일은 실제 macOS 12 실행 검증을 대신하지 않는다.
