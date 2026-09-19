@@ -6,7 +6,6 @@ struct InstalledFontSettingsView: View {
     @ObservedObject var library: FontLibrarySettingsModel
     @State private var showingLibrary = false
     @State private var query = ""
-    @State private var showingOptions = false
 
     private var families: [(name: String, records: [InstalledFontRecord])] {
         let records = model.snapshot?.records ?? []
@@ -78,7 +77,7 @@ struct InstalledFontSettingsView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
                         ForEach(families, id: \.name) { group in
-                            DisclosureGroup {
+                            FontSettingsDisclosure {
                                 VStack(alignment: .leading, spacing: 0) {
                                     ForEach(group.records) { record in
                                         HStack {
@@ -95,7 +94,7 @@ struct InstalledFontSettingsView: View {
                                         }.padding(.vertical, 4)
                                     }
                                 }
-                                .padding(.leading, 32)
+                                .padding(.leading, 42)
                                 .padding(.bottom, 8)
                             } label: {
                                 HStack {
@@ -118,7 +117,7 @@ struct InstalledFontSettingsView: View {
                     .padding(.trailing, 24)
                 }
             }
-            DisclosureGroup("사용 설정", isExpanded: $showingOptions) {
+            FontSettingsDisclosure {
                 VStack(alignment: .leading, spacing: 6) {
                     Toggle("문서 연동 시 설치 글꼴 사용", isOn: Binding(
                         get: { model.snapshot?.enabled ?? false },
@@ -127,6 +126,8 @@ struct InstalledFontSettingsView: View {
                     Text("현재는 설정만 저장합니다. 원본을 삭제하거나 비활성화하면 사용할 수 없습니다.")
                         .font(.caption).foregroundStyle(.secondary)
                 }.padding(.top, 6)
+            } label: {
+                Text("사용 설정")
             }
             Divider()
             HStack {
@@ -160,6 +161,39 @@ struct InstalledFontSettingsView: View {
         panel.begin { response in
             let selected = response == .OK ? panel.url : nil
             Task { @MainActor in await model.selectLocation(selected, replacing: id) }
+        }
+    }
+}
+
+// 제목 행 전체를 하나의 버튼으로 처리해 화살표·문구·빈 공간의 동작을 일치시킨다.
+private struct FontSettingsDisclosure<Label: View, Content: View>: View {
+    @State private var expanded = false
+    private let label: Label
+    private let content: Content
+
+    init(@ViewBuilder content: () -> Content, @ViewBuilder label: () -> Label) {
+        self.content = content()
+        self.label = label()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Button { expanded.toggle() } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: expanded ? "chevron.down" : "chevron.right")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 10)
+                        .accessibilityHidden(true)
+                    label
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityValue(expanded ? "펼쳐짐" : "접힘")
+            .accessibilityHint("펼치거나 접으려면 활성화하세요.")
+            if expanded { content }
         }
     }
 }

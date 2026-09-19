@@ -61,3 +61,5 @@ Stage 5는 설정 UI와 공급 DTO까지다. Studio 제품 메시지 handler·�
 사용자의 20개 이상 가상 목록 요청에 따라 기본 probe를 28개 family/84개 face로 확대했다. 실제 설치 없이 검색·스크롤·긴 이름·충돌·권한 부족·미지원 표시를 조작할 수 있다. macOS 12 대상 컴파일·서명 검증 통과 후 창에서 28개 표시를 확인했고, 사용자 조작용으로 열어 두었다. 화면은 `screenshots/demo28.jpeg`, 로그는 `ui-demo28.log`다.
 
 사용자 스크린샷 피드백에 따라 펼친 스타일 목록에 leading 32pt(부모 이름보다 약 20pt 안쪽)와 bottom 8pt를 적용했다. 목록 내용의 trailing 여백을 24pt로 늘려 overlay 스크롤바와 내용이 겹치지 않도록 했다. 부모 구분선 정렬은 유지했다. macOS 12 대상 warnings-as-errors 컴파일·서명 검증 및 실제 펼친 화면 확인을 통과했고, 28개 가상 목록 창을 다시 열어 두었다. 화면: `screenshots/spacing.jpeg`, 로그: `ui-spacing.log`.
+
+사용자 요청으로 펼침 제목 행을 전체 폭의 plain Button으로 전환했다. 화살표 폭 10pt·우측 간격 12pt, 자식 leading 42pt로 부모 이름 대비 20pt 들여쓰기를 유지한다. 제목/스타일/빈 영역을 동일 버튼으로 처리하고 하위 접근 허용 버튼은 독립시켰다. 사용 설정에도 같은 컴포넌트를 적용했다. 접근성 값으로 접힘/펼쳐짐을 제공한다. macOS 12 대상 warnings-as-errors 컴파일·서명 검증 및 실제 행 클릭의 펼침→접힘→펼침을 확인했다. 사용자 조작용 창은 열어 두었다. 화면: `screenshots/row-click.jpeg`, 로그: `ui-row-click.log`.
