@@ -104,13 +104,60 @@ final class InstalledFontCatalogTests: XCTestCase {
         state.locked { $0.records = [] }
         let removed = try await service.refresh()
         XCTAssertNotEqual(removed.generation, initial.generation)
-        XCTAssertEqual(removed.records.first?.failure, .inactive)
+        XCTAssertTrue(removed.records.isEmpty)
+        do { _ = try await service.readResource("face-1", expectedGeneration: removed.generation); XCTFail() }
+        catch { XCTAssertEqual(error as? InstalledFontFailure, .inactive) }
         state.locked { $0.records = [record(revision: 3)] }
         let updated = try await service.refresh()
         XCTAssertNil(updated.records.first?.failure)
         XCTAssertNotEqual(updated.generation, removed.generation)
         do { _ = try await service.readResource("face-1", expectedGeneration: initial.generation); XCTFail() }
         catch { XCTAssertEqual(error as? InstalledFontFailure, .staleGeneration) }
+    }
+
+    func testHistoricalCatalogAtCapacityIsPrunedAndPersistsAcrossRelaunch() async throws {
+        let state = InstalledFontTestState()
+        state.records = (0..<InstalledFontSystem.maximumRecords).map { record(id: "old-\($0)") }
+        let catalog = try service(state)
+        _ = try await catalog.prepare()
+        let old = try await catalog.setEnabled(true)
+        state.locked { $0.records = [record(id: "new-face")] }
+        let current = try await catalog.refresh()
+        XCTAssertEqual(current.records.map(\.id), ["new-face"])
+        XCTAssertNil(current.refreshFailure)
+        XCTAssertNotEqual(current.generation, old.generation)
+        do { _ = try await catalog.readResource("old-0", expectedGeneration: old.generation); XCTFail() }
+        catch { XCTAssertEqual(error as? InstalledFontFailure, .staleGeneration) }
+        do { _ = try await catalog.readResource("old-0", expectedGeneration: current.generation); XCTFail() }
+        catch { XCTAssertEqual(error as? InstalledFontFailure, .inactive) }
+        _ = try await catalog.readResource("new-face", expectedGeneration: current.generation)
+        let saved = try JSONDecoder().decode(InstalledFontSavedState.self, from: XCTUnwrap(state.stored))
+        XCTAssertEqual(saved.records.map(\.id), ["new-face"])
+        let relaunched = try service(state)
+        let restored = try await relaunched.prepare()
+        XCTAssertTrue(restored.enabled)
+        XCTAssertEqual(restored.records.map(\.id), ["new-face"])
+        _ = try await relaunched.readResource("new-face", expectedGeneration: restored.generation)
+    }
+
+    func testOverCapacityCatalogRecoversWhenCurrentScanReturnsWithinLimit() async throws {
+        let state = InstalledFontTestState(); state.records = [record()]
+        let catalog = try service(state)
+        _ = try await catalog.prepare()
+        let initial = try await catalog.setEnabled(true)
+        state.locked { $0.records = (0...InstalledFontSystem.maximumRecords).map { record(id: "large-\($0)") } }
+        do { _ = try await catalog.refresh(); XCTFail() }
+        catch { XCTAssertEqual(error as? InstalledFontFailure, .catalogLimit) }
+        let failed = await catalog.snapshot()
+        XCTAssertEqual(failed.refreshFailure, .catalogLimit)
+        do { _ = try await catalog.readResource("face-1", expectedGeneration: failed.generation); XCTFail() }
+        catch { XCTAssertEqual(error as? InstalledFontFailure, .catalogLimit) }
+        state.locked { $0.records = [record(id: "recovered-face")] }
+        let recovered = try await catalog.refresh()
+        XCTAssertNil(recovered.refreshFailure)
+        XCTAssertEqual(recovered.records.map(\.id), ["recovered-face"])
+        XCTAssertNotEqual(recovered.generation, initial.generation)
+        _ = try await catalog.readResource("recovered-face", expectedGeneration: recovered.generation)
     }
 
     func testOldReadIsRejectedWhenDisabledWhileWorkerRuns() async throws {

@@ -109,8 +109,9 @@ actor InstalledFontCatalogService {
         do {
             let scan = try environment.scan(saved.grants)
             let previousRecords = Dictionary(uniqueKeysWithValues: saved.records.map { ($0.id, $0) })
-            var fresh = previousRecords
-            for id in Array(fresh.keys) { fresh[id]?.failure = .inactive }
+            // 성공한 스캔의 현재 목록만 보존한다. 제거된 원본은 generation 변경과
+            // 알 수 없는 ID의 inactive 응답으로 차단하며 과거 이력을 누적하지 않는다.
+            var fresh: [String: InstalledFontRecord] = [:]
             for var record in scan.records {
                 if let previous = previousRecords[record.id], previous.stamp == record.stamp,
                    record.failure == nil, !retryIDs.contains(record.id),

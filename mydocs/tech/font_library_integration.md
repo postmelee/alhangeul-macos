@@ -39,7 +39,7 @@ let resource = try await service.readResource(id, expectedGeneration: snapshot.g
 - 원본 URL·bookmark·저장 metadata는 native 전용이다. WebView에는 필요한 ID와 사용자 표시용 face 정보만 별도 DTO로 보낸다. native 모델 전체를 메시지로 노출하지 않는다.
 - 원본 부재·비활성·권한 상실·충돌·손상·미지원은 명시적 상태와 정상 fallback으로 연결한다. TTC/가변은 소비자 검증 전 지원 완료로 표시하지 않는다.
 - 권한 재선택은 NSOpenPanel의 선택 URL로 `grantAccess`를 호출한다. stale/resolve 문제는 `grantIssues`로 안내하고 `replacing` ID로 교체한다. 저장된 grant 제거가 OS 세션 권한을 강제 철회한다고 안내하지 않는다.
-- 준비 전 `notPrepared`, refresh 전체 실패, `omittedFaceCount`를 빈 목록/완전 탐색 성공과 구분한다. 조회된 레코드는 비활성 tombstone을 포함할 수 있다.
+- 준비 전 `notPrepared`, refresh 전체 실패, `omittedFaceCount`를 빈 목록/완전 탐색 성공과 구분한다. 성공한 스캔은 현재 감지된 레코드만 보존하고 제거된 원본의 과거 기록을 정리한다. 목록 한도는 과거 누적이 아닌 현재 목록에 적용한다. 제거된 ID의 현재 generation 요청은 inactive, 과거 generation 요청은 staleGeneration으로 거부한다. 스캔 실패 시 이전 기록을 보존하되 공급을 차단하며, 다음 정상 스캔에서 복구한다.
 
 ## 설치 참조 UI·공급 DTO — Stage 5 계약
 
