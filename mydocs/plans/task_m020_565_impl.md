@@ -1,3 +1,62 @@
+# Task M020 #565 구현계획서 — Mac 설치 글꼴 자동 사용 기반
+
+- [수행계획](task_m020_565.md), [이슈 #565](https://github.com/postmelee/alhangeul-macos/issues/565)
+- 브랜치: `local/task565` → `devel`, M020 / v0.2 계열
+- 2026-09-20 범위 변경 합의에 따른 계획 갱신. Stage 1–2 결과 보존, 수정 Stage 3 승인 대기.
+
+## 확인한 재사용 경계
+
+기준은 `rhwp-core.lock` 및 bundled Studio의 v0.8.6 / `f1f9c6ae58344ee9368996d3543f76b9345cf227`이다.
+
+- Studio `src/core/local-fonts.ts`: 저장된 목록, PS/full/family+style 매칭, 모호한 family 처리, 필요 bytes 요청 및 진행 중 요청 병합이 있다. 현재 bytes 로더는 Local Font Access 경로를 요구하므로 WKWebView native 공급이 자동으로 연결된다고 가정하지 않는다. 진행 중 Promise 병합은 영구 bytes 캐시가 아니다.
+- Studio `src/view/canvaskit-renderer.ts`: local font bytes와 typeface 사용 경로가 있다. 변경 알림에 따른 기존 typeface 무효화는 실험에서 확인한다.
+- native `src/renderer/font_paths.rs`: 시스템 폴더를 custom 경로에 넣으면 family당 단일 typeface로 스타일 선택을 잃을 수 있어 기존 시스템 FontMgr 매칭 경계를 유지한다. OS 폴더를 custom font_paths에 일괄 추가하지 않는다.
+
+## Stage 1–2 — 완료 이력
+
+[Stage 1](../working/task_m020_565_stage1.md), [Stage 2](../working/task_m020_565_stage2.md)의 탐색·일시 scope·가져오기 서비스·화면은 유지한다. OS 폴더 파일 탐색은 활성 face 감지를 대신하지 않으며, 복사 성공은 설치 글꼴 자동 사용의 성공이 아니다. 기존 Stage 3 충돌/삭제 UI 계획은 아래 단계로 대체한다.
+
+## Stage 3 — 최소 native→rhwp 연결 실험
+
+제품 UI 확장 전에 독립 probe로 필요한 연결 위치와 한계를 확정한다. 실험 소스·로그는 재현 가능하게 보존하되 제품 완료로 간주하지 않는다.
+
+1. CoreText 활성 descriptor에서 PS/full/family, style/traits, face/축, 실제 원본 identity를 추출하고 폴더 후보 목록과 구분한다. 기존 설치된 사용 가능한 글꼴을 우선하며 사용자 설치 상태를 변경하지 않는다.
+2. 고정 Studio의 기존 이름·스타일 선택을 거쳐 native가 제공한 식별자와 필요한 bytes가 실제 renderer face에 연결되는 최소 adapter를 실험한다. CSS 존재 감지와 CanvasKit 데이터 사용을 구분한다.
+3. 일반/굵은 스타일 요청과 동명/모호한 이름 음성 대조군을 실행한다. 요청 이름, 선택 PS/face/style, 원본 식별, 공급 bytes 지문, 실제 renderer 선택 증거와 문서 화면을 기록한다. 단순 육안 유사성은 통과 기준이 아니다.
+4. cold/warm/새 프로세스에서 요청·실제 읽기 수와 캐시 수명을 측정한다. 최소 설정 복원 실험과 권한 경계를 확인하되 완성된 지속 계층은 Stage 4에 둔다.
+5. 자체 fixture/주입 오류로 원본 부재·권한 실패·손상 시 fallback을 확인한다. 사용자 글꼴 삭제·비활성화는 하지 않는다. 실제 설치 상태 변경 테스트가 필요하면 자체 fixture와 변경 범위를 먼저 명시한다.
+
+산출물: 재현 명령, 선택 근거, 화면, 공급 계약 초안, signed sandbox에서 확인한 범위/미확인 범위. 기존 rhwp 계약으로 불가능하거나 upstream 수정이 필요하면 이유와 최소 변경안을 보고하고 후속 범위를 재승인받는다. 최소 연결 실패를 catalog/UI만 구현하여 우회 완료하지 않는다.
+
+## Stage 4 — 활성 목록·설정·권한 지속
+
+- HostApp 서비스가 CoreText의 활성 face를 기준으로 catalog를 만든다. 경로만으로 식별하지 않고 원본 resource identity/변경 정보, PS/face/style/축과 catalog generation을 함께 다룬다. 같은 PS의 다른 원본·버전을 임의로 덮어쓰지 않는다.
+- 사용 설정과 메타데이터를 지속한다. 정상 접근이 가능한 경로는 불필요한 권한 요청을 하지 않는다. 실제 sandbox에서 필요한 경로에 한해 선택 URL/bookmark의 지속 권한을 검증하며 stale bookmark·resolve 실패·원본 이동/권한 상실을 구분한다.
+- 시작 시 가벼운 재검사, 설치 상태 알림의 병합 처리, 수동 새로고침, 사용 직전 유효성 검사를 조합한다. 변경된 원본은 catalog와 소비자 cache generation을 갱신하고 오래된 in-flight 결과를 적용하지 않는다.
+- bytes는 필요할 때 제한된 크기로 읽고 동시 요청을 병합한다. 전체 bytes 영구 복사나 매번 모든 파일 읽기를 하지 않는다. 읽기 중 교체/손상도 실패로 처리한다.
+- 검증: 새 프로세스 설정 복원·scope 균형·권한 복구·동명 충돌·변경/삭제/비활성·알림 누락·오래된 결과 무시.
+
+## Stage 5 — UI와 공급 계약
+
+- 설정을 ‘Mac에 설치된 글꼴 사용’과 ‘글꼴 목록 새로고침’ 중심으로 구성한다. 기본 사용은 복사/import 동작을 호출하지 않는다.
+- 초기 감지·사용 가능·일부 제한·권한 복구·오류 상태를 안내한다. 설치 글꼴 원본을 삭제하는 관리 기능을 제공하지 않는다. 별도 가져오기 데이터와 설치 참조의 수명을 구분한다.
+- native는 불투명 리소스 ID와 face/style/축·generation 계약을 제공한다. WebView가 임의 경로를 요청하게 하거나 경로/bookmark를 전달하지 않는다.
+- Studio 실제 소비자 연결/매칭/캐시 무효화는 #567, 출력·확장은 #568 소유다. shared App Group의 데이터가 있다는 이유로 외부 원본 권한도 공유된다고 가정하지 않는다.
+- 상태 전이·취소/오래된 응답·설정 지속 테스트와 실제 UI 스크린샷/실행 경로를 제공한다. 시각 확인은 밝은/어두운 모드, 긴 이름, 키보드 동작을 포함한다.
+
+## Stage 6 — 회귀·인계
+
+HostApp 빌드, 글꼴·설정 회귀, signed sandbox 최초 접근과 종료 후 재실행, 변경된 원본의 재검증을 수행한다. 실제 OS별 결과와 macOS 12 빌드만 통과한 결과를 분리한다. 개발 산출물 등록은 표준 smoke 절차로 정리한다.
+
+#567/#568 소비자별 연결·미연결 표와 #569 수용 시나리오를 인계한다. 화면·PDF·인쇄·Quick Look·썸네일이 동일 선택을 사용하는지는 각 소비자가 검증한다. 원본 부재 후 독립 사용은 별도 가져오기 자산에만 적용한다.
+
+## 승인 경계
+
+이번 범위 정리에서는 제품 소스를 변경하지 않는다. 다음 승인 대상은 위 Stage 3 최소 연결 실험이다. 각 단계 결과·보고·커밋 후 다음 단계 승인을 받는다.
+
+<details>
+<summary>이전 범위 계획 — Stage 1–2 이력 보존용, 이후 단계는 위 계획으로 대체</summary>
+
 # Task M020 #565 구현계획서 — Mac 한글 글꼴 자동 탐색 및 일괄 가져오기
 
 - 수행계획: [task_m020_565.md](task_m020_565.md)
@@ -145,3 +204,5 @@ Mac 탐색·권한·UI는 HostApp에 둔다. #564의 저장 형식과 원자적 
 각 단계의 코드·테스트와 `mydocs/working/task_m020_565_stage{N}.md`를 함께 커밋하고 다음 단계 승인을 요청한다. 실패는 해당 단계에서 해결하며, 환경 때문에 남은 미검증은 승인 판단에 명시한다.
 
 모든 단계 후 `mydocs/report/task_m020_565_report.md`에 실제 지원 범위·UI 증거·직접 확인 절차·제약을 정리한다. 최종 보고 승인 후 PR을 게시한다. **이번 구현계획 승인은 Stage 1 착수 승인**이며 이후 단계는 결과 보고 뒤 각각 진행한다.
+
+</details>
