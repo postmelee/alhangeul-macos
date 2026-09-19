@@ -7,6 +7,7 @@ struct AlHangeulMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var updateController = UpdateController()
     @StateObject private var analyticsSettingsModel = AppExecutionAnalyticsSettingsModel()
+    @StateObject private var fontSettingsModel = FontLibrarySettingsModel()
 
     var body: some Scene {
         WindowGroup {
@@ -17,7 +18,7 @@ struct AlHangeulMacApp: App {
         }
 
         Settings {
-            AppExecutionAnalyticsSettingsView(model: analyticsSettingsModel)
+            AppSettingsView(analytics: analyticsSettingsModel, fonts: fontSettingsModel)
         }
     }
 }
