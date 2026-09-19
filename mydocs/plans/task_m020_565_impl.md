@@ -2,7 +2,7 @@
 
 - [수행계획](task_m020_565.md), [이슈 #565](https://github.com/postmelee/alhangeul-macos/issues/565)
 - 브랜치: `local/task565` → `devel`, M020 / v0.2 계열
-- 2026-09-20 범위 변경 합의에 따른 계획 갱신. Stage 1–2 결과 보존. Stage 5는 “진행해줘”로 승인되어 UI·공급 DTO 구현·검증 완료, Stage 6 회귀·sandbox 재실행·소비자 인계 완료, 최종 보고/PR 승인 대기. [단계 보고](../working/task_m020_565_stage6.md).
+- 2026-09-20 범위 변경 합의에 따른 계획 갱신. Stage 1–2 결과 보존. Stage 5는 “진행해줘”로 승인되어 UI·공급 DTO 구현·검증 완료, Stage 6 회귀·sandbox 재실행·소비자 인계 완료, 최종 보고/PR 게시 승인 완료. [단계 보고](../working/task_m020_565_stage6.md).
 
 ## 확인한 재사용 경계
 
@@ -52,7 +52,7 @@ HostApp 빌드, 글꼴·설정 회귀, signed sandbox 최초 접근과 종료 �
 
 ## 승인 경계
 
-Stage 5 자동 사용 UI와 공급 DTO 구현·실제 화면 검증을 완료했다. Stage 6 회귀·signed sandbox 재실행 및 소비자 인계를 완료했다. 다음 승인 대상은 최종 보고/PR 절차다. 각 단계 결과·보고·커밋 후 다음 단계 승인을 받는다.
+Stage 5 자동 사용 UI와 공급 DTO 구현·실제 화면 검증을 완료했다. Stage 6 회귀·signed sandbox 재실행 및 소비자 인계를 완료했다. 최종 보고/PR 게시는 작업지시자의 승인으로 진행한다. 각 단계 결과·보고·커밋 후 다음 단계 승인을 받는다.
 
 <details>
 <summary>이전 범위 계획 — Stage 1–2 이력 보존용, 이후 단계는 위 계획으로 대체</summary>
