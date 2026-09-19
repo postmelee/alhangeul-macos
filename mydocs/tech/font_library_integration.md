@@ -13,6 +13,16 @@ Mac 기본 목표는 **활성 설치 글꼴 자동 사용**으로 변경됐다. 
 - 기반 설계: [글꼴 마이그레이션 설계](font_migration_design.md)
 - 구현: `Sources/Shared/FontLibrary/`, `Sources/HostApp/Services/FontLibraryService.swift`
 
+## 설치 참조 adapter — Stage 3 실험 인계
+
+[최소 연결 실험](../working/task_m020_565_stage3.md)에서 실제 활성 static face 2종의 기존 rhwp 매칭·CanvasKit 적용을 확인했다. 제품 통합 및 signed sandbox는 미완료다.
+
+- catalog 열거와 bytes 요청을 분리한다. 기존 감지의 blob 이름 보강에 전체 파일을 무조건 공급하지 않는다.
+- PS만으로 원본·버전을 식별하지 않는다. native identity/face/style/축·generation을 보존하며 모호한 입력을 임의로 합치지 않는다.
+- 변경 시 renderer의 이미 준비된 local 객체와 실패 캐시까지 무효화한다. 목록만 갱신하면 오래된 렌더 객체가 남는다.
+- 바이트 검증 실패는 공급 전에 거부하고 정상 fallback으로 연결한다. 손상 데이터로 생성된 FontMgr 객체의 존재를 준비 성공으로 취급하지 않는다.
+- 실험용 queryLocalFonts/chrome.storage shim은 제품 API가 아니다. #567 에서 native provenance·메타데이터/alias·opaque ID·필요 bytes 공급 계약을 정식 연결한다.
+
 ## HostApp 입력 계층 — #565 / #566
 
 `AppDelegate.fontLibraryService`는 지연 생성한 `Result<FontLibraryService, Error>`다. 최초 사용 시 App Group 설정·현재 서명·컨테이너를 확인한다. 구성 실패는 임의의 다른 폴더로 우회하지 않는다. 호출자가 실패 원인을 안내하고, 서비스 사용 시작 때 `prepare()`로 검증·복구를 실행한다. 현재 이 서비스는 입력 UI나 앱 시작 시 자동 탐색을 실행하지 않는다.
