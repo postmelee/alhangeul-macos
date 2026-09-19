@@ -23,6 +23,24 @@ Mac 기본 목표는 **활성 설치 글꼴 자동 사용**으로 변경됐다. 
 - 바이트 검증 실패는 공급 전에 거부하고 정상 fallback으로 연결한다. 손상 데이터로 생성된 FontMgr 객체의 존재를 준비 성공으로 취급하지 않는다.
 - 실험용 queryLocalFonts/chrome.storage shim은 제품 API가 아니다. #567 에서 native provenance·메타데이터/alias·opaque ID·필요 bytes 공급 계약을 정식 연결한다.
 
+## 설치 참조 service — Stage 4 계약
+
+[Stage 4 결과](../working/task_m020_565_stage4.md)의 `InstalledFontCatalogService`를 HostApp 단위로 하나 소유한다. 초기 파일 읽기를 포함한 생성은 MainActor 밖에서 수행하고, `prepare()` 이후에만 리소스를 요청한다. UI/renderer 연결은 Stage 5 및 #567/#568 범위다.
+
+```swift
+let service = try await Task.detached { try InstalledFontCatalogService.live() }.value
+let snapshot = try await service.prepare()
+// enabled 설정은 사용자 선택을 반영한다. metadata 접근 가능이 적용 성공은 아니다.
+let resource = try await service.readResource(id, expectedGeneration: snapshot.generation)
+```
+
+- `updates()`의 최신 generation이 바뀌면 기존 renderer 객체·측정·실패 캐시를 무효화하고 필요한 글꼴만 다시 요청한다. `staleGeneration` 결과는 재조회하며 오래된 bytes를 적용하지 않는다.
+- `busy`는 동시 요청 한도에 따른 일시 상태다. caller는 최대 2개로 요청을 제한하거나 재시도하며 이를 글꼴 손상/영구 미지원으로 저장하지 않는다. 서비스는 완료된 bytes를 영구 보관하지 않는다.
+- 원본 URL·bookmark·저장 metadata는 native 전용이다. WebView에는 필요한 ID와 사용자 표시용 face 정보만 별도 DTO로 보낸다. native 모델 전체를 메시지로 노출하지 않는다.
+- 원본 부재·비활성·권한 상실·충돌·손상·미지원은 명시적 상태와 정상 fallback으로 연결한다. TTC/가변은 소비자 검증 전 지원 완료로 표시하지 않는다.
+- 권한 재선택은 NSOpenPanel의 선택 URL로 `grantAccess`를 호출한다. stale/resolve 문제는 `grantIssues`로 안내하고 `replacing` ID로 교체한다. 저장된 grant 제거가 OS 세션 권한을 강제 철회한다고 안내하지 않는다.
+- 준비 전 `notPrepared`, refresh 전체 실패, `omittedFaceCount`를 빈 목록/완전 탐색 성공과 구분한다. 조회된 레코드는 비활성 tombstone을 포함할 수 있다.
+
 ## HostApp 입력 계층 — #565 / #566
 
 `AppDelegate.fontLibraryService`는 지연 생성한 `Result<FontLibraryService, Error>`다. 최초 사용 시 App Group 설정·현재 서명·컨테이너를 확인한다. 구성 실패는 임의의 다른 폴더로 우회하지 않는다. 호출자가 실패 원인을 안내하고, 서비스 사용 시작 때 `prepare()`로 검증·복구를 실행한다. 현재 이 서비스는 입력 UI나 앱 시작 시 자동 탐색을 실행하지 않는다.
