@@ -79,20 +79,24 @@ struct InstalledFontSettingsView: View {
                     LazyVStack(alignment: .leading, spacing: 0) {
                         ForEach(families, id: \.name) { group in
                             DisclosureGroup {
-                                ForEach(group.records) { record in
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 3) {
-                                            Text(record.fullName).lineLimit(2).help(record.fullName)
-                                            if let failure = limitation(record) {
-                                                Text(failure.displayMessage).font(.caption).foregroundStyle(.secondary)
+                                VStack(alignment: .leading, spacing: 0) {
+                                    ForEach(group.records) { record in
+                                        HStack {
+                                            VStack(alignment: .leading, spacing: 3) {
+                                                Text(record.fullName).lineLimit(2).help(record.fullName)
+                                                if let failure = limitation(record) {
+                                                    Text(failure.displayMessage).font(.caption).foregroundStyle(.secondary)
+                                                }
                                             }
-                                        }
-                                        Spacer()
-                                        if record.failure == .permissionDenied {
-                                            Button("접근 허용…") { chooseLocation(for: record) }.disabled(model.busy)
-                                        }
-                                    }.padding(.vertical, 4)
+                                            Spacer()
+                                            if record.failure == .permissionDenied {
+                                                Button("접근 허용…") { chooseLocation(for: record) }.disabled(model.busy)
+                                            }
+                                        }.padding(.vertical, 4)
+                                    }
                                 }
+                                .padding(.leading, 32)
+                                .padding(.bottom, 8)
                             } label: {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
@@ -109,7 +113,9 @@ struct InstalledFontSettingsView: View {
                             }
                             Divider()
                         }
-                    }.padding(.horizontal, 8)
+                    }
+                    .padding(.leading, 8)
+                    .padding(.trailing, 24)
                 }
             }
             DisclosureGroup("사용 설정", isExpanded: $showingOptions) {

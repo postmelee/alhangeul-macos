@@ -59,3 +59,5 @@ Stage 5는 설정 UI와 공급 DTO까지다. Studio 제품 메시지 handler·�
 최신 화면은 `build.noindex/task565-stage5/screenshots/refined-search.jpeg`다. 사용자 조작을 위해 실제 목록 테스트 창을 열어 둔다. 제품 앱 설정 및 글꼴 원본은 변경하지 않았으며 문서 렌더러 연결과 Stage 6은 여전히 후속 범위다.
 
 사용자의 20개 이상 가상 목록 요청에 따라 기본 probe를 28개 family/84개 face로 확대했다. 실제 설치 없이 검색·스크롤·긴 이름·충돌·권한 부족·미지원 표시를 조작할 수 있다. macOS 12 대상 컴파일·서명 검증 통과 후 창에서 28개 표시를 확인했고, 사용자 조작용으로 열어 두었다. 화면은 `screenshots/demo28.jpeg`, 로그는 `ui-demo28.log`다.
+
+사용자 스크린샷 피드백에 따라 펼친 스타일 목록에 leading 32pt(부모 이름보다 약 20pt 안쪽)와 bottom 8pt를 적용했다. 목록 내용의 trailing 여백을 24pt로 늘려 overlay 스크롤바와 내용이 겹치지 않도록 했다. 부모 구분선 정렬은 유지했다. macOS 12 대상 warnings-as-errors 컴파일·서명 검증 및 실제 펼친 화면 확인을 통과했고, 28개 가상 목록 창을 다시 열어 두었다. 화면: `screenshots/spacing.jpeg`, 로그: `ui-spacing.log`.
