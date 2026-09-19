@@ -51,6 +51,29 @@ let resource = try await service.readResource(id, expectedGeneration: snapshot.g
 
 기본 UI는 원본 삭제/비활성 시 사용할 수 없음을 안내한다. 별도 복사본은 ‘가져온 글꼴 보관함’으로 분리했다. 현재 목록 확인·설정 저장까지 지원하고 문서 표시·출력 연결은 준비 중임을 명시한다. App Group 파일 존재를 extension 원본 접근 권한으로 해석하지 않는다.
 
+## Stage 6 소비자 인계와 수용 시나리오
+
+| 소비자 | 현재 연결 | 후속 완료 조건 |
+|--------|-----------|----------------|
+| HostApp 설정 | 활성 목록·검색·family/스타일 펼치기·설정 지속·권한 복구 UI 연결 | signed 제품 UI의 신규 권한 제출·다양한 OS 수용은 별도 검증 |
+| Studio (#567) | native DTO 및 필요 bytes API 제공, 제품 JS handler 미연결 | 같은 catalog 인스턴스 사용, 신뢰한 frame/message 제한, ID+generation 조회, 기존 이름/스타일 매칭 연결 |
+| CanvasKit (#567) | Stage 3 독립 실험만 통과 | 실제 HWP/HWPX에서 Regular/Bold 선택 증거, generation 변경 시 typeface·측정·실패 캐시 무효화 |
+| PDF·인쇄·native (#568) | 설치 참조 service 미연결 | 화면과 출력의 동일 face/버전 선택 및 출력 중 원본 변경 시 처리 검증 |
+| Quick Look·Thumbnail (#568) | 설치 참조·외부 원본 권한 미연결 | 프로세스별 권한·접근 경계 확정, App Group만으로 접근 가능하다고 가정하지 않음 |
+| Windows/외부 파일 (#566) | 복사 보관함 기반 보존, Windows ZIP UI 미구현 | ZIP 입력 검증·사용자 선택·관리 복사본 수명 연결 |
+| 수용·웹 안내 (#569) | 사용자 설명에 필요한 경계 확정 | 아래 실제 문서 시나리오 완료 후 지원 범위와 단계별 안내 게시 |
+
+#569는 다음을 실제 문서에서 확인한다.
+
+1. 설치 글꼴이 있는 Mac에서 별도 파일 복사 없이 감지·정확한 스타일 적용, 새 프로세스에서도 설정 복원.
+2. 권한 없는 원본은 해당 글꼴의 접근 허용으로 복구. 선택 취소 시 목록·설정 보존. stale 권한은 재선택으로 복구.
+3. 글꼴 갱신/비활성/삭제 또는 문서 전환 중 이전 요청이 끝나도 오래된 face를 적용하지 않음. 동명 다른 버전은 임의 선택하지 않음.
+4. 원본 읽기·검증 실패 시 정상 fallback 및 조치 안내. 목록에 존재한다는 사실만으로 화면 적용 성공을 판단하지 않음.
+5. 실제 화면·PDF·인쇄·Quick Look·썸네일에서 요청 PS/style, 선택된 face, bytes 식별 증거를 비교. 미연결 소비자를 완료로 합산하지 않음.
+6. 한컴 삭제 후 원본 글꼴도 없어지면 계속 사용을 보장하지 않음. 독립 보관은 별도 가져오기 복사본에만 해당함을 웹 안내에 반영.
+
+Stage 6의 자동 회귀와 독립 sandbox probe는 제품 전체 소비자 수용을 대신하지 않는다. 최소 OS 실제 실행, 실제 한컴 편집기 설치본, 볼륨 이동 및 OS에서의 영구 활성화/비활성화 조작은 별도 수용 환경이 필요하다.
+
 ## HostApp 입력 계층 — #565 / #566
 
 `AppDelegate.fontLibraryService`는 지연 생성한 `Result<FontLibraryService, Error>`다. 최초 사용 시 App Group 설정·현재 서명·컨테이너를 확인한다. 구성 실패는 임의의 다른 폴더로 우회하지 않는다. 호출자가 실패 원인을 안내하고, 서비스 사용 시작 때 `prepare()`로 검증·복구를 실행한다. 현재 이 서비스는 입력 UI나 앱 시작 시 자동 탐색을 실행하지 않는다.
@@ -119,4 +142,4 @@ lease는 PID/시간 추정 없이 파일 잠금으로 생존을 판정한다. �
 
 `scripts/test-font-library.sh`는 공개 배포 가능한 자체 fixture의 해시, App Group 설정, parser/store/process/snapshot/HostApp 서비스 XCTest를 검증한다. PR CI의 macOS validation에서 동일 스크립트를 호출한다. 로컬 서명 검증은 `probe-font-library-container.sh`와 `probe-font-library-host.py`를 사용하며 인증서/로그인 환경이 필요하므로 일반 CI에서 실행하지 않는다.
 
-이번 작업은 공통 저장·공급 기반이다. 자동 Mac 폴더 탐색/버튼, Windows ZIP, Studio의 실제 이름 해석·렌더러 공급, PDF/인쇄·확장 공유, 제품 웹페이지 안내는 각각 #565~#569에 남아 있다. macOS 12 target 컴파일은 실제 macOS 12 실행 검증을 대신하지 않는다.
+이번 작업은 공통 저장·공급 기반이다. Mac 설치 목록·설정 UI는 #565에서 구현했다. Windows ZIP, Studio의 실제 이름 해석·렌더러 공급, PDF/인쇄·확장 공유, 제품 웹페이지 안내는 각각 #566~#569에 남아 있다. macOS 12 target 컴파일은 실제 macOS 12 실행 검증을 대신하지 않는다.
