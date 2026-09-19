@@ -57,3 +57,5 @@ Stage 5는 설정 UI와 공급 DTO까지다. Studio 제품 메시지 handler·�
 실제 Mac 목록을 격리 저장소로 확인하는 `--live` probe를 추가했다. 실제 목록 232개 family에서 검색·펼치기·스크롤을 확인했다. List의 macOS 런타임 경고를 확인하여 ScrollView/LazyVStack으로 변경 후 동일 동작을 재검증했다. macOS 12 대상 warnings-as-errors 컴파일·ad-hoc 서명 검증, 공용 Swift 의존 및 diff 검사를 통과했다. 이번 보완은 UI와 probe 변경으로 기존 89개 service 테스트 결과와 구분한다.
 
 최신 화면은 `build.noindex/task565-stage5/screenshots/refined-search.jpeg`다. 사용자 조작을 위해 실제 목록 테스트 창을 열어 둔다. 제품 앱 설정 및 글꼴 원본은 변경하지 않았으며 문서 렌더러 연결과 Stage 6은 여전히 후속 범위다.
+
+사용자의 20개 이상 가상 목록 요청에 따라 기본 probe를 28개 family/84개 face로 확대했다. 실제 설치 없이 검색·스크롤·긴 이름·충돌·권한 부족·미지원 표시를 조작할 수 있다. macOS 12 대상 컴파일·서명 검증 통과 후 창에서 28개 표시를 확인했고, 사용자 조작용으로 열어 두었다. 화면은 `screenshots/demo28.jpeg`, 로그는 `ui-demo28.log`다.
