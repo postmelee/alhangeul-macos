@@ -62,6 +62,11 @@ struct RhwpStudioWebView: NSViewRepresentable {
         self.onDocumentSaved = onDocumentSaved
     }
 
+    static func dismantleNSView(_ webView: WKWebView, coordinator: Coordinator) {
+        coordinator.fontMessageHandler.reset()
+        webView.configuration.userContentController.removeScriptMessageHandler(forName: StudioFontMessageHandler.name, contentWorld: .page)
+    }
+
     func makeCoordinator() -> Coordinator {
         Coordinator()
     }
@@ -177,6 +182,7 @@ extension RhwpStudioWebView {
             try DocumentSavePanel.write(data:$0, to:$1, allowOverwrite:$2)
         }
         private var pdfExportState: RhwpStudioPDFExportState = .idle
+        let fontMessageHandler = StudioFontMessageHandler()
         private var nextPDFExportRequestID = 0
         private var isPDFPreparing = false
         var choosePDFDestination: (String, NSWindow?) async -> URL? = {
@@ -202,6 +208,7 @@ extension RhwpStudioWebView {
 
         func makeWebView() -> WKWebView {
             let configuration = WKWebViewConfiguration()
+            configuration.userContentController.addScriptMessageHandler(fontMessageHandler, contentWorld: .page, name: StudioFontMessageHandler.name)
             configuration.userContentController.add(
                 self,
                 name: RhwpStudioHostBridgeScript.messageHandlerName
@@ -220,6 +227,7 @@ extension RhwpStudioWebView {
 
             let webView = RhwpStudioNativeCommandWebView(frame: .zero, configuration: configuration)
             commandWebView = webView
+            fontMessageHandler.webView = webView
             webView.nativeCommandHandler = { [weak self, weak webView] command in
                 guard let self, let webView else {
                     return false
@@ -274,6 +282,7 @@ extension RhwpStudioWebView {
             documentProvider.setDocument(document)
             editorSession = nil
             editorLoadToken = UUID().uuidString
+            fontMessageHandler.reset()
             installUserScripts(in: webView, loadID: loadID)
 
             htmlDownload?.cancel()
@@ -340,6 +349,7 @@ extension RhwpStudioWebView {
                 documentProvider.setDocument(nil)
             }
             if let previous, previous.snapshot.documentEpoch != snapshot.documentEpoch {
+                fontMessageHandler.begin(loadToken: editorLoadToken)
                 htmlDownload?.cancel()
                 pdfExportState.invalidatePendingRequestForDocumentChange()
                 if let activeSaveEpoch, activeSaveEpoch != snapshot.documentEpoch {
@@ -348,6 +358,10 @@ extension RhwpStudioWebView {
                 }
             }
             onEditorSessionChange(session)
+        }
+
+        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+            fontMessageHandler.begin(loadToken: editorLoadToken)
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -530,6 +544,7 @@ extension RhwpStudioWebView {
 
         private func reportFailure(_ failure: RhwpStudioWebViewFailure) {
             if failure.isFatal {
+                fontMessageHandler.reset()
                 htmlDownload?.cancel()
                 activeSaveID = nil
                 pendingSaveRequest = nil

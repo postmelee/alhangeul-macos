@@ -3,8 +3,8 @@
 - 수행계획: [task_m020_567.md](task_m020_567.md)
 - 이슈: [#567](https://github.com/postmelee/alhangeul-macos/issues/567), M020 / v0.2
 - 브랜치: `local/task567`, 기준 `devel` / `0fa65fa`
-- 상태: 2026-09-20 구현계획 승인. Stage 1 계약 확정 완료, Stage 2 승인 대기. [계약](../tech/task_m020_567_adapter.md) · [단계 보고](../working/task_m020_567_stage1.md).
-- 제품 소스와 upstream pin은 변경하지 않았다.
+- 상태: 2026-09-20 구현계획 승인. Stage 2 native 공급 구현·검증 완료, Stage 3 승인 대기. [계약](../tech/task_m020_567_adapter.md) · [단계 보고](../working/task_m020_567_stage1.md).
+- Stage 2 native 소스와 테스트를 변경했다. upstream pin과 Studio bundle은 유지했다.
 
 ## 1. 확인한 출발점
 
@@ -86,4 +86,4 @@ OS 지속 설치는 아직 하지 않았다. 초기에는 별도 파일 공급/�
 
 ## 6. 승인 요청
 
-구현계획 승인에 따라 Stage 1의 adapter·캐시 계약을 확정했다. 다음 승인 대상은 Stage 2 native 공급 구현이며, Stage 3은 정식 upstream 확장·pin/sync를 선행 조건으로 갖는다. 제품 소스 구현은 아직 시작하지 않았다.
+구현계획 승인에 따라 Stage 1의 adapter·캐시 계약을 확정했다. Stage 2 native 공급 구현·검증을 완료했다. 다음 Stage 3은 정식 upstream 확장·pin/sync를 선행 조건으로 갖는다. [Stage 2 보고](../working/task_m020_567_stage2.md)를 참고한다.

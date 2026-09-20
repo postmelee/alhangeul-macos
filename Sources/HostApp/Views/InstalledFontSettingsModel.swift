@@ -12,7 +12,7 @@ final class InstalledFontSettingsModel: ObservableObject {
     private var observation: Task<Void, Never>?
 
     init(makeService: @escaping @Sendable () async throws -> InstalledFontCatalogService = {
-        try await Task.detached { try InstalledFontCatalogService.live() }.value
+        try await InstalledFontServiceProvider.shared.service()
     }) {
         self.makeService = makeService
     }

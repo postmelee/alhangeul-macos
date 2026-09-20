@@ -86,3 +86,16 @@ Typeface와 실패·pending 캐시를 함께 버린다. 이름/count가 같아�
 ## 단계 경계
 
 Stage 2는 native 전용 공유 환경·catalog/transfer bridge·관리 변경 구독·수명 테스트를 구현한다. 제품 Studio에 임시 shim을 주입하지 않는다. Stage 3 진입 전 upstream 변경 범위와 정식 pin/sync 대상을 승인받는다. 외부 PR 게시·core 변경·배포는 Stage 1 완료 승인에 포함시키지 않는다.
+
+
+## Stage 2 구현 인계
+
+`StudioFontMessageHandler`는 page content world의 `alhangeulFonts` 응답형 handler다. 모든 요청에 `version: 1`, `op`, 현재 `window.__alhangeulEditorLoad.token`의 `loadToken`을 넣는다. handshake 응답의 session/revision을 이후 요청에 넣는다. catalog는 offset(기본 0)을 받으며 nextOffset/total로 순회한다. openFace에는 catalog face ID를, readChunk/closeFace에는 openFace가 발급한 transfer ID를 넣는다. cancel은 진행 중 face ID 또는 이미 발급된 transfer ID를 받는다. offset/length는 정수이며 추가 필드·bool 정수는 거부한다.
+
+최초 handshake에 공급 목록 준비가 필요하다. 준비 중 native generation이 변하면 staleSession을 반환할 수 있으므로 소비자는 최신 handshake부터 재시도한다. 설치/관리 변경 시 기존 세션을 폐기하고 `alhangeul-fonts-changed` DOM 이벤트를 알린다. 실제 소비자 구독과 busy/stale의 제한된 재시도는 Stage 3에서 구현한다. 제품에는 queryLocalFonts shim을 추가하지 않았다.
+
+현재 설치 metadata의 weight는 nil이며 traits와 style을 공급한다. 실제 읽은 face의 정확한 weight·PS·SFNT index·SHA256은 openFace 응답에 포함한다. 관리 자산은 저장한 weight와 이름 aliases를 공급하며 미해결 충돌 face는 limitation=conflict로 표시한다. 설치 traits는 CoreText, 관리 traits는 OS/2 selectionFlags이므로 source와 함께 해석해야 한다. Stage 3의 공통 style 모델 정규화에서 둘을 같은 비트 집합으로 취급하지 않는다.
+
+관리 snapshot lease는 문서 세션의 catalog가 소유한다. closeFace/만료는 transfer bytes와 앱 전체 slot을 해제하고, lease는 revision/문서 전환·종료에서 해제한다. 취소된 읽기는 실제 I/O 반환까지 slot을 유지해 취소 반복으로 앱 전체 읽기 한도를 우회하지 못한다. 해제 이후 진행 중 읽기는 정상 취소/실패로 끝나며 이전 bytes를 새 session에 게시하지 않는다.
+
+현 구현은 native 공급 경계이며 실제 renderer 적용·캐시·최소 OS/signed sandbox 검증을 완료한 것은 아니다. [Stage 2 검증 보고](../working/task_m020_567_stage2.md)에 해당 범위와 증거를 구분했다.
