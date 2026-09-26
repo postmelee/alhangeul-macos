@@ -1,0 +1,11 @@
+[INFO]: 🎯  Checking for the Wasm target...
+[INFO]: 🌀  Compiling to Wasm...
+   Compiling rhwp v0.8.6 (/Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/pr7405-validation/upstream)
+   Compiling rhwp-password-crypto v0.1.0 (/Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/pr7405-validation/upstream/crates/rhwp-password-crypto)
+   Compiling rhwp-contracts v0.1.0 (/Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/pr7405-validation/upstream/crates/rhwp-contracts)
+   Compiling rhwp-ooxml-chart v0.1.0 (/Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/pr7405-validation/upstream/crates/rhwp-ooxml-chart)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 52.55s
+[INFO]: ⬇️  Installing wasm-bindgen...
+[WARN  wasm_pack::install] could not download pre-built `wasm-bindgen`: no prebuilt wasm-bindgen binaries are available for this platform: Unrecognized target!. Falling back to `cargo install`.
+[INFO]: ✨   Done in 55.77s
+[INFO]: 📦   Your wasm pkg is ready to publish at /Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/pr7405-validation/upstream/pkg.

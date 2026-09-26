@@ -1,8 +1,20 @@
 # Studio native 글꼴 adapter 계약 — #567 Stage 1
 
-이 문서는 구현할 계약이다. 현재 제품 연결 완료를 의미하지 않는다. 기준은 core/Studio `v0.8.6`, commit `f1f9c6ae58344ee9368996d3543f76b9345cf227`이며 [구현계획](../plans/task_m020_567_impl.md)을 따른다.
+이 문서는 구현할 계약이다. 현재 제품 연결 완료를 의미하지 않는다. 제품 pin은 core/Studio `v0.8.6`, commit `f1f9c6ae58344ee9368996d3543f76b9345cf227`이며 [구현계획](../plans/task_m020_567_impl.md)을 따른다.
 
-## 소스 추적과 변경 필요성
+## 2026-09-26 공개 API 확정과 적용 순서
+
+upstream [#7405](https://github.com/edwardkim/rhwp/pull/7405)는 `aeb9f489e1d5e297c1e98cf1ca8ff84532270aca`로 병합되었다. 아래 Stage 1의 v0.8.6 조사·제안은 당시 근거로 보존하며, API 이름과 지원 범위는 이 절의 확정 계약이 우선한다. [병합분 대조·이슈 검토](task_m020_567_replan.md)를 참고한다.
+
+- 같은 realm의 `window.rhwpStudio.fonts.setProvider(provider)` / `getState()` / `setProvider(null)`을 소비한다.
+- provider는 `getSnapshot(signal) -> {revision, faces}`, `readFace(id, revision, signal) -> {bytes: ArrayBuffer, faceIndex?}`, `subscribe(onChange) -> unsubscribe`를 제공한다. 공개 `resolve` 함수는 요구하지 않으며 기존 upstream matcher가 선택한다.
+- face는 `id/family/fullName/postscriptName/style`, 선택 `aliases/weight/slant`를 사용한다. native 출처별 metadata·충돌 정책을 정규화하며 upstream API에 경로·bookmark를 넘기지 않는다.
+- `setProvider` 완료는 목록 준비만 의미한다. 화면 paint 완료나 별도 PDF WebView 글꼴 준비 완료 신호로 사용하지 않는다.
+- 지원 화면은 Canvas2D/CanvasKit의 textRun·charOverlap 경로다. 범용 CSS/SVG DOM·toolbar 목록·별도 출력 환경으로 자동 연결된다고 가정하지 않는다. `getPageSvg`는 원래 이름을 보존하는 portable SVG다.
+- 출력 snapshot·출력 WebView bytes 공급·준비 대기와 프로세스별 권한은 #568의 호스트 책임이다. 현재 증거로 추가 upstream 출력 API를 필수 선행 조건으로 두지 않는다.
+- Stage 3.1은 어댑터·수명 계약을 먼저 구현·검증한다. 제품 pin/sync와 UI 지원 안내 변경은 정식 릴리즈 후 Stage 3.2 이상에서 수행한다. TTC upstream 시험 성공만으로 native 서비스의 TTC 차단을 해제하지 않는다.
+
+## Stage 1 소스 추적과 변경 필요성 — v0.8.6 조사 이력
 
 아래 upstream 경로는 고정 commit의 `rhwp-studio/src/` 기준이다.
 
@@ -85,7 +97,7 @@ Typeface와 실패·pending 캐시를 함께 버린다. 이름/count가 같아�
 
 ## 단계 경계
 
-Stage 2는 native 전용 공유 환경·catalog/transfer bridge·관리 변경 구독·수명 테스트를 구현한다. 제품 Studio에 임시 shim을 주입하지 않는다. Stage 3 진입 전 upstream 변경 범위와 정식 pin/sync 대상을 승인받는다. 외부 PR 게시·core 변경·배포는 Stage 1 완료 승인에 포함시키지 않는다.
+Stage 2는 native 전용 공유 환경·catalog/transfer bridge·관리 변경 구독·수명 테스트를 구현했다. 제품 Studio에 임시 shim을 주입하지 않는다. 2026-09-26 보정에 따라 Stage 3.1은 병합 API를 기준으로 준비하고 Stage 3.2 진입 전 정식 릴리즈 pin/sync 대상을 확정한다. 외부 PR 게시·core 변경·배포는 Stage 1 완료 승인에 포함시키지 않는다.
 
 
 ## Stage 2 구현 인계
@@ -99,3 +111,16 @@ Stage 2는 native 전용 공유 환경·catalog/transfer bridge·관리 변경 �
 관리 snapshot lease는 문서 세션의 catalog가 소유한다. closeFace/만료는 transfer bytes와 앱 전체 slot을 해제하고, lease는 revision/문서 전환·종료에서 해제한다. 취소된 읽기는 실제 I/O 반환까지 slot을 유지해 취소 반복으로 앱 전체 읽기 한도를 우회하지 못한다. 해제 이후 진행 중 읽기는 정상 취소/실패로 끝나며 이전 bytes를 새 session에 게시하지 않는다.
 
 현 구현은 native 공급 경계이며 실제 renderer 적용·캐시·최소 OS/signed sandbox 검증을 완료한 것은 아니다. [Stage 2 검증 보고](../working/task_m020_567_stage2.md)에 해당 범위와 증거를 구분했다.
+
+## Stage 3.1 앱 어댑터 인계
+
+`StudioFontProviderScript.source`는 같은 page realm에서 평가하는 factory 표현식이다. 제품 coordinator에는 아직 주입하지 않는다. factory 입력은 `postMessage(body)`, `getLoadToken()`, `getFontsAPI()`, `events`이며 반환값은 `provider/connect/refresh/dispose`다. `connect()`는 API 부재 시 `{supported:false}`만 반환하며 native 열거를 시작하지 않는다. 연결 성공은 목록 준비만 뜻한다.
+
+- installed의 알려진 static style만 weight로 정규화하며 실제 openFace 응답의 PS/weight와 일치해야 bytes를 반환한다. 알 수 없는 style(예: Book), 빈 style, 모순된 Regular/bold trait는 제외한다. 지역화된 style과 더 넓은 metadata 지원은 별도 실제 자산 근거가 필요하다.
+- managed의 정확한 weight와 OS/2 italic/oblique bit를 사용한다. 선택된 managed와 같은 이름/스타일의 installed를 제외하고, managed 충돌·미지원·잘못된 metadata는 일치하는 이름 집합을 보수적으로 차단한다. 이는 일부 sibling 사용을 제한할 수 있지만 다른 버전의 조용한 대체를 막는다.
+- 한 문서에서 동시 transfer 2개, 대기 64개, readChunk 256 KiB, face 64 MiB 한도다. 앱 전체 slot 2개는 기존 native budget이 최종 통제한다. 같은 face의 in-flight 병합은 upstream HostFontSource가 담당한다.
+- busy는 100/250/500ms 후 최대 3회 재시도한다. 소진된 busy 또는 stale 오류는 1초 후 어댑터 세대를 한 번 갱신해 upstream 실패 캐시에서 회복할 기회를 준다. 같은 복구 주기의 반복 실패는 자동 재시도하지 않으며 실제 변경 이벤트/명시 refresh가 다음 복구를 연다.
+- 문서 token 교체 시 소유 coordinator가 native `begin` 이후 `refresh()`를 호출해야 한다. 종료 시 `dispose()`와 native `reset`을 모두 수행한다. native token은 captured credentials로만 전송하며 이전 revision의 응답은 게시하지 않는다.
+- 취소는 호출자에게 즉시 전달하되 취소를 무시한 openFace가 늦게 transfer를 발급하면 closeFace로 회수한다. 실제 native 반환/정리 전에는 local active slot도 해제하지 않는다. 관리 snapshot lease는 기존 native session이 소유하므로 JS dispose만으로 전체 lease가 해제된다고 간주하지 않는다.
+
+[Stage 3 보고](../working/task_m020_567_stage3.md)의 격리 실행은 IPC·bytes 계약 증거다. 정식 Studio main 진입, 실제 renderer·toolbar, signed sandbox 및 OS 설치 권한의 제품 수용 증거가 아니다.

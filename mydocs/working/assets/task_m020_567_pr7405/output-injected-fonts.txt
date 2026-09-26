@@ -1,0 +1,5 @@
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+AAAAAB+GowunBatang-Regular           TrueType          MacRoman         yes yes no       6  0
+AAAAAC+GowunBatang-Regular           TrueType          WinAnsi          yes yes yes      7  0
+AAAAAE+GowunBatang-Bold              TrueType          WinAnsi          yes yes yes      9  0

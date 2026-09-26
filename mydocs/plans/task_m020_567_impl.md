@@ -3,7 +3,7 @@
 - 수행계획: [task_m020_567.md](task_m020_567.md)
 - 이슈: [#567](https://github.com/postmelee/alhangeul-macos/issues/567), M020 / v0.2
 - 브랜치: `local/task567`, 기준 `devel` / `0fa65fa`
-- 상태: 2026-09-20 구현계획 승인. Stage 2 native 공급 구현·검증 완료, Stage 3 승인 대기. [계약](../tech/task_m020_567_adapter.md) · [단계 보고](../working/task_m020_567_stage1.md).
+- 상태: Stage 2 native 공급과 Stage 3.1 어댑터 준비·검증 완료. [Stage 3 보고](../working/task_m020_567_stage3.md). Stage 3.2는 정식 릴리즈·단계 승인 후 수행한다. [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
 - Stage 2 native 소스와 테스트를 변경했다. upstream pin과 Studio bundle은 유지했다.
 
 ## 1. 확인한 출발점
@@ -45,11 +45,22 @@ TTC/가변은 현재 native 제한을 유지한다. 정확한 face/axes가 검�
 |------|--------|-----------|------|
 | 1 | pinned 소스의 감지→매칭→각 renderer→저장 경로, adapter API·우선순위·세대/캐시 계약, upstream 필요 여부와 변경 경계 | 소스 위치 근거, 고운바탕을 사용하는 실제 문서 검증 시나리오, 미결정 사항 해소 | `Task #567 Stage 1: Studio 글꼴 adapter와 캐시 계약 확정` |
 | 2 | 단일 service 소유권, session 범위 catalog/bytes bridge, 관리 snapshot 수명 및 취소 | 비신뢰 frame/origin, 잘못된 ID·세대, 종료 후 응답, 요청 한도, busy 재시도, lease 해제·오류 경로 | `Task #567 Stage 2: Studio native 글꼴 공급 연결` |
-| 3 | 정식 adapter 및 기존 매칭 연결, CSS/SVG/Canvas2D·CanvasKit 실제 face 적용 | 한글/영문 이름·Regular/Bold 선택과 bytes hash, 실제 HWP/HWPX 표시·편집, alias 저장 미유출 | `Task #567 Stage 3: Studio 글꼴 매칭과 렌더러 적용` |
+| 3.1 | 병합 API용 앱 adapter, metadata 정규화, IPC queue·취소·재연결 | metadata만 열거, 필요 face만 읽기, source별 weight/slant, 충돌 제외, busy/stale·늦은 응답·API 부재 검증. 제품 pin 유지 | `Task #567 [Stage 3.1]: Studio 공개 API용 글꼴 어댑터 준비` |
+| 3.2 | 정식 릴리즈 반영 후 adapter를 제품 Studio에 연결 | core/Studio provenance 일치, 실제 이름·Regular/Bold·bytes hash, HWP/HWPX 표시·편집·저장, alias 미유출 | `Task #567 [Stage 3.2]: 정식 Studio 글꼴 API 연결` |
 | 4 | 설치/관리 변경 전파, Typeface·측정·실패 캐시 갱신, 자동 준비와 설정 안내 | 열린 문서에서 삭제·비활성·갱신·권한 상실·설정 변경·복구, 빠른 문서 전환, 실제 UI 확인 | `Task #567 Stage 4: 글꼴 변경 반영과 자동 사용 흐름 구현` |
 | 5 | 실제 문서 수용·signed sandbox 재실행·성능 회귀 및 #568/#569 인계 | 새 프로세스·cold/warm 읽기 수·동시 병합, 저장/재열기, 원본 부재/관리 복사본 대조, 관련 빌드·테스트 | `Task #567 Stage 5: Studio 글꼴 통합 검증과 소비자 인계` |
 
-각 단계는 해당 소스와 `mydocs/working/task_m020_567_stage{N}.md`를 함께 커밋하고 승인을 받은 후 다음 단계로 진행한다. Stage 1에서 upstream 소스 변경이 필요하다고 확정되면 정식 변경·pin/sync를 선행 의존으로 제시한다. 외부 저장소 게시·PR 생성·pin 변경은 확정 범위의 승인 뒤 진행하며 minified 산출물 직접 편집으로 우회하지 않는다.
+각 단계는 해당 소스와 단계 보고서를 함께 커밋하고 승인을 받은 후 다음 단계로 진행한다. Stage 3.1/3.2는 Stage 3의 하위 단계로 추적하며 Stage 4/5의 수용 범위를 줄이지 않는다. upstream 확장은 병합되었으며 정식 릴리즈 pin/sync는 Stage 3.2의 선행 조건이다. 외부 저장소 게시·PR 생성·pin 변경은 확정 범위의 승인 뒤 진행하며 minified 산출물 직접 편집으로 우회하지 않는다.
+
+### Stage 3.1 구현 경계
+
+- 같은 page realm에서 공개 `fonts.setProvider/getState`만 소비한다. provider는 `getSnapshot/readFace/subscribe`를 구현하며 upstream matcher·renderer를 복제하지 않는다.
+- native `postScriptName`을 `postscriptName`으로 변환한다. 빈 필수 이름·빈 alias 및 미지원/모호한 face를 검증하고 설치 CoreText traits와 관리 OS/2 traits를 각각 정규화한다. metadata로 증명되지 않는 weight/slant를 정확한 스타일로 주장하지 않는다.
+- 관리 선택 우선순위·미해결 충돌 차단을 목록 구성에서 처리한다. 새 API는 브라우저/호스트 목록의 우선순위를 자동 병합하지 않는다.
+- native 두 transfer slot에 맞는 제한 queue와 busy/stale 재시도·일시 오류 복구를 구현한다. 실패가 upstream 동일 세대 실패 캐시에 영구 고착되지 않게 복구 동작을 검증한다.
+- documentEpoch/loadToken 변경 시 handshake를 갱신하고 이전 작업을 폐기한다. AbortSignal, close/cancel, 구독 해제, bytes/lease 수명을 검증한다.
+- API 없는 v0.8.6에서는 연결 성공으로 표시하지 않는다. 제품 번들·pin·현재 준비 중 UI를 유지하며 계약 mock과 격리 시험으로 준비 범위만 검증한다.
+- host 목록은 toolbar에 자동 추가되지 않는다. 기존 문서 표시와 글꼴 메뉴 선택을 별도 완료 항목으로 두고 Stage 3.2에서 실제 메뉴 연결 경로를 확인한다. 내부 렌더 별칭을 메뉴/저장 값에 사용하지 않는다.
 
 ## 4. 다운로드한 테스트 글꼴
 
@@ -86,4 +97,4 @@ OS 지속 설치는 아직 하지 않았다. 초기에는 별도 파일 공급/�
 
 ## 6. 승인 요청
 
-구현계획 승인에 따라 Stage 1의 adapter·캐시 계약을 확정했다. Stage 2 native 공급 구현·검증을 완료했다. 다음 Stage 3은 정식 upstream 확장·pin/sync를 선행 조건으로 갖는다. [Stage 2 보고](../working/task_m020_567_stage2.md)를 참고한다.
+Stage 1 계약과 Stage 2 native 공급 구현·검증을 완료했다. 2026-09-26 지시에 따라 Stage 3.1은 정식 릴리즈 전에 준비하고, Stage 3.2에서 확정 릴리즈 pin/sync 및 실제 제품 연결을 수행한다. [Stage 2 보고](../working/task_m020_567_stage2.md)와 [이슈 재정렬 검토](../tech/task_m020_567_replan.md)를 참고한다. 이번 보정은 이슈 완료나 릴리즈 승인이 아니다.

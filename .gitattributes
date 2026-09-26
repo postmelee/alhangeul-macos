@@ -1,1 +1,3 @@
 scripts/ci/fixtures/render-tree/*.json linguist-generated=true
+# 해시로 보존한 원시 빌드 로그의 도구 출력 공백을 정규화하지 않는다.
+mydocs/working/assets/task_m020_567_pr7405/probe-build.log -whitespace

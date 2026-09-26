@@ -1,0 +1,12 @@
+[
+  {
+    "status" : "loaded",
+    "family" : "Host Face",
+    "weight" : "400"
+  },
+  {
+    "status" : "loaded",
+    "weight" : "700",
+    "family" : "Host Face"
+  }
+]

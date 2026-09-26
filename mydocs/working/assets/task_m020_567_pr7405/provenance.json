@@ -1,0 +1,39 @@
+{
+  "appSourceSHA": "ef7d638794f82b71a71c75ef2029bf4eb3d463db",
+  "upstreamHead": "bf371e200cfbc343094b552169864ba6c9235a27",
+  "upstreamBase": "505661360e9a2d596f55300d0cb0c5222f0e14b4",
+  "productionCoreStudio": "f1f9c6ae58344ee9368996d3543f76b9345cf227",
+  "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.5.2\nBuildVersion:\t\t25F84\n",
+  "files": {
+    "pkg/rhwp_bg.wasm": {
+      "size": 41036755,
+      "sha256": "fcb45acbe3491a981e02c5f752595fd039ca9a3e6826fe3bd730ae7b9801a35f"
+    },
+    "pkg/rhwp.js": {
+      "size": 558609,
+      "sha256": "8f01a5bcc227a41d72b4aca57792445e9f413c4400154b74bdf8992f35301df3"
+    },
+    "rhwp-studio/package-lock.json": {
+      "size": 247025,
+      "sha256": "5796ae160af3319f5a8d3cd4ae8a11136bf415926e08a00422bd4bcf7ee3324c"
+    },
+    "tests/fixtures/fonts/RHWPHostFixture.ttc": {
+      "size": 2680,
+      "sha256": "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf"
+    },
+    "tests/fixtures/fonts/RHWPHostFixture-Regular.ttf": {
+      "size": 1008,
+      "sha256": "44479fbcc1e0cb20f97e13405a1fcb26b29fbcdf445ca52b41f6f645b3bd6aa5"
+    },
+    "tests/fixtures/fonts/RHWPHostFixture-Italic.ttf": {
+      "size": 996,
+      "sha256": "b6f6f576995a976e35eb4323a39633352060ad6b884fd791152a8fce1b1c1e81"
+    },
+    "tests/fixtures/fonts/RHWPHostFixture-Oblique.ttf": {
+      "size": 1008,
+      "sha256": "e3b86278af359b9e02128fea72e483e1627506c59739b15ee75672ec6eb6be56"
+    }
+  },
+  "upstreamTrackedDiff": " rhwp-studio/public/rhwp.js | 2395 +++++++++++++++++++++++++++++++++++++++++---\n 1 file changed, 2282 insertions(+), 113 deletions(-)\n",
+  "note": "fresh WASM; exact upstream tracked renderer/provider sources unchanged; probe entry/config are added instrumentation; native app sources unchanged, injected fixture supply; dependencies reused via read-only node_modules symlink"
+}
