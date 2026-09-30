@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-09-30",
+  "label": "Windows / Linux 버전 보기 →",
+  "homeLink": {
+    "title": "알한글 — Windows와 Linux를 위한 HWP/HWPX 편집기",
+    "url": "https://postmelee.github.io/alhangeul-tauri/"
+  },
+  "footerLink": {
+    "url": "https://postmelee.github.io/alhangeul-tauri/",
+    "title": "알한글 — Windows와 Linux를 위한 HWP/HWPX 편집기",
+    "source": "/updates/v0.2.2.html"
+  }
+}
