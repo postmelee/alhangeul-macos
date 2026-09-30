@@ -150,6 +150,34 @@ video {
   color: var(--accent);
 }
 
+.header-platform-link {
+  white-space: nowrap;
+}
+
+.mobile-platform-link {
+  display: none;
+}
+
+.mobile-platform-link:hover {
+  text-decoration: underline;
+}
+
+.notice-platform-link {
+  flex-basis: 100%;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.news-platform-link {
+  width: 100%;
+  justify-content: center;
+  margin-top: 16px;
+  color: var(--accent);
+  font-size: 14px;
+}
+
 .header-download-button {
   min-height: 32px;
   border-radius: 999px;
@@ -1559,6 +1587,16 @@ video {
     width: min(100% - 32px, var(--content-width));
   }
 
+  .header-platform-link {
+    display: none;
+  }
+
+  .mobile-platform-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+  }
+
   .hero {
     padding-top: clamp(44px, 6vh, 64px);
   }
@@ -1622,6 +1660,9 @@ video {
   .site-footer nav {
     grid-column: 1;
     justify-self: start;
+    max-width: 100%;
+    flex-wrap: wrap;
+    row-gap: 12px;
   }
 
   .features-section {
