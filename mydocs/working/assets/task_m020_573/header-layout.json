@@ -1,0 +1,533 @@
+{
+  "description": "브라우저의 실제 anchor 경계·화면 내 포함·겹침·표시 문구·URL 검사",
+  "checks": [
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/",
+      "width": 360
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/",
+      "width": 375
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/",
+      "width": 520
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/",
+      "width": 521
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/",
+      "width": 700
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/",
+      "width": 701
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/",
+      "width": 768
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/",
+      "width": 820
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/",
+      "width": 821
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/",
+      "width": 1024
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.2.2.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.2.2.html",
+      "width": 360
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.2.2.html",
+      "width": 375
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.2.2.html",
+      "width": 520
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/updates/v0.2.2.html",
+      "width": 521
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/updates/v0.2.2.html",
+      "width": 700
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/updates/v0.2.2.html",
+      "width": 701
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/updates/v0.2.2.html",
+      "width": 768
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/updates/v0.2.2.html",
+      "width": 820
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.2.2.html",
+      "width": 821
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.2.2.html",
+      "width": 1024
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.2.2.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/news/",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/news/",
+      "width": 360
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/news/",
+      "width": 375
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/news/",
+      "width": 520
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/news/",
+      "width": 521
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/news/",
+      "width": 700
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/news/",
+      "width": 701
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/news/",
+      "width": 768
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/news/",
+      "width": 820
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/news/",
+      "width": 821
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/news/",
+      "width": 1024
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/news/",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/feedback/",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/feedback/",
+      "width": 360
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/feedback/",
+      "width": 375
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/feedback/",
+      "width": 520
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/feedback/",
+      "width": 521
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/feedback/",
+      "width": 700
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/feedback/",
+      "width": 701
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/feedback/",
+      "width": 768
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/feedback/",
+      "width": 820
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/feedback/",
+      "width": 821
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/feedback/",
+      "width": 1024
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/feedback/",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/",
+      "width": 360
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/",
+      "width": 375
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/",
+      "width": 520
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/updates/",
+      "width": 521
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/updates/",
+      "width": 700
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/updates/",
+      "width": 701
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/updates/",
+      "width": 768
+    },
+    {
+      "failures": [],
+      "headerHeight": 82.59375,
+      "path": "/updates/",
+      "width": 820
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/",
+      "width": 821
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/",
+      "width": 1024
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.0.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.0.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.1.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.1.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.2.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.2.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.3.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.3.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.4.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.4.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.5.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.5.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.6.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.6.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.7.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.7.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.8.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.8.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.9.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.9.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.10.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.10.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.1.11.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.1.11.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.2.0.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.2.0.html",
+      "width": 1440
+    },
+    {
+      "failures": [],
+      "headerHeight": 75.796875,
+      "path": "/updates/v0.2.1.html",
+      "width": 320
+    },
+    {
+      "failures": [],
+      "headerHeight": 52,
+      "path": "/updates/v0.2.1.html",
+      "width": 1440
+    }
+  ]
+}

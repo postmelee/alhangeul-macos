@@ -150,6 +150,10 @@ video {
   color: var(--accent);
 }
 
+.header-platform-link {
+  white-space: nowrap;
+}
+
 .header-download-button {
   min-height: 32px;
   border-radius: 999px;
@@ -1555,8 +1559,36 @@ video {
 }
 
 @media (max-width: 820px) {
+  .site-header {
+    height: auto;
+    min-height: var(--header-height);
+  }
+
   .site-header-inner {
     width: min(100% - 32px, var(--content-width));
+    height: auto;
+    padding-block: 10px;
+  }
+
+  .site-header .brand-link {
+    align-self: flex-start;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .header-actions {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 10px;
+  }
+
+  .header-platform-link {
+    order: 1;
+    flex-basis: 100%;
+    justify-content: flex-end;
+    line-height: 1.4;
   }
 
   .hero {
