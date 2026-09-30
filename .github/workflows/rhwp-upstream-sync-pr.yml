@@ -597,6 +597,9 @@ jobs:
             --commit "$target_commit" \
             --upstream-dir "$upstream_dir"
 
+          python3 scripts/ci/update-rhwp-readme-badge.py
+          python3 scripts/ci/update-rhwp-readme-badge.py --check
+
           git diff --check
 
           verification_file="$work_dir/verification.txt"
@@ -612,6 +615,7 @@ jobs:
             echo "\`scripts/check-no-appkit.sh\`: OK"
             echo "\`scripts/sync-rhwp-studio.sh --tag $target_tag --commit $target_commit\`: OK"
             echo "\`scripts/verify-rhwp-studio-assets.sh --tag $target_tag --commit $target_commit --upstream-dir <target-checkout>\`: Cargo.lock fingerprint match OK"
+            echo "\`python3 scripts/ci/update-rhwp-readme-badge.py --check\`: bundled badge and link OK"
             echo "\`git diff --check\`: OK"
           } > "$verification_file"
 
@@ -626,6 +630,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
           git add \
+            README.md \
             Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift \
             scripts/ci/fixtures/render-tree/request-page0.json \
             Sources/HostApp/Resources/rhwp-studio \
