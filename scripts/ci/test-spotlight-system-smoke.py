@@ -3,6 +3,7 @@
 import importlib.util
 import argparse
 import json
+import os
 import plistlib
 import shutil
 import subprocess
@@ -89,6 +90,9 @@ class SmokeTests(unittest.TestCase):
             (bundle / "Contents/MacOS").mkdir(parents=True)
             (bundle / "Contents/Info.plist").write_text("synthetic")
             (bundle / "Contents/MacOS/Alhangeul").write_text("synthetic")
+        # Linux는 birthtime 없이 inode로 설치 객체를 구분한다. 삭제 뒤에도
+        # 기존 fixture inode를 유지해 새 copy에 즉시 재사용되는 것을 막는다.
+        self.addCleanup(os.close, os.open(app / smoke.PLUGIN, os.O_RDONLY))
         shutil.copytree(app, source)
         (fixtures / "initial").mkdir(parents=True)
         for name in ["document-a.hwp", "document-b.hwpx", "document-c.hwp", "index-control.txt"]:
@@ -131,6 +135,24 @@ class SmokeTests(unittest.TestCase):
                 smoke.assert_automatic_candidate_unchanged(state)
                 with self.assertRaisesRegex(ValueError, "one launch"):
                     smoke.automatic_search(state)
+
+    def test_reinstall_rejects_unchanged_installation_object_before_launch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state, plist = self.reinstall_fixture(directory)
+            def run(argv, **kwargs):
+                if argv[0] == "ditto": shutil.copytree(argv[1], argv[2])
+                else: self.assertEqual(argv[0], "codesign")
+                return ""
+            with patch.object(smoke.Path, "home", return_value=Path(directory)), \
+                 patch.object(smoke, "stop_candidate"), patch.object(smoke, "expect_paths"), \
+                 patch.object(smoke, "observe_reinstall_baseline", return_value={"mode": "absent"}), \
+                 patch.object(smoke, "run", side_effect=run):
+                smoke.prepare_reinstall(state, plist)
+                with patch.object(smoke, "installation_object", return_value=state["reinstall"]["before_object"]), \
+                     patch.object(smoke, "launch") as launch, \
+                     self.assertRaisesRegex(ValueError, "new installation object"):
+                    smoke.reinstall_app(state)
+                launch.assert_not_called()
 
     def test_reinstall_refuses_receipt_change_before_copy(self):
         with tempfile.TemporaryDirectory() as directory:
