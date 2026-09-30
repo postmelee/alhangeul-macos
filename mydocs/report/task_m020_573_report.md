@@ -3,7 +3,7 @@
 - 이슈: [#573](https://github.com/postmelee/alhangeul-macos/issues/573), M020 / GitHub `v0.2`
 - 작업: `local/task573` → `publish/task573`, PR 대상 `devel`
 - 기준: `origin/devel` `0fa65fa`, 작업일: 2026-09-30 (Asia/Seoul)
-- 승인: 사용자 요청에 포함된 이슈·계획·구현·검증·보고·PR 생성. merge·공개 배포 제외.
+- 승인: 최초 요청은 이슈·계획·구현·검증·보고·PR 생성까지였다. 후속 `병합하고 배포해줘` 지시로 PR 병합과 이번 변경의 main 반영·Pages 배포가 추가 승인되었다.
 - PR: [#574](https://github.com/postmelee/alhangeul-macos/pull/574). 2026-09-30 사용자 후속 지시로 CI 실패 fixture와 모바일 플랫폼 링크 배치를 보정해 갱신한다.
 
 ## 사용자에게 보이는 결과
@@ -49,4 +49,10 @@ native core와 bundled Studio 모두 `v0.8.6`, resolved commit `f1f9c6ae58344ee9
 
 원래 checkout의 `local/task567` / `7a60448`과 다른 작업자의 변경을 보존했다. rhwp pin, native·Studio 제품 소스, 기능, 릴리즈·설치본, Sparkle·Homebrew·서명·공증 산출물은 변경하지 않았다. 임시 미리보기 HTML·bytecode는 제거했으며 타스크 worktree와 branch는 PR 검토·merge 후 정리에 필요하므로 유지한다.
 
-`devel` 대상 Open PR 검토·merge가 남아 있다. 공개 README와 홈페이지 반영은 별도 승인된 main 반영·Pages 문서 배포가 필요하다. 이 타스크에서 merge·이슈 close·공개 배포는 수행하지 않는다. PR CI의 run 링크는 생성 후 최종 응답으로 전달하고 Actions 완료는 기다리지 않는다.
+사용자의 추가 승인에 따라 PR #574의 정확한 head CI 성공 후 merge하고, 이번 타스크 변경만 `main` 기준 별도 PR으로 반영한다. `devel`의 다른 앱 기능 변경을 포함하지 않는다. `main`의 `docs/**` merge로 실행되는 `Docs-only Pages Deploy`가 기존 public appcast를 보존하며 홈페이지를 배포한다. merge·배포 결과와 공개 확인은 최종 응답으로 전달한다.
+
+## Stage 3.3 — 승인된 병합과 문서 배포 준비
+
+공개 `main` 기준 `0cd5e7964c4802ba37fa42caa8088187ea041610`에서 타스크의 5개 커밋만 `cherry-pick -x`로 선별했다. README·홈페이지·배지 유지관리·CI fixture·타스크 기록만 반영하며 source·pin·framework·project.yml·Xcode project는 기존 main과 일치한다. main/source 콘텐츠 gate 통과, 배지 fixture 10개·Pages 14개·소식 UI 9개·현재 릴리스 안내 v0.2.2·README 배지·diff 검증 통과.
+
+배포 전 public appcast를 받아 XML 검증을 완료했다. SHA256은 `8b0face06819d65f60cc6e3675244eaa1cccead997927c1f27c131d523313140`이다. 문서 배포 후 같은 피드의 보존 여부와 공개 홈페이지의 최종 모바일 배치를 확인한다. 앱 버전 태그·GitHub Release·DMG 생성은 이번 홈페이지 배포 범위에 포함하지 않는다.
