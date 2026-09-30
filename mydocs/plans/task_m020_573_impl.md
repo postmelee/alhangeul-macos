@@ -21,3 +21,7 @@
 - 실제 native Cargo provenance와 Studio asset gate, 배지·workflow fixture, 기존 Pages 관련 검증, `git diff --check`를 수행한다.
 - rhwp pin·제품 소스·릴리스 산출물 무변경, 원래 checkout 보존을 확인한다.
 - 최종 보고와 오늘할일 완료 시각을 커밋한다. 검증된 body-file로 Open PR을 만들고 연결한다. merge·공개 배포는 수행하지 않는다.
+
+## Stage 3.1 — PR CI 실패 후속 검증
+
+2026-09-30 사용자가 PR #574의 실제 실패 로그 조사·범위 내 수정·검증·PR 갱신을 지시했다. `Script syntax checks` 실패는 기존 Spotlight 재설치 fixture의 설치 객체 비교에서 발생했다. Linux에서 삭제 직후 inode가 재사용될 수 있는 테스트 전제를 제거하고, 실제 재설치 smoke의 동일 객체 거부 gate는 유지한다. fixture 수정과 해당 경계 회귀 검증, 같은 CI step의 관련 검증을 수행한 후 보고·커밋·push한다. 새 head의 CI run을 확인하여 완료 대기 없이 링크를 전달한다. 모바일 링크 위치 제안은 이 CI 보정에 포함하지 않는다.

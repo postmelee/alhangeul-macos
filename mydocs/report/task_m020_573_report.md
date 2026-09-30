@@ -4,6 +4,7 @@
 - 작업: `local/task573` → `publish/task573`, PR 대상 `devel`
 - 기준: `origin/devel` `0fa65fa`, 작업일: 2026-09-30 (Asia/Seoul)
 - 승인: 사용자 요청에 포함된 이슈·계획·구현·검증·보고·PR 생성. merge·공개 배포 제외.
+- PR: [#574](https://github.com/postmelee/alhangeul-macos/pull/574). 2026-09-30 사용자 후속 지시로 CI 실패 fixture를 보정해 갱신한다.
 
 ## 사용자에게 보이는 결과
 
@@ -36,6 +37,14 @@ native core와 bundled Studio 모두 `v0.8.6`, resolved commit `f1f9c6ae58344ee9
 대표 5개 페이지는 320/360/375/520/521/700/701/768/820/821/1024/1440px, 나머지 버전별 페이지는 320/1440px로 확인했다. 데스크톱과 모바일 브라우저 viewport 검증이며 실제 모든 기기·브라우저를 검증한 결과로 확대하지 않는다.
 
 증거: [레이아웃 결과](../working/assets/task_m020_573/header-layout.json), [실제 링크 이동](../working/assets/task_m020_573/link-navigation.json), [320px 화면](../working/assets/task_m020_573/home-320.png), [1024px 화면](../working/assets/task_m020_573/home-1024.png), [배지 화면](../working/assets/task_m020_573/readme-badges.png). 단계별 기록: [Stage 1](../working/task_m020_573_stage1.md), [Stage 2](../working/task_m020_573_stage2.md), [Stage 3](../working/task_m020_573_stage3.md).
+
+## PR CI 실패 보정
+
+첫 head `c895dbdb61648012cb41fcc713dd1f1a66b69378`의 [실패 job 로그](https://github.com/postmelee/alhangeul-macos/actions/runs/36726004622/job/109923088685)를 조회했다. 새 배지·Pages 검증은 성공했으며 기존 Spotlight 재설치 fixture가 `reinstall did not create a new installation object`로 실패했다. Linux에서 birthtime 없이 설치 객체를 비교할 때 삭제 직후 inode가 재사용될 수 있는 테스트 전제를 제거했다. synthetic importer의 이전 inode를 fd로 유지하여 새 copy와 구분하고 cleanup에서 fd를 닫는다. 운영 smoke의 동일 객체 거부 gate는 그대로 두었고 launch 전 실패 경계 검증을 추가했다.
+
+후속 로컬 검증: Spotlight 44개, birthtime 없는 설치 객체 조건의 전체 44개·경계 반복 40개, 동일 CI step의 bundle 5개·release install 25개·release promotion 16개, 배지 10개와 현재 pin 배지·문법·diff 검사 통과. 실제 Linux 로컬 실행은 Docker daemon 부재로 수행하지 않았으며 Linux CI 완료 여부로 일반화하지 않는다. [Stage 3.1 기록](../working/task_m020_573_stage3.md)에 원인·범위·검증을 기록했다. push 후 정확한 새 head의 CI run 링크를 최종 응답으로 전달하고 완료를 기다리지 않는다.
+
+모바일 헤더 링크의 소개 영역·공통 푸터 이동 제안은 아직 구현되지 않았다. 이번 후속 보정은 CI fixture에 한정한다.
 
 ## 보존과 공개 반영
 
