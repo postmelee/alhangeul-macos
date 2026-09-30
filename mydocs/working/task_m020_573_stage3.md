@@ -32,3 +32,19 @@ Stage 1·2의 검증 결과와 화면 증거를 최종 보고에 묶고 오늘�
 - 기존 head 대비 운영 smoke·README·홈페이지·rhwp pin·제품 source·framework·project.yml 변경 없음 확인.
 
 로컬 Docker daemon이 실행 중이지 않아 실제 Linux 컨테이너 실행은 하지 않았다. birthtime 없는 조건 검증과 실제 Linux 새 head CI 결과는 구분한다. 보정 commit을 push하여 새 head에 연결된 CI run 링크를 최종 응답으로 전달하며 완료는 기다리지 않는다. 모바일 링크 위치 변경은 별도 후속 결정으로 남겨 둔다.
+
+## Stage 3.2 — 모바일 플랫폼 링크 위치 보정
+
+사용자가 모바일 헤더의 부담을 지적하고 다운로드 영역 아래 보조 링크와 기존 한 줄 헤더 적용을 승인한 후, 같은 채팅에서 이어서 진행을 지시했다. 데스크톱의 `알한글 for Windows / Linux` 헤더 링크는 유지하고, 820px 이하에서는 숨긴다. 홈페이지의 릴리스 다운로드 버튼 아래에는 `Windows / Linux 버전 보기 →`를 표시한다. 하위 페이지는 기존 푸터, 푸터가 없는 소식 페이지는 하단 외부 콘텐츠 안내 뒤에 같은 모바일 링크를 배치했다. 공통 푸터는 줄바꿈을 허용하며 19개 HTML의 stylesheet cache query를 갱신했다.
+
+검증:
+
+- 19개 페이지·88개 화면 조합에서 헤더 높이 52px, 화면별 플랫폼 링크 하나 표시, 모바일·데스크톱 위치와 문구·URL 일치, 헤더 겹침·잘림·문서와 푸터 가로 넘침 없음. [최종 결과 JSON](assets/task_m020_573/mobile-layout.json).
+- 대표 5개 페이지는 320/360/375/520/521/700/701/768/820/821/1024/1440px, 나머지 버전별 페이지는 320/1440px로 검사했다. 실제 모든 기기·브라우저 검증으로 확대하지 않는다.
+- 모바일 홈페이지와 v0.2.2 푸터 링크를 실제 클릭해 Windows / Linux 홈페이지 URL·제목·본문을 확인했다. [이동 기록](assets/task_m020_573/mobile-link-navigation.json).
+- 19개 HTML에서 추가 모바일 링크와 cache query 변경만 제거하면 이전 head `505a481`의 파일과 byte 단위로 일치한다. 기존 제품 안내·다운로드 URL을 보존했다.
+- Pages 검증 14개, 소식 UI 9개, 현재 릴리스 안내 `v0.2.2` gate, 현재 pin README 배지 `--check`, `git diff --check` 통과.
+
+최종 화면: [모바일 홈페이지 320px](assets/task_m020_573/home-mobile-320.png), [데스크톱 헤더 1024px](assets/task_m020_573/home-desktop-1024.png), [하위 페이지 푸터 320px](assets/task_m020_573/subpage-footer-320.png). 기존 Stage 2 화면은 당시 검증 기록으로 보존했다.
+
+이어 진행 시 조회에서 Stage 3.1 head `505a4811d95443170e68a200df5263f2e8dd08d8`의 [PR CI run](https://github.com/postmelee/alhangeul-macos/actions/runs/36727831280)이 성공했음을 확인했다. Linux `Script syntax checks`와 `Release helper checks` 모두 성공하여 기존 CI fixture 실패 보정이 확인되었다. Stage 3.2를 push한 최종 head는 별도 CI run 링크를 전달하고 완료를 기다리지 않는다. PR 설명과 최종 보고를 현재 배치로 갱신하며 merge·공개 배포는 수행하지 않는다.
