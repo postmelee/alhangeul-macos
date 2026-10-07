@@ -6,9 +6,11 @@ final class StudioFontMessageHandler: NSObject, WKScriptMessageHandlerWithReply 
     static let name = "alhangeulFonts"
     weak var webView: WKWebView?
     private let session: StudioFontSession
+    private let observeLiveChanges: Bool
 
-    init(session: StudioFontSession? = nil) {
+    init(session: StudioFontSession? = nil, observeLiveChanges: Bool = true) {
         self.session = session ?? StudioFontSession()
+        self.observeLiveChanges = observeLiveChanges
         super.init()
     }
     private var observations: [Task<Void, Never>] = []
@@ -21,7 +23,7 @@ final class StudioFontMessageHandler: NSObject, WKScriptMessageHandlerWithReply 
         reset()
         active = true
         self.loadToken = loadToken
-        guard observeChanges else { return }
+        guard observeChanges && observeLiveChanges else { return }
         observations.append(Task { [weak self] in
             guard let catalog = try? await InstalledFontServiceProvider.shared.service() else { return }
             let stream = await catalog.updates()

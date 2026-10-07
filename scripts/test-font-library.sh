@@ -4,7 +4,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 OUT="$ROOT/build.noindex/font-library-tests"
 mkdir -p "$OUT"
-node --test scripts/ci/test-studio-font-provider.cjs
+node --test scripts/ci/test-studio-font-*.cjs
 python3 - "$ROOT" <<'PY'
 import hashlib
 import plistlib

@@ -3,7 +3,7 @@
 - 수행계획: [task_m020_567.md](task_m020_567.md)
 - 이슈: [#567](https://github.com/postmelee/alhangeul-macos/issues/567), M020 / v0.2
 - 브랜치: `local/task567`, 기준 `devel` / `0fa65fa`
-- 상태: Stage 2 native 공급과 Stage 3.1 어댑터 준비·검증 완료. [Stage 3 보고](../working/task_m020_567_stage3.md). Stage 3.2는 정식 릴리즈·단계 승인 후 수행한다. [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
+- 상태: Stage 2/3.1 완료. 2026-10-07 v0.8.7 반영·연결 지시로 Stage 3.2 진행 중. [Stage 3 보고](../working/task_m020_567_stage3.md). [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
 - Stage 2 native 소스와 테스트를 변경했다. upstream pin과 Studio bundle은 유지했다.
 
 ## 1. 확인한 출발점
@@ -61,6 +61,18 @@ TTC/가변은 현재 native 제한을 유지한다. 정확한 face/axes가 검�
 - documentEpoch/loadToken 변경 시 handshake를 갱신하고 이전 작업을 폐기한다. AbortSignal, close/cancel, 구독 해제, bytes/lease 수명을 검증한다.
 - API 없는 v0.8.6에서는 연결 성공으로 표시하지 않는다. 제품 번들·pin·현재 준비 중 UI를 유지하며 계약 mock과 격리 시험으로 준비 범위만 검증한다.
 - host 목록은 toolbar에 자동 추가되지 않는다. 기존 문서 표시와 글꼴 메뉴 선택을 별도 완료 항목으로 두고 Stage 3.2에서 실제 메뉴 연결 경로를 확인한다. 내부 렌더 별칭을 메뉴/저장 값에 사용하지 않는다.
+
+### Stage 3.2 확정 범위 — 2026-10-07
+
+- v0.8.7의 resolved commit과 #7405 포함·최종 API를 확인하고 stable core pin, bridge/FFI 산출물, build info 및 producer golden을 정식 절차로 갱신한다.
+- 태그 helper의 반복 shallow fetch가 큰 원격 pack 준비에서 지연되어, 동일 원격 태그 commit과 core source/lock 무변경을 검증한 기존 checkout 재사용 옵션을 추가한다. 원래 원격 조회 경로와 임시 checkout 정리는 유지한다.
+- 같은 commit의 fresh WASM·Studio를 빌드·sync하고 manifest/Cargo provenance·정적 자원을 검증한다. 임시 source patch는 넣지 않는다.
+- Studio sync의 checkout 판정은 `.git` 디렉터리 유무 대신 Git 검증을 사용하여 정상 detached worktree도 수용한다.
+- 앱 소유 user script에서 공개 API 준비 시 provider를 연결한다. 문서 epoch 교체 후 native begin/adapter refresh, navigation·종료·실패에서 dispose/reset을 연결한다.
+- 실제 Studio main/Canvas2D/CanvasKit에 승인된 고운바탕 static Regular/Bold를 공급하여 이름·선택 face·bytes·화면 및 저장 이름을 검증한다. 실제 OS 설치가 필요한 수용은 기존 별도 승인 경계를 유지한다.
+- 글꼴 메뉴는 정식 API/확장점을 조사하여 실제 제공 범위를 확인한다. 공개 진입점으로 해결할 수 없는 경우 산출물 직접 패치를 하지 않고 잔여 의존을 기록한다.
+- 공개 automation extension command/menu와 `applyCharPropsToRange`로 앱 소유 선택 창을 연결했다. 검색·family 중복 제거·원래 이름 저장·문서/권한/목록 변경 시 적용 차단을 구현했고, 실제 v0.8.7 Studio에서 표시·적용·저장·재열기를 통과했다. [Stage 3.2 결과](../working/task_m020_567_stage3.md#stage-32-완료--2026-10-07).
+- 제품 전체 수용·설정 안내 수정과 signed sandbox 회귀는 Stage 4/5, 출력·Finder는 #568에 남긴다. 이 단계는 알한글 공개 배포 승인이 아니다.
 
 ## 4. 다운로드한 테스트 글꼴
 

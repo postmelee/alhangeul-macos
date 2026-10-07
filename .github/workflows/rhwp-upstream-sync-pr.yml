@@ -102,6 +102,7 @@ jobs:
           scripts/verify-rhwp-core-build-info.sh --help
           scripts/verify-rhwp-studio-assets.sh --help
           scripts/ci/test-rhwp-core-build-info.sh
+          bash scripts/ci/test-rhwp-core-checkout-reuse.sh
           scripts/ci/test-rhwp-studio-cargo-lock-verification.sh
 
       - name: Resolve current and target rhwp release

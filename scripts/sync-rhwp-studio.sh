@@ -156,7 +156,7 @@ if [ -z "$ACTUAL_WASM_BUILD_COMMAND" ]; then
   ACTUAL_WASM_BUILD_COMMAND="$RECOMMENDED_WASM_BUILD_COMMAND"
 fi
 
-if [ ! -d "$UPSTREAM_DIR/.git" ]; then
+if [ "$(git -C "$UPSTREAM_DIR" rev-parse --is-inside-work-tree 2>/dev/null || true)" != "true" ]; then
   fail "missing upstream checkout: $UPSTREAM_DIR"
 fi
 

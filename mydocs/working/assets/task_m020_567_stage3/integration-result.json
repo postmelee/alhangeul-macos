@@ -1,0 +1,24 @@
+{
+  "checks" : [
+    "hwp: actual product Coordinator + v0.8.7 Studio provider connected",
+    "hwp-canvas2d: exact Regular\/Bold bytes requested in this document generation",
+    "hwp: Canvas2D fillText uses document-owned host face alias",
+    "hwp: portable SVG original font name",
+    "hwpx: actual product Coordinator + v0.8.7 Studio provider connected",
+    "hwpx-canvas2d: exact Regular\/Bold bytes requested in this document generation",
+    "hwpx: Canvas2D fillText uses document-owned host face alias",
+    "hwpx: portable SVG original font name",
+    "hwpx: actual product Coordinator + v0.8.7 Studio provider connected",
+    "actual CanvasKit backend, no Canvas2D fallback",
+    "CanvasKit actual WebGL context",
+    "hwpx-canvaskit: exact Regular\/Bold bytes requested in this document generation",
+    "hwpx: portable SVG original font name",
+    "public extension font picker enabled",
+    "actual picker apply uses public command path",
+    "picker edit marks actual document dirty",
+    "picker edit triggers completed CanvasKit repaint",
+    "HWP export after picker apply",
+    "HWPX export after picker apply"
+  ],
+  "error" : null
+}

@@ -63,6 +63,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
     }
 
     static func dismantleNSView(_ webView: WKWebView, coordinator: Coordinator) {
+        coordinator.disposeFontProvider(in: webView)
         coordinator.fontMessageHandler.reset()
         webView.configuration.userContentController.removeScriptMessageHandler(forName: StudioFontMessageHandler.name, contentWorld: .page)
     }
@@ -182,7 +183,7 @@ extension RhwpStudioWebView {
             try DocumentSavePanel.write(data:$0, to:$1, allowOverwrite:$2)
         }
         private var pdfExportState: RhwpStudioPDFExportState = .idle
-        let fontMessageHandler = StudioFontMessageHandler()
+        let fontMessageHandler: StudioFontMessageHandler
         private var nextPDFExportRequestID = 0
         private var isPDFPreparing = false
         var choosePDFDestination: (String, NSWindow?) async -> URL? = {
@@ -201,6 +202,16 @@ extension RhwpStudioWebView {
         private var recentNativeDrop: NativeDropMarker?
         private var currentReloadToken = 0
         private var hasCompletedCurrentLoad = false
+
+        override init() {
+            fontMessageHandler = StudioFontMessageHandler()
+            super.init()
+        }
+
+        init(fontMessageHandler: StudioFontMessageHandler) {
+            self.fontMessageHandler = fontMessageHandler
+            super.init()
+        }
 
         deinit {
             loadTimeoutTask?.cancel()
@@ -326,7 +337,7 @@ extension RhwpStudioWebView {
                 injectionTime: .atDocumentStart, forMainFrameOnly: true
             ))
             controller.addUserScript(WKUserScript(
-                source: RhwpStudioHostBridgeScript.source,
+                source: StudioFontProviderScript.bootstrapSource + RhwpStudioHostBridgeScript.source,
                 injectionTime: .atDocumentEnd, forMainFrameOnly: true
             ))
         }
@@ -350,6 +361,7 @@ extension RhwpStudioWebView {
             }
             if let previous, previous.snapshot.documentEpoch != snapshot.documentEpoch {
                 fontMessageHandler.begin(loadToken: editorLoadToken)
+                commandWebView?.evaluateJavaScript("window.__alhangeulFontConnection?.refresh()", completionHandler: nil)
                 htmlDownload?.cancel()
                 pdfExportState.invalidatePendingRequestForDocumentChange()
                 if let activeSaveEpoch, activeSaveEpoch != snapshot.documentEpoch {
@@ -367,6 +379,12 @@ extension RhwpStudioWebView {
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             hasCompletedCurrentLoad = true
             finishLoading()
+        }
+
+        func disposeFontProvider(in webView: WKWebView) {
+            // 실패/해제 처리가 새 navigation의 page에 뒤늦게 적용되지 않게 token을 확인한다.
+            let token = Self.javaScriptStringLiteral(editorLoadToken)
+            webView.evaluateJavaScript("if (window.__alhangeulEditorLoad?.token === \(token)) { void window.__alhangeulFontConnection?.dispose(); }", completionHandler: nil)
         }
 
         func webView(
@@ -544,6 +562,7 @@ extension RhwpStudioWebView {
 
         private func reportFailure(_ failure: RhwpStudioWebViewFailure) {
             if failure.isFatal {
+                if let webView = commandWebView { disposeFontProvider(in: webView) }
                 fontMessageHandler.reset()
                 htmlDownload?.cancel()
                 activeSaveID = nil

@@ -338,6 +338,15 @@ assert_contains "$COMMAND_STDOUT" \
 assert_contains "$COMMAND_STDOUT" "rhwp-studio sync check passed" \
   "sync check did not complete"
 
+# A linked worktree has a .git file, and is a supported source checkout too.
+linked_upstream="$TMP_ROOT/linked-upstream"
+git -C "$upstream_dir" worktree add -q --detach "$linked_upstream" "$upstream_commit"
+"$SYNC" --check --upstream-dir "$linked_upstream" --target-dir "$sync_target" \
+  --tag v9.9.9 --commit "$upstream_commit" --actual-wasm-build-command "fixture wasm build" \
+  > "$COMMAND_STDOUT"
+assert_contains "$COMMAND_STDOUT" "rhwp-studio sync check passed" \
+  "sync check rejected a valid linked worktree"
+
 "$VERIFIER" > "$COMMAND_STDOUT"
 assert_files_equal "$production_manifest_before" "$PRODUCTION_RESOURCE/manifest.json" \
   "fixture verification changed the production rhwp-studio manifest"

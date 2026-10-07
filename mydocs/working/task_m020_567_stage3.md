@@ -41,3 +41,68 @@ Xcode가 자동 등록한 이번 개발용 HostApp 경로는 `lsregister -u`로 
 알 수 없는 installed style은 보수적으로 제외하고 실제 읽은 weight/PS가 목록과 다른 경우 실패 처리한다. 모든 지역화된 글꼴 스타일·TTC·가변 지원을 주장하지 않는다. 화면 변경이 없어 새 제품 스크린샷은 없다. 실제 최소 OS 실행·signed sandbox·OS 권한 복원·다중 창 전체 수용·실문서 편집/저장·PDF/인쇄/Finder 확장은 미검증이다.
 
 Stage 3.2는 API가 포함된 정식 릴리즈와 해당 단계 승인 후 진행한다. 기존 sync PR 여부를 확인해 core/Studio provenance·ABI·자산을 갱신하고, coordinator의 API 준비 시점·문서 token 교체·dispose를 연결한다. 실제 renderer 및 편집 글꼴 메뉴를 각각 검증한 뒤 Stage 4/5로 진행한다. 현재 제품 v0.8.6 pin과 준비 중 안내는 유지했다.
+
+## Stage 3.2 완료 — 2026-10-07
+
+사용자가 upstream [v0.8.7](https://github.com/edwardkim/rhwp/releases/tag/v0.8.7) 반영과 로컬 글꼴 연결 재개를 지시했다. 기존 `local/task567`에서 최신 devel `17dad15`를 병합(`e99b1ee`)했으며, 동일 릴리즈 sync PR은 조회 당시 없었다. 앞 절의 v0.8.6 유지·연결 미완료 상태는 Stage 3.1의 이력이다.
+
+### 정식 릴리즈 반영
+
+- stable v0.8.7은 2026-10-06 07:54:34 UTC 게시되었다. resolved commit은 `1a76570e833917d15817415a53c09ad61ab3203f`이며 #7405 병합 `aeb9f489e1d5e297c1e98cf1ca8ff84532270aca`를 포함한다.
+- `RustBridge/Cargo.toml`은 공식 git URL + tag, Cargo.lock은 같은 commit으로 고정했다. arm64/Intel native-skia staticlib, XCFramework, header/FFI 검증 후 `rhwp-core.lock` 산출물 metadata와 build info를 갱신했다. FFI header hash/size는 이전과 동일하다. 같은 환경의 strict source·ABI·archive 검증도 통과했다.
+- 동일 태그의 WASM을 upstream 공식 locked wrapper와 Rust 1.93.1로 fresh build하고, `npm ci`, `npx tsc`, `npx vite build --base ./` 후 sync했다. root Cargo.lock 무변경과 manifest source lock fingerprint를 대조했다. WASM SHA256은 `d6a00eb16a7155607b7a81641ef33ba5414a032f74091c72c1c1d351b7086cdf`다.
+- native bridge는 앱의 Rust 1.94.1을 사용했다. 공유 upstream target cache에 임시 `RustBridge/target` symlink를 두어 재사용했고, 단계 종료 때 symlink만 제거했다. 공유 캐시는 삭제/초기화하지 않았다.
+- producer golden의 core provenance와 실제 출력이 갱신되었다. 이전 대비 page bbox, 순서대로 추출한 text와 TextRun 103/Table 4/TextLine 65 개수는 동일하고 선 두께·위치 등 수치는 바뀌었다. Swift 전체 decode와 동일 producer 재검증을 통과했다. 이를 모든 문서의 시각 정합성 보장으로 확대하지 않는다.
+- README 포함 버전 배지도 기존 helper로 갱신했다. upstream 소스/생성 JS를 수동 패치하지 않았다.
+
+### 제품 연결·선택 UI
+
+`StudioFontProviderScript.bootstrapSource`를 제품의 document-end user script에 연결했다. 공개 `window.rhwpStudio.fonts` 준비 후 provider를 등록하며, 연결 상태와 제한된 실패 복구를 관리한다. 문서 epoch 교체에서는 native begin과 provider refresh, navigation/pagehide·fatal failure·view 해제에서는 dispose/reset을 처리한다. 늦은 dispose가 새 page에 적용되지 않도록 native load token을 확인한다.
+
+host catalog는 upstream toolbar 목록에 자동 추가되지 않는다. 공개 automation extension command/menu로 **서식 → 로컬 글꼴 선택…**을 추가했다. 앱 소유 선택 창은 family 검색·중복 제거·선택 후 적용을 제공하며 원래 family를 `findOrCreateFontId`와 기존 `applyCharPropsToRange`에 전달한다. 외부 matcher·편집 엔진을 복제하지 않는다. 현재 선택 창은 글자를 선택한 상태에서 열며, 커서 위치에서 새로 입력할 글꼴의 전체 수용은 Stage 5에 남긴다. 선택 영역이 없는 메뉴를 비활성화하고 읽기 전용·양식 제한·객체 선택과 창을 연 뒤의 문서/입력 handler/목록 변경을 검사하고, Escape·취소·dispose로 창과 자신이 등록한 command를 정리한다.
+
+테스트 공급과 observer를 주입할 수 있는 Coordinator/handler 초기화 경로를 추가했다. 제품 기본 공급·observer 동작은 유지했다. 격리 probe에서는 live observer를 끄고 승인된 시험 글꼴만 공급한다.
+
+### 최종 검증
+
+| 검증 | 결과 | 실제 범위 |
+|---|---|---|
+| `build-rust-macos.sh --update-lock` 및 `--verify-strict` | PASS | v0.8.7 source/Cargo/header/FFI/arm64+Intel archive 및 XCFramework |
+| core build info·README badge·Studio strict asset/Cargo provenance | PASS | native와 Studio 모두 공식 태그·동일 SHA |
+| producer golden update/verify | PASS | pinned native producer 및 Swift 전체 decode |
+| `scripts/test-font-library.sh` | Node 27 + XCTest 100 PASS | 실제 Swift JS 소스 실행, 설치/관리 공급·보안·수명 회귀 |
+| upstream host-font/host-canvas/renderer-session tests | 27 PASS | v0.8.7 태그의 실제 테스트. 이전 PR head의 29개와 구분 |
+| checkout reuse 및 Studio sync fixture | PASS | annotated tag/linked worktree, dirty/stale/non-Git/API 거부, 원본 보존 |
+| HostApp Debug build | BUILD SUCCEEDED | macOS 12 target, `CODE_SIGNING_ALLOWED=NO` |
+| native render smoke | 3 PASS | KTX/request/exam_kor의 tree·한글 glyph·비어 있지 않은 PNG |
+| 제품 SwiftUI 문서 lifecycle smoke | 43 PASS | 새 문서·저장·재열기·내보내기·취소/실패·종료 및 font IPC |
+| 실제 제품 Coordinator + 실제 bundled Studio probe | PASS | 아래 renderer·선택·저장 증거 |
+| no-AppKit·변경 shell/JS/YAML·diff 형식 | PASS | 공통 계층 경계와 변경 파일 검사 |
+
+실행 환경: macOS 26.5.2 (25F84), Xcode 26.6 (17F113), native Rust 1.94.1, Node 24.15.0. macOS 12는 compile target이며 실제 최소 OS 실행 결과가 아니다. Intel도 build 결과이며 실제 Intel 기기 실행은 하지 않았다.
+
+### 실제 Studio 증거
+
+승인된 Google Fonts 고운바탕 static Regular/Bold를 사용했다. 사용자 글꼴의 OS 설치·설정·권한을 변경하지 않고 메모리 기반 시험 공급을 제품 Coordinator에 주입했다. 실제 native handler/session과 실제 v0.8.7 Studio/WASM을 사용하며 Studio API mock은 사용하지 않았다.
+
+- HWP/Canvas2D와 HWPX/Canvas2D 각각에서 해당 문서 generation의 정확한 Regular/Bold PS bytes 요청 및 실제 `fillText`의 host face alias를 확인했다.
+- HWPX/CanvasKit은 `effectiveBackend=canvaskit`, no fallback, Apple GPU/WebGL 2.0, local typeface 2개·load failure 0개·render complete를 확인했다. Canvas2D 성공을 대신 근거로 쓰지 않았다.
+- 다른 글꼴(돋움)이 사용된 마지막 ‘확인’을 포함한 합성 문서에서 실제 메뉴의 선택 창을 열어 고운바탕을 적용했다. dirty 변경, 새 document revision의 완료된 CanvasKit repaint와 실제 화면 변화를 확인했다.
+- 적용 결과를 HWP/HWPX로 저장하고 실제 bundled WASM으로 다시 열었다. 처음 Regular·중간 Bold·마지막 바뀐 글꼴 모두 원래 `Gowun Batang` 이름과 굵기를 유지하며 portable SVG에 내부 renderer alias가 없다.
+- 한글 본문은 실제 렌더 검증에 포함된다. 이 무료 글꼴의 name table은 영문 family/PS만 제공하므로 실제 한글 family/지역화 이름의 전체 수용을 주장하지 않는다. alias 정규화·한국어 문자열은 계약 테스트에서 검증하며 다른 실제 글꼴의 수용은 Stage 5에 남긴다.
+
+작은 증거와 화면은 [Stage 3.2 재현 자료](assets/task_m020_567_stage3/REPRODUCE.md), 원시 로그/산출물은 `build.noindex/task567/stage3-2/`에 있다. lifecycle 원시 자료는 `build.noindex/studio-lifecycle-cq2zaz7b/`다. `scripts/probe-studio-font-integration.py --interactive --skip-build`로 격리 창을 직접 조작할 수 있다. 일반 실행은 자동 검증 종료 후 자신의 앱 경로를 등록 해제하고, 직접 조작 모드는 창 닫기 시 provider/lease를 정리하고 자신의 등록 해제를 실행한다.
+
+### 중간 실패·환경 정리
+
+초기 중복 upstream fetch는 필요한 태그 조회로 줄였다. Cargo 캐시가 없어서 git 다운로드를 한 번 수행했고, 디스크 부족으로 첫 full checkout이 실패했다. 해당 실패 checkout만 제거해 공간을 복구하고 재실행했다. 완료된 해당 checkout은 검증된 source 경로의 sparse checkout으로 줄여 불필요한 PDF/문서 복사본을 제거했으며 core/lock Git diff는 없다. cache의 동일 pack은 이미 hardlink라 추가 중복 제거량은 0이었다. offline 첫 조회의 tag ref 부재 및 svg2pdf registry 부재는 해소한 뒤 공식 Cargo lock 갱신을 성공시켰다. 실패한 updater는 manifest/lock을 자동 복원했다.
+
+첫 UI probe는 선택 영역을 만들지 않아 창 목록을 확인하지 못했다. 실제 select-all 흐름으로 수정했다. 선택 후 화면을 즉시 캡처한 결과에는 이전 paint가 보였고, render count 증가를 기다리는 보강은 편집 시 count가 초기화되어 시간 초과됐다. 새 document revision의 render complete를 검사하도록 고친 뒤 실제 glyph 변화와 저장·재열기를 모두 재검증했다. 실패를 통과로 집계하지 않는다.
+
+이번 HostApp Debug 경로는 `lsregister -u`로 해제했다. 전체 읽기 전용 등록 위생 helper는 과거 개발 경로 잔존 때문에 FAIL이며 Finder 통합 성공으로 기록하지 않는다. 특히 과거 `build.noindex/font-library-tests/.../Alhangeul.app` 경로는 실제 파일이 없어 개별 해제 시 -10814였다. 다른 worktree/설치 앱이나 전역 등록 DB는 변경하지 않았다. CUA로 격리 창을 확인하는 시도도 timeout이어서 CUA 조작 검증으로 주장하지 않으며, 실제 WK snapshot과 정상 NSWindow 실행을 증거로 사용한다. Quick Look/Thumbnail 수동 개발 등록은 하지 않았다.
+
+### 다음 단계
+
+이 단계의 정식 릴리즈 의존은 해소됐다. 추가 upstream 릴리즈를 기다리지 않고 Stage 4로 진행할 수 있다. Stage 4는 설정 변경·권한/원본 상태 변화·열린 문서 캐시 갱신·재실행·지원 안내, Stage 5는 signed sandbox·실제 OS 설치·다양한 실제 문서/글꼴·성능/다중 창 수용이다. 현재 사용 설정 기본값과 준비 중 안내는 Stage 4의 정책·수용 검증 대상으로 유지했다.
+
+#567 전체 완료·PR·제품 v0.2 배포는 아직 아니다. PDF/인쇄/native/Finder(#568) 및 Windows 입력(#566)은 별도 책임으로 유지한다. 다음 단계는 저장소의 단계 승인 절차를 따른다.

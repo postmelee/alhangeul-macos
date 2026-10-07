@@ -150,6 +150,7 @@ jobs:
         run: |
           set -euo pipefail
           scripts/ci/test-rhwp-core-build-info.sh
+          bash scripts/ci/test-rhwp-core-checkout-reuse.sh
 
       - name: Check studio Cargo.lock verification fixtures
         shell: bash

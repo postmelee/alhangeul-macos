@@ -1,8 +1,67 @@
 import Foundation
 
-/// 공개 Studio API용 factory. Stage 3.2의 정식 bundle 반영 전에는 제품에 주입하지 않는다.
-/// 같은 page realm에서 평가한 factory에 native transport와 문서 token을 연결한다.
+/// 공개 Studio API용 factory. 같은 page realm의 bootstrap이 native transport를 연결한다.
 enum StudioFontProviderScript {
+    static var bootstrapSource: String {
+        """
+        (() => {
+          if (window.__alhangeulFontConnection) return;
+          const create = \(source);
+          const adapter = create({
+            postMessage: body => window.webkit.messageHandlers.alhangeulFonts.postMessage(body),
+            getLoadToken: () => window.__alhangeulEditorLoad?.token,
+            getFontsAPI: () => window.rhwpStudio?.fonts,
+            events: window
+          });
+          const picker = (\(StudioFontPickerScript.source))({adapter, getAutomation: () => window.rhwpStudio?.automation, document});
+          let stopped = false, status = 'waiting', error = null, timer = null, menuTimer = null;
+          let pending = null;
+          const deadline = Date.now() + 15000;
+          function installMenu() {
+            if (stopped) return;
+            if (!picker.install() && Date.now() < deadline) menuTimer = setTimeout(installMenu, 50);
+          }
+          async function connect() {
+            if (stopped || pending) return;
+            if (!window.rhwpStudio?.fonts) {
+              if (Date.now() < deadline) timer = setTimeout(connect, 50);
+              else status = 'unsupported';
+              return;
+            }
+            pending = adapter.connect();
+            try {
+              const result = await pending;
+              if (!stopped) { status = result.supported ? 'connected' : 'unsupported'; error = null; if (result.supported) installMenu(); }
+            } catch {
+              if (!stopped) { status = 'failed'; error = 'fontProviderUnavailable'; }
+            } finally { pending = null; }
+          }
+          const connection = Object.freeze({
+            getState: () => ({status, error, ...(window.rhwpStudio?.fonts?.getState?.() || {})}),
+            refresh() {
+              if (stopped) return;
+              adapter.refresh();
+              if (status === 'failed') void connect();
+            },
+            async dispose() {
+              if (stopped) return;
+              stopped = true; status = 'disposed';
+              if (timer !== null) clearTimeout(timer);
+              if (menuTimer !== null) clearTimeout(menuTimer);
+              window.removeEventListener('alhangeul-fonts-changed', reconnect);
+              picker.dispose();
+              await adapter.dispose();
+            }
+          });
+          function reconnect() { if (status === 'failed') void connect(); }
+          window.__alhangeulFontConnection = connection;
+          window.addEventListener('alhangeul-fonts-changed', reconnect);
+          window.addEventListener('pagehide', () => { void connection.dispose(); }, {once: true});
+          void connect();
+        })();
+        """
+    }
+
     static let source = #"""
     ((environment) => {
       const {postMessage, getLoadToken, getFontsAPI, events} = environment;
