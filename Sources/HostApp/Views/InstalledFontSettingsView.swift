@@ -33,8 +33,16 @@ struct InstalledFontSettingsView: View {
                     Label("새로고침", systemImage: "arrow.clockwise")
                 }.disabled(model.busy).help("새로 설치하거나 변경한 글꼴 목록을 다시 확인합니다.")
             }
-            Label("문서에 적용하는 기능은 준비 중입니다.", systemImage: "info.circle")
-                .font(.callout).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 6) {
+                Toggle("Mac에 설치된 글꼴 사용", isOn: Binding(
+                    get: { model.snapshot?.enabled ?? false },
+                    set: { value in Task { await model.setEnabled(value) } }
+                )).disabled(model.busy || model.snapshot == nil)
+                Text("켜면 지원되는 글꼴을 문서에 자동으로 적용하고, 상단 글꼴 목록에서 선택할 수 있습니다.")
+                    .font(.callout).foregroundStyle(.secondary)
+                Text("사용 설정은 다음 실행에도 유지됩니다. 원본을 삭제하거나 비활성화하면 사용할 수 없습니다.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             HStack {
                 Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                 TextField("글꼴 이름 검색", text: $query).textFieldStyle(.plain)
@@ -116,18 +124,6 @@ struct InstalledFontSettingsView: View {
                     .padding(.leading, 8)
                     .padding(.trailing, 24)
                 }
-            }
-            FontSettingsDisclosure {
-                VStack(alignment: .leading, spacing: 6) {
-                    Toggle("문서 연동 시 설치 글꼴 사용", isOn: Binding(
-                        get: { model.snapshot?.enabled ?? false },
-                        set: { value in Task { await model.setEnabled(value) } }
-                    )).disabled(model.busy || model.snapshot == nil)
-                    Text("현재는 설정만 저장합니다. 원본을 삭제하거나 비활성화하면 사용할 수 없습니다.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }.padding(.top, 6)
-            } label: {
-                Text("사용 설정")
             }
             Divider()
             HStack {

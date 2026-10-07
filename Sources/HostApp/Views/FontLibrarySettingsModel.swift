@@ -35,7 +35,7 @@ final class FontLibrarySettingsModel: ObservableObject {
     private var operation: Task<Void, Never>?
     private var requestID = UUID()
 
-    init(makeClient: @escaping () throws -> FontLibraryUIClient = { .init(service: try FontLibraryService()) },
+    init(makeClient: @escaping () throws -> FontLibraryUIClient = { .init(service: try FontLibraryService.shared.get()) },
          discover: @escaping @Sendable (MacFontDiscoveryRequest, FontImportSourceSession?) async -> MacFontDiscoveryResult = {
              await MacFontDiscovery().discover($0, session: $1)
          }, sourceAccess: FontLibrarySourceAccess = .securityScoped) {

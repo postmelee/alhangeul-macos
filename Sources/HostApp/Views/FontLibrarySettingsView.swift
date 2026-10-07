@@ -14,7 +14,7 @@ struct FontLibrarySettingsView: View {
                 Spacer()
                 Button("새로고침") { Task { await model.prepare() } }.disabled(model.busy)
             }
-            Text("문서 표시·출력 적용은 준비 중입니다.")
+            Text("지원되는 글꼴은 문서에 자동으로 적용하고, 상단 글꼴 목록에서 선택할 수 있습니다. 인쇄·PDF 내보내기 지원은 준비 중입니다.")
                 .font(.callout).foregroundStyle(.secondary)
             if let message = model.message { Text(message).font(.callout).foregroundStyle(.secondary) }
             if model.preparing { ProgressView("글꼴 보관함 확인 중…") }

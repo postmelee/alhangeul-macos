@@ -49,6 +49,7 @@ actor InstalledFontCatalogService {
     private var observers: [UUID: AsyncStream<InstalledFontSnapshot>.Continuation] = [:]
     private var monitor: InstalledFontChangeMonitor?
     private var refreshTask: Task<Void, Never>?
+    private var retryPermissionsOnRefresh = false
     private struct Pending {
         let token: UUID
         let task: Task<InstalledFontRead, Error>
@@ -100,7 +101,18 @@ actor InstalledFontCatalogService {
         if observeChanges, monitor == nil {
             monitor = InstalledFontChangeMonitor { [weak self] in Task { await self?.scheduleRefresh() } }
         }
-        return try refresh()
+        guard !prepared || refreshFailure != nil else { return snapshot() }
+        // 저장된 읽기 거부는 새 프로세스에서 재확인한다. bytes는 미리 읽지 않는다.
+        return try refresh(retryIDs: permissionFailureIDs())
+    }
+
+    @discardableResult
+    func refreshForUser() throws -> InstalledFontSnapshot {
+        try refresh(retryIDs: Set(saved.records.filter { $0.failure != nil }.map(\.id)))
+    }
+
+    private func permissionFailureIDs() -> Set<String> {
+        Set(saved.records.filter { $0.failure == .permissionDenied }.map(\.id))
     }
 
     // UI 수동 새로고침, 시작 시 재검사, CoreText 알림은 같은 경로를 사용한다.
@@ -214,17 +226,25 @@ actor InstalledFontCatalogService {
     }
 
     // 알림이 누락되어도 readResource의 실제 원본/활성 상태 검사가 마지막 방어선이다.
-    func scheduleRefresh() {
+    func scheduleRefresh(retryPermissionFailures: Bool = false) {
+        retryPermissionsOnRefresh = retryPermissionsOnRefresh || retryPermissionFailures
         refreshTask?.cancel()
         refreshTask = Task { [weak self] in
             do { try await Task.sleep(nanoseconds: 200_000_000); try Task.checkCancellation() }
             catch { return }
-            _ = try? await self?.refresh()
+            _ = try? await self?.refreshScheduled()
         }
     }
 
+    private func refreshScheduled() throws {
+        try Task.checkCancellation()
+        let retry = retryPermissionsOnRefresh ? permissionFailureIDs() : []
+        retryPermissionsOnRefresh = false
+        _ = try refresh(retryIDs: retry)
+    }
+
     func stopMonitoring() {
-        monitor = nil; refreshTask?.cancel(); refreshTask = nil
+        monitor = nil; refreshTask?.cancel(); refreshTask = nil; retryPermissionsOnRefresh = false
     }
 
     private func store(_ next: InstalledFontSavedState) throws {

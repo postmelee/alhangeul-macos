@@ -3,7 +3,7 @@
 - 수행계획: [task_m020_567.md](task_m020_567.md)
 - 이슈: [#567](https://github.com/postmelee/alhangeul-macos/issues/567), M020 / v0.2
 - 브랜치: `local/task567`, 기준 `devel` / `0fa65fa`
-- 상태: Stage 2/3.1/3.2/3.3 완료. 2026-10-07 기존 글꼴 목록 통합·별도 팝업 제거와 선택/커서 입력·저장 검증을 완료했다. [Stage 3 보고](../working/task_m020_567_stage3.md). [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
+- 상태: Stage 2/3.1/3.2/3.3/4 완료. 2026-10-07 사용자 테스트 후 다음 단계 지시로 Stage 4를 구현·검증했다. [Stage 3 보고](../working/task_m020_567_stage3.md) · [Stage 4 보고](../working/task_m020_567_stage4.md). Stage 5 승인·수용은 남아 있다. [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
 - Stage 2 native 소스와 테스트를 변경했다. upstream pin과 Studio bundle은 유지했다.
 
 ## 1. 확인한 출발점
@@ -61,6 +61,15 @@ TTC/가변은 현재 native 제한을 유지한다. 정확한 face/axes가 검�
 - host 세대 변경은 열린 메뉴의 이전 목록을 폐기하고 새 snapshot 완료 후 갱신한다. 선택한 문서 이름·범위는 기존 toolbar 명령으로 보존한다.
 - 별도 선택 창과 확장 명령/메뉴를 제거한다. 빌드 helper·변환 fingerprint·sync/CI에 같은 경로를 기록해 다음 upstream sync에서도 기능이 보존되게 한다. upstream 소스 형태가 달라지면 빌드를 실패시킨다.
 - 실제 WKWebView의 기존 메뉴에서 선택·새 글자 입력·저장/재열기와 CanvasKit repaint를 확인하고 스크린샷·직접 조작 창을 제공한다.
+
+### Stage 4 확정 범위 — 2026-10-07
+
+- 사용자 테스트 후 “다음을 진행해줘” 지시를 승인으로 기록한다. 기존 false 기본값·사용자 설정을 보존하며 Stage 5·OS 지속 설치·배포는 포함하지 않는다.
+- 보관함 UI와 Studio의 관리 서비스/변경 스트림을 공유한다. 격리 저장소도 같은 native 공급·observer 경로로 검증할 수 있게 주입 경계를 일치시킨다.
+- 최초 준비를 공유하고 재실행 시 저장된 권한·활성 설정을 다시 검사한다. 수동 새로고침은 이전 읽기 실패를 재시도하며 앱 활성화·CoreText 알림은 debounce 갱신을 사용한다. 알림 없는 파일 변경에 즉시 반응한다고 보장하지 않는다.
+- 기존 renderer의 generation·리소스/측정/실패 캐시 갱신을 실제 Canvas2D/CanvasKit에서 검증한다. 사용 끄기/켜기, 설치 후보 제거·권한 실패/복구·같은 이름 다른 bytes, 관리 가져오기/제거, 빠른 문서 전환 뒤 stale 응답과 dirty/문서 이름 보존을 확인한다.
+- 설치 사용 toggle을 쉽게 찾을 수 있게 표시하고 ‘준비 중’ 안내를 지원되는 화면 표시·편집 및 기존 목록 선택에 맞게 수정한다. 인쇄/PDF/Finder 지원을 주장하지 않는다.
+- native 상태 전이 회귀와 실제 WKWebView, 격리 새 프로세스 재실행·설정 창 screenshot/직접 조작으로 증거를 남긴다. 실제 OS 설치·signed sandbox 권한 복원은 Stage 5 수용과 구분한다.
 
 ### Stage 3.1 구현 경계
 

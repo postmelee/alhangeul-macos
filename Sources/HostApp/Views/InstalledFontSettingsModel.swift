@@ -40,7 +40,7 @@ final class InstalledFontSettingsModel: ObservableObject {
 
     func refresh() async {
         if service == nil { await prepare(); return }
-        await perform { catalog in _ = try await catalog.refresh() }
+        await perform { catalog in _ = try await catalog.refreshForUser() }
     }
 
     func setEnabled(_ enabled: Bool) async {

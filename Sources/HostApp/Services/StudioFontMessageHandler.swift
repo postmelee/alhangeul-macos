@@ -7,10 +7,18 @@ final class StudioFontMessageHandler: NSObject, WKScriptMessageHandlerWithReply 
     weak var webView: WKWebView?
     private let session: StudioFontSession
     private let observeLiveChanges: Bool
+    private let installed: InstalledFontServiceProvider
+    private let library: @Sendable () throws -> FontLibraryService
+    private let onFaceRead: ((String, String, String) -> Void)?
 
-    init(session: StudioFontSession? = nil, observeLiveChanges: Bool = true) {
-        self.session = session ?? StudioFontSession()
+    init(session: StudioFontSession? = nil, observeLiveChanges: Bool = true,
+         installed: InstalledFontServiceProvider = .shared,
+         library: @escaping @Sendable () throws -> FontLibraryService = { try FontLibraryService.shared.get() },
+         onFaceRead: ((String, String, String) -> Void)? = nil) {
+        self.session = session ?? StudioFontSession(supply: .using(installed: installed, library: library))
         self.observeLiveChanges = observeLiveChanges
+        self.installed = installed; self.library = library
+        self.onFaceRead = onFaceRead
         super.init()
     }
     private var observations: [Task<Void, Never>] = []
@@ -24,8 +32,8 @@ final class StudioFontMessageHandler: NSObject, WKScriptMessageHandlerWithReply 
         active = true
         self.loadToken = loadToken
         guard observeChanges && observeLiveChanges else { return }
-        observations.append(Task { [weak self] in
-            guard let catalog = try? await InstalledFontServiceProvider.shared.service() else { return }
+        observations.append(Task { [weak self, installed] in
+            guard let catalog = try? await installed.service() else { return }
             let stream = await catalog.updates()
             var previous: UUID?
             for await snapshot in stream {
@@ -34,8 +42,8 @@ final class StudioFontMessageHandler: NSObject, WKScriptMessageHandlerWithReply 
                 previous = snapshot.generation
             }
         })
-        observations.append(Task { [weak self] in
-            guard let library = try? FontLibraryService.shared.get() else { return }
+        observations.append(Task { [weak self, library] in
+            guard let library = try? library() else { return }
             let stream = await library.changes.updates()
             var initial = true
             for await _ in stream {
@@ -86,6 +94,11 @@ final class StudioFontMessageHandler: NSObject, WKScriptMessageHandlerWithReply 
             do {
                 let response = try await session.handle(body)
                 guard active, loadToken == token else { throw StudioFontError.staleSession }
+                // 격리 검증용으로 현재 frame에 실제 공급한 식별자/검증 hash만 관찰한다.
+                if body["op"] as? String == "openFace", let id = body["id"] as? String,
+                   let ps = response["postScriptName"] as? String, let hash = response["sha256"] as? String {
+                    onFaceRead?(id, ps, hash)
+                }
                 replyHandler(response, nil)
             }
             catch let error as StudioFontError { replyHandler(nil, error.rawValue) }

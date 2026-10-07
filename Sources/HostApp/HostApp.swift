@@ -223,6 +223,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ notification: Notification) {
         repositionUnreachableWindowsIfNeeded()
+        Task {
+            if let catalog = try? await InstalledFontServiceProvider.shared.service() {
+                await catalog.scheduleRefresh(retryPermissionFailures: true)
+            }
+        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

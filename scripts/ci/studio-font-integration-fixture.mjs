@@ -20,6 +20,24 @@ if (mode === 'create') {
     writeFileSync(resolve(output, 'gowun-document.hwp'), doc.exportHwp());
     writeFileSync(resolve(output, 'gowun-document.hwpx'), doc.exportHwpx());
   } finally { doc.free(); }
+} else if (mode === 'verify-changes') {
+  const proof=[];
+  for(const ext of ['hwp','hwpx']) {
+    const doc=new HwpDocument(readFileSync(resolve(output, `changes-result.${ext}`)));
+    try {
+      assert.equal(doc.getTextRange(0,0,0,doc.getParagraphLength(0,0)),text);
+      for(const offset of [0,3,text.length-2]) {
+        const props=JSON.parse(doc.getCharPropertiesAt(0,0,offset));
+        assert.equal(props.fontFamily,offset===text.length-2 ? '돋움' : 'Gowun Batang');
+        assert.equal(props.bold,offset===3);
+        assert(props.fontFamilies.every(name=>name===props.fontFamily));
+        proof.push({ext,offset,fontFamily:props.fontFamily,bold:props.bold});
+      }
+      assert(!doc.renderPageSvg(0).includes('__rhwp_host_face_'));
+    } finally { doc.free(); }
+  }
+  writeFileSync(resolve(output,'changes-saved-proof.json'),JSON.stringify(proof,null,2)+'\n');
+  console.log('PASS: native font changes preserve HWP/HWPX original content/names/styles on reopen');
 } else if (mode === 'verify') {
   const proof = [];
   for (const ext of ['hwp', 'hwpx']) {

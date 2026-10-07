@@ -1,0 +1,30 @@
+{
+  "repository": "https://github.com/google/fonts",
+  "commit": "c1eda9233c33ad7775b27efd794f931095cf6133",
+  "files": [
+    {
+      "file": "OFL.txt",
+      "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/OFL.txt",
+      "bytes": 4397,
+      "sha256": "49a57cc769fa9affd6eefb9070a61e3d3f6b757c97cafb15848bc6d1c81acc78"
+    },
+    {
+      "file": "METADATA.pb",
+      "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/METADATA.pb",
+      "bytes": 1307,
+      "sha256": "5ab6c5630b85b7d20e8cec7a3be246f9cd5a8f247dea4993f6fb9cf1cc24478e"
+    },
+    {
+      "file": "GowunBatang-Regular.ttf",
+      "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/GowunBatang-Regular.ttf",
+      "bytes": 8433296,
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849"
+    },
+    {
+      "file": "GowunBatang-Bold.ttf",
+      "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/GowunBatang-Bold.ttf",
+      "bytes": 8178712,
+      "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94"
+    }
+  ]
+}

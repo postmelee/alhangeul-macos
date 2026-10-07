@@ -1,5 +1,7 @@
 import AppKit
 import WebKit
+import SwiftUI
+import ScreenCaptureKit
 
 private actor Reads {
     var counts: [String: Int] = [:]
@@ -20,6 +22,8 @@ private struct Main {
 @MainActor
 private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var window: NSWindow?
+    private var settingsWindow: NSWindow?
+    private var faceResponses: [[String: String]] = []
     private var web: WKWebView?
     private var coordinator: RhwpStudioWebView.Coordinator?
     private var session: RhwpStudioEditorSession?
@@ -95,6 +99,7 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
         """)
     }
     private func run() async throws {
+        if CommandLine.arguments.contains("--changes") { try await runChanges(); return }
         let root = URL(fileURLWithPath: CommandLine.arguments[2])
         var assets: [String: StudioFontBytes] = [:]
         var rows: [StudioFontFace] = []
@@ -275,14 +280,246 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
         try Data(savedHwpx).write(to: out.appendingPathComponent("picker-result.hwpx"))
         try await screenshot("studio-after-dropdown.png")
     }
+    private func fontGeneration() async throws -> Int {
+        try await js("return window.rhwpStudio.fonts.getState().generation;") as? Int ?? -1
+    }
+    private func resourceGeneration() async throws -> Int {
+        (try await rendererDiagnostics()["selection"] as? [String: Any])?["resourceGeneration"] as? Int ?? -1
+    }
+    private func waitForFonts(_ count: Int, backend: String, after generation: Int = -1, resources: Int = -1) async throws {
+        try await wait("\(backend) current font state \(count)") {
+            let state = try await self.js("return window.rhwpStudio.fonts.getState();") as? [String: Any] ?? [:]
+            guard state["count"] as? Int == count, (state["generation"] as? Int ?? -1) > generation else { return false }
+            let diagnostics = try await self.rendererDiagnostics()
+            guard diagnostics["effectiveBackend"] as? String == backend,
+                  ((diagnostics["selection"] as? [String: Any])?["resourceGeneration"] as? Int ?? -1) > resources else { return false }
+            if backend == "canvas2d" {
+                let fonts = try await self.js("return window.__fontProbeWasm.getHostCanvasFontDiagnostics();") as? [String: Any] ?? [:]
+                return fonts["loaded"] as? Int == count && fonts["pending"] as? Int == 0
+            }
+            let page = self.canvasKitPage(diagnostics)
+            return page["localTypefaceCount"] as? Int == count && page["localTypefacePendingCount"] as? Int == 0 &&
+                page["lastRenderCompleted"] as? Bool == true && page["lastRenderError"] is NSNull
+        }
+    }
+    private func showSettings(_ model: InstalledFontSettingsModel, library: FontLibrarySettingsModel) {
+        let settings = NSWindow(contentRect: NSRect(x: 100, y: 180, width: 720, height: 560),
+            styleMask: [.titled, .closable], backing: .buffered, defer: false)
+        settings.title = "알한글 — 글꼴 설정 · 격리 테스트"
+        settings.isReleasedWhenClosed = false; settings.appearance = NSAppearance(named: .aqua)
+        settings.contentView = NSHostingView(rootView: InstalledFontSettingsView(model: model, library: library).frame(width: 720, height: 560))
+        settingsWindow = settings; settings.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
+    }
+    private func screenshotSettings(_ name: String) async throws {
+        try await Task.sleep(nanoseconds: 300_000_000)
+        guard #available(macOS 14.4, *) else { throw Failure(message: "settings capture requires macOS 14.4") }
+        // 현재 프로세스의 창만 조회/캡처한다. 다른 앱 화면이나 전역 화면 권한은 요구하지 않는다.
+        let content = try await SCShareableContent.currentProcess
+        guard let owned = content.windows.first(where: { $0.windowID == CGWindowID(settingsWindow!.windowNumber) }) else {
+            throw Failure(message: "own settings window not found")
+        }
+        let config = SCStreamConfiguration()
+        config.width = Int(owned.frame.width * 2); config.height = Int(owned.frame.height * 2)
+        config.showsCursor = false; config.ignoreShadowsSingleWindow = true
+        let cg = try await SCScreenshotManager.captureImage(contentFilter: SCContentFilter(desktopIndependentWindow: owned), configuration: config)
+        guard let data = NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:]) else { throw Failure(message: "settings PNG") }
+        try data.write(to: out.appendingPathComponent(name))
+    }
+    private func runChanges() async throws {
+        let repository = URL(fileURLWithPath: CommandLine.arguments[2])
+        guard let index = CommandLine.arguments.firstIndex(of: "--state-dir"), index + 1 < CommandLine.arguments.count else { throw Failure(message: "state directory") }
+        let state = URL(fileURLWithPath: CommandLine.arguments[index + 1])
+        let installedReopen = CommandLine.arguments.contains("--installed-reopen")
+        let reopening = CommandLine.arguments.contains("--reopen") || installedReopen
+        let fixture = try FontChangeFixture(repository: repository, directory: state.appendingPathComponent("sources"), create: !reopening)
+        defer { try? fixture.setReadable(true); Task { await fixture.gate.open() } }
+        let catalog = try InstalledFontCatalogService(persistence: .file(at: state.appendingPathComponent("installed")),
+            environment: fixture.environment, observeChanges: false)
+        let provider = InstalledFontServiceProvider(factory: { catalog })
+        let library = FontLibraryService(store: .init(rootURL: state.appendingPathComponent("library")))
+        let model = InstalledFontSettingsModel(makeService: { try await provider.service() })
+        let libraryModel = FontLibrarySettingsModel(makeClient: { .init(service: library) })
+        await model.prepare(); await libraryModel.prepare()
+        let initial = await catalog.snapshot()
+        try check(initial.enabled == installedReopen, installedReopen ? "new process restores enabled installed-font setting" :
+            reopening ? "new process restores disabled setting" : "new installation keeps approved false default")
+        showSettings(model, library: libraryModel)
+        try await screenshotSettings(reopening ? "settings-reopen.png" : "settings-default.png")
+        let handler = StudioFontMessageHandler(installed: provider, library: { library }, onFaceRead: { [weak self] id, ps, hash in
+            self?.faceResponses.append(["source": id, "ps": ps, "sha256": hash])
+        })
+        let coordinator = RhwpStudioWebView.Coordinator(fontMessageHandler: handler)
+        self.coordinator = coordinator; coordinator.onEditorSessionChange = { self.session = $0 }
+        let web = coordinator.makeWebView(); self.web = web
+        let window = NSWindow(contentRect: NSRect(x: 180, y: 100, width: 1100, height: 800),
+            styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
+        window.title = "알한글 — 글꼴 변경 연동 검증"; window.delegate = self
+        window.isReleasedWhenClosed = false; window.contentView = web; self.window = window
+        window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
+        func load(_ backend: String, id: Int) async throws {
+            if id == 2 {
+                await fixture.gate.arm()
+                await model.setEnabled(true)
+                try await wait("old document read entered") { await fixture.gate.entered }
+                for hop in 11...13 {
+                    let old = RhwpStudioDocumentPayload(data: try Data(contentsOf: out.appendingPathComponent("gowun-document.hwp")),
+                        filename: "font-switch-\(hop).hwp", revision: hop, sourceProtection: .plain)
+                    coordinator.update(document: old, sourceDocument: nil, reloadToken: 0, loadID: hop, in: web)
+                }
+                await model.setEnabled(false)
+                await fixture.gate.open()
+                faceResponses.removeAll()
+            }
+            session = nil
+            let url = out.appendingPathComponent("gowun-document.hwpx")
+            let payload = RhwpStudioDocumentPayload(data: try Data(contentsOf: url), filename: url.lastPathComponent,
+                revision: id, sourceProtection: .plain)
+            coordinator.update(document: payload, sourceDocument: nil, reloadToken: 0, loadID: id, in: web)
+            var components = URLComponents(url: try RhwpStudioResourceLocator.loadURL(for: payload), resolvingAgainstBaseURL: false)!
+            components.queryItems = (components.queryItems ?? []) + [.init(name: "renderer", value: backend), .init(name: "canvaskitSurface", value: "webgl")]
+            web.load(URLRequest(url: components.url!))
+            try await wait("change document ready") { self.session?.snapshot.ready == true }
+            try await wait("change provider connected") { try await self.js("return window.__alhangeulFontConnection?.getState().status==='connected';") as? Bool == true }
+            _ = try await js("""
+            const a=window.rhwpStudio.automation;
+            a.registerCommand({id:'ext:change-probe-services',label:'probe',execute(s){window.__fontProbeWasm=s.wasm;window.__fontProbeState=s.documentState;}});
+            a.execute('ext:change-probe-services');a.unregisterCommand('ext:change-probe-services');return true;
+            """)
+        }
+        if reopening {
+            try check(fixture.sourceExists == installedReopen, installedReopen ? "new process rechecks original source copies" : "new process has no original source copies")
+            try check(try await library.list().entries.count == (installedReopen ? 0 : 2),
+                installedReopen ? "installed automatic use is verified without managed substitutes" : "new process restores managed Regular/Bold copies")
+            try await load("canvaskit", id: 101)
+            try await waitForFonts(2, backend: "canvaskit")
+            let prefix = installedReopen ? "installed:" : "managed:"
+            try check(faceResponses.count >= 2 && faceResponses.allSatisfy { $0["source"]?.hasPrefix(prefix) == true },
+                installedReopen ? "enabled setting automatically supplies exact installed bytes on new process" : "new process automatically renders exact managed bytes without source or new import")
+            try await screenshot(installedReopen ? "studio-installed-reopen.png" : "studio-reopen.png")
+            if !installedReopen {
+                let generation = try await fontGeneration(), resources = try await resourceGeneration()
+                try fixture.restore(); await model.refresh(); await model.setEnabled(true)
+                for entry in try await library.list().entries {
+                    _ = try await library.remove(objectHash: entry.object.sha256, expectedGeneration: try await library.list().generation)
+                }
+                await libraryModel.prepare()
+                try await waitForFonts(2, backend: "canvaskit", after: generation, resources: resources)
+                try check(faceResponses.suffix(2).allSatisfy { $0["source"]?.hasPrefix("installed:") == true },
+                    "managed substitutes removed before independent installed relaunch")
+            }
+            try await screenshotSettings("settings-enabled.png")
+            return
+        }
+        for (index, backend) in ["canvas2d", "canvaskit"].enumerated() {
+            await model.setEnabled(false)
+            try await load(backend, id: index + 1)
+            try await waitForFonts(0, backend: backend)
+            if index == 1 {
+                try check(faceResponses.isEmpty, "rapid document changes reject gated previous replies and restore final fallback")
+            }
+            let original = try await js("return JSON.stringify([0,3,25].map(p=>window.__fontProbeWasm.getCharPropertiesAt(0,0,p)));") as? String
+            var generation = try await fontGeneration(), resources = try await resourceGeneration()
+            await model.setEnabled(true)
+            try await waitForFonts(2, backend: backend, after: generation, resources: resources)
+            try check(true, "\(backend): enabling saved setting loads both exact installed faces in open document")
+            generation = try await fontGeneration(); resources = try await resourceGeneration()
+            await model.setEnabled(false)
+            try await waitForFonts(0, backend: backend, after: generation, resources: resources)
+            try check(true, "\(backend): disabling removes local face/measurement resources and renders fallback")
+            generation = try await fontGeneration(); resources = try await resourceGeneration()
+            await model.setEnabled(true)
+            try await waitForFonts(2, backend: backend, after: generation, resources: resources)
+            try check(true, "\(backend): re-enabling recovers without reopening document")
+            generation = try await fontGeneration(); resources = try await resourceGeneration()
+            try fixture.setReadable(false); await model.refresh()
+            try await waitForFonts(0, backend: backend, after: generation, resources: resources)
+            try check((await catalog.snapshot()).records.allSatisfy { $0.failure == .permissionDenied },
+                "\(backend): actual fixture read denial is published and stale faces are discarded")
+            if backend == "canvaskit" { try await screenshotSettings("settings-permission.png") }
+            generation = try await fontGeneration(); resources = try await resourceGeneration()
+            try fixture.setReadable(true); await model.refresh()
+            try await waitForFonts(2, backend: backend, after: generation, resources: resources)
+            try check(true, "\(backend): restored permission and manual refresh clear failure caches")
+            generation = try await fontGeneration(); resources = try await resourceGeneration()
+            faceResponses.removeAll()
+            let changedHash = try fixture.replaceBytes(); await model.refresh()
+            try await waitForFonts(2, backend: backend, after: generation, resources: resources)
+            try check(faceResponses.contains { $0["ps"] == "GowunBatang-Regular" && $0["sha256"] == changedHash },
+                "\(backend): same PostScript name reloads changed verified content hash")
+            generation = try await fontGeneration(); resources = try await resourceGeneration()
+            try fixture.removeSources(); await model.refresh()
+            try await waitForFonts(0, backend: backend, after: generation, resources: resources)
+            try check(true, "\(backend): removed installed candidates fall back without retaining old faces")
+            generation = try await fontGeneration(); resources = try await resourceGeneration()
+            try fixture.restore(); await model.refresh()
+            try await waitForFonts(2, backend: backend, after: generation, resources: resources)
+            try check(true, "\(backend): reappearing candidates recover in current document")
+            generation = try await fontGeneration(); resources = try await resourceGeneration()
+            await model.setEnabled(false)
+            try await waitForFonts(0, backend: backend, after: generation, resources: resources)
+            generation = try await fontGeneration(); resources = try await resourceGeneration()
+            libraryModel.beginImport(); libraryModel.scan(.selected([fixture.directory]))
+            try await wait("managed UI discovery") { libraryModel.phase == .candidates }
+            libraryModel.importSelected()
+            try await wait("managed UI import") { libraryModel.phase == .results }
+            libraryModel.dismissImport()
+            try check(libraryModel.results.filter { $0.status == .added }.count == 2, "\(backend): real UI model imports Regular/Bold through shared service")
+            try await waitForFonts(2, backend: backend, after: generation, resources: resources)
+            try check(faceResponses.suffix(2).count == 2 && faceResponses.suffix(2).allSatisfy { $0["source"]?.hasPrefix("managed:") == true },
+                "\(backend): managed import observer updates exact bytes while installed use is disabled")
+            try fixture.removeSources(); await model.refresh()
+            try check(!fixture.sourceExists, "\(backend): own source files removed; managed copies remain independent")
+            if backend == "canvas2d" {
+                generation = try await fontGeneration(); resources = try await resourceGeneration()
+                for entry in try await library.list().entries {
+                    _ = try await library.remove(objectHash: entry.object.sha256, expectedGeneration: try await library.list().generation)
+                }
+                try await waitForFonts(0, backend: backend, after: generation, resources: resources)
+                try check(true, "\(backend): managed removal publishes and clears old face resources")
+                try fixture.restore(); await model.refresh()
+            } else {
+                generation = try await fontGeneration(); resources = try await resourceGeneration()
+                for entry in try await library.list().entries {
+                    _ = try await library.remove(objectHash: entry.object.sha256, expectedGeneration: try await library.list().generation)
+                }
+                try await waitForFonts(0, backend: backend, after: generation, resources: resources)
+                try check(true, "\(backend): managed removal publishes and clears old face resources")
+                try fixture.restore(); await model.refresh()
+                generation = try await fontGeneration(); resources = try await resourceGeneration()
+                libraryModel.beginImport(); libraryModel.scan(.selected([fixture.directory]))
+                try await wait("managed reimport discovery") { libraryModel.phase == .candidates }
+                libraryModel.importSelected()
+                try await wait("managed reimport") { libraryModel.phase == .results }
+                libraryModel.dismissImport()
+                try await waitForFonts(2, backend: backend, after: generation, resources: resources)
+                try fixture.removeSources(); await model.refresh()
+                try check(true, "\(backend): managed reimport clears failure cache and survives source removal")
+            }
+            try check(try await js("return window.__fontProbeState.isDirty()===false;") as? Bool == true,
+                "\(backend): font changes preserve clean/undo document state")
+            try check(try await js("return JSON.stringify([0,3,25].map(p=>window.__fontProbeWasm.getCharPropertiesAt(0,0,p)));") as? String == original,
+                "\(backend): font changes preserve document original names and styles")
+            try await screenshot("studio-changes-\(backend).png")
+        }
+        for ext in ["hwp", "hwpx"] {
+            let method = ext == "hwp" ? "exportHwp" : "exportHwpx"
+            let data = try await js("return Array.from(window.__fontProbeWasm.\(method)());") as? [UInt8] ?? []
+            try Data(data).write(to: out.appendingPathComponent("changes-result.\(ext)"))
+        }
+        try JSONSerialization.data(withJSONObject: faceResponses, options: [.prettyPrinted, .sortedKeys])
+            .write(to: out.appendingPathComponent("change-face-proof.json"))
+    }
     private func finish(_ error: String?) {
         let result: [String: Any] = ["checks": checks, "error": error as Any? ?? NSNull()]
         if let data = try? JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys]) {
-            try? data.write(to: out.appendingPathComponent("integration-result.json"))
+            let filename = CommandLine.arguments.contains("--changes")
+                ? (CommandLine.arguments.contains("--installed-reopen") ? "installed-reopen-result.json" :
+                    CommandLine.arguments.contains("--reopen") ? "reopen-result.json" : "changes-result.json") : "integration-result.json"
+            try? data.write(to: out.appendingPathComponent(filename))
         }
         print(error.map { "FAIL: \($0)" } ?? "PASS: product Studio integration")
         if error == nil && CommandLine.arguments.contains("--interactive") {
-            window?.title = "알한글 — 고운바탕 연결 체험 · 테스트 문서"
+            window?.title = CommandLine.arguments.contains("--changes") ? "알한글 — 글꼴 변경 연동 · 격리 테스트 문서" : "알한글 — 고운바탕 연결 체험 · 테스트 문서"
             Task { @MainActor in
                 _ = try? await js("return window.rhwpStudio.automation.execute('edit:select-all');")
                 try? await openFontMenu("system")

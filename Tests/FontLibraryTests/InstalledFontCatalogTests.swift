@@ -331,6 +331,45 @@ final class InstalledFontCatalogTests: XCTestCase {
         catch { XCTAssertEqual(error as? InstalledFontFailure, .staleGeneration) }
     }
 
+    func testRepeatedPreparationSharesCurrentCatalogWithoutRescanning() async throws {
+        let state = InstalledFontTestState(); state.records = [record()]
+        let catalog = try service(state)
+        let first = try await catalog.prepare(), second = try await catalog.prepare()
+        XCTAssertEqual(first.generation, second.generation)
+        XCTAssertEqual(state.scanCount, 1)
+        XCTAssertEqual(state.reads, 0)
+    }
+
+    func testRelaunchRechecksSavedPermissionFailureWithoutReadingWholeCatalog() async throws {
+        let state = InstalledFontTestState(); state.records = [record()]; state.readFailure = .permissionDenied
+        let first = try service(state)
+        _ = try await first.prepare(); let initial = try await first.setEnabled(true)
+        do { _ = try await first.readResource("face-1", expectedGeneration: initial.generation); XCTFail() }
+        catch { XCTAssertEqual(error as? InstalledFontFailure, .permissionDenied) }
+        state.locked { $0.readFailure = nil }
+        let second = try service(state), reads = state.reads
+        let ready = try await second.prepare()
+        XCTAssertTrue(ready.enabled); XCTAssertNil(ready.records.first?.failure)
+        XCTAssertEqual(state.reads, reads)
+        _ = try await second.readResource("face-1", expectedGeneration: ready.generation)
+    }
+
+    func testForegroundRecoveryIntentSurvivesCoreTextNotificationBurst() async throws {
+        let state = InstalledFontTestState(); state.records = [record()]; state.readFailure = .permissionDenied
+        let catalog = try service(state)
+        _ = try await catalog.prepare(); let initial = try await catalog.setEnabled(true)
+        do { _ = try await catalog.readResource("face-1", expectedGeneration: initial.generation); XCTFail() } catch {}
+        state.locked { $0.readFailure = nil }
+        await catalog.scheduleRefresh(retryPermissionFailures: true)
+        for _ in 0..<10 { await catalog.scheduleRefresh() }
+        try await Task.sleep(nanoseconds: 400_000_000)
+        let ready = await catalog.snapshot()
+        XCTAssertNil(ready.records.first?.failure)
+        XCTAssertEqual(state.scanCount, 2)
+        _ = try await catalog.readResource("face-1", expectedGeneration: ready.generation)
+        await catalog.stopMonitoring()
+    }
+
 }
 
 extension InstalledFontCatalogTests {
@@ -372,6 +411,24 @@ extension InstalledFontCatalogTests {
         for _ in 0..<100 where model.snapshot?.enabled != true { await Task.yield() }
         XCTAssertEqual(model.snapshot?.enabled, true)
         XCTAssertNil(model.message)
+    }
+
+    @MainActor
+    func testSettingsRefreshRetriesReadFailureAndKeepsAutomaticSupplyEnabled() async throws {
+        let state = InstalledFontTestState(); state.records = [record()]; state.readFailure = .corrupt
+        let catalog = try service(state), model = InstalledFontSettingsModel(makeService: { catalog })
+        await model.prepare(); await model.setEnabled(true)
+        let initial = await catalog.snapshot()
+        do { _ = try await catalog.readResource("face-1", expectedGeneration: initial.generation); XCTFail() } catch {}
+        state.locked { $0.readFailure = nil }
+        await model.refresh()
+        let ready = await catalog.snapshot()
+        for _ in 0..<100 where model.snapshot?.generation != ready.generation { await Task.yield() }
+        XCTAssertNil(model.snapshot?.records.first?.failure)
+        XCTAssertEqual(model.snapshot?.enabled, true)
+        XCTAssertNil(model.message)
+        XCTAssertEqual(state.reads, 1)
+        _ = try await catalog.readResource("face-1", expectedGeneration: ready.generation)
     }
 
     func testSupplyContractDoesNotExposeSourceOrPermission() throws {
