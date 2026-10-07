@@ -6,10 +6,13 @@ import argparse, platform, plistlib, shutil, subprocess
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--interactive', action='store_true', help='검증 후 테스트 문서 창을 직접 조작하도록 유지')
 parser.add_argument('--skip-build', action='store_true', help='이전에 빌드한 격리 앱을 사용')
+parser.add_argument('--output-dir', type=Path, help='검증 산출물 폴더 (.app은 build.noindex 아래)')
 args = parser.parse_args()
 
 root = Path(__file__).resolve().parent.parent
-out = root / 'build.noindex/task567/stage3-2'
+out = (args.output_dir or root / 'build.noindex/task567/stage3-3').resolve()
+if not out.is_relative_to(root / 'build.noindex'):
+    parser.error('--output-dir must be under build.noindex')
 out.mkdir(parents=True, exist_ok=True)
 bundle = root / 'Sources/HostApp/Resources/rhwp-studio'
 fixture_tool = root / 'scripts/ci/studio-font-integration-fixture.mjs'

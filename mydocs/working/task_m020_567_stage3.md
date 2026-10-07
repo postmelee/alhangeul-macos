@@ -106,3 +106,40 @@ host catalog는 upstream toolbar 목록에 자동 추가되지 않는다. 공개
 이 단계의 정식 릴리즈 의존은 해소됐다. 추가 upstream 릴리즈를 기다리지 않고 Stage 4로 진행할 수 있다. Stage 4는 설정 변경·권한/원본 상태 변화·열린 문서 캐시 갱신·재실행·지원 안내, Stage 5는 signed sandbox·실제 OS 설치·다양한 실제 문서/글꼴·성능/다중 창 수용이다. 현재 사용 설정 기본값과 준비 중 안내는 Stage 4의 정책·수용 검증 대상으로 유지했다.
 
 #567 전체 완료·PR·제품 v0.2 배포는 아직 아니다. PDF/인쇄/native/Finder(#568) 및 Windows 입력(#566)은 별도 책임으로 유지한다. 다음 단계는 저장소의 단계 승인 절차를 따른다.
+
+## Stage 3.3 완료 — 2026-10-07
+
+사용자가 기존 글꼴 목록의 전체/시스템 범주에 로컬 글꼴을 연결하고 별도 팝업을 제거하는 제안에 “그렇게 진행해줘”라고 지시했다. 이 범위를 #567의 Stage 3.3으로 보정하고 구현했다. Stage 3.2의 별도 선택 창은 이력이며 현재 제품 소스에는 남아 있지 않다.
+
+### 변경과 경계
+
+- `StudioFontPickerScript`와 전용 automation 명령/서식 메뉴를 제거했다. 제품 bootstrap은 공개 host provider 연결·수명만 담당한다. Xcode 프로젝트는 `project.yml`에서 `xcodegen`으로 재생성했다.
+- 앱 소유 `studio-font-menu-adapter.mjs`는 빌드 시 원본 Studio의 `getLocalFonts()`와 toolbar 변경 구독 두 곳을 변환한다. host provider가 활성일 때 공급 가능한 원래 family를 반환한다. Regular/Bold는 family 한 항목으로 표시하며 굵기·face 선택은 기존 renderer matcher가 처리한다. 해제 시 기존 browser 목록을 반환한다. 같은 함수를 사용하는 글자 모양/글꼴 세트 UI도 같은 목록을 받는다.
+- host invalidation 시 열린 이전 메뉴를 닫고, 새 snapshot 완료 후 현재 세대의 새 메뉴만 갱신한다. 문서 선택 범위·현재 이름은 유지한다. 메뉴 선택은 기존 toolbar `format-char`/input handler 경로를 사용하므로 선택 영역과 커서 입력을 모두 지원한다. 편집·읽기 전용 정책과 renderer/bytes 공급 구현은 복제하지 않았다.
+- `build-rhwp-studio.mjs`는 변환 소스의 격리 사본을 upstream에 고정된 TypeScript CLI로 검사하고 Vite plugin으로 빌드한다. 원본 checkout의 tracked 소스는 변경하지 않았다. minified 산출물을 직접 패치하지 않는다. native core·WASM pin/bytes는 Stage 3.2와 동일한 공식 v0.8.7이다.
+- 빌드 증명은 builder/adapter·원본/변환 소스 SHA256과 upstream commit을 기록한다. sync는 증명을 요구하고 verifier는 manifest·helper·source fingerprint를 대조한다. 다음 자동 sync도 같은 helper를 사용하며 소스 형태 변경·누락/오래된 증명은 실패한다. CI 변경 분류에 builder/adapter도 등록했다.
+
+### 검증과 실제 화면
+
+| 검증 | 결과 |
+|---|---|
+| 변환된 TypeScript typecheck + 실제 Vite/PWA build | PASS |
+| strict Studio asset/Cargo/adapter provenance, 원본 tracked Git diff | PASS / 무변경 |
+| `scripts/test-font-library.sh` | Node 24 + XCTest 100 PASS |
+| Studio source lock/sync fixtures | PASS: linked worktree·stale/dirty 경계·증명 누락 거부, 원본 보존 |
+| HostApp Debug/macOS 12 target | BUILD SUCCEEDED |
+| 실제 WKWebView·제품 Coordinator·공식 Studio 검증 | 27 PASS |
+| 실제 HWP/HWPX 저장 후 bundled WASM 재열기 | 8 위치 PASS, 7개 언어 원래 이름·Regular/Bold·입력 내용·alias 미유출 |
+| README badge fixture 10건, 변경 shell/Node/Python/YAML·no-AppKit·diff | PASS |
+
+고운바탕 Regular/Bold를 격리 fixture로 공급하고 HWP/Canvas2D, HWPX/Canvas2D, HWPX/CanvasKit을 확인했다. 기존 메뉴를 열어도 추가 bytes 읽기가 없고, 전체/시스템에서 family 중복이 없다. 이전 별도 명령이 없음을 확인했다. catalog refresh로 이전 메뉴를 폐기한 뒤에도 문서 선택을 유지하고, 실제 선택으로 마지막 돋움을 고운바탕으로 변경했다. 커서에서는 메뉴로 돋움→고운바탕을 선택한 뒤 실제 input 이벤트로 ` 입력`을 추가했다. 선택과 입력 각각 새 document revision의 CanvasKit repaint 완료를 기다렸으며 저장·재열기도 대조했다.
+
+[현재 화면·재현 자료](assets/task_m020_567_stage3_3/REPRODUCE.md)에 드롭다운/입력 결과와 빌드 증명을 보존했다. 원시 자료는 `build.noindex/task567/stage3-3/`, 최종 paint 검증은 그 아래 `final/`에 있다. **알한글 — 고운바탕 연결 체험 · 테스트 문서** 창은 직접 조작하도록 유지한다. 메뉴의 한 항목은 고운바탕 family의 두 굵기이며 실제 OS 전체 목록을 의미하지 않는다.
+
+### 중간 보정·등록 정리와 제한
+
+초기 builder는 TypeScript JS compiler API를 기대했지만 실제 pin의 TypeScript 7 CLI에는 해당 API가 없어 실패했다. 변환 소스 격리 사본+동일 pinned CLI로 검사하도록 수정했다. sync fixture는 HEAD 전환 뒤 오래된 증명을 갖고 있어 실패했으며 의도한 source commit으로 갱신했다. 저장 검증에서 native WASM에 없는 `getParagraphText`를 호출한 오류는 실제 `getTextRange`로 고쳤다. 첫 입력 직후 snapshot은 이전 paint였으므로 입력 후 revision/render complete까지 기다리도록 보강하고 현재 glyph를 재확인했다. 최종 표에는 수정 후 결과만 집계한다.
+
+첫 sandbox 내 GUI 실행/등록 해제와 Xcode 캐시 접근은 권한 경계 때문에 실패했다. 승인된 격리 GUI와 기존 Xcode cache 접근으로 재실행해 통과했다. 이번 HostApp 개발 산출물의 정확한 경로에 `lsregister -u`를 실행해 종료 코드 0을 확인했고 자동 probe도 자신의 앱 경로만 해제했다. 글꼴 테스트 DerivedData에는 Alhangeul.app이 없어 해제할 대상이 없었다. 전체 등록 위생 조회는 같은 과거 개발 경로가 LaunchServices에 잔존해 FAIL이다. 전역 등록·다른 worktree·사용자 설치본은 변경하지 않았고 Finder 성공으로 집계하지 않는다.
+
+Stage 4/5는 아직 진행하지 않았다. 설정 기본값/준비 중 안내, 실제 OS 설치·권한/원본 변화와 새 프로세스 복원, signed sandbox·다양한 실제 문서/다중 창/대규모 성능은 남는다. 이번 창은 사용자 글꼴 설정·OS 설치를 변경하지 않는 격리 시험이다. #567 close·PR 게시·릴리스는 하지 않았다.

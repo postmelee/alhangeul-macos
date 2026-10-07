@@ -1,0 +1,30 @@
+{
+  "REPRODUCE.md": {
+    "sha256": "436f2d497b381983c009f1a400cff90f898d65d04a6a2cef77c12e05c6722e8d",
+    "size": 3301
+  },
+  "adapter-receipt.json": {
+    "sha256": "21581c6cb0998c346a467913b496e28bef9689df68e532b5e7a51c7a00655b80",
+    "size": 911
+  },
+  "integration-result.json": {
+    "sha256": "cd5adf5037aefb09290e502308cb39d330ab5679b37ade3d846dfc5740f174e4",
+    "size": 1690
+  },
+  "local-font-dropdown.png": {
+    "sha256": "d8bdd34f230fc8f5edb665d97171ef1b590e13147463f281704d57311c20d526",
+    "size": 206838
+  },
+  "saved-font-proof.json": {
+    "sha256": "5e0e2719f6d73710fa88372619c7a11a41b9aa45d42d5f1e98c53b2394a2f631",
+    "size": 777
+  },
+  "studio-after-dropdown.png": {
+    "sha256": "c55d7cefd021b158798245aac6e3b8e27c8822966659a1167e5780752611cc18",
+    "size": 210472
+  },
+  "studio-manifest.json": {
+    "sha256": "c93dcc072d0e191abfc938e3d9ba0e4ee486ed5397f79c2011e7e5055edd657e",
+    "size": 1788
+  }
+}

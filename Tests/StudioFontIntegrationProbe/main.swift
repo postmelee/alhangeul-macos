@@ -77,6 +77,23 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func canvasKitPage(_ diagnostics: [String: Any]) -> [String: Any] {
         (diagnostics["page"] as? [String: Any])?["canvaskit"] as? [String: Any] ?? [:]
     }
+    private func openFontMenu(_ category: String) async throws {
+        _ = try await js("""
+        const select=document.querySelector('#font-name');
+        if(!document.querySelector('.font-picker-menu'))select.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true}));
+        document.querySelector('.font-picker-category[data-category="\(category)"]').click();
+        """)
+        try await wait("existing font menu ready") {
+            try await self.js("return [...document.querySelectorAll('.font-picker-option')].some(n=>n.textContent==='Gowun Batang');") as? Bool == true
+        }
+    }
+    private func chooseFont(_ name: String) async throws {
+        let quoted = String(data: try JSONSerialization.data(withJSONObject: [name]), encoding: .utf8)!
+        _ = try await js("""
+        const option=[...document.querySelectorAll('.font-picker-option')].find(n=>n.textContent===\(quoted)[0]);
+        if(!option)throw Error('Missing existing menu font');option.click();return true;
+        """)
+    }
     private func run() async throws {
         let root = URL(fileURLWithPath: CommandLine.arguments[2])
         var assets: [String: StudioFontBytes] = [:]
@@ -150,7 +167,7 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
             try check(true, "\(ext): actual product Coordinator + v0.8.7 Studio provider connected")
             _ = try await js("""
             const a=window.rhwpStudio.automation;
-            a.registerCommand({id:'ext:font-probe-services',label:'probe',execute(s){window.__fontProbeWasm=s.wasm;window.__fontProbeState=s.documentState;}});
+            a.registerCommand({id:'ext:font-probe-services',label:'probe',execute(s){window.__fontProbeWasm=s.wasm;window.__fontProbeState=s.documentState;window.__fontProbeInput=s.getInputHandler();}});
             a.execute('ext:font-probe-services');a.unregisterCommand('ext:font-probe-services');
             return true;
             """)
@@ -186,21 +203,28 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
             try await screenshot("studio-\(label).png")
         }
         _ = try await js("return window.rhwpStudio.automation.execute('edit:select-all');")
-        let result = try await js("return window.rhwpStudio.automation.execute('ext:alhangeul-local-font-picker',{}, {allowDialog:true});") as? [String: Any]
-        try check(result?["ok"] as? Bool == true, "public extension font picker enabled")
-        try await wait("font picker list") {
-            try await self.js("return document.querySelector('.alhangeul-local-font-dialog select')?.options.length > 0;") as? Bool == true
-        }
-        try await screenshot("local-font-picker.png")
+        let menuReads = await reads.snapshot()
+        try await openFontMenu("system")
+        try check(await reads.snapshot() == menuReads, "opening existing font menu does not read all font bytes")
+        try check(try await js("return document.querySelectorAll('.font-picker-option').length === 1;") as? Bool == true,
+            "existing system menu deduplicates Regular/Bold into one family")
+        try await screenshot("local-font-dropdown.png")
+        try await openFontMenu("all")
+        try check(try await js("return [...document.querySelectorAll('.font-picker-option')].filter(n=>n.textContent==='Gowun Batang').length===1;") as? Bool == true,
+            "existing all menu includes host family once")
+        try check(try await js("return !window.rhwpStudio.automation.execute('ext:alhangeul-local-font-picker',{}, {allowDialog:true}).ok && !document.querySelector('.alhangeul-local-font-overlay');") as? Bool == true,
+            "separate local font dialog/menu removed")
+        _ = try await js("window.__alhangeulFontConnection.refresh();return true;")
+        try check(try await js("return !document.querySelector('.font-picker-menu');") as? Bool == true,
+            "catalog invalidation discards open stale menu")
+        try await openFontMenu("system")
+        try check(try await js("return !!window.__fontProbeInput.getSelection();") as? Bool == true,
+            "catalog refresh preserves document text selection")
         documentRevisionBeforePicker = ((try await rendererDiagnostics())["selection"] as? [String: Any])?["documentRevision"] as? Int ?? 0
-        _ = try await js("""
-        const select=document.querySelector('.alhangeul-local-font-dialog select');
-        select.value='Gowun Batang';select.dispatchEvent(new Event('change'));
-        document.querySelectorAll('.alhangeul-local-font-actions button')[1].click();
-        """)
-        try await wait("font picker apply") { try await self.js("return !document.querySelector('.alhangeul-local-font-overlay');") as? Bool == true }
-        try check(true, "actual picker apply uses public command path")
-        try check(try await js("return window.__fontProbeState.isDirty();") as? Bool == true, "picker edit marks actual document dirty")
+        try await chooseFont("Gowun Batang")
+        try check(try await js("return !document.querySelector('.font-picker-menu');") as? Bool == true,
+            "existing menu selection closes dropdown")
+        try check(try await js("return window.__fontProbeState.isDirty();") as? Bool == true, "toolbar font edit marks actual document dirty")
         do {
             try await wait("picker edit render completed") {
                 let diagnostics = try await self.rendererDiagnostics()
@@ -215,14 +239,41 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
             try await screenshot("picker-render-failure.png")
             throw error
         }
-        try check(true, "picker edit triggers completed CanvasKit repaint")
+        try check(true, "toolbar font edit triggers completed CanvasKit repaint")
+        _ = try await js("""
+        return window.__fontProbeInput.moveCursorTo({sectionIndex:0,paragraphIndex:0,charOffset:'한글 가나다 ABC 0123 고운바탕 글꼴 확인'.length});
+        """)
+        try await openFontMenu("all")
+        try await chooseFont("돋움")
+        try await openFontMenu("system")
+        try await chooseFont("Gowun Batang")
+        try check(try await js("return !window.__fontProbeInput.getSelection();") as? Bool == true,
+            "host family can be selected at caret without text range")
+        let revisionBeforeTyping = ((try await rendererDiagnostics())["selection"] as? [String: Any])?["documentRevision"] as? Int ?? 0
+        _ = try await js("""
+        window.__fontProbeInput.focus();
+        const input=document.querySelector('[aria-label="문서 편집 입력"]');
+        input.value=' 입력';input.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:' 입력'}));
+        return true;
+        """)
+        try await wait("caret input font") {
+            try await self.js("return window.__fontProbeWasm.getCharPropertiesAt(0,0,'한글 가나다 ABC 0123 고운바탕 글꼴 확인'.length+1).fontFamily==='Gowun Batang';") as? Bool == true
+        }
+        try check(true, "newly typed text uses chosen local family through existing input handler")
+        try await wait("typed text render completed") {
+            let diagnostics = try await self.rendererDiagnostics()
+            let page = self.canvasKitPage(diagnostics)
+            let revision = (diagnostics["selection"] as? [String: Any])?["documentRevision"] as? Int ?? 0
+            return revision > revisionBeforeTyping && page["lastRenderCompleted"] as? Bool == true && page["lastRenderError"] is NSNull
+        }
+        try check(true, "typed text triggers completed CanvasKit repaint")
         let saved = try await js("return Array.from(window.__fontProbeWasm.exportHwp());") as? [UInt8] ?? []
-        try check(!saved.isEmpty, "HWP export after picker apply")
+        try check(!saved.isEmpty, "HWP export after toolbar selection and typing")
         try Data(saved).write(to: out.appendingPathComponent("picker-result.hwp"))
         let savedHwpx = try await js("return Array.from(window.__fontProbeWasm.exportHwpx());") as? [UInt8] ?? []
-        try check(!savedHwpx.isEmpty, "HWPX export after picker apply")
+        try check(!savedHwpx.isEmpty, "HWPX export after toolbar selection and typing")
         try Data(savedHwpx).write(to: out.appendingPathComponent("picker-result.hwpx"))
-        try await screenshot("studio-after-picker.png")
+        try await screenshot("studio-after-dropdown.png")
     }
     private func finish(_ error: String?) {
         let result: [String: Any] = ["checks": checks, "error": error as Any? ?? NSNull()]
@@ -233,7 +284,8 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if error == nil && CommandLine.arguments.contains("--interactive") {
             window?.title = "알한글 — 고운바탕 연결 체험 · 테스트 문서"
             Task { @MainActor in
-                _ = try? await js("window.rhwpStudio.automation.execute('edit:select-all'); return window.rhwpStudio.automation.execute('ext:alhangeul-local-font-picker',{}, {allowDialog:true});")
+                _ = try? await js("return window.rhwpStudio.automation.execute('edit:select-all');")
+                try? await openFontMenu("system")
             }
             return
         }

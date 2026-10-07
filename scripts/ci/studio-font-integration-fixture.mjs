@@ -15,7 +15,7 @@ if (mode === 'create') {
     doc.createBlankDocument(); doc.insertText(0, 0, 0, text);
     doc.applyCharFormat(0, 0, 0, text.length, JSON.stringify({fontId: doc.findOrCreateFontId('Gowun Batang'), fontSize: 2400}));
     doc.applyCharFormat(0, 0, 3, 6, JSON.stringify({bold: true}));
-    // 선택 창이 기존 글꼴과 다른 이름으로 실제 문서 데이터를 바꾸는지 확인한다.
+    // 기존 메뉴 선택이 다른 이름의 문서 데이터를 실제로 바꾸는지 확인한다.
     doc.applyCharFormat(0, 0, text.length - 2, text.length, JSON.stringify({fontId: doc.findOrCreateFontId('돋움')}));
     writeFileSync(resolve(output, 'gowun-document.hwp'), doc.exportHwp());
     writeFileSync(resolve(output, 'gowun-document.hwpx'), doc.exportHwpx());
@@ -25,13 +25,14 @@ if (mode === 'create') {
   for (const ext of ['hwp', 'hwpx']) {
     const doc = new HwpDocument(readFileSync(resolve(output, `picker-result.${ext}`)));
     try {
-      for (const offset of [0, 3, text.length - 2]) {
+      for (const offset of [0, 3, text.length - 2, text.length + 1]) {
         const props = JSON.parse(doc.getCharPropertiesAt(0, 0, offset));
         assert.equal(props.fontFamily, 'Gowun Batang');
         assert.equal(props.bold, offset === 3);
         assert(props.fontFamilies.every(f => f === 'Gowun Batang'));
         proof.push({ext, offset, fontFamily: props.fontFamily, bold: props.bold});
       }
+      assert(doc.getTextRange(0,0,0,doc.getParagraphLength(0,0)).endsWith(' 입력'));
       assert(!doc.renderPageSvg(0).includes('__rhwp_host_face_'));
     } finally { doc.free(); }
   }

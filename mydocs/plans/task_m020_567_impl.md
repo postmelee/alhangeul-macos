@@ -3,7 +3,7 @@
 - 수행계획: [task_m020_567.md](task_m020_567.md)
 - 이슈: [#567](https://github.com/postmelee/alhangeul-macos/issues/567), M020 / v0.2
 - 브랜치: `local/task567`, 기준 `devel` / `0fa65fa`
-- 상태: Stage 2/3.1 완료. 2026-10-07 v0.8.7 반영·연결 지시로 Stage 3.2 진행 중. [Stage 3 보고](../working/task_m020_567_stage3.md). [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
+- 상태: Stage 2/3.1/3.2/3.3 완료. 2026-10-07 기존 글꼴 목록 통합·별도 팝업 제거와 선택/커서 입력·저장 검증을 완료했다. [Stage 3 보고](../working/task_m020_567_stage3.md). [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
 - Stage 2 native 소스와 테스트를 변경했다. upstream pin과 Studio bundle은 유지했다.
 
 ## 1. 확인한 출발점
@@ -47,10 +47,20 @@ TTC/가변은 현재 native 제한을 유지한다. 정확한 face/axes가 검�
 | 2 | 단일 service 소유권, session 범위 catalog/bytes bridge, 관리 snapshot 수명 및 취소 | 비신뢰 frame/origin, 잘못된 ID·세대, 종료 후 응답, 요청 한도, busy 재시도, lease 해제·오류 경로 | `Task #567 Stage 2: Studio native 글꼴 공급 연결` |
 | 3.1 | 병합 API용 앱 adapter, metadata 정규화, IPC queue·취소·재연결 | metadata만 열거, 필요 face만 읽기, source별 weight/slant, 충돌 제외, busy/stale·늦은 응답·API 부재 검증. 제품 pin 유지 | `Task #567 [Stage 3.1]: Studio 공개 API용 글꼴 어댑터 준비` |
 | 3.2 | 정식 릴리즈 반영 후 adapter를 제품 Studio에 연결 | core/Studio provenance 일치, 실제 이름·Regular/Bold·bytes hash, HWP/HWPX 표시·편집·저장, alias 미유출 | `Task #567 [Stage 3.2]: 정식 Studio 글꼴 API 연결` |
+| 3.3 | 호스트 family를 기존 글꼴 메뉴 전체/시스템 범주에 연결하고 별도 팝업 제거 | 기존 편집 명령으로 선택/커서 글꼴 적용, 중복·갱신·저장, adapter provenance와 실제 화면 | `Task #567 [Stage 3.3]: 기존 글꼴 목록에 로컬 글꼴 통합` |
 | 4 | 설치/관리 변경 전파, Typeface·측정·실패 캐시 갱신, 자동 준비와 설정 안내 | 열린 문서에서 삭제·비활성·갱신·권한 상실·설정 변경·복구, 빠른 문서 전환, 실제 UI 확인 | `Task #567 Stage 4: 글꼴 변경 반영과 자동 사용 흐름 구현` |
 | 5 | 실제 문서 수용·signed sandbox 재실행·성능 회귀 및 #568/#569 인계 | 새 프로세스·cold/warm 읽기 수·동시 병합, 저장/재열기, 원본 부재/관리 복사본 대조, 관련 빌드·테스트 | `Task #567 Stage 5: Studio 글꼴 통합 검증과 소비자 인계` |
 
-각 단계는 해당 소스와 단계 보고서를 함께 커밋하고 승인을 받은 후 다음 단계로 진행한다. Stage 3.1/3.2는 Stage 3의 하위 단계로 추적하며 Stage 4/5의 수용 범위를 줄이지 않는다. upstream 확장은 병합되었으며 정식 릴리즈 pin/sync는 Stage 3.2의 선행 조건이다. 외부 저장소 게시·PR 생성·pin 변경은 확정 범위의 승인 뒤 진행하며 minified 산출물 직접 편집으로 우회하지 않는다.
+각 단계는 해당 소스와 단계 보고서를 함께 커밋하고 승인을 받은 후 다음 단계로 진행한다. Stage 3.1/3.2/3.3은 Stage 3의 하위 단계로 추적하며 Stage 4/5의 수용 범위를 줄이지 않는다. upstream 확장은 병합되었으며 정식 릴리즈 pin/sync는 Stage 3.2의 선행 조건이다. 외부 저장소 게시·PR 생성·pin 변경은 확정 범위의 승인 뒤 진행하며 minified 산출물 직접 편집으로 우회하지 않는다.
+
+### Stage 3.3 확정 범위 — 2026-10-07
+
+- 사용자의 기존 글꼴 목록 통합 지시를 승인으로 기록한다. 기존 #567 브랜치에서 진행하며 Stage 4/5, OS 지속 설치·배포는 포함하지 않는다.
+- 앱 소유 Vite 변환으로 공개 provider의 family 목록을 기존 `getLocalFonts()` UI 소비자에 연결한다. renderer 매칭·바이트 공급·편집 엔진은 유지하고 upstream checkout 및 minified 번들은 직접 수정하지 않는다.
+- 기존 글꼴 메뉴의 전체/시스템 범주와 글자 모양 등 같은 목록 소비자를 일관되게 연결한다. 호스트 provider가 활성일 때는 공급 가능한 family만 반환하고, 해제 시 기존 브라우저 경로로 돌아간다.
+- host 세대 변경은 열린 메뉴의 이전 목록을 폐기하고 새 snapshot 완료 후 갱신한다. 선택한 문서 이름·범위는 기존 toolbar 명령으로 보존한다.
+- 별도 선택 창과 확장 명령/메뉴를 제거한다. 빌드 helper·변환 fingerprint·sync/CI에 같은 경로를 기록해 다음 upstream sync에서도 기능이 보존되게 한다. upstream 소스 형태가 달라지면 빌드를 실패시킨다.
+- 실제 WKWebView의 기존 메뉴에서 선택·새 글자 입력·저장/재열기와 CanvasKit repaint를 확인하고 스크린샷·직접 조작 창을 제공한다.
 
 ### Stage 3.1 구현 경계
 

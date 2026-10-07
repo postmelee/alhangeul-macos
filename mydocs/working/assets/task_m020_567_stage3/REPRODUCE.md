@@ -2,6 +2,8 @@
 
 공식 v0.8.7 `1a76570e833917d15817415a53c09ad61ab3203f`의 core/Studio를 반영한 실제 제품 연결 검증이다. 과거 PR #7405 head 검증과 구분한다. 자세한 범위·중간 실패·환경은 [단계 보고](../../task_m020_567_stage3.md)에 있다.
 
+이 자료와 아래 명령은 앱 commit `f8ed454`의 Stage 3.2 이력이다. Stage 3.3부터 별도 선택 창은 제거됐고 probe 기본 출력 폴더도 바뀌었다. 현재 소스의 재현은 [Stage 3.3 자료](../task_m020_567_stage3_3/REPRODUCE.md)를 따른다.
+
 ## 사전 준비
 
 1. 앱 저장소의 고정 toolchain과 `scripts/build-rust-macos.sh --verify-portable`로 native bridge를 준비한다. shared cache를 사용할 때에는 build script가 기대하는 `RustBridge/target` 경로를 맞춰야 한다. 이번 실행의 임시 symlink는 종료 후 제거했다.

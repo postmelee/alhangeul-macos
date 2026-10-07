@@ -431,8 +431,7 @@ jobs:
 
           cd "$upstream_dir/rhwp-studio"
           npm ci
-          npx tsc
-          npx vite build --base ./
+          node "$GITHUB_WORKSPACE/scripts/build-rhwp-studio.mjs" --upstream-dir "$upstream_dir"
 
       - name: Prepare studio build artifact
         shell: bash

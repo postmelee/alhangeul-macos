@@ -13,14 +13,9 @@ enum StudioFontProviderScript {
             getFontsAPI: () => window.rhwpStudio?.fonts,
             events: window
           });
-          const picker = (\(StudioFontPickerScript.source))({adapter, getAutomation: () => window.rhwpStudio?.automation, document});
-          let stopped = false, status = 'waiting', error = null, timer = null, menuTimer = null;
+          let stopped = false, status = 'waiting', error = null, timer = null;
           let pending = null;
           const deadline = Date.now() + 15000;
-          function installMenu() {
-            if (stopped) return;
-            if (!picker.install() && Date.now() < deadline) menuTimer = setTimeout(installMenu, 50);
-          }
           async function connect() {
             if (stopped || pending) return;
             if (!window.rhwpStudio?.fonts) {
@@ -31,7 +26,7 @@ enum StudioFontProviderScript {
             pending = adapter.connect();
             try {
               const result = await pending;
-              if (!stopped) { status = result.supported ? 'connected' : 'unsupported'; error = null; if (result.supported) installMenu(); }
+              if (!stopped) { status = result.supported ? 'connected' : 'unsupported'; error = null; }
             } catch {
               if (!stopped) { status = 'failed'; error = 'fontProviderUnavailable'; }
             } finally { pending = null; }
@@ -47,9 +42,7 @@ enum StudioFontProviderScript {
               if (stopped) return;
               stopped = true; status = 'disposed';
               if (timer !== null) clearTimeout(timer);
-              if (menuTimer !== null) clearTimeout(menuTimer);
               window.removeEventListener('alhangeul-fonts-changed', reconnect);
-              picker.dispose();
               await adapter.dispose();
             }
           });

@@ -240,6 +240,18 @@ actual_wasm_build_command="$(manifest_field "$RESOURCE_DIR/manifest.json" actual
 [ "$wasm_build_command" = "$actual_wasm_build_command" ] || fail "manifest wasm_build_command must match actual_wasm_build_command"
 [ -n "$recommended_wasm_build_command" ] || fail "manifest recommended_wasm_build_command is empty"
 [ -n "$actual_wasm_build_command" ] || fail "manifest actual_wasm_build_command is empty"
-grep -q '"studio_build_command": "npx tsc && npx vite build --base ./"' "$RESOURCE_DIR/manifest.json" || fail "manifest does not record relative-base build command"
+studio_build_command="$(manifest_field "$RESOURCE_DIR/manifest.json" studio_build_command)" || fail "manifest missing studio_build_command"
+if [ "$studio_build_command" = 'node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>' ]; then
+  adapter_fingerprint="$(manifest_field "$RESOURCE_DIR/manifest.json" studio_font_menu_adapter_sha256)" || fail "manifest missing studio_font_menu_adapter_sha256"
+  validate_sha256 studio_font_menu_adapter_sha256 "$adapter_fingerprint"
+  [ -f "$RESOURCE_DIR/alhangeul-font-menu-adapter.json" ] || fail "missing Studio font menu adapter receipt"
+  actual_adapter_fingerprint="$(shasum -a 256 "$RESOURCE_DIR/alhangeul-font-menu-adapter.json" | awk '{print $1}')"
+  [ "$adapter_fingerprint" = "$actual_adapter_fingerprint" ] || fail "Studio font menu adapter receipt fingerprint mismatch"
+  adapter_args=(--verify-receipt "$RESOURCE_DIR")
+  if [ -n "$UPSTREAM_DIR" ]; then adapter_args+=(--upstream-dir "$UPSTREAM_DIR"); fi
+  node "$ROOT/scripts/build-rhwp-studio.mjs" "${adapter_args[@]}" || fail "Studio font menu adapter verification failed"
+elif [ "$studio_build_command" != 'npx tsc && npx vite build --base ./' ]; then
+  fail "manifest does not record a supported relative-base build command"
+fi
 
 echo "OK: rhwp-studio assets verified at $RESOURCE_DIR"
