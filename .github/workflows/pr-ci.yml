@@ -72,6 +72,11 @@ jobs:
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-threads-news.py
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-news-pages.py
 
+      - name: Verify bundled rhwp README badge
+        run: |
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-rhwp-readme-badge.py
+          python3 scripts/ci/update-rhwp-readme-badge.py --check
+
       - name: Check Python helper syntax
         shell: bash
         run: python3 -m compileall -q scripts/ci

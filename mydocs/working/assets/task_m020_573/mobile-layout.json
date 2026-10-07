@@ -1,0 +1,621 @@
+{
+  "description": "최종 배치: 한 줄 헤더, 모바일 다운로드/하단 보조 링크, desktop 헤더 링크, 단일 표시·가로 넘침·겹침 검사",
+  "checks": [
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 360
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 375
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 520
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 521
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 700
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 701
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 768
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 820
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 821
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 1024
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 360
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 375
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 520
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 521
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 700
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 701
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 768
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 820
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 821
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 1024
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/news/",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 360
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 375
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 520
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 521
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 700
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 701
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 768
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 820
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 821
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 1024
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/feedback/",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 360
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 375
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 520
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 521
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 700
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 701
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 768
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 820
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 821
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 1024
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 360
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 375
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 520
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 521
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 700
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 701
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 768
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 820
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 821
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 1024
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.0.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.0.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.1.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.1.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.2.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.3.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.3.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.4.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.4.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.5.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.5.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.6.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.6.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.7.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.7.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.8.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.8.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.9.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.9.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.10.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.10.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.11.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.1.11.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.0.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.0.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.1.html",
+      "visiblePlatformLinks": 1,
+      "width": 320
+    },
+    {
+      "headerHeight": 52,
+      "issues": [],
+      "path": "/updates/v0.2.1.html",
+      "visiblePlatformLinks": 1,
+      "width": 1440
+    }
+  ]
+}
