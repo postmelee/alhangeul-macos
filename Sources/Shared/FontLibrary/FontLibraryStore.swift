@@ -342,6 +342,15 @@ extension FontLibraryStore {
     }
 
     func acquireSnapshot() async throws -> FontLibrarySnapshot {
+        try await acquireSnapshot(validatesObjects: true)
+    }
+
+    // 목록 열거는 원본 파일을 선읽기하지 않는다. readResource가 선택된 object의 hash를 검증한다.
+    func acquireMetadataSnapshot() async throws -> FontLibrarySnapshot {
+        try await acquireSnapshot(validatesObjects: false)
+    }
+
+    private func acquireSnapshot(validatesObjects: Bool) async throws -> FontLibrarySnapshot {
         try await perform {
             let fs = try FontLibraryFileSystem(rootURL: self.rootURL)
             return try fs.withLock {
@@ -353,7 +362,7 @@ extension FontLibraryStore {
                           let face = entry.faces.first(where: { $0.id == selection.faceID }) else {
                         throw FontLibraryError.corruptManifest
                     }
-                    try self.verifyObject(entry.object, fs: fs)
+                    if validatesObjects { try self.verifyObject(entry.object, fs: fs) }
                     let resource = FontSnapshotResource(id: "font-\(entry.object.sha256)-\(face.id.sfntIndex)",
                         object: entry.object, face: face, axes: selection.axes, usageEvidence: entry.usageEvidence)
                     if !resources.contains(resource) { resources.append(resource) }

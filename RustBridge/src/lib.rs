@@ -5,9 +5,11 @@ use std::ptr;
 use rhwp::document_core::queries::rendering::PngExportOptions;
 use rhwp::wasm_api::HwpDocument;
 
-mod text;
 mod font_context;
-pub use font_context::{rhwp_render_page_png_with_font_context, RhwpFontRenderStatus};
+mod text;
+pub use font_context::{
+    rhwp_page_font_requests_json, rhwp_render_page_png_with_font_context, RhwpFontRenderStatus,
+};
 #[cfg(test)]
 mod text_tests;
 

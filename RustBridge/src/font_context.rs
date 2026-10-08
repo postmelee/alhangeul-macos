@@ -7,7 +7,7 @@ use rhwp::paint::{
 use rhwp::renderer::layer_renderer::RasterRenderOptions;
 use rhwp::renderer::skia::{native_skia_glyph_run_replay_proof, SkiaLayerRenderer};
 use rhwp::renderer::style_resolver::detect_lang_category;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
 use std::ffi::c_char;
@@ -151,16 +151,9 @@ impl Context {
             let face =
                 ttf_parser::Face::parse(&bytes[input.offset..input.offset + input.length], 0)
                     .map_err(|_| RHWP_FONT_RENDER_INVALID_CONTEXT)?;
-            let family_matches = face.names().into_iter().any(|name| {
-                matches!(name.name_id, 1 | 4 | 6 | 16)
-                    && name
-                        .to_string()
-                        .is_some_and(|name| name.eq_ignore_ascii_case(&request.family))
-            });
-            if !family_matches
-                || face.is_bold() != request.bold
-                || face.is_italic() != request.italic
-            {
+            // family는 원본 문서 slot을 묶는 이름이다. host matcher가 고른 face는
+            // PS/SHA/스타일로 검증한다. 문서 별칭을 선택된 face의 name으로 바꾸지 않는다.
+            if face.is_bold() != request.bold || face.is_italic() != request.italic {
                 return Err(RHWP_FONT_RENDER_INVALID_CONTEXT);
             }
         }
@@ -195,6 +188,109 @@ fn visit_ops(node: &LayerNode, operation: &mut impl FnMut(&PaintOp)) {
                 operation(op);
             }
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PageFontRequest {
+    char_shape_id: u32,
+    language_index: usize,
+    family: String,
+    bold: bool,
+    italic: bool,
+}
+
+fn collect_requests(root: &LayerNode) -> Result<Vec<PageFontRequest>, RhwpFontRenderStatus> {
+    let mut requests = std::collections::BTreeMap::new();
+    let mut error = None;
+    visit_ops(root, &mut |op| {
+        if error.is_some() {
+            return;
+        }
+        if let PaintOp::TextRun { run, .. } = op {
+            if run.text.is_empty() {
+                return;
+            }
+            let Some(shape) = run.char_shape_id else {
+                error = Some(RHWP_FONT_RENDER_UNSUPPORTED);
+                return;
+            };
+            if !label(&run.style.font_family) {
+                error = Some(RHWP_FONT_RENDER_UNSUPPORTED);
+                return;
+            }
+            for character in run.text.chars() {
+                let language = detect_lang_category(character);
+                let request = PageFontRequest {
+                    char_shape_id: shape,
+                    language_index: language,
+                    family: run.style.font_family.clone(),
+                    bold: run.style.bold,
+                    italic: run.style.italic,
+                };
+                if let Some(previous) = requests.insert((shape, language), request.clone()) {
+                    if previous != request {
+                        error = Some(RHWP_FONT_RENDER_UNSUPPORTED);
+                        return;
+                    }
+                }
+                if requests.len() > 2048 {
+                    error = Some(RHWP_FONT_RENDER_TOO_LARGE);
+                    return;
+                }
+            }
+        }
+    });
+    if let Some(error) = error {
+        return Err(error);
+    }
+    Ok(requests.into_values().collect())
+}
+
+/// 원본 문서의 TextRun별 slot/family/style만 조회한다. 텍스트/경로/bytes는 반환하지 않는다.
+/// out_json은 쓰기 가능한 포인터이며 실패 시 NULL이다. 성공은 빈 요청 배열도 허용한다.
+/// 입력 handle은 호출 동안 유효해야 하며 동시 mutation은 금지한다.
+/// 반환 JSON은 rhwp_free_string으로 한 번 해제한다. panic은 경계를 넘지 않는다.
+#[no_mangle]
+pub extern "C" fn rhwp_page_font_requests_json(
+    handle: *const RhwpHandle,
+    page: u32,
+    out_json: *mut *mut c_char,
+) -> RhwpFontRenderStatus {
+    if out_json.is_null() {
+        return RHWP_FONT_RENDER_INVALID_OUTPUT;
+    }
+    unsafe {
+        *out_json = ptr::null_mut();
+    }
+    if handle.is_null() {
+        return RHWP_FONT_RENDER_INVALID_HANDLE;
+    }
+    match catch_unwind(AssertUnwindSafe(|| {
+        let handle = unsafe { &*handle };
+        if page >= handle.doc.page_count() {
+            return RHWP_FONT_RENDER_INVALID_PAGE_INDEX;
+        }
+        let tree = match handle.doc.build_page_layer_tree(page) {
+            Ok(tree) => tree,
+            Err(_) => return RHWP_FONT_RENDER_FAILURE,
+        };
+        let requests = match collect_requests(&tree.root) {
+            Ok(rows) => rows,
+            Err(error) => return error,
+        };
+        let json = serde_json::json!({"version":1,"requests":requests}).to_string();
+        if json.len() > MAX_METADATA {
+            return RHWP_FONT_RENDER_TOO_LARGE;
+        }
+        unsafe {
+            *out_json = string_to_c(json);
+        }
+        RHWP_FONT_RENDER_OK
+    })) {
+        Ok(status) => status,
+        Err(_) => RHWP_FONT_RENDER_FAILURE,
     }
 }
 

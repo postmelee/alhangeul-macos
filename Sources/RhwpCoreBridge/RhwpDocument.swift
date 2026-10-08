@@ -317,6 +317,19 @@ class RhwpDocument {
         return json
     }
 
+    /// core의 언어 분류/원본 slot을 조회한다. 반환 문자열의 C 수명은 이 메서드에서 끝낸다.
+    func nativeFontRequests(at page: Int) throws -> [RhwpNativePageFontRequest] {
+        guard let page = UInt32(exactly: page) else { throw RhwpNativeFontContext.Failure.invalid }
+        var pointer: UnsafeMutablePointer<CChar>?
+        let status = rhwp_page_font_requests_json(handle, page, &pointer)
+        defer { if let pointer { rhwp_free_string(pointer) } }
+        guard status.rawValue == 0, let pointer else { throw RhwpNativeFontContext.Failure.invalid }
+        struct Response: Decodable { let version: Int; let requests: [RhwpNativePageFontRequest] }
+        let response = try JSONDecoder().decode(Response.self, from: Data(String(cString: pointer).utf8))
+        guard response.version == 1, response.requests.count <= 2048 else { throw RhwpNativeFontContext.Failure.invalid }
+        return response.requests
+    }
+
     /// 특정 페이지를 Skia PNG bytes로 렌더링한다.
     func renderPagePNG(
         at page: Int,

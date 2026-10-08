@@ -43,3 +43,22 @@ swiftc -target arm64-apple-macosx12.0 -module-cache-path build.noindex/task568/s
 실행 시 working directory는 `build.noindex/task568/stage4/swift-integration`으로 지정하고 executable과 repository 인자는 절대 경로를 사용한다. repository cwd로 실행하면 기존 registry가 번들 WOFF2를 process 등록하므로, 이것을 사용자 TTF 무등록 증거와 혼동하지 않는다. 결과의 `bundledProcessRegisteredCount`도 확인한다.
 
 실제 글꼴 버전 변경 시험 대신, 같은 PS의 메모리 padding bytes와 원본을 연속 적용해 hash/resource identity가 교체되는지 검사한다. 성공 PNG의 face/hash·run proof, 실패 시 빈 PNG, 원본 문서 tree 보존, context 제거 뒤 기본 렌더 복원, 기본 glyph가 없는 face의 실패를 확인한다. 초기 nominal lowerer 한계와 최종 public adapter 결과를 분리해 보존한다.
+
+## Stage 4.2 — 공통 공급 service와 native 요청
+
+공식 matcher는 upstream v0.8.7 원본 8개 module 및 기존 앱 catalog 정책으로 생성한다. upstream source를 편집하지 않는다. 생성 bundle의 receipt는 CI에서 검사한다. 생성 도구는 build.noindex 안에 고정 설치하며 제품 실행 의존성이 아니다.
+
+```bash
+npm install --prefix build.noindex/task568/stage4/native-tooling --no-audit --no-fund --save-exact esbuild@0.25.12
+node scripts/build-native-font-matcher.mjs --upstream-dir build.noindex/task567/stage3-2/upstream-v087 --tool-dir build.noindex/task568/stage4/native-tooling
+node scripts/build-native-font-matcher.mjs --verify --upstream-dir build.noindex/task567/stage3-2/upstream-v087
+python3 Tests/NativeFontSupplyProbe/prepare_fixture.py build.noindex/task568/stage3/fixtures/gowun-document.hwpx build.noindex/task568/stage4/installed-wide.hwpx --installed-regular
+python3 -m venv build.noindex/task568/stage4/font-tooling
+build.noindex/task568/stage4/font-tooling/bin/pip install fonttools==4.59.2
+build.noindex/task568/stage4/font-tooling/bin/python Tests/NativeFontSupplyProbe/supply/prepare_variant.py build.noindex/task567/fonts/gowun-batang/GowunBatang-Regular.ttf build.noindex/task568/stage4/GowunBatang-Regular-outline.ttf
+python3 scripts/probe-native-font-supply.py --output build.noindex/task568/stage4/supply-new-run
+```
+
+fixture helper와 수용 wrapper는 기존 출력 경로를 거부한다. 이미 생성한 입력은 재사용하고 새 수용 출력 경로를 지정한다. 현재 환경의 활성 `ArialUnicodeMS`와 기존 승인 고운바탕 입력이 필요하다. 사용자 원본은 읽기만 하고 고운바탕 설치 경로 fixture는 프로세스 한정 등록 후 해제한다. 관리 복사본은 새 격리 저장소에 import한다.
+
+실제 서비스·선택·CG/Skia·원본 변형/복원과 metadata snapshot의 필요 object만 읽기를 검사한다. 동명/미해결 충돌 DTO, 대기 gate·문서 current는 주입 수용이다. 결과 JSON의 read count는 소비자 공급 판독 횟수이며 inspector/Skia의 전체 I/O·peak RSS를 뜻하지 않는다. 모든 시험은 앱 설치·인쇄·인증서·확장 등록 없이 CLI에서 실행하며 cwd도 격리 출력으로 고정한다. [단계 보고서](../../mydocs/working/task_m020_568_stage4.md)의 지원/미검증 범위를 따른다.

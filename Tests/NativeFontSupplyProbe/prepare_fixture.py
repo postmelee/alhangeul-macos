@@ -1,13 +1,16 @@
 """승인된 합성 HWPX에서 nominal Regular 양성 대조군만 만든다. 원본을 수정하지 않는다."""
 import pathlib
 import re
-import sys
+import argparse
 import zipfile
 
-source, output = map(pathlib.Path, sys.argv[1:3])
-missing = sys.argv[3:] == ["--missing-glyph"]
-if sys.argv[3:] and not missing:
-    raise SystemExit("알 수 없는 옵션")
+parser = argparse.ArgumentParser()
+parser.add_argument("source", type=pathlib.Path)
+parser.add_argument("output", type=pathlib.Path)
+parser.add_argument("--missing-glyph", action="store_true")
+parser.add_argument("--installed-regular", action="store_true")
+args = parser.parse_args()
+source, output, missing = args.source, args.output, args.missing_glyph
 if source.resolve() == output.resolve() or output.exists():
     raise SystemExit("새 출력 경로를 사용해야 합니다")
 with zipfile.ZipFile(source) as original, zipfile.ZipFile(output, "w") as target:
@@ -15,6 +18,10 @@ with zipfile.ZipFile(source) as original, zipfile.ZipFile(output, "w") as target
         data = original.read(entry.filename)
         if entry.filename == "Contents/header.xml":
             data = re.sub(rb"<hh:bold\s*/>", b"", data)
+            if args.installed_regular:
+                before = b'face="Gowun Batang"'
+                if before not in data: raise SystemExit("합성 입력의 글꼴 이름을 확인할 수 없습니다")
+                data = data.replace(before, b'face="ArialUnicodeMS"')
         elif entry.filename == "Contents/section0.xml":
             text = data.decode("utf-8")
             retained = [False]

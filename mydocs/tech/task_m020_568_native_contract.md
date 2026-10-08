@@ -3,7 +3,7 @@
 - 이슈: [#568](https://github.com/postmelee/alhangeul-macos/issues/568), M020, 작업 `local/task568`.
 - 기준: Stage 3 `b64732c`, core v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`.
 - 승인: 2026-10-09 “Stage 4 진행해줘”. 추가 지시로 먼저 이전 임시 빌드·캐시를 정리했다.
-- 상태: 승인된 새 C ABI·Swift wrapper/header/symbol 및 작업별 CoreGraphics/Skia 어댑터의 격리 검증(4.1) 완료. core v0.8.7은 유지했다. 실제 설치/관리 snapshot·선택/lease/budget 연결과 cache/변경 수용은 남아 있으며 Stage 4 완료보고서가 아니다.
+- 상태: Stage 4.1 어댑터 및 4.2 실제 공급·선택/lease/budget·원본/세대 변화·cache identity 수용 완료. core v0.8.7은 유지했다. 단계 결과와 미검증 범위는 [Stage 4 보고서](../working/task_m020_568_stage4.md)를 따른다. 확장 프로세스 연결과 signed Finder 수용은 Stage 5에 남아 있다.
 
 ## 1. 저장공간 정리
 
@@ -51,7 +51,7 @@ Skia family 저장/스타일 문제는 pinned source의 정적 코드 근거다.
 
 `RustBridge/src/font_context.rs`의 새 C ABI는 strict JSON v1 metadata와 연속 bytes buffer를 호출 동안만 빌린다. version/unknown field·중복 ID/slot·offset/length overflow/연속성·SHA-256·실제 SFNT PS·family alias·bold/italic를 검사한다. 빈/null/과대 입력과 유효하지 않은 output slot을 구분하고, 성공 PNG는 `rhwp_free_bytes`, 진단 JSON은 `rhwp_free_string`으로 해제한다. 기존 PNG ABI의 선언/상태 번호는 유지했다.
 
-현재 요청 family는 공급 face의 실제 name ID 1/4/6/16 중 하나와 일치해야 한다. 다른 스타일의 PS 이름을 원래 요청으로 유지하는 경우 등 공식 matcher의 별칭 선택 결과 전체를 이 경계에 접합한 것은 아니다. 이 제한과 문서 slot 대응은 다음 실제 snapshot 연결에서 검증·보정한다.
+4.1 초기 요청 family는 공급 face의 name ID 1/4/6/16 중 하나와 일치해야 했다. 4.2에서는 family를 원본 문서 slot의 binding으로 검증하고, 선택 source는 PS/SHA/style로 검증한다. 이로써 공식 matcher의 별칭을 문서 이름 변경 없이 연결한다. PS exact 선택이 요청 Bold/Italic과 다른 경우 스타일을 바꾸지 않고 미지원으로 거부한다.
 
 metadata 1 MiB, face 64·요청 2,048·대상 run 256, 입력 64 MiB/face·128 MiB 합계와 slot별 mapping 작업량 128 MiB를 제한한다. portable 어댑터는 core resource/proof의 32 MiB/face·64 MiB/작업 경계를 유지한다. 이 값은 전체 renderer RSS/Skia 내부 할당 상한을 검증한 결과가 아니다. Swift transport는 합친 buffer의 Data slice를 face view로 사용하며 큰 원본을 context 안에서 이중 보관하지 않는 실제 주소 공유를 확인했다.
 
@@ -82,8 +82,20 @@ HostApp build가 임시 앱을 LaunchServices에 자동 등록했다. 이번 Deb
 
 ## 6. 다음 연결과 upstream 후보
 
-다음 작업은 실제 설치/관리 snapshot에서 공식 matcher가 선택한 face를 native 문서 slot에 대응시키고, 같은 공급/lease·설치 세대 검증·읽기 budget을 붙이는 것이다. 관리 우선/동명 충돌·disabled/원본 상실·취소·cache identity를 실제 소비자 요청에서 수용하기 전 Stage 4를 완료하지 않는다. Finder 등록/서명 수용은 Stage 5의 별도 승인 범위다.
+4.1 종료 당시 실제 공급의 slot 대응·lease/budget·충돌/설정/원본/취소·cache 수용이 남아 있었다. 4.2 결과는 아래 7절과 Stage 4 보고서로 보완한다. Finder 등록/서명 수용은 Stage 5의 별도 승인 범위다.
 
 검증한 어댑터에서 upstream에 의미 있는 후보는 **host가 선택한 exact static face/bytes를 native glyph replay로 연결하는 범용 helper**다. 기존 public primitives로 가능한 범위가 확인됐으므로 “upstream 수정 없이는 구현 불가능”으로 등록하지 않는다. source/style 검증·portable resource 생성·동일 face의 언어 혼합·기존 producer 위치와 실패 정책을 core 소유로 통합하면 downstream의 재구현 부담을 줄일 수 있다. 복잡 shaping을 더 지원하거나 기존 guard를 무조건 제거하는 제안과 구분한다.
+
+## 7. Stage 4.2 — 실제 공급과 종료 수명
+
+`rhwp_page_font_requests_json`이 public core의 언어 분류로 charShape/language/family/style만 추출한다. Rust 할당 JSON은 Swift에서 해제하고 원본 문서와 텍스트·경로를 외부에 넘기지 않는다. `RhwpNativeFontMatcher`는 고정 Studio 원본 8개 module과 기존 앱 catalog 정책에서 생성한 bundle을 작업별 JavaScriptCore realm에서 실행한다. 공급 metadata만 받고 bytes I/O는 금지한다. 소스·생성 파일·core commit receipt를 CI에서 검사하며 upstream checkout은 수정하지 않는다.
+
+`HwpNativeFontPageRenderer`가 문서 copy와 snapshot을 작업 동안 소유한다. 관리 우선·유일 설치 후보·동명 모호성/미해결 충돌 거부를 공식 matcher와 동일하게 적용하고, 선택한 고유 face만 공유 두 읽기 slot 안에서 읽는다. 읽기 전후의 generation·문서 current와 실제 inspector/SHA/PS/style를 확인한다. 취소한 I/O의 실제 반환 전에 slot/lease를 풀지 않으며 성공·실패에서 lease를 한 번 해제한다. 알려진 disabled/충돌/지원 불가 face는 조용한 system-name fallback으로 성공시키지 않는다. catalog에 없는 family만 기존 경로에 남긴다.
+
+기존 snapshot 생성이 모든 선택 object를 판독하는 것을 발견해 `acquireMetadataSnapshot`을 추가했다. catalog 공급은 metadata/lease만 획득하고 선택된 `readResource`에서 hash를 검사한다. 기존 전체 검증 snapshot과 시작 recovery는 유지한다. 사용하지 않는 관리 Bold object가 없는 상태에서도 Regular 문서는 성공하고, 실제 필요한 Regular object가 없으면 실패한다.
+
+cache identity는 원본 문서 hash/filename/page·core/matcher 버전·renderer/크기·설치/관리 snapshot·선택 ID/SHA/PS/slot·fallback 목록을 묶는다. 공통 job은 영구 bytes/PNG cache를 보관하지 않는다. 선택 glyph는 작업별 portable resource를 쓰고 CoreText context도 작업 종료 시 복원한다. 확장의 기존 thumbnail/Finder cache는 Stage 5에서 이 identity와 공급 변경을 연결해야 한다.
+
+127개 FontLibraryTests와 29개 Rust 테스트, 실제 관리 고운바탕 R/B 및 활성 ArialUnicodeMS 원본의 CG/Skia 한글 렌더, 원본 변형/복원·세대/문서 변화·취소·한도/상실을 수용했다. 고운바탕 설치 경로는 process scope fixture이며 사용자 영구 설치가 아니다. 동명 설치/미해결 충돌 DTO 및 대기 gate는 주입 시험이다. 일부 OS 활성 글꼴(AppleMyungjo/AppleGothic)은 기존 inspector의 구조 제한으로 거부되며 이를 모든 static font 지원으로 확대하지 않는다. 상세 증거·정리·실행 환경은 Stage 4 보고서에 기록한다.
 
 별도로 custom font path의 family당 첫 face 저장·스타일 선택 문제는 최신 pinned source에서도 확인했다. 이 항목은 아직 독립적인 runtime 재현을 완료하지 않았으므로 이를 버그 수용 증거로 혼동하지 않는다. 범용 helper와 작은 스타일 버그 수정은 독립 이슈/PR 후보로 두고, 우리 작업 완료 결과를 취합한 뒤 범위·중복을 다시 확인한다. C ABI/Swift·CoreText·bookmark/보관함·App Group 정책은 앱 저장소 소유로 남긴다. 공개 이슈/PR·push는 수행하지 않았다.

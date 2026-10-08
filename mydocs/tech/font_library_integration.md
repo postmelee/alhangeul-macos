@@ -8,10 +8,13 @@
 |--------|-----------|-----------|
 | HostApp 설정·Studio (#567) | 공유 catalog/provider, 기존 toolbar 선택, Canvas2D/CanvasKit, 변경·복구, 저장 이름 보존, 정상 권한 재실행 확인 | 실제 한컴 설치본·최소 OS/Intel·새 권한 패널/볼륨·배포 후보 수용은 #569에서 취합 |
 | PDF·인쇄 (#568) | [Stage 3](../working/task_m020_568_stage3.md): 설치/관리 snapshot·공식 matcher·실제 저장/인쇄 연결, HWP/HWPX의 PS/style/program/ToUnicode·텍스트와 signed sandbox·패널 취소 수용 | 실제 한컴·최소 OS/Intel·다양한 문서·물리 인쇄 수용은 별도. 일반 가로 Bold 외 효과/형식 지원을 확대하지 않음 |
-| native·Quick Look·Thumbnail (#568) | 설치/관리 provider 미연결 | 프로세스별 권한·App Group/lease 경계와 정확한 스타일, 표준 Finder smoke |
+| 공통 native (#568) | [Stage 4](../working/task_m020_568_stage4.md): 공식 matcher·설치/관리 snapshot과 bytes 공급을 CG/Skia에 연결하고 원본/세대/취소·cache identity 수용 | 제한된 static SFNT·PositionAdjusted replay. 일부 OS 글꼴은 기존 inspector 제한으로 판독 실패. 전체 layout/최소 OS/Intel 수용은 별도 |
+| Quick Look·Thumbnail (#568) | 공통 native 진입점은 준비됐으며 확장 소비자 연결은 미완료 | Stage 5의 프로세스별 권한·App Group/lease/cache 경계와 표준 Finder smoke |
 | Windows ZIP (#566) / 전체 안내 (#569) | 후속 | Mac·Windows 수용 분리, 독립 보관과 설치 참조 설명, 소비자별 검증 후 공개 안내/배포 |
 
 JS에 전달하는 공급 정보는 ID·source·revision/generation·이름·스타일·제한이며 URL/bookmark는 native에 남긴다. 필요 bytes만 동일 원본/활성 상태를 검증해 읽고 동시 전송 slot 두 개·제한 재시도·취소·stale 거부를 유지한다. 설치 generation 또는 관리 snapshot이 바뀌면 각 소비자의 Typeface·측정·실패 캐시를 함께 갱신한다. 명시적 관리 선택 → 유일한 활성 설치 후보 → 기존 rhwp fallback 순서와 원래 문서 이름 보존을 소비자별로 검증한다. HostApp bookmark를 다른 프로세스에 복사해서 원본 접근 권한을 공유하지 않는다.
+
+Stage 4부터 공급 catalog는 `acquireMetadataSnapshot`으로 lease/metadata만 획득하고, 선택된 resource의 실제 read에서 크기·hash를 검증한다. 기존 `acquireSnapshot`의 전체 object 검증과 시작 recovery는 유지한다. metadata 열거 성공은 bytes 적용 성공을 뜻하지 않으며, 알려진 disabled/충돌/지원 불가 face를 native 기본 글꼴로 조용히 바꾸지 않는다.
 
 metadata/menu 열거 성공은 모든 face 적용 성공이 아니다. native TTC/가변 제한을 유지하고, 설정의 설치 원본 의존 안내·별도 가져오기 복사본의 독립 보관 안내를 제품 도움말에도 그대로 반영한다. 출력과 Finder가 완료되기 전 Studio 결과로 해당 소비자 지원을 선언하지 않는다.
 

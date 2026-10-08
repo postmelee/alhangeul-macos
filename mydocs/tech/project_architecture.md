@@ -480,6 +480,8 @@ Task #484 Stage 3 실제 UI smoke에서 공개 HWP의 menu와 toolbar 결과는 
 - `rhwp_render_page_tree`
 - `rhwp_page_overlay_images`
 - `rhwp_render_page_png`
+- `rhwp_page_font_requests_json`
+- `rhwp_render_page_png_with_font_context`
 - `rhwp_image_data`
 - `rhwp_extract_thumbnail`
 - `rhwp_extract_text_utf8`
@@ -506,6 +508,10 @@ Task #484 Stage 3 실제 UI smoke에서 공개 HWP의 menu와 toolbar 결과는 
 `rhwp_render_page_svg`는 현재 HostApp/extension의 주 렌더링 경로는 아니지만, 진단/호환성 관점에서 ABI에 포함되어 있다. core SVG와 native renderer 비교 절차는 [`render_core_native_compare_guide.md`](../manual/render_core_native_compare_guide.md)를 따른다.
 
 External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제품 경로에서 직접 호출하지 않는다. RustBridge는 external path를 열지 않으며 source URL 권한, resolver policy, bytes read와 cache signature는 Swift/macOS shell 책임이다. `rhwp_image_state_json`은 pinned public API가 전체 image 상태를 제공하지 않아 현재 ABI에 포함하지 않는다.
+
+#568의 `rhwp_page_font_requests_json`은 원본 페이지의 charShape/language/family/style 요청만 반환한다. `rhwp_render_page_png_with_font_context`는 검증한 단일 static SFNT bytes와 해당 slot의 선택을 호출 동안 빌려 받아 제한된 portable glyph replay로 렌더한다. 기존 ABI는 유지한다. null/한도/수명과 지원 범위는 [native 계약](task_m020_568_native_contract.md), 실제 공급 수용은 [Stage 4](../working/task_m020_568_stage4.md)를 따른다.
+
+공통 `HwpNativeFontPageRenderer`는 immutable 문서와 `StudioFontSupplySnapshot`을 소유하고 공식 Studio matcher의 별도 JavaScriptCore realm에서 선택한 원본만 읽는다. 공유 DTO/budget은 `Shared/FontLibrary`, 공급 service는 HostApp, bytes context/renderer는 `RhwpCoreBridge`가 소유한다. 생성 matcher는 `build-native-font-matcher.mjs`의 receipt로 고정한다. metadata snapshot은 원본 선읽기를 하지 않으며 실제 read에서 hash를 검증하고, 성공·실패·취소에서 I/O 종료 후 lease를 해제한다. Finder의 별도 프로세스 공급·cache/권한 연결은 Stage 5에서 수용한다.
 
 ## FFI 안전성 규칙
 

@@ -3,6 +3,14 @@ import CoreGraphics
 import CoreText
 import CryptoKit
 
+struct RhwpNativePageFontRequest: Decodable, Hashable {
+    let charShapeId: UInt32
+    let languageIndex: Int
+    let family: String
+    let bold: Bool
+    let italic: Bool
+}
+
 /// 호출 동안만 전달하는 글꼴 원본과 명시적인 문서 slot 선택. 경로/권한/OS 등록을 보관하지 않는다.
 struct RhwpNativeFontContext: Sendable {
     struct Face: Sendable {

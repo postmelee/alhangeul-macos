@@ -5,6 +5,65 @@ use std::ffi::CStr;
 const REGULAR: &[u8] = include_bytes!("../../../Tests/FontLibraryTests/Fixtures/regular.ttf");
 const BOLD: &[u8] = include_bytes!("../../../Tests/FontLibraryTests/Fixtures/bold.ttf");
 
+#[test]
+fn page_requests_clear_outputs_and_use_original_slots() {
+    let mut json = std::ptr::dangling_mut();
+    assert_eq!(
+        rhwp_page_font_requests_json(ptr::null(), 0, &mut json),
+        RHWP_FONT_RENDER_INVALID_HANDLE
+    );
+    assert!(json.is_null());
+    assert_eq!(
+        rhwp_page_font_requests_json(ptr::null(), 0, ptr::null_mut()),
+        RHWP_FONT_RENDER_INVALID_OUTPUT
+    );
+    let bytes = include_bytes!("../../../samples/basic/KTX.hwp");
+    let handle = rhwp_open(bytes.as_ptr(), bytes.len());
+    assert_eq!(
+        rhwp_page_font_requests_json(handle, u32::MAX, &mut json),
+        RHWP_FONT_RENDER_INVALID_PAGE_INDEX
+    );
+    assert!(json.is_null());
+    assert_eq!(
+        rhwp_page_font_requests_json(handle, 0, &mut json),
+        RHWP_FONT_RENDER_OK
+    );
+    let value: serde_json::Value =
+        serde_json::from_str(unsafe { CStr::from_ptr(json) }.to_str().unwrap()).unwrap();
+    let expected = collect_requests(
+        &unsafe { &*handle }
+            .doc
+            .build_page_layer_tree(0)
+            .unwrap()
+            .root,
+    )
+    .unwrap();
+    assert_eq!(value["version"], 1);
+    assert_eq!(value["requests"], serde_json::to_value(expected).unwrap());
+    assert!(!value["requests"].as_array().unwrap().is_empty());
+    rhwp_free_string(json);
+    rhwp_close(handle);
+}
+
+#[test]
+fn page_requests_collect_mixed_languages_and_bold_without_name_rewrite() {
+    let (tree, _) = nominal_tree(BOLD, "한글 ABC");
+    let rows = collect_requests(&tree.root).unwrap();
+    assert_eq!(rows.len(), 2);
+    assert!(rows
+        .iter()
+        .all(|row| row.char_shape_id == 0 && row.bold && !row.italic));
+    assert_eq!(
+        rows.iter()
+            .map(|row| row.language_index)
+            .collect::<Vec<_>>(),
+        [0, 1]
+    );
+    let mut alias = fixture(BOLD);
+    alias["requests"][0]["family"] = serde_json::json!("document-only-alias");
+    assert!(parse(&alias, BOLD).is_ok()); // slot의 실제 family 대응은 render에서 다시 검사한다.
+}
+
 fn fixture(bytes: &[u8]) -> serde_json::Value {
     let face = ttf_parser::Face::parse(bytes, 0).unwrap();
     let name = |id| {
@@ -46,7 +105,6 @@ fn validates_source_identity_and_style_before_lowering() {
         ("bold", serde_json::json!(true)),
         ("italic", serde_json::json!(true)),
         ("faceId", serde_json::json!("missing")),
-        ("family", serde_json::json!("wrong")),
         ("languageIndex", serde_json::json!(7)),
     ] {
         let mut input = fixture(REGULAR);

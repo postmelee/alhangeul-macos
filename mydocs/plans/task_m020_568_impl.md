@@ -118,7 +118,7 @@ A 보고 이후 B의 구체 변경과 API·권한·테스트 자산을 재확인
 
 2026-10-09 진입 승인 후 임시 빌드/캐시 정리와 direct CoreText bytes 실험을 완료했다. [native 연결 조사·확장안](../tech/task_m020_568_native_contract.md)에 현재 경계, Skia family당 한 face 저장 제약, 새 bytes 기반 C ABI 후보 및 한도·수명·검증 범위를 정리했다. 이어 작업지시자가 새 C ABI/연관 wrapper/header/symbol 범위를 승인했다. public glyph replay 후보는 격리 검증 후 채택/추가 필요사항을 판단하며 정확한 스타일을 지원하지 못하면 성공으로 처리하지 않는다.
 
-Stage 4.1에서 새 C ABI/Swift context와 public FontResolver 기반의 제한된 native 어댑터를 구현했다. 실제 HWP/HWPX에서 Regular/Bold·동일 face의 한국어/ASCII 혼합이 Skia/CG로 통과했다. native 계약 5절의 지원/실패·진단·검증 범위를 따른다. live 설치/관리 snapshot·선택/lease/budget, 충돌·원본/세대 변화와 cache 수용은 다음 작업이며 Stage 4 전체는 미완료다. core source/릴리즈 pin은 유지하고 upstream 후보는 우리 검증 결과에서 분리한다.
+Stage 4.1에서 새 C ABI/Swift context와 public FontResolver 기반의 제한된 native 어댑터를 구현했다. 실제 HWP/HWPX에서 Regular/Bold·동일 face의 한국어/ASCII 혼합이 Skia/CG로 통과했다. 이어 Stage 4.2에서 공식 matcher의 pinned JavaScriptCore bundle·core의 slot 조회와 실제 설치/관리 snapshot·lease/budget 공급을 공통 native 진입점에 연결했다. 충돌·원본/세대/문서 변화·취소·cache identity와 glyph를 바꾼 동일 PS 원본 교체를 수용했다. metadata snapshot의 불필요한 전체 원본 판독도 제거했다. [Stage 4 보고서](../working/task_m020_568_stage4.md)의 실제 service/주입 시험 및 형식·캐시 경계를 따른다. core source/릴리즈 pin은 유지했으며 확장 프로세스 연결과 signed Finder 수용은 Stage 5에 남아 있다.
 
 필요한 공통 DTO/수명은 AppKit 없는 계층에 둔다. 새 FFI/API가 필요하면 Stage 4 구현 전에 승인 범위를 보정하고 포인터/길이/문자열/handle 수명을 검증한다. 추가 upstream 릴리즈가 꼭 필요한 조건과 앱 bridge에서 처리 가능한 조건을 분리한다.
 

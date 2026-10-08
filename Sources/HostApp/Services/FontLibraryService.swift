@@ -65,6 +65,7 @@ final class FontLibraryService: Sendable {
         return result
     }
     func acquireSnapshot() async throws -> FontLibrarySnapshot { try await store.acquireSnapshot() }
+    func acquireMetadataSnapshot() async throws -> FontLibrarySnapshot { try await store.acquireMetadataSnapshot() }
     func readResource(_ id: String, snapshot: FontLibrarySnapshot) async throws -> Data {
         try await store.readResource(id, snapshot: snapshot)
     }

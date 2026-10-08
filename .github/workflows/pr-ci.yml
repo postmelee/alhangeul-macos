@@ -303,6 +303,7 @@ jobs:
         run: |
           set -euo pipefail
           ./scripts/verify-rhwp-studio-assets.sh
+          node scripts/build-native-font-matcher.mjs --verify
 
       - name: Generate Xcode project
         shell: bash
