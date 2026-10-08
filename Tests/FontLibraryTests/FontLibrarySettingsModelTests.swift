@@ -107,6 +107,25 @@ final class FontLibrarySettingsModelTests: XCTestCase {
         XCTAssertNotNil(model.message)
         XCTAssertEqual(model.selected.count, 2)
     }
+    func testLateSheetDismissalDoesNotCancelReopenedDiscovery() async throws {
+        let gate = SettingsGate(), client = client(), found = try candidates()
+        let model = FontLibrarySettingsModel(makeClient: { client }, discover: { _, _ in
+            await gate.wait(); return found
+        })
+        await model.prepare(); model.beginImport(); model.dismissImport()
+        model.beginImport(); model.scan(.selected([]))
+        try await waitForGate(gate)
+        model.importSheetDidDismiss() // 이전 표시가 끝난 뒤 도착한 native 닫힘 알림.
+        XCTAssertTrue(model.showingImport)
+        XCTAssertEqual(model.phase, .discovering)
+        await gate.release()
+        try await waitFor { model.phase == .candidates }
+        XCTAssertEqual(model.selected.count, 2)
+        model.showingImport = false // 사용자가 현재 sheet를 실제 닫은 경우.
+        model.importSheetDidDismiss()
+        XCTAssertEqual(model.phase, .source)
+        XCTAssertFalse(model.showingImport)
+    }
     func testDismissDuringImportWaitsForWorkerAndRefreshesStoredResults() async throws {
         let gate = SettingsGate(), found = try candidates()
         let service = FontLibraryService(store: .init(rootURL: root))

@@ -4,8 +4,11 @@ import SwiftUI
 struct InstalledFontSettingsView: View {
     @ObservedObject var model: InstalledFontSettingsModel
     @ObservedObject var library: FontLibrarySettingsModel
-    @State private var showingLibrary = false
     @State private var query = ""
+
+    private var familyCount: Int {
+        Set((model.snapshot?.records ?? []).map { $0.family.isEmpty ? $0.fullName : $0.family }).count
+    }
 
     private var families: [(name: String, records: [InstalledFontRecord])] {
         let records = model.snapshot?.records ?? []
@@ -21,28 +24,64 @@ struct InstalledFontSettingsView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("글꼴").font(.title2.weight(.semibold))
-                    Text("Mac에 설치된 글꼴을 자동으로 찾습니다.")
-                        .foregroundStyle(.secondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("글꼴").font(.title2.weight(.semibold))
+                HStack {
+                    Text("설치된 글꼴").font(.headline)
+                    Spacer()
+                    if model.busy { ProgressView().controlSize(.small) }
+                    Button { Task { await model.refresh() } } label: {
+                        Label("다시 감지", systemImage: "arrow.clockwise")
+                    }.disabled(model.busy).help("새로 설치하거나 변경한 글꼴 목록을 다시 확인합니다.")
                 }
-                Spacer()
-                Button { Task { await model.refresh() } } label: {
-                    Label("새로고침", systemImage: "arrow.clockwise")
-                }.disabled(model.busy).help("새로 설치하거나 변경한 글꼴 목록을 다시 확인합니다.")
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle("Mac에 설치된 글꼴 사용", isOn: Binding(
+                        get: { model.snapshot?.enabled ?? false },
+                        set: { value in Task { await model.setEnabled(value) } }
+                    )).disabled(model.busy || model.snapshot == nil)
+                    Text("켜면 지원되는 글꼴을 문서에 자동으로 적용하고, 상단 글꼴 목록에서 선택할 수 있습니다.")
+                        .font(.callout).foregroundStyle(.secondary)
+                    Text("사용 설정은 다음 실행에도 유지됩니다. 설치 원본을 삭제하거나 비활성화하면 사용할 수 없습니다.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                if let message = model.message { Text(message).font(.callout) }
+                if let snapshot = model.snapshot {
+                    if let failure = snapshot.refreshFailure { Text(failure.displayMessage).font(.callout) }
+                    if snapshot.omittedFaceCount > 0 {
+                        Text("일부 글꼴의 정보를 확인하지 못했습니다.").font(.caption).foregroundStyle(.secondary)
+                    }
+                    ForEach(snapshot.grantIssues, id: \.id) { issue in
+                        HStack {
+                            Text("저장된 폴더의 접근 권한을 확인해 주세요.").font(.caption)
+                            Spacer()
+                            Button("폴더 다시 선택…") { chooseLocation(replacing: issue.id) }.disabled(model.busy)
+                        }
+                    }
+                }
+                FontSettingsDisclosure {
+                    installedDetails.padding(.top, 10)
+                } label: {
+                    HStack {
+                        Text("감지한 글꼴 \(familyCount)개")
+                        Spacer()
+                        if model.snapshot?.records.contains(where: { limitation($0) != nil }) == true {
+                            Label("확인 필요", systemImage: "exclamationmark.circle")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }.padding(.vertical, 5)
+                }
+                Divider()
+                FontLibrarySettingsView(model: library, embedded: true)
             }
-            VStack(alignment: .leading, spacing: 6) {
-                Toggle("Mac에 설치된 글꼴 사용", isOn: Binding(
-                    get: { model.snapshot?.enabled ?? false },
-                    set: { value in Task { await model.setEnabled(value) } }
-                )).disabled(model.busy || model.snapshot == nil)
-                Text("켜면 지원되는 글꼴을 문서에 자동으로 적용하고, 상단 글꼴 목록에서 선택할 수 있습니다.")
-                    .font(.callout).foregroundStyle(.secondary)
-                Text("사용 설정은 다음 실행에도 유지됩니다. 원본을 삭제하거나 비활성화하면 사용할 수 없습니다.")
-                    .font(.caption).foregroundStyle(.secondary)
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
+        }
+        .task { await model.prepare() }
+    }
+
+    private var installedDetails: some View {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                 TextField("글꼴 이름 검색", text: $query).textFieldStyle(.plain)
@@ -57,88 +96,54 @@ struct InstalledFontSettingsView: View {
                 Spacer()
                 if model.busy { ProgressView().controlSize(.small) }
             }
-            if let message = model.message { Text(message).font(.callout) }
-            if let snapshot = model.snapshot {
-                if let failure = snapshot.refreshFailure { Text(failure.displayMessage).font(.callout) }
-                if snapshot.omittedFaceCount > 0 {
-                    Text("일부 글꼴의 정보를 확인하지 못했습니다.").font(.caption).foregroundStyle(.secondary)
-                }
-                if !snapshot.grantIssues.isEmpty {
-                    ScrollView {
-                        ForEach(snapshot.grantIssues, id: \.id) { issue in
-                            HStack {
-                                Text("저장된 폴더의 접근 권한을 확인해 주세요.").font(.caption)
-                                Spacer()
-                                Button("폴더 다시 선택…") { chooseLocation(replacing: issue.id) }.disabled(model.busy)
-                            }
-                        }
-                    }.frame(maxHeight: 60)
-                }
-            }
             if families.isEmpty {
                 VStack(spacing: 8) {
                     Image(systemName: "textformat").font(.title).foregroundStyle(.secondary)
                     Text(model.busy ? "글꼴을 찾고 있습니다…" : query.isEmpty ? "확인된 글꼴이 없습니다" : "검색 결과가 없습니다")
                     if !query.isEmpty { Text("다른 이름으로 검색해 보세요.").font(.callout).foregroundStyle(.secondary) }
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                }.frame(maxWidth: .infinity).padding(.vertical, 16)
             } else {
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        ForEach(families, id: \.name) { group in
-                            FontSettingsDisclosure {
-                                VStack(alignment: .leading, spacing: 0) {
-                                    ForEach(group.records) { record in
-                                        HStack {
-                                            VStack(alignment: .leading, spacing: 3) {
-                                                Text(record.fullName).lineLimit(2).help(record.fullName)
-                                                if let failure = limitation(record) {
-                                                    Text(failure.displayMessage).font(.caption).foregroundStyle(.secondary)
-                                                }
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(families, id: \.name) { group in
+                        FontSettingsDisclosure {
+                            VStack(alignment: .leading, spacing: 0) {
+                                ForEach(group.records) { record in
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            Text(record.fullName).lineLimit(2).help(record.fullName)
+                                            if let failure = limitation(record) {
+                                                Text(failure.displayMessage).font(.caption).foregroundStyle(.secondary)
                                             }
-                                            Spacer()
-                                            if record.failure == .permissionDenied {
-                                                Button("접근 허용…") { chooseLocation(for: record) }.disabled(model.busy)
-                                            }
-                                        }.padding(.vertical, 4)
-                                    }
+                                        }
+                                        Spacer()
+                                        if record.failure == .permissionDenied {
+                                            Button("접근 허용…") { chooseLocation(for: record) }.disabled(model.busy)
+                                        }
+                                    }.padding(.vertical, 4)
                                 }
-                                .padding(.leading, 42)
-                                .padding(.bottom, 8)
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(group.name).lineLimit(2).help(group.name)
-                                        Text(Array(Set(group.records.map(\.style))).sorted().joined(separator: " · "))
-                                            .font(.caption).foregroundStyle(.secondary).lineLimit(2)
-                                    }
-                                    Spacer()
-                                    if group.records.contains(where: { limitation($0) != nil }) {
-                                        Label("확인 필요", systemImage: "exclamationmark.circle")
-                                            .font(.caption).foregroundStyle(.secondary)
-                                    }
-                                }.padding(.vertical, 6)
                             }
-                            Divider()
+                            .padding(.leading, 42)
+                            .padding(.bottom, 8)
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(group.name).lineLimit(2).help(group.name)
+                                    Text(Array(Set(group.records.map(\.style))).sorted().joined(separator: " · "))
+                                        .font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                                }
+                                Spacer()
+                                if group.records.contains(where: { limitation($0) != nil }) {
+                                    Label("확인 필요", systemImage: "exclamationmark.circle")
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                            }.padding(.vertical, 6)
                         }
+                        Divider()
                     }
-                    .padding(.leading, 8)
-                    .padding(.trailing, 24)
                 }
+                .padding(.leading, 8)
+                .padding(.trailing, 24)
             }
-            Divider()
-            HStack {
-                Text("별도로 가져온 파일은 보관함에서 관리합니다.").font(.caption).foregroundStyle(.secondary)
-                Spacer()
-                Button("가져온 글꼴 보관함…") { showingLibrary = true }
-            }
-        }
-        .padding(24)
-        .task { await model.prepare() }
-        .sheet(isPresented: $showingLibrary) {
-            VStack {
-                FontLibrarySettingsView(model: library)
-                Button("닫기") { showingLibrary = false }.keyboardShortcut(.cancelAction).padding(.bottom)
-            }.frame(width: 720, height: 560)
         }
     }
 
@@ -162,13 +167,13 @@ struct InstalledFontSettingsView: View {
 }
 
 // 제목 행 전체를 하나의 버튼으로 처리해 화살표·문구·빈 공간의 동작을 일치시킨다.
-private struct FontSettingsDisclosure<Label: View, Content: View>: View {
+struct FontSettingsDisclosure<Label: View, Content: View>: View {
     @State private var expanded = false
     private let label: Label
-    private let content: Content
+    private let content: () -> Content
 
-    init(@ViewBuilder content: () -> Content, @ViewBuilder label: () -> Label) {
-        self.content = content()
+    init(@ViewBuilder content: @escaping () -> Content, @ViewBuilder label: () -> Label) {
+        self.content = content
         self.label = label()
     }
 
@@ -189,7 +194,7 @@ private struct FontSettingsDisclosure<Label: View, Content: View>: View {
             .buttonStyle(.plain)
             .accessibilityValue(expanded ? "펼쳐짐" : "접힘")
             .accessibilityHint("펼치거나 접으려면 활성화하세요.")
-            if expanded { content }
+            if expanded { content() }
         }
     }
 }

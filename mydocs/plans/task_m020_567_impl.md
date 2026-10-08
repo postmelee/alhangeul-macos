@@ -3,7 +3,7 @@
 - 수행계획: [task_m020_567.md](task_m020_567.md)
 - 이슈: [#567](https://github.com/postmelee/alhangeul-macos/issues/567), M020 / v0.2
 - 브랜치: `local/task567`, 기준 `devel` / `0fa65fa`
-- 상태: Stage 2/3.1/3.2/3.3/4 완료. 2026-10-07 사용자 테스트 후 다음 단계 지시로 Stage 4를 구현·검증했다. [Stage 3 보고](../working/task_m020_567_stage3.md) · [Stage 4 보고](../working/task_m020_567_stage4.md). Stage 5 승인·수용은 남아 있다. [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
+- 상태: Stage 2/3.1/3.2/3.3/4/4.1 완료. 2026-10-08 설정 간소화와 시작 비용 조사를 구현·검증했다. [Stage 3 보고](../working/task_m020_567_stage3.md) · [Stage 4/4.1 보고](../working/task_m020_567_stage4.md) · [시작 비용 조사](../tech/task_m020_567_startup.md). Stage 5 승인·수용은 남아 있다. [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
 - Stage 2 native 소스와 테스트를 변경했다. upstream pin과 Studio bundle은 유지했다.
 
 ## 1. 확인한 출발점
@@ -49,6 +49,7 @@ TTC/가변은 현재 native 제한을 유지한다. 정확한 face/axes가 검�
 | 3.2 | 정식 릴리즈 반영 후 adapter를 제품 Studio에 연결 | core/Studio provenance 일치, 실제 이름·Regular/Bold·bytes hash, HWP/HWPX 표시·편집·저장, alias 미유출 | `Task #567 [Stage 3.2]: 정식 Studio 글꼴 API 연결` |
 | 3.3 | 호스트 family를 기존 글꼴 메뉴 전체/시스템 범주에 연결하고 별도 팝업 제거 | 기존 편집 명령으로 선택/커서 글꼴 적용, 중복·갱신·저장, adapter provenance와 실제 화면 | `Task #567 [Stage 3.3]: 기존 글꼴 목록에 로컬 글꼴 통합` |
 | 4 | 설치/관리 변경 전파, Typeface·측정·실패 캐시 갱신, 자동 준비와 설정 안내 | 열린 문서에서 삭제·비활성·갱신·권한 상실·설정 변경·복구, 빠른 문서 전환, 실제 UI 확인 | `Task #567 Stage 4: 글꼴 변경 반영과 자동 사용 흐름 구현` |
+| 4.1 | 기본 설정을 사용 여부·개수·재감지로 간소화, 상세 접기·가져오기 직접 진입, 시작 비용 조사 | 실제 설정/가져오기 화면과 권한 안내, 서비스 준비/탐색/bytes 횟수·실측, 기존 제품 회귀 | `Task #567 [Stage 4.1]: 글꼴 설정 간소화와 시작 탐색 비용 조사` |
 | 5 | 실제 문서 수용·signed sandbox 재실행·성능 회귀 및 #568/#569 인계 | 새 프로세스·cold/warm 읽기 수·동시 병합, 저장/재열기, 원본 부재/관리 복사본 대조, 관련 빌드·테스트 | `Task #567 Stage 5: Studio 글꼴 통합 검증과 소비자 인계` |
 
 각 단계는 해당 소스와 단계 보고서를 함께 커밋하고 승인을 받은 후 다음 단계로 진행한다. Stage 3.1/3.2/3.3은 Stage 3의 하위 단계로 추적하며 Stage 4/5의 수용 범위를 줄이지 않는다. upstream 확장은 병합되었으며 정식 릴리즈 pin/sync는 Stage 3.2의 선행 조건이다. 외부 저장소 게시·PR 생성·pin 변경은 확정 범위의 승인 뒤 진행하며 minified 산출물 직접 편집으로 우회하지 않는다.
@@ -70,6 +71,15 @@ TTC/가변은 현재 native 제한을 유지한다. 정확한 face/axes가 검�
 - 기존 renderer의 generation·리소스/측정/실패 캐시 갱신을 실제 Canvas2D/CanvasKit에서 검증한다. 사용 끄기/켜기, 설치 후보 제거·권한 실패/복구·같은 이름 다른 bytes, 관리 가져오기/제거, 빠른 문서 전환 뒤 stale 응답과 dirty/문서 이름 보존을 확인한다.
 - 설치 사용 toggle을 쉽게 찾을 수 있게 표시하고 ‘준비 중’ 안내를 지원되는 화면 표시·편집 및 기존 목록 선택에 맞게 수정한다. 인쇄/PDF/Finder 지원을 주장하지 않는다.
 - native 상태 전이 회귀와 실제 WKWebView, 격리 새 프로세스 재실행·설정 창 screenshot/직접 조작으로 증거를 남긴다. 실제 OS 설치·signed sandbox 권한 복원은 Stage 5 수용과 구분한다.
+
+### Stage 4.1 확정 범위 — 2026-10-08
+
+- “그렇게 진행하고 싶어” 지시를 설정 간소화 제안의 승인으로 기록한다. 기존 #567 브랜치·공급 계약을 유지하고 Stage 5·서명 sandbox·OS 설치·배포는 포함하지 않는다.
+- 기존 toolbar 선택은 유지한다. 설정 기본 화면은 사용 설정·감지 개수·다시 감지 중심으로 구성하고 설치 상세 목록은 접어 둔다. 저장된 권한 문제와 해당 글꼴 접근 복구 경로는 보존한다.
+- 설정에 보관한 글꼴 요약/상세와 가져오기 버튼을 직접 배치하여 보관함 sheet를 거치지 않고 한 번의 가져오기 sheet를 연다. 원본 참조와 복사 보관의 차이 및 화면 적용/출력 제한을 일관되게 안내한다.
+- 실제 시작 호출·활성화·문서 snapshot·수동 갱신과 native bytes 경로를 추적하고 실제 CoreText 목록의 시간·호출 횟수·bytes 요청 수를 격리 저장소에서 측정한다. 기존 시작/사용 기본값 정책은 이번 조사에서 변경하지 않는다.
+- 새 프로세스와 같은 프로세스 준비 공유를 구분하고, 폰트 서버의 OS cold 상태나 앱 전체 시작 시간을 측정했다고 주장하지 않는다. 설치 상태 변화·권한 검사를 생략한 영구 캐시로 우회하지 않는다.
+- HostApp build·글꼴 회귀·실제 WK 변경 및 lifecycle smoke와 실제 설정/상세/가져오기 screenshot·직접 조작 창을 제공한다. 발견한 성능 위험과 후속 권고를 단계 보고에 남긴다.
 
 ### Stage 3.1 구현 경계
 

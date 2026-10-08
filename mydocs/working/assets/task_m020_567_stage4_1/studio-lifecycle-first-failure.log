@@ -1,0 +1,19 @@
+Evidence: /Users/melee/Documents/projects/rhwp-mac/build.noindex/studio-lifecycle-eg8p_gpt
+PASS hwp: new document preserves WKWebView
+PASS hwp: native and editor epoch agree
+PASS save cancellation preserves new document
+PASS write failure keeps dirty and creates no destination
+PASS format save dispatched
+PASS first save preserves editor and binds filename
+PASS repeat save same destination
+PASS repeat save preserves epoch
+PASS explicit reopen uses new load in same WebView
+PASS close cancellation preserves dirty window
+PASS close save failure keeps dirty window
+PASS termination cancellation request awaits confirmation
+PASS termination cancellation is not rejected before confirmation
+PASS termination cancellation preserves document
+PASS termination save request awaits confirmation
+PASS termination save is not rejected before confirmation
+PASS save permits app termination
+FAIL timeout: window closed after save

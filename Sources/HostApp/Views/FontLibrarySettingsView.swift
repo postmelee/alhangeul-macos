@@ -2,51 +2,68 @@ import SwiftUI
 
 struct FontLibrarySettingsView: View {
     @ObservedObject var model: FontLibrarySettingsModel
+    var embedded = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("가져온 글꼴").font(.title2.weight(.semibold))
-                    Text("별도로 가져온 글꼴의 복사본을 알한글에 보관합니다.")
-                        .foregroundStyle(.secondary)
+                    Text("보관한 글꼴").font(embedded ? .headline : .title2.weight(.semibold))
                 }
                 Spacer()
-                Button("새로고침") { Task { await model.prepare() } }.disabled(model.busy)
+                if !embedded {
+                    Button("새로고침") { Task { await model.prepare() } }.disabled(model.busy)
+                }
+                Button("글꼴 가져오기…") { model.beginImport() }.disabled(!model.ready || model.busy)
             }
-            Text("지원되는 글꼴은 문서에 자동으로 적용하고, 상단 글꼴 목록에서 선택할 수 있습니다. 인쇄·PDF 내보내기 지원은 준비 중입니다.")
+            Text("한글 앱이나 글꼴 폴더에서 복사해 보관합니다. 보관한 복사본은 원본을 삭제해도 남습니다.")
                 .font(.callout).foregroundStyle(.secondary)
             if let message = model.message { Text(message).font(.callout).foregroundStyle(.secondary) }
             if model.preparing { ProgressView("글꼴 보관함 확인 중…") }
             if !model.ready {
-                Spacer()
+                if !model.preparing {
+                    Button("다시 시도") { Task { await model.prepare() } }.disabled(model.busy)
+                }
+                if !embedded { Spacer() }
             } else if model.manifest.entries.isEmpty {
                 VStack(spacing: 12) {
-                    Image(systemName: "textformat").font(.system(size: 36)).foregroundStyle(.secondary)
-                    Text("아직 가져온 글꼴이 없습니다").font(.headline)
-                    Text("한글 앱이나 글꼴 폴더에서 한꺼번에 가져올 수 있습니다.")
-                        .foregroundStyle(.secondary)
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                    if !embedded { Image(systemName: "textformat").font(.system(size: 36)).foregroundStyle(.secondary) }
+                    Text("아직 보관한 글꼴이 없습니다.").foregroundStyle(.secondary)
+                }.frame(maxWidth: .infinity, alignment: embedded ? .leading : .center)
+            } else if embedded {
+                FontSettingsDisclosure {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(model.manifest.entries, id: \.object.sha256) { entry in
+                            entryRow(entry).padding(.vertical, 8)
+                            Divider()
+                        }
+                        Button("보관한 목록 새로고침") { Task { await model.prepare() } }
+                            .disabled(model.busy).padding(.top, 8)
+                    }.padding(.leading, 22).padding(.trailing, 24)
+                } label: {
+                    Text("보관한 파일 \(model.manifest.entries.count)개").padding(.vertical, 5)
+                }
             } else {
                 List(model.manifest.entries, id: \.object.sha256) { entry in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(entry.faces.first?.fullName ?? entry.source.originalFilename)
-                        Text("\(entry.faces.count)개 서체 · \(entry.source.originalFilename)")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }.padding(.vertical, 4)
+                    entryRow(entry).padding(.vertical, 4)
                 }
             }
-            HStack {
-                Text("원본 파일은 변경하지 않습니다.").font(.caption).foregroundStyle(.secondary)
-                Spacer()
-                Button("기존 한글 글꼴 가져오기…") { model.beginImport() }
-                    .disabled(!model.ready || model.busy)
-            }
+            Text("지원되는 글꼴은 문서와 상단 글꼴 목록에서 사용할 수 있습니다. 인쇄·PDF 내보내기 지원은 준비 중입니다.")
+                .font(.caption).foregroundStyle(.secondary)
         }
-        .padding(24)
+        .padding(embedded ? 0 : 24)
         .task { await model.prepare() }
-        .sheet(isPresented: $model.showingImport, onDismiss: { model.dismissImport() }) {
+        .sheet(isPresented: $model.showingImport, onDismiss: { model.importSheetDidDismiss() }) {
             MacFontImportView(model: model)
+        }
+    }
+
+    private func entryRow(_ entry: FontLibraryEntry) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(entry.faces.first?.fullName ?? entry.source.originalFilename)
+                .lineLimit(2).help(entry.source.originalFilename)
+            Text("\(entry.faces.count)개 서체 · \(entry.source.originalFilename)")
+                .font(.caption).foregroundStyle(.secondary).lineLimit(2)
         }
     }
 }

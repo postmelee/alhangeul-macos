@@ -23,8 +23,9 @@ private final class PreviewDelegate: NSObject, NSApplicationDelegate {
         }
     }
     func show() async throws {
-        let root = URL(fileURLWithPath: Bundle.main.object(forInfoDictionaryKey: "ProbeRepositoryRoot") as! String)
-            .appendingPathComponent("build.noindex/task565-stage5/ui-data")
+        let root = (Bundle.main.object(forInfoDictionaryKey: "ProbeDataRoot") as? String).map { URL(fileURLWithPath: $0) }
+            ?? URL(fileURLWithPath: Bundle.main.object(forInfoDictionaryKey: "ProbeRepositoryRoot") as! String)
+                .appendingPathComponent("build.noindex/task565-stage5/ui-data")
         let live = CommandLine.arguments.contains("--live")
         let catalog = try await Task.detached {
             try InstalledFontCatalogService(persistence: .file(at: root.appendingPathComponent(live ? "installed-live" : "installed-demo28")),

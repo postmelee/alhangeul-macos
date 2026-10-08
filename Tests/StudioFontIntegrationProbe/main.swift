@@ -356,6 +356,15 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.title = "알한글 — 글꼴 변경 연동 검증"; window.delegate = self
         window.isReleasedWhenClosed = false; window.contentView = web; self.window = window
         window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
+        func beginVisibleImport() async throws {
+            try await wait("managed UI ready") { libraryModel.ready && !libraryModel.busy }
+            libraryModel.beginImport()
+            try await wait("native import sheet presented") { self.settingsWindow?.attachedSheet != nil }
+        }
+        func dismissVisibleImport() async throws {
+            libraryModel.dismissImport()
+            try await wait("native import sheet dismissed") { self.settingsWindow?.attachedSheet == nil }
+        }
         func load(_ backend: String, id: Int) async throws {
             if id == 2 {
                 await fixture.gate.arm()
@@ -432,6 +441,11 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
             try check(true, "\(backend): re-enabling recovers without reopening document")
             generation = try await fontGeneration(); resources = try await resourceGeneration()
             try fixture.setReadable(false); await model.refresh()
+            // 목록 무효화 중의 일시적인 count=0을 두 face의 실패 완료로 오인하지 않는다.
+            try await wait("both fixture permission failures published") {
+                let records = await catalog.snapshot().records
+                return records.count == 2 && records.allSatisfy { $0.failure == .permissionDenied }
+            }
             try await waitForFonts(0, backend: backend, after: generation, resources: resources)
             try check((await catalog.snapshot()).records.allSatisfy { $0.failure == .permissionDenied },
                 "\(backend): actual fixture read denial is published and stale faces are discarded")
@@ -458,11 +472,11 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
             await model.setEnabled(false)
             try await waitForFonts(0, backend: backend, after: generation, resources: resources)
             generation = try await fontGeneration(); resources = try await resourceGeneration()
-            libraryModel.beginImport(); libraryModel.scan(.selected([fixture.directory]))
+            try await beginVisibleImport(); libraryModel.scan(.selected([fixture.directory]))
             try await wait("managed UI discovery") { libraryModel.phase == .candidates }
             libraryModel.importSelected()
             try await wait("managed UI import") { libraryModel.phase == .results }
-            libraryModel.dismissImport()
+            try await dismissVisibleImport()
             try check(libraryModel.results.filter { $0.status == .added }.count == 2, "\(backend): real UI model imports Regular/Bold through shared service")
             try await waitForFonts(2, backend: backend, after: generation, resources: resources)
             try check(faceResponses.suffix(2).count == 2 && faceResponses.suffix(2).allSatisfy { $0["source"]?.hasPrefix("managed:") == true },
@@ -486,17 +500,17 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 try check(true, "\(backend): managed removal publishes and clears old face resources")
                 try fixture.restore(); await model.refresh()
                 generation = try await fontGeneration(); resources = try await resourceGeneration()
-                libraryModel.beginImport(); libraryModel.scan(.selected([fixture.directory]))
+                try await beginVisibleImport(); libraryModel.scan(.selected([fixture.directory]))
                 try await wait("managed reimport discovery") { libraryModel.phase == .candidates }
                 libraryModel.importSelected()
                 try await wait("managed reimport") { libraryModel.phase == .results }
-                libraryModel.dismissImport()
+                try await dismissVisibleImport()
                 try await waitForFonts(2, backend: backend, after: generation, resources: resources)
                 try fixture.removeSources(); await model.refresh()
                 try check(true, "\(backend): managed reimport clears failure cache and survives source removal")
             }
             try check(try await js("return window.__fontProbeState.isDirty()===false;") as? Bool == true,
-                "\(backend): font changes preserve clean/undo document state")
+                "\(backend): font changes preserve clean document state")
             try check(try await js("return JSON.stringify([0,3,25].map(p=>window.__fontProbeWasm.getCharPropertiesAt(0,0,p)));") as? String == original,
                 "\(backend): font changes preserve document original names and styles")
             try await screenshot("studio-changes-\(backend).png")
