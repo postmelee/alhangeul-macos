@@ -15,6 +15,12 @@
 - 실제 목록의 설정·기존 메뉴 화면과 직접 조작 가능한 창을 제공한다. 이전 fixture 상태 전이/원본 상실·독립 관리 복사본 대조 및 완료한 회귀 증거는 재사용하고 새 sandbox 경계에 필요한 검증을 추가한다.
 - #568의 출력/확장과 #569의 Mac/Windows 수용·제품 안내에 계약·제약을 인계한다. 최종 보고/PR 게시·이슈 close·공개 배포·공증·Quick Look 등록은 포함하지 않는다.
 
+## PR 리뷰·CI 보정 승인 범위 — 2026-10-08
+
+- PR #578 게시 후 작업지시자의 “진행해줘”를 CI 확인·리뷰·문제 없을 때 단계 커밋을 보존한 merge 및 정리 진행 승인으로 기록한다.
+- 최초 CI의 main/source content gate가 `README.md`와 core 운영 매뉴얼의 충돌을 보고했다. 현재 `main`의 기존 승인 변경을 merge 방식으로 인계하고, 공식 v0.8.7 배지·앱 소유 Studio adapter 안내·기존 문서/CI 변경을 보존한다. history rebase나 gate 생략은 하지 않는다.
+- 해결된 변경 범위와 main/source gate·배지/Studio provenance·CI 결과를 검증하고 리뷰 기록/최종 보고에 보정 내용을 남긴다. 실제 제품 소스 결함이 발견되면 같은 이슈에서 해당 수정·회귀를 먼저 완료한다. 필수 CI가 통과하기 전에 merge하지 않는다.
+
 ## 1. 확인한 출발점
 
 - native 공급은 `InstalledFontCatalogService`, `InstalledFontSupplyCatalog`를 재사용한다. 현재 service는 `InstalledFontSettingsModel`의 private 멤버이므로 공유 소유권을 명시적으로 분리하거나 접근 경계를 제공해야 한다.
