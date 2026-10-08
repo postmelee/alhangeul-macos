@@ -2,6 +2,11 @@ import AppKit
 import PDFKit
 import XCTest
 
+private actor PDFExportLeaseMeter {
+    var releases = 0
+    func release() { releases += 1 }
+}
+
 @MainActor
 final class RhwpStudioPDFExportControllerTests: XCTestCase {
     override func setUp() {
@@ -93,6 +98,78 @@ final class RhwpStudioPDFExportControllerTests: XCTestCase {
         wait(for: [duplicateCompletion, firstCompletion], timeout: 5)
     }
 
+    func testCancelledFinalValidationCannotOverwriteDestinationOrFinishNextExport() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at:folder,withIntermediateDirectories:true)
+        defer { try? FileManager.default.removeItem(at:folder) }
+        let destination = folder.appendingPathComponent("existing.pdf"), original = Data("keep original".utf8)
+        try original.write(to:destination)
+        let controller = makeController(), payload = try RhwpStudioPagePayload(fileName:"a.hwpx",pageCount:1,pages:[svg(width:200,height:300,text:"문서")])
+        let validating = expectation(description:"validation paused"), cancelled = expectation(description:"cancelled once")
+        var resumeValidation: CheckedContinuation<Void,Never>?, firstCalls = 0
+        controller.export(payload:payload,destinationURL:destination,validateBeforeWrite:{
+            await withCheckedContinuation { resumeValidation = $0; validating.fulfill() }
+        }) { result in
+            firstCalls += 1
+            if case .failure(let error) = result { XCTAssertEqual(error as? RhwpStudioOutputFontError,.cancelled) }
+            else { XCTFail("cancel delivered success") }
+            cancelled.fulfill()
+        }
+        await fulfillment(of:[validating],timeout:5)
+        controller.cancel()
+        await fulfillment(of:[cancelled],timeout:5)
+        let next = expectation(description:"next export completes")
+        controller.export(payload:payload,destinationURL:folder.appendingPathComponent("next.pdf")) {
+            if case .failure(let error) = $0 { XCTFail("late old task cancelled new export: \(error)") }
+            next.fulfill()
+        }
+        resumeValidation?.resume()
+        await fulfillment(of:[next],timeout:5)
+        XCTAssertEqual(try Data(contentsOf:destination),original)
+        XCTAssertEqual(firstCalls,1)
+    }
+
+    func testFinalValidationAndAtomicWriteFailuresPreserveExistingDestination() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at:folder,withIntermediateDirectories:true)
+        defer { try? FileManager.default.removeItem(at:folder) }
+        let destination = folder.appendingPathComponent("existing.pdf"), original = Data("keep original".utf8)
+        try original.write(to:destination)
+        let controller = makeController(), payload = try RhwpStudioPagePayload(fileName:"a.hwpx",pageCount:1,pages:[svg(width:200,height:300,text:"문서")])
+        let result: Result<URL,Error> = await withCheckedContinuation { done in
+            controller.export(payload:payload,destinationURL:destination,validateBeforeWrite:{ throw RhwpStudioOutputFontError.stale }) { done.resume(returning:$0) }
+        }
+        if case .failure(let error) = result { XCTAssertEqual(error as? RhwpStudioOutputFontError,.stale) }
+        else { XCTFail("stale output written") }
+        XCTAssertEqual(try Data(contentsOf:destination),original)
+        let failed: Result<URL,Error> = await withCheckedContinuation { done in
+            controller.export(payload:payload,destinationURL:folder.appendingPathComponent("missing/out.pdf")) { done.resume(returning:$0) }
+        }
+        if case .success = failed { XCTFail("unwritable output succeeded") }
+        XCTAssertEqual(try Data(contentsOf:destination),original)
+    }
+
+    func testWriteFailureClosesOutputLeaseBeforeCompletion() async throws {
+        let meter = PDFExportLeaseMeter()
+        let job = RhwpStudioOutputFontJob(document:.init(loadToken:"test",epoch:1,revision:1),
+            snapshot:.init(identity:"empty",faces:[],omitted:0,failure:nil,
+                read:{_ in throw RhwpStudioOutputFontError.unavailable},current:{true},release:{await meter.release()}),
+            documentIsCurrent:{true},resolve:{requests in
+                .init(identity:"empty",revision:"r1",generation:1,selections:requests.map {
+                    .init(key:$0.key,status:"absent",id:nil,postscriptName:nil,weight:nil,slant:nil)
+                })
+            })
+        let controller = makeController(outputFonts:job)
+        let payload = try RhwpStudioPagePayload(fileName:"a.hwpx",pageCount:1,pages:[svg(width:200,height:300,text:"문서")])
+        let destination = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + "/missing/out.pdf")
+        let result: Result<URL,Error> = await withCheckedContinuation { done in
+            controller.export(payload:payload,destinationURL:destination) { done.resume(returning:$0) }
+        }
+        if case .success = result { XCTFail("write failure succeeded") }
+        let released = await meter.releases; XCTAssertEqual(released,1)
+        XCTAssertEqual(job.residentBytes,0)
+    }
+
     private func export(
         payload: RhwpStudioPagePayload,
         to destinationURL: URL
@@ -116,13 +193,13 @@ final class RhwpStudioPDFExportControllerTests: XCTestCase {
         """
     }
 
-    private func makeController() -> RhwpStudioPDFExportController {
+    private func makeController(outputFonts: RhwpStudioOutputFontJob? = nil) -> RhwpStudioPDFExportController {
         RhwpStudioPDFExportController(renderer: RhwpStudioPagePDFRenderer(
             fontResourceProvider: RhwpStudioPDFFontDirectoryResourceProvider(
                 directoryURL: repositoryRootURL
                     .appendingPathComponent("Sources/HostApp/Resources/rhwp-studio/fonts", isDirectory: true)
-            )
-        ))
+            ),outputFonts:outputFonts
+        ),outputFonts:outputFonts)
     }
 
     private var repositoryRootURL: URL {

@@ -7,7 +7,7 @@
 | 소비자 | 현재 상태 | 후속 검증 |
 |--------|-----------|-----------|
 | HostApp 설정·Studio (#567) | 공유 catalog/provider, 기존 toolbar 선택, Canvas2D/CanvasKit, 변경·복구, 저장 이름 보존, 정상 권한 재실행 확인 | 실제 한컴 설치본·최소 OS/Intel·새 권한 패널/볼륨·배포 후보 수용은 #569에서 취합 |
-| PDF·인쇄 (#568) | 설치/관리 provider 미연결 | 출력 snapshot과 별도 WebView의 실제 face 준비 대기, PS/style/hash 대조, generation·문서 변경·취소 처리 |
+| PDF·인쇄 (#568) | [Stage 3](../working/task_m020_568_stage3.md): 설치/관리 snapshot·공식 matcher·실제 저장/인쇄 연결, HWP/HWPX의 PS/style/program/ToUnicode·텍스트와 signed sandbox·패널 취소 수용 | 실제 한컴·최소 OS/Intel·다양한 문서·물리 인쇄 수용은 별도. 일반 가로 Bold 외 효과/형식 지원을 확대하지 않음 |
 | native·Quick Look·Thumbnail (#568) | 설치/관리 provider 미연결 | 프로세스별 권한·App Group/lease 경계와 정확한 스타일, 표준 Finder smoke |
 | Windows ZIP (#566) / 전체 안내 (#569) | 후속 | Mac·Windows 수용 분리, 독립 보관과 설치 참조 설명, 소비자별 검증 후 공개 안내/배포 |
 

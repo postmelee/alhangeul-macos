@@ -1,7 +1,18 @@
 import Foundation
 
-enum RhwpStudioOutputFontError: String, Error {
+enum RhwpStudioOutputFontError: String, LocalizedError {
     case invalidRequest, stale, unavailable, unsupported, restricted, tooLarge, cancelled
+    var errorDescription: String? {
+        switch self {
+        case .invalidRequest: "출력 글꼴 요청을 확인할 수 없습니다."
+        case .stale: "출력 준비 중 문서나 글꼴이 변경되었습니다. 다시 시도해 주세요."
+        case .unavailable: "필요한 글꼴을 읽거나 선택할 수 없습니다."
+        case .unsupported: "이 글꼴 형식이나 스타일은 현재 출력에서 지원하지 않습니다."
+        case .restricted: "이 글꼴의 임베딩 제한으로 PDF에 포함할 수 없습니다."
+        case .tooLarge: "출력에 필요한 글꼴 데이터가 허용 크기를 초과했습니다."
+        case .cancelled: "출력이 취소되었습니다."
+        }
+    }
 }
 
 // FontUsageEvidence와 OS/2 선언을 합쳐 새로운 허가 상태를 만들지 않는다.

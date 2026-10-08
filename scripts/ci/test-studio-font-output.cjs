@@ -57,3 +57,33 @@ test('출력 bridge는 native catalog identity에 묶고 빈 catalog와 실제 �
   await assert.rejects(execute({generation:1,revision:'r1',selections:[]},context,2));
   await assert.rejects(execute({generation:1,revision:null,selections:[]},null,1));
 });
+
+test('실제 Bold 속성·같은 위치만 Bold 요청으로 바꾸고 모호한 효과는 보존', async () => {
+  const {outputPageSource} = await adapter;
+  const makeNode = (overrides = {}) => {
+    const attrs = {'x':'20','y':'50','font-family':"'Font', serif",'font-size':'24',fill:'#000000',stroke:'#000000','stroke-width':'0.480',...overrides};
+    return {children:[],textContent:'가',attrs, getAttribute:k=>attrs[k] ?? null,hasAttribute:k=>k in attrs,
+      closest:()=>null,setAttribute:(k,v)=>{attrs[k]=v;},removeAttribute:k=>{delete attrs[k];}};
+  };
+  const op = {type:'textRun',text:'가',rotation:0,isVertical:false,orientation:'horizontal',charOverlap:null,
+    style:{bold:true,italic:false,ratio:1,fontFamily:'Font',fontSize:24,color:'#000000'},
+    placement:{runToPage:{a:1,b:0,c:0,d:1,e:20,f:50},baselineY:0},
+    clusters:[{textRangeUtf16:{start:0,end:1},origin:{x:0,y:0},projection:'verbatim'}]};
+  const tree = {schemaVersion:1,schemaMinorVersion:23,unit:'px',coordinateSystem:'page-top-left-y-down',root:{kind:'leaf',ops:[op]}};
+  let nodes;
+  const parsed = {querySelector:()=>null,querySelectorAll:()=>nodes};
+  const normalize = vm.runInNewContext(stripTypeScriptTypes(outputPageSource) + '\nnormalizeHostOutputSvg', {
+    DOMParser:class {parseFromString(){return parsed;}},XMLSerializer:class {serializeToString(){return 'serialized';}}
+  });
+  nodes=[makeNode()];assert.equal(normalize('svg',tree),'serialized');
+  assert.equal(nodes[0].attrs['font-weight'],'700');assert.equal(nodes[0].attrs.stroke,undefined);
+  assert.equal(nodes[0].attrs.x,'20');assert.equal(nodes[0].attrs['font-size'],'24');
+  for (const effects of [{shadowType:1},{outlineType:1},{superscript:true},{ratio:0.8},{bold:false}]) {
+    nodes=[makeNode()];normalize('svg',{...tree,root:{kind:'leaf',ops:[{...op,style:{...op.style,...effects}}]}});
+    assert.equal(nodes[0].attrs.stroke,'#000000');
+  }
+  nodes=[makeNode(),makeNode()];normalize('svg',tree);assert(nodes.every(n=>n.attrs.stroke));
+  nodes=[makeNode()];normalize('svg',{...tree,root:{kind:'leaf',ops:[op,op]}});assert(nodes[0].attrs.stroke);
+  nodes=[makeNode({'stroke-width':'0.7'})];normalize('svg',tree);assert(nodes[0].attrs.stroke);
+  nodes=[makeNode()];nodes[0].closest=()=>({});normalize('svg',tree);assert(nodes[0].attrs.stroke);
+});

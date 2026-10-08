@@ -48,7 +48,7 @@ struct FontLibrarySettingsView: View {
                     entryRow(entry).padding(.vertical, 4)
                 }
             }
-            Text("지원되는 글꼴은 문서와 상단 글꼴 목록에서 사용할 수 있습니다. 인쇄·PDF 내보내기 지원은 준비 중입니다.")
+            Text("지원되는 글꼴은 문서와 상단 글꼴 목록에서 사용할 수 있습니다. PDF·인쇄에 포함할 수 없는 글꼴은 출력 전에 안내합니다.")
                 .font(.caption).foregroundStyle(.secondary)
         }
         .padding(embedded ? 0 : 24)

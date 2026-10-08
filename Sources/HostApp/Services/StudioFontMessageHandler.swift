@@ -10,20 +10,34 @@ final class StudioFontMessageHandler: NSObject, WKScriptMessageHandlerWithReply 
     private let installed: InstalledFontServiceProvider
     private let library: @Sendable () throws -> FontLibraryService
     private let onFaceRead: ((String, String, String) -> Void)?
+    private let onOutputFaceRead: (@MainActor @Sendable (String, StudioFontBytes) async -> Void)?
 
     init(session: StudioFontSession? = nil, observeLiveChanges: Bool = true,
          installed: InstalledFontServiceProvider = .shared,
          library: @escaping @Sendable () throws -> FontLibraryService = { try FontLibraryService.shared.get() },
-         onFaceRead: ((String, String, String) -> Void)? = nil) {
+         onFaceRead: ((String, String, String) -> Void)? = nil,
+         onOutputFaceRead: (@MainActor @Sendable (String, StudioFontBytes) async -> Void)? = nil) {
         self.session = session ?? StudioFontSession(supply: .using(installed: installed, library: library))
         self.observeLiveChanges = observeLiveChanges
         self.installed = installed; self.library = library
         self.onFaceRead = onFaceRead
+        self.onOutputFaceRead = onOutputFaceRead
         super.init()
     }
     private var observations: [Task<Void, Never>] = []
     private var active = false
     private var loadToken: String?
+
+    func outputSnapshot() async throws -> StudioFontSupplySnapshot {
+        let snapshot = try await StudioFontSupply.using(installed: installed, library: library).snapshot()
+        guard let observe = onOutputFaceRead else { return snapshot }
+        return .init(identity:snapshot.identity,faces:snapshot.faces,omitted:snapshot.omitted,failure:snapshot.failure,
+            read:{ id in
+                let bytes = try await snapshot.read(id)
+                await observe(id, bytes)
+                return bytes
+            }, current:snapshot.current,release:snapshot.release)
+    }
 
     deinit { for task in observations { task.cancel() } }
 

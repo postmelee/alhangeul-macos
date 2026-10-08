@@ -263,6 +263,7 @@ targets:
       - path: Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift
       - path: Sources/HostApp/Services/RhwpStudioPagePayload.swift
       - path: Sources/HostApp/Services/RhwpStudioPrintLifecycle.swift
+      - path: Sources/HostApp/Services/RhwpStudioPrintController.swift
       - path: Sources/HostApp/Services/RhwpStudioPrintOrientationPolicy.swift
       - path: Sources/HostApp/Services/SpotlightReindexService.swift
       - path: Sources/HostApp/Support/RhwpProvenance.swift

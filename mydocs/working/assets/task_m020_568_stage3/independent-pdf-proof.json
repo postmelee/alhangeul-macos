@@ -1,0 +1,738 @@
+[
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 4004,
+            "sha256": "e8f3bebe58b54cd944242e75b2af00fdb1168559accc8e19bdcfd55d5be5d779"
+          }
+        },
+        "toUnicodeBytes": 432,
+        "toUnicodeSHA256": "90d1b5d4b967c54caf2220b5c41a901f31dcdfc31780932ecfdae33e1809a9f0"
+      },
+      {
+        "baseFont": "/AAAAAE+GowunBatang-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1420,
+            "sha256": "5a2f899141c74c14eb2d718683301468eba5655e3578f7adbd32a38a33c6bcfd"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAF+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "/MacRomanEncoding",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1628,
+            "sha256": "b5c1a13a8826fcb12be1add104a3670b4f30c4190cbe5536388606fec21aa3ed"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAH+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "32a9d8a05a5de7d87c92419f2d6ec1e6349d644fbc82fdf400e0bf012fcea2e1"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "managed",
+    "file": "hwp.pdf",
+    "pdfSHA256": "765c4d7062cf26ae7c80a519892d79e72a8ce228118104ca264c910cba283a24",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 4004,
+            "sha256": "e8f3bebe58b54cd944242e75b2af00fdb1168559accc8e19bdcfd55d5be5d779"
+          }
+        },
+        "toUnicodeBytes": 432,
+        "toUnicodeSHA256": "90d1b5d4b967c54caf2220b5c41a901f31dcdfc31780932ecfdae33e1809a9f0"
+      },
+      {
+        "baseFont": "/AAAAAE+GowunBatang-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1420,
+            "sha256": "5a2f899141c74c14eb2d718683301468eba5655e3578f7adbd32a38a33c6bcfd"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAF+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "/MacRomanEncoding",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1628,
+            "sha256": "b5c1a13a8826fcb12be1add104a3670b4f30c4190cbe5536388606fec21aa3ed"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAH+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "32a9d8a05a5de7d87c92419f2d6ec1e6349d644fbc82fdf400e0bf012fcea2e1"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "managed",
+    "file": "hwpx.pdf",
+    "pdfSHA256": "63e10d4f082918cbe4376103a0bea0580fc80facae166397c5ee769ab2afa2eb",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 4004,
+            "sha256": "e8f3bebe58b54cd944242e75b2af00fdb1168559accc8e19bdcfd55d5be5d779"
+          }
+        },
+        "toUnicodeBytes": 432,
+        "toUnicodeSHA256": "90d1b5d4b967c54caf2220b5c41a901f31dcdfc31780932ecfdae33e1809a9f0"
+      },
+      {
+        "baseFont": "/AAAAAE+GowunBatang-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1420,
+            "sha256": "5a2f899141c74c14eb2d718683301468eba5655e3578f7adbd32a38a33c6bcfd"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAF+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "/MacRomanEncoding",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1628,
+            "sha256": "b5c1a13a8826fcb12be1add104a3670b4f30c4190cbe5536388606fec21aa3ed"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAH+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "32a9d8a05a5de7d87c92419f2d6ec1e6349d644fbc82fdf400e0bf012fcea2e1"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "managed",
+    "file": "hwp-print.pdf",
+    "pdfSHA256": "470faae8cead17086e05d32a5c9f31b999973514b7e764f3f2bb3849c3696848",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 4004,
+            "sha256": "e8f3bebe58b54cd944242e75b2af00fdb1168559accc8e19bdcfd55d5be5d779"
+          }
+        },
+        "toUnicodeBytes": 432,
+        "toUnicodeSHA256": "90d1b5d4b967c54caf2220b5c41a901f31dcdfc31780932ecfdae33e1809a9f0"
+      },
+      {
+        "baseFont": "/AAAAAE+GowunBatang-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1420,
+            "sha256": "5a2f899141c74c14eb2d718683301468eba5655e3578f7adbd32a38a33c6bcfd"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAF+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "/MacRomanEncoding",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1628,
+            "sha256": "b5c1a13a8826fcb12be1add104a3670b4f30c4190cbe5536388606fec21aa3ed"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAH+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "32a9d8a05a5de7d87c92419f2d6ec1e6349d644fbc82fdf400e0bf012fcea2e1"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "managed",
+    "file": "hwpx-print.pdf",
+    "pdfSHA256": "b10cbeba4b83251104e7cc3bc3dea81e7dec2424a79e2e2225e0db040ee240d7",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+NanumSquareR",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 2212,
+            "sha256": "efca7c3342495b5f10aed501621347c875ba23ec967a39f4228b54ff98813d23"
+          }
+        },
+        "toUnicodeBytes": 462,
+        "toUnicodeSHA256": "dcfd614deacb50017c4ed1236bfa68cdd0fdb3fe6e997246d762ca124821a48f"
+      },
+      {
+        "baseFont": "/AAAAAE+NanumSquareB",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 776,
+            "sha256": "626d5182bee16fe9a71b2d5fb5a3cb3107107858c875c8d1c1d46e0fa8e92c53"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAG+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "9cafd7ad207e47b21a51dac6b0b202bb791a3535b7c89439d2b9720b8a10dc2f"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "installed",
+    "file": "hwp.pdf",
+    "pdfSHA256": "0362cdfe3e28e3b7b8f45fbee084873a30d7e7b516b693123fbbf457fb4468ce",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글\n꼴 확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+NanumSquareR",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 2212,
+            "sha256": "efca7c3342495b5f10aed501621347c875ba23ec967a39f4228b54ff98813d23"
+          }
+        },
+        "toUnicodeBytes": 462,
+        "toUnicodeSHA256": "dcfd614deacb50017c4ed1236bfa68cdd0fdb3fe6e997246d762ca124821a48f"
+      },
+      {
+        "baseFont": "/AAAAAE+NanumSquareB",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 776,
+            "sha256": "626d5182bee16fe9a71b2d5fb5a3cb3107107858c875c8d1c1d46e0fa8e92c53"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAG+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "9cafd7ad207e47b21a51dac6b0b202bb791a3535b7c89439d2b9720b8a10dc2f"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "installed",
+    "file": "hwpx.pdf",
+    "pdfSHA256": "d1250650e017cf43d60c9f0fbe620175bd489e44be19a7ea5d0903aee2d336c9",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글\n꼴 확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+NanumSquareR",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 2212,
+            "sha256": "efca7c3342495b5f10aed501621347c875ba23ec967a39f4228b54ff98813d23"
+          }
+        },
+        "toUnicodeBytes": 462,
+        "toUnicodeSHA256": "dcfd614deacb50017c4ed1236bfa68cdd0fdb3fe6e997246d762ca124821a48f"
+      },
+      {
+        "baseFont": "/AAAAAE+NanumSquareB",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 776,
+            "sha256": "626d5182bee16fe9a71b2d5fb5a3cb3107107858c875c8d1c1d46e0fa8e92c53"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAG+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "9cafd7ad207e47b21a51dac6b0b202bb791a3535b7c89439d2b9720b8a10dc2f"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "installed",
+    "file": "hwp-print.pdf",
+    "pdfSHA256": "30dd9f8dbb2a9fa3237bcac71799acb77fb36d4f13a3b60de4ebcc4cdf2ce6c9",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글\n꼴 확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+NanumSquareR",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 2212,
+            "sha256": "efca7c3342495b5f10aed501621347c875ba23ec967a39f4228b54ff98813d23"
+          }
+        },
+        "toUnicodeBytes": 462,
+        "toUnicodeSHA256": "dcfd614deacb50017c4ed1236bfa68cdd0fdb3fe6e997246d762ca124821a48f"
+      },
+      {
+        "baseFont": "/AAAAAE+NanumSquareB",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 776,
+            "sha256": "626d5182bee16fe9a71b2d5fb5a3cb3107107858c875c8d1c1d46e0fa8e92c53"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAG+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "9cafd7ad207e47b21a51dac6b0b202bb791a3535b7c89439d2b9720b8a10dc2f"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "installed",
+    "file": "hwpx-print.pdf",
+    "pdfSHA256": "3fdf23c651d03c151ea81f973295a39d5c0daeb997355c461b6d762be5e794eb",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글\n꼴 확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+NotoSerifKRExtraLight-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 3936,
+            "sha256": "db03a022529fd1b6dbea91ae1075de13e150b8447406350e0f2f83bafe85f42d"
+          }
+        },
+        "toUnicodeBytes": 432,
+        "toUnicodeSHA256": "90d1b5d4b967c54caf2220b5c41a901f31dcdfc31780932ecfdae33e1809a9f0"
+      },
+      {
+        "baseFont": "/AAAAAE+NotoSerifKRExtraLight-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1384,
+            "sha256": "018d12b951a76a3de165f29ae4e94f7d290aaf13e92604b0858e395df4355f21"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAG+AppleMyungjo",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 2852,
+            "sha256": "56875b5e30abab7219017cbc3092dfd00b3ceaaf051caa6cfe59ed2f5543254b"
+          }
+        },
+        "toUnicodeBytes": 357,
+        "toUnicodeSHA256": "52fcdeba846b0583046e55ea8de9a31a0810eb518be7d77a7c324c2266796461"
+      },
+      {
+        "baseFont": "/AAAAAI+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "9047d71e3c66de8fe95856745a73dd1a5e80e0acf7555ec8cea384917b24f478"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "baseline",
+    "file": "hwp.pdf",
+    "pdfSHA256": "9e302433a157161c267f5410c333b2a8ec115d54efe095b229c9d84cb881ac1a",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+NotoSerifKRExtraLight-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 3936,
+            "sha256": "db03a022529fd1b6dbea91ae1075de13e150b8447406350e0f2f83bafe85f42d"
+          }
+        },
+        "toUnicodeBytes": 432,
+        "toUnicodeSHA256": "90d1b5d4b967c54caf2220b5c41a901f31dcdfc31780932ecfdae33e1809a9f0"
+      },
+      {
+        "baseFont": "/AAAAAE+NotoSerifKRExtraLight-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1384,
+            "sha256": "018d12b951a76a3de165f29ae4e94f7d290aaf13e92604b0858e395df4355f21"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAG+AppleMyungjo",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 2852,
+            "sha256": "56875b5e30abab7219017cbc3092dfd00b3ceaaf051caa6cfe59ed2f5543254b"
+          }
+        },
+        "toUnicodeBytes": 357,
+        "toUnicodeSHA256": "52fcdeba846b0583046e55ea8de9a31a0810eb518be7d77a7c324c2266796461"
+      },
+      {
+        "baseFont": "/AAAAAI+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "9047d71e3c66de8fe95856745a73dd1a5e80e0acf7555ec8cea384917b24f478"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "baseline",
+    "file": "hwpx.pdf",
+    "pdfSHA256": "8bad4241f1ae8fbb0d579ccdee7e27eb30af3ccd5d984b5b80b083650356cd30",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+NotoSerifKRExtraLight-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 3936,
+            "sha256": "db03a022529fd1b6dbea91ae1075de13e150b8447406350e0f2f83bafe85f42d"
+          }
+        },
+        "toUnicodeBytes": 432,
+        "toUnicodeSHA256": "90d1b5d4b967c54caf2220b5c41a901f31dcdfc31780932ecfdae33e1809a9f0"
+      },
+      {
+        "baseFont": "/AAAAAE+NotoSerifKRExtraLight-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1384,
+            "sha256": "018d12b951a76a3de165f29ae4e94f7d290aaf13e92604b0858e395df4355f21"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAG+AppleMyungjo",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 2852,
+            "sha256": "56875b5e30abab7219017cbc3092dfd00b3ceaaf051caa6cfe59ed2f5543254b"
+          }
+        },
+        "toUnicodeBytes": 357,
+        "toUnicodeSHA256": "52fcdeba846b0583046e55ea8de9a31a0810eb518be7d77a7c324c2266796461"
+      },
+      {
+        "baseFont": "/AAAAAI+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "9047d71e3c66de8fe95856745a73dd1a5e80e0acf7555ec8cea384917b24f478"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "baseline",
+    "file": "hwp-print.pdf",
+    "pdfSHA256": "4217b17907a9974d6e29478c7f9cd1ed1f27f7470aa2a3818f29acdb0b65420b",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력\n\f"
+  },
+  {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAC+NotoSerifKRExtraLight-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 3936,
+            "sha256": "db03a022529fd1b6dbea91ae1075de13e150b8447406350e0f2f83bafe85f42d"
+          }
+        },
+        "toUnicodeBytes": 432,
+        "toUnicodeSHA256": "90d1b5d4b967c54caf2220b5c41a901f31dcdfc31780932ecfdae33e1809a9f0"
+      },
+      {
+        "baseFont": "/AAAAAE+NotoSerifKRExtraLight-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1384,
+            "sha256": "018d12b951a76a3de165f29ae4e94f7d290aaf13e92604b0858e395df4355f21"
+          }
+        },
+        "toUnicodeBytes": 372,
+        "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+      },
+      {
+        "baseFont": "/AAAAAG+AppleMyungjo",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 2852,
+            "sha256": "56875b5e30abab7219017cbc3092dfd00b3ceaaf051caa6cfe59ed2f5543254b"
+          }
+        },
+        "toUnicodeBytes": 357,
+        "toUnicodeSHA256": "52fcdeba846b0583046e55ea8de9a31a0810eb518be7d77a7c324c2266796461"
+      },
+      {
+        "baseFont": "/AAAAAI+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "9047d71e3c66de8fe95856745a73dd1a5e80e0acf7555ec8cea384917b24f478"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "dbbb94de180ca212d8eb452eaae08ccae24f8298e895f20c9498b4a31e453647"
+      }
+    ],
+    "source": "baseline",
+    "file": "hwpx-print.pdf",
+    "pdfSHA256": "f1a6cd0a4869d83ddf30fd7650881244f401c939cf4782e26678a382fa2ff187",
+    "popplerText": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력\n\f"
+  }
+]

@@ -81,6 +81,33 @@ final class RhwpStudioOutputFontJobTests: XCTestCase {
         let released = await meter.releases; XCTAssertEqual(released, 1)
     }
 
+    func testUnavailableFamiliesAreCollectedWithoutTreatingStaleAsFallback() async throws {
+        let meter = OutputFontMeter()
+        let output = job(try bytes(),meter:meter,resolution:{ requests in
+            .init(identity:"native",revision:"r1",generation:1,selections:requests.map {
+                .init(key:$0.key,status:"unavailable",id:nil,postscriptName:nil,weight:nil,slant:nil)
+            })
+        })
+        await rejects(.unavailable) {
+            _ = try await output.prepare([.init(key:"a",family:"Font A",weight:400,slant:"normal"),
+                .init(key:"b",family:"Font B",weight:400,slant:"normal")])
+        }
+        XCTAssertEqual(output.failures.map(\.family),["Font A","Font B"])
+        let reads = await meter.reads; XCTAssertEqual(reads,0)
+        await meter.invalidate()
+        await rejects(.stale) { _ = try await output.prepare([self.request()]) }
+        XCTAssertEqual(output.failures.count,2)
+        await output.close()
+    }
+
+    func testBoldRequestNeverSilentlyUsesExactRegularFace() async throws {
+        let meter = OutputFontMeter(), output = job(try bytes(),meter:meter)
+        await rejects(.unavailable) { _ = try await output.prepare([self.request(weight:700)]) }
+        let reads = await meter.reads; XCTAssertEqual(reads,0)
+        XCTAssertEqual(output.failures.map(\.family),["Fixture"])
+        await output.close()
+    }
+
     func testConcurrentSameFaceReadIsJoined() async throws {
         let gate = OutputReadGate(), meter = OutputFontMeter(), output = job(try bytes(), meter: meter, gate: gate)
         let first = Task { try await output.prepare([self.request("a")]) }

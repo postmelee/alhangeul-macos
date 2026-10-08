@@ -9,7 +9,7 @@
   "recommended_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "actual_wasm_build_command": "CARGO_TARGET_DIR=/Users/melee/Documents/projects/forks/rhwp/target/pr-review scripts/wasm-pack-locked.sh --target web --out-dir pkg",
   "studio_build_command": "node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>",
-  "studio_font_menu_adapter_sha256": "83972efb72825a0ac9fc71c0281370763d4c576a756e55e3dc18275f0441ab5b",
+  "studio_font_menu_adapter_sha256": "f53b4416cff6e32e63be61da5bcce271280c8db6ee2ef7ce9ad6f5d55ee59dc4",
   "copied_from": "rhwp-studio/dist",
   "excluded_paths": [
     "samples/"
@@ -19,15 +19,15 @@
     "fonts/FONTS.md"
   ],
   "copied_file_count": 65,
-  "copied_total_bytes": 57971357,
+  "copied_total_bytes": 57974172,
   "entrypoints": {
     "index_html": {
       "path": "index.html",
-      "sha256": "31a7ca799334a1d76fbe8d616c78937928ec820e526b49b12c5b3265802bae27"
+      "sha256": "1639b41060c377bfde8b77e608e08ee226b5c5937579746d6d09345f9d7968ab"
     },
     "main_js": {
-      "path": "assets/index-BxfABQYo.js",
-      "sha256": "17a09dfac6ee406bf5024db52c19e8dceabf0f8df976a79cab581369b5eac0e5"
+      "path": "assets/index-C-fUUwLu.js",
+      "sha256": "9b2991e0f02c1afbb2a6d48201db95d12656fff7282a5d7563b78e74fc79484e"
     },
     "main_css": {
       "path": "assets/index-Dy0DTkWY.css",

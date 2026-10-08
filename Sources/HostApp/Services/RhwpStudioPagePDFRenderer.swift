@@ -360,6 +360,10 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             case .success(let value):
                 preparation = value
             case .failure(let error):
+                if error is RhwpStudioOutputFontError || error is CancellationError {
+                    self.finish(.failure(error), for:token)
+                    return
+                }
                 self.finish(
                     .failure(
                         RhwpStudioPagePDFRenderError.fontPreparationFailed(

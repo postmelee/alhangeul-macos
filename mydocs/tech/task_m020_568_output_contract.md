@@ -2,15 +2,15 @@
 
 - 기준: 제품 `db8a94d1eb03f5a14f265621191f85f0ddf149cb`, 공식 core/Studio v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`.
 - 근거: [구현계획](../plans/task_m020_568_impl.md), [Stage 1 실험](../working/task_m020_568_stage1.md), [#567 인계](font_library_integration.md).
-- 상태: 2026-10-09 [Stage 2](../working/task_m020_568_stage2.md)의 공통 job·scheme·준비·adapter 구현/검증 완료. 실제 editor의 PDF·인쇄 진입과 서명/패널 수용은 Stage 3 범위다.
+- 상태: 2026-10-09 [Stage 3](../working/task_m020_568_stage3.md)의 실제 editor PDF·인쇄 연결과 로컬 서명 sandbox·패널 취소 수용 완료. native·Finder 연결은 Stage 4–5 승인 후 진행한다.
 
 ## 1. 소비자 경계와 현재 결함
 
 | 소비자 | 현재 구현 | 이 계약의 후속 작업 |
 |--------|-----------|--------------------|
 | Studio 화면 | 공유 설치/관리 catalog, 공식 host provider와 matcher | 기존 선택 정책 재사용; 출력 수명은 독립 |
-| HostApp PDF | `RhwpStudioPagePDFRenderer`, 별도 nonpersistent WKWebView, Noto 4종, 저장 전 문서 lock 검사 | 선택 ID·검증 bytes·임베딩 정책·최종 글꼴 상태 검사 |
-| HostApp 인쇄 | 같은 renderer, PDFKit의 `NSPrintOperation`, payload에 문서 identity 없음 | collection lock·seal·패널 수명, 실패/취소/성공 구분 |
+| HostApp PDF | 공유 설치/관리 snapshot·공식 matcher·별도 WebView, 저장 직전 문서/글꼴 검사·atomic write 연결 | 실제 한컴/최소 OS·다양한 문서 수용은 #569 |
+| HostApp 인쇄 | 같은 공급/collection lock·immutable PDF seal·실제 `NSPrintOperation` 연결, 패널 취소 수용 | 물리 spool/종이 출력은 별도 승인·미검증 |
 | CoreGraphics | `CGTreeRenderer` → `resolveAppleFont`, bundled font의 process 등록·정적 이름 정책 | 관리/설치 exact 공급, glyph·equation 등 별도 경로와 cache key 검증 |
 | Skia | `RustBridge` PNG 출력의 `font_paths: Vec::new()` | bytes/선택과 bridge 수명 조사. 전체 시스템 폴더 주입으로 대체하지 않음 |
 | Quick Look | `HwpPreviewProvider` → Shared PDF/PNG renderer | 프로세스별 접근·snapshot·선택과 Finder 수용 |
@@ -35,7 +35,9 @@ Stage 1에서 기존 Noto 대조군의 공백은 `#`로 추출됐다. Stage 2는
 
 출력 요청은 출력 WebView의 앱 준비 script가 읽은 실제 SVG text/tspan의 family/style과 node identity를 사용한다. layer tree collection은 화면의 대조 근거이며, chart label·equation·faux-bold 등 모든 SVG text를 다룬다는 보증으로 사용하지 않는다. Stage 2에서 adapter와 준비 callback을 연결해 페이지 token·node mapping을 확인하고, Stage 3 실제 HWP/HWPX에서 화면 선택과 대조한다.
 
-원본 SVG는 family 체인·`bold/500/italic`·stroke 효과를 내보낼 수 있다. Regular/Bold의 표준 400/700은 우선 지원한다. 500·faux-bold·slant 또는 glyph resource에 대해서 근거 없이 400/700으로 반올림해 exact 성공으로 표시하지 않는다. 명시 PS/fullName이 선택한 face와 요청 효과도 별도로 기록한다. 지원하지 않는 사용자 face의 출력은 5절 정책으로 처리한다.
+원본 SVG는 family 체인·`bold/500/italic`·stroke 효과를 내보낼 수 있다. Regular/Bold의 표준 400/700은 우선 지원한다. Stage 3의 `getOutputPageSvg` adapter는 같은 portable metrics transaction에서 얻은 SVG와 schema 1.23 layer tree를 대조한다. 일반 가로 본문에서 Bold=true, 좌표·크기·색·family·본문이 유일하게 일치하고 core의 0.02em faux stroke임을 입증한 경우에만 700으로 보정하고 해당 stroke를 제거한다. 사용자 공급이 없는 Noto Bold에도 같은 보정을 적용해 PDFKit 반복 문자 추출을 방지한다. 화면 renderer의 결과와 원본 문서는 바꾸지 않는다.
+
+외곽선/그림자/회전/첨자/장평·겹침·모호한 중복은 임의 보정하지 않는다. 500·그 외 faux-bold·slant 또는 glyph resource를 근거 없이 400/700으로 반올림해 exact 성공으로 표시하지 않는다. 명시 Regular PS가 700 요청에 선택돼도 400으로 조용히 출력하지 않으며 미지원 안내/명시 대체로 처리한다. 명시 PS/fullName이 선택한 face와 요청 효과도 별도로 기록한다. 지원하지 않는 사용자 face의 출력은 5절 정책으로 처리한다.
 
 ## 3. 출력 작업 identity와 상태
 
@@ -108,6 +110,8 @@ OpenType 명세에서 permissions 0/4/8과 restricted 2, no-subsetting 0x0100, b
 
 custom PDF는 두 face 모두 `/FontFile2` program이 있으며 한글 subset은 `/ToUnicode`, ASCII subset은 MacRoman encoding을 사용했다. input hash와 subset hash는 다르다. PDFKit 문자열·선택·한글 검색 5건과 Poppler의 custom 본문 exact 추출을 확인했고, 794×1123 pt 한 페이지의 PNG를 눈으로 검토했다.
 
-현재 결과는 합성 SVG·native 비-sandbox prototype이다. 제품 HWP/HWPX collection/adapter 연결·원본 상실·document/catalog 변화·취소·동시 slot·관리 lease·서명 sandbox·실제 인쇄는 아직 미검증이다. Stage 2는 계약에 맞는 제품 공통 구현/단위·WebKit 회귀, Stage 3은 실제 PDF/인쇄 진입·sandbox·패널 수용이다.
+위 Stage 1 결과는 합성 SVG·native 비-sandbox prototype의 이력이다. Stage 3은 실제 HWP/HWPX의 편집 본문으로 설치 NanumSquareR/B·관리 고운바탕·공급 없는 Noto를 각각 PDF 저장 및 인쇄용 PDF에서 검증했다. 실제 bytes 반환 직후 취소와 private 관리 자산 제거/stale/복원·재출력을 검사했다. 물리 I/O 중 취소·문서/세대 변경·임베딩 제한·FontFace 실패·쓰기 실패·seal 수명은 단위 주입 검증과 실제 수용을 구분한다. 사용자 OS 원본 삭제·WebContent 강제 종료의 전체 Coordinator 수용을 완료했다고 주장하지 않는다.
+
+기존 인증서로 로컬 서명한 sandbox 앱의 세 경로와 실제 인쇄 패널 취소를 확인했다. managed 패널의 성공 기록은 30개 검사/18회 읽기, installed는 25개/14회, baseline은 16개/0회다. 각 정상 출력 job은 필요한 두 face를 각 1회 읽는다. 독립 pypdf/Poppler로 12 PDF의 program·한글 ToUnicode·본문을 대조했고 PDFKit 검색·선택 및 PNG 시각 검사도 통과했다. 페이지는 기존 SVG의 논리 bounds를 유지하며 물리 A4 mm 교정·물리 인쇄·최소 OS/Intel 실행은 미검증이다. Stage 2의 별도 시스템 영문 header PDFKit 추출 제약은 남는다.
 
 B는 따로 진행한다. HostApp snapshot/bytes를 다른 프로세스의 권한으로 취급하지 않으며 RhwpCoreBridge의 AppKit/UIKit 금지를 유지한다. Stage 4 API/FFI·캐시 key 구체 승인과 Stage 5 설치본 보존/복원·표준 Finder smoke 승인이 필요하다. A 성공으로 #568 전체 close, Windows 지원 또는 Finder 지원을 선언하지 않는다.

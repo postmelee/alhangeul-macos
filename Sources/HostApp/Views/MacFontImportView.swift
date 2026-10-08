@@ -115,7 +115,7 @@ struct MacFontImportView: View {
     private var resultList: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("글꼴 가져오기 결과").font(.headline)
-            Text("지원되는 글꼴은 문서와 상단 글꼴 목록에서 사용할 수 있습니다. 인쇄·PDF 내보내기 지원은 준비 중입니다.")
+            Text("지원되는 글꼴은 문서와 상단 글꼴 목록에서 사용할 수 있습니다. PDF·인쇄에 포함할 수 없는 글꼴은 출력 전에 안내합니다.")
                 .font(.callout).foregroundStyle(.secondary)
             List(Array(model.results.enumerated()), id: \.offset) { _, result in
                 HStack {

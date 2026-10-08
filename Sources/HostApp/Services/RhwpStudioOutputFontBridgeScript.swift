@@ -1,6 +1,6 @@
 import Foundation
 
-// 다음 단계 coordinator의 resolver callback에서 사용한다. bytes/path는 받지 않는다.
+// Coordinator의 출력 resolver다. bytes/path는 받지 않는다.
 enum RhwpStudioOutputFontBridgeScript {
     static let resolve = #"""
     const api = window.rhwpStudio?.fonts;

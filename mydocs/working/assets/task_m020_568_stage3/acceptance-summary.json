@@ -1,0 +1,63 @@
+{
+  "environment": {
+    "macOS": "26.5.2 (25F84)",
+    "architecture": "arm64",
+    "Xcode": "26.6 (17F113)",
+    "deploymentTarget": "macOS 12.0 (compile only)",
+    "pypdf": "6.10.0",
+    "Poppler": "26.07.0"
+  },
+  "core": {
+    "tag": "v0.8.7",
+    "commit": "1a76570e833917d15817415a53c09ad61ab3203f"
+  },
+  "probe": {
+    "bundleID": "com.postmelee.alhangeul.OutputAcceptance.a1ba3091ff.signed",
+    "executableSHA256": "f547feffd58f6a4fb517208e72f065355d3f2f7a051123879a11f3a3275dfea6",
+    "signature": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+    "sandbox": true,
+    "runs": [
+      {
+        "label": "managed-d3d0a227-c438-4e07-a0f6-4cfcd082c318",
+        "source": "managed",
+        "driverSHA256": "7cacbc70f2c49dfee1146835efcef68d8fa3dc0c244beb50c26e92552750945c",
+        "bundleID": "com.postmelee.alhangeul.OutputAcceptance.a1ba3091ff.signed",
+        "signature": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+        "panel": true,
+        "interactive": true
+      },
+      {
+        "label": "installed-f120af3a-437f-4574-890b-5ffe3c3a1fed",
+        "source": "installed",
+        "driverSHA256": "7cacbc70f2c49dfee1146835efcef68d8fa3dc0c244beb50c26e92552750945c",
+        "bundleID": "com.postmelee.alhangeul.OutputAcceptance.a1ba3091ff.signed",
+        "signature": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+        "panel": false,
+        "interactive": false
+      },
+      {
+        "label": "baseline-938af4be-099b-4661-9f74-be350d4d2d06",
+        "source": "baseline",
+        "driverSHA256": "7cacbc70f2c49dfee1146835efcef68d8fa3dc0c244beb50c26e92552750945c",
+        "bundleID": "com.postmelee.alhangeul.OutputAcceptance.a1ba3091ff.signed",
+        "signature": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+        "panel": false,
+        "interactive": false
+      }
+    ]
+  },
+  "tests": {
+    "fontLibrary": 122,
+    "javascript": 30,
+    "output": 81,
+    "documentLifecycle": 43
+  },
+  "physicalPrint": false,
+  "interactive": {
+    "run": "interactive-final",
+    "passed": true,
+    "checks": 29,
+    "reads": 16,
+    "print": "private PDF callback, no live panel"
+  }
+}

@@ -23,8 +23,18 @@ final class RhwpStudioOutputFontPreparation {
                     try Task.checkCancellation()
                     let encoded = try JSONEncoder().encode(nodes)
                     let mappings = try JSONSerialization.jsonObject(with: encoded)
-                    _ = try await view.callAsyncJavaScript(Self.applyScript,
+                    let applied = try await view.callAsyncJavaScript(Self.applyScript,
                         arguments: ["mappings": mappings], in: nil, contentWorld: .defaultClient)
+                    try await fonts.validate()
+                    guard let json = applied as? String,
+                          let failedKeys = try JSONSerialization.jsonObject(with:Data(json.utf8)) as? [String],
+                          Set(failedKeys).isSubset(of:Set(requests.map(\.key))) else {
+                        throw RhwpStudioOutputFontError.invalidRequest
+                    }
+                    if !failedKeys.isEmpty {
+                        fonts.recordFaceLoadFailure(requests.filter { failedKeys.contains($0.key) })
+                        throw RhwpStudioOutputFontError.unavailable
+                    }
                 }
                 try Task.checkCancellation()
                 guard let result = try await view.callAsyncJavaScript(RhwpStudioPagePDFHTML.pagePreparationScript,
@@ -66,12 +76,14 @@ final class RhwpStudioOutputFontPreparation {
     nonisolated static let collectionScript = familyParser + #"""
     const elements = document.querySelectorAll('svg text, svg tspan');
     if (elements.length > 65536) throw Error('PDF text node limit');
-    const groups = new Map(), requests = [], refs = new Map();
+    const groups = new Map(), requests = [], refs = new Map(), fallbacks = new WeakMap();
     const nonce = String(Math.random()).slice(2);
     for (const node of elements) {
       if (!directPDFText(node)) continue;
       const style = getComputedStyle(node);
-      const family = splitPDFFamilies(style.fontFamily)[0];
+      const families = splitPDFFamilies(style.fontFamily), family = families[0];
+      const keys = families.map(n => n.toLowerCase());
+      fallbacks.set(node, keys.includes('serif') || \#(RhwpStudioPDFFontStyle.serifAliasesJSON).some(n => keys.includes(n.toLowerCase())) ? 'serif' : 'sans-serif');
       const weight = Number.parseInt(style.fontWeight, 10);
       const slant = style.fontStyle.startsWith('oblique') ? 'oblique' : style.fontStyle;
       const hasUnsupportedStyle = style.fontStyle !== slant;
@@ -86,7 +98,7 @@ final class RhwpStudioOutputFontPreparation {
       refs.get(groups.get(signature)).push(node);
     }
     // defaultClient world 전용 객체다. SVG data-*나 page world의 같은 이름은 사용하지 않는다.
-    globalThis.__alhangeulPDFOutput = {refs, custom: new WeakSet()};
+    globalThis.__alhangeulPDFOutput = {refs, fallbacks, custom: new WeakSet()};
     return JSON.stringify(requests);
     """#
 
@@ -103,9 +115,16 @@ final class RhwpStudioOutputFontPreparation {
         document.fonts.add(face); faces.set(f.alias, face);
       }
     }
-    await Promise.all(Array.from(faces.values()).map(face => face.load()));
-    if (Array.from(faces.values()).some(face => face.status !== 'loaded')) throw Error('PDF face unavailable');
+    await Promise.all(Array.from(faces.values()).map(face => face.load().catch(() => null)));
+    const failed = mappings.filter(row => row.font && faces.get(row.font.alias)?.status !== 'loaded').map(row => row.key);
+    if (failed.length) return JSON.stringify(failed);
     for (const row of mappings) {
+      if (row.useFallback) {
+        for (const node of state.refs.get(row.key)) {
+          // 명시 대체에서는 거부된 로컬 family를 ASCII fallback에도 남기지 않는다.
+          node.style.setProperty('font-family', state.fallbacks.get(node) || 'sans-serif', 'important');
+        }
+      }
       if (!row.font) continue;
       for (const node of state.refs.get(row.key)) {
         if (!node.isConnected) throw Error('Detached PDF text');
@@ -117,6 +136,6 @@ final class RhwpStudioOutputFontPreparation {
       }
     }
     await document.fonts.ready;
-    return true;
+    return JSON.stringify([]);
     """#
 }

@@ -1,0 +1,107 @@
+{
+  "checks": [
+    "hwp: 줄 경계의 공백을 제외한 현재 편집 본문·한글·ASCII의 PDFKit 추출",
+    "hwp: PDFKit 검색·영역 선택의 한글 text layer",
+    "hwp: 공급 없는 Noto 기준선은 로컬 bytes 읽기 0",
+    "hwp: PDF 내보내기는 원래 문서 bytes·dirty·changeSeq 유지",
+    "인쇄 seal이 실제 face 읽기 후 실행",
+    "hwp: 인쇄 callback 취소를 성공과 구분",
+    "hwp: seal된 실제 인쇄 PDF text layer",
+    "hwp: 인쇄 준비·취소 후 원래 문서 상태 유지",
+    "hwpx: 줄 경계의 공백을 제외한 현재 편집 본문·한글·ASCII의 PDFKit 추출",
+    "hwpx: PDFKit 검색·영역 선택의 한글 text layer",
+    "hwpx: 공급 없는 Noto 기준선은 로컬 bytes 읽기 0",
+    "hwpx: PDF 내보내기는 원래 문서 bytes·dirty·changeSeq 유지",
+    "인쇄 seal이 실제 face 읽기 후 실행",
+    "hwpx: 인쇄 callback 취소를 성공과 구분",
+    "hwpx: seal된 실제 인쇄 PDF text layer",
+    "hwpx: 인쇄 준비·취소 후 원래 문서 상태 유지"
+  ],
+  "error": null,
+  "errors": [],
+  "outputs": [
+    {
+      "bounds": [
+        794,
+        1123
+      ],
+      "fonts": [
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 1072,
+          "ps": "AAAAAI+NotoSansKR-Regular",
+          "subtype": "TrueType",
+          "toUnicode": true
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 2852,
+          "ps": "AAAAAG+AppleMyungjo",
+          "subtype": "TrueType",
+          "toUnicode": true
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 1384,
+          "ps": "AAAAAE+NotoSerifKRExtraLight-Bold",
+          "subtype": "TrueType",
+          "toUnicode": true
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 3936,
+          "ps": "AAAAAC+NotoSerifKRExtraLight-Regular",
+          "subtype": "TrueType",
+          "toUnicode": true
+        }
+      ],
+      "format": "hwp",
+      "reads": [],
+      "selection": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력",
+      "text": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력"
+    },
+    {
+      "bounds": [
+        794,
+        1123
+      ],
+      "fonts": [
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 1072,
+          "ps": "AAAAAI+NotoSansKR-Regular",
+          "subtype": "TrueType",
+          "toUnicode": true
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 2852,
+          "ps": "AAAAAG+AppleMyungjo",
+          "subtype": "TrueType",
+          "toUnicode": true
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 1384,
+          "ps": "AAAAAE+NotoSerifKRExtraLight-Bold",
+          "subtype": "TrueType",
+          "toUnicode": true
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 3936,
+          "ps": "AAAAAC+NotoSerifKRExtraLight-Regular",
+          "subtype": "TrueType",
+          "toUnicode": true
+        }
+      ],
+      "format": "hwpx",
+      "reads": [],
+      "selection": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력",
+      "text": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력"
+    }
+  ],
+  "passed": true,
+  "reads": [],
+  "source": "baseline"
+}

@@ -4,7 +4,7 @@
   "source_resolved_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "adapter_files": {
     "scripts/build-rhwp-studio.mjs": "69eacdc439efae1ab9439631a659328021bbb86d2a5c138150bb4a0461ff95cd",
-    "scripts/studio-font-menu-adapter.mjs": "5ed8e7b4c587f753f193ca3ef3c0b09c0b329a1c14dec11afe2529d4b28615f2"
+    "scripts/studio-font-menu-adapter.mjs": "62ad70b2fbb9eb48357715656cb65cfc1f1ca7354b052971ac3c10ab33fdc4c0"
   },
   "sources": [
     {
@@ -25,7 +25,7 @@
     {
       "path": "src/main.ts",
       "original_sha256": "277a3fa5a172035624719a19db49ca417c8684aadaa234d156655263eac383b2",
-      "adapted_sha256": "e41a5269b3fbbdf961c020024fe48a7176bd299c634538142eaaf3bc8f447097"
+      "adapted_sha256": "712ab370e38feb00e69750b7b8b5b87f5e3b13ba1d9bcc9bae33007232c9c4ce"
     }
   ]
 }

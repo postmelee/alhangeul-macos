@@ -5,7 +5,7 @@
 - 작업: `local/task568` → `publish/task568` → `devel`
 - 제품 기준: `db8a94d1eb03f5a14f265621191f85f0ddf149cb` (PR #578), 공식 core/Studio v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`
 - 승인: 2026-10-08 작업지시자의 “진행해줘”로 수행계획 승인·구현계획 작성 진행.
-- 상태: 2026-10-08 작업지시자의 “진행해줘”로 Stage 2 진입 승인. 2026-10-09 A 공통 공급·matcher adapter·준비/수명·Noto 보정 구현과 검증 완료. [Stage 2 보고](../working/task_m020_568_stage2.md) 후 Stage 3 승인 대기.
+- 상태: 2026-10-09 승인된 [Stage 3](../working/task_m020_568_stage3.md)의 실제 PDF·인쇄 연결/수용 완료. Stage 4 B의 구체 공급·캐시/API 경계 확인 및 진입 승인 대기.
 
 ## 1. 단계와 완료 경계
 
@@ -13,7 +13,7 @@
 |------|--------|------|-----------|
 | 1 | A/B 조사, A 계약 | 출력 identity·매칭·임베딩·변경/취소 정책과 최소 실험 | 2026-10-08 완료 |
 | 2 | A 공통 기반 | 제한된 출력 snapshot·font route·준비·수명 구현 | 2026-10-09 완료 |
-| 3 | A 실제 연결 | PDF·인쇄 진입 연결, 정확한 face와 text layer·패널 수용 | Stage 2 승인 후 |
+| 3 | A 실제 연결 | PDF·인쇄 진입 연결, 정확한 face와 text layer·패널 수용 | 2026-10-09 완료 |
 | 4 | B native | CoreGraphics/Skia 공급·매칭·캐시 연결 | A 결과와 B 구체 범위 승인 후 |
 | 5 | B 확장 | Quick Look/Thumbnail의 signed 프로세스·Finder 수용 | Stage 4 및 설치 smoke 범위 승인 후 |
 | 6 | 전체 인계 | 소비자별 회귀·제약·최종 소스/증거 대조 | Stage 5 승인 후 |
@@ -163,4 +163,4 @@ HostApp Debug의 macOS 12 target compile/link와 실제 최소 OS runtime은 별
 
 ## 10. 현재 승인 요청
 
-Stage 2 보고와 출력 계약을 검토하고 **Stage 3의 A 실제 PDF·인쇄 연결과 수용** 진입을 요청한다. 실제 editor 요청·snapshot/선택·저장 직전 검증·인쇄 seal/close·오류/취소·HWP/HWPX/reader 수용을 진행한다. 서명 sandbox·새 폴더 접근은 구체 앱/대상을 준비한 뒤 필요한 승인을 확인한다. B 진입·새 Developer ID 사용·설치 교체·물리 프린터 전송·push/PR·공개 배포는 현재 승인에 포함하지 않는다.
+Stage 3 보고와 출력 계약을 검토하고 **Stage 4의 B CoreGraphics/Skia 연결** 진입을 요청한다. 우선 현재 native 공급·우선순위·캐시와 bridge의 API/수명 경계를 확인하고 필요한 구체 변경을 확정한다. 새 FFI/API가 필요하면 구현 전 승인 범위를 보정한다. Stage 5의 Finder 설치/등록·새 인증서/폴더 권한·물리 프린터 전송·push/PR·공개 배포는 이 진입 승인에 포함하지 않는다.

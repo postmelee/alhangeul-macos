@@ -49,6 +49,12 @@ struct RhwpStudioOutputFontDescriptor: Encodable, Sendable {
 struct RhwpStudioOutputFontNode: Encodable, Sendable {
     let key: String
     let font: RhwpStudioOutputFontDescriptor?
+    var useFallback: Bool = false
+}
+
+struct RhwpStudioOutputFontFailure: Equatable, Sendable {
+    let family: String
+    let reason: String
 }
 
 struct RhwpStudioOutputFontLimits: Sendable {
@@ -68,11 +74,14 @@ final class RhwpStudioOutputFontJob {
     }
     let document: RhwpStudioOutputDocumentIdentity
     let token = UUID().uuidString
+    var supplyIdentity: String { snapshot.identity }
     private let snapshot: StudioFontSupplySnapshot
     private let resolve: Resolver
     private let documentIsCurrent: @MainActor () async throws -> Bool
     private let budget: StudioFontTransferBudget
     private let limits: RhwpStudioOutputFontLimits
+    private let fallbackFamilies: Set<String>
+    private(set) var failures: [RhwpStudioOutputFontFailure] = []
     private var active = true
     private var sealed = false
     private var binding: (revision: String, generation: Int)?
@@ -84,9 +93,11 @@ final class RhwpStudioOutputFontJob {
 
     init(document: RhwpStudioOutputDocumentIdentity, snapshot: StudioFontSupplySnapshot,
          budget: StudioFontTransferBudget = .shared, limits: RhwpStudioOutputFontLimits = .init(),
+         fallbackFamilies: Set<String> = [],
          documentIsCurrent: @escaping @MainActor () async throws -> Bool, resolve: @escaping Resolver) {
         self.document = document; self.snapshot = snapshot; self.budget = budget; self.limits = limits
         self.documentIsCurrent = documentIsCurrent; self.resolve = resolve
+        self.fallbackFamilies = fallbackFamilies
     }
 
     deinit {
@@ -99,8 +110,14 @@ final class RhwpStudioOutputFontJob {
 
     func validate() async throws {
         guard active, !sealed, !Task.isCancelled else { throw RhwpStudioOutputFontError.cancelled }
-        let fontsCurrent = try await snapshot.current()
-        let documentCurrent = try await documentIsCurrent()
+        let fontsCurrent: Bool, documentCurrent: Bool
+        do {
+            fontsCurrent = try await snapshot.current()
+            documentCurrent = try await documentIsCurrent()
+        } catch {
+            if !active || Task.isCancelled || error is CancellationError { throw RhwpStudioOutputFontError.cancelled }
+            throw RhwpStudioOutputFontError.stale
+        }
         guard active, !sealed, !Task.isCancelled else { throw RhwpStudioOutputFontError.cancelled }
         guard fontsCurrent, documentCurrent else { throw RhwpStudioOutputFontError.stale }
     }
@@ -131,24 +148,49 @@ final class RhwpStudioOutputFontJob {
             }
         } else { binding = (result.revision, result.generation) }
         var nodes: [RhwpStudioOutputFontNode] = []
+        var firstFailure: Error?
         for (request, selected) in zip(input, result.selections) {
-            if selected.status == "absent" {
-                guard selected.id == nil, selected.postscriptName == nil, selected.weight == nil, selected.slant == nil
-                else { throw RhwpStudioOutputFontError.invalidRequest }
-                nodes.append(.init(key: request.key, font: nil)); continue
+            if fallbackFamilies.contains(request.family) {
+                nodes.append(.init(key:request.key,font:nil,useFallback:true)); continue
             }
-            guard selected.status == "selected", let id = selected.id,
-                  let ps = selected.postscriptName, !ps.isEmpty,
-                  let weight = selected.weight, let slant = selected.slant,
-                  [400, 700].contains(request.weight), [400, 700].contains(weight),
-                  request.hasStroke != true, request.hasUnsupportedStyle != true,
-                  ["normal", "italic", "oblique"].contains(slant)
-            else { throw RhwpStudioOutputFontError.unavailable }
-            let font = try await read(id, postscriptName: ps, weight: weight, slant: slant)
-            nodes.append(.init(key: request.key, font: font))
+            do {
+                if selected.status == "absent" {
+                    guard selected.id == nil, selected.postscriptName == nil, selected.weight == nil, selected.slant == nil
+                    else { throw RhwpStudioOutputFontError.invalidRequest }
+                    nodes.append(.init(key: request.key, font: nil)); continue
+                }
+                guard selected.status == "selected", let id = selected.id,
+                      let ps = selected.postscriptName, !ps.isEmpty,
+                      let weight = selected.weight, let slant = selected.slant,
+                      [400, 700].contains(request.weight), [400, 700].contains(weight),
+                      request.weight != 700 || weight == 700,
+                      request.hasStroke != true, request.hasUnsupportedStyle != true,
+                      ["normal", "italic", "oblique"].contains(slant)
+                else { throw RhwpStudioOutputFontError.unavailable }
+                let font = try await read(id, postscriptName: ps, weight: weight, slant: slant)
+                nodes.append(.init(key: request.key, font: font))
+            } catch {
+                // 문서/세대/취소는 대체 출력으로 우회하지 않는다.
+                if error as? RhwpStudioOutputFontError == .stale || error as? RhwpStudioOutputFontError == .invalidRequest
+                    || error as? RhwpStudioOutputFontError == .cancelled
+                    || error is CancellationError { throw error }
+                firstFailure = firstFailure ?? error
+                let reason = (error as? RhwpStudioOutputFontError)?.rawValue
+                    ?? (error as? StudioFontError)?.rawValue ?? "readFailed"
+                let failure = RhwpStudioOutputFontFailure(family:request.family,reason:reason)
+                if !failures.contains(failure) { failures.append(failure) }
+            }
         }
         try await validate()
+        if let firstFailure { throw firstFailure }
         return nodes
+    }
+
+    func recordFaceLoadFailure(_ input: [RhwpStudioOutputFontRequest]) {
+        for request in input {
+            let failure = RhwpStudioOutputFontFailure(family:request.family,reason:"fontLoadFailed")
+            if !failures.contains(failure) { failures.append(failure) }
+        }
     }
 
     private func read(_ id: String, postscriptName: String, weight: Int, slant: String) async throws -> RhwpStudioOutputFontDescriptor {
@@ -169,7 +211,14 @@ final class RhwpStudioOutputFontJob {
             reservedBytes += limits.fileBytes
             let snapshot = snapshot, budget = budget
             task = Task {
-                let slot = try await budget.acquire()
+                var acquired: UUID?
+                for delay in [UInt64(0), 100_000_000, 250_000_000, 500_000_000] {
+                    if delay > 0 { try await Task.sleep(nanoseconds:delay) }
+                    try Task.checkCancellation()
+                    do { acquired = try await budget.acquire(); break }
+                    catch { guard error as? StudioFontError == .busy else { throw error } }
+                }
+                guard let slot = acquired else { throw StudioFontError.busy }
                 do {
                     let supplied = try await snapshot.read(id)
                     try Task.checkCancellation()
