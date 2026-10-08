@@ -5,13 +5,13 @@
 - 작업: `local/task568` → `publish/task568` → `devel`
 - 제품 기준: `db8a94d1eb03f5a14f265621191f85f0ddf149cb` (PR #578), 공식 core/Studio v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`
 - 승인: 2026-10-08 작업지시자의 “진행해줘”로 수행계획 승인·구현계획 작성 진행.
-- 상태: 구현계획·Stage 1 진입 승인 대기. 계획 문서만 변경했고 제품 소스·실험 runner는 아직 변경하지 않았다.
+- 상태: 2026-10-08 구현계획·Stage 1 승인 후 조사·격리 실험 완료. [출력 계약](../tech/task_m020_568_output_contract.md)·[단계 보고](../working/task_m020_568_stage1.md) 검토와 Stage 2 승인 대기. 제품 소스는 아직 변경하지 않았다.
 
 ## 1. 단계와 완료 경계
 
 | 단계 | 소비자 | 목표 | 진입 상태 |
 |------|--------|------|-----------|
-| 1 | A/B 조사, A 계약 | 출력 identity·매칭·임베딩·변경/취소 정책과 최소 실험 | 승인 대기 |
+| 1 | A/B 조사, A 계약 | 출력 identity·매칭·임베딩·변경/취소 정책과 최소 실험 | 2026-10-08 완료 |
 | 2 | A 공통 기반 | 제한된 출력 snapshot·font route·준비·수명 구현 | Stage 1 승인 후 |
 | 3 | A 실제 연결 | PDF·인쇄 진입 연결, 정확한 face와 text layer·패널 수용 | Stage 2 승인 후 |
 | 4 | B native | CoreGraphics/Skia 공급·매칭·캐시 연결 | A 결과와 B 구체 범위 승인 후 |
@@ -26,7 +26,7 @@ A 완료는 #568 전체 완료가 아니다. B와 Mac/Windows 수용을 별도 �
 
 - 작업 단위는 native 요청 ID, editor loadToken·documentEpoch/revision, 설치 generation, 관리 snapshot generation/digest와 필요한 face 선택 목록을 묶는다. PDF 목적지 선택 이후의 최신 문서 상태를 기준으로 페이지와 face를 수집한다.
 - 설치 service와 관리 service는 #567의 공유 인스턴스를 사용한다. 관리 snapshot의 lease는 작업 완료/실패/취소까지 유지한다. 설치 원본은 필요한 읽기마다 동일 identity·활성 상태·bytes를 검증하며 lease가 원본 파일을 고정한다고 취급하지 않는다.
-- 후보 정책은 준비 중 문서/글꼴 변경 시 작업 중단, 전송/출력 완료 전 현재 identity 재검증이다. 이미 검증해 보유한 bytes와 새 generation의 face를 섞지 않는다. 인쇄 패널 대기 중 변경의 중단 가능 지점과 이미 시작한 spool의 경계는 Stage 1에서 확인·확정한다.
+- 확정 정책은 준비 중 문서/글꼴 변경 시 중단, PDF atomic write 직전 재검증, 인쇄 패널 직전 재검증·immutable PDF seal이다. seal 이후 패널에는 해당 PDF만 유지하며 편집/글꼴 변경으로 교체하지 않는다. 이미 spool된 출력을 회수한다고 약속하지 않는다. 서로 다른 generation의 bytes는 섞지 않는다.
 - UI 취소와 실제 I/O 종료를 구분한다. 늦은 응답은 폐기하며 진행 중 읽기가 반환하기 전 동시 slot을 해제하지 않는다. page watchdog·exactly-once completion·재진입을 유지하고 성공/실패/취소 모두 lease와 opaque route를 정리한다.
 
 ### 2.2 선택·공급·한도
@@ -35,12 +35,12 @@ A 완료는 #568 전체 완료가 아니다. B와 Mac/Windows 수용을 별도 �
 - Stage 1에서 공개 surface와 앱 소유 source adapter 후보를 비교한다. 필요한 adapter가 있다면 기존 matcher를 호출하는 좁은 연결만 두고 typecheck·receipt/hash를 갱신한다. 이름/스타일 matcher를 Swift에 복제하거나 minified 자산을 직접 수정하지 않는다. 제품 변경은 Stage 2 이후 승인 범위다.
 - 요청 family/style → 선택 source/opaque ID/revision → 검증된 PS·SFNT face·bytes hash → 출력 font resource의 대응을 기록한다. 지역화 별칭·family와 fullName의 차이·Regular/Bold·동명 충돌·지원하지 않는 slant를 검사한다.
 - 사용자 font URL은 작업 token과 허용 face ID에만 연결한다. native 원본 경로/bookmark·전체 manifest는 JS/HTML에 보내지 않고, 다른 작업·이미 만료된 token·임의 filename/URL은 거부한다. 내장 Noto 4종의 기존 route는 유지한다.
-- 파일 한도 64 MiB와 두 읽기 동시 한도를 유지한다. 출력과 화면의 중첩 요청을 포함해 한도를 검증한다. 작업 전체의 고유 face 수·유지 bytes 한도는 Stage 1 실측 후 확정하며 초과를 무제한 queue나 조용한 font 교체로 우회하지 않는다.
+- 파일 64 MiB, 화면+출력의 두 읽기 동시 한도를 유지한다. 초기 출력 job 한도는 고유 face 64, family/style 요청 2,048, native 유지 사용자 bytes 128 MiB다. 두 face의 실제 유지량은 16,612,008 bytes이며 전체 프로세스 peak 메모리 검증을 뜻하지 않는다. 초과를 무제한 queue나 조용한 font 교체로 우회하지 않는다.
 
 ### 2.3 임베딩·fallback·text layer
 
 - `embeddingFlags`와 `FontUsageEvidence`를 출력 전용 정책 입력으로 보존한다. 화면 DTO에 해당 정보가 없다는 이유로 허가 상태를 만들어 넣지 않는다. `unknown`을 `allowed`로 자동 변환하지 않는다.
-- Stage 1에서 제한된/불명확한 face, no-subsetting·bitmap-only 등 기술적 제약, 로드 실패의 취소/명시 대체 기준을 확정한다. 기존 제품을 모든 글꼴 라이선스의 검증 수단으로 설명하지 않는다. 새 승인 UI나 사용 근거 수집 기능이 필요해지면 구현 범위를 먼저 보정한다.
+- 검증된 OS/2 version·fsType의 기술적 허용 선언으로 후보를 정하며 명시 restricted 근거는 차단한다. evidence unknown은 그대로 보존하고 허가로 변경하지 않는다. no-subsetting·bitmap-only·불명확한 legacy 선언은 현재 exact 경로 미지원이다. 공급/임베딩/충돌 실패는 취소 기본·명시 대체 출력으로 처리한다. 새 라이선스 승인/근거 수집 UI를 정상 흐름에 추가하지 않는다. 세부 조건은 출력 계약 5절을 따른다.
 - exact face 적용과 기존 Noto fallback을 분리한다. custom face를 Noto alias 규칙으로 덮지 않고, 공급 대상이 아닌 글꼴의 기존 한글/자모·ASCII·Hanja·수식 fallback을 보존한다. 새 alias는 출력 DOM에만 적용하며 원본 문서 이름/bytes는 변경하지 않는다.
 - `document.fonts.ready/load/check`뿐 아니라 해당 face의 loaded 상태와 PDF PS/스타일·font program 임베딩·ToUnicode·텍스트를 확인한다. bitmap화·OCR overlay로 searchable text를 대신하지 않는다. WebKit/PDFKit subset에서 한계가 재현되면 성공으로 합산하지 않고 Stage 2 범위를 보정한다.
 - 원본 bytes hash와 PDF의 subset font program hash는 같다고 가정하지 않는다. 공급한 ID/PS/style/hash와 준비 증거를 출력 resource·glyph/텍스트 결과에 연결하고, 한글 mapping과 ASCII encoding/subset의 검증 경계를 각각 기록한다.
@@ -66,14 +66,14 @@ A 완료는 #568 전체 완료가 아니다. B와 Mac/Windows 수용을 별도 �
 ### 통과 기준·검증
 
 - 선택 source/ID/PS/style/hash와 출력 결과를 연결한 대조표, 지원/실패/미검증 행, 채택할 공급·매칭·변경 정책과 한도가 있다.
-- 실제 custom face의 PDF 결과와 Noto 기준선의 검색·복사·시각 회귀가 분리되어 있으며, 불가능한 조건은 다음 구현 단계 진입 전에 보고한다.
+- 실제 custom face의 PDF 결과와 Noto 기준선의 검색·복사·시각 회귀가 분리되어 있으며, 불가능한 조건은 다음 구현 단계 진입 전에 보고한다. Stage 1은 custom 본문 exact 추출 성공과 Noto 대조군의 공백→`#` 결함을 각각 기록했다. 후자를 제품 성공으로 합산하지 않는다.
 - 다음 명령은 실제 생성한 합성 출력에만 적용한다. tool 부재는 기록하고 Swift/PDFKit 결과로 가능한 범위를 구분한다. production runtime에 CLI 의존을 추가하지 않는다.
 
 ```bash
 scripts/verify-rhwp-studio-assets.sh --upstream-dir build.noindex/task567/stage3-2/upstream-v087 --tag v0.8.7 --commit 1a76570e833917d15817415a53c09ad61ab3203f
-pdfinfo build.noindex/task568/stage1/custom.pdf
-pdffonts build.noindex/task568/stage1/custom.pdf
-pdftotext -layout build.noindex/task568/stage1/custom.pdf build.noindex/task568/stage1/custom.txt
+pdfinfo build.noindex/task568/stage1/run-09/custom/sample.pdf
+pdffonts build.noindex/task568/stage1/run-09/custom/sample.pdf
+pdftotext -layout build.noindex/task568/stage1/run-09/custom/sample.pdf build.noindex/task568/stage1/run-09/custom/text.txt
 ```
 
 commit: `Task #568 Stage 1: 출력 글꼴 계약과 PDF 최소 실험`
@@ -85,11 +85,13 @@ commit: `Task #568 Stage 1: 출력 글꼴 계약과 PDF 최소 실험`
 - HostApp 출력 전용 snapshot/선택 metadata·lease owner·검증 bytes와 작업 token/ID route를 구현한다. 새 helper 이름은 `RhwpStudioOutputFontSnapshot/Provider` 등을 후보로 두고 Stage 1 확정 계약에 맞춘다. 화면 `StudioFontSession`을 출력에 그대로 재사용해 navigation reset과 출력 수명을 섞지 않는다.
 - `RhwpStudioPagePayload`, `RhwpStudioPDFFontProvider`, `RhwpStudioPagePDFRenderer`에서 좁은 공급·custom/Noto 매핑·font 준비 실패·취소와 최종 정리 경계를 연결한다. 공급 없는 기존 호출의 fallback을 보존한다.
 - Stage 1이 source adapter를 요구하면 앱 빌드 adapter만 확장한다. 공식 checkout은 변경하지 않고, typecheck·manifest·receipt와 기존 메뉴/환경설정 회귀를 함께 검증한다.
+- Stage 1의 narrow resolver 결론을 적용한다. `scripts/studio-font-menu-adapter.mjs`와 `scripts/build-rhwp-studio.mjs`의 transformed source/receipt를 갱신하며 `local-fonts.ts`/main surface를 통해 공식 matcher의 선택 ID·revision/generation만 반환한다. stage별 test double과 실제 진입 연결은 구분한다.
+- Noto 대조군의 텍스트 매핑 문제를 같은 준비/출력 경계에서 조사·보완한다. custom 성공만으로 전체 fallback 복사가 정상이라고 주장하지 않는다. 기존 정확한 face·레이아웃·한글/ASCII·수식과 text layer를 함께 검사하며 수정에 다른 core/API 범위가 필요하면 해당 부분을 별도 승인 대상으로 보고한다.
 - `Tests/HostAppTests`, `Tests/FontLibraryTests`와 `project.yml`에 필요한 공급/수명 회귀를 등록한다. 현재 CI는 HostAppTests의 Spotlight 검사만 직접 실행하므로 `.github/workflows/pr-ci.yml`에 영향받은 PDF/출력/인쇄 검사가 실제 실행되도록 반영한다.
 
 ### 통과 기준
 
-정상 exact face·지원 불가/충돌·변경/취소·잘못된 token/ID/URL·stale/busy·부분 읽기 실패·늦은 callback·과대 입력/bytes·두 slot과 lease 회귀가 통과한다. 문서 script·외부 font/image·frame/navigation 차단, Noto 한글 매핑, page geometry·30초 timeout·exactly-once completion과 재진입이 유지된다. 마지막 정리 전 slot/lease를 조기 해제하거나 기존 목적지를 먼저 삭제하지 않는다.
+정상 exact face·지원 불가/충돌·변경/취소·잘못된 token/ID/URL·stale/busy·부분 읽기 실패·늦은 callback·과대 입력/bytes·두 slot과 lease 회귀가 통과한다. 문서 script·외부 font/image·frame/navigation 차단, Noto 한글/공백/ASCII 매핑, page geometry·30초 timeout·exactly-once completion과 재진입을 검증한다. Noto 결함이 해결되지 않으면 그 경계를 미완료로 표시하고 Stage 3 진입 조건을 보정한다. 마지막 정리 전 slot/lease를 조기 해제하거나 기존 목적지를 먼저 삭제하지 않는다.
 
 공통 A 검증 명령은 9절을 적용한다. commit: `Task #568 Stage 2: 출력 글꼴 snapshot과 제한 공급 구현`
 
@@ -157,6 +159,6 @@ HostApp Debug의 macOS 12 target compile/link와 실제 최소 OS runtime은 별
 
 각 Stage 종료 시 `mydocs/working/task_m020_568_stage{N}.md`에 실제 명령·환경·입력 provenance·선택/준비/출력·hash·실패/제약을 기록해 해당 변경과 묶어 commit한다. 다음 단계는 작업지시자 승인 후 진행한다. 최종 보고/원격 push/PR과 merge·issue close·정리는 별도 승인 시점이며 현재 수행하지 않는다.
 
-## 10. 이번 승인 요청
+## 10. 현재 승인 요청
 
-이 구현계획과 **Stage 1의 source 계약 조사·허가된 테스트 자산의 격리 PDF 최소 실험** 진입을 요청한다. 승인 후 matcher 재사용·출력 snapshot·임베딩/실패 정책·한도를 증거로 확정하고 다음 구현 단계의 구체 계약을 보고한다. Stage 2 제품 소스 변경, B 진입, 새 폴더 권한·로컬 서명·설치 교체·프린터 전송·공개 배포를 일괄 승인받는 요청은 아니다.
+Stage 1 보고와 출력 계약을 검토하고 **Stage 2의 A 공통 구현** 진입을 요청한다. 범위는 matcher의 좁은 앱 adapter·제한 snapshot/route·준비/수명·임베딩 선언/보존된 근거와 실패 모델·Noto 텍스트 회귀 보완·관련 CI 검사다. Stage 3의 실제 진입/서명 sandbox·패널 수용, B 진입, 새 폴더 권한·Developer ID·설치 교체·프린터 전송·공개 배포는 포함하지 않는다.
