@@ -211,7 +211,7 @@ enum HwpPreviewPNGRenderer {
             return "invalidPageIndex"
         case .invalidOptions:
             return "invalidRenderOptions"
-        case .failure:
+        case .failure, .invalidFontContext, .fontContextTooLarge, .unsupportedFontContext:
             return "skiaRenderFailure"
         }
     }

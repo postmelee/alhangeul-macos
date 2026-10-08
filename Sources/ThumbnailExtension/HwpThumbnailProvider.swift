@@ -148,6 +148,8 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
             return "pngDecodeFailure"
         case .memoryTimeoutFallback:
             return "memoryTimeoutFallback"
+        case .unsupportedFontContext:
+            return "unsupportedFontContext"
         }
     }
 

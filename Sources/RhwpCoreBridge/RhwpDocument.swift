@@ -87,6 +87,9 @@ enum RhwpPagePNGStatus: Equatable {
     case invalidPageIndex
     case invalidOptions
     case failure
+    case invalidFontContext
+    case fontContextTooLarge
+    case unsupportedFontContext
 
     init(_ status: RhwpRenderStatus) {
         switch status.rawValue {
@@ -104,11 +107,26 @@ enum RhwpPagePNGStatus: Equatable {
             self = .failure
         }
     }
+
+    init(fontStatus: RhwpFontRenderStatus) {
+        switch fontStatus.rawValue {
+        case 0: self = .ok
+        case 1: self = .invalidHandle
+        case 2: self = .invalidOutput
+        case 3: self = .invalidPageIndex
+        case 4: self = .invalidOptions
+        case 6: self = .invalidFontContext
+        case 7: self = .fontContextTooLarge
+        case 8: self = .unsupportedFontContext
+        default: self = .failure
+        }
+    }
 }
 
 struct RhwpRenderedPNG {
     let data: Data
     let status: RhwpPagePNGStatus
+    var fontDiagnostic: RhwpNativeFontDiagnostic? = nil
 
     var byteCount: Int {
         data.count
@@ -303,9 +321,10 @@ class RhwpDocument {
     func renderPagePNG(
         at page: Int,
         scale: Double = 0,
-        maxDimension: Int = 0
+        maxDimension: Int = 0,
+        fontContext: RhwpNativeFontContext? = nil
     ) -> RhwpRenderedPNG {
-        guard page >= 0 else {
+        guard let pageNumber = UInt32(exactly: page) else {
             return RhwpRenderedPNG(data: Data(), status: .invalidPageIndex)
         }
         guard scale.isFinite, scale >= 0, maxDimension >= 0, maxDimension <= Int(UInt32.max) else {
@@ -314,30 +333,61 @@ class RhwpDocument {
 
         var outData: UnsafeMutablePointer<UInt8>?
         var outLen: UInt = 0
-        let status = RhwpPagePNGStatus(
-            rhwp_render_page_png(
-                handle,
-                UInt32(page),
-                scale,
-                UInt32(maxDimension),
-                &outData,
-                &outLen
+        var outDiagnostic: UnsafeMutablePointer<CChar>?
+        let status: RhwpPagePNGStatus
+        if let context = fontContext {
+            status = context.metadata.withUnsafeBytes { metadata in
+                context.bytes.withUnsafeBytes { bytes in
+                    RhwpPagePNGStatus(fontStatus: rhwp_render_page_png_with_font_context(
+                        handle, pageNumber, scale, UInt32(maxDimension),
+                        metadata.bindMemory(to: UInt8.self).baseAddress, UInt(metadata.count),
+                        bytes.bindMemory(to: UInt8.self).baseAddress, UInt(bytes.count),
+                        &outData, &outLen, &outDiagnostic))
+                }
+            }
+        } else {
+            status = RhwpPagePNGStatus(
+                rhwp_render_page_png(
+                    handle,
+                    pageNumber,
+                    scale,
+                    UInt32(maxDimension),
+                    &outData,
+                    &outLen
+                )
             )
-        )
+        }
 
         defer {
+            if let pointer = outDiagnostic { rhwp_free_string(pointer) }
             if let ptr = outData, outLen > 0 {
                 rhwp_free_bytes(ptr, outLen)
             }
         }
 
+        let diagnostic = outDiagnostic.flatMap { pointer in
+            try? JSONDecoder().decode(RhwpNativeFontDiagnostic.self, from: Data(String(cString: pointer).utf8))
+        }
+
+        if let context = fontContext, status == .ok {
+            guard let diagnostic, diagnostic.version == 1, diagnostic.identity == context.identity,
+                  diagnostic.reason == "exactPortableGlyphReplay", let targets = diagnostic.targetRuns,
+                  targets > 0, diagnostic.provenRuns == targets,
+                  diagnostic.proofFailures?.isEmpty == true,
+                  Set(diagnostic.faces?.map { "\($0.postScriptName):\($0.sha256):\($0.faceIndex)" } ?? [])
+                    == Set(context.faces.map { "\($0.postScriptName):\($0.sha256):\($0.faceIndex)" }) else {
+                return RhwpRenderedPNG(data: Data(), status: .failure, fontDiagnostic: diagnostic)
+            }
+        }
+
         guard status == .ok, let pngPtr = outData, outLen > 0, outLen <= UInt(Int.max) else {
-            return RhwpRenderedPNG(data: Data(), status: status)
+            return RhwpRenderedPNG(data: Data(), status: status, fontDiagnostic: diagnostic)
         }
 
         return RhwpRenderedPNG(
             data: Data(bytes: pngPtr, count: Int(outLen)),
-            status: status
+            status: status,
+            fontDiagnostic: diagnostic
         )
     }
 

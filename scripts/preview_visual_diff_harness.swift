@@ -2572,6 +2572,8 @@ private func fallbackReasonName(_ reason: HwpPageRenderFallbackReason) -> String
         return "pngDecodeFailure"
     case .memoryTimeoutFallback:
         return "memoryTimeoutFallback"
+    case .unsupportedFontContext:
+        return "unsupportedFontContext"
     }
 }
 

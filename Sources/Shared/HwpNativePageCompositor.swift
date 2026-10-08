@@ -8,7 +8,29 @@ enum HwpNativePageCompositor {
         pageHeight: Double,
         document: RhwpDocument
     ) {
+        render(tree: tree, overlays: overlays, in: context, pageHeight: pageHeight,
+               document: document, renderer: CGTreeRenderer())
+    }
+
+    static func render(
+        tree: RenderNode,
+        overlays: RhwpPageOverlayImageSet?,
+        in context: CGContext,
+        pageHeight: Double,
+        document: RhwpDocument,
+        fontContext: RhwpCoreTextFontContext
+    ) throws {
         let renderer = CGTreeRenderer()
+        try renderer.withFontContext(fontContext, tree: tree) {
+            render(tree: tree, overlays: overlays, in: context, pageHeight: pageHeight,
+                   document: document, renderer: renderer)
+        }
+    }
+
+    private static func render(
+        tree: RenderNode, overlays: RhwpPageOverlayImageSet?, in context: CGContext,
+        pageHeight: Double, document: RhwpDocument, renderer: CGTreeRenderer
+    ) {
         let overlayLayers = renderTreeOverlayLayers(from: overlays, tree: tree)
 
         renderer.render(

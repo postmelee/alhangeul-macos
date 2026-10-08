@@ -86,6 +86,7 @@ swiftc -parse-as-library \
   -I "$MODULEMAP_DIR" \
   "$ROOT/Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift" \
   "$ROOT/Sources/RhwpCoreBridge/RhwpDocument.swift" \
+  "$ROOT/Sources/RhwpCoreBridge/RhwpNativeFontContext.swift" \
   "$ROOT/Sources/RhwpCoreBridge/RenderTree.swift" \
   "$ROOT/Sources/RhwpCoreBridge/PageOverlayImages.swift" \
   "$ROOT/Sources/RhwpCoreBridge/FontFallback.swift" \

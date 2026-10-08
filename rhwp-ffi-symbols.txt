@@ -12,6 +12,7 @@ rhwp_page_count
 rhwp_page_overlay_images
 rhwp_page_size
 rhwp_render_page_png
+rhwp_render_page_png_with_font_context
 rhwp_render_page_svg
 rhwp_render_page_tree
 rhwp_set_file_name_utf8

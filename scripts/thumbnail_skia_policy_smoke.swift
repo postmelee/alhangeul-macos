@@ -594,6 +594,8 @@ struct ThumbnailSkiaPolicySmoke {
             return "pngDecodeFailure"
         case .memoryTimeoutFallback:
             return "memoryTimeoutFallback"
+        case .unsupportedFontContext:
+            return "unsupportedFontContext"
         }
     }
 

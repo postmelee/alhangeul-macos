@@ -6,6 +6,8 @@ use rhwp::document_core::queries::rendering::PngExportOptions;
 use rhwp::wasm_api::HwpDocument;
 
 mod text;
+mod font_context;
+pub use font_context::{rhwp_render_page_png_with_font_context, RhwpFontRenderStatus};
 #[cfg(test)]
 mod text_tests;
 

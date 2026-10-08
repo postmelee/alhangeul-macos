@@ -51,6 +51,7 @@ class CGTreeRenderer {
 
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
+    private var fontContext: RhwpCoreTextFontContext?
 
     private var pageBounds: BBox?
     private var pageHeight: Double = 0
@@ -98,6 +99,28 @@ class CGTreeRenderer {
     private enum FormObjectLabelAlignment {
         case left
         case center
+    }
+
+    /// 작업별 원본 face를 검증하고 이 호출의 TextRun에만 적용한다. 다른 렌더/캐시로 넘기지 않는다.
+    func render(
+        tree: RenderNode,
+        in context: CGContext,
+        pageHeight: Double,
+        document: RhwpDocument?,
+        fontContext: RhwpCoreTextFontContext,
+        mode: CGTreeRenderMode = .complete
+    ) throws {
+        try withFontContext(fontContext, tree: tree) {
+            render(tree: tree, in: context, pageHeight: pageHeight, document: document, mode: mode)
+        }
+    }
+
+    func withFontContext(_ fontContext: RhwpCoreTextFontContext, tree: RenderNode, render: () -> Void) throws {
+        _ = try fontContext.validate(tree)
+        let previous = self.fontContext
+        self.fontContext = fontContext
+        defer { self.fontContext = previous }
+        render()
     }
 
     func render(
@@ -2423,7 +2446,7 @@ class CGTreeRenderer {
         ctx.translateBy(x: CGFloat(bbox.x), y: CGFloat(bbox.y + bbox.height))
         ctx.scaleBy(x: 1, y: -1)
 
-        let font = makeTextRunFont(style: style, fontSize: fontSize)
+        let font = makeTextRunFont(style: style, fontSize: fontSize, run: run)
         let attributes = makeTextRunAttributes(style: style, font: font)
 
         let attrStr = NSAttributedString(string: displayRun.text, attributes: attributes)
@@ -2529,7 +2552,7 @@ class CGTreeRenderer {
         ctx.translateBy(x: CGFloat(bbox.x), y: CGFloat(bbox.y + bbox.height))
         ctx.scaleBy(x: 1, y: -1)
 
-        let font = makeTextRunFont(style: style, fontSize: fontSize)
+        let font = makeTextRunFont(style: style, fontSize: fontSize, run: run)
         let attributes = makeTextRunAttributes(style: style, font: font)
         let line = CTLineCreateWithAttributedString(NSAttributedString(string: displayText, attributes: attributes))
         let layout = makeTextRunLayoutPlan(
@@ -2610,8 +2633,8 @@ class CGTreeRenderer {
         return changed ? output : source
     }
 
-    private func makeTextRunFont(style: TextStyle, fontSize: CGFloat) -> CTFont {
-        var font = resolveAppleFont(
+    private func makeTextRunFont(style: TextStyle, fontSize: CGFloat, run: TextRunNode) -> CTFont {
+        var font = fontContext?.font(for: run, size: fontSize) ?? resolveAppleFont(
             hwpFontFamily: style.fontFamily,
             bold: style.bold,
             italic: style.italic,
