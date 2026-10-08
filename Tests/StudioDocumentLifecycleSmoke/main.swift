@@ -61,6 +61,67 @@ import WebKit
             throw Failure(description: "saved Korean text missing")
         }
     }
+    @MainActor static func fontTransport() async throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        let downloaded = root.appendingPathComponent("build.noindex/task567/fonts/gowun-batang/GowunBatang-Regular.ttf")
+        let fixture = FileManager.default.fileExists(atPath: downloaded.path) ? downloaded
+            : root.appendingPathComponent("Tests/FontLibraryTests/Fixtures/regular.ttf")
+        let bytes = try Data(contentsOf: fixture)
+        let inspected = try FontFileInspector().inspect(bytes, filename: fixture.lastPathComponent)
+        guard let face = inspected.faces.first else { throw Failure(description: "missing probe face") }
+        let metadata = StudioFontFace(id: "probe-face", source: "managed", postScriptName: face.postScriptName,
+            family: face.familyName ?? "", fullName: face.fullName ?? "", style: face.subfamilyName ?? "",
+            aliases: [], weight: Int(face.weightClass), traits: 0, limitation: nil)
+        let supply = StudioFontSupply(snapshot: {
+            .init(identity: "probe", faces: [metadata], omitted: 0, failure: nil,
+                  read: { _ in .init(data: bytes, face: face) }, current: { true }, release: {})
+        })
+        let handler = StudioFontMessageHandler(session: StudioFontSession(supply: supply))
+        let configuration = WKWebViewConfiguration()
+        configuration.setURLSchemeHandler(FontTransportPage(), forURLScheme: "alhangeul-studio")
+        configuration.userContentController.addScriptMessageHandler(handler, contentWorld: .page, name: StudioFontMessageHandler.name)
+        let web = WKWebView(frame: NSRect(x: 0, y: 0, width: 400, height: 200), configuration: configuration)
+        handler.webView = web
+        handler.begin(loadToken: "probe-load", observeChanges: false)
+        defer {
+            handler.reset()
+            configuration.userContentController.removeScriptMessageHandler(forName: StudioFontMessageHandler.name, contentWorld: .page)
+        }
+        web.load(URLRequest(url: URL(string: "alhangeul-studio://app/index.html")!))
+        try await wait("font transport page") { web.url != nil && !web.isLoading }
+        let reply = try await web.callAsyncJavaScript(
+            "return await window.webkit.messageHandlers.alhangeulFonts.postMessage({op:'handshake',version:1,loadToken:'probe-load'});",
+            arguments: [:], in: nil, contentWorld: .page)
+        try check((reply as? [String: Any])?["session"] is String, "font bridge actual WebKit handshake")
+        guard var auth = reply as? [String: Any] else { throw Failure(description: "missing font handshake") }
+        auth["loadToken"] = "probe-load"
+        auth["op"] = "openFace"; auth["id"] = "probe-face"
+        let opened = try await web.callAsyncJavaScript("return await window.webkit.messageHandlers.alhangeulFonts.postMessage(request);",
+            arguments: ["request": auth], in: nil, contentWorld: .page) as? [String: Any]
+        guard let transfer = opened?["id"] as? String else { throw Failure(description: "missing transfer") }
+        try check(opened?["sha256"] as? String == inspected.object.sha256, "font bridge verified face hash")
+        auth["op"] = "readChunk"; auth["id"] = transfer
+        var received = Data()
+        while received.count < bytes.count {
+            auth["offset"] = received.count; auth["length"] = min(256 * 1024, bytes.count - received.count)
+            let chunk = try await web.callAsyncJavaScript("return await window.webkit.messageHandlers.alhangeulFonts.postMessage(request);",
+                arguments: ["request": auth], in: nil, contentWorld: .page) as? [String: Any]
+            guard let encoded = chunk?["data"] as? String, let data = Data(base64Encoded: encoded) else {
+                throw Failure(description: "invalid font chunk")
+            }
+            received.append(data)
+        }
+        try check(received == bytes, "font bridge chunk bytes match " + face.postScriptName)
+        auth.removeValue(forKey: "offset"); auth.removeValue(forKey: "length"); auth["op"] = "closeFace"
+        _ = try await web.callAsyncJavaScript("return await window.webkit.messageHandlers.alhangeulFonts.postMessage(request);",
+            arguments: ["request": auth], in: nil, contentWorld: .page)
+
+        let rejected = try await web.callAsyncJavaScript(
+            "try { await window.webkit.messageHandlers.alhangeulFonts.postMessage({op:'handshake',version:1,loadToken:'old'}); return false; } catch { return true; }",
+            arguments: [:], in: nil, contentWorld: .page)
+        try check(rejected as? Bool == true, "font bridge rejects old load token")
+    }
+
     @MainActor static func run(format: DocumentSaveFormat, fixture: URL, output: URL) async throws {
         let store = DocumentViewerStore()
         let window = NSWindow(contentRect: NSRect(x: 150, y: 150, width: 920, height: 660),
@@ -198,6 +259,7 @@ import WebKit
                     try await run(format: format, fixture: fixture, output: output)
                 }
                 try check(try Data(contentsOf: fixture) == before, "input unchanged")
+                try await fontTransport()
                 print("PASS TOTAL \(checks)")
                 exit(0)
             } catch { print("FAIL \(error)"); exit(1) }
@@ -210,4 +272,13 @@ import WebKit
 @MainActor final class DocumentWindowPresenter {
     static let shared = DocumentWindowPresenter()
     func openDocument(_ url: URL) { fatalError("unexpected external document open") }
+}
+
+private final class FontTransportPage: NSObject, WKURLSchemeHandler {
+    func webView(_ webView: WKWebView, start task: WKURLSchemeTask) {
+        let data = Data("<!doctype html><html><body>Font transport</body></html>".utf8)
+        task.didReceive(URLResponse(url: task.request.url!, mimeType: "text/html", expectedContentLength: data.count, textEncodingName: "utf-8"))
+        task.didReceive(data); task.didFinish()
+    }
+    func webView(_ webView: WKWebView, stop task: WKURLSchemeTask) {}
 }

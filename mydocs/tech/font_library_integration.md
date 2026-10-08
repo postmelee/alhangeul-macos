@@ -1,5 +1,20 @@
 # 공통 글꼴 관리 계층 연동 계약
 
+## 2026-10-08 #567 Studio 수용·소비자 인계
+
+아래 #564/#565 단계별 설명은 당시 계약과 검증 이력이다. 현재 제품은 core/Studio `v0.8.7` / `1a76570e833917d15817415a53c09ad61ab3203f`와 앱 소유 adapter로 설치 참조·관리 복사본을 실제 Studio 문서/기존 글꼴 목록에 연결했다. [#567 Stage 5](../working/task_m020_567_stage5.md)의 실제 CoreText·로컬 서명 sandbox·native HWP/HWPX 저장/재열기 수용을 기준으로 한다. 출력·확장·Windows와 전체 배포 수용은 각 후속 이슈의 책임이다.
+
+| 소비자 | 현재 상태 | 후속 검증 |
+|--------|-----------|-----------|
+| HostApp 설정·Studio (#567) | 공유 catalog/provider, 기존 toolbar 선택, Canvas2D/CanvasKit, 변경·복구, 저장 이름 보존, 정상 권한 재실행 확인 | 실제 한컴 설치본·최소 OS/Intel·새 권한 패널/볼륨·배포 후보 수용은 #569에서 취합 |
+| PDF·인쇄 (#568) | 설치/관리 provider 미연결 | 출력 snapshot과 별도 WebView의 실제 face 준비 대기, PS/style/hash 대조, generation·문서 변경·취소 처리 |
+| native·Quick Look·Thumbnail (#568) | 설치/관리 provider 미연결 | 프로세스별 권한·App Group/lease 경계와 정확한 스타일, 표준 Finder smoke |
+| Windows ZIP (#566) / 전체 안내 (#569) | 후속 | Mac·Windows 수용 분리, 독립 보관과 설치 참조 설명, 소비자별 검증 후 공개 안내/배포 |
+
+JS에 전달하는 공급 정보는 ID·source·revision/generation·이름·스타일·제한이며 URL/bookmark는 native에 남긴다. 필요 bytes만 동일 원본/활성 상태를 검증해 읽고 동시 전송 slot 두 개·제한 재시도·취소·stale 거부를 유지한다. 설치 generation 또는 관리 snapshot이 바뀌면 각 소비자의 Typeface·측정·실패 캐시를 함께 갱신한다. 명시적 관리 선택 → 유일한 활성 설치 후보 → 기존 rhwp fallback 순서와 원래 문서 이름 보존을 소비자별로 검증한다. HostApp bookmark를 다른 프로세스에 복사해서 원본 접근 권한을 공유하지 않는다.
+
+metadata/menu 열거 성공은 모든 face 적용 성공이 아니다. native TTC/가변 제한을 유지하고, 설정의 설치 원본 의존 안내·별도 가져오기 복사본의 독립 보관 안내를 제품 도움말에도 그대로 반영한다. 출력과 Finder가 완료되기 전 Studio 결과로 해당 소비자 지원을 선언하지 않는다.
+
 ## 2026-09-20 현재 적용 기준
 
 Mac 기본 목표는 **활성 설치 글꼴 자동 사용**으로 변경됐다. [#565 수정 계획](../plans/task_m020_565_impl.md)을 현재 기준으로 삼는다. 메타데이터·설정·필요한 권한을 지속하고 필요한 bytes만 읽으며 기존 rhwp 매칭/fallback을 재사용한다. 원본 삭제·비활성·권한 상실 시 계속 사용을 보장하지 않는다. 한컴 앱 내부에만 있는 글꼴 자동 추출은 기본 범위에서 제외한다.

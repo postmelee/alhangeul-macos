@@ -150,6 +150,7 @@ jobs:
         run: |
           set -euo pipefail
           scripts/ci/test-rhwp-core-build-info.sh
+          bash scripts/ci/test-rhwp-core-checkout-reuse.sh
 
       - name: Check studio Cargo.lock verification fixtures
         shell: bash
@@ -217,6 +218,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Set up Node for Studio font provider contracts
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
       - name: Verify render tree decoder compatibility
         shell: bash
         run: |
@@ -237,6 +243,10 @@ jobs:
       - name: Test font library and HostApp service
         shell: bash
         run: scripts/test-font-library.sh
+
+      - name: Verify Studio font provider over WebKit IPC
+        shell: bash
+        run: bash scripts/probe-studio-font-provider.sh
 
       - name: Record Rust bridge lock policy
         shell: bash

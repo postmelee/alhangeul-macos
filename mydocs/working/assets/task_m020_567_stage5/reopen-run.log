@@ -1,0 +1,17 @@
+PASS: 동시 최초 준비 8회·최초 활성화가 실제 metadata 탐색 1회 공유
+PASS: 전체 목록 준비는 font bytes를 읽지 않음
+PASS: 새 프로세스에서 사용 설정 자동 복원
+PASS: 같은 실제 face의 동시 요청 8개가 native 읽기 1회 병합
+PASS: 완료 bytes를 native 영구 캐시하지 않고 원본 재검증
+PASS: 서로 다른 실제 Regular/Bold 요청은 native 두 slot에서 공급
+PASS: hwp/canvas2d: 실제 설치 Regular/Bold 검증 bytes와 정확한 renderer 적용
+PASS: hwp: 기존 확대/축소 명령 실행
+PASS: hwp: 반복 표시·확대/축소에서 준비한 face 재사용
+PASS: hwpx/canvaskit: 실제 설치 Regular/Bold 검증 bytes와 정확한 renderer 적용
+PASS: hwpx: 기존 확대/축소 명령 실행
+PASS: hwpx: 반복 표시·확대/축소에서 준비한 face 재사용
+PASS: 기존 시스템 글꼴 목록에 실제 Mac family 20개 이상·NanumSquare 한 번 표시
+PASS: 기존 글꼴 목록 열기는 전체 bytes를 읽지 않음
+PASS: 새 프로세스에서 저장 문서의 한글 입력 복원
+PASS: 실제 Mac 목록 설정 창을 열어도 문서 상태 보존
+PASS: Studio/native 오류 없음

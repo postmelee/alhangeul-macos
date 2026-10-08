@@ -1,0 +1,389 @@
+✔ 제품 bootstrap은 늦은 API 준비 이후 연결하고 pagehide에서 해제 (3.895416ms)
+(node:63336) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 활성 host family를 중복 제거하고 비활성 시 기존 browser 목록을 사용 (32.301542ms)
+✔ 변경 직후 이전 메뉴 폐기, 지연 snapshot 완료 시 새 메뉴 갱신, 오래된 세대 무시 (1.561ms)
+✔ upstream 확장 지점 변경·중복은 빌드를 실패시키며 대상 이외 파일을 변환하지 않음 (0.414958ms)
+✔ API 부재는 unsupported, native 읽기와 등록 없음 (1.888583ms)
+✔ metadata 페이지 조회만으로 129 faces 준비, bytes는 지연 조회 (2.203167ms)
+✔ 필요 face만 chunk 단위로 읽고 정확한 bytes와 index 반환·slot 해제 (2.729333ms)
+✔ 설치 CoreText와 관리 OS/2의 서로 다른 bits·style을 정규화 (0.307375ms)
+✔ 빈 필수 이름·중복 ID·미지원은 제외하고 빈 alias는 제거 (0.863292ms)
+✔ 선택된 관리 글꼴은 동명 설치 글꼴보다 우선, 다른 굵기는 유지 (0.23575ms)
+✔ 관리 충돌·미지원·잘못된 metadata는 동명 설치 fallback을 차단 (0.335875ms)
+✔ bounded queue가 여러 요청을 처리해도 native transfer는 최대 2개 (5.647584ms)
+✔ 일시 busy는 제한 재시도로 복구 (1.31925ms)
+✔ 지속 busy는 세대 자동 복구 1회 후 중단, 외부 변경으로 다시 복구 가능 (2104.657375ms)
+✔ catalog 중간 stale은 handshake부터 재시도 (0.850459ms)
+✔ 동일 이름 bytes 변경 알림과 document token 교체 후 이전 reference 거부 (4.356666ms)
+✔ metadata 요청 취소는 호출자에 즉시 반영하고 공유 준비를 손상하지 않음 (0.809333ms)
+✔ 취소 무시한 늦은 openFace 응답도 close하고 bytes를 게시하지 않음 (1.600625ms)
+✔ generation 변경으로 진행 중 read 및 대기 read 취소·늦은 응답 폐기 (1.35875ms)
+✔ 손상 chunk 또는 metadata와 다른 face는 반환하지 않고 transfer 해제 (0.861833ms)
+✔ dispose는 provider 연결과 변경 구독을 해제하고 후속 요청 거부 (0.139667ms)
+✔ 잘못된 catalog 진행·총량은 무한 paging이나 과다 목록으로 이어지지 않음 (0.451958ms)
+✔ 대기열은 64건 한도, 이미 취소한 요청은 native 읽기 없음 (4.287792ms)
+✔ 목록 준비 중 dispose하면 늦은 연결 성공을 보고하지 않음 (0.307334ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2185.847125
+PASS: App Group 설정 일치·fixture 해시
+⚙️  Generating plists...
+⚙️  Generating project...
+⚙️  Writing project...
+Created project at /Users/melee/Documents/projects/rhwp-mac/Alhangeul.xcodeproj
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project Alhangeul.xcodeproj -scheme FontLibraryTests -configuration Debug -destination platform=macOS -derivedDataPath /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- build-for-testing
+
+Build settings from command line:
+    CODE_SIGN_IDENTITY = -
+    CODE_SIGNING_ALLOWED = YES
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  Sparkle: https://github.com/sparkle-project/Sparkle @ 2.9.1
+
+2026-10-08 11:32:55.475 xcodebuild[63340:251419] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+--- xcodebuild: WARNING: Using the first of multiple matching destinations:
+{ platform:macOS, arch:arm64, id:00006040-000C60462E20801C, name:My Mac }
+{ platform:macOS, arch:x86_64, id:00006040-000C60462E20801C, name:My Mac }
+note: Using codesigning identity override: -
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (2 targets)
+    Target 'FontLibraryTests' in project 'Alhangeul'
+        ➜ Explicit dependency on target 'FontLibraryProcessProbe' in project 'Alhangeul'
+    Target 'FontLibraryProcessProbe' in project 'Alhangeul' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/SDKStatCaches.noindex/macosx26.5-25F70-688ef53f1462e2c8f657fdc38a81448fe082c4a02f00227109f4ed75e425c832.sdkstatcache
+    cd /Users/melee/Documents/projects/rhwp-mac/Alhangeul.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -o /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/SDKStatCaches.noindex/macosx26.5-25F70-688ef53f1462e2c8f657fdc38a81448fe082c4a02f00227109f4ed75e425c832.sdkstatcache
+
+SwiftDriver FontLibraryTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name FontLibraryTests -Onone @/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -target arm64-apple-macos12.0 -g -module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j12 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/SDKStatCaches.noindex/macosx26.5-25F70-688ef53f1462e2c8f657fdc38a81448fe082c4a02f00227109f4ed75e425c832.sdkstatcache -output-file-map /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-generated-files.hmap -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-own-target-headers.hmap -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-all-target-headers.hmap -Xcc -iquote -Xcc /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-project-headers.hmap -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/include -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/DerivedSources/arm64 -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests-Swift.h -working-directory /Users/melee/Documents/projects/rhwp-mac -experimental-emit-module-separately -disable-cmo
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ FontLibraryTests (in target 'FontLibraryTests' from project 'Alhangeul')
+
+EmitSwiftModule normal arm64 (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    
+
+SwiftCompile normal arm64 Compiling\ FontLibrarySettingsModel.swift /Users/melee/Documents/projects/rhwp-mac/Sources/HostApp/Views/FontLibrarySettingsModel.swift (in target 'FontLibraryTests' from project 'Alhangeul')
+
+SwiftCompile normal arm64 /Users/melee/Documents/projects/rhwp-mac/Sources/HostApp/Views/FontLibrarySettingsModel.swift (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    
+
+SwiftDriverJobDiscovery normal arm64 Compiling FontLibrarySettingsModel.swift (in target 'FontLibraryTests' from project 'Alhangeul')
+
+SwiftDriver\ Compilation FontLibraryTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    builtin-Swift-Compilation -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name FontLibraryTests -Onone @/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -target arm64-apple-macos12.0 -g -module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j12 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/SDKStatCaches.noindex/macosx26.5-25F70-688ef53f1462e2c8f657fdc38a81448fe082c4a02f00227109f4ed75e425c832.sdkstatcache -output-file-map /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-generated-files.hmap -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-own-target-headers.hmap -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-all-target-headers.hmap -Xcc -iquote -Xcc /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-project-headers.hmap -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/include -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/DerivedSources/arm64 -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests-Swift.h -working-directory /Users/melee/Documents/projects/rhwp-mac -experimental-emit-module-separately -disable-cmo
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for FontLibraryTests (in target 'FontLibraryTests' from project 'Alhangeul')
+
+SwiftDriver\ Compilation\ Requirements FontLibraryTests normal arm64 com.apple.xcode.tools.swift.compiler (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name FontLibraryTests -Onone @/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.SwiftFileList -DDEBUG -plugin-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -target arm64-apple-macos12.0 -g -module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -profile-coverage-mapping -profile-generate -enable-testing -index-store-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -c -j12 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/SDKStatCaches.noindex/macosx26.5-25F70-688ef53f1462e2c8f657fdc38a81448fe082c4a02f00227109f4ed75e425c832.sdkstatcache -output-file-map /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests_const_extract_protocols.json -Xcc -iquote -Xcc /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-generated-files.hmap -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-own-target-headers.hmap -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-all-target-headers.hmap -Xcc -iquote -Xcc /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests-project-headers.hmap -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/include -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/DerivedSources-normal/arm64 -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/DerivedSources/arm64 -Xcc -I/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests-Swift.h -working-directory /Users/melee/Documents/projects/rhwp-mac -experimental-emit-module-separately -disable-cmo
+
+Copy /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.swiftmodule/arm64-apple-macos.abi.json /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.abi.json (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.abi.json /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.swiftmodule/arm64-apple-macos.abi.json
+
+Copy /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.swiftsourceinfo (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.swiftsourceinfo /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.swiftmodule/Project/arm64-apple-macos.swiftsourceinfo
+
+Ld /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest/Contents/MacOS/FontLibraryTests normal (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-macos12.0 -bundle -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk -O0 -L/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/EagerLinkingTBDs/Debug -L/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug -L/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/EagerLinkingTBDs/Debug -F/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -filelist /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.LinkFileList -Xlinker -rpath -Xlinker /usr/lib/swift -Xlinker -rpath -Xlinker @loader_path/../Frameworks -Xlinker -rpath -Xlinker @executable_path/../Frameworks -Xlinker -object_path_lto -Xlinker /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests_lto.o -rdynamic -Xlinker -no_deduplicate -Xlinker -debug_variant -Xlinker -dependency_info -Xlinker /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests_dependency_info.dat -fobjc-link-runtime -fprofile-instr-generate -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx -L/usr/lib/swift -Xlinker -add_ast_path -Xlinker /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.swiftmodule @/Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests-linker-args.resp -Xlinker -needed_framework -Xlinker XCTest -framework XCTest -Xlinker -needed-lXCTestSwiftSupport -lXCTestSwiftSupport -framework CoreText -framework Security -Xlinker -no_adhoc_codesign -o /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest/Contents/MacOS/FontLibraryTests
+/Users/melee/Documents/projects/rhwp-mac/Alhangeul.xcodeproj: FontLibraryTests: ld: warning: building for macOS-12.0, but linking with dylib '@rpath/XCTest.framework/Versions/A/XCTest' which was built for newer version 14.0
+/Users/melee/Documents/projects/rhwp-mac/Alhangeul.xcodeproj: FontLibraryTests: ld: warning: building for macOS-12.0, but linking with dylib '@rpath/libXCTestSwiftSupport.dylib' which was built for newer version 14.0
+
+ExtractAppIntentsMetadata (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.6.109.0.OvQjEc/Metal.xctoolchain --module-name FontLibraryTests --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk --xcode-version 17F113 --platform-family macOS --deployment-target 12.0 --bundle-identifier com.postmelee.alhangeul.FontLibraryTests --output /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest/Contents/Resources --target-triple arm64-apple-macos12.0 --binary-file /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest/Contents/MacOS/FontLibraryTests --dependency-file /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests_dependency_info.dat --stringsdata-file /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.SwiftFileList --metadata-file-list /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests.DependencyMetadataFileList --static-metadata-file-list /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/FontLibraryTests.DependencyStaticMetadataFileList --swift-const-vals-list /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/Objects-normal/arm64/FontLibraryTests.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
+2026-10-08 11:32:57.867 appintentsmetadataprocessor[63361:251679] Starting appintentsmetadataprocessor export
+2026-10-08 11:32:57.872 appintentsmetadataprocessor[63361:251679] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+
+CopySwiftLibs /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    builtin-swiftStdLibTool --copy --verbose --sign - --scan-executable /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest/Contents/MacOS/FontLibraryTests --scan-folder /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest/Contents/Frameworks --scan-folder /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest/Contents/PlugIns --scan-folder /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest/Contents/Library/SystemExtensions --scan-folder /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest/Contents/Extensions --scan-folder /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/System/Library/Frameworks/CoreText.framework --scan-folder /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.5.sdk/System/Library/Frameworks/Security.framework --platform macosx --toolchain /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.6.109.0.OvQjEc/Metal.xctoolchain --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest/Contents/Frameworks --strip-bitcode --scan-executable /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Intermediates.noindex/Alhangeul.build/Debug/FontLibraryTests.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+
+CodeSign /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest (in target 'FontLibraryTests' from project 'Alhangeul')
+    cd /Users/melee/Documents/projects/rhwp-mac
+    
+    Signing Identity:     "Sign to Run Locally"
+    
+    /usr/bin/codesign --force --sign - --timestamp\=none --generate-entitlement-der /Users/melee/Documents/projects/rhwp-mac/build.noindex/font-library-tests/DerivedData/Build/Products/Debug/FontLibraryTests.xctest
+
+** TEST BUILD SUCCEEDED ** [2.466 sec]
+
+Test Suite 'All tests' started at 2026-10-08 11:32:58.358.
+Test Suite 'FontLibraryTests.xctest' started at 2026-10-08 11:32:58.359.
+Test Suite 'FontFileInspectorTests' started at 2026-10-08 11:32:58.359.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testCFFAndBoldAreIndependentFaces]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testCFFAndBoldAreIndependentFaces]' passed (0.003 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testCmapAndLocaOffsetsCannotEscapeTables]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testCmapAndLocaOffsetsCannotEscapeTables]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testCollectionCountAndOffsetsAreBounded]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testCollectionCountAndOffsetsAreBounded]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testCollectionUsesSFNTIndexAndNeverClaimsFaceSelection]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testCollectionUsesSFNTIndexAndNeverClaimsFaceSelection]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testEmptyTruncatedAndSizeBoundaries]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testEmptyTruncatedAndSizeBoundaries]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testEveryTruncatedFixturePrefixIsRejected]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testEveryTruncatedFixturePrefixIsRejected]' passed (0.002 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testInvalidLanguageTagReferenceAndVariableNameAreRejected]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testInvalidLanguageTagReferenceAndVariableNameAreRejected]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testLanguageTagsAndUnknownEncodingPreserveOriginalNames]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testLanguageTagsAndUnknownEncodingPreserveOriginalNames]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testNamesStayWithinTheirOwnTableAndRespectBudget]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testNamesStayWithinTheirOwnTableAndRespectBudget]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testSameBytesSameIdentityAndExtensionCannotDisguiseFormat]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testSameBytesSameIdentityAndExtensionCannotDisguiseFormat]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testStaticTrueTypeMetadataAndKoreanNames]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testStaticTrueTypeMetadataAndKoreanNames]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testTableOverflowOverlapAndDuplicateTag]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testTableOverflowOverlapAndDuplicateTag]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testVariableAxisRangeAndInstanceBounds]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testVariableAxisRangeAndInstanceBounds]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.FontFileInspectorTests testVariableInstancesAreNotFaces]' started.
+Test Case '-[FontLibraryTests.FontFileInspectorTests testVariableInstancesAreNotFaces]' passed (0.000 seconds).
+Test Suite 'FontFileInspectorTests' passed at 2026-10-08 11:32:58.371.
+	 Executed 14 tests, with 0 failures (0 unexpected) in 0.011 (0.012) seconds
+Test Suite 'FontLibraryLocationTests' started at 2026-10-08 11:32:58.371.
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testAuthorizedContainerLocation]' started.
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testAuthorizedContainerLocation]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testMalformedConfigurationIsRejected]' started.
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testMalformedConfigurationIsRejected]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testMissingEntitlementDoesNotEvenRequestContainer]' started.
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testMissingEntitlementDoesNotEvenRequestContainer]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testUnavailableContainerNeverFallsBack]' started.
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testUnavailableContainerNeverFallsBack]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testUnentitledTestRunnerCannotUseProductionContainer]' started.
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testUnentitledTestRunnerCannotUseProductionContainer]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testWrongTeamCannotResolveGroup]' started.
+Test Case '-[FontLibraryTests.FontLibraryLocationTests testWrongTeamCannotResolveGroup]' passed (0.000 seconds).
+Test Suite 'FontLibraryLocationTests' passed at 2026-10-08 11:32:58.373.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'FontLibraryProcessTests' started at 2026-10-08 11:32:58.373.
+Test Case '-[FontLibraryTests.FontLibraryProcessTests testConcurrentProcessInitialization]' started.
+Test Case '-[FontLibraryTests.FontLibraryProcessTests testConcurrentProcessInitialization]' passed (1.013 seconds).
+Test Case '-[FontLibraryTests.FontLibraryProcessTests testProcessDeathAtEveryPublicationBoundaryPreservesCommittedGeneration]' started.
+Test Case '-[FontLibraryTests.FontLibraryProcessTests testProcessDeathAtEveryPublicationBoundaryPreservesCommittedGeneration]' passed (0.701 seconds).
+Test Case '-[FontLibraryTests.FontLibraryProcessTests testSeparateReaderSurvivesDeletionAndCrashReleasesLease]' started.
+Test Case '-[FontLibraryTests.FontLibraryProcessTests testSeparateReaderSurvivesDeletionAndCrashReleasesLease]' passed (0.181 seconds).
+Test Case '-[FontLibraryTests.FontLibraryProcessTests testTwoProcessesSerializeAndDeduplicateWithoutLostUpdates]' started.
+Test Case '-[FontLibraryTests.FontLibraryProcessTests testTwoProcessesSerializeAndDeduplicateWithoutLostUpdates]' passed (0.532 seconds).
+Test Suite 'FontLibraryProcessTests' passed at 2026-10-08 11:33:00.800.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 2.426 (2.427) seconds
+Test Suite 'FontLibraryServiceTests' started at 2026-10-08 11:33:00.800.
+Test Case '-[FontLibraryTests.FontLibraryServiceTests testBatchBudgetIsNotResetPerCandidate]' started.
+Test Case '-[FontLibraryTests.FontLibraryServiceTests testBatchBudgetIsNotResetPerCandidate]' passed (0.027 seconds).
+Test Case '-[FontLibraryTests.FontLibraryServiceTests testCancellationReleasesScopeAfterCopyStops]' started.
+Test Case '-[FontLibraryTests.FontLibraryServiceTests testCancellationReleasesScopeAfterCopyStops]' passed (0.019 seconds).
+Test Case '-[FontLibraryTests.FontLibraryServiceTests testFalseScopeStartStillAllowsAccessibleFilesAndIsNotStopped]' started.
+Test Case '-[FontLibraryTests.FontLibraryServiceTests testFalseScopeStartStillAllowsAccessibleFilesAndIsNotStopped]' passed (0.049 seconds).
+Test Case '-[FontLibraryTests.FontLibraryServiceTests testFolderScopeHeldUntilBatchCompletesAndFailuresStayPerFile]' started.
+Test Case '-[FontLibraryTests.FontLibraryServiceTests testFolderScopeHeldUntilBatchCompletesAndFailuresStayPerFile]' passed (0.028 seconds).
+Test Case '-[FontLibraryTests.FontLibraryServiceTests testStorageFailurePreservesResultAndReleasesScope]' started.
+Test Case '-[FontLibraryTests.FontLibraryServiceTests testStorageFailurePreservesResultAndReleasesScope]' passed (0.013 seconds).
+Test Suite 'FontLibraryServiceTests' passed at 2026-10-08 11:33:00.936.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.135 (0.136) seconds
+Test Suite 'FontLibrarySettingsModelTests' started at 2026-10-08 11:33:00.936.
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testCancelledDiscoveryRetainsPartialCandidates]' started.
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testCancelledDiscoveryRetainsPartialCandidates]' passed (0.032 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testDismissDuringImportWaitsForWorkerAndRefreshesStoredResults]' started.
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testDismissDuringImportWaitsForWorkerAndRefreshesStoredResults]' passed (0.074 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testDismissedScanCannotOverwriteNewSession]' started.
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testDismissedScanCannotOverwriteNewSession]' passed (0.069 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testLateSheetDismissalDoesNotCancelReopenedDiscovery]' started.
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testLateSheetDismissalDoesNotCancelReopenedDiscovery]' passed (0.054 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testOneBatchPreservesTotalCandidateLimit]' started.
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testOneBatchPreservesTotalCandidateLimit]' passed (0.059 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testPreparationFailureCanRetryWithoutShowingImport]' started.
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testPreparationFailureCanRetryWithoutShowingImport]' passed (0.017 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testSelectionPanelCancellationAndSingleBatchImport]' started.
+Test Case '-[FontLibraryTests.FontLibrarySettingsModelTests testSelectionPanelCancellationAndSingleBatchImport]' passed (0.062 seconds).
+Test Suite 'FontLibrarySettingsModelTests' passed at 2026-10-08 11:33:01.304.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 0.366 (0.368) seconds
+Test Suite 'FontLibrarySnapshotTests' started at 2026-10-08 11:33:01.304.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testCorruptUnknownAndUnsafeLeasesDeferCollection]' started.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testCorruptUnknownAndUnsafeLeasesDeferCollection]' passed (0.055 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testDeletedSelectionRemainsReadableUntilReleaseAndReimportRestoresIt]' started.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testDeletedSelectionRemainsReadableUntilReleaseAndReimportRestoresIt]' passed (0.083 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testIndependentSnapshotHandlesAndAutomaticLifetimeRelease]' started.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testIndependentSnapshotHandlesAndAutomaticLifetimeRelease]' passed (0.068 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testInvalidResourceOtherLibraryAndTamperedBytesAreRejected]' started.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testInvalidResourceOtherLibraryAndTamperedBytesAreRejected]' passed (0.038 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testMissingLeaseDirectoryFailsClosedWhileReaderLives]' started.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testMissingLeaseDirectoryFailsClosedWhileReaderLives]' passed (0.047 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testOriginalPermissionLossAndDeletionDoNotAffectManagedReads]' started.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testOriginalPermissionLossAndDeletionDoNotAffectManagedReads]' passed (0.041 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testRecoveryCleansOnlyRecognizedAbandonedTransactions]' started.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testRecoveryCleansOnlyRecognizedAbandonedTransactions]' passed (0.034 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testRecoveryDoesNotCollectWhenManifestIsCorruptOrUnsupported]' started.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testRecoveryDoesNotCollectWhenManifestIsCorruptOrUnsupported]' passed (0.049 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testStaleRemovalAndReimportBeforeCollection]' started.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testStaleRemovalAndReimportBeforeCollection]' passed (0.054 seconds).
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testUnreadableLeasePreservesObjectsWithoutProcessIdentityQueries]' started.
+Test Case '-[FontLibraryTests.FontLibrarySnapshotTests testUnreadableLeasePreservesObjectsWithoutProcessIdentityQueries]' passed (0.051 seconds).
+Test Suite 'FontLibrarySnapshotTests' passed at 2026-10-08 11:33:01.825.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.519 (0.521) seconds
+Test Suite 'FontLibraryStoreTests' started at 2026-10-08 11:33:01.826.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testCancellationPreservesPreviouslyCommittedItems]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testCancellationPreservesPreviouslyCommittedItems]' passed (0.049 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testCandidateFileAndBatchLimits]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testCandidateFileAndBatchLimits]' passed (0.033 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testConcurrentStoreInstancesDoNotLoseUpdates]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testConcurrentStoreInstancesDoNotLoseUpdates]' passed (0.841 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testConflictKeepsCurrentSelectionAndVersionNeverAutoReplaces]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testConflictKeepsCurrentSelectionAndVersionNeverAutoReplaces]' passed (0.071 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testCorruptOrUnknownManifestIsNeverOverwritten]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testCorruptOrUnknownManifestIsNeverOverwritten]' passed (0.011 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testFailureAfterRenameReportsVisibleCommitAndRetryIsSafe]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testFailureAfterRenameReportsVisibleCommitAndRetryIsSafe]' passed (0.024 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testIndependentCopyDuplicateAndRestart]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testIndependentCopyDuplicateAndRestart]' passed (0.031 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testLimitedFormatsAreStoredWithoutAutomaticActivation]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testLimitedFormatsAreStoredWithoutAutomaticActivation]' passed (0.044 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testManagedChildSymlinkCannotEscapeRoot]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testManagedChildSymlinkCannotEscapeRoot]' passed (0.013 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testManagedSymlinkAndSourceFIFOAreRejected]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testManagedSymlinkAndSourceFIFOAreRejected]' passed (0.002 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testMissingManifestCannotResetExistingLibrary]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testMissingManifestCannotResetExistingLibrary]' passed (0.024 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testPartialFailureDoesNotRollbackValidFiles]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testPartialFailureDoesNotRollbackValidFiles]' passed (0.043 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testSourceReplacementAfterInspectionCannotChangeStoredBytes]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testSourceReplacementAfterInspectionCannotChangeStoredBytes]' passed (0.026 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testTamperedObjectCannotBeReportedAsDuplicate]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testTamperedObjectCannotBeReportedAsDuplicate]' passed (0.030 seconds).
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testWriteFailureBeforeCommitPreservesOldManifest]' started.
+Test Case '-[FontLibraryTests.FontLibraryStoreTests testWriteFailureBeforeCommitPreservesOldManifest]' passed (0.207 seconds).
+Test Suite 'FontLibraryStoreTests' passed at 2026-10-08 11:33:03.277.
+	 Executed 15 tests, with 0 failures (0 unexpected) in 1.449 (1.451) seconds
+Test Suite 'InstalledFontCatalogTests' started at 2026-10-08 11:33:03.277.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testChangedGenerationRejectsInFlightBytes]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testChangedGenerationRejectsInFlightBytes]' passed (0.002 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testConcurrentReadsShareWorkerButDoNotPersistBytes]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testConcurrentReadsShareWorkerButDoNotPersistBytes]' passed (0.103 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testCoreTextNotificationInvalidatesAndStreamsNewGeneration]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testCoreTextNotificationInvalidatesAndStreamsNewGeneration]' passed (0.534 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testCorruptOrNewerStorageIsPreserved]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testCorruptOrNewerStorageIsPreserved]' passed (0.002 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testDifferentOriginsWithSamePSAreNotSilentlyCollapsed]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testDifferentOriginsWithSamePSAreNotSilentlyCollapsed]' passed (0.002 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testForegroundRecoveryIntentSurvivesCoreTextNotificationBurst]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testForegroundRecoveryIntentSurvivesCoreTextNotificationBurst]' passed (0.424 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testHistoricalCatalogAtCapacityIsPrunedAndPersistsAcrossRelaunch]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testHistoricalCatalogAtCapacityIsPrunedAndPersistsAcrossRelaunch]' passed (0.339 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testNotificationBurstIsDebounced]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testNotificationBurstIsDebounced]' passed (0.403 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testOldReadIsRejectedWhenDisabledWhileWorkerRuns]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testOldReadIsRejectedWhenDisabledWhileWorkerRuns]' passed (0.003 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testOverCapacityCatalogRecoversWhenCurrentScanReturnsWithinLimit]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testOverCapacityCatalogRecoversWhenCurrentScanReturnsWithinLimit]' passed (0.047 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testPermissionBookmarksPersistReplaceAndRevoke]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testPermissionBookmarksPersistReplaceAndRevoke]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testReadFailureInvalidatesAndRequiresExplicitRetry]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testReadFailureInvalidatesAndRequiresExplicitRetry]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testRealActiveFixtureReadRejectsChangedOriginalWithoutNotification]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testRealActiveFixtureReadRejectsChangedOriginalWithoutNotification]' passed (0.542 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testRelaunchRechecksSavedPermissionFailureWithoutReadingWholeCatalog]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testRelaunchRechecksSavedPermissionFailureWithoutReadingWholeCatalog]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testRelaunchRestoresSettingsButRechecksLiveCatalogBeforeServing]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testRelaunchRestoresSettingsButRechecksLiveCatalogBeforeServing]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testRemovalAndUpdateInvalidateGeneration]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testRemovalAndUpdateInvalidateGeneration]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testRepeatedPreparationSharesCurrentCatalogWithoutRescanning]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testRepeatedPreparationSharesCurrentCatalogWithoutRescanning]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testScanFailureBlocksOldSnapshotAndRecoveryRevalidates]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testScanFailureBlocksOldSnapshotAndRecoveryRevalidates]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testScopeBalanceAndStalePermissionsEvenWhenOperationFails]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testScopeBalanceAndStalePermissionsEvenWhenOperationFails]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testSettingsRefreshRetriesReadFailureAndKeepsAutomaticSupplyEnabled]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testSettingsRefreshRetriesReadFailureAndKeepsAutomaticSupplyEnabled]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testSettingsSaveFailureDoesNotShowEnabledSuccess]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testSettingsSaveFailureDoesNotShowEnabledSuccess]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testSettingsUsesOrderedUpdatesAndCancelledSelectionPreservesPermission]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testSettingsUsesOrderedUpdatesAndCancelledSelectionPreservesPermission]' passed (0.110 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testStorageFailureDoesNotPretendSettingsWereSaved]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testStorageFailureDoesNotPretendSettingsWereSaved]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testSupplyContractDoesNotExposeSourceOrPermission]' started.
+Test Case '-[FontLibraryTests.InstalledFontCatalogTests testSupplyContractDoesNotExposeSourceOrPermission]' passed (0.000 seconds).
+Test Suite 'InstalledFontCatalogTests' passed at 2026-10-08 11:33:05.796.
+	 Executed 24 tests, with 0 failures (0 unexpected) in 2.516 (2.520) seconds
+Test Suite 'MacFontDiscoveryTests' started at 2026-10-08 11:33:05.796.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testApplicationDepthAndLinkedDocumentDirectory]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testApplicationDepthAndLinkedDocumentDirectory]' passed (0.006 seconds).
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testDepthVisitAndCandidateLimitsReportPartialSearch]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testDepthVisitAndCandidateLimitsReportPartialSearch]' passed (0.003 seconds).
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testExplicitUnknownAppUsesOnlyKnownSubfoldersWithoutClaimingHancom]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testExplicitUnknownAppUsesOnlyKnownSubfoldersWithoutClaimingHancom]' passed (0.004 seconds).
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testFalseScopeStartAllowsReadAndNeverStops]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testFalseScopeStartAllowsReadAndNeverStops]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testHomeIsAccountHomeAndDefaultRequestsExcludeSystemFonts]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testHomeIsAccountHomeAndDefaultRequestsExcludeSystemFonts]' passed (0.000 seconds).
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testInstalledAndSelectedSourcesDeduplicateAndKeepFormats]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testInstalledAndSelectedSourcesDeduplicateAndKeepFormats]' passed (0.002 seconds).
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testMidTraversalFailurePreservesReadableCandidatesAndSessionDeinitCloses]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testMidTraversalFailurePreservesReadableCandidatesAndSessionDeinitCloses]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testMissingAndPermissionErrorsRemainDistinct]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testMissingAndPermissionErrorsRemainDistinct]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testMultipleApplicationsOnlyIncludeDocumentFonts]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testMultipleApplicationsOnlyIncludeDocumentFonts]' passed (0.007 seconds).
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testScopeCloseWaitsForCancelledWorkerAndCannotBeReopened]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testScopeCloseWaitsForCancelledWorkerAndCannotBeReopened]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testSymlinksAndNestedAppsAreExcluded]' started.
+Test Case '-[FontLibraryTests.MacFontDiscoveryTests testSymlinksAndNestedAppsAreExcluded]' passed (0.001 seconds).
+Test Suite 'MacFontDiscoveryTests' passed at 2026-10-08 11:33:05.824.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.027 (0.028) seconds
+Test Suite 'StudioFontSessionTests' started at 2026-10-08 11:33:05.824.
+Test Case '-[FontLibraryTests.StudioFontSessionTests testAppWideBudgetAndExpiryReleaseSlots]' started.
+Test Case '-[FontLibraryTests.StudioFontSessionTests testAppWideBudgetAndExpiryReleaseSlots]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.StudioFontSessionTests testChunkBoundsAndCrossDocumentTokenAreRejected]' started.
+Test Case '-[FontLibraryTests.StudioFontSessionTests testChunkBoundsAndCrossDocumentTokenAreRejected]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.StudioFontSessionTests testChunkRoundTripAndExplicitClose]' started.
+Test Case '-[FontLibraryTests.StudioFontSessionTests testChunkRoundTripAndExplicitClose]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.StudioFontSessionTests testInstalledProviderSharesConcurrentCreation]' started.
+Test Case '-[FontLibraryTests.StudioFontSessionTests testInstalledProviderSharesConcurrentCreation]' passed (0.123 seconds).
+Test Case '-[FontLibraryTests.StudioFontSessionTests testMalformedAndUnauthorizedRequestsCannotRead]' started.
+Test Case '-[FontLibraryTests.StudioFontSessionTests testMalformedAndUnauthorizedRequestsCannotRead]' passed (0.001 seconds).
+Test Case '-[FontLibraryTests.StudioFontSessionTests testManagedChangesStreamPublishesAfterImport]' started.
+Test Case '-[FontLibraryTests.StudioFontSessionTests testManagedChangesStreamPublishesAfterImport]' passed (0.140 seconds).
+Test Case '-[FontLibraryTests.StudioFontSessionTests testNavigationDuringReadDiscardsLateBytesAndReleasesBudget]' started.
+Test Case '-[FontLibraryTests.StudioFontSessionTests testNavigationDuringReadDiscardsLateBytesAndReleasesBudget]' passed (0.115 seconds).
+Test Case '-[FontLibraryTests.StudioFontSessionTests testRevisionAndNavigationRejectPreviousTransfers]' started.
+Test Case '-[FontLibraryTests.StudioFontSessionTests testRevisionAndNavigationRejectPreviousTransfers]' passed (0.003 seconds).
+Test Case '-[FontLibraryTests.StudioFontSessionTests testTrustedFramePolicy]' started.
+Test Case '-[FontLibraryTests.StudioFontSessionTests testTrustedFramePolicy]' passed (0.001 seconds).
+Test Suite 'StudioFontSessionTests' passed at 2026-10-08 11:33:06.213.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.387 (0.389) seconds
+Test Suite 'FontLibraryTests.xctest' passed at 2026-10-08 11:33:06.213.
+	 Executed 105 tests, with 0 failures (0 unexpected) in 7.838 (7.854) seconds
+Test Suite 'All tests' passed at 2026-10-08 11:33:06.213.
+	 Executed 105 tests, with 0 failures (0 unexpected) in 7.838 (7.855) seconds

@@ -1,0 +1,42 @@
+[
+  {
+    "ps" : "GowunBatang-Regular",
+    "sha256" : "70304f96ffc151bc7739ea0277b8a2d4c589b693ac0adbbff0ae2dfca2137c53",
+    "source" : "installed:GowunBatang-Regular"
+  },
+  {
+    "ps" : "GowunBatang-Bold",
+    "sha256" : "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+    "source" : "installed:GowunBatang-Bold"
+  },
+  {
+    "ps" : "GowunBatang-Regular",
+    "sha256" : "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+    "source" : "installed:GowunBatang-Regular"
+  },
+  {
+    "ps" : "GowunBatang-Bold",
+    "sha256" : "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+    "source" : "installed:GowunBatang-Bold"
+  },
+  {
+    "ps" : "GowunBatang-Regular",
+    "sha256" : "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+    "source" : "managed:font-466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849-0"
+  },
+  {
+    "ps" : "GowunBatang-Bold",
+    "sha256" : "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+    "source" : "managed:font-dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94-0"
+  },
+  {
+    "ps" : "GowunBatang-Regular",
+    "sha256" : "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+    "source" : "managed:font-466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849-0"
+  },
+  {
+    "ps" : "GowunBatang-Bold",
+    "sha256" : "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+    "source" : "managed:font-dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94-0"
+  }
+]

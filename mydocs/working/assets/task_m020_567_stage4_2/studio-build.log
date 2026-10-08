@@ -1,0 +1,32 @@
+vite v8.3.2 building client environment for production...
+transforming...
+[plugin rolldown:vite-resolve] Module "path" has been externalized for browser compatibility, imported by "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/node_modules/canvaskit-wasm/bin/canvaskit.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "fs" has been externalized for browser compatibility, imported by "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/node_modules/canvaskit-wasm/bin/canvaskit.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+✓ 280 modules transformed.
+rendering chunks...
+computing gzip size...
+build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/dist/registerSW.js                               0.13 kB
+build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/dist/manifest.webmanifest                        0.76 kB
+build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/dist/alhangeul-font-menu-adapter.json            1.15 kB │ gzip:     0.61 kB
+build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/dist/index.html                                 87.04 kB │ gzip:    11.51 kB
+build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/dist/assets/canvaskit-SCAxUyCS.wasm          7,317.34 kB │ gzip: 2,989.78 kB
+build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/dist/assets/rhwp_bg-CgLRUUmQ.wasm           11,804.13 kB │ gzip: 4,458.23 kB
+build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/dist/assets/index-Dy0DTkWY.css                 113.83 kB │ gzip:    19.60 kB
+build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/dist/assets/studio-plugin-7wns0tfd.js           54.38 kB │ gzip:    16.18 kB
+build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/dist/assets/canvaskit-renderer-Dz71SnNb.js     247.51 kB │ gzip:    74.61 kB
+build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/dist/assets/index-j2qd_6Qq.js                2,117.29 kB │ gzip:   438.34 kB
+
+✓ built in 465ms
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+
+PWA v1.3.0
+mode      generateSW
+precache  59 entries (26230.38 KiB)
+files generated
+  dist/sw.js
+  dist/workbox-dcde9eb3.js
+OK: Studio built with host font menu adapter; upstream source files unchanged

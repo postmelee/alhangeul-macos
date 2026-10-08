@@ -172,7 +172,7 @@ classify_path() {
   case "$path" in
     RustBridge/examples/*)
       ;;
-    RustBridge/*|rhwp-core.lock|Frameworks/*|Vendor/rhwp/*|rust-toolchain.toml|scripts/build-rust-macos.sh|scripts/update-rhwp-core.sh|scripts/sync-rhwp-studio.sh|scripts/verify-rhwp-studio-assets.sh)
+    RustBridge/*|rhwp-core.lock|Frameworks/*|Vendor/rhwp/*|rust-toolchain.toml|scripts/build-rust-macos.sh|scripts/update-rhwp-core.sh|scripts/sync-rhwp-studio.sh|scripts/verify-rhwp-studio-assets.sh|scripts/build-rhwp-studio.mjs|scripts/studio-font-menu-adapter.mjs)
       enable_macos_build "$path affects Rust bridge/core artifacts"
       enable_rust_verify "$path affects Rust bridge/core lock verification"
       matched=1

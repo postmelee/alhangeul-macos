@@ -1,0 +1,106 @@
+{
+  "backendFallbackReason" : null,
+  "effectiveBackend" : "canvaskit",
+  "initializationError" : null,
+  "initialized" : true,
+  "page" : {
+    "canvaskit" : {
+      "bundledTypefaceCount" : 0,
+      "bundledTypefaceLoadFailureCount" : 0,
+      "fontSubstitutionLimit" : 4096,
+      "fontSubstitutions" : [
+        {
+          "kind" : "unregisteredFallback",
+          "requestedFamily" : "돋움",
+          "resolvedFamily" : "Noto Sans KR",
+          "source" : "unregisteredDefault"
+        }
+      ],
+      "glyphRunFontBlobBytes" : 0,
+      "glyphRunFontBlobCount" : 0,
+      "glyphRunFontCount" : 0,
+      "glyphRunTypefaceCount" : 0,
+      "hiddenCanvas2dOverlayUsed" : false,
+      "imageCacheEntries" : 0,
+      "imageCacheEvictions" : 0,
+      "imageCacheHits" : 0,
+      "imageCacheLimit" : 128,
+      "imageCacheMisses" : 0,
+      "imageCachePixelLimit" : 67108864,
+      "imageCachePixels" : 0,
+      "imageFailureCacheHits" : 0,
+      "imageFailures" : [
+
+      ],
+      "lastExpectedUnsupportedOps" : [
+
+      ],
+      "lastRenderCompleted" : true,
+      "lastRenderDurationMs" : 11.000000000000114,
+      "lastRenderError" : null,
+      "lastUnexpectedUnsupportedOps" : [
+
+      ],
+      "lastUnsupportedOps" : [
+
+      ],
+      "localTypefaceCount" : 2,
+      "localTypefaceLoadFailureCount" : 0,
+      "localTypefacePendingCount" : 0,
+      "mode" : "default",
+      "passesRuntimeReadinessGate" : true,
+      "readinessBlockers" : [
+
+      ],
+      "renderCount" : 2,
+      "replayFeatureCounts" : {
+        "dashedStrokes" : 0,
+        "glyphRuns" : 0,
+        "verticalPresentationPunctuation" : 0,
+        "verticalTextRuns" : 0
+      },
+      "surfaceBackend" : "default",
+      "surfaceFallbackReason" : null,
+      "surfacePreference" : "webgl",
+      "unregisteredFontFallbacks" : 1
+    },
+    "index" : 0
+  },
+  "request" : {
+    "backend" : {
+      "backend" : "canvaskit",
+      "requested" : "canvaskit",
+      "source" : "url"
+    },
+    "canvaskitMode" : {
+      "mode" : "default",
+      "source" : "default"
+    },
+    "canvaskitSurface" : {
+      "preference" : "webgl",
+      "requested" : "webgl"
+    },
+    "renderProfile" : "screen"
+  },
+  "schemaVersion" : 1,
+  "selection" : {
+    "decisionKey" : "blake3:a90019505e14ed50eccc909f5c04571253a918ddc590b371bcb227cea3dbe4e8|revision:2|profile:screen|resources:2|request:canvaskit|mode:default",
+    "documentDigest" : "blake3:a90019505e14ed50eccc909f5c04571253a918ddc590b371bcb227cea3dbe4e8",
+    "documentRevision" : 2,
+    "effectiveBackend" : "canvaskit",
+    "fallbackReason" : null,
+    "initializationError" : null,
+    "preflight" : null,
+    "renderProfile" : "screen",
+    "request" : {
+      "backend" : "canvaskit",
+      "requested" : "canvaskit",
+      "source" : "url"
+    },
+    "requestedBackend" : "canvaskit",
+    "resourceGeneration" : 2,
+    "schemaVersion" : 1,
+    "selectionError" : null,
+    "selectionReason" : "explicitCanvasKit"
+  }
+}

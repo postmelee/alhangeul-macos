@@ -12,7 +12,7 @@ final class InstalledFontSettingsModel: ObservableObject {
     private var observation: Task<Void, Never>?
 
     init(makeService: @escaping @Sendable () async throws -> InstalledFontCatalogService = {
-        try await Task.detached { try InstalledFontCatalogService.live() }.value
+        try await InstalledFontServiceProvider.shared.service()
     }) {
         self.makeService = makeService
     }
@@ -40,7 +40,7 @@ final class InstalledFontSettingsModel: ObservableObject {
 
     func refresh() async {
         if service == nil { await prepare(); return }
-        await perform { catalog in _ = try await catalog.refresh() }
+        await perform { catalog in _ = try await catalog.refreshForUser() }
     }
 
     func setEnabled(_ enabled: Bool) async {

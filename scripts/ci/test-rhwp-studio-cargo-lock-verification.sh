@@ -143,11 +143,47 @@ EOF
   printf '%s\n' '{}' \
     > "$upstream_dir/rhwp-studio/dist/manifest.webmanifest"
 
+  mkdir -p "$upstream_dir/rhwp-studio/src/core" "$upstream_dir/rhwp-studio/src/ui"
+  cat > "$upstream_dir/rhwp-studio/src/core/local-fonts.ts" <<'EOF'
+export function getLocalFonts(options: GetLocalFontsOptions = {}): string[] {
+  return [];
+}
+EOF
+  cat > "$upstream_dir/rhwp-studio/src/ui/toolbar.ts" <<'EOF'
+import { getLocalFonts } from '@/core/local-fonts';
+    eventBus.on('local-fonts-changed', () => {
+      this.refreshFontDropdown();
+    });
+EOF
+
+  cat > "$upstream_dir/rhwp-studio/src/ui/options-dialog.ts" <<'EOF'
+function createFontPanel() {
+    // ── 로컬 글꼴 섹션 ──
+}
+EOF
+
   git -C "$upstream_dir" init -q
   git -C "$upstream_dir" config user.name fixture
   git -C "$upstream_dir" config user.email fixture@example.invalid
-  git -C "$upstream_dir" add Cargo.lock pkg rhwp-studio/dist
+  git -C "$upstream_dir" add Cargo.lock pkg rhwp-studio/dist rhwp-studio/src
   git -C "$upstream_dir" commit -qm "fixture upstream"
+  node --input-type=module - "$ROOT" "$upstream_dir" <<'JS'
+import {readFileSync, writeFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+const [root, upstream] = process.argv.slice(2);
+const {adaptSource, sourcePaths, receiptName, buildCommand} = await import(pathToFileURL(resolve(root, 'scripts/studio-font-menu-adapter.mjs')));
+const sha = input => createHash('sha256').update(input).digest('hex');
+const files = ['scripts/build-rhwp-studio.mjs', 'scripts/studio-font-menu-adapter.mjs'];
+const receipt = {schema: 1, studio_build_command: buildCommand,
+  source_resolved_commit: execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim(),
+  adapter_files: Object.fromEntries(files.map(path => [path, sha(readFileSync(resolve(root, path)))])),
+  sources: sourcePaths.map(path => {const original = readFileSync(resolve(upstream, 'rhwp-studio', path), 'utf8');
+    return {path, original_sha256:sha(original), adapted_sha256:sha(adaptSource(original, path))};})};
+writeFileSync(resolve(upstream, 'rhwp-studio/dist', receiptName), JSON.stringify(receipt,null,2)+'\n');
+JS
 }
 
 for required_script in "$VERIFIER" "$SYNC"; do
@@ -324,6 +360,17 @@ assert_contains "$COMMAND_STDERR" "Checkout:        $upstream_dir" \
 sync_target="$TMP_ROOT/sync-target"
 write_resource "$sync_target"
 upstream_commit="$stale_upstream_head"
+node - "$upstream_dir/rhwp-studio/dist/alhangeul-font-menu-adapter.json" "$upstream_commit" <<'JS'
+const fs=require('node:fs'), [path, commit]=process.argv.slice(2);
+const receipt=JSON.parse(fs.readFileSync(path));receipt.source_resolved_commit=commit;
+fs.writeFileSync(path,JSON.stringify(receipt,null,2)+'\n');
+JS
+cp "$upstream_dir/rhwp-studio/dist/alhangeul-font-menu-adapter.json" "$TMP_ROOT/adapter-receipt.json"
+rm "$upstream_dir/rhwp-studio/dist/alhangeul-font-menu-adapter.json"
+expect_failure "sync without font menu adapter" "ENOENT" \
+  "$SYNC" --check --upstream-dir "$upstream_dir" --target-dir "$sync_target" \
+  --tag v9.9.9 --commit "$upstream_commit" --actual-wasm-build-command "fixture wasm build"
+cp "$TMP_ROOT/adapter-receipt.json" "$upstream_dir/rhwp-studio/dist/alhangeul-font-menu-adapter.json"
 "$SYNC" \
   --check \
   --upstream-dir "$upstream_dir" \
@@ -337,6 +384,16 @@ assert_contains "$COMMAND_STDOUT" \
   "sync self-check did not compare the generated fingerprint"
 assert_contains "$COMMAND_STDOUT" "rhwp-studio sync check passed" \
   "sync check did not complete"
+
+# A linked worktree has a .git file, and is a supported source checkout too.
+linked_upstream="$TMP_ROOT/linked-upstream"
+git -C "$upstream_dir" worktree add -q --detach "$linked_upstream" "$upstream_commit"
+cp "$upstream_dir/rhwp-studio/dist/alhangeul-font-menu-adapter.json" "$linked_upstream/rhwp-studio/dist/"
+"$SYNC" --check --upstream-dir "$linked_upstream" --target-dir "$sync_target" \
+  --tag v9.9.9 --commit "$upstream_commit" --actual-wasm-build-command "fixture wasm build" \
+  > "$COMMAND_STDOUT"
+assert_contains "$COMMAND_STDOUT" "rhwp-studio sync check passed" \
+  "sync check rejected a valid linked worktree"
 
 "$VERIFIER" > "$COMMAND_STDOUT"
 assert_files_equal "$production_manifest_before" "$PRODUCTION_RESOURCE/manifest.json" \

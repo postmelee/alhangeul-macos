@@ -18,6 +18,8 @@ struct FontLibrarySourceAccess: Sendable {
 // UI/탐색/ZIP과 무관한 HostApp 진입점. 원본 권한만 여기서 소유한다.
 // 모든 저장 I/O는 FontLibraryStore의 직렬 큐에서 실행한다.
 final class FontLibraryService: Sendable {
+    static let shared: Result<FontLibraryService, Error> = Result { try FontLibraryService() }
+    let changes = FontLibraryChanges()
     private let store: FontLibraryStore
     private let access: FontLibrarySourceAccess
 
@@ -47,14 +49,20 @@ final class FontLibraryService: Sendable {
             }
         }
         // 배치 전체를 한 번에 넘겨 후보 수/누적 bytes 한도를 유지한다.
-        return await store.importCandidates(request.candidates)
+        let results = await store.importCandidates(request.candidates)
+        if let manifest = try? await store.list() { await changes.publish(manifest.generation) } // 부분 게시도 통지한다.
+        return results
     }
 
     func selectActive(groupID: String, faceID: FontFaceID, expectedGeneration: UInt64) async throws -> FontLibraryManifest {
-        try await store.selectActive(groupID: groupID, faceID: faceID, expectedGeneration: expectedGeneration)
+        let result = try await store.selectActive(groupID: groupID, faceID: faceID, expectedGeneration: expectedGeneration)
+        await changes.publish(result.generation)
+        return result
     }
     func remove(objectHash: String, expectedGeneration: UInt64) async throws -> FontLibraryManifest {
-        try await store.remove(objectHash: objectHash, expectedGeneration: expectedGeneration)
+        let result = try await store.remove(objectHash: objectHash, expectedGeneration: expectedGeneration)
+        await changes.publish(result.generation)
+        return result
     }
     func acquireSnapshot() async throws -> FontLibrarySnapshot { try await store.acquireSnapshot() }
     func readResource(_ id: String, snapshot: FontLibrarySnapshot) async throws -> Data {

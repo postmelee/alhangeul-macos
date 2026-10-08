@@ -1,0 +1,10 @@
+{
+  "checks" : [
+    "new process restores disabled setting",
+    "new process has no original source copies",
+    "new process restores managed Regular\/Bold copies",
+    "new process automatically renders exact managed bytes without source or new import",
+    "managed substitutes removed before independent installed relaunch"
+  ],
+  "error" : null
+}

@@ -1,0 +1,5 @@
+PASS: new process restores enabled installed-font setting
+PASS: new process rechecks original source copies
+PASS: installed automatic use is verified without managed substitutes
+PASS: enabled setting automatically supplies exact installed bytes on new process
+PASS: product Studio integration

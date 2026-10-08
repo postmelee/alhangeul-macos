@@ -1,0 +1,104 @@
+{
+  "source_release_tag": "v0.8.7",
+  "source_resolved_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "native": {
+    "lock_version": 2,
+    "rhwp_repo": "https://github.com/edwardkim/rhwp.git",
+    "rhwp_ref_kind": "release-tag",
+    "rhwp_release_tag": "v0.8.7",
+    "rhwp_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "rhwp_enabled_features": "native-skia",
+    "built_at": "2026-10-07T01:52:14Z",
+    "ffi_symbols_file": "rhwp-ffi-symbols.txt",
+    "artifacts": [
+      {
+        "path": "Frameworks/generated_rhwp.h",
+        "sha256": "bf1134c349f9c4f9c6ab7b5dfbd4abd9a681f8ca397a3147acc2214c8b048760",
+        "size": 4624
+      },
+      {
+        "path": "Frameworks/universal/librhwp.a",
+        "sha256": "a5ce5eb7db9c2eafb939f11c777c0523f577695345c547e4e179960de8d480ea",
+        "size": 245423192
+      }
+    ]
+  },
+  "studio": {
+    "name": "rhwp-studio",
+    "source_repository": "https://github.com/edwardkim/rhwp.git",
+    "source_ref_kind": "release-tag",
+    "source_release_tag": "v0.8.7",
+    "source_resolved_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "source_cargo_lock_sha256": "f24e98940a42000cea09500bea090cc571773e761c3d068769227e82a0e2f024",
+    "wasm_build_command": "CARGO_TARGET_DIR=/Users/melee/Documents/projects/forks/rhwp/target/pr-review scripts/wasm-pack-locked.sh --target web --out-dir pkg",
+    "recommended_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
+    "actual_wasm_build_command": "CARGO_TARGET_DIR=/Users/melee/Documents/projects/forks/rhwp/target/pr-review scripts/wasm-pack-locked.sh --target web --out-dir pkg",
+    "studio_build_command": "npx tsc && npx vite build --base ./",
+    "copied_from": "rhwp-studio/dist",
+    "excluded_paths": [
+      "samples/"
+    ],
+    "local_overlay_paths": [
+      "alhangeul-wkwebview-overrides.css",
+      "fonts/FONTS.md"
+    ],
+    "copied_file_count": 64,
+    "copied_total_bytes": 57968068,
+    "entrypoints": {
+      "index_html": {
+        "path": "index.html",
+        "sha256": "f7943861864475f4e4885e80f241f458ffaadbff75338c07d5a5aadce1a46991"
+      },
+      "main_js": {
+        "path": "assets/index-Bj_IJTiX.js",
+        "sha256": "653926cfc39c31b5143ea08fae15891e06672e5f8ef563ee49ff1e4a6f383ad2"
+      },
+      "main_css": {
+        "path": "assets/index-Dy0DTkWY.css",
+        "sha256": "77febd44c7840da15121989e64d344123d5d353b9d7c4ecc66f44ac8d544110e"
+      },
+      "wasm": {
+        "path": "assets/rhwp_bg-CgLRUUmQ.wasm",
+        "sha256": "d6a00eb16a7155607b7a81641ef33ba5414a032f74091c72c1c1d351b7086cdf"
+      }
+    }
+  },
+  "toolchains": {
+    "native_rust": "1.94.1",
+    "wasm_rust": "1.93.1",
+    "node": "24.15.0",
+    "macos": "26.5.2 (25F84)",
+    "xcode": "26.6 (17F113)"
+  },
+  "fonts": {
+    "repository": "https://github.com/google/fonts",
+    "commit": "c1eda9233c33ad7775b27efd794f931095cf6133",
+    "files": [
+      {
+        "file": "OFL.txt",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/OFL.txt",
+        "bytes": 4397,
+        "sha256": "49a57cc769fa9affd6eefb9070a61e3d3f6b757c97cafb15848bc6d1c81acc78"
+      },
+      {
+        "file": "METADATA.pb",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/METADATA.pb",
+        "bytes": 1307,
+        "sha256": "5ab6c5630b85b7d20e8cec7a3be246f9cd5a8f247dea4993f6fb9cf1cc24478e"
+      },
+      {
+        "file": "GowunBatang-Regular.ttf",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/GowunBatang-Regular.ttf",
+        "bytes": 8433296,
+        "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849"
+      },
+      {
+        "file": "GowunBatang-Bold.ttf",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/GowunBatang-Bold.ttf",
+        "bytes": 8178712,
+        "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94"
+      }
+    ]
+  },
+  "scope": "승인된 fixture 공급 + 실제 제품 Coordinator/handler + 실제 v0.8.7 Studio; OS 설치·signed sandbox·전체 수용은 별도"
+}

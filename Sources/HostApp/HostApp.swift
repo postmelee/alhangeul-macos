@@ -13,6 +13,7 @@ struct AlHangeulMacApp: App {
     var body: some Scene {
         WindowGroup {
             DocumentWindowRootView()
+                .background(AppSettingsOpener())
         }
         .commands {
             HostAppCommands(updateController: updateController)
@@ -185,7 +186,7 @@ private struct HostAppCommands: Commands {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     // 후속 가져오기 UI는 이 결과를 통해 App Group 구성 실패를 안내한다.
-    lazy var fontLibraryService: Result<FontLibraryService, Error> = Result { try FontLibraryService() }
+    lazy var fontLibraryService: Result<FontLibraryService, Error> = FontLibraryService.shared
 
     func applicationDidFinishLaunching(_ notification: Notification) {
 #if DEBUG
@@ -223,6 +224,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ notification: Notification) {
         repositionUnreachableWindowsIfNeeded()
+        let activatedAt = ProcessInfo.processInfo.systemUptime
+        Task {
+            if let catalog = try? await InstalledFontServiceProvider.shared.service() {
+                await catalog.scheduleRefreshForActivation(at: activatedAt)
+            }
+        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

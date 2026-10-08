@@ -100,6 +100,7 @@ enum RhwpStudioHostBridgeScript {
       window.__alhangeulHostBridgeInstalled = true;
 
       const nativeCommands = new Set([
+        "app:font-settings",
         "file:open",
         "file:save",
         "file:save-as",
@@ -792,7 +793,8 @@ enum RhwpStudioHostBridgeScript {
           ? "file:export-pdf"
           : command;
 
-        if (canonicalCommand === "file:open" ||
+        if (canonicalCommand === "app:font-settings" ||
+            canonicalCommand === "file:open" ||
             canonicalCommand === "file:save" ||
             canonicalCommand === "file:save-as" ||
             canonicalCommand === "file:save-as-hwp" ||

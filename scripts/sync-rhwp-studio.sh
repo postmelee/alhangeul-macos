@@ -156,7 +156,7 @@ if [ -z "$ACTUAL_WASM_BUILD_COMMAND" ]; then
   ACTUAL_WASM_BUILD_COMMAND="$RECOMMENDED_WASM_BUILD_COMMAND"
 fi
 
-if [ ! -d "$UPSTREAM_DIR/.git" ]; then
+if [ "$(git -C "$UPSTREAM_DIR" rev-parse --is-inside-work-tree 2>/dev/null || true)" != "true" ]; then
   fail "missing upstream checkout: $UPSTREAM_DIR"
 fi
 
@@ -184,9 +184,13 @@ fi
 if [ ! -f "$DIST/index.html" ]; then
   echo "missing rhwp-studio dist; run from upstream rhwp-studio:" >&2
   echo "  npm ci" >&2
-  echo "  npx tsc && npx vite build --base ./" >&2
+  echo "  node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>" >&2
   exit 1
 fi
+
+# 다음 sync에서 앱 소유 글꼴 목록 연결을 조용히 잃지 않도록 빌드 증명을 요구한다.
+node "$ROOT/scripts/build-rhwp-studio.mjs" --verify-receipt "$DIST" --upstream-dir "$UPSTREAM_DIR"
+font_menu_adapter_sha256="$(shasum -a 256 "$DIST/alhangeul-font-menu-adapter.json" | awk '{print $1}')"
 
 if [ "$CHECK_MODE" = "true" ]; then
   mkdir -p "$ROOT/build.noindex"
@@ -241,7 +245,8 @@ cat > "$TARGET/manifest.json" <<JSON
   "wasm_build_command": "$ACTUAL_WASM_BUILD_COMMAND",
   "recommended_wasm_build_command": "$RECOMMENDED_WASM_BUILD_COMMAND",
   "actual_wasm_build_command": "$ACTUAL_WASM_BUILD_COMMAND",
-  "studio_build_command": "npx tsc && npx vite build --base ./",
+  "studio_build_command": "node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>",
+  "studio_font_menu_adapter_sha256": "$font_menu_adapter_sha256",
   "copied_from": "rhwp-studio/dist",
   "excluded_paths": [
     "samples/"

@@ -8,7 +8,7 @@ struct MacFontImportView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("기존 한글 글꼴 가져오기").font(.title2.weight(.semibold))
+            Text("글꼴 가져오기").font(.title2.weight(.semibold))
             Text("가져올 위치를 선택하고, 발견된 글꼴을 확인해 주세요.").foregroundStyle(.secondary)
             if let message = model.message { Text(message).font(.callout).foregroundStyle(.secondary) }
             switch model.phase {
@@ -47,7 +47,6 @@ struct MacFontImportView: View {
         }
         .padding(24).frame(width: 680, height: 500)
         .interactiveDismissDisabled(model.busy || choosingLocation)
-        .onDisappear { model.dismissImport() }
     }
 
     private var sourceChoices: some View {
@@ -116,7 +115,8 @@ struct MacFontImportView: View {
     private var resultList: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("글꼴 가져오기 결과").font(.headline)
-            Text("문서 표시·출력 적용은 준비 중입니다.").foregroundStyle(.secondary)
+            Text("지원되는 글꼴은 문서와 상단 글꼴 목록에서 사용할 수 있습니다. 인쇄·PDF 내보내기 지원은 준비 중입니다.")
+                .font(.callout).foregroundStyle(.secondary)
             List(Array(model.results.enumerated()), id: \.offset) { _, result in
                 HStack {
                     Text(model.discovery.candidates.first { $0.id == result.candidateID }?.url.lastPathComponent ?? "글꼴 파일")

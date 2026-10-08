@@ -35,7 +35,7 @@ final class FontLibrarySettingsModel: ObservableObject {
     private var operation: Task<Void, Never>?
     private var requestID = UUID()
 
-    init(makeClient: @escaping () throws -> FontLibraryUIClient = { .init(service: try FontLibraryService()) },
+    init(makeClient: @escaping () throws -> FontLibraryUIClient = { .init(service: try FontLibraryService.shared.get()) },
          discover: @escaping @Sendable (MacFontDiscoveryRequest, FontImportSourceSession?) async -> MacFontDiscoveryResult = {
              await MacFontDiscovery().discover($0, session: $1)
          }, sourceAccess: FontLibrarySourceAccess = .securityScoped) {
@@ -135,7 +135,7 @@ final class FontLibrarySettingsModel: ObservableObject {
             guard let self, self.requestID == id else { return }
             self.results = imported
             if let refreshed { self.manifest = refreshed }
-            else { self.message = "가져오기 결과는 아래와 같습니다. 보관함 목록은 닫은 뒤 새로고침해 주세요." }
+            else { self.message = "일부 저장 결과는 목록을 다시 확인해 주세요. 보관한 목록을 새로고침할 수 있습니다." }
             self.session = nil
             self.phase = .results
             self.cancelling = false
@@ -160,6 +160,11 @@ final class FontLibrarySettingsModel: ObservableObject {
         showingImport = false
         phase = .source; cancelling = false
         // worker는 자체 lease를 유지한다. 화면은 늦은 결과를 받지 않는다.
+    }
+    func importSheetDidDismiss() {
+        // 이전 sheet의 늦은 닫힘 알림이 이미 연 새 가져오기를 취소하지 않는다.
+        guard !showingImport else { return }
+        dismissImport()
     }
     private func discardSession() { session?.close(); session = nil }
     deinit { operation?.cancel(); session?.close() }
