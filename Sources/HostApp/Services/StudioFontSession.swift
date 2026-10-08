@@ -110,7 +110,8 @@ final class StudioFontSession {
                 rows = candidate
             }
             return ["revision": revision, "faces": rows, "nextOffset": offset + rows.count,
-                    "total": snapshot.faces.count, "omitted": snapshot.omitted, "failure": snapshot.failure as Any? ?? NSNull()]
+                    "total": snapshot.faces.count, "omitted": snapshot.omitted, "identity": snapshot.identity,
+                    "failure": snapshot.failure as Any? ?? NSNull()]
         case "openFace":
             guard let id = message["id"] as? String,
                   let face = snapshot.faces.first(where: { $0.id == id }) else { throw StudioFontError.invalidRequest }

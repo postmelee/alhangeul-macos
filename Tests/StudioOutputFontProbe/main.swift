@@ -97,7 +97,8 @@ final class Probe: NSObject, NSApplicationDelegate {
             body = body.replacingOccurrences(of: anchor, with: """
             return JSON.stringify({ width, height, fontFailureReason,
               loaded: Array.from(document.fonts).filter(f => f.status === 'loaded').map(f => ({family:f.family, weight:f.weight})),
-              customComputed: Array.from(document.querySelectorAll('[data-face]')).map(n => ({face:n.dataset.face, family:getComputedStyle(n).fontFamily, weight:getComputedStyle(n).fontWeight})) });
+              customComputed: Array.from(document.querySelectorAll('[data-face]')).map(n => ({face:n.dataset.face, family:getComputedStyle(n).fontFamily, weight:getComputedStyle(n).fontWeight,
+                descendantFamilies:Array.from(n.querySelectorAll('tspan')).map(s => getComputedStyle(s).fontFamily)})) });
             """)
             let regularURL = self.resources.url("regular")
             let boldURL = self.mode == "wrong-token" ? self.resources.url("bold").replacingOccurrences(of: self.resources.token, with: "wrong") : self.resources.url("bold")
@@ -207,9 +208,16 @@ final class Probe: NSObject, NSApplicationDelegate {
             try writeJSON(["faces":values,"nanumPresent":["NanumSquareR","NanumSquareB"].filter(names.contains)],output)
             return
         }
-        guard ["baseline","naive","custom","missing","wrong-token"].contains(mode) else { throw problem(400) }
+        guard ["baseline","naive","custom","missing","wrong-token","job"].contains(mode) else { throw problem(400) }
         let data = try Data(contentsOf:output.deletingLastPathComponent().appendingPathComponent("metadata.json"))
         let metadata = try JSONSerialization.jsonObject(with:data) as! [String: Any]
+        if mode == "job" {
+            let probe = JobProbe(root:root,fonts:fonts,output:output,metadata:metadata["faces"] as! [[String:Any]])
+            let app = NSApplication.shared; app.setActivationPolicy(.accessory); app.delegate = probe
+            app.finishLaunching(); probe.start()
+            withExtendedLifetime(probe) { app.run() }
+            return
+        }
         let probe = Probe(root:root,fonts:fonts,output:output,mode:mode,metadata:metadata["faces"] as! [[String:Any]])
         let app = NSApplication.shared; app.setActivationPolicy(.accessory); app.delegate = probe
         // accessory executable의 windowless launch 대기를 피한다. 시작은 멱등이다.

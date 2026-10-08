@@ -18,13 +18,18 @@ FONT_HASHES = {
 }
 SOURCES = [
     "Tests/StudioOutputFontProbe/main.swift",
-    "Sources/Shared/FontLibrary/FontLibraryModels.swift",
-    "Sources/Shared/FontLibrary/FontFileInspector.swift",
+    "Tests/StudioOutputFontProbe/job.swift",
+    "Sources/HostApp/Services/StudioFontSupply.swift",
+    "Sources/HostApp/Services/FontLibraryService.swift",
+    "Sources/HostApp/Services/FontLibraryChanges.swift",
+    "Sources/HostApp/Services/MacFontDiscovery.swift",
+    "Sources/HostApp/Services/FontImportSourceSession.swift",
     "Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift",
     "Sources/HostApp/Services/RhwpStudioPDFFontProvider.swift",
     "Sources/HostApp/Services/RhwpStudioPagePayload.swift",
     "Tests/HostAppTests/CGPDFFontResourceInspector.swift",
 ]
+SOURCES += sorted(str(p.relative_to(ROOT)) for pattern in ["Sources/Shared/FontLibrary/*.swift", "Sources/HostApp/Services/InstalledFont*.swift", "Sources/HostApp/Services/RhwpStudioOutputFont*.swift"] for p in ROOT.glob(pattern))
 SVG = '''<svg xmlns="http://www.w3.org/2000/svg" width="794" height="1123" viewBox="0 0 794 1123">
 <rect width="794" height="1123" fill="white"/>
 <text x="64" y="85" font-family="sans-serif" font-size="24" font-weight="700">Task 568 | PDF FONT PROBE</text>
@@ -73,6 +78,7 @@ def main():
     parser.add_argument("--font-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--node", default="node")
+    parser.add_argument("--stage2", action="store_true", help="제품 output job과 Noto 회귀를 검사")
     args = parser.parse_args()
     upstream, fonts, output = (p.resolve() for p in (args.upstream_dir, args.font_dir, args.output_dir))
     if not output.is_relative_to(ROOT / "build.noindex/task568") or output.exists():
@@ -94,7 +100,7 @@ def main():
     for name in official_sources:
         committed = run(["git", "-C", upstream, "show", "HEAD:" + name])
         assert hashlib.sha256(committed.encode()).hexdigest() == official_hashes[name], name
-    (output / "sample.svg").write_text(SVG, encoding="utf-8")
+    (output / "sample.svg").write_text(SVG.replace("고운바탕", "Gowun Batang Regular").replace("localized family", "fullName") if args.stage2 else SVG, encoding="utf-8")
     app = output / "StudioOutputFontProbe.app"
     executable = app / "Contents/MacOS/StudioOutputFontProbe"
     executable.parent.mkdir(parents=True)
@@ -112,11 +118,11 @@ def main():
     lsregister = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
     try:
         run([executable, ROOT, fonts, output / "metadata.json", "metadata"], log=output / "metadata.log")
-        run([args.node, ROOT / "Tests/StudioOutputFontProbe/matcher.mjs", upstream, fonts, output],
+        run([args.node, ROOT / "Tests/StudioOutputFontProbe/matcher.mjs", upstream, fonts, output, *(["--adapted"] if args.stage2 else [])],
             log=output / "matcher.log")
         metadata = json.loads((output / "metadata.json").read_text())
         reports = {}
-        for mode in ["baseline", "naive", "custom", "missing", "wrong-token"]:
+        for mode in (["baseline", "job"] if args.stage2 else ["baseline", "naive", "custom", "missing", "wrong-token"]):
             directory = output / mode
             directory.mkdir()
             run([executable, ROOT, fonts, directory, mode], log=directory / "runtime.log")
@@ -131,7 +137,7 @@ def main():
             fidelity = {}
             for field in ["text", "selectionText"]:
                 fidelity[field] = "한글 글꼴 확인 가나다 ABC 123" in report[field]
-                if mode == "custom":
+                if mode in ["custom", "job"]:
                     assert fidelity[field] and "한글 굵은 글꼴 가나다 ABC 123" in report[field], field
                 else:
                     # 기준선의 기존 공백 mapping 결함은 측정해 남긴다. exact 통과로 합산하지 않는다.
@@ -142,24 +148,30 @@ def main():
             run(["pdftotext", "-layout", pdf, directory / "text.txt"])
             extracted = (directory / "text.txt").read_text()
             fidelity["pdftotext"] = "한글 글꼴 확인 가나다 ABC 123" in extracted
-            if mode == "custom":
+            if mode in ["custom", "job"]:
                 assert fidelity["pdftotext"] and "한글 굵은 글꼴 가나다 ABC 123" in extracted
             fidelity["notoControlExact"] = "내장 바탕 대조 한글 ABC 456" in extracted
+            if args.stage2:
+                assert all(fidelity.values()), fidelity
             report["textFidelity"] = fidelity
             (directory / "result.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             run(["pdftoppm", "-png", "-singlefile", "-scale-to", "1400", pdf, directory / "page"])
-            if mode == "custom":
+            if mode in ["custom", "job"]:
                 for ps in ["GowunBatang-Regular", "GowunBatang-Bold"]:
                     rows = [line for line in fonts_text.splitlines() if ps in line]
                     assert rows and all(re.search(r"\s+yes\s+yes\s+(yes|no)\s+\d+\s+\d+$", line) for line in rows), ps
                     assert any(re.search(r"\s+yes\s+yes\s+yes\s+\d+\s+\d+$", line) for line in rows), ps
                 assert report["sourceReads"] == 2 and report["residentBytes"] == 16_612_008
-                assert all("Noto" not in row["family"] for row in report["preparation"]["customComputed"])
+                if mode == "custom":
+                    assert all("Noto" not in row["family"] for row in report["preparation"]["customComputed"])
+                else:
+                    assert report["releases"] == 1 and report["residentAfterClose"] == 0
             else:
                 assert "Noto" in fonts_text
                 if mode == "baseline":
                     assert "GowunBatang" not in fonts_text
-                assert all(row["family"].startswith('"Noto') for row in report["preparation"]["customComputed"][:5])
+                assert all(row["family"].startswith('"Noto') or any(f.startswith('"Noto') for f in row["descendantFamilies"])
+                           for row in report["preparation"]["customComputed"][:5])
                 assert report["sourceReads"] == (0 if mode == "baseline" else 2)
         assert inputs == {name: digest(ROOT / name) for name in SOURCES}
         assert official_hashes == {name: digest(upstream / name) for name in official_sources}

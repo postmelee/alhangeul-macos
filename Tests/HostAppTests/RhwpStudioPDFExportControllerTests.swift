@@ -1,9 +1,14 @@
-import Foundation
+import AppKit
 import PDFKit
 import XCTest
 
 @MainActor
 final class RhwpStudioPDFExportControllerTests: XCTestCase {
+    override func setUp() {
+        super.setUp()
+        _ = NSApplication.shared
+    }
+
     func testExportWritesSearchablePDFAndPreservesPageGeometry() async throws {
         let temporaryDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent("rhwp-pdf-export-\(UUID().uuidString)", isDirectory: true)

@@ -1,7 +1,33 @@
-// 앱 소유 목록 연결. upstream 파일·renderer·편집 명령은 수정하지 않는다.
+// 앱 소유 목록·출력 선택 연결. upstream 파일·renderer·편집 명령은 수정하지 않는다.
 export const receiptName = 'alhangeul-font-menu-adapter.json';
 export const buildCommand = 'node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>';
-export const sourcePaths = ['src/core/local-fonts.ts', 'src/ui/toolbar.ts', 'src/ui/options-dialog.ts'];
+export const sourcePaths = ['src/core/local-fonts.ts', 'src/ui/toolbar.ts', 'src/ui/options-dialog.ts', 'src/main.ts'];
+
+export const outputResolverSource = `
+export async function resolveHostOutputFonts(requests: readonly {
+  key: string; family: string; weight: number; slant: 'normal' | 'italic' | 'oblique'; hasStroke?: boolean;
+}[]) {
+  if (!hasHostFontProvider()) throw new Error('Output host provider unavailable');
+  await prepareHostFontCatalog();
+  const state = getHostFontState();
+  if (state.lastError !== null || !state.active || !Array.isArray(requests) || requests.length > 2048
+    || new Set(requests.map(r => r?.key)).size !== requests.length) throw new Error('Invalid output catalog/request');
+  currentHostRecords();
+  const selections = requests.map(request => {
+    if (!request || typeof request.key !== 'string' || request.key.length > 1024 || !request.key.trim()
+      || typeof request.family !== 'string' || !request.family.trim() || request.family.length > 1024
+      || !Number.isInteger(request.weight) || request.weight < 1 || request.weight > 1000
+      || !['normal','italic','oblique'].includes(request.slant)) throw new Error('Invalid output font request');
+    const record = resolveRendererLocalFont(request.family, request);
+    const reference = record?.hostReference;
+    if (reference) return {key: request.key, status: 'selected', id: reference.face.id,
+      postscriptName: reference.face.postscriptName, weight: reference.face.weight, slant: reference.face.slant};
+    return {key: request.key, status: hostLookup.aliases.has(normalizeFontAlias(request.family)) ? 'unavailable' : 'absent'};
+  });
+  if (state.generation !== getHostFontState().generation) throw new Error('Stale output catalog');
+  return {generation: state.generation, revision: hostFontSource.references()[0]?.revision ?? null, selections};
+}
+`;
 
 function replaceOnce(source, before, after, label) {
   if (source.split(before).length !== 2) throw Error(`Studio font menu adapter drift: ${label}`);
@@ -10,7 +36,7 @@ function replaceOnce(source, before, after, label) {
 
 export function adaptSource(source, path) {
   if (path === sourcePaths[0]) {
-    return replaceOnce(source,
+    source = replaceOnce(source,
       'export function getLocalFonts(options: GetLocalFontsOptions = {}): string[] {\n',
       `export function getLocalFonts(options: GetLocalFontsOptions = {}): string[] {
   // 알한글: 메뉴는 공급 가능한 family를 표시하고 style 선택은 기존 renderer에 맡긴다.
@@ -18,6 +44,13 @@ export function adaptSource(source, path) {
     return normalizeFamilies(currentHostRecords().map(record => record.family));
   }
 `, path);
+    if (source.includes('function resolveHostOutputFonts')) throw Error('Studio output adapter drift: duplicate resolver');
+    return source + outputResolverSource;
+  }
+  if (path === sourcePaths[3]) {
+    source = replaceOnce(source, 'import { setHostFontProvider,', 'import { resolveHostOutputFonts, setHostFontProvider,', path);
+    return replaceOnce(source, 'fonts: { setProvider: setHostFontProvider, getState: getHostFontState },',
+      'fonts: { setProvider: setHostFontProvider, getState: getHostFontState, resolveOutputRequests: resolveHostOutputFonts },', path);
   }
   if (path === sourcePaths[1]) {
     source = replaceOnce(source,

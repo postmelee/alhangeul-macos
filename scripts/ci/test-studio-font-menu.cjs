@@ -49,7 +49,7 @@ test('native 환경설정은 Mac 안내와 native 진입점만 사용하고 brow
 test('활성 host family를 중복 제거하고 비활성 시 기존 browser 목록을 사용', async () => {
   const {adaptSource, sourcePaths} = await adapter;
   let active = true, records = [{family: '고운바탕'}, {family: '고운바탕'}, {family: '<글꼴 & 이름>'}];
-  const source = stripTypeScriptTypes(adaptSource(fonts, sourcePaths[0]).replace('export ', ''));
+  const source = stripTypeScriptTypes(adaptSource(fonts, sourcePaths[0]).replaceAll('export ', ''));
   const get = vm.runInNewContext(source + '\ngetLocalFonts', {
     hasHostFontProvider: () => active, currentHostRecords: () => records,
     normalizeFamilies: names => [...new Set(names)],

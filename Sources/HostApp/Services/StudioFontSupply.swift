@@ -22,6 +22,11 @@ struct StudioFontFace: Encodable, Sendable {
 struct StudioFontBytes: Sendable {
     let data: Data
     let face: FontFace
+    let usageEvidence: FontUsageEvidence?
+
+    init(data: Data, face: FontFace, usageEvidence: FontUsageEvidence? = nil) {
+        self.data = data; self.face = face; self.usageEvidence = usageEvidence
+    }
 }
 
 struct StudioFontSupplySnapshot: Sendable {
@@ -97,7 +102,8 @@ struct StudioFontSupply: Sendable {
                 failure: state.refreshFailure?.rawValue,
                 read: { id in
                     if let resource = managed.resources.first(where: { "managed:" + $0.id == id }) {
-                        return StudioFontBytes(data: try await library.readResource(resource.id, snapshot: managed), face: resource.face)
+                        return StudioFontBytes(data: try await library.readResource(resource.id, snapshot: managed),
+                                               face: resource.face, usageEvidence: resource.usageEvidence)
                     }
                     guard let record = state.records.first(where: { "installed:" + $0.id == id }) else {
                         throw StudioFontError.invalidRequest

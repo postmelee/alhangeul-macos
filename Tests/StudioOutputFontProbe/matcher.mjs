@@ -1,14 +1,24 @@
 // Node 24의 type stripping으로 pinned TypeScript module을 수정 없이 실행한다.
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, cp } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 
-const [upstream, fontDirectory, output] = process.argv.slice(2).map(value => resolve(value));
+const [upstream, fontDirectory, output] = process.argv.slice(2, 5).map(value => resolve(value));
 const studio = join(upstream, 'rhwp-studio');
-const api = await import(pathToFileURL(join(studio, 'src/core/local-fonts.ts')));
-const { collectHostFontRequests } = await import(pathToFileURL(join(studio, 'src/core/host-font-requests.ts')));
+const adapted = process.argv.includes('--adapted');
+let modulePath = join(studio, 'src/core/local-fonts.ts');
+if (adapted) {
+  const {adaptSource} = await import('../../scripts/studio-font-menu-adapter.mjs');
+  const copy = join(output, 'matcher-source');
+  await cp(join(studio, 'src'), join(copy, 'src'), {recursive:true});
+  modulePath = join(copy, 'src/core/local-fonts.ts');
+  await writeFile(modulePath, adaptSource(await readFile(modulePath, 'utf8'), 'src/core/local-fonts.ts'));
+}
+const api = await import(pathToFileURL(modulePath));
+const { collectHostFontRequests } = await import(pathToFileURL(adapted
+  ? join(output, 'matcher-source/src/core/host-font-requests.ts') : join(studio, 'src/core/host-font-requests.ts')));
 const metadata = JSON.parse(await readFile(join(output, 'metadata.json'), 'utf8'));
 let revision = 'probe-1', onChange, reads = 0;
 let faces = metadata.faces.map(({ id, family, fullName, postscriptName, style, aliases, weight }) =>
@@ -28,6 +38,16 @@ await api.setHostFontProvider(provider);
 await api.prepareHostFontCatalog();
 assert.equal(api.getHostFontState().count, 2);
 assert.equal(reads, 0);
+if (adapted) {
+  const requests = [['Gowun Batang',400],['Gowun Batang',700],['Gowun Batang Regular',400],
+    ['GowunBatang-Bold',700],['바탕',400],['돋움',700],['serif',400],['sans-serif',400],
+    ['sans-serif',700]].map(([family,weight],i)=>({key:String(i),family,weight,slant:'normal'}));
+  const result = await api.resolveHostOutputFonts(requests);
+  assert.deepEqual(result.selections.slice(0,4).map(s=>s.id), ['regular','bold','regular','bold']);
+  assert.ok(result.selections.slice(4).every(s=>s.status==='absent'));
+  assert.equal(reads,0);
+  await writeFile(join(output,'output-resolutions.json'),JSON.stringify({requests,...result},null,2)+'\n');
+}
 const cases = [];
 function check(label, name, weight, slant, expected) {
   const record = api.resolveRendererLocalFont(name, { weight, slant });

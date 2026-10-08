@@ -6,6 +6,11 @@ import XCTest
 
 @MainActor
 final class RhwpStudioPagePDFRendererTests: XCTestCase {
+    override func setUp() {
+        super.setUp()
+        _ = NSApplication.shared
+    }
+
     func testPageHTMLPlacesStrictCSPBeforeDocumentSVG() throws {
         let expectedPolicy = [
             "default-src 'none'",
@@ -513,7 +518,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             return
         }
         XCTAssertEqual(page, 1)
-        XCTAssertTrue(reason.contains("Haansoft Dotum/bold"), reason)
+        XCTAssertTrue(reason.contains("Noto PDF Sans 700"), reason)
     }
 
     func testCGPDFFontInspectorTraversalRejectsCyclesAndExcessDepth() {
@@ -1166,6 +1171,42 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         }
         assertPageRenderTimedOut(results[0], page: 1)
         assertPageRenderTimedOut(results[1], page: 1)
+    }
+
+    func testCancelFinishesOnceAndIgnoresLateCallbacks() async throws {
+        let payload = try RhwpStudioPagePayload(fileName:"cancel.hwpx", pageCount:1,
+            pages:[svg(width:200,height:300,text:"Cancel")])
+        let renderer = makeRenderer()
+        var completions = 0
+        renderer.render(payload:payload) { result in
+            completions += 1
+            if case .failure(let error) = result {
+                XCTAssertEqual(error as? RhwpStudioOutputFontError, .cancelled)
+            } else { XCTFail("cancelled renderer succeeded") }
+        }
+        renderer.cancel(); renderer.cancel()
+        try await Task.sleep(nanoseconds:100_000_000)
+        XCTAssertEqual(completions,1)
+    }
+
+    func testMixedTextRunSpacesPunctuationAndTspanRemainSearchable() async throws {
+        let lines = ["한글 글꼴 확인 가나다 ABC 123 / A+B=1", "내장 바탕 대조 한글 ABC 456",
+                     "㈀ 원문자 ㉠ 한글 / ASCII", "한글 f(x)=x²+2x+1"]
+        let payload = try RhwpStudioPagePayload(fileName:"mixed-runs.hwpx",pageCount:1,pages:["""
+          <svg xmlns="http://www.w3.org/2000/svg" width="700" height="400">
+            <text x="30" y="60" font-family="돋움" font-size="24" data-probe-owned="true">\(lines[0])</text>
+            <text x="30" y="125" font-family="batang" font-size="24"><tspan>\(lines[1])</tspan></text>
+            <text x="350" y="190" text-anchor="middle" font-family="sans-serif" font-size="24">\(lines[2])</text>
+            <text x="30" y="255" font-family="'Times New Roman',serif" font-size="24">\(lines[3])</text>
+          </svg>
+          """])
+        let pdf = try await render(payload), page = try XCTUnwrap(pdf.page(at:0))
+        let copied = try XCTUnwrap(page.selection(for:page.bounds(for:.mediaBox))?.string)
+        for line in lines {
+            XCTAssertTrue(page.string?.contains(line) == true, page.string ?? "")
+            XCTAssertTrue(copied.contains(line),copied)
+            XCTAssertEqual(pdf.findString(line,withOptions:[]).count,1)
+        }
     }
 
     private func render(_ payload: RhwpStudioPagePayload) async throws -> PDFDocument {

@@ -325,18 +325,9 @@ jobs:
         shell: bash
         run: scripts/verify-spotlight-importer.sh build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app
 
-      - name: Test Spotlight launch reindex policy
+      - name: Test PDF output, print lifecycle and Spotlight policy
         shell: bash
-        run: |
-          set -euo pipefail
-          xcodebuild -project Alhangeul.xcodeproj \
-            -scheme HostAppTests \
-            -configuration Debug \
-            -destination 'platform=macOS' \
-            -derivedDataPath build.noindex/DerivedData \
-            CODE_SIGNING_ALLOWED=NO \
-            -only-testing:HostAppTests/SpotlightReindexServiceTests \
-            test
+        run: bash scripts/test-studio-output.sh
 
       - name: Test SwiftUI Studio document lifecycle
         run: python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-font-dotum-empty-hancom.hwp

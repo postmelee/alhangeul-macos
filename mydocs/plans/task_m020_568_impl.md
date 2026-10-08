@@ -5,14 +5,14 @@
 - 작업: `local/task568` → `publish/task568` → `devel`
 - 제품 기준: `db8a94d1eb03f5a14f265621191f85f0ddf149cb` (PR #578), 공식 core/Studio v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`
 - 승인: 2026-10-08 작업지시자의 “진행해줘”로 수행계획 승인·구현계획 작성 진행.
-- 상태: 2026-10-08 구현계획·Stage 1 승인 후 조사·격리 실험 완료. [출력 계약](../tech/task_m020_568_output_contract.md)·[단계 보고](../working/task_m020_568_stage1.md) 검토와 Stage 2 승인 대기. 제품 소스는 아직 변경하지 않았다.
+- 상태: 2026-10-08 작업지시자의 “진행해줘”로 Stage 2 진입 승인. 2026-10-09 A 공통 공급·matcher adapter·준비/수명·Noto 보정 구현과 검증 완료. [Stage 2 보고](../working/task_m020_568_stage2.md) 후 Stage 3 승인 대기.
 
 ## 1. 단계와 완료 경계
 
 | 단계 | 소비자 | 목표 | 진입 상태 |
 |------|--------|------|-----------|
 | 1 | A/B 조사, A 계약 | 출력 identity·매칭·임베딩·변경/취소 정책과 최소 실험 | 2026-10-08 완료 |
-| 2 | A 공통 기반 | 제한된 출력 snapshot·font route·준비·수명 구현 | Stage 1 승인 후 |
+| 2 | A 공통 기반 | 제한된 출력 snapshot·font route·준비·수명 구현 | 2026-10-09 완료 |
 | 3 | A 실제 연결 | PDF·인쇄 진입 연결, 정확한 face와 text layer·패널 수용 | Stage 2 승인 후 |
 | 4 | B native | CoreGraphics/Skia 공급·매칭·캐시 연결 | A 결과와 B 구체 범위 승인 후 |
 | 5 | B 확장 | Quick Look/Thumbnail의 signed 프로세스·Finder 수용 | Stage 4 및 설치 smoke 범위 승인 후 |
@@ -101,6 +101,8 @@ commit: `Task #568 Stage 1: 출력 글꼴 계약과 PDF 최소 실험`
 
 합성 입력으로 설치 참조·관리 복사본·공급 없는 Noto 대조군을 각각 검증한다. 원본 상실·관리 선택/제거·사용 설정·문서 교체·WebContent 실패·패널 취소·쓰기 실패·재출력을 포함한다. 실제 PDF 저장과 인쇄 패널/미리보기/취소, test callback 주입과 실제 spool을 구분한다. 서명 sandbox·정상 권한 새 프로세스는 준비된 고유 앱/컨테이너에서 수행하고 필요한 인증서/폴더 접근 범위를 제시한다.
 
+Stage 2의 Noto 본문 공백·구두점 결함은 보정됐다. 기본 시스템 영문 header의 PDFKit 반복 글자 누락은 남아 있으며 Poppler에서는 정상이다. 실제 문서·선택 face/reader의 재현과 지원/제약 판정을 Stage 3에 포함하고 전체 페이지 exact 성공으로 합산하지 않는다.
+
 ### 통과 기준
 
 - PDF의 선택된 PS/style·임베딩·ToUnicode, 한글/ASCII 추출·검색·영역 선택·복사, page count/bounds와 주요 글자·표·수식의 시각 결과가 맞는다. `CGPDFFontResourceInspector`는 현재 BaseFont/Subtype/ToUnicode만 제공하므로 font program 임베딩·하위 font dictionary 확인이 필요한 부분은 helper를 보강한다.
@@ -161,4 +163,4 @@ HostApp Debug의 macOS 12 target compile/link와 실제 최소 OS runtime은 별
 
 ## 10. 현재 승인 요청
 
-Stage 1 보고와 출력 계약을 검토하고 **Stage 2의 A 공통 구현** 진입을 요청한다. 범위는 matcher의 좁은 앱 adapter·제한 snapshot/route·준비/수명·임베딩 선언/보존된 근거와 실패 모델·Noto 텍스트 회귀 보완·관련 CI 검사다. Stage 3의 실제 진입/서명 sandbox·패널 수용, B 진입, 새 폴더 권한·Developer ID·설치 교체·프린터 전송·공개 배포는 포함하지 않는다.
+Stage 2 보고와 출력 계약을 검토하고 **Stage 3의 A 실제 PDF·인쇄 연결과 수용** 진입을 요청한다. 실제 editor 요청·snapshot/선택·저장 직전 검증·인쇄 seal/close·오류/취소·HWP/HWPX/reader 수용을 진행한다. 서명 sandbox·새 폴더 접근은 구체 앱/대상을 준비한 뒤 필요한 승인을 확인한다. B 진입·새 Developer ID 사용·설치 교체·물리 프린터 전송·push/PR·공개 배포는 현재 승인에 포함하지 않는다.

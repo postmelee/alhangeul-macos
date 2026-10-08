@@ -2,7 +2,7 @@
 
 - 기준: 제품 `db8a94d1eb03f5a14f265621191f85f0ddf149cb`, 공식 core/Studio v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`.
 - 근거: [구현계획](../plans/task_m020_568_impl.md), [Stage 1 실험](../working/task_m020_568_stage1.md), [#567 인계](font_library_integration.md).
-- 상태: 2026-10-08 Stage 1 조사·prototype 결과로 정한 **다음 구현의 계약**. 제품 연결 완료 기록이 아니다.
+- 상태: 2026-10-09 [Stage 2](../working/task_m020_568_stage2.md)의 공통 job·scheme·준비·adapter 구현/검증 완료. 실제 editor의 PDF·인쇄 진입과 서명/패널 수용은 Stage 3 범위다.
 
 ## 1. 소비자 경계와 현재 결함
 
@@ -18,7 +18,7 @@
 
 PDF의 기존 준비 script는 한글을 포함한 미분류 SVG text에 Noto family를 앞세운다. 실제 FontFace를 추가해도 이 처리에 덮인다. Stage 1의 `naive`는 고운바탕이 ASCII MacRoman subset으로 포함되었지만 한글 subset은 Noto였다. 검색 성공·FontFace loaded·PS 존재만으로 모든 대상 글자에 정확한 face가 적용됐다고 판정할 수 없다.
 
-또한 현재 OS의 기존 Noto 대조군에서 공백이 `#`로 추출되었다. custom 본문은 정상이어도 Noto 대조 문자열은 그대로 남았다. Stage 2/3은 이 문제를 정상 회귀로 합산하지 않고 원인·개선 또는 명시적인 미완료 기준을 남긴다. OCR·bitmap·숨긴 중복 텍스트로 대체하지 않는다.
+Stage 1에서 기존 Noto 대조군의 공백은 `#`로 추출됐다. Stage 2는 한글과 원래 fallback 문자의 run을 나눠 Noto 본문·공백·구두점·수식 회귀를 보정했다. custom/대조 본문 exact와 기본 시스템 영문 header의 PDFKit 반복 글자 누락을 구분한다. 후자는 남아 있고 Poppler에서는 정상이며 Stage 3 실제 reader 수용에 포함한다. 전체 페이지 exact로 확대하거나 OCR·bitmap·숨긴 중복 텍스트로 대체하지 않는다.
 
 ## 2. 공식 matcher를 재사용하는 앱 adapter
 
@@ -104,7 +104,7 @@ OpenType 명세에서 permissions 0/4/8과 restricted 2, no-subsetting 0x0100, b
 
 ## 6. 실험 증거와 다음 단계의 종료 조건
 
-고운바탕의 두 원본은 OFL/provenance·SHA-256·PS·weight 400/700·fsType 0을 확인했다. 현재 새 프로세스의 CoreText 목록에 두 PS와 NanumSquareR/B는 없었다. 영구 설치와 실제 설치 참조 경로를 시험한 결과가 아니다.
+고운바탕의 두 원본은 OFL/provenance·SHA-256·PS·weight 400/700·fsType 0을 확인했다. 새 프로세스의 CoreText 목록에 두 PS는 없고 NanumSquareR/B는 있었다. Stage 1 원본 metadata/receipt와 대조해 이 문장의 오기를 Stage 2에서 보정했다. 영구 설치와 실제 설치 참조 bytes 공급을 시험한 결과가 아니다.
 
 custom PDF는 두 face 모두 `/FontFile2` program이 있으며 한글 subset은 `/ToUnicode`, ASCII subset은 MacRoman encoding을 사용했다. input hash와 subset hash는 다르다. PDFKit 문자열·선택·한글 검색 5건과 Poppler의 custom 본문 exact 추출을 확인했고, 794×1123 pt 한 페이지의 PNG를 눈으로 검토했다.
 

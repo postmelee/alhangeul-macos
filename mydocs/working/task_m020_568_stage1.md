@@ -32,7 +32,7 @@
 - Regular: PS `GowunBatang-Regular`, weight 400, fsType 0, 8,433,296 bytes, SHA-256 `466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849`.
 - Bold: PS `GowunBatang-Bold`, weight 700, fsType 0, 8,178,712 bytes, SHA-256 `dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94`.
 - OFL: SHA-256 `49a57cc769fa9affd6eefb9070a61e3d3f6b757c97cafb15848bc6d1c81acc78`; provenance의 METADATA.pb도 hash/크기를 대조했다.
-- 새 프로세스의 CoreText 목록에 두 고운바탕 PS 및 NanumSquareR/B가 없었다. 설치 경로 대조군은 **미수행**이며 새 OS 등록도 하지 않았다.
+- 새 프로세스의 CoreText 목록에 두 고운바탕 PS는 없었고 NanumSquareR/B는 있었다. 원본 metadata/receipt의 `nanumPresent`와 대조해 Stage 2에서 이 문장의 오기를 보정했다. 설치 경로의 bytes 읽기·출력 대조군은 **미수행**이며 새 OS 등록도 하지 않았다.
 - 출력 앱은 고유 bundle ID·ad-hoc, 비-sandbox다. Developer ID 인증서·키체인·새 사용자 폴더 접근·App Group·Finder 등록·프린터 전송은 사용하지 않았다.
 
 ## 4. 실제 검증 명령과 결과
