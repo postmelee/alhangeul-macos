@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {readFileSync, writeFileSync, copyFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
-const [mode, bundle, output] = process.argv.slice(2);
+const [mode, bundle, output, suppliedFamily] = process.argv.slice(2);
+const family = suppliedFamily || 'Gowun Batang';
 const modulePath = resolve(output, 'probe-rhwp.mjs');
 copyFileSync(resolve(bundle, 'rhwp.js'), modulePath);
 const {initSync, HwpDocument} = await import(pathToFileURL(modulePath));
@@ -13,13 +14,32 @@ if (mode === 'create') {
   const doc = HwpDocument.createEmpty();
   try {
     doc.createBlankDocument(); doc.insertText(0, 0, 0, text);
-    doc.applyCharFormat(0, 0, 0, text.length, JSON.stringify({fontId: doc.findOrCreateFontId('Gowun Batang'), fontSize: 2400}));
+    doc.applyCharFormat(0, 0, 0, text.length, JSON.stringify({fontId: doc.findOrCreateFontId(family), fontSize: 2400}));
     doc.applyCharFormat(0, 0, 3, 6, JSON.stringify({bold: true}));
     // 기존 메뉴 선택이 다른 이름의 문서 데이터를 실제로 바꾸는지 확인한다.
     doc.applyCharFormat(0, 0, text.length - 2, text.length, JSON.stringify({fontId: doc.findOrCreateFontId('돋움')}));
     writeFileSync(resolve(output, 'gowun-document.hwp'), doc.exportHwp());
     writeFileSync(resolve(output, 'gowun-document.hwpx'), doc.exportHwpx());
   } finally { doc.free(); }
+} else if (mode === 'verify-live') {
+  assert(suppliedFamily, '실제 설치 테스트 family를 지정해야 함');
+  const proof = [];
+  for (const ext of ['hwp','hwpx']) {
+    const doc = new HwpDocument(readFileSync(resolve(output, `saved.${ext}`)));
+    try {
+      assert.equal(doc.getTextRange(0,0,0,doc.getParagraphLength(0,0)), text + ' 입력');
+      for (const offset of [0,3,text.length-2,text.length+1]) {
+        const props = JSON.parse(doc.getCharPropertiesAt(0,0,offset));
+        assert.equal(props.fontFamily, family);
+        assert.equal(props.bold, offset === 3);
+        assert(props.fontFamilies.every(f => f === family));
+        proof.push({ext,offset,fontFamily:props.fontFamily,bold:props.bold});
+      }
+      assert(!doc.renderPageSvg(0).includes('__rhwp_host_face_'));
+    } finally { doc.free(); }
+  }
+  writeFileSync(resolve(output,'saved-font-proof.json'),JSON.stringify(proof,null,2)+'\n');
+  console.log('PASS: 실제 설치 글꼴 적용·입력·저장 후 원래 family/style 재열기');
 } else if (mode === 'verify-changes') {
   const proof=[];
   for(const ext of ['hwp','hwpx']) {

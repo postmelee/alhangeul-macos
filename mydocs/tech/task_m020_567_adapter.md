@@ -1,6 +1,6 @@
 # Studio native 글꼴 adapter 계약 — #567 Stage 1
 
-이 문서는 구현할 계약이다. 현재 제품 연결 완료를 의미하지 않는다. 제품 pin은 core/Studio `v0.8.6`, commit `f1f9c6ae58344ee9368996d3543f76b9345cf227`이며 [구현계획](../plans/task_m020_567_impl.md)을 따른다.
+Stage 1의 조사·설계 이력과 이후 확정 계약을 함께 보존한다. 현재 제품 pin은 core/Studio `v0.8.7`, commit `1a76570e833917d15817415a53c09ad61ab3203f`이며 Studio 표시·기존 메뉴 선택·native 저장/재열기를 [Stage 5](../working/task_m020_567_stage5.md)에서 수용했다. 출력/확장은 #568, 전체 제품 수용/안내는 #569다. [구현계획](../plans/task_m020_567_impl.md)을 따른다.
 
 ## 2026-09-26 공개 API 확정과 적용 순서
 

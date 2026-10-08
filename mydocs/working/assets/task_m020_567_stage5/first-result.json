@@ -1,0 +1,190 @@
+{
+  "checks" : [
+    "동시 최초 준비 8회·최초 활성화가 실제 metadata 탐색 1회 공유",
+    "전체 목록 준비는 font bytes를 읽지 않음",
+    "같은 실제 face의 동시 요청 8개가 native 읽기 1회 병합",
+    "완료 bytes를 native 영구 캐시하지 않고 원본 재검증",
+    "서로 다른 실제 Regular\/Bold 요청은 native 두 slot에서 공급",
+    "hwp\/canvas2d: 실제 설치 Regular\/Bold 검증 bytes와 정확한 renderer 적용",
+    "hwp: 기존 확대\/축소 명령 실행",
+    "hwp: 반복 표시·확대\/축소에서 준비한 face 재사용",
+    "hwpx\/canvaskit: 실제 설치 Regular\/Bold 검증 bytes와 정확한 renderer 적용",
+    "hwpx: 기존 확대\/축소 명령 실행",
+    "hwpx: 반복 표시·확대\/축소에서 준비한 face 재사용",
+    "기존 시스템 글꼴 목록에 실제 Mac family 20개 이상·NanumSquare 한 번 표시",
+    "기존 글꼴 목록 열기는 전체 bytes를 읽지 않음",
+    "기존 글꼴 메뉴 선택으로 실제 문서 편집",
+    "native 저장 bridge·payload 검증·실제 HWPX 파일 쓰기·완료 동기화",
+    "기존 HWP로 다른 이름 저장 명령",
+    "한글 입력 후 native hwp 저장 성공",
+    "한글 입력 후 native hwpx 저장 성공",
+    "실제 Mac 목록 설정 창을 열어도 문서 상태 보존",
+    "Studio\/native 오류 없음"
+  ],
+  "error" : null,
+  "measurements" : {
+    "canvas2dFonts" : {
+      "failed" : 0,
+      "loaded" : 2,
+      "pending" : 0
+    },
+    "canvas2dPaintFonts" : [
+      "32px __rhwp_host_face_1_1, NanumSquare, \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+      "bold 32px __rhwp_host_face_1_2, NanumSquare, \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif"
+    ],
+    "faceCount" : 809,
+    "faceResponses" : [
+      {
+        "ps" : "NanumSquareR",
+        "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+      },
+      {
+        "ps" : "NanumSquareB",
+        "sha256" : "f737d58294faec9c632189af3a2a3e48e49c03c0256de09db61e879e2857bfbf"
+      },
+      {
+        "ps" : "NanumSquareR",
+        "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+      },
+      {
+        "ps" : "NanumSquareB",
+        "sha256" : "f737d58294faec9c632189af3a2a3e48e49c03c0256de09db61e879e2857bfbf"
+      },
+      {
+        "ps" : "NanumSquareR",
+        "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+      },
+      {
+        "ps" : "NanumSquareB",
+        "sha256" : "f737d58294faec9c632189af3a2a3e48e49c03c0256de09db61e879e2857bfbf"
+      }
+    ],
+    "familyCount" : 232,
+    "finalMeter" : {
+      "maximumConcurrentReads" : 2,
+      "readCount" : 10,
+      "reads" : [
+        {
+          "failure" : null,
+          "milliseconds" : 80.729541667096782,
+          "ps" : "NanumSquareR",
+          "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 75.267999998686719,
+          "ps" : "NanumSquareR",
+          "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 83.212999999886961,
+          "ps" : "NanumSquareB",
+          "sha256" : "f737d58294faec9c632189af3a2a3e48e49c03c0256de09db61e879e2857bfbf"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 86.813458334290772,
+          "ps" : "NanumSquareR",
+          "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 79.474875001324108,
+          "ps" : "NanumSquareR",
+          "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 72.78891666646814,
+          "ps" : "NanumSquareB",
+          "sha256" : "f737d58294faec9c632189af3a2a3e48e49c03c0256de09db61e879e2857bfbf"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 76.885625001523294,
+          "ps" : "NanumSquareR",
+          "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 72.102583333617076,
+          "ps" : "NanumSquareB",
+          "sha256" : "f737d58294faec9c632189af3a2a3e48e49c03c0256de09db61e879e2857bfbf"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 75.011041666584788,
+          "ps" : "NanumSquareR",
+          "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 73.353416666577687,
+          "ps" : "NanumSquareB",
+          "sha256" : "f737d58294faec9c632189af3a2a3e48e49c03c0256de09db61e879e2857bfbf"
+        }
+      ],
+      "scanCount" : 1,
+      "scanMS" : [
+        442.28537500021048
+      ]
+    },
+    "hwp-documentReadyMS" : 2151.3777500003926,
+    "hwp-exactFontReadyMS" : 2152.3237916662765,
+    "hwp-newNativeReads" : 2,
+    "hwpx-documentReadyMS" : 1146.4157499995054,
+    "hwpx-exactFontReadyMS" : 1147.4634999995033,
+    "hwpx-newNativeReads" : 2,
+    "launchToAcceptanceMS" : 6426.3233750007203,
+    "metadataFailureCount" : 0,
+    "nativeDirectReads" : {
+      "maximumConcurrentReads" : 2,
+      "readCount" : 4,
+      "reads" : [
+        {
+          "failure" : null,
+          "milliseconds" : 80.729541667096782,
+          "ps" : "NanumSquareR",
+          "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 75.267999998686719,
+          "ps" : "NanumSquareR",
+          "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 83.212999999886961,
+          "ps" : "NanumSquareB",
+          "sha256" : "f737d58294faec9c632189af3a2a3e48e49c03c0256de09db61e879e2857bfbf"
+        },
+        {
+          "failure" : null,
+          "milliseconds" : 86.813458334290772,
+          "ps" : "NanumSquareR",
+          "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+        }
+      ],
+      "scanCount" : 1,
+      "scanMS" : [
+        442.28537500021048
+      ]
+    },
+    "omittedFaceCount" : 0,
+    "os" : "Version 26.5.2 (Build 25F84)",
+    "pid" : 2897,
+    "prepareMS" : 454.73441666581493,
+    "restoredEnabled" : false,
+    "savedMetadataPresent" : false,
+    "systemMenuFamilyCount" : 204,
+    "testFamily" : "NanumSquare",
+    "testPS" : [
+      "NanumSquareR",
+      "NanumSquareB"
+    ],
+    "variableFaceCount" : 118
+  },
+  "passed" : true
+}

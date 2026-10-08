@@ -3,8 +3,17 @@
 - 수행계획: [task_m020_567.md](task_m020_567.md)
 - 이슈: [#567](https://github.com/postmelee/alhangeul-macos/issues/567), M020 / v0.2
 - 브랜치: `local/task567`, 기준 `devel` / `0fa65fa`
-- 상태: Stage 2/3.1/3.2/3.3/4/4.1/4.2 완료. 2026-10-08 설정 진입 통일·Mac 안내·최초 활성화 중복 탐색 병합을 구현·검증했다. [Stage 3 보고](../working/task_m020_567_stage3.md) · [Stage 4/4.1/4.2 보고](../working/task_m020_567_stage4.md) · [시작 비용 조사](../tech/task_m020_567_startup.md). Stage 5 승인·수용은 남아 있다. [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
+- 상태: Stage 2/3.1/3.2/3.3/4/4.1/4.2/5 완료. 2026-10-08 승인된 [Stage 5](../working/task_m020_567_stage5.md)의 실제 Mac 목록·로컬 서명 sandbox·native 저장/재열기·권한 복원·성능 검증 및 #568/#569 인계를 완료했다. 최종 보고·PR 게시 승인 대기. [Stage 3 보고](../working/task_m020_567_stage3.md) · [Stage 4/4.1/4.2 보고](../working/task_m020_567_stage4.md) · [시작 비용 조사](../tech/task_m020_567_startup.md). [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
 - Stage 2 native 소스와 테스트를 변경했다. upstream pin과 Studio bundle은 유지했다.
+
+## Stage 5 승인 범위 — 2026-10-08
+
+- 현재 #567 / `local/task567`에서 실제 CoreText 목록과 제품 service·Coordinator·공식 bundled Studio를 사용하는 격리 앱의 서명 sandbox 수용을 진행한다. 테스트 도구와 필요한 결함 수정, 검증 증거·인계·단계 보고를 포함한다.
+- 이미 설치된 NanumSquare Regular/Bold를 우선 사용한다. 새 글꼴 영구 설치나 사용자 원본 변경 없이 실제 목록·필요 face bytes·기존 메뉴·문서 저장/재열기를 검증한다. 설치 목록 수와 지원/읽기 성공 수를 구분한다.
+- 새 프로세스의 준비·사용 설정 복원, 최초 활성화 탐색 병합, 동일 face 동시 요청 병합과 반복 표시의 읽기 수/시간을 기록한다. 격리 앱 준비부터 첫 문서 ready까지를 측정하며 전체 제품 시작·OS font server cold·최소 OS 실행으로 일반화하지 않는다.
+- #565의 동일 bundle ID와 기존 승인된 로컬 서명 기준으로 테스트 폴더 bookmark 복원을 최종 소스에서 재검증한다. 허용 범위는 기존 `build.noindex/task565-stage4/installed-font-permission-fixture`이며 새 Studio probe로 권한을 복사하지 않는다.
+- 실제 목록의 설정·기존 메뉴 화면과 직접 조작 가능한 창을 제공한다. 이전 fixture 상태 전이/원본 상실·독립 관리 복사본 대조 및 완료한 회귀 증거는 재사용하고 새 sandbox 경계에 필요한 검증을 추가한다.
+- #568의 출력/확장과 #569의 Mac/Windows 수용·제품 안내에 계약·제약을 인계한다. 최종 보고/PR 게시·이슈 close·공개 배포·공증·Quick Look 등록은 포함하지 않는다.
 
 ## 1. 확인한 출발점
 

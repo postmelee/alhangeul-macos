@@ -1,0 +1,15 @@
+/Users/melee/Documents/projects/rhwp-mac/Tests/StudioFontAcceptanceProbe/main.swift:162:52: error: cannot convert value of type 'String?' to expected argument type 'String'
+160 |         let coordinator = RhwpStudioWebView.Coordinator(fontMessageHandler: handler)
+161 |         coordinator.onEditorSessionChange = { self.session = $0 }
+162 |         coordinator.onError = { self.errors.append($0) }
+    |                                                    `- error: cannot convert value of type 'String?' to expected argument type 'String'
+163 |         coordinator.onOpenFontSettings = { [weak self] in self?.showSettings(); return true }
+164 |         self.coordinator = coordinator
+
+/Users/melee/Documents/projects/rhwp-mac/Tests/StudioFontAcceptanceProbe/main.swift:228:33: error: cannot force unwrap value of non-optional type 'NSWindow'
+226 |         measurements["systemMenuFamilyCount"] = menu.count
+227 |         try check(meter.snapshot()["readCount"] as? Int == menuReads, "기존 글꼴 목록 열기는 전체 bytes를 읽지 않음")
+228 |         try await capture(window!, "actual-font-menu.png")
+    |                                 `- error: cannot force unwrap value of non-optional type 'NSWindow'
+229 |         _ = try await js("document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));")
+230 |         if !reopened {

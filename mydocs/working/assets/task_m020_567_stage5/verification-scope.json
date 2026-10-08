@@ -1,0 +1,19 @@
+{
+  "baselineCommit": "8e0b6d8",
+  "productSourcesAndFrameworksUnchanged": true,
+  "nativeFontTestsUnchanged": true,
+  "reused": {
+    "nativeFontTests": 109,
+    "WKChangesAndReopen": 40,
+    "settingsSceneNavigation": 8,
+    "lifecycleSmoke": 43,
+    "HostAppDebugBuild": "Stage 4.2 BUILD SUCCEEDED"
+  },
+  "new": {
+    "signedStudioFirst": 20,
+    "signedStudioReopen": 17,
+    "savedFontPositions": 8,
+    "JS": 25,
+    "bookmarkRelaunchProcesses": 2
+  }
+}

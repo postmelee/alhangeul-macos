@@ -61,3 +61,13 @@
 같은 현재 환경에서 기존 활성화 호출과 보정 호출을 각각 새 CLI 프로세스 5회씩 비교했다. 현재 목록은 528 faces / 180 families로 Stage 4.1의 809/232와 다르므로 과거 0.38초 대비 속도 향상을 주장하지 않는다. 현재 목록을 각 실행에서 확인한 결과 기존 호출은 scan 2회, 보정은 1회였고 직접 font bytes 요청은 모두 0회다. metadata scan 시간 합계의 중앙값은 기존 188.68ms, 보정 101.33ms였다. 보정의 복원 후 prepare 중앙값은 105.67ms이고 반복 준비 20회는 추가 scan이 없었다.
 
 전체 앱 시작·OS cold·signed sandbox·최소 OS/Intel 런타임 성능은 여전히 미측정이다. 설치 사용이 꺼진 경우의 지연 준비 정책도 이번에는 변경하지 않았다. [비교 원본](../working/assets/task_m020_567_stage4_2/startup-summary.json)과 [Stage 4.2 보고](../working/task_m020_567_stage4.md)를 참조한다.
+
+## Stage 5 sandbox 실측 — 2026-10-08
+
+실제 CoreText와 제품 catalog/Coordinator/bundled Studio를 사용하는 로컬 서명 sandbox 앱의 두 새 프로세스에서 확인했다. 가상 목록은 주입하지 않았으며 실제 목록은 809 faces / 232 families였다. 이전 CLI 528/180과 프로세스·시점이 다르므로 목록 차이를 최적화 효과로 해석하지 않는다. [Stage 5 보고](../working/task_m020_567_stage5.md)와 [첫 결과](../working/assets/task_m020_567_stage5/first-result.json)·[재실행](../working/assets/task_m020_567_stage5/reopen-result.json)을 기준으로 한다.
+
+동시 prepare 8회와 초기 활성화 호출을 재현한 실제 metadata 탐색은 각 1회, scan 442.29/440.58ms, prepare 454.73/453.23ms, 준비의 bytes 읽기 0회였다. CoreText 알림 감시를 꺼 결정적으로 계측한 결과이며 실제 OS 알림 전달 검증과 구분한다. 문서마다 실제 NanumSquare Regular/Bold 두 face만 읽었고 native 원본/활성/bytes 검증은 69.73–86.81ms였다. 동시 도착용 150ms 지연은 읽기 실측에서 제외했다. 반복 SVG·기존 확대/축소·전체 메뉴 열기는 추가 bytes 읽기 0회였다.
+
+HWP 문서 요청→ready는 첫 2,151.38ms / 재실행 1,006.46ms, HWPX는 1,146.42/1,161.35ms였다. 준비/읽기/문서 ready는 서로 다른 구간이며 이 숫자를 전체 제품 시작 시간으로 더하지 않는다. helper 총시간에는 테스트 대기·직접 읽기 대조·촬영이 들어가므로 launch benchmark로 사용하지 않는다. OS font server cold·정식 제품 전체 launch·최소 OS/Intel 성능은 미측정이다.
+
+현재는 전체 font bytes 선읽기·완료 bytes의 native 영구 캐시 없이 실제 원본을 검증한다. 추가 성능 개선을 판단하려면 제품 배포 후보의 시작과 필요한 읽기의 파일/활성 CoreText/검사 비용을 나눠 측정한다. 이번 단계에서 사용 꺼짐의 지연 준비 정책이나 원본/권한 검사 생략 정책을 추가하지 않았다.
