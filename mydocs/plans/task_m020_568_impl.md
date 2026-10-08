@@ -5,7 +5,7 @@
 - 작업: `local/task568` → `publish/task568` → `devel`
 - 제품 기준: `db8a94d1eb03f5a14f265621191f85f0ddf149cb` (PR #578), 공식 core/Studio v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`
 - 승인: 2026-10-08 작업지시자의 “진행해줘”로 수행계획 승인·구현계획 작성 진행.
-- 상태: 2026-10-09 승인된 [Stage 3](../working/task_m020_568_stage3.md)의 실제 PDF·인쇄 연결/수용 완료. Stage 4 B의 구체 공급·캐시/API 경계 확인 및 진입 승인 대기.
+- 상태: 2026-10-09 작업지시자의 “Stage 4 진행해줘”로 B의 구체 공급·캐시/API 경계 확인 및 진입 승인. 추가 지시에 따라 이전 임시 빌드·캐시를 정리한 뒤 native 연결 진행. 새 FFI/API가 필요하면 구현 전 구체 범위를 보정한다.
 
 ## 1. 단계와 완료 경계
 
@@ -14,7 +14,7 @@
 | 1 | A/B 조사, A 계약 | 출력 identity·매칭·임베딩·변경/취소 정책과 최소 실험 | 2026-10-08 완료 |
 | 2 | A 공통 기반 | 제한된 출력 snapshot·font route·준비·수명 구현 | 2026-10-09 완료 |
 | 3 | A 실제 연결 | PDF·인쇄 진입 연결, 정확한 face와 text layer·패널 수용 | 2026-10-09 완료 |
-| 4 | B native | CoreGraphics/Skia 공급·매칭·캐시 연결 | A 결과와 B 구체 범위 승인 후 |
+| 4 | B native | CoreGraphics/Skia 공급·매칭·캐시 연결 | 2026-10-09 진입 승인·진행 중 |
 | 5 | B 확장 | Quick Look/Thumbnail의 signed 프로세스·Finder 수용 | Stage 4 및 설치 smoke 범위 승인 후 |
 | 6 | 전체 인계 | 소비자별 회귀·제약·최종 소스/증거 대조 | Stage 5 승인 후 |
 
@@ -116,6 +116,8 @@ Stage 2의 Noto 본문 공백·구두점 결함은 보정됐다. 기본 시스�
 
 A 보고 이후 B의 구체 변경과 API·권한·테스트 자산을 재확인해 승인받는다. `FontFallback`, `CGTreeRenderer`, `FontResourceRegistry`, Shared preview helpers와 RustBridge의 `font_paths: Vec::new()` 경계를 조사·보강한다. 기존 custom/system/bundled 우선순위와 정확한 PS/style·identity를 유지하고 renderer cache key에 소비자 snapshot identity를 반영한다. 전역 OS 등록이나 전체 system 폴더의 custom path 주입으로 대체하지 않는다.
 
+2026-10-09 진입 승인 후 임시 빌드/캐시 정리와 direct CoreText bytes 실험을 완료했다. [native 연결 조사·확장안](../tech/task_m020_568_native_contract.md)에 현재 경계, Skia family당 한 face 저장 제약, 새 bytes 기반 C ABI 후보 및 한도·수명·검증 범위를 정리했다. 새 C ABI/연관 wrapper/header/symbol의 구체 승인 전에는 해당 FFI를 구현하지 않는다. public glyph replay 후보는 아직 exact style 적용의 실행 증거가 없으며 격리 검증 후 채택/추가 필요사항을 판단한다.
+
 필요한 공통 DTO/수명은 AppKit 없는 계층에 둔다. 새 FFI/API가 필요하면 Stage 4 구현 전에 승인 범위를 보정하고 포인터/길이/문자열/handle 수명을 검증한다. 추가 upstream 릴리즈가 꼭 필요한 조건과 앱 bridge에서 처리 가능한 조건을 분리한다.
 
 통과 기준: native CoreGraphics/Skia 각각의 실제 face/style/hash·대체·동명 충돌·설정/원본 변화·snapshot 캐시 결과, 기존 render tree/glyph/clip/image 회귀와 메모리 제한. 형식/축을 검증하지 않은 TTC·가변 지원을 추가하지 않는다.
@@ -163,4 +165,4 @@ HostApp Debug의 macOS 12 target compile/link와 실제 최소 OS runtime은 별
 
 ## 10. 현재 승인 요청
 
-Stage 3 보고와 출력 계약을 검토하고 **Stage 4의 B CoreGraphics/Skia 연결** 진입을 요청한다. 우선 현재 native 공급·우선순위·캐시와 bridge의 API/수명 경계를 확인하고 필요한 구체 변경을 확정한다. 새 FFI/API가 필요하면 구현 전 승인 범위를 보정한다. Stage 5의 Finder 설치/등록·새 인증서/폴더 권한·물리 프린터 전송·push/PR·공개 배포는 이 진입 승인에 포함하지 않는다.
+Stage 4 진입은 승인됐다. 현재 [native 연결안](../tech/task_m020_568_native_contract.md)의 **앱 소유 bytes 기반 C ABI 설계·격리 검증 및 Swift wrapper/header/symbol 변경** 범위를 확인한다. core v0.8.7과 기존 ABI는 유지한다. exact Skia가 검증되지 않으면 완료로 처리하지 않고 추가 API/선행 조건을 먼저 보고한다. upstream 변경/공개 이슈·Stage 5의 Finder 설치/등록·새 인증서/폴더 권한·물리 프린터 전송·push/PR·공개 배포는 이번 범위에 포함하지 않는다.
