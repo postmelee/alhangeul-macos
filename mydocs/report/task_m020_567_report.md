@@ -57,6 +57,8 @@ Stage 4.2의 같은 CLI 목록에서 metadata scan 시간 합계 중앙값은 18
 
 단계별 실제 실행·재사용 근거는 [Stage 2](../working/task_m020_567_stage2.md), [Stage 3](../working/task_m020_567_stage3.md), [Stage 4](../working/task_m020_567_stage4.md), [Stage 5](../working/task_m020_567_stage5.md)에서 확인한다. 최종 보고 단계는 제품 소스를 수정하지 않았다. native/HostApp/WK 수용을 이 단계에서 전부 다시 실행했다고 주장하지 않는다. 최종 점검 로그는 `build.noindex/task567/final-report/`에 있다.
 
+PR #578 게시 후 첫 CI는 main/source content gate의 두 문서 충돌로 실패했다. 2026-10-08 “진행해줘” 승인에 따라 `main`의 기존 변경을 merge commit `a2d5e40`으로 인계했다. v0.8.7 배지·Studio adapter 안내를 유지했고 merge 전후 제품 tree는 동일하다. gate·배지·공식 Studio provenance·JS 25·Stage 5 source receipt 175개를 다시 확인했다. 원문 라이선스와 체크섬으로 보존한 로그의 공백은 파일별 attribute로만 제외했다. [PR 리뷰 기록](../working/task_m020_567_review.md)에 판정과 중복 PR #577 비교를 남겼으며, 필수 원격 CI 통과 후 merge한다.
+
 ## 5. 잔여 위험과 후속 작업
 
 | 범위 | 판정/인계 |
@@ -73,4 +75,4 @@ Stage 4.2의 같은 CLI 목록에서 metadata scan 시간 합계 중앙값은 18
 
 ## 6. 작업지시자 승인 요청
 
-승인된 Studio 범위의 구현과 검증을 완료하고 `publish/task567` → `devel` Open PR을 게시한다. 단계 커밋을 보존해 리뷰·merge 승인을 요청한다. merge·이슈 close·부산물 정리·제품 릴리스는 이번 게시 작업에 포함하지 않는다. 다음 소비자 작업은 #568 이며, 자동 동기화 PR #577 의 중복 처리도 통합 리뷰에서 확인한다.
+승인된 Studio 범위의 구현과 검증을 완료하고 `publish/task567` → `devel` Open PR #578을 게시했다. 최초 게시 승인은 merge·이슈 close를 포함하지 않았으며, 이후 2026-10-08 “진행해줘”로 리뷰·CI 보정·문제 없을 때 단계 커밋을 보존한 merge 및 정리를 승인받았다. 필수 CI 통과 전에는 merge하지 않는다. 제품 릴리스는 포함하지 않는다. 다음 소비자 작업은 #568이며, 자동 동기화 PR #577은 별도로 유지한다.
