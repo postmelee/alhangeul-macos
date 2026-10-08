@@ -3,7 +3,7 @@
 - 수행계획: [task_m020_567.md](task_m020_567.md)
 - 이슈: [#567](https://github.com/postmelee/alhangeul-macos/issues/567), M020 / v0.2
 - 브랜치: `local/task567`, 기준 `devel` / `0fa65fa`
-- 상태: Stage 2/3.1/3.2/3.3/4/4.1/4.2/5 완료. 2026-10-08 승인된 [Stage 5](../working/task_m020_567_stage5.md)의 실제 Mac 목록·로컬 서명 sandbox·native 저장/재열기·권한 복원·성능 검증 및 #568/#569 인계를 완료했다. 최종 보고·PR 게시 승인 대기. [Stage 3 보고](../working/task_m020_567_stage3.md) · [Stage 4/4.1/4.2 보고](../working/task_m020_567_stage4.md) · [시작 비용 조사](../tech/task_m020_567_startup.md). [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
+- 상태: 전체 단계 완료. 2026-10-08 최종 보고·PR 게시를 승인받아 [최종 보고](../report/task_m020_567_report.md)에 수용 결과·한계·#568/#569 인계를 정리했다. PR 리뷰·merge 승인 대기. [Stage 5](../working/task_m020_567_stage5.md) · [Stage 3 보고](../working/task_m020_567_stage3.md) · [Stage 4/4.1/4.2 보고](../working/task_m020_567_stage4.md) · [시작 비용 조사](../tech/task_m020_567_startup.md). [계약](../tech/task_m020_567_adapter.md) · [진행 보정](../tech/task_m020_567_replan.md).
 - Stage 2 native 소스와 테스트를 변경했다. upstream pin과 Studio bundle은 유지했다.
 
 ## Stage 5 승인 범위 — 2026-10-08
