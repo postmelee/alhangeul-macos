@@ -1,0 +1,208 @@
+{
+  "scope": "실제 CoreText metadata / 격리 저장소 / 현재·기존 활성화 경로 각각 새 CLI 프로세스 5회 / Swift -O / OS cold와 제품 전체 launch는 미측정",
+  "macOS": "26.5.2",
+  "architecture": "arm64",
+  "runs": [
+    {
+      "activationMode": "coalesced",
+      "directFontBytesReads": 0,
+      "enabled": false,
+      "faceCount": 528,
+      "familyCount": 180,
+      "metadataSaveCount": 1,
+      "metadataScanMS": [
+        134.847833
+      ],
+      "metadataUnchangedAfterActivation": true,
+      "prepareMS": 141.527583,
+      "repeatPrepare20MS": 1.521166,
+      "repeatPrepareAdditionalScans": 0,
+      "restoredSavedMetadata": false,
+      "savedJSONBytes": 261968,
+      "scanCountAfterActivation": 1,
+      "serviceLoadMS": 0.259375
+    },
+    {
+      "activationMode": "coalesced",
+      "directFontBytesReads": 0,
+      "enabled": false,
+      "faceCount": 528,
+      "familyCount": 180,
+      "metadataSaveCount": 1,
+      "metadataScanMS": [
+        101.333791
+      ],
+      "metadataUnchangedAfterActivation": true,
+      "prepareMS": 107.644667,
+      "repeatPrepare20MS": 0.225042,
+      "repeatPrepareAdditionalScans": 0,
+      "restoredSavedMetadata": true,
+      "savedJSONBytes": 261968,
+      "scanCountAfterActivation": 1,
+      "serviceLoadMS": 6.797125
+    },
+    {
+      "activationMode": "coalesced",
+      "directFontBytesReads": 0,
+      "enabled": false,
+      "faceCount": 528,
+      "familyCount": 180,
+      "metadataSaveCount": 1,
+      "metadataScanMS": [
+        91.95975
+      ],
+      "metadataUnchangedAfterActivation": true,
+      "prepareMS": 97.918208,
+      "repeatPrepare20MS": 0.279042,
+      "repeatPrepareAdditionalScans": 0,
+      "restoredSavedMetadata": true,
+      "savedJSONBytes": 261968,
+      "scanCountAfterActivation": 1,
+      "serviceLoadMS": 3.758709
+    },
+    {
+      "activationMode": "coalesced",
+      "directFontBytesReads": 0,
+      "enabled": false,
+      "faceCount": 528,
+      "familyCount": 180,
+      "metadataSaveCount": 1,
+      "metadataScanMS": [
+        104.06775
+      ],
+      "metadataUnchangedAfterActivation": true,
+      "prepareMS": 110.410625,
+      "repeatPrepare20MS": 0.672083,
+      "repeatPrepareAdditionalScans": 0,
+      "restoredSavedMetadata": true,
+      "savedJSONBytes": 261968,
+      "scanCountAfterActivation": 1,
+      "serviceLoadMS": 3.355333
+    },
+    {
+      "activationMode": "coalesced",
+      "directFontBytesReads": 0,
+      "enabled": false,
+      "faceCount": 528,
+      "familyCount": 180,
+      "metadataSaveCount": 1,
+      "metadataScanMS": [
+        96.92925
+      ],
+      "metadataUnchangedAfterActivation": true,
+      "prepareMS": 103.6925,
+      "repeatPrepare20MS": 0.8575,
+      "repeatPrepareAdditionalScans": 0,
+      "restoredSavedMetadata": true,
+      "savedJSONBytes": 261968,
+      "scanCountAfterActivation": 1,
+      "serviceLoadMS": 3.344417
+    }
+  ],
+  "restoredPrepareMedianMS": 105.6685835,
+  "scanMedianMS": 101.333791,
+  "baselineRuns": [
+    {
+      "activationMode": "legacy",
+      "directFontBytesReads": 0,
+      "enabled": false,
+      "faceCount": 528,
+      "familyCount": 180,
+      "metadataSaveCount": 1,
+      "metadataScanMS": [
+        102.726208,
+        107.256584
+      ],
+      "metadataUnchangedAfterActivation": true,
+      "prepareMS": 109.633709,
+      "repeatPrepare20MS": 0.190334,
+      "repeatPrepareAdditionalScans": 0,
+      "restoredSavedMetadata": false,
+      "savedJSONBytes": 261968,
+      "scanCountAfterActivation": 2,
+      "serviceLoadMS": 0.114625
+    },
+    {
+      "activationMode": "legacy",
+      "directFontBytesReads": 0,
+      "enabled": false,
+      "faceCount": 528,
+      "familyCount": 180,
+      "metadataSaveCount": 1,
+      "metadataScanMS": [
+        85.738083,
+        102.938417
+      ],
+      "metadataUnchangedAfterActivation": true,
+      "prepareMS": 91.6795,
+      "repeatPrepare20MS": 0.169708,
+      "repeatPrepareAdditionalScans": 0,
+      "restoredSavedMetadata": true,
+      "savedJSONBytes": 261968,
+      "scanCountAfterActivation": 2,
+      "serviceLoadMS": 3.239167
+    },
+    {
+      "activationMode": "legacy",
+      "directFontBytesReads": 0,
+      "enabled": false,
+      "faceCount": 528,
+      "familyCount": 180,
+      "metadataSaveCount": 1,
+      "metadataScanMS": [
+        86.579833,
+        100.888375
+      ],
+      "metadataUnchangedAfterActivation": true,
+      "prepareMS": 92.748583,
+      "repeatPrepare20MS": 0.183542,
+      "repeatPrepareAdditionalScans": 0,
+      "restoredSavedMetadata": true,
+      "savedJSONBytes": 261968,
+      "scanCountAfterActivation": 2,
+      "serviceLoadMS": 3.417083
+    },
+    {
+      "activationMode": "legacy",
+      "directFontBytesReads": 0,
+      "enabled": false,
+      "faceCount": 528,
+      "familyCount": 180,
+      "metadataSaveCount": 1,
+      "metadataScanMS": [
+        85.31925,
+        100.984334
+      ],
+      "metadataUnchangedAfterActivation": true,
+      "prepareMS": 91.092958,
+      "repeatPrepare20MS": 0.164083,
+      "repeatPrepareAdditionalScans": 0,
+      "restoredSavedMetadata": true,
+      "savedJSONBytes": 261968,
+      "scanCountAfterActivation": 2,
+      "serviceLoadMS": 3.641
+    },
+    {
+      "activationMode": "legacy",
+      "directFontBytesReads": 0,
+      "enabled": false,
+      "faceCount": 528,
+      "familyCount": 180,
+      "metadataSaveCount": 1,
+      "metadataScanMS": [
+        92.232209,
+        102.594417
+      ],
+      "metadataUnchangedAfterActivation": true,
+      "prepareMS": 98.20575,
+      "repeatPrepare20MS": 0.18575,
+      "repeatPrepareAdditionalScans": 0,
+      "restoredSavedMetadata": true,
+      "savedJSONBytes": 261968,
+      "scanCountAfterActivation": 2,
+      "serviceLoadMS": 3.457167
+    }
+  ],
+  "coalescedTotalScanMedianMS": 101.333791,
+  "baselineTotalScanMedianMS": 188.6765
+}

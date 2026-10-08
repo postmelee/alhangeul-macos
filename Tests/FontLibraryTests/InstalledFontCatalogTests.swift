@@ -340,6 +340,93 @@ final class InstalledFontCatalogTests: XCTestCase {
         XCTAssertEqual(state.reads, 0)
     }
 
+    func testInitialActivationAndPreparationShareOneScanInEitherOrder() async throws {
+        for activationFirst in [false, true] {
+            let state = InstalledFontTestState(); state.records = [record()]
+            let catalog = try service(state), activatedAt = ProcessInfo.processInfo.systemUptime
+            if activationFirst { await catalog.scheduleRefreshForActivation(at: activatedAt) }
+            _ = try await catalog.prepare()
+            if !activationFirst { await catalog.scheduleRefreshForActivation(at: activatedAt) }
+            try await Task.sleep(nanoseconds: 400_000_000)
+            XCTAssertEqual(state.locked { $0.scanCount }, 1)
+            XCTAssertEqual(state.locked { $0.reads }, 0)
+            // 이후 활성화는 같은 시각값이어도 새 검사를 요청한다.
+            state.locked { $0.records = [record(revision: 2)] }
+            await catalog.scheduleRefreshForActivation()
+            try await Task.sleep(nanoseconds: 400_000_000)
+            let next = await catalog.snapshot()
+            XCTAssertEqual(state.locked { $0.scanCount }, 2)
+            XCTAssertEqual(next.records.first?.stamp?.modifiedSeconds, 2)
+            await catalog.stopMonitoring()
+        }
+    }
+
+    func testDelayedFirstActivationAfterBackgroundPreparationRechecks() async throws {
+        let state = InstalledFontTestState(); state.records = [record()]
+        let catalog = try service(state)
+        _ = try await catalog.prepare()
+        state.locked { $0.records = [] }
+        await catalog.scheduleRefreshForActivation(at: ProcessInfo.processInfo.systemUptime + 1)
+        try await Task.sleep(nanoseconds: 400_000_000)
+        let next = await catalog.snapshot()
+        XCTAssertEqual(state.locked { $0.scanCount }, 2)
+        XCTAssertTrue(next.records.isEmpty)
+        await catalog.stopMonitoring()
+    }
+
+    func testInitialActivationRetriesNewPermissionFailureAndFailedPreparation() async throws {
+        let state = InstalledFontTestState(); state.records = [record()]
+        let catalog = try service(state)
+        _ = try await catalog.prepare(); let ready = try await catalog.setEnabled(true)
+        state.locked { $0.readFailure = .permissionDenied }
+        do { _ = try await catalog.readResource("face-1", expectedGeneration: ready.generation); XCTFail() }
+        catch { XCTAssertEqual(error as? InstalledFontFailure, .permissionDenied) }
+        state.locked { $0.readFailure = nil }
+        await catalog.scheduleRefreshForActivation()
+        try await Task.sleep(nanoseconds: 400_000_000)
+        let recovered = await catalog.snapshot()
+        XCTAssertEqual(state.locked { $0.scanCount }, 2)
+        XCTAssertNil(recovered.records.first?.failure)
+        _ = try await catalog.readResource("face-1", expectedGeneration: recovered.generation)
+        await catalog.stopMonitoring()
+
+        let failedState = InstalledFontTestState(); failedState.scanFailure = .catalogLimit
+        let failed = try service(failedState)
+        do { _ = try await failed.prepare(); XCTFail() } catch {}
+        failedState.locked { $0.scanFailure = nil; $0.records = [record()] }
+        await failed.scheduleRefreshForActivation()
+        try await Task.sleep(nanoseconds: 400_000_000)
+        let retried = await failed.snapshot()
+        XCTAssertNil(retried.refreshFailure)
+        XCTAssertEqual(failedState.locked { $0.scanCount }, 2)
+        await failed.stopMonitoring()
+    }
+
+    func testCoreTextChangeDuringInitialScanSurvivesActivationCoalescing() async throws {
+        let state = InstalledFontTestState(); state.records = [record()]
+        let entered = DispatchSemaphore(value: 0), release = DispatchSemaphore(value: 0)
+        let base = state.environment(try result())
+        let environment = InstalledFontEnvironment(scan: { grants in
+            if state.locked({ $0.scanCount == 0 }) { entered.signal(); release.wait() }
+            return try base.scan(grants)
+        }, read: base.read, makeBookmark: base.makeBookmark)
+        let catalog = try InstalledFontCatalogService(persistence: state.persistence, environment: environment)
+        let activatedAt = ProcessInfo.processInfo.systemUptime
+        let preparing = Task { try await catalog.prepare() }
+        let started = await Task.detached { entered.wait(timeout: .now() + 5) == .success }.value
+        guard started else { release.signal(); _ = try? await preparing.value; XCTFail("scan did not start"); return }
+        NotificationCenter.default.post(name: Notification.Name(kCTFontManagerRegisteredFontsChangedNotification as String), object: nil)
+        state.locked { $0.records = [record(revision: 3)] }
+        release.signal()
+        _ = try await preparing.value
+        await catalog.scheduleRefreshForActivation(at: activatedAt)
+        try await Task.sleep(nanoseconds: 400_000_000)
+        let next = await catalog.snapshot()
+        XCTAssertEqual(state.locked { $0.scanCount }, 2, "실제 변경 알림의 재검사를 버리지 않는다")
+        XCTAssertEqual(next.records.first?.stamp?.modifiedSeconds, 3)
+        await catalog.stopMonitoring()
+    }
+
     func testRelaunchRechecksSavedPermissionFailureWithoutReadingWholeCatalog() async throws {
         let state = InstalledFontTestState(); state.records = [record()]; state.readFailure = .permissionDenied
         let first = try service(state)

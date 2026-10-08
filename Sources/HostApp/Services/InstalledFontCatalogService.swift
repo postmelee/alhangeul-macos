@@ -50,6 +50,8 @@ actor InstalledFontCatalogService {
     private var monitor: InstalledFontChangeMonitor?
     private var refreshTask: Task<Void, Never>?
     private var retryPermissionsOnRefresh = false
+    private var hasActivated = false
+    private var lastSuccessfulRefreshAt: TimeInterval?
     private struct Pending {
         let token: UUID
         let task: Task<InstalledFontRead, Error>
@@ -143,6 +145,7 @@ actor InstalledFontCatalogService {
             let changed = !prepared || next.records != saved.records || scan.grantIssues != grantIssues || scan.omittedFaceCount != omittedFaceCount || refreshFailure != nil
             if changed { try store(next) }
             saved = next; omittedFaceCount = scan.omittedFaceCount; grantIssues = scan.grantIssues; refreshFailure = nil; prepared = true
+            lastSuccessfulRefreshAt = ProcessInfo.processInfo.systemUptime
             if changed { invalidate() }
             return snapshot()
         } catch {
@@ -223,6 +226,22 @@ actor InstalledFontCatalogService {
             }
             throw failure
         }
+    }
+
+    // 최초 활성화만 시작 준비와 합친다. 이벤트 시각은 provider/actor 대기 전에 기록한다.
+    // 백그라운드 시작 뒤 늦은 활성화와 새 읽기 거부는 재확인하며 변경 알림은 취소하지 않는다.
+    func scheduleRefreshForActivation(at activatedAt: TimeInterval = ProcessInfo.processInfo.systemUptime) {
+        let first = !hasActivated
+        hasActivated = true
+        if first, !prepared {
+            _ = try? prepare()
+            return
+        }
+        if first, let completedAt = lastSuccessfulRefreshAt,
+           activatedAt <= completedAt + 0.2, refreshFailure == nil, permissionFailureIDs().isEmpty {
+            return
+        }
+        scheduleRefresh(retryPermissionFailures: true)
     }
 
     // 알림이 누락되어도 readResource의 실제 원본/활성 상태 검사가 마지막 방어선이다.

@@ -1,0 +1,20 @@
+{
+  "activationMode" : "legacy",
+  "directFontBytesReads" : 0,
+  "enabled" : false,
+  "faceCount" : 528,
+  "familyCount" : 180,
+  "metadataSaveCount" : 1,
+  "metadataScanMS" : [
+    92.232208999999997,
+    102.59441700000001
+  ],
+  "metadataUnchangedAfterActivation" : true,
+  "prepareMS" : 98.205749999999995,
+  "repeatPrepare20MS" : 0.18575,
+  "repeatPrepareAdditionalScans" : 0,
+  "restoredSavedMetadata" : true,
+  "savedJSONBytes" : 261968,
+  "scanCountAfterActivation" : 2,
+  "serviceLoadMS" : 3.4571670000000001
+}

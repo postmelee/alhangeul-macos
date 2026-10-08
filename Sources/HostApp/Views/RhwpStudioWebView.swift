@@ -202,6 +202,7 @@ extension RhwpStudioWebView {
         private var recentNativeDrop: NativeDropMarker?
         private var currentReloadToken = 0
         private var hasCompletedCurrentLoad = false
+        var onOpenFontSettings: () -> Bool = { AppSettingsNavigation.shared.openFonts() }
 
         override init() {
             fontMessageHandler = StudioFontMessageHandler()
@@ -529,6 +530,13 @@ extension RhwpStudioWebView {
 
             switch type {
             case "command":
+                if body["command"] as? String == "app:font-settings" {
+                    let origin = message.frameInfo.securityOrigin
+                    guard StudioFontMessageHandler.permits(mainFrame: message.frameInfo.isMainFrame,
+                        originScheme: origin.protocol, originHost: origin.host, originPort: origin.port,
+                        frameURL: message.frameInfo.request.url, sameWebView: message.webView === commandWebView)
+                    else { return }
+                }
                 handleHostCommand(body)
             case "dropped-document":
                 handleDroppedDocument(body)
@@ -750,6 +758,10 @@ extension RhwpStudioWebView {
             }
 
             switch command {
+            case "app:font-settings":
+                if !onOpenFontSettings() {
+                    onError("글꼴 설정을 열 수 없습니다. 알한글 메뉴의 설정에서 글꼴 탭을 열어 주세요.")
+                }
             case "file:open":
                 onOpenDocument()
             case "file:export-pdf":

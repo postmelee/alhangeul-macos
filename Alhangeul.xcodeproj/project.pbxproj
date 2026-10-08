@@ -159,6 +159,7 @@
 		748E5560ED13294F03F1B627 /* RenderTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A01160D544F0F71CA0C3501 /* RenderTree.swift */; };
 		7499FC7614680941A929F075 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E4457E7F57DA695C2D4A7757 /* CoreServices.framework */; };
 		7561FA65463CDF9CC5BED398 /* PageOverlayImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77B27A9A00D195F9031B6311 /* PageOverlayImages.swift */; };
+		7671123AFBF0250AC1B9307F /* AppSettingsNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E224B47D69D5DC6677AC189 /* AppSettingsNavigation.swift */; };
 		770901D3A2B2139FB9649377 /* ColorSync.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82B73611C892296A43FDC8B2 /* ColorSync.framework */; };
 		77453A10DF3C8A0D13A1C311 /* SpotlightReindexServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 091E0D0C089D4D11FD2B25C6 /* SpotlightReindexServiceTests.swift */; };
 		7A30B489C04C957C050AB78F /* RhwpStudioResourceSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D6D965AEFE52537281289A1 /* RhwpStudioResourceSchemeHandler.swift */; };
@@ -251,6 +252,7 @@
 		B440DC974A2D658C23E93E41 /* RhwpDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423B5D870B909D2D5D87F3D6 /* RhwpDocument.swift */; };
 		B544AA3D8829D8CE8EA9B863 /* RhwpStudioPrintOrientationPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B2EF7B163D45E8EFD21CDDF /* RhwpStudioPrintOrientationPolicyTests.swift */; };
 		B5A86FEE1EDDEFFAAB26EC35 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96DA8725B9E959FB54D06F3F /* CoreText.framework */; };
+		B6DDF7200CCA41F09D84DA06 /* AppSettingsOpener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109673FCD8A7E27EE7D68387 /* AppSettingsOpener.swift */; };
 		B80F6C806594EFE2927431A2 /* InstalledFontServiceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E266D1CF02E5AA9BCED4E1 /* InstalledFontServiceProvider.swift */; };
 		B8431077BFAC5321EB89E5AD /* DocumentCloseConfirmationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CF5F2312600B0FAE8D1D9FF /* DocumentCloseConfirmationController.swift */; };
 		B8FF4EE00DFCB02131ACC8A4 /* InstalledFontSettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF4F51D571C0DC89DF7873D /* InstalledFontSettingsModel.swift */; };
@@ -421,9 +423,11 @@
 		0CCBBB1CE93E4840CC4CF27D /* AppExecutionOutbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppExecutionOutbox.swift; sourceTree = "<group>"; };
 		0CF5F2312600B0FAE8D1D9FF /* DocumentCloseConfirmationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCloseConfirmationController.swift; sourceTree = "<group>"; };
 		0D03050B560F60198F4CBBB0 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		0E224B47D69D5DC6677AC189 /* AppSettingsNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsNavigation.swift; sourceTree = "<group>"; };
 		0E931CF12C8BE40BCE94DC51 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 		0F5AFC8EC56882BF138E698C /* Rhwp.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Rhwp.xcframework; path = Frameworks/Rhwp.xcframework; sourceTree = "<group>"; };
 		0FCEB1E34C6235A402631964 /* RhwpStudioWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioWebView.swift; sourceTree = "<group>"; };
+		109673FCD8A7E27EE7D68387 /* AppSettingsOpener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsOpener.swift; sourceTree = "<group>"; };
 		1116217E7FF50304A4A7EEF8 /* RhwpStudioPagePDFRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhwpStudioPagePDFRenderer.swift; sourceTree = "<group>"; };
 		1309795C091DEE3BD8E9EA7D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		133475D84BB02E4940904336 /* FontLibraryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontLibraryService.swift; sourceTree = "<group>"; };
@@ -996,6 +1000,7 @@
 			children = (
 				23F35BCAF2E4A2B5A3AF9DC0 /* AboutView.swift */,
 				46111B2C92166FABDD64FF11 /* AppExecutionAnalyticsSettingsView.swift */,
+				109673FCD8A7E27EE7D68387 /* AppSettingsOpener.swift */,
 				B016DB702381431F3586F892 /* AppSettingsView.swift */,
 				81391ABAF81F59C2FAE9880D /* ContentView.swift */,
 				34D472AE322872D733515F8A /* DocumentViewerView.swift */,
@@ -1036,6 +1041,7 @@
 				DB049ADD6B2E35FFEBAA8BF7 /* AppExecutionAnalyticsState.swift */,
 				FA729BF52F47B1A982DB84B0 /* AppExecutionEvent.swift */,
 				0CCBBB1CE93E4840CC4CF27D /* AppExecutionOutbox.swift */,
+				0E224B47D69D5DC6677AC189 /* AppSettingsNavigation.swift */,
 				0CF5F2312600B0FAE8D1D9FF /* DocumentCloseConfirmationController.swift */,
 				EC5D4F52776B873F6AB20372 /* DocumentFileActions.swift */,
 				3BA5AFA00641CA48894E658C /* DocumentHTMLExportFormat.swift */,
@@ -1400,6 +1406,8 @@
 				B400A4BA8ADF0F0859240E4D /* AppExecutionAnalyticsState.swift in Sources */,
 				87B1211E7B9239FED4415944 /* AppExecutionEvent.swift in Sources */,
 				9B0F29134B03D8A00E8379D0 /* AppExecutionOutbox.swift in Sources */,
+				7671123AFBF0250AC1B9307F /* AppSettingsNavigation.swift in Sources */,
+				B6DDF7200CCA41F09D84DA06 /* AppSettingsOpener.swift in Sources */,
 				722360E693D7186A43ED2792 /* AppSettingsView.swift in Sources */,
 				227BB0B9C6B7D7C6811A4C36 /* BuildInfo.swift in Sources */,
 				7291708FE7C4B4C49E3548FB /* CGTreeRenderer.swift in Sources */,

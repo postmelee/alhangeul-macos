@@ -1,0 +1,19 @@
+{
+  "activationMode" : "coalesced",
+  "directFontBytesReads" : 0,
+  "enabled" : false,
+  "faceCount" : 528,
+  "familyCount" : 180,
+  "metadataSaveCount" : 1,
+  "metadataScanMS" : [
+    96.929249999999996
+  ],
+  "metadataUnchangedAfterActivation" : true,
+  "prepareMS" : 103.6925,
+  "repeatPrepare20MS" : 0.85750000000000004,
+  "repeatPrepareAdditionalScans" : 0,
+  "restoredSavedMetadata" : true,
+  "savedJSONBytes" : 261968,
+  "scanCountAfterActivation" : 1,
+  "serviceLoadMS" : 3.344417
+}

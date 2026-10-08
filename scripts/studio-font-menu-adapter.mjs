@@ -1,7 +1,7 @@
 // 앱 소유 목록 연결. upstream 파일·renderer·편집 명령은 수정하지 않는다.
 export const receiptName = 'alhangeul-font-menu-adapter.json';
 export const buildCommand = 'node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>';
-export const sourcePaths = ['src/core/local-fonts.ts', 'src/ui/toolbar.ts'];
+export const sourcePaths = ['src/core/local-fonts.ts', 'src/ui/toolbar.ts', 'src/ui/options-dialog.ts'];
 
 function replaceOnce(source, before, after, label) {
   if (source.split(before).length !== 2) throw Error(`Studio font menu adapter drift: ${label}`);
@@ -38,6 +38,34 @@ export function adaptSource(source, path) {
         }
       });
     });`, path);
+  }
+  if (path === sourcePaths[2]) {
+    return replaceOnce(source,
+      '    // ── 로컬 글꼴 섹션 ──\n',
+      `    // 알한글은 browser 감지/저장과 별개인 native 설정에서 글꼴을 관리한다.
+    const nativeCommand = (window as unknown as {
+      __alhangeulHostBridgeRunNativeCommand?: (command: string) => boolean;
+    }).__alhangeulHostBridgeRunNativeCommand;
+    if (typeof nativeCommand === 'function') {
+      const section = document.createElement('div');
+      section.className = 'dialog-section';
+      section.dataset.alhangeulFontSettings = '';
+      const title = document.createElement('div');
+      title.className = 'dialog-section-title';
+      title.textContent = 'Mac 글꼴';
+      const description = document.createElement('p');
+      description.className = 'opt-desc';
+      description.textContent = 'Mac에 설치된 글꼴의 사용 설정과 글꼴 가져오기는 앱의 글꼴 설정에서 관리합니다. 사용할 수 있는 글꼴은 상단 글꼴 목록에서 선택할 수 있습니다.';
+      const button = document.createElement('button');
+      button.className = 'dialog-btn opt-fontset-btn';
+      button.textContent = '글꼴 설정 열기…';
+      button.addEventListener('click', () => { nativeCommand('app:font-settings'); });
+      section.append(title, description, button);
+      panel.appendChild(section);
+      return panel;
+    }
+    // ── 로컬 글꼴 섹션 ──
+`, path);
   }
   throw Error(`Unexpected Studio adapter source: ${path}`);
 }

@@ -20,7 +20,7 @@ struct InstalledFontStartupProbe {
     private static func elapsed(_ start: UInt64) -> Double { Double(now() - start) / 1_000_000 }
 
     static func main() async throws {
-        guard CommandLine.arguments.count == 3 else { throw InstalledFontFailure.notPrepared }
+        guard CommandLine.arguments.count >= 3 else { throw InstalledFontFailure.notPrepared }
         let stateURL = URL(fileURLWithPath: CommandLine.arguments[1])
         let outputURL = URL(fileURLWithPath: CommandLine.arguments[2])
         let meter = ProbeMeter(), system = InstalledFontSystem().environment
@@ -48,11 +48,18 @@ struct InstalledFontStartupProbe {
         let ready = try await catalog.prepare()
         let prepareMS = elapsed(prepareStart)
         // 제품의 시작 prepare 뒤 didBecomeActive 요청을 재현한다.
-        await catalog.scheduleRefresh(retryPermissionFailures: true)
-        let deadline = now() + 30_000_000_000
-        while meter.snapshot().0.count < 2 {
-            guard now() < deadline else { throw InstalledFontFailure.busy }
-            try await Task.sleep(nanoseconds: 10_000_000)
+        let legacy = CommandLine.arguments.contains("--legacy-activation")
+        if legacy {
+            await catalog.scheduleRefresh(retryPermissionFailures: true)
+            let deadline = now() + 30_000_000_000
+            while meter.snapshot().0.count < 2 {
+                guard now() < deadline else { throw InstalledFontFailure.busy }
+                try await Task.sleep(nanoseconds: 10_000_000)
+            }
+        } else {
+            await catalog.scheduleRefreshForActivation()
+            try await Task.sleep(nanoseconds: 400_000_000)
+            guard meter.snapshot().0.count == 1 else { throw InstalledFontFailure.changed }
         }
         let latest = await catalog.snapshot()
         let before = meter.snapshot().0.count, repeatedStart = now()
@@ -64,6 +71,7 @@ struct InstalledFontStartupProbe {
         await catalog.stopMonitoring()
         let result: [String: Any] = [
             "restoredSavedMetadata": existed, "enabled": ready.enabled,
+            "activationMode": legacy ? "legacy" : "coalesced",
             "faceCount": ready.records.count, "familyCount": Set(ready.records.map(\.family)).count,
             "serviceLoadMS": serviceMS, "prepareMS": prepareMS,
             "metadataScanMS": metrics.0, "scanCountAfterActivation": metrics.0.count,

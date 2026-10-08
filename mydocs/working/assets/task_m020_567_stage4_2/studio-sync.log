@@ -1,0 +1,6 @@
+OK: Studio font menu adapter receipt verified
+OK: upstream checkout HEAD matches 1a76570e833917d15817415a53c09ad61ab3203f
+OK: manifest source_cargo_lock_sha256 matches build.noindex/task567/stage3-2/upstream-v087/Cargo.lock
+OK: Studio font menu adapter receipt verified
+OK: rhwp-studio assets verified at /Users/melee/Documents/projects/rhwp-mac/Sources/HostApp/Resources/rhwp-studio
+OK: rhwp-studio synced to /Users/melee/Documents/projects/rhwp-mac/Sources/HostApp/Resources/rhwp-studio from v0.8.7 at 1a76570e833917d15817415a53c09ad61ab3203f

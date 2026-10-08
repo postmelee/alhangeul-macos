@@ -12,6 +12,40 @@ const toolbar = `import { getLocalFonts } from '@/core/local-fonts';
     eventBus.on('local-fonts-changed', () => {
       this.refreshFontDropdown();
     });`;
+const options = `function createFontPanel() {
+    const panel = document.createElement('div');
+    panel.appendChild(document.createElement('recent-fonts'));
+    panel.appendChild(document.createElement('font-sets'));
+    // ── 로컬 글꼴 섹션 ──
+    browserCalls++;
+    panel.appendChild(document.createElement('browser-fonts'));
+    return panel;
+}`;
+test('native 환경설정은 Mac 안내와 native 진입점만 사용하고 browser 환경은 기존 경로 유지', async () => {
+  const {adaptSource, sourcePaths} = await adapter;
+  const commands = [], window = {};
+  const context = vm.createContext({window, browserCalls: 0, document: {createElement(tag) {
+    return {tag, dataset: {}, children: [], append(...items) { this.children.push(...items); },
+      appendChild(item) { this.append(item); }, addEventListener(event, callback) { this[event] = callback; }};
+  }}});
+  const code = stripTypeScriptTypes(adaptSource(options, sourcePaths[2]));
+  vm.runInContext(code, context);
+  window.__alhangeulHostBridgeRunNativeCommand = command => { commands.push(command); return true; };
+  const native = context.createFontPanel();
+  assert.equal(context.browserCalls, 0);
+  assert.deepEqual(native.children.map(row => row.tag), ['recent-fonts', 'font-sets', 'div']);
+  const section = native.children[2];
+  assert.equal(section.children[0].textContent, 'Mac 글꼴');
+  assert.match(section.children[1].textContent, /상단 글꼴 목록/);
+  assert.equal(section.children[2].textContent, '글꼴 설정 열기…');
+  section.children[2].click();
+  assert.deepEqual(commands, ['app:font-settings']);
+  delete window.__alhangeulHostBridgeRunNativeCommand;
+  const browser = context.createFontPanel();
+  assert.equal(context.browserCalls, 1);
+  assert.equal(browser.children[2].tag, 'browser-fonts');
+  assert.throws(() => adaptSource(options.replace('로컬 글꼴 섹션', '새 글꼴 섹션'), sourcePaths[2]), /adapter drift/);
+});
 test('활성 host family를 중복 제거하고 비활성 시 기존 browser 목록을 사용', async () => {
   const {adaptSource, sourcePaths} = await adapter;
   let active = true, records = [{family: '고운바탕'}, {family: '고운바탕'}, {family: '<글꼴 & 이름>'}];

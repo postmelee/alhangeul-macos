@@ -124,3 +124,9 @@ Stage 2는 native 전용 공유 환경·catalog/transfer bridge·관리 변경 �
 - 취소는 호출자에게 즉시 전달하되 취소를 무시한 openFace가 늦게 transfer를 발급하면 closeFace로 회수한다. 실제 native 반환/정리 전에는 local active slot도 해제하지 않는다. 관리 snapshot lease는 기존 native session이 소유하므로 JS dispose만으로 전체 lease가 해제된다고 간주하지 않는다.
 
 [Stage 3 보고](../working/task_m020_567_stage3.md)의 격리 실행은 IPC·bytes 계약 증거다. 정식 Studio main 진입, 실제 renderer·toolbar, signed sandbox 및 OS 설치 권한의 제품 수용 증거가 아니다.
+
+## Stage 4.2 설정 진입 계약
+
+앱 소유 Vite 어댑터의 대상에 `src/ui/options-dialog.ts`를 추가했다. main frame의 native command bridge가 있으면 로컬 글꼴 영역만 Mac 안내·`app:font-settings` 진입 버튼으로 바꾼다. 브라우저의 탐색/저장/초기화를 호출하지 않으며 bridge 없는 환경에서는 기존 upstream 경로를 유지한다. 최근 글꼴·대표 글꼴·파일 설정과 편집 엔진은 유지한다. receipt에는 원본/변환 소스 fingerprint가 추가되며 upstream 소스나 minified 산출물을 직접 편집하지 않는다.
+
+새 명령은 소유 WebView, main frame, 신뢰 origin 및 index.html 경로를 검사한다. 문서를 편집하지 않고 native Settings Scene의 글꼴 탭을 선택한다. macOS 14+에서는 문서 Scene에 등록된 공개 `openSettings` action을 사용하고 이전 지원 OS는 설정/환경설정 selector로 연다. 각 문서 Scene의 opener는 사라질 때 해제하며 설정 UI·글꼴 공급은 기존 공유 service를 사용한다. [Apple OpenSettingsAction](https://developer.apple.com/documentation/swiftui/opensettingsaction)을 참고했고 최소 OS 실행은 Stage 5 수용에 남긴다.

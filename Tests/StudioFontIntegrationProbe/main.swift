@@ -350,6 +350,11 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
         })
         let coordinator = RhwpStudioWebView.Coordinator(fontMessageHandler: handler)
         self.coordinator = coordinator; coordinator.onEditorSessionChange = { self.session = $0 }
+        coordinator.onOpenFontSettings = { [weak self] in
+            guard let window = self?.settingsWindow else { return false }
+            window.makeKeyAndOrderFront(nil)
+            return true
+        }
         let web = coordinator.makeWebView(); self.web = web
         let window = NSWindow(contentRect: NSRect(x: 180, y: 100, width: 1100, height: 800),
             styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)

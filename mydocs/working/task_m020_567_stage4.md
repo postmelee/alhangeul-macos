@@ -100,3 +100,50 @@ CoreText 알림·앱 활성화·수동 새로고침 및 실제 읽기 시 원본
 최종 lifecycle 첫 실행은 저장 뒤 실제 창 닫힘 대기에서 실패했다. 그 코드는 이번 UI 보정에서 변경하지 않았으며 원인을 제품 회귀로 단정하지 않았다. [실패 로그](assets/task_m020_567_stage4_1/studio-lifecycle-first-failure.log)를 유지하고, 같은 소스를 다른 UI 조작 없이 독립 재실행해 43항목 통과를 확인했다. 성공으로 덮어쓰거나 최초 실패가 없었다고 주장하지 않는다. 화면 확인 도구의 앱 선택 응답에도 긴 지연이 있었으나 이후 실제 조작/화면 확인은 완료했다.
 
 이번 소유 lifecycle 앱은 종료 시 해당 경로 등록 해제를 수행했다. HostApp Debug 경로 해제는 `-10814`를 반환했으며 전역 clean 성공으로 집계하지 않았다. 직접 조작 창은 유지하며 종료 후 각 probe의 소유 경로만 해제한다. 전역 등록 clean·최소 OS/Intel 실제 실행·signed sandbox 및 대규모 성능 수용은 이번 결과가 아니다. Stage 5와 시작 최적화 후속 범위는 다음 지시 후 보정한다.
+
+## Stage 4.2 완료 — 2026-10-08
+
+사용자의 “그렇게 진행해줘”를 직전 설정 진입·Mac 안내·최초 중복 탐색 병합 제안의 승인으로 기록했다. 기존 #567 / M020 / local/task567에서 진행했으며 Stage 5와 공개 배포는 포함하지 않는다.
+
+### 설정 진입과 안내
+
+- 제품 메뉴의 설정(`⌘,`) 외에 Studio의 도구 → 환경설정 → Mac 글꼴 → “글꼴 설정 열기…”에서 같은 native Settings Scene의 글꼴 탭을 연다. 이후 보관한 글꼴의 “글꼴 가져오기…”를 사용할 수 있다.
+- Chrome/Edge/Firefox 안내와 browser 감지/초기화 버튼은 native bridge가 있는 환경에서 Mac 안내·설정 진입 버튼으로 통일했다. bridge 없는 browser 경로와 최근/대표 글꼴·파일 탭은 유지한다.
+- Settings 탭 선택과 문서 Scene의 공개 openSettings action을 연결했다. macOS 14+는 공개 API, 이전 지원 OS는 기존 설정/환경설정 selector를 사용한다. 문서 Scene이 사라지면 해당 opener를 제거한다.
+- 새 명령은 소유 WebView·main frame·신뢰 origin·index.html 경로를 검사한다. 동일 origin iframe의 명령도 거부하며 문서를 편집하지 않는다.
+- 앱 소유 어댑터의 변환 대상에 options-dialog를 추가하고 원본/변환 fingerprint·sync fixture를 갱신했다. 같은 공식 v0.8.7 소스로 typecheck·Studio 재빌드/sync를 수행했으며 upstream 소스·core pin·WASM은 유지했다. minified 산출물을 직접 편집하지 않았다.
+
+![Studio의 Mac 글꼴 안내와 설정 진입](assets/task_m020_567_stage4_2/studio-preferences.png)
+
+![native 글꼴 설정](assets/task_m020_567_stage4_2/native-font-settings.png)
+
+### 최초 탐색 병합과 비용
+
+활성화 시각을 provider/actor 대기 전에 기록한다. 최초 활성화가 먼저 도착하면 공유 prepare로 준비하며, 성공한 준비와 겹치거나 완료 직후 200ms 이내인 첫 활성화는 재검사를 생략한다. 새 permissionDenied·준비 실패, 늦은 첫 활성화, 이후 활성화는 기존 재검사를 유지한다. CoreText 변경 알림·수동 재감지의 예약을 취소하지 않는다. 사용 꺼짐의 지연 준비 정책과 bytes/원본 검사는 변경하지 않았다.
+
+같은 현재 CoreText 목록 528 faces / 180 families로 각 호출 경로를 새 CLI 프로세스 5회씩 비교했다. 기존은 scan 2회, 보정은 1회였고 metadata scan 시간 합계 중앙값은 188.68ms → 101.33ms였다. 직접 font bytes 요청은 두 경로 모두 0회다. Stage 4.1 당시 목록 809/232와 다르므로 과거 0.38초와의 속도 향상을 주장하지 않는다. 전체 앱 launch·OS cold 성능은 이번 측정이 아니다. [조사 보정](../tech/task_m020_567_startup.md) · [비교 원본](assets/task_m020_567_stage4_2/startup-summary.json).
+
+### 검증과 직접 조작
+
+| 검증 | 결과 |
+|------|------|
+| native 글꼴 회귀 | 109개 통과. 최초 활성화 양쪽 순서의 1회 검사·이후 활성화, 늦은 최초 활성화, 새 권한 실패/준비 실패 복구, 준비 중 실제 CoreText 알림 보존 회귀 추가 |
+| JavaScript | 25개 통과. native 안내/단일 진입 명령 및 bridge 없는 browser 경로 보존 |
+| 실제 WK 변경/복원 | 열린 문서 31 + 관리 새 프로세스 5 + 설치 새 프로세스 4항목, HWP/HWPX 저장·재열기 6위치 원래 본문/이름/스타일/alias 미유출 대조 통과 |
+| 실제 Settings Scene | 8항목 통과. 기존 Studio 환경설정→버튼→native bridge→공개 openSettings→글꼴 탭, sheet 한 개 표시/닫기, iframe 거부, 재열기, 문서 epoch/changeSeq/dirty 보존 및 오류 없음 |
+| 제품 빌드 | HostApp Debug / macOS 12 target compile·link 성공 |
+| provenance/경계 | 공식 checkout 대조와 Studio receipt/자원 verifier, sync/Cargo fixture 및 color-picker 6사례, no-AppKit, 변경 Python/shell 문법·diff 검사 통과 |
+
+증거 로그 복사본은 줄 끝 공백과 마지막 빈 줄만 정리했다. 실행 원본은 `build.noindex/task567/stage4-2/`에 유지한다.
+
+Settings Scene 시험은 제품과 같은 SwiftUI Scene·opener·설정 View·Coordinator를 사용하고 승인된 고운바탕 Regular/Bold 복사본과 별도 저장소를 주입했다. 가져오기 sheet는 변경하지 않은 버튼과 동일한 기존 model action으로 표시했다. 가져오기 버튼의 물리 클릭을 자동 검증했다고 주장하지 않는다. 실제 버튼 조작은 직접 조작 창에서 확인할 수 있다.
+
+직접 조작용 “알한글 — 글꼴 설정 연결 · 격리 테스트” 창을 Studio 환경설정 화면으로 열어 두었다. Mac 글꼴의 설정 열기 버튼으로 글꼴 탭에 들어가 가져오기 버튼을 누를 수 있다. 고운바탕 두 style은 테스트용 활성 목록이며 사용자 OS 글꼴 설치·설정·문서를 변경하지 않는다. private native 공급과 설정이 같은 서비스를 사용하므로 설치 사용 toggle도 같은 테스트 문서에 연결된다.
+
+### 중간 실패와 남은 수용
+
+최초 Xcode 실행은 제한된 환경의 표준 캐시 쓰기에서 실패하여 허용된 실제 macOS 빌드 환경으로 실행했다. GUI 시험도 제한된 실행 환경의 앱 시작/LaunchServices 정리와 구분해 실행했다. 추가 SwiftUI 시험은 경로 인자·창 표시 및 LaunchServices 시작 차이를 보정했고, 표준 open 경로의 -10810은 같은 앱의 직접 시작으로 분리했다. 최종 helper는 시험 경로를 Info.plist에 기록하고 인자를 최소화하여 직접 실행한다.
+
+초기 Studio 자동화 호출은 대화상자에 필요한 allowDialog 옵션 없이 실행해 실패했다. 이후 native 설정 창은 열렸지만 SwiftUI 스크롤 영역의 접근성 하위 객체를 찾지 못했고 navigation-order 배열의 타입 bridge 오류도 확인했다. 해당 자동 버튼 탐색을 최종 시험에서 제거하고, 실제 새 진입 버튼과 Settings Scene 및 기존 model의 sheet 결합을 검증했다. [초기 옵션 실패](assets/task_m020_567_stage4_2/settings-navigation-first-failure.json)와 [접근성 실패](assets/task_m020_567_stage4_2/settings-navigation-ax-first-failure.json)를 성공 증거와 구분해 보존한다. 제품의 가져오기 버튼 구현은 변경하지 않았다.
+
+각 종료한 시험 앱의 소유 경로만 등록 해제하며 직접 조작 앱은 유지한다. 전역 등록 clean·Quick Look 개발 등록 smoke는 수행하지 않았다. 최소 OS/Intel 실제 실행·정식 signed sandbox 권한 복원·제품 전체 시작/성능·최종 수용 및 #568/#569 인계는 Stage 5에 남긴다. 이슈 전체 완료·PR·배포를 수행한 단계가 아니다.

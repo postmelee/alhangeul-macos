@@ -156,6 +156,12 @@ import { getLocalFonts } from '@/core/local-fonts';
     });
 EOF
 
+  cat > "$upstream_dir/rhwp-studio/src/ui/options-dialog.ts" <<'EOF'
+function createFontPanel() {
+    // ── 로컬 글꼴 섹션 ──
+}
+EOF
+
   git -C "$upstream_dir" init -q
   git -C "$upstream_dir" config user.name fixture
   git -C "$upstream_dir" config user.email fixture@example.invalid

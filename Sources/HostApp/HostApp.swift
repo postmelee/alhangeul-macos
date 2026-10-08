@@ -13,6 +13,7 @@ struct AlHangeulMacApp: App {
     var body: some Scene {
         WindowGroup {
             DocumentWindowRootView()
+                .background(AppSettingsOpener())
         }
         .commands {
             HostAppCommands(updateController: updateController)
@@ -223,9 +224,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ notification: Notification) {
         repositionUnreachableWindowsIfNeeded()
+        let activatedAt = ProcessInfo.processInfo.systemUptime
         Task {
             if let catalog = try? await InstalledFontServiceProvider.shared.service() {
-                await catalog.scheduleRefresh(retryPermissionFailures: true)
+                await catalog.scheduleRefreshForActivation(at: activatedAt)
             }
         }
     }

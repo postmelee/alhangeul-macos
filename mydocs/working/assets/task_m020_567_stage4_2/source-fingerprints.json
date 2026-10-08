@@ -1,0 +1,22 @@
+{
+  "Sources/HostApp/HostApp.swift": "44aa735c4f9730f9e861d2f72be68d2b182df6dfae294244ce8aff930c4b1b8a",
+  "Sources/HostApp/Resources/rhwp-studio/alhangeul-font-menu-adapter.json": "39ba9c2109266ff3918adeadc266fc9e88c8bb5b8bb44c558a706db95e12e98f",
+  "Sources/HostApp/Resources/rhwp-studio/index.html": "6fdc7aaceee42d8afaeca16949c7ec0a68e90a4880bba28515c86716696f7a82",
+  "Sources/HostApp/Resources/rhwp-studio/manifest.json": "0f049c6fe20c92cb668e2c9af602714ee807aebd71dd8e41e574bf40a521673d",
+  "Sources/HostApp/Resources/rhwp-studio/sw.js": "1ce40ddf7658a396f2b60fb9de3dfb6c2ee1081291d716ad191f4d113c0916cf",
+  "Sources/HostApp/Services/InstalledFontCatalogService.swift": "a53475cf4c40ee990379047d305237d608feef06b58c8830141a52310af5184b",
+  "Sources/HostApp/Services/RhwpStudioHostBridgeScript.swift": "dccaee959e5a74024dc6ceac920a426a96858d3300d1728f4af7d2a2bb617d9e",
+  "Sources/HostApp/Views/AppSettingsView.swift": "d2d8b3a6b26ee2eb735a022525f92291b56c92161707a3ee0fec998811fec829",
+  "Sources/HostApp/Views/RhwpStudioWebView.swift": "06c7cb7cc377facbe3d977f09a5b82b094a3e0420d3c753c65162516f46cada4",
+  "Tests/FontLibraryTests/InstalledFontCatalogTests.swift": "0016f35092a22a8651e49349e3d6c9247ef5f6771d2e62fc1a58be1852e06364",
+  "Tests/InstalledFontStartupProbe/main.swift": "d56130e6a2a44302e96549ce56e54b501ca68bb798253ef287871f3f562b6550",
+  "Tests/StudioFontIntegrationProbe/main.swift": "42fc2efd20f06ded5284a803c72e6c608281306aadb3dce1a5d0e5adba938950",
+  "scripts/ci/test-rhwp-studio-cargo-lock-verification.sh": "d2f61cf632e06809258a12db9ba264d347b9b949d180be2668b23aa817c676af",
+  "scripts/ci/test-studio-font-menu.cjs": "7eeecf02ceb4cfc2b7734d3a168c8a8b2fa25d6c395360ca21650f41372be522",
+  "scripts/probe-studio-font-integration.py": "268248593bef1ea781733abd7a5759b5b640caf2d65afb9566ef99b989a27a0a",
+  "scripts/profile-installed-font-startup.sh": "4a7183bc54e8395d344e86d38439ccfb9267dae94751bfd6dec67e880d3daa95",
+  "scripts/studio-font-menu-adapter.mjs": "ca95e81181ae454762715760858a8d4730b8c75e63fc1a6e1411286bc2bd0137",
+  "Sources/HostApp/Services/AppSettingsNavigation.swift": "801053350a21fd74a5b5341aacb560d693c419ed48713b219f4f0e732c30ab7c",
+  "Sources/HostApp/Views/AppSettingsOpener.swift": "b5033de2b49c21eabe2fce37a2575b827b3299c8f0b7cc69cb507115c9631c8f",
+  "Tests/StudioFontSettingsProbe/main.swift": "f145d37883d780c3ada1e50861476d01fe5340cc6d9f0b4046018e3fb4e06102"
+}
