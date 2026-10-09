@@ -9,6 +9,7 @@ xcodegen generate
 xcodebuild -project Alhangeul.xcodeproj -scheme HostAppTests \
   -configuration Debug -destination 'platform=macOS' -derivedDataPath "$OUT" \
   CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- build-for-testing
+ALHANGEUL_PDF_TEST_DIAGNOSTICS="$OUT/pdf-output-diagnostics" \
 LLVM_PROFILE_FILE="$OUT/coverage-%p.profraw" xcrun xctest \
   -XCTest HostAppTests.RhwpStudioOutputFontPreparationTests,HostAppTests.RhwpStudioPagePDFRendererTests,HostAppTests.RhwpStudioPDFExportControllerTests,HostAppTests.RhwpStudioPagePayloadTests,HostAppTests.RhwpStudioPDFExportStateTests,HostAppTests.RhwpStudioPrintLifecycleTests,HostAppTests.RhwpStudioPrintControllerTests,HostAppTests.RhwpStudioPrintOrientationPolicyTests,HostAppTests.SpotlightReindexServiceTests \
   "$OUT/Build/Products/Debug/HostAppTests.xctest"

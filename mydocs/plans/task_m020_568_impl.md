@@ -171,6 +171,8 @@ HostApp Debug의 macOS 12 target compile/link와 실제 최소 OS runtime은 별
 
 ## 10. 현재 승인 범위
 
+2026-10-10 PR #579의 macOS 15.7.9 PDF 텍스트 검사 실패 보고 후 작업지시자의 “진행해줘”로 원인 조사·필요한 PDF/시험 fixture 보정·회귀·동일 PR 반영을 승인받았다. 실제 합성 PDF/reader 대조로 원인을 구분하고 문자 보존/외부 차단 기준을 유지한다. core pin·새 기능/ABI 확대·설치 시험·merge/배포는 추가하지 않는다.
+
 2026-10-10 Stage 6 완료 보고 후 작업지시자의 “진행해줘”로 최종 보고·오늘할일 완료 처리·`publish/task568` 원격 push·`devel` Open PR 게시를 승인받았다. merge/이슈 close·후속 구현·upstream 공개 기여·제품/웹 배포는 포함하지 않는다.
 
 2026-10-10 Stage 5 완료 보고 후 작업지시자의 “진행해줘”로 Stage 6의 소비자별 회귀·지원 범위 보정·소스/증거 hash 대조·#566/#569 인계를 승인받았다. 공개 이슈 변경·upstream 기여 게시·최종 보고/원격 push/PR·제품/웹 배포는 별도 단계다.

@@ -64,6 +64,8 @@ Stage 3 signed 출력 compiled 입력은 177개 중 162개 현재 hash 일치, 1
 
 2026-10-10 [PR #579](https://github.com/postmelee/alhangeul-macos/pull/579) 게시 직후 `Script syntax checks`의 Cargo.lock fixture 단계가 실패했다. [실패 job](https://github.com/postmelee/alhangeul-macos/actions/runs/37964231501/job/113934497967)의 ENOENT와 `sourcePaths` 4개/fixture 3개 차이를 확인했다. 기존 시험만 현재 adapter 입력 계약에 맞게 보정했고, 로컬에서 Cargo.lock fingerprint/checkout·receipt·sync·production 불변 회귀가 통과했다. `cargo-lock-fixtures.log`와 초기 CI 로그를 보존하며 원격 CI 통과 여부는 수정 head에서 별도로 확인한다.
 
+같은 날 다음 [macOS CI job](https://github.com/postmelee/alhangeul-macos/actions/runs/37964819628/job/113936836296)의 PDF 검사 4건이 실패했다. macOS 15.7.9의 `PDFPage.string`/검색에서는 `㈀`·`㉠`·`²`가 호환 분해된 반면 영역 선택의 원문 검사는 통과했다. PDF 생성과 reader 동작을 구분하기 위해 고정 합성 fixture 4개만 PDF·현재/재열기 추출·검색·font resource JSON으로 보존하도록 연결했다. 외부 paint URL 차단 fixture에는 검은색 fallback과 문구가 잘리지 않는 폭을 명시했다. macOS 26.5.2에서 출력 관련 81개 검사와 Poppler 원문 추출·PNG 대조가 통과했으며, macOS 15의 실제 PDF 대조와 최종 원인 판정은 진행 중이다. 이 시점에 제품 renderer 변경이나 원문 보존 기준 완화는 하지 않았다.
+
 같은 수용 문서의 사용자 공급 없는 Noto 기준선과 관리 고운바탕 적용 결과다. 과거 제품 화면을 새로 촬영한 Before/After로 해석하지 않는다.
 
 | PDF 기준선 | 관리 글꼴 PDF |

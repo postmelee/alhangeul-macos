@@ -418,6 +418,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         )
 
         let document = try await render(payload)
+        defer { recordPDFDiagnostics(document, name: "math-stack", queries: ["문2", "함수", "f(x)=x²+2x+1"]) }
         let page = try XCTUnwrap(document.page(at: 0))
         let pageText = try XCTUnwrap(page.string)
         let fullSelection = try XCTUnwrap(
@@ -458,6 +459,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         )
 
         let document = try await render(payload)
+        defer { recordPDFDiagnostics(document, name: "enclosed-hangul", queries: ["외부", "모노스페이스", "미등록", "㈀", "㉠"]) }
         let page = try XCTUnwrap(document.page(at: 0))
         let pageText = try XCTUnwrap(page.string)
         let fullSelection = try XCTUnwrap(
@@ -650,7 +652,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             pages: [
                 """
                 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                     width="200" height="300" viewBox="0 0 200 300">
+                     width="260" height="300" viewBox="0 0 260 300">
                   <style>
                     @import url("\(httpBaseURL)/import.css");
                     @font-face { font-family: probe; src: url(\(httpBaseURL)/font.woff2); }
@@ -659,11 +661,11 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
                       src: url(alhangeul-pdf-font://bundle/NotAllowed.woff2);
                     }
                     .external-fill {
-                      fill: url(\(httpsBaseURL)/paint.svg#paint);
+                      fill: url(\(httpsBaseURL)/paint.svg#paint) black;
                       font-family: probe, rejected-custom-probe;
                     }
                   </style>
-                  <rect width="200" height="300" fill="white" />
+                  <rect width="260" height="300" fill="white" />
                   <text x="20" y="40" font-size="18" fill="black" class="external-fill">NETWORK-BLOCKED</text>
                   <image href="\(httpBaseURL)/image.png" x="0" y="60" width="100" height="100" />
                   <image xlink:href="\(httpBaseURL)/legacy-image.png" x="0" y="160" width="100" height="100" />
@@ -692,6 +694,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         }
 
         try await Task.sleep(nanoseconds: 500_000_000)
+        defer { recordPDFDiagnostics(document, name: "network-blocked", queries: ["NETWORK-BLOCKED"]) }
         XCTAssertEqual(document.pageCount, 1)
         XCTAssertTrue(document.page(at: 0)?.string?.contains("NETWORK-BLOCKED") == true)
         XCTAssertEqual(completionCount, 1)
@@ -1201,6 +1204,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
           </svg>
           """])
         let pdf = try await render(payload), page = try XCTUnwrap(pdf.page(at:0))
+        defer { recordPDFDiagnostics(pdf, name: "mixed-runs", queries: lines) }
         let copied = try XCTUnwrap(page.selection(for:page.bounds(for:.mediaBox))?.string)
         for line in lines {
             XCTAssertTrue(page.string?.contains(line) == true, page.string ?? "")
@@ -1217,6 +1221,44 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
                 continuation.resume(with: result)
             }
         }
+    }
+
+    // 고정된 합성 fixture만 opt-in으로 보존한다. 기존 assertion 뒤에 호출해 판정 순서를 바꾸지 않는다.
+    private func recordPDFDiagnostics(_ document: PDFDocument, name: String, queries: [String]) {
+        guard let path = ProcessInfo.processInfo.environment["ALHANGEUL_PDF_TEST_DIAGNOSTICS"] else { return }
+        do {
+            let root = URL(fileURLWithPath: path, isDirectory: true)
+            try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+            let data = try XCTUnwrap(document.dataRepresentation())
+            let reopened = try XCTUnwrap(PDFDocument(data: data))
+            func describe(_ pdf: PDFDocument) -> [[String: Any]] {
+                (0..<pdf.pageCount).compactMap { index in
+                    guard let page = pdf.page(at: index) else { return nil }
+                    return [
+                        "page": index,
+                        "string": page.string ?? "<nil>",
+                        "attributedString": page.attributedString?.string ?? "<nil>",
+                        "selection": page.selection(for: page.bounds(for: .mediaBox))?.string ?? "<nil>",
+                        "searches": queries.map { query -> [String: Any] in
+                            ["query": query, "default": pdf.findString(query, withOptions: []).count,
+                             "literal": pdf.findString(query, withOptions: [.literal]).count,
+                             "compatibilityDecomposed": pdf.findString(query.decomposedStringWithCompatibilityMapping, withOptions: []).count]
+                        }
+                    ]
+                }
+            }
+            let fonts: [[String: Any]] = CGPDFFontResourceInspector.records(in: document).map {
+                ["page": $0.pageIndex, "baseFont": $0.baseFont,
+                 "hasToUnicode": $0.hasToUnicode, "programBytes": $0.fontProgramBytes]
+            }
+            let details: [String: Any] = [
+                "system": ProcessInfo.processInfo.operatingSystemVersionString,
+                "current": describe(document), "reopened": describe(reopened), "fonts": fonts
+            ]
+            try data.write(to: root.appendingPathComponent(name + ".pdf"), options: .atomic)
+            try JSONSerialization.data(withJSONObject: details, options: [.prettyPrinted, .sortedKeys])
+                .write(to: root.appendingPathComponent(name + ".json"), options: .atomic)
+        } catch { XCTFail("합성 PDF 진단 저장 실패: \(error)") }
     }
 
     private func makeRenderer(

@@ -330,6 +330,14 @@ jobs:
         shell: bash
         run: bash scripts/test-studio-output.sh
 
+      - name: Preserve synthetic PDF output diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: studio-pdf-output-diagnostics
+          path: build.noindex/DerivedData/pdf-output-diagnostics/
+          if-no-files-found: ignore
+
       - name: Test SwiftUI Studio document lifecycle
         run: python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-font-dotum-empty-hancom.hwp
 
