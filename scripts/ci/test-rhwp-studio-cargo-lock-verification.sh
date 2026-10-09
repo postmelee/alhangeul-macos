@@ -162,6 +162,13 @@ function createFontPanel() {
 }
 EOF
 
+  cat > "$upstream_dir/rhwp-studio/src/main.ts" <<'EOF'
+import { setHostFontProvider, getHostFontState } from '@/core/local-fonts';
+const rhwpStudio = {
+  fonts: { setProvider: setHostFontProvider, getState: getHostFontState },
+};
+EOF
+
   git -C "$upstream_dir" init -q
   git -C "$upstream_dir" config user.name fixture
   git -C "$upstream_dir" config user.email fixture@example.invalid

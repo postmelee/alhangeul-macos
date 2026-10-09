@@ -56,10 +56,13 @@ core/Studio는 공식 `v0.8.7` / `1a76570e833917d15817415a53c09ad61ab3203f`를 �
 | 최종 소스·증거·빌드 | OK | Stage 5 source 125개 전부 현재 일치·signed checksum 26개·PDF 12개·고운바탕 2개·core artifact 2개 대조. 최종 FontLibrary 133/HostApp 237, 일반/probe Release 빌드 통과 |
 | core/ABI·producer 회귀 | OK | Rust 29개·arm64/x86_64 archive·header/symbol·portable/동일 환경 strict·golden 수용. core release/commit 유지 |
 | 최종 보고 시 가벼운 검증 | OK | main/source content gate·build info·native matcher/Studio receipt·no-AppKit·증거/local 링크·diff 검사. 제품 소스 변경 없이 기존 시험 결과 재사용 |
+| PR 게시 후 Cargo.lock fixture 보정 | OK(로컬), 원격 CI 재검증 | 초기 CI의 가짜 upstream에 새 adapter 입력 `src/main.ts`가 없어 ENOENT. 해당 fixture 파일을 추가하고 동일 `test-rhwp-studio-cargo-lock-verification.sh` 및 shell syntax 통과. 제품/어댑터·검증 정책은 그대로 유지 |
 
 단계별 실행·재사용은 [Stage 1](../working/task_m020_568_stage1.md), [Stage 2](../working/task_m020_568_stage2.md), [Stage 3](../working/task_m020_568_stage3.md), [Stage 4](../working/task_m020_568_stage4.md), [Stage 5](../working/task_m020_568_stage5.md), [Stage 6](../working/task_m020_568_stage6.md)를 따른다. 최종 보고 단계에서 native/HostApp/signed 수용을 전부 재실행하지 않았다. Stage 6 JS 30개 및 최종 133/237개 성공은 서로 다른 시험 집합/시점이다.
 
 Stage 3 signed 출력 compiled 입력은 177개 중 162개 현재 hash 일치, 15개 공통 service/native/probe 입력 변경이다. Stage 4 receipt는 31개 중 27개 일치, 4개 변경이며 Stage 5 회귀로 연결한다. 이후 제품 source 125개는 최종 signed Finder 입력과 전부 일치한다. 모든 소비자를 같은 최신 signed 배포 후보에서 재수용했다는 뜻은 아니다. [증거 대조](../working/assets/task_m020_568_stage6/evidence-audit.json)와 최종 점검 로그 `build.noindex/task568/final-report/`를 보존한다.
+
+2026-10-10 [PR #579](https://github.com/postmelee/alhangeul-macos/pull/579) 게시 직후 `Script syntax checks`의 Cargo.lock fixture 단계가 실패했다. [실패 job](https://github.com/postmelee/alhangeul-macos/actions/runs/37964231501/job/113934497967)의 ENOENT와 `sourcePaths` 4개/fixture 3개 차이를 확인했다. 기존 시험만 현재 adapter 입력 계약에 맞게 보정했고, 로컬에서 Cargo.lock fingerprint/checkout·receipt·sync·production 불변 회귀가 통과했다. `cargo-lock-fixtures.log`와 초기 CI 로그를 보존하며 원격 CI 통과 여부는 수정 head에서 별도로 확인한다.
 
 같은 수용 문서의 사용자 공급 없는 Noto 기준선과 관리 고운바탕 적용 결과다. 과거 제품 화면을 새로 촬영한 Before/After로 해석하지 않는다.
 
@@ -86,4 +89,4 @@ Stage 5 승인 시험 후 기존 앱을 복원하고 후보/백업/staging/helpe
 
 ## 6. 작업지시자 승인 요청
 
-2026-10-10 승인된 최종 보고/`publish/task568` → `devel` Open PR 게시 범위로 진행한다. 6단계의 제한된 Mac 소비자 연결·검증·인계를 완료했으며 #568 merge/이슈 close, 후속 이슈 구현·upstream 공개 게시·제품/웹 배포 승인은 포함하지 않는다. PR CI와 리뷰에서 범위·잔여 조건을 확인한 뒤 merge 승인을 요청한다. #566/#569·상위 #562 추적은 유지한다.
+2026-10-10 승인된 최종 보고/`publish/task568` → `devel` Open PR #579 게시를 완료했다. 초기 CI fixture 누락은 동일 게시 검증 범위의 기존 시험 보정으로 회복했다. 6단계의 제한된 Mac 소비자 연결·검증·인계를 완료했으며 #568 merge/이슈 close, 후속 이슈 구현·upstream 공개 게시·제품/웹 배포 승인은 포함하지 않는다. 수정 head의 PR CI와 리뷰에서 범위·잔여 조건을 확인한 뒤 merge 승인을 요청한다. #566/#569·상위 #562 추적은 유지한다.
