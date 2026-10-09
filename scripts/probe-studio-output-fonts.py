@@ -19,11 +19,7 @@ FONT_HASHES = {
 SOURCES = [
     "Tests/StudioOutputFontProbe/main.swift",
     "Tests/StudioOutputFontProbe/job.swift",
-    "Sources/HostApp/Services/StudioFontSupply.swift",
-    "Sources/HostApp/Services/FontLibraryService.swift",
-    "Sources/HostApp/Services/FontLibraryChanges.swift",
     "Sources/HostApp/Services/MacFontDiscovery.swift",
-    "Sources/HostApp/Services/FontImportSourceSession.swift",
     "Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift",
     "Sources/HostApp/Services/RhwpStudioPDFFontProvider.swift",
     "Sources/HostApp/Services/RhwpStudioPagePayload.swift",

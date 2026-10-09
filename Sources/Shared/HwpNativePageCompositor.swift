@@ -6,10 +6,14 @@ enum HwpNativePageCompositor {
         overlays: RhwpPageOverlayImageSet?,
         in context: CGContext,
         pageHeight: Double,
-        document: RhwpDocument
+        document: RhwpDocument,
+        forceDefaultFonts: Bool = false
     ) {
-        render(tree: tree, overlays: overlays, in: context, pageHeight: pageHeight,
-               document: document, renderer: CGTreeRenderer())
+        let renderer = CGTreeRenderer()
+        renderer.withDefaultFontFallback(forceDefaultFonts) {
+            render(tree: tree, overlays: overlays, in: context, pageHeight: pageHeight,
+                   document: document, renderer: renderer)
+        }
     }
 
     static func render(

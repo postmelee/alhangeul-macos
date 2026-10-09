@@ -22,21 +22,30 @@ final class FontLibraryService: Sendable {
     let changes = FontLibraryChanges()
     private let store: FontLibraryStore
     private let access: FontLibrarySourceAccess
+    private let readOnly: Bool
 
     convenience init() throws {
         try self.init(store: FontLibraryStore(rootURL: FontLibraryLocation().resolve()))
     }
 
     // 테스트 및 격리된 진단에서만 root가 주입된 store를 전달한다.
-    init(store: FontLibraryStore, access: FontLibrarySourceAccess = .securityScoped) {
+    init(store: FontLibraryStore, access: FontLibrarySourceAccess = .securityScoped, readOnly: Bool = false) {
         self.store = store
         self.access = access
+        self.readOnly = readOnly
     }
 
-    func prepare() async throws -> FontLibraryRecoveryResult { try await store.recover() }
-    func list() async throws -> FontLibraryManifest { try await store.list() }
+    func prepare() async throws -> FontLibraryRecoveryResult { try await recover() }
+    func list() async throws -> FontLibraryManifest {
+        if readOnly { return try await store.listReadOnly() }
+        return try await store.list()
+    }
 
     func importFonts(_ request: FontLibraryImportRequest) async -> [FontImportItemResult] {
+        guard !readOnly else {
+            return request.candidates.map { .init(candidateID: $0.id, status: .storageFailure,
+                objectHash: nil, reasonCode: "readOnlyConsumer", nextAction: .none, publication: .notPublished) }
+        }
         var started: [URL] = []
         var seen = Set<URL>()
         defer { for url in started.reversed() { access.stop(url) } }
@@ -55,22 +64,34 @@ final class FontLibraryService: Sendable {
     }
 
     func selectActive(groupID: String, faceID: FontFaceID, expectedGeneration: UInt64) async throws -> FontLibraryManifest {
+        guard !readOnly else { throw FontLibraryError.readOnlyConsumer }
         let result = try await store.selectActive(groupID: groupID, faceID: faceID, expectedGeneration: expectedGeneration)
         await changes.publish(result.generation)
         return result
     }
     func remove(objectHash: String, expectedGeneration: UInt64) async throws -> FontLibraryManifest {
+        guard !readOnly else { throw FontLibraryError.readOnlyConsumer }
         let result = try await store.remove(objectHash: objectHash, expectedGeneration: expectedGeneration)
         await changes.publish(result.generation)
         return result
     }
-    func acquireSnapshot() async throws -> FontLibrarySnapshot { try await store.acquireSnapshot() }
-    func acquireMetadataSnapshot() async throws -> FontLibrarySnapshot { try await store.acquireMetadataSnapshot() }
+    func acquireSnapshot() async throws -> FontLibrarySnapshot {
+        guard !readOnly else { throw FontLibraryError.readOnlyConsumer }
+        return try await store.acquireSnapshot()
+    }
+    func acquireMetadataSnapshot() async throws -> FontLibrarySnapshot {
+        if readOnly { return try await store.acquireReadOnlyMetadataSnapshot() }
+        return try await store.acquireMetadataSnapshot()
+    }
     func readResource(_ id: String, snapshot: FontLibrarySnapshot) async throws -> Data {
-        try await store.readResource(id, snapshot: snapshot)
+        if readOnly { return try await store.readResourceReadOnly(id, snapshot: snapshot) }
+        return try await store.readResource(id, snapshot: snapshot)
     }
     func releaseSnapshot(_ snapshot: FontLibrarySnapshot) async throws {
         try await store.releaseSnapshot(snapshot)
     }
-    func recover() async throws -> FontLibraryRecoveryResult { try await store.recover() }
+    func recover() async throws -> FontLibraryRecoveryResult {
+        guard !readOnly else { throw FontLibraryError.readOnlyConsumer }
+        return try await store.recover()
+    }
 }

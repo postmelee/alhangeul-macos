@@ -94,6 +94,11 @@ swiftc -parse-as-library \
   "$ROOT/Sources/RhwpCoreBridge/CGTreeRenderer.swift" \
   "$ROOT/Sources/Shared/HwpPageImageRenderer.swift" \
   "$ROOT/Sources/Shared/HwpNativePageCompositor.swift" \
+  "$ROOT"/Sources/Shared/FontLibrary/*.swift \
+  "$ROOT"/Sources/Shared/NativeFonts/*.swift \
+  "$ROOT/Sources/Shared/HwpPreviewPDFRenderer.swift" \
+  "$ROOT/Sources/Shared/HwpPreviewPNGRenderer.swift" \
+  "$ROOT/Sources/Shared/HwpExternalImageResolver.swift" \
   "$ROOT/Sources/ThumbnailExtension/HwpThumbnailPolicyResolver.swift" \
   "$ROOT/Sources/ThumbnailExtension/HwpThumbnailRenderCache.swift" \
   "$ROOT/scripts/thumbnail_skia_policy_smoke.swift" \

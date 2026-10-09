@@ -80,7 +80,16 @@ actor InstalledFontCatalogService {
         guard let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
             throw InstalledFontFailure.storage
         }
-        return try .init(persistence: .file(at: support.appendingPathComponent("Alhangeul/InstalledFonts", isDirectory: true)))
+        var privateRoot = support.appendingPathComponent("Alhangeul/InstalledFonts", isDirectory: true)
+        if let id = FontLibraryLocation.extensionProbeIdentifier {
+            privateRoot.appendPathComponent("extension-probes/" + id.uuidString, isDirectory: true)
+        }
+        let persistence = InstalledFontPersistence.file(at: privateRoot)
+        // unsigned 진단에서는 공유 컨테이너가 없을 수 있다. 실제 확장은 별도 live 공급자를 쓴다.
+        if let root = try? FontLibraryLocation().resolve() {
+            return try .init(persistence: FontConsumerPolicyStore(rootURL: root).wrapping(persistence))
+        }
+        return try .init(persistence: persistence)
     }
 
     func snapshot() -> InstalledFontSnapshot {

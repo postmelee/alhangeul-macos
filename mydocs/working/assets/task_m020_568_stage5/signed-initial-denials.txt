@@ -1,0 +1,4 @@
+2026-10-10 00:44:05.877 E  kernel[0:348e58] (Sandbox) Sandbox: AlhangeulThumbnail(46885) deny(1) file-write-data fixture/consumer-policy/lock
+2026-10-10 00:44:07.806 E  kernel[0:348e58] (Sandbox) Sandbox: AlhangeulThumbnail(46885) deny(1) file-write-data fixture/consumer-policy/lock
+2026-10-10 00:44:08.823 E  kernel[0:348e58] (Sandbox) Sandbox: AlhangeulThumbnail(46885) deny(1) file-write-data fixture/consumer-policy/lock
+2026-10-10 00:44:09.836 E  kernel[0:348e58] (Sandbox) Sandbox: AlhangeulThumbnail(46885) deny(1) file-write-data fixture/consumer-policy/lock

@@ -22,7 +22,7 @@
 | 필요한 face 읽기 | `InstalledFontSystem.read`에서 원본 열기·stat·활성 상태 확인·bytes 검사. 활성 descriptor 검사는 읽기 전후 실행되지만 이번 시작 측정에는 face 읽기를 포함하지 않음 |
 | 수동 재감지/CoreText 변경 | metadata 재검사. 바뀐 generation은 기존 Studio 리소스 갱신으로 전달 |
 
-근거: [HostApp](../../Sources/HostApp/HostApp.swift), [설정 모델](../../Sources/HostApp/Views/InstalledFontSettingsModel.swift), [provider](../../Sources/HostApp/Services/InstalledFontServiceProvider.swift), [catalog](../../Sources/HostApp/Services/InstalledFontCatalogService.swift), [CoreText 공급](../../Sources/HostApp/Services/InstalledFontSystem.swift), [Studio snapshot](../../Sources/HostApp/Services/StudioFontSupply.swift).
+근거: [HostApp](../../Sources/HostApp/HostApp.swift), [설정 모델](../../Sources/HostApp/Views/InstalledFontSettingsModel.swift), [provider](../../Sources/Shared/FontLibrary/InstalledFontServiceProvider.swift), [catalog](../../Sources/Shared/FontLibrary/InstalledFontCatalogService.swift), [CoreText 공급](../../Sources/Shared/FontLibrary/InstalledFontSystem.swift), [Studio snapshot](../../Sources/Shared/FontLibrary/StudioFontSupply.swift).
 
 앱 시작 준비와 최초 활성화는 별도 호출이다. 공유 `prepare()`는 중복 준비를 막지만 활성화의 명시적 `refresh()`를 막지는 않는다. 시작 준비 뒤 활성화를 순서대로 재현한 5개 새 프로세스에서 각각 탐색 2회를 확인했다. 실제 앱의 모든 실행에서 정확히 2회라고 측정한 결과는 아니며, 백그라운드 실행·이벤트 도착 순서·CoreText 알림에 따라 달라질 수 있다.
 

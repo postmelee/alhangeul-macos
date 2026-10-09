@@ -7,7 +7,7 @@ final class FontLibraryDirectory {
     init(descriptor: Int32) { self.descriptor = descriptor }
     deinit { close(descriptor) }
 
-    static func openRoot(_ url: URL) throws -> FontLibraryDirectory {
+    static func openRoot(_ url: URL, createMissing: Bool = true) throws -> FontLibraryDirectory {
         guard url.isFileURL, url.path.hasPrefix("/") else { throw FontLibraryError.unsafePath }
         var directory = FontLibraryDirectory(descriptor: open("/", O_SEARCH | O_CLOEXEC))
         guard directory.descriptor >= 0 else { throw FontLibraryError.io(errno) }
@@ -18,7 +18,7 @@ final class FontLibraryDirectory {
             components.insert("private", at: 0)
         }
         for (index, part) in components.enumerated() {
-            directory = try directory.child(part, searchOnly: index < components.count - 1)
+            directory = try directory.child(part, searchOnly: index < components.count - 1, createMissing: createMissing)
         }
         return directory
     }
@@ -29,12 +29,19 @@ final class FontLibraryDirectory {
         }
     }
 
-    func child(_ name: String, searchOnly: Bool = false) throws -> FontLibraryDirectory {
+    func child(_ name: String, searchOnly: Bool = false, createMissing: Bool = true) throws -> FontLibraryDirectory {
         try validate(name)
+        let access = searchOnly ? O_SEARCH : (O_RDONLY | O_DIRECTORY)
+        let flags = access | O_NOFOLLOW | O_CLOEXEC
+        // sandbox는 존재하는 상위 경로라도 mkdir 요청을 거부할 수 있다.
+        // 먼저 기존 디렉터리를 열고, 없는 자식에만 생성 권한을 요청한다.
+        let existing = openat(descriptor, name, flags)
+        if existing >= 0 { return FontLibraryDirectory(descriptor: existing) }
+        guard errno == ENOENT else { throw FontLibraryError.directoryIO(operation: "open", code: errno) }
+        guard createMissing else { throw FontLibraryError.io(ENOENT) }
         let created = mkdirat(descriptor, name, 0o700) == 0
         if !created && errno != EEXIST { throw FontLibraryError.directoryIO(operation: "mkdir", code: errno) }
-        let access = searchOnly ? O_SEARCH : (O_RDONLY | O_DIRECTORY)
-        let fd = openat(descriptor, name, access | O_NOFOLLOW | O_CLOEXEC)
+        let fd = openat(descriptor, name, flags)
         guard fd >= 0 else { throw FontLibraryError.directoryIO(operation: "open", code: errno) }
         let child = FontLibraryDirectory(descriptor: fd)
         if created { try sync() }

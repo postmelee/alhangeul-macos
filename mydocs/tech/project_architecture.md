@@ -511,7 +511,7 @@ External image context ABI는 #409 Swift wrapper/Quick Look 적용 전까지 제
 
 #568의 `rhwp_page_font_requests_json`은 원본 페이지의 charShape/language/family/style 요청만 반환한다. `rhwp_render_page_png_with_font_context`는 검증한 단일 static SFNT bytes와 해당 slot의 선택을 호출 동안 빌려 받아 제한된 portable glyph replay로 렌더한다. 기존 ABI는 유지한다. null/한도/수명과 지원 범위는 [native 계약](task_m020_568_native_contract.md), 실제 공급 수용은 [Stage 4](../working/task_m020_568_stage4.md)를 따른다.
 
-공통 `HwpNativeFontPageRenderer`는 immutable 문서와 `StudioFontSupplySnapshot`을 소유하고 공식 Studio matcher의 별도 JavaScriptCore realm에서 선택한 원본만 읽는다. 공유 DTO/budget은 `Shared/FontLibrary`, 공급 service는 HostApp, bytes context/renderer는 `RhwpCoreBridge`가 소유한다. 생성 matcher는 `build-native-font-matcher.mjs`의 receipt로 고정한다. metadata snapshot은 원본 선읽기를 하지 않으며 실제 read에서 hash를 검증하고, 성공·실패·취소에서 I/O 종료 후 lease를 해제한다. Finder의 별도 프로세스 공급·cache/권한 연결은 Stage 5에서 수용한다.
+공통 `HwpNativeFontPageRenderer`는 immutable 문서와 `StudioFontSupplySnapshot`을 소유하고 공식 Studio matcher의 별도 JavaScriptCore realm에서 선택한 원본만 읽는다. 공유 DTO/budget·Foundation/CoreText 공급 service는 `Shared/FontLibrary`, HostApp의 UI/WebView session·script는 HostApp, bytes context/renderer는 `RhwpCoreBridge`가 소유한다. 생성 matcher는 `build-native-font-matcher.mjs`의 receipt로 고정한다. metadata snapshot은 원본 선읽기를 하지 않으며 실제 read에서 hash를 검증하고, 성공·실패·취소에서 I/O 종료 후 lease를 해제한다. Finder의 별도 프로세스는 HostApp bookmark를 받지 않고 `ExtensionFontSupply`의 자체 catalog를 사용한다. 사용 flag/revision만 App Group에 공유하며 preview의 기존 이미지 context와 thumbnail의 source/font cache identity를 유지한다. 소스·unsigned 수용과 실제 signed Finder 수용 경계는 [Finder 계약](task_m020_568_finder_contract.md)을 따른다.
 
 ## FFI 안전성 규칙
 

@@ -200,14 +200,10 @@ targets:
           - FontLibrary/**
       - path: Sources/HostApp
         includes:
-          - Services/FontLibraryService.swift
-          - Services/FontLibraryChanges.swift
           - Services/StudioFont*.swift
           - Services/RhwpStudioOutputFontJob.swift
           - Services/RhwpStudioOutputFontPolicy.swift
-          - Services/InstalledFont*.swift
           - Services/MacFontDiscovery.swift
-          - Services/FontImportSourceSession.swift
           - Views/FontLibrarySettingsModel.swift
           - Views/InstalledFontSettingsModel.swift
     dependencies:
@@ -232,13 +228,8 @@ targets:
           - FontLibrary/**
       - path: Sources/HostApp/Services
         includes:
-          - StudioFontSupply.swift
-          - FontLibraryService.swift
-          - FontLibraryChanges.swift
-          - InstalledFont*.swift
           - MacFontDiscovery.swift
           - RhwpStudioOutputFont*.swift
-          - FontImportSourceSession.swift
       - path: Sources/HostApp/Services/AppExecutionAnalyticsState.swift
       - path: Sources/HostApp/Services/AppExecutionAnalyticsRuntime.swift
       - path: Sources/HostApp/Services/AppExecutionEvent.swift

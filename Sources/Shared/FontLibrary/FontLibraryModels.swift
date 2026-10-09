@@ -192,6 +192,7 @@ enum FontPublicationState: String, Codable, Sendable {
 }
 
 enum FontLibraryError: Error, Equatable, Sendable {
+    case readOnlyConsumer
     case unsafePath, notRegularFile, inputChanged, inputLimitExceeded, cancelled
     case io(Int32)
     case directoryIO(operation: String, code: Int32)

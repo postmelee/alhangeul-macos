@@ -52,11 +52,62 @@ enum HwpNativeFontPageRenderer {
         try Task.checkCancellation()
     }
 
+    struct Prepared {
+        let context: RhwpNativeFontContext?
+        let cacheIdentity: String
+        let snapshotIdentity: String
+        let selectedFaces: [String]
+        let fallbackFamilies: [String]
+        let sourceReads: Int
+        let sourceBytes: Int
+    }
+
+    /// 외부 이미지가 주입된 기존 document를 사용한다. 이 호출이 snapshot을 소유한다.
+    static func withPreparedPage<T>(document: RhwpDocument, documentIdentity: String, filename: String,
+        pageIndex: Int, snapshot: StudioFontSupplySnapshot, maximumPixelSize: CGSize? = nil,
+        policy: HwpPageRenderPolicy = .coreGraphicsOnly,
+        documentIsCurrent: @escaping @Sendable () async throws -> Bool = { true },
+        operation: (Prepared) throws -> T) async throws -> T {
+        let result: T
+        do {
+            let prepared = try await preparePage(document: document, documentIdentity: documentIdentity,
+                filename: filename, pageIndex: pageIndex, snapshot: snapshot, maximumPixelSize: maximumPixelSize,
+                policy: policy, documentIsCurrent: documentIsCurrent)
+            result = try operation(prepared)
+            try await validate(snapshot, documentIsCurrent)
+        } catch {
+            await snapshot.release()
+            throw error
+        }
+        await snapshot.release()
+        try Task.checkCancellation()
+        return result
+    }
+
     private static func perform(data: Data, filename: String, pageIndex: Int, snapshot: StudioFontSupplySnapshot,
-                                maximumPixelSize: CGSize?, policy: HwpPageRenderPolicy,
-                                documentIsCurrent: @escaping @Sendable () async throws -> Bool,
-                                budget: StudioFontTransferBudget, limits: Limits) async throws -> HwpNativeFontPageResult {
-        guard data.count <= hwpQuickLookMaxFileSize, limits.faces > 0, limits.faces <= 64,
+        maximumPixelSize: CGSize?, policy: HwpPageRenderPolicy,
+        documentIsCurrent: @escaping @Sendable () async throws -> Bool,
+        budget: StudioFontTransferBudget, limits: Limits) async throws -> HwpNativeFontPageResult {
+        guard data.count <= hwpQuickLookMaxFileSize else { throw HwpNativeFontSupplyError.tooLarge }
+        let document = try RhwpDocument(data: data, filename: filename)
+        let prepared = try await preparePage(document: document, documentIdentity: digest(data), filename: filename,
+            pageIndex: pageIndex, snapshot: snapshot, maximumPixelSize: maximumPixelSize, policy: policy,
+            documentIsCurrent: documentIsCurrent, budget: budget, limits: limits)
+        let page = try HwpPageImageRenderer.renderPage(document: document, pageIndex: pageIndex,
+            maximumPixelSize: maximumPixelSize, policy: policy, fontContext: prepared.context)
+        try await validate(snapshot, documentIsCurrent)
+        return .init(page: page, cacheIdentity: prepared.cacheIdentity, snapshotIdentity: prepared.snapshotIdentity,
+            selectedFaces: prepared.selectedFaces, fallbackFamilies: prepared.fallbackFamilies,
+            sourceReads: prepared.sourceReads, sourceBytes: prepared.sourceBytes)
+    }
+
+    /// snapshot을 빌린다. 여러 페이지 PDF의 외부 호출자가 같은 세대의 lease를 한 번 해제한다.
+    static func preparePage(document: RhwpDocument, documentIdentity: String, filename: String,
+        pageIndex: Int, snapshot: StudioFontSupplySnapshot, maximumPixelSize: CGSize? = nil,
+        policy: HwpPageRenderPolicy = .coreGraphicsOnly,
+        documentIsCurrent: @escaping @Sendable () async throws -> Bool = { true },
+        budget: StudioFontTransferBudget = .shared, limits: Limits = .init()) async throws -> Prepared {
+        guard !documentIdentity.isEmpty, limits.faces > 0, limits.faces <= 64,
               limits.fileBytes > 0, limits.fileBytes <= 64 * 1024 * 1024,
               limits.residentBytes > 0, limits.residentBytes <= 128 * 1024 * 1024 else { throw HwpNativeFontSupplyError.tooLarge }
         guard !filename.isEmpty, filename.utf8.count <= 1024 else { throw HwpNativeFontSupplyError.invalid }
@@ -65,7 +116,6 @@ enum HwpNativeFontPageRenderer {
                   size.width <= 16_384, size.height <= 16_384 else { throw HwpNativeFontSupplyError.invalid }
         }
         try await validate(snapshot, documentIsCurrent)
-        let document = try RhwpDocument(data: data, filename: filename)
         let slots = try document.nativeFontRequests(at: pageIndex)
         let requests = slots.enumerated().map { index, slot in
             RhwpNativeFontMatcher.Request(key: String(index), family: slot.family,
@@ -115,7 +165,7 @@ enum HwpNativeFontPageRenderer {
                                faceIndex: UInt32(face.id.sfntIndex), data: value.data))
         }
         let identityData = try JSONSerialization.data(withJSONObject: [
-            "version": 1, "core": RhwpCoreBuildInfo.commit, "matcher": RhwpNativeFontMatcherSource.sha256, "document": digest(data), "filename": filename, "page": pageIndex, "snapshot": snapshot.identity,
+            "version": 1, "core": RhwpCoreBuildInfo.commit, "matcher": RhwpNativeFontMatcherSource.sha256, "document": documentIdentity, "filename": filename, "page": pageIndex, "snapshot": snapshot.identity,
             "renderer": policy.identifier, "width": maximumPixelSize?.width ?? 0,
             "height": maximumPixelSize?.height ?? 0,
             "faces": faces.map { ["id": $0.id, "sha256": $0.sha256, "postScriptName": $0.postScriptName] },
@@ -127,11 +177,7 @@ enum HwpNativeFontPageRenderer {
         let context = faces.isEmpty ? nil : try RhwpNativeFontContext(identity: identity, faces: faces, requests: selected)
         faces.removeAll() // 합친 buffer 이외의 원본 참조를 render 전에 해제한다.
         try await validate(snapshot, documentIsCurrent)
-        let page = try HwpPageImageRenderer.renderPage(document: document, pageIndex: pageIndex,
-            maximumPixelSize: maximumPixelSize, policy: policy, fontContext: context)
-        // 동기 render 중 설정 변경이나 취소가 일어나도 이전 결과를 반환하지 않는다.
-        try await validate(snapshot, documentIsCurrent)
-        return .init(page: page, cacheIdentity: identity, snapshotIdentity: snapshot.identity,
+        return .init(context: context, cacheIdentity: identity, snapshotIdentity: snapshot.identity,
             selectedFaces: context?.faces.map(\.postScriptName).sorted() ?? [], fallbackFamilies: fallbacks.sorted(),
             sourceReads: needed.count, sourceBytes: total)
     }

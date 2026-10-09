@@ -1,5 +1,6 @@
 import CoreGraphics
 import Foundation
+import CryptoKit
 
 struct HwpThumbnailRenderRequest {
     let fileURL: URL
@@ -95,6 +96,7 @@ struct HwpThumbnailCacheKey: Hashable {
     let pixelWidth: Int
     let pixelHeight: Int
     let renderSignature: HwpThumbnailRenderSignature
+    var documentIdentity: String = ""
 }
 
 enum HwpThumbnailCacheEvent: CustomStringConvertible, Equatable {
@@ -134,7 +136,7 @@ private extension URLResourceValues {
 }
 
 final class HwpThumbnailRenderCache {
-    static let shared = HwpThumbnailRenderCache()
+    static let shared = HwpThumbnailRenderCache(supply: ExtensionFontRenderer.live)
 
     private let stateQueue = DispatchQueue(label: "com.postmelee.alhangeul.thumbnail-cache")
     private let workerQueue = DispatchQueue(
@@ -142,12 +144,16 @@ final class HwpThumbnailRenderCache {
         qos: .utility
     )
     private let maxEntryCount = 96
+    private let maxBitmapBytes = 64 * 1024 * 1024
+    private let supply: ExtensionFontRenderer.Supply?
+    private var fontJobs: [HwpThumbnailCacheKey: Task<HwpRenderedPage, Error>] = [:]
+    private var pendingFontRequests = 0
 
     private var cachedPages: [HwpThumbnailCacheKey: HwpRenderedPage] = [:]
     private var accessOrder: [HwpThumbnailCacheKey] = []
     private var inFlight: [HwpThumbnailCacheKey: [(Result<HwpThumbnailRenderResult, Error>) -> Void]] = [:]
 
-    private init() {}
+    init(supply: ExtensionFontRenderer.Supply? = nil) { self.supply = supply }
 
     func renderedPage(
         for request: HwpThumbnailRenderRequest,
@@ -167,6 +173,13 @@ final class HwpThumbnailRenderCache {
         for request: HwpThumbnailRenderRequest,
         completion: @escaping (Result<HwpThumbnailRenderResult, Error>) -> Void
     ) {
+        if let supply {
+            Task {
+                do { completion(.success(try await renderWithFonts(request, supply: supply))) }
+                catch { completion(.failure(error)) }
+            }
+            return
+        }
         stateQueue.async {
             if let hit = self.cachedPage(for: request.key) {
                 self.touch(hit.key)
@@ -222,11 +235,102 @@ final class HwpThumbnailRenderCache {
         }
     }
 
+    private func state<T>(_ body: @escaping () -> T) async -> T {
+        await withCheckedContinuation { continuation in
+            stateQueue.async { continuation.resume(returning: body()) }
+        }
+    }
+
+    private func renderWithFonts(_ request: HwpThumbnailRenderRequest,
+        supply: ExtensionFontRenderer.Supply) async throws -> HwpThumbnailRenderResult {
+        let admitted = await state { () -> Bool in
+            guard self.pendingFontRequests < 16 else { return false }
+            self.pendingFontRequests += 1
+            return true
+        }
+        guard admitted else { throw StudioFontError.busy }
+        do {
+            let result = try await performWithFonts(request, supply: supply)
+            _ = await state { self.pendingFontRequests -= 1 }
+            return result
+        } catch {
+            _ = await state { self.pendingFontRequests -= 1 }
+            throw error
+        }
+    }
+
+    private func performWithFonts(_ request: HwpThumbnailRenderRequest,
+        supply: ExtensionFontRenderer.Supply) async throws -> HwpThumbnailRenderResult {
+        let stamp = try InstalledFontSystem.statURL(request.fileURL)
+        let current: @Sendable () async throws -> Bool = { try InstalledFontSystem.statURL(request.fileURL) == stamp }
+        let snapshot: StudioFontSupplySnapshot
+        do { snapshot = try await supply() }
+        catch {
+            if ExtensionFontRenderer.isStaleOrCancelled(error) { throw error }
+            let context = try HwpPreviewPDFRenderer.load(fileURL: request.fileURL, resolveExternalImages: false)
+            let page = try await ExtensionFontRenderer.fallbackThumbnail(context: context,
+                maximumPixelSize: request.maximumPixelSize, policy: request.policy, current: current, error: error)
+            return .init(page: page, cacheEvent: .miss, requestedKey: request.key, matchedKey: request.key)
+        }
+        var key = request.key
+        let encoder = JSONEncoder(); encoder.outputFormatting = [.sortedKeys]
+        let stampData = try encoder.encode(stamp)
+        key.documentIdentity = SHA256.hash(data: stampData).map { String(format: "%02x", $0) }.joined() + ":" + snapshot.identity
+        do {
+            guard try await snapshot.current(), try await current() else { throw HwpNativeFontSupplyError.stale }
+        } catch { await snapshot.release(); throw error }
+        let lookup = await state { self.cachedPage(for: key) }
+        if let hit = lookup {
+            let valid: Bool
+            do { valid = try await snapshot.current()
+                if valid { guard try await current() else { throw HwpNativeFontSupplyError.stale } } }
+            catch { await snapshot.release(); throw error }
+            await snapshot.release()
+            try Task.checkCancellation()
+            guard valid else { throw HwpNativeFontSupplyError.stale }
+            await state { self.touch(hit.key) }
+            return .init(page: hit.page, cacheEvent: hit.event, requestedKey: key, matchedKey: hit.key)
+        }
+        let immutableKey = key
+        let chosen = await state { () -> (Task<HwpRenderedPage, Error>?, Bool) in
+            if let job = self.fontJobs[immutableKey] { return (job, false) }
+            guard self.fontJobs.count < 2 else { return (nil, false) }
+            let job = Task<HwpRenderedPage, Error> {
+                let context: HwpPreviewDocumentContext
+                do { context = try HwpPreviewPDFRenderer.load(fileURL: request.fileURL, resolveExternalImages: false) }
+                catch { await snapshot.release(); throw error }
+                return try await ExtensionFontRenderer.thumbnail(context: context,
+                    maximumPixelSize: request.maximumPixelSize, policy: request.policy,
+                    snapshot: snapshot, current: current)
+            }
+            self.fontJobs[immutableKey] = job
+            return (job, true)
+        }
+        guard let job = chosen.0 else { await snapshot.release(); throw StudioFontError.busy }
+        if !chosen.1 { await snapshot.release() }
+        do {
+            let page = try await job.value
+            guard try await current(), try await snapshot.current() else { throw HwpNativeFontSupplyError.stale }
+            try Task.checkCancellation()
+            if chosen.1 {
+                await state {
+                    self.fontJobs.removeValue(forKey: immutableKey)
+                    // 실패의 default 결과는 보존하지 않아 다음 요청의 재시도를 막지 않는다.
+                    if page.diagnostics.fontSupplyFailure == nil { self.store(page, for: immutableKey) }
+                }
+            }
+            return .init(page: page, cacheEvent: .miss, requestedKey: immutableKey, matchedKey: immutableKey)
+        } catch {
+            if chosen.1 { _ = await state { self.fontJobs.removeValue(forKey: immutableKey) } }
+            throw error
+        }
+    }
+
     private func store(_ page: HwpRenderedPage, for key: HwpThumbnailCacheKey) {
         cachedPages[key] = page
         touch(key)
 
-        while accessOrder.count > maxEntryCount {
+        while accessOrder.count > maxEntryCount || cachedPages.values.reduce(0, { $0 + $1.image.bytesPerRow * $1.image.height }) > maxBitmapBytes {
             let removedKey = accessOrder.removeFirst()
             cachedPages.removeValue(forKey: removedKey)
         }
@@ -255,6 +359,7 @@ final class HwpThumbnailRenderCache {
                 candidateKey.modificationTime == requestedKey.modificationTime,
                 candidateKey.fileSize == requestedKey.fileSize,
                 candidateKey.renderSignature == requestedKey.renderSignature,
+                candidateKey.documentIdentity == requestedKey.documentIdentity,
                 candidateKey.pixelWidth >= requestedKey.pixelWidth,
                 candidateKey.pixelHeight >= requestedKey.pixelHeight
             else {

@@ -14,8 +14,8 @@
 | 1 | A/B 조사, A 계약 | 출력 identity·매칭·임베딩·변경/취소 정책과 최소 실험 | 2026-10-08 완료 |
 | 2 | A 공통 기반 | 제한된 출력 snapshot·font route·준비·수명 구현 | 2026-10-09 완료 |
 | 3 | A 실제 연결 | PDF·인쇄 진입 연결, 정확한 face와 text layer·패널 수용 | 2026-10-09 완료 |
-| 4 | B native | CoreGraphics/Skia 공급·매칭·캐시 연결 | 2026-10-09 진입 승인·진행 중 |
-| 5 | B 확장 | Quick Look/Thumbnail의 signed 프로세스·Finder 수용 | Stage 4 및 설치 smoke 범위 승인 후 |
+| 4 | B native | CoreGraphics/Skia 공급·매칭·캐시 연결 | 2026-10-09 완료 |
+| 5 | B 확장 | Quick Look/Thumbnail의 signed 프로세스·Finder 수용 | 2026-10-09 소스 연결·검증 준비 승인. 구체 서명·설치 smoke는 준비 후 승인 |
 | 6 | 전체 인계 | 소비자별 회귀·제약·최종 소스/증거 대조 | Stage 5 승인 후 |
 
 A 완료는 #568 전체 완료가 아니다. B와 Mac/Windows 수용을 별도 행으로 기록한다. #566 ZIP 구현, #569 웹 안내·전체 배포 수용은 해당 이슈에 남긴다. core pin/Studio 자산을 먼저 재동기화하거나 중복 PR #577을 merge하지 않는다.
@@ -130,7 +130,11 @@ Stage 4.1에서 새 C ABI/Swift context와 public FontResolver 기반의 제한�
 
 ## 7. Stage 5 — B Quick Look·Thumbnail signed 수용
 
+2026-10-09 소스 연결·unsigned 격리 수용을 완료하고 [구체 Finder 계약](../tech/task_m020_568_finder_contract.md)을 작성했다. 이어 2026-10-10 승인된 signed Finder 수용·읽기 전용 보정·기존 앱 복원을 완료했다. [Stage 5 보고서](../working/task_m020_568_stage5.md)의 실제 소비자별 결과와 OS cache/최소 환경 경계를 따른다. Stage 6는 후속 승인 단계다.
+
 `Sources/QLExtension`, `Sources/ThumbnailExtension`, Shared font location/snapshot·preview helpers를 연결한다. 각 프로세스가 권한을 실제로 얻었는지 검증하며 HostApp bookmark나 App Group 파일 존재를 원본 접근 성공으로 대신하지 않는다. 설치 참조와 관리 복사본·lease/회수·원본 변화·fallback·자원 제한·Finder 캐시를 소비자별로 기록한다.
+
+2026-10-10 승인된 signed 시험에서 두 확장의 App Group 쓰기 거부를 발견해 설정/관리 목록을 읽기 전용으로 보정했다. 디스크 lease를 생성하지 않고 실제 읽기 동안 shared flock으로 writer/GC를 막고, 세대/선택/hash를 재검증한다. 원본 변경 시 stale로 폐기하며 HostApp의 기존 디스크 lease는 유지한다. 권한 확대·새 ABI·전역 reset은 추가하지 않았다. 같은 승인 범위에서 보정 후보를 재검증하고 원래 설치본을 복원했다.
 
 `scripts/check-extension-registration-hygiene.sh --check-only`를 먼저 실행한다. 표준 smoke helper가 실제 설치 경로를 교체하고 등록/캐시를 바꾼다는 점을 반영해 signed/sealed 앱, 기존 설치본 보존/복원·소유 등록 해제 범위를 준비한 뒤 해당 구체 smoke를 승인받는다. 무단 설치본 교체·전역 reset·다른 작업의 앱 등록 해제는 하지 않는다. A 작업 중에는 확장을 등록하지 않는다.
 
@@ -167,4 +171,8 @@ HostApp Debug의 macOS 12 target compile/link와 실제 최소 OS runtime은 별
 
 ## 10. 현재 승인 범위
 
-Stage 4와 [native 연결안](../tech/task_m020_568_native_contract.md)의 **앱 소유 bytes 기반 C ABI 설계·격리 검증 및 Swift wrapper/header/symbol 변경**이 승인됐다. core v0.8.7과 기존 ABI는 유지한다. exact Skia가 검증되지 않으면 완료로 처리하지 않고 추가 API/선행 조건을 보고한다. 완성된 검증에서 upstream에 도움되는 부분만 분리하는 방향에 동의했으며 공개 이슈/PR 게시는 별도 범위다. Stage 5의 Finder 설치/등록·새 인증서/폴더 권한·물리 프린터 전송·push/PR·공개 배포는 이번 범위에 포함하지 않는다.
+2026-10-10 작업지시자가 준비된 Stage 5 후보/fixture의 기존 Developer ID 로컬 서명, 고유 보관함, `/Applications/Alhangeul.app` 보존·임시 교체·표준 Finder 시험·복원을 명시 승인했다. [Finder 계약](../tech/task_m020_568_finder_contract.md)의 해당 UUID와 앱만 대상으로 하며 전역 reset·다른 앱 등록 변경·공개 배포는 제외한다.
+
+2026-10-09 작업지시자의 “진행해줘”로 Stage 5 공통 서비스·App Group 설정 공유, 확장 자체 권한의 원본 읽기, preview/thumbnail 연결·캐시 갱신과 격리 검증 준비를 승인받았다. HostApp bookmark는 공유하지 않는다. 구체 인증서 서명·기존 설치본 교체·Finder 등록은 산출물/보존/복원 절차를 준비한 후 승인받으며 현재 실행하지 않는다.
+
+Stage 4와 [native 연결안](../tech/task_m020_568_native_contract.md)의 **앱 소유 bytes 기반 C ABI 설계·격리 검증 및 Swift wrapper/header/symbol 변경**이 승인됐다. core v0.8.7과 기존 ABI는 유지한다. exact Skia가 검증되지 않으면 완료로 처리하지 않고 추가 API/선행 조건을 보고한다. 완성된 검증에서 upstream에 도움되는 부분만 분리하는 방향에 동의했으며 공개 이슈/PR 게시는 별도 범위다. Stage 4 승인 당시에는 Stage 5의 Finder 설치/등록·새 인증서/폴더 권한·물리 프린터 전송·push/PR·공개 배포를 제외했다. 위 2026-10-10 승인으로 구체 Stage 5 로컬 서명·설치 시험만 추가했으며 나머지 제외 범위는 유지한다.

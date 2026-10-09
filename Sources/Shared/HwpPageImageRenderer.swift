@@ -66,6 +66,7 @@ struct HwpPageRenderDiagnostics {
     let durationMs: HwpPageRenderDuration
     var fontIdentity: String? = nil
     var fontFaces: [String] = []
+    var fontSupplyFailure: String? = nil
 }
 
 struct HwpRenderedPage: @unchecked Sendable {
@@ -158,7 +159,8 @@ enum HwpPageImageRenderer {
         pageIndex: Int,
         maximumPixelSize: CGSize? = nil,
         policy: HwpPageRenderPolicy = .coreGraphicsOnly,
-        fontContext: RhwpNativeFontContext? = nil
+        fontContext: RhwpNativeFontContext? = nil,
+        forceDefaultFonts: Bool = false
     ) throws -> HwpRenderedPage {
         guard pageIndex >= 0, pageIndex < document.pageCount else {
             throw HwpRenderError.pageOutOfRange
@@ -175,6 +177,11 @@ enum HwpPageImageRenderer {
             maximumPixelSize: maximumPixelSize
         )
         let pixelSize = renderedPixelSize(pageSize: pageSize, scale: scale)
+
+        if forceDefaultFonts {
+            return try renderCoreGraphicsPage(document: document, pageIndex: pageIndex, pageSize: pageSize,
+                scale: scale, pixelSize: pixelSize, policy: policy, forceDefaultFonts: true)
+        }
 
         switch policy {
         case .coreGraphicsOnly:
@@ -415,7 +422,8 @@ enum HwpPageImageRenderer {
         pngBytes: Int? = nil,
         skiaRenderMs: Double? = nil,
         pngDecodeMs: Double? = nil,
-        fontContext: RhwpNativeFontContext? = nil
+        fontContext: RhwpNativeFontContext? = nil,
+        forceDefaultFonts: Bool = false
     ) throws -> HwpRenderedPage {
         let coreStart = DispatchTime.now().uptimeNanoseconds
         guard let tree = document.renderPageTree(at: pageIndex) else {
@@ -453,7 +461,8 @@ enum HwpPageImageRenderer {
                 overlays: overlays,
                 in: context,
                 pageHeight: pageSize.height,
-                document: document
+                document: document,
+                forceDefaultFonts: forceDefaultFonts
             )
         }
 

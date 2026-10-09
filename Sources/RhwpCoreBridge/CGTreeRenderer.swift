@@ -51,7 +51,20 @@ class CGTreeRenderer {
 
     private var imageCache: [UInt16: CGImage] = [:]
     private weak var document: RhwpDocument?
+    private var forceDefaultFonts = false
     private var fontContext: RhwpCoreTextFontContext?
+
+    func withDefaultFontFallback(_ enabled: Bool, render: () -> Void) {
+        let previous = forceDefaultFonts
+        forceDefaultFonts = enabled
+        defer { forceDefaultFonts = previous }
+        render()
+    }
+
+    private func resolveTextFont(hwpFontFamily: String, bold: Bool, italic: Bool, size: CGFloat = 1) -> CTFont {
+        if forceDefaultFonts { return resolveDefaultAppleFont(bold: bold, italic: italic, size: size) }
+        return resolveAppleFont(hwpFontFamily: hwpFontFamily, bold: bold, italic: italic, size: size)
+    }
 
     private var pageBounds: BBox?
     private var pageHeight: Double = 0
@@ -1400,7 +1413,7 @@ class CGTreeRenderer {
         var metrics = TextRunTypographicMetrics(width: 0, ascent: 0, descent: 0, leading: 0)
 
         while resolvedFontSize >= 5 {
-            let font = resolveAppleFont(
+            let font = resolveTextFont(
                 hwpFontFamily: "Apple SD Gothic Neo",
                 bold: false,
                 italic: false,
@@ -1634,7 +1647,7 @@ class CGTreeRenderer {
         var metrics = TextRunTypographicMetrics(width: 0, ascent: 0, descent: 0, leading: 0)
 
         while resolvedFontSize >= 6 {
-            let font = resolveAppleFont(
+            let font = resolveTextFont(
                 hwpFontFamily: "Apple SD Gothic Neo",
                 bold: false,
                 italic: false,
@@ -2634,7 +2647,7 @@ class CGTreeRenderer {
     }
 
     private func makeTextRunFont(style: TextStyle, fontSize: CGFloat, run: TextRunNode) -> CTFont {
-        var font = fontContext?.font(for: run, size: fontSize) ?? resolveAppleFont(
+        var font = fontContext?.font(for: run, size: fontSize) ?? resolveTextFont(
             hwpFontFamily: style.fontFamily,
             bold: style.bold,
             italic: style.italic,
@@ -3309,7 +3322,7 @@ class CGTreeRenderer {
         guard let dot = emphasisDotText(style.emphasisDot) else { return }
 
         let dotSize = max(fontSize * 0.3, 1)
-        let dotFont = resolveAppleFont(
+        let dotFont = resolveTextFont(
             hwpFontFamily: style.fontFamily,
             bold: false,
             italic: false,
@@ -3481,7 +3494,7 @@ class CGTreeRenderer {
         ctx.translateBy(x: CGFloat(bbox.x), y: CGFloat(bbox.y + bbox.height))
         ctx.scaleBy(x: 1, y: -1)
 
-        let font = resolveAppleFont(
+        let font = resolveTextFont(
             hwpFontFamily: marker.fontFamily,
             bold: false,
             italic: false,

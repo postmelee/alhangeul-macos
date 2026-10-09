@@ -1,0 +1,23 @@
+[
+  {
+    "size": 768,
+    "start": "2026-10-10T00:59:45.495069",
+    "status": 0,
+    "output": "Testing Quick Look thumbnails with files using server:\n\t/Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/samples/alhangeul-smoke-02-20261010-005456.hwpx\n\t- force using content type UTI: com.postmelee.alhangeul.hwpx\n* /Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/samples/alhangeul-smoke-02-20261010-005456.hwpx produced one thumbnail\nDone producing thumbnails\n",
+    "end": "2026-10-10T00:59:46.656304"
+  },
+  {
+    "size": 768,
+    "start": "2026-10-10T00:59:46.656584",
+    "status": 0,
+    "output": "Testing Quick Look thumbnails with files using server:\n\t/Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/samples/alhangeul-smoke-02-20261010-005456.hwpx\n\t- force using content type UTI: com.postmelee.alhangeul.hwpx\n* /Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/samples/alhangeul-smoke-02-20261010-005456.hwpx produced one thumbnail\nDone producing thumbnails\n",
+    "end": "2026-10-10T00:59:47.729761"
+  },
+  {
+    "size": 256,
+    "start": "2026-10-10T00:59:47.730202",
+    "status": 0,
+    "output": "Testing Quick Look thumbnails with files using server:\n\t/Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/samples/alhangeul-smoke-02-20261010-005456.hwpx\n\t- force using content type UTI: com.postmelee.alhangeul.hwpx\n* /Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/samples/alhangeul-smoke-02-20261010-005456.hwpx produced one thumbnail\nDone producing thumbnails\n",
+    "end": "2026-10-10T00:59:48.796516"
+  }
+]

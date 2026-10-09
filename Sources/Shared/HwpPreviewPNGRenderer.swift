@@ -36,6 +36,9 @@ struct HwpPreviewPNGDiagnostics {
     let skiaPNGBytes: Int?
     let pngPixelSize: CGSize?
     let durationMs: HwpPreviewPNGDuration
+    var fontIdentity: String? = nil
+    var fontFaces: [String] = []
+    var fontSupplyFailure: String? = nil
 }
 
 struct HwpRenderedPreviewPNG {
@@ -47,38 +50,46 @@ struct HwpRenderedPreviewPNG {
 enum HwpPreviewPNGRenderer {
     static func render(
         context: HwpPreviewDocumentContext,
-        mode: HwpPreviewPNGReplyMode = .coreGraphics
+        mode: HwpPreviewPNGReplyMode = .coreGraphics,
+        fontContext: RhwpNativeFontContext? = nil,
+        forceDefaultFonts: Bool = false
     ) throws -> HwpRenderedPreviewPNG {
         guard context.pageCount == 1 else {
             throw HwpRenderError.pageOutOfRange
         }
 
+        if forceDefaultFonts {
+            return try renderEncodedPage(context: context, requestedMode: mode, policy: .coreGraphicsOnly,
+                forceDefaultFonts: true)
+        }
         switch mode {
         case .coreGraphics:
             return try renderEncodedPage(
                 context: context,
                 requestedMode: mode,
-                policy: .coreGraphicsOnly
+                policy: .coreGraphicsOnly, fontContext: fontContext
             )
         case .skiaDecode:
             return try renderEncodedPage(
                 context: context,
                 requestedMode: mode,
-                policy: .skiaOptIn
+                policy: .skiaOptIn, fontContext: fontContext
             )
         case .skiaDirect:
-            return try renderDirectSkiaPNG(context: context)
+            return try renderDirectSkiaPNG(context: context, fontContext: fontContext)
         }
     }
 
     private static func renderDirectSkiaPNG(
-        context: HwpPreviewDocumentContext
+        context: HwpPreviewDocumentContext,
+        fontContext: RhwpNativeFontContext?
     ) throws -> HwpRenderedPreviewPNG {
         let skiaStart = DispatchTime.now().uptimeNanoseconds
         let png = context.document.renderPagePNG(
             at: 0,
             scale: 1,
-            maxDimension: 0
+            maxDimension: 0,
+            fontContext: fontContext
         )
         let skiaRenderMs = elapsedMilliseconds(since: skiaStart)
 
@@ -89,7 +100,7 @@ enum HwpPreviewPNGRenderer {
                 policy: .coreGraphicsOnly,
                 fallbackReason: directFallbackReason(for: png.status),
                 skiaRenderMs: skiaRenderMs,
-                skiaPNGBytes: png.byteCount > 0 ? png.byteCount : nil
+                skiaPNGBytes: png.byteCount > 0 ? png.byteCount : nil, fontContext: fontContext
             )
         }
 
@@ -103,7 +114,7 @@ enum HwpPreviewPNGRenderer {
                 fallbackReason: "invalidPNGHeader",
                 skiaRenderMs: skiaRenderMs,
                 pngHeaderValidateMs: validateMs,
-                skiaPNGBytes: png.byteCount
+                skiaPNGBytes: png.byteCount, fontContext: fontContext
             )
         }
         let validateMs = elapsedMilliseconds(since: validateStart)
@@ -126,7 +137,7 @@ enum HwpPreviewPNGRenderer {
                     pngEncodeMs: nil,
                     coreGraphicsRenderMs: nil,
                     totalMs: skiaRenderMs + validateMs
-                )
+                ), fontIdentity: fontContext?.identity, fontFaces: fontContext?.faces.map(\.postScriptName).sorted() ?? []
             )
         )
     }
@@ -138,12 +149,15 @@ enum HwpPreviewPNGRenderer {
         fallbackReason: String? = nil,
         skiaRenderMs: Double? = nil,
         pngHeaderValidateMs: Double? = nil,
-        skiaPNGBytes: Int? = nil
+        skiaPNGBytes: Int? = nil,
+        fontContext: RhwpNativeFontContext? = nil,
+        forceDefaultFonts: Bool = false
     ) throws -> HwpRenderedPreviewPNG {
         let page = try HwpPageImageRenderer.renderPage(
             document: context.document,
             pageIndex: 0,
-            policy: policy
+            policy: policy,
+            fontContext: fontContext, forceDefaultFonts: forceDefaultFonts
         )
 
         let encodeStart = DispatchTime.now().uptimeNanoseconds
@@ -181,7 +195,7 @@ enum HwpPreviewPNGRenderer {
                     pngEncodeMs: encodeMs,
                     coreGraphicsRenderMs: renderDiagnostics.durationMs.coreGraphicsRenderMs,
                     totalMs: totalMs
-                )
+                ), fontIdentity: renderDiagnostics.fontIdentity, fontFaces: renderDiagnostics.fontFaces
             )
         )
     }

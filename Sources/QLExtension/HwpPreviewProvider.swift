@@ -10,21 +10,23 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
     )
 
     func providePreview(for request: QLFilePreviewRequest) async throws -> QLPreviewReply {
-        try Self.createPreview(for: request)
+        try await Self.createPreview(for: request)
     }
 
-    private static func createPreview(for request: QLFilePreviewRequest) throws -> QLPreviewReply {
+    private static func createPreview(for request: QLFilePreviewRequest) async throws -> QLPreviewReply {
         logger.debug("Preview requested file=\(request.fileURL.lastPathComponent, privacy: .public)")
         do {
+            let stamp = try InstalledFontSystem.statURL(request.fileURL)
+            let current: @Sendable () async throws -> Bool = { try InstalledFontSystem.statURL(request.fileURL) == stamp }
             let documentContext = try HwpPreviewPDFRenderer.load(fileURL: request.fileURL)
             logExternalResourceReport(documentContext.externalResourceReport)
             if documentContext.pageCount == 1 {
                 let mode = HwpQuickLookPNGReplyModeResolver.resolve()
                 logger.debug("Preview selected PNG reply file=\(documentContext.filename, privacy: .public) mode=\(mode.identifier, privacy: .public) pages=\(documentContext.pageCount, privacy: .public) size=\(Int(documentContext.contentSize.width), privacy: .public)x\(Int(documentContext.contentSize.height), privacy: .public)")
-                return try Self.pngReply(documentContext, mode: mode)
+                return try await Self.pngReply(documentContext, mode: mode, current: current)
             } else {
                 logger.debug("Preview selected PDF reply file=\(documentContext.filename, privacy: .public) pages=\(documentContext.pageCount, privacy: .public) size=\(Int(documentContext.contentSize.width), privacy: .public)x\(Int(documentContext.contentSize.height), privacy: .public)")
-                return try Self.pdfReply(documentContext)
+                return try await Self.pdfReply(documentContext, current: current)
             }
         } catch {
             if let reason = HwpDocumentFallbackClassifier.reason(for: error) {
@@ -48,13 +50,14 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
 
     private static func pngReply(
         _ documentContext: HwpPreviewDocumentContext,
-        mode: HwpPreviewPNGReplyMode
-    ) throws -> QLPreviewReply {
+        mode: HwpPreviewPNGReplyMode,
+        current: @escaping @Sendable () async throws -> Bool
+    ) async throws -> QLPreviewReply {
         logger.debug("Preview rendering PNG file=\(documentContext.filename, privacy: .public) mode=\(mode.identifier, privacy: .public)")
         let filename = documentContext.filename
-        let result = try HwpPreviewPNGRenderer.render(
+        let result = try await ExtensionFontRenderer.png(
             context: documentContext,
-            mode: mode
+            mode: mode, current: current
         )
         let data = result.data
         logPNGDiagnostics(result, filename: filename)
@@ -74,20 +77,17 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         filename: String
     ) {
         let diagnostics = result.diagnostics
+        logger.debug("Preview fonts identity=\(optionalStringDescription(diagnostics.fontIdentity), privacy: .public) faces=\(diagnostics.fontFaces.joined(separator: ","), privacy: .public) supplyFallback=\(optionalStringDescription(diagnostics.fontSupplyFailure), privacy: .public)")
         logger.debug("Preview PNG render backend file=\(filename, privacy: .public) requestedMode=\(diagnostics.requestedMode.identifier, privacy: .public) outputMode=\(diagnostics.outputMode.identifier, privacy: .public) backend=\(backendDescription(diagnostics.backendUsed), privacy: .public) fallback=\(optionalStringDescription(diagnostics.fallbackReason), privacy: .public)")
         logger.debug("Preview PNG render output file=\(filename, privacy: .public) bytes=\(diagnostics.outputBytes, privacy: .public) skiaPNGBytes=\(optionalIntDescription(diagnostics.skiaPNGBytes), privacy: .public) pixel=\(optionalSizeDescription(diagnostics.pngPixelSize), privacy: .public)")
         logger.debug("Preview PNG render timing totalMs=\(millisecondsDescription(diagnostics.durationMs.totalMs), privacy: .public) skiaMs=\(optionalMillisecondsDescription(diagnostics.durationMs.skiaRenderMs), privacy: .public) validateMs=\(optionalMillisecondsDescription(diagnostics.durationMs.pngHeaderValidateMs), privacy: .public) decodeMs=\(optionalMillisecondsDescription(diagnostics.durationMs.pngDecodeMs), privacy: .public) encodeMs=\(optionalMillisecondsDescription(diagnostics.durationMs.pngEncodeMs), privacy: .public) coreMs=\(optionalMillisecondsDescription(diagnostics.durationMs.coreGraphicsRenderMs), privacy: .public)")
     }
 
-    private static func pdfReply(_ documentContext: HwpPreviewDocumentContext) throws -> QLPreviewReply {
+    private static func pdfReply(_ documentContext: HwpPreviewDocumentContext, current: @escaping @Sendable () async throws -> Bool) async throws -> QLPreviewReply {
         logger.debug("Preview rendering PDF file=\(documentContext.filename, privacy: .public) pages=\(documentContext.pageCount, privacy: .public)")
         let filename = documentContext.filename
         let contentSize = documentContext.contentSize
-        let result = try HwpPreviewPDFRenderer.render(
-            context: documentContext,
-            policy: .coreGraphicsOnly,
-            collectDiagnostics: true
-        )
+        let result = try await ExtensionFontRenderer.pdf(context: documentContext, current: current)
         let data = result.data
         logPDFDiagnostics(result, filename: filename)
         logger.debug("Preview PDF ready file=\(filename, privacy: .public) pages=\(result.pageCount, privacy: .public) bytes=\(data.count, privacy: .public)")
@@ -110,6 +110,7 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         var totalRenderMs = 0.0
 
         for page in result.pageDiagnostics {
+            logger.debug("Preview PDF fonts page=\(page.pageIndex, privacy: .public) identity=\(optionalStringDescription(page.diagnostics.fontIdentity), privacy: .public) faces=\(page.diagnostics.fontFaces.joined(separator: ","), privacy: .public) supplyFallback=\(optionalStringDescription(page.diagnostics.fontSupplyFailure), privacy: .public)")
             switch page.diagnostics.backendUsed {
             case .coreGraphics:
                 coreGraphicsPages += 1

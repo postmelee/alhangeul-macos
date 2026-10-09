@@ -1,0 +1,20 @@
+Alhangeul extension registration hygiene
+Diagnostics: /Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/sealed-cleanup-hygiene/20261010-012618
+
+Allowed installed app locations:
+  - /Applications/Alhangeul.app
+  - /Users/melee/Applications/Alhangeul.app
+Provider app roots:
+  - /Applications/Alhangeul.app
+Development registrations:
+  - (none)
+Development app bundles found:
+  - (none)
+Legacy app candidates:
+  - (none)
+Legacy extension candidates:
+  - (none)
+Issues:
+  - (none)
+Warnings:
+  - (none)

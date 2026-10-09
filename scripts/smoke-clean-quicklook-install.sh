@@ -9,6 +9,9 @@ REPLACE_APPLICATIONS_INSTALL=0
 REMOVE_USER_APPLICATION_COPY=0
 OPEN_FINDER=0
 SKIP_PACKAGE=0
+PRESERVE_SIGNATURE=0
+SCOPED_REGISTRATIONS=0
+SKIP_GLOBAL_RESET=0
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 ORIGINAL_CWD="$(pwd)"
@@ -39,6 +42,12 @@ Options:
       are accepted.
   --replace-applications-install
       Required when --install-app is /Applications/Alhangeul.app.
+  --preserve-signature
+      Verify and preserve the already sealed app. Never re-sign it ad-hoc.
+  --scoped-registrations
+      Leave other development app registrations unchanged.
+  --skip-global-reset
+      Use fresh sample paths without killing services or clearing system caches.
   --remove-user-application-copy
       Remove $HOME/Applications/Alhangeul.app if present to avoid duplicate
       PlugInKit/LaunchServices providers.
@@ -111,6 +120,9 @@ parse_args() {
         REPLACE_APPLICATIONS_INSTALL=1
         shift
         ;;
+      --preserve-signature) PRESERVE_SIGNATURE=1; shift ;;
+      --scoped-registrations) SCOPED_REGISTRATIONS=1; shift ;;
+      --skip-global-reset) SKIP_GLOBAL_RESET=1; shift ;;
       --remove-user-application-copy)
         REMOVE_USER_APPLICATION_COPY=1
         shift
@@ -273,7 +285,11 @@ prepare_smoke_app_copy() {
   rm -rf "$run_dir/staging"
   mkdir -p "$run_dir/staging"
   ditto "$APP_PATH" "$smoke_app"
-  resign_smoke_app "$smoke_app" "$run_dir/signing"
+  if [ "$PRESERVE_SIGNATURE" -eq 1 ]; then
+    verify_signed_bundle "$smoke_app"
+  else
+    resign_smoke_app "$smoke_app" "$run_dir/signing"
+  fi
   APP_PATH="$smoke_app"
   SMOKE_APP_PATH="$smoke_app"
 }
@@ -335,7 +351,7 @@ install_app() {
       ;;
   esac
 
-  unregister_ephemeral_alhangeul_app_registrations
+  if [ "$SCOPED_REGISTRATIONS" -ne 1 ]; then unregister_ephemeral_alhangeul_app_registrations; fi
 
   local user_copy="$HOME/Applications/Alhangeul.app"
   if [ "$INSTALL_APP" != "$user_copy" ] && [ -d "$user_copy" ]; then
@@ -360,6 +376,7 @@ install_app() {
 }
 
 reset_quicklook() {
+  if [ "$SKIP_GLOBAL_RESET" -eq 1 ]; then return; fi
   killall AlhangeulPreview >/dev/null 2>&1 || true
   killall AlhangeulThumbnail >/dev/null 2>&1 || true
   killall QuickLookUIService >/dev/null 2>&1 || true
