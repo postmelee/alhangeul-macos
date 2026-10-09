@@ -1387,7 +1387,10 @@ name = "rhwp_mac_bridge"
 version = "0.1.0"
 dependencies = [
  "rhwp",
+ "serde",
  "serde_json",
+ "sha2",
+ "ttf-parser",
 ]
 
 [[package]]

@@ -200,12 +200,10 @@ targets:
           - FontLibrary/**
       - path: Sources/HostApp
         includes:
-          - Services/FontLibraryService.swift
-          - Services/FontLibraryChanges.swift
           - Services/StudioFont*.swift
-          - Services/InstalledFont*.swift
+          - Services/RhwpStudioOutputFontJob.swift
+          - Services/RhwpStudioOutputFontPolicy.swift
           - Services/MacFontDiscovery.swift
-          - Services/FontImportSourceSession.swift
           - Views/FontLibrarySettingsModel.swift
           - Views/InstalledFontSettingsModel.swift
     dependencies:
@@ -223,6 +221,15 @@ targets:
     platform: macOS
     sources:
       - path: Tests/HostAppTests
+      - path: Tests/FontLibraryTests/Fixtures
+        type: folder
+      - path: Sources/Shared
+        includes:
+          - FontLibrary/**
+      - path: Sources/HostApp/Services
+        includes:
+          - MacFontDiscovery.swift
+          - RhwpStudioOutputFont*.swift
       - path: Sources/HostApp/Services/AppExecutionAnalyticsState.swift
       - path: Sources/HostApp/Services/AppExecutionAnalyticsRuntime.swift
       - path: Sources/HostApp/Services/AppExecutionEvent.swift
@@ -247,6 +254,7 @@ targets:
       - path: Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift
       - path: Sources/HostApp/Services/RhwpStudioPagePayload.swift
       - path: Sources/HostApp/Services/RhwpStudioPrintLifecycle.swift
+      - path: Sources/HostApp/Services/RhwpStudioPrintController.swift
       - path: Sources/HostApp/Services/RhwpStudioPrintOrientationPolicy.swift
       - path: Sources/HostApp/Services/SpotlightReindexService.swift
       - path: Sources/HostApp/Support/RhwpProvenance.swift
@@ -265,6 +273,7 @@ targets:
       - path: Tests/ExternalImageTests
       - path: Sources/Shared/HwpExternalImageResolver.swift
       - path: Sources/RhwpCoreBridge/RhwpDocument.swift
+      - path: Sources/RhwpCoreBridge/RhwpNativeFontContext.swift
       - path: Sources/RhwpCoreBridge/RhwpDocumentProtection.swift
       - path: Sources/RhwpCoreBridge/RenderTree.swift
     dependencies:

@@ -1,0 +1,45 @@
+{
+  "bundledProcessRegisteredCount" : 0,
+  "invalidHashAndPSRejected" : true,
+  "kind" : "isolated native adapter acceptance; live service\/Finder unconnected",
+  "missingGlyphRejectedWithoutPNG" : true,
+  "passed" : true,
+  "records" : [
+    {
+      "contextRestored" : true,
+      "coreGraphicsPS" : [
+        "GowunBatang-Bold",
+        "GowunBatang-Regular"
+      ],
+      "documentUnchanged" : true,
+      "format" : "hwpx",
+      "imageSHA256" : "9120fe4934333f727d458e85700b1bac73561ae162d482da31e213009dc4ee3c",
+      "provenRuns" : 4,
+      "sharedRenderer" : "same exact faces in Skia",
+      "skiaReason" : "exactPortableGlyphReplay",
+      "skiaStatus" : "ok",
+      "targetRuns" : 4
+    },
+    {
+      "contextRestored" : true,
+      "coreGraphicsPS" : [
+        "GowunBatang-Bold",
+        "GowunBatang-Regular"
+      ],
+      "documentUnchanged" : true,
+      "format" : "hwp",
+      "imageSHA256" : "69ac4efcc040138ab04396fb9d998efe205fa50f37d779e59e6f8c528bfc9e6b",
+      "provenRuns" : 4,
+      "sharedRenderer" : "same exact faces in Skia",
+      "skiaReason" : "exactPortableGlyphReplay",
+      "skiaStatus" : "ok",
+      "targetRuns" : 4
+    }
+  ],
+  "regularSkiaPNGBytes" : 21905,
+  "regularSkiaRuns" : 1,
+  "samePSChangedBytesAndOriginalReused" : true,
+  "sharedTransportBuffer" : true,
+  "userFontOSRegistration" : false,
+  "widePageIndexRejected" : true
+}

@@ -18,9 +18,6 @@ PY
 swiftc -parse-as-library -warnings-as-errors -target "$(uname -m)-apple-macosx12.0" \
   -module-cache-path "$OUT/module-cache" \
   "$ROOT"/Sources/Shared/FontLibrary/*.swift \
-  "$ROOT/Sources/HostApp/Services/FontLibraryService.swift" \
-  "$ROOT/Sources/HostApp/Services/FontLibraryChanges.swift" \
-  "$ROOT/Sources/HostApp/Services/FontImportSourceSession.swift" \
   "$ROOT/Sources/HostApp/Services/MacFontDiscovery.swift" \
   "$ROOT/Sources/HostApp/Views/FontLibrarySettingsModel.swift" \
   "$ROOT/Sources/HostApp/Views/FontLibrarySettingsView.swift" \

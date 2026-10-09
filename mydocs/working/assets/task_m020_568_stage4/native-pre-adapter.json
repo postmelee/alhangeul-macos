@@ -1,0 +1,75 @@
+{
+  "OSFontRegistration": false,
+  "core": "v0.8.7",
+  "documentUnchanged": true,
+  "results": [
+    {
+      "diagnostic": {
+        "emittedRuns": 2,
+        "faces": [
+          {
+            "faceIndex": 0,
+            "postScriptName": "GowunBatang-Regular",
+            "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849"
+          }
+        ],
+        "identity": "probe-regular",
+        "proofFailures": [],
+        "provenRuns": 2,
+        "reason": "glyphLoweringUnsupported",
+        "targetRuns": 3,
+        "version": 1
+      },
+      "mode": "regular",
+      "pngBytes": 0,
+      "status": 8
+    },
+    {
+      "diagnostic": {
+        "emittedRuns": 0,
+        "faces": [
+          {
+            "faceIndex": 0,
+            "postScriptName": "GowunBatang-Bold",
+            "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94"
+          }
+        ],
+        "identity": "probe-bold",
+        "proofFailures": [],
+        "provenRuns": 0,
+        "reason": "glyphLoweringUnsupported",
+        "targetRuns": 1,
+        "version": 1
+      },
+      "mode": "bold",
+      "pngBytes": 0,
+      "status": 8
+    },
+    {
+      "diagnostic": {
+        "emittedRuns": 2,
+        "faces": [
+          {
+            "faceIndex": 0,
+            "postScriptName": "GowunBatang-Regular",
+            "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849"
+          },
+          {
+            "faceIndex": 0,
+            "postScriptName": "GowunBatang-Bold",
+            "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94"
+          }
+        ],
+        "identity": "probe-both",
+        "proofFailures": [],
+        "provenRuns": 2,
+        "reason": "glyphLoweringUnsupported",
+        "targetRuns": 4,
+        "version": 1
+      },
+      "mode": "both",
+      "pngBytes": 0,
+      "status": 8
+    }
+  ]
+}

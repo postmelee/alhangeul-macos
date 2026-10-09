@@ -15,10 +15,6 @@ app,out=map(Path,sys.argv[1:])
 PY
 swiftc -parse-as-library -warnings-as-errors -target "$(uname -m)-apple-macosx12.0" -module-cache-path "$OUT/module-cache" \
  "$ROOT"/Sources/Shared/FontLibrary/*.swift \
- "$ROOT/Sources/HostApp/Services/FontLibraryService.swift" \
-  "$ROOT/Sources/HostApp/Services/FontLibraryChanges.swift" \
- "$ROOT/Sources/HostApp/Services/FontImportSourceSession.swift" \
- "$ROOT"/Sources/HostApp/Services/InstalledFont*.swift \
  "$ROOT/Tests/InstalledFontCatalogProbe/main.swift" -o "$APP/Contents/MacOS/InstalledFontCatalogProbe"
 codesign --force --options runtime --timestamp=none --sign "${PROBE_SIGN_ID:?승인된 로컬 서명 인증서를 지정하세요}" --entitlements "$OUT/catalog.entitlements" "$APP"
 codesign --verify --strict "$APP"

@@ -60,6 +60,19 @@ function fixture(rows = [face('a')], overrides = {}) {
 }
 const cleanup = (t, f) => t.after(() => f.adapter.dispose());
 
+test('출력 context는 native identity와 누락 후보를 제공하고 bytes 읽기 없이 갱신 때 폐기', async t => {
+  const f = fixture([face('a'), face('b',{limitation:'disabled'}),
+    face('c',{source:'managed',weight:400,limitation:'conflict'})], {
+      catalog: result => ({...result,identity:'native-snapshot'}),
+  }); cleanup(t,f);
+  await f.adapter.connect();
+  const value = f.adapter.getOutputContext([{key:'a',family:'Family a'},{key:'b',family:'Family b'},{key:'c',family:'Family c'}]);
+  assert.equal(value.identity,'native-snapshot');
+  assert.deepEqual(value.unavailable,['c']);
+  assert.equal(f.calls.filter(c=>c.op==='openFace').length,0);
+  f.adapter.refresh(); assert.equal(f.adapter.getOutputContext([]),null);
+});
+
 test('API 부재는 unsupported, native 읽기와 등록 없음', async t => {
   const f = fixture(undefined, {noAPI: true}); cleanup(t, f);
   assert.deepEqual(await f.adapter.connect(), {supported: false});

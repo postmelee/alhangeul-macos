@@ -1,0 +1,362 @@
+{
+  "checks": [
+    "승인된 고운바탕 두 face를 private 관리 보관함에 복사",
+    "hwp: 줄 경계의 공백을 제외한 현재 편집 본문·한글·ASCII의 PDFKit 추출",
+    "hwp: PDFKit 검색·영역 선택의 한글 text layer",
+    "hwp: 정확한 Regular/Bold PS와 한글 ToUnicode",
+    "hwp: PDF job은 필요한 두 face만 각 1회 읽음",
+    "hwp: PDF 내보내기는 원래 문서 bytes·dirty·changeSeq 유지",
+    "인쇄 seal이 실제 face 읽기 후 실행",
+    "hwp: 인쇄 callback 취소를 성공과 구분",
+    "hwp: seal된 실제 인쇄 PDF text layer",
+    "hwp: 인쇄 준비·취소 후 원래 문서 상태 유지",
+    "hwp: 실제 bytes 반환 직후 취소는 기존 목적지를 보존·늦은 결과 폐기",
+    "hwp: 실제 관리 자산 제거는 stale 중단·대체 확인 우회 없음",
+    "hwp: 제거한 private 복사본 복원",
+    "hwp: 취소·설정 변경 이후 새 snapshot으로 재출력",
+    "hwp: 취소·관리 변경·재출력에서 원래 문서 상태 유지",
+    "hwpx: 줄 경계의 공백을 제외한 현재 편집 본문·한글·ASCII의 PDFKit 추출",
+    "hwpx: PDFKit 검색·영역 선택의 한글 text layer",
+    "hwpx: 정확한 Regular/Bold PS와 한글 ToUnicode",
+    "hwpx: PDF job은 필요한 두 face만 각 1회 읽음",
+    "hwpx: PDF 내보내기는 원래 문서 bytes·dirty·changeSeq 유지",
+    "인쇄 seal이 실제 face 읽기 후 실행",
+    "hwpx: 인쇄 callback 취소를 성공과 구분",
+    "hwpx: seal된 실제 인쇄 PDF text layer",
+    "hwpx: 인쇄 준비·취소 후 원래 문서 상태 유지",
+    "hwpx: 실제 bytes 반환 직후 취소는 기존 목적지를 보존·늦은 결과 폐기",
+    "hwpx: 실제 관리 자산 제거는 stale 중단·대체 확인 우회 없음",
+    "hwpx: 제거한 private 복사본 복원",
+    "hwpx: 취소·설정 변경 이후 새 snapshot으로 재출력",
+    "hwpx: 취소·관리 변경·재출력에서 원래 문서 상태 유지",
+    "실제 인쇄 패널 취소·spool 전송 없음"
+  ],
+  "error": null,
+  "errors": [],
+  "outputs": [
+    {
+      "bounds": [
+        794,
+        1123
+      ],
+      "fonts": [
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 1628,
+          "ps": "AAAAAF+GowunBatang-Regular",
+          "subtype": "TrueType",
+          "toUnicode": false
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 1420,
+          "ps": "AAAAAE+GowunBatang-Bold",
+          "subtype": "TrueType",
+          "toUnicode": true
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 1072,
+          "ps": "AAAAAH+NotoSansKR-Regular",
+          "subtype": "TrueType",
+          "toUnicode": true
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 4004,
+          "ps": "AAAAAC+GowunBatang-Regular",
+          "subtype": "TrueType",
+          "toUnicode": true
+        }
+      ],
+      "format": "hwp",
+      "reads": [
+        {
+          "bytes": 8433296,
+          "idSource": "managed",
+          "ps": "GowunBatang-Regular",
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "weight": 400
+        },
+        {
+          "bytes": 8178712,
+          "idSource": "managed",
+          "ps": "GowunBatang-Bold",
+          "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+          "weight": 700
+        },
+        {
+          "bytes": 8433296,
+          "idSource": "managed",
+          "ps": "GowunBatang-Regular",
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "weight": 400
+        },
+        {
+          "bytes": 8178712,
+          "idSource": "managed",
+          "ps": "GowunBatang-Bold",
+          "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+          "weight": 700
+        },
+        {
+          "bytes": 8433296,
+          "idSource": "managed",
+          "ps": "GowunBatang-Regular",
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "weight": 400
+        },
+        {
+          "bytes": 8433296,
+          "idSource": "managed",
+          "ps": "GowunBatang-Regular",
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "weight": 400
+        },
+        {
+          "bytes": 8433296,
+          "idSource": "managed",
+          "ps": "GowunBatang-Regular",
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "weight": 400
+        },
+        {
+          "bytes": 8178712,
+          "idSource": "managed",
+          "ps": "GowunBatang-Bold",
+          "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+          "weight": 700
+        }
+      ],
+      "selection": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력",
+      "text": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력"
+    },
+    {
+      "bounds": [
+        794,
+        1123
+      ],
+      "fonts": [
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 1628,
+          "ps": "AAAAAF+GowunBatang-Regular",
+          "subtype": "TrueType",
+          "toUnicode": false
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 1420,
+          "ps": "AAAAAE+GowunBatang-Bold",
+          "subtype": "TrueType",
+          "toUnicode": true
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 1072,
+          "ps": "AAAAAH+NotoSansKR-Regular",
+          "subtype": "TrueType",
+          "toUnicode": true
+        },
+        {
+          "descendantSubtype": "",
+          "fontProgramBytes": 4004,
+          "ps": "AAAAAC+GowunBatang-Regular",
+          "subtype": "TrueType",
+          "toUnicode": true
+        }
+      ],
+      "format": "hwpx",
+      "reads": [
+        {
+          "bytes": 8433296,
+          "idSource": "managed",
+          "ps": "GowunBatang-Regular",
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "weight": 400
+        },
+        {
+          "bytes": 8178712,
+          "idSource": "managed",
+          "ps": "GowunBatang-Bold",
+          "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+          "weight": 700
+        },
+        {
+          "bytes": 8433296,
+          "idSource": "managed",
+          "ps": "GowunBatang-Regular",
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "weight": 400
+        },
+        {
+          "bytes": 8178712,
+          "idSource": "managed",
+          "ps": "GowunBatang-Bold",
+          "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+          "weight": 700
+        },
+        {
+          "bytes": 8433296,
+          "idSource": "managed",
+          "ps": "GowunBatang-Regular",
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "weight": 400
+        },
+        {
+          "bytes": 8433296,
+          "idSource": "managed",
+          "ps": "GowunBatang-Regular",
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "weight": 400
+        },
+        {
+          "bytes": 8433296,
+          "idSource": "managed",
+          "ps": "GowunBatang-Regular",
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "weight": 400
+        },
+        {
+          "bytes": 8178712,
+          "idSource": "managed",
+          "ps": "GowunBatang-Bold",
+          "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+          "weight": 700
+        }
+      ],
+      "selection": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력",
+      "text": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인 입력"
+    }
+  ],
+  "passed": true,
+  "reads": [
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8178712,
+      "idSource": "managed",
+      "ps": "GowunBatang-Bold",
+      "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "weight": 700
+    },
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8178712,
+      "idSource": "managed",
+      "ps": "GowunBatang-Bold",
+      "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "weight": 700
+    },
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8178712,
+      "idSource": "managed",
+      "ps": "GowunBatang-Bold",
+      "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "weight": 700
+    },
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8178712,
+      "idSource": "managed",
+      "ps": "GowunBatang-Bold",
+      "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "weight": 700
+    },
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8178712,
+      "idSource": "managed",
+      "ps": "GowunBatang-Bold",
+      "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "weight": 700
+    },
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8178712,
+      "idSource": "managed",
+      "ps": "GowunBatang-Bold",
+      "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "weight": 700
+    },
+    {
+      "bytes": 8433296,
+      "idSource": "managed",
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "weight": 400
+    },
+    {
+      "bytes": 8178712,
+      "idSource": "managed",
+      "ps": "GowunBatang-Bold",
+      "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "weight": 700
+    }
+  ],
+  "source": "managed"
+}

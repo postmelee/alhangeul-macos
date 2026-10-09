@@ -1,0 +1,70 @@
+{
+  "removed": [
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate/Alhangeul.app",
+      "logicalBytes": 273912549
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate/FontExtensionFixtureProbe.app",
+      "logicalBytes": 18930203
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate/backup",
+      "logicalBytes": 446248370
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate/modules",
+      "logicalBytes": 34076822
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate/finder-results/20261010-003237/staging",
+      "logicalBytes": 273912549
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate-02/Alhangeul.app",
+      "logicalBytes": 273912965
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate-02/FontExtensionFixtureProbe.app",
+      "logicalBytes": 18930203
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate-02/backup",
+      "logicalBytes": 446248370
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate-02/modules",
+      "logicalBytes": 34078390
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate-02/finder-results/20261010-004400/staging",
+      "logicalBytes": 273912965
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate-03/backup",
+      "logicalBytes": 446248370
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/staging",
+      "logicalBytes": 273883541
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate-03/Alhangeul.app",
+      "logicalBytes": 273883541
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate-03/FontExtensionFixtureProbe.app",
+      "logicalBytes": 18981787
+    },
+    {
+      "path": "build.noindex/task568/stage5/signed-candidate-03/modules",
+      "logicalBytes": 34479948
+    },
+    {
+      "path": "build.noindex/task568/stage5/unsigned/Build/Products/Release/Alhangeul.app",
+      "logicalBytes": 274992401
+    }
+  ],
+  "logicalBytes": 3416632974,
+  "kept": "다음 단계용 Xcode 중간 산출물·검증 결과·소스/서명 hash와 재현 script. 임시 .app은 모두 제거."
+}

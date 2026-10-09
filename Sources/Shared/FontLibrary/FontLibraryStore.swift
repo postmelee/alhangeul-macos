@@ -164,6 +164,12 @@ final class FontLibraryStore: Sendable {
             try fs.markInitialized()
             return empty
         }
+        let manifest = try decodeManifest(data)
+        if try !fs.initializationMarked() { try fs.markInitialized() }
+        return manifest
+    }
+
+    private func decodeManifest(_ data: Data) throws -> FontLibraryManifest {
         let decoder = JSONDecoder()
         struct Header: Decodable { let schemaVersion: Int }
         guard let header = try? decoder.decode(Header.self, from: data) else { throw FontLibraryError.corruptManifest }
@@ -172,7 +178,6 @@ final class FontLibraryStore: Sendable {
             throw FontLibraryError.corruptManifest
         }
         try validate(manifest)
-        if try !fs.initializationMarked() { try fs.markInitialized() }
         return manifest
     }
 
@@ -318,6 +323,112 @@ final class FontLibraryStore: Sendable {
 }
 
 extension FontLibraryStore {
+    // Quick Look의 App Group은 실제 실행에서 읽기만 허용될 수 있다.
+    // metadata에는 bytes/디스크 lease를 만들지 않는다. 각 실제 읽기 동안 shared flock으로
+    // writer/GC를 막고, 읽기 전후 호출자의 세대 검증으로 변경된 결과를 폐기한다.
+    private final class ReadAccess {
+        let root: FontLibraryDirectory
+        let lockFD: Int32?
+
+        init(rootURL: URL) throws {
+            root = try FontLibraryDirectory.openRoot(rootURL, createMissing: false)
+            do { lockFD = try root.openFile("library.lock", flags: O_RDONLY) }
+            catch FontLibraryError.io(let code) where code == ENOENT { lockFD = nil }
+        }
+        deinit { if let lockFD { close(lockFD) } }
+
+        func withLock<T>(_ body: () throws -> T) throws -> T {
+            guard let lockFD else { return try body() }
+            while flock(lockFD, LOCK_SH | LOCK_NB) != 0 {
+                if errno == EINTR { continue }
+                throw StudioFontError.busy
+            }
+            defer { _ = flock(lockFD, LOCK_UN) }
+            return try body()
+        }
+    }
+
+    private func readManifest(_ access: ReadAccess) throws -> FontLibraryManifest {
+        if let data = try access.root.read("current.json", limit: maximumManifestBytes) {
+            guard access.lockFD != nil else { throw FontLibraryError.missingManifest }
+            return try decodeManifest(data)
+        }
+        if let fd = access.lockFD {
+            var marked: UInt8 = 0
+            guard pread(fd, &marked, 1, 0) >= 0 else { throw FontLibraryError.io(errno) }
+            guard marked == 0 else { throw FontLibraryError.missingManifest }
+        }
+        for name in ["objects", "staging"] {
+            do {
+                guard try access.root.existingChild(name).isEmpty() else { throw FontLibraryError.missingManifest }
+            } catch FontLibraryError.io(let code) where code == ENOENT { continue }
+        }
+        return FontLibraryManifest()
+    }
+
+    private func readResources(_ manifest: FontLibraryManifest) throws -> [FontSnapshotResource] {
+        let entries = Dictionary(uniqueKeysWithValues: manifest.entries.map { ($0.object.sha256, $0) })
+        var resources: [FontSnapshotResource] = []
+        for selection in manifest.activeSelections {
+            guard let entry = entries[selection.faceID.objectHash],
+                  let face = entry.faces.first(where: { $0.id == selection.faceID }) else {
+                throw FontLibraryError.corruptManifest
+            }
+            let resource = FontSnapshotResource(id: "font-\(entry.object.sha256)-\(face.id.sfntIndex)",
+                object: entry.object, face: face, axes: selection.axes, usageEvidence: entry.usageEvidence)
+            if !resources.contains(resource) { resources.append(resource) }
+        }
+        return resources.sorted { $0.id < $1.id }
+    }
+
+    func listReadOnly() async throws -> FontLibraryManifest {
+        try await perform {
+            let access = try ReadAccess(rootURL: self.rootURL)
+            return try access.withLock { try self.readManifest(access) }
+        }
+    }
+
+    func acquireReadOnlyMetadataSnapshot() async throws -> FontLibrarySnapshot {
+        try await perform {
+            let access = try ReadAccess(rootURL: self.rootURL)
+            return try access.withLock {
+                let manifest = try self.readManifest(access)
+                // FD는 snapshot의 읽기/해제 수명만 보유한다. 장기 shared lock은 잡지 않는다.
+                let fd = dup(access.lockFD ?? access.root.descriptor)
+                guard fd >= 0 else { throw FontLibraryError.io(errno) }
+                do {
+                    return try FontLibrarySnapshot(generation: manifest.generation,
+                        resources: self.readResources(manifest), rootPath: self.rootURL.standardizedFileURL.path,
+                        descriptor: fd)
+                } catch { close(fd); throw error }
+            }
+        }
+    }
+
+    func readResourceReadOnly(_ id: String, snapshot: FontLibrarySnapshot) async throws -> Data {
+        try await perform {
+            try snapshot.withLease(rootPath: self.rootURL.standardizedFileURL.path) {
+                let access = try ReadAccess(rootURL: self.rootURL)
+                return try access.withLock {
+                    let manifest = try self.readManifest(access)
+                    guard manifest.generation == snapshot.generation,
+                          try self.readResources(manifest) == snapshot.resources else {
+                        throw FontLibraryError.staleGeneration
+                    }
+                    guard let resource = snapshot.resources.first(where: { $0.id == id }) else {
+                        throw FontLibraryError.invalidResource
+                    }
+                    let objects = try access.root.existingChild("objects")
+                    guard let data = try objects.read(resource.object.sha256 + ".font", limit: resource.object.byteCount),
+                          data.count == resource.object.byteCount, Self.hash(data) == resource.object.sha256 else {
+                        throw FontLibraryError.corruptObject
+                    }
+                    return data
+                }
+            }
+        }
+    }
+
     func remove(objectHash: String, expectedGeneration: UInt64) async throws -> FontLibraryManifest {
         try await perform {
             let fs = try FontLibraryFileSystem(rootURL: self.rootURL)
@@ -342,6 +453,15 @@ extension FontLibraryStore {
     }
 
     func acquireSnapshot() async throws -> FontLibrarySnapshot {
+        try await acquireSnapshot(validatesObjects: true)
+    }
+
+    // 목록 열거는 원본 파일을 선읽기하지 않는다. readResource가 선택된 object의 hash를 검증한다.
+    func acquireMetadataSnapshot() async throws -> FontLibrarySnapshot {
+        try await acquireSnapshot(validatesObjects: false)
+    }
+
+    private func acquireSnapshot(validatesObjects: Bool) async throws -> FontLibrarySnapshot {
         try await perform {
             let fs = try FontLibraryFileSystem(rootURL: self.rootURL)
             return try fs.withLock {
@@ -353,7 +473,7 @@ extension FontLibraryStore {
                           let face = entry.faces.first(where: { $0.id == selection.faceID }) else {
                         throw FontLibraryError.corruptManifest
                     }
-                    try self.verifyObject(entry.object, fs: fs)
+                    if validatesObjects { try self.verifyObject(entry.object, fs: fs) }
                     let resource = FontSnapshotResource(id: "font-\(entry.object.sha256)-\(face.id.sfntIndex)",
                         object: entry.object, face: face, axes: selection.axes, usageEvidence: entry.usageEvidence)
                     if !resources.contains(resource) { resources.append(resource) }

@@ -1,0 +1,599 @@
+{
+  "localReader": "Version 26.5.2 (Build 25F84)",
+  "fixtures": [
+    {
+      "name": "enclosed-hangul",
+      "ciSystem": "Version 15.7.9 (Build 24G830)",
+      "current": {
+        "rawString": " [외부: sample.png] 모노스페이스 한글\n미등록 글꼴 한글 (ᄀ) 원문자 ᄀ 한글\n",
+        "rawSelection": "[외부: sample.png]\n모노스페이스 한글\n미등록 글꼴 한글\n㈀ 원문자 ㉠ 한글",
+        "rawStringContainsQueries": [
+          true,
+          true,
+          true,
+          false,
+          false
+        ],
+        "NFKDStringContainsQueries": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "외부"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "모노스페이스"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "미등록"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 0,
+            "literal": 0,
+            "query": "㈀"
+          },
+          {
+            "compatibilityDecomposed": 2,
+            "default": 0,
+            "literal": 0,
+            "query": "㉠"
+          }
+        ]
+      },
+      "reopened": {
+        "rawString": "[외부: sample.png]\n모노스페이스 한글\n미등록 글꼴 한글\n㈀ 원문자 ㉠ 한글",
+        "rawSelection": "[외부: sample.png]\n모노스페이스 한글\n미등록 글꼴 한글\n㈀ 원문자 ㉠ 한글",
+        "rawStringContainsQueries": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "NFKDStringContainsQueries": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "외부"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "모노스페이스"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "미등록"
+          },
+          {
+            "compatibilityDecomposed": 0,
+            "default": 1,
+            "literal": 1,
+            "query": "㈀"
+          },
+          {
+            "compatibilityDecomposed": 0,
+            "default": 1,
+            "literal": 1,
+            "query": "㉠"
+          }
+        ]
+      },
+      "localReader": {
+        "rawString": "[외부: sample.png]\n모노스페이스 한글\n미등록 글꼴 한글\n㈀ 원문자 ㉠ 한글",
+        "rawSelection": "[외부: sample.png]\n모노스페이스 한글\n미등록 글꼴 한글\n㈀ 원문자 ㉠ 한글",
+        "rawStringContainsQueries": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "NFKDStringContainsQueries": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityComposed": 1,
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "외부"
+          },
+          {
+            "compatibilityComposed": 1,
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "모노스페이스"
+          },
+          {
+            "compatibilityComposed": 1,
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "미등록"
+          },
+          {
+            "compatibilityComposed": 0,
+            "compatibilityDecomposed": 0,
+            "default": 1,
+            "literal": 1,
+            "query": "㈀"
+          },
+          {
+            "compatibilityComposed": 0,
+            "compatibilityDecomposed": 0,
+            "default": 1,
+            "literal": 1,
+            "query": "㉠"
+          }
+        ]
+      },
+      "poppler": "[외부: sample.png]\n\n\n모노스페이스 한글\n\n\n미등록 글꼴 한글\n\n\n㈀ 원문자 ㉠ 한글",
+      "popplerContainsOriginalQueries": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "originalToUnicodeMappings": [
+        {
+          "font": "/AAAAAE+NotoSansKR-Regular",
+          "originalSymbols": [
+            "㈀",
+            "㉠"
+          ]
+        }
+      ],
+      "pdfSHA256": "4381876934f3a60183fec309e349f70e66f5c481943dfb44a6bcaee147b413b2"
+    },
+    {
+      "name": "math-stack",
+      "ciSystem": "Version 15.7.9 (Build 24G830)",
+      "current": {
+        "rawString": " 문2 함수 f(x)=x2+2x+1\n",
+        "rawSelection": "문2 함수 f(x)=x²+2x+1",
+        "rawStringContainsQueries": [
+          true,
+          true,
+          false
+        ],
+        "NFKDStringContainsQueries": [
+          true,
+          true,
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true,
+          true,
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "문2"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "함수"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 0,
+            "literal": 0,
+            "query": "f(x)=x²+2x+1"
+          }
+        ]
+      },
+      "reopened": {
+        "rawString": "문2 함수 f(x)=x²+2x+1",
+        "rawSelection": "문2 함수 f(x)=x²+2x+1",
+        "rawStringContainsQueries": [
+          true,
+          true,
+          true
+        ],
+        "NFKDStringContainsQueries": [
+          true,
+          true,
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true,
+          true,
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "문2"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "함수"
+          },
+          {
+            "compatibilityDecomposed": 0,
+            "default": 1,
+            "literal": 1,
+            "query": "f(x)=x²+2x+1"
+          }
+        ]
+      },
+      "localReader": {
+        "rawString": "문2 함수 f(x)=x²+2x+1",
+        "rawSelection": "문2 함수 f(x)=x²+2x+1",
+        "rawStringContainsQueries": [
+          true,
+          true,
+          true
+        ],
+        "NFKDStringContainsQueries": [
+          true,
+          true,
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true,
+          true,
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityComposed": 1,
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "문2"
+          },
+          {
+            "compatibilityComposed": 1,
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "함수"
+          },
+          {
+            "compatibilityComposed": 0,
+            "compatibilityDecomposed": 0,
+            "default": 1,
+            "literal": 1,
+            "query": "f(x)=x²+2x+1"
+          }
+        ]
+      },
+      "poppler": "문2 함수 f(x)=x²+2x+1",
+      "popplerContainsOriginalQueries": [
+        true,
+        true,
+        true
+      ],
+      "originalToUnicodeMappings": [
+        {
+          "font": "/AAAAAF+STIXTwoText",
+          "originalSymbols": [
+            "²"
+          ]
+        }
+      ],
+      "pdfSHA256": "b9178c8e0953873338593544210cf5c404998fc2129fe6f5dc6353feff11a82d"
+    },
+    {
+      "name": "mixed-runs",
+      "ciSystem": "Version 15.7.9 (Build 24G830)",
+      "current": {
+        "rawString": " 한글 글꼴 확인 가나다 ABC 123 / A+B=1 내장 바탕 대조 한글 ABC 456\n(ᄀ) 원문자 ᄀ 한글 / ASCII 한글 f(x)=x2+2x+1\n",
+        "rawSelection": "한글 글꼴 확인 가나다 ABC 123 / A+B=1\n내장 바탕 대조 한글 ABC 456\n㈀ 원문자 ㉠ 한글 / ASCII\n한글 f(x)=x²+2x+1",
+        "rawStringContainsQueries": [
+          true,
+          true,
+          false,
+          false
+        ],
+        "NFKDStringContainsQueries": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "한글 글꼴 확인 가나다 ABC 123 / A+B=1"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "내장 바탕 대조 한글 ABC 456"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 0,
+            "literal": 0,
+            "query": "㈀ 원문자 ㉠ 한글 / ASCII"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 0,
+            "literal": 0,
+            "query": "한글 f(x)=x²+2x+1"
+          }
+        ]
+      },
+      "reopened": {
+        "rawString": "한글 글꼴 확인 가나다 ABC 123 / A+B=1\n내장 바탕 대조 한글 ABC 456\n㈀ 원문자 ㉠ 한글 / ASCII\n한글 f(x)=x²+2x+1",
+        "rawSelection": "한글 글꼴 확인 가나다 ABC 123 / A+B=1\n내장 바탕 대조 한글 ABC 456\n㈀ 원문자 ㉠ 한글 / ASCII\n한글 f(x)=x²+2x+1",
+        "rawStringContainsQueries": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "NFKDStringContainsQueries": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "한글 글꼴 확인 가나다 ABC 123 / A+B=1"
+          },
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "내장 바탕 대조 한글 ABC 456"
+          },
+          {
+            "compatibilityDecomposed": 0,
+            "default": 1,
+            "literal": 1,
+            "query": "㈀ 원문자 ㉠ 한글 / ASCII"
+          },
+          {
+            "compatibilityDecomposed": 0,
+            "default": 1,
+            "literal": 1,
+            "query": "한글 f(x)=x²+2x+1"
+          }
+        ]
+      },
+      "localReader": {
+        "rawString": "한글 글꼴 확인 가나다 ABC 123 / A+B=1\n내장 바탕 대조 한글 ABC 456\n㈀ 원문자 ㉠ 한글 / ASCII\n한글 f(x)=x²+2x+1",
+        "rawSelection": "한글 글꼴 확인 가나다 ABC 123 / A+B=1\n내장 바탕 대조 한글 ABC 456\n㈀ 원문자 ㉠ 한글 / ASCII\n한글 f(x)=x²+2x+1",
+        "rawStringContainsQueries": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "NFKDStringContainsQueries": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityComposed": 1,
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "한글 글꼴 확인 가나다 ABC 123 / A+B=1"
+          },
+          {
+            "compatibilityComposed": 1,
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "내장 바탕 대조 한글 ABC 456"
+          },
+          {
+            "compatibilityComposed": 0,
+            "compatibilityDecomposed": 0,
+            "default": 1,
+            "literal": 1,
+            "query": "㈀ 원문자 ㉠ 한글 / ASCII"
+          },
+          {
+            "compatibilityComposed": 0,
+            "compatibilityDecomposed": 0,
+            "default": 1,
+            "literal": 1,
+            "query": "한글 f(x)=x²+2x+1"
+          }
+        ]
+      },
+      "poppler": "한글 글꼴 확인 가나다 ABC 123 / A+B=1\n\n내장 바탕 대조 한글 ABC 456\n\n                  ㈀ 원문자 ㉠ 한글 / ASCII\n\n한글 f(x)=x²+2x+1",
+      "popplerContainsOriginalQueries": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "originalToUnicodeMappings": [
+        {
+          "font": "/AAAAAC+NotoSansKR-Regular",
+          "originalSymbols": [
+            "㈀",
+            "㉠"
+          ]
+        },
+        {
+          "font": "/AAAAAK+TimesNewRomanPSMT",
+          "originalSymbols": [
+            "²"
+          ]
+        }
+      ],
+      "pdfSHA256": "588d2ca3f6cc59f9154ffa420924e13131922545b9ed52e87cce369f171130dd"
+    },
+    {
+      "name": "network-blocked",
+      "ciSystem": "Version 15.7.9 (Build 24G830)",
+      "current": {
+        "rawString": " NETWORK-BLOCKED\n",
+        "rawSelection": "NETWORK-BLOCKED",
+        "rawStringContainsQueries": [
+          true
+        ],
+        "NFKDStringContainsQueries": [
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "NETWORK-BLOCKED"
+          }
+        ]
+      },
+      "reopened": {
+        "rawString": "NETWORK-BLOCKED",
+        "rawSelection": "NETWORK-BLOCKED",
+        "rawStringContainsQueries": [
+          true
+        ],
+        "NFKDStringContainsQueries": [
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "NETWORK-BLOCKED"
+          }
+        ]
+      },
+      "localReader": {
+        "rawString": "NETWORK-BLOCKED",
+        "rawSelection": "NETWORK-BLOCKED",
+        "rawStringContainsQueries": [
+          true
+        ],
+        "NFKDStringContainsQueries": [
+          true
+        ],
+        "rawSelectionContainsQueries": [
+          true
+        ],
+        "searches": [
+          {
+            "compatibilityComposed": 1,
+            "compatibilityDecomposed": 1,
+            "default": 1,
+            "literal": 1,
+            "query": "NETWORK-BLOCKED"
+          }
+        ]
+      },
+      "poppler": "NETWORK-BLOCKED",
+      "popplerContainsOriginalQueries": [
+        true
+      ],
+      "originalToUnicodeMappings": [],
+      "pdfSHA256": "d1e697b4b57a86e4ccb5183027848d079fc51592dce396c8ab1725c6d7cc8e33"
+    }
+  ],
+  "provenance": {
+    "repository": "postmelee/alhangeul-macos",
+    "run": 37969798803,
+    "job": 113953285941,
+    "head": "05b8b97ef23c7f8a70f0c278de7ce0f617409846",
+    "artifact": 11638030730,
+    "Poppler": "pdftotext version 26.07.0"
+  }
+}

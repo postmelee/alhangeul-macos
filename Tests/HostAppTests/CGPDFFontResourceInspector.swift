@@ -7,6 +7,8 @@ struct CGPDFFontResourceRecord: Equatable {
     let baseFont: String
     let subtype: String
     let hasToUnicode: Bool
+    var fontProgramBytes: Int = 0
+    var descendantSubtype: String = ""
 }
 
 struct CGPDFResourceTraversalState {
@@ -101,6 +103,21 @@ enum CGPDFFontResourceInspector {
                 ) && subtypeName != nil
                     ? String(cString: subtypeName!)
                     : ""
+                var embedded = fontDictionary
+                var descendants: CGPDFArrayRef?, descendant: CGPDFDictionaryRef?
+                if CGPDFDictionaryGetArray(fontDictionary,"DescendantFonts",&descendants), let descendants,
+                   CGPDFArrayGetDictionary(descendants,0,&descendant), let descendant { embedded = descendant }
+                var descriptor: CGPDFDictionaryRef?, programBytes = 0
+                if CGPDFDictionaryGetDictionary(embedded,"FontDescriptor",&descriptor), let descriptor {
+                    for key in ["FontFile","FontFile2","FontFile3"] {
+                        var stream: CGPDFStreamRef?, format = CGPDFDataFormat.raw
+                        if CGPDFDictionaryGetStream(descriptor,key,&stream), let stream,
+                           let data = CGPDFStreamCopyData(stream,&format) { programBytes += CFDataGetLength(data) }
+                    }
+                }
+                var childSubtype: UnsafePointer<CChar>?
+                let descendantSubtype = embedded != fontDictionary && CGPDFDictionaryGetName(embedded,"Subtype",&childSubtype)
+                    && childSubtype != nil ? String(cString:childSubtype!) : ""
 
                 records.append(CGPDFFontResourceRecord(
                     pageIndex: pageIndex,
@@ -111,7 +128,7 @@ enum CGPDFFontResourceInspector {
                         fontDictionary,
                         "ToUnicode",
                         &toUnicodeStream
-                    )
+                    ), fontProgramBytes:programBytes,descendantSubtype:descendantSubtype
                 ))
             }
         }

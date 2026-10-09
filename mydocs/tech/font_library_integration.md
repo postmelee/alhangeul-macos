@@ -1,19 +1,24 @@
 # 공통 글꼴 관리 계층 연동 계약
 
-## 2026-10-08 #567 Studio 수용·소비자 인계
+## 2026-10-10 #567/#568 소비자 수용·인계
 
-아래 #564/#565 단계별 설명은 당시 계약과 검증 이력이다. 현재 제품은 core/Studio `v0.8.7` / `1a76570e833917d15817415a53c09ad61ab3203f`와 앱 소유 adapter로 설치 참조·관리 복사본을 실제 Studio 문서/기존 글꼴 목록에 연결했다. [#567 Stage 5](../working/task_m020_567_stage5.md)의 실제 CoreText·로컬 서명 sandbox·native HWP/HWPX 저장/재열기 수용을 기준으로 한다. 출력·확장·Windows와 전체 배포 수용은 각 후속 이슈의 책임이다.
+아래 #564/#565 단계별 설명은 당시 계약과 검증 이력이다. core/Studio `v0.8.7` / `1a76570e833917d15817415a53c09ad61ab3203f`와 앱 소유 adapter로 설치 참조·관리 복사본을 실제 Studio 문서/기존 글꼴 목록 및 출력·확장에 연결했다. Studio는 [#567 Stage 5](../working/task_m020_567_stage5.md), 출력·확장은 [#568 Stage 6 인계](task_m020_568_consumer_handoff.md)의 소비자별 실제 수용·재사용·미검증 구분을 기준으로 한다. 이 작업 브랜치의 수용 결과를 현재 공개 출시 기능으로 설명하지 않는다.
 
 | 소비자 | 현재 상태 | 후속 검증 |
 |--------|-----------|-----------|
 | HostApp 설정·Studio (#567) | 공유 catalog/provider, 기존 toolbar 선택, Canvas2D/CanvasKit, 변경·복구, 저장 이름 보존, 정상 권한 재실행 확인 | 실제 한컴 설치본·최소 OS/Intel·새 권한 패널/볼륨·배포 후보 수용은 #569에서 취합 |
-| PDF·인쇄 (#568) | 설치/관리 provider 미연결 | 출력 snapshot과 별도 WebView의 실제 face 준비 대기, PS/style/hash 대조, generation·문서 변경·취소 처리 |
-| native·Quick Look·Thumbnail (#568) | 설치/관리 provider 미연결 | 프로세스별 권한·App Group/lease 경계와 정확한 스타일, 표준 Finder smoke |
+| PDF·인쇄 (#568) | [Stage 3](../working/task_m020_568_stage3.md): 설치/관리 snapshot·공식 matcher·실제 저장/인쇄 연결, HWP/HWPX의 PS/style/program/ToUnicode·텍스트와 signed sandbox·패널 취소 수용 | 실제 한컴·최소 OS/Intel·다양한 문서·물리 인쇄 수용은 별도. 일반 가로 Bold 외 효과/형식 지원을 확대하지 않음 |
+| 공통 native (#568) | [Stage 4](../working/task_m020_568_stage4.md): 공식 matcher·설치/관리 snapshot과 bytes 공급을 CG/Skia에 연결하고 원본/세대/취소·cache identity 수용 | 제한된 static SFNT·PositionAdjusted replay. 일부 OS 글꼴은 기존 inspector 제한으로 판독 실패. 전체 layout/최소 OS/Intel 수용은 별도 |
+| Quick Look·Thumbnail (#568) | [Stage 5](../working/task_m020_568_stage5.md): 실제 signed Release에서 설치/관리·PNG/2페이지 PDF·변경/재실행·cache 수용과 원래 앱 복원 완료 | 전체 반복 탐색 비용·OS cache 자동 갱신 경계, 최소 OS/Intel·다양한 문서 수용은 후속 |
 | Windows ZIP (#566) / 전체 안내 (#569) | 후속 | Mac·Windows 수용 분리, 독립 보관과 설치 참조 설명, 소비자별 검증 후 공개 안내/배포 |
 
 JS에 전달하는 공급 정보는 ID·source·revision/generation·이름·스타일·제한이며 URL/bookmark는 native에 남긴다. 필요 bytes만 동일 원본/활성 상태를 검증해 읽고 동시 전송 slot 두 개·제한 재시도·취소·stale 거부를 유지한다. 설치 generation 또는 관리 snapshot이 바뀌면 각 소비자의 Typeface·측정·실패 캐시를 함께 갱신한다. 명시적 관리 선택 → 유일한 활성 설치 후보 → 기존 rhwp fallback 순서와 원래 문서 이름 보존을 소비자별로 검증한다. HostApp bookmark를 다른 프로세스에 복사해서 원본 접근 권한을 공유하지 않는다.
 
-metadata/menu 열거 성공은 모든 face 적용 성공이 아니다. native TTC/가변 제한을 유지하고, 설정의 설치 원본 의존 안내·별도 가져오기 복사본의 독립 보관 안내를 제품 도움말에도 그대로 반영한다. 출력과 Finder가 완료되기 전 Studio 결과로 해당 소비자 지원을 선언하지 않는다.
+Stage 4부터 공급 catalog는 `acquireMetadataSnapshot`으로 lease/metadata만 획득하고, 선택된 resource의 실제 read에서 크기·hash를 검증한다. 기존 `acquireSnapshot`의 전체 object 검증과 시작 recovery는 유지한다. metadata 열거 성공은 bytes 적용 성공을 뜻하지 않으며, 알려진 disabled/충돌/지원 불가 face를 native 기본 글꼴로 조용히 바꾸지 않는다.
+
+Stage 5 확장 소비자는 실제 sandbox의 App Group 쓰기 거부에 맞춰 읽기 전용 목록/설정과 FD snapshot을 사용한다. 디스크 lease를 새로 만들지 않고 실제 선택 object 읽기 동안 shared flock으로 GC/게시를 막는다. 읽기 사이에 변경된 세대/선택은 stale로 폐기한다. HostApp의 기존 writable store/디스크 lease 계약과 구분한다. signed Release 수용은 기존 CoreGraphics 정책이며 Skia decode/direct는 공통 renderer의 unsigned 시험 범위다. Finder/OS가 요청을 보내지 않는 영구 cache의 자동 갱신은 보증하지 않는다.
+
+metadata/menu 열거 성공은 모든 face 적용 성공이 아니다. TTC/가변과 제한된 native replay 범위를 유지하고, 설정의 설치 원본 의존 안내·별도 가져오기 복사본의 독립 보관 안내를 제품 도움말에도 그대로 반영한다. signed Release 확장의 설치/관리 수용은 완료했으며 전체 글꼴·실제 한컴 제거·Windows·최소 OS/Intel·물리 인쇄로 확대하지 않는다.
 
 ## 2026-09-20 현재 적용 기준
 
@@ -26,7 +31,7 @@ Mac 기본 목표는 **활성 설치 글꼴 자동 사용**으로 변경됐다. 
 
 - 범위: [#564](https://github.com/postmelee/alhangeul-macos/issues/564), M020
 - 기반 설계: [글꼴 마이그레이션 설계](font_migration_design.md)
-- 구현: `Sources/Shared/FontLibrary/`, `Sources/HostApp/Services/FontLibraryService.swift`
+- 구현: `Sources/Shared/FontLibrary/`
 
 ## 설치 참조 adapter — Stage 3 실험 인계
 
@@ -66,7 +71,9 @@ let resource = try await service.readResource(id, expectedGeneration: snapshot.g
 
 기본 UI는 원본 삭제/비활성 시 사용할 수 없음을 안내한다. 별도 복사본은 ‘가져온 글꼴 보관함’으로 분리했다. 현재 목록 확인·설정 저장까지 지원하고 문서 표시·출력 연결은 준비 중임을 명시한다. App Group 파일 존재를 extension 원본 접근 권한으로 해석하지 않는다.
 
-## Stage 6 소비자 인계와 수용 시나리오
+## #565 Stage 6 당시 소비자 인계와 수용 시나리오
+
+아래 표는 #565 종료 당시의 인계 이력이다. 현재 Studio·출력·확장의 완료 상태와 지원 경계는 이 문서 첫 표와 [#568 소비자 인계](task_m020_568_consumer_handoff.md)를 따른다.
 
 | 소비자 | 현재 연결 | 후속 완료 조건 |
 |--------|-----------|----------------|
@@ -74,7 +81,7 @@ let resource = try await service.readResource(id, expectedGeneration: snapshot.g
 | Studio (#567) | native DTO 및 필요 bytes API 제공, 제품 JS handler 미연결 | 같은 catalog 인스턴스 사용, 신뢰한 frame/message 제한, ID+generation 조회, 기존 이름/스타일 매칭 연결 |
 | CanvasKit (#567) | Stage 3 독립 실험만 통과 | 실제 HWP/HWPX에서 Regular/Bold 선택 증거, generation 변경 시 typeface·측정·실패 캐시 무효화 |
 | PDF·인쇄·native (#568) | 설치 참조 service 미연결 | 화면과 출력의 동일 face/버전 선택 및 출력 중 원본 변경 시 처리 검증 |
-| Quick Look·Thumbnail (#568) | 설치 참조·외부 원본 권한 미연결 | 프로세스별 권한·접근 경계 확정, App Group만으로 접근 가능하다고 가정하지 않음 |
+| Quick Look·Thumbnail (#568) | 자체 installed catalog·설정 flag 공유 소스 연결 완료. 실제 signed 원본 접근은 미검증 | 프로세스별 권한·접근 경계 확정, App Group만으로 접근 가능하다고 가정하지 않음 |
 | Windows/외부 파일 (#566) | 복사 보관함 기반 보존, Windows ZIP UI 미구현 | ZIP 입력 검증·사용자 선택·관리 복사본 수명 연결 |
 | 수용·웹 안내 (#569) | 사용자 설명에 필요한 경계 확정 | 아래 실제 문서 시나리오 완료 후 지원 범위와 단계별 안내 게시 |
 

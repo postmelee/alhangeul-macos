@@ -303,6 +303,7 @@ jobs:
         run: |
           set -euo pipefail
           ./scripts/verify-rhwp-studio-assets.sh
+          node scripts/build-native-font-matcher.mjs --verify
 
       - name: Generate Xcode project
         shell: bash
@@ -325,18 +326,18 @@ jobs:
         shell: bash
         run: scripts/verify-spotlight-importer.sh build.noindex/DerivedData/Build/Products/Debug/Alhangeul.app
 
-      - name: Test Spotlight launch reindex policy
+      - name: Test PDF output, print lifecycle and Spotlight policy
         shell: bash
-        run: |
-          set -euo pipefail
-          xcodebuild -project Alhangeul.xcodeproj \
-            -scheme HostAppTests \
-            -configuration Debug \
-            -destination 'platform=macOS' \
-            -derivedDataPath build.noindex/DerivedData \
-            CODE_SIGNING_ALLOWED=NO \
-            -only-testing:HostAppTests/SpotlightReindexServiceTests \
-            test
+        run: bash scripts/test-studio-output.sh
+
+      - name: Preserve synthetic PDF output diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: studio-pdf-output-diagnostics
+          path: build.noindex/DerivedData/pdf-output-diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Test SwiftUI Studio document lifecycle
         run: python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-font-dotum-empty-hancom.hwp

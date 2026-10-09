@@ -1,4 +1,5 @@
 import AppKit
+import PDFKit
 import SwiftUI
 import WebKit
 
@@ -63,6 +64,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
     }
 
     static func dismantleNSView(_ webView: WKWebView, coordinator: Coordinator) {
+        coordinator.cancelOutputPreparation()
         coordinator.disposeFontProvider(in: webView)
         coordinator.fontMessageHandler.reset()
         webView.configuration.userContentController.removeScriptMessageHandler(forName: StudioFontMessageHandler.name, contentWorld: .page)
@@ -186,6 +188,15 @@ extension RhwpStudioWebView {
         let fontMessageHandler: StudioFontMessageHandler
         private var nextPDFExportRequestID = 0
         private var isPDFPreparing = false
+        private var isPrintPreparing = false
+        private var isPrintSealed = false
+        private var pdfTask: Task<Void, Never>?
+        private var printTask: Task<Void, Never>?
+        var confirmOutputFontFallback: ([RhwpStudioOutputFontFailure], NSWindow?) async -> Bool = {
+            await RhwpStudioOutputFontFallbackAlert.confirm($0,window:$1)
+        }
+        var runPrintOperation: (@MainActor (PDFDocument, String) -> Bool?)?
+        var onPrintCompleted: (RhwpStudioPrintResult) -> Void = { _ in }
         var choosePDFDestination: (String, NSWindow?) async -> URL? = {
             await DocumentPDFExportPanel.chooseDestinationURL(suggestedFilename:$0, presentingWindow:$1)
         }
@@ -298,6 +309,7 @@ extension RhwpStudioWebView {
             installUserScripts(in: webView, loadID: loadID)
 
             htmlDownload?.cancel()
+            cancelOutputPreparation()
             pdfExportState.invalidatePendingRequestForDocumentChange()
             activeSaveID = nil
             pendingSaveRequest = nil
@@ -364,6 +376,7 @@ extension RhwpStudioWebView {
                 fontMessageHandler.begin(loadToken: editorLoadToken)
                 commandWebView?.evaluateJavaScript("window.__alhangeulFontConnection?.refresh()", completionHandler: nil)
                 htmlDownload?.cancel()
+                cancelOutputPreparation()
                 pdfExportState.invalidatePendingRequestForDocumentChange()
                 if let activeSaveEpoch, activeSaveEpoch != snapshot.documentEpoch {
                     activeSaveID = nil
@@ -398,6 +411,7 @@ extension RhwpStudioWebView {
 
         func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
             htmlDownload?.cancel()
+            cancelOutputPreparation()
             pdfExportState.invalidatePendingRequestForDocumentChange()
             hasCompletedCurrentLoad = false
             finishLoading()
@@ -530,7 +544,7 @@ extension RhwpStudioWebView {
 
             switch type {
             case "command":
-                if body["command"] as? String == "app:font-settings" {
+                if ["app:font-settings","file:print","file:export-pdf"].contains(body["command"] as? String ?? "") {
                     let origin = message.frameInfo.securityOrigin
                     guard StudioFontMessageHandler.permits(mainFrame: message.frameInfo.isMainFrame,
                         originScheme: origin.protocol, originHost: origin.host, originPort: origin.port,
@@ -545,11 +559,11 @@ extension RhwpStudioWebView {
             case "share-document":
                 shareDocument(body)
             case "print-document":
-                printDocument(body)
+                break // 요청/문서 lock에 연결되지 않은 이전 payload는 사용하지 않는다.
             case "export-pdf-document":
                 break // 요청에 연결된 async 결과만 처리한다.
             case "export-pdf-error":
-                handlePDFExportError(body)
+                break // 이전 비상관 오류도 현재 출력 상태를 변경하지 않는다.
             case "error":
                 let message = body["message"] as? String
                 onError(message)
@@ -773,6 +787,8 @@ extension RhwpStudioWebView {
                     in: webView,
                     suggestedFilename: body["fileName"] as? String
                 )
+            case "file:print":
+                if let webView = commandWebView { requestPrint(in:webView) }
             default:
                 break
             }
@@ -917,17 +933,9 @@ extension RhwpStudioWebView {
             return data
         }
 
-        private func printDocument(_ body: [String: Any]) {
-            guard let payload = pagePayload(from: body, missingMessage: "인쇄 데이터를 만들 수 없습니다") else {
-                return
-            }
-
-            printLifecycle.start(
-                payload: payload,
-                onRejected: { [weak self] error in
-                    self?.onError(error.localizedDescription)
-                }
-            )
+        func cancelOutputPreparation() {
+            pdfTask?.cancel(); pdfExportController?.cancel()
+            if !isPrintSealed { printTask?.cancel(); printLifecycle.cancelPreparation() }
         }
 
         private func pagePayload(
@@ -995,7 +1003,8 @@ extension RhwpStudioWebView {
             case "file:open":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:open')"
             case "file:print":
-                script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:print')"
+                requestPrint(in:webView)
+                return
             case "file:share":
                 script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:share')"
             case "file:export-pdf":
@@ -1038,7 +1047,7 @@ extension RhwpStudioWebView {
             forcePanel: Bool,
             completion: ((RhwpStudioDocumentSaveResult) -> Void)?
         ) {
-            guard activeSaveID == nil, htmlExportID == nil, pdfExportState.isIdle, !isPDFPreparing else {
+            guard activeSaveID == nil, htmlExportID == nil, pdfExportState.isIdle, !isPDFPreparing, !isPrintPreparing else {
                 completion?(.failed("이미 저장이 진행 중입니다."))
                 return
             }
@@ -1243,7 +1252,7 @@ extension RhwpStudioWebView {
         }
 
         private func requestHTMLExport(format: DocumentHTMLExportFormat, in webView: WKWebView) {
-            guard htmlExportID == nil, activeSaveID == nil, pdfExportState.isIdle, !isPDFPreparing else {
+            guard htmlExportID == nil, activeSaveID == nil, pdfExportState.isIdle, !isPDFPreparing, !isPrintPreparing else {
                 onError("저장 또는 내보내기가 이미 진행 중입니다.")
                 return
             }
@@ -1309,8 +1318,122 @@ extension RhwpStudioWebView {
             else { throw DocumentSaveProtectionPolicyError.documentChanged }
         }
 
+        private struct OutputScope {
+            let id: String, token: String
+            let epoch: Int, revision: Int, loadID: Int, sourceRevision: Int
+        }
+
+        private func outputScope(id: String, token: String, body: [String:Any]) throws -> OutputScope {
+            guard body["requestID"] as? String == id, body["token"] as? String == token,
+                  editorLoadToken == token, let state = body["snapshot"] as? [String:Any],
+                  let epoch = intValue(state["documentEpoch"]), let revision = intValue(state["changeSeq"]),
+                  editorSession?.snapshot.documentEpoch == epoch else { throw RhwpStudioOutputFontError.stale }
+            return .init(id:id,token:token,epoch:epoch,revision:revision,loadID:activeLoadID,
+                         sourceRevision:currentDocument?.revision ?? 0)
+        }
+
+        private func validateOutput(_ scope: OutputScope, in webView: WKWebView) async throws -> Bool {
+            func nativeCurrent() -> Bool {
+                editorLoadToken == scope.token && activeLoadID == scope.loadID
+                    && editorSession?.snapshot.documentEpoch == scope.epoch
+                    && editorSession?.snapshot.ready == true && (currentDocument?.revision ?? 0) == scope.sourceRevision
+            }
+            try Task.checkCancellation()
+            guard nativeCurrent() else { return false }
+            let state = try await bridgeObject("return await window.__alhangeulHostBridgeSave.validate(id);",
+                arguments:["id":scope.id],in:webView)
+            try Task.checkCancellation()
+            return nativeCurrent() && intValue(state["documentEpoch"]) == scope.epoch
+                && intValue(state["changeSeq"]) == scope.revision
+        }
+
+        private func outputJob(_ scope: OutputScope, in webView: WKWebView,
+                               fallbacks: Set<String>, expectedIdentity: String?) async throws -> RhwpStudioOutputFontJob {
+            let snapshot = try await fontMessageHandler.outputSnapshot()
+            do {
+                guard try await validateOutput(scope,in:webView),
+                      expectedIdentity == nil || expectedIdentity == snapshot.identity
+                else { throw RhwpStudioOutputFontError.stale }
+            } catch { await snapshot.release(); throw error }
+            return .init(document:.init(loadToken:scope.token,epoch:scope.epoch,revision:scope.revision),
+                snapshot:snapshot,fallbackFamilies:fallbacks,documentIsCurrent:{ [weak self,weak webView] in
+                    guard let self, let webView else { return false }
+                    return try await self.validateOutput(scope,in:webView)
+                },resolve:{ [weak self,weak webView] requests in
+                    guard let self, let webView, try await self.validateOutput(scope,in:webView) else {
+                        throw RhwpStudioOutputFontError.stale
+                    }
+                    let input = try JSONSerialization.jsonObject(with:JSONEncoder().encode(requests))
+                    guard let value = try await webView.callAsyncJavaScript(RhwpStudioOutputFontBridgeScript.resolve,
+                        arguments:["requests":input],in:nil,contentWorld:.page) as? String,
+                        value.utf8.count <= 8 * 1024 * 1024 else { throw RhwpStudioOutputFontError.invalidRequest }
+                    return try JSONDecoder().decode(RhwpStudioOutputFontResolution.self,from:Data(value.utf8))
+                })
+        }
+
+        private func releaseOutputLock(id: String, token: String, in webView: WKWebView) async {
+            guard editorLoadToken == token else { return }
+            _ = try? await webView.callAsyncJavaScript("window.__alhangeulHostBridgeSave?.release(id);",
+                arguments:["id":id],in:nil,contentWorld:.page)
+        }
+
+        private func requestPrint(in webView: WKWebView) {
+            guard !isPrintPreparing, !isPDFPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
+                onError("저장 또는 출력이 이미 진행 중입니다."); return
+            }
+            isPrintPreparing = true; isPrintSealed = false
+            let token = editorLoadToken, id = "print-" + UUID().uuidString
+            printTask = Task { @MainActor [weak self,weak webView] in
+                guard let self, let webView else { return }
+                do {
+                    let session = try await self.readEditorSession(in:webView)
+                    let body = try await self.bridgeObject("return await window.__alhangeulHostBridgeSave.begin(id, token, epoch, 'pdf');",
+                        arguments:["id":id,"token":token,"epoch":session.snapshot.documentEpoch],in:webView)
+                    let scope = try self.outputScope(id:id,token:token,body:body)
+                    guard let payload = self.pagePayload(from:body,missingMessage:"인쇄 데이터를 만들 수 없습니다") else {
+                        throw RhwpStudioOutputFontError.invalidRequest
+                    }
+                    var fallbacks = Set<String>(), identity: String?
+                    while true {
+                        let job = try await self.outputJob(scope,in:webView,fallbacks:fallbacks,expectedIdentity:identity)
+                        identity = job.supplyIdentity
+                        var result: RhwpStudioPrintResult = .cancelledBeforePanel
+                        let controller = RhwpStudioPrintController(outputFonts:job,onSealed:{
+                            self.isPrintSealed = true
+                            await self.releaseOutputLock(id:id,token:token,in:webView)
+                        },runOperation:self.runPrintOperation,onResult:{ result = $0 },presentError:{ _ in })
+                        let outcome: RhwpStudioPrintResult
+                        do {
+                            outcome = try await withCheckedThrowingContinuation { done in
+                                self.printLifecycle.start(payload:payload,controller:controller,
+                                    onFinished:{ done.resume(returning:result) },onRejected:{ done.resume(throwing:$0) })
+                            }
+                        } catch { await job.close(); throw error }
+                        await job.close()
+                        if case .failed(let error) = outcome {
+                            if !Task.isCancelled, error as? RhwpStudioOutputFontError != .stale,
+                               error as? RhwpStudioOutputFontError != .cancelled, !(error is CancellationError), !job.failures.isEmpty {
+                                guard await self.confirmOutputFontFallback(job.failures,webView.window) else { throw SaveOperationCancelled() }
+                                fallbacks.formUnion(job.failures.map(\.family)); continue
+                            }
+                            throw error
+                        }
+                        self.onPrintCompleted(outcome); break
+                    }
+                } catch is SaveOperationCancelled { self.onPrintCompleted(.cancelledBeforePanel) }
+                catch {
+                    if !Task.isCancelled {
+                        self.onError("인쇄할 수 없습니다: \(error.localizedDescription)")
+                        self.onPrintCompleted(.failed(error))
+                    }
+                }
+                await self.releaseOutputLock(id:id,token:token,in:webView)
+                self.isPrintPreparing = false; self.isPrintSealed = false; self.printTask = nil
+            }
+        }
+
         private func requestPDFExport(in webView: WKWebView, suggestedFilename: String? = nil) {
-            guard !isPDFPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
+            guard !isPDFPreparing, !isPrintPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
                 onError("저장 또는 PDF 내보내기가 이미 진행 중입니다.")
                 return
             }
@@ -1319,7 +1442,7 @@ extension RhwpStudioWebView {
             let id = nextPDFExportRequestID
             let token = editorLoadToken
             let lockID = "pdf-\(token)-\(id)"
-            Task { @MainActor [weak self, weak webView] in
+            pdfTask = Task { @MainActor [weak self, weak webView] in
                 guard let self, let webView else { return }
                 do {
                     let initial = try await self.readEditorSession(in:webView)
@@ -1344,49 +1467,40 @@ extension RhwpStudioWebView {
                           let payload = self.pagePayload(from:body, missingMessage:"PDF 데이터를 만들 수 없습니다"),
                           self.pdfExportState.beginExporting(requestID:id) != nil
                     else { throw DocumentSaveProtectionPolicyError.documentChanged }
-                    let controller = RhwpStudioPDFExportController()
-                    self.pdfExportController = controller
-                    let savedURL: URL = try await withCheckedThrowingContinuation { continuation in
-                        controller.export(payload:payload, destinationURL:url, validateBeforeWrite: {
-                            _ = try await self.bridgeObject(
-                                "return await window.__alhangeulHostBridgeSave.validate(id);", arguments:["id":lockID], in:webView
-                            )
-                            guard self.editorLoadToken == token,
-                                  self.editorSession?.snapshot.documentEpoch == initial.snapshot.documentEpoch
-                            else { throw DocumentSaveProtectionPolicyError.documentChanged }
-                        }, completion: { continuation.resume(with:$0) })
+                    let scope = try self.outputScope(id:lockID,token:token,body:body)
+                    var fallbacks = Set<String>(), identity: String?
+                    while true {
+                        let job = try await self.outputJob(scope,in:webView,fallbacks:fallbacks,expectedIdentity:identity)
+                        identity = job.supplyIdentity
+                        let controller = RhwpStudioPDFExportController(outputFonts:job)
+                        self.pdfExportController = controller
+                        do {
+                            let savedURL: URL = try await withCheckedThrowingContinuation { continuation in
+                                controller.export(payload:payload,destinationURL:url,completion:{ continuation.resume(with:$0) })
+                            }
+                            self.onPDFExported(savedURL); break
+                        } catch {
+                            await job.close()
+                            guard !Task.isCancelled, error as? RhwpStudioOutputFontError != .stale,
+                                  error as? RhwpStudioOutputFontError != .cancelled, !(error is CancellationError),
+                                  !job.failures.isEmpty else { throw error }
+                            guard await self.confirmOutputFontFallback(job.failures,webView.window) else { throw SaveOperationCancelled() }
+                            fallbacks.formUnion(job.failures.map(\.family))
+                        }
                     }
-                    self.onPDFExported(savedURL)
                 } catch is SaveOperationCancelled {
                     // 선택 취소는 원본 상태를 바꾸지 않는다.
                 } catch {
-                    self.onError("PDF를 내보낼 수 없습니다: \(error.localizedDescription)")
+                    if !Task.isCancelled { self.onError("PDF를 내보낼 수 없습니다: \(error.localizedDescription)") }
                 }
-                if self.editorLoadToken == token {
-                    _ = try? await webView.callAsyncJavaScript(
-                        "window.__alhangeulHostBridgeSave?.release(id);", arguments:["id":lockID], in:nil, contentWorld:.page
-                    )
-                }
+                await self.releaseOutputLock(id:lockID,token:token,in:webView)
                 self.pdfExportState.cancelDestinationSelection(requestID:id)
                 self.pdfExportState.failCollection(requestID:id)
                 self.pdfExportState.finishExport(requestID:id)
                 self.pdfExportController = nil
                 self.isPDFPreparing = false
+                self.pdfTask = nil
             }
-        }
-
-        private func handlePDFExportError(_ body: [String: Any]) {
-            guard let requestID = intValue(body["requestID"]),
-                  resetPendingPDFExportCollection(requestID: requestID)
-            else {
-                return
-            }
-            onError(body["message"] as? String ?? "PDF 데이터를 만들 수 없습니다.")
-        }
-
-        @discardableResult
-        private func resetPendingPDFExportCollection(requestID: Int) -> Bool {
-            pdfExportState.failCollection(requestID: requestID)
         }
 
         private func evaluateHostBridgeAction(

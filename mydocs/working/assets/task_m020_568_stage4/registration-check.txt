@@ -1,0 +1,20 @@
+Alhangeul extension registration hygiene
+Diagnostics: /private/tmp/alhangeul-extension-registration-hygiene/20261009-025843
+
+Allowed installed app locations:
+  - /Applications/Alhangeul.app
+  - /Users/melee/Applications/Alhangeul.app
+Provider app roots:
+  - /Applications/Alhangeul.app
+Development registrations:
+  - (none)
+Development app bundles found:
+  - (none)
+Legacy app candidates:
+  - (none)
+Legacy extension candidates:
+  - (none)
+Issues:
+  - (none)
+Warnings:
+  - (none)

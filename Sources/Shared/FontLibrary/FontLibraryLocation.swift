@@ -15,6 +15,15 @@ enum FontLibraryLocationError: Error, Equatable {
 
 struct FontLibraryLocation {
     static let infoKey = "AlhangeulFontLibraryGroupIdentifier"
+    // signed Finder smoke 전용. 일반 제품 빌드에는 이 우회 경로가 컴파일되지 않는다.
+    static var extensionProbeIdentifier: UUID? {
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        if let value = Bundle.main.object(forInfoDictionaryKey: "AlhangeulFontExtensionProbeIdentifier") as? String {
+            return UUID(uuidString: value)
+        }
+        #endif
+        return nil
+    }
     let groupIdentifier: String
 
     init(bundle: Bundle = .main) throws {
@@ -38,9 +47,15 @@ struct FontLibraryLocation {
     }
 
     func resolve() throws -> URL {
-        try resolve(identity: Self.currentIdentity()) { identifier in
+        let root = try resolve(identity: Self.currentIdentity()) { identifier in
             FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)
         }
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        guard let id = Self.extensionProbeIdentifier else { throw FontLibraryLocationError.invalidConfiguration }
+        return root.appendingPathComponent("extension-probes/" + id.uuidString, isDirectory: true)
+        #else
+        return root
+        #endif
     }
 
     // 테스트는 서명/컨테이너 조회를 주입한다. 제품은 위 resolve()만 사용한다.

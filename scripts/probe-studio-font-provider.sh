@@ -16,11 +16,7 @@ PY
 swiftc -parse-as-library -warnings-as-errors -target "$(uname -m)-apple-macosx12.0" \
   -module-cache-path "$OUT/module-cache" \
   "$ROOT"/Sources/Shared/FontLibrary/*.swift \
-  "$ROOT"/Sources/HostApp/Services/InstalledFont*.swift \
   "$ROOT"/Sources/HostApp/Services/StudioFont*.swift \
-  "$ROOT/Sources/HostApp/Services/FontLibraryService.swift" \
-  "$ROOT/Sources/HostApp/Services/FontLibraryChanges.swift" \
-  "$ROOT/Sources/HostApp/Services/FontImportSourceSession.swift" \
   "$ROOT/Tests/StudioFontProviderProbe/main.swift" \
   -o "$APP/Contents/MacOS/StudioFontProviderProbe"
 codesign --force --sign - "$APP"

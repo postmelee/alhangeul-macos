@@ -20,6 +20,34 @@ final class FontLibrarySnapshotTests: XCTestCase {
         return store
     }
 
+    func testMetadataSnapshotDefersObjectVerificationUntilRead() async throws {
+        let store = try await imported()
+        let manifest = try await store.list()
+        let object = try XCTUnwrap(manifest.entries.first?.object)
+        try FileManager.default.removeItem(at: root.appendingPathComponent("objects/\(object.sha256).font"))
+        let metadata = try await store.acquireMetadataSnapshot()
+        let resource = try XCTUnwrap(metadata.resources.first)
+        do { _ = try await store.readResource(resource.id, snapshot: metadata); XCTFail("없는 원본") }
+        catch { XCTAssertEqual(error as? FontLibraryError, .corruptObject) }
+        do { _ = try await store.acquireSnapshot(); XCTFail("기존 전체 검증은 유지") }
+        catch { XCTAssertEqual(error as? FontLibraryError, .corruptObject) }
+        try await store.releaseSnapshot(metadata)
+    }
+
+    func testMetadataSnapshotKeepsTheSameLeaseProtection() async throws {
+        let store = try await imported()
+        let snapshot = try await store.acquireMetadataSnapshot()
+        let resource = try XCTUnwrap(snapshot.resources.first)
+        _ = try await store.remove(objectHash: resource.object.sha256, expectedGeneration: snapshot.generation)
+        let held = try await store.recover()
+        XCTAssertEqual(held.removedObjects, 0)
+        let bytes = try await store.readResource(resource.id, snapshot: snapshot)
+        XCTAssertEqual(bytes, try Data(contentsOf: fixture()))
+        try await store.releaseSnapshot(snapshot)
+        let collected = try await store.recover()
+        XCTAssertEqual(collected.removedObjects, 1)
+    }
+
     func testDeletedSelectionRemainsReadableUntilReleaseAndReimportRestoresIt() async throws {
         let store = try await imported()
         let snapshot = try await store.acquireSnapshot()

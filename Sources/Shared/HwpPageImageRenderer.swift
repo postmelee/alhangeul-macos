@@ -34,6 +34,7 @@ enum HwpPageRenderFallbackReason {
     case skiaRenderFailure
     case pngDecodeFailure
     case memoryTimeoutFallback
+    case unsupportedFontContext
 }
 
 struct HwpPageRenderDuration {
@@ -63,6 +64,9 @@ struct HwpPageRenderDiagnostics {
     let pixelSize: CGSize
     let pngBytes: Int?
     let durationMs: HwpPageRenderDuration
+    var fontIdentity: String? = nil
+    var fontFaces: [String] = []
+    var fontSupplyFailure: String? = nil
 }
 
 struct HwpRenderedPage: @unchecked Sendable {
@@ -154,7 +158,9 @@ enum HwpPageImageRenderer {
         document: RhwpDocument,
         pageIndex: Int,
         maximumPixelSize: CGSize? = nil,
-        policy: HwpPageRenderPolicy = .coreGraphicsOnly
+        policy: HwpPageRenderPolicy = .coreGraphicsOnly,
+        fontContext: RhwpNativeFontContext? = nil,
+        forceDefaultFonts: Bool = false
     ) throws -> HwpRenderedPage {
         guard pageIndex >= 0, pageIndex < document.pageCount else {
             throw HwpRenderError.pageOutOfRange
@@ -172,6 +178,11 @@ enum HwpPageImageRenderer {
         )
         let pixelSize = renderedPixelSize(pageSize: pageSize, scale: scale)
 
+        if forceDefaultFonts {
+            return try renderCoreGraphicsPage(document: document, pageIndex: pageIndex, pageSize: pageSize,
+                scale: scale, pixelSize: pixelSize, policy: policy, forceDefaultFonts: true)
+        }
+
         switch policy {
         case .coreGraphicsOnly:
             return try renderCoreGraphicsPage(
@@ -180,7 +191,8 @@ enum HwpPageImageRenderer {
                 pageSize: pageSize,
                 scale: scale,
                 pixelSize: pixelSize,
-                policy: policy
+                policy: policy,
+                fontContext: fontContext
             )
         case .skiaOptIn:
             let attempt = renderSkiaPage(
@@ -188,7 +200,8 @@ enum HwpPageImageRenderer {
                 pageIndex: pageIndex,
                 pageSize: pageSize,
                 scale: scale,
-                maxDimension: skiaMaxDimension(from: maximumPixelSize)
+                maxDimension: skiaMaxDimension(from: maximumPixelSize),
+                fontContext: fontContext
             )
             if let page = attempt.page {
                 return page
@@ -203,7 +216,8 @@ enum HwpPageImageRenderer {
                 fallbackReason: attempt.fallbackReason,
                 pngBytes: attempt.pngBytes,
                 skiaRenderMs: attempt.skiaRenderMs,
-                pngDecodeMs: attempt.pngDecodeMs
+                pngDecodeMs: attempt.pngDecodeMs,
+                fontContext: fontContext
             )
         }
     }
@@ -332,13 +346,15 @@ enum HwpPageImageRenderer {
         pageIndex: Int,
         pageSize: CGSize,
         scale: CGFloat,
-        maxDimension: Int
+        maxDimension: Int,
+        fontContext: RhwpNativeFontContext?
     ) -> SkiaRenderAttempt {
         let skiaStart = DispatchTime.now().uptimeNanoseconds
         let png = document.renderPagePNG(
             at: pageIndex,
             scale: maxDimension > 0 ? 0 : Double(scale),
-            maxDimension: maxDimension
+            maxDimension: maxDimension,
+            fontContext: fontContext
         )
         let skiaRenderMs = elapsedMilliseconds(since: skiaStart)
 
@@ -383,7 +399,9 @@ enum HwpPageImageRenderer {
                     pageSize: pageSize,
                     pixelSize: pixelSize,
                     pngBytes: png.byteCount,
-                    durationMs: duration
+                    durationMs: duration,
+                    fontIdentity: fontContext?.identity,
+                    fontFaces: png.fontDiagnostic?.faces?.map(\.postScriptName) ?? []
                 )
             ),
             fallbackReason: nil,
@@ -403,7 +421,9 @@ enum HwpPageImageRenderer {
         fallbackReason: HwpPageRenderFallbackReason? = nil,
         pngBytes: Int? = nil,
         skiaRenderMs: Double? = nil,
-        pngDecodeMs: Double? = nil
+        pngDecodeMs: Double? = nil,
+        fontContext: RhwpNativeFontContext? = nil,
+        forceDefaultFonts: Bool = false
     ) throws -> HwpRenderedPage {
         let coreStart = DispatchTime.now().uptimeNanoseconds
         guard let tree = document.renderPageTree(at: pageIndex) else {
@@ -431,13 +451,20 @@ enum HwpPageImageRenderer {
         context.translateBy(x: 0, y: CGFloat(height))
         context.scaleBy(x: scale, y: -scale)
 
-        HwpNativePageCompositor.render(
-            tree: tree,
-            overlays: overlays,
-            in: context,
-            pageHeight: pageSize.height,
-            document: document
-        )
+        let nativeFonts = try fontContext.map(RhwpCoreTextFontContext.init)
+        if let nativeFonts {
+            try HwpNativePageCompositor.render(tree: tree, overlays: overlays, in: context,
+                pageHeight: pageSize.height, document: document, fontContext: nativeFonts)
+        } else {
+            HwpNativePageCompositor.render(
+                tree: tree,
+                overlays: overlays,
+                in: context,
+                pageHeight: pageSize.height,
+                document: document,
+                forceDefaultFonts: forceDefaultFonts
+            )
+        }
 
         guard let image = context.makeImage() else {
             throw HwpRenderError.imageUnavailable
@@ -456,7 +483,9 @@ enum HwpPageImageRenderer {
                 pngDecodeMs: pngDecodeMs,
                 coreGraphicsRenderMs: coreGraphicsRenderMs,
                 totalMs: totalMs
-            )
+            ),
+            fontIdentity: fontContext?.identity,
+            fontFaces: try nativeFonts?.validate(tree) ?? []
         )
 
         return HwpRenderedPage(
@@ -485,7 +514,9 @@ enum HwpPageImageRenderer {
             return .invalidPageIndex
         case .invalidOptions:
             return .invalidRenderOptions
-        case .failure:
+        case .unsupportedFontContext:
+            return .unsupportedFontContext
+        case .failure, .invalidFontContext, .fontContextTooLarge:
             return .skiaRenderFailure
         }
     }

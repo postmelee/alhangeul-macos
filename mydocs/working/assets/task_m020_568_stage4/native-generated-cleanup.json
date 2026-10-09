@@ -1,0 +1,11 @@
+{
+  "scope": "this Stage 4 generated products only",
+  "ownedRegistrationsRemaining": 0,
+  "removed": [
+    "Alhangeul.app",
+    "Sparkle.framework/Versions/B/Updater.app",
+    "AlhangeulPreview.appex",
+    "AlhangeulThumbnail.appex"
+  ],
+  "note": "Xcode main app unregistered; nested unsigned Updater had scan -10814 and no registration"
+}

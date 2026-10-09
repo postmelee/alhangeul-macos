@@ -1,5 +1,6 @@
 import CoreGraphics
 import Foundation
+private let baselineCache = HwpThumbnailRenderCache()
 
 struct SmokeError: Error, CustomStringConvertible {
     let description: String
@@ -288,7 +289,7 @@ struct ThumbnailSkiaPolicySmoke {
         let start = DispatchTime.now().uptimeNanoseconds
         var captured: Result<HwpThumbnailRenderResult, Error>?
 
-        HwpThumbnailRenderCache.shared.renderedPageResult(for: request) { result in
+        baselineCache.renderedPageResult(for: request) { result in
             captured = result
             semaphore.signal()
         }
@@ -594,6 +595,8 @@ struct ThumbnailSkiaPolicySmoke {
             return "pngDecodeFailure"
         case .memoryTimeoutFallback:
             return "memoryTimeoutFallback"
+        case .unsupportedFontContext:
+            return "unsupportedFontContext"
         }
     }
 

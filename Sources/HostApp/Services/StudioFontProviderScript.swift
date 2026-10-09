@@ -33,6 +33,7 @@ enum StudioFontProviderScript {
           }
           const connection = Object.freeze({
             getState: () => ({status, error, ...(window.rhwpStudio?.fonts?.getState?.() || {})}),
+            getOutputContext: requests => adapter.getOutputContext(requests),
             refresh() {
               if (stopped) return;
               adapter.refresh();
@@ -191,7 +192,7 @@ enum StudioFontProviderScript {
             const hello = await retry(() => rpc('handshake', {loadToken}), signal, expected);
             if (hello.version !== 1 || !name(hello.session) || !name(hello.revision)) throw failure('invalidResponse');
             const credentials = {loadToken, session: hello.session, revision: hello.revision};
-            let offset = 0, total = null;
+            let offset = 0, total = null, identity = null;
             const rows = [];
             do {
               const page = await retry(() => rpc('catalog', credentials, {offset}), signal, expected);
@@ -200,6 +201,10 @@ enum StudioFontProviderScript {
                   (total !== null && total !== page.total) || page.nextOffset !== offset + page.faces.length ||
                   page.nextOffset > page.total || (page.nextOffset === offset && offset < page.total)) throw failure('invalidResponse');
               total = page.total; offset = page.nextOffset;
+              if (page.identity !== undefined) {
+                if (!name(page.identity) || (identity !== null && identity !== page.identity)) throw failure('invalidResponse');
+                identity = page.identity;
+              }
               if (page.faces.some(row => !row || typeof row !== 'object')) throw failure('invalidResponse');
               rows.push(...page.faces);
             } while (offset < total);
@@ -207,7 +212,12 @@ enum StudioFontProviderScript {
             if (loadToken !== getLoadToken()) throw failure('staleSession');
             const faces = Object.freeze(select(rows));
             const snapshot = Object.freeze({revision: `${expected}:${hello.revision}`, faces});
-            catalog = {credentials, snapshot, ids: new Map(faces.map(face => [face.id, face]))};
+            const ids = new Map(faces.map(face => [face.id, face]));
+            const unavailableNames = new Set();
+            for (const row of rows) {
+              if (row.limitation !== 'disabled' && !ids.has(row.id)) names(row).forEach(n => unavailableNames.add(n));
+            }
+            catalog = {credentials, snapshot, identity, unavailableNames, ids};
             return snapshot;
           } catch (error) {
             check(signal, expected);
@@ -308,6 +318,13 @@ enum StudioFontProviderScript {
       }
       const provider = Object.freeze({getSnapshot, readFace,
         subscribe(listener) { check(); listeners.add(listener); return () => listeners.delete(listener); }});
+      function getOutputContext(requests) {
+        if (!catalog || !name(catalog.identity) || !Array.isArray(requests) || requests.length > 2048) return null;
+        if (requests.some(request => !request || !name(request.family) || !name(request.key))) return null;
+        const unavailable = requests.filter(request => catalog.unavailableNames.has(key(request.family)))
+          .map(request => request.key);
+        return {identity: catalog.identity, revision: catalog.snapshot.revision, unavailable};
+      }
       events?.addEventListener('alhangeul-fonts-changed', refresh);
       async function connect() {
         check();
@@ -328,7 +345,7 @@ enum StudioFontProviderScript {
         connectedAPI = null;
       }
       // 문서 epoch/loadToken 교체 때 native begin 이후 refresh를 호출하는 책임은 소유 coordinator에 있다.
-      return Object.freeze({provider, connect, refresh, dispose});
+      return Object.freeze({provider, connect, refresh, dispose, getOutputContext});
     })
     """#
 }

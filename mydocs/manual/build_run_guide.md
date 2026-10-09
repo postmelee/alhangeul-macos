@@ -459,6 +459,8 @@ scripts/check-extension-registration-hygiene.sh --cleanup-dev-registrations
 - `qlmanage -t -x`로 HWP/HWPX thumbnail output 생성
 - 실패 시 `pluginkit`, `lsregister`, `codesign`, `plutil`, `qlmanage` 로그를 output directory에 저장
 
+이미 서명·seal된 후보의 App Group 등 원래 권한을 검증할 때는 `smoke-clean-quicklook-install.sh --preserve-signature`로 staging copy를 재서명하지 않는다. `--scoped-registrations`는 다른 개발 산출물의 등록 정리를 생략하며 `--skip-global-reset`는 daemon kill·전역 Quick Look cache reset을 생략한다. fresh sample 경로로 시험하고, 기존 설치본의 보존·복원은 해당 작업의 승인된 wrapper에서 수행한다. 설치 대상 교체 승인 자체를 생략하는 옵션은 아니다.
+
 `scripts/smoke-finder-integration.sh`가 자동으로 수행하는 항목:
 
 - `scripts/package-release.sh <version>`으로 Release package 생성 (`--skip-package` 또는 `--app` 지정 시 생략)

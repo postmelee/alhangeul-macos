@@ -39,7 +39,7 @@ final class RhwpStudioHostBridgeScriptTests: XCTestCase {
     func testPDFExportUsesPageSVGsWithoutHwpBytePayload() throws {
         let section = try sourceSection(
             from: "async function exportPDFDocument(requestID)",
-            to: "async function printDocument()"
+            to: "async function handleNativeCommand(command)"
         )
 
         XCTAssertTrue(section.contains("documentPages()"))

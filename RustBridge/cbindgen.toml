@@ -8,6 +8,7 @@ include = [
   "RhwpExternalImageStatus",
   "RhwpPageSize",
   "RhwpRenderStatus",
+  "RhwpFontRenderStatus",
   "RhwpTextStatus",
   "RHWP_TEXT_MAX_INPUT_BYTES",
 ]
