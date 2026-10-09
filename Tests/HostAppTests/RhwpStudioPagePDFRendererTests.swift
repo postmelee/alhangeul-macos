@@ -417,8 +417,11 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             ]
         )
 
-        let document = try await render(payload)
-        defer { recordPDFDiagnostics(document, name: "math-stack", queries: ["문2", "함수", "f(x)=x²+2x+1"]) }
+        let rendered = try await render(payload)
+        defer { recordPDFDiagnostics(rendered, name: "math-stack", queries: ["문2", "함수", "f(x)=x²+2x+1"]) }
+        let livePage = try XCTUnwrap(rendered.page(at: 0))
+        let liveSelection = try XCTUnwrap(livePage.selection(for: livePage.bounds(for: .mediaBox))?.string)
+        let document = try reopenSavedPDF(rendered)
         let page = try XCTUnwrap(document.page(at: 0))
         let pageText = try XCTUnwrap(page.string)
         let fullSelection = try XCTUnwrap(
@@ -426,6 +429,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         )
 
         for sentinel in ["문2", "함수", "f(x)=x²+2x+1"] {
+            XCTAssertTrue(liveSelection.contains(sentinel), "조립 중인 PDF 영역 선택 누락: \(sentinel)")
             XCTAssertTrue(pageText.contains(sentinel), "PDFPage.string 누락: \(sentinel)")
             XCTAssertTrue(fullSelection.contains(sentinel), "영역 선택 누락: \(sentinel)")
             XCTAssertGreaterThan(document.findString(sentinel, withOptions: []).count, 0)
@@ -458,8 +462,11 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             ]
         )
 
-        let document = try await render(payload)
-        defer { recordPDFDiagnostics(document, name: "enclosed-hangul", queries: ["외부", "모노스페이스", "미등록", "㈀", "㉠"]) }
+        let rendered = try await render(payload)
+        defer { recordPDFDiagnostics(rendered, name: "enclosed-hangul", queries: ["외부", "모노스페이스", "미등록", "㈀", "㉠"]) }
+        let livePage = try XCTUnwrap(rendered.page(at: 0))
+        let liveSelection = try XCTUnwrap(livePage.selection(for: livePage.bounds(for: .mediaBox))?.string)
+        let document = try reopenSavedPDF(rendered)
         let page = try XCTUnwrap(document.page(at: 0))
         let pageText = try XCTUnwrap(page.string)
         let fullSelection = try XCTUnwrap(
@@ -467,6 +474,7 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
         )
 
         for sentinel in ["외부", "모노스페이스", "미등록", "㈀", "㉠"] {
+            XCTAssertTrue(liveSelection.contains(sentinel), "조립 중인 PDF 영역 선택 누락: \(sentinel)")
             XCTAssertTrue(pageText.contains(sentinel), "PDFPage.string 누락: \(sentinel)")
             XCTAssertTrue(fullSelection.contains(sentinel), "영역 선택 누락: \(sentinel)")
             XCTAssertGreaterThan(document.findString(sentinel, withOptions: []).count, 0)
@@ -1203,10 +1211,14 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
             <text x="30" y="255" font-family="'Times New Roman',serif" font-size="24">\(lines[3])</text>
           </svg>
           """])
-        let pdf = try await render(payload), page = try XCTUnwrap(pdf.page(at:0))
-        defer { recordPDFDiagnostics(pdf, name: "mixed-runs", queries: lines) }
+        let rendered = try await render(payload)
+        defer { recordPDFDiagnostics(rendered, name: "mixed-runs", queries: lines) }
+        let livePage = try XCTUnwrap(rendered.page(at: 0))
+        let liveSelection = try XCTUnwrap(livePage.selection(for: livePage.bounds(for: .mediaBox))?.string)
+        let pdf = try reopenSavedPDF(rendered), page = try XCTUnwrap(pdf.page(at:0))
         let copied = try XCTUnwrap(page.selection(for:page.bounds(for:.mediaBox))?.string)
         for line in lines {
+            XCTAssertTrue(liveSelection.contains(line), liveSelection)
             XCTAssertTrue(page.string?.contains(line) == true, page.string ?? "")
             XCTAssertTrue(copied.contains(line),copied)
             XCTAssertEqual(pdf.findString(line,withOptions:[]).count,1)
@@ -1221,6 +1233,13 @@ final class RhwpStudioPagePDFRendererTests: XCTestCase {
                 continuation.resume(with: result)
             }
         }
+    }
+
+    // 사용자에게 저장하는 bytes를 검사한다. macOS 15에서는 page를 insert한 PDFDocument와
+    // 같은 bytes를 재열기한 문서의 string/findString 결과가 다르지만 원문 ToUnicode는 보존된다.
+    private func reopenSavedPDF(_ document: PDFDocument) throws -> PDFDocument {
+        let data = try XCTUnwrap(document.dataRepresentation())
+        return try XCTUnwrap(PDFDocument(data: data))
     }
 
     // 고정된 합성 fixture만 opt-in으로 보존한다. 기존 assertion 뒤에 호출해 판정 순서를 바꾸지 않는다.

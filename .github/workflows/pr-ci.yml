@@ -337,6 +337,7 @@ jobs:
           name: studio-pdf-output-diagnostics
           path: build.noindex/DerivedData/pdf-output-diagnostics/
           if-no-files-found: ignore
+          retention-days: 7
 
       - name: Test SwiftUI Studio document lifecycle
         run: python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-font-dotum-empty-hancom.hwp
