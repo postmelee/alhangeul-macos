@@ -1,8 +1,8 @@
 # 공통 글꼴 관리 계층 연동 계약
 
-## 2026-10-08 #567 Studio 수용·소비자 인계
+## 2026-10-10 #567/#568 소비자 수용·인계
 
-아래 #564/#565 단계별 설명은 당시 계약과 검증 이력이다. 현재 제품은 core/Studio `v0.8.7` / `1a76570e833917d15817415a53c09ad61ab3203f`와 앱 소유 adapter로 설치 참조·관리 복사본을 실제 Studio 문서/기존 글꼴 목록에 연결했다. [#567 Stage 5](../working/task_m020_567_stage5.md)의 실제 CoreText·로컬 서명 sandbox·native HWP/HWPX 저장/재열기 수용을 기준으로 한다. 출력·확장·Windows와 전체 배포 수용은 각 후속 이슈의 책임이다.
+아래 #564/#565 단계별 설명은 당시 계약과 검증 이력이다. core/Studio `v0.8.7` / `1a76570e833917d15817415a53c09ad61ab3203f`와 앱 소유 adapter로 설치 참조·관리 복사본을 실제 Studio 문서/기존 글꼴 목록 및 출력·확장에 연결했다. Studio는 [#567 Stage 5](../working/task_m020_567_stage5.md), 출력·확장은 [#568 Stage 6 인계](task_m020_568_consumer_handoff.md)의 소비자별 실제 수용·재사용·미검증 구분을 기준으로 한다. 이 작업 브랜치의 수용 결과를 현재 공개 출시 기능으로 설명하지 않는다.
 
 | 소비자 | 현재 상태 | 후속 검증 |
 |--------|-----------|-----------|
@@ -18,7 +18,7 @@ Stage 4부터 공급 catalog는 `acquireMetadataSnapshot`으로 lease/metadata�
 
 Stage 5 확장 소비자는 실제 sandbox의 App Group 쓰기 거부에 맞춰 읽기 전용 목록/설정과 FD snapshot을 사용한다. 디스크 lease를 새로 만들지 않고 실제 선택 object 읽기 동안 shared flock으로 GC/게시를 막는다. 읽기 사이에 변경된 세대/선택은 stale로 폐기한다. HostApp의 기존 writable store/디스크 lease 계약과 구분한다. signed Release 수용은 기존 CoreGraphics 정책이며 Skia decode/direct는 공통 renderer의 unsigned 시험 범위다. Finder/OS가 요청을 보내지 않는 영구 cache의 자동 갱신은 보증하지 않는다.
 
-metadata/menu 열거 성공은 모든 face 적용 성공이 아니다. native TTC/가변 제한을 유지하고, 설정의 설치 원본 의존 안내·별도 가져오기 복사본의 독립 보관 안내를 제품 도움말에도 그대로 반영한다. 출력과 Finder가 완료되기 전 Studio 결과로 해당 소비자 지원을 선언하지 않는다.
+metadata/menu 열거 성공은 모든 face 적용 성공이 아니다. TTC/가변과 제한된 native replay 범위를 유지하고, 설정의 설치 원본 의존 안내·별도 가져오기 복사본의 독립 보관 안내를 제품 도움말에도 그대로 반영한다. signed Release 확장의 설치/관리 수용은 완료했으며 전체 글꼴·실제 한컴 제거·Windows·최소 OS/Intel·물리 인쇄로 확대하지 않는다.
 
 ## 2026-09-20 현재 적용 기준
 
@@ -71,7 +71,9 @@ let resource = try await service.readResource(id, expectedGeneration: snapshot.g
 
 기본 UI는 원본 삭제/비활성 시 사용할 수 없음을 안내한다. 별도 복사본은 ‘가져온 글꼴 보관함’으로 분리했다. 현재 목록 확인·설정 저장까지 지원하고 문서 표시·출력 연결은 준비 중임을 명시한다. App Group 파일 존재를 extension 원본 접근 권한으로 해석하지 않는다.
 
-## Stage 6 소비자 인계와 수용 시나리오
+## #565 Stage 6 당시 소비자 인계와 수용 시나리오
+
+아래 표는 #565 종료 당시의 인계 이력이다. 현재 Studio·출력·확장의 완료 상태와 지원 경계는 이 문서 첫 표와 [#568 소비자 인계](task_m020_568_consumer_handoff.md)를 따른다.
 
 | 소비자 | 현재 연결 | 후속 완료 조건 |
 |--------|-----------|----------------|

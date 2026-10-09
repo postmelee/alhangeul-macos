@@ -5,7 +5,7 @@
 - 작업: `local/task568` → `publish/task568` → `devel`
 - 제품 기준: `db8a94d1eb03f5a14f265621191f85f0ddf149cb` (PR #578), 공식 core/Studio v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`
 - 승인: 2026-10-08 작업지시자의 “진행해줘”로 수행계획 승인·구현계획 작성 진행.
-- 상태: 2026-10-09 Stage 4 진입 및 임시 산출물 정리 이후 “우선 우리 작업 계획대로 이걸 승인할테니 진행”으로 앱 소유 bytes C ABI 설계·격리 검증과 연관 Swift wrapper/header/symbol 변경 승인. core v0.8.7을 유지하며 검증 결과에서 범용 upstream 기여 후보만 추린다.
+- 상태: 2026-10-10 승인된 [Stage 6 소비자별 회귀·증거 대조·문서화·인계](../working/task_m020_568_stage6.md) 완료. core v0.8.7과 제품 소스를 유지하며 범용 upstream 기여 후보를 취합했다. 최종 보고·PR 단계 승인 대기.
 
 ## 1. 단계와 완료 경계
 
@@ -15,8 +15,8 @@
 | 2 | A 공통 기반 | 제한된 출력 snapshot·font route·준비·수명 구현 | 2026-10-09 완료 |
 | 3 | A 실제 연결 | PDF·인쇄 진입 연결, 정확한 face와 text layer·패널 수용 | 2026-10-09 완료 |
 | 4 | B native | CoreGraphics/Skia 공급·매칭·캐시 연결 | 2026-10-09 완료 |
-| 5 | B 확장 | Quick Look/Thumbnail의 signed 프로세스·Finder 수용 | 2026-10-09 소스 연결·검증 준비 승인. 구체 서명·설치 smoke는 준비 후 승인 |
-| 6 | 전체 인계 | 소비자별 회귀·제약·최종 소스/증거 대조 | Stage 5 승인 후 |
+| 5 | B 확장 | Quick Look/Thumbnail의 signed 프로세스·Finder 수용 | 2026-10-10 구체 승인 범위 수용·복원 완료 |
+| 6 | 전체 인계 | 소비자별 회귀·제약·최종 소스/증거 대조 | 2026-10-10 승인·완료 |
 
 A 완료는 #568 전체 완료가 아니다. B와 Mac/Windows 수용을 별도 행으로 기록한다. #566 ZIP 구현, #569 웹 안내·전체 배포 수용은 해당 이슈에 남긴다. core pin/Studio 자산을 먼저 재동기화하거나 중복 PR #577을 merge하지 않는다.
 
@@ -130,7 +130,7 @@ Stage 4.1에서 새 C ABI/Swift context와 public FontResolver 기반의 제한�
 
 ## 7. Stage 5 — B Quick Look·Thumbnail signed 수용
 
-2026-10-09 소스 연결·unsigned 격리 수용을 완료하고 [구체 Finder 계약](../tech/task_m020_568_finder_contract.md)을 작성했다. 이어 2026-10-10 승인된 signed Finder 수용·읽기 전용 보정·기존 앱 복원을 완료했다. [Stage 5 보고서](../working/task_m020_568_stage5.md)의 실제 소비자별 결과와 OS cache/최소 환경 경계를 따른다. Stage 6는 후속 승인 단계다.
+2026-10-09 소스 연결·unsigned 격리 수용을 완료하고 [구체 Finder 계약](../tech/task_m020_568_finder_contract.md)을 작성했다. 이어 2026-10-10 승인된 signed Finder 수용·읽기 전용 보정·기존 앱 복원을 완료했다. [Stage 5 보고서](../working/task_m020_568_stage5.md)의 실제 소비자별 결과와 OS cache/최소 환경 경계를 따른다. 이후 작업지시자가 Stage 6 진행을 승인했다.
 
 `Sources/QLExtension`, `Sources/ThumbnailExtension`, Shared font location/snapshot·preview helpers를 연결한다. 각 프로세스가 권한을 실제로 얻었는지 검증하며 HostApp bookmark나 App Group 파일 존재를 원본 접근 성공으로 대신하지 않는다. 설치 참조와 관리 복사본·lease/회수·원본 변화·fallback·자원 제한·Finder 캐시를 소비자별로 기록한다.
 
@@ -170,6 +170,8 @@ HostApp Debug의 macOS 12 target compile/link와 실제 최소 OS runtime은 별
 각 Stage 종료 시 `mydocs/working/task_m020_568_stage{N}.md`에 실제 명령·환경·입력 provenance·선택/준비/출력·hash·실패/제약을 기록해 해당 변경과 묶어 commit한다. 다음 단계는 작업지시자 승인 후 진행한다. 최종 보고/원격 push/PR과 merge·issue close·정리는 별도 승인 시점이며 현재 수행하지 않는다.
 
 ## 10. 현재 승인 범위
+
+2026-10-10 Stage 5 완료 보고 후 작업지시자의 “진행해줘”로 Stage 6의 소비자별 회귀·지원 범위 보정·소스/증거 hash 대조·#566/#569 인계를 승인받았다. 공개 이슈 변경·upstream 기여 게시·최종 보고/원격 push/PR·제품/웹 배포는 별도 단계다.
 
 2026-10-10 작업지시자가 준비된 Stage 5 후보/fixture의 기존 Developer ID 로컬 서명, 고유 보관함, `/Applications/Alhangeul.app` 보존·임시 교체·표준 Finder 시험·복원을 명시 승인했다. [Finder 계약](../tech/task_m020_568_finder_contract.md)의 해당 UUID와 앱만 대상으로 하며 전역 reset·다른 앱 등록 변경·공개 배포는 제외한다.
 

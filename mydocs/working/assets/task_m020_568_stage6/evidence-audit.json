@@ -1,0 +1,632 @@
+{
+  "version": 1,
+  "date": "2026-10-10",
+  "baselineCommit": "817d193110d75691a80a65f306456b27e5a94b19",
+  "scope": "소스·보존 증거 대조. 실제 signed 시험 재실행/배포 수용은 아님",
+  "sources": {
+    "Stage3": {
+      "receipt": "build.noindex/task568/stage3/sandbox-output-01/receipt.json",
+      "total": 177,
+      "sameCount": 162,
+      "moved": [
+        {
+          "previous": "Sources/HostApp/Services/FontImportSourceSession.swift",
+          "current": "Sources/Shared/FontLibrary/FontImportSourceSession.swift"
+        },
+        {
+          "previous": "Sources/HostApp/Services/FontLibraryChanges.swift",
+          "current": "Sources/Shared/FontLibrary/FontLibraryChanges.swift"
+        },
+        {
+          "previous": "Sources/HostApp/Services/FontLibraryService.swift",
+          "current": "Sources/Shared/FontLibrary/FontLibraryService.swift"
+        },
+        {
+          "previous": "Sources/HostApp/Services/InstalledFontCatalogService.swift",
+          "current": "Sources/Shared/FontLibrary/InstalledFontCatalogService.swift"
+        },
+        {
+          "previous": "Sources/HostApp/Services/InstalledFontModels.swift",
+          "current": "Sources/Shared/FontLibrary/InstalledFontModels.swift"
+        },
+        {
+          "previous": "Sources/HostApp/Services/InstalledFontServiceProvider.swift",
+          "current": "Sources/Shared/FontLibrary/InstalledFontServiceProvider.swift"
+        },
+        {
+          "previous": "Sources/HostApp/Services/InstalledFontSupplyCatalog.swift",
+          "current": "Sources/Shared/FontLibrary/InstalledFontSupplyCatalog.swift"
+        },
+        {
+          "previous": "Sources/HostApp/Services/InstalledFontSystem.swift",
+          "current": "Sources/Shared/FontLibrary/InstalledFontSystem.swift"
+        },
+        {
+          "previous": "Sources/HostApp/Services/StudioFontSupply.swift",
+          "current": "Sources/Shared/FontLibrary/StudioFontSupply.swift"
+        }
+      ],
+      "changed": [
+        {
+          "path": "Sources/Shared/FontLibrary/FontLibraryService.swift",
+          "previousSHA256": "388414fd950c5dd2bf9271d6975219dc4cd8308453e4b8e3efd03691481616db",
+          "currentSHA256": "ce28d225d0f899e60d0b0daee944a78bc5bd8355fd54533a27e16a47fd741021"
+        },
+        {
+          "path": "Sources/Shared/FontLibrary/InstalledFontCatalogService.swift",
+          "previousSHA256": "a53475cf4c40ee990379047d305237d608feef06b58c8830141a52310af5184b",
+          "currentSHA256": "2a6ef5b0233e6fadd32ae75f3bce9ee294e22d14b10695f3e23a0a4b84989296"
+        },
+        {
+          "path": "Sources/Shared/FontLibrary/StudioFontSupply.swift",
+          "previousSHA256": "3ad7fbe62b33d2dd2ac644e2c3a0a31746f72f2e8c3ea2ea262deb435a893309",
+          "currentSHA256": "f50d0df606c33bb77525f38ca4708911a5caee348c92903b49a6d33dea24c816"
+        },
+        {
+          "path": "Sources/Shared/FontLibrary/FontLibraryFileSystem.swift",
+          "previousSHA256": "cce5c9a4ac19a327ebc14e257870666c35ae08c2c4d430197e34887ae9984d92",
+          "currentSHA256": "8c41c8b97a8304143ac49b28bbdfcf2f31f0122ec50da82f1845e0dec66431e3"
+        },
+        {
+          "path": "Sources/Shared/FontLibrary/FontLibraryLocation.swift",
+          "previousSHA256": "d7fdae5ffca167c4139aa4089c818f264da3fb69e57d434cf7b165bef0a03bdd",
+          "currentSHA256": "4b51d29285655d63b06ce958fe0df59c15770c58bc3cfc42664aa15ce8e95cc4"
+        },
+        {
+          "path": "Sources/Shared/FontLibrary/FontLibraryModels.swift",
+          "previousSHA256": "3abf95c63b358d952541ae12ca7e3c67145df76965371f9b5e6f9624101239bd",
+          "currentSHA256": "39fcafc7a0130d6e6d7a165ae02a96d7cd8f52d2947b07715d4c1c2fed78c481"
+        },
+        {
+          "path": "Sources/Shared/FontLibrary/FontLibraryStore.swift",
+          "previousSHA256": "ef9f0b523ff815271e07c181f081853dd533a31c9a67fe941c37c8c8bba2fb5e",
+          "currentSHA256": "9f9714e4241604368ebfdd09684b7fe5ed2cf2fb654aa774313161796ab05c89"
+        },
+        {
+          "path": "Sources/Shared/HwpNativePageCompositor.swift",
+          "previousSHA256": "c20568b32af3d2ab9b8692bac5b247031981dbed5749450fe078b0035552c2d0",
+          "currentSHA256": "fd683bcb0ed64cf10bf02c3e8b7fb348ceeab25757c8b4e4d70fd893b43e354a"
+        },
+        {
+          "path": "Sources/Shared/HwpPageImageRenderer.swift",
+          "previousSHA256": "7ca26faf82d9ad0a0fda935bd48258b0d9d1a05f70319a918054836a511a9695",
+          "currentSHA256": "4aeb655783822126f5c4c7765932bcdf019cb8791f46143b17ae7a233342ccf1"
+        },
+        {
+          "path": "Sources/Shared/HwpPreviewPDFRenderer.swift",
+          "previousSHA256": "6d8cc2379fbd5c5e784d7348a59a9e1e2881349e01c81176e967d941c448b948",
+          "currentSHA256": "695b2a5aaa8ad76216e1bc63e37275884077e37d7d15f213f5aa8a29530ad3f7"
+        },
+        {
+          "path": "Sources/Shared/HwpPreviewPNGRenderer.swift",
+          "previousSHA256": "0243167c2aa975fce0c5b8849430d01a72d03c809e2f146a4923693e09f410cc",
+          "currentSHA256": "f51acc6c9e5d80beece02fb4f7991a47a5fa16689fdad68fd4de0eed89d71b2b"
+        },
+        {
+          "path": "Sources/RhwpCoreBridge/CGTreeRenderer.swift",
+          "previousSHA256": "408711f3d92dc40042e72a510e583861b3a4d776ccaee2089d99516f8a23543d",
+          "currentSHA256": "9d5119d0f9a39e8781e3713258efe4ec6cb217f14f715c988d32720eb694445c"
+        },
+        {
+          "path": "Sources/RhwpCoreBridge/FontFallback.swift",
+          "previousSHA256": "cd8fd37d1553afd8d2c71f6ff357e5cd9ac55f333c735458002b1de10f4039bf",
+          "currentSHA256": "a00d375c4b51a652eb02f603aa94e5a8ab2b942fa55e40a9fd3c65b49b774c91"
+        },
+        {
+          "path": "Sources/RhwpCoreBridge/RhwpDocument.swift",
+          "previousSHA256": "1d321d7e683694b0c4142a09dbe7cdace75d41d36476143a9925523bca8af104",
+          "currentSHA256": "f75c60bf0f9648a16027a73ec33bbff423a89fc1257692492865435f1cbbb614"
+        },
+        {
+          "path": "scripts/probe-studio-output-acceptance.py",
+          "previousSHA256": "8a2f65f81e40302d0167a01cbcf82a04765b1509cd3a6edfc120a7bb1764c43f",
+          "currentSHA256": "7cacbc70f2c49dfee1146835efcef68d8fa3dc0c244beb50c26e92552750945c"
+        }
+      ],
+      "missing": [],
+      "receiptSHA256": "084d3110fc55844f8b4a614a931b1c79b6977c36e54e14c2d4059ec80064adde"
+    },
+    "Stage4": {
+      "receipt": "mydocs/working/assets/task_m020_568_stage4/supply-receipt.json",
+      "total": 31,
+      "sameCount": 27,
+      "moved": [
+        {
+          "previous": "Sources/HostApp/Services/StudioFontSupply.swift",
+          "current": "Sources/Shared/FontLibrary/StudioFontSupply.swift"
+        },
+        {
+          "previous": "Sources/HostApp/Services/FontLibraryService.swift",
+          "current": "Sources/Shared/FontLibrary/FontLibraryService.swift"
+        }
+      ],
+      "changed": [
+        {
+          "path": "Sources/Shared/NativeFonts/HwpNativeFontPageRenderer.swift",
+          "previousSHA256": "5b9a72a5b37611dad8c071eee3154352e62ffe7471a479b51a2e6a3e14527755",
+          "currentSHA256": "e1349c82b2b56038a576103318d9338a0158c9e18bee9ba1078881ba26404a9f"
+        },
+        {
+          "path": "Sources/Shared/FontLibrary/FontLibraryStore.swift",
+          "previousSHA256": "eb9ce0a219e816517c343c8e7550cff94b38c92a5e63eff5169fc2d1192f3783",
+          "currentSHA256": "9f9714e4241604368ebfdd09684b7fe5ed2cf2fb654aa774313161796ab05c89"
+        },
+        {
+          "path": "Sources/Shared/FontLibrary/FontLibraryService.swift",
+          "previousSHA256": "ae23d4d4a8a98cd31349218d8e9b1ede62e1c033d5e66c057792549f76716542",
+          "currentSHA256": "ce28d225d0f899e60d0b0daee944a78bc5bd8355fd54533a27e16a47fd741021"
+        },
+        {
+          "path": "scripts/probe-native-font-supply.py",
+          "previousSHA256": "4ce9fa5d6d83fa71dd4fd2056af59e37962251c5097e91fcf78b743f7dadcf6c",
+          "currentSHA256": "ad05be6f96d444220655528986faf1abe1eaf6e46013be45f94687fda8b9c10d"
+        }
+      ],
+      "missing": [],
+      "receiptSHA256": "33cc81e0e8c4bb7f41a12a1c606d256e0fc2c70279e87babdb8dc933d1f9031e"
+    },
+    "Stage5": {
+      "receipt": "mydocs/working/assets/task_m020_568_stage5/signed-source-provenance.json",
+      "total": 125,
+      "sameCount": 125,
+      "moved": [],
+      "changed": [],
+      "missing": [],
+      "receiptSHA256": "571375d357a7a35fff135d71c49df10cd18889fedaf0aa3b9dabf9783a9e33ce"
+    }
+  },
+  "core": {
+    "tag": "v0.8.7",
+    "commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "lockSHA256": "975712e98ff9a83a98aa0395139794ff743b7c0d242eeaa8aec48a57e3b47697",
+    "artifacts": [
+      {
+        "path": "Frameworks/generated_rhwp.h",
+        "sha256": "14994c7d1923107b5739b5518e43f98bc002e1b954a068647a377ec4d6e1fbc2",
+        "bytes": 7584
+      },
+      {
+        "path": "Frameworks/universal/librhwp.a",
+        "sha256": "521e53707bed97f95923e011076616344b17aaa42893b342923e82b973e4152a",
+        "bytes": 245983992
+      }
+    ]
+  },
+  "studio": {
+    "manifestSHA256": "108e3cfed593fa29f1a4e34c008548184a342a9af1141ad65a746f0d499f10a7",
+    "commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "adapterSHA256": "f53b4416cff6e32e63be61da5bcce271280c8db6ee2ef7ce9ad6f5d55ee59dc4"
+  },
+  "signedChecksums": {
+    "verifiedCount": 26,
+    "checksumFile": "mydocs/working/assets/task_m020_568_stage5/SHA256SUMS"
+  },
+  "stage3PDFs": [
+    {
+      "source": "managed",
+      "file": "hwp.pdf",
+      "sha256": "765c4d7062cf26ae7c80a519892d79e72a8ce228118104ca264c910cba283a24",
+      "pages": 1
+    },
+    {
+      "source": "managed",
+      "file": "hwpx.pdf",
+      "sha256": "63e10d4f082918cbe4376103a0bea0580fc80facae166397c5ee769ab2afa2eb",
+      "pages": 1
+    },
+    {
+      "source": "managed",
+      "file": "hwp-print.pdf",
+      "sha256": "470faae8cead17086e05d32a5c9f31b999973514b7e764f3f2bb3849c3696848",
+      "pages": 1
+    },
+    {
+      "source": "managed",
+      "file": "hwpx-print.pdf",
+      "sha256": "b10cbeba4b83251104e7cc3bc3dea81e7dec2424a79e2e2225e0db040ee240d7",
+      "pages": 1
+    },
+    {
+      "source": "installed",
+      "file": "hwp.pdf",
+      "sha256": "0362cdfe3e28e3b7b8f45fbee084873a30d7e7b516b693123fbbf457fb4468ce",
+      "pages": 1
+    },
+    {
+      "source": "installed",
+      "file": "hwpx.pdf",
+      "sha256": "d1250650e017cf43d60c9f0fbe620175bd489e44be19a7ea5d0903aee2d336c9",
+      "pages": 1
+    },
+    {
+      "source": "installed",
+      "file": "hwp-print.pdf",
+      "sha256": "30dd9f8dbb2a9fa3237bcac71799acb77fb36d4f13a3b60de4ebcc4cdf2ce6c9",
+      "pages": 1
+    },
+    {
+      "source": "installed",
+      "file": "hwpx-print.pdf",
+      "sha256": "3fdf23c651d03c151ea81f973295a39d5c0daeb997355c461b6d762be5e794eb",
+      "pages": 1
+    },
+    {
+      "source": "baseline",
+      "file": "hwp.pdf",
+      "sha256": "9e302433a157161c267f5410c333b2a8ec115d54efe095b229c9d84cb881ac1a",
+      "pages": 1
+    },
+    {
+      "source": "baseline",
+      "file": "hwpx.pdf",
+      "sha256": "8bad4241f1ae8fbb0d579ccdee7e27eb30af3ccd5d984b5b80b083650356cd30",
+      "pages": 1
+    },
+    {
+      "source": "baseline",
+      "file": "hwp-print.pdf",
+      "sha256": "4217b17907a9974d6e29478c7f9cd1ed1f27f7470aa2a3818f29acdb0b65420b",
+      "pages": 1
+    },
+    {
+      "source": "baseline",
+      "file": "hwpx-print.pdf",
+      "sha256": "f1a6cd0a4869d83ddf30fd7650881244f401c939cf4782e26678a382fa2ff187",
+      "pages": 1
+    }
+  ],
+  "managedOriginals": [
+    {
+      "ps": "GowunBatang-Regular",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "bytes": 8433296
+    },
+    {
+      "ps": "GowunBatang-Bold",
+      "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "bytes": 8178712
+    }
+  ],
+  "verificationLogs": {
+    "build.noindex/task568/stage5-readonly-tests-final.log": {
+      "sha256": "1404450bbe09aafc80e2bcd25773a202940df007b01339d9f5a19d1fb16eaf7c",
+      "tests": 133,
+      "failures": 0,
+      "reused": true
+    },
+    "build.noindex/task568/stage5-host-tests-readonly.log": {
+      "sha256": "3f5c3360ca975df931e02dba89afe11547da16f377b557243fe93624bfa73ebb",
+      "tests": 237,
+      "failures": 0,
+      "reused": true
+    },
+    "build.noindex/task568/stage5-normal-release-final.log": {
+      "sha256": "daac21387dee3a9d8182ef6b99101afa839d92b3b0be88d2075abab81a1a65a4",
+      "build": "passed",
+      "reused": true
+    },
+    "build.noindex/task568/stage5-readonly-build-final.log": {
+      "sha256": "84aed78c2e8e92debe68aa4145c1e5489965e13ce1d3ff6abe778adfd4e1bdf4",
+      "build": "passed",
+      "reused": true
+    },
+    "build.noindex/task568/stage6-js-tests.log": {
+      "sha256": "9817cee45ad177f2de8fb9a85793ff653a880684da1332a12110bb76d504b529",
+      "tests": 30,
+      "failures": 0,
+      "reused": false
+    }
+  },
+  "restoredInstallation": {
+    "currentInfoSHA256": "41f64c73e4d2848e2b8d34d4b3a1954e0645121072074f5d299929b5d52279a7",
+    "matchedStage5Original": true,
+    "full152FileTree": "Stage 5 복원 당시 receipt 재사용. 이번에 전체 tree를 재검사하지 않음"
+  },
+  "evidenceFiles": [
+    {
+      "path": "mydocs/working/assets/task_m020_567_stage5/first-result.json",
+      "sha256": "a8f6b94c408f90e24c3b322c8df33d2de5a6dc8e036231ee01f8d532e6c287a0",
+      "bytes": 7301
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_567_stage5/first-saved-font-proof.json",
+      "sha256": "31ef564f18b92b79d62f9db7c93958de2dd64720a69d5c7cb037d869251bd71f",
+      "bytes": 769
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_567_stage5/reopen-result.json",
+      "sha256": "b4599c8845c653132bc65e8b91510b30575eab837b7f1c1dce29bec266619cdc",
+      "bytes": 6419
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage3/acceptance-summary.json",
+      "sha256": "48e5bcd43801894aa62896336029919be093b289ff44a5d0cd591e3ea5be3ba9",
+      "bytes": 2149
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage3/baseline-pdf.png",
+      "sha256": "c1474d7f2e8f2bf4e6144a3960ef604468175f9281ba7bfb0f77ae3b4836c1b0",
+      "bytes": 19047
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage3/baseline-result.json",
+      "sha256": "ad5aa5e96270b02758b60d826f7047c61ffbdebfd0cfe7b2d325b48af995f8a4",
+      "bytes": 3386
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage3/independent-pdf-proof.json",
+      "sha256": "6aabea8e75891e0c964ed88edb85dd9df5c5d977426dc561f4d978ae698ebd7f",
+      "bytes": 24317
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage3/installed-pdf.png",
+      "sha256": "79388c8123b4eb139fc466e9da3ea901604e7775e749cbedd9ca57c59f281a96",
+      "bytes": 16195
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage3/installed-result.json",
+      "sha256": "d9a0f679cd7ff5f5fa329eb803a18d8948ee75f0b0c9cd76af878e1b943adadc",
+      "bytes": 9584
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage3/managed-editor.png",
+      "sha256": "bb978870fa967795764fcb1e49b9e4f6aee76e80eb1e14c3c6d58ba54533e1be",
+      "bytes": 438453
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage3/managed-pdf.png",
+      "sha256": "35fd2060fdc20a76a608a20da02a06158c28e9f6c5eaaaa4e31182955b3dd99c",
+      "bytes": 19673
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage3/managed-result.json",
+      "sha256": "e8eadf028c5e071c3c57aa002dd903b5bace3754ac7f30fdf312981206b10725",
+      "bytes": 11757
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage3/registration-cleanup.json",
+      "sha256": "f9399ee9e6e84505f3fb85406137a4795ce49fc889776562e4064e1390982f01",
+      "bytes": 2112
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/cleanup-summary.json",
+      "sha256": "3b4f6e5fb25e80948ec4a1c0bdbfb7186c0dda107ccdd101f4fdee96e97b80f5",
+      "bytes": 38047
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/coretext-bytes.png",
+      "sha256": "c0f210a03a288a7ab08b74d05a8b5e7474abe2bbb5796bf6653a6b4453446395",
+      "bytes": 36039
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/coretext-result.json",
+      "sha256": "e4e7a95e959cc8d32aeef14a9ffad01cd6baae0116d22eedb7063b99c83b3a47",
+      "bytes": 1649
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/native-cg-hwpx.png",
+      "sha256": "9120fe4934333f727d458e85700b1bac73561ae162d482da31e213009dc4ee3c",
+      "bytes": 32775
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/native-ffi-hwp.json",
+      "sha256": "605e72b07388e48f9bf42c572a2701f851d559043eb239968e9d596b2d137d5d",
+      "bytes": 1913
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/native-ffi-hwpx.json",
+      "sha256": "86ef239c1088555f6a44b154c3347f7e63ee9b02090de6c7c0e220746124608d",
+      "bytes": 1913
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/native-generated-cleanup.json",
+      "sha256": "a860836d70dea19db0b0eea42fb10876135a0bde8083d5c098179fe2de1e6153",
+      "bytes": 341
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/native-integration-result.json",
+      "sha256": "caef01a80b08bd630d2e680f927ae4d5e77e1e97deb53965457de3a3e07f5696",
+      "bytes": 1380
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/native-missing-glyph.json",
+      "sha256": "3e82234acb8872fddb67c9898b27b243f0a8497dc32d33cd68632997119ef24b",
+      "bytes": 642
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/native-pre-adapter.json",
+      "sha256": "a723e1a2b2d72f43832397afa76251b86d5564f9da1cbebad033ed888e4bf6b8",
+      "bytes": 1901
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/native-receipt.json",
+      "sha256": "075128449a8216ca8e469ef6652cb8746dee64bc5aad4d7466c44015c14a190a",
+      "bytes": 5515
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/native-regular-control.json",
+      "sha256": "46834dd9987355668c5ffb827c3c7133160ff25a49b281743916646515e92252",
+      "bytes": 646
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/native-skia-hwpx.png",
+      "sha256": "baa052a3129d8aa7c51a7f5a5423ce4282e6113cf39ab2d5a962d2ffbf204e30",
+      "bytes": 31821
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/registration-check.txt",
+      "sha256": "250283a24aefae3c32cd78d1e3a2fda118b19c96d9e7fb26c018afc49df6ba4d",
+      "bytes": 480
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/supply-changed-source-skia.png",
+      "sha256": "22db5433ea7e8ce32dedfada573346929d4945e0a6f68779c0bd06ad6c9d93b5",
+      "bytes": 21716
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/supply-generated-cleanup.json",
+      "sha256": "553b226eb841ee2600b85fc9dfc7bed206c4a701d44e6240c77820c7cf0d01ab",
+      "bytes": 8390
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/supply-managed-hwpx-coreGraphicsOnly.png",
+      "sha256": "9120fe4934333f727d458e85700b1bac73561ae162d482da31e213009dc4ee3c",
+      "bytes": 32775
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/supply-managed-hwpx-skiaOptIn.png",
+      "sha256": "76a361c738fd8e01e7dba534dc8626a8da87af9d09431f19284aaff14d4788ac",
+      "bytes": 31662
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/supply-real-installed-skiaOptIn.png",
+      "sha256": "34b0acf4c74cc0bab99e394c2952df9992a06919c405ad271552f7835d907a62",
+      "bytes": 20790
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/supply-receipt.json",
+      "sha256": "33cc81e0e8c4bb7f41a12a1c606d256e0fc2c70279e87babdb8dc933d1f9031e",
+      "bytes": 4490
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage4/supply-result.json",
+      "sha256": "04ee6d4b2ed2467da9e18a1b5d19f528d61f0f943f80f4fbc1714e057a6a8aa7",
+      "bytes": 3086
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/SHA256SUMS",
+      "sha256": "e20007cb02a1b1f7ad66e386352359a7552a979d081b0a023732d50bfa4210b9",
+      "bytes": 2338
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/cleanup.json",
+      "sha256": "08bbff8e3799d5e361b6d5223895d1e0ffa32c41258ce32f00eaacb04114664b",
+      "bytes": 2263
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/finder-disabled-installed-fallback.png",
+      "sha256": "0086a27607382dcfe9dfa861c80bec95154d6f1ae6aa7f1f90db6b650ccb94f7",
+      "bytes": 11608
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/finder-hwp.png",
+      "sha256": "7cfbd8b94a06698829cd1f07689c1680e26e7505e3b0ab1fb352b78d850d85de",
+      "bytes": 20233
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/finder-hwpx.png",
+      "sha256": "5abec126be51336b3f16a73117f7944bc1f4b8646e37b4dafdea244994174b82",
+      "bytes": 20342
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/finder-installed.png",
+      "sha256": "2204ea54d4b54b38af8a6953f314493b56c76642d45c0c63a6b9e37ae5ce4a82",
+      "bytes": 11296
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/finder-missing-managed-fallback.png",
+      "sha256": "dec7f4e159fd493cc0627a5724e5655d1002ebaea576d0912aee263dddc97d3f",
+      "bytes": 19149
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/native-regression.json",
+      "sha256": "04ee6d4b2ed2467da9e18a1b5d19f528d61f0f943f80f4fbc1714e057a6a8aa7",
+      "bytes": 3086
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/preview-coreGraphics.png",
+      "sha256": "9120fe4934333f727d458e85700b1bac73561ae162d482da31e213009dc4ee3c",
+      "bytes": 32775
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/preview-multiple.pdf",
+      "sha256": "cdcf0e51d3fb5ac039ee1e7142f93c288cf6e2e5d1802d1234e58be1792acead",
+      "bytes": 26930
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/preview-permission-fallback.png",
+      "sha256": "e38021c90f07adbe46b172fa28cfcc1777fb3e94c40c42c5308cf2eec1d64954",
+      "bytes": 29415
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/preview-skiaDecode.png",
+      "sha256": "5dc2d62886b3a3596adc4f6d0f6bd86991a4a4c096595d3c0af32d3662dd5901",
+      "bytes": 31654
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/preview-skiaDirect.png",
+      "sha256": "6f481069347e806bba809c952f2b18f113e3749c4ac84f5efbba2a77ac1053a8",
+      "bytes": 31826
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/readonly-result.json",
+      "sha256": "ada48b1a16d61c7396657ef8435aab844052b2a7eb799a9e1e3188e4343cc49c",
+      "bytes": 1174
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/registration-hygiene.txt",
+      "sha256": "4b12d7a9a395cec87386dd9e9156106fbc72720da238265045fb0109108dd32c",
+      "bytes": 519
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/restore-verification.json",
+      "sha256": "b5f39d73be2ffeac32a645abd92301a1fc00dd9f90aa52f5f2e32e93e3f9e31a",
+      "bytes": 229
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/result.json",
+      "sha256": "ada48b1a16d61c7396657ef8435aab844052b2a7eb799a9e1e3188e4343cc49c",
+      "bytes": 1174
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/signed-cache-receipt.json",
+      "sha256": "fa3b05de78dfa8887704d86f9b6f4b21fbd4b1bfa839b46564743dc064c006d8",
+      "bytes": 1977
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/signed-disabled-receipt.json",
+      "sha256": "468fdde708ea456f02a9d944956ec276a45ed759b370c3879aa989183ec4427c",
+      "bytes": 2634
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/signed-executables.json",
+      "sha256": "9dc2dd819f9f38e0923ad6b0f82c7c29304c7c7a8dcf3add9635984fce967119",
+      "bytes": 581
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/signed-font-events.json",
+      "sha256": "ea1afa074ffa441f280d4c4febfabaf39fed9ddbd5f39b4eb4486f978b79e979",
+      "bytes": 71149
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/signed-initial-denials.txt",
+      "sha256": "40d1c56cbe9f98d9bbfca7e5b5bc39c94c0d123cd37dc59a86f744cf6ddab234",
+      "bytes": 568
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/signed-removed-receipt.json",
+      "sha256": "3eeeb30c9dac33e954bfd28b00c5b63fe860b67cffd098b0d087f089db0efa18",
+      "bytes": 1910
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/signed-restored-receipt.json",
+      "sha256": "0297bc92eed1a907375be71f82c94cd7b925d424fb7b199d0ef67e0a684a7630",
+      "bytes": 5057
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/signed-source-provenance.json",
+      "sha256": "571375d357a7a35fff135d71c49df10cd18889fedaf0aa3b9dabf9783a9e33ce",
+      "bytes": 15764
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/signed-summary.json",
+      "sha256": "c8ed8bf17d466d068aef803bbdc48ab0526d9108ef7692bb8e8cbdb34e5b5af6",
+      "bytes": 963
+    },
+    {
+      "path": "mydocs/working/assets/task_m020_568_stage5/thumbnail.png",
+      "sha256": "0b59834c713b85b50aaac4e265a1af420657498ee0b4d3449e58e59670622b51",
+      "bytes": 3949
+    }
+  ]
+}

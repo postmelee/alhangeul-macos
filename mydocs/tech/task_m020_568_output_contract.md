@@ -2,11 +2,11 @@
 
 - 기준: 제품 `db8a94d1eb03f5a14f265621191f85f0ddf149cb`, 공식 core/Studio v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`.
 - 근거: [구현계획](../plans/task_m020_568_impl.md), [Stage 1 실험](../working/task_m020_568_stage1.md), [#567 인계](font_library_integration.md).
-- 상태: 2026-10-09 [Stage 3](../working/task_m020_568_stage3.md)의 실제 editor PDF·인쇄 연결과 로컬 서명 sandbox·패널 취소 수용 완료. native·Finder 연결은 Stage 4–5 승인 후 진행한다.
+- 상태: A의 [Stage 3](../working/task_m020_568_stage3.md) 실제 editor PDF·인쇄 연결 및 B의 [Stage 4](../working/task_m020_568_stage4.md) native 공급·[Stage 5](../working/task_m020_568_stage5.md) signed Finder 수용 완료. 아래 초기 결함 표는 조사 당시 경계이며 현재 상태는 [소비자 인계](task_m020_568_consumer_handoff.md)를 따른다.
 
-## 1. 소비자 경계와 현재 결함
+## 1. Stage 3 이후의 소비자 경계와 B 진입 과제
 
-| 소비자 | 현재 구현 | 이 계약의 후속 작업 |
+| 소비자 | Stage 3 이후 구현 | 당시 후속 작업 |
 |--------|-----------|--------------------|
 | Studio 화면 | 공유 설치/관리 catalog, 공식 host provider와 matcher | 기존 선택 정책 재사용; 출력 수명은 독립 |
 | HostApp PDF | 공유 설치/관리 snapshot·공식 matcher·별도 WebView, 저장 직전 문서/글꼴 검사·atomic write 연결 | 실제 한컴/최소 OS·다양한 문서 수용은 #569 |
@@ -114,4 +114,4 @@ custom PDF는 두 face 모두 `/FontFile2` program이 있으며 한글 subset은
 
 기존 인증서로 로컬 서명한 sandbox 앱의 세 경로와 실제 인쇄 패널 취소를 확인했다. managed 패널의 성공 기록은 30개 검사/18회 읽기, installed는 25개/14회, baseline은 16개/0회다. 각 정상 출력 job은 필요한 두 face를 각 1회 읽는다. 독립 pypdf/Poppler로 12 PDF의 program·한글 ToUnicode·본문을 대조했고 PDFKit 검색·선택 및 PNG 시각 검사도 통과했다. 페이지는 기존 SVG의 논리 bounds를 유지하며 물리 A4 mm 교정·물리 인쇄·최소 OS/Intel 실행은 미검증이다. Stage 2의 별도 시스템 영문 header PDFKit 추출 제약은 남는다.
 
-B는 따로 진행한다. HostApp snapshot/bytes를 다른 프로세스의 권한으로 취급하지 않으며 RhwpCoreBridge의 AppKit/UIKit 금지를 유지한다. Stage 4 API/FFI·캐시 key 구체 승인과 Stage 5 설치본 보존/복원·표준 Finder smoke 승인이 필요하다. A 성공으로 #568 전체 close, Windows 지원 또는 Finder 지원을 선언하지 않는다.
+B는 별도 승인을 거쳐 Stage 4–5에서 수용했다. HostApp snapshot/bytes를 다른 프로세스의 권한으로 취급하지 않으며 RhwpCoreBridge의 AppKit/UIKit 금지를 유지한다. signed 확장의 읽기 전용 App Group 공급과 설치본 보존/복원·표준 Finder smoke 결과는 해당 단계 보고서를 따른다. Windows 입력과 전체 사용자/출시 수용은 각각 #566/#569에 남긴다.
