@@ -5,7 +5,7 @@
 - 작업: `local/task568` → `publish/task568` → `devel`
 - 제품 기준: `db8a94d1eb03f5a14f265621191f85f0ddf149cb` (PR #578), 공식 core/Studio v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`
 - 승인: 2026-10-08 작업지시자의 “진행해줘”로 수행계획 승인·구현계획 작성 진행.
-- 상태: 2026-10-10 승인된 [Stage 6 소비자별 회귀·증거 대조·문서화·인계](../working/task_m020_568_stage6.md) 완료. core v0.8.7과 제품 소스를 유지하며 범용 upstream 기여 후보를 취합했다. 최종 보고·PR 단계 승인 대기.
+- 상태: 2026-10-10 [Stage 6 수용/인계](../working/task_m020_568_stage6.md) 및 승인된 [최종 보고](../report/task_m020_568_report.md) 완료. core v0.8.7과 제품 소스를 유지하며 범용 upstream 기여 후보를 취합했다. `publish/task568` → `devel` Open PR 게시 진행, CI·리뷰/merge는 후속.
 
 ## 1. 단계와 완료 경계
 
@@ -167,9 +167,11 @@ python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-font-dot
 
 HostApp Debug의 macOS 12 target compile/link와 실제 최소 OS runtime은 별도로 기록한다. source adapter가 바뀌면 공식 checkout typecheck/receipt와 JS·기존 메뉴/환경설정 probe를 추가하고 실제 결과를 보존한다.
 
-각 Stage 종료 시 `mydocs/working/task_m020_568_stage{N}.md`에 실제 명령·환경·입력 provenance·선택/준비/출력·hash·실패/제약을 기록해 해당 변경과 묶어 commit한다. 다음 단계는 작업지시자 승인 후 진행한다. 최종 보고/원격 push/PR과 merge·issue close·정리는 별도 승인 시점이며 현재 수행하지 않는다.
+각 Stage 종료 시 `mydocs/working/task_m020_568_stage{N}.md`에 실제 명령·환경·입력 provenance·선택/준비/출력·hash·실패/제약을 기록해 해당 변경과 묶어 commit한다. 다음 단계는 작업지시자 승인 후 진행한다. 최종 보고/원격 push/PR은 10절의 최신 승인 범위를 따르며 merge·issue close·정리는 별도 승인 시점이다.
 
 ## 10. 현재 승인 범위
+
+2026-10-10 Stage 6 완료 보고 후 작업지시자의 “진행해줘”로 최종 보고·오늘할일 완료 처리·`publish/task568` 원격 push·`devel` Open PR 게시를 승인받았다. merge/이슈 close·후속 구현·upstream 공개 기여·제품/웹 배포는 포함하지 않는다.
 
 2026-10-10 Stage 5 완료 보고 후 작업지시자의 “진행해줘”로 Stage 6의 소비자별 회귀·지원 범위 보정·소스/증거 hash 대조·#566/#569 인계를 승인받았다. 공개 이슈 변경·upstream 기여 게시·최종 보고/원격 push/PR·제품/웹 배포는 별도 단계다.
 
