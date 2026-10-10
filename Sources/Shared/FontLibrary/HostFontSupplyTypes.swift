@@ -49,7 +49,12 @@ actor StudioFontTransferBudget {
     static let shared = StudioFontTransferBudget()
     private var slots = Set<UUID>()
     func acquire() throws -> UUID {
-        guard slots.count < 2 else { throw StudioFontError.busy }
+        guard slots.count < 2 else {
+            #if ALHANGEUL_FONT_EXTENSION_PROBE
+            ExtensionFontPerformanceTrace.busy("transferSlots")
+            #endif
+            throw StudioFontError.busy
+        }
         let id = UUID(); slots.insert(id); return id
     }
     func release(_ id: UUID) { slots.remove(id) }

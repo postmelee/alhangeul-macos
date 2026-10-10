@@ -43,7 +43,16 @@ struct InstalledFontSystem: Sendable {
 
     var environment: InstalledFontEnvironment {
         .init(scan: { try self.scan($0) }, read: { record, grants in
+            #if ALHANGEUL_FONT_EXTENSION_PROBE
+            let id = ExtensionFontPerformanceTrace.request.get(), observer = ExtensionFontPerformanceTrace.details.get()
+            let work = Task.detached(priority: .utility) {
+                try ExtensionFontPerformanceTrace.request.withValue(id) {
+                    try ExtensionFontPerformanceTrace.details.withValue(observer) { try self.read(record, grants: grants) }
+                }
+            }
+            #else
             let work = Task.detached(priority: .utility) { try self.read(record, grants: grants) }
+            #endif
             return try await withTaskCancellationHandler(operation: { try await work.value }, onCancel: { work.cancel() })
         }, makeBookmark: { url in
             let session = FontImportSourceSession(urls: [url], access: self.access.scope)
@@ -56,6 +65,11 @@ struct InstalledFontSystem: Sendable {
         try access.withAccess(grants) { issues in
             let descriptors = activeDescriptors()
             guard descriptors.count <= Self.maximumRecords else { throw InstalledFontFailure.catalogLimit }
+            #if ALHANGEUL_FONT_EXTENSION_PROBE
+            let started = DispatchTime.now().uptimeNanoseconds
+            var normalized = false
+            defer { ExtensionFontPerformanceTrace.interval("systemNormalize", start: started, success: normalized) }
+            #endif
             var records: [String: InstalledFontRecord] = [:]
             var omitted = 0
             for descriptor in descriptors {
@@ -88,11 +102,18 @@ struct InstalledFontSystem: Sendable {
                     traits: CTFontGetSymbolicTraits(font).rawValue, axes: axes, stamp: stamp, failure: failure)
                 records[id] = record
             }
+            #if ALHANGEUL_FONT_EXTENSION_PROBE
+            normalized = true
+            #endif
             return .init(records: records.values.sorted { $0.id < $1.id }, grantIssues: issues, omittedFaceCount: omitted)
         }
     }
 
     private func activeDescriptors() -> [CTFontDescriptor] {
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        let started = DispatchTime.now().uptimeNanoseconds
+        defer { ExtensionFontPerformanceTrace.interval("systemEnumerate", start: started, success: true) }
+        #endif
         let collection = CTFontCollectionCreateFromAvailableFonts(nil)
         return (CTFontCollectionCreateMatchingFontDescriptors(collection) as? [CTFontDescriptor] ?? []).filter {
             (CTFontDescriptorCopyAttribute($0, kCTFontEnabledAttribute) as? NSNumber)?.boolValue != false

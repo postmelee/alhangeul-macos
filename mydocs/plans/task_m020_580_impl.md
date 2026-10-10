@@ -3,7 +3,8 @@
 - 수행계획: [task_m020_580.md](task_m020_580.md)
 - 이슈: [#580](https://github.com/postmelee/alhangeul-macos/issues/580), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562), 후속 [#569](https://github.com/postmelee/alhangeul-macos/issues/569)
 - 제품 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`, 작업 `local/task580`
-- 수행계획 승인: 2026-10-10 “수행계획 승인·구현계획 작성 진행”. 이 문서의 승인과 Stage 1 실행은 아직 승인받지 않았다.
+- 수행계획 승인: 2026-10-10 “수행계획 승인·구현계획 작성 진행”. 구현계획·Stage 1 승인: 같은 날 “구현계획 승인·Stage 1 진행”.
+- 현재: [Stage 1 보고](../working/task_m020_580_stage1.md)와 [확정 계약](../tech/task_m020_580_extension_font_contract.md) 작성·검증 완료. Stage 2 진입 승인 대기다.
 - 측정 기준: #569 Stage 2 `60ea06a384ce5ba9e43b60a30278ce1268efe237`. 공개 본문의 핵심 표와 로컬 브랜치·선별 증거를 대조한다. 원시 근거는 덮어쓰지 않는다.
 
 ## 1. 현행 경로와 단계 구성
@@ -52,6 +53,8 @@ admission 16건 안에서 miss job을 대기시키고 실제 렌더는 2건까�
 - 완료·오류·stale·취소 모두 다음 대기 작업을 깨운다. slot·admission·lease가 새거나 continuation을 두 번 resume하지 않는다. cache hit도 current 검증을 거친다.
 - cache 96항목/64MiB·render 2건·admission 16건과 기존 전송 budget을 유지한다. 17번째 실제 admission 초과는 명시 busy로 판정한다. 정상 3번째 miss가 슬롯을 기다리는 동작과 구분해 기존 probe 기대값을 보정한다.
 - 대기 순서·deadlines·공유 작업 종료 규칙은 Stage 1에서 cold workload와 provider 수명 계약을 대조해 확정한다. 무제한 대기 목록·반복 즉시 재시도·한도 증가로 해결하지 않는다.
+
+Stage 1 확정: 활성 descriptor·원본 stamp와 즉시 변경 epoch를 확인하고 준비 전후 signature가 일치한 세대만 재사용한다. 서로 다른 miss key는 FIFO, admission 후 렌더 시작 전 대기는 단조 시계 30초로 제한한다. 이 값은 OS timeout 보장이 아니며 deadline과 물리 I/O 슬롯 수명을 구분한다. 세부 규칙·한계·검증은 [확정 계약](../tech/task_m020_580_extension_font_contract.md)을 따른다.
 
 ## 3. Stage 1 — 경계 진단·설계와 측정 인계
 
@@ -136,6 +139,6 @@ CoreGraphics 기본과 Skia opt-in의 단일/다중 페이지 및 실제 공급 
 
 ## 9. 현재 승인 범위와 다음 승인 요청
 
-수행계획과 이 구현계획 작성까지만 승인받았다. **이 구현계획 및 Stage 1의 경계 진단·무효화/대기 계약·측정 도구 인계를 승인하면 Stage 1을 실행한다.** Stage 1은 필요한 진단 코드/검증 도구를 포함하며 제품 성능 구조 구현은 Stage 2/3 승인 후 진행한다.
+수행계획·구현계획과 Stage 1의 경계 진단·무효화/대기 계약·측정 도구 인계를 승인받아 완료했다. **Stage 1 보고와 확정 계약을 검토하고 Stage 2의 확장 목록/metadata 재사용·OFF 경로·요청별 수명 구현을 승인받으면 진행한다.** 렌더 대기 제품 구조는 이후 Stage 3 승인 범위다.
 
-Stage 1 결과에서 signature·대기 설계가 정확성이나 잠정 성능 목표를 만족시키기 어려우면 측정 근거와 대안을 제시해 범위를 보정한다. 새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·새 후보 로컬 서명/임시 설치·공개 release는 이번 승인 요청에 포함하지 않는다.
+Stage 1의 unsigned signature 비용은 재사용 설계를 진행할 근거이며 signed 성능 목표 달성을 입증하지 않는다. 이후 현재성 검사와 실제 대기 구현이 정확성이나 잠정 목표를 만족시키기 어려우면 측정 근거와 대안을 제시해 범위를 보정한다. 새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·새 후보 로컬 서명/임시 설치·공개 release는 Stage 2 승인 요청에 포함하지 않는다.

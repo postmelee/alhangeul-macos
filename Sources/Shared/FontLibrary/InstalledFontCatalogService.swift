@@ -211,7 +211,12 @@ actor InstalledFontCatalogService {
         let operation: Pending
         if let existing = pending[id] { operation = existing }
         else {
-            guard pending.count < 2 else { throw InstalledFontFailure.busy }
+            guard pending.count < 2 else {
+                #if ALHANGEUL_FONT_EXTENSION_PROBE
+                ExtensionFontPerformanceTrace.busy("installedReadSlots")
+                #endif
+                throw InstalledFontFailure.busy
+            }
             let environment = environment, grants = saved.grants
             operation = Pending(token: UUID(), task: Task { try await environment.read(record, grants) })
             pending[id] = operation

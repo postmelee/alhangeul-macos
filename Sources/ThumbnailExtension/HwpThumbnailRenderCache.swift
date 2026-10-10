@@ -248,7 +248,12 @@ final class HwpThumbnailRenderCache {
             self.pendingFontRequests += 1
             return true
         }
-        guard admitted else { throw StudioFontError.busy }
+        guard admitted else {
+            #if ALHANGEUL_FONT_EXTENSION_PROBE
+            ExtensionFontPerformanceTrace.busy("thumbnailAdmission")
+            #endif
+            throw StudioFontError.busy
+        }
         do {
             let result = try await performWithFonts(request, supply: supply)
             _ = await state { self.pendingFontRequests -= 1 }
@@ -306,7 +311,12 @@ final class HwpThumbnailRenderCache {
             self.fontJobs[immutableKey] = job
             return (job, true)
         }
-        guard let job = chosen.0 else { await snapshot.release(); throw StudioFontError.busy }
+        guard let job = chosen.0 else {
+            #if ALHANGEUL_FONT_EXTENSION_PROBE
+            ExtensionFontPerformanceTrace.busy("thumbnailRenderSlots")
+            #endif
+            await snapshot.release(); throw StudioFontError.busy
+        }
         if !chosen.1 { await snapshot.release() }
         do {
             let page = try await job.value
