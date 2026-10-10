@@ -1,7 +1,7 @@
 # Task M020 #580 — 확장 글꼴 준비·렌더 대기 계약
 
-- 근거: [구현계획](../plans/task_m020_580_impl.md), [Stage 1 보고](../working/task_m020_580_stage1.md), [Stage 2 보고](../working/task_m020_580_stage2.md).
-- 적용 상태: Stage 2의 확장 전용 metadata 재사용·OFF 경로·요청별 수명은 구현·검증했다. Stage 3의 썸네일 대기는 아직 구현하지 않았다. 아래 계약의 준비 부분은 Stage 2, 대기 부분은 Stage 3 범위다.
+- 근거: [구현계획](../plans/task_m020_580_impl.md), [Stage 1 보고](../working/task_m020_580_stage1.md), [Stage 2 보고](../working/task_m020_580_stage2.md), [Stage 3 보고](../working/task_m020_580_stage3.md).
+- 적용 상태: Stage 2의 확장 전용 metadata 재사용·OFF 경로·요청별 수명은 구현·검증했다. Stage 3의 bounded FIFO·동일 key 병합·취소·deadline도 구현·격리 검증했다. 실제 signed Finder 재측정은 Stage 4 범위다.
 - 기준: `devel`의 `dac73a589dc17143e744da6a12a51d638a81fb77`, core v0.8.7. HostApp의 기본 준비·설정, C ABI, 렌더 기본값은 유지한다.
 
 ## 1. 비용과 진단의 해석
@@ -58,21 +58,21 @@ current 확인 이후 원본이 변할 수 있는 기존 TOCTOU 경계는 남는
 
 | 자원 | 계약 |
 |------|------|
-| admission | 실행·metadata 준비·대기·동일 키 참가자를 모두 포함해 요청 16건; 17번째는 공급 획득 전 busy |
+| admission | 실행·metadata 준비·대기·동일 키 참가자를 모두 포함해 요청 16건; 취소된 job의 소유 접수도 실제 참조/I/O 종료까지 계산; 17번째는 공급 획득 전 busy |
 | 물리 실행 | font miss job 최대 2건; 취소 요청을 받아도 실제 I/O 종료 전 슬롯을 반환하지 않음 |
 | 대기 순서 | 서로 다른 miss key의 FIFO; 같은 key는 기존 대기/실행 job에 참가하며 새 슬롯을 만들지 않음 |
 | cache | 기존 96항목·64MiB 유지; exact/larger hit도 현재성 검사 |
 | bytes | 슬롯을 얻고 현재성을 재검사한 뒤 문서 load·선택 bytes 읽기·렌더 시작; 대기 중 전체 bytes/bitmap 선보유 금지 |
 | 전송 | 설치 read 2건·공유 bytes 전송 2건 유지; 해당 과부하를 렌더 대기 성공으로 숨기지 않음 |
 
-admission 이후 실제 렌더 시작 전 대기에는 단조 시계 기준 **30초**의 내부 deadline을 둔다. metadata 준비·key 확인·렌더 큐 대기를 포함하고, 실제 시작한 물리 I/O의 강제 종료 시간으로 사용하지 않는다. 정상 direct cold 동시 workload의 최대 약 2.752초와 구분해 여유를 둔 초기 값이며 OS가 보장하는 timeout이 아니다. 느린 사용자 환경에서도 무기한 대기 객체를 남기지 않기 위한 한도다. Stage 3는 주입 시계/deadline으로 경계 회귀를 검증하고 Stage 4는 정상 10개가 이 한도에 걸리지 않는지 확인한다.
+admission 이후 실제 렌더 시작 전 대기에는 단조 시계 기준 **30초**의 내부 deadline을 둔다. metadata 준비·key 확인·렌더 큐 대기를 포함하고, 실제 시작한 물리 I/O의 강제 종료 시간으로 사용하지 않는다. 정상 direct cold 동시 workload의 최대 약 2.752초와 구분해 여유를 둔 초기 값이며 OS가 보장하는 timeout이 아니다. 느린 사용자 환경에서도 무기한 대기 객체를 남기지 않기 위한 한도다. Stage 3는 주입한 deadline 길이와 제어한 공급/current/read gate로 단조 시계 경계를 검증하고 Stage 4는 정상 10개가 이 한도에 걸리지 않는지 확인한다.
 
 deadline 초과는 `StudioFontError.busy`로 끝내되 `busy.thumbnailWaitDeadline`로 별도 진단한다. 반복 polling/즉시 재시도를 만들지 않는다. state 소유자가 deadline·완료·취소 경합을 직렬 처리해 대기 continuation을 한 번만 완료한다. 현재 callback 기반 provider는 OS 취소를 내부 Task로 직접 전달하지 않으므로 OS가 모든 요청 취소를 알려준다고 가정하지 않는다. 내부 Task 취소 회귀와 실제 Finder 관찰을 구분한다.
 
 ## 6. 병합 작업의 소유와 종료
 
 - 각 참가자는 자신의 문서 stamp·공급 current·취소 상태를 반환 직전에 확인한다. key가 같다는 이유로 각자의 current 확인을 생략하지 않는다.
-- job은 실제 렌더에 쓸 snapshot 한 개를 소유하고 참가자의 metadata lease와 수명을 구분한다. 참가자 한 명의 해제 때문에 실행 job의 FD가 닫히지 않게 한다. 불필요한 추가 lease는 해제하되 재검사에 필요한 값은 유지한다.
+- job은 실제 렌더에 쓸 snapshot 한 개를 소유하고 참가자의 metadata lease와 수명을 구분한다. 최초 참가자의 단일 FD 소유에 job 참조를 retain하며, 마지막 참조에서만 실제 release한다. 다른 참가자는 각각 독립 snapshot을 획득한다. 참가자 한 명의 해제 때문에 실행 job의 FD가 닫히지 않게 한다. 불필요한 추가 lease는 해제하되 재검사에 필요한 값은 유지한다.
 - 한 참가자의 취소/deadline은 그 참가자만 제거한다. 마지막 참가자가 없어진 대기 job은 큐에서 제거하고 소유 lease를 해제한다. 실행 중이면 취소 요청 후 물리 종료까지 슬롯과 job lease를 유지한다.
 - 완료·오류·stale·취소 후 다음 FIFO job을 깨운다. key 변경/문서 변경/정책 변경 시 대기 결과는 폐기한다. 실패/fallback bitmap은 기존대로 성공 cache를 채우지 않는다.
 - 유효한 참가자의 완료와 cache 게시를 별도로 판단한다. 취소된 마지막 참가자·무효 세대의 결과를 cache에 게시하지 않는다. 실제 완료 후 job 소유 해제·slot 반환·admission 반환이 각각 한 번 대응해야 한다.

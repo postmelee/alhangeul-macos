@@ -97,7 +97,7 @@ Stage 2 반영: `ExtensionInstalledFontPreparation`의 단일 준비·즉시 epo
 - 대기 중 정책/문서/원본/관리 객체 변경에서 이전 결과 폐기, 실제 시작 전 불필요한 bytes 읽기 없음, 각 획득에 대응한 단 한 번 해제.
 - exact/larger cache hit의 current 검증과 96항목/64MiB eviction, 오류/fallback 결과로 재시도를 막지 않는 동작.
 
-기존 `Tests/ExtensionFontProbe/main.swift`의 “2건 렌더 중 다음 요청 busy” 부분은 정상 요청 대기/완료 증거로 보정한다. 실제 admission 초과·전송 한도·취소 I/O 완료까지 slot 보유 회귀는 유지한다. 실패를 모두 성공으로 바꾸거나 기존 제한 검사를 제거하지 않는다.
+추가 `Tests/ExtensionFontProbe/ThumbnailQueueAcceptance.swift`와 기존 `Tests/ExtensionFontProbe/main.swift`의 “2건 렌더 중 다음 요청 busy” 부분은 정상 요청 대기/완료 증거로 보정한다. 실제 admission 초과·전송 한도·취소 I/O 완료까지 slot 보유 회귀는 유지한다. 실패를 모두 성공으로 바꾸거나 기존 제한 검사를 제거하지 않는다.
 
 ## 6. Stage 4 — 같은 workload의 재측정·소비자 수용
 
@@ -141,6 +141,6 @@ CoreGraphics 기본과 Skia opt-in의 단일/다중 페이지 및 실제 공급 
 
 ## 9. 현재 승인 범위와 다음 승인 요청
 
-수행계획·구현계획·Stage 1 및 Stage 2를 승인받아 완료했다. **Stage 2 보고를 검토하고 Stage 3의 제한된 렌더 대기·병합·취소/과부하 구현을 승인받으면 진행한다.** 새 signed 후보·임시 설치·공개 배포는 이후 별도 승인 범위다.
+수행계획·구현계획·Stage 1 및 Stage 2를 승인받아 완료했다. Stage 2 보고 후 작업지시자의 “진행해줘. 저장공간도 최대한 확보하면서 진행해줘.” 지시로 **Stage 3의 제한된 렌더 대기·병합·취소/과부하 구현과 소유 부산물 정리를 승인받아 완료했다.** [Stage 3 보고](../working/task_m020_580_stage3.md) 검토 후 Stage 4 재측정·후보 수용 준비 승인을 요청한다. 새 signed 후보·임시 설치·공개 배포는 이후 별도 승인 범위다.
 
-Stage 2의 unsigned 반복 비용 개선은 signed 성능 목표 달성을 입증하지 않는다. 최초 miss의 추가 현재성 비용과 남은 렌더 슬롯 busy를 따로 검증한다. 이후 실제 대기 구현이 정확성이나 잠정 목표를 만족시키기 어려우면 근거와 대안을 제시해 범위를 보정한다. 새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·새 후보 로컬 서명/임시 설치·공개 release는 Stage 3 승인 요청에 포함하지 않는다.
+Stage 2의 unsigned 반복 비용 개선은 signed 성능 목표 달성을 입증하지 않는다. Stage 3 직접 consumer에서 정상 busy 0을 확인했지만 최초 miss의 추가 현재성 비용과 실제 Finder 요청을 Stage 4에서 따로 검증한다. signed 수용이 정확성이나 잠정 목표를 만족시키기 어려우면 근거와 대안을 제시해 범위를 보정한다. 새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·새 후보 로컬 서명/임시 설치·공개 release는 Stage 3 승인 요청에 포함하지 않는다.

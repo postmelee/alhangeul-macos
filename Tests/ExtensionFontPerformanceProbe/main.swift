@@ -105,9 +105,7 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter:
         maximumSize: CGSize(width: width, height: width), scale: 1)
     return try await ExtensionFontPerformanceTrace.request.withValue(PerformanceTrace.request.get() ?? UUID().uuidString) {
         try await ExtensionFontPerformanceTrace.details.withValue({ meter.detail($0, $1, $2, $3, $4) }) {
-            try await withCheckedThrowingContinuation { continuation in
-                cache.renderedPageResult(for: request) { continuation.resume(with: $0) }
-            }
+            try await cache.renderedPageResult(for: request)
         }
     }
 }
@@ -252,18 +250,20 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter:
                         try require(row.spans.filter { $0.kind == "release" }.count == 1, "larger hit release")
                     }
                 }
-                for concurrent in [false, true] {
+                for batchSize in [1, 4, 10] {
+                    let scenario = batchSize == 1 ? "many-serial" : batchSize == 4 ? "many-concurrent" : "many-max10"
                     let cache = HwpThumbnailRenderCache(supply: tracked)
                     for pass in 0..<3 {
-                        for offset in stride(from: 0, to: 10, by: concurrent ? 4 : 1) {
-                            let batch = offset..<min(10, offset + (concurrent ? 4 : 1))
+                        for offset in stride(from: 0, to: 10, by: batchSize) {
+                            let batch = offset..<min(10, offset + batchSize)
                             let rows = await withTaskGroup(of: PerformanceSample.self, returning: [PerformanceSample].self) { group in
                                 for index in batch {
-                                    group.addTask { await runThumbnail(cache, file: input.appendingPathComponent("many-\(index).hwpx"), scenario: concurrent ? "many-concurrent" : "many-serial", phase: pass == 0 ? "cold" : "warm", index: pass) }
+                                    group.addTask { await runThumbnail(cache, file: input.appendingPathComponent("many-\(index).hwpx"), scenario: scenario, phase: pass == 0 ? "cold" : "warm", index: pass) }
                                 }
                                 var values: [PerformanceSample] = []; for await row in group { values.append(row) }; return values
                             }
                             samples.append(contentsOf: rows.sorted { $0.request < $1.request }); try save()
+                            try require(rows.allSatisfy { $0.status == "success" && $0.fallback == nil && $0.faces.count == 2 }, "normal queued thumbnails no busy/fallback")
                         }
                     }
                 }
@@ -293,7 +293,7 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter:
                     }
                 }
                 proofs["exactManagedRegularBold"] = true; proofs["hitWithoutBytes"] = true
-                proofs["singleSnapshotMultiPage"] = true
+                proofs["singleSnapshotMultiPage"] = true; proofs["normalQueueBusyZero"] = true
             } else if mode == "transitions" {
                 let cache = HwpThumbnailRenderCache(supply: tracked), file = input.appendingPathComponent("single.hwpx")
                 let first = await runThumbnail(cache, file: file, scenario: "change", phase: "before", index: 0)

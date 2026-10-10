@@ -33,7 +33,7 @@ def summarize(results):
     groups = collections.defaultdict(list)
     for result in results:
         for row in result["samples"]:
-            key = (result["mode"], result["installedEnabled"], row["scenario"], row["file"] if row["scenario"] not in ("many-serial", "many-concurrent") else "many", row["phase"], row.get("cache"))
+            key = (result["mode"], result["installedEnabled"], row["scenario"], row["file"] if row["scenario"] not in ("many-serial", "many-concurrent", "many-max10") else "many", row["phase"], row.get("cache"))
             groups[key].append(row)
     summary = []
     for key, rows in sorted(groups.items(), key=lambda pair: str(pair[0])):

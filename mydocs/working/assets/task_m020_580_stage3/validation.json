@@ -1,0 +1,901 @@
+{
+  "parentCommit": "fe06d8d7",
+  "sourceReceiptMatches": true,
+  "coreLockSHA256": "975712e98ff9a83a98aa0395139794ff743b7c0d242eeaa8aec48a57e3b47697",
+  "acceptance": [
+    {
+      "result": {
+        "path": "build.noindex/task580/stage3/default-acceptance-01/result.json",
+        "sha256": "7c4279b2f28e5c053f4e248897d2d5dd687b71a9eed4c30167834007c7b55abf",
+        "bytes": 1763
+      },
+      "proof": {
+        "concurrentJobsBounded": true,
+        "documentStampInvalidated": true,
+        "permissionFallback": true,
+        "proofs": [
+          {
+            "bytes": 32775,
+            "consumer": "PNG",
+            "faces": [
+              "GowunBatang-Bold",
+              "GowunBatang-Regular"
+            ],
+            "mode": "coreGraphics",
+            "reads": 2,
+            "releases": 1
+          },
+          {
+            "bytes": 31654,
+            "consumer": "PNG",
+            "faces": [
+              "GowunBatang-Regular",
+              "GowunBatang-Bold"
+            ],
+            "mode": "skiaDecode",
+            "reads": 2,
+            "releases": 1
+          },
+          {
+            "bytes": 31826,
+            "consumer": "PNG",
+            "faces": [
+              "GowunBatang-Bold",
+              "GowunBatang-Regular"
+            ],
+            "mode": "skiaDirect",
+            "reads": 2,
+            "releases": 1
+          },
+          {
+            "consumer": "PDF",
+            "pages": 2,
+            "reads": 4,
+            "releases": 1
+          },
+          {
+            "consumer": "Thumbnail",
+            "first": "miss",
+            "reads": 4,
+            "releases": 4,
+            "second": "exactHit",
+            "settingChange": "miss",
+            "smaller": "largerBucketHit(256x256)"
+          }
+        ],
+        "scope": "unsigned CLI; actual group/Finder not tested",
+        "staleRejected": true,
+        "thumbnailQueue": {
+          "admission": 16,
+          "allCancelKeepsIOSlots": true,
+          "cancelAtSlotBoundary": true,
+          "cancelCompletionRecovery": true,
+          "deadlineExcludesRunningIO": true,
+          "deadlineIncludesMetadata": true,
+          "distinctKeys": 10,
+          "eviction64MiB": true,
+          "eviction97Entries": true,
+          "exactlyOnceRelease": true,
+          "fallbackNotCached": true,
+          "fifo": true,
+          "mergedParticipants": 5,
+          "noEarlyBytes": true,
+          "oneParticipantCancel": true,
+          "physicalSlots": 2,
+          "queuedMergeCancel": true,
+          "staleQueueRejected": true
+        }
+      },
+      "compileLog": {
+        "path": "build.noindex/task580/stage3/default-acceptance-01/compile.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "runLog": {
+        "path": "build.noindex/task580/stage3/default-acceptance-01/run.log",
+        "sha256": "495a25f15edde53bbd476b8fb49709b74f3dae3d00a2a14ad716ad860af1dd57",
+        "bytes": 51
+      }
+    },
+    {
+      "result": {
+        "path": "build.noindex/task580/stage3/diagnostic-acceptance-01/result.json",
+        "sha256": "7c4279b2f28e5c053f4e248897d2d5dd687b71a9eed4c30167834007c7b55abf",
+        "bytes": 1763
+      },
+      "proof": {
+        "concurrentJobsBounded": true,
+        "documentStampInvalidated": true,
+        "permissionFallback": true,
+        "proofs": [
+          {
+            "bytes": 32775,
+            "consumer": "PNG",
+            "faces": [
+              "GowunBatang-Bold",
+              "GowunBatang-Regular"
+            ],
+            "mode": "coreGraphics",
+            "reads": 2,
+            "releases": 1
+          },
+          {
+            "bytes": 31654,
+            "consumer": "PNG",
+            "faces": [
+              "GowunBatang-Regular",
+              "GowunBatang-Bold"
+            ],
+            "mode": "skiaDecode",
+            "reads": 2,
+            "releases": 1
+          },
+          {
+            "bytes": 31826,
+            "consumer": "PNG",
+            "faces": [
+              "GowunBatang-Bold",
+              "GowunBatang-Regular"
+            ],
+            "mode": "skiaDirect",
+            "reads": 2,
+            "releases": 1
+          },
+          {
+            "consumer": "PDF",
+            "pages": 2,
+            "reads": 4,
+            "releases": 1
+          },
+          {
+            "consumer": "Thumbnail",
+            "first": "miss",
+            "reads": 4,
+            "releases": 4,
+            "second": "exactHit",
+            "settingChange": "miss",
+            "smaller": "largerBucketHit(256x256)"
+          }
+        ],
+        "scope": "unsigned CLI; actual group/Finder not tested",
+        "staleRejected": true,
+        "thumbnailQueue": {
+          "admission": 16,
+          "allCancelKeepsIOSlots": true,
+          "cancelAtSlotBoundary": true,
+          "cancelCompletionRecovery": true,
+          "deadlineExcludesRunningIO": true,
+          "deadlineIncludesMetadata": true,
+          "distinctKeys": 10,
+          "eviction64MiB": true,
+          "eviction97Entries": true,
+          "exactlyOnceRelease": true,
+          "fallbackNotCached": true,
+          "fifo": true,
+          "mergedParticipants": 5,
+          "noEarlyBytes": true,
+          "oneParticipantCancel": true,
+          "physicalSlots": 2,
+          "queuedMergeCancel": true,
+          "staleQueueRejected": true
+        }
+      },
+      "compileLog": {
+        "path": "build.noindex/task580/stage3/diagnostic-acceptance-01/compile.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "runLog": {
+        "path": "build.noindex/task580/stage3/diagnostic-acceptance-01/run.log",
+        "sha256": "495a25f15edde53bbd476b8fb49709b74f3dae3d00a2a14ad716ad860af1dd57",
+        "bytes": 51
+      }
+    }
+  ],
+  "builds": [
+    {
+      "log": {
+        "path": "build.noindex/task580/stage3/release-default.log",
+        "sha256": "a3cf43ef9f385457d3697b16055d5e509f4173a89f6ce67003e1dff0900644e9",
+        "bytes": 204928
+      },
+      "success": true
+    },
+    {
+      "log": {
+        "path": "build.noindex/task580/stage3/release-diagnostics.log",
+        "sha256": "3f14ab1f3afc4d00625f6d0cc6caa227c1eca315a3e7eba1ecca051863f94de3",
+        "bytes": 173526
+      },
+      "success": true
+    }
+  ],
+  "pngBaselineIdentical": [
+    {
+      "name": "preview-coreGraphics.png",
+      "equal": true
+    },
+    {
+      "name": "preview-permission-fallback.png",
+      "equal": true
+    },
+    {
+      "name": "preview-skiaDecode.png",
+      "equal": true
+    },
+    {
+      "name": "preview-skiaDirect.png",
+      "equal": true
+    }
+  ],
+  "basicRenderSmoke": {
+    "path": "build.noindex/task580/stage3/render-smoke.log",
+    "sha256": "93a261022a3ed4f1c9ae61ff493b373eebe22064628c0764d59e10b5a13b29f9",
+    "bytes": 829
+  },
+  "cleanup": [
+    {
+      "receipt": {
+        "path": "build.noindex/task580/stage3/initial-cleanup.json",
+        "sha256": "8afe428a12eb8bd7fffdaae29349f50a8745213c14bb96a5e4c961ef054e8f64",
+        "bytes": 3361
+      },
+      "details": {
+        "completed": true,
+        "logicalBytes": 1358138938,
+        "entries": [
+          {
+            "path": "build.noindex/task580/stage1/default-regression-01/extension-probe",
+            "bytes": 67066784,
+            "files": 1,
+            "sha256": "4c16dea87abe660b906b80c42a5d997768dfb68a853939335829d9857bd47b84"
+          },
+          {
+            "path": "build.noindex/task580/stage1/default-regression-01/modules",
+            "bytes": 35501708,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/signature-01/build/font-performance",
+            "bytes": 67415776,
+            "files": 1,
+            "sha256": "8fb3c407f75710c96f359c7f02e3477c572639cb0653481564c3fc47a5fcc810"
+          },
+          {
+            "path": "build.noindex/task580/stage1/signature-01/build/modules",
+            "bytes": 35499844,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/snapshot-01/build/font-performance",
+            "bytes": 67415776,
+            "files": 1,
+            "sha256": "8fb3c407f75710c96f359c7f02e3477c572639cb0653481564c3fc47a5fcc810"
+          },
+          {
+            "path": "build.noindex/task580/stage1/snapshot-01/build/modules",
+            "bytes": 35499484,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage2/default-regression-01/extension-probe",
+            "bytes": 67282304,
+            "files": 1,
+            "sha256": "eadbcbbe58c44faee246ed0a1b3806d55d459ccf6fb62dc370f81b295940bc39"
+          },
+          {
+            "path": "build.noindex/task580/stage2/default-regression-02/extension-probe",
+            "bytes": 67282736,
+            "files": 1,
+            "sha256": "8540a78fb922dcb0ac7749a6529ac673b7db25edab41de1c2ddaa89474fd908a"
+          },
+          {
+            "path": "build.noindex/task580/stage2/default-regression-final/extension-probe",
+            "bytes": 67282976,
+            "files": 1,
+            "sha256": "e10e819d77884a6dbca92af7e257692574c43776a4296454445129b07e467564"
+          },
+          {
+            "path": "build.noindex/task580/stage2/default-regression-final/modules",
+            "bytes": 35503300,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage2/final-direct-01/build/font-performance",
+            "bytes": 67632768,
+            "files": 1,
+            "sha256": "cf8bff911d5aa9367094f3cc723fefb631a65e376de2591623e57917a1869d00"
+          },
+          {
+            "path": "build.noindex/task580/stage2/final-direct-01/build/modules",
+            "bytes": 35501708,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage2/native-regression-final/modules",
+            "bytes": 35502900,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage2/snapshot-01/build/font-performance",
+            "bytes": 67615632,
+            "files": 1,
+            "sha256": "24b0f480cdac4bba59c6ddf83aeb307fd59a42dee006db8ea7fd80e440c45fad"
+          },
+          {
+            "path": "build.noindex/task580/stage2/snapshot-02/build/font-performance",
+            "bytes": 67632528,
+            "files": 1,
+            "sha256": "76cc76447f2c1cad93ac0fce281e3ef2368c8018279037df8948fa82a0a1d44f"
+          },
+          {
+            "path": "build.noindex/task580/stage2/snapshot-03/build/font-performance",
+            "bytes": 67632656,
+            "files": 1,
+            "sha256": "cc9733635fcc8b1a25768b37fdc8f6c7e7435879215b3c6ad3935c9d485b1dec"
+          },
+          {
+            "path": "build.noindex/task580/stage2/studio-output-tests",
+            "bytes": 470870058,
+            "files": 6295,
+            "sha256": null
+          }
+        ]
+      }
+    },
+    {
+      "receipt": {
+        "path": "build.noindex/task580/stage3/rust-cache-cleanup.json",
+        "sha256": "71faa8162ed1b20883f7da0020f7f0d83fb94f82ccebfa4b891bb46f0feb4b46",
+        "bytes": 414
+      },
+      "details": {
+        "completed": true,
+        "path": "RustBridge/target",
+        "logicalBytes": 2105680422,
+        "files": 3518,
+        "reason": "완료된 core 빌드 캐시; 현재 단계는 기존 Frameworks 산출물을 사용",
+        "frameworksPreserved": true,
+        "processInspection": "sandbox pgrep exit 3: unavailable; no process-absence claim",
+        "frameworksUnchangedCheck": true
+      }
+    },
+    {
+      "receipt": {
+        "path": "build.noindex/task580/stage3/bundle-cleanup.json",
+        "sha256": "659bc2f5c4637311c6fcdf1b3df3bb890e08a0fd981dc2d4a40f8d114d567240",
+        "bytes": 1588
+      },
+      "details": {
+        "completed": true,
+        "entries": [
+          {
+            "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app",
+            "files": 147,
+            "logicalBytes": 275709105
+          },
+          {
+            "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulPreview.appex",
+            "files": 5,
+            "logicalBytes": 64608170
+          },
+          {
+            "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulThumbnail.appex",
+            "files": 5,
+            "logicalBytes": 64790367
+          },
+          {
+            "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.mdimporter",
+            "files": 3,
+            "logicalBytes": 14337709
+          }
+        ],
+        "actions": [
+          {
+            "tool": "pluginkit",
+            "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+            "exit": 0
+          },
+          {
+            "tool": "pluginkit",
+            "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+            "exit": 0
+          },
+          {
+            "tool": "lsregister",
+            "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app",
+            "exit": 0
+          },
+          {
+            "tool": "lsregister",
+            "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+            "exit": 0
+          }
+        ]
+      }
+    },
+    {
+      "receipt": {
+        "path": "build.noindex/task580/stage3/final-artifact-cleanup.json",
+        "sha256": "2f28dba460ac8902b95cb5d988d7e50e802daa223631fff6587343c28aac946a",
+        "bytes": 13215
+      },
+      "details": {
+        "completed": true,
+        "reason": "완료된 검증의 실행 파일·임시 복제 보관함·모듈/cache; canonical 기록·원본 fixture·다음 단계 재사용 binary와 Xcode Release 캐시는 보존",
+        "entries": [
+          {
+            "path": "build.noindex/font-library-tests/DerivedData/Build",
+            "logicalBytes": 52031276,
+            "files": 553,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/font-library-tests/DerivedData/ModuleCache.noindex",
+            "logicalBytes": 82143321,
+            "files": 177,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task567/stage3-2/native-render/stage3_render_check",
+            "logicalBytes": 63994864,
+            "files": 1,
+            "sha256": "5aaf85cb50be720dfd421e1418aa2a856a782f8e4bf4d6122fbd32167439d2fb"
+          },
+          {
+            "path": "build.noindex/task567/stage4-1/startup-profile/InstalledFontStartupProbe",
+            "logicalBytes": 1141256,
+            "files": 1,
+            "sha256": "9e617febe36e547daa1ec7fa8841f224d37593b1b7dc24ea9e0ec6d3f083f837"
+          },
+          {
+            "path": "build.noindex/task567/stage4-2/startup-profile/InstalledFontStartupProbe",
+            "logicalBytes": 1143544,
+            "files": 1,
+            "sha256": "01b0a74d7d1ec894cb6493618e2d76fc0bd9fde4c1c81be1846896b038162c60"
+          },
+          {
+            "path": "build.noindex/task580/stage1/consumers-01/consumers-off-0/library",
+            "logicalBytes": 16620234,
+            "files": 5,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/consumers-01/consumers-on-0/library",
+            "logicalBytes": 16620320,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/default-regression-01/private-library",
+            "logicalBytes": 16620304,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/diagnostic-comparison-01/0-baseline/library",
+            "logicalBytes": 16620319,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/diagnostic-comparison-01/1-detailed/library",
+            "logicalBytes": 16620317,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/diagnostic-comparison-01/2-baseline/library",
+            "logicalBytes": 16620319,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/diagnostic-comparison-01/3-detailed/library",
+            "logicalBytes": 16620319,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/guards-01/guards-off-0/library",
+            "logicalBytes": 25057387,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/guards-01/guards-off-0/padding-variant.ttf",
+            "logicalBytes": 8433297,
+            "files": 1,
+            "sha256": "8f0dd47e31d0ddc3f761f40de4e442260a94eaccf4ecc97adace7a482cd4b8d7"
+          },
+          {
+            "path": "build.noindex/task580/stage1/guards-01/guards-on-0/library",
+            "logicalBytes": 25057472,
+            "files": 7,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/guards-01/guards-on-0/padding-variant.ttf",
+            "logicalBytes": 8433297,
+            "files": 1,
+            "sha256": "8f0dd47e31d0ddc3f761f40de4e442260a94eaccf4ecc97adace7a482cd4b8d7"
+          },
+          {
+            "path": "build.noindex/task580/stage1/signature-01/signature-off-0/library",
+            "logicalBytes": 16620234,
+            "files": 5,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/signature-01/signature-on-0/library",
+            "logicalBytes": 16620320,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/snapshot-01/snapshot-off-0/library",
+            "logicalBytes": 16620232,
+            "files": 5,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/snapshot-01/snapshot-on-0/library",
+            "logicalBytes": 16620319,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/snapshot-02/snapshot-off-0/library",
+            "logicalBytes": 16620231,
+            "files": 5,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage1/snapshot-02/snapshot-on-0/library",
+            "logicalBytes": 16620319,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage2/default-regression-01/private-library",
+            "logicalBytes": 16620303,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage2/default-regression-02/private-library",
+            "logicalBytes": 16620304,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage2/default-regression-final/private-library",
+            "logicalBytes": 16620304,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage2/final-direct-01/guards-off-0/padding-variant.ttf",
+            "logicalBytes": 8433297,
+            "files": 1,
+            "sha256": "8f0dd47e31d0ddc3f761f40de4e442260a94eaccf4ecc97adace7a482cd4b8d7"
+          },
+          {
+            "path": "build.noindex/task580/stage2/final-direct-01/guards-on-0/padding-variant.ttf",
+            "logicalBytes": 8433297,
+            "files": 1,
+            "sha256": "8f0dd47e31d0ddc3f761f40de4e442260a94eaccf4ecc97adace7a482cd4b8d7"
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-acceptance-01/extension-probe",
+            "logicalBytes": 67736480,
+            "files": 1,
+            "sha256": "52e76452805a975758efc05fa3d8bb2513316b484863190de32708e902ae6530"
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-acceptance-01/modules",
+            "logicalBytes": 35501708,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-acceptance-01/private-library",
+            "logicalBytes": 16620304,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-01/extension-probe",
+            "logicalBytes": 67383744,
+            "files": 1,
+            "sha256": "8e46717a0dd2dc8ebf7febe5c6f712fa168e0481352c3617c5a675ab5a9335f3"
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-01/modules",
+            "logicalBytes": 35501708,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-01/private-library",
+            "logicalBytes": 16620304,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-02/modules",
+            "logicalBytes": 35501708,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-03/extension-probe",
+            "logicalBytes": 67616304,
+            "files": 1,
+            "sha256": "d6bee95b44232c53da2d39007590de3113a8384a015693b829938b4a284ec1ba"
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-03/modules",
+            "logicalBytes": 35501708,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-03/private-library",
+            "logicalBytes": 16620304,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-04/extension-probe",
+            "logicalBytes": 67655104,
+            "files": 1,
+            "sha256": "57c72e4265a57060bdc8a0aedf2996b101b0f5c24b2ac57596528a82be82bc28"
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-04/modules",
+            "logicalBytes": 35501708,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-04/private-library",
+            "logicalBytes": 16620304,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-final/extension-probe",
+            "logicalBytes": 67710960,
+            "files": 1,
+            "sha256": "5a5543731f1ec0e10cee6dc3b7f8299d84b74220bd43b76012a26cd9c42082e0"
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-final/modules",
+            "logicalBytes": 35503300,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/default-regression-final/private-library",
+            "logicalBytes": 16620304,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/diagnostic-acceptance-01/extension-probe",
+            "logicalBytes": 67818240,
+            "files": 1,
+            "sha256": "208ad415b302817e7dc97e69b77a29438af29007114c9774635e458738af53a1"
+          },
+          {
+            "path": "build.noindex/task580/stage3/diagnostic-acceptance-01/modules",
+            "logicalBytes": 35503300,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/diagnostic-acceptance-01/private-library",
+            "logicalBytes": 16620304,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/build/font-performance",
+            "logicalBytes": 67746640,
+            "files": 1,
+            "sha256": "f4d4e7dd38df73157e178564d67d30a17f315d370ea80b4890757bfe7e01fab2"
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/build/modules",
+            "logicalBytes": 35501708,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/consumers-off-0/library",
+            "logicalBytes": 16620240,
+            "files": 5,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/consumers-on-0/library",
+            "logicalBytes": 16620327,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/guards-off-0/library",
+            "logicalBytes": 25057405,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/guards-off-0/padding-variant.ttf",
+            "logicalBytes": 8433297,
+            "files": 1,
+            "sha256": "8f0dd47e31d0ddc3f761f40de4e442260a94eaccf4ecc97adace7a482cd4b8d7"
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/guards-on-0/library",
+            "logicalBytes": 25057491,
+            "files": 7,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/guards-on-0/padding-variant.ttf",
+            "logicalBytes": 8433297,
+            "files": 1,
+            "sha256": "8f0dd47e31d0ddc3f761f40de4e442260a94eaccf4ecc97adace7a482cd4b8d7"
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/snapshot-off-0/library",
+            "logicalBytes": 16620240,
+            "files": 5,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/snapshot-on-0/library",
+            "logicalBytes": 16620327,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/transitions-off-0/library",
+            "logicalBytes": 16620327,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-01/transitions-on-0/library",
+            "logicalBytes": 16620327,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/build/modules",
+            "logicalBytes": 35501708,
+            "files": 69,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/consumers-off-0/library",
+            "logicalBytes": 16620240,
+            "files": 5,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/consumers-on-0/library",
+            "logicalBytes": 16620327,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/guards-off-0/library",
+            "logicalBytes": 25057404,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/guards-off-0/padding-variant.ttf",
+            "logicalBytes": 8433297,
+            "files": 1,
+            "sha256": "8f0dd47e31d0ddc3f761f40de4e442260a94eaccf4ecc97adace7a482cd4b8d7"
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/guards-on-0/library",
+            "logicalBytes": 25057491,
+            "files": 7,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/guards-on-0/padding-variant.ttf",
+            "logicalBytes": 8433297,
+            "files": 1,
+            "sha256": "8f0dd47e31d0ddc3f761f40de4e442260a94eaccf4ecc97adace7a482cd4b8d7"
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/snapshot-off-0/library",
+            "logicalBytes": 16620240,
+            "files": 5,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/snapshot-on-0/library",
+            "logicalBytes": 16620327,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/transitions-off-0/library",
+            "logicalBytes": 16620327,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/final-direct-02/transitions-on-0/library",
+            "logicalBytes": 16620328,
+            "files": 6,
+            "sha256": null
+          },
+          {
+            "path": "build.noindex/task580/stage3/render-smoke/stage3_render_check",
+            "logicalBytes": 64406256,
+            "files": 1,
+            "sha256": "c6ff47c938de73a749ee028cd0a7d72cc04d773280a19b0efae2c92a688acc7d"
+          }
+        ],
+        "logicalBytes": 1840947670
+      }
+    }
+  ],
+  "removedLogicalBytes": 5724212381,
+  "hygiene": {
+    "log": {
+      "path": "build.noindex/task580/stage3/hygiene-final.log",
+      "sha256": "bd6da2f511e1df04cfde40e331c5a49fc8ef93f17f7409ff38cd8ba53b7bea32",
+      "bytes": 510
+    },
+    "noDevelopmentRegistrations": true,
+    "noDevelopmentBundles": true,
+    "issues": 0,
+    "warnings": 0,
+    "providerRoot": "/Applications/Alhangeul.app"
+  },
+  "importerFinal": {
+    "log": {
+      "path": "build.noindex/task580/stage3/importers-recheck.log",
+      "sha256": "e96b3f7b83862f45001dda7878c911ffa649d0538a21a4c1ca06d61ee135953a",
+      "bytes": 1179
+    },
+    "ownImporterAbsent": true,
+    "initialAsynchronousStaleEntry": true
+  },
+  "installedApp": {
+    "infoSHA256": "41f64c73e4d2848e2b8d34d4b3a1954e0645121072074f5d299929b5d52279a7",
+    "signatureLog": {
+      "path": "build.noindex/task580/stage3/installed-signature-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "strictSignatureExit": 0,
+    "replaced": false
+  },
+  "optionalRustVerify": {
+    "status": "not completed; build command encountered sandbox Cargo git-directory permission failure before artifacts changed",
+    "requiredForThisSwiftCacheChange": false,
+    "frameworkAndHeaderSHA256MatchStage2": true
+  },
+  "priorCommonRegression": {
+    "stage2FontLibraryTests": 154,
+    "stage2HostOutputTests": 81,
+    "rerunInStage3": false,
+    "reason": "공통 catalog·HostApp·native renderer/core source 변경 없음"
+  }
+}
