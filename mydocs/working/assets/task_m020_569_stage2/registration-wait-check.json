@@ -1,0 +1,19 @@
+{
+  "sourceSHA256": "f6d99d02b273337e7dff00b622560014ca31ed3f779e9ab6bf3c904cb5618ca8",
+  "mockedOSOnly": true,
+  "initialHarnessFailure": "wrong mock argument index; corrected; production function unchanged",
+  "checks": [
+    {
+      "case": "settle",
+      "exitCode": 0,
+      "attempts": 2,
+      "passed": true
+    },
+    {
+      "case": "wrong-path",
+      "exitCode": 30,
+      "attempts": 10,
+      "passed": true
+    }
+  ]
+}

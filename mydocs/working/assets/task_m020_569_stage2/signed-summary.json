@@ -1,0 +1,270 @@
+{
+  "probeIdentifier": "50DBE545-4FEC-4F71-ACC8-F7DA289DA8E4",
+  "scope": "optimized locally Developer ID signed sandbox extensions; actual Finder UI and qlmanage -t controlled requests separated",
+  "sourceBaseCommit": "22e92164307f4cab4f16167513bd65dec1b6fd84",
+  "processImageUUID": {
+    "com.postmelee.alhangeul.QLExtension": "F7A5A467-5441-36C3-A1E4-E1E0D409A059",
+    "com.postmelee.alhangeul.ThumbnailExtension": "769F241B-F11D-343E-8EC8-138DD4CCD1DD"
+  },
+  "totalSamples": 157,
+  "statuses": {
+    "success": 126,
+    "failure": 31
+  },
+  "previewSuccess": 36,
+  "thumbnailSuccess": 90,
+  "thumbnailBusy": 31,
+  "controlledCommands": 63,
+  "controlledSuccess": 63,
+  "controlled": [
+    {
+      "label": "off-01",
+      "pid": 20620,
+      "documentHash": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+      "groups": [
+        {
+          "cache": "miss",
+          "count": 1,
+          "metadataMs": {
+            "count": 1,
+            "minimum": 1052.422083,
+            "median": 1052.422083,
+            "maximum": 1052.422083
+          },
+          "providerMs": {
+            "count": 1,
+            "minimum": 1200.947792,
+            "median": 1200.947792,
+            "maximum": 1200.947792
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.8763262566537946,
+            "median": 0.8763262566537946,
+            "maximum": 0.8763262566537946
+          }
+        },
+        {
+          "cache": "exactHit",
+          "count": 10,
+          "metadataMs": {
+            "count": 10,
+            "minimum": 983.759042,
+            "median": 1008.6911044999999,
+            "maximum": 1034.970958,
+            "p90": 1025.385458
+          },
+          "providerMs": {
+            "count": 10,
+            "minimum": 1001.684833,
+            "median": 1027.7834585,
+            "maximum": 1052.566625,
+            "p90": 1045.5985
+          },
+          "metadataFraction": {
+            "count": 10,
+            "minimum": 0.9806684477837333,
+            "median": 0.9824573744525781,
+            "maximum": 0.9843642819062943,
+            "p90": 0.9837735806339354
+          }
+        },
+        {
+          "cache": "largerBucketHit(256x256)",
+          "count": 10,
+          "metadataMs": {
+            "count": 10,
+            "minimum": 1017.720083,
+            "median": 1026.7071455,
+            "maximum": 1050.322042,
+            "p90": 1035.502083
+          },
+          "providerMs": {
+            "count": 10,
+            "minimum": 1033.779125,
+            "median": 1044.7973545,
+            "maximum": 1067.7125,
+            "p90": 1053.882792
+          },
+          "metadataFraction": {
+            "count": 10,
+            "minimum": 0.9822973674277217,
+            "median": 0.9830706524505421,
+            "maximum": 0.9844656932882061,
+            "p90": 0.9837124150930142
+          }
+        }
+      ]
+    },
+    {
+      "label": "on-01",
+      "pid": 20620,
+      "documentHash": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+      "groups": [
+        {
+          "cache": "miss",
+          "count": 1,
+          "metadataMs": {
+            "count": 1,
+            "minimum": 1047.825875,
+            "median": 1047.825875,
+            "maximum": 1047.825875
+          },
+          "providerMs": {
+            "count": 1,
+            "minimum": 1226.497583,
+            "median": 1226.497583,
+            "maximum": 1226.497583
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.8543236362822901,
+            "median": 0.8543236362822901,
+            "maximum": 0.8543236362822901
+          }
+        },
+        {
+          "cache": "exactHit",
+          "count": 10,
+          "metadataMs": {
+            "count": 10,
+            "minimum": 999.5125,
+            "median": 1050.9987919999999,
+            "maximum": 1135.385625,
+            "p90": 1107.112042
+          },
+          "providerMs": {
+            "count": 10,
+            "minimum": 1017.12825,
+            "median": 1068.0863960000001,
+            "maximum": 1173.660459,
+            "p90": 1171.287334
+          },
+          "metadataFraction": {
+            "count": 10,
+            "minimum": 0.9435207253765111,
+            "median": 0.9833116043585614,
+            "maximum": 0.9845038288714452,
+            "p90": 0.9843222420715299
+          }
+        },
+        {
+          "cache": "largerBucketHit(256x256)",
+          "count": 10,
+          "metadataMs": {
+            "count": 10,
+            "minimum": 999.426167,
+            "median": 1057.3104374999998,
+            "maximum": 1146.577291,
+            "p90": 1102.937125
+          },
+          "providerMs": {
+            "count": 10,
+            "minimum": 1016.665167,
+            "median": 1075.9274165000002,
+            "maximum": 1165.853375,
+            "p90": 1119.299583
+          },
+          "metadataFraction": {
+            "count": 10,
+            "minimum": 0.9649913869831807,
+            "median": 0.9837568240251207,
+            "maximum": 0.9857484433649973,
+            "p90": 0.985381520507544
+          }
+        }
+      ]
+    },
+    {
+      "label": "on-02",
+      "pid": 20620,
+      "documentHash": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+      "groups": [
+        {
+          "cache": "miss",
+          "count": 1,
+          "metadataMs": {
+            "count": 1,
+            "minimum": 1032.5375,
+            "median": 1032.5375,
+            "maximum": 1032.5375
+          },
+          "providerMs": {
+            "count": 1,
+            "minimum": 1536.999292,
+            "median": 1536.999292,
+            "maximum": 1536.999292
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.6717878826452965,
+            "median": 0.6717878826452965,
+            "maximum": 0.6717878826452965
+          }
+        },
+        {
+          "cache": "exactHit",
+          "count": 10,
+          "metadataMs": {
+            "count": 10,
+            "minimum": 999.677958,
+            "median": 1018.3676665,
+            "maximum": 1120.395542,
+            "p90": 1083.397792
+          },
+          "providerMs": {
+            "count": 10,
+            "minimum": 1015.317292,
+            "median": 1035.0787500000001,
+            "maximum": 1137.871208,
+            "p90": 1101.245333
+          },
+          "metadataFraction": {
+            "count": 10,
+            "minimum": 0.9789307757234422,
+            "median": 0.9838326613960842,
+            "maximum": 0.9846417890907737,
+            "p90": 0.9845966043095817
+          }
+        },
+        {
+          "cache": "largerBucketHit(256x256)",
+          "count": 10,
+          "metadataMs": {
+            "count": 10,
+            "minimum": 991.111875,
+            "median": 1022.139979,
+            "maximum": 1142.540542,
+            "p90": 1060.7295
+          },
+          "providerMs": {
+            "count": 10,
+            "minimum": 1007.735917,
+            "median": 1039.355771,
+            "maximum": 1161.588041,
+            "p90": 1078.3015
+          },
+          "metadataFraction": {
+            "count": 10,
+            "minimum": 0.9776935206535591,
+            "median": 0.9834951538065824,
+            "maximum": 0.984382989519223,
+            "p90": 0.984333125093912
+          }
+        }
+      ]
+    }
+  ],
+  "actualFinderAndInitialSmokeSummary": "preview ON26/OFF10; thumbnail smoke3 and GUI24 success/31 busy; GUI request omission reason not inferred",
+  "stage2Decision": "pre-release performance improvement required; same PID independent controlled ON workloads reproduce metadata >=500ms and paired fraction >=0.30; no product optimization in measurement stage",
+  "rawEventsSHA256": "1a6d1197e90dbeb5d790c85a2fb2bb9309c53297aa4ed5dcbbb2aa129526c3ff",
+  "preparationSHA256": "f80ce5dcae5834939f63a61513956f872c3f02bdc026b20f8b32f8ad6c258fff",
+  "signedManifestSHA256": "94a41115bfebf1d15c36026ca92bb2ab86709e051ce780287cd17db8b643be80",
+  "limitations": [
+    "provider reply/callback completion, not Finder paint",
+    "snapshot metadata includes catalog/metadata/stat/current and internal waits, not pure CoreText scan",
+    "same extension PID for two signed warm repetitions; independent new-PID repetitions are direct probe",
+    "no actual commercial installed-face bytes acceptance in Stage2",
+    "partial UI snapshot checks do not establish why no extension request was made"
+  ]
+}

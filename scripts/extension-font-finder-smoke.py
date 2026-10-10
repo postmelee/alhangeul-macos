@@ -8,14 +8,21 @@ LS=Path('/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServ
 p=argparse.ArgumentParser(); p.add_argument('--candidate-dir',type=Path,required=True)
 p.add_argument('--mode',choices=['plan','sign','install','restore'],default='plan'); a=p.parse_args()
 base=a.candidate_dir.resolve()
-if not base.is_relative_to(ROOT/'build.noindex/task568/stage5'): raise SystemExit('task568 Stage 5 후보만 사용합니다')
+legacy=base.is_relative_to(ROOT/'build.noindex/task568/stage5')
+performance=base.is_relative_to(ROOT/'build.noindex/task569/stage2')
+if not (legacy or performance): raise SystemExit('Task 568 Stage 5 또는 Task 569 Stage 2 후보만 사용합니다')
 receipt=json.loads((base/'preparation.json').read_text()); identifier=receipt['probeIdentifier']
+if performance and receipt.get('task')!=569: raise SystemExit('Task 569 준비 영수증이 필요합니다')
 app=base/'Alhangeul.app'; fixture=base/'FontExtensionFixtureProbe.app'; stateFile=base/'install-state.json'
 def run(args,**kw): return subprocess.run(list(map(str,args)),check=True,**kw)
 def info(bundle): return plistlib.loads((bundle/'Contents/Info.plist').read_bytes())
 def digest(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def seal(bundle): run(['codesign','--verify','--deep','--strict',bundle])
 def marker(bundle): return info(bundle).get('AlhangeulFontExtensionProbeIdentifier') if bundle.exists() else None
+def bundle_hashes():
+    return {str(bundle.relative_to(base)):{'infoSHA256':digest(bundle/'Contents/Info.plist'),
+        'executableSHA256':digest(bundle/'Contents/MacOS'/info(bundle)['CFBundleExecutable'])}
+        for bundle in [app,fixture]+sorted((app/'Contents/PlugIns').glob('*.appex'))}
 def unregister(bundle):
     for child in (bundle/'Contents/PlugIns').glob('*.appex') if bundle.exists() else []:
         subprocess.run(['pluginkit','-r',str(child)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
@@ -29,12 +36,12 @@ def restore():
     if not stateFile.exists(): raise SystemExit('이 실행의 백업 상태가 없습니다')
     state=json.loads(stateFile.read_text()); backup=base/'backup/Alhangeul.app'
     if state['probeIdentifier']!=identifier: raise SystemExit('다른 실행의 백업입니다')
+    seal(backup)
+    if digest(backup/'Contents/Info.plist')!=state['originalInfoSHA256']: raise SystemExit('백업 identity가 바뀌었습니다')
     if marker(INSTALL)==identifier:
-        seal(backup)
-        if digest(backup/'Contents/Info.plist')!=state['originalInfoSHA256']: raise SystemExit('백업 identity가 바뀌었습니다')
         unregister(INSTALL); shutil.rmtree(INSTALL); run(['ditto',backup,INSTALL])
     elif not INSTALL.exists():
-        seal(backup); run(['ditto',backup,INSTALL])
+        run(['ditto',backup,INSTALL])
     elif digest(INSTALL/'Contents/Info.plist')!=state['originalInfoSHA256']:
         raise SystemExit('설치본이 다른 작업에서 바뀌어 자동 복원을 중단합니다')
     seal(INSTALL); register(INSTALL)
@@ -46,11 +53,22 @@ def restore():
 if a.mode=='plan':
     print(json.dumps({'candidate':str(app),'fixture':str(fixture),'probeIdentifier':identifier,
         'installTarget':str(INSTALL),'backup':str(base/'backup/Alhangeul.app'),
+        'task':receipt.get('task',568),'installedInfoSHA256':digest(INSTALL/'Contents/Info.plist') if INSTALL.exists() else None,
+        'installedVersion':info(INSTALL).get('CFBundleShortVersionString') if INSTALL.exists() else None,
         'globalReset':False,'otherRegistrationsChanged':False},indent=2)); raise SystemExit()
 if a.mode=='restore': restore(); raise SystemExit()
+if performance:
+    if any(digest(ROOT/path)!=expected for path,expected in receipt['sourceSHA256'].items()):
+        raise SystemExit('후보 준비 이후 제품 소스가 변경됐습니다')
+    if digest(ROOT/'rhwp-core.lock')!=receipt['coreLockSHA256']: raise SystemExit('core lock이 변경됐습니다')
+    for sample in receipt['samples']:
+        path=Path(sample['path'])
+        if not path.is_relative_to(ROOT/'build.noindex/task569/stage2') or digest(path)!=sample['sha256']:
+            raise SystemExit('Task 569 입력 문서 경로/hash 불일치')
 for bundle in [app,fixture]+sorted((app/'Contents/PlugIns').glob('*.appex')):
     if marker(bundle)!=identifier: raise SystemExit('같은 고유 테스트 보관함 설정이 필요합니다')
 if a.mode=='sign':
+    if performance and bundle_hashes()!=receipt['unsignedBundles']: raise SystemExit('준비한 unsigned 후보 bytes가 변경됐습니다')
     identity=os.environ.get('PROBE_SIGN_ID')
     if not identity: raise SystemExit('승인한 PROBE_SIGN_ID가 필요합니다')
     def sign(bundle,entitlements=None):
@@ -70,10 +88,16 @@ if a.mode=='sign':
         entitlementFile=base/(target+'.entitlements'); entitlementFile.write_text(expanded)
         sign(app/'Contents/PlugIns'/name if name else app,entitlementFile)
     sign(fixture,base/'fixture.entitlements'); seal(app); seal(fixture)
+    if performance: (base/'signed-bundles.json').write_text(json.dumps(bundle_hashes(),indent=2)+'\n')
     print('로컬 서명 완료. 설치/공증/공개 배포 없음.'); raise SystemExit()
+if performance and bundle_hashes()!=json.loads((base/'signed-bundles.json').read_text()): raise SystemExit('서명한 후보 bytes가 변경됐습니다')
 seal(app); seal(fixture)
 if stateFile.exists(): raise SystemExit('기존 실행 상태가 있습니다. 우선 복원 상태를 확인하세요')
 if not INSTALL.exists(): raise SystemExit('승인 대상 기존 설치본이 없습니다')
+if performance:
+    plan=json.loads((base/'operation-plan.json').read_text())
+    if digest(INSTALL/'Contents/Info.plist')!=plan['installedInfoSHA256']:
+        raise SystemExit('승인 준비 시점의 설치본이 변경됐습니다. 새 복원 계획이 필요합니다')
 if (Path.home()/'Applications/Alhangeul.app').exists(): raise SystemExit('다른 설치본을 삭제하지 않습니다')
 # 사용자 HostApp/기존 확장이 실행 중이면 교체하지 않는다. 종료는 직접 확인한 다음 수행한다.
 for executable in ['Alhangeul','AlhangeulPreview']:
@@ -97,7 +121,7 @@ try:
             time.sleep(0.1)
         else: raise RuntimeError('대상 Thumbnail worker가 종료되지 않아 교체를 중단합니다')
     run([fixture/'Contents/MacOS/FontExtensionFixtureProbe','--setup'])
-    samples=[ROOT/'build.noindex/task568/stage3/fixtures/gowun-document.hwp',ROOT/'build.noindex/task568/stage3/fixtures/gowun-document.hwpx',
+    samples=[Path(s['path']) for s in receipt['samples']] if performance else [ROOT/'build.noindex/task568/stage3/fixtures/gowun-document.hwp',ROOT/'build.noindex/task568/stage3/fixtures/gowun-document.hwpx',
         ROOT/'build.noindex/task568/stage5/probe-inputs/multiple-two.hwpx',ROOT/'build.noindex/task568/stage4/installed-wide.hwpx']
     args=['bash',ROOT/'scripts/smoke-clean-quicklook-install.sh','--app',app,'--install-app',INSTALL,
         '--replace-applications-install','--preserve-signature','--scoped-registrations','--skip-global-reset','--output-dir',base/'finder-results']

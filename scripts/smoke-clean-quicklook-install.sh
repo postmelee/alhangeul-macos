@@ -416,8 +416,20 @@ verify_active_provider_path() {
   local preview_log="$run_dir/pluginkit-preview.txt"
   local thumbnail_log="$run_dir/pluginkit-thumbnail.txt"
 
-  pluginkit -mAvvv -i com.postmelee.alhangeul.QLExtension > "$preview_log"
-  pluginkit -mAvvv -i com.postmelee.alhangeul.ThumbnailExtension > "$thumbnail_log"
+  # Registration is asynchronous; keep the exact-path gate while allowing it
+  # to settle without resetting global services or caches.
+  local attempt
+  for attempt in {1..10}; do
+    pluginkit -mAvvv -i com.postmelee.alhangeul.QLExtension > "$preview_log"
+    pluginkit -mAvvv -i com.postmelee.alhangeul.ThumbnailExtension > "$thumbnail_log"
+    cp "$preview_log" "$run_dir/pluginkit-preview.attempt-$attempt.txt"
+    cp "$thumbnail_log" "$run_dir/pluginkit-thumbnail.attempt-$attempt.txt"
+    if grep -F "Path = $expected_preview" "$preview_log" >/dev/null &&
+       grep -F "Path = $expected_thumbnail" "$thumbnail_log" >/dev/null; then
+      return 0
+    fi
+    if [ "$attempt" -lt 10 ]; then sleep 1; fi
+  done
 
   if ! grep -F "Path = $expected_preview" "$preview_log" >/dev/null; then
     echo "ERROR: active preview provider is not the installed app. See $preview_log" >&2

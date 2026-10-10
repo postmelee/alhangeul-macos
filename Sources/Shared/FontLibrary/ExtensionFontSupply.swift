@@ -2,6 +2,23 @@ import CryptoKit
 import Foundation
 import OSLog
 
+/// 고유 시험 빌드에서만 활성화되는 진단. 경로/bytes 대신 opaque 요청 ID를 연결한다.
+enum ExtensionFontPerformanceTrace {
+    static let request = TaskLocal<String?>(wrappedValue: nil)
+    static let observer = TaskLocal<(@Sendable (UInt64, UInt64, Bool) -> Void)?>(wrappedValue: nil)
+    #if ALHANGEUL_FONT_EXTENSION_PROBE
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.postmelee.alhangeul.FontSupply",
+                                       category: "FontPerformance")
+    static func interval(_ kind: String, start: UInt64, success: Bool, id: String? = request.get()) {
+        let end = DispatchTime.now().uptimeNanoseconds
+        if kind == "metadata" { observer.get()?(start, end, success) }
+        guard let id else { return }
+        let milliseconds = Double(end - start) / 1_000_000
+        logger.debug("FontPerformance request=\(id, privacy: .public) kind=\(kind, privacy: .public) startNanos=\(start, privacy: .public) endNanos=\(end, privacy: .public) ms=\(milliseconds, privacy: .public) success=\(success, privacy: .public)")
+    }
+    #endif
+}
+
 /// 확장별 singleton. HostApp catalog/bookmark는 읽지 않고 자체 CoreText 목록과 권한을 사용한다.
 actor ExtensionFontSupply {
     static let shared = ExtensionFontSupply()
@@ -20,6 +37,10 @@ actor ExtensionFontSupply {
 
     func snapshot() async throws -> StudioFontSupplySnapshot {
         let started = DispatchTime.now().uptimeNanoseconds
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        var prepared = false
+        defer { ExtensionFontPerformanceTrace.interval("metadata", start: started, success: prepared) }
+        #endif
         try Task.checkCancellation()
         if root == nil {
             let resolved = try resolveRoot()
@@ -42,6 +63,9 @@ actor ExtensionFontSupply {
             guard try policyStore.read() == policy, try await base.current() else { throw StudioFontError.staleGeneration }
             let elapsed = Double(DispatchTime.now().uptimeNanoseconds - started) / 1_000_000
             Self.logger.debug("Font metadata ready installedEnabled=\(policy.installedEnabled, privacy: .public) records=\(records.count, privacy: .public) managed=\(manifest.entries.count, privacy: .public) metadataMs=\(elapsed, privacy: .public)")
+            #if ALHANGEUL_FONT_EXTENSION_PROBE
+            prepared = true
+            #endif
             return .init(identity: base.identity + ":" + policy.revision.uuidString + ":" + fingerprint,
                 faces: base.faces, omitted: base.omitted, failure: base.failure,
                 read: base.read, current: {

@@ -1,0 +1,46 @@
+{
+  "scope": "only Task 569 obsolete compile caches/binaries/intermediate products; raw data/receipts/candidate/final probe/SPM cache preserved",
+  "removed": [
+    {
+      "path": "direct-01/build/modules",
+      "logicalBytes": 35498460
+    },
+    {
+      "path": "direct-02/build/modules",
+      "logicalBytes": 35498460
+    },
+    {
+      "path": "direct-02/build/font-performance",
+      "logicalBytes": 67161456
+    },
+    {
+      "path": "direct-03/build/modules",
+      "logicalBytes": 35498460
+    },
+    {
+      "path": "direct-03/build/font-performance",
+      "logicalBytes": 67190752
+    },
+    {
+      "path": "guards-01/build/modules",
+      "logicalBytes": 35498460
+    },
+    {
+      "path": "guards-01/build/font-performance",
+      "logicalBytes": 67293616
+    },
+    {
+      "path": "native-regression-01/modules",
+      "logicalBytes": 35501108
+    },
+    {
+      "path": "native-regression-01/extension-probe",
+      "logicalBytes": 67066784
+    },
+    {
+      "path": "finder-build/DerivedData/Build",
+      "logicalBytes": 855393323
+    }
+  ],
+  "logicalBytes": 1301600879
+}
