@@ -58,7 +58,20 @@ struct InstalledFontSystem: Sendable {
             let session = FontImportSourceSession(urls: [url], access: self.access.scope)
             defer { session.close() }
             return try self.access.create(url)
-        })
+        }, activeSignature: { try self.activeSignature() })
+    }
+
+    private func activeSignature() throws -> InstalledFontActiveSignature {
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        let started = DispatchTime.now().uptimeNanoseconds
+        var success = false
+        defer { ExtensionFontPerformanceTrace.interval("activeSignature", start: started, success: success) }
+        #endif
+        let value = try InstalledFontActiveSignature.captureActive(activeDescriptors())
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        success = true
+        #endif
+        return value
     }
 
     func scan(_ grants: [InstalledFontGrant]) throws -> InstalledFontScan {

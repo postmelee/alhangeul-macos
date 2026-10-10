@@ -4,7 +4,7 @@
 - 이슈: [#580](https://github.com/postmelee/alhangeul-macos/issues/580), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562), 후속 [#569](https://github.com/postmelee/alhangeul-macos/issues/569)
 - 제품 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`, 작업 `local/task580`
 - 수행계획 승인: 2026-10-10 “수행계획 승인·구현계획 작성 진행”. 구현계획·Stage 1 승인: 같은 날 “구현계획 승인·Stage 1 진행”.
-- 현재: [Stage 1 보고](../working/task_m020_580_stage1.md)와 [확정 계약](../tech/task_m020_580_extension_font_contract.md) 작성·검증 완료. Stage 2 진입 승인 대기다.
+- 현재: Stage 1 완료 후 2026-10-10 “진행해줘”로 Stage 2를 승인받았다. [Stage 2 보고](../working/task_m020_580_stage2.md)의 재사용·OFF 경로·현재성/수명 검증 완료, Stage 3 진입 승인 대기다.
 - 측정 기준: #569 Stage 2 `60ea06a384ce5ba9e43b60a30278ce1268efe237`. 공개 본문의 핵심 표와 로컬 브랜치·선별 증거를 대조한다. 원시 근거는 덮어쓰지 않는다.
 
 ## 1. 현행 경로와 단계 구성
@@ -84,6 +84,8 @@ Stage 1 확정: 활성 descriptor·원본 stamp와 즉시 변경 epoch를 확인
 
 관련 XCTest는 `Tests/FontLibraryTests`에서 production service를 사용하고, renderer/bitmap 현재성은 기존 확장/native probe를 확장한다. 해당 단계에서 schema/core/ABI·HostApp UI를 바꾸지 않는다.
 
+Stage 2 반영: `ExtensionInstalledFontPreparation`의 단일 준비·즉시 epoch·전후 signature 확인, `InstalledFontActiveSignature`, 명시적인 preparedState 공급 경계를 사용한다. 공통 catalog의 scan 수용 로직을 재사용하며 HostApp 기본 준비는 유지했다. 최초 자기 번들 등록 경합 때문에 기존 등록을 native 공급/PNG/PDF 진입으로 앞당겼다. managed current는 전체 manifest도 대조한다. 직접 warm 비용과 cold 추가 검사 비용을 구분해 [Stage 2 보고](../working/task_m020_580_stage2.md)에 남겼다.
+
 ## 5. Stage 3 — 제한된 렌더 대기·취소
 
 `HwpThumbnailRenderCache`의 font 작업 상태를 admission·대기 job·실행 job·대기자 수명으로 관리한다. Stage 1 계약에 정한 상태 전이만 직렬 상태 큐 또는 내부 actor가 소유하게 한다. 이미 생성된 lease를 여러 호출자의 ownership으로 복제하지 않는다.
@@ -139,6 +141,6 @@ CoreGraphics 기본과 Skia opt-in의 단일/다중 페이지 및 실제 공급 
 
 ## 9. 현재 승인 범위와 다음 승인 요청
 
-수행계획·구현계획과 Stage 1의 경계 진단·무효화/대기 계약·측정 도구 인계를 승인받아 완료했다. **Stage 1 보고와 확정 계약을 검토하고 Stage 2의 확장 목록/metadata 재사용·OFF 경로·요청별 수명 구현을 승인받으면 진행한다.** 렌더 대기 제품 구조는 이후 Stage 3 승인 범위다.
+수행계획·구현계획·Stage 1 및 Stage 2를 승인받아 완료했다. **Stage 2 보고를 검토하고 Stage 3의 제한된 렌더 대기·병합·취소/과부하 구현을 승인받으면 진행한다.** 새 signed 후보·임시 설치·공개 배포는 이후 별도 승인 범위다.
 
-Stage 1의 unsigned signature 비용은 재사용 설계를 진행할 근거이며 signed 성능 목표 달성을 입증하지 않는다. 이후 현재성 검사와 실제 대기 구현이 정확성이나 잠정 목표를 만족시키기 어려우면 측정 근거와 대안을 제시해 범위를 보정한다. 새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·새 후보 로컬 서명/임시 설치·공개 release는 Stage 2 승인 요청에 포함하지 않는다.
+Stage 2의 unsigned 반복 비용 개선은 signed 성능 목표 달성을 입증하지 않는다. 최초 miss의 추가 현재성 비용과 남은 렌더 슬롯 busy를 따로 검증한다. 이후 실제 대기 구현이 정확성이나 잠정 목표를 만족시키기 어려우면 근거와 대안을 제시해 범위를 보정한다. 새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·새 후보 로컬 서명/임시 설치·공개 release는 Stage 3 승인 요청에 포함하지 않는다.

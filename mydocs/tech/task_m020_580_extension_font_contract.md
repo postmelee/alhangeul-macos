@@ -1,7 +1,7 @@
 # Task M020 #580 — 확장 글꼴 준비·렌더 대기 계약
 
-- 근거: [구현계획](../plans/task_m020_580_impl.md), [Stage 1 보고](../working/task_m020_580_stage1.md).
-- 적용 예정: Stage 2의 확장 전용 metadata 재사용과 Stage 3의 썸네일 대기. Stage 1에서는 진단만 추가했으며 아래 제품 구조는 아직 구현하지 않았다.
+- 근거: [구현계획](../plans/task_m020_580_impl.md), [Stage 1 보고](../working/task_m020_580_stage1.md), [Stage 2 보고](../working/task_m020_580_stage2.md).
+- 적용 상태: Stage 2의 확장 전용 metadata 재사용·OFF 경로·요청별 수명은 구현·검증했다. Stage 3의 썸네일 대기는 아직 구현하지 않았다. 아래 계약의 준비 부분은 Stage 2, 대기 부분은 Stage 3 범위다.
 - 기준: `devel`의 `dac73a589dc17143e744da6a12a51d638a81fb77`, core v0.8.7. HostApp의 기본 준비·설정, C ABI, 렌더 기본값은 유지한다.
 
 ## 1. 비용과 진단의 해석
@@ -29,6 +29,8 @@
 
 descriptor에 URL/PS 정보가 없거나 자료형·variation/traits를 신뢰할 수 없으면 이전 정상 metadata의 재사용을 허용하지 않는다. 기존 full scan의 생략/limitation 규칙을 따른다. descriptor에 표현되지 않는 내부 이름·축 정보는 원본 stamp 변화로 다시 정규화한다. 실제 내용/face 검증은 기존 FD·hash·PS/style 검사로 수행한다. stat만으로 정확한 bytes를 사용했다고 주장하지 않는다.
 
+Stage 2 구현은 CoreText collection 안에서 이미 활성 필터를 통과한 목록의 enabled 속성을 중복 조회하지 않는다. 렌더 후 workload의 프로파일에서 중복 조회가 CoreText 내부 분석을 반복시키는 비용을 확인했다. signature가 불완전하거나 없는 주입 환경은 매 current 경계에서 full scan으로 검증한다. 원본 stat 실패를 정상 재사용 상태로 취급하지 않는다.
+
 sandbox에서 얻는 목록과 원본 상태만 사용한다. HostApp bookmark나 관리 보관함 외의 지속 접근 권한을 공유하지 않는다. 현재성 검사가 실패하면 이전 bitmap을 성공으로 반환하지 않고 stale/준비 오류 경로로 처리한다. 모든 파일 bytes 선읽기는 금지한다.
 
 ## 3. 준비 세대와 변경의 게시
@@ -39,6 +41,8 @@ sandbox에서 얻는 목록과 원본 상태만 사용한다. HostApp bookmark�
 4. 알림이 누락돼도 매 요청과 반환 전 current 경계의 활성 signature·원본 상태 확인이 추가/제거/제자리 교체를 감지한다. 서로 다른 actor 구간에서 읽은 signature와 metadata를 하나의 유효 세대로 묶지 않는다.
 5. 준비 중 변화가 확인되면 결과를 폐기하고 해당 요청은 stale로 끝낸다. 무한 재시도하지 않는다. 다음 요청이 새 준비를 시도한다. 준비 실패·권한 상실 상태에서 과거 정상 세대로 복귀하지 않는다.
 6. OFF는 명시적인 설치 제외 상태로 관리 metadata만 조립한다. `StudioFontSupply.using()`의 기본 자동 prepare를 우회하는 내부 경계를 둔다. HostApp 기본 인자의 동작은 유지한다. OFF→ON은 새 준비와 변경 감시를 요구한다.
+
+최초 렌더에 필요한 기존 process-scope 번들 글꼴 등록은 확장 공급/PNG/PDF 진입에서 설치 목록 준비보다 먼저 끝낸다. 준비 후 자기 번들 등록으로 세대가 바뀌는 경합을 피하며 renderer 기본값이나 OS 지속 글꼴 설치를 바꾸지 않는다. 모든 요청의 관리 manifest는 generation뿐 아니라 전체 불변 값도 비교해 같은 generation의 변경을 거부한다.
 
 current 확인 이후 원본이 변할 수 있는 기존 TOCTOU 경계는 남는다. 실제 읽기 시와 결과 반환 직전 재검사를 보존하며 OS와 원자적 snapshot을 제공한다고 주장하지 않는다. 시험에서 활성 목록/권한 재검사 비용이 목표를 넘으면 정확성 검사를 제거하지 않고 근거와 대안을 보고한다.
 

@@ -25,7 +25,7 @@ final class PerformanceMeter: @unchecked Sendable {
     private let lock = NSLock()
     private var values: [Span] = []
     func record(_ kind: String, _ start: UInt64, bytes: Int = 0, success: Bool = true, request: String? = nil) {
-        let span = Span(request: request ?? PerformanceTrace.request.get() ?? "background", kind: kind,
+        let span = Span(request: request ?? PerformanceTrace.request.get() ?? ExtensionFontPerformanceTrace.request.get() ?? "background", kind: kind,
                         start: start, end: uptime(), bytes: bytes, success: success)
         lock.lock(); values.append(span); lock.unlock()
     }
@@ -141,7 +141,7 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter:
             let start = uptime()
             do { let value = try await live.read(record, grants); meter.record("installedRead", start, bytes: value.data.count); return value }
             catch { meter.record("installedRead", start, success: false); throw error }
-        }, makeBookmark: live.makeBookmark)
+        }, makeBookmark: live.makeBookmark, activeSignature: live.activeSignature)
         let supply = ExtensionFontSupply(resolveRoot: { root }, environment: environment)
         let tracked: ExtensionFontRenderer.Supply = {
             let start = uptime()
@@ -208,10 +208,12 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter:
                         await value.release(); return finish(row)
                     }
                     samples.append(row); try save()
-                    try require(row.spans.filter { $0.kind == "scan" }.count == 1, "one real scan per snapshot")
+                    let expectedScans = enabled && index == 0 ? 1 : 0
+                    try require(row.spans.filter { $0.kind == "scan" }.count == expectedScans, "ON first scan once; OFF/warm skip normalization")
                     try require(!row.spans.contains { $0.kind == "read" || $0.kind == "installedRead" }, "no bytes pre-read")
                 }
                 proofs["metadataOnly"] = true
+                proofs["installedPreparationReused"] = true
             } else if mode == "signature" {
                 var previous: String?
                 for index in 0...10 {
