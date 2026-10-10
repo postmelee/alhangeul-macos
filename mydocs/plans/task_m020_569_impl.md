@@ -4,7 +4,8 @@
 - 이슈: [#569](https://github.com/postmelee/alhangeul-macos/issues/569), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562)
 - 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`, 작업 `local/task569`
 - 승인: 2026-10-10 수행계획서 제시 후 작업지시자의 “진행해줘”를 수행계획 승인·구현계획 작성 지시로 기록한다.
-- 현재: 구현계획 작성. Stage 1과 제품/웹 소스 수정·시험 실행은 이 계획 승인 이후다.
+- 구현계획/Stage 1 승인: 2026-10-10, 구체 구현계획 제시 후 작업지시자의 “진행해줘”.
+- 현재: Stage 1의 소스·증거 대조와 [Mac 수용 기준](../tech/task_m020_569_mac_acceptance.md)·[Finder 측정 계약](../tech/task_m020_569_finder_performance.md) 작성 완료. Stage 2 실행은 단계 보고 승인 이후다.
 
 ## 1. 실행 순서와 완료 범위
 
@@ -122,4 +123,4 @@ public release는 M900 운영 이슈로 추적한다. 확정 버전/build number
 
 각 단계는 `mydocs/working/task_m020_569_stage{N}.md`에 실제 명령·환경·입력·판정·실패/미검증·소유 정리 결과를 기록한다. stage commit은 `Task #569 Stage {N}: ...` 형식이다. 문서 작성 단계는 링크/구조·오늘할일·diff 확인만 수행한다.
 
-현재 승인된 것은 수행계획과 이 구현계획 작성이다. **구현계획 및 Stage 1 시작 승인**을 요청한다. 단계 경계에서 승인 범위를 확인하며 새 성능 구조 변경·core/ABI·구체 signed 설치 시험·release 운영은 준비된 대상으로 분리한다.
+수행계획과 구현계획·Stage 1 실행은 승인받았다. Stage 1의 기존 소스/증거·자산 확인을 완료했으며 **Stage 2 격리 probe 구현·반복 탐색 측정과 개선 판단**의 시작 승인을 요청한다. 단계 경계에서 승인 범위를 확인하며 새 성능 구조 변경·core/ABI·구체 signed 설치 시험·release 운영은 준비된 대상으로 분리한다.

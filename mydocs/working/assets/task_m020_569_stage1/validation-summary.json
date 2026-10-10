@@ -1,0 +1,33 @@
+{
+  "source_count": 125,
+  "evidence_count": 61,
+  "signed_checksum_count": 26,
+  "retained_pdf_count": 12,
+  "original_font_files": 4,
+  "fixtures": [
+    {
+      "path": "build.noindex/task568/stage3/fixtures/gowun-document.hwp",
+      "sha256": "80f75353ba6b31c55169a7a8e29e35cbeba3ff4a2c66d0f961cadb4400caf199",
+      "bytes": 13312
+    },
+    {
+      "path": "build.noindex/task568/stage3/fixtures/gowun-document.hwpx",
+      "sha256": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+      "bytes": 7488
+    },
+    {
+      "path": "build.noindex/task568/stage5/probe-inputs/multiple-two.hwpx",
+      "sha256": "0a85f61a0fcb2a5fad6fa1487db862dedca3133a0457794c9f95b2c60f5ee281",
+      "bytes": 7422
+    }
+  ],
+  "historical_metadata": {
+    "count": 32,
+    "minimum": 453.637875,
+    "median": 1089.7723335,
+    "maximum": 2949.453667
+  },
+  "core_artifacts": 3,
+  "studio_assets": 2,
+  "scope": "Stage 1 보존 자산·소스 hash 확인. 새 렌더/측정/signed 실행 아님"
+}
