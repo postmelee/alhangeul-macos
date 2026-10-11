@@ -1,0 +1,12 @@
+{
+  "probeIdentifier": "88FFC8FB-E8C2-47D6-A818-08FDA89C2CC2",
+  "containerDirectory": "C379AD05-5A0D-45FF-969E-7C976E9EA850",
+  "existsBefore": true,
+  "catalogSHA256": "d7575b6c8a487c9c572f2778b79de2cb33e6c79daed2fcd37d99c48fd9300ca2",
+  "logicalBytes": 419133,
+  "schema": 1,
+  "enabled": true,
+  "recordCount": 809,
+  "grantCount": 0,
+  "existsAfter": false
+}

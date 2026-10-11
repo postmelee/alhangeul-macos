@@ -1,7 +1,7 @@
 # Task M020 #569 — Mac 출시 수용 기준
 
-- 기준일: 2026-10-10, 작업 `local/task569`, 제품 기준 `dac73a589dc17143e744da6a12a51d638a81fb77`.
-- 현재 단계: Stage 3. [웹/현재 UI 검증](../working/task_m020_569_stage3.md)을 추가했다. Stage 1의 과거 증거 대조와 새 ad-hoc UI 검증, 최종 후보 수용을 구분한다.
+- 최초 기준일: 2026-10-10, 작업 `local/task569`, 당시 제품 기준 `dac73a589dc17143e744da6a12a51d638a81fb77`. 2026-10-12 Stage 4 제품 소스는 `46b3d66828bc2616842abdff6821b4aea3aed162`로 고정했다.
+- 현재 단계: [Stage 4](../working/task_m020_569_stage4.md) 같은 소스의 Developer ID 진단 후보 Mac 주요 수용·복원/정리 완료. Stage 5 승인 전. 과거 증거·현재 진단 후보·최종 배포 DMG 수용을 구분한다.
 - core/Studio: 공식 `v0.8.7` / `1a76570e833917d15817415a53c09ad61ab3203f`.
 - 근거: [#568 소비자 인계](task_m020_568_consumer_handoff.md), [Stage 1 대조 영수증](../working/assets/task_m020_569_stage1/evidence-audit.json).
 
@@ -13,15 +13,15 @@
 
 ## 2. 현재까지 확인된 Mac 소비자
 
-| 소비자 | 기존 실제 수용과 원본 | 현재 지원/조건 | 이번 출시 후보 수용 |
+| 소비자 | 기존 실제 수용과 원본 | 현재 지원/조건 | 이번 Mac 준비 후보 수용 (최종 DMG 별도) |
 |--------|----------------------|----------------|----------------------|
-| Studio·기존 글꼴 목록 | #567 signed sandbox의 활성 NanumSquare R/B, HWP/HWPX 저장/재열기·재실행. 별도 관리 Gowun R/B의 격리 WK 변경/복구 | 조건부: 활성 원본·접근 권한과 지원 face. Canvas2D/CanvasKit, 화면 목록과 출력 exact 지원은 구분 | 미검증: 최종 후보에서 설정→선택→저장/재열기→재실행 |
-| 사용자 PDF | #568 Stage 3 signed sandbox, 설치 NanumSquare·관리 Gowun R/B, HWP/HWPX. 실제 PS/program·한글 ToUnicode·원문/검색/선택, 독립 reader 대조 | 조건부: 검증한 static SFNT·R/B·일반 가로 본문. 임베딩/읽기 실패는 기본 취소·명시 대체 | 미검증: 최종 후보의 실제 저장 bytes·폰트·본문/검색과 안내 동선 |
-| 인쇄 | #568 Stage 3 seal된 실제 인쇄 PDF·callback. 관리 경로는 실제 macOS 패널 열기·사용자 취소 | 확인됨: 해당 payload·패널/취소 경로. 물리 프린터 출력은 미검증 | 미검증: 같은 후보의 패널 열기/취소·문서 상태·자산 수명 |
-| native CoreGraphics | #568 Stage 4/5, 관리 Gowun R/B·실제 OS ArialUnicodeMS·프로세스 fixture, HWP/HWPX | 조건부: exact PS/style/hash의 제한된 glyph replay. 전체 재조판/complex shaping 아님 | 필요한 회귀를 최종 후보 source/receipt와 연결 |
-| native Skia | #568 Stage 4/5 unsigned 공통 renderer, 관리 R/B·동일 PS 다른 bytes·설치 원본 대조 | 조건부: unsigned decode/direct 경로. signed Release 확장 기본은 CoreGraphics | 기본 backend 전환 없이 필요한 공통 회귀만 연결 |
-| Quick Look | #568 Stage 5 실제 signed 확장·Finder, OS ArialUnicodeMS 및 관리 Gowun, 단일 PNG·2페이지 PDF·새 PID | 조건부: 확장 자체 권한·App Group 읽기 전용 공급. 실패는 기본 대체, stale는 폐기 | 미검증: 후보의 실제 Finder 호출·읽기·정확한 face·변경/복구 |
-| Thumbnail | #568 Stage 5 signed 설치/관리 공급·새 PID, exact/larger cache·정책/객체 제거/복구·동일 경로 무효화 | 조건부: 새 extension 요청의 cache identity. OS가 요청을 생략하는 영구 cache 즉시 갱신은 미보증 | 미검증: 후보의 최초/반복·다수 문서·변경/복구·성능 |
+| Studio·기존 글꼴 목록 | #567 signed sandbox의 활성 NanumSquare R/B, HWP/HWPX 저장/재열기·재실행. 별도 관리 Gowun R/B의 격리 WK 변경/복구 | 조건부: 활성 원본·접근 권한과 지원 face. Canvas2D/CanvasKit, 화면 목록과 출력 exact 지원은 구분 | 확인됨: 같은 Developer ID 후보의 실제 설정/시스템 메뉴·NanumSquare·두 형식 저장 패널/재열기·새 PID 복원. 내부 bytes/renderer 상세는 같은 소스의 ad-hoc probe와 구분 |
+| 사용자 PDF | #568 Stage 3 signed sandbox, 설치 NanumSquare·관리 Gowun R/B, HWP/HWPX. 실제 PS/program·한글 ToUnicode·원문/검색/선택, 독립 reader 대조 | 조건부: 검증한 static SFNT·R/B·일반 가로 본문. 임베딩/읽기 실패는 기본 취소·명시 대체 | 확인됨: 같은 후보의 실제 PDF 저장·Nanum R/B program/ToUnicode·원문/한글 검색/확대. 제한 face의 실제 GUI 대체 안내는 이번 새 수용에서 미검증 |
+| 인쇄 | #568 Stage 3 seal된 실제 인쇄 PDF·callback. 관리 경로는 실제 macOS 패널 열기·사용자 취소 | 확인됨: 해당 payload·패널/취소 경로. 물리 프린터 출력은 미검증 | 확인됨: 같은 후보의 두 형식 실제 macOS 패널 열기/취소. 현재 소스의 ad-hoc sandbox 70 check로 immutable PDF·문서 보존·취소/복구를 별도 확인 |
+| native CoreGraphics | #568 Stage 4/5, 관리 Gowun R/B·실제 OS ArialUnicodeMS·프로세스 fixture, HWP/HWPX | 조건부: exact PS/style/hash의 제한된 glyph replay. 전체 재조판/complex shaping 아님 | 확인됨: 같은 후보의 Finder CoreGraphics PNG/PDF·Gowun R/B. #580의 공통 정확성 회귀와 동일 소스 경계로 연결 |
+| native Skia | #568 Stage 4/5 unsigned 공통 renderer, 관리 R/B·동일 PS 다른 bytes·설치 원본 대조 | 조건부: unsigned decode/direct 경로. signed Release 확장 기본은 CoreGraphics | 조건부: #580의 동일 공통 코드 최적화 회귀 인계. 현재 signed Finder 기본은 CoreGraphics이며 Skia 기본 전환 아님 |
+| Quick Look | #568 Stage 5 실제 signed 확장·Finder, OS ArialUnicodeMS 및 관리 Gowun, 단일 PNG·2페이지 PDF·새 PID | 조건부: 확장 자체 권한·App Group 읽기 전용 공급. 실패는 기본 대체, stale는 폐기 | 확인됨: 같은 후보의 실제 Finder 단일 PNG 2개·2페이지 PDF/이동·정확한 Gowun R/B·fallback 0. 변경/복구는 별도 실제 Thumbnail 요청 |
+| Thumbnail | #568 Stage 5 signed 설치/관리 공급·새 PID, exact/larger cache·정책/객체 제거/복구·동일 경로 무효화 | 조건부: 새 extension 요청의 cache identity. OS가 요청을 생략하는 영구 cache 즉시 갱신은 미보증 | 확인됨: 표준 PNG 3개·GUI 요청, 같은 경로 10 phase/20 요청. 정상 16·예상 fallback 4를 구분. 다수 문서/성능은 #580 accepted 증거 인계·#581 분리 |
 
 이전 signed 출력과 Finder는 서로 다른 단계 빌드다. Stage 1에서는 제품 입력 소스 125개가 signed Finder provenance와 같고 보존 증거 61개·checksum 26개·PDF 12개가 기존 hash와 일치함을 확인했다. 과거 앱 executable은 정리되었으며 현재 바이너리를 다시 확인한 것으로 표현하지 않는다. 이 결과가 새로운 후보 전체 통과를 의미하지 않는다.
 
@@ -37,7 +37,7 @@
 
 ## 4. 최종 후보 기록과 필수 Mac 동선
 
-Stage 4 및 release 운영에서 다음 필드를 채운다. 아직 후보가 만들어지지 않은 항목은 `미검증/미확정`으로 유지한다.
+Stage 4의 569.4.1/UUID 후보는 보고서·영수증에 기록했다. 최종 공개 버전/DMG 등 release 운영에서 아직 만들어지지 않은 항목은 `미검증/미확정`으로 유지한다.
 
 | 필드 | 기록할 값 |
 |------|-----------|
@@ -55,12 +55,12 @@ Stage 4 및 release 운영에서 다음 필드를 채운다. 아직 후보가 �
 
 PR #582의 `34ae2f4b`를 `4a17ea87`로 통합한 제품 소스와 웹·Help 변경을 기준으로 126개 Swift 입력 hash를 보존했다. 현재 UI probe의 기록 입력 192개가 실행 후 소스와 일치한다. 실제 Mac 목록 232 family/809 face, 시스템 메뉴 204 family, NanumSquareR/B의 HWP Canvas2D·HWPX CanvasKit·native 저장·새 프로세스 복원 20/17 check가 ad-hoc sandbox 앱에서 통과했다. 첫 실행 `restoredEnabled=false`와 재실행 `true`를 구분한다.
 
-이는 실제 목록과 안내 이미지 근거이며 signed 제품 전체 수용으로 확대하지 않는다. PDF·인쇄·최종 동일 후보 Finder·Help의 실제 클릭 수용은 Stage 4에 남긴다. #580의 signed 성능/정확성 결과와 <300ms 후속 #581을 연결하되, 최종 Mac 후보 column은 실제 Stage 4 결과 전까지 미검증을 유지한다.
+Stage 3의 실제 목록/안내 이미지 검증과 Stage 4의 Developer ID 후보 실제 앱·출력·Finder 검증을 구분한다. 2026-10-12 Stage 4 결과로 위 표를 갱신했다. #580의 승인된 성능/정확성 결과와 <300ms 후속 #581 분리를 유지하며 최종 DMG·공개 gate는 별도로 남긴다.
 
 ## 5. 후보 준비·복원과 출시 인계
 
 - Stage 2 직접 probe는 실제 CoreText 환경과 격리 관리 저장소를 사용한다. 기존 user store/OS 설치 글꼴을 변경하지 않는다.
-- 실제 Finder용 후보는 `build.noindex/task569/stage2/finder-{UUID}/`에 앱·fixture·backups·install-state를 배치한다. 제품 ID와 고유 probe UUID/compile flag의 차이를 영수증에 기록하고 해당 UUID의 시험 보관함만 사용한다.
+- 기존 Stage 2 후보와 구분하여 이번 같은 소스 후보는 `build.noindex/task569/stage4/finder-candidate-01/`에 앱·fixture·backups·install-state를 배치했다. 제품 ID와 고유 probe UUID/compile flag의 차이를 영수증에 기록하고 해당 UUID의 시험 보관함만 사용한다.
 - 기존 #568 전용 helper의 경로 guard를 우회하지 않는다. Stage 2에서 승인된 #569 입력/출력 루트·고유 marker·백업 digest·상태 검사를 갖춘 재사용 경계를 마련한 뒤 `plan` 결과를 검토한다.
 - 구체 서명·기존 `/Applications/Alhangeul.app` 보존/임시 교체·복원은 후보와 절차가 준비된 시점에 범위를 확인한다. 사용자 문서 창이 열려 있거나 다른 작업의 설치본으로 바뀌었으면 교체/자동 복원을 진행하지 않는다.
 - 표준 smoke 안에서만 소유 후보/확장 등록을 수행한다. 전역 cache reset 없이 소유 경로를 해제하고 원래 앱·등록·보관함을 복원한다. 다른 앱 등록·원본 문서는 변경하지 않는다.

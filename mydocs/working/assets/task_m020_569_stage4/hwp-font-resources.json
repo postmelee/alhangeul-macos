@@ -1,0 +1,48 @@
+{
+  "pypdf": "6.10.0",
+  "pages": 1,
+  "fonts": [
+    {
+      "baseFont": "/AAAAAC+NanumSquareR",
+      "subtype": "/TrueType",
+      "descendantSubtype": "/TrueType",
+      "encoding": "",
+      "programs": {
+        "/FontFile2": {
+          "bytes": 1852,
+          "sha256": "f65aad9ff5dee95892062c91d7f2b613f88f2198bde6c66d16c9add990b39614"
+        }
+      },
+      "toUnicodeBytes": 462,
+      "toUnicodeSHA256": "a46717b7dbfd5f9cf50c4fc5f78b78353e785e1817908689af3da56e2e0029f0"
+    },
+    {
+      "baseFont": "/AAAAAE+NanumSquareB",
+      "subtype": "/TrueType",
+      "descendantSubtype": "/TrueType",
+      "encoding": "",
+      "programs": {
+        "/FontFile2": {
+          "bytes": 776,
+          "sha256": "626d5182bee16fe9a71b2d5fb5a3cb3107107858c875c8d1c1d46e0fa8e92c53"
+        }
+      },
+      "toUnicodeBytes": 372,
+      "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+    },
+    {
+      "baseFont": "/AAAAAF+GowunBatang-Regular",
+      "subtype": "/TrueType",
+      "descendantSubtype": "/TrueType",
+      "encoding": "/MacRomanEncoding",
+      "programs": {
+        "/FontFile2": {
+          "bytes": 1628,
+          "sha256": "b5c1a13a8826fcb12be1add104a3670b4f30c4190cbe5536388606fec21aa3ed"
+        }
+      },
+      "toUnicodeBytes": 0,
+      "toUnicodeSHA256": null
+    }
+  ]
+}
