@@ -2,13 +2,15 @@
 
 - 수행계획: [task_m020_569.md](task_m020_569.md)
 - 이슈: [#569](https://github.com/postmelee/alhangeul-macos/issues/569), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562)
-- 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`, 작업 `local/task569`
+- 시작 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`, 작업 `local/task569`
+- 재개 기준: `devel` / PR #582 merge `34ae2f4b14ea6baf5cce6346b5d491a8e6e6ba11`을 `4a17ea87` merge로 통합했다. 제품·테스트·도구는 검토된 devel과 일치하며 #569 기존 증거·이력을 보존한다.
 - 승인: 2026-10-10 수행계획서 제시 후 작업지시자의 “진행해줘”를 수행계획 승인·구현계획 작성 지시로 기록한다.
 - 구현계획/Stage 1 승인: 2026-10-10, 구체 구현계획 제시 후 작업지시자의 “진행해줘”.
 - Stage 2 승인: 2026-10-10, Stage 1 보고 후 작업지시자의 “진행해줘”.
 - Finder 시험 승인: 2026-10-10, 구체 후보의 로컬 서명·임시 설치·복원 요청 후 작업지시자의 “진행해줘”.
 - 후속 정렬 승인: 2026-10-10, 작업지시자의 “진행해줘”로 성능 이슈 등록·수행계획 작성·후속 순서 정렬을 승인받았다. 성능 제품 구조 구현은 해당 계획 승인 후 진행한다.
-- 현재: [Stage 2 보고](../working/task_m020_569_stage2.md)의 직접 530건·signed 157건·정확성/복원 검증 완료. [#580](https://github.com/postmelee/alhangeul-macos/issues/580)을 등록했으며 [등록 기록](../working/task_m020_569_performance_issue.md)을 보존한다. #580 개선·재측정 → Stage 3 웹 안내 → Stage 4 같은 후보 Mac 수용 → Stage 5 부분 PR·release 운영 인계 순서다. Stage 3는 미착수다.
+- 재개 승인: 2026-10-11 “#569의 웹페이지 로컬 글꼴 안내와 Mac 최종 수용 검증을 진행해줘”. Stage 3 웹 안내·도움말 구현과 Stage 4 수용 준비를 진행한다. 구체 후보의 Developer ID 사용·임시 설치는 준비 후 승인한다.
+- 현재: [Stage 3](../working/task_m020_569_stage3.md) 구현·로컬 검증 완료.웹 안내와 Mac 최종 수용을 함께 명시 지시받아 Stage 4 후보 준비를 이어간다. #580 완료·현재 signed 결과를 수용했으며 <300ms 후속 #581은 선행 조건이 아니다. Stage 4 같은 후보 Mac 수용 → Stage 5 부분 PR·release 운영 인계를 유지한다.
 
 ## 1. 실행 순서와 완료 범위
 
@@ -128,4 +130,4 @@ public release는 M900 운영 이슈로 추적한다. 확정 버전/build number
 
 각 단계는 `mydocs/working/task_m020_569_stage{N}.md`에 실제 명령·환경·입력·판정·실패/미검증·소유 정리 결과를 기록한다. stage commit은 `Task #569 Stage {N}: ...` 형식이다. 문서 작성 단계는 링크/구조·오늘할일·diff 확인만 수행한다.
 
-수행계획과 구현계획·Stage 1 및 **Stage 2 격리 probe 구현·반복 탐색 측정과 개선 판단** 실행은 승인받았다. 직접 측정·회귀·후보 준비 후 실제 signed Finder 측정의 구체 서명·임시 설치·복원도 승인받았다. 시스템 인증 후 signed Finder/제어 요청과 원래 앱 복원을 완료했다. Stage 2 측정 종료이며 성능 개선은 아직 구현하지 않았다. 단계 경계에서 승인 범위를 확인하고 성능 후속 이슈/계획·웹 안내의 순서를 정렬한다. Stage 3나 최종 출시 수용 진입으로 처리하지 않는다.
+기존 Stage 1–2와 해당 signed Finder 측정·복원 승인은 완료된 실행의 근거로 보존한다. 2026-10-11 PR #582 병합 후 웹 안내와 Mac 최종 수용 재개를 명시 승인받아 Stage 3의 기존 범위를 실행한다. 구체 후보의 Developer ID 사용·임시 설치는 준비 후 승인하며, 각 단계 종료 보고와 최종 공개 배포 게이트를 유지한다. 이번 웹 초안 작성이나 ad-hoc 격리 UI 촬영을 최종 제품/DMG 수용 완료로 판정하지 않는다.

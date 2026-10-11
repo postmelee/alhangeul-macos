@@ -1,0 +1,27 @@
+{
+  "releaseBuild": true,
+  "actualUI": {
+    "firstChecks": 20,
+    "reopenChecks": 17,
+    "passed": true,
+    "signature": "ad-hoc",
+    "finalProductAcceptance": false
+  },
+  "registration": {
+    "devRegistrations": 0,
+    "issues": 0,
+    "filesystemWarnings": 1,
+    "provider": "/Applications/Alhangeul.app",
+    "globalCacheReset": false
+  },
+  "publicLatest": {
+    "tag": "v0.2.2",
+    "draft": false,
+    "prerelease": false
+  },
+  "web": "web-validation.json",
+  "browser": "browser-checks.json",
+  "helpActualClick": "Stage 4 pending",
+  "finalMacCandidate": "Stage 4 pending",
+  "publicDeployment": false
+}

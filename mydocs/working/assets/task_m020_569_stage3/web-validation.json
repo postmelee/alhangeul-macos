@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "pages": [
+    {
+      "page": "index.html",
+      "language": "ko",
+      "linksChecked": 43,
+      "imagesWithAlt": true
+    },
+    {
+      "page": "fonts/index.html",
+      "language": "ko",
+      "linksChecked": 22,
+      "imagesWithAlt": true
+    }
+  ],
+  "errors": []
+}

@@ -1,7 +1,7 @@
 # Task M020 #569 — Mac 출시 수용 기준
 
 - 기준일: 2026-10-10, 작업 `local/task569`, 제품 기준 `dac73a589dc17143e744da6a12a51d638a81fb77`.
-- 현재 단계: Stage 1. 기존 증거·자산 정합성 확인이며 새로운 출시 후보 수용 결과가 아니다.
+- 현재 단계: Stage 3. [웹/현재 UI 검증](../working/task_m020_569_stage3.md)을 추가했다. Stage 1의 과거 증거 대조와 새 ad-hoc UI 검증, 최종 후보 수용을 구분한다.
 - core/Studio: 공식 `v0.8.7` / `1a76570e833917d15817415a53c09ad61ab3203f`.
 - 근거: [#568 소비자 인계](task_m020_568_consumer_handoff.md), [Stage 1 대조 영수증](../working/assets/task_m020_569_stage1/evidence-audit.json).
 
@@ -50,6 +50,12 @@ Stage 4 및 release 운영에서 다음 필드를 채운다. 아직 후보가 �
 필수 흐름은 설정(⌘,) → 글꼴 → **Mac에 설치된 글꼴 사용** → 필요한 권한 → 기존 상단 글꼴 목록 선택 → HWP/HWPX 편집·저장/재열기 → PDF·인쇄 경로 → 앱 재실행이다. Finder는 같은 후보의 단일/다중 페이지 Quick Look과 Thumbnail을 별도로 확인한다. 원본/설정/관리 객체 변경과 복구, 반복 요청 freshness와 비용을 함께 수용한다.
 
 웹 안내는 **다시 감지**, **폴더 다시 선택…**, **보관한 글꼴 → 글꼴 가져오기…**를 실제 메뉴와 대조한다. 가상 목록이나 한 face만 공급한 과거 화면을 실제 전체 감지 화면으로 쓰지 않는다. 공개 안내의 기능 제공 버전은 release 시점에 맞춘다.
+
+### 2026-10-12 Stage 3 추가 근거
+
+PR #582의 `34ae2f4b`를 `4a17ea87`로 통합한 제품 소스와 웹·Help 변경을 기준으로 126개 Swift 입력 hash를 보존했다. 현재 UI probe의 기록 입력 192개가 실행 후 소스와 일치한다. 실제 Mac 목록 232 family/809 face, 시스템 메뉴 204 family, NanumSquareR/B의 HWP Canvas2D·HWPX CanvasKit·native 저장·새 프로세스 복원 20/17 check가 ad-hoc sandbox 앱에서 통과했다. 첫 실행 `restoredEnabled=false`와 재실행 `true`를 구분한다.
+
+이는 실제 목록과 안내 이미지 근거이며 signed 제품 전체 수용으로 확대하지 않는다. PDF·인쇄·최종 동일 후보 Finder·Help의 실제 클릭 수용은 Stage 4에 남긴다. #580의 signed 성능/정확성 결과와 <300ms 후속 #581을 연결하되, 최종 Mac 후보 column은 실제 Stage 4 결과 전까지 미검증을 유지한다.
 
 ## 5. 후보 준비·복원과 출시 인계
 

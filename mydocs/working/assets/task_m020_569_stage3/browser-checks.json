@@ -1,0 +1,46 @@
+{
+  "responsive": [
+    {
+      "heading": 350,
+      "overflow": false,
+      "width": 390
+    },
+    {
+      "faqKeyboardOpened": true,
+      "fragment": "#choose",
+      "width": 390
+    },
+    {
+      "outside": [],
+      "overflow": false,
+      "width": 320
+    }
+  ],
+  "toc": [
+    {
+      "label": "사용 설정",
+      "expectedHref": "#enable",
+      "actual": "#enable"
+    },
+    {
+      "label": "글꼴 선택",
+      "expectedHref": "#choose",
+      "actual": "#choose"
+    },
+    {
+      "label": "저장과 출력",
+      "expectedHref": "#output",
+      "actual": "#output"
+    },
+    {
+      "label": "문제 해결",
+      "expectedHref": "#troubleshoot",
+      "actual": "#troubleshoot"
+    }
+  ],
+  "keyboardFaq": true,
+  "skipLink": {
+    "fragment": "#main",
+    "focusedElement": "main"
+  }
+}
