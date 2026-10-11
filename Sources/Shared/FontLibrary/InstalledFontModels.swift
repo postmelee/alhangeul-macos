@@ -82,6 +82,14 @@ struct InstalledFontEnvironment: Sendable {
     let scan: @Sendable ([InstalledFontGrant]) throws -> InstalledFontScan
     let read: @Sendable (InstalledFontRecord, [InstalledFontGrant]) async throws -> InstalledFontRead
     let makeBookmark: @Sendable (URL) throws -> Data
+    let activeSignature: (@Sendable () throws -> InstalledFontActiveSignature)?
+
+    init(scan: @escaping @Sendable ([InstalledFontGrant]) throws -> InstalledFontScan,
+         read: @escaping @Sendable (InstalledFontRecord, [InstalledFontGrant]) async throws -> InstalledFontRead,
+         makeBookmark: @escaping @Sendable (URL) throws -> Data,
+         activeSignature: (@Sendable () throws -> InstalledFontActiveSignature)? = nil) {
+        self.scan = scan; self.read = read; self.makeBookmark = makeBookmark; self.activeSignature = activeSignature
+    }
 }
 
 struct InstalledFontSavedState: Codable {

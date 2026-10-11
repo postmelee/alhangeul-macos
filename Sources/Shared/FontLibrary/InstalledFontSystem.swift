@@ -35,27 +35,63 @@ struct InstalledFontPermissionAccess: Sendable {
 }
 
 struct InstalledFontSystem: Sendable {
+    enum ActiveListMode: Sendable {
+        case checkedAttributes
+        case activeCollection
+    }
     let access: InstalledFontPermissionAccess
+    private let descriptorCache: InstalledFontDescriptorCache?
+    private let activeListMode: ActiveListMode
     static let maximumRecords = 20_000
     static let maximumBytes = 64 * 1024 * 1024
 
-    init(access: InstalledFontPermissionAccess = .system) { self.access = access }
+    init(access: InstalledFontPermissionAccess = .system, descriptorCache: InstalledFontDescriptorCache? = nil,
+         activeListMode: ActiveListMode = .checkedAttributes) {
+        self.access = access; self.descriptorCache = descriptorCache; self.activeListMode = activeListMode
+    }
 
     var environment: InstalledFontEnvironment {
         .init(scan: { try self.scan($0) }, read: { record, grants in
+            #if ALHANGEUL_FONT_EXTENSION_PROBE
+            let id = ExtensionFontPerformanceTrace.request.get(), observer = ExtensionFontPerformanceTrace.details.get()
+            let work = Task.detached(priority: .utility) {
+                try ExtensionFontPerformanceTrace.withSynchronousContext(request: id, details: observer) {
+                    try self.read(record, grants: grants)
+                }
+            }
+            #else
             let work = Task.detached(priority: .utility) { try self.read(record, grants: grants) }
+            #endif
             return try await withTaskCancellationHandler(operation: { try await work.value }, onCancel: { work.cancel() })
         }, makeBookmark: { url in
             let session = FontImportSourceSession(urls: [url], access: self.access.scope)
             defer { session.close() }
             return try self.access.create(url)
-        })
+        }, activeSignature: { try self.activeSignature() })
+    }
+
+    private func activeSignature() throws -> InstalledFontActiveSignature {
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        let started = DispatchTime.now().uptimeNanoseconds
+        var success = false
+        defer { ExtensionFontPerformanceTrace.interval("activeSignature", start: started, success: success) }
+        #endif
+        let value = try InstalledFontActiveSignature.captureActive(activeDescriptors(), cache: descriptorCache)
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        success = true
+        #endif
+        return value
     }
 
     func scan(_ grants: [InstalledFontGrant]) throws -> InstalledFontScan {
         try access.withAccess(grants) { issues in
             let descriptors = activeDescriptors()
             guard descriptors.count <= Self.maximumRecords else { throw InstalledFontFailure.catalogLimit }
+            #if ALHANGEUL_FONT_EXTENSION_PROBE
+            let started = DispatchTime.now().uptimeNanoseconds
+            var normalized = false
+            defer { ExtensionFontPerformanceTrace.interval("systemNormalize", start: started, success: normalized) }
+            #endif
             var records: [String: InstalledFontRecord] = [:]
             var omitted = 0
             for descriptor in descriptors {
@@ -88,11 +124,27 @@ struct InstalledFontSystem: Sendable {
                     traits: CTFontGetSymbolicTraits(font).rawValue, axes: axes, stamp: stamp, failure: failure)
                 records[id] = record
             }
+            #if ALHANGEUL_FONT_EXTENSION_PROBE
+            normalized = true
+            #endif
             return .init(records: records.values.sorted { $0.id < $1.id }, grantIssues: issues, omittedFaceCount: omitted)
         }
     }
 
     private func activeDescriptors() -> [CTFontDescriptor] {
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        let started = DispatchTime.now().uptimeNanoseconds
+        defer { ExtensionFontPerformanceTrace.interval("systemEnumerate", start: started, success: true) }
+        #endif
+        if activeListMode == .activeCollection {
+            // CoreText matching 자체의 disabled 제외 계약을 사용한다. 각 검사마다 새 목록을 얻으며 중복은 보존한다.
+            let options = [kCTFontCollectionIncludeDisabledFontsOption: false] as CFDictionary
+            let collection = CTFontCollectionCreateFromAvailableFonts(options)
+            if let descriptors = CTFontCollectionCreateMatchingFontDescriptors(collection) as? [CTFontDescriptor] {
+                return descriptors
+            }
+            // collection 결과를 얻지 못한 경우 기존 조회로 다시 확인한다.
+        }
         let collection = CTFontCollectionCreateFromAvailableFonts(nil)
         return (CTFontCollectionCreateMatchingFontDescriptors(collection) as? [CTFontDescriptor] ?? []).filter {
             (CTFontDescriptorCopyAttribute($0, kCTFontEnabledAttribute) as? NSNumber)?.boolValue != false

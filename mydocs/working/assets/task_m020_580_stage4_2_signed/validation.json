@@ -1,0 +1,303 @@
+{
+  "status": "새 후보 signed/GUI/복원 시험 완료; ON 시간 목표 미달로 부모 Stage 4 미완료",
+  "task": 580,
+  "sourceCommit": "f7e5e1290a9193705552d09a62ff3402569f54d3",
+  "sourceReceipt": "../task_m020_580_stage4_2/source-receipt.json",
+  "sourceReceiptSHA256": "447ee62f8cfca17319982222597b921da7a425783178b670a712b1abe3b2e8d6",
+  "signExit": 0,
+  "installExit": 0,
+  "restoreExit": 0,
+  "signedBundles": {
+    "Alhangeul.app": {
+      "infoSHA256": "af5b128428c8c35e877b76ec79aa3e43831378232c11bf24d08675bd6eb2acc7",
+      "executableSHA256": "8b49c1a52af96341f5421b500c6721b409b58ca097e4d1a363337d5b88543549"
+    },
+    "FontExtensionFixtureProbe.app": {
+      "infoSHA256": "b4ad565988f14abc28caffcb904ace719d51e48f956267dc03f6da0815773ed7",
+      "executableSHA256": "81dae2b86035ce4d08da3781ab1b381cd3e4246218d73126588cfa3d36195427"
+    },
+    "Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex": {
+      "infoSHA256": "cad6986eced93a31f66704228e2c358831043345c709fd55d672ed84c9f8538d",
+      "executableSHA256": "e0ae6c061dec896f46e6f827796729642887352540270c0cbbf6895e261ba99a"
+    },
+    "Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex": {
+      "infoSHA256": "3f80d920978037a99934f4803e0e5b5ff6923db1b2bd05a90040931bb4566c45",
+      "executableSHA256": "53eda2e638ffa6891e5e8001397c84be6b9c9ef88334426580fbc646b7baf807"
+    }
+  },
+  "signedInventory": {
+    "Alhangeul.app": "c0075807d2ece26c5e48f694ab797502a8106cf4ec9d5c83300577b44873c5a7",
+    "FontExtensionFixtureProbe.app": "49dc1230c0b04ea18297bb8a129231c5bf3e9d4d888afd3442b57b6cf463e442"
+  },
+  "restoration": {
+    "restored": true,
+    "restoredOriginalInventoryDigest": "fa694017af3e0b3705510b353ef0e9dc5549be57493b74e99e5ca05540b3707b",
+    "restoredOriginalEntries": 243,
+    "privateUUIDRootRemoved": true,
+    "xattrsCompared": false,
+    "removed": [
+      {
+        "path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/Alhangeul.app",
+        "inventoryDigest": "c0075807d2ece26c5e48f694ab797502a8106cf4ec9d5c83300577b44873c5a7",
+        "inventoryEntries": 248,
+        "logicalBytes": 274735045,
+        "unregisterCommands": [
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/Alhangeul.app"
+            ],
+            "exit": 0
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter"
+            ],
+            "exit": 1
+          }
+        ]
+      },
+      {
+        "path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/FontExtensionFixtureProbe.app",
+        "inventoryDigest": "49dc1230c0b04ea18297bb8a129231c5bf3e9d4d888afd3442b57b6cf463e442",
+        "inventoryEntries": 11,
+        "logicalBytes": 19389963,
+        "unregisterCommands": [
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/FontExtensionFixtureProbe.app"
+            ],
+            "exit": 0
+          }
+        ]
+      },
+      {
+        "path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/backup/Alhangeul.app",
+        "inventoryDigest": "fa694017af3e0b3705510b353ef0e9dc5549be57493b74e99e5ca05540b3707b",
+        "inventoryEntries": 243,
+        "logicalBytes": 446248370,
+        "unregisterCommands": [
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/backup/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/backup/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/backup/Alhangeul.app"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/backup/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/backup/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter"
+            ],
+            "exit": 1
+          }
+        ]
+      },
+      {
+        "path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/finder-results/20261011-160902/staging/Alhangeul.app",
+        "inventoryDigest": "c0075807d2ece26c5e48f694ab797502a8106cf4ec9d5c83300577b44873c5a7",
+        "inventoryEntries": 248,
+        "logicalBytes": 274735045,
+        "unregisterCommands": [
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/finder-results/20261011-160902/staging/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/finder-results/20261011-160902/staging/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/finder-results/20261011-160902/staging/Alhangeul.app"
+            ],
+            "exit": 0
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/finder-results/20261011-160902/staging/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/finder-results/20261011-160902/staging/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter"
+            ],
+            "exit": 1
+          }
+        ]
+      }
+    ],
+    "logicalBytesRemoved": 1015108423,
+    "at": "2026-10-11T07:25:33.578622+00:00",
+    "globalCacheReset": false
+  },
+  "stoppedWorkers": {
+    "at": "2026-10-11T07:23:51.746795+00:00",
+    "workers": [
+      {
+        "pid": 89446,
+        "path": "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex/Contents/MacOS/AlhangeulThumbnail",
+        "imageUUID": "F2C0F5C8-D0A5-342A-8655-A358151E09FF",
+        "marker": "8649CF03-60CF-439C-B228-5A0C038BF374",
+        "terminated": true
+      },
+      {
+        "pid": 93253,
+        "path": "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex/Contents/MacOS/AlhangeulPreview",
+        "imageUUID": "17E0D162-7BB1-3639-BDD4-20961FC58D4B",
+        "marker": "8649CF03-60CF-439C-B228-5A0C038BF374",
+        "terminated": true
+      }
+    ]
+  },
+  "stoppedLog": {
+    "pid": 89338,
+    "verifiedComm": "/usr/bin/log",
+    "outputFile": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-02/signed-events.ndjson",
+    "at": "2026-10-11T07:24:21.213276+00:00"
+  },
+  "gui": {
+    "status": "실제 Finder·Preview 확인 완료; 성능 목표와 구분",
+    "userReleasedFinder": true,
+    "ownWindowCreated": true,
+    "manyFolders": [
+      "many-first",
+      "many-second"
+    ],
+    "firstFolderOFF32Observed": true,
+    "firstFolderON256Observed": true,
+    "firstFolderAll10RenderedScreenshotObserved": true,
+    "sliderObservedValues": [
+      24,
+      112,
+      40
+    ],
+    "notes": [
+      "슬라이더는 pixels가 아닌 값; 128 입력은 최대 112로 제한되어 즉시 40으로 보정",
+      "실제 요청만 로그에서 별도 집계; 아직 Preview 시도 전"
+    ],
+    "updated": "2026-10-11T07:13:59.760550+00:00",
+    "actualManyFoldersVerified": true,
+    "all10IconsRenderedEachFolder": true,
+    "revisitEachFolder": true,
+    "smallerSliderValue": 32,
+    "sameFilePreviewAttempts": 10,
+    "uniquePreviewPassAttempts": 2,
+    "uniquePreviewFiles": 10,
+    "extraPrefetchRequestsExcludedFromAttemptCount": true,
+    "twoPagePDFBothPagesVisuallyVerified": true,
+    "ownedFinderWindowClosed": true,
+    "screenshotDelivery": "CUA 도구 결과에 실제 화면 표시; 저장 파일 SHA는 제공하지 않음",
+    "actualThumbnailSamples": 77,
+    "actualPreviewSamples": 38
+  },
+  "registrationFinal": {
+    "checkExit": 0,
+    "activeProvider": "/Applications/Alhangeul.app",
+    "developmentRegistrations": 0,
+    "developmentBundles": 0,
+    "issues": 0,
+    "warnings": 0
+  },
+  "priorRegistrationCheck": {
+    "checkExit": 1,
+    "reason": "소유 후보/staging 등록·bundle 잔여; 삭제 전 개별 해제 후 최종 0 확인"
+  },
+  "limitations": [
+    "실제 runtime arm64/macOS 26.5.2; Intel/최소 OS 실행 미검증",
+    "xattr inventory 비교 안 함",
+    "앱 서명은 승인한 로컬 시험; 공증/공개 배포 아님",
+    "GUI screenshot은 CUA 결과로 직접 표시; 로컬 screenshot SHA 파일 없음",
+    "OS prefetch/추가 요청은 UI 시도 횟수에 합산하지 않음"
+  ],
+  "pending": [
+    "sandbox 활성 상태 getter/collection 현재성 계약 실험 승인",
+    "기존 current/원본 검사와 digest를 유지하는 조건부 보완",
+    "새 후보 동일 signed 시간 목표 재측정"
+  ],
+  "rawEvidenceSHA256": {
+    "build.noindex/task580/stage4/finder-candidate-02/sign.log": "1e13b6850e92fb56d22f15498174b7c2bf650aed3ae83da20deebefbff703f89",
+    "build.noindex/task580/stage4/finder-candidate-02/install.log": "c49551ff731adf34a1723868e45484b532b494387859557d86840c85b5d11cd5",
+    "build.noindex/task580/stage4/finder-candidate-02/restore.log": "1e2e830d5ae01ca255d7bb0b27abba90348ae310f65e1eb7640ae99f49505132",
+    "build.noindex/task580/stage4/finder-candidate-02/preparation.json": "18d368413cc809800e9850696370cc19f178dd8459d942e9bcfdbbd0fd9d12f3",
+    "build.noindex/task580/stage4/finder-candidate-02/operation-plan.json": "be3c5acb8fc56180377c37510e46cf4289c0c9aba4e1fa92cd95c8b5639cd8cc",
+    "build.noindex/task580/stage4/finder-candidate-02/signed-bundles.json": "d211e43a7b5ead4571cbea61fc1b2ebe388df8fbe5780334c977367a190c18fe",
+    "build.noindex/task580/stage4/finder-candidate-02/signed-inventory.json": "bdfa1f067d81f0b12c9b2fbc0c9b544dcee93e0d071b558a95c5f616a9171af2",
+    "build.noindex/task580/stage4/finder-candidate-02/cleanup.json": "204cdc2acec30a4c2940e654e9811ef51d2833510dcef9d3608a678ea935b018",
+    "build.noindex/task580/stage4/finder-candidate-02/hygiene.log": "c419f719f4f1a4738ab34269250c23ea1cc1127a9d87968d41d5172a96b01b88",
+    "build.noindex/task580/stage4/finder-candidate-02/hygiene-final.log": "59eba39753a076893f0af90133e7ea5ed16b0924bdabd20cf9d7381aec04db23",
+    "build.noindex/task580/stage4/finder-candidate-02/stopped-workers.json": "6729f4fe57d06cdbba31c3369e31ead864fec2baab87951e2679bac5fa40e40c",
+    "build.noindex/task580/stage4/finder-candidate-02/stopped-log.json": "a684f056a012823d1a025ad51f7d51f154ddebbfa9be2a3d71e4d8bc98c79a2d"
+  },
+  "at": "2026-10-11T07:28:25.805565+00:00"
+}

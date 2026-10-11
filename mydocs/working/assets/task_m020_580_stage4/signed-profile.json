@@ -1,0 +1,66 @@
+{
+  "scope": "동일 signed 후보의 별도 3초 stack sample; 성능 gate 표본에서 제외. 아래 구간 분포는 ON1 HWP warm exactHit 10건이며 중첩 구간을 합산하지 않는다.",
+  "imageUUID": "353D18CA-27A8-3FDF-8122-30546E16145E",
+  "warmRequests": 10,
+  "spanMs": {
+    "activeSignature": {
+      "count": 40,
+      "minimum": 415.571875,
+      "median": 464.823521,
+      "maximum": 548.546667
+    },
+    "catalogPreparation": {
+      "count": 10,
+      "minimum": 432.073084,
+      "median": 468.72725,
+      "maximum": 540.544334
+    },
+    "managedQueueWait": {
+      "count": 100,
+      "minimum": 0.012959,
+      "median": 0.0312705,
+      "maximum": 0.315667
+    },
+    "metadata": {
+      "count": 10,
+      "minimum": 887.057167,
+      "median": 927.8359585000001,
+      "maximum": 1061.281208
+    },
+    "sourceFingerprint": {
+      "count": 40,
+      "minimum": 0.122334,
+      "median": 0.2541455,
+      "maximum": 0.34675
+    },
+    "supplyAssembly": {
+      "count": 10,
+      "minimum": 2.131125,
+      "median": 3.7382495000000002,
+      "maximum": 4.590333
+    },
+    "systemEnumerate": {
+      "count": 40,
+      "minimum": 88.14525,
+      "median": 102.69225,
+      "maximum": 143.047333
+    },
+    "thumbnail": {
+      "count": 10,
+      "minimum": 1798.347708,
+      "median": 1872.9829165,
+      "maximum": 2037.206791
+    }
+  },
+  "sampleScope": "utility worker Thread_7872493의 첫 호출 트리 블록(1111 표본). stack 횟수이며 CPU 사용률이나 전체 프로세스 시간 비율이 아니다.",
+  "selectedStackBranches": {
+    "captureActive": 894,
+    "traitsGetterAtLine47": 193,
+    "variationGetterAtLine40": 185,
+    "familyGetterAtLine37": 167,
+    "styleGetterAtLine36": 154
+  },
+  "rawSampleSHA256": "a171b0b7f7743e451ea282d16c3fe1fb97ec82338fcd7ca48800efedf8384df8",
+  "rawReceiptSHA256": "54f2d5f11cc3c596b567be300ea0e7b6d4ed7bc0d69285627ec883de07e95845",
+  "sdkContract": "CTFontDescriptorCopyAttributes는 descriptor를 완전히 특정하는 최소 속성 dictionary를 반환한다. 모든 계산 속성이 이미 포함된다고 가정하지 않는다."
+}

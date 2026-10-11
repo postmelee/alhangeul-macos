@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SUBSYSTEMS = {"com.postmelee.alhangeul.QLExtension", "com.postmelee.alhangeul.ThumbnailExtension"}
-TRACE = re.compile(r"FontPerformance request=(\S+) kind=(metadata|thumbnail|preview) startNanos=(\d+) endNanos=(\d+) ms=([\d.]+) success=(true|false|1|0)")
+TRACE = re.compile(r"FontPerformance request=(\S+) kind=([A-Za-z][A-Za-z0-9.]*) startNanos=(\d+) endNanos=(\d+) ms=([\d.]+) success=(true|false|1|0)")
 READY = re.compile(r"Thumbnail ready file=(\S+) policy=(\S+) cache=(\S+) requestedBucket=(\S+) matchedBucket=(\S+) backend=(\S+) fallback=(\S+) renderMs=([\d.]+) pixels=(\S+) context=(\S+) page=(\S+)")
 METADATA = re.compile(r"Font metadata ready installedEnabled=(true|false) records=(\d+) managed=(\d+) metadataMs=([\d.]+)")
 
@@ -89,9 +89,10 @@ def summarize(events):
     samples = []
     for (pid, subsystem, request), rows in sorted(requests.items()):
         metadata = [r for r in rows if r["kind"] == "metadata"]
-        providers = [r for r in rows if r["kind"] != "metadata"]
+        providers = [r for r in rows if r["kind"] in ("thumbnail", "preview")]
         sample = {"pid": pid, "subsystem": subsystem, "request": request, "events": rows,
-                  "status": "unpaired", "cache": "unknown", "document": None}
+                  "status": "unpaired", "cache": "unknown", "document": None,
+                  "details": [r for r in rows if r["kind"] not in ("metadata", "thumbnail", "preview")]}
         if len(metadata) == 1 and len(providers) == 1:
             m, p = metadata[0], providers[0]
             sample["consumer"] = p["kind"]
@@ -100,7 +101,10 @@ def summarize(events):
             if "callback" in p:
                 sample.update(p["callback"])
                 sample["callbackEvidence"] = p["callbackEvidence"]
-            if p["startNanos"] <= m["startNanos"] <= m["endNanos"] <= p["endNanos"]:
+            images = {r["processImageUUID"] for r in rows if r["processImageUUID"] is not None}
+            if len(images) > 1:
+                sample["status"] = "invalidImageIdentity"
+            elif p["startNanos"] <= m["startNanos"] <= m["endNanos"] <= p["endNanos"]:
                 sample["metadataMs"] = (m["endNanos"] - m["startNanos"]) / 1_000_000
                 sample["providerMs"] = (p["endNanos"] - p["startNanos"]) / 1_000_000
                 sample["status"] = "success" if m["success"] and p["success"] else "failure"
@@ -123,6 +127,7 @@ def summarize(events):
                         "providerMs": distribution([r["providerMs"] for r in valid]),
                         "metadataFraction": distribution([r["metadataFraction"] for r in valid])})
     return {"samples": samples, "summary": summary,
+            "busyBoundaryAttempts": dict(collections.Counter(r["kind"] for sample in samples for r in sample["details"] if r["kind"].startswith("busy."))),
             "scope": "signed provider completion, not Finder screen paint; UUID interval pairing; callback attributes only from immediate same-thread synchronous event within 1ms; otherwise unknown"}
 
 
@@ -136,9 +141,16 @@ def self_test():
             event(3, "c", "thumbnail", 0, 10), event(4, "d", "metadata", 1, 2),
             event(4, "d", "metadata", 1, 2), event(4, "d", "thumbnail", 0, 3),
             event(5, "e", "metadata", 1, 2, "false"), event(5, "e", "thumbnail", 0, 3)]
+    rows += [event(1, "a", "catalogRefresh", 12, 40), event(5, "e", "busy.thumbnailRenderSlots", 1, 1, "false")]
     samples = summarize(rows)["samples"]
     assert collections.Counter(r["status"] for r in samples) == {"success": 2, "unpaired": 1, "invalidInterval": 1, "ambiguous": 1, "failure": 1}
     assert next(r for r in samples if r["pid"] == 1 and r["request"] == "a")["metadataMs"] == 50 / 1e6
+    assert summarize(rows)["busyBoundaryAttempts"] == {"busy.thumbnailRenderSlots": 1}
+    different_images = [dict(event(7, "g", "metadata", 1, 2), processImageUUID="first"),
+                        dict(event(7, "g", "thumbnail", 0, 3), processImageUUID="second")]
+    assert summarize(different_images)["samples"][0]["status"] == "invalidImageIdentity"
+    foreign_subsystem = dict(event(7, "g", "thumbnail", 0, 3), subsystem="other")
+    assert summarize([different_images[0], foreign_subsystem])["samples"][0]["status"] == "unpaired"
     ready = "Thumbnail ready file=test.hwpx policy=coreGraphicsOnly cache=exactHit requestedBucket=256x256 matchedBucket=256x256 backend=coreGraphics fallback=- renderMs=7.0 pixels=181x256 context=181x256 page=793x1122"
     for thread, gap, expected in [(9, 100, "exactHit"), (10, 100, "unknown"), (9, 5000, "unknown")]:
         a = event(6, "f", "metadata", 1, 2)
@@ -164,8 +176,8 @@ def main():
     if not args.events or not args.output:
         parser.error("--events와 --output이 필요합니다")
     output = args.output.resolve()
-    if output.exists() or not output.is_relative_to(ROOT / "build.noindex/task569/stage2"):
-        raise SystemExit("Task 569 Stage 2 아래 새 결과 경로가 필요합니다")
+    if output.exists() or not output.is_relative_to(ROOT / "build.noindex/task580"):
+        raise SystemExit("Task 580 아래 새 결과 경로가 필요합니다")
     output.write_text(json.dumps(summarize(read_events(args.events)), indent=2) + "\n")
     print(output)
 

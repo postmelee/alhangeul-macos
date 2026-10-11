@@ -25,7 +25,7 @@ final class PerformanceMeter: @unchecked Sendable {
     private let lock = NSLock()
     private var values: [Span] = []
     func record(_ kind: String, _ start: UInt64, bytes: Int = 0, success: Bool = true, request: String? = nil) {
-        let span = Span(request: request ?? PerformanceTrace.request.get() ?? "background", kind: kind,
+        let span = Span(request: request ?? PerformanceTrace.request.get() ?? ExtensionFontPerformanceTrace.currentRequest ?? "background", kind: kind,
                         start: start, end: uptime(), bytes: bytes, success: success)
         lock.lock(); values.append(span); lock.unlock()
     }
@@ -36,6 +36,11 @@ final class PerformanceMeter: @unchecked Sendable {
     func metadata(_ start: UInt64, _ end: UInt64, _ success: Bool) {
         let span = Span(request: PerformanceTrace.request.get() ?? "background", kind: "metadata",
                         start: start, end: end, bytes: 0, success: success)
+        lock.lock(); values.append(span); lock.unlock()
+    }
+    func detail(_ kind: String, _ start: UInt64, _ end: UInt64, _ success: Bool, _ request: String?) {
+        guard kind != "metadata" else { return } // metadata는 기존 대응 관찰자가 한 번 기록한다.
+        let span = Span(request: request ?? "unattributed", kind: kind, start: start, end: end, bytes: 0, success: success)
         lock.lock(); values.append(span); lock.unlock()
     }
     func all() -> [Span] {
@@ -95,11 +100,13 @@ func waitFor(_ gate: PerformanceGate, count: Int) async throws {
 func require(_ condition: Bool, _ message: String) throws {
     if !condition { throw PerformanceFailure.invalid(message) }
 }
-func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async throws -> HwpThumbnailRenderResult {
+func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter: PerformanceMeter) async throws -> HwpThumbnailRenderResult {
     let request = try HwpThumbnailRenderRequest(fileURL: file,
         maximumSize: CGSize(width: width, height: width), scale: 1)
-    return try await withCheckedThrowingContinuation { continuation in
-        cache.renderedPageResult(for: request) { continuation.resume(with: $0) }
+    return try await ExtensionFontPerformanceTrace.request.withValue(PerformanceTrace.request.get() ?? UUID().uuidString) {
+        try await ExtensionFontPerformanceTrace.details.withValue({ meter.detail($0, $1, $2, $3, $4) }) {
+            try await cache.renderedPageResult(for: request)
+        }
     }
 }
 
@@ -111,6 +118,15 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async 
         let output = URL(fileURLWithPath: CommandLine.arguments[2])
         let mode = CommandLine.arguments[3], enabled = CommandLine.arguments[4] == "on"
         let repetition = Int(CommandLine.arguments[5]) ?? 0
+        if mode == "collections" {
+            let equivalent = try await ActiveCollectionExperiment.run(input: input, output: output)
+            let result = PerformanceResult(pid: getpid(), mode: mode, installedEnabled: enabled,
+                repetition: repetition, processBundledFontWarmup: false, samples: [], events: [],
+                proofs: ["activeCollectionEquivalenceAndProcessLifecycle": equivalent])
+            let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            try encoder.encode(result).write(to: output.appendingPathComponent("result.json"))
+            return
+        }
         let root = output.appendingPathComponent("library")
         let store = FontLibraryStore(rootURL: root)
         let imported = await store.importCandidates(["Regular", "Bold"].map {
@@ -123,7 +139,9 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async 
             let context = try HwpPreviewPDFRenderer.load(fileURL: input.appendingPathComponent("single.hwpx"))
             _ = try HwpPreviewPNGRenderer.render(context: context, mode: .coreGraphics, forceDefaultFonts: true)
         }
-        let meter = PerformanceMeter(), live = InstalledFontSystem().environment
+        let changes = InstalledFontChangeEpoch()
+        let meter = PerformanceMeter(), live = InstalledFontSystem(descriptorCache: .init(changes: changes),
+                                                                  activeListMode: .activeCollection).environment
         let environment = InstalledFontEnvironment(scan: { grants in
             let start = uptime()
             do { let value = try live.scan(grants); meter.record("scan", start); return value }
@@ -132,8 +150,8 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async 
             let start = uptime()
             do { let value = try await live.read(record, grants); meter.record("installedRead", start, bytes: value.data.count); return value }
             catch { meter.record("installedRead", start, success: false); throw error }
-        }, makeBookmark: live.makeBookmark)
-        let supply = ExtensionFontSupply(resolveRoot: { root }, environment: environment)
+        }, makeBookmark: live.makeBookmark, activeSignature: live.activeSignature)
+        let supply = ExtensionFontSupply(resolveRoot: { root }, environment: environment, changes: changes)
         let tracked: ExtensionFontRenderer.Supply = {
             let start = uptime()
             let request = PerformanceTrace.request.get()
@@ -141,7 +159,9 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async 
             do {
                 value = try await ExtensionFontPerformanceTrace.request.withValue(PerformanceTrace.request.get()) {
                     try await ExtensionFontPerformanceTrace.observer.withValue({ meter.metadata($0, $1, $2) }) {
-                        try await supply.snapshot()
+                        try await ExtensionFontPerformanceTrace.details.withValue({ meter.detail($0, $1, $2, $3, $4) }) {
+                            try await supply.snapshot()
+                        }
                     }
                 }
                 meter.record("snapshotCall", start)
@@ -152,7 +172,13 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async 
                     let start = uptime()
                     do { let bytes = try await value.read(id); meter.record("read", start, bytes: bytes.data.count, request: request); return bytes }
                     catch { meter.record("read", start, success: false, request: request); throw error }
-                }, current: value.current, release: { let start = uptime(); await value.release(); meter.record("release", start, request: request) })
+                }, current: {
+                    try await ExtensionFontPerformanceTrace.request.withValue(request) {
+                        try await ExtensionFontPerformanceTrace.details.withValue({ meter.detail($0, $1, $2, $3, $4) }) {
+                            try await ExtensionFontPerformanceTrace.measure("currentCheck") { try await value.current() }
+                        }
+                    }
+                }, release: { let start = uptime(); await value.release(); meter.record("release", start, request: request) })
         }
         var samples: [PerformanceSample] = [], proofs: [String: Bool] = [:]
         func save() throws {
@@ -172,7 +198,7 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async 
                 var row = PerformanceSample(request: id, scenario: scenario, phase: phase,
                     file: file.lastPathComponent, width: width, start: uptime())
                 do {
-                    let value = try await thumbnail(cache, file, width: width)
+                    let value = try await thumbnail(cache, file, width: width, meter: meter)
                     row.cache = value.cacheEvent.description; row.identity = value.page.diagnostics.fontIdentity
                     row.faces = value.page.diagnostics.fontFaces.sorted(); row.fallback = value.page.diagnostics.fontSupplyFailure
                     if value.cacheEvent == .miss { row.renderMs = value.page.diagnostics.durationMs.totalMs }
@@ -191,10 +217,33 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async 
                         await value.release(); return finish(row)
                     }
                     samples.append(row); try save()
-                    try require(row.spans.filter { $0.kind == "scan" }.count == 1, "one real scan per snapshot")
+                    let expectedScans = enabled && index == 0 ? 1 : 0
+                    try require(row.spans.filter { $0.kind == "scan" }.count == expectedScans, "ON first scan once; OFF/warm skip normalization")
                     try require(!row.spans.contains { $0.kind == "read" || $0.kind == "installedRead" }, "no bytes pre-read")
                 }
                 proofs["metadataOnly"] = true
+                proofs["installedPreparationReused"] = true
+            } else if mode == "attributes" {
+                proofs["actualAttributeSignatureEquivalence"] = try AttributeSignatureExperiment.run(output: output)
+            } else if mode == "signature" {
+                var previous: String?
+                for index in 0...10 {
+                    let id = "signature-\(index)"
+                    let row = try await PerformanceTrace.request.withValue(id) { () async throws -> PerformanceSample in
+                        var row = PerformanceSample(request: id, scenario: "signatureExperiment",
+                            phase: index == 0 ? "cold" : "warm", file: "none", width: 0, start: uptime())
+                        let start = uptime(), capture = try ActiveSignatureExperiment.capture()
+                        meter.record("activeSignature", start)
+                        if let previous { try require(previous == capture.digest, "unchanged active signature") }
+                        previous = capture.digest; row.identity = capture.digest; row.faceCount = capture.descriptors
+                        if index == 0 { _ = try environment.scan([]) }
+                        return finish(row)
+                    }
+                    samples.append(row); try save()
+                }
+                proofs["unchangedActiveSignature"] = true
+                proofs["signatureSemanticKeys"] = try ActiveSignatureExperiment.semanticChecks()
+                try require(proofs["signatureSemanticKeys"] == true, "active key differences")
             } else if mode == "consumers" {
                 for name in ["single.hwp", "single.hwpx"] {
                     let cache = HwpThumbnailRenderCache(supply: tracked), file = input.appendingPathComponent(name)
@@ -214,18 +263,20 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async 
                         try require(row.spans.filter { $0.kind == "release" }.count == 1, "larger hit release")
                     }
                 }
-                for concurrent in [false, true] {
+                for batchSize in [1, 4, 10] {
+                    let scenario = batchSize == 1 ? "many-serial" : batchSize == 4 ? "many-concurrent" : "many-max10"
                     let cache = HwpThumbnailRenderCache(supply: tracked)
                     for pass in 0..<3 {
-                        for offset in stride(from: 0, to: 10, by: concurrent ? 4 : 1) {
-                            let batch = offset..<min(10, offset + (concurrent ? 4 : 1))
+                        for offset in stride(from: 0, to: 10, by: batchSize) {
+                            let batch = offset..<min(10, offset + batchSize)
                             let rows = await withTaskGroup(of: PerformanceSample.self, returning: [PerformanceSample].self) { group in
                                 for index in batch {
-                                    group.addTask { await runThumbnail(cache, file: input.appendingPathComponent("many-\(index).hwpx"), scenario: concurrent ? "many-concurrent" : "many-serial", phase: pass == 0 ? "cold" : "warm", index: pass) }
+                                    group.addTask { await runThumbnail(cache, file: input.appendingPathComponent("many-\(index).hwpx"), scenario: scenario, phase: pass == 0 ? "cold" : "warm", index: pass) }
                                 }
                                 var values: [PerformanceSample] = []; for await row in group { values.append(row) }; return values
                             }
                             samples.append(contentsOf: rows.sorted { $0.request < $1.request }); try save()
+                            try require(rows.allSatisfy { $0.status == "success" && $0.fallback == nil && $0.faces.count == 2 }, "normal queued thumbnails no busy/fallback")
                         }
                     }
                 }
@@ -255,7 +306,7 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async 
                     }
                 }
                 proofs["exactManagedRegularBold"] = true; proofs["hitWithoutBytes"] = true
-                proofs["singleSnapshotMultiPage"] = true
+                proofs["singleSnapshotMultiPage"] = true; proofs["normalQueueBusyZero"] = true
             } else if mode == "transitions" {
                 let cache = HwpThumbnailRenderCache(supply: tracked), file = input.appendingPathComponent("single.hwpx")
                 let first = await runThumbnail(cache, file: file, scenario: "change", phase: "before", index: 0)
@@ -287,9 +338,9 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int) async 
                         release: { await admissionReleases.increment() })
                 })
                 let file = input.appendingPathComponent("single.hwpx")
-                let held = (0..<16).map { _ in Task { try await thumbnail(limited, file, width: 256) } }
+                let held = (0..<16).map { _ in Task { try await thumbnail(limited, file, width: 256, meter: meter) } }
                 try await waitFor(admission, count: 16)
-                do { _ = try await thumbnail(limited, file, width: 256); throw PerformanceFailure.invalid("17th admitted") }
+                do { _ = try await thumbnail(limited, file, width: 256, meter: meter); throw PerformanceFailure.invalid("17th admitted") }
                 catch { try require((error as? StudioFontError) == .busy, "17th busy") }
                 try require(await admission.count == 16, "17th never entered supply")
                 await admission.finish()

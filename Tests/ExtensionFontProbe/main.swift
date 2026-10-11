@@ -23,6 +23,10 @@ actor ReadGate {
     func finish() { opened = true; waiters.forEach { $0.resume() }; waiters.removeAll() }
 }
 func verify(_ value: Bool, _ message: String, line: UInt = #line) {
+    if !value {
+        fputs("FAIL: \(message) (\(line))\n", stderr)
+        fflush(stderr)
+    }
     precondition(value, "\(message) (\(line))")
 }
 func track(_ snapshot: StudioFontSupplySnapshot, meter: Meter, staleAt: Int? = nil,
@@ -39,9 +43,7 @@ func track(_ snapshot: StudioFontSupplySnapshot, meter: Meter, staleAt: Int? = n
         }, release: { await snapshot.release(); await meter.release() })
 }
 func thumbnail(_ cache: HwpThumbnailRenderCache, _ request: HwpThumbnailRenderRequest) async throws -> HwpThumbnailRenderResult {
-    try await withCheckedThrowingContinuation { continuation in
-        cache.renderedPageResult(for: request) { continuation.resume(with: $0) }
-    }
+    try await cache.renderedPageResult(for: request)
 }
 @main struct ExtensionProbe {
     static func main() async throws {
@@ -133,13 +135,13 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ request: HwpThumbnailRenderRe
         for _ in 0..<100 { if await gate.count >= 2 { break }; try await Task.sleep(nanoseconds: 10_000_000) }
         verify(await gate.count == 2, "동시에 두 원본 작업만 진행")
         let third = try HwpThumbnailRenderRequest(fileURL: file, maximumSize: CGSize(width:512,height:512), scale:1)
-        do { _ = try await thumbnail(limited, third); preconditionFailure("세 번째 작업을 무제한 시작") }
-        catch { verify((error as? StudioFontError) == .busy, "초과 작업 거부") }
-        verify(await boundMeter.reads == 2, "초과 요청은 bytes를 읽지 않음")
-        verify(await boundMeter.releases == 1, "초과 요청 lease만 먼저 해제")
+        let waiting = Task { try await thumbnail(limited, third) }
+        try await Task.sleep(nanoseconds: 100_000_000)
+        verify(await boundMeter.reads == 2, "대기 요청은 bytes를 읽지 않음")
+        verify(await boundMeter.releases == 0, "실제 I/O와 대기 lease 유지")
         await gate.finish()
-        _ = try await heldA.value; _ = try await heldB.value
-        verify(await boundMeter.releases == 3, "두 실제 I/O 완료 후 남은 lease 해제")
+        _ = try await heldA.value; _ = try await heldB.value; _ = try await waiting.value
+        verify(await boundMeter.releases == 3, "세 요청 완료 후 lease 해제")
         let stamp = try InstalledFontSystem.statURL(file)
         let oldStampRequest = large.key
         let modified = out.appendingPathComponent("source-change.hwpx")
@@ -154,8 +156,12 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ request: HwpThumbnailRenderRe
         let afterChange = try await thumbnail(cache, local)
         verify(afterChange.cacheEvent == .miss && afterChange.requestedKey != beforeChange.requestedKey, "inode/ctime 변경")
         verify(try InstalledFontSystem.statURL(file) == stamp && oldStampRequest == large.key, "원본 fixture 보존")
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        try await verifySynchronousTraceContext()
+        #endif
+        let queueProof = try await verifyThumbnailQueue(file: file, output: out, supply: { try await supply.snapshot() })
         let proof: [String:Any] = ["scope":"unsigned CLI; actual group/Finder not tested", "proofs":proofs,
-            "staleRejected":true,"permissionFallback":true,"documentStampInvalidated":true,"concurrentJobsBounded":true]
+            "thumbnailQueue":queueProof, "staleRejected":true,"permissionFallback":true,"documentStampInvalidated":true,"concurrentJobsBounded":true]
         try JSONSerialization.data(withJSONObject:proof,options:[.prettyPrinted,.sortedKeys]).write(to:out.appendingPathComponent("result.json"))
         print("PASS: Extension font PNG/PDF/Thumbnail preparation")
     }

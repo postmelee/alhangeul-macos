@@ -21,7 +21,7 @@ struct InstalledFontPersistence: Sendable {
 }
 
 // CoreText의 process scope와 session/persistent scope 알림을 모두 받는다.
-private final class InstalledFontChangeMonitor: @unchecked Sendable {
+final class InstalledFontChangeMonitor: @unchecked Sendable {
     private let local: NSObjectProtocol
     private let distributed: NSObjectProtocol
     init(changed: @escaping @Sendable () -> Void) {
@@ -129,41 +129,50 @@ actor InstalledFontCatalogService {
     // UI 수동 새로고침, 시작 시 재검사, CoreText 알림은 같은 경로를 사용한다.
     @discardableResult
     func refresh(retryIDs: Set<String> = []) throws -> InstalledFontSnapshot {
-        do {
-            let scan = try environment.scan(saved.grants)
-            let previousRecords = Dictionary(uniqueKeysWithValues: saved.records.map { ($0.id, $0) })
-            // 성공한 스캔의 현재 목록만 보존한다. 제거된 원본은 generation 변경과
-            // 알 수 없는 ID의 inactive 응답으로 차단하며 과거 이력을 누적하지 않는다.
-            var fresh: [String: InstalledFontRecord] = [:]
-            for var record in scan.records {
-                if let previous = previousRecords[record.id], previous.stamp == record.stamp,
-                   record.failure == nil, !retryIDs.contains(record.id),
-                   let failure = previous.failure, [.corrupt, .unsupported, .permissionDenied].contains(failure) {
-                    record.failure = failure
-                }
-                fresh[record.id] = record
+        do { return try acceptScan(environment.scan(saved.grants), retryIDs: retryIDs) }
+        catch { failPreparation(error); throw refreshFailure! }
+    }
+
+    // 확장 전용: 별도 직렬 준비 작업에서 확인된 불변 metadata만 게시한다.
+    func acceptExtensionScan(_ scan: InstalledFontScan) throws -> InstalledFontSnapshot {
+        do { return try acceptScan(scan, retryIDs: permissionFailureIDs()) }
+        catch { failPreparation(error); throw refreshFailure! }
+    }
+
+    func failPreparation(_ error: Error) {
+        refreshFailure = InstalledFontSystem.failure(error)
+        if !(error is InstalledFontFailure) { refreshFailure = .storage }
+        prepared = true
+        invalidate()
+    }
+
+    private func acceptScan(_ scan: InstalledFontScan, retryIDs: Set<String>) throws -> InstalledFontSnapshot {
+        let previousRecords = Dictionary(uniqueKeysWithValues: saved.records.map { ($0.id, $0) })
+        // 성공한 스캔의 현재 목록만 보존한다. 제거된 원본은 generation 변경과
+        // 알 수 없는 ID의 inactive 응답으로 차단하며 과거 이력을 누적하지 않는다.
+        var fresh: [String: InstalledFontRecord] = [:]
+        for var record in scan.records {
+            if let previous = previousRecords[record.id], previous.stamp == record.stamp,
+               record.failure == nil, !retryIDs.contains(record.id),
+               let failure = previous.failure, [.corrupt, .unsupported, .permissionDenied].contains(failure) {
+                record.failure = failure
             }
-            guard fresh.count <= InstalledFontSystem.maximumRecords else { throw InstalledFontFailure.catalogLimit }
-            let active = scan.records.filter { $0.failure != .inactive }
-            let groups = Dictionary(grouping: active, by: { $0.postScriptName.lowercased() })
-            for group in groups.values where Set(group.map(\.id)).count > 1 {
-                for record in group { fresh[record.id]?.failure = .conflict }
-            }
-            var next = saved
-            next.records = fresh.values.sorted { $0.id < $1.id }
-            let changed = !prepared || next.records != saved.records || scan.grantIssues != grantIssues || scan.omittedFaceCount != omittedFaceCount || refreshFailure != nil
-            if changed { try store(next) }
-            saved = next; omittedFaceCount = scan.omittedFaceCount; grantIssues = scan.grantIssues; refreshFailure = nil; prepared = true
-            lastSuccessfulRefreshAt = ProcessInfo.processInfo.systemUptime
-            if changed { invalidate() }
-            return snapshot()
-        } catch {
-            refreshFailure = InstalledFontSystem.failure(error)
-            if !(error is InstalledFontFailure) { refreshFailure = .storage }
-            prepared = true
-            invalidate()
-            throw refreshFailure!
+            fresh[record.id] = record
         }
+        guard fresh.count <= InstalledFontSystem.maximumRecords else { throw InstalledFontFailure.catalogLimit }
+        let active = scan.records.filter { $0.failure != .inactive }
+        let groups = Dictionary(grouping: active, by: { $0.postScriptName.lowercased() })
+        for group in groups.values where Set(group.map(\.id)).count > 1 {
+            for record in group { fresh[record.id]?.failure = .conflict }
+        }
+        var next = saved
+        next.records = fresh.values.sorted { $0.id < $1.id }
+        let changed = !prepared || next.records != saved.records || scan.grantIssues != grantIssues || scan.omittedFaceCount != omittedFaceCount || refreshFailure != nil
+        if changed { try store(next) }
+        saved = next; omittedFaceCount = scan.omittedFaceCount; grantIssues = scan.grantIssues; refreshFailure = nil; prepared = true
+        lastSuccessfulRefreshAt = ProcessInfo.processInfo.systemUptime
+        if changed { invalidate() }
+        return snapshot()
     }
 
     @discardableResult
@@ -211,7 +220,12 @@ actor InstalledFontCatalogService {
         let operation: Pending
         if let existing = pending[id] { operation = existing }
         else {
-            guard pending.count < 2 else { throw InstalledFontFailure.busy }
+            guard pending.count < 2 else {
+                #if ALHANGEUL_FONT_EXTENSION_PROBE
+                ExtensionFontPerformanceTrace.busy("installedReadSlots")
+                #endif
+                throw InstalledFontFailure.busy
+            }
             let environment = environment, grants = saved.grants
             operation = Pending(token: UUID(), task: Task { try await environment.read(record, grants) })
             pending[id] = operation

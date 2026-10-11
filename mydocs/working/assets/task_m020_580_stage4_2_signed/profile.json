@@ -1,0 +1,27 @@
+{
+  "pid": 89446,
+  "imageUUID": "F2C0F5C8-D0A5-342A-8655-A358151E09FF",
+  "scope": "성능 gate와 분리한 동일 signed sandbox sample 및 SDK 읽기 조사",
+  "start": "2026-10-11T07:23:05.476281+00:00",
+  "attempts": [
+    {
+      "sequence": 0,
+      "exit": 0
+    },
+    {
+      "sequence": 1,
+      "exit": 0
+    },
+    {
+      "sequence": 2,
+      "exit": 0
+    }
+  ],
+  "sampleExit": 0,
+  "end": "2026-10-11T07:23:10.776632+00:00",
+  "sampleSHA256": "ec381555295aed56a69ce3f3f7adee717051d9418b5a85925d5a142a1fdb8ef4",
+  "observation": "현재성 enabled getter가 CoreText CopyIsEnabled → FontRegistry XPC 동기 대기로 이어짐; getter 캐시로 활성 상태를 생략하는 변경은 미구현",
+  "sdkHeader": "CTFontCollection.h",
+  "sdkHeaderSHA256": "cc3db6ddb5df3ad486dbb38052f163218251f556c09d48e057d4035be0b857c3",
+  "nextHypothesis": "기본 collection의 disabled 제외 계약과 현재 별도 enabled 필터의 동등성 확인; 확인 전 제품 변경 없음"
+}
