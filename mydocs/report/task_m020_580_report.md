@@ -3,9 +3,9 @@
 ## 1. 작업 요약과 완료 판정
 
 - 대상: [#580](https://github.com/postmelee/alhangeul-macos/issues/580), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562), Mac 통합 수용·웹 안내 [#569](https://github.com/postmelee/alhangeul-macos/issues/569). 마일스톤 M020 / v0.2 계열.
-- 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`. 작업 `local/task580`, 게시 예정 `publish/task580`, PR base `devel`.
+- 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`. 작업 `local/task580`, 게시 `publish/task580`, PR base `devel`.
 - 최종 제품 구현: `1624842b`. 같은 제품 Source 126개로 signed 후보 `580.4.3`을 검증했고 `f4b7f379`에 측정·복원 결과를 기록했다. Stage 4 완료 기준 보정 커밋은 `d9171d80`이다.
-- 2026-10-11 작업지시자가 현재 검증 결과 수용·Stage 4 기준 보정·추가 최적화의 후속 분리·Stage 5 진행을 승인했다. **Stage 4 완료, Stage 5 최종 보고·PR 준비 완료. 구체 공개 게시 승인 대기이며 merge·이슈 close·출시는 미수행이다.**
+- 2026-10-11 작업지시자가 현재 검증 결과 수용·Stage 4 기준 보정·추가 최적화의 후속 분리·Stage 5 진행을 승인했다. **Stage 4/5 완료.** 이어서 최종 보고와 구체 공개 범위를 승인받아 [후속 #581](https://github.com/postmelee/alhangeul-macos/issues/581) 등록·기존 #580 기준 갱신·`publish/task580` push·[Open PR #582](https://github.com/postmelee/alhangeul-macos/pull/582) 게시를 완료했다. CI/리뷰 대기이며 merge·이슈 close·출시는 미수행이다.
 
 확장은 변경 없는 설치 글꼴 metadata의 전체 정규화를 재사용하고 동시 준비를 합친다. 설치 사용 OFF에서는 설치 목록 준비를 생략한다. Thumbnail은 정상 세 번째 font miss를 즉시 busy로 반환하던 동작을 제한된 FIFO 대기로 바꾸고, 같은 key의 작업을 병합한다. 정확한 face/bytes·원본/권한·현재성·취소/lease·물리 I/O 수명과 기존 실행/메모리 한도를 유지했다.
 
@@ -43,7 +43,7 @@ baseline의 정확한 입력/표본은 #569 Stage 2와 #580 이슈 본문을 따
 
 정상 자동 Thumbnail 186건(반복 126 + 최대 동시 10파일·3 pass·OFF/ON 60)은 모두 완료·busy 0이다. 실제 GUI Thumbnail 85건, Preview 31건과 분리한다. 전체 대응 provider 완료 328건에는 관리 객체 삭제/권한 차단의 의도적인 공급 fallback 4건이 있으므로 328건 모두 로컬 글꼴 성공으로 설명하지 않는다.
 
-최초 준비·다수 파일 대기는 남는다. 최종 ON 다수 파일 첫 miss provider 중앙값 1,877.938ms·최대 5,339.784ms, warm exact 중앙값 357.995ms였다. 이 값을 단일 반복 요청·화면 paint·앱 시작 시간과 합치지 않으며 즉시 표시를 보장하지 않는다. 현재성 signature 비용의 추가 분해·검증된 보완은 [독립 후속 본문](../working/task_m020_580_followup_issue.md)으로 인계한다. 이 후속은 #580 완료와 #569 Mac 수용·안내·출시 준비의 선행 조건이 아니다.
+최초 준비·다수 파일 대기는 남는다. 최종 ON 다수 파일 첫 miss provider 중앙값 1,877.938ms·최대 5,339.784ms, warm exact 중앙값 357.995ms였다. 이 값을 단일 반복 요청·화면 paint·앱 시작 시간과 합치지 않으며 즉시 표시를 보장하지 않는다. 현재성 signature 비용의 추가 분해·검증된 보완은 [독립 후속 #581](https://github.com/postmelee/alhangeul-macos/issues/581)로 인계했다. 이 후속은 #580 완료와 #569 Mac 수용·안내·출시 준비의 선행 조건이 아니다.
 
 ## 4. 검증과 증거 대조
 
@@ -60,7 +60,7 @@ baseline의 정확한 입력/표본은 #569 Stage 2와 #580 이슈 본문을 따
 | Stage 5 source/증거 audit | 마지막 signed 제품 Source 126개·직접 receipt의 테스트 24개/스크립트 7개와 현재 hash 모두 일치. core lock·Studio manifest·native 두 산출물 4개 및 기존 선별 checksum 31개 일치 |
 | Stage 5 가벼운 검증 | no-AppKit·native matcher/Studio receipt·core build-info·parser self-test·mock helper guards 16조건·main/source content gate 통과. 원래 앱 inventory/strict 서명·읽기 전용 등록 점검 재확인; 개발 등록/bundle·문제·경고 0 |
 
-단계별 실제 실행/실패·회복 기록은 [Stage 1](../working/task_m020_580_stage1.md), [Stage 2](../working/task_m020_580_stage2.md), [Stage 3](../working/task_m020_580_stage3.md), [Stage 4](../working/task_m020_580_stage4.md)를 따른다. 최종 결과보고 단계는 제품을 변경하지 않아 XCTest·전체 성능·signed 설치 시험을 반복하지 않았다. [Stage 5 증거 audit](../working/assets/task_m020_580_stage5/evidence-audit.json), [검증/승인 receipt](../working/assets/task_m020_580_stage5/validation.json), [SHA256SUMS](../working/assets/task_m020_580_stage5/SHA256SUMS)를 보존한다.
+단계별 실제 실행/실패·회복 기록은 [Stage 1](../working/task_m020_580_stage1.md), [Stage 2](../working/task_m020_580_stage2.md), [Stage 3](../working/task_m020_580_stage3.md), [Stage 4](../working/task_m020_580_stage4.md)를 따른다. 최종 결과보고 단계는 제품을 변경하지 않아 XCTest·전체 성능·signed 설치 시험을 반복하지 않았다. [Stage 5 증거 audit](../working/assets/task_m020_580_stage5/evidence-audit.json), [검증/승인 receipt](../working/assets/task_m020_580_stage5/validation.json), [게시 결과](../working/assets/task_m020_580_stage5/publication.json), [SHA256SUMS](../working/assets/task_m020_580_stage5/SHA256SUMS)를 보존한다.
 
 최종 signed 첫 설치 smoke는 parent app 등록 뒤 확장 matching 실패로 중단·자동 복원됐다. 같은 고정 후보 재시도에서 설치본 marker/Info/executable SHA가 맞는 두 `.appex`만 명시 등록해 표준 smoke가 통과했다. 전역 reset이나 tracked helper 보정은 하지 않았다. 이전 실험 실패·취소/오류 대조·Rust portable 재빌드의 sandbox 접근 실패를 성공 표본/재빌드 완료로 바꾸지 않는다.
 
@@ -68,7 +68,7 @@ baseline의 정확한 입력/표본은 #569 Stage 2와 #580 이슈 본문을 따
 
 | 항목 | 인계 |
 |------|------|
-| warm <300ms 추가 최적화 | [후속 이슈 본문](../working/task_m020_580_followup_issue.md) 등록 대기. signature 내부 비용·bulk 속성/전체 key 비교의 동등성을 먼저 조사. 새로운 구현·후보 서명/설치 승인을 자동 승계하지 않음 |
+| warm <300ms 추가 최적화 | [후속 #581](https://github.com/postmelee/alhangeul-macos/issues/581) 등록 완료·미착수. signature 내부 비용·bulk 속성/전체 key 비교의 동등성을 먼저 조사. 새로운 구현·후보 서명/설치 승인을 자동 승계하지 않음 |
 | #569 Mac 통합 수용·웹 안내 | #580 merge 후 Stage 3 웹 안내 → Stage 4 같은 최종 후보의 설정/권한·Studio 기존 목록·저장/재열기·PDF·인쇄 경로·Finder·재실행·변경/복구 → 부분 보고/PR·Release Operations 인계 |
 | #569 미병합 브랜치 | `local/task569`의 진단/보고·`60ea06a384ce5ba9e43b60a30278ce1268efe237`/`e55cbaf6` 인계 지점을 보존. 이번 선별 진단과 대조하고 승인 없이 전체 cherry-pick/rebase/merge하지 않음 |
 | 미확보 환경/지원 경계 | 최소 macOS/Intel runtime, 실제 한컴 내부 자산·한컴 제거 후 유지·사용자 OS 전체 설치/비활성·물리 프린터·public DMG는 이번 수용 밖. Windows #566 독립 후속 |
@@ -79,8 +79,8 @@ baseline의 정확한 입력/표본은 #569 Stage 2와 #580 이슈 본문을 따
 
 현재 `/Applications/Alhangeul.app`은 원래 공개 v0.2.2이며 #580 후보가 설치된 상태가 아니다. Source/표본/OS·sandbox/sign·PID/image·원본/정책·복원 제한을 #569 후보 준비 시 대조한다. 설치 참조 글꼴은 원본 삭제·비활성·권한 상실 후 계속 사용을 보장하지 않는다.
 
-## 6. 구체 공개 게시 승인
+## 6. 구체 공개 게시 승인과 결과
 
-최종 보고·Stage 5 기록·오늘할일·PR 본문과 [기존 이슈 기준 갱신 본문](../working/task_m020_580_issue_update.md)을 준비했다. 공개할 범위는 `postmelee/alhangeul-macos`의 후속 이슈 등록, #580 완료 기준 본문 갱신, 현재 source/테스트/측정 증거/보고서를 포함한 `local/task580` → `publish/task580` push 및 `devel` 대상 Open PR이다. 게시 후 필수 CI/리뷰를 확인하며 merge·이슈 close·공개 배포는 이번 게시 승인에 포함하지 않는다.
+최종 보고·Stage 5 기록·오늘할일·PR 본문과 [기존 이슈 기준 갱신 본문](../working/task_m020_580_issue_update.md)을 준비한 뒤 작업지시자가 “최종 보고 승인·이슈/기준 갱신·push/Open PR 게시”로 명시 승인했다. `postmelee/alhangeul-macos`에 [후속 #581](https://github.com/postmelee/alhangeul-macos/issues/581)을 등록하고 #580 완료 기준을 갱신했으며, source/테스트/측정 증거/보고서를 포함한 `local/task580` → `publish/task580` push와 `devel` 대상 [Open PR #582](https://github.com/postmelee/alhangeul-macos/pull/582) 게시를 완료했다. 생성 당시 CI가 시작됐으며 필수 CI/리뷰를 확인한다. merge·이슈 close·공개 배포는 이번 게시 승인에 포함하지 않는다.
 
-후속 이슈의 첫 등록 시도는 자동 승인 검토가 “후속 작업 분리 승인만으로 측정·경로·커밋 정보를 포함한 구체 본문의 공개 권한이 명시되지 않았다”는 이유로 거절했다. 이슈/기존 본문/원격 브랜치/PR은 변경하지 않았으며 우회하지 않았다. 준비된 공개 본문과 전체 push 범위를 마지막에 한 번에 승인받는다. 추가 성능 보완 승인을 기다리는 상태가 아니다.
+후속 이슈의 첫 등록 시도는 자동 승인 검토가 “후속 작업 분리 승인만으로 측정·경로·커밋 정보를 포함한 구체 본문의 공개 권한이 명시되지 않았다”는 이유로 거절했다. 거절 당시 이슈/기존 본문/원격 브랜치/PR을 변경하거나 우회하지 않았다. 이후 준비된 공개 본문과 전체 push 범위를 한 번에 명시 승인받아 게시를 완료했다. 추가 성능 보완 승인을 기다리는 상태가 아니다.

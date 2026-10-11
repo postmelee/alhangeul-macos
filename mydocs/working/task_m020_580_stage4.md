@@ -333,6 +333,6 @@ ON1 HWP exact 10요청의 warm trace는 activeSignature 40구간 중앙값 **81.
 
 **부모 Stage 4 완료, Stage 5 진행 승인.** 기존 signed `measurements.json`/`validation.json`의 `goalsMet: false`, 모든 표본·원시 SHA와 이전 실패 기록은 보존한다. 새로운 보편적인 350ms 상한을 만들거나 300ms 통과로 바꾸지 않는다. 현재 결과 수용은 글꼴 정확성·원본/권한·현재성 검사 완화와 관계없다.
 
-[후속 이슈 본문](task_m020_580_followup_issue.md)은 warm 비용 분해·동등성이 입증된 작은 보완을 다룬다. 등록 시 기존 milestone과 `enhancement`/`kind:follow-up`/두 확장·rendering label을 사용한다. 구체 본문 공개 등록은 자동 승인 검토가 별도 권한을 요구해 승인 대기이며, 후속 구현·새 후보 서명/설치는 시작하지 않았다. 후속 이슈는 #580 완료와 #569 Mac 수용·안내·출시 준비의 선행 조건이 아니다.
+[후속 이슈 본문](task_m020_580_followup_issue.md)은 warm 비용 분해·동등성이 입증된 작은 보완을 다룬다. 등록 시 기존 milestone과 `enhancement`/`kind:follow-up`/두 확장·rendering label을 사용한다. 구체 본문 공개 등록은 최초 자동 승인 검토에서 별도 권한을 요구했으며, 이어서 작업지시자가 최종 보고·구체 공개 범위를 명시 승인해 [후속 #581](https://github.com/postmelee/alhangeul-macos/issues/581)로 등록했다. 후속 구현·새 후보 서명/설치는 시작하지 않았다. 후속 이슈는 #580 완료와 #569 Mac 수용·안내·출시 준비의 선행 조건이 아니다.
 
-Stage 5에서는 증거 checksum·현재 제품 source receipt·core/asset/native와 문서/본문·content gate를 확인하고 기존 성공 회귀를 취합한다. 제품 변경이 없어 전체 성능·signed 설치 시험을 반복하지 않는다. 최종 보고/PR 준비 이후 공개 게시 승인 절차를 따르며, #580 merge 후 #569 Stage 3 웹 안내 → Stage 4 같은 후보 Mac 수용으로 인계한다. 공개 release나 #562/#569 전체 완료는 포함하지 않는다.
+Stage 5에서는 증거 checksum·현재 제품 source receipt·core/asset/native와 문서/본문·content gate를 확인하고 기존 성공 회귀를 취합한다. 제품 변경이 없어 전체 성능·signed 설치 시험을 반복하지 않는다. 최종 보고와 구체 공개 범위 승인 후 [PR #582](https://github.com/postmelee/alhangeul-macos/pull/582) 게시를 완료했으며, #580 merge 후 #569 Stage 3 웹 안내 → Stage 4 같은 후보 Mac 수용으로 인계한다. 공개 release나 #562/#569 전체 완료는 포함하지 않는다.

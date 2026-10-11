@@ -4,7 +4,7 @@
 - 이슈: [#580](https://github.com/postmelee/alhangeul-macos/issues/580), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562), 후속 [#569](https://github.com/postmelee/alhangeul-macos/issues/569)
 - 제품 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`, 작업 `local/task580`
 - 수행계획 승인: 2026-10-10 “수행계획 승인·구현계획 작성 진행”. 구현계획·Stage 1 승인: 같은 날 “구현계획 승인·Stage 1 진행”.
-- 현재: Stage 1~3, Stage 4.2/4.3 보완과 새 후보 `580.4.3`의 signed Finder·실제 GUI/Preview·원상복원을 완료했다. ON metadata 약 160~170ms는 <200ms지만 provider 약 328~343ms로 원래 <300ms 목표에 미달했다. 2026-10-11 작업지시자가 현재 검증 결과의 수용·Stage 4 기준 보정·추가 최적화 후속 분리와 Stage 5 진행을 승인했다. 부모 Stage 4 완료, Stage 5 최종 보고·구체 PR 준비 완료, 공개 게시 승인 대기이며 §6.3은 미착수 후속으로 인계한다.
+- 현재: Stage 1~3, Stage 4.2/4.3 보완과 새 후보 `580.4.3`의 signed Finder·실제 GUI/Preview·원상복원을 완료했다. ON metadata 약 160~170ms는 <200ms지만 provider 약 328~343ms로 원래 <300ms 목표에 미달했다. 2026-10-11 작업지시자가 현재 검증 결과의 수용·Stage 4 기준 보정·추가 최적화 후속 분리와 Stage 5 진행을 승인했다. 부모 Stage 4 완료, Stage 5 최종 보고·공개 게시 완료([PR #582](https://github.com/postmelee/alhangeul-macos/pull/582)), CI/리뷰 대기다. §6.3은 [#581](https://github.com/postmelee/alhangeul-macos/issues/581) 미착수 후속으로 인계한다.
 - 측정 기준: #569 Stage 2 `60ea06a384ce5ba9e43b60a30278ce1268efe237`. 공개 본문의 핵심 표와 로컬 브랜치·선별 증거를 대조한다. 원시 근거는 덮어쓰지 않는다.
 
 ## 1. 현행 경로와 단계 구성
@@ -150,7 +150,7 @@ Stage 4의 첫 signed 시험에서 warm metadata 중앙값은 OFF 약 4.5~5.0ms,
 
 ### 6.3 독립 후속 인계 — warm 현재성 구간 비용 분해·입증 조건 보완 (미착수)
 
-`finder-candidate-03` signed 시험은 정상 제어 186건 busy 0·실제 GUI/Preview·원상복원을 완료했다. ON metadata 약 160~170ms는 <200ms지만 provider 약 328~343ms로 원래 <300ms에 미달했다. 2026-10-11 작업지시자는 이 후보의 측정 결과를 수용하고 Stage 4.4 제안을 독립 후속으로 분리하도록 승인했다. 아래 제안은 [후속 이슈 본문](../working/task_m020_580_followup_issue.md)으로 인계하며 #580 제품 변경을 더 시작하지 않는다. 후속 등록은 공개 본문 승인 후 수행하고 #569 Mac 수용·안내·출시 준비의 선행 조건으로 두지 않는다.
+`finder-candidate-03` signed 시험은 정상 제어 186건 busy 0·실제 GUI/Preview·원상복원을 완료했다. ON metadata 약 160~170ms는 <200ms지만 provider 약 328~343ms로 원래 <300ms에 미달했다. 2026-10-11 작업지시자는 이 후보의 측정 결과를 수용하고 Stage 4.4 제안을 독립 후속으로 분리하도록 승인했다. 아래 제안은 [후속 이슈 본문](../working/task_m020_580_followup_issue.md)으로 인계하며 #580 제품 변경을 더 시작하지 않는다. 구체 공개 본문을 승인받아 [후속 #581](https://github.com/postmelee/alhangeul-macos/issues/581)로 등록했고 #569 Mac 수용·안내·출시 준비의 선행 조건으로 두지 않는다.
 
 warm activeSignature 81.039ms 중 systemEnumerate 25.480ms가 관찰됐다. 별도 sample은 cold/warm이 섞여 있어 나머지 비용의 원인을 확정하지 않았다. 후속은 현재성 검사 횟수를 줄이지 않고 안쪽 비용부터 구분한다.
 
@@ -189,4 +189,4 @@ warm activeSignature 81.039ms 중 systemEnumerate 25.480ms가 관찰됐다. 별�
 
 수행계획·구현계획·Stage 1 및 Stage 2를 승인받아 완료했다. Stage 2 보고 후 작업지시자의 “진행해줘. 저장공간도 최대한 확보하면서 진행해줘.” 지시로 **Stage 3의 제한된 렌더 대기·병합·취소/과부하 구현과 소유 부산물 정리를 승인받아 완료했다.** [Stage 3 보고](../working/task_m020_580_stage3.md) 후 작업지시자의 “진행해줘.” 지시로 Stage 4 재측정·후보 수용 준비를 승인받았다.
 
-고유 후보/fixture·백업/복원 대상의 서명·임시 설치는 각 후보별 승인에 따라 수행·복원했다. Stage 4.2/4.3의 구체 보완도 승인받아 구현·직접 회귀·signed 실제 GUI 수용을 완료했다. ON provider가 원래 목표에 미달해 Stage 4.4를 제안했으나 **2026-10-11 작업지시자가 현재 결과 수용·Stage 4 완료 기준 보정·추가 최적화 후속 분리·Stage 5 진행을 승인했다.** Stage 4 완료 기록과 최종 회귀 근거·보고서·오늘할일·PR 본문을 준비한다. 최종 보고/공개 본문 승인 절차 후 `publish/task580` → `devel` Open PR을 게시하며 merge 확인 전 이슈를 닫지 않는다. 후속 최적화의 구체 공개 본문은 자동 승인 검토에서 별도 공개 권한을 요구해 등록 대기다. 추가 소스 변경·새 서명/임시 설치·새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·공개 release는 포함하지 않는다.
+고유 후보/fixture·백업/복원 대상의 서명·임시 설치는 각 후보별 승인에 따라 수행·복원했다. Stage 4.2/4.3의 구체 보완도 승인받아 구현·직접 회귀·signed 실제 GUI 수용을 완료했다. ON provider가 원래 목표에 미달해 Stage 4.4를 제안했으나 **2026-10-11 작업지시자가 현재 결과 수용·Stage 4 완료 기준 보정·추가 최적화 후속 분리·Stage 5 진행을 승인했다.** Stage 4 완료 기록과 최종 회귀 근거·보고서·오늘할일·PR 본문을 준비했다. 최종 보고와 구체 공개 본문·push/Open PR 게시를 명시 승인받아 [후속 #581](https://github.com/postmelee/alhangeul-macos/issues/581) 등록·기존 #580 기준 갱신·`publish/task580` → `devel` [Open PR #582](https://github.com/postmelee/alhangeul-macos/pull/582) 게시를 완료했다. 최초 자동 승인 검토의 공개 권한 요구는 이 명시 승인으로 해소했다. CI/리뷰를 확인하며 merge 확인 전 이슈를 닫지 않는다. 추가 소스 변경·새 서명/임시 설치·새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·공개 release는 포함하지 않는다.
