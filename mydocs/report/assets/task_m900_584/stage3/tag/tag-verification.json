@@ -1,0 +1,17 @@
+{
+  "verified_at_kst": "2026-10-12T07:27:19.569762+09:00",
+  "tag_name": "v0.2.3",
+  "tag_object_sha": "041343f5f1c747d50ccfdaee8e8f28040527efa3",
+  "peeled_commit_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "tag_kind": "tag",
+  "tag_message": "Alhangeul v0.2.3",
+  "remote_object_matches_local": true,
+  "remote_commit_matches_approved_main": true,
+  "tag_created": true,
+  "tag_pushed": true,
+  "tag_force_moved": false,
+  "release_publish_dispatched": false,
+  "signed_dmg_created": false,
+  "public_release_promoted": false,
+  "result": "PASS"
+}
