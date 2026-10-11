@@ -10,10 +10,12 @@ p=argparse.ArgumentParser(); p.add_argument('--candidate-dir',type=Path,required
 p.add_argument('--mode',choices=['plan','sign','install','restore'],default='plan'); a=p.parse_args()
 base=a.candidate_dir.resolve()
 legacy=base.is_relative_to(ROOT/'build.noindex/task568/stage5')
-performance=base.is_relative_to(ROOT/'build.noindex/task580/stage4')
-if not (legacy or performance): raise SystemExit('Task 568 Stage 5 또는 Task 580 Stage 4 후보만 사용합니다')
+performance_roots={task:ROOT/f'build.noindex/task{task}/stage4' for task in (569,580)}
+task=next((task for task,path in performance_roots.items() if base.is_relative_to(path)),None)
+performance=task is not None
+if not (legacy or performance): raise SystemExit('Task 568 Stage 5 또는 Task 569/580 Stage 4 후보만 사용합니다')
 receipt=json.loads((base/'preparation.json').read_text()); identifier=receipt['probeIdentifier']
-if performance and receipt.get('task')!=580: raise SystemExit('Task 580 준비 영수증이 필요합니다')
+if performance and receipt.get('task')!=task: raise SystemExit(f'Task {task} 준비 영수증이 필요합니다')
 app=base/'Alhangeul.app'; fixture=base/'FontExtensionFixtureProbe.app'; stateFile=base/'install-state.json'
 def run(args,**kw): return subprocess.run(list(map(str,args)),check=True,**kw)
 def info(bundle): return plistlib.loads((bundle/'Contents/Info.plist').read_bytes())
@@ -74,8 +76,8 @@ if performance:
     if any(digest(ROOT/path)!=expected for path,expected in receipt['nativeArtifactSHA256'].items()): raise SystemExit('native 산출물이 변경됐습니다')
     for sample in receipt['samples']:
         path=Path(sample['path'])
-        if not path.is_relative_to(ROOT/'build.noindex/task580/stage4') or digest(path)!=sample['sha256']:
-            raise SystemExit('Task 580 입력 문서 경로/hash 불일치')
+        if not path.is_relative_to(performance_roots[task]) or digest(path)!=sample['sha256']:
+            raise SystemExit(f'Task {task} 입력 문서 경로/hash 불일치')
 for bundle in [app,fixture]+sorted((app/'Contents/PlugIns').glob('*.appex')):
     if marker(bundle)!=identifier: raise SystemExit('같은 고유 테스트 보관함 설정이 필요합니다')
 if a.mode=='sign':

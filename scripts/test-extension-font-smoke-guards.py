@@ -16,12 +16,13 @@ from extension_font_probe_inventory import bundle_inventory, inventory_digest
 ROOT = Path(__file__).resolve().parents[1]
 p = argparse.ArgumentParser()
 p.add_argument('--output', type=Path, required=True)
+p.add_argument('--task', type=int, choices=[569,580], default=580)
 a = p.parse_args(); out = a.output.resolve()
-if out.exists() or not out.is_relative_to(ROOT / 'build.noindex/task580/stage4'):
-    raise SystemExit('Task 580 Stage 4 아래 새 격리 경로가 필요합니다')
+if out.exists() or not out.is_relative_to(ROOT / f'build.noindex/task{a.task}/stage4'):
+    raise SystemExit(f'Task {a.task} Stage 4 아래 새 격리 경로가 필요합니다')
 out.mkdir(parents=True)
 base = out / 'candidate'; base.mkdir()
-identifier = '580-GUARD-ONLY'
+identifier = f'{a.task}-GUARD-ONLY'
 app = base / 'Alhangeul.app'; fixture = base / 'FontExtensionFixtureProbe.app'
 for bundle in [app, fixture]:
     (bundle / 'Contents/MacOS').mkdir(parents=True)
@@ -36,7 +37,7 @@ def digest(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def bundle_hashes():
     return {str(b.relative_to(base)): {'infoSHA256': digest(b/'Contents/Info.plist'),
             'executableSHA256': digest(b/'Contents/MacOS/guard')} for b in [app, fixture]}
-receipt = {'fixtureSourceSHA256':digest(ROOT/'Tests/ExtensionFontProbe/fixture.swift'), 'task': 580, 'probeIdentifier': identifier,
+receipt = {'fixtureSourceSHA256':digest(ROOT/'Tests/ExtensionFontProbe/fixture.swift'), 'task': a.task, 'probeIdentifier': identifier,
            'sourceSHA256':{str(path.relative_to(ROOT)):digest(path) for path in sorted((ROOT/'Sources').rglob('*.swift'))},
            'coreLockSHA256': digest(ROOT/'rhwp-core.lock'),
            'assetManifestSHA256': digest(ROOT/'Sources/HostApp/Resources/rhwp-studio/manifest.json'),
@@ -60,8 +61,8 @@ def rejected(name, value, expected, candidate=base):
     results[name] = True
 
 rejected('noSigningAuthorization', receipt, 'PROBE_SIGN_ID')
-rejected('wrongPath', receipt, 'Stage 4 후보', ROOT/'build.noindex/task580/stage3')
-r = copy.deepcopy(receipt); r['task'] = 569
+rejected('wrongPath', receipt, 'Stage 4 후보', ROOT/f'build.noindex/task{a.task}/stage3')
+r = copy.deepcopy(receipt); r['task'] = 580 if a.task==569 else 569
 rejected('wrongTask', r, '준비 영수증')
 r = copy.deepcopy(receipt); r['sourceSHA256'] = {'Sources/ThumbnailExtension/HwpThumbnailRenderCache.swift':'0'*64}
 rejected('changedSource', r, '제품 소스')

@@ -1,0 +1,29 @@
+{
+  "checks": [
+    {
+      "case": "Task 568 Stage 5",
+      "passed": true,
+      "mode": "install",
+      "returncode": 1
+    },
+    {
+      "case": "Task 569 준비 영수증",
+      "passed": true,
+      "mode": "sign",
+      "returncode": 1
+    },
+    {
+      "case": "제품 소스가 변경",
+      "passed": true,
+      "mode": "install",
+      "returncode": 1
+    },
+    {
+      "case": "입력 문서 경로/hash 불일치",
+      "passed": true,
+      "mode": "install",
+      "returncode": 1
+    }
+  ],
+  "signingOrInstallationPerformed": false
+}

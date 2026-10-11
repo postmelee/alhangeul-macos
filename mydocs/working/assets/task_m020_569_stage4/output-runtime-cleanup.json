@@ -1,0 +1,17 @@
+[
+  {
+    "label": "managed-b0f388f9-4496-4f4b-b4aa-0133cb280d90",
+    "logicalBytes": 17572574,
+    "removed": true
+  },
+  {
+    "label": "installed-66fdab97-e62e-47f4-8874-c82800c550f0",
+    "logicalBytes": 921544,
+    "removed": true
+  },
+  {
+    "label": "baseline-cb1c3378-c1f7-4284-8992-857cddfba648",
+    "logicalBytes": 946507,
+    "removed": true
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "scope": "controlled fixtures; no external command or actual OS signing/install",
+  "proofs": {
+    "noSigningAuthorization": true,
+    "wrongPath": true,
+    "wrongTask": true,
+    "changedSource": true,
+    "addedSourceSet": true,
+    "removedSourceSet": true,
+    "changedCore": true,
+    "changedAssetReceipt": true,
+    "changedNativeArtifact": true,
+    "wrongSamplePath": true,
+    "changedSample": true,
+    "changedUnsignedResource": true,
+    "restoredUnsignedResource": true,
+    "backupContentLinkModeEquality": true,
+    "changedModeRejected": true,
+    "changedLinkRejectedWithoutFollowing": true
+  }
+}

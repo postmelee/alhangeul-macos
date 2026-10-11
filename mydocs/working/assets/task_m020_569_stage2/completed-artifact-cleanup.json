@@ -1,0 +1,32 @@
+{
+  "reason": "completed baseline measurement; both original backups and restored app compared; raw logs/receipts and source retained",
+  "removed": [
+    {
+      "path": "build.noindex/task569/stage2/finder-candidate-01/Alhangeul.app",
+      "logicalBytes": 273912725
+    },
+    {
+      "path": "build.noindex/task569/stage2/finder-candidate-01/FontExtensionFixtureProbe.app",
+      "logicalBytes": 19026107
+    },
+    {
+      "path": "build.noindex/task569/stage2/finder-candidate-01/backup/Alhangeul.app",
+      "logicalBytes": 446248370
+    },
+    {
+      "path": "build.noindex/task569/stage2/finder-candidate-01/failed-install-01/backup/Alhangeul.app",
+      "logicalBytes": 446248370
+    },
+    {
+      "path": "build.noindex/task569/stage2/finder-candidate-01/finder-results/20261010-155604/staging/Alhangeul.app",
+      "logicalBytes": 273912725
+    },
+    {
+      "path": "build.noindex/task569/stage2/finder-candidate-01/finder-results/20261010-155700/staging/Alhangeul.app",
+      "logicalBytes": 273912725
+    }
+  ],
+  "logicalBytes": 1733261022,
+  "originalAppPreserved": true,
+  "globalReset": false
+}

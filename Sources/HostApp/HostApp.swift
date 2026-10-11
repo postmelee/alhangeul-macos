@@ -162,6 +162,14 @@ private struct HostAppCommands: Commands {
 
         CommandGroup(replacing: .newItem) {}
 
+        CommandGroup(after: .help) {
+            Button("Mac 글꼴 사용 안내") {
+                if let url = URL(string: "https://postmelee.github.io/alhangeul-macos/fonts/") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+        }
+
         CommandGroup(replacing: .saveItem) {
             Button("저장") {
                 RhwpStudioNativeCommandDispatcher.run("file:save")

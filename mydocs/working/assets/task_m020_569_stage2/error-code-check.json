@@ -1,0 +1,6 @@
+{
+  "sourceSHA256": "e46bb8bb28b17d8a1831a223e5a4e2992a70c9cefeb32b46410f4755896bc59a",
+  "source": "Sources/Shared/FontLibrary/HostFontSupplyTypes.swift",
+  "actualEnumExtracted": true,
+  "result": "busy=4 stale=3"
+}
