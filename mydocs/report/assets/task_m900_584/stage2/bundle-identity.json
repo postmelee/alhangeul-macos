@@ -1,0 +1,86 @@
+[
+  {
+    "configuration": "source",
+    "target": "HostApp",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "$(PRODUCT_BUNDLE_IDENTIFIER)"
+  },
+  {
+    "configuration": "source",
+    "target": "QLExtension",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "$(PRODUCT_BUNDLE_IDENTIFIER)"
+  },
+  {
+    "configuration": "source",
+    "target": "ThumbnailExtension",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "$(PRODUCT_BUNDLE_IDENTIFIER)"
+  },
+  {
+    "configuration": "source",
+    "target": "SpotlightImporter",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "$(PRODUCT_BUNDLE_IDENTIFIER)"
+  },
+  {
+    "configuration": "Debug",
+    "target": "HostApp",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "com.postmelee.alhangeul"
+  },
+  {
+    "configuration": "Debug",
+    "target": "QLExtension",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "com.postmelee.alhangeul.QLExtension"
+  },
+  {
+    "configuration": "Debug",
+    "target": "ThumbnailExtension",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "com.postmelee.alhangeul.ThumbnailExtension"
+  },
+  {
+    "configuration": "Debug",
+    "target": "SpotlightImporter",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "com.postmelee.alhangeul.SpotlightImporter"
+  },
+  {
+    "configuration": "Release",
+    "target": "HostApp",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "com.postmelee.alhangeul"
+  },
+  {
+    "configuration": "Release",
+    "target": "QLExtension",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "com.postmelee.alhangeul.QLExtension"
+  },
+  {
+    "configuration": "Release",
+    "target": "ThumbnailExtension",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "com.postmelee.alhangeul.ThumbnailExtension"
+  },
+  {
+    "configuration": "Release",
+    "target": "SpotlightImporter",
+    "version": "0.2.3",
+    "build": "21",
+    "bundle_id": "com.postmelee.alhangeul.SpotlightImporter"
+  }
+]

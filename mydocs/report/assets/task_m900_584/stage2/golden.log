@@ -1,0 +1,8 @@
+   Compiling rhwp_mac_bridge v0.1.0 (<workspace>/RustBridge)
+    Finished `release` profile [optimized] target(s) in 2.93s
+     Running `RustBridge/target/aarch64-apple-darwin/release/examples/render_tree_golden <workspace>/samples/basic/request.hwp 0`
+LAYOUT_TABLE_OVERLAP: page=0, sec=0, para_a=14, para_b=14, a=294.4~312.6, b=294.4~312.6, overlap=18.2px
+LAYOUT_TABLE_OVERLAP: page=0, sec=0, para_a=14, para_b=14, a=294.4~312.6, b=294.4~312.6, overlap=18.2px
+OK: producer golden decoded (TextRun=103, Table=4, TextLine=65)
+OK: producer golden decoded (TextRun=103, Table=4, TextLine=65)
+OK: pinned producer, golden provenance and Swift decoder contract match

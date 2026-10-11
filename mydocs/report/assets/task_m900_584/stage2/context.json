@@ -1,0 +1,12 @@
+{
+  "stage": "#584 Stage 2",
+  "source_commit": "ee453da2c68721542d05d88580f9cd26a22eb2af",
+  "verified_at": "2026-10-12T04:09:43.320609+09:00",
+  "macos": "26.5.2",
+  "machine": "arm64",
+  "xcode": "Xcode 26.6\nBuild version 17F113",
+  "rust": "rustc 1.94.1 (e408947bf 2026-03-25)",
+  "new_dmg": null,
+  "public_release": "v0.2.2",
+  "issue_complete": false
+}

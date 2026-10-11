@@ -1,0 +1,41 @@
+{
+  "cleaned_at": "2026-10-12T04:15:32.044617+09:00",
+  "removed_paths": [
+    {
+      "path": "build.noindex/task584/stage2/DerivedData",
+      "logical_bytes": 1036964478
+    },
+    {
+      "path": "build.noindex/task584/stage2/DerivedDataRelease",
+      "logical_bytes": 2188065582
+    },
+    {
+      "path": "build.noindex/task584/stage2/render/swift-module-cache",
+      "logical_bytes": 64142
+    },
+    {
+      "path": "build.noindex/task584/stage2/render/clang-module-cache",
+      "logical_bytes": 34933824
+    },
+    {
+      "path": "build.noindex/task584/stage2/pages",
+      "logical_bytes": 59089586
+    },
+    {
+      "path": "RustBridge/target",
+      "logical_bytes": 1871910419
+    }
+  ],
+  "logical_bytes_removed": 5191028031,
+  "disk_free_bytes_before": 10623557632,
+  "disk_free_bytes_after": 15006945280,
+  "preserved": [
+    "Frameworks 고정 산출물",
+    "Cargo official source/registry cache",
+    "기존 Sparkle cache",
+    "raw 검증 로그·render PNG",
+    "tracked 증거·스크린샷",
+    "원래 Applications 앱"
+  ],
+  "new_dmg_created": false
+}

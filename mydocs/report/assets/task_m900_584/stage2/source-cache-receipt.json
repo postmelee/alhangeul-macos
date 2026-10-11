@@ -1,0 +1,10 @@
+{
+  "commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "excluded_cached_paths": [
+    "mydocs/pr/assets",
+    "pdf"
+  ],
+  "reason": "공식 의존성 캐시의 PR 이미지·비교 PDF를 제외해 저장공간 확보. 제품 소스·tag·lock 수정 없음.",
+  "tracked_changes": [],
+  "git_status": "?? .cargo-ok"
+}

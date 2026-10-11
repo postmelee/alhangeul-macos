@@ -1,0 +1,46 @@
+[
+  {
+    "configuration": "Debug",
+    "exit_code": 0,
+    "command": [
+      "xcodebuild",
+      "-project",
+      "Alhangeul.xcodeproj",
+      "-scheme",
+      "HostApp",
+      "-configuration",
+      "Debug",
+      "-derivedDataPath",
+      "build.noindex/task584/stage2/DerivedData",
+      "-clonedSourcePackagesDirPath",
+      "build.noindex/task569/stage3/host-build/SourcePackages",
+      "-disableAutomaticPackageResolution",
+      "-skipPackageUpdates",
+      "CODE_SIGNING_ALLOWED=NO",
+      "build"
+    ]
+  },
+  {
+    "configuration": "Release",
+    "exit_code": 0,
+    "command": [
+      "xcodebuild",
+      "-project",
+      "Alhangeul.xcodeproj",
+      "-scheme",
+      "HostApp",
+      "-configuration",
+      "Release",
+      "-derivedDataPath",
+      "build.noindex/task584/stage2/DerivedDataRelease",
+      "-clonedSourcePackagesDirPath",
+      "build.noindex/task569/stage3/host-build/SourcePackages",
+      "-disableAutomaticPackageResolution",
+      "-skipPackageUpdates",
+      "ARCHS=arm64 x86_64",
+      "ONLY_ACTIVE_ARCH=NO",
+      "CODE_SIGNING_ALLOWED=NO",
+      "build"
+    ]
+  }
+]

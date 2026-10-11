@@ -2,7 +2,7 @@
 
 ## 기준과 상태
 
-2026-10-12 Stage 1에서 만든 검증 계약이다. 계획은 v0.2.3 / build 21이며 최종 일반 Release signed/notarized DMG의 source SHA·run/artifact/hash는 아직 없다. 모든 runtime 행은 **대기**다. 현재 PASS는 출처/정적 조사에 한정하며 최종 후보 수용을 뜻하지 않는다.
+2026-10-12 Stage 1에서 만든 검증 계약이다. 계획은 v0.2.3 / build 21이며 최종 일반 Release signed/notarized DMG의 source SHA·run/artifact/hash는 아직 없다. 모든 runtime 행은 **대기**다. Stage 2의 source/unsigned build·helper·로컬 Pages 선행 검증은 PASS지만 아래 최종 DMG 수용을 뜻하지 않는다. [Stage 2 보고](../working/task_m900_584_stage2.md)와 새 DMG 검사 결과를 구분한다.
 
 [릴리즈 기록](../release/v0.2.3.md), [구현계획](../plans/task_m900_584_impl.md), [Stage 1 출처](../report/assets/task_m900_584/stage1/context.json)를 기준으로 한다.
 
