@@ -1,7 +1,7 @@
 # Task M020 #569 — Mac 출시 수용 기준
 
 - 최초 기준일: 2026-10-10, 작업 `local/task569`, 당시 제품 기준 `dac73a589dc17143e744da6a12a51d638a81fb77`. 2026-10-12 Stage 4 제품 소스는 `46b3d66828bc2616842abdff6821b4aea3aed162`로 고정했다.
-- 현재 단계: [Stage 4](../working/task_m020_569_stage4.md) 같은 소스의 Developer ID 진단 후보 Mac 주요 수용·복원/정리 완료. Stage 5 승인 전. 과거 증거·현재 진단 후보·최종 배포 DMG 수용을 구분한다.
+- 현재 단계: [Stage 4](../working/task_m020_569_stage4.md) 같은 소스의 Developer ID 진단 후보 Mac 주요 수용·복원/정리 결과 수용 승인. [Stage 5](../working/task_m020_569_stage5.md) 회귀·[Mac 부분 최종 보고](../report/task_m020_569_report.md) 준비 완료, 공개 게이트 승인 전. 과거 증거·현재 진단 후보·최종 배포 DMG 수용을 구분한다.
 - core/Studio: 공식 `v0.8.7` / `1a76570e833917d15817415a53c09ad61ab3203f`.
 - 근거: [#568 소비자 인계](task_m020_568_consumer_handoff.md), [Stage 1 대조 영수증](../working/assets/task_m020_569_stage1/evidence-audit.json).
 

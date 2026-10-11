@@ -1,0 +1,69 @@
+{
+  "task": 569,
+  "stage": 5,
+  "date": "2026-10-12",
+  "approval": "Stage 4 수용·Stage 5 준비 진행",
+  "scope": "로컬 회귀·최종 보고·부분 PR 초안; 공개 게시 제외",
+  "tests": {
+    "fontLibrary": {
+      "count": 162,
+      "failures": 0,
+      "skipped": 0
+    },
+    "studioNode": {
+      "count": 30,
+      "failures": 0,
+      "skipped": 0
+    },
+    "hostOutputPrintSpotlight": {
+      "count": 81,
+      "failures": 0,
+      "skipped": 0
+    },
+    "candidateGuards": {
+      "task569": 16,
+      "task580": 16,
+      "externalMutation": false
+    }
+  },
+  "recovery": {
+    "initialHostFailures": 1,
+    "reason": "전제 Debug HostApp 미준비; Spotlight importer bundle nil",
+    "sameSuiteAfterHostBuild": "81개 통과, 제품/테스트 변경 없음",
+    "registration": "시험 bundle의 Sparkle Updater 경로를 추가 해제한 후 최종 hygiene 통과"
+  },
+  "contracts": {
+    "explicitFallbackBlockedFamilyReadCount": 0,
+    "browserFaceLoadFailureIdentifiesFamily": true
+  },
+  "validators": {
+    "no-appkit": "passed",
+    "matcher": "passed",
+    "studio-assets": "passed",
+    "core-build-info": "passed"
+  },
+  "sourceAudit": "evidence-audit.json",
+  "hygiene": {
+    "providerApps": [
+      "/Applications/Alhangeul.app"
+    ],
+    "developmentRegistrations": 0,
+    "developmentApps": 0,
+    "issues": 0,
+    "warnings": 0,
+    "globalReset": false
+  },
+  "originalAppStrictSignature": "passed",
+  "ci": "PR 게시 전 미실행",
+  "publicPush": false,
+  "publicPR": false,
+  "publicRelease": false,
+  "issuesClosed": false,
+  "rawLogSHA256": {
+    "font-library.log": "c00683d28f73a558a48c67a67cce4b4bf5802902be59db77e0e85cba4456f7d8",
+    "studio-output.log": "4122eb598aaddb801509edf855113c4a4430020e0f196d3c1ec27b06a39757d6",
+    "studio-output-retry.log": "f82bf3598eee45b45af7c185469626d4ba7f97b34e39823e9f748394022795b4",
+    "host-debug-build.log": "ee711c2a26425d1f1121be6714881de4b0e3d22f996fed5e1301b002764d0a9d",
+    "final-hygiene.log": "bb3c7097a601241df8e1e20613d51e2ad56c7f6003d9ef8501844446d75c29ce"
+  }
+}
