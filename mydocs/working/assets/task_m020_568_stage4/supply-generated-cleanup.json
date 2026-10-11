@@ -1,0 +1,278 @@
+{
+  "removed": [
+    {
+      "path": "build.noindex/task568/stage4/host/Build/Products/Debug/Alhangeul.app",
+      "bytes": 289079269
+    },
+    {
+      "path": "build.noindex/task568/stage4/host/Build/Products/Debug/AlhangeulPreview.appex",
+      "bytes": 67298088
+    },
+    {
+      "path": "build.noindex/task568/stage4/host/Build/Products/Debug/AlhangeulThumbnail.appex",
+      "bytes": 67364141
+    },
+    {
+      "path": "build.noindex/task568/stage4/host/Build/Products/Debug/Sparkle.framework/Versions/B/Updater.app",
+      "bytes": 308430
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-3/native-supply",
+      "bytes": 66740208
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-3/library-BE7F21F9-C886-44EE-B4AA-E5893E389475",
+      "bytes": 179
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-3/modules",
+      "bytes": 35096054
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-3/installed-656540EC-A19D-4533-AE59-3D551EED8B54",
+      "bytes": 262511
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-2/native-supply",
+      "bytes": 66723280
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-2/installed-120F1DBA-DCBA-4EB1-856E-6871F1126690",
+      "bytes": 262511
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-2/library-688E278D-0BA9-4740-854F-C55FB08605B0",
+      "bytes": 179
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-2/modules",
+      "bytes": 35096054
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-01/installed-084C32BD-E868-4A25-8CB0-C8E2FEABAFD7",
+      "bytes": 261967
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-01/native-supply",
+      "bytes": 66651424
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-01/modules",
+      "bytes": 35093670
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-06/installed-skia.png",
+      "bytes": 21971
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-06/library-D2E2C5FC-DE8B-4BD6-9B8C-5EA0D5A80EED",
+      "bytes": 16627960
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-06/native-supply",
+      "bytes": 66688336
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-06/modules",
+      "bytes": 35093670
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-06/installed-29CC9679-2986-4D5D-BF80-3DDE3D5DF2E3",
+      "bytes": 262511
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-06/installed-cg.png",
+      "bytes": 22167
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-07/installed-skia.png",
+      "bytes": 21971
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-07/native-supply",
+      "bytes": 66722944
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-07/library-448539F1-F2A2-49B7-A3E2-B28AA2F1DA4B",
+      "bytes": 16628357
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-07/modules",
+      "bytes": 35093670
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-07/installed-cg.png",
+      "bytes": 22167
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-07/installed-62A689E7-B614-4AEC-8DB6-AA7E62998A5A",
+      "bytes": 262511
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final/installed-skia.png",
+      "bytes": 21971
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final/native-supply",
+      "bytes": 66722944
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final/library-E35185E8-F251-4DF0-95D8-EAED65759C89",
+      "bytes": 16628357
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final/installed-6D0DD7D8-9896-40AA-845A-8804356B92C3",
+      "bytes": 262511
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final/modules",
+      "bytes": 35095150
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final/installed-cg.png",
+      "bytes": 22167
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-05/installed-skia.png",
+      "bytes": 21971
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-05/native-supply",
+      "bytes": 66688336
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-05/library-3038A90D-8B09-4063-89CC-BED475C741B5",
+      "bytes": 25059938
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-05/modules",
+      "bytes": 35093670
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-05/installed-cg.png",
+      "bytes": 22167
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-05/installed-DD840355-65B5-43BF-A639-D205117721B2",
+      "bytes": 262511
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-02/installed-AEAF7D90-4B0D-4B24-A4D8-58C3A92BBFF6",
+      "bytes": 261967
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-02/native-supply",
+      "bytes": 66651424
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-02/modules",
+      "bytes": 35093670
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-03/installed-469200E0-AF62-4C67-A33C-1E02650FDDF9",
+      "bytes": 262511
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-03/installed-skia.png",
+      "bytes": 21971
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-03/native-supply",
+      "bytes": 66668096
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-03/library-82AC7C6A-F61E-413D-9778-EC9EF3E52C73",
+      "bytes": 25059496
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-03/modules",
+      "bytes": 35093670
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-03/installed-cg.png",
+      "bytes": 22167
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-accepted/native-supply",
+      "bytes": 66723280
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-accepted/installed-79D4E7B0-F44D-4654-A058-335BFE919AB7",
+      "bytes": 262531
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-accepted/library-953592E3-DE7C-4490-A337-A8716D75E7CE",
+      "bytes": 179
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-accepted/modules",
+      "bytes": 35096798
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-04/installed-skia.png",
+      "bytes": 21971
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-04/installed-3927E46D-82BE-4AC1-BCB9-7E3F8C4946AA",
+      "bytes": 262511
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-04/native-supply",
+      "bytes": 66668144
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-04/modules",
+      "bytes": 35093670
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-04/library-2E93E878-0505-48BB-9342-C75DB3E4EB04",
+      "bytes": 25059495
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-04/installed-cg.png",
+      "bytes": 22167
+    },
+    {
+      "path": "build.noindex/task568/stage4/host/Build/Products/Debug/Alhangeul.app",
+      "bytes": 289085477
+    },
+    {
+      "path": "build.noindex/task568/stage4/host/Build/Products/Debug/AlhangeulPreview.appex",
+      "bytes": 67299912
+    },
+    {
+      "path": "build.noindex/task568/stage4/host/Build/Products/Debug/AlhangeulThumbnail.appex",
+      "bytes": 67365981
+    },
+    {
+      "path": "build.noindex/task568/stage4/host/Build/Products/Debug/Sparkle.framework/Versions/B/Updater.app",
+      "bytes": 308430
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-proof/installed-skia.png",
+      "bytes": 21971
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-proof/installed-40CC5551-7BDD-44FF-9B52-102B9B428DD9",
+      "bytes": 262511
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-proof/native-supply",
+      "bytes": 66723280
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-proof/modules",
+      "bytes": 35098062
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-proof/library-C56BFEE2-6252-43A4-B497-029A4C246903",
+      "bytes": 16628533
+    },
+    {
+      "path": "build.noindex/task568/stage4/supply-final-proof/installed-cg.png",
+      "bytes": 22167
+    }
+  ],
+  "logicalBytes": 2214769935,
+  "preserved": "최종 supply-complete 결과·PNG·로그·binary와 공통 Rust/Xcode 캐시"
+}

@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "probeIdentifier": "86066D3B-F312-4F45-A5D6-69D88D012CB0",
+  "platform": "arm64/macOS 26.5.2 (25F84)",
+  "core": "v0.8.7 / 1a76570e833917d15817415a53c09ad61ab3203f",
+  "signedReleaseBackend": "CoreGraphics",
+  "acceptedProcessIDs": {
+    "Thumbnail": [
+      52517,
+      56552
+    ],
+    "QuickLook": [
+      52692,
+      59467
+    ]
+  },
+  "metadataMilliseconds": {
+    "count": 32,
+    "minimum": 453.637875,
+    "median": 1089.7723335,
+    "maximum": 2949.453667
+  },
+  "restore": {
+    "restored": true,
+    "bundleFilesAndLinks": 152,
+    "treeSHA256": "46aa59aebfba3e825b371d6e6487df9fd86eeca7bd033655b004e606da3fc38e",
+    "originalInfoSHA256": "41f64c73e4d2848e2b8d34d4b3a1954e0645121072074f5d299929b5d52279a7"
+  },
+  "restored": true,
+  "limits": "Finder/OS persistent cache automatic invalidation and macOS 12/Intel runtime remain unverified; Skia acceptance is the unsigned common renderer, Release extensions use CoreGraphics."
+}

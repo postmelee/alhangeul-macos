@@ -1,0 +1,178 @@
+{
+  "phases": [
+    {
+      "phase": "on-baseline",
+      "caches": [
+        "miss",
+        "exactHit"
+      ],
+      "fontMessages": [
+        "Thumbnail fonts identity=a1bc533987f5f23b9941110041809fd7581222149bb235ed504aafafa5815ffe faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+        "Thumbnail fonts identity=a1bc533987f5f23b9941110041809fd7581222149bb235ed504aafafa5815ffe faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none"
+      ],
+      "pid": 52813,
+      "imageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+      "pngSHA256": [
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048",
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+      ]
+    },
+    {
+      "phase": "off",
+      "caches": [
+        "miss",
+        "exactHit"
+      ],
+      "fontMessages": [
+        "Thumbnail fonts identity=bdc79cbf89b146e4313bb918fda8d78fe19ac47a1a7dd06e0e9225773de2b43e faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+        "Thumbnail fonts identity=bdc79cbf89b146e4313bb918fda8d78fe19ac47a1a7dd06e0e9225773de2b43e faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none"
+      ],
+      "pid": 52813,
+      "imageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+      "pngSHA256": [
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048",
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+      ]
+    },
+    {
+      "phase": "conflict-added",
+      "caches": [
+        "miss",
+        "exactHit"
+      ],
+      "fontMessages": [
+        "Thumbnail fonts identity=a800cc650770887ac28c9a3c130fefb53a2cb378c3f564816d25d431748e082a faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+        "Thumbnail fonts identity=a800cc650770887ac28c9a3c130fefb53a2cb378c3f564816d25d431748e082a faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none"
+      ],
+      "pid": 52813,
+      "imageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+      "pngSHA256": [
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048",
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+      ]
+    },
+    {
+      "phase": "conflict-selected",
+      "caches": [
+        "miss",
+        "exactHit"
+      ],
+      "fontMessages": [
+        "Thumbnail fonts identity=f3d1e35352e07441d6c230322c1a9a81a1d90bfc3fbf3d3fe6196cf51fd2de98 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+        "Thumbnail fonts identity=f3d1e35352e07441d6c230322c1a9a81a1d90bfc3fbf3d3fe6196cf51fd2de98 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none"
+      ],
+      "pid": 52813,
+      "imageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+      "pngSHA256": [
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048",
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+      ]
+    },
+    {
+      "phase": "selection-restored",
+      "caches": [
+        "miss",
+        "exactHit"
+      ],
+      "fontMessages": [
+        "Thumbnail fonts identity=ecd558710b5afcb349c81c759e260bad40daf0160adfe15d4dafc290f0a1febc faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+        "Thumbnail fonts identity=ecd558710b5afcb349c81c759e260bad40daf0160adfe15d4dafc290f0a1febc faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none"
+      ],
+      "pid": 52813,
+      "imageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+      "pngSHA256": [
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048",
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+      ]
+    },
+    {
+      "phase": "permission-denied",
+      "caches": [
+        "miss",
+        "miss"
+      ],
+      "fontMessages": [
+        "Thumbnail fonts identity=none faces= supplyFallback=FontLibraryError:io(13)",
+        "Thumbnail fonts identity=none faces= supplyFallback=FontLibraryError:io(13)"
+      ],
+      "pid": 52813,
+      "imageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+      "pngSHA256": [
+        "5adda3e86868da04716524632ddaea3251969d3a118f3a41aecd169b367e2b9d",
+        "5adda3e86868da04716524632ddaea3251969d3a118f3a41aecd169b367e2b9d"
+      ]
+    },
+    {
+      "phase": "permission-restored",
+      "caches": [
+        "miss",
+        "exactHit"
+      ],
+      "fontMessages": [
+        "Thumbnail fonts identity=84ace2e331cc48772d99997652445c8e741b3b4b236024f763769e81be719b01 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+        "Thumbnail fonts identity=84ace2e331cc48772d99997652445c8e741b3b4b236024f763769e81be719b01 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none"
+      ],
+      "pid": 52813,
+      "imageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+      "pngSHA256": [
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048",
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+      ]
+    },
+    {
+      "phase": "object-missing",
+      "caches": [
+        "miss",
+        "miss"
+      ],
+      "fontMessages": [
+        "Thumbnail fonts identity=none faces= supplyFallback=FontLibraryError:corruptObject",
+        "Thumbnail fonts identity=none faces= supplyFallback=FontLibraryError:corruptObject"
+      ],
+      "pid": 52813,
+      "imageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+      "pngSHA256": [
+        "5adda3e86868da04716524632ddaea3251969d3a118f3a41aecd169b367e2b9d",
+        "5adda3e86868da04716524632ddaea3251969d3a118f3a41aecd169b367e2b9d"
+      ]
+    },
+    {
+      "phase": "objects-restored",
+      "caches": [
+        "miss",
+        "exactHit"
+      ],
+      "fontMessages": [
+        "Thumbnail fonts identity=83f4b6df117ad35b4798e0041ebc35875531ffb518ab0d6dfe12cb5a9707d631 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+        "Thumbnail fonts identity=83f4b6df117ad35b4798e0041ebc35875531ffb518ab0d6dfe12cb5a9707d631 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none"
+      ],
+      "pid": 52813,
+      "imageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+      "pngSHA256": [
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048",
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+      ]
+    },
+    {
+      "phase": "on-restored",
+      "caches": [
+        "miss",
+        "exactHit"
+      ],
+      "fontMessages": [
+        "Thumbnail fonts identity=6d8011999326ec8953dfa5539bcbf7c9c8b5c68921e87bd682fd2ab2f396c064 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+        "Thumbnail fonts identity=6d8011999326ec8953dfa5539bcbf7c9c8b5c68921e87bd682fd2ab2f396c064 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none"
+      ],
+      "pid": 52813,
+      "imageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+      "pngSHA256": [
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048",
+        "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+      ]
+    }
+  ],
+  "rawSHA256": "bd3f09ef1389982219446a10bc2fe44cd7e46f743cd42b534478ce120688957b",
+  "normalRequests": 16,
+  "expectedFallbackRequests": 4,
+  "notes": "callback success와 정확한 글꼴 공급 성공을 구분한다. 추가 성능 목표를 판단하지 않는다."
+}

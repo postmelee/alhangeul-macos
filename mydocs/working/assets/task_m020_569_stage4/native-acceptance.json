@@ -1,0 +1,61 @@
+{
+  "hwp": {
+    "savedSHA256": "56df6f111d141db680fe301d011e76639371d62e5a9880f6af869ef29ee51acd",
+    "pdfSHA256": "a9074d2fc289e7f7509fa3014e792330dd25d2c09ae52e2364691e693674159d",
+    "text": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인"
+  },
+  "hwpx": {
+    "savedSHA256": "a881f3e70d91d8ba7fc3b01cab245b8f13c508d6437d7e0f2d13922fc4430eca",
+    "pdfSHA256": "9ff5bfb017887285983e93eb4a1997890d82d3a154b428e4a2441cb1dbd0ee18",
+    "text": "한글 가나다 ABC 0123 고운바탕 글꼴\n확인"
+  },
+  "candidate": {
+    "build": "569.4.1",
+    "probeIdentifier": "88FFC8FB-E8C2-47D6-A818-08FDA89C2CC2"
+  },
+  "hostPIDs": [
+    "63430"
+  ],
+  "environment": {
+    "macOS": "26.5.2",
+    "build": "25F84",
+    "architecture": "arm64"
+  },
+  "hostFirstPID": 53744,
+  "hostReopenedPID": 63430,
+  "settingsFamilies": 232,
+  "systemMenuFamilies": 205,
+  "systemMenuIncludes": "실제 OS family와 UUID 보관함 Gowun Batang family",
+  "nativeOpenAndSavePanels": true,
+  "nativePDFPanels": true,
+  "nativePrintPanelsCancelled": [
+    "hwp",
+    "hwpx"
+  ],
+  "physicalPrinting": false,
+  "reopenEnabled": true,
+  "reopenFontFamilies": {
+    "hwp": "NanumSquare",
+    "hwpx": "NanumSquare"
+  },
+  "helpMenu": {
+    "label": "Mac 글꼴 사용 안내",
+    "url": "https://postmelee.github.io/alhangeul-macos/fonts/",
+    "openedInDefaultBrowser": true,
+    "currentPageStatus": 404,
+    "published": false
+  },
+  "previewPID": 65891,
+  "thumbnailPID": 52813,
+  "previewImageUUID": "0646BA41-6D42-3467-BDD7-C2D73796C9BA",
+  "thumbnailImageUUID": "E36431C8-E1FC-3A19-8EB2-E07D9B9D8DEC",
+  "preview": [
+    "HWP single PNG",
+    "HWPX single PNG",
+    "HWPX two-page PDF, page 2 selected"
+  ],
+  "newExtensionCrashReports": 0,
+  "finderRawLogSHA256": "abc19a7bb46845c6983870ba257c987cca19222a2b4a14fb2d6e0c08cae62735",
+  "privateCatalogCleanup": "실제 opaque 컨테이너의 승인 UUID만 확인 후 삭제. catalog schema 1, enabled true, 809 records, grants 0; 419133 bytes. 공유 UUID는 fixture cleanup exit 0. 사용자 catalog·전역 권한 변경 없음.",
+  "preferencesScope": "실제 HostApp의 일반 UserDefaults/최근 문서 동작은 사용했다. 전체 preference backup/restore를 수행한 시험으로 표현하지 않는다."
+}

@@ -1,0 +1,16 @@
+Executable=/Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/stage5/native-save-acceptance/StudioFontAcceptanceProbe.app/Contents/MacOS/StudioFontAcceptanceProbe
+Identifier=com.postmelee.alhangeul.StudioFontAcceptanceProbe.16d92e10
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20500 size=137862 flags=0x10000(runtime) hashes=4296+7 location=embedded
+Signature size=4662
+Authority=Developer ID Application: Taegyu Lee (XH6JHKYXV8)
+Authority=Developer ID Certification Authority
+Authority=Apple Root CA
+Signed Time=Oct 8, 2026 at 13:51:43
+Info.plist entries=8
+TeamIdentifier=XH6JHKYXV8
+Runtime Version=26.5.0
+Sealed Resources version=2 rules=13 files=68
+Internal requirements count=1 size=220
+warning: Specifying ':' in the path is deprecated and will not work in a future release
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>com.apple.security.app-sandbox</key><true/><key>com.apple.security.files.bookmarks.app-scope</key><true/><key>com.apple.security.files.user-selected.read-write</key><true/><key>com.apple.security.network.client</key><true/></dict></plist>

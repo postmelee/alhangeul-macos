@@ -31,3 +31,14 @@
 `THREADS_NEWS_ENABLED=false`를 유지한다. 신규 게시물은 목록 수정·배포로 추가한다. 수동 모드가 있으므로 false 설정만으로 전체 글이 숨겨지지 않으며 중단 시 수동 items도 비워야 한다.
 
 작업지시자가 구현부터 공개 배포까지 연속 진행을 승인했다. devel PR과 main 배포 PR의 CI 성공 후 공개 반영한다. 실제 배포 SHA/run·공개 목록·appcast 검증 결과는 배포 PR에 기록한다.
+
+## 공개 완료
+
+- 구현 PR #559 및 공개 PR #560 병합 완료.
+- main: `0cd5e7964c4802ba37fa42caa8088187ea041610`.
+- [Pages 배포 성공](https://github.com/postmelee/alhangeul-macos/actions/runs/34966682182).
+- [공개 최신 소식](https://postmelee.github.io/alhangeul-macos/news/)과 홈·JSON 모두 인증 없는 HTTP 200. 공개 JSON은 v3 manual 6개이며 선택한 목록과 정확히 일치한다.
+- Chrome 공개 페이지에서 실제 공식 임베드 6개와 글 내용 표시 확인.
+- 공개 appcast 전후 bytes 동일: SHA-256 `8b0face06819d65f60cc6e3675244eaa1cccead997927c1f27c131d523313140`.
+- 자동 수집 설정 false 확인. 기존 글은 수동 표시하고 새 글 자동 추가는 활성화하지 않았다.
+- 구현·공개 PR 모두 필수 CI PASS. 이 기록 PR은 운영 문서만 갱신한다.

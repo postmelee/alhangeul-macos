@@ -7,17 +7,20 @@ struct AlHangeulMacApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var updateController = UpdateController()
     @StateObject private var analyticsSettingsModel = AppExecutionAnalyticsSettingsModel()
+    @StateObject private var installedFonts = InstalledFontSettingsModel.shared
+    @StateObject private var fontSettingsModel = FontLibrarySettingsModel()
 
     var body: some Scene {
         WindowGroup {
             DocumentWindowRootView()
+                .background(AppSettingsOpener())
         }
         .commands {
             HostAppCommands(updateController: updateController)
         }
 
         Settings {
-            AppExecutionAnalyticsSettingsView(model: analyticsSettingsModel)
+            AppSettingsView(analytics: analyticsSettingsModel, fonts: fontSettingsModel, installedFonts: installedFonts)
         }
     }
 }
@@ -159,6 +162,14 @@ private struct HostAppCommands: Commands {
 
         CommandGroup(replacing: .newItem) {}
 
+        CommandGroup(after: .help) {
+            Button("Mac 글꼴 사용 안내") {
+                if let url = URL(string: "https://postmelee.github.io/alhangeul-macos/fonts/") {
+                    NSWorkspace.shared.open(url)
+                }
+            }
+        }
+
         CommandGroup(replacing: .saveItem) {
             Button("저장") {
                 RhwpStudioNativeCommandDispatcher.run("file:save")
@@ -182,7 +193,14 @@ private struct HostAppCommands: Commands {
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    // 후속 가져오기 UI는 이 결과를 통해 App Group 구성 실패를 안내한다.
+    lazy var fontLibraryService: Result<FontLibraryService, Error> = FontLibraryService.shared
+
     func applicationDidFinishLaunching(_ notification: Notification) {
+#if DEBUG
+        if FontLibraryHostProbe.runIfRequested() { return }
+#endif
+        Task { await InstalledFontSettingsModel.shared.prepare() }
         // Keep analytics first: the following services write legacy-evidence keys
         // that distinguish an existing installation from a genuine first launch.
         AppExecutionAnalyticsRuntime.shared.prepareForLaunch(
@@ -214,6 +232,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ notification: Notification) {
         repositionUnreachableWindowsIfNeeded()
+        let activatedAt = ProcessInfo.processInfo.systemUptime
+        Task {
+            if let catalog = try? await InstalledFontServiceProvider.shared.service() {
+                await catalog.scheduleRefreshForActivation(at: activatedAt)
+            }
+        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

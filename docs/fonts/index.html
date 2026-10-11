@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="알한글에서 Mac에 설치된 글꼴을 켜고, 기존 글꼴 목록에서 선택하는 방법과 문제 해결을 안내합니다. v0.2.3부터 Mac 설치 글꼴을 사용할 수 있습니다." />
+  <title>Mac 글꼴 사용 안내 — 알한글</title>
+  <link rel="icon" href="../assets/logo-256@2x.png" />
+  <link rel="apple-touch-icon" href="../assets/logo-256@2x.png" />
+  <link rel="stylesheet" href="../styles.css?v=20261011-font-guide" />
+</head>
+
+<body class="font-guide-page">
+  <a class="skip-link" href="#main">본문으로 이동</a>
+  <header class="site-header" aria-label="주요 탐색">
+    <div class="site-header-inner">
+      <a class="brand-link" href="../" aria-label="알한글 홈">
+        <img src="../assets/logo-256@2x.png" width="28" height="28" alt="" />
+        <span>알한글</span>
+      </a>
+      <nav class="header-actions" aria-label="주요 링크">
+        <a class="header-link" href="../">홈</a>
+        <a class="header-link" href="../updates/">업데이트</a>
+        <a class="header-link" href="../feedback/">문의/제보</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="font-guide" tabindex="-1">
+    <section class="font-guide-hero" aria-labelledby="guide-title">
+      <p class="font-guide-eyebrow">Mac 글꼴 사용 안내</p>
+      <h1 id="guide-title">Mac에 설치한 글꼴을<br />알한글에서도.</h1>
+      <p class="font-guide-lead">사용 설정을 켜고, 익숙한 글꼴 목록에서 선택하세요.<br />원본과 접근 권한이 유지되면 다음 실행에도 자동으로 사용합니다.</p>
+      <aside class="font-guide-status" aria-label="기능 제공 상태">
+        <strong>v0.2.3부터 Mac 설치 글꼴을 사용할 수 있습니다.</strong>
+        <p>먼저 <a href="../updates/v0.2.3.html">v0.2.3 이상으로 업데이트</a>한 뒤 아래 순서대로 설정하세요. 이전 버전에는 이 기능이 포함되지 않습니다.</p>
+      </aside>
+      <nav class="font-guide-toc" aria-label="안내 목차">
+        <a href="#enable">사용 설정</a>
+        <a href="#choose">글꼴 선택</a>
+        <a href="#output">저장과 출력</a>
+        <a href="#troubleshoot">문제 해결</a>
+      </nav>
+    </section>
+
+    <section id="enable" class="font-guide-section" aria-labelledby="enable-title">
+      <div class="font-guide-heading">
+        <span class="font-guide-number" aria-hidden="true">1</span>
+        <div>
+          <h2 id="enable-title">설정에서 글꼴 사용을 켜세요.</h2>
+          <p>알한글을 실행하고 <strong>설정 → 글꼴</strong>을 여세요. 단축키는 <kbd>⌘</kbd> + <kbd>,</kbd>입니다.</p>
+        </div>
+      </div>
+      <p><strong>Mac에 설치된 글꼴 사용</strong>을 켭니다. 처음 목록을 준비할 때는 잠시 기다려 주세요. 읽기 권한이 필요한 글꼴은 <strong>감지한 글꼴</strong> 목록을 펼쳐 <strong>접근 허용…</strong>으로 글꼴이 있는 폴더를 선택합니다.</p>
+      <figure class="font-guide-figure">
+        <a href="../assets/fonts/mac-font-settings.png" aria-label="Mac 글꼴 설정 화면 크게 보기">
+          <img src="../assets/fonts/mac-font-settings.png" width="1440" height="1184" alt="Mac에 설치된 글꼴 사용을 켠 설정 화면. 다시 감지와 보관한 글꼴의 글꼴 가져오기 버튼이 함께 있습니다." decoding="async" />
+        </a>
+        <figcaption>실제 Mac 목록을 읽는 개발 검증 화면입니다. 글꼴 수와 확인 필요 항목은 Mac마다 다릅니다. 이미지를 누르면 크게 볼 수 있습니다.</figcaption>
+      </figure>
+      <p class="font-guide-tip">문서 안의 <strong>도구 → 환경 설정 → 글꼴</strong>에서 <strong>Mac 글꼴 → 글꼴 설정 열기…</strong>를 눌러도 앱의 글꼴 설정으로 이동할 수 있습니다.</p>
+    </section>
+
+    <section id="choose" class="font-guide-section" aria-labelledby="choose-title">
+      <div class="font-guide-heading">
+        <span class="font-guide-number" aria-hidden="true">2</span>
+        <div>
+          <h2 id="choose-title">기존 글꼴 목록에서 선택하세요.</h2>
+          <p>글자를 선택한 뒤 문서 상단의 글꼴 이름을 누르세요.</p>
+        </div>
+      </div>
+      <p>펼쳐진 목록에서 <strong>시스템 글꼴</strong>을 선택하면 Mac에서 감지한 글꼴을 찾을 수 있습니다. 지원되는 글꼴은 문서에 지정된 이름에 맞춰 자동으로 사용하며, 다른 글꼴로 바꾸고 싶을 때는 이 목록에서 직접 선택합니다.</p>
+      <figure class="font-guide-figure">
+        <a href="../assets/fonts/mac-font-menu.png" aria-label="기존 글꼴 목록 화면 크게 보기">
+          <img src="../assets/fonts/mac-font-menu.png" width="2200" height="1664" alt="문서 상단의 기존 글꼴 목록에서 시스템 글꼴을 선택한 화면. 별도의 로컬 글꼴 선택 팝업 없이 여러 Mac 글꼴이 표시됩니다." loading="lazy" decoding="async" />
+        </a>
+        <figcaption>실제 설치 글꼴과 NanumSquare를 사용한 개발 검증 화면입니다. 목록에 보이는 것과 PDF·인쇄에서 사용할 수 있는 범위는 다를 수 있습니다.</figcaption>
+      </figure>
+      <p class="font-guide-tip">원하는 글꼴을 선택한 뒤 일반 글자와 굵은 글자, 한글과 영문을 함께 확인해 주세요. 설치된 글꼴의 굵기·스타일과 문서가 요구하는 스타일이 다르면 대체 글꼴을 사용할 수 있습니다.</p>
+    </section>
+
+    <section id="output" class="font-guide-section" aria-labelledby="output-title">
+      <div class="font-guide-heading">
+        <span class="font-guide-number" aria-hidden="true">3</span>
+        <div>
+          <h2 id="output-title">저장한 문서와 PDF도 확인하세요.</h2>
+          <p>문서를 저장하고 다시 열어 글꼴과 본문을 확인하세요.</p>
+        </div>
+      </div>
+      <p>설정은 다음 실행에도 유지되므로 글꼴을 매번 가져올 필요가 없습니다. HWP/HWPX 문서를 전달할 때는 상대방 Mac에도 같은 글꼴이 있어야 동일한 글꼴을 사용할 수 있습니다.</p>
+      <p>PDF로 내보내거나 인쇄하기 전에는 결과를 확인해 주세요. 글꼴을 읽거나 출력 파일에 포함할 수 없으면 안내가 나타납니다. 기본 동작은 출력 취소이며, 안내에서 대체 글꼴 출력을 선택할 수 있습니다.</p>
+      <p class="font-guide-tip">Finder 썸네일과 Quick Look은 앱과 다른 표시 경로를 사용합니다. 지원되는 글꼴을 사용하더라도 복잡한 문서의 배치와 화면이 다를 수 있고, 기존 썸네일은 macOS가 새로 요청할 때 갱신됩니다.</p>
+    </section>
+
+    <section class="font-guide-section" aria-labelledby="keep-title">
+      <h2 id="keep-title">설치된 글꼴 사용과 가져오기는 달라요.</h2>
+      <div class="font-guide-comparison">
+        <article>
+          <h3>Mac에 설치된 글꼴 사용</h3>
+          <p>Mac의 활성 글꼴 원본을 참조합니다. 원본을 삭제하거나 비활성화하거나 접근 권한을 잃으면 사용할 수 없습니다.</p>
+        </article>
+        <article>
+          <h3>보관한 글꼴 → 글꼴 가져오기…</h3>
+          <p>지원되는 글꼴 파일을 알한글의 보관함에 복사합니다. 복사본은 원본을 삭제해도 남습니다. 먼저 해당 글꼴을 복사해 사용할 수 있는지 사용 조건을 확인해 주세요.</p>
+        </article>
+      </div>
+      <p>한컴 한글 앱 내부에만 있는 글꼴을 자동으로 추출하는 기능은 아닙니다. 한컴 앱을 삭제한 뒤에도 사용할 수 있는지는 글꼴이 Mac에 별도로 남아 있는지에 달려 있습니다.</p>
+    </section>
+
+    <section id="troubleshoot" class="font-guide-section" aria-labelledby="troubleshoot-title">
+      <h2 id="troubleshoot-title">원하는 글꼴이 보이지 않나요?</h2>
+      <div class="font-guide-faq faq-list">
+        <details>
+          <summary>새로 설치한 글꼴이 목록에 없어요.</summary>
+          <p>macOS 서체 관리자에서 해당 글꼴이 활성 상태인지 확인한 뒤, 알한글 <strong>설정 → 글꼴 → 다시 감지</strong>를 누르세요. <strong>감지한 글꼴</strong> 목록을 펼치면 이름과 스타일을 확인할 수 있습니다.</p>
+        </details>
+        <details>
+          <summary>‘확인 필요’ 또는 권한 안내가 표시돼요.</summary>
+          <p>감지 목록에서 해당 글꼴을 펼쳐 이유를 확인하세요. <strong>접근 허용…</strong>은 원본 폴더의 읽기 권한을 허용하는 동작입니다. 저장한 폴더 권한이 유효하지 않다면 <strong>폴더 다시 선택…</strong>으로 다시 지정하세요. 같은 이름의 충돌이나 미지원 형식은 폴더 권한만으로 해결되지 않습니다.</p>
+        </details>
+        <details>
+          <summary>글꼴을 선택했는데 화면이나 출력이 달라요.</summary>
+          <p>글꼴의 이름뿐 아니라 굵기·스타일과 원본 상태를 확인해 주세요. PDF·인쇄와 Finder는 각각 지원 범위가 다릅니다. 현재는 검증된 일반 TTF·OTF 글꼴과 Regular/Bold의 일반 가로 본문을 중심으로 안내하며, TTC의 개별 서체·가변 글꼴의 축·HFT와 복잡한 문서의 완전한 동일 표현은 보장하지 않습니다.</p>
+        </details>
+        <details>
+          <summary>한컴 한글을 지워도 글꼴이 남나요?</summary>
+          <p>Mac에 독립적으로 설치되어 활성 상태로 남은 글꼴은 사용할 수 있습니다. 한컴 앱 안의 글꼴이나 삭제되는 원본까지 계속 사용할 수 있다고 보장하지 않습니다. 설치 여부가 다른 앱에서의 사용·복사 허가를 뜻하지 않으므로 글꼴별 사용 조건을 확인해 주세요.</p>
+        </details>
+        <details>
+          <summary>Windows의 글꼴을 Mac으로 가져올 수도 있나요?</summary>
+          <p>이 안내는 Mac에 설치된 글꼴 사용을 다룹니다. Windows 폴더·ZIP 전달과 가져오기는 별도 작업으로 준비 중이며, 아직 이 절차만으로 Windows 글꼴 이전을 완료할 수 있다고 안내하지 않습니다.</p>
+        </details>
+      </div>
+      <p class="font-guide-contact">해결되지 않으면 앱 버전, macOS 버전, 글꼴 이름과 증상을 알려 주세요. <a href="../feedback/">문의 / 제보 방법 보기 →</a></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand"><img src="../assets/logo-256@2x.png" width="32" height="32" alt="" /><span>알한글</span></div>
+    <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 편집 앱입니다.</p>
+    <nav aria-label="푸터 링크"><a href="../">알한글 홈</a><a href="../updates/">업데이트 안내</a></nav>
+  </footer>
+</body>
+</html>

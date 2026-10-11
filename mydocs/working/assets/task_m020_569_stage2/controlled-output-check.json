@@ -1,0 +1,68 @@
+[
+  {
+    "label": "off-01",
+    "requestedSize": 128,
+    "count": 10,
+    "samePNGBytes": true,
+    "dimensions": [
+      91,
+      128
+    ],
+    "sha256": "b8ea2bc1fdebc47633372f2f2acfc1ea29e1d7014c74b57b64de38d9c0271587"
+  },
+  {
+    "label": "off-01",
+    "requestedSize": 256,
+    "count": 11,
+    "samePNGBytes": true,
+    "dimensions": [
+      182,
+      256
+    ],
+    "sha256": "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+  },
+  {
+    "label": "on-01",
+    "requestedSize": 128,
+    "count": 10,
+    "samePNGBytes": true,
+    "dimensions": [
+      91,
+      128
+    ],
+    "sha256": "b8ea2bc1fdebc47633372f2f2acfc1ea29e1d7014c74b57b64de38d9c0271587"
+  },
+  {
+    "label": "on-01",
+    "requestedSize": 256,
+    "count": 11,
+    "samePNGBytes": true,
+    "dimensions": [
+      182,
+      256
+    ],
+    "sha256": "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+  },
+  {
+    "label": "on-02",
+    "requestedSize": 128,
+    "count": 10,
+    "samePNGBytes": true,
+    "dimensions": [
+      91,
+      128
+    ],
+    "sha256": "b8ea2bc1fdebc47633372f2f2acfc1ea29e1d7014c74b57b64de38d9c0271587"
+  },
+  {
+    "label": "on-02",
+    "requestedSize": 256,
+    "count": 11,
+    "samePNGBytes": true,
+    "dimensions": [
+      182,
+      256
+    ],
+    "sha256": "6ffca6c69c90f0393bc4822f33cb80d254492790ebdd1852387bdbf14e9ed048"
+  }
+]

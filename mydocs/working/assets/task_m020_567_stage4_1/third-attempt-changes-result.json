@@ -1,0 +1,29 @@
+{
+  "checks" : [
+    "new installation keeps approved false default",
+    "canvas2d: enabling saved setting loads both exact installed faces in open document",
+    "canvas2d: disabling removes local face\/measurement resources and renders fallback",
+    "canvas2d: re-enabling recovers without reopening document",
+    "canvas2d: actual fixture read denial is published and stale faces are discarded",
+    "canvas2d: restored permission and manual refresh clear failure caches",
+    "canvas2d: same PostScript name reloads changed verified content hash",
+    "canvas2d: removed installed candidates fall back without retaining old faces",
+    "canvas2d: reappearing candidates recover in current document",
+    "canvas2d: real UI model imports Regular\/Bold through shared service",
+    "canvas2d: managed import observer updates exact bytes while installed use is disabled",
+    "canvas2d: own source files removed; managed copies remain independent",
+    "canvas2d: managed removal publishes and clears old face resources",
+    "canvas2d: font changes preserve clean document state",
+    "canvas2d: font changes preserve document original names and styles",
+    "rapid document changes reject gated previous replies and restore final fallback",
+    "canvaskit: enabling saved setting loads both exact installed faces in open document",
+    "canvaskit: disabling removes local face\/measurement resources and renders fallback",
+    "canvaskit: re-enabling recovers without reopening document",
+    "canvaskit: actual fixture read denial is published and stale faces are discarded",
+    "canvaskit: restored permission and manual refresh clear failure caches",
+    "canvaskit: same PostScript name reloads changed verified content hash",
+    "canvaskit: removed installed candidates fall back without retaining old faces",
+    "canvaskit: reappearing candidates recover in current document"
+  ],
+  "error" : "Failure(message: \"timeout: managed UI discovery\")"
+}

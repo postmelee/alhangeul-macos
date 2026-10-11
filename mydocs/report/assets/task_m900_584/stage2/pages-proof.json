@@ -1,0 +1,26 @@
+{
+  "public_appcast_sha256": "8b0face06819d65f60cc6e3675244eaa1cccead997927c1f27c131d523313140",
+  "preserved_exact_bytes": true,
+  "latest_dmg_url": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.2/alhangeul-macos-0.2.2.dmg",
+  "v0.2.3_release_http_status": 404,
+  "expected_pages_asset_gate": "deploy=false",
+  "public_mutation": false,
+  "linked_dmg_versions": [
+    "0.1.0",
+    "0.1.1",
+    "0.1.10",
+    "0.1.11",
+    "0.1.2",
+    "0.1.3",
+    "0.1.4",
+    "0.1.5",
+    "0.1.6",
+    "0.1.7",
+    "0.1.8",
+    "0.1.9",
+    "0.2.0",
+    "0.2.2",
+    "0.2.3"
+  ],
+  "pages_gate_workflow_unchanged": true
+}

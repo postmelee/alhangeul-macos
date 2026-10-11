@@ -1,0 +1,14 @@
+[
+  "Native IPC → Canvas2D · Gowun Batang Regular",
+  "Native IPC → Canvas2D · Gowun Batang Bold",
+  "TTC Regular",
+  "TTC Italic",
+  "TTC Oblique",
+  "Actual WASM document → WebKit Canvas2D",
+  "CanvasKit requested webgl · Italic",
+  "CanvasKit requested webgl · Oblique",
+  "CanvasKit requested webgpu · Italic",
+  "CanvasKit requested webgpu · Oblique",
+  "CanvasKit requested software · Italic",
+  "CanvasKit requested software · Oblique"
+]

@@ -1,0 +1,12 @@
+{
+  "Sources/HostApp/Views/InstalledFontSettingsView.swift": "25c59feef064e6c45c05925d6f757fd85215df8971783cea183c4142cfd5ea80",
+  "Sources/HostApp/Views/FontLibrarySettingsView.swift": "192e484ecb998c8d5a81bb46a4191f6ecd3cdd4502b62cec2e3ccaebc9d20bbe",
+  "Sources/HostApp/Views/FontLibrarySettingsModel.swift": "fcdcc36ca8b6f334e571dfeff2e8b2af51a2072f534a2c9ed8d8704dabbb379a",
+  "Sources/HostApp/Views/MacFontImportView.swift": "4cba8318ed1d0c2807c9cccba4768605d7c59507a2154a8e749c7c3cf3618ad5",
+  "Tests/FontLibraryTests/FontLibrarySettingsModelTests.swift": "5256ea5995f6df3969481777ec069eb792ecd604c769f6632eb9f0a679b6580a",
+  "Tests/InstalledFontUIProbe/main.swift": "b6853cd60d1a887b222f76bb6c06c671bf14709107375188b06d18a1f16fa4e4",
+  "Tests/InstalledFontStartupProbe/main.swift": "07e815b74d1fff4e0c412dc6b6d69b01b3f5eb8b24e2442a5b43279803ecbdca",
+  "Tests/StudioFontIntegrationProbe/main.swift": "406b83e3c26d3b73d1f1c1ceba075c5c5da7b727af76b68a6fec39bbd3e154bf",
+  "scripts/probe-installed-font-ui.sh": "76895993b8dda912b59a6194fe321378c7c9882209b63b9eafda6f2f7b48131e",
+  "scripts/profile-installed-font-startup.sh": "9e11e5efd8658475e3618ba6676f565497864aad2431a117e9618ac17d608468"
+}

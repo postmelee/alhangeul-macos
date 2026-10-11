@@ -1,0 +1,47 @@
+{
+  "task": 580,
+  "scope": "unsigned 후보 준비; 서명/설치/fixture 실행 전",
+  "probeIdentifier": "02FB58C8-150B-4C37-903E-DD4C0A6B92A9",
+  "version": "580.4.1",
+  "candidatePath": "build.noindex/task580/stage4/finder-candidate-01/Alhangeul.app",
+  "fixturePath": "build.noindex/task580/stage4/finder-candidate-01/FontExtensionFixtureProbe.app",
+  "preparationSHA256": "dfc5d69924dfec8041de046b867a1912748ed247632197a4f9ffa8cd617e9759",
+  "operationPlanSHA256": "ebced70166e6a871600c9f8e47260cc7ff403bc6f7b8a906a218791616157634",
+  "unsignedInventory": {
+    "Alhangeul.app": "2abd4f6370e7ed9430238f2d90969a1738306c3727cee86be9cc7aa3827316e5",
+    "FontExtensionFixtureProbe.app": "3ea9b01082db2d81bb913d1c856943d87512efa0b08bbf45a0b718aa073c4372"
+  },
+  "unsignedBundles": {
+    "Alhangeul.app": {
+      "infoSHA256": "663dd78792e9d81b604800e603632f38270c6454553ba62bb00c2fc374d34cac",
+      "executableSHA256": "eb4b3b487b4f89686073bf1a710efd6030b2a175e10a2cc23aa57c4ddeab3358"
+    },
+    "FontExtensionFixtureProbe.app": {
+      "infoSHA256": "b9c69579378965995b5eddbcd7f4e0f03d580ba631910bf17269d1ab6fb21c34",
+      "executableSHA256": "d5b5619cf7f089e7346e7d596b60cb06532dec8bf564b0ec50a3dc56e82a3c19"
+    },
+    "Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex": {
+      "infoSHA256": "b21eddc07546a5acbe8ec1e63832f21a4a6a33dd8d8b810f5056818ad2fb3547",
+      "executableSHA256": "2a43d3d41c5637e6db622abe9b37b50bebc4f2a9f6d45369257cf9a0cb2b0d2f"
+    },
+    "Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex": {
+      "infoSHA256": "53dc3e03ec5903a6bc5f2ba9e4eb7a8f09fa425dca1fe3cde5bbf086b9ea03fe",
+      "executableSHA256": "0d2fd96cd65ad9d46b104eb8854c86f1f7057104e55f07b6f92e62afb065bd92"
+    }
+  },
+  "imageUUIDs": {
+    "Alhangeul.app": "B33318BE-E28B-35EE-8F8A-2184DDA8E053",
+    "AlhangeulPreview.appex": "E0356498-05F9-3131-98DC-067D7121F767",
+    "AlhangeulThumbnail.appex": "353D18CA-27A8-3FDF-8122-30546E16145E"
+  },
+  "fixtureSourceSHA256": "4a280630e6153ad583ff2c71b9eeea1b1a639b1814df74442b5b375165515d03",
+  "installedVersion": "0.2.2",
+  "originalInfoSHA256": "41f64c73e4d2848e2b8d34d4b3a1954e0645121072074f5d299929b5d52279a7",
+  "originalInventorySHA256": "fa694017af3e0b3705510b353ef0e9dc5549be57493b74e99e5ca05540b3707b",
+  "originalInventoryEntries": 243,
+  "backupPath": "build.noindex/task580/stage4/finder-candidate-01/backup/Alhangeul.app",
+  "globalReset": false,
+  "installedUserFontsModified": false,
+  "stateFilePresent": false,
+  "backupPresent": false
+}

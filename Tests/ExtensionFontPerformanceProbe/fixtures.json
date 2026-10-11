@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "baselineCommit": "60ea06a384ce5ba9e43b60a30278ce1268efe237",
+  "scope": "read-only OFL fonts and isolated documents; no OS font installation",
+  "originalFonts": {
+    "provenance": {
+      "repository": "https://github.com/google/fonts",
+      "commit": "c1eda9233c33ad7775b27efd794f931095cf6133",
+      "files": [
+        {
+          "file": "OFL.txt",
+          "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/OFL.txt",
+          "bytes": 4397,
+          "sha256": "49a57cc769fa9affd6eefb9070a61e3d3f6b757c97cafb15848bc6d1c81acc78"
+        },
+        {
+          "file": "METADATA.pb",
+          "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/METADATA.pb",
+          "bytes": 1307,
+          "sha256": "5ab6c5630b85b7d20e8cec7a3be246f9cd5a8f247dea4993f6fb9cf1cc24478e"
+        },
+        {
+          "file": "GowunBatang-Regular.ttf",
+          "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/GowunBatang-Regular.ttf",
+          "bytes": 8433296,
+          "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849"
+        },
+        {
+          "file": "GowunBatang-Bold.ttf",
+          "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/GowunBatang-Bold.ttf",
+          "bytes": 8178712,
+          "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94"
+        }
+      ]
+    },
+    "verifiedFiles": [
+      {
+        "path": "build.noindex/task567/fonts/gowun-batang/OFL.txt",
+        "sha256": "49a57cc769fa9affd6eefb9070a61e3d3f6b757c97cafb15848bc6d1c81acc78",
+        "bytes": 4397
+      },
+      {
+        "path": "build.noindex/task567/fonts/gowun-batang/METADATA.pb",
+        "sha256": "5ab6c5630b85b7d20e8cec7a3be246f9cd5a8f247dea4993f6fb9cf1cc24478e",
+        "bytes": 1307
+      },
+      {
+        "path": "build.noindex/task567/fonts/gowun-batang/GowunBatang-Regular.ttf",
+        "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+        "bytes": 8433296
+      },
+      {
+        "path": "build.noindex/task567/fonts/gowun-batang/GowunBatang-Bold.ttf",
+        "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+        "bytes": 8178712
+      }
+    ]
+  },
+  "fixtures": [
+    {
+      "path": "build.noindex/task568/stage3/fixtures/gowun-document.hwp",
+      "sha256": "80f75353ba6b31c55169a7a8e29e35cbeba3ff4a2c66d0f961cadb4400caf199",
+      "bytes": 13312
+    },
+    {
+      "path": "build.noindex/task568/stage3/fixtures/gowun-document.hwpx",
+      "sha256": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+      "bytes": 7488
+    },
+    {
+      "path": "build.noindex/task568/stage5/probe-inputs/multiple-two.hwpx",
+      "sha256": "0a85f61a0fcb2a5fad6fa1487db862dedca3133a0457794c9f95b2c60f5ee281",
+      "bytes": 7422
+    }
+  ]
+}

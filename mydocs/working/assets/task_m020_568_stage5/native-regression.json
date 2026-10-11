@@ -1,0 +1,101 @@
+{
+  "ambiguousInstalledDTORejectedWithoutReads" : true,
+  "bundledProcessRegisteredCount" : 0,
+  "cacheIdentityChanged" : true,
+  "cancelWaitedForActualIOAndReleasedOnce" : true,
+  "changedSourceCGAndSkiaBothChanged" : true,
+  "disabledInstalledRejectedWithoutReads" : true,
+  "fileLimitRejected" : "tooLarge",
+  "installedCatalogCount" : 529,
+  "installedCGAndSkia" : true,
+  "installedFaces" : [
+    "GowunBatang-Regular"
+  ],
+  "installedReads" : 1,
+  "kind" : "real services with process-scope installed fixture and isolated persistence\/library; Finder not connected",
+  "managed" : [
+    {
+      "backend" : "coreGraphicsOnly",
+      "bytes" : 16612008,
+      "faces" : [
+        "GowunBatang-Bold",
+        "GowunBatang-Regular"
+      ],
+      "format" : "hwpx",
+      "imageSHA256" : "9120fe4934333f727d458e85700b1bac73561ae162d482da31e213009dc4ee3c",
+      "managedPriority" : true,
+      "reads" : 2
+    },
+    {
+      "backend" : "skiaOptIn",
+      "bytes" : 16612008,
+      "faces" : [
+        "GowunBatang-Bold",
+        "GowunBatang-Regular"
+      ],
+      "format" : "hwpx",
+      "imageSHA256" : "76a361c738fd8e01e7dba534dc8626a8da87af9d09431f19284aaff14d4788ac",
+      "managedPriority" : true,
+      "reads" : 2
+    },
+    {
+      "backend" : "coreGraphicsOnly",
+      "bytes" : 16612008,
+      "faces" : [
+        "GowunBatang-Bold",
+        "GowunBatang-Regular"
+      ],
+      "format" : "hwp",
+      "imageSHA256" : "69ac4efcc040138ab04396fb9d998efe205fa50f37d779e59e6f8c528bfc9e6b",
+      "managedPriority" : true,
+      "reads" : 2
+    },
+    {
+      "backend" : "skiaOptIn",
+      "bytes" : 16612008,
+      "faces" : [
+        "GowunBatang-Bold",
+        "GowunBatang-Regular"
+      ],
+      "format" : "hwp",
+      "imageSHA256" : "6cd584e71c474f788078b7cd892acf5fec308cfa3f2072d72e93bbbcabd1eaaa",
+      "managedPriority" : true,
+      "reads" : 2
+    }
+  ],
+  "managedSourceMissingRejected" : "corruptObject",
+  "managedWithInstalledDisabled" : true,
+  "officialMatcherCommit" : "1a76570e833917d15817415a53c09ad61ab3203f",
+  "passed" : true,
+  "previousActiveSelectionPreservedOnCollision" : true,
+  "realUserInstalledReadOnly" : [
+    {
+      "backend" : "coreGraphicsOnly",
+      "bytes" : 23278008,
+      "faces" : [
+        "ArialUnicodeMS"
+      ],
+      "imageSHA256" : "0213c3a2fea8b051c4fddd34f62ba50c8f2d093871d837ea19a1b13000356f15"
+    },
+    {
+      "backend" : "skiaOptIn",
+      "bytes" : 23278008,
+      "faces" : [
+        "ArialUnicodeMS"
+      ],
+      "imageSHA256" : "34b0acf4c74cc0bab99e394c2952df9992a06919c405ad271552f7835d907a62"
+    }
+  ],
+  "samePSChangedOutlinePNGChanged" : true,
+  "sharedBudgetHeldUntilIOCompleted" : true,
+  "sourceRestoredPNGEqual" : true,
+  "staleDocumentRejectedWithoutReads" : true,
+  "staleDuringReadRejected" : true,
+  "staleRejected" : "stale",
+  "testSourceProcessRegistered" : true,
+  "unneededManagedObjectNotRead" : true,
+  "unresolvedConflictDTORejectedWithoutReads" : "unavailable",
+  "userFontPersistentOSRegistration" : false,
+  "userSettingsChanged" : false,
+  "userSourceFilesChanged" : false
+}

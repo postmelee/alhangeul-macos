@@ -1,0 +1,67 @@
+[
+  {
+    "path": "build.noindex/task568/stage3/acceptance-01/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/acceptance-02/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/acceptance-03/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/acceptance-04/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/acceptance-05/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/acceptance-06/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/acceptance-07/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/acceptance-08/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/acceptance-09/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/sandbox-output-01/ui-control/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/sandbox-output-01/StudioOutputAcceptanceProbe.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/host/Build/Products/Debug/Alhangeul.app",
+    "unregisterExitCode": 1,
+    "registeredAfter": false
+  },
+  {
+    "path": "build.noindex/task568/stage3/host/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+    "unregisterExitCode": 0,
+    "registeredAfter": false
+  }
+]

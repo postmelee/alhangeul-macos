@@ -1,0 +1,15 @@
+/Users/melee/Documents/projects/rhwp-mac/Tests/StudioFontAcceptanceProbe/main.swift:267:40: error: 'RhwpStudioNativeCommandWebView' is inaccessible due to 'private' protection level
+265 |             """)
+266 |             try await wait("입력 반영") { try await self.js("return window.__probeWasm.getTextRange(0,0,0,window.__probeWasm.getParagraphLength(0,0)).endsWith(' 입력');") as? Bool == true }
+267 |             guard let native = web as? RhwpStudioNativeCommandWebView else { throw Failure(message: "native command view") }
+    |                                        `- error: 'RhwpStudioNativeCommandWebView' is inaccessible due to 'private' protection level
+268 |             let savedURL: URL = try await withCheckedThrowingContinuation { continuation in
+269 |                 guard native.saveDocument(completion: { result in
+
+/Users/melee/Documents/projects/rhwp-mac/Sources/HostApp/Views/RhwpStudioWebView.swift:1419:21: note: type declared here
+1417 | }
+1418 |
+1419 | private final class RhwpStudioNativeCommandWebView: WKWebView {
+     |                     `- note: type declared here
+1420 |     var nativeCommandHandler: ((String) -> Bool)?
+1421 |     var saveDocumentHandler: ((@escaping (RhwpStudioDocumentSaveResult) -> Void) -> Bool)?

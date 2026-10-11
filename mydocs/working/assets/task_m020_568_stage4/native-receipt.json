@@ -1,0 +1,158 @@
+{
+  "phase": "Stage 4.1 approval scope acceptance; Stage 4 incomplete",
+  "core": {
+    "rhwp_release_tag": "v0.8.7",
+    "rhwp_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "rhwp_enabled_features": "native-skia"
+  },
+  "runtime": "26.5.2",
+  "swiftTarget": "arm64-apple-macosx12.0",
+  "rustTests": 27,
+  "sources": [
+    {
+      "path": "RustBridge/src/font_context/nominal.rs",
+      "bytes": 10894,
+      "sha256": "df8c373b5a31e1650224ef450a508fc018e0089d78aab056a6cd5884582acb5a"
+    },
+    {
+      "path": "RustBridge/src/font_context/tests.rs",
+      "bytes": 10060,
+      "sha256": "7e4ab19d3c6e5cd13de7b76cd0577eb35da7f900a81413acb8c18db890672205"
+    },
+    {
+      "path": "RustBridge/src/font_context.rs",
+      "bytes": 15859,
+      "sha256": "d1aa5524dc1fd094621ba69f278f6505c94679a7444038015b749a05d5b88de9"
+    },
+    {
+      "path": "RustBridge/src/lib.rs",
+      "bytes": 27928,
+      "sha256": "9ebc63a9fe2c319c6e4269f6abfb5db212e93255141deb6f28bed2c08a35ebaa"
+    },
+    {
+      "path": "RustBridge/Cargo.toml",
+      "bytes": 347,
+      "sha256": "e1fd6cd17696fb219b4490f4d04dd2e90a1920bdda473f19e7f8d4518bc0d89c"
+    },
+    {
+      "path": "RustBridge/Cargo.lock",
+      "bytes": 57897,
+      "sha256": "1950de7e756e30b8170aca2daef2568a448959c4fce09a4cd1f06f170255ee4a"
+    },
+    {
+      "path": "Sources/RhwpCoreBridge/RhwpNativeFontContext.swift",
+      "bytes": 8113,
+      "sha256": "1b4f0e851b9afa0ff7a28b5309c36ffb3b332455160255de6a3a31fcd97ef15d"
+    },
+    {
+      "path": "Sources/RhwpCoreBridge/RhwpDocument.swift",
+      "bytes": 15896,
+      "sha256": "730605b76883ba227c111106b111d6697c0ba337790eb0a63d27391f883b02c6"
+    },
+    {
+      "path": "Sources/RhwpCoreBridge/CGTreeRenderer.swift",
+      "bytes": 165575,
+      "sha256": "f8882e81c2d21d97a6a39e48396d3c9ca10eb7b7d9bc7a6e58c81ad7152254d9"
+    },
+    {
+      "path": "Sources/Shared/HwpPageImageRenderer.swift",
+      "bytes": 18939,
+      "sha256": "633d29f80299455d070059e8c1b033f79b0b8871f6a7098c8726fd7c76b1b957"
+    },
+    {
+      "path": "Sources/Shared/HwpNativePageCompositor.swift",
+      "bytes": 4610,
+      "sha256": "9f8486f57a65373d3f87e98984152ee9c2e81d17dab79dcd0af20f4f0bcf06dd"
+    },
+    {
+      "path": "Tests/NativeFontSupplyProbe/integration/main.swift",
+      "bytes": 9048,
+      "sha256": "814acb9a28284c5a7cbebc01e97b348dd8bf4ce1ecf57a6d531e0632811e194f"
+    },
+    {
+      "path": "RustBridge/examples/native_font_context_probe.rs",
+      "bytes": 6535,
+      "sha256": "de681cdfeadbd09b2cfdce58a77d0d4acfe0da9336e0bcac630c6371ba7f0505"
+    },
+    {
+      "path": "Tests/NativeFontSupplyProbe/prepare_fixture.py",
+      "bytes": 1308,
+      "sha256": "146d6f1cc0562b74a98a1b6728ad4f01df2bdb438342dca1b589331b4be6ae3d"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "Frameworks/generated_rhwp.h",
+      "bytes": 6925,
+      "sha256": "13aa1cb57ea8a9e8ae0279b76e3f8531d09c734b0de736b2c1b60de40f5c99da"
+    },
+    {
+      "path": "Frameworks/universal/librhwp.a",
+      "bytes": 245904864,
+      "sha256": "e22ab07332468096dee5d92118458c2e72b2b02e2cdb6acfbaa66a6c4801e8ef"
+    },
+    {
+      "path": "build.noindex/task568/stage4/native-integration",
+      "bytes": 64375824,
+      "sha256": "04f15500fb42e502cad07db33fe358f3cb8c421d06664eebf25c3b23ad0af5bf"
+    }
+  ],
+  "checks": {
+    "rustTests": {
+      "log": "build.noindex/task568/stage4/cargo-all-tests.log",
+      "sha256": "14566d37e60943134063d144a8de4d2869ffbb46fdb845b9ee2df1c1b8cccfbe",
+      "passed": true
+    },
+    "hostCompile": {
+      "log": "build.noindex/task568/stage4/host-build.log",
+      "sha256": "d42666b4ae4d22e1063e83b30417e3434458dfa626c6952e0f105fc0f96f70a1",
+      "passed": true
+    },
+    "portable": {
+      "log": "build.noindex/task568/stage4/verify-portable.log",
+      "sha256": "13ea92941f3c77418ddb7eb73293d7a26d4b7cb41689b00a21adb79ddd73a9b4",
+      "passed": true
+    },
+    "strict": {
+      "log": "build.noindex/task568/stage4/verify-strict.log",
+      "sha256": "53336da6264971e11eb18bba76bfac85139627501250dd0822dd226425c80c58",
+      "passed": true
+    },
+    "golden": {
+      "log": "build.noindex/task568/stage4/golden.log",
+      "sha256": "c200e020ac8383edd5b1741ed4157abfd1ebd1d645a3a97257afd9da22d95ec5",
+      "passed": true
+    },
+    "renderSmoke": {
+      "log": "build.noindex/task568/stage4/render-smoke.log",
+      "sha256": "f4d864ee684bb121f3f434516f62fec9bdd551c488546ea26caf59f38e4d428b",
+      "passed": true
+    },
+    "renderCompare": {
+      "log": "build.noindex/task568/stage4/render-compare.log",
+      "sha256": "4ede3c999fc742e096e660a61f3cf8b7bc53ed719d02bc51d0586cffd23b9566",
+      "passed": true
+    },
+    "registrationHygiene": {
+      "log": "build.noindex/task568/stage4/registration-final.log",
+      "sha256": "1be295a72875b67bf3f35999e1b145d693c79bf24d1e360195ac621c876b2657",
+      "passed": true
+    },
+    "swiftCompile": {
+      "log": "build.noindex/task568/stage4/swift-compile.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "passed": true
+    },
+    "swiftIntegration": {
+      "log": "build.noindex/task568/stage4/swift-integration.log",
+      "sha256": "5c42837ad142aacd3396379b703fe2a6a7809b4aafae751030d00c8e0206af7a",
+      "passed": true
+    }
+  },
+  "remaining": [
+    "live installed/managed snapshot and official matcher slot binding",
+    "lease/read budget/stale/cancel/conflict/cache acceptance",
+    "minimum macOS/Intel runtime",
+    "Stage 5 signed Finder acceptance"
+  ]
+}

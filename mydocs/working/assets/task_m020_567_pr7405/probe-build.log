@@ -1,0 +1,25 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - import "./vite.config" without a file extension (vite.probe.config.ts:1:22). Add the file extension
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+vite v8.3.0 building client environment for production...
+transforming...
+[plugin rolldown:vite-resolve] Module "fs" has been externalized for browser compatibility, imported by "/private/tmp/rhwp-7403/rhwp-studio/node_modules/canvaskit-wasm/bin/canvaskit.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "path" has been externalized for browser compatibility, imported by "/private/tmp/rhwp-7403/rhwp-studio/node_modules/canvaskit-wasm/bin/canvaskit.js". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+✓ 53 modules transformed.
+
+(!) outDir /Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/pr7405-validation/upstream/probe-dist is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+rendering chunks...
+computing gzip size...
+../probe-dist/probe.html                           0.27 kB │ gzip:      0.23 kB
+../probe-dist/assets/canvaskit-SCAxUyCS.wasm   7,317.34 kB │ gzip:  2,989.78 kB
+../probe-dist/assets/rhwp_bg-COwFUq0X.wasm    41,036.75 kB │ gzip: 10,395.06 kB
+../probe-dist/assets/probe-xpwAaz4t.js           829.11 kB │ gzip:    141.53 kB
+
+✓ built in 818ms
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

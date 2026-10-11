@@ -7,7 +7,10 @@ protocol RhwpStudioPrintControlling: AnyObject {
     /// failure, or user cancellation.
     @MainActor
     func print(payload: RhwpStudioPagePayload, completion: @escaping () -> Void)
+    @MainActor func cancel()
 }
+
+extension RhwpStudioPrintControlling { func cancel() {} }
 
 @MainActor
 final class RhwpStudioPrintLifecycle {
@@ -15,6 +18,8 @@ final class RhwpStudioPrintLifecycle {
 
     private let controllerFactory: ControllerFactory
     private var activeController: (any RhwpStudioPrintControlling)?
+    var isPrinting: Bool { activeController != nil }
+    func cancelPreparation() { activeController?.cancel() }
 
     init(controllerFactory: @escaping ControllerFactory) {
         self.controllerFactory = controllerFactory
@@ -23,6 +28,8 @@ final class RhwpStudioPrintLifecycle {
     @discardableResult
     func start(
         payload: RhwpStudioPagePayload,
+        controller suppliedController: (any RhwpStudioPrintControlling)? = nil,
+        onFinished: @escaping @MainActor () -> Void = {},
         onRejected: (RhwpStudioPrintLifecycleError) -> Void
     ) -> Bool {
         guard activeController == nil else {
@@ -30,7 +37,7 @@ final class RhwpStudioPrintLifecycle {
             return false
         }
 
-        let controller = controllerFactory()
+        let controller = suppliedController ?? controllerFactory()
         activeController = controller
         controller.print(payload: payload) { [weak self, weak controller] in
             guard let self,
@@ -42,6 +49,7 @@ final class RhwpStudioPrintLifecycle {
             }
 
             self.activeController = nil
+            onFinished()
         }
         return true
     }

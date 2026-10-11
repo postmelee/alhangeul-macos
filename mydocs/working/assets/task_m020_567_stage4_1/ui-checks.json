@@ -1,0 +1,15 @@
+{
+  "scope": "Cua 실제 UI 조작, 별도 ID·저장소의 가상 28-family 설정 probe. 문서 적용이나 실제 OS 설치 증거는 아님.",
+  "checks": [
+    "기본 화면에서 감지한 글꼴 28개가 접힘 상태임 확인",
+    "상세를 펼쳐 검색과 여러 family 표시 확인",
+    "권한 확인 family를 펼쳐 Bold/Light/Regular와 접근 허용 버튼 3개 확인",
+    "목록 끝과 처음으로 스크롤해 scroll bar 값 1/0 및 행 변경 확인",
+    "상세를 접으면 검색과 긴 목록이 제거됨 확인",
+    "기본 가져오기 버튼 클릭 후 보관함 없이 source 선택 sheet 표시 확인",
+    "가져오기 sheet 실제 screenshot 확인",
+    "닫기 클릭 후 접힌 기본 설정 화면 복귀 확인"
+  ],
+  "permissionSubmitted": false,
+  "sourceScanSubmitted": false
+}

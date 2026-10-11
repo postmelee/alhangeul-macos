@@ -100,6 +100,7 @@ enum RhwpStudioHostBridgeScript {
       window.__alhangeulHostBridgeInstalled = true;
 
       const nativeCommands = new Set([
+        "app:font-settings",
         "file:open",
         "file:save",
         "file:save-as",
@@ -696,7 +697,9 @@ enum RhwpStudioHostBridgeScript {
         const pageCount = await requestRhwp("pageCount");
         const pages = [];
         for (let page = 0; page < pageCount; page += 1) {
-          pages.push(await requestRhwp("getPageSvg", { page }, 30000));
+          const output = window.rhwpStudio?.fonts?.getOutputPageSvg;
+          pages.push(typeof output === "function" ? await output(page)
+            : await requestRhwp("getPageSvg", { page }, 30000));
         }
         return { pageCount, pages };
       }
@@ -770,34 +773,19 @@ enum RhwpStudioHostBridgeScript {
         }
       }
 
-      async function printDocument() {
-        try {
-          const { pageCount, pages } = await documentPages();
-          postNative({
-            type: "print-document",
-            fileName: currentFileName(),
-            pageCount,
-            pages
-          });
-        } catch (error) {
-          postNative({
-            type: "error",
-            message: `인쇄 데이터를 만들 수 없습니다: ${error?.message || String(error)}`
-          });
-        }
-      }
-
       async function handleNativeCommand(command) {
         const canonicalCommand = command === "file:print-to-pdf"
           ? "file:export-pdf"
           : command;
 
-        if (canonicalCommand === "file:open" ||
+        if (canonicalCommand === "app:font-settings" ||
+            canonicalCommand === "file:open" ||
             canonicalCommand === "file:save" ||
             canonicalCommand === "file:save-as" ||
             canonicalCommand === "file:save-as-hwp" ||
             canonicalCommand === "file:save-as-hwpx" ||
             canonicalCommand === "file:export-pdf" ||
+            canonicalCommand === "file:print" ||
             canonicalCommand === "file:export-doc" ||
             canonicalCommand === "file:export-html") {
           postNative({
@@ -813,10 +801,6 @@ enum RhwpStudioHostBridgeScript {
           return;
         }
 
-        if (canonicalCommand === "file:print") {
-          printDocument();
-          return;
-        }
       }
 
       window.__alhangeulHostBridgeExportHwpDocument = (messageType) => {

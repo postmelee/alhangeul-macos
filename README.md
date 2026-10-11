@@ -14,7 +14,7 @@
   <a href="https://www.swift.org/"><img src="https://img.shields.io/badge/Swift-5.9-orange" alt="Swift 5.9" /></a>
   <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-native%20bridge-orange" alt="Rust native bridge" /></a>
   <!-- bundled-rhwp-badges:start -->
-  <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.8.6" title="포함된 rhwp commit: f1f9c6ae58344ee9368996d3543f76b9345cf227"><img src="https://img.shields.io/badge/bundled%20rhwp-v0.8.6-blue" alt="bundled rhwp: v0.8.6" /></a>
+  <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.8.7" title="포함된 rhwp commit: 1a76570e833917d15817415a53c09ad61ab3203f"><img src="https://img.shields.io/badge/bundled%20rhwp-v0.8.7-blue" alt="bundled rhwp: v0.8.7" /></a>
   <!-- bundled-rhwp-badges:end -->
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
   <a href="https://github.com/postmelee/alhangeul-macos/releases"><img src="https://img.shields.io/github/downloads/postmelee/alhangeul-macos/total?label=downloads" alt="GitHub all releases downloads" /></a>
@@ -57,6 +57,8 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 > 기존 `devel`에 있던 native viewer/editor 장기 작업은 `native-viewer-editor` 브랜치로 보존했습니다. 이 브랜치는 이제 Swift native macOS shell, Rust/rhwp Skia renderer 연동, Swift 편집 UI/오버레이 실험 라인으로 취급합니다. `devel-webview`는 퇴역한 legacy alias이며 신규 PR 대상이나 자동화 기준으로 사용하지 않습니다.
 
 ## 릴리즈 안내
+
+v0.2.3 / build 21은 Mac 설치 글꼴 사용과 rhwp v0.8.7 반영을 포함한 **미공개 준비 후보**입니다. 최종 DMG·설치·실제 업데이트 수용은 아직 진행하지 않았으며, 현재 공개 제공 버전은 아래 v0.2.2입니다. 준비 상태는 [v0.2.3 기록](mydocs/release/v0.2.3.md)에서 확인할 수 있습니다.
 
 ### v0.2.2
 
@@ -141,7 +143,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 ### WKWebView Viewer (MVP 뷰어)
 
 - macOS SwiftUI 기반 HostApp shell과 WKWebView
-- 개발 브랜치 기준 `edwardkim/rhwp` `v0.8.6`의 `rhwp-studio` viewer/editor 통합
+- 개발 브랜치 기준 `edwardkim/rhwp` `v0.8.7`의 `rhwp-studio` viewer/editor 통합
 - HWP/HWPX 파일 열기
 - WebView 내부 찾기, 복사, 기본 편집 UI
 - Finder 또는 다른 앱에서 파일 열기 요청 수신

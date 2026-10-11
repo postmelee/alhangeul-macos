@@ -13,7 +13,7 @@ enum RhwpStudioPDFFontResource: String, CaseIterable {
 }
 
 enum RhwpStudioPDFFontRoute {
-    static let scheme = "alhangeul-pdf-font"
+    static let scheme = RhwpStudioOutputFontRoute.scheme
     static let host = "bundle"
 
     static func resource(for url: URL?) throws -> RhwpStudioPDFFontResource {
@@ -140,15 +140,26 @@ struct RhwpStudioPDFFontDirectoryResourceProvider: RhwpStudioPDFFontResourceProv
     }
 }
 
+@MainActor
 final class RhwpStudioPDFFontSchemeHandler: NSObject, WKURLSchemeHandler {
     private let resourceProvider: RhwpStudioPDFFontResourceProviding
+    private weak var outputFonts: RhwpStudioOutputFontJob?
 
-    init(resourceProvider: RhwpStudioPDFFontResourceProviding) {
+    init(resourceProvider: RhwpStudioPDFFontResourceProviding, outputFonts: RhwpStudioOutputFontJob? = nil) {
         self.resourceProvider = resourceProvider
+        self.outputFonts = outputFonts
     }
 
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
         do {
+            if let url = urlSchemeTask.request.url, url.host == "snapshot" {
+                guard let outputFonts else { throw RhwpStudioOutputFontError.invalidRequest }
+                let value = try outputFonts.resource(for: url)
+                urlSchemeTask.didReceive(URLResponse(url: url, mimeType: value.mimeType,
+                    expectedContentLength: value.data.count, textEncodingName: nil))
+                urlSchemeTask.didReceive(value.data); urlSchemeTask.didFinish()
+                return
+            }
             let resource = try RhwpStudioPDFFontRoute.resource(for: urlSchemeTask.request.url)
             let data = try resourceProvider.data(for: resource)
             guard !data.isEmpty else {
@@ -231,6 +242,7 @@ enum RhwpStudioPDFFontStyle {
         )
         return String(decoding: data, as: UTF8.self)
     }()
+    static let serifAliasesJSON = String(decoding: try! JSONSerialization.data(withJSONObject: serifAliases), as: UTF8.self)
 
     static let fontFaceCSS: String = {
         var rules: [String] = []

@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "kind": "실제 service·공통 native 진입 수용; Finder 미연결",
+  "coreCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "runtime": {
+    "architecture": "arm64",
+    "macOS": "26.5.2"
+  },
+  "hashes": {
+    "RustBridge/src/font_context.rs": "bb415d38325e193d454937d5458da0cd62c0ca1cbb9d02daca66b81fd2d43cd7",
+    "RustBridge/src/font_context/nominal.rs": "df8c373b5a31e1650224ef450a508fc018e0089d78aab056a6cd5884582acb5a",
+    "Sources/Shared/NativeFonts/HwpNativeFontPageRenderer.swift": "5b9a72a5b37611dad8c071eee3154352e62ffe7471a479b51a2e6a3e14527755",
+    "Sources/Shared/FontLibrary/HostFontSupplyTypes.swift": "e46bb8bb28b17d8a1831a223e5a4e2992a70c9cefeb32b46410f4755896bc59a",
+    "Sources/Shared/FontLibrary/RhwpNativeFontMatcher.swift": "afefd1123bbb7e5b4bdfd9e25f84189b24315f3111f8d093d36b75b2c18199a7",
+    "Sources/Shared/FontLibrary/RhwpNativeFontMatcherSource.swift": "cea9b46e4bc7e19d7373f71ef557c1281af58cbd9d0133226a67a1ea96e6afbb",
+    "Sources/Shared/FontLibrary/FontLibraryStore.swift": "eb9ce0a219e816517c343c8e7550cff94b38c92a5e63eff5169fc2d1192f3783",
+    "Sources/HostApp/Services/StudioFontSupply.swift": "f50d0df606c33bb77525f38ca4708911a5caee348c92903b49a6d33dea24c816",
+    "Sources/HostApp/Services/FontLibraryService.swift": "ae23d4d4a8a98cd31349218d8e9b1ede62e1c033d5e66c057792549f76716542",
+    "Tests/NativeFontSupplyProbe/supply/main.swift": "b627adc23f9eedc1881562c0bb658fa3d10f20dc983ab04c5867bc1acf1b7422",
+    "Tests/NativeFontSupplyProbe/supply/prepare_variant.py": "b75022de3dc05076187b164cf5357b1a1a9382ce1c9ba335f11fdefb07c82cfb",
+    "Tests/NativeFontSupplyProbe/prepare_fixture.py": "7709e4f9d2c341c6653f29f7e434b9aaafe81c9b7242b58923df30bc288642dd",
+    "scripts/probe-native-font-supply.py": "4ce9fa5d6d83fa71dd4fd2056af59e37962251c5097e91fcf78b743f7dadcf6c",
+    "scripts/build-native-font-matcher.mjs": "45e77b6636e866a518aff849c33014f05f1501f62c0dc9d6a0e809221483feca",
+    "rhwp-core.lock": "975712e98ff9a83a98aa0395139794ff743b7c0d242eeaa8aec48a57e3b47697",
+    "build.noindex/task568/stage4/supply-complete/result.json": "04ee6d4b2ed2467da9e18a1b5d19f528d61f0f943f80f4fbc1714e057a6a8aa7",
+    "build.noindex/task568/stage4/supply-complete/native-supply": "0567814dce636e060dbb3452ade4d82a6754dbcb95a3480833f0038fd3d1270c",
+    "build.noindex/task568/stage4/GowunBatang-Regular-outline.ttf": "9af88a4e964db8402e03616118422dec9601b426a1c3a980881b50b167f9ce86",
+    "build.noindex/task568/stage4/cargo-supply-tests.log": "3baedfda0b85a1a87a832957cda2e54c24494a797f51129f902f01f4f951de18",
+    "build.noindex/task568/stage4/font-library-supply-final-tests.log": "64b8641822d8898fbf70150217476bd044c21aad9bd4a60b122382c965af1ace",
+    "build.noindex/task568/stage4/verify-supply-portable.log": "1f0e73adadb098c18922de5a07535db68022dfeba82699ea58c4408a667dfce9",
+    "build.noindex/task568/stage4/verify-supply-strict.log": "db559c72db99c5f41e106c888387df8c586975739b8aa53eeaa50c138a248cf1",
+    "Tests/FontLibraryTests/FontLibrarySnapshotTests.swift": "17d65aa04fdfb086da0d5de078d93d50a91671a77c37bc9c535c686569a31c42",
+    "Tests/FontLibraryTests/RhwpNativeFontMatcherTests.swift": "7475e1c0c33fd8aaddf0c8723c53f1c6410752b6e341e81e9faced24f8a8f1e4",
+    "Sources/RhwpCoreBridge/RhwpNativeFontContext.swift": "f84184cdc5e3579e6f0f0532b084f98053d43e23bf60751e12068808822560c9",
+    "Sources/RhwpCoreBridge/RhwpDocument.swift": "f75c60bf0f9648a16027a73ec33bbff423a89fc1257692492865435f1cbbb614",
+    "Sources/HostApp/Services/HwpNativeFontSupply.swift": "7b4450e368a87bd6c7847387b5d27fb5396119031276683b48ab5a05f0336994",
+    "Frameworks/generated_rhwp.h": "14994c7d1923107b5739b5518e43f98bc002e1b954a068647a377ec4d6e1fbc2",
+    "Frameworks/universal/librhwp.a": "521e53707bed97f95923e011076616344b17aaa42893b342923e82b973e4152a",
+    "build.noindex/task568/stage4/host-supply-complete-build.log": "adbaf31a704307d1a8303631a5285d4cf51d101c4f8bcd2cb4105b8cecff34ce",
+    "build.noindex/task568/stage4/registration-supply-complete-clean.log": "e90f67db079c4b4218d06a7019d018a31d3e6b272b1d0448b87c5373d94eddcc"
+  },
+  "installed": "활성 ArialUnicodeMS 원본 읽기만 수행; 고운바탕은 별도 process scope fixture",
+  "managed": "격리 저장소·실제 import/select/read/lease; 충돌 DTO와 read gate는 주입 시험",
+  "remaining": [
+    "Stage 5 확장 공급/권한·signed Finder/cache 수용",
+    "최소 OS·Intel runtime",
+    "프로세스 peak RSS와 복잡 shaping/layout parity"
+  ]
+}

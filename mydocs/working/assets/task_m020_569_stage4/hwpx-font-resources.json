@@ -1,0 +1,34 @@
+{
+  "pypdf": "6.10.0",
+  "pages": 1,
+  "fonts": [
+    {
+      "baseFont": "/AAAAAC+NanumSquareR",
+      "subtype": "/TrueType",
+      "descendantSubtype": "/TrueType",
+      "encoding": "",
+      "programs": {
+        "/FontFile2": {
+          "bytes": 2572,
+          "sha256": "f34ef7616825e3dbbf66da0dfa7783d180744d9db52f6c775c9f5fb0d104b5ff"
+        }
+      },
+      "toUnicodeBytes": 493,
+      "toUnicodeSHA256": "2153ff1fdfcc00858cfbb09b762fd0a7cf5d66b829b23398d23f78ce25c40811"
+    },
+    {
+      "baseFont": "/AAAAAE+NanumSquareB",
+      "subtype": "/TrueType",
+      "descendantSubtype": "/TrueType",
+      "encoding": "",
+      "programs": {
+        "/FontFile2": {
+          "bytes": 776,
+          "sha256": "626d5182bee16fe9a71b2d5fb5a3cb3107107858c875c8d1c1d46e0fa8e92c53"
+        }
+      },
+      "toUnicodeBytes": 372,
+      "toUnicodeSHA256": "d2e7fc5aaef73ea2ed818a2a6b3834eae23bb1052d6682037e8f01e30984ea1d"
+    }
+  ]
+}

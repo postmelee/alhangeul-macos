@@ -1,0 +1,5 @@
+name                                 type              encoding         emb sub uni object ID
+------------------------------------ ----------------- ---------------- --- --- --- ---------
+AAAAAC+NotoSansKR-Regular            TrueType          WinAnsi          yes yes yes      7  0
+AAAAAE+NotoSansKRThin-Bold           TrueType          WinAnsi          yes yes yes      9  0
+AAAAAF+AppleSDGothicNeo-Regular      CID Type 0C       Identity-H       yes yes no      10  0

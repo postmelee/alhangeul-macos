@@ -1,0 +1,9 @@
+{
+  "checks" : [
+    "new process restores enabled installed-font setting",
+    "new process rechecks original source copies",
+    "installed automatic use is verified without managed substitutes",
+    "enabled setting automatically supplies exact installed bytes on new process"
+  ],
+  "error" : null
+}

@@ -1972,6 +1972,59 @@ video {
   }
 }
 
+/* Mac 글꼴 사용 안내 — 기존 사이트 색상·탐색을 재사용한다. */
+.font-guide { width: min(880px, calc(100% - 48px)); margin: 0 auto; padding-bottom: 64px; }
+.font-guide-hero { padding: 72px 0 24px; }
+.font-guide-eyebrow { color: var(--accent); font: inherit; letter-spacing: normal; margin: 0 0 16px; }
+.font-guide-hero h1 { font-size: clamp(36px, 5vw, 58px); line-height: 1.15; letter-spacing: -2px; margin: 0 0 24px; }
+.font-guide-lead { color: var(--muted); font-size: 20px; line-height: 1.65; margin: 0 0 28px; word-break: keep-all; }
+.font-guide-status { border: 1px solid #d0e1f5; border-radius: 14px; padding: 18px 22px; background: #f3f8ff; }
+.font-guide-status strong { font-size: 15px; }
+.font-guide-status p { margin: 6px 0 0; font-size: 14px; line-height: 1.6; }
+.font-guide a:not(.font-guide-figure a) { color: var(--accent); }
+.font-guide a:hover { text-decoration: underline; }
+.font-guide a:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; border-radius: 3px; }
+.font-guide-toc { display: flex; flex-wrap: wrap; gap: 12px 28px; padding: 24px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
+.font-guide-section { padding: 44px 0; border-bottom: 1px solid var(--border); scroll-margin-top: 76px; }
+.font-guide-section:last-child { border-bottom: 0; padding-bottom: 0; }
+.font-guide-section h2 { font-size: 28px; letter-spacing: -.8px; line-height: 1.3; margin: 0 0 16px; word-break: keep-all; }
+.font-guide-section p { line-height: 1.75; word-break: keep-all; overflow-wrap: anywhere; }
+.font-guide-heading { display: flex; gap: 18px; align-items: flex-start; }
+.font-guide-heading h2 { margin-bottom: 8px; }
+.font-guide-heading p { margin: 0 0 16px; color: var(--muted); }
+.font-guide-number { display: grid; place-items: center; flex: 0 0 38px; height: 38px; border-radius: 50%; background: #eaf3ff; color: var(--accent); font-size: 18px; font-weight: 600; }
+.font-guide kbd { font: inherit; font-size: .9em; padding: 2px 6px; border: 1px solid var(--border); border-radius: 5px; background: #f7f7f9; white-space: nowrap; }
+.font-guide-figure { margin: 28px 0 22px; }
+.font-guide-figure img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 8px 28px rgba(0,0,0,.06); }
+.font-guide-figure figcaption { margin-top: 12px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.font-guide-tip { border-left: 3px solid #c8d9ec; background: #f7f9fc; padding: 14px 18px; border-radius: 0 10px 10px 0; font-size: 15px; }
+.font-guide-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 24px 0; }
+.font-guide-comparison article { padding: 24px; background: var(--parchment); border-radius: 14px; }
+.font-guide-comparison h3 { font-size: 18px; margin: 0 0 12px; line-height: 1.5; }
+.font-guide-comparison p { margin: 0; font-size: 15px; }
+.font-guide-faq { margin-top: 24px; }
+.font-guide-contact { font-size: 15px; margin-top: 24px; }
+@media (max-width: 700px) {
+  .font-guide { width: calc(100% - 40px); padding-bottom: 44px; }
+  .font-guide-hero { padding-top: 42px; }
+  .font-guide-hero h1 { letter-spacing: -1.2px; }
+  .font-guide-lead { font-size: 17px; }
+  .font-guide-status { padding: 16px; }
+  .font-guide-section { padding: 32px 0; }
+  .font-guide-section h2 { font-size: 24px; }
+  .font-guide-heading { gap: 12px; }
+  .font-guide-number { flex-basis: 32px; height: 32px; font-size: 16px; }
+  .font-guide-comparison { grid-template-columns: minmax(0, 1fr); }
+  .font-guide-comparison article { padding: 20px; }
+  .font-guide-page .header-actions { gap: 14px; }
+}
+@media (max-width: 380px) {
+  .font-guide { width: calc(100% - 32px); }
+  .font-guide-hero h1 { font-size: 32px; }
+  .font-guide-section h2 { font-size: 22px; }
+  .font-guide-page .header-actions { gap: 10px; }
+}
+
 /* Threads 최신 소식 */
 
 .news-home{padding:48px 24px 40px;background:#f7f7f9;scroll-margin-top:70px}

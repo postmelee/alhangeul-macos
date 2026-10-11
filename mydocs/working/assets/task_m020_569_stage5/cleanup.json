@@ -1,0 +1,10 @@
+{
+  "removed": true,
+  "path": "build.noindex/font-library-tests/DerivedData/Build/Products/Debug/Alhangeul.app",
+  "logicalBytes": 292569881,
+  "scope": "Stage 5 회귀를 위해 새로 빌드한 Debug 앱. XCTest/필요 캐시는 유지",
+  "installedAppChanged": false,
+  "globalReset": false,
+  "sparkleUpdaterUnregistered": true,
+  "cleanupRecovery": "부모 앱 해제 뒤 Sparkle Updater 하위 등록을 경로로 확인·해제. 시험 bundle 잠시 재생성 후 최종 제거"
+}

@@ -1,0 +1,57 @@
+{
+  "concurrentJobsBounded" : true,
+  "documentStampInvalidated" : true,
+  "permissionFallback" : true,
+  "proofs" : [
+    {
+      "bytes" : 32775,
+      "consumer" : "PNG",
+      "faces" : [
+        "GowunBatang-Bold",
+        "GowunBatang-Regular"
+      ],
+      "mode" : "coreGraphics",
+      "reads" : 2,
+      "releases" : 1
+    },
+    {
+      "bytes" : 31654,
+      "consumer" : "PNG",
+      "faces" : [
+        "GowunBatang-Regular",
+        "GowunBatang-Bold"
+      ],
+      "mode" : "skiaDecode",
+      "reads" : 2,
+      "releases" : 1
+    },
+    {
+      "bytes" : 31826,
+      "consumer" : "PNG",
+      "faces" : [
+        "GowunBatang-Bold",
+        "GowunBatang-Regular"
+      ],
+      "mode" : "skiaDirect",
+      "reads" : 2,
+      "releases" : 1
+    },
+    {
+      "consumer" : "PDF",
+      "pages" : 2,
+      "reads" : 4,
+      "releases" : 1
+    },
+    {
+      "consumer" : "Thumbnail",
+      "first" : "miss",
+      "reads" : 4,
+      "releases" : 4,
+      "second" : "exactHit",
+      "settingChange" : "miss",
+      "smaller" : "largerBucketHit(256x256)"
+    }
+  ],
+  "scope" : "unsigned CLI; actual group\/Finder not tested",
+  "staleRejected" : true
+}

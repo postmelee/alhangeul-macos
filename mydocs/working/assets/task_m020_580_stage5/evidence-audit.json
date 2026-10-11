@@ -1,0 +1,173 @@
+{
+  "at": "2026-10-11T12:31:22.701608+00:00",
+  "scope": "현재 제품/검증 소스·고정 산출물·선별 증거의 읽기 대조; 새 signed 시험 아님",
+  "auditedGitHead": "f4b7f379ef76ed2611efea7d9afd0aabb9770c50",
+  "checks": {
+    "productSources": {
+      "count": 126,
+      "mismatches": []
+    },
+    "testSources": {
+      "count": 24,
+      "mismatches": []
+    },
+    "scripts": {
+      "count": 7,
+      "mismatches": []
+    },
+    "signedProductSources": {
+      "count": 126,
+      "exactSetAndHashes": true,
+      "sourceCommit": "1624842b"
+    },
+    "signedSourceCommit": {
+      "count": 126,
+      "hashesMatchCurrent": true
+    },
+    "coreAssetNative": {
+      "count": 4,
+      "mismatches": []
+    },
+    "curatedEvidence": {
+      "count": 31,
+      "entries": [
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage1/measurements.json",
+          "sha256": "912820327bab172b2d6d29d0edfc1d12d68a125ea979ad83d69dda948936bc0c"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage1/source-receipt.json",
+          "sha256": "e6eb03fc7278c693421089022c6aefa44a9e7f7aebb15413145577b27a774e06"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage1/validation.json",
+          "sha256": "a6babd84308f47bbe6b0467462f6fa551da8d4ef51a4aa72df0c2f5b1114da47"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage2/measurements.json",
+          "sha256": "4b9a8857c8334dd750d8110e56decb80fbc27f8dc1f1815ade0cc76de7c957b0"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage2/source-receipt.json",
+          "sha256": "ea732cc78edb62ea0c4cb685112a2657b42fdba33e81ff342aaab3c662ecfcfa"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage2/validation.json",
+          "sha256": "acf7e1f13c14cb22acc66e67ea69b75985540edfa341a3150b8e8a387f6b2e43"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage3/measurements.json",
+          "sha256": "eca47f85bacb7f0f8e64acb3bcf1984c37c3e6197f6670c0947070c6decf3a24"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage3/source-receipt.json",
+          "sha256": "cc7630c7a156360d29e651311ceab838f279f1ba0632c6820c3557fb4b06b38d"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage3/validation.json",
+          "sha256": "af61c40b4a8aca177de69677fc99d77a255dee63db4c941f3e2654ec12d8a067"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4/candidate-preparation.json",
+          "sha256": "c6c7ff972587723ad56510c4a272560689cba1a16843ea5dfdf7bf9ffd8e51a1"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4/measurements.json",
+          "sha256": "6b423092abc06e4f580ce5d6a030c27f5be44b6b197685e13ca6b3b0a5ac2afb"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4/signed-measurements.json",
+          "sha256": "f3abbedcc2e932c84e442f534ab78bbf0ac7440dd7ec423ff4d304e5dbe72cb2"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4/signed-profile.json",
+          "sha256": "d1eb7dabc77c2a240b0c916c4d3fe0d6413dd3d79127bdac7a0aeead24bb4cc6"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4/source-receipt.json",
+          "sha256": "a0017fb4f24daabe0afb0f6c427eb93315235520f8d5bdd249a0173ba96d2ba7"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4/validation.json",
+          "sha256": "584dbcfb970642d90e7ed6db0d7573caaca05dac1204fed382dac65340a205fc"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_2/attribute-equivalence.json",
+          "sha256": "e6113fd16578ec85e8166a30eff7759c22fa7169a409499178ab0a55d536d354"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_2/candidate-preparation.json",
+          "sha256": "52cd329051f52326321a7b107f20ff9a32ceabbfd3965e16cc01efa2b0606eec"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_2/measurements.json",
+          "sha256": "9807301f0a0e5769d269021e38de77ccb79b077363817611d3fc70b134222572"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_2/source-receipt.json",
+          "sha256": "447ee62f8cfca17319982222597b921da7a425783178b670a712b1abe3b2e8d6"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_2/validation.json",
+          "sha256": "97ddcfa11a7ec36ba4d069b9e3f072119997d5cb68e4bdbd90afb919696c3060"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_2_signed/measurements.json",
+          "sha256": "5aff9b84888bac107389989feecda0c2f2d3c9587bd526110e2e4bcf1d28f2bd"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_2_signed/profile.json",
+          "sha256": "ef44200bfbfcc15c5032f8de21fee52505f7b38cf6f9314297ffb3398b8c624c"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_2_signed/validation.json",
+          "sha256": "17cfcf6c5a9e353d13a45508c8fff5e8598fc7988f76fba6a69a5df1378e2ac8"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_3/candidate-preparation.json",
+          "sha256": "9eadb9fe2a7c985fe985d0a447ad97a70a29877c1676413f69e0311e2c7e7c7f"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_3/collection-equivalence.json",
+          "sha256": "2f880f6079d140e2aa1b2c64ebc4cc2edb4c06e37e9e7e8b9a1be92f93fface8"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_3/measurements.json",
+          "sha256": "c8eb444c21fe011cdbac13835e00fe9334f022f49c9a00d8fb44a7a1177bafe2"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_3/source-receipt.json",
+          "sha256": "fd822f4d4475437ce515eeafb8dbd293fd1b8b2e8297e196ea945f697a30eaf1"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_3/validation.json",
+          "sha256": "c4e135ae9c77411d3b9ba1396708f1a6876b89221d425ce878f9e00f6e28fa87"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_3_signed/measurements.json",
+          "sha256": "67ac69fc5a8f3f0644db066c2f2d6b998b3ce85e9e59900716b2d70bce892dcf"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_3_signed/profile.json",
+          "sha256": "243bd82278539f3a9f793afac96221c44d685386faff3d98efb6fef45d4054d6"
+        },
+        {
+          "path": "mydocs/working/assets/task_m020_580_stage4_3_signed/validation.json",
+          "sha256": "1b688627bcd1c92d3f4d453444eaf25d160c7887aa7566756f4fdc22b4291f63"
+        }
+      ],
+      "mismatches": []
+    },
+    "signedEvidenceSemantics": {
+      "normalControlled": 186,
+      "normalBusy": 0,
+      "pairedSamples": 328,
+      "expectedSupplyFallbacks": 4,
+      "controlledWarmConditions": 12,
+      "samplesPerWarmCondition": 10,
+      "original300msGoalStillFalse": true,
+      "restorationRecorded": true,
+      "currentTrialAcceptanceByUserApproval": true
+    }
+  }
+}

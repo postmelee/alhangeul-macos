@@ -1,0 +1,38 @@
+{
+  "REPRODUCE.md": {
+    "sha256": "5b9f2c590c2dff2a635b8a84e58225cad9905f35fec9af263dd995a740db0d76",
+    "size": 4078
+  },
+  "canvaskit-diagnostics.json": {
+    "sha256": "ed6a0970c382d032a48079936d33cd3ffe87b4fb3077982d025efabef46f374c",
+    "size": 2934
+  },
+  "canvaskit-gpu.json": {
+    "sha256": "4d6412d44b54c75f2f7a7b75412a21a565ea32b095595529b10d6f22fc319560",
+    "size": 57
+  },
+  "integration-result.json": {
+    "sha256": "6015ddecc75928c211431190b6c6f40d525d76163142b7ad312d2d7ec1d9d8eb",
+    "size": 1154
+  },
+  "local-font-picker.png": {
+    "sha256": "d16b78528a8953f998a279fd152084f807e638054d40d185768039047145b3cc",
+    "size": 248493
+  },
+  "provenance.json": {
+    "sha256": "f2b6da52ab37dac66b8c3cdf8956e253049d870696072214ac457c5856659dc0",
+    "size": 4258
+  },
+  "saved-font-proof.json": {
+    "sha256": "d663ff5fa6890441a50ddb9c410b3f75e79a354c4e8ee8fe0c1413fde02d8fb0",
+    "size": 582
+  },
+  "studio-after-picker.png": {
+    "sha256": "ed4575abcfa87b14dbec1988099da5ba0ca4347b4e3b55e450cb60117cc38393",
+    "size": 232248
+  },
+  "studio-hwpx-canvaskit.png": {
+    "sha256": "c70747e7aa318a82d055501975303072549d3c50190747c281c1cd948afd9bf6",
+    "size": 229094
+  }
+}

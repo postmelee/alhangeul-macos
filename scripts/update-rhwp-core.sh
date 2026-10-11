@@ -13,6 +13,8 @@ CHANNEL=""
 REV=""
 TAG=""
 WORK_DIR=""
+UPSTREAM_DIR=""
+WORK_DIR_OWNED=0
 TARGET_COMMIT=""
 CARGO_TOML_BACKUP=""
 CARGO_LOCK_BACKUP=""
@@ -38,6 +40,7 @@ Options:
   --rev SHA         Full 40-character commit SHA for demo channel.
   --tag TAG         Release tag for stable channel.
   --check           Run upstream ref and API checks without editing files.
+  --upstream-dir DIR Reuse an existing checkout at the verified target commit.
 EOF
 }
 
@@ -51,7 +54,7 @@ finish() {
       cp "$CARGO_LOCK_BACKUP" "$CARGO_LOCK"
     fi
   fi
-  if [ -n "$WORK_DIR" ] && [ -d "$WORK_DIR" ]; then
+  if [ "$WORK_DIR_OWNED" -eq 1 ] && [ -n "$WORK_DIR" ] && [ -d "$WORK_DIR" ]; then
     rm -rf "$WORK_DIR"
   fi
   if [ -n "$CARGO_TOML_BACKUP" ] && [ -f "$CARGO_TOML_BACKUP" ]; then
@@ -264,6 +267,14 @@ parse_args() {
       --check)
         CHECK_ONLY=1
         ;;
+      --upstream-dir)
+        if [ "$#" -lt 2 ]; then
+          echo "ERROR: missing value for --upstream-dir" >&2
+          exit 1
+        fi
+        UPSTREAM_DIR="$2"
+        shift
+        ;;
       -h|--help)
         usage
         exit 0
@@ -308,12 +319,39 @@ validate_args() {
 
 init_work_repo() {
   WORK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/rhwp-core.XXXXXX")"
+  WORK_DIR_OWNED=1
   git -C "$WORK_DIR" init -q
   git -C "$WORK_DIR" remote add origin "$RHWP_REPO"
   git -C "$WORK_DIR" config lfs.skipSmudge true
 }
 
 fetch_target() {
+  if [ -n "$UPSTREAM_DIR" ]; then
+    if [ ! -d "$UPSTREAM_DIR" ] || [ "$(git -C "$UPSTREAM_DIR" rev-parse --is-inside-work-tree 2>/dev/null || true)" != "true" ]; then
+      echo "ERROR: upstream directory is not a git checkout: $UPSTREAM_DIR" >&2
+      exit 1
+    fi
+    WORK_DIR="$(cd "$UPSTREAM_DIR" && pwd)"
+    TARGET_COMMIT="$(git -C "$WORK_DIR" rev-parse HEAD)"
+    local expected="$REV"
+    if [ "$CHANNEL" = "stable" ]; then
+      local refs
+      refs="$(git ls-remote --tags "$RHWP_REPO" "refs/tags/$TAG" "refs/tags/$TAG^{}")"
+      expected="$(printf '%s\n' "$refs" | awk '$2 ~ /\^\{\}$/ {print $1; exit}')"
+      if [ -z "$expected" ]; then
+        expected="$(printf '%s\n' "$refs" | awk '$2 !~ /\^\{\}$/ {print $1; exit}')"
+      fi
+    fi
+    if ! is_full_sha "$expected" || [ "$TARGET_COMMIT" != "$expected" ]; then
+      echo "ERROR: upstream checkout does not match verified target commit" >&2
+      exit 1
+    fi
+    if ! git -C "$WORK_DIR" diff --quiet HEAD -- src crates vendor Cargo.toml Cargo.lock build.rs; then
+      echo "ERROR: upstream checkout contains modified core source or lock" >&2
+      exit 1
+    fi
+    return
+  fi
   init_work_repo
 
   if [ "$CHANNEL" = "demo" ]; then

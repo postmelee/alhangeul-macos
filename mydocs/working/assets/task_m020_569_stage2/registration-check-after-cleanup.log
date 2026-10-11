@@ -1,0 +1,20 @@
+Alhangeul extension registration hygiene
+Diagnostics: <local-registration-diagnostics>/20261010-152846
+
+Allowed installed app locations:
+  - /Applications/Alhangeul.app
+  - <user-home>/Applications/Alhangeul.app
+Provider app roots:
+  - /Applications/Alhangeul.app
+Development registrations:
+  - (none)
+Development app bundles found:
+  - build.noindex/task569/stage2/finder-candidate-01/Alhangeul.app
+Legacy app candidates:
+  - (none)
+Legacy extension candidates:
+  - (none)
+Issues:
+  - (none)
+Warnings:
+  - development/test Alhangeul.app bundles exist under build.noindex or DerivedData; this is only a problem if they are registered.

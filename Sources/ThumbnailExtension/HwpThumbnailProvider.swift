@@ -13,6 +13,21 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
         for request: QLFileThumbnailRequest,
         _ handler: @escaping (QLThumbnailReply?, Error?) -> Void
     ) {
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        let id = UUID().uuidString, started = DispatchTime.now().uptimeNanoseconds
+        ExtensionFontPerformanceTrace.request.withValue(id) {
+            createThumbnail(for: request) { reply, error in
+                ExtensionFontPerformanceTrace.interval("thumbnail", start: started, success: error == nil, id: id)
+                handler(reply, error)
+            }
+        }
+        #else
+        createThumbnail(for: request, handler)
+        #endif
+    }
+
+    private func createThumbnail(for request: QLFileThumbnailRequest,
+                                 _ handler: @escaping (QLThumbnailReply?, Error?) -> Void) {
         let policy = HwpThumbnailPolicyResolver.resolve()
         let policyID = HwpThumbnailPolicyResolver.identifier(for: policy)
         Self.logger.debug("Thumbnail requested file=\(request.fileURL.lastPathComponent, privacy: .public) policy=\(policyID, privacy: .public) max=\(Int(request.maximumSize.width), privacy: .public)x\(Int(request.maximumSize.height), privacy: .public) scale=\(request.scale, privacy: .public)")
@@ -29,6 +44,7 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
                 case .success(let renderResult):
                     let renderedPage = renderResult.page
                     let diagnostics = renderedPage.diagnostics
+                    Self.logger.debug("Thumbnail fonts identity=\(diagnostics.fontIdentity ?? "none", privacy: .public) faces=\(diagnostics.fontFaces.joined(separator: ","), privacy: .public) supplyFallback=\(diagnostics.fontSupplyFailure ?? "none", privacy: .public)")
                     let contextSize = Self.aspectFit(renderedPage.size, within: request.maximumSize)
                     let image = renderedPage.image
                     Self.logger.debug("Thumbnail ready file=\(request.fileURL.lastPathComponent, privacy: .public) policy=\(policyID, privacy: .public) cache=\(renderResult.cacheEvent.description, privacy: .public) requestedBucket=\(Self.bucketDescription(renderResult.requestedKey), privacy: .public) matchedBucket=\(Self.bucketDescription(renderResult.matchedKey), privacy: .public) backend=\(Self.backendDescription(diagnostics.backendUsed), privacy: .public) fallback=\(Self.fallbackDescription(diagnostics.fallbackReason), privacy: .public) renderMs=\(Self.durationDescription(diagnostics.durationMs.totalMs), privacy: .public) pixels=\(Self.sizeDescription(diagnostics.pixelSize), privacy: .public) context=\(Self.sizeDescription(contextSize), privacy: .public) page=\(Self.sizeDescription(renderedPage.size), privacy: .public)")
@@ -148,6 +164,8 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
             return "pngDecodeFailure"
         case .memoryTimeoutFallback:
             return "memoryTimeoutFallback"
+        case .unsupportedFontContext:
+            return "unsupportedFontContext"
         }
     }
 

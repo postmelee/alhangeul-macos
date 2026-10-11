@@ -1,0 +1,83 @@
+{
+  "issue": 567,
+  "milestone": "M020",
+  "stage": 4,
+  "date": "2026-10-07",
+  "base_commit": "f287ab2",
+  "environment": {
+    "macOS": "26.5.2",
+    "architecture": "arm64"
+  },
+  "studio_manifest": {
+    "name": "rhwp-studio",
+    "source_repository": "https://github.com/edwardkim/rhwp.git",
+    "source_ref_kind": "release-tag",
+    "source_release_tag": "v0.8.7",
+    "source_resolved_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "source_cargo_lock_sha256": "f24e98940a42000cea09500bea090cc571773e761c3d068769227e82a0e2f024",
+    "wasm_build_command": "CARGO_TARGET_DIR=/Users/melee/Documents/projects/forks/rhwp/target/pr-review scripts/wasm-pack-locked.sh --target web --out-dir pkg",
+    "recommended_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
+    "actual_wasm_build_command": "CARGO_TARGET_DIR=/Users/melee/Documents/projects/forks/rhwp/target/pr-review scripts/wasm-pack-locked.sh --target web --out-dir pkg",
+    "studio_build_command": "node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>",
+    "studio_font_menu_adapter_sha256": "21581c6cb0998c346a467913b496e28bef9689df68e532b5e7a51c7a00655b80",
+    "copied_from": "rhwp-studio/dist",
+    "excluded_paths": [
+      "samples/"
+    ],
+    "local_overlay_paths": [
+      "alhangeul-wkwebview-overrides.css",
+      "fonts/FONTS.md"
+    ],
+    "copied_file_count": 65,
+    "copied_total_bytes": 57969151,
+    "entrypoints": {
+      "index_html": {
+        "path": "index.html",
+        "sha256": "759851581c20d19df384b418759c0f17c8ca581ec7689b488a6f4353229aa998"
+      },
+      "main_js": {
+        "path": "assets/index-BYdCXqyX.js",
+        "sha256": "1fc0495ab6092e7cf82187b50aa5ae017978f0d8e7bf86f3679dfdb60ccc25ea"
+      },
+      "main_css": {
+        "path": "assets/index-Dy0DTkWY.css",
+        "sha256": "77febd44c7840da15121989e64d344123d5d353b9d7c4ecc66f44ac8d544110e"
+      },
+      "wasm": {
+        "path": "assets/rhwp_bg-CgLRUUmQ.wasm",
+        "sha256": "d6a00eb16a7155607b7a81641ef33ba5414a032f74091c72c1c1d351b7086cdf"
+      }
+    }
+  },
+  "scope": "제품 Coordinator·native 서비스·설정 View·정식 Studio의 격리 변경/재실행 검증. 활성 metadata 목록은 주입하고 전용 파일의 실제 bytes·stat·POSIX 권한·삭제를 사용한다.",
+  "limits": [
+    "OS 지속 설치와 signed sandbox 권한 복원은 미검증",
+    "최소 macOS 및 Intel 실제 실행·다중 제품 창/대규모 성능 수용은 미검증",
+    "undo stack 자체는 검사하지 않고 dirty=false 및 문서 속성을 검사했다",
+    "패딩 변경 시험은 같은 이름의 다른 hash를 확인하며 다른 버전 glyph/metrics 비교는 아니다"
+  ],
+  "results": {
+    "native_tests": 104,
+    "javascript_tests": 24,
+    "wk_changes": 31,
+    "managed_new_process": 5,
+    "installed_new_process": 4,
+    "document_lifecycle": 43,
+    "save_reopen_positions": 6
+  },
+  "source_sha256": {
+    "Sources/HostApp/HostApp.swift": "f003ca509991c0a984ea4f292f2484fc205ddd16fa6e6249649f14fda22b40d0",
+    "Sources/HostApp/Services/InstalledFontCatalogService.swift": "7294f04eaacc50d4ef9abf9642b5a518b764a6b0b68b392a2507eff05dd8cb24",
+    "Sources/HostApp/Services/StudioFontMessageHandler.swift": "c318dbb2443f3e68fc8877c1d5f3fc4f96006814e3f04d2a18e05b34a9880518",
+    "Sources/HostApp/Services/StudioFontSupply.swift": "fe8f8e487db574456154c2c2109d84369847fc4e2e8e97f6ded48f381294d504",
+    "Sources/HostApp/Views/FontLibrarySettingsModel.swift": "86df189846255d9eb7e1552f16937f3918e29717dd02b449383db5c954b0f5f1",
+    "Sources/HostApp/Views/FontLibrarySettingsView.swift": "994b49662d8657ccf9707bceb8a927f52c0c5470b902f26f137cc65d9fc9dfae",
+    "Sources/HostApp/Views/InstalledFontSettingsModel.swift": "f53517e7f33f60de69065591038626b5669c9e20d23b743145c55b4d4b46329f",
+    "Sources/HostApp/Views/InstalledFontSettingsView.swift": "92c95039ad582c29984e0693571f987e89e49dd9b3a82f8d853bdde52100e58c",
+    "Tests/FontLibraryTests/InstalledFontCatalogTests.swift": "5de41e8b4560e91c034ac2a2ab0769fd3af5576ee60947f313562ed28e13d2c9",
+    "Tests/StudioFontIntegrationProbe/main.swift": "764716c3f144fcd2fea2c9370f132d248ccdf896aaa4dcf0357c28a747e524e3",
+    "Tests/StudioFontIntegrationProbe/FontChangeFixture.swift": "17933b6301fade4db56e3a53e75b616ca87a208d76ec4332b1790ecd96159ca7",
+    "scripts/probe-studio-font-integration.py": "2134ccf2536f6c9b09709e671e5fda8a941c8c45d8b6f042dccf481f3aaed5d7",
+    "scripts/ci/studio-font-integration-fixture.mjs": "5bb11ab5cb240b80170784429bb7b0ad8bb151ef71e20d9a5834b24911c914d3"
+  }
+}

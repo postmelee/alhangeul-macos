@@ -1,0 +1,24 @@
+{
+  "bookmarkCount" : 1,
+  "bookmarkRead" : true,
+  "fonts" : [
+    {
+      "bytes" : 723640,
+      "faceIndex" : 0,
+      "ps" : "NanumSquareR",
+      "sha256" : "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+    },
+    {
+      "bytes" : 733500,
+      "faceIndex" : 0,
+      "ps" : "NanumSquareB",
+      "sha256" : "f737d58294faec9c632189af3a2a3e48e49c03c0256de09db61e879e2857bfbf"
+    }
+  ],
+  "grantIssues" : 0,
+  "omittedFaceCount" : 0,
+  "os" : "Version 26.5.2 (Build 25F84)",
+  "pid" : 98284,
+  "records" : 810,
+  "restoredEnabled" : true
+}

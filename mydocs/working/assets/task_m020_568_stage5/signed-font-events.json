@@ -1,0 +1,1416 @@
+[
+  {
+    "timestamp": "2026-10-10 00:55:02.060049+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-01-20261010-005456.hwp policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:02.061000+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-01-20261010-005456.hwp policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:02.514933+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=809 managed=2 metadataMs=453.637875",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:03.730116+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=49aa6b6fa568a59d2111a6247737b0a0757528357e54361de470383761219674 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:03.730174+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-01-20261010-005456.hwp policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=1053.35 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:03.946741+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:03.946789+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:04.938797+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=991.998750",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:05.108205+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=cd920a2347cbdf6281bbdf7315862ce5dcd86ed432a5ef2e348336b08f2312ba faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:05.108272+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=8.39 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:05.984643+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-03-20261010-005456.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:05.984839+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-03-20261010-005456.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:06.973075+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=988.220709",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:07.146798+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=79eb050432518c535a0078d6040ce6e72832ddb9f5853f2e05b568a051c10040 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:07.146848+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-03-20261010-005456.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=7.85 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:08.009814+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:08.009861+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:09.002326+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=992.468666",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:09.437652+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=a9f4ea5f733a34f3719d8cc4ad75c6d2226c8372c5ac9a9e81010067c8e3022d faces=ArialUnicodeMS supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:09.437705+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=12.05 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:36.582909+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-01-20261010-005456.hwp policy=coreGraphicsOnly max=16x16 scale=2.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:36.582962+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-01-20261010-005456.hwp policy=coreGraphicsOnly pixels=32x32",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:36.583074+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly max=16x16 scale=2.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:36.583154+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly pixels=32x32",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:36.583211+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-03-20261010-005456.hwpx policy=coreGraphicsOnly max=16x16 scale=2.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:36.583257+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-03-20261010-005456.hwpx policy=coreGraphicsOnly pixels=32x32",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:39.516243+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=2933.370709",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:39.532236+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=2949.165084",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:39.532842+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=2949.453667",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:39.555351+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=79eb050432518c535a0078d6040ce6e72832ddb9f5853f2e05b568a051c10040 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:39.555392+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-03-20261010-005456.hwpx policy=coreGraphicsOnly cache=largerBucketHit(1024x1024) requestedBucket=32x32 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=7.85 pixels=725x1024 context=11x16 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:39.555719+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=cd920a2347cbdf6281bbdf7315862ce5dcd86ed432a5ef2e348336b08f2312ba faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:39.555779+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly cache=largerBucketHit(1024x1024) requestedBucket=32x32 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=8.39 pixels=725x1024 context=11x16 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:39.558677+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly max=16x16 scale=2.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:39.558727+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly pixels=32x32",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:40.552239+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=993.488292",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:40.568137+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=a9f4ea5f733a34f3719d8cc4ad75c6d2226c8372c5ac9a9e81010067c8e3022d faces=ArialUnicodeMS supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:40.568183+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly cache=largerBucketHit(1024x1024) requestedBucket=32x32 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=12.05 pixels=725x1024 context=11x16 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:40.637994+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=b698726078df054ca1d6b359d0425071eae3f945f1fa218327bbb3f2b4bdde17 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:40.638036+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-01-20261010-005456.hwp policy=coreGraphicsOnly cache=miss requestedBucket=32x32 matchedBucket=32x32 backend=coreGraphics fallback=- renderMs=7.52 pixels=23x32 context=11x16 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:52.482572+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview requested file=alhangeul-smoke-02-20261010-005456.hwpx",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:52.486556+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview externalResource state=attempted total=0 injected=0 alreadyLoaded=0 missing=0 rejected=0 tooLarge=0 permissionDenied=0 readFailed=0 bridgeFailed=0",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:52.486577+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview selected PNG reply file=alhangeul-smoke-02-20261010-005456.hwpx mode=coreGraphics pages=1 size=793x1122",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:52.486585+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview rendering PNG file=alhangeul-smoke-02-20261010-005456.hwpx mode=coreGraphics",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:52.946627+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=809 managed=2 metadataMs=459.926625",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:54.134004+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview fonts identity=bc80d97cc17e9a59589fb4933d7010d55cdad4d27cbe4970b386546492438bba faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:54.134029+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render backend file=alhangeul-smoke-02-20261010-005456.hwpx requestedMode=coreGraphics outputMode=coreGraphics backend=coreGraphics fallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:54.134036+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render output file=alhangeul-smoke-02-20261010-005456.hwpx bytes=32775 skiaPNGBytes=none pixel=794x1123",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:54.134047+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render timing totalMs=1059.228 skiaMs=none validateMs=none decodeMs=none encodeMs=4.741 coreMs=1054.487",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:55:54.134051+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG ready file=alhangeul-smoke-02-20261010-005456.hwpx mode=coreGraphics bytes=32775",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:34.169969+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview requested file=alhangeul-smoke-03-20261010-005456.hwpx",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:34.173425+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview externalResource state=attempted total=0 injected=0 alreadyLoaded=0 missing=0 rejected=0 tooLarge=0 permissionDenied=0 readFailed=0 bridgeFailed=0",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:34.173459+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview selected PDF reply file=alhangeul-smoke-03-20261010-005456.hwpx pages=2 size=793x1122",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:34.173469+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview rendering PDF file=alhangeul-smoke-03-20261010-005456.hwpx pages=2",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:35.441092+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1267.650417",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:35.942358+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF fonts page=0 identity=c922f2f1fd0e2b830723d295d1ead884963de38fdd0e054021e6b480530afdb0 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:35.942389+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF fonts page=1 identity=e217d856422227a16f267f20448d9f3cf2fe0ed58de51da7ddf0347116a06fb2 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:35.942398+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF render backend file=alhangeul-smoke-03-20261010-005456.hwpx pages=2 skiaPages=0 coreGraphicsPages=2",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:35.942401+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF render fallback embeddedThumbnailPages=0 fallbackPages=0",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:35.942409+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF render output pngBytes=0 totalRenderMs=17.162",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:56:35.942413+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF ready file=alhangeul-smoke-03-20261010-005456.hwpx pages=2 bytes=27086",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:58:23.600403+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview requested file=alhangeul-smoke-01-20261010-005456.hwp",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:58:23.606963+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview externalResource state=attempted total=0 injected=0 alreadyLoaded=0 missing=0 rejected=0 tooLarge=0 permissionDenied=0 readFailed=0 bridgeFailed=0",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:58:23.606990+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview selected PNG reply file=alhangeul-smoke-01-20261010-005456.hwp mode=coreGraphics pages=1 size=793x1122",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:58:23.607001+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview rendering PNG file=alhangeul-smoke-01-20261010-005456.hwp mode=coreGraphics",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:58:24.700387+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1093.434958",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:58:24.847913+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview fonts identity=7e8f87f320d40c178a11e4f637576de3c32f17ca148267cceaa5cdd31bf2b49c faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:58:24.847941+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render backend file=alhangeul-smoke-01-20261010-005456.hwp requestedMode=coreGraphics outputMode=coreGraphics backend=coreGraphics fallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:58:24.847949+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render output file=alhangeul-smoke-01-20261010-005456.hwp bytes=32272 skiaPNGBytes=none pixel=794x1123",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:58:24.847962+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render timing totalMs=15.066 skiaMs=none validateMs=none decodeMs=none encodeMs=5.266 coreMs=9.800",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:58:24.847967+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG ready file=alhangeul-smoke-01-20261010-005456.hwp mode=coreGraphics bytes=32272",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:16.469430+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview requested file=alhangeul-smoke-04-20261010-005456.hwpx",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:16.470901+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview externalResource state=attempted total=0 injected=0 alreadyLoaded=0 missing=0 rejected=0 tooLarge=0 permissionDenied=0 readFailed=0 bridgeFailed=0",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:16.470940+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview selected PNG reply file=alhangeul-smoke-04-20261010-005456.hwpx mode=coreGraphics pages=1 size=793x1122",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:16.470962+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview rendering PNG file=alhangeul-smoke-04-20261010-005456.hwpx mode=coreGraphics",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:17.581507+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1110.591833",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:17.829096+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview fonts identity=50a83064525e0387f370504099dfec0f2ffa9037587a93370bf7364dd2f2f3aa faces=ArialUnicodeMS supplyFallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:17.829120+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render backend file=alhangeul-smoke-04-20261010-005456.hwpx requestedMode=coreGraphics outputMode=coreGraphics backend=coreGraphics fallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:17.829131+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render output file=alhangeul-smoke-04-20261010-005456.hwpx bytes=20796 skiaPNGBytes=none pixel=794x1123",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:17.829143+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render timing totalMs=13.663 skiaMs=none validateMs=none decodeMs=none encodeMs=4.510 coreMs=9.153",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:17.829147+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG ready file=alhangeul-smoke-04-20261010-005456.hwpx mode=coreGraphics bytes=20796",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:45.534567+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:45.534687+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:46.630659+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1095.889333",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:46.646566+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=cd920a2347cbdf6281bbdf7315862ce5dcd86ed432a5ef2e348336b08f2312ba faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:46.646623+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly cache=exactHit requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=8.39 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:46.681578+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:46.681631+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:47.707267+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1025.632916",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:47.723094+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=cd920a2347cbdf6281bbdf7315862ce5dcd86ed432a5ef2e348336b08f2312ba faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:47.723177+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly cache=exactHit requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=8.39 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:47.759159+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly max=256x256 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:47.759211+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly pixels=256x256",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:48.777102+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1017.887833",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:48.792028+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=cd920a2347cbdf6281bbdf7315862ce5dcd86ed432a5ef2e348336b08f2312ba faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 00:59:48.792077+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly cache=largerBucketHit(1024x1024) requestedBucket=256x256 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=8.39 pixels=725x1024 context=181x256 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:38.731096+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:38.731141+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:39.790048+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=false records=846 managed=2 metadataMs=1058.908375",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:39.846007+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=none faces= supplyFallback=HwpNativeFontSupplyError",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:39.846053+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=1.33 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:39.881469+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=managed-with-installed-disabled.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:39.881625+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=managed-with-installed-disabled.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:40.907511+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=false records=846 managed=2 metadataMs=1025.836292",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:41.051685+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=c43ea9c5ff55f6b3076bc068e808c773dfb81f9aacb8794169065a9ebf083491 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:41.051776+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=managed-with-installed-disabled.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=8.23 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:41.324104+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=disabled-installed.hwpx policy=coreGraphicsOnly max=16x16 scale=2.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:41.324251+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=disabled-installed.hwpx policy=coreGraphicsOnly pixels=32x32",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:41.324466+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=managed-with-installed-disabled.hwpx policy=coreGraphicsOnly max=16x16 scale=2.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:41.324526+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=managed-with-installed-disabled.hwpx policy=coreGraphicsOnly pixels=32x32",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:43.295601+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=false records=846 managed=2 metadataMs=1971.322417",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:43.304783+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=false records=846 managed=2 metadataMs=1980.246666",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:43.321919+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=c43ea9c5ff55f6b3076bc068e808c773dfb81f9aacb8794169065a9ebf083491 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:43.321977+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=managed-with-installed-disabled.hwpx policy=coreGraphicsOnly cache=largerBucketHit(1024x1024) requestedBucket=32x32 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=8.23 pixels=725x1024 context=11x16 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:43.348882+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=none faces= supplyFallback=HwpNativeFontSupplyError",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:00:43.348925+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=disabled-installed.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=32x32 matchedBucket=32x32 backend=coreGraphics fallback=- renderMs=0.40 pixels=23x32 context=11x16 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:01:22.824364+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview requested file=disabled-installed.hwpx",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:01:22.825881+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview externalResource state=attempted total=0 injected=0 alreadyLoaded=0 missing=0 rejected=0 tooLarge=0 permissionDenied=0 readFailed=0 bridgeFailed=0",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:01:22.825955+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview selected PNG reply file=disabled-installed.hwpx mode=coreGraphics pages=1 size=793x1122",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:01:22.825973+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview rendering PNG file=disabled-installed.hwpx mode=coreGraphics",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:01:24.174228+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Font metadata ready installedEnabled=false records=846 managed=2 metadataMs=1348.318416",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:01:24.218320+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview fonts identity=none faces= supplyFallback=HwpNativeFontSupplyError",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:01:24.218350+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render backend file=disabled-installed.hwpx requestedMode=coreGraphics outputMode=coreGraphics backend=coreGraphics fallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:01:24.218361+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render output file=disabled-installed.hwpx bytes=20825 skiaPNGBytes=none pixel=794x1123",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:01:24.218381+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render timing totalMs=6.392 skiaMs=none validateMs=none decodeMs=none encodeMs=4.490 coreMs=1.902",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:01:24.218388+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG ready file=disabled-installed.hwpx mode=coreGraphics bytes=20825",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:45.479752+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:45.479840+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:46.575729+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1095.859500",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:46.679780+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=none faces= supplyFallback=FontLibraryError:corruptObject",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:46.679833+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=5.22 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:47.004855+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=missing-managed-two.hwpx policy=coreGraphicsOnly max=16x16 scale=2.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:47.005004+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=missing-managed-two.hwpx policy=coreGraphicsOnly pixels=32x32",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:47.005429+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=missing-managed.hwpx policy=coreGraphicsOnly max=16x16 scale=2.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:47.005486+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=missing-managed.hwpx policy=coreGraphicsOnly pixels=32x32",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:49.069527+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=2064.479250",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:49.077059+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=2071.620500",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:49.156833+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=none faces= supplyFallback=FontLibraryError:corruptObject",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:49.156887+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=missing-managed-two.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=32x32 matchedBucket=32x32 backend=coreGraphics fallback=- renderMs=1.09 pixels=23x32 context=11x16 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:49.202941+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=none faces= supplyFallback=FontLibraryError:corruptObject",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:02:49.202994+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=missing-managed.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=32x32 matchedBucket=32x32 backend=coreGraphics fallback=- renderMs=1.11 pixels=23x32 context=11x16 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:28.899203+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview requested file=missing-managed-two.hwpx",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:28.901666+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview externalResource state=attempted total=0 injected=0 alreadyLoaded=0 missing=0 rejected=0 tooLarge=0 permissionDenied=0 readFailed=0 bridgeFailed=0",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:28.901696+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview selected PDF reply file=missing-managed-two.hwpx pages=2 size=793x1122",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:28.901705+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview rendering PDF file=missing-managed-two.hwpx pages=2",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:29.987771+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1086.109709",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:30.071941+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF fonts page=0 identity=none faces= supplyFallback=FontLibraryError:corruptObject",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:30.071961+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF fonts page=1 identity=none faces= supplyFallback=FontLibraryError:corruptObject",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:30.071968+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF render backend file=missing-managed-two.hwpx pages=2 skiaPages=0 coreGraphicsPages=2",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:30.071971+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF render fallback embeddedThumbnailPages=0 fallbackPages=0",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:30.071984+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF render output pngBytes=0 totalRenderMs=4.084",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:03:30.071988+0900",
+    "processID": 52692,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PDF ready file=missing-managed-two.hwpx pages=2 bytes=24320",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:38.851452+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:38.851503+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:39.873856+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1022.266458",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:40.042616+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=c598e687138aaa31408cb4ef9091cc936aea01ce584dbf556ba58b382e7fb0a5 faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:40.042657+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-02-20261010-005456.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=7.95 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:40.077016+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:40.077182+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:41.103463+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1026.204042",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:41.543829+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=5f4ccaf7cf86fcf709d85425098a0a5c45d989abf8d71511b00089aba7fa0e1b faces=ArialUnicodeMS supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:41.543875+0900",
+    "processID": 52517,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=alhangeul-smoke-04-20261010-005456.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=10.36 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:41.674999+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=restart-managed.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:41.675345+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=restart-managed.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:42.138415+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=809 managed=2 metadataMs=462.969708",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:43.388788+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=f94ab890b6c944b6c4db6eb6b37b9504361bea7433f2e5f2339cd94d2cde3f2f faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:43.388840+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=restart-managed.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=1096.12 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:43.422140+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=restart-installed.hwpx policy=coreGraphicsOnly max=768x768 scale=1.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:43.422275+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=restart-installed.hwpx policy=coreGraphicsOnly pixels=1024x1024",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:44.452889+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1030.573833",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:44.816508+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=0db74948cbc266123a3508051a0be2afdb64af8534c6674b4f399ed21b4a3c40 faces=ArialUnicodeMS supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:44.816666+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=restart-installed.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=1024x1024 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=11.23 pixels=725x1024 context=543x768 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:45.092909+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=restart-installed.hwpx policy=coreGraphicsOnly max=16x16 scale=2.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:45.092969+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=restart-installed.hwpx policy=coreGraphicsOnly pixels=32x32",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:45.093201+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail requested file=restart-managed.hwpx policy=coreGraphicsOnly max=16x16 scale=2.000000",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:45.093247+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail render enqueued file=restart-managed.hwpx policy=coreGraphicsOnly pixels=32x32",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:47.064366+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1971.437750",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:47.072930+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1979.716542",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:47.082831+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=0db74948cbc266123a3508051a0be2afdb64af8534c6674b4f399ed21b4a3c40 faces=ArialUnicodeMS supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:47.082948+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=restart-installed.hwpx policy=coreGraphicsOnly cache=largerBucketHit(1024x1024) requestedBucket=32x32 matchedBucket=1024x1024 backend=coreGraphics fallback=- renderMs=11.23 pixels=725x1024 context=11x16 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:47.233028+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail fonts identity=6b294b593a1d46d79b5a0e52c7befee7847b5eab0b2a119b4b658cdfeb70704e faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:04:47.233071+0900",
+    "processID": 56552,
+    "subsystem": "com.postmelee.alhangeul.ThumbnailExtension",
+    "eventMessage": "Thumbnail ready file=restart-managed.hwpx policy=coreGraphicsOnly cache=miss requestedBucket=32x32 matchedBucket=32x32 backend=coreGraphics fallback=- renderMs=7.47 pixels=23x32 context=11x16 page=793x1122",
+    "processImageUUID": "CBEB8549-67EE-3624-911E-A519E199F3AD"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:09.650045+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview requested file=restart-managed.hwpx",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:09.681891+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview externalResource state=attempted total=0 injected=0 alreadyLoaded=0 missing=0 rejected=0 tooLarge=0 permissionDenied=0 readFailed=0 bridgeFailed=0",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:09.681917+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview selected PNG reply file=restart-managed.hwpx mode=coreGraphics pages=1 size=793x1122",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:09.681924+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview rendering PNG file=restart-managed.hwpx mode=coreGraphics",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:10.153965+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=809 managed=2 metadataMs=471.889666",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:11.423639+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview fonts identity=4f39cbb9b046cf1907821285e36dfe8b9a787ec12ae154bbe3a16dde41dc968d faces=GowunBatang-Bold,GowunBatang-Regular supplyFallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:11.423668+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render backend file=restart-managed.hwpx requestedMode=coreGraphics outputMode=coreGraphics backend=coreGraphics fallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:11.423678+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render output file=restart-managed.hwpx bytes=32775 skiaPNGBytes=none pixel=794x1123",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:11.423692+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render timing totalMs=1096.953 skiaMs=none validateMs=none decodeMs=none encodeMs=4.670 coreMs=1092.282",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:11.423697+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG ready file=restart-managed.hwpx mode=coreGraphics bytes=32775",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:53.812344+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview requested file=restart-installed.hwpx",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:53.813359+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview externalResource state=attempted total=0 injected=0 alreadyLoaded=0 missing=0 rejected=0 tooLarge=0 permissionDenied=0 readFailed=0 bridgeFailed=0",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:53.813373+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview selected PNG reply file=restart-installed.hwpx mode=coreGraphics pages=1 size=793x1122",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:53.813382+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview rendering PNG file=restart-installed.hwpx mode=coreGraphics",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:55.140620+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Font metadata ready installedEnabled=true records=846 managed=2 metadataMs=1327.298542",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:55.366121+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview fonts identity=18265f3b2c5732c5a15c962138e93c749dc586c1e92b7c4de03b979bafa8a3c3 faces=ArialUnicodeMS supplyFallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:55.366143+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render backend file=restart-installed.hwpx requestedMode=coreGraphics outputMode=coreGraphics backend=coreGraphics fallback=none",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:55.366152+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render output file=restart-installed.hwpx bytes=20796 skiaPNGBytes=none pixel=794x1123",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:55.366167+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG render timing totalMs=14.273 skiaMs=none validateMs=none decodeMs=none encodeMs=4.533 coreMs=9.740",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  },
+  {
+    "timestamp": "2026-10-10 01:06:55.366172+0900",
+    "processID": 59467,
+    "subsystem": "com.postmelee.alhangeul.QLExtension",
+    "eventMessage": "Preview PNG ready file=restart-installed.hwpx mode=coreGraphics bytes=20796",
+    "processImageUUID": "ADD6AB6E-3F85-367E-A1AC-A9BE2902A213"
+  }
+]

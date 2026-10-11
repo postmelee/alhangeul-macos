@@ -1,0 +1,346 @@
+{
+  "source": "CUA tool results, manually transcribed exact start timestamps; no paint elapsed inference",
+  "trials": [
+    {
+      "condition": "on",
+      "scenario": "same",
+      "start": "2026-10-10T06:57:45.760Z",
+      "attempt": 1,
+      "verification": "observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "same",
+      "start": "2026-10-10T06:58:11.956Z",
+      "attempt": 2,
+      "verification": "observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "same",
+      "start": "2026-10-10T06:58:13.656Z",
+      "attempt": 3,
+      "verification": "diff-only check inconclusive"
+    },
+    {
+      "condition": "on",
+      "scenario": "same",
+      "start": "2026-10-10T06:58:15.500Z",
+      "attempt": 4,
+      "verification": "observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "same",
+      "start": "2026-10-10T06:58:17.004Z",
+      "attempt": 5,
+      "verification": "diff-only check inconclusive"
+    },
+    {
+      "condition": "on",
+      "scenario": "same",
+      "start": "2026-10-10T06:58:18.730Z",
+      "attempt": 6,
+      "verification": "observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "same",
+      "start": "2026-10-10T06:58:20.262Z",
+      "attempt": 7,
+      "verification": "diff-only check inconclusive"
+    },
+    {
+      "condition": "on",
+      "scenario": "same",
+      "start": "2026-10-10T06:58:22.024Z",
+      "attempt": 8,
+      "verification": "observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "same",
+      "start": "2026-10-10T06:58:23.675Z",
+      "attempt": 9,
+      "verification": "diff-only check inconclusive"
+    },
+    {
+      "condition": "on",
+      "scenario": "same",
+      "start": "2026-10-10T06:58:25.394Z",
+      "attempt": 10,
+      "verification": "observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T06:59:39.859Z",
+      "pass": 1,
+      "file": "01.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:00:31.098Z",
+      "pass": 1,
+      "file": "02.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:00:57.529Z",
+      "pass": 1,
+      "file": "03.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:00:59.501Z",
+      "pass": 1,
+      "file": "04.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:01:29.400Z",
+      "pass": 1,
+      "file": "05.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:01:32.436Z",
+      "pass": 1,
+      "file": "06.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:01:35.572Z",
+      "pass": 1,
+      "file": "07.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:01:38.542Z",
+      "pass": 1,
+      "file": "08.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:01:52.101Z",
+      "pass": 1,
+      "file": "09.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:02:08.510Z",
+      "pass": 1,
+      "file": "10.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:02:18.990Z",
+      "pass": 2,
+      "file": "01.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:02:21.552Z",
+      "pass": 2,
+      "file": "02.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:02:35.199Z",
+      "pass": 2,
+      "file": "03.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:02:37.834Z",
+      "pass": 2,
+      "file": "04.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:02:53.804Z",
+      "pass": 2,
+      "file": "05.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:02:56.578Z",
+      "pass": 2,
+      "file": "06.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:03:05.499Z",
+      "pass": 2,
+      "file": "07.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:03:28.893Z",
+      "pass": 2,
+      "file": "08.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:03:41.123Z",
+      "pass": 2,
+      "file": "09.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "many",
+      "start": "2026-10-10T07:03:54.333Z",
+      "pass": 2,
+      "file": "10.hwpx",
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "on",
+      "scenario": "icons",
+      "start": "2026-10-10T07:04:16.338Z",
+      "pass": 1,
+      "note": "icon radio was confirmed by subsequent click"
+    },
+    {
+      "condition": "on",
+      "scenario": "icons-size",
+      "start": "2026-10-10T07:04:36.685Z",
+      "sliderRequested": 128,
+      "sliderObserved": 112,
+      "note": "oversized; corrected to 24 before repeat"
+    },
+    {
+      "condition": "on",
+      "scenario": "icons",
+      "start": "2026-10-10T07:05:44.007Z",
+      "pass": 2
+    },
+    {
+      "condition": "off",
+      "scenario": "same",
+      "start": "2026-10-10T07:07:35.078Z",
+      "attempt": 1,
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "off",
+      "scenario": "same",
+      "start": "2026-10-10T07:08:09.437Z",
+      "attempt": 2,
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "off",
+      "scenario": "same",
+      "start": "2026-10-10T07:08:38.424Z",
+      "attempt": 3,
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "off",
+      "scenario": "same",
+      "start": "2026-10-10T07:09:17.139Z",
+      "attempt": 4,
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "off",
+      "scenario": "same",
+      "start": "2026-10-10T07:10:07.128Z",
+      "attempt": 5,
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "off",
+      "scenario": "same",
+      "start": "2026-10-10T07:10:44.821Z",
+      "attempt": 6,
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "off",
+      "scenario": "same",
+      "start": "2026-10-10T07:10:47.533Z",
+      "attempt": 7,
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "off",
+      "scenario": "same",
+      "start": "2026-10-10T07:10:49.983Z",
+      "attempt": 8,
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "off",
+      "scenario": "same",
+      "start": "2026-10-10T07:11:09.532Z",
+      "attempt": 9,
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "off",
+      "scenario": "same",
+      "start": "2026-10-10T07:11:12.604Z",
+      "attempt": 10,
+      "verification": "file-name observed"
+    },
+    {
+      "condition": "off",
+      "scenario": "icons",
+      "start": "2026-10-10T07:11:32.618Z",
+      "pass": 1
+    },
+    {
+      "condition": "off",
+      "scenario": "icons-size",
+      "start": "2026-10-10T07:11:48.564Z",
+      "sliderRequested": 32,
+      "sliderObserved": 32
+    },
+    {
+      "condition": "off",
+      "scenario": "icons",
+      "start": "2026-10-10T07:12:13.135Z",
+      "pass": 2
+    }
+  ],
+  "ownedWindowClosed": true
+}

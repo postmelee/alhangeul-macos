@@ -1,0 +1,32 @@
+PASS: new installation keeps approved false default
+PASS: canvas2d: enabling saved setting loads both exact installed faces in open document
+PASS: canvas2d: disabling removes local face/measurement resources and renders fallback
+PASS: canvas2d: re-enabling recovers without reopening document
+PASS: canvas2d: actual fixture read denial is published and stale faces are discarded
+PASS: canvas2d: restored permission and manual refresh clear failure caches
+PASS: canvas2d: same PostScript name reloads changed verified content hash
+PASS: canvas2d: removed installed candidates fall back without retaining old faces
+PASS: canvas2d: reappearing candidates recover in current document
+PASS: canvas2d: real UI model imports Regular/Bold through shared service
+PASS: canvas2d: managed import observer updates exact bytes while installed use is disabled
+PASS: canvas2d: own source files removed; managed copies remain independent
+PASS: canvas2d: managed removal publishes and clears old face resources
+PASS: canvas2d: font changes preserve clean document state
+PASS: canvas2d: font changes preserve document original names and styles
+PASS: rapid document changes reject gated previous replies and restore final fallback
+PASS: canvaskit: enabling saved setting loads both exact installed faces in open document
+PASS: canvaskit: disabling removes local face/measurement resources and renders fallback
+PASS: canvaskit: re-enabling recovers without reopening document
+PASS: canvaskit: actual fixture read denial is published and stale faces are discarded
+PASS: canvaskit: restored permission and manual refresh clear failure caches
+PASS: canvaskit: same PostScript name reloads changed verified content hash
+PASS: canvaskit: removed installed candidates fall back without retaining old faces
+PASS: canvaskit: reappearing candidates recover in current document
+PASS: canvaskit: real UI model imports Regular/Bold through shared service
+PASS: canvaskit: managed import observer updates exact bytes while installed use is disabled
+PASS: canvaskit: own source files removed; managed copies remain independent
+PASS: canvaskit: managed removal publishes and clears old face resources
+PASS: canvaskit: managed reimport clears failure cache and survives source removal
+PASS: canvaskit: font changes preserve clean document state
+PASS: canvaskit: font changes preserve document original names and styles
+PASS: product Studio integration

@@ -21,6 +21,11 @@ func resolveAppleFont(hwpFontFamily: String, bold: Bool, italic: Bool, size: CGF
     return HwpFontFallbackPolicy.defaultFont(size: size, bold: bold, italic: italic)
 }
 
+/// 공급 실패 시 문서의 원래 이름을 OS 조회로 우회하지 않는 명시적 기본 face.
+func resolveDefaultAppleFont(bold: Bool, italic: Bool, size: CGFloat) -> CTFont {
+    HwpFontFallbackPolicy.defaultFont(size: size, bold: bold, italic: italic)
+}
+
 /// HWP 폰트명 → Apple 플랫폼 폰트명 매핑
 func mapHWPFontToApple(_ hwpFont: String) -> String {
     HwpBundledFontRegistry.ensureRegistered()

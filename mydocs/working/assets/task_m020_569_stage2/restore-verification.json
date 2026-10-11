@@ -1,0 +1,12 @@
+{
+  "restored": true,
+  "version": "0.2.2",
+  "filesAndLinks": 152,
+  "firstBackupSecondBackupRestoredEqual": true,
+  "inventorySchema": "path+file SHA256+mode or symlink target; sorted JSON",
+  "inventorySHA256": "5a843775ebad3d978a9e74e4c79041969a50f94ad2997316cb3a660340b7812d",
+  "infoSHA256": "41f64c73e4d2848e2b8d34d4b3a1954e0645121072074f5d299929b5d52279a7",
+  "privateFixtureRemoved": true,
+  "strictSignatureVerifiedUnrestricted": true,
+  "installedProviders": "/Applications/Alhangeul.app/Contents/PlugIns"
+}

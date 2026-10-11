@@ -100,6 +100,7 @@ swiftc -parse-as-library \
   -Xcc -fmodules-cache-path="$CLANG_MODULE_CACHE" \
   -I "$MODULEMAP_DIR" \
   "$ROOT/Sources/RhwpCoreBridge/RhwpDocument.swift" \
+  "$ROOT/Sources/RhwpCoreBridge/RhwpNativeFontContext.swift" \
   "$ROOT/Sources/RhwpCoreBridge/RenderTree.swift" \
   "$ROOT/Sources/RhwpCoreBridge/PageOverlayImages.swift" \
   "$ROOT/scripts/overlay_metadata_smoke.swift" \

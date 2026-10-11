@@ -1,0 +1,45 @@
+Evidence: /Users/melee/Documents/projects/rhwp-mac/build.noindex/studio-lifecycle-k4dqnzds
+PASS hwp: new document preserves WKWebView
+PASS hwp: native and editor epoch agree
+PASS save cancellation preserves new document
+PASS write failure keeps dirty and creates no destination
+PASS format save dispatched
+PASS first save preserves editor and binds filename
+PASS repeat save same destination
+PASS repeat save preserves epoch
+PASS explicit reopen uses new load in same WebView
+PASS close cancellation preserves dirty window
+PASS close save failure keeps dirty window
+PASS termination cancellation request awaits confirmation
+PASS termination cancellation is not rejected before confirmation
+PASS termination cancellation preserves document
+PASS termination save request awaits confirmation
+PASS termination save is not rejected before confirmation
+PASS save permits app termination
+PASS save closes real window and preserves final text
+PASS discard closes without changing saved bytes
+PASS hwpx: new document preserves WKWebView
+PASS hwpx: native and editor epoch agree
+PASS save cancellation preserves new document
+PASS write failure keeps dirty and creates no destination
+PASS format save dispatched
+PASS first save preserves editor and binds filename
+PASS repeat save same destination
+PASS repeat save preserves epoch
+PASS explicit reopen uses new load in same WebView
+PASS close cancellation preserves dirty window
+PASS close save failure keeps dirty window
+PASS termination cancellation request awaits confirmation
+PASS termination cancellation is not rejected before confirmation
+PASS termination cancellation preserves document
+PASS termination save request awaits confirmation
+PASS termination save is not rejected before confirmation
+PASS save permits app termination
+PASS save closes real window and preserves final text
+PASS discard closes without changing saved bytes
+PASS input unchanged
+PASS font bridge actual WebKit handshake
+PASS font bridge verified face hash
+PASS font bridge chunk bytes match GowunBatang-Regular
+PASS font bridge rejects old load token
+PASS TOTAL 43

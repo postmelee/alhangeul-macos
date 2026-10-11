@@ -1,0 +1,17 @@
+{
+  "verification_mode": "portable",
+  "lock_modified": false,
+  "artifacts": [
+    {
+      "path": "Frameworks/generated_rhwp.h",
+      "size_bytes": 7584,
+      "sha256": "14994c7d1923107b5739b5518e43f98bc002e1b954a068647a377ec4d6e1fbc2"
+    },
+    {
+      "path": "Frameworks/universal/librhwp.a",
+      "size_bytes": 245983992,
+      "sha256": "521e53707bed97f95923e011076616344b17aaa42893b342923e82b973e4152a"
+    }
+  ],
+  "matches_reference_sha256_and_size": true
+}

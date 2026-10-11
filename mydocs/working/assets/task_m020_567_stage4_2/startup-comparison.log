@@ -1,0 +1,18 @@
+PASS: 실제 시작 catalog 준비·활성화·반복 준비 조사
+PASS: 실제 시작 catalog 준비·활성화·반복 준비 조사
+PASS: 실제 시작 catalog 준비·활성화·반복 준비 조사
+PASS: 실제 시작 catalog 준비·활성화·반복 준비 조사
+PASS: 실제 시작 catalog 준비·활성화·반복 준비 조사
+PASS: 실제 시작 catalog 준비·활성화·반복 준비 조사
+PASS: 실제 시작 catalog 준비·활성화·반복 준비 조사
+PASS: 실제 시작 catalog 준비·활성화·반복 준비 조사
+PASS: 실제 시작 catalog 준비·활성화·반복 준비 조사
+PASS: 실제 시작 catalog 준비·활성화·반복 준비 조사
+증거: /Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/stage4-2/startup-profile/run-c17e44f6-e691-421d-9de7-7268e6ad24e0
+metadata faces: 528 families: 180
+restored prepare median ms: 105.669
+scan median ms: 101.334
+scan counts: [1, 1, 1, 1, 1]
+font bytes reads: [0, 0, 0, 0, 0]
+baseline scan counts: [2, 2, 2, 2, 2]
+total metadata scan median ms: coalesced 101.334 legacy 188.677

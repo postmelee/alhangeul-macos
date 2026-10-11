@@ -1,1 +1,9 @@
 scripts/ci/fixtures/render-tree/*.json linguist-generated=true
+# 해시로 보존한 원시 빌드 로그의 도구 출력 공백을 정규화하지 않는다.
+mydocs/working/assets/task_m020_567_pr7405/probe-build.log -whitespace
+# 원문 라이선스와 체크섬으로 보존한 Stage 4/4.1 도구 로그만 공백 검사에서 제외한다.
+mydocs/working/assets/task_m020_567_stage4/OFL.txt -whitespace
+mydocs/working/assets/task_m020_567_stage4/font-library-tests.log -whitespace
+mydocs/working/assets/task_m020_567_stage4/host-build.log -whitespace
+mydocs/working/assets/task_m020_567_stage4_1/font-library-tests.log -whitespace
+mydocs/working/assets/task_m020_567_stage4_1/host-build.log -whitespace

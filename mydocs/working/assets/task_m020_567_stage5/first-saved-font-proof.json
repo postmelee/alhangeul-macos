@@ -1,0 +1,50 @@
+[
+  {
+    "ext": "hwp",
+    "offset": 0,
+    "fontFamily": "NanumSquare",
+    "bold": false
+  },
+  {
+    "ext": "hwp",
+    "offset": 3,
+    "fontFamily": "NanumSquare",
+    "bold": true
+  },
+  {
+    "ext": "hwp",
+    "offset": 24,
+    "fontFamily": "NanumSquare",
+    "bold": false
+  },
+  {
+    "ext": "hwp",
+    "offset": 27,
+    "fontFamily": "NanumSquare",
+    "bold": false
+  },
+  {
+    "ext": "hwpx",
+    "offset": 0,
+    "fontFamily": "NanumSquare",
+    "bold": false
+  },
+  {
+    "ext": "hwpx",
+    "offset": 3,
+    "fontFamily": "NanumSquare",
+    "bold": true
+  },
+  {
+    "ext": "hwpx",
+    "offset": 24,
+    "fontFamily": "NanumSquare",
+    "bold": false
+  },
+  {
+    "ext": "hwpx",
+    "offset": 27,
+    "fontFamily": "NanumSquare",
+    "bold": false
+  }
+]

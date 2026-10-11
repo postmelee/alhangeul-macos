@@ -26,7 +26,7 @@
   <script>
     document.documentElement.classList.add("reveal-ready");
   </script>
-  <link rel="stylesheet" href="./styles.css?v=20260930-platform-mobile" />
+  <link rel="stylesheet" href="./styles.css?v=20261011-font-guide" />
 </head>
 
 <body>
@@ -51,8 +51,8 @@
           GitHub
         </a>
         <a class="header-download-button"
-          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.2.dmg"
-          aria-label="알한글 v0.2.2 DMG 다운로드">
+          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg"
+          aria-label="알한글 v0.2.3 DMG 다운로드">
           다운로드
         </a>
       </nav>
@@ -61,10 +61,10 @@
 
   <aside class="release-version-notice" aria-label="최신 릴리즈 안내">
     <div class="release-version-notice-inner">
-      <p><strong>알한글 v0.2.2가 공개되었습니다.</strong> 문서 저장 후 닫기·종료와 재설치 후 Spotlight 검색 준비를 보완했습니다.</p>
+      <p><strong>알한글 v0.2.3이 공개되었습니다.</strong> Mac 설치 글꼴을 기존 글꼴 목록에서 선택하고 문서·PDF·Finder에서 사용할 수 있습니다.</p>
       <div class="release-version-notice-actions">
-        <a class="notice-primary-link" href="./updates/v0.2.2.html">이번 버전의 변경 사항</a>
-        <a class="notice-secondary-link" href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.2.dmg">v0.2.2 다운로드</a>
+        <a class="notice-primary-link" href="./updates/v0.2.3.html">이번 버전의 변경 사항</a>
+        <a class="notice-secondary-link" href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg">v0.2.3 다운로드</a>
         <a class="mobile-platform-link notice-platform-link" href="https://postmelee.github.io/alhangeul-tauri/">Windows / Linux 버전 보기 →</a>
       </div>
     </div>
@@ -216,19 +216,23 @@
               rel="noreferrer"><code>edwardkim/rhwp</code></a>의 <code>rhwp-studio</code>를 WKWebView로 사용합니다. 문서를 열어 내용을
             확인하고, <code>rhwp-studio</code>가 제공하는 범위 안에서 텍스트 중심의 기본 편집을 할 수 있습니다. HWP와 HWPX 모두 형식별 저장과 다른 이름으로 저장을 지원하며,
             저장 결과를 같은 형식으로 다시 열 수 있습니다. 복잡한 문서 요소의 완전한 의미 보존 범위는 upstream exporter 지원 수준에 따릅니다.</p>
-          <p>v0.2.2에는 암호 문서·HWP3 원본 저장 보호가 포함됩니다. 암호를 유지하는 저장이나 HWP3 원형 저장은 지원하지 않으며, 안내 뒤 새 평문·변환 복사본으로 저장합니다. 자세한 내용은 <a href="./updates/v0.2.2.html">v0.2.2 릴리즈 노트</a>를 확인하세요.</p>
+          <p>v0.2.3에는 암호 문서·HWP3 원본 저장 보호가 포함됩니다. 암호를 유지하는 저장이나 HWP3 원형 저장은 지원하지 않으며, 안내 뒤 새 평문·변환 복사본으로 저장합니다. 자세한 내용은 <a href="./updates/v0.2.3.html">v0.2.3 릴리즈 노트</a>를 확인하세요.</p>
         </details>
         <details>
           <summary>다운로드 파일은 어디에서 받을 수 있나요?</summary>
-          <p>상단 다운로드 버튼에서 v0.2.2 공식 DMG를 바로 내려받을 수 있습니다. 공식 DMG는 Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용합니다. 현재 공개된 버전이나 이전 버전이
+          <p>상단 다운로드 버튼에서 v0.2.3 공식 DMG를 바로 내려받을 수 있습니다. 공식 DMG는 Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용합니다. 현재 공개된 버전이나 이전 버전이
             필요하면 <a href="https://github.com/postmelee/alhangeul-macos/releases/latest" target="_blank"
               rel="noreferrer">GitHub Releases</a>에서 배포 상태를 확인할 수 있습니다.</p>
-          <p>Homebrew Cask에서도 v0.2.2를 설치할 수 있습니다: <code>brew install --cask postmelee/tap/alhangeul</code>. 기존 설치본은 <code>brew update</code> 후 <code>brew upgrade --cask postmelee/tap/alhangeul</code>로 업데이트하세요.</p>
+          <p>Homebrew Cask의 현재 제공 버전은 v0.2.2입니다: <code>brew install --cask postmelee/tap/alhangeul</code>. 기존 설치본은 <code>brew update</code> 후 <code>brew upgrade --cask postmelee/tap/alhangeul</code>로 업데이트하세요.</p>
         </details>
         <details>
           <summary>앱 업데이트는 어떻게 확인하나요?</summary>
           <p>앱 메뉴의 <code>알한글 &gt; 업데이트 확인...</code>에서 새 버전을 확인할 수 있습니다. 업데이트 안내와 릴리즈 노트는 <a
               href="./updates/">업데이트 안내</a> 페이지에서 확인할 수 있습니다.</p>
+        </details>
+        <details>
+          <summary>Mac에 설치한 글꼴도 사용할 수 있나요?</summary>
+          <p>v0.2.3부터 설정 → 글꼴에서 <strong>Mac에 설치된 글꼴 사용</strong>을 켜고, 문서의 기존 글꼴 목록에서 <strong>시스템 글꼴</strong>을 선택할 수 있습니다. 처음 목록을 준비할 때는 잠시 기다려 주세요. 원본·권한 조건과 자세한 순서는 <a href="./fonts/">Mac 글꼴 사용 안내</a>에서 확인하세요.</p>
         </details>
         <details>
           <summary>썸네일/Quick Look과 앱에서 보이는 화면이 다를 수 있나요?</summary>
@@ -293,6 +297,7 @@
     </div>
     <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 편집 앱입니다. 한글 파일이 더 이상 낯선 파일로 남지 않도록 만듭니다.</p>
     <nav aria-label="푸터 링크">
+      <a href="./fonts/">Mac 글꼴 사용 안내</a>
       <a href="https://github.com/postmelee/alhangeul-macos/blob/main/LICENSE" rel="noreferrer">MIT License</a>
     </nav>
   </footer>

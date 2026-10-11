@@ -1,0 +1,41 @@
+{
+  "restored": true,
+  "version": "0.2.2",
+  "originalInventoryCount": 243,
+  "originalInventorySHA256": "fa694017af3e0b3705510b353ef0e9dc5549be57493b74e99e5ca05540b3707b",
+  "sourceCount": 126,
+  "sourceUnchanged": true,
+  "probeIdentifier": "88FFC8FB-E8C2-47D6-A818-08FDA89C2CC2",
+  "signedInventory": {
+    "Alhangeul.app": "01c404a6c29859143155781ce266dd662972689b52ad5f27a3d7f29f5c6c8b8f",
+    "FontExtensionFixtureProbe.app": "f24883b861a31dcec7719e167140cecd1a1624c6c8a4b1f0fea696c58eddc23c"
+  },
+  "cleanup": [
+    {
+      "path": "build.noindex/task569/stage4/finder-candidate-01/Alhangeul.app",
+      "logicalBytes": 274762725,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task569/stage4/finder-candidate-01/FontExtensionFixtureProbe.app",
+      "logicalBytes": 19409739,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task569/stage4/finder-candidate-01/backup/Alhangeul.app",
+      "logicalBytes": 446248370,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task569/stage4/finder-candidate-01/finder-results/20261012-004034/staging/Alhangeul.app",
+      "logicalBytes": 274762725,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task568/stage3/task569-current-output-01/StudioOutputAcceptanceProbe.app",
+      "logicalBytes": 147341075,
+      "removed": true
+    }
+  ],
+  "logicalBytesRemoved": 1162524634
+}

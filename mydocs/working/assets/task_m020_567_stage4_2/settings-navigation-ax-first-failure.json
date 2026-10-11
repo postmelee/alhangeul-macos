@@ -1,0 +1,8 @@
+{
+  "checks" : [
+    "기존 도구→환경설정 명령으로 대화상자 열기",
+    "Mac 안내·단일 설정 버튼, 최근\/대표\/파일 설정 보존"
+  ],
+  "error" : "Failure(message: \"timeout: native import button accessible; \")",
+  "passed" : false
+}

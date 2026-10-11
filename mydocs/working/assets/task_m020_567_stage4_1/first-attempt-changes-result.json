@@ -1,0 +1,9 @@
+{
+  "checks" : [
+    "new installation keeps approved false default",
+    "canvas2d: enabling saved setting loads both exact installed faces in open document",
+    "canvas2d: disabling removes local face\/measurement resources and renders fallback",
+    "canvas2d: re-enabling recovers without reopening document"
+  ],
+  "error" : "Failure(message: \"canvas2d: actual fixture read denial is published and stale faces are discarded\")"
+}

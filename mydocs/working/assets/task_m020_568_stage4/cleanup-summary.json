@@ -1,0 +1,1008 @@
+{
+  "targets": [
+    {
+      "path": "build.noindex/studio-smoke-module-cache",
+      "allocatedBytesBefore": 86466560,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-znsr99xf/StudioLifecycleSmoke.app",
+      "allocatedBytesBefore": 129093632,
+      "appRegistrationPaths": [
+        "build.noindex/studio-lifecycle-znsr99xf/StudioLifecycleSmoke.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-eg8p_gpt/StudioLifecycleSmoke.app",
+      "allocatedBytesBefore": 128700416,
+      "appRegistrationPaths": [
+        "build.noindex/studio-lifecycle-eg8p_gpt/StudioLifecycleSmoke.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-lfrnogyg/StudioLifecycleSmoke.app",
+      "allocatedBytesBefore": 129253376,
+      "appRegistrationPaths": [
+        "build.noindex/studio-lifecycle-lfrnogyg/StudioLifecycleSmoke.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-cq2zaz7b/StudioLifecycleSmoke.app",
+      "allocatedBytesBefore": 128712704,
+      "appRegistrationPaths": [
+        "build.noindex/studio-lifecycle-cq2zaz7b/StudioLifecycleSmoke.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task565-stage3/InstalledFontConnectionProbe-signed-final.app",
+      "allocatedBytesBefore": 10924032,
+      "appRegistrationPaths": [
+        "build.noindex/task565-stage3/InstalledFontConnectionProbe-signed-final.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task565-stage2/FontLibraryUIProbe.app",
+      "allocatedBytesBefore": 1708032,
+      "appRegistrationPaths": [
+        "build.noindex/task565-stage2/FontLibraryUIProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-76p43_nj/StudioLifecycleSmoke.app",
+      "allocatedBytesBefore": 128712704,
+      "appRegistrationPaths": [
+        "build.noindex/studio-lifecycle-76p43_nj/StudioLifecycleSmoke.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-k4dqnzds/StudioLifecycleSmoke.app",
+      "allocatedBytesBefore": 128700416,
+      "appRegistrationPaths": [
+        "build.noindex/studio-lifecycle-k4dqnzds/StudioLifecycleSmoke.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/studio-lifecycle-ezaqwilm/StudioLifecycleSmoke.app",
+      "allocatedBytesBefore": 128708608,
+      "appRegistrationPaths": [
+        "build.noindex/studio-lifecycle-ezaqwilm/StudioLifecycleSmoke.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task565-stage3/InstalledFontConnectionProbe-adhoc.app",
+      "allocatedBytesBefore": 10924032,
+      "appRegistrationPaths": [
+        "build.noindex/task565-stage3/InstalledFontConnectionProbe-adhoc.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task565-stage4/InstalledFontCatalogProbe.app",
+      "allocatedBytesBefore": 1556480,
+      "appRegistrationPaths": [
+        "build.noindex/task565-stage4/InstalledFontCatalogProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task565-stage3/InstalledFontConnectionProbe.app",
+      "allocatedBytesBefore": 10907648,
+      "appRegistrationPaths": [
+        "build.noindex/task565-stage3/InstalledFontConnectionProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/font-library-tests/DerivedData",
+      "allocatedBytesBefore": 269131776,
+      "appRegistrationPaths": [
+        "build.noindex/font-library-tests/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework/Updater.app",
+        "build.noindex/font-library-tests/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework/Versions/B/Updater.app"
+      ],
+      "dmgFilesRemoved": 7,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task565-stage5/InstalledFontUIProbe.app",
+      "allocatedBytesBefore": 2703360,
+      "appRegistrationPaths": [
+        "build.noindex/task565-stage5/InstalledFontUIProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage3-2/StudioFontIntegrationProbe.app",
+      "allocatedBytesBefore": 128823296,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage3-2/StudioFontIntegrationProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage3-2/DerivedData",
+      "allocatedBytesBefore": 1120292864,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage3-2/DerivedData/Build/Products/Debug/Alhangeul.app",
+        "build.noindex/task567/stage3-2/DerivedData/Build/Products/Debug/Sparkle.framework/Updater.app",
+        "build.noindex/task567/stage3-2/DerivedData/Build/Products/Debug/Sparkle.framework/Versions/B/Updater.app",
+        "build.noindex/task567/stage3-2/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Updater.app",
+        "build.noindex/task567/stage3-2/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+        "build.noindex/task567/stage3-2/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework/Updater.app",
+        "build.noindex/task567/stage3-2/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework/Versions/B/Updater.app",
+        "build.noindex/task567/stage3-2/DerivedData/Build/Products/Debug/AlhangeulPreview.appex",
+        "build.noindex/task567/stage3-2/DerivedData/Build/Products/Debug/AlhangeulThumbnail.appex",
+        "build.noindex/task567/stage3-2/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+        "build.noindex/task567/stage3-2/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+      ],
+      "dmgFilesRemoved": 7,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task568/stage3/host",
+      "allocatedBytesBefore": 900685824,
+      "appRegistrationPaths": [
+        "build.noindex/task568/stage3/host/Build/Products/Debug/Alhangeul.app",
+        "build.noindex/task568/stage3/host/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Updater.app",
+        "build.noindex/task568/stage3/host/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+        "build.noindex/task568/stage3/host/SourcePackages/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework/Updater.app",
+        "build.noindex/task568/stage3/host/SourcePackages/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework/Versions/B/Updater.app",
+        "build.noindex/task568/stage3/host/Build/Products/Debug/AlhangeulPreview.appex",
+        "build.noindex/task568/stage3/host/Build/Products/Debug/AlhangeulThumbnail.appex",
+        "build.noindex/task568/stage3/host/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+        "build.noindex/task568/stage3/host/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+      ],
+      "dmgFilesRemoved": 7,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4/StudioFontIntegrationProbe.app",
+      "allocatedBytesBefore": 129155072,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4/StudioFontIntegrationProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4-2/HostAppDerivedData",
+      "allocatedBytesBefore": 1113423872,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4-2/HostAppDerivedData/Build/Products/Debug/Alhangeul.app",
+        "build.noindex/task567/stage4-2/HostAppDerivedData/Build/Products/Debug/Sparkle.framework/Updater.app",
+        "build.noindex/task567/stage4-2/HostAppDerivedData/Build/Products/Debug/Sparkle.framework/Versions/B/Updater.app",
+        "build.noindex/task567/stage4-2/HostAppDerivedData/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Updater.app",
+        "build.noindex/task567/stage4-2/HostAppDerivedData/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+        "build.noindex/task567/stage4-2/HostAppDerivedData/SourcePackages/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework/Updater.app",
+        "build.noindex/task567/stage4-2/HostAppDerivedData/SourcePackages/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework/Versions/B/Updater.app",
+        "build.noindex/task567/stage4-2/HostAppDerivedData/Build/Products/Debug/AlhangeulPreview.appex",
+        "build.noindex/task567/stage4-2/HostAppDerivedData/Build/Products/Debug/AlhangeulThumbnail.appex",
+        "build.noindex/task567/stage4-2/HostAppDerivedData/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+        "build.noindex/task567/stage4-2/HostAppDerivedData/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+      ],
+      "dmgFilesRemoved": 7,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage3-3/StudioFontIntegrationProbe.app",
+      "allocatedBytesBefore": 128868352,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage3-3/StudioFontIntegrationProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task568/stage2/host",
+      "allocatedBytesBefore": 894144512,
+      "appRegistrationPaths": [
+        "build.noindex/task568/stage2/host/Build/Products/Debug/Alhangeul.app",
+        "build.noindex/task568/stage2/host/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Updater.app",
+        "build.noindex/task568/stage2/host/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+        "build.noindex/task568/stage2/host/SourcePackages/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework/Updater.app",
+        "build.noindex/task568/stage2/host/SourcePackages/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework/Versions/B/Updater.app",
+        "build.noindex/task568/stage2/host/Build/Products/Debug/AlhangeulPreview.appex",
+        "build.noindex/task568/stage2/host/Build/Products/Debug/AlhangeulThumbnail.appex",
+        "build.noindex/task568/stage2/host/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+        "build.noindex/task568/stage2/host/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+      ],
+      "dmgFilesRemoved": 7,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4-2/settings-navigation-final/StudioFontSettingsProbe.app",
+      "allocatedBytesBefore": 128884736,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4-2/settings-navigation-final/StudioFontSettingsProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage3-3/final/StudioFontIntegrationProbe.app",
+      "allocatedBytesBefore": 128868352,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage3-3/final/StudioFontIntegrationProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage3-1/webkit-probe/StudioFontProviderProbe.app",
+      "allocatedBytesBefore": 1839104,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage3-1/webkit-probe/StudioFontProviderProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4-2/settings-navigation/StudioFontSettingsProbe.app",
+      "allocatedBytesBefore": 128880640,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4-2/settings-navigation/StudioFontSettingsProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/upstream/rhwp-studio/node_modules",
+      "allocatedBytesBefore": 196440064,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4-2/font-changes/StudioFontIntegrationProbe.app",
+      "allocatedBytesBefore": 129310720,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4-2/font-changes/StudioFontIntegrationProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task568/stage2/run-07/StudioOutputFontProbe.app",
+      "allocatedBytesBefore": 2363392,
+      "appRegistrationPaths": [
+        "build.noindex/task568/stage2/run-07/StudioOutputFontProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4-2/settings-navigation-capture/StudioFontSettingsProbe.app",
+      "allocatedBytesBefore": 128884736,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4-2/settings-navigation-capture/StudioFontSettingsProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4/final/StudioFontIntegrationProbe.app",
+      "allocatedBytesBefore": 129171456,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4/final/StudioFontIntegrationProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage5/acceptance/StudioFontAcceptanceProbe.app",
+      "allocatedBytesBefore": 128659456,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage5/acceptance/StudioFontAcceptanceProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4-2/experience/StudioFontSettingsProbe.app",
+      "allocatedBytesBefore": 128884736,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4-2/experience/StudioFontSettingsProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4-1/ui-preview/InstalledFontUIProbe.app",
+      "allocatedBytesBefore": 2732032,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4-1/ui-preview/InstalledFontUIProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage3-2/native-render/clang-module-cache",
+      "allocatedBytesBefore": 34762752,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage5/final-acceptance/StudioFontAcceptanceProbe.app",
+      "allocatedBytesBefore": 128679936,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage5/final-acceptance/StudioFontAcceptanceProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4-2/font-changes-final/StudioFontIntegrationProbe.app",
+      "allocatedBytesBefore": 129310720,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4-2/font-changes-final/StudioFontIntegrationProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage4-1/experience/StudioFontIntegrationProbe.app",
+      "allocatedBytesBefore": 129183744,
+      "appRegistrationPaths": [
+        "build.noindex/task567/stage4-1/experience/StudioFontIntegrationProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage3-2/native-render/swift-module-cache",
+      "allocatedBytesBefore": 102400,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task568/stage1/run-09/StudioOutputFontProbe.app",
+      "allocatedBytesBefore": 978944,
+      "appRegistrationPaths": [
+        "build.noindex/task568/stage1/run-09/StudioOutputFontProbe.app"
+      ],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/node_modules",
+      "allocatedBytesBefore": 196280320,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/__pycache__",
+      "allocatedBytesBefore": 233472,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/__pycache__",
+      "allocatedBytesBefore": 12288,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/__pycache__",
+      "allocatedBytesBefore": 8192,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/merge/__pycache__",
+      "allocatedBytesBefore": 94208,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/encodings/__pycache__",
+      "allocatedBytesBefore": 28672,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/designspaceLib/__pycache__",
+      "allocatedBytesBefore": 184320,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/unicodedata/__pycache__",
+      "allocatedBytesBefore": 151552,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/colorLib/__pycache__",
+      "allocatedBytesBefore": 69632,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/config/__pycache__",
+      "allocatedBytesBefore": 4096,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/qu2cu/__pycache__",
+      "allocatedBytesBefore": 36864,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/pens/__pycache__",
+      "allocatedBytesBefore": 335872,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/ttLib/__pycache__",
+      "allocatedBytesBefore": 278528,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/__pycache__",
+      "allocatedBytesBefore": 167936,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/mtiLib/__pycache__",
+      "allocatedBytesBefore": 81920,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/voltLib/__pycache__",
+      "allocatedBytesBefore": 147456,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/otlLib/__pycache__",
+      "allocatedBytesBefore": 167936,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/varLib/__pycache__",
+      "allocatedBytesBefore": 598016,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/feaLib/__pycache__",
+      "allocatedBytesBefore": 380928,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/cu2qu/__pycache__",
+      "allocatedBytesBefore": 73728,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/ufoLib/__pycache__",
+      "allocatedBytesBefore": 258048,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/t1Lib/__pycache__",
+      "allocatedBytesBefore": 28672,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/svgLib/__pycache__",
+      "allocatedBytesBefore": 4096,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/misc/__pycache__",
+      "allocatedBytesBefore": 507904,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/cffLib/__pycache__",
+      "allocatedBytesBefore": 237568,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/subset/__pycache__",
+      "allocatedBytesBefore": 241664,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/req/__pycache__",
+      "allocatedBytesBefore": 172032,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/pyproject_hooks/__pycache__",
+      "allocatedBytesBefore": 28672,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/platformdirs/__pycache__",
+      "allocatedBytesBefore": 122880,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/rich/__pycache__",
+      "allocatedBytesBefore": 1466368,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/urllib3/__pycache__",
+      "allocatedBytesBefore": 192512,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/resolvelib/__pycache__",
+      "allocatedBytesBefore": 45056,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/metadata/__pycache__",
+      "allocatedBytesBefore": 81920,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/cachecontrol/__pycache__",
+      "allocatedBytesBefore": 77824,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/distro/__pycache__",
+      "allocatedBytesBefore": 69632,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/truststore/__pycache__",
+      "allocatedBytesBefore": 86016,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/misc/filesystem/__pycache__",
+      "allocatedBytesBefore": 94208,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/utils/__pycache__",
+      "allocatedBytesBefore": 249856,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/tomli/__pycache__",
+      "allocatedBytesBefore": 53248,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/vcs/__pycache__",
+      "allocatedBytesBefore": 102400,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/varLib/instancer/__pycache__",
+      "allocatedBytesBefore": 131072,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/packaging/__pycache__",
+      "allocatedBytesBefore": 303104,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/misc/plistlib/__pycache__",
+      "allocatedBytesBefore": 36864,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/requests/__pycache__",
+      "allocatedBytesBefore": 253952,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/operations/__pycache__",
+      "allocatedBytesBefore": 61440,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/pygments/__pycache__",
+      "allocatedBytesBefore": 180224,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/index/__pycache__",
+      "allocatedBytesBefore": 102400,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/ttLib/tables/__pycache__",
+      "allocatedBytesBefore": 1441792,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/commands/__pycache__",
+      "allocatedBytesBefore": 225280,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/distlib/__pycache__",
+      "allocatedBytesBefore": 192512,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/locations/__pycache__",
+      "allocatedBytesBefore": 49152,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/msgpack/__pycache__",
+      "allocatedBytesBefore": 65536,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/certifi/__pycache__",
+      "allocatedBytesBefore": 12288,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/distributions/__pycache__",
+      "allocatedBytesBefore": 28672,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/otlLib/optimize/__pycache__",
+      "allocatedBytesBefore": 32768,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/fontTools/svgLib/path/__pycache__",
+      "allocatedBytesBefore": 36864,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/resolution/__pycache__",
+      "allocatedBytesBefore": 8192,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/network/__pycache__",
+      "allocatedBytesBefore": 114688,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/cli/__pycache__",
+      "allocatedBytesBefore": 180224,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/idna/__pycache__",
+      "allocatedBytesBefore": 458752,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/dependency_groups/__pycache__",
+      "allocatedBytesBefore": 32768,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/models/__pycache__",
+      "allocatedBytesBefore": 118784,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/pkg_resources/__pycache__",
+      "allocatedBytesBefore": 192512,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/tomli_w/__pycache__",
+      "allocatedBytesBefore": 20480,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/operations/install/__pycache__",
+      "allocatedBytesBefore": 45056,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/__pycache__",
+      "allocatedBytesBefore": 102400,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/urllib3/util/__pycache__",
+      "allocatedBytesBefore": 135168,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/pygments/formatters/__pycache__",
+      "allocatedBytesBefore": 16384,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/pygments/lexers/__pycache__",
+      "allocatedBytesBefore": 143360,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/resolvelib/resolvers/__pycache__",
+      "allocatedBytesBefore": 49152,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/resolution/legacy/__pycache__",
+      "allocatedBytesBefore": 32768,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/pygments/styles/__pycache__",
+      "allocatedBytesBefore": 8192,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/resolution/resolvelib/__pycache__",
+      "allocatedBytesBefore": 172032,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/pygments/filters/__pycache__",
+      "allocatedBytesBefore": 40960,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/urllib3/packages/__pycache__",
+      "allocatedBytesBefore": 49152,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/packaging/licenses/__pycache__",
+      "allocatedBytesBefore": 65536,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/operations/build/__pycache__",
+      "allocatedBytesBefore": 32768,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/pyproject_hooks/_in_process/__pycache__",
+      "allocatedBytesBefore": 20480,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_internal/metadata/importlib/__pycache__",
+      "allocatedBytesBefore": 40960,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/cachecontrol/caches/__pycache__",
+      "allocatedBytesBefore": 20480,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/urllib3/contrib/_securetransport/__pycache__",
+      "allocatedBytesBefore": 40960,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    },
+    {
+      "path": "build.noindex/task563-tools/lib/python3.14/site-packages/pip/_vendor/urllib3/packages/backports/__pycache__",
+      "allocatedBytesBefore": 16384,
+      "appRegistrationPaths": [],
+      "dmgFilesRemoved": 0,
+      "removed": true
+    }
+  ],
+  "allocatedBytesRemoved": 7995043840,
+  "availableBytesBefore": 13486489600,
+  "availableBytesAfter": 20661686272,
+  "elapsedSeconds": 7.52,
+  "protected": [
+    "build.noindex/task568/stage3/sandbox-output-01/StudioOutputAcceptanceProbe.app",
+    "build.noindex/task567/stage5/native-save-acceptance/StudioFontAcceptanceProbe.app",
+    "build.noindex/task567/fonts"
+  ],
+  "additionalModuleCaches": [
+    {
+      "path": "build.noindex/task565-stage4/module-cache",
+      "allocatedBytesBefore": 67604480
+    },
+    {
+      "path": "build.noindex/task568/stage2/run-07/module-cache",
+      "allocatedBytesBefore": 71389184
+    },
+    {
+      "path": "build.noindex/task568/stage1/run-09/module-cache",
+      "allocatedBytesBefore": 71389184
+    },
+    {
+      "path": "build.noindex/task567/stage4-2/startup-profile/module-cache",
+      "allocatedBytesBefore": 33947648
+    },
+    {
+      "path": "build.noindex/task567/stage4-1/ui-preview/module-cache",
+      "allocatedBytesBefore": 67686400
+    },
+    {
+      "path": "build.noindex/task567/stage4-1/startup-profile/module-cache",
+      "allocatedBytesBefore": 33947648
+    },
+    {
+      "path": "build.noindex/task567/stage3-1/webkit-probe/module-cache",
+      "allocatedBytesBefore": 70774784
+    }
+  ],
+  "postCleanupHygiene": "passed",
+  "staleUpdaterRegistrationsRemoved": 2
+}

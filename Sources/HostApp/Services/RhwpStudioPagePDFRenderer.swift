@@ -103,25 +103,27 @@ struct RhwpStudioPagePDFWebKitOperations {
         WKPDFConfiguration,
         @escaping @MainActor @Sendable (Result<Data, Error>) -> Void
     ) -> Void
+    let cancelPreparation: @MainActor () -> Void
+
+    init(preparePage: @escaping @MainActor (WKWebView, @escaping @MainActor @Sendable (Result<Any, Error>) -> Void) -> Void,
+         createPDF: @escaping @MainActor (WKWebView, WKPDFConfiguration, @escaping @MainActor @Sendable (Result<Data, Error>) -> Void) -> Void,
+         cancelPreparation: @escaping @MainActor () -> Void = {}) {
+        self.preparePage = preparePage; self.createPDF = createPDF; self.cancelPreparation = cancelPreparation
+    }
 
     @MainActor
-    static func live() -> Self {
-        Self(
+    static func live(outputFonts: RhwpStudioOutputFontJob? = nil) -> Self {
+        let preparation = RhwpStudioOutputFontPreparation(fonts: outputFonts)
+        return Self(
             preparePage: { webView, completion in
-                webView.callAsyncJavaScript(
-                    RhwpStudioPagePDFHTML.pagePreparationScript,
-                    arguments: [:],
-                    in: nil,
-                    in: .defaultClient,
-                    completionHandler: completion
-                )
+                preparation.prepare(webView, completion: completion)
             },
             createPDF: { webView, configuration, completion in
                 webView.createPDF(
                     configuration: configuration,
                     completionHandler: completion
                 )
-            }
+            }, cancelPreparation: { preparation.cancel() }
         )
     }
 }
@@ -139,11 +141,13 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
     private var didFinish = true
     private var renderLifecycle = RhwpStudioPagePDFRenderLifecycle()
     private var pageRenderTimeoutTask: Task<Void, Never>?
+    private let outputFonts: RhwpStudioOutputFontJob?
 
     init(
         pageRenderTimeoutNanoseconds: UInt64 = 30_000_000_000,
         fontResourceProvider: RhwpStudioPDFFontResourceProviding =
             RhwpStudioPDFFontBundleResourceProvider(),
+        outputFonts: RhwpStudioOutputFontJob? = nil,
         webKitOperations: RhwpStudioPagePDFWebKitOperations? = nil,
         webViewFactory: @MainActor (WKWebViewConfiguration) -> WKWebView = { configuration in
             WKWebView(
@@ -156,13 +160,14 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         }
     ) {
         self.pageRenderTimeoutNanoseconds = pageRenderTimeoutNanoseconds
-        self.webKitOperations = webKitOperations ?? .live()
+        self.outputFonts = outputFonts
+        self.webKitOperations = webKitOperations ?? .live(outputFonts: outputFonts)
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
         configuration.defaultWebpagePreferences.allowsContentJavaScript = false
         let pdfFontSchemeHandler = RhwpStudioPDFFontSchemeHandler(
-            resourceProvider: fontResourceProvider
+            resourceProvider: fontResourceProvider, outputFonts: outputFonts
         )
         configuration.setURLSchemeHandler(
             pdfFontSchemeHandler,
@@ -176,6 +181,15 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
 
     deinit {
         pageRenderTimeoutTask?.cancel()
+        // MainActor 정리는 해당 actor에서 한다. 출력 job은 single-use다.
+        // 성공 후에는 저장/인쇄 소유자가 최종 검증·seal까지 lease를 유지한다.
+        let fonts = didFinish ? nil : outputFonts, cancel = webKitOperations.cancelPreparation
+        Task { @MainActor in cancel(); fonts?.cancel() }
+    }
+
+    func cancel() {
+        guard let token = renderLifecycle.currentPageToken else { return }
+        finish(.failure(RhwpStudioOutputFontError.cancelled), for: token)
     }
 
     func render(
@@ -346,6 +360,10 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
             case .success(let value):
                 preparation = value
             case .failure(let error):
+                if error is RhwpStudioOutputFontError || error is CancellationError {
+                    self.finish(.failure(error), for:token)
+                    return
+                }
                 self.finish(
                     .failure(
                         RhwpStudioPagePDFRenderError.fontPreparationFailed(
@@ -388,7 +406,14 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
 
                 switch result {
                 case .success(let data):
-                    self.appendPDFPage(data, for: token)
+                    if let fonts = self.outputFonts {
+                        Task { [weak self] in
+                            do {
+                                try await fonts.validate()
+                                self?.appendPDFPage(data, for: token)
+                            } catch { self?.finish(.failure(error), for: token) }
+                        }
+                    } else { self.appendPDFPage(data, for: token) }
                 case .failure(let error):
                     self.finish(.failure(error), for: token)
                 }
@@ -488,6 +513,8 @@ final class RhwpStudioPagePDFRenderer: NSObject, WKNavigationDelegate {
         webView.navigationDelegate = nil
         pageRenderTimeoutTask?.cancel()
         pageRenderTimeoutTask = nil
+        webKitOperations.cancelPreparation()
+        if case .failure = result { outputFonts?.cancel() }
         webView.stopLoading()
         let completion = completion
         self.completion = nil
@@ -534,86 +561,62 @@ enum RhwpStudioPagePDFHTML {
 
     static let pagePreparationScript = #"""
     await document.fonts.ready;
+    \#(RhwpStudioOutputFontPreparation.familyParser)
     const ownedFamilies = \#(RhwpStudioPDFFontStyle.ownedFamilyNamesJSON);
+    const ownedByKey = new Map(ownedFamilies.map(name => [name.toLowerCase(),name]));
     const hangulPattern = /[\#(RhwpStudioPDFFontStyle.hangulJavaScriptCharacterClass)]/;
-    const normalizeFamily = value => value.trim().replace(/^['"]|['"]$/g, "");
-    const ownedFallbackFamily = families => {
-      const normalized = families.map(family => family.toLowerCase());
-      if (normalized.includes("serif")) {
-        return "Noto Serif KR";
-      }
-      if (normalized.includes("sans-serif")) {
-        return "Noto Sans KR";
-      }
-      return null;
-    };
+    const custom = globalThis.__alhangeulPDFOutput?.custom;
     const requiredFaces = new Map();
-    for (const textNode of document.querySelectorAll("svg text")) {
-      const sample = (textNode.textContent || "").match(hangulPattern)?.[0];
-      if (!sample) {
-        continue;
+    const fallbackToken = Array.from(crypto.getRandomValues(new Uint32Array(4))).map(n => n.toString(16)).join('');
+    let generatedRuns = 0;
+    const outputNodes = [...document.querySelectorAll("svg text"), ...document.querySelectorAll("svg tspan")];
+    for (const textNode of outputNodes) {
+      if (custom?.has(textNode)) continue;
+      const sample = directPDFText(textNode).match(hangulPattern)?.[0];
+      if (!sample) continue;
+      const style = getComputedStyle(textNode);
+      const families = splitPDFFamilies(style.fontFamily);
+      const owned = families.map(candidate => ownedByKey.get(candidate.toLowerCase())).find(Boolean);
+      const serif = owned ? \#(RhwpStudioPDFFontStyle.serifAliasesJSON).includes(owned)
+        : families.some(name => name.toLowerCase() === 'serif');
+      const weight = Number.parseInt(style.fontWeight, 10) >= 500 ? 700 : 400;
+      const alias = `Noto PDF ${serif ? 'Serif' : 'Sans'} ${weight} ${fallbackToken}`;
+      if (!requiredFaces.has(alias)) {
+        const filename = `Noto${serif ? 'Serif' : 'Sans'}KR-${weight === 700 ? 'Bold' : 'Regular'}.woff2`;
+        const face = new FontFace(alias, `url("alhangeul-pdf-font://bundle/${filename}")`, {
+          weight:String(weight), style:'normal',
+          // 한글에만 적용한다. ASCII·수학·Hanja는 원래 fallback을 유지한다.
+          unicodeRange:'\#(RhwpStudioPDFFontStyle.hangulUnicodeRange)'
+        });
+        document.fonts.add(face); requiredFaces.set(alias, {face, weight, sample});
       }
-      let style = getComputedStyle(textNode);
-      let families = style.fontFamily.split(",").map(normalizeFamily);
-      let family = families.find(candidate => ownedFamilies.includes(candidate));
-      if (!family) {
-        const fallbackFamily = ownedFallbackFamily(families) || "Noto Sans KR";
-        textNode.style.setProperty(
-          "font-family",
-          `"${fallbackFamily}", ${style.fontFamily}`,
-          "important"
-        );
-        style = getComputedStyle(textNode);
-        families = style.fontFamily.split(",").map(normalizeFamily);
-        family = families.find(candidate => ownedFamilies.includes(candidate));
+      const fallback = families.filter(name => !ownedByKey.has(name.toLowerCase()));
+      const quoteFamily = name => ['serif','sans-serif','monospace','system-ui','cursive','fantasy','ui-serif','ui-sans-serif','ui-monospace','emoji','math','fangsong'].includes(name.toLowerCase()) ? name : '"' + name.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+      const original = fallback.length ? fallback.map(quoteFamily).join(', ') : (serif ? 'serif' : 'sans-serif');
+      // WebKit은 혼합 run의 공백/구두점을 한글 subset 코드로 잘못 매핑할 수 있다.
+      // 원래 문자 순서·SVG 위치 속성을 유지한 채 script 경계에서만 run을 분리한다.
+      for (const child of Array.from(textNode.childNodes)) {
+        if (child.nodeType !== Node.TEXT_NODE || !hangulPattern.test(child.textContent || '')) continue;
+        const parts = (child.textContent || '').match(/[\#(RhwpStudioPDFFontStyle.hangulJavaScriptCharacterClass)]+|[^\#(RhwpStudioPDFFontStyle.hangulJavaScriptCharacterClass)]+/gu) || [];
+        generatedRuns += parts.length;
+        if (generatedRuns > 65536) throw Error('PDF fallback run limit');
+        const fragment = document.createDocumentFragment();
+        for (const part of parts) {
+          const span = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+          span.textContent = part;
+          span.style.setProperty('font-family', hangulPattern.test(part) ? '"' + alias + '"' : original, 'important');
+          fragment.appendChild(span);
+        }
+        child.replaceWith(fragment);
       }
-      if (!family) {
-        throw new Error(`failed to apply owned Hangul fallback: ${style.fontFamily || "(empty)"}`);
-      }
-      const numericWeight = Number.parseInt(style.fontWeight, 10);
-      const isBold = style.fontWeight === "bold"
-        || (Number.isFinite(numericWeight) && numericWeight >= 500);
-      requiredFaces.set(`${family}|${isBold ? "bold" : "regular"}`, {
-        family,
-        isBold,
-        sample
-      });
     }
-
-    await Promise.all(Array.from(requiredFaces.values()).map(required => {
-      const cssWeight = required.isBold ? 700 : 400;
-      const escapedFamily = required.family.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-      return document.fonts.load(
-        `${cssWeight} 12px "${escapedFamily}"`,
-        required.sample
-      ).catch(() => []);
-    }));
+    await Promise.all(Array.from(requiredFaces.values()).map(required => required.face.load().catch(() => null)));
     await document.fonts.ready;
-
-    const loadedFaces = Array.from(document.fonts).filter(face => face.status === "loaded");
-    const faceIsBold = face => {
-      const weights = (face.weight || "").match(/\d+/g)?.map(Number) || [];
-      return weights.length > 0 && weights[0] >= 500;
-    };
-    const unresolvedFaces = Array.from(requiredFaces.values()).filter(required => {
-      const hasLoadedFace = loadedFaces.some(face =>
-        normalizeFamily(face.family) === required.family
-          && faceIsBold(face) === required.isBold
-      );
-      const cssWeight = required.isBold ? 700 : 400;
-      const escapedFamily = required.family.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-      return !hasLoadedFace
-        || !document.fonts.check(`${cssWeight} 12px "${escapedFamily}"`, required.sample);
-    });
-
+    const unresolvedFaces = Array.from(requiredFaces.entries()).filter(([alias, required]) =>
+      required.face.status !== 'loaded' || !document.fonts.check(`${required.weight} 12px "${alias}"`, required.sample));
     let fontFailureReason = null;
-    if (document.fonts.status !== "loaded") {
-      fontFailureReason = `document.fonts.status=${document.fonts.status}`;
-    } else if (unresolvedFaces.length > 0) {
-      fontFailureReason = `unresolved PDF fonts: ${unresolvedFaces
-        .map(face => `${face.family}/${face.isBold ? "bold" : "regular"}`)
-        .join(", ")}`;
-    }
+    if (document.fonts.status !== 'loaded') fontFailureReason = `document.fonts.status=${document.fonts.status}`;
+    else if (unresolvedFaces.length) fontFailureReason = `unresolved PDF fonts: ${unresolvedFaces.map(([name]) => name).join(', ')}`;
 
     const svg = document.querySelector("svg");
     const rect = svg?.getBoundingClientRect();

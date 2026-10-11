@@ -1,0 +1,97 @@
+{
+  "at": "2026-10-11T12:34:13.238083+00:00",
+  "scope": "Stage 5의 문서/증거/경계·원래 설치본 읽기 검증; 제품 변경·새 signed 시험 없음",
+  "stage4CompletionCommit": "d9171d808a15e5e35396d7006bb38a700e0da6a6",
+  "stage4Decision": {
+    "approved": true,
+    "approvalDate": "2026-10-11",
+    "instruction": "현재 검증 결과를 수용하도록 Stage 4 완료 기준을 보정하고, 추가 최적화는 후속 작업으로 분리한 뒤 #580 Stage 5를 진행해줘",
+    "candidateVersion": "580.4.3",
+    "productSourceCommit": "1624842b",
+    "original300msGoalMet": false,
+    "currentTrialAccepted": true,
+    "metadata200msGoalRetained": true,
+    "correctnessFreshnessLeaseLimitsRetained": true,
+    "noNewGeneralTimeUpperBound": true
+  },
+  "executedStaticChecks": {
+    "noAppKit": true,
+    "nativeMatcherReceipt": true,
+    "studioAssetReceipt": true,
+    "coreBuildInfo": true,
+    "parserSelfTest": true,
+    "candidateGuardProofs": 16,
+    "candidateGuardExternalMutations": false,
+    "mainSourceContentGate": true
+  },
+  "testResultsReused": {
+    "fontLibrary": {
+      "count": 162,
+      "failures": 0,
+      "source": "task_m020_580_stage4_3/validation.json"
+    },
+    "studioOutput": {
+      "count": 81,
+      "failures": 0,
+      "source": "task_m020_580_stage4_3/validation.json"
+    },
+    "normalDirectConsumers": {
+      "count": 1152,
+      "busy": 0,
+      "conditions": "비최적화/-O 각 14프로세스·650시간 표본; 같은 최종 제품 소스"
+    },
+    "extensionPNGAndTwoPagePDFCurrentQueueLease": "task_m020_580_stage4_3/validation.json",
+    "signedFinder": "task_m020_580_stage4_3_signed/validation.json"
+  },
+  "originalAppReadCheck": {
+    "path": "/Applications/Alhangeul.app",
+    "version": "0.2.2",
+    "inventoryEntries": 243,
+    "inventoryDigest": "fa694017af3e0b3705510b353ef0e9dc5549be57493b74e99e5ca05540b3707b",
+    "matchesSignedRestorationReceipt": true,
+    "strictCodesignExit": 0,
+    "xattrsCompared": false
+  },
+  "hygieneReadCheck": {
+    "originalProvider": true,
+    "developmentRegistrations": 0,
+    "developmentBundles": 0,
+    "issues": 0,
+    "warnings": 0
+  },
+  "rawSHA256": {
+    "contentGate": "e5da57b5f15ca30de4f9dbfecac707c6ed26589915de83eb382d3f31fb95ddf9",
+    "guards": "3319f4fe4e5be2803bbe476980ffa0c177bc85877a0a47fff902c8234cd94351",
+    "hygieneIssues": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hygieneWarnings": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "providerRoots": "0e4e4e81b047f909c6762e1c1cd8dc68ff22971648db6b6428281e1383fd375c",
+    "developmentRegistrations": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "developmentBundles": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "publication": {
+    "followupIssueCreated": false,
+    "reason": "구체 이슈 본문 공개 등록이 자동 승인 검토에서 거절되어 공개 승인 대기",
+    "issue580BodyUpdated": false,
+    "publishBranchPushed": false,
+    "pullRequestCreated": false,
+    "issue580Closed": false,
+    "publicRelease": false
+  },
+  "limits": [
+    "arm64/macOS 26.5.2 실제 signed 결과; 최소 macOS/Intel runtime 미검증",
+    "provider 시간과 GUI paint·앱 시작 시간 구분",
+    "현재 source/증거 읽기 대조는 새 consumer 시험이나 public DMG 수용을 대신하지 않음",
+    "후속 최적화는 #580 완료·#569 Mac 수용/안내·출시 준비의 선행 조건 아님"
+  ],
+  "documentChecks": {
+    "documents": 9,
+    "localLinks": 63,
+    "existingAndStage5ChecksumFiles": 33,
+    "passed": true,
+    "githubBodyValidationPassed": [
+      "task_m020_580_followup_issue.md",
+      "task_m020_580_issue_update.md"
+    ],
+    "diffCheckPassed": true
+  }
+}

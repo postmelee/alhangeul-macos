@@ -1,0 +1,74 @@
+{
+  "viewports": [
+    {
+      "page": "release",
+      "documentWidth": 390,
+      "title": "알한글 v0.2.3 릴리즈 노트",
+      "width": 390
+    },
+    {
+      "page": "release",
+      "documentWidth": 320,
+      "title": "알한글 v0.2.3 릴리즈 노트",
+      "width": 320
+    },
+    {
+      "page": "fonts",
+      "documentWidth": 320,
+      "title": "Mac 글꼴 사용 안내 — 알한글",
+      "width": 320
+    },
+    {
+      "page": "fonts",
+      "documentWidth": 390,
+      "title": "Mac 글꼴 사용 안내 — 알한글",
+      "width": 390
+    },
+    {
+      "page": "updates",
+      "documentWidth": 390,
+      "width": 390
+    },
+    {
+      "page": "updates",
+      "documentWidth": 320,
+      "width": 320
+    },
+    {
+      "page": "updates",
+      "documentWidth": 1280,
+      "width": 1280
+    },
+    {
+      "page": "home",
+      "documentWidth": 1280,
+      "width": 1280
+    },
+    {
+      "page": "home",
+      "documentWidth": 390,
+      "width": 390
+    },
+    {
+      "page": "home",
+      "documentWidth": 320,
+      "width": 320
+    },
+    {
+      "page": "fonts",
+      "documentWidth": 1280,
+      "width": 1280
+    },
+    {
+      "page": "release",
+      "documentWidth": 1280,
+      "width": 1280
+    }
+  ],
+  "keyboard": {
+    "skipLink": "focus main",
+    "fontFaqEnter": "Windows answer expanded",
+    "homebrewArrowRight": "update tab selected"
+  },
+  "previewOnly": true
+}

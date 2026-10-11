@@ -1,0 +1,324 @@
+{
+  "scope": "unsigned actual CoreText; each comparison uses a fresh available collection; no user OS fonts modified",
+  "runs": 2,
+  "pairs": 22,
+  "results": [
+    {
+      "run": "attributes-off-0",
+      "pairs": [
+        {
+          "cachedMs": 70.717041,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 0,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 71.78925
+        },
+        {
+          "cachedMs": 29.78925,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 1,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 52.264625
+        },
+        {
+          "cachedMs": 28.207208,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 2,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 51.921667
+        },
+        {
+          "cachedMs": 27.621125,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 3,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 50.576875
+        },
+        {
+          "cachedMs": 27.315,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 4,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 51.774792
+        },
+        {
+          "cachedMs": 28.111958,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 5,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 52.249125
+        },
+        {
+          "cachedMs": 27.923166,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 6,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 50.989125
+        },
+        {
+          "cachedMs": 27.002541,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 7,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 52.207709
+        },
+        {
+          "cachedMs": 27.587542,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 8,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 50.099125
+        },
+        {
+          "cachedMs": 26.580667,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 9,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 50.613291
+        },
+        {
+          "cachedMs": 27.8285,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 10,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 50.207833
+        }
+      ],
+      "rawSHA256": "d0e19c6d5b65705962cf7143daf5723e7fb180aa4aa44a6ca989aaece5924527"
+    },
+    {
+      "run": "attributes-on-0",
+      "pairs": [
+        {
+          "cachedMs": 64.84875,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 0,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 53.948542
+        },
+        {
+          "cachedMs": 29.16225,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 1,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 53.680625
+        },
+        {
+          "cachedMs": 28.943541,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 2,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 53.115917
+        },
+        {
+          "cachedMs": 29.234292,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 3,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 52.610083
+        },
+        {
+          "cachedMs": 28.882166,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 4,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 51.913959
+        },
+        {
+          "cachedMs": 31.711542,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 5,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 53.058
+        },
+        {
+          "cachedMs": 28.860667,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 6,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 64.4465
+        },
+        {
+          "cachedMs": 32.959583,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 7,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 51.150875
+        },
+        {
+          "cachedMs": 29.130666,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 8,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 51.541667
+        },
+        {
+          "cachedMs": 31.353375,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 9,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 54.29475
+        },
+        {
+          "cachedMs": 27.996583,
+          "descriptors": 565,
+          "digest": "44a1cf124b20111c85c0bbebbc76b60805b9710f6c3bdea8873410ac62f781b3",
+          "iteration": 10,
+          "retainedBytes": 287368,
+          "retainedRecords": 565,
+          "reusable": true,
+          "strictMs": 52.411084
+        }
+      ],
+      "rawSHA256": "bc26e9c74fbca175fb7e8aa5c467dff191d44b1f15eabde4c7a2aa76f1bf5e9d"
+    }
+  ],
+  "sourceReceipt": {
+    "sources": {
+      "Sources/RhwpCoreBridge/CGTreeRenderer.swift": "9d5119d0f9a39e8781e3713258efe4ec6cb217f14f715c988d32720eb694445c",
+      "Sources/RhwpCoreBridge/FontFallback.swift": "a00d375c4b51a652eb02f603aa94e5a8ab2b942fa55e40a9fd3c65b49b774c91",
+      "Sources/RhwpCoreBridge/FontResourceRegistry.swift": "d88559812422690473084f974066fbfc9a62a57abd1605b7b03e530efbd81ac0",
+      "Sources/RhwpCoreBridge/PageOverlayImages.swift": "8e413a9c514755a225831e3d857934054ccdf2bdb7cd942f3a539262b3b3f0a2",
+      "Sources/RhwpCoreBridge/RenderTree.swift": "9cf7e27b903b894c007c73296499dff07d9fe4349a3c9a5c0ecb559ddd31d922",
+      "Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift": "906fce68b21c92ac58af6cd8f15f146a655fa8558cd5ad152d91c4b2db176ad3",
+      "Sources/RhwpCoreBridge/RhwpDocument.swift": "f75c60bf0f9648a16027a73ec33bbff423a89fc1257692492865435f1cbbb614",
+      "Sources/RhwpCoreBridge/RhwpDocumentProtection.swift": "af71e6c70efcc665761567bea9b272d41ba5c2f14d3535356d1731731638d175",
+      "Sources/RhwpCoreBridge/RhwpNativeFontContext.swift": "f84184cdc5e3579e6f0f0532b084f98053d43e23bf60751e12068808822560c9",
+      "Sources/Shared/FontLibrary/ExtensionFontSupply.swift": "423fb2bb29bdbfc61ea94f0c8d82ca1157a42091fbf1920b1c986e4fcb4ce6d4",
+      "Sources/Shared/FontLibrary/ExtensionInstalledFontPreparation.swift": "09619bcfc494339704e5f8d31f2f786f016c34aaeebf0d8d6a3c68ccb976810f",
+      "Sources/Shared/FontLibrary/FontConsumerPolicyStore.swift": "6e5ee811ac474a8748daf9bfc8e024b2f905b39bed7e01ced72e5a6a3b566a2f",
+      "Sources/Shared/FontLibrary/FontFileInspector.swift": "be99974fe4ca9fc0134eda7c925a415c8dc1de14a55483dbe0e7dfca5c5802c3",
+      "Sources/Shared/FontLibrary/FontImportSourceSession.swift": "5ee525bb6e4537a529e5f71d03edd80c67d242b7fb292137f5ad0b89384de40f",
+      "Sources/Shared/FontLibrary/FontLibraryChanges.swift": "3ba98daafb5d20cd0ceb44da41ec74e2ff1a1ebd40c0970d2d4b354ebfe1c58a",
+      "Sources/Shared/FontLibrary/FontLibraryFileSystem.swift": "8c41c8b97a8304143ac49b28bbdfcf2f31f0122ec50da82f1845e0dec66431e3",
+      "Sources/Shared/FontLibrary/FontLibraryLocation.swift": "4b51d29285655d63b06ce958fe0df59c15770c58bc3cfc42664aa15ce8e95cc4",
+      "Sources/Shared/FontLibrary/FontLibraryModels.swift": "39fcafc7a0130d6e6d7a165ae02a96d7cd8f52d2947b07715d4c1c2fed78c481",
+      "Sources/Shared/FontLibrary/FontLibraryRecovery.swift": "481bc33c615333cbfacea6855f222af7638eb6a1e42dad7c770c887ea179cc67",
+      "Sources/Shared/FontLibrary/FontLibraryService.swift": "ce28d225d0f899e60d0b0daee944a78bc5bd8355fd54533a27e16a47fd741021",
+      "Sources/Shared/FontLibrary/FontLibrarySnapshot.swift": "689a3e28356031f5cd9ffd07b3893ac4447633028a3d1fdf091b0f014d979c83",
+      "Sources/Shared/FontLibrary/FontLibraryStore.swift": "b7d331b3c3dd1c254b9c4503684cc623d9edabc5bd2b7d98a944a7138fa8dfa6",
+      "Sources/Shared/FontLibrary/HostFontSupplyTypes.swift": "dd4622418f8d44274620b5b71973e63ff16c50dc0b8b8991d25143eb3bd6d5b0",
+      "Sources/Shared/FontLibrary/InstalledFontActiveSignature.swift": "73081e21f1a489079be5ab375cbd28284af92e282a54191d327ce8e9a17a7242",
+      "Sources/Shared/FontLibrary/InstalledFontCatalogService.swift": "ef5cc95a886d63f307818a4314cda78221422e9877ce3acf96a1905d71ce4a30",
+      "Sources/Shared/FontLibrary/InstalledFontDescriptorCache.swift": "7cb6747ad174ce9b672bdc634e6c180e152209e4ff36f36ab4ac12a2cdc8785b",
+      "Sources/Shared/FontLibrary/InstalledFontModels.swift": "3892b3e7fcc06b71add77441c3f21513b6f2e99280862c0a0162cdb34209ba0c",
+      "Sources/Shared/FontLibrary/InstalledFontServiceProvider.swift": "cb4df48220d2796afb4060e172ce55e9415b7ffb5a813159b83d130ec457e00d",
+      "Sources/Shared/FontLibrary/InstalledFontSupplyCatalog.swift": "71d929e5541335dad21dcedf45bc8e8dd748234ba54c9ab0ba04bfb41d296378",
+      "Sources/Shared/FontLibrary/InstalledFontSystem.swift": "b998cc99a48c529c0b673b64575cb39a8afdae2306c78bed0defbd23b37d968a",
+      "Sources/Shared/FontLibrary/RhwpNativeFontMatcher.swift": "afefd1123bbb7e5b4bdfd9e25f84189b24315f3111f8d093d36b75b2c18199a7",
+      "Sources/Shared/FontLibrary/RhwpNativeFontMatcherSource.swift": "cea9b46e4bc7e19d7373f71ef557c1281af58cbd9d0133226a67a1ea96e6afbb",
+      "Sources/Shared/FontLibrary/StudioFontSupply.swift": "4a1ca242da66c5c16252799d87e8f126111b4f67a8c537bed98fcde8dd34c9a9",
+      "Sources/Shared/NativeFonts/ExtensionFontRenderer.swift": "81e8f7bd1eb7f9c35dc8cc6b5c1be0af23b4e7234ed6d6e4c870560a53f714e9",
+      "Sources/Shared/NativeFonts/HwpNativeFontPageRenderer.swift": "e1349c82b2b56038a576103318d9338a0158c9e18bee9ba1078881ba26404a9f",
+      "Sources/Shared/HwpPageImageRenderer.swift": "4aeb655783822126f5c4c7765932bcdf019cb8791f46143b17ae7a233342ccf1",
+      "Sources/Shared/HwpNativePageCompositor.swift": "fd683bcb0ed64cf10bf02c3e8b7fb348ceeab25757c8b4e4d70fd893b43e354a",
+      "Sources/Shared/HwpPreviewPDFRenderer.swift": "695b2a5aaa8ad76216e1bc63e37275884077e37d7d15f213f5aa8a29530ad3f7",
+      "Sources/Shared/HwpPreviewPNGRenderer.swift": "f51acc6c9e5d80beece02fb4f7991a47a5fa16689fdad68fd4de0eed89d71b2b",
+      "Sources/Shared/HwpExternalImageResolver.swift": "7fdd30513af432b87c62c7fbf226b990b5dd11489f95c3044ac6bcb46f79dd4d",
+      "Sources/ThumbnailExtension/HwpThumbnailRenderCache.swift": "71934cba2e23de3abcf67db72fa17cb989b12d59693536d6f58eef9fe59b360c",
+      "Tests/ExtensionFontPerformanceProbe/attributes.swift": "0159c8a92b0ea3147dbdb068caef6465070213cfa23c6257228e7fcb3cf0d520",
+      "Tests/ExtensionFontPerformanceProbe/main.swift": "b1613534f0a7f8b269abbe8211485e0ee1ab874ba045e0b2d177f6a982ef7e26",
+      "Tests/ExtensionFontPerformanceProbe/signature.swift": "075b6edbac09c3850aea01927dfd7599b49a72d9ed1910eb2a8040625046cc9f",
+      "Tests/ExtensionFontPerformanceProbe/fixtures.json": "433a7394456ceb51fb94b442801279e6c9f5e78be87ce27836c05335b84ce12a",
+      "Frameworks/universal/librhwp.a": "521e53707bed97f95923e011076616344b17aaa42893b342923e82b973e4152a",
+      "Frameworks/generated_rhwp.h": "14994c7d1923107b5739b5518e43f98bc002e1b954a068647a377ec4d6e1fbc2"
+    },
+    "binarySHA256": "f7d848ae32f51af75b43588783587bdd7b101bceacc6eedf7ac2f95a2f92c12f",
+    "buildFlags": [
+      "ALHANGEUL_FONT_EXTENSION_PROBE"
+    ],
+    "optimization": "speed"
+  },
+  "excluded": [
+    "attribute-equivalence-01: source changed during compilation/execution",
+    "attribute-equivalence-02: same descriptor inspected twice; enabled getter reanalysis timing bias"
+  ],
+  "dictionaryInspection": {
+    "attributeKeys": {
+      "NSFontNameAttribute": 528
+    },
+    "bulkMs": 1.426875,
+    "complete": 0,
+    "descriptors": 528,
+    "missing": {
+      "NSCTFontFileURLAttribute": 528,
+      "NSCTFontTraitsAttribute": 528,
+      "NSCTFontVariationAttribute": 528,
+      "NSFontFaceAttribute": 528,
+      "NSFontFamilyAttribute": 528
+    },
+    "valueTypes": {
+      "__NSCFConstantString": 164,
+      "__NSCFString": 308,
+      "NSTaggedPointerString": 56
+    }
+  },
+  "diagnosticSHA256": {
+    "build.noindex/task580/stage4/attribute-key-cost-01/result.json": "74cfd9db0f190d5534673b537f663579c55b9c5ce9309a2bd5d569a96bba5a14",
+    "build.noindex/task580/stage4/attribute-cost-sample-01/sample.txt": "99285cb8fa0dbbc4dccbbd3d604cd4bdc9a1d0c55d7c10c78cf4a02bbba8628a",
+    "build.noindex/task580/stage4/attribute-cost-sample-01/receipt.json": "4a3161cc7840b0f56e25e350bfb16b54b4760a2edd7833b49e028dcd2ac3c60f"
+  }
+}

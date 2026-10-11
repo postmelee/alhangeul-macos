@@ -1,0 +1,34 @@
+[
+  {
+    "path": ".github/workflows/release-rehearsal.yml",
+    "defaults": {
+      "version": "0.2.3",
+      "previous_release_ref": "v0.2.2",
+      "expected_rhwp_tag": "v0.8.7"
+    }
+  },
+  {
+    "path": ".github/workflows/release-publish.yml",
+    "defaults": {
+      "version": "0.2.3",
+      "previous_release_ref": "v0.2.2",
+      "expected_rhwp_tag": "v0.8.7",
+      "require_latest_rhwp": true,
+      "include_rhwp_in_title": false,
+      "draft": true,
+      "prerelease": false
+    }
+  },
+  {
+    "path": ".github/workflows/release-promote.yml",
+    "defaults": {
+      "version": "0.2.3",
+      "expected_build": "21",
+      "source_run_id": null,
+      "source_sha": null,
+      "source_artifact_id": null,
+      "validation_run_id": null,
+      "dmg_sha256": null
+    }
+  }
+]

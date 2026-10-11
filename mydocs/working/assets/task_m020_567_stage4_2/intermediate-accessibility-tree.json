@@ -1,0 +1,52 @@
+[
+  {
+    "AXRole" : "AXWindow",
+    "AXTitle" : "글꼴",
+    "class" : "AppKitWindow"
+  },
+  {
+    "AXRole" : "AXUnknown",
+    "class" : "AppKitWindowHostingView<ModifiedContent<AnyView, RootModifier>>"
+  },
+  {
+    "AXRole" : "AXScrollArea",
+    "class" : "HostingScrollView"
+  },
+  {
+    "AXRole" : "AXToolbar",
+    "class" : "NSToolbarView"
+  },
+  {
+    "AXDescription" : "개인정보",
+    "AXRole" : "AXButton",
+    "AXTitle" : "개인정보",
+    "class" : "NSToolbarItemViewer"
+  },
+  {
+    "AXDescription" : "글꼴",
+    "AXRole" : "AXButton",
+    "AXTitle" : "글꼴",
+    "class" : "NSToolbarItemViewer"
+  },
+  {
+    "AXRole" : "AXButton",
+    "class" : "_NSThemeCloseWidgetCell"
+  },
+  {
+    "AXRole" : "AXButton",
+    "class" : "_NSThemeZoomWidgetCell"
+  },
+  {
+    "AXRole" : "AXGroup",
+    "class" : "NSThemeWidgetZoomMenuRemoteView"
+  },
+  {
+    "AXRole" : "AXButton",
+    "class" : "_NSThemeWidgetCell"
+  },
+  {
+    "AXRole" : "AXStaticText",
+    "AXValue" : "글꼴",
+    "class" : "NSAccessibilityReparentingCellProxy"
+  }
+]

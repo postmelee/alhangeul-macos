@@ -1,0 +1,458 @@
+{
+  "scope": "unsigned actual CoreText; fresh collection/multiset/digest/reusable comparison; only exact URL/PS/process-scope fixture descriptors toggled; no user OS fonts modified",
+  "runs": 2,
+  "pairs": 30,
+  "results": [
+    {
+      "run": "collections-off-0",
+      "pairs": [
+        {
+          "collectionCount": 809,
+          "collectionMs": 177.830375,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 0,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 190.760417
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 32.053084,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 1,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 181.5495
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 32.801166,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 2,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 183.764792
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 30.487584,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 3,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 183.291541
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 31.184917,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 4,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 185.49225
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 31.989875,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 5,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 184.338375
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 31.685416,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 6,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 191.222334
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 31.197083,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 7,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 187.497709
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 31.770875,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 8,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 189.592584
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 30.441792,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 9,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 191.904916
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 30.774125,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 10,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 189.683917
+        },
+        {
+          "collectionCount": 810,
+          "collectionMs": 266.658542,
+          "digest": "f11f747d1aa2e3759c8e23d2b32930739e5e071c16b161ffdd6059c75360ef96",
+          "fixturePresent": true,
+          "iteration": 0,
+          "phase": "registered-enabled",
+          "reusable": true,
+          "strictCount": 810,
+          "strictMs": 222.2165
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 189.998708,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 0,
+          "phase": "disabled",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 199.7895
+        },
+        {
+          "collectionCount": 810,
+          "collectionMs": 187.619792,
+          "digest": "f11f747d1aa2e3759c8e23d2b32930739e5e071c16b161ffdd6059c75360ef96",
+          "fixturePresent": true,
+          "iteration": 0,
+          "phase": "re-enabled",
+          "reusable": true,
+          "strictCount": 810,
+          "strictMs": 197.515125
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 184.373209,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 0,
+          "phase": "unregistered",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 194.918958
+        }
+      ],
+      "rawSHA256": "e40242e5209ea4471dfe323dcdd7b40b473cd0e48dbfa550d70602e082f6bdf5",
+      "warmStrictMs": {
+        "count": 10,
+        "median": 186.4949795,
+        "maximum": 191.904916,
+        "minimum": 181.5495
+      },
+      "warmCollectionMs": {
+        "count": 10,
+        "median": 31.441249499999998,
+        "maximum": 32.801166,
+        "minimum": 30.441792
+      }
+    },
+    {
+      "run": "collections-on-0",
+      "pairs": [
+        {
+          "collectionCount": 809,
+          "collectionMs": 174.024708,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 0,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 186.266625
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 32.982458,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 1,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 183.956792
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 31.35,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 2,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 184.842125
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 30.125958,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 3,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 185.19425
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 32.501042,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 4,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 185.423875
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 31.442042,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 5,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 186.573083
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 30.901417,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 6,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 186.645083
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 33.352416,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 7,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 184.393334
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 30.925625,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 8,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 185.361208
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 31.7165,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 9,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 185.603125
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 31.984334,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 10,
+          "phase": "baseline",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 185.494458
+        },
+        {
+          "collectionCount": 810,
+          "collectionMs": 179.442416,
+          "digest": "f11f747d1aa2e3759c8e23d2b32930739e5e071c16b161ffdd6059c75360ef96",
+          "fixturePresent": true,
+          "iteration": 0,
+          "phase": "registered-enabled",
+          "reusable": true,
+          "strictCount": 810,
+          "strictMs": 194.616542
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 182.615917,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 0,
+          "phase": "disabled",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 193.034333
+        },
+        {
+          "collectionCount": 810,
+          "collectionMs": 186.893042,
+          "digest": "f11f747d1aa2e3759c8e23d2b32930739e5e071c16b161ffdd6059c75360ef96",
+          "fixturePresent": true,
+          "iteration": 0,
+          "phase": "re-enabled",
+          "reusable": true,
+          "strictCount": 810,
+          "strictMs": 192.642667
+        },
+        {
+          "collectionCount": 809,
+          "collectionMs": 183.063875,
+          "digest": "251ea27d9db5fc7c2db4912614c6ede663fa23146a5bb70913a8f02eef1ae926",
+          "fixturePresent": false,
+          "iteration": 0,
+          "phase": "unregistered",
+          "reusable": true,
+          "strictCount": 809,
+          "strictMs": 191.663208
+        }
+      ],
+      "rawSHA256": "30cf6b9dad4f2a89f3c59f6643623d924df492320e5b12a0db9cd6a48da88705",
+      "warmStrictMs": {
+        "count": 10,
+        "median": 185.3925415,
+        "maximum": 186.645083,
+        "minimum": 183.956792
+      },
+      "warmCollectionMs": {
+        "count": 10,
+        "median": 31.579271,
+        "maximum": 33.352416,
+        "minimum": 30.125958
+      }
+    }
+  ],
+  "sourceReceiptBeforeProductChange": {
+    "sources": {
+      "Sources/RhwpCoreBridge/CGTreeRenderer.swift": "9d5119d0f9a39e8781e3713258efe4ec6cb217f14f715c988d32720eb694445c",
+      "Sources/RhwpCoreBridge/FontFallback.swift": "a00d375c4b51a652eb02f603aa94e5a8ab2b942fa55e40a9fd3c65b49b774c91",
+      "Sources/RhwpCoreBridge/FontResourceRegistry.swift": "d88559812422690473084f974066fbfc9a62a57abd1605b7b03e530efbd81ac0",
+      "Sources/RhwpCoreBridge/PageOverlayImages.swift": "8e413a9c514755a225831e3d857934054ccdf2bdb7cd942f3a539262b3b3f0a2",
+      "Sources/RhwpCoreBridge/RenderTree.swift": "9cf7e27b903b894c007c73296499dff07d9fe4349a3c9a5c0ecb559ddd31d922",
+      "Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift": "906fce68b21c92ac58af6cd8f15f146a655fa8558cd5ad152d91c4b2db176ad3",
+      "Sources/RhwpCoreBridge/RhwpDocument.swift": "f75c60bf0f9648a16027a73ec33bbff423a89fc1257692492865435f1cbbb614",
+      "Sources/RhwpCoreBridge/RhwpDocumentProtection.swift": "af71e6c70efcc665761567bea9b272d41ba5c2f14d3535356d1731731638d175",
+      "Sources/RhwpCoreBridge/RhwpNativeFontContext.swift": "f84184cdc5e3579e6f0f0532b084f98053d43e23bf60751e12068808822560c9",
+      "Sources/Shared/FontLibrary/ExtensionFontSupply.swift": "97395c334a36f80599f94e76b7f1ed2ad4b9394b4bcb366ed9770cdca5b88b81",
+      "Sources/Shared/FontLibrary/ExtensionInstalledFontPreparation.swift": "09619bcfc494339704e5f8d31f2f786f016c34aaeebf0d8d6a3c68ccb976810f",
+      "Sources/Shared/FontLibrary/FontConsumerPolicyStore.swift": "6e5ee811ac474a8748daf9bfc8e024b2f905b39bed7e01ced72e5a6a3b566a2f",
+      "Sources/Shared/FontLibrary/FontFileInspector.swift": "be99974fe4ca9fc0134eda7c925a415c8dc1de14a55483dbe0e7dfca5c5802c3",
+      "Sources/Shared/FontLibrary/FontImportSourceSession.swift": "5ee525bb6e4537a529e5f71d03edd80c67d242b7fb292137f5ad0b89384de40f",
+      "Sources/Shared/FontLibrary/FontLibraryChanges.swift": "3ba98daafb5d20cd0ceb44da41ec74e2ff1a1ebd40c0970d2d4b354ebfe1c58a",
+      "Sources/Shared/FontLibrary/FontLibraryFileSystem.swift": "8c41c8b97a8304143ac49b28bbdfcf2f31f0122ec50da82f1845e0dec66431e3",
+      "Sources/Shared/FontLibrary/FontLibraryLocation.swift": "4b51d29285655d63b06ce958fe0df59c15770c58bc3cfc42664aa15ce8e95cc4",
+      "Sources/Shared/FontLibrary/FontLibraryModels.swift": "39fcafc7a0130d6e6d7a165ae02a96d7cd8f52d2947b07715d4c1c2fed78c481",
+      "Sources/Shared/FontLibrary/FontLibraryRecovery.swift": "481bc33c615333cbfacea6855f222af7638eb6a1e42dad7c770c887ea179cc67",
+      "Sources/Shared/FontLibrary/FontLibraryService.swift": "ce28d225d0f899e60d0b0daee944a78bc5bd8355fd54533a27e16a47fd741021",
+      "Sources/Shared/FontLibrary/FontLibrarySnapshot.swift": "689a3e28356031f5cd9ffd07b3893ac4447633028a3d1fdf091b0f014d979c83",
+      "Sources/Shared/FontLibrary/FontLibraryStore.swift": "b7d331b3c3dd1c254b9c4503684cc623d9edabc5bd2b7d98a944a7138fa8dfa6",
+      "Sources/Shared/FontLibrary/HostFontSupplyTypes.swift": "dd4622418f8d44274620b5b71973e63ff16c50dc0b8b8991d25143eb3bd6d5b0",
+      "Sources/Shared/FontLibrary/InstalledFontActiveSignature.swift": "fd47d3c5088695a55a9978d96e6baad528f64259b23fe8fa0172081363e04b88",
+      "Sources/Shared/FontLibrary/InstalledFontCatalogService.swift": "ef5cc95a886d63f307818a4314cda78221422e9877ce3acf96a1905d71ce4a30",
+      "Sources/Shared/FontLibrary/InstalledFontDescriptorCache.swift": "7cb6747ad174ce9b672bdc634e6c180e152209e4ff36f36ab4ac12a2cdc8785b",
+      "Sources/Shared/FontLibrary/InstalledFontModels.swift": "3892b3e7fcc06b71add77441c3f21513b6f2e99280862c0a0162cdb34209ba0c",
+      "Sources/Shared/FontLibrary/InstalledFontServiceProvider.swift": "cb4df48220d2796afb4060e172ce55e9415b7ffb5a813159b83d130ec457e00d",
+      "Sources/Shared/FontLibrary/InstalledFontSupplyCatalog.swift": "71d929e5541335dad21dcedf45bc8e8dd748234ba54c9ab0ba04bfb41d296378",
+      "Sources/Shared/FontLibrary/InstalledFontSystem.swift": "721545261b8734f4f554144bdafaaa3c93758f187c82c79a37f57d2b143e6005",
+      "Sources/Shared/FontLibrary/RhwpNativeFontMatcher.swift": "afefd1123bbb7e5b4bdfd9e25f84189b24315f3111f8d093d36b75b2c18199a7",
+      "Sources/Shared/FontLibrary/RhwpNativeFontMatcherSource.swift": "cea9b46e4bc7e19d7373f71ef557c1281af58cbd9d0133226a67a1ea96e6afbb",
+      "Sources/Shared/FontLibrary/StudioFontSupply.swift": "4a1ca242da66c5c16252799d87e8f126111b4f67a8c537bed98fcde8dd34c9a9",
+      "Sources/Shared/NativeFonts/ExtensionFontRenderer.swift": "81e8f7bd1eb7f9c35dc8cc6b5c1be0af23b4e7234ed6d6e4c870560a53f714e9",
+      "Sources/Shared/NativeFonts/HwpNativeFontPageRenderer.swift": "e1349c82b2b56038a576103318d9338a0158c9e18bee9ba1078881ba26404a9f",
+      "Sources/Shared/HwpPageImageRenderer.swift": "4aeb655783822126f5c4c7765932bcdf019cb8791f46143b17ae7a233342ccf1",
+      "Sources/Shared/HwpNativePageCompositor.swift": "fd683bcb0ed64cf10bf02c3e8b7fb348ceeab25757c8b4e4d70fd893b43e354a",
+      "Sources/Shared/HwpPreviewPDFRenderer.swift": "695b2a5aaa8ad76216e1bc63e37275884077e37d7d15f213f5aa8a29530ad3f7",
+      "Sources/Shared/HwpPreviewPNGRenderer.swift": "f51acc6c9e5d80beece02fb4f7991a47a5fa16689fdad68fd4de0eed89d71b2b",
+      "Sources/Shared/HwpExternalImageResolver.swift": "7fdd30513af432b87c62c7fbf226b990b5dd11489f95c3044ac6bcb46f79dd4d",
+      "Sources/ThumbnailExtension/HwpThumbnailRenderCache.swift": "71934cba2e23de3abcf67db72fa17cb989b12d59693536d6f58eef9fe59b360c",
+      "Tests/ExtensionFontPerformanceProbe/attributes.swift": "0159c8a92b0ea3147dbdb068caef6465070213cfa23c6257228e7fcb3cf0d520",
+      "Tests/ExtensionFontPerformanceProbe/collections.swift": "fd48cc802c37714fb0c742e41c44219bbb513405bea6f0ea356002a7ae566fa6",
+      "Tests/ExtensionFontPerformanceProbe/main.swift": "729764a1f99d41befbe633db846a73da5819ac2d9891785731159ae880f3965f",
+      "Tests/ExtensionFontPerformanceProbe/signature.swift": "075b6edbac09c3850aea01927dfd7599b49a72d9ed1910eb2a8040625046cc9f",
+      "Tests/ExtensionFontPerformanceProbe/fixtures.json": "433a7394456ceb51fb94b442801279e6c9f5e78be87ce27836c05335b84ce12a",
+      "Frameworks/universal/librhwp.a": "521e53707bed97f95923e011076616344b17aaa42893b342923e82b973e4152a",
+      "Frameworks/generated_rhwp.h": "14994c7d1923107b5739b5518e43f98bc002e1b954a068647a377ec4d6e1fbc2"
+    },
+    "binarySHA256": "6670f99671ac6fb286bf4ee1339a3fc00124045035b778bbbc2fe8d7858d716e",
+    "buildFlags": [
+      "ALHANGEUL_FONT_EXTENSION_PROBE"
+    ],
+    "optimization": "speed"
+  },
+  "excluded": [
+    {
+      "run": "collection-equivalence-43-01",
+      "reason": "11 baseline comparisons matched; RegisterFontDescriptors enabled=false callback succeeded but actual matched descriptor remained enabled; expected disabled assertion failed, not a disabled-state proof",
+      "driverSHA256": "e108eaf39129f72cff4b6b6abb79a9a8484806dd7831d5d68c098ded559511d6"
+    }
+  ],
+  "diagnostics": {
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/compile-observable.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/compile-repaired.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/compile-scope.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/compile-sync.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/compile.log": "c108618d5418947173daa3883b41e24087df9c20efff89a94f376a60ec19f4c9",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/main.swift": "406c92e6b161df8606e92c6b7bacec8d7f7e53d3feb90efc4bb68833242f6199",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/runtime-observable.log": "49b535f62227b3bcb880140311fa6623175e9b3d4765af76406c3a28269c66c5",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/runtime-scope.log": "e612efcd937a2f7c99f8be5e94da8e70f9e4e5f2c510b7ef5a5e070535dde9b8",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/runtime-sync.log": "796d10bf690e5ca35d1ec4c3b73f483301e4f12a2aeaf28c0ec2b147267c94bd",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/runtime.log": "9d5ca1cf520c01d448de49d805f2ff9d0ddfe1a7b06c09dd5123e253f41c1688",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/scope-attribute.swift": "0c3bef7f83d8bbbfb05e8a78db73681e79e3d46546dbbc2bff8600007642b084",
+    "build.noindex/task580/stage4/collection-lifecycle-debug-43/sync.swift": "e6cd4293c10de7e555168f3bae931890151bdce47c68736f8e8ea1ca089688e2"
+  },
+  "SDKContract": {
+    "header": "CoreText/CTFontCollection.h",
+    "option": "kCTFontCollectionIncludeDisabledFontsOption=false",
+    "availability": "macOS 10.7+",
+    "fallback": "fresh default collection plus prior enabled filter"
+  },
+  "scopeObservation": "GetScopeForURL returned none even for valid process registration; actual matching descriptor registrationScope=process used as guard"
+}

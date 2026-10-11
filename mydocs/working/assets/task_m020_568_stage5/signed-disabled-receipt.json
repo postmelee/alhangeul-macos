@@ -1,0 +1,45 @@
+[
+  {
+    "command": [
+      "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/FontExtensionFixtureProbe.app/Contents/MacOS/FontExtensionFixtureProbe",
+      "--disable-installed"
+    ],
+    "start": "2026-10-10T01:00:38.185294",
+    "end": "2026-10-10T01:00:38.703243",
+    "output": "fixture 86066D3B-F312-4F45-A5D6-69D88D012CB0 faces 811 current true\n"
+  },
+  {
+    "command": [
+      "qlmanage",
+      "-t",
+      "-x",
+      "-s",
+      "768",
+      "-c",
+      "com.postmelee.alhangeul.hwpx",
+      "-o",
+      "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/lifecycle/disabled",
+      "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/samples/alhangeul-smoke-04-20261010-005456.hwpx"
+    ],
+    "start": "2026-10-10T01:00:38.703275",
+    "end": "2026-10-10T01:00:39.854123",
+    "output": "Testing Quick Look thumbnails with files using server:\n\t/Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/samples/alhangeul-smoke-04-20261010-005456.hwpx\n\t- force using content type UTI: com.postmelee.alhangeul.hwpx\n* /Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/samples/alhangeul-smoke-04-20261010-005456.hwpx produced one thumbnail\nDone producing thumbnails\n"
+  },
+  {
+    "command": [
+      "qlmanage",
+      "-t",
+      "-x",
+      "-s",
+      "768",
+      "-c",
+      "com.postmelee.alhangeul.hwpx",
+      "-o",
+      "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/lifecycle/disabled",
+      "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/lifecycle/disabled/managed-with-installed-disabled.hwpx"
+    ],
+    "start": "2026-10-10T01:00:39.854152",
+    "end": "2026-10-10T01:00:41.060716",
+    "output": "Testing Quick Look thumbnails with files using server:\n\t/Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/lifecycle/disabled/managed-with-installed-disabled.hwpx\n\t- force using content type UTI: com.postmelee.alhangeul.hwpx\n* /Users/melee/Documents/projects/rhwp-mac/build.noindex/task568/stage5/signed-candidate-03/finder-results/20261010-005456/lifecycle/disabled/managed-with-installed-disabled.hwpx produced one thumbnail\nDone producing thumbnails\n"
+  }
+]

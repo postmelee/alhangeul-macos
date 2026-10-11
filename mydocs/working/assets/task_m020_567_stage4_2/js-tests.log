@@ -1,0 +1,35 @@
+✔ 제품 bootstrap은 늦은 API 준비 이후 연결하고 pagehide에서 해제 (2.726458ms)
+(node:75312) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ native 환경설정은 Mac 안내와 native 진입점만 사용하고 browser 환경은 기존 경로 유지 (24.336209ms)
+✔ 활성 host family를 중복 제거하고 비활성 시 기존 browser 목록을 사용 (0.675667ms)
+✔ 변경 직후 이전 메뉴 폐기, 지연 snapshot 완료 시 새 메뉴 갱신, 오래된 세대 무시 (2.054667ms)
+✔ upstream 확장 지점 변경·중복은 빌드를 실패시키며 대상 이외 파일을 변환하지 않음 (0.212417ms)
+✔ API 부재는 unsupported, native 읽기와 등록 없음 (1.528666ms)
+✔ metadata 페이지 조회만으로 129 faces 준비, bytes는 지연 조회 (1.869375ms)
+✔ 필요 face만 chunk 단위로 읽고 정확한 bytes와 index 반환·slot 해제 (2.333333ms)
+✔ 설치 CoreText와 관리 OS/2의 서로 다른 bits·style을 정규화 (0.258542ms)
+✔ 빈 필수 이름·중복 ID·미지원은 제외하고 빈 alias는 제거 (0.223459ms)
+✔ 선택된 관리 글꼴은 동명 설치 글꼴보다 우선, 다른 굵기는 유지 (0.194458ms)
+✔ 관리 충돌·미지원·잘못된 metadata는 동명 설치 fallback을 차단 (0.36275ms)
+✔ bounded queue가 여러 요청을 처리해도 native transfer는 최대 2개 (6.126333ms)
+✔ 일시 busy는 제한 재시도로 복구 (1.472667ms)
+✔ 지속 busy는 세대 자동 복구 1회 후 중단, 외부 변경으로 다시 복구 가능 (2104.223459ms)
+✔ catalog 중간 stale은 handshake부터 재시도 (1.227916ms)
+✔ 동일 이름 bytes 변경 알림과 document token 교체 후 이전 reference 거부 (2.198791ms)
+✔ metadata 요청 취소는 호출자에 즉시 반영하고 공유 준비를 손상하지 않음 (0.431708ms)
+✔ 취소 무시한 늦은 openFace 응답도 close하고 bytes를 게시하지 않음 (1.243416ms)
+✔ generation 변경으로 진행 중 read 및 대기 read 취소·늦은 응답 폐기 (0.940208ms)
+✔ 손상 chunk 또는 metadata와 다른 face는 반환하지 않고 transfer 해제 (0.832166ms)
+✔ dispose는 provider 연결과 변경 구독을 해제하고 후속 요청 거부 (0.122542ms)
+✔ 잘못된 catalog 진행·총량은 무한 paging이나 과다 목록으로 이어지지 않음 (0.559459ms)
+✔ 대기열은 64건 한도, 이미 취소한 요청은 native 읽기 없음 (3.506375ms)
+✔ 목록 준비 중 dispose하면 늦은 연결 성공을 보고하지 않음 (0.14725ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2176.00925

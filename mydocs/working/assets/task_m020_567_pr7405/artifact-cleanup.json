@@ -1,0 +1,45 @@
+{
+  "date": "2026-09-25",
+  "target": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task567/pr7405-validation",
+  "removedWorktreeHead": "bf371e200cfbc343094b552169864ba6c9235a27",
+  "reportedMergedHead": "7978d00b8253ccc5876f95ed8e668a5ab93fbff5",
+  "reportedMergeSHA": "aeb9f489e1d5e297c1e98cf1ca8ff84532270aca",
+  "beforeAllocatedKiB": 1141400,
+  "previousEvidenceChecksumsVerified": 29,
+  "modifiedAfterEvidenceSealing": [],
+  "matchingProcesses": [],
+  "extraPreservedFiles": [
+    "canvas-4.png",
+    "canvas-3.png",
+    "canvas-2.png",
+    "canvas-0.png",
+    "canvas-1.png",
+    "output-injected.png",
+    "current-output.png",
+    "build-command.log",
+    "canvas-10.png",
+    "canvas-11.png",
+    "run-first.log",
+    "canvas-9.png",
+    "canvas-8.png"
+  ],
+  "note": "실제 downstream 검증 SHA와 후속 병합 head는 다름. 이번 정리는 병합 head 재검증이 아님.",
+  "removed": true,
+  "afterAllocatedKiB": 0,
+  "removedAllocatedBytes": 1168793600,
+  "preserved": [
+    "build.noindex/task567/upstream",
+    "build.noindex/task567/fonts/gowun-batang",
+    "mydocs/working/task_m020_567_pr7405_validation.md",
+    "mydocs/working/assets/task_m020_567_pr7405"
+  ],
+  "temporaryDependencyRemaining": false,
+  "storageNote": "삭제한 트리의 du 할당량 기준; APFS snapshot/공유 블록 때문에 실제 가용 용량 증가와 다를 수 있음.",
+  "excludedUntouched": [
+    "/Users/melee/Documents/projects/forks/rhwp/target/pr-review",
+    "운영 앱과 의존성"
+  ],
+  "postcheckNotes": [
+    "공유 target/pr-review 경로가 후검사 시 존재하지 않음. 이 작업의 삭제 범위에 포함하지 않았으며 원인은 확인하지 않음."
+  ]
+}

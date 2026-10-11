@@ -172,11 +172,64 @@ targets:
         CODE_SIGN_STYLE: Automatic
         SKIP_INSTALL: YES
 
+  FontLibraryProcessProbe:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Tests/FontLibraryProcessProbe
+      - path: Sources/Shared
+        includes:
+          - FontLibrary/**
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.FontLibraryProcessProbe
+        SKIP_INSTALL: YES
+        OTHER_SWIFT_FLAGS: "$(inherited) -parse-as-library"
+
+  FontLibraryTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/FontLibraryTests
+        excludes:
+          - Fixtures
+      - path: Tests/FontLibraryTests/Fixtures
+        type: folder
+      - path: Sources/Shared
+        includes:
+          - FontLibrary/**
+      - path: Sources/HostApp
+        includes:
+          - Services/StudioFont*.swift
+          - Services/RhwpStudioOutputFontJob.swift
+          - Services/RhwpStudioOutputFontPolicy.swift
+          - Services/MacFontDiscovery.swift
+          - Views/FontLibrarySettingsModel.swift
+          - Views/InstalledFontSettingsModel.swift
+    dependencies:
+      - target: FontLibraryProcessProbe
+        link: false
+      - sdk: CoreText.framework
+      - sdk: Security.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.postmelee.alhangeul.FontLibraryTests
+        GENERATE_INFOPLIST_FILE: YES
+
   HostAppTests:
     type: bundle.unit-test
     platform: macOS
     sources:
       - path: Tests/HostAppTests
+      - path: Tests/FontLibraryTests/Fixtures
+        type: folder
+      - path: Sources/Shared
+        includes:
+          - FontLibrary/**
+      - path: Sources/HostApp/Services
+        includes:
+          - MacFontDiscovery.swift
+          - RhwpStudioOutputFont*.swift
       - path: Sources/HostApp/Services/AppExecutionAnalyticsState.swift
       - path: Sources/HostApp/Services/AppExecutionAnalyticsRuntime.swift
       - path: Sources/HostApp/Services/AppExecutionEvent.swift
@@ -201,6 +254,7 @@ targets:
       - path: Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift
       - path: Sources/HostApp/Services/RhwpStudioPagePayload.swift
       - path: Sources/HostApp/Services/RhwpStudioPrintLifecycle.swift
+      - path: Sources/HostApp/Services/RhwpStudioPrintController.swift
       - path: Sources/HostApp/Services/RhwpStudioPrintOrientationPolicy.swift
       - path: Sources/HostApp/Services/SpotlightReindexService.swift
       - path: Sources/HostApp/Support/RhwpProvenance.swift
@@ -219,6 +273,7 @@ targets:
       - path: Tests/ExternalImageTests
       - path: Sources/Shared/HwpExternalImageResolver.swift
       - path: Sources/RhwpCoreBridge/RhwpDocument.swift
+      - path: Sources/RhwpCoreBridge/RhwpNativeFontContext.swift
       - path: Sources/RhwpCoreBridge/RhwpDocumentProtection.swift
       - path: Sources/RhwpCoreBridge/RenderTree.swift
     dependencies:

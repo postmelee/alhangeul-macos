@@ -1,0 +1,45 @@
+{
+  "backendFallbackReason" : null,
+  "effectiveBackend" : "canvas2d",
+  "initializationError" : null,
+  "initialized" : true,
+  "page" : {
+    "canvaskit" : null,
+    "index" : 0
+  },
+  "request" : {
+    "backend" : {
+      "backend" : "canvas2d",
+      "source" : "default"
+    },
+    "canvaskitMode" : {
+      "mode" : "default",
+      "source" : "default"
+    },
+    "canvaskitSurface" : {
+      "preference" : "auto",
+      "requested" : "auto"
+    },
+    "renderProfile" : "screen"
+  },
+  "schemaVersion" : 1,
+  "selection" : {
+    "decisionKey" : "blake3:ffc5fb61297e8e8115fdc3b6d7e80e3da4b876cf2ddb90f3960e2143c290c611|revision:1|profile:screen|resources:1|request:canvas2d|mode:default",
+    "documentDigest" : "blake3:ffc5fb61297e8e8115fdc3b6d7e80e3da4b876cf2ddb90f3960e2143c290c611",
+    "documentRevision" : 1,
+    "effectiveBackend" : "canvas2d",
+    "fallbackReason" : null,
+    "initializationError" : null,
+    "preflight" : null,
+    "renderProfile" : "screen",
+    "request" : {
+      "backend" : "canvas2d",
+      "source" : "default"
+    },
+    "requestedBackend" : "canvas2d",
+    "resourceGeneration" : 1,
+    "schemaVersion" : 1,
+    "selectionError" : null,
+    "selectionReason" : "defaultCanvas2d"
+  }
+}

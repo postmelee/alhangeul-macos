@@ -1,0 +1,746 @@
+{
+  "calls" : [
+    {
+      "bytes" : 8433296,
+      "faceIndex" : 0,
+      "hash" : "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "id" : "regular",
+      "revision" : "9FBFB6F7-710F-4EAC-BC05-26D9F4FD97D7"
+    },
+    {
+      "bytes" : 8178712,
+      "faceIndex" : 0,
+      "hash" : "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "id" : "bold",
+      "revision" : "9FBFB6F7-710F-4EAC-BC05-26D9F4FD97D7"
+    },
+    {
+      "bytes" : 8178712,
+      "faceIndex" : 0,
+      "hash" : "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "id" : "regular",
+      "revision" : "6D21E13D-C544-4CE3-9B43-95DEFCDD2EBB"
+    },
+    {
+      "bytes" : 8433296,
+      "faceIndex" : 0,
+      "hash" : "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "id" : "regular",
+      "revision" : "58FAB19E-A4A3-4150-8506-42534C8E9D82"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 0,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "ttc0",
+      "revision" : "494712F4-E283-4CC9-9DB6-803F8E9AA3F2"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 0,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "ttc0",
+      "revision" : "494712F4-E283-4CC9-9DB6-803F8E9AA3F2"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 1,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "ttc1",
+      "revision" : "494712F4-E283-4CC9-9DB6-803F8E9AA3F2"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 1,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "ttc1",
+      "revision" : "494712F4-E283-4CC9-9DB6-803F8E9AA3F2"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 2,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "ttc2",
+      "revision" : "494712F4-E283-4CC9-9DB6-803F8E9AA3F2"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 2,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "ttc2",
+      "revision" : "494712F4-E283-4CC9-9DB6-803F8E9AA3F2"
+    },
+    {
+      "bytes" : 8433296,
+      "faceIndex" : 0,
+      "hash" : "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "id" : "regular",
+      "revision" : "69EF4207-12CD-4DC0-BACE-43012CDDE1BA"
+    },
+    {
+      "bytes" : 8178712,
+      "faceIndex" : 0,
+      "hash" : "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "id" : "bold",
+      "revision" : "69EF4207-12CD-4DC0-BACE-43012CDDE1BA"
+    },
+    {
+      "bytes" : 8178712,
+      "faceIndex" : 0,
+      "hash" : "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "id" : "regular",
+      "revision" : "224CCFFF-120A-4A1C-89CC-CCE4AF5BC68B"
+    },
+    {
+      "bytes" : 8178712,
+      "faceIndex" : 0,
+      "hash" : "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "id" : "bold",
+      "revision" : "224CCFFF-120A-4A1C-89CC-CCE4AF5BC68B"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 1,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "selected",
+      "revision" : "89C26337-1BF1-412D-A682-D0F966DA1ABD"
+    },
+    {
+      "bytes" : 996,
+      "faceIndex" : 0,
+      "hash" : "b6f6f576995a976e35eb4323a39633352060ad6b884fd791152a8fce1b1c1e81",
+      "id" : "selected",
+      "revision" : "B42CBD11-6976-4EEE-A511-079EE7229590"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 2,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "selected",
+      "revision" : "9319C4C8-0E67-4BC4-A289-A5F7E5A59F5B"
+    },
+    {
+      "bytes" : 1008,
+      "faceIndex" : 0,
+      "hash" : "e3b86278af359b9e02128fea72e483e1627506c59739b15ee75672ec6eb6be56",
+      "id" : "selected",
+      "revision" : "E97906E0-9F2A-4C9F-ADF0-676EDDCE3F19"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 1,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "selected",
+      "revision" : "DD30329E-CFD5-4A33-AB49-9F4CFB01E47C"
+    },
+    {
+      "bytes" : 996,
+      "faceIndex" : 0,
+      "hash" : "b6f6f576995a976e35eb4323a39633352060ad6b884fd791152a8fce1b1c1e81",
+      "id" : "selected",
+      "revision" : "11D640FB-CBB2-4581-ABE6-1473E1D6B011"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 2,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "selected",
+      "revision" : "73734420-4503-4BDE-8ABA-9B7A42EAFCA7"
+    },
+    {
+      "bytes" : 1008,
+      "faceIndex" : 0,
+      "hash" : "e3b86278af359b9e02128fea72e483e1627506c59739b15ee75672ec6eb6be56",
+      "id" : "selected",
+      "revision" : "3253B224-287B-4EB1-9D9D-C3B945B70C33"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 1,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "selected",
+      "revision" : "2F101655-C23A-4D88-87E0-C9F1FC1C195A"
+    },
+    {
+      "bytes" : 996,
+      "faceIndex" : 0,
+      "hash" : "b6f6f576995a976e35eb4323a39633352060ad6b884fd791152a8fce1b1c1e81",
+      "id" : "selected",
+      "revision" : "1E68109F-EB17-48F1-9763-4788011C7774"
+    },
+    {
+      "bytes" : 2680,
+      "faceIndex" : 2,
+      "hash" : "adc2b93966ad2cee31a5edece6d84efd4763a613b3a8bda76720d97f8a26dabf",
+      "id" : "selected",
+      "revision" : "F876C8B3-9C2A-48A1-84D6-E78C004FF37C"
+    },
+    {
+      "bytes" : 1008,
+      "faceIndex" : 0,
+      "hash" : "e3b86278af359b9e02128fea72e483e1627506c59739b15ee75672ec6eb6be56",
+      "id" : "selected",
+      "revision" : "79779074-9512-4410-BE55-FC240C3FBF46"
+    }
+  ],
+  "finalFontCount" : 0,
+  "records" : [
+    {
+      "active" : true,
+      "count" : 2,
+      "generation" : 1,
+      "lastError" : null,
+      "name" : "metadata only",
+      "pass" : true
+    },
+    {
+      "diag" : {
+        "failed" : 0,
+        "loaded" : 1,
+        "pending" : 0
+      },
+      "name" : "native static face applied",
+      "pass" : true
+    },
+    {
+      "calls" : [
+        {
+          "bytes" : 8433296,
+          "faceIndex" : 0,
+          "hash" : "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+          "id" : "regular",
+          "revision" : "9FBFB6F7-710F-4EAC-BC05-26D9F4FD97D7"
+        },
+        {
+          "bytes" : 8178712,
+          "faceIndex" : 0,
+          "hash" : "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+          "id" : "bold",
+          "revision" : "9FBFB6F7-710F-4EAC-BC05-26D9F4FD97D7"
+        }
+      ],
+      "name" : "bold chosen",
+      "pass" : true
+    },
+    {
+      "fontCount" : 1,
+      "name" : "same name replacement",
+      "pass" : true
+    },
+    {
+      "failed" : 1,
+      "loaded" : 0,
+      "name" : "read failure cleared old FontFace",
+      "pass" : true,
+      "pending" : 0
+    },
+    {
+      "failed" : 0,
+      "loaded" : 1,
+      "name" : "error recovery new revision",
+      "pass" : true,
+      "pending" : 0
+    },
+    {
+      "name" : "old reference rejected",
+      "pass" : true
+    },
+    {
+      "expected" : 43.200000000000003,
+      "index" : 0,
+      "measured" : 43.200000762939453,
+      "name" : "TTC Regular paint\/measurement",
+      "pass" : true,
+      "referenceWidth" : 43.200000762939453,
+      "width" : 43.200000762939453
+    },
+    {
+      "expected" : 51.840000000000003,
+      "index" : 1,
+      "measured" : 51.840000152587891,
+      "name" : "TTC Italic paint\/measurement",
+      "pass" : false,
+      "referenceWidth" : 51.840000152587891,
+      "width" : 51.840000152587891
+    },
+    {
+      "expected" : 57.600000000000001,
+      "index" : 2,
+      "measured" : 51.840000152587891,
+      "name" : "TTC Oblique paint\/measurement",
+      "pass" : false,
+      "referenceWidth" : 57.599998474121094,
+      "width" : 51.840000152587891
+    },
+    {
+      "name" : "detach releases FontFace",
+      "pass" : true
+    },
+    {
+      "name" : "detach rejects late native response",
+      "pass" : true
+    },
+    {
+      "diag" : {
+        "failed" : 0,
+        "loaded" : 2,
+        "pending" : 0
+      },
+      "name" : "actual document host faces",
+      "paints" : [
+        {
+          "font" : "32px __rhwp_host_face_1_1, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "한"
+        },
+        {
+          "font" : "32px __rhwp_host_face_1_1, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "글"
+        },
+        {
+          "font" : "bold 32px __rhwp_host_face_1_2, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "가"
+        },
+        {
+          "font" : "bold 32px __rhwp_host_face_1_2, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "나"
+        },
+        {
+          "font" : "bold 32px __rhwp_host_face_1_2, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "다"
+        },
+        {
+          "font" : "32px __rhwp_host_face_1_1, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "A"
+        },
+        {
+          "font" : "32px __rhwp_host_face_1_1, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "B"
+        },
+        {
+          "font" : "32px __rhwp_host_face_1_1, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "C"
+        },
+        {
+          "font" : "32px __rhwp_host_face_1_1, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "0"
+        },
+        {
+          "font" : "32px __rhwp_host_face_1_1, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "1"
+        },
+        {
+          "font" : "32px __rhwp_host_face_1_1, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "2"
+        },
+        {
+          "font" : "32px __rhwp_host_face_1_1, \"Host Face\", \"Malgun Gothic\", \"맑은 고딕\", \"Apple SD Gothic Neo\", \"Noto Sans KR ExtraLight\", \"Noto Sans KR\", Pretendard, \"HCR Batang\", 함초롬바탕, \"HCR Batang Ext\", \"함초롬바탕 확장\", \"HCR Batang ExtB\", \"함초롬바탕 확장B\", \"Source Han Serif K Old Hangul\", sans-serif",
+          "t" : "3"
+        }
+      ],
+      "pass" : true
+    },
+    {
+      "name" : "portable SVG retains names",
+      "pass" : true
+    },
+    {
+      "name" : "font change preserves document",
+      "pass" : true
+    },
+    {
+      "name" : "document switch releases FontFaces",
+      "pass" : true
+    },
+    {
+      "diagnostics" : {
+        "bundledTypefaceCount" : 0,
+        "bundledTypefaceLoadFailureCount" : 0,
+        "fontSubstitutionLimit" : 4096,
+        "fontSubstitutions" : [
+
+        ],
+        "glyphRunFontBlobBytes" : 0,
+        "glyphRunFontBlobCount" : 0,
+        "glyphRunFontCount" : 0,
+        "glyphRunTypefaceCount" : 0,
+        "hiddenCanvas2dOverlayUsed" : false,
+        "imageCacheEntries" : 0,
+        "imageCacheEvictions" : 0,
+        "imageCacheHits" : 0,
+        "imageCacheLimit" : 128,
+        "imageCacheMisses" : 0,
+        "imageCachePixelLimit" : 67108864,
+        "imageCachePixels" : 0,
+        "imageFailureCacheHits" : 0,
+        "imageFailures" : [
+
+        ],
+        "lastExpectedUnsupportedOps" : [
+
+        ],
+        "lastRenderCompleted" : true,
+        "lastRenderDurationMs" : 182,
+        "lastRenderError" : null,
+        "lastUnexpectedUnsupportedOps" : [
+
+        ],
+        "lastUnsupportedOps" : [
+
+        ],
+        "localTypefaceCount" : 1,
+        "localTypefaceLoadFailureCount" : 0,
+        "localTypefacePendingCount" : 0,
+        "mode" : "default",
+        "passesRuntimeReadinessGate" : true,
+        "readinessBlockers" : [
+
+        ],
+        "renderCount" : 1,
+        "replayFeatureCounts" : {
+          "dashedStrokes" : 0,
+          "glyphRuns" : 0,
+          "verticalPresentationPunctuation" : 0,
+          "verticalTextRuns" : 0
+        },
+        "surfaceBackend" : "default",
+        "surfaceFallbackReason" : null,
+        "surfacePreference" : "webgl",
+        "unregisteredFontFallbacks" : 0
+      },
+      "name" : "CanvasKit webgl Italic TTC parity",
+      "pass" : true,
+      "pixelsEqual" : true,
+      "requested" : "webgl"
+    },
+    {
+      "diagnostics" : {
+        "bundledTypefaceCount" : 0,
+        "bundledTypefaceLoadFailureCount" : 0,
+        "fontSubstitutionLimit" : 4096,
+        "fontSubstitutions" : [
+
+        ],
+        "glyphRunFontBlobBytes" : 0,
+        "glyphRunFontBlobCount" : 0,
+        "glyphRunFontCount" : 0,
+        "glyphRunTypefaceCount" : 0,
+        "hiddenCanvas2dOverlayUsed" : false,
+        "imageCacheEntries" : 0,
+        "imageCacheEvictions" : 0,
+        "imageCacheHits" : 0,
+        "imageCacheLimit" : 128,
+        "imageCacheMisses" : 0,
+        "imageCachePixelLimit" : 67108864,
+        "imageCachePixels" : 0,
+        "imageFailureCacheHits" : 0,
+        "imageFailures" : [
+
+        ],
+        "lastExpectedUnsupportedOps" : [
+
+        ],
+        "lastRenderCompleted" : true,
+        "lastRenderDurationMs" : 9,
+        "lastRenderError" : null,
+        "lastUnexpectedUnsupportedOps" : [
+
+        ],
+        "lastUnsupportedOps" : [
+
+        ],
+        "localTypefaceCount" : 1,
+        "localTypefaceLoadFailureCount" : 0,
+        "localTypefacePendingCount" : 0,
+        "mode" : "default",
+        "passesRuntimeReadinessGate" : true,
+        "readinessBlockers" : [
+
+        ],
+        "renderCount" : 1,
+        "replayFeatureCounts" : {
+          "dashedStrokes" : 0,
+          "glyphRuns" : 0,
+          "verticalPresentationPunctuation" : 0,
+          "verticalTextRuns" : 0
+        },
+        "surfaceBackend" : "default",
+        "surfaceFallbackReason" : null,
+        "surfacePreference" : "webgl",
+        "unregisteredFontFallbacks" : 0
+      },
+      "name" : "CanvasKit webgl Oblique TTC parity",
+      "pass" : true,
+      "pixelsEqual" : true,
+      "requested" : "webgl"
+    },
+    {
+      "name" : "CanvasKit webgl dispose",
+      "pass" : true
+    },
+    {
+      "diagnostics" : {
+        "bundledTypefaceCount" : 0,
+        "bundledTypefaceLoadFailureCount" : 0,
+        "fontSubstitutionLimit" : 4096,
+        "fontSubstitutions" : [
+
+        ],
+        "glyphRunFontBlobBytes" : 0,
+        "glyphRunFontBlobCount" : 0,
+        "glyphRunFontCount" : 0,
+        "glyphRunTypefaceCount" : 0,
+        "hiddenCanvas2dOverlayUsed" : false,
+        "imageCacheEntries" : 0,
+        "imageCacheEvictions" : 0,
+        "imageCacheHits" : 0,
+        "imageCacheLimit" : 128,
+        "imageCacheMisses" : 0,
+        "imageCachePixelLimit" : 67108864,
+        "imageCachePixels" : 0,
+        "imageFailureCacheHits" : 0,
+        "imageFailures" : [
+
+        ],
+        "lastExpectedUnsupportedOps" : [
+
+        ],
+        "lastRenderCompleted" : true,
+        "lastRenderDurationMs" : 28,
+        "lastRenderError" : null,
+        "lastUnexpectedUnsupportedOps" : [
+
+        ],
+        "lastUnsupportedOps" : [
+
+        ],
+        "localTypefaceCount" : 1,
+        "localTypefaceLoadFailureCount" : 0,
+        "localTypefacePendingCount" : 0,
+        "mode" : "default",
+        "passesRuntimeReadinessGate" : true,
+        "readinessBlockers" : [
+
+        ],
+        "renderCount" : 1,
+        "replayFeatureCounts" : {
+          "dashedStrokes" : 0,
+          "glyphRuns" : 0,
+          "verticalPresentationPunctuation" : 0,
+          "verticalTextRuns" : 0
+        },
+        "surfaceBackend" : "default",
+        "surfaceFallbackReason" : "webgpuSurfaceUnsupported",
+        "surfacePreference" : "webgpu",
+        "unregisteredFontFallbacks" : 0
+      },
+      "name" : "CanvasKit webgpu Italic TTC parity",
+      "pass" : true,
+      "pixelsEqual" : true,
+      "requested" : "webgpu"
+    },
+    {
+      "diagnostics" : {
+        "bundledTypefaceCount" : 0,
+        "bundledTypefaceLoadFailureCount" : 0,
+        "fontSubstitutionLimit" : 4096,
+        "fontSubstitutions" : [
+
+        ],
+        "glyphRunFontBlobBytes" : 0,
+        "glyphRunFontBlobCount" : 0,
+        "glyphRunFontCount" : 0,
+        "glyphRunTypefaceCount" : 0,
+        "hiddenCanvas2dOverlayUsed" : false,
+        "imageCacheEntries" : 0,
+        "imageCacheEvictions" : 0,
+        "imageCacheHits" : 0,
+        "imageCacheLimit" : 128,
+        "imageCacheMisses" : 0,
+        "imageCachePixelLimit" : 67108864,
+        "imageCachePixels" : 0,
+        "imageFailureCacheHits" : 0,
+        "imageFailures" : [
+
+        ],
+        "lastExpectedUnsupportedOps" : [
+
+        ],
+        "lastRenderCompleted" : true,
+        "lastRenderDurationMs" : 10.000000000000455,
+        "lastRenderError" : null,
+        "lastUnexpectedUnsupportedOps" : [
+
+        ],
+        "lastUnsupportedOps" : [
+
+        ],
+        "localTypefaceCount" : 1,
+        "localTypefaceLoadFailureCount" : 0,
+        "localTypefacePendingCount" : 0,
+        "mode" : "default",
+        "passesRuntimeReadinessGate" : true,
+        "readinessBlockers" : [
+
+        ],
+        "renderCount" : 1,
+        "replayFeatureCounts" : {
+          "dashedStrokes" : 0,
+          "glyphRuns" : 0,
+          "verticalPresentationPunctuation" : 0,
+          "verticalTextRuns" : 0
+        },
+        "surfaceBackend" : "default",
+        "surfaceFallbackReason" : "webgpuSurfaceUnsupported",
+        "surfacePreference" : "webgpu",
+        "unregisteredFontFallbacks" : 0
+      },
+      "name" : "CanvasKit webgpu Oblique TTC parity",
+      "pass" : true,
+      "pixelsEqual" : true,
+      "requested" : "webgpu"
+    },
+    {
+      "name" : "CanvasKit webgpu dispose",
+      "pass" : true
+    },
+    {
+      "diagnostics" : {
+        "bundledTypefaceCount" : 0,
+        "bundledTypefaceLoadFailureCount" : 0,
+        "fontSubstitutionLimit" : 4096,
+        "fontSubstitutions" : [
+
+        ],
+        "glyphRunFontBlobBytes" : 0,
+        "glyphRunFontBlobCount" : 0,
+        "glyphRunFontCount" : 0,
+        "glyphRunTypefaceCount" : 0,
+        "hiddenCanvas2dOverlayUsed" : false,
+        "imageCacheEntries" : 0,
+        "imageCacheEvictions" : 0,
+        "imageCacheHits" : 0,
+        "imageCacheLimit" : 128,
+        "imageCacheMisses" : 0,
+        "imageCachePixelLimit" : 67108864,
+        "imageCachePixels" : 0,
+        "imageFailureCacheHits" : 0,
+        "imageFailures" : [
+
+        ],
+        "lastExpectedUnsupportedOps" : [
+
+        ],
+        "lastRenderCompleted" : true,
+        "lastRenderDurationMs" : 5,
+        "lastRenderError" : null,
+        "lastUnexpectedUnsupportedOps" : [
+
+        ],
+        "lastUnsupportedOps" : [
+
+        ],
+        "localTypefaceCount" : 1,
+        "localTypefaceLoadFailureCount" : 0,
+        "localTypefacePendingCount" : 0,
+        "mode" : "default",
+        "passesRuntimeReadinessGate" : true,
+        "readinessBlockers" : [
+
+        ],
+        "renderCount" : 1,
+        "replayFeatureCounts" : {
+          "dashedStrokes" : 0,
+          "glyphRuns" : 0,
+          "verticalPresentationPunctuation" : 0,
+          "verticalTextRuns" : 0
+        },
+        "surfaceBackend" : "software",
+        "surfaceFallbackReason" : null,
+        "surfacePreference" : "software",
+        "unregisteredFontFallbacks" : 0
+      },
+      "name" : "CanvasKit software Italic TTC parity",
+      "pass" : true,
+      "pixelsEqual" : true,
+      "requested" : "software"
+    },
+    {
+      "diagnostics" : {
+        "bundledTypefaceCount" : 0,
+        "bundledTypefaceLoadFailureCount" : 0,
+        "fontSubstitutionLimit" : 4096,
+        "fontSubstitutions" : [
+
+        ],
+        "glyphRunFontBlobBytes" : 0,
+        "glyphRunFontBlobCount" : 0,
+        "glyphRunFontCount" : 0,
+        "glyphRunTypefaceCount" : 0,
+        "hiddenCanvas2dOverlayUsed" : false,
+        "imageCacheEntries" : 0,
+        "imageCacheEvictions" : 0,
+        "imageCacheHits" : 0,
+        "imageCacheLimit" : 128,
+        "imageCacheMisses" : 0,
+        "imageCachePixelLimit" : 67108864,
+        "imageCachePixels" : 0,
+        "imageFailureCacheHits" : 0,
+        "imageFailures" : [
+
+        ],
+        "lastExpectedUnsupportedOps" : [
+
+        ],
+        "lastRenderCompleted" : true,
+        "lastRenderDurationMs" : 1,
+        "lastRenderError" : null,
+        "lastUnexpectedUnsupportedOps" : [
+
+        ],
+        "lastUnsupportedOps" : [
+
+        ],
+        "localTypefaceCount" : 1,
+        "localTypefaceLoadFailureCount" : 0,
+        "localTypefacePendingCount" : 0,
+        "mode" : "default",
+        "passesRuntimeReadinessGate" : true,
+        "readinessBlockers" : [
+
+        ],
+        "renderCount" : 1,
+        "replayFeatureCounts" : {
+          "dashedStrokes" : 0,
+          "glyphRuns" : 0,
+          "verticalPresentationPunctuation" : 0,
+          "verticalTextRuns" : 0
+        },
+        "surfaceBackend" : "software",
+        "surfaceFallbackReason" : null,
+        "surfacePreference" : "software",
+        "unregisteredFontFallbacks" : 0
+      },
+      "name" : "CanvasKit software Oblique TTC parity",
+      "pass" : true,
+      "pixelsEqual" : true,
+      "requested" : "software"
+    },
+    {
+      "name" : "CanvasKit software dispose",
+      "pass" : true
+    },
+    {
+      "name" : "final cleanup",
+      "pass" : true
+    },
+    {
+      "free" : 2,
+      "name" : "native slots reusable",
+      "pass" : true,
+      "reads" : 28,
+      "releases" : 21
+    }
+  ],
+  "userAgent" : "Mozilla\/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit\/605.1.15 (KHTML, like Gecko)",
+  "webgpu" : true
+}

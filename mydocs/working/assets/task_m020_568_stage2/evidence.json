@@ -1,0 +1,305 @@
+{
+  "status": "passed",
+  "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "swift": "swift-driver version: 1.148.6 Apple Swift version 6.3.3 (swiftlang-6.3.3.1.3 clang-2100.1.1.101)\nTarget: arm64-apple-macosx26.0",
+  "os": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "productSources": {
+    "Tests/StudioOutputFontProbe/main.swift": "dd222eefe8ef411075b4187ac4824618dbaf82745a30aefc0f8b627debf7a89c",
+    "Tests/StudioOutputFontProbe/job.swift": "d44d76cdbde6e94e31dba16338c31617cc7382bcec834336a83468df9bfe394b",
+    "Sources/HostApp/Services/StudioFontSupply.swift": "3ad7fbe62b33d2dd2ac644e2c3a0a31746f72f2e8c3ea2ea262deb435a893309",
+    "Sources/HostApp/Services/FontLibraryService.swift": "388414fd950c5dd2bf9271d6975219dc4cd8308453e4b8e3efd03691481616db",
+    "Sources/HostApp/Services/FontLibraryChanges.swift": "3ba98daafb5d20cd0ceb44da41ec74e2ff1a1ebd40c0970d2d4b354ebfe1c58a",
+    "Sources/HostApp/Services/MacFontDiscovery.swift": "e9f7bcaf1a6dc73cfba46111094504bb3d79dc41ae62d99216b664a75406ab14",
+    "Sources/HostApp/Services/FontImportSourceSession.swift": "5ee525bb6e4537a529e5f71d03edd80c67d242b7fb292137f5ad0b89384de40f",
+    "Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift": "891c6ebf15a40a87345133c30b184fe7603eec3b56141617bfee2d90005cd0ed",
+    "Sources/HostApp/Services/RhwpStudioPDFFontProvider.swift": "8a42610b6199dffdc0d236245a92b17e4696189011a4c5f58a3a3826ca3a7477",
+    "Sources/HostApp/Services/RhwpStudioPagePayload.swift": "4b7db97e88234af0eece1cdaa2dcaa56e0d31f649ea54af0e80e144c8b22f657",
+    "Tests/HostAppTests/CGPDFFontResourceInspector.swift": "470a1f6b59fcb93c322f8a798c24e282ddc776bf83b8d7064f4d4c30c61b5f5e",
+    "Sources/HostApp/Services/InstalledFontCatalogService.swift": "a53475cf4c40ee990379047d305237d608feef06b58c8830141a52310af5184b",
+    "Sources/HostApp/Services/InstalledFontModels.swift": "e2752ffb4ff44060e7471350006c6181bb6b5183d27dc6f8c8d45654fbfcdfc7",
+    "Sources/HostApp/Services/InstalledFontServiceProvider.swift": "cb4df48220d2796afb4060e172ce55e9415b7ffb5a813159b83d130ec457e00d",
+    "Sources/HostApp/Services/InstalledFontSupplyCatalog.swift": "71d929e5541335dad21dcedf45bc8e8dd748234ba54c9ab0ba04bfb41d296378",
+    "Sources/HostApp/Services/InstalledFontSystem.swift": "f97136ac87f360faa1a058ed89e1f6b247f23050aa500b1de237e740c60bb9ac",
+    "Sources/HostApp/Services/RhwpStudioOutputFontBridgeScript.swift": "b7fb107f47bf5d9d2f56194d4789feb46ece5a772eaf8501bc75eff0ed034048",
+    "Sources/HostApp/Services/RhwpStudioOutputFontJob.swift": "f1fe754865f8c07d63db3f66fd140922d657c41ee48be6029a0fa3cfd00a54b2",
+    "Sources/HostApp/Services/RhwpStudioOutputFontPolicy.swift": "135059b671c4a9c993141fd6ed855ad94a61c11ee4c13ee38b1b294fb11befba",
+    "Sources/HostApp/Services/RhwpStudioOutputFontPreparation.swift": "9cb319e19362528a4807cad1f77a34736bfc35b81cb47fa7ec93843ac20a9c89",
+    "Sources/Shared/FontLibrary/FontFileInspector.swift": "be99974fe4ca9fc0134eda7c925a415c8dc1de14a55483dbe0e7dfca5c5802c3",
+    "Sources/Shared/FontLibrary/FontLibraryFileSystem.swift": "cce5c9a4ac19a327ebc14e257870666c35ae08c2c4d430197e34887ae9984d92",
+    "Sources/Shared/FontLibrary/FontLibraryLocation.swift": "d7fdae5ffca167c4139aa4089c818f264da3fb69e57d434cf7b165bef0a03bdd",
+    "Sources/Shared/FontLibrary/FontLibraryModels.swift": "3abf95c63b358d952541ae12ca7e3c67145df76965371f9b5e6f9624101239bd",
+    "Sources/Shared/FontLibrary/FontLibraryRecovery.swift": "481bc33c615333cbfacea6855f222af7638eb6a1e42dad7c770c887ea179cc67",
+    "Sources/Shared/FontLibrary/FontLibrarySnapshot.swift": "689a3e28356031f5cd9ffd07b3893ac4447633028a3d1fdf091b0f014d979c83",
+    "Sources/Shared/FontLibrary/FontLibraryStore.swift": "ef9f0b523ff815271e07c181f081853dd533a31c9a67fe941c37c8c8bba2fb5e"
+  },
+  "officialSources": {
+    "rhwp-studio/src/core/local-fonts.ts": "78228d2db58ea6467271bfe3bd5018ae7fb16b17480cc23f453cd0dc186fe1c8",
+    "rhwp-studio/src/core/host-font-provider.ts": "dd1928c6cf2239ab7591ae6842a6ba279a485ff3bc0663f40462adea722a0423",
+    "rhwp-studio/src/core/host-font-requests.ts": "e0cb0e834250501a684770014180a5fadfbdaa5b775339a81f2621260efb2355",
+    "rhwp-studio/src/main.ts": "277a3fa5a172035624719a19db49ca417c8684aadaa234d156655263eac383b2"
+  },
+  "fontProvenance": {
+    "repository": "https://github.com/google/fonts",
+    "commit": "c1eda9233c33ad7775b27efd794f931095cf6133",
+    "files": [
+      {
+        "file": "OFL.txt",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/OFL.txt",
+        "bytes": 4397,
+        "sha256": "49a57cc769fa9affd6eefb9070a61e3d3f6b757c97cafb15848bc6d1c81acc78"
+      },
+      {
+        "file": "METADATA.pb",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/METADATA.pb",
+        "bytes": 1307,
+        "sha256": "5ab6c5630b85b7d20e8cec7a3be246f9cd5a8f247dea4993f6fb9cf1cc24478e"
+      },
+      {
+        "file": "GowunBatang-Regular.ttf",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/GowunBatang-Regular.ttf",
+        "bytes": 8433296,
+        "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849"
+      },
+      {
+        "file": "GowunBatang-Bold.ttf",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/GowunBatang-Bold.ttf",
+        "bytes": 8178712,
+        "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94"
+      }
+    ]
+  },
+  "systemPresent": {
+    "GowunBatang-Regular": false,
+    "GowunBatang-Bold": false
+  },
+  "nanumPresent": [
+    "NanumSquareR",
+    "NanumSquareB"
+  ],
+  "modes": {
+    "baseline": {
+      "status": "rendered",
+      "sourceReads": 0,
+      "residentBytes": 0,
+      "pdfSHA256": "cc1fe8882e4e340916d5098af0d6c25dea032b154c4cee0b9c2f745514e28d83",
+      "pages": 1,
+      "matches": 5,
+      "textFidelity": {
+        "text": true,
+        "selectionText": true,
+        "pdftotext": true,
+        "notoControlExact": true
+      }
+    },
+    "job": {
+      "status": "rendered",
+      "sourceReads": 2,
+      "residentBytes": 16612008,
+      "pdfSHA256": "af78dc17377c2a040b15b74dd631dc2e166ff731970ed1cf52de72e1ed6ba9ed",
+      "pages": 1,
+      "matches": 5,
+      "textFidelity": {
+        "text": true,
+        "selectionText": true,
+        "pdftotext": true,
+        "notoControlExact": true
+      }
+    }
+  },
+  "actualPrint": false,
+  "sandbox": false,
+  "adHocSigned": true,
+  "OSFontRegistration": false,
+  "runtime": {
+    "baseline": {
+      "pdfSHA256": "cc1fe8882e4e340916d5098af0d6c25dea032b154c4cee0b9c2f745514e28d83",
+      "residentBytes": 0,
+      "sourceReads": 0,
+      "status": "rendered",
+      "textFidelity": {
+        "text": true,
+        "selectionText": true,
+        "pdftotext": true,
+        "notoControlExact": true
+      }
+    },
+    "job": {
+      "editorBinding": "fixture resolver with actual adapted module results",
+      "pdfSHA256": "af78dc17377c2a040b15b74dd631dc2e166ff731970ed1cf52de72e1ed6ba9ed",
+      "productionPreparation": true,
+      "releases": 1,
+      "residentAfterClose": 0,
+      "residentBytes": 16612008,
+      "sourceReads": 2,
+      "status": "rendered",
+      "textFidelity": {
+        "text": true,
+        "selectionText": true,
+        "pdftotext": true,
+        "notoControlExact": true
+      }
+    }
+  },
+  "programs": {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAB+AppleSDGothicNeo-Bold",
+        "subtype": "/Type0",
+        "descendantSubtype": "/CIDFontType0",
+        "encoding": "/Identity-H",
+        "programs": {
+          "/FontFile3": {
+            "bytes": 1420,
+            "sha256": "d5edcdd4db2a27d3b3b731454c1303d7a996e323c30bc42fc1c704ed7259ff38"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAC+AppleSDGothicNeo-Regular",
+        "subtype": "/Type0",
+        "descendantSubtype": "/CIDFontType0",
+        "encoding": "/Identity-H",
+        "programs": {
+          "/FontFile3": {
+            "bytes": 2341,
+            "sha256": "adcfccf0b26c4b1935081bf979128084363a7d886771fd8acbf40cad5e9504d7"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAE+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 8320,
+            "sha256": "2a2754eb7a8fa928232ad0dc1c08830f6105cd12ee96aab3ce6809866feb0004"
+          }
+        },
+        "toUnicodeBytes": 583,
+        "toUnicodeSHA256": "2ec6763d10b4d873665b99700212879c6079c6b12aab72dc10753f0793949a0d"
+      },
+      {
+        "baseFont": "/AAAAAF+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "/MacRomanEncoding",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 3880,
+            "sha256": "1cc83dc1cd510bc3d70793ebf46de8620f40909682da450b9ce57ec97438b9f3"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAH+GowunBatang-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 5924,
+            "sha256": "a37cf7227351b5528ce00c625e076169fd9f188a032d0402111bbbe0eebc4d28"
+          }
+        },
+        "toUnicodeBytes": 508,
+        "toUnicodeSHA256": "f07a856bc1aaa34ecb2576f93565584c52c2ec1b420004463f062ca60b189c5b"
+      },
+      {
+        "baseFont": "/AAAAAI+GowunBatang-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "/MacRomanEncoding",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 5176,
+            "sha256": "a975a1526e59116d580fa1f2f8a7cd3c1a315685dd7951dcb82decd3f9353ff5"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAK+NotoSerifKRExtraLight-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 5804,
+            "sha256": "2cebe0eb3cbca8e7e5fc9f3bbcb0ac78c9b9c423a227c2747284ca4aefe8778f"
+          }
+        },
+        "toUnicodeBytes": 553,
+        "toUnicodeSHA256": "b787a40b4a7feda4b9922a215f9cb88d5ce8fdbe6139754043336a111c84faae"
+      },
+      {
+        "baseFont": "/AAAAAM+AppleMyungjo",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 5524,
+            "sha256": "d8b8aa5123e342979129ab63dfdfde5b7919220dee9377eb4b14dba4942103b1"
+          }
+        },
+        "toUnicodeBytes": 462,
+        "toUnicodeSHA256": "0fae5e360122edafd9364493c0f200b4fe89c5e195906fe87092fc52181326ff"
+      },
+      {
+        "baseFont": "/AAAAAO+NotoSansKRThin-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1656,
+            "sha256": "7ce67a88a241c77d45b74b0d95e6a080311597cbf756fa8c6027d5cb97ac24d5"
+          }
+        },
+        "toUnicodeBytes": 447,
+        "toUnicodeSHA256": "82d494fac25bf1f5210a2e97a536ffb66146bf730bacecfd1fb02f919ed9aee8"
+      },
+      {
+        "baseFont": "/AAAAAQ+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "480929d98bd09f14abdf56bae3d4f9541c829775126dfbb253f22e8e08685fd9"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "e532031a17a24738f4c7a14e960f6b9f0676e21c7e880a8a1eb5778cbd45bb97"
+      }
+    ]
+  },
+  "checks": {
+    "fontLibraryTests": 120,
+    "studioOutputTests": 72,
+    "javascriptTests": 29,
+    "studioLifecycleChecks": 43,
+    "webkitIPC": "passed",
+    "hostBuild": "passed",
+    "assetsVerification": "passed"
+  },
+  "scope": "Stage 2 공통 제품 job·scheme·준비와 fixture snapshot/resolver. 실제 editor·PDF 저장/인쇄 진입, sandbox·설치 참조·Finder·물리 인쇄 미수행.",
+  "knownReaderLimitation": "기본 시스템 영문 fallback을 PDFKit은 falback으로 추출; Poppler는 fallback. Noto와 custom 본문 exact 검사는 통과, 전체 문자열 동일성 검증은 아님.",
+  "probeSources": {
+    "scripts/probe-studio-output-fonts.py": "b13b0106a7727b3a7b942770bfa9eb050bd564dee6650f86a62ae8883af69642",
+    "Tests/StudioOutputFontProbe/matcher.mjs": "c81d6736d0f416a4370a0f8f836662501bc92403a7e9acc34804346a7bfe998a",
+    "Tests/StudioOutputFontProbe/inspect_pdf.py": "765bcbde7ab7a46153d62e78c062b6a99b8bf26af4820cfc84d0bcf2a933435e"
+  }
+}

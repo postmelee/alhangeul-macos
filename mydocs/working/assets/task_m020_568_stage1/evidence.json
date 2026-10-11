@@ -1,0 +1,477 @@
+{
+  "status": "passed",
+  "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "swift": "swift-driver version: 1.148.6 Apple Swift version 6.3.3 (swiftlang-6.3.3.1.3 clang-2100.1.1.101)\nTarget: arm64-apple-macosx26.0",
+  "os": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "productSources": {
+    "Tests/StudioOutputFontProbe/main.swift": "fc469598797818479277622add695f89223291c11067da4ddcdcd0fcb8d92c1e",
+    "Sources/Shared/FontLibrary/FontLibraryModels.swift": "3abf95c63b358d952541ae12ca7e3c67145df76965371f9b5e6f9624101239bd",
+    "Sources/Shared/FontLibrary/FontFileInspector.swift": "be99974fe4ca9fc0134eda7c925a415c8dc1de14a55483dbe0e7dfca5c5802c3",
+    "Sources/HostApp/Services/RhwpStudioPagePDFRenderer.swift": "393085d3b753f0232da1574128c925572937d34befadcafda96cf2d2d27aaceb",
+    "Sources/HostApp/Services/RhwpStudioPDFFontProvider.swift": "d10e8660f84a41c2f6620bc68b9023eea2ca5f469c7754c1e96d7cca44f59840",
+    "Sources/HostApp/Services/RhwpStudioPagePayload.swift": "4b7db97e88234af0eece1cdaa2dcaa56e0d31f649ea54af0e80e144c8b22f657",
+    "Tests/HostAppTests/CGPDFFontResourceInspector.swift": "470a1f6b59fcb93c322f8a798c24e282ddc776bf83b8d7064f4d4c30c61b5f5e"
+  },
+  "officialSources": {
+    "rhwp-studio/src/core/local-fonts.ts": "78228d2db58ea6467271bfe3bd5018ae7fb16b17480cc23f453cd0dc186fe1c8",
+    "rhwp-studio/src/core/host-font-provider.ts": "dd1928c6cf2239ab7591ae6842a6ba279a485ff3bc0663f40462adea722a0423",
+    "rhwp-studio/src/core/host-font-requests.ts": "e0cb0e834250501a684770014180a5fadfbdaa5b775339a81f2621260efb2355",
+    "rhwp-studio/src/main.ts": "277a3fa5a172035624719a19db49ca417c8684aadaa234d156655263eac383b2"
+  },
+  "fontProvenance": {
+    "repository": "https://github.com/google/fonts",
+    "commit": "c1eda9233c33ad7775b27efd794f931095cf6133",
+    "files": [
+      {
+        "file": "OFL.txt",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/OFL.txt",
+        "bytes": 4397,
+        "sha256": "49a57cc769fa9affd6eefb9070a61e3d3f6b757c97cafb15848bc6d1c81acc78"
+      },
+      {
+        "file": "METADATA.pb",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/METADATA.pb",
+        "bytes": 1307,
+        "sha256": "5ab6c5630b85b7d20e8cec7a3be246f9cd5a8f247dea4993f6fb9cf1cc24478e"
+      },
+      {
+        "file": "GowunBatang-Regular.ttf",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/GowunBatang-Regular.ttf",
+        "bytes": 8433296,
+        "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849"
+      },
+      {
+        "file": "GowunBatang-Bold.ttf",
+        "url": "https://raw.githubusercontent.com/google/fonts/c1eda9233c33ad7775b27efd794f931095cf6133/ofl/gowunbatang/GowunBatang-Bold.ttf",
+        "bytes": 8178712,
+        "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94"
+      }
+    ]
+  },
+  "systemPresent": {
+    "GowunBatang-Regular": false,
+    "GowunBatang-Bold": false
+  },
+  "nanumPresent": [
+    "NanumSquareR",
+    "NanumSquareB"
+  ],
+  "modes": {
+    "baseline": {
+      "status": "rendered",
+      "sourceReads": 0,
+      "residentBytes": 0,
+      "pdfSHA256": "a5b0edee383f996dc6280db453d0b0b24a19878a27beccc6046d06a0eb246746",
+      "pages": 1,
+      "matches": 5,
+      "textFidelity": {
+        "text": false,
+        "selectionText": false,
+        "pdftotext": false,
+        "notoControlExact": false
+      },
+      "imageSHA256": "680fb341b3dc29cdf37cb6aef2a74dc665072b8ec6c6614dfa11669a96f703f6",
+      "customComputed": [
+        {
+          "face": "regular",
+          "family": "\"Noto Sans KR\", \"Gowun Batang\"",
+          "weight": "400"
+        },
+        {
+          "face": "bold",
+          "family": "\"Noto Sans KR\", \"Gowun Batang\"",
+          "weight": "700"
+        },
+        {
+          "face": "regular",
+          "family": "\"Noto Sans KR\", 고운바탕",
+          "weight": "400"
+        },
+        {
+          "face": "bold",
+          "family": "\"Noto Sans KR\", GowunBatang-Bold",
+          "weight": "700"
+        },
+        {
+          "face": "regular",
+          "family": "\"Noto Sans KR\", \"Gowun Batang\"",
+          "weight": "400"
+        },
+        {
+          "face": "bold",
+          "family": "\"Gowun Batang\"",
+          "weight": "700"
+        }
+      ]
+    },
+    "naive": {
+      "status": "rendered",
+      "sourceReads": 2,
+      "residentBytes": 16612008,
+      "pdfSHA256": "80a1d19a1679ef944ea8f20e9220b1cda3048c43cce0e8137cf0f8418e4edafe",
+      "pages": 1,
+      "matches": 5,
+      "textFidelity": {
+        "text": true,
+        "selectionText": true,
+        "pdftotext": true,
+        "notoControlExact": false
+      },
+      "imageSHA256": "3718c7f656b7a71eb8bde73685f08de05272111891f2298810e1d04234746e57",
+      "customComputed": [
+        {
+          "face": "regular",
+          "family": "\"Noto Sans KR\", Stage568Regular",
+          "weight": "400"
+        },
+        {
+          "face": "bold",
+          "family": "\"Noto Sans KR\", Stage568Bold",
+          "weight": "700"
+        },
+        {
+          "face": "regular",
+          "family": "\"Noto Sans KR\", Stage568Regular",
+          "weight": "400"
+        },
+        {
+          "face": "bold",
+          "family": "\"Noto Sans KR\", Stage568Bold",
+          "weight": "700"
+        },
+        {
+          "face": "regular",
+          "family": "\"Noto Sans KR\", Stage568Regular",
+          "weight": "400"
+        },
+        {
+          "face": "bold",
+          "family": "Stage568Bold",
+          "weight": "700"
+        }
+      ]
+    },
+    "custom": {
+      "status": "rendered",
+      "sourceReads": 2,
+      "residentBytes": 16612008,
+      "pdfSHA256": "adbca1884455e5dd9e7d4cec94dc1fe5c8a854ab0f5ef8f3958d3422c04e3ce6",
+      "pages": 1,
+      "matches": 5,
+      "textFidelity": {
+        "text": true,
+        "selectionText": true,
+        "pdftotext": true,
+        "notoControlExact": false
+      },
+      "imageSHA256": "54db02f0f2ea6a31ec8a2240caa1197423f226df9db076e7e968b15985fe6709",
+      "customComputed": [
+        {
+          "face": "regular",
+          "family": "Stage568Regular",
+          "weight": "400"
+        },
+        {
+          "face": "bold",
+          "family": "Stage568Bold",
+          "weight": "700"
+        },
+        {
+          "face": "regular",
+          "family": "Stage568Regular",
+          "weight": "400"
+        },
+        {
+          "face": "bold",
+          "family": "Stage568Bold",
+          "weight": "700"
+        },
+        {
+          "face": "regular",
+          "family": "Stage568Regular",
+          "weight": "400"
+        },
+        {
+          "face": "bold",
+          "family": "Stage568Bold",
+          "weight": "700"
+        }
+      ]
+    },
+    "missing": {
+      "status": "expected-rejection",
+      "sourceReads": 1,
+      "residentBytes": 8433296,
+      "pdfSHA256": null,
+      "pages": null,
+      "matches": null,
+      "textFidelity": null,
+      "rejectionCodes": [
+        404
+      ]
+    },
+    "wrong-token": {
+      "status": "expected-rejection",
+      "sourceReads": 1,
+      "residentBytes": 8433296,
+      "pdfSHA256": null,
+      "pages": null,
+      "matches": null,
+      "textFidelity": null,
+      "rejectionCodes": [
+        403
+      ]
+    }
+  },
+  "actualPrint": false,
+  "sandbox": false,
+  "adHocSigned": true,
+  "OSFontRegistration": false,
+  "matcher": {
+    "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "cases": [
+      {
+        "label": "family-regular",
+        "name": "Gowun Batang",
+        "weight": 400,
+        "slant": "normal",
+        "selectedID": "regular",
+        "postscriptName": "GowunBatang-Regular"
+      },
+      {
+        "label": "family-bold",
+        "name": "Gowun Batang",
+        "weight": 700,
+        "slant": "normal",
+        "selectedID": "bold",
+        "postscriptName": "GowunBatang-Bold"
+      },
+      {
+        "label": "localized-regular",
+        "name": "고운바탕",
+        "weight": 400,
+        "slant": "normal",
+        "selectedID": "regular",
+        "postscriptName": "GowunBatang-Regular"
+      },
+      {
+        "label": "localized-bold",
+        "name": "고운바탕",
+        "weight": 700,
+        "slant": "normal",
+        "selectedID": "bold",
+        "postscriptName": "GowunBatang-Bold"
+      },
+      {
+        "label": "postscript-exact",
+        "name": "GowunBatang-Regular",
+        "weight": 700,
+        "slant": "italic",
+        "selectedID": "regular",
+        "postscriptName": "GowunBatang-Regular"
+      },
+      {
+        "label": "full-name-exact",
+        "name": "Gowun Batang Bold",
+        "weight": 400,
+        "slant": "normal",
+        "selectedID": "bold",
+        "postscriptName": "GowunBatang-Bold"
+      },
+      {
+        "label": "unsupported-italic",
+        "name": "Gowun Batang",
+        "weight": 400,
+        "slant": "italic",
+        "selectedID": null,
+        "postscriptName": null
+      },
+      {
+        "label": "missing-family",
+        "name": "Stage568AbsentFont",
+        "weight": 400,
+        "slant": "normal",
+        "selectedID": null,
+        "postscriptName": null
+      },
+      {
+        "label": "ambiguous-family",
+        "name": "Gowun Batang",
+        "weight": 400,
+        "slant": "normal",
+        "selectedID": null,
+        "postscriptName": null
+      },
+      {
+        "label": "ambiguous-localized",
+        "name": "고운바탕",
+        "weight": 400,
+        "slant": "normal",
+        "selectedID": null,
+        "postscriptName": null
+      }
+    ],
+    "collectedIDs": [
+      "bold",
+      "regular"
+    ],
+    "metadataReads": 0,
+    "eightConcurrentReads": 1,
+    "repeatedReadTotal": 2,
+    "finalReads": 3,
+    "staleRead": "rejected",
+    "bytesCache": "in-flight-only"
+  },
+  "fontPrograms": {
+    "pypdf": "6.10.0",
+    "pages": 1,
+    "fonts": [
+      {
+        "baseFont": "/AAAAAB+AppleSDGothicNeo-Bold",
+        "subtype": "/Type0",
+        "descendantSubtype": "/CIDFontType0",
+        "encoding": "/Identity-H",
+        "programs": {
+          "/FontFile3": {
+            "bytes": 1420,
+            "sha256": "d5edcdd4db2a27d3b3b731454c1303d7a996e323c30bc42fc1c704ed7259ff38"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAC+AppleSDGothicNeo-Regular",
+        "subtype": "/Type0",
+        "descendantSubtype": "/CIDFontType0",
+        "encoding": "/Identity-H",
+        "programs": {
+          "/FontFile3": {
+            "bytes": 2341,
+            "sha256": "adcfccf0b26c4b1935081bf979128084363a7d886771fd8acbf40cad5e9504d7"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAE+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 8320,
+            "sha256": "2a2754eb7a8fa928232ad0dc1c08830f6105cd12ee96aab3ce6809866feb0004"
+          }
+        },
+        "toUnicodeBytes": 583,
+        "toUnicodeSHA256": "2ec6763d10b4d873665b99700212879c6079c6b12aab72dc10753f0793949a0d"
+      },
+      {
+        "baseFont": "/AAAAAF+GowunBatang-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "/MacRomanEncoding",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 4628,
+            "sha256": "b1c83fe78ee824ed167251836918889b6b7d6a95235cefa59f2c00e43e3e5061"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAH+GowunBatang-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 5924,
+            "sha256": "a37cf7227351b5528ce00c625e076169fd9f188a032d0402111bbbe0eebc4d28"
+          }
+        },
+        "toUnicodeBytes": 508,
+        "toUnicodeSHA256": "f07a856bc1aaa34ecb2576f93565584c52c2ec1b420004463f062ca60b189c5b"
+      },
+      {
+        "baseFont": "/AAAAAI+GowunBatang-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "/MacRomanEncoding",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 5176,
+            "sha256": "a975a1526e59116d580fa1f2f8a7cd3c1a315685dd7951dcb82decd3f9353ff5"
+          }
+        },
+        "toUnicodeBytes": 0,
+        "toUnicodeSHA256": null
+      },
+      {
+        "baseFont": "/AAAAAK+NotoSerifKRExtraLight-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 6548,
+            "sha256": "5292d9e337c333ed5371977707edcb4691ed8fba344835980524b4a0c4ff1145"
+          }
+        },
+        "toUnicodeBytes": 598,
+        "toUnicodeSHA256": "c7f75bba002e793ea3d2fa4c7d8a50f90d270432eeda1f0d3d7c75fdbda9a8f1"
+      },
+      {
+        "baseFont": "/AAAAAM+NotoSansKRThin-Bold",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 2376,
+            "sha256": "b18118cd13b88aa9872ad556cd7403ec9ba28f1aa2a0358830c8e555b64c4604"
+          }
+        },
+        "toUnicodeBytes": 493,
+        "toUnicodeSHA256": "efec38e122c088df321b123b1ae32c02c25cc1e8d1a37ba8ddce60ef06a520f5"
+      },
+      {
+        "baseFont": "/AAAAAO+AppleMyungjo",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 3756,
+            "sha256": "21ed0528d7b1849e5c9d6fb46c2c707e19fc3a7cd4269ee4590bb06a0a87db3a"
+          }
+        },
+        "toUnicodeBytes": 432,
+        "toUnicodeSHA256": "4d8e229d75ce63521a03afa3306ddd77553d4625aa9c8064cd2cf3e96cab05a6"
+      },
+      {
+        "baseFont": "/AAAAAQ+NotoSansKR-Regular",
+        "subtype": "/TrueType",
+        "descendantSubtype": "/TrueType",
+        "encoding": "",
+        "programs": {
+          "/FontFile2": {
+            "bytes": 1072,
+            "sha256": "480929d98bd09f14abdf56bae3d4f9541c829775126dfbb253f22e8e08685fd9"
+          }
+        },
+        "toUnicodeBytes": 387,
+        "toUnicodeSHA256": "e532031a17a24738f4c7a14e960f6b9f0676e21c7e880a8a1eb5778cbd45bb97"
+      }
+    ]
+  },
+  "probeSources": {
+    "scripts/probe-studio-output-fonts.py": "33b7c6cc8b34842b5f5814ead4ddd5c1162cf30c8d177e685036b1807cb4ddf2",
+    "Tests/StudioOutputFontProbe/matcher.mjs": "04b1bb91a7709d72dc779ac208943681dd4128726b74ce9115e83ec872649452",
+    "Tests/StudioOutputFontProbe/inspect_pdf.py": "765bcbde7ab7a46153d62e78c062b6a99b8bf26af4820cfc84d0bcf2a933435e"
+  },
+  "scope": "합성 SVG·custom 본문 exact·실패 대조군. Noto 대조 문자열은 결함 재현, 제품/인쇄 수용 미완료."
+}

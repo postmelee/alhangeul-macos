@@ -1,5 +1,6 @@
 import CoreGraphics
 import Foundation
+import CryptoKit
 
 struct HwpRenderedPreviewPDF {
     let data: Data
@@ -26,15 +27,16 @@ struct HwpPreviewDocumentContext {
     let pageCount: Int
     let document: RhwpDocument
     let externalResourceReport: RhwpExternalResourceReport
+    var sourceIdentity: String = ""
 }
 
 enum HwpPreviewPDFRenderer {
-    static func load(fileURL: URL) throws -> HwpPreviewDocumentContext {
+    static func load(fileURL: URL, resolveExternalImages: Bool = true) throws -> HwpPreviewDocumentContext {
         let input = try loadInput(fileURL: fileURL)
         let openResult = try HwpExternalImageResolver.open(
             data: input.data,
             context: RhwpDocumentOpenContext(
-                sourceURL: fileURL,
+                sourceURL: resolveExternalImages ? fileURL : nil,
                 displayFilename: input.filename,
                 maximumExternalResourceBytes: hwpQuickLookMaxFileSize
             )
@@ -48,7 +50,8 @@ enum HwpPreviewPDFRenderer {
             contentSize: metadata.contentSize,
             pageCount: metadata.pageCount,
             document: openResult.document,
-            externalResourceReport: openResult.externalResourceReport
+            externalResourceReport: openResult.externalResourceReport,
+            sourceIdentity: SHA256.hash(data: input.data).map { String(format: "%02x", $0) }.joined()
         )
     }
 
@@ -116,7 +119,8 @@ enum HwpPreviewPDFRenderer {
         pageCount: Int,
         contentSize: CGSize,
         policy: HwpPageRenderPolicy = .coreGraphicsOnly,
-        collectDiagnostics: Bool = false
+        collectDiagnostics: Bool = false,
+        forceDefaultFonts: Bool = false
     ) throws -> HwpRenderedPreviewPDF {
         let pdfData = NSMutableData()
         guard let consumer = CGDataConsumer(data: pdfData as CFMutableData) else {
@@ -139,8 +143,59 @@ enum HwpPreviewPDFRenderer {
             let renderedPage = try HwpPageImageRenderer.renderPage(
                 document: document,
                 pageIndex: pageIndex,
-                policy: policy
+                policy: policy, forceDefaultFonts: forceDefaultFonts
             )
+            if collectDiagnostics {
+                pageDiagnostics.append(
+                    HwpPreviewPDFPageDiagnostics(
+                        pageIndex: pageIndex,
+                        diagnostics: renderedPage.diagnostics
+                    )
+                )
+            }
+            drawPDFPage(renderedPage, in: context)
+        }
+
+        context.closePDF()
+        guard pdfData.length > 0 else {
+            throw HwpRenderError.pdfEncodingFailed
+        }
+
+        return HwpRenderedPreviewPDF(
+            data: pdfData as Data,
+            contentSize: contentSize,
+            pageCount: pageCount,
+            pageDiagnostics: pageDiagnostics
+        )
+    }
+
+    static func render(
+        context documentContext: HwpPreviewDocumentContext,
+        pageRenderer: (Int) async throws -> HwpRenderedPage
+    ) async throws -> HwpRenderedPreviewPDF {
+        let pageCount = documentContext.pageCount
+        let contentSize = documentContext.contentSize
+        let collectDiagnostics = true
+        let pdfData = NSMutableData()
+        guard let consumer = CGDataConsumer(data: pdfData as CFMutableData) else {
+            throw HwpRenderError.pdfEncodingFailed
+        }
+
+        var mediaBox = CGRect(
+            origin: .zero,
+            size: contentSize
+        )
+        guard let context = CGContext(consumer: consumer, mediaBox: &mediaBox, nil) else {
+            throw HwpRenderError.pdfEncodingFailed
+        }
+
+        var pageDiagnostics: [HwpPreviewPDFPageDiagnostics] = []
+        if collectDiagnostics {
+            pageDiagnostics.reserveCapacity(pageCount)
+        }
+        for pageIndex in 0..<pageCount {
+            try Task.checkCancellation()
+            let renderedPage = try await pageRenderer(pageIndex)
             if collectDiagnostics {
                 pageDiagnostics.append(
                     HwpPreviewPDFPageDiagnostics(
@@ -197,6 +252,7 @@ enum HwpPreviewPDFRenderer {
         }
 
         let data = try Data(contentsOf: fileURL, options: [.mappedIfSafe])
+        guard data.count <= hwpQuickLookMaxFileSize else { throw HwpRenderError.fileTooLarge }
         return LoadedInput(
             data: data,
             filename: fileURL.lastPathComponent

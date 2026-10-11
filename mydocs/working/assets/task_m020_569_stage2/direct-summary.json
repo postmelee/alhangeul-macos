@@ -1,0 +1,1188 @@
+{
+  "scope": "unsigned direct real CoreText; swiftc without -O; not signed Finder or Release performance",
+  "runs": 12,
+  "samples": 530,
+  "statuses": {
+    "success": 514,
+    "busy": 16
+  },
+  "rows": [
+    {
+      "mode": "snapshot",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 12145,
+      "scenario": "snapshot",
+      "phase": "cold",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 160.838833,
+        "snapshotCallMedianMs": 160.897125,
+        "scanMedianMs": 145.213167,
+        "totalMedianMs": 166.653334,
+        "pairedMetadataFractionMedian": 0.9651102029557956
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 12145,
+      "scenario": "snapshot",
+      "phase": "warm",
+      "statuses": {
+        "success": 10
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 107.070271,
+        "snapshotCallMedianMs": 107.07804200000001,
+        "scanMedianMs": 95.846959,
+        "totalMedianMs": 112.0344795,
+        "pairedMetadataFractionMedian": 0.958456884510867
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 12147,
+      "scenario": "snapshot",
+      "phase": "cold",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 119.189166,
+        "snapshotCallMedianMs": 119.240792,
+        "scanMedianMs": 104.248625,
+        "totalMedianMs": 124.681375,
+        "pairedMetadataFractionMedian": 0.9559500446638481
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 12147,
+      "scenario": "snapshot",
+      "phase": "warm",
+      "statuses": {
+        "success": 10
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 108.93618749999999,
+        "snapshotCallMedianMs": 108.9450625,
+        "scanMedianMs": 97.21089599999999,
+        "totalMedianMs": 113.9911045,
+        "pairedMetadataFractionMedian": 0.9580023655810141
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": false,
+      "repetition": 2,
+      "pid": 12148,
+      "scenario": "snapshot",
+      "phase": "cold",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 115.427875,
+        "snapshotCallMedianMs": 115.474083,
+        "scanMedianMs": 100.783875,
+        "totalMedianMs": 120.550709,
+        "pairedMetadataFractionMedian": 0.9575047376950724
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": false,
+      "repetition": 2,
+      "pid": 12148,
+      "scenario": "snapshot",
+      "phase": "warm",
+      "statuses": {
+        "success": 10
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 111.6845005,
+        "snapshotCallMedianMs": 111.6940205,
+        "scanMedianMs": 99.13316649999999,
+        "totalMedianMs": 116.746229,
+        "pairedMetadataFractionMedian": 0.9567071805787508
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 12149,
+      "scenario": "snapshot",
+      "phase": "cold",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 116.904792,
+        "snapshotCallMedianMs": 116.943167,
+        "scanMedianMs": 101.561375,
+        "totalMedianMs": 122.603708,
+        "pairedMetadataFractionMedian": 0.9535175885544995
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 12149,
+      "scenario": "snapshot",
+      "phase": "warm",
+      "statuses": {
+        "success": 10
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 110.399812,
+        "snapshotCallMedianMs": 110.4099375,
+        "scanMedianMs": 98.53522849999999,
+        "totalMedianMs": 115.772542,
+        "pairedMetadataFractionMedian": 0.9533490146260422
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 12152,
+      "scenario": "snapshot",
+      "phase": "cold",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 117.286167,
+        "snapshotCallMedianMs": 117.327167,
+        "scanMedianMs": 102.501625,
+        "totalMedianMs": 122.180125,
+        "pairedMetadataFractionMedian": 0.959944729144777
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 12152,
+      "scenario": "snapshot",
+      "phase": "warm",
+      "statuses": {
+        "success": 10
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 107.257125,
+        "snapshotCallMedianMs": 107.265708,
+        "scanMedianMs": 96.1175415,
+        "totalMedianMs": 111.7396665,
+        "pairedMetadataFractionMedian": 0.9581525781936615
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": true,
+      "repetition": 2,
+      "pid": 12153,
+      "scenario": "snapshot",
+      "phase": "cold",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 116.456833,
+        "snapshotCallMedianMs": 116.492333,
+        "scanMedianMs": 101.242,
+        "totalMedianMs": 121.658042,
+        "pairedMetadataFractionMedian": 0.9572473063474094
+      }
+    },
+    {
+      "mode": "snapshot",
+      "enabled": true,
+      "repetition": 2,
+      "pid": 12153,
+      "scenario": "snapshot",
+      "phase": "warm",
+      "statuses": {
+        "success": 10
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 110.91833299999999,
+        "snapshotCallMedianMs": 110.92699999999999,
+        "scanMedianMs": 98.76068749999999,
+        "totalMedianMs": 116.5729585,
+        "pairedMetadataFractionMedian": 0.9559093661864584
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 9576,
+      "scenario": "larger",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 637.943771,
+        "snapshotCallMedianMs": 637.9520004999999,
+        "scanMedianMs": 625.424854,
+        "totalMedianMs": 649.324063,
+        "pairedMetadataFractionMedian": 0.9834887854057096
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 9576,
+      "scenario": "many-concurrent",
+      "phase": "cold",
+      "statuses": {
+        "busy": 4,
+        "success": 6
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 2516.5243745,
+        "snapshotCallMedianMs": 2516.6745005000002,
+        "scanMedianMs": 626.0235,
+        "totalMedianMs": 2628.8273755,
+        "pairedMetadataFractionMedian": 0.9572806311992351
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 9576,
+      "scenario": "many-concurrent",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 2545.6296039999997,
+        "snapshotCallMedianMs": 2545.8354375,
+        "scanMedianMs": 625.9261670000001,
+        "totalMedianMs": 2565.5682295,
+        "pairedMetadataFractionMedian": 0.9929277613629701
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 9576,
+      "scenario": "many-serial",
+      "phase": "cold",
+      "statuses": {
+        "success": 10
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 635.691125,
+        "snapshotCallMedianMs": 635.700625,
+        "scanMedianMs": 622.650479,
+        "totalMedianMs": 744.413562,
+        "pairedMetadataFractionMedian": 0.8565224475092386
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 9576,
+      "scenario": "many-serial",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 633.1067085,
+        "snapshotCallMedianMs": 633.1150205,
+        "scanMedianMs": 620.5087495,
+        "totalMedianMs": 643.9459165000001,
+        "pairedMetadataFractionMedian": 0.9832578020590113
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 9576,
+      "scenario": "preview",
+      "phase": "cold",
+      "statuses": {
+        "success": 3
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 637.146167,
+        "snapshotCallMedianMs": 637.155291,
+        "scanMedianMs": 624.921375,
+        "totalMedianMs": 757.650791,
+        "pairedMetadataFractionMedian": 0.863294801564321
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 9576,
+      "scenario": "preview",
+      "phase": "warm",
+      "statuses": {
+        "success": 9
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 641.193375,
+        "snapshotCallMedianMs": 641.202125,
+        "scanMedianMs": 628.514583,
+        "totalMedianMs": 742.736084,
+        "pairedMetadataFractionMedian": 0.8647483610715028
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 9576,
+      "scenario": "same",
+      "phase": "cold",
+      "statuses": {
+        "success": 2
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 735.985896,
+        "snapshotCallMedianMs": 736.0185835,
+        "scanMedianMs": 721.780354,
+        "totalMedianMs": 897.6882505,
+        "pairedMetadataFractionMedian": 0.8158248761146478
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 9576,
+      "scenario": "same",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 629.5831875,
+        "snapshotCallMedianMs": 629.5926455,
+        "scanMedianMs": 617.2200415,
+        "totalMedianMs": 640.486896,
+        "pairedMetadataFractionMedian": 0.9841244003994687
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 10060,
+      "scenario": "larger",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 653.1355209999999,
+        "snapshotCallMedianMs": 653.143542,
+        "scanMedianMs": 637.1809165,
+        "totalMedianMs": 665.42575,
+        "pairedMetadataFractionMedian": 0.9831233511952989
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 10060,
+      "scenario": "many-concurrent",
+      "phase": "cold",
+      "statuses": {
+        "busy": 4,
+        "success": 6
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 2557.7967295,
+        "snapshotCallMedianMs": 2557.8506875000003,
+        "scanMedianMs": 632.990292,
+        "totalMedianMs": 2674.0926455,
+        "pairedMetadataFractionMedian": 0.9509097233982026
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 10060,
+      "scenario": "many-concurrent",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 2562.561646,
+        "snapshotCallMedianMs": 2562.6462295,
+        "scanMedianMs": 630.4687495000001,
+        "totalMedianMs": 2577.565292,
+        "pairedMetadataFractionMedian": 0.993546454883011
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 10060,
+      "scenario": "many-serial",
+      "phase": "cold",
+      "statuses": {
+        "success": 10
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 649.918354,
+        "snapshotCallMedianMs": 649.9274795,
+        "scanMedianMs": 637.0208125,
+        "totalMedianMs": 765.308375,
+        "pairedMetadataFractionMedian": 0.851930645910878
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 10060,
+      "scenario": "many-serial",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 641.424875,
+        "snapshotCallMedianMs": 641.4329164999999,
+        "scanMedianMs": 628.3726045000001,
+        "totalMedianMs": 653.2387914999999,
+        "pairedMetadataFractionMedian": 0.9826506158058343
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 10060,
+      "scenario": "preview",
+      "phase": "cold",
+      "statuses": {
+        "success": 3
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 639.633209,
+        "snapshotCallMedianMs": 639.643417,
+        "scanMedianMs": 626.317333,
+        "totalMedianMs": 750.951625,
+        "pairedMetadataFractionMedian": 0.8559460365123366
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 10060,
+      "scenario": "preview",
+      "phase": "warm",
+      "statuses": {
+        "success": 9
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 621.667459,
+        "snapshotCallMedianMs": 621.676917,
+        "scanMedianMs": 608.786042,
+        "totalMedianMs": 741.040584,
+        "pairedMetadataFractionMedian": 0.8645781898138459
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 10060,
+      "scenario": "same",
+      "phase": "cold",
+      "statuses": {
+        "success": 2
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 673.075542,
+        "snapshotCallMedianMs": 673.0966245,
+        "scanMedianMs": 658.8850835000001,
+        "totalMedianMs": 960.2275415,
+        "pairedMetadataFractionMedian": 0.7282485716494307
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": false,
+      "repetition": 1,
+      "pid": 10060,
+      "scenario": "same",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 638.091833,
+        "snapshotCallMedianMs": 638.1023545,
+        "scanMedianMs": 625.0044375,
+        "totalMedianMs": 649.8107285000001,
+        "pairedMetadataFractionMedian": 0.9834311816373235
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 11133,
+      "scenario": "larger",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 619.4626875,
+        "snapshotCallMedianMs": 619.4712294999999,
+        "scanMedianMs": 606.5738544999999,
+        "totalMedianMs": 630.737417,
+        "pairedMetadataFractionMedian": 0.9834999625576789
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 11133,
+      "scenario": "many-concurrent",
+      "phase": "cold",
+      "statuses": {
+        "success": 6,
+        "busy": 4
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 2510.938313,
+        "snapshotCallMedianMs": 2510.9472079999996,
+        "scanMedianMs": 622.7252080000001,
+        "totalMedianMs": 2643.234625,
+        "pairedMetadataFractionMedian": 0.9458331252374168
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 11133,
+      "scenario": "many-concurrent",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 2530.941604,
+        "snapshotCallMedianMs": 2531.199229,
+        "scanMedianMs": 622.0799999999999,
+        "totalMedianMs": 2556.0978955,
+        "pairedMetadataFractionMedian": 0.9930700966966572
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 11133,
+      "scenario": "many-serial",
+      "phase": "cold",
+      "statuses": {
+        "success": 10
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 616.1348335,
+        "snapshotCallMedianMs": 616.143875,
+        "scanMedianMs": 603.4824160000001,
+        "totalMedianMs": 738.1357915,
+        "pairedMetadataFractionMedian": 0.8339560003488538
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 11133,
+      "scenario": "many-serial",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 629.934771,
+        "snapshotCallMedianMs": 629.942625,
+        "scanMedianMs": 616.9195835,
+        "totalMedianMs": 641.5378745,
+        "pairedMetadataFractionMedian": 0.9832001059467568
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 11133,
+      "scenario": "preview",
+      "phase": "cold",
+      "statuses": {
+        "success": 3
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 644.375834,
+        "snapshotCallMedianMs": 644.385041,
+        "scanMedianMs": 631.70925,
+        "totalMedianMs": 763.488917,
+        "pairedMetadataFractionMedian": 0.8394397212295265
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 11133,
+      "scenario": "preview",
+      "phase": "warm",
+      "statuses": {
+        "success": 9
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 654.726458,
+        "snapshotCallMedianMs": 654.736167,
+        "scanMedianMs": 641.867708,
+        "totalMedianMs": 781.454416,
+        "pairedMetadataFractionMedian": 0.8464996134726405
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 11133,
+      "scenario": "same",
+      "phase": "cold",
+      "statuses": {
+        "success": 2
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 621.3248329999999,
+        "snapshotCallMedianMs": 621.3490835,
+        "scanMedianMs": 607.4643745000001,
+        "totalMedianMs": 741.200167,
+        "pairedMetadataFractionMedian": 0.8382787091320693
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 11133,
+      "scenario": "same",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 620.1620419999999,
+        "snapshotCallMedianMs": 620.1712709999999,
+        "scanMedianMs": 607.8848745,
+        "totalMedianMs": 631.2313955,
+        "pairedMetadataFractionMedian": 0.98280580902678
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 11207,
+      "scenario": "larger",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 640.0004584999999,
+        "snapshotCallMedianMs": 640.0086665,
+        "scanMedianMs": 627.4948755,
+        "totalMedianMs": 650.5637915,
+        "pairedMetadataFractionMedian": 0.9825814992316474
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 11207,
+      "scenario": "many-concurrent",
+      "phase": "cold",
+      "statuses": {
+        "busy": 4,
+        "success": 6
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 2558.025854,
+        "snapshotCallMedianMs": 2558.035959,
+        "scanMedianMs": 629.6860624999999,
+        "totalMedianMs": 2696.734833,
+        "pairedMetadataFractionMedian": 0.9417841221507302
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 11207,
+      "scenario": "many-concurrent",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 2575.6483749999998,
+        "snapshotCallMedianMs": 2575.836854,
+        "scanMedianMs": 633.7952290000001,
+        "totalMedianMs": 2606.4318335,
+        "pairedMetadataFractionMedian": 0.9899641049038556
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 11207,
+      "scenario": "many-serial",
+      "phase": "cold",
+      "statuses": {
+        "success": 10
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 641.7968539999999,
+        "snapshotCallMedianMs": 641.8054999999999,
+        "scanMedianMs": 629.0662709999999,
+        "totalMedianMs": 765.0408130000001,
+        "pairedMetadataFractionMedian": 0.8404364967755809
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 11207,
+      "scenario": "many-serial",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 641.9058335,
+        "snapshotCallMedianMs": 641.9145000000001,
+        "scanMedianMs": 629.281208,
+        "totalMedianMs": 653.1582085,
+        "pairedMetadataFractionMedian": 0.9829154764015664
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 11207,
+      "scenario": "preview",
+      "phase": "cold",
+      "statuses": {
+        "success": 3
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 643.541125,
+        "snapshotCallMedianMs": 643.550125,
+        "scanMedianMs": 631.297125,
+        "totalMedianMs": 771.59025,
+        "pairedMetadataFractionMedian": 0.8401631137770339
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 11207,
+      "scenario": "preview",
+      "phase": "warm",
+      "statuses": {
+        "success": 9
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 646.951209,
+        "snapshotCallMedianMs": 646.960083,
+        "scanMedianMs": 634.727709,
+        "totalMedianMs": 770.344458,
+        "pairedMetadataFractionMedian": 0.840293127737427
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 11207,
+      "scenario": "same",
+      "phase": "cold",
+      "statuses": {
+        "success": 2
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 643.200417,
+        "snapshotCallMedianMs": 643.223208,
+        "scanMedianMs": 629.3113335,
+        "totalMedianMs": 766.45575,
+        "pairedMetadataFractionMedian": 0.8391122321843547
+      }
+    },
+    {
+      "mode": "consumers",
+      "enabled": true,
+      "repetition": 1,
+      "pid": 11207,
+      "scenario": "same",
+      "phase": "warm",
+      "statuses": {
+        "success": 20
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 638.426417,
+        "snapshotCallMedianMs": 638.4359374999999,
+        "scanMedianMs": 625.0203545,
+        "totalMedianMs": 650.3461665,
+        "pairedMetadataFractionMedian": 0.9827087705785178
+      }
+    },
+    {
+      "mode": "transitions",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 12159,
+      "scenario": "change",
+      "phase": "before",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 646.955208,
+        "snapshotCallMedianMs": 646.991917,
+        "scanMedianMs": 631.791625,
+        "totalMedianMs": 767.587958,
+        "pairedMetadataFractionMedian": 0.8428417893444858
+      }
+    },
+    {
+      "mode": "transitions",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 12159,
+      "scenario": "change",
+      "phase": "missing",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 1,
+      "metrics": {
+        "metadataMedianMs": 658.640917,
+        "snapshotCallMedianMs": 658.651917,
+        "scanMedianMs": 646.293167,
+        "totalMedianMs": 719.979833,
+        "pairedMetadataFractionMedian": 0.914804674813718
+      }
+    },
+    {
+      "mode": "transitions",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 12159,
+      "scenario": "change",
+      "phase": "restored",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 682.224417,
+        "snapshotCallMedianMs": 682.233666,
+        "scanMedianMs": 669.759042,
+        "totalMedianMs": 804.6265,
+        "pairedMetadataFractionMedian": 0.8478771417545905
+      }
+    },
+    {
+      "mode": "transitions",
+      "enabled": false,
+      "repetition": 0,
+      "pid": 12159,
+      "scenario": "change",
+      "phase": "toggle",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 637.715333,
+        "snapshotCallMedianMs": 637.72425,
+        "scanMedianMs": 622.062667,
+        "totalMedianMs": 766.5685,
+        "pairedMetadataFractionMedian": 0.831909128799318
+      }
+    },
+    {
+      "mode": "transitions",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 12161,
+      "scenario": "change",
+      "phase": "before",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 679.449375,
+        "snapshotCallMedianMs": 679.481375,
+        "scanMedianMs": 662.575959,
+        "totalMedianMs": 811.140125,
+        "pairedMetadataFractionMedian": 0.8376473485391935
+      }
+    },
+    {
+      "mode": "transitions",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 12161,
+      "scenario": "change",
+      "phase": "missing",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 1,
+      "metrics": {
+        "metadataMedianMs": 645.016875,
+        "snapshotCallMedianMs": 645.026084,
+        "scanMedianMs": 632.321834,
+        "totalMedianMs": 686.014,
+        "pairedMetadataFractionMedian": 0.940238646733157
+      }
+    },
+    {
+      "mode": "transitions",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 12161,
+      "scenario": "change",
+      "phase": "restored",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 643.241792,
+        "snapshotCallMedianMs": 643.2515,
+        "scanMedianMs": 630.239042,
+        "totalMedianMs": 754.023292,
+        "pairedMetadataFractionMedian": 0.8530794722452685
+      }
+    },
+    {
+      "mode": "transitions",
+      "enabled": true,
+      "repetition": 0,
+      "pid": 12161,
+      "scenario": "change",
+      "phase": "toggle",
+      "statuses": {
+        "success": 1
+      },
+      "fallbacks": 0,
+      "metrics": {
+        "metadataMedianMs": 647.093708,
+        "snapshotCallMedianMs": 647.102959,
+        "scanMedianMs": 630.558625,
+        "totalMedianMs": 751.179375,
+        "pairedMetadataFractionMedian": 0.8614370009826215
+      }
+    }
+  ],
+  "signedFinder": "pending concrete approval",
+  "criteria": "Task-specific provisional: repeated warm/cache-hit metadata median >=500ms and paired fraction >=0.30, or repeated normal many-file preparation busy",
+  "preliminaryDecision": "both consumer repetitions meet direct performance review trigger; Release signed Finder remains required",
+  "inputs": {
+    "many-4.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+    "many-8.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+    "METADATA.pb": "5ab6c5630b85b7d20e8cec7a3be246f9cd5a8f247dea4993f6fb9cf1cc24478e",
+    "many-9.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+    "many-5.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+    "GowunBatang-Bold.ttf": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+    "many-2.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+    "many-3.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+    "two.hwpx": "0a85f61a0fcb2a5fad6fa1487db862dedca3133a0457794c9f95b2c60f5ee281",
+    "many-0.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+    "OFL.txt": "49a57cc769fa9affd6eefb9070a61e3d3f6b757c97cafb15848bc6d1c81acc78",
+    "many-1.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+    "single.hwp": "80f75353ba6b31c55169a7a8e29e35cbeba3ff4a2c66d0f961cadb4400caf199",
+    "many-6.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+    "single.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33",
+    "GowunBatang-Regular.ttf": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+    "many-7.hwpx": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33"
+  },
+  "rawResultsSHA256": {
+    "snapshot-04/snapshot-off-0/result.json": "b8502a83da9082e4ac7840de9fb63a8e1ae7eebffacc637398d1a01011d6cb1d",
+    "snapshot-04/snapshot-off-1/result.json": "48f14090ab0ec302e1b0a88b876cb380f314927e8b2c61a4cdd1b2669945ec91",
+    "snapshot-04/snapshot-off-2/result.json": "8e75c38934c946896e916d7432dd24b061a04b2152d329e948b1cd28f3828c6e",
+    "snapshot-04/snapshot-on-0/result.json": "7c5f105551db1aeea3fe7aa9c7b7e07ace133ce92153e01b6c2441f1c8dcacb2",
+    "snapshot-04/snapshot-on-1/result.json": "f01702a0e8c2c3639a5ce67c6af91ef0e10c636e561fa54039a746de5c68d46b",
+    "snapshot-04/snapshot-on-2/result.json": "4eb91d7d6b62702e336ccc6aa2b5532a7cc5bc19aa6c67f969639744b41901e1",
+    "consumers-04/consumers-off-0/result.json": "a8a104792ac8cd336d35fdea5c1fd1b0adbc37410cacd1a597fc89b6303a3da1",
+    "consumers-04/consumers-off-1/result.json": "32c3c9d74df33b5d098000a48a35cde62ea3a7d07225ecb8d493160349c1de2f",
+    "consumers-04/consumers-on-0/result.json": "9db5a5e1a73aeee42e9bea1ec0012eaa2fb8c5db0be4dfde5f46cc36c4fe4ecc",
+    "consumers-04/consumers-on-1/result.json": "bf6fbde92daa9a86321a4bbed126b0603af8778f5584f43ccaa98b150a138535",
+    "transitions-04/transitions-off-0/result.json": "21a569f297fab45aad298e395114f3284d003d4b7a89ed74296e4e183976e8b0",
+    "transitions-04/transitions-on-0/result.json": "76e52a7219be5f3dd9021903b4412cd8637b0fdb02cfe9f168d8098667826180"
+  },
+  "guardResults": {
+    "guards-off-0": {
+      "admission16BeforeSupply": true,
+      "cancelledPreviewReleased": true,
+      "selectionChangesIdentityAndExactBytes": true
+    },
+    "guards-on-0": {
+      "admission16BeforeSupply": true,
+      "cancelledPreviewReleased": true,
+      "selectionChangesIdentityAndExactBytes": true
+    }
+  },
+  "nativeRegression": {
+    "concurrentJobsBounded": true,
+    "documentStampInvalidated": true,
+    "permissionFallback": true,
+    "proofs": [
+      {
+        "bytes": 32775,
+        "consumer": "PNG",
+        "faces": [
+          "GowunBatang-Bold",
+          "GowunBatang-Regular"
+        ],
+        "mode": "coreGraphics",
+        "reads": 2,
+        "releases": 1
+      },
+      {
+        "bytes": 31654,
+        "consumer": "PNG",
+        "faces": [
+          "GowunBatang-Regular",
+          "GowunBatang-Bold"
+        ],
+        "mode": "skiaDecode",
+        "reads": 2,
+        "releases": 1
+      },
+      {
+        "bytes": 31826,
+        "consumer": "PNG",
+        "faces": [
+          "GowunBatang-Bold",
+          "GowunBatang-Regular"
+        ],
+        "mode": "skiaDirect",
+        "reads": 2,
+        "releases": 1
+      },
+      {
+        "consumer": "PDF",
+        "pages": 2,
+        "reads": 4,
+        "releases": 1
+      },
+      {
+        "consumer": "Thumbnail",
+        "first": "miss",
+        "reads": 4,
+        "releases": 4,
+        "second": "exactHit",
+        "settingChange": "miss",
+        "smaller": "largerBucketHit(256x256)"
+      }
+    ],
+    "scope": "unsigned CLI; actual group/Finder not tested",
+    "staleRejected": true
+  },
+  "unattributedEvents": 0,
+  "compilerFlags": [
+    "ALHANGEUL_FONT_EXTENSION_PROBE"
+  ]
+}
