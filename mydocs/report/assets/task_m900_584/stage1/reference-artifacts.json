@@ -1,0 +1,14 @@
+[
+  {
+    "path": "Frameworks/generated_rhwp.h",
+    "sha256": "14994c7d1923107b5739b5518e43f98bc002e1b954a068647a377ec4d6e1fbc2",
+    "size": 7584,
+    "matches_reference": true
+  },
+  {
+    "path": "Frameworks/universal/librhwp.a",
+    "sha256": "521e53707bed97f95923e011076616344b17aaa42893b342923e82b973e4152a",
+    "size": 245983992,
+    "matches_reference": true
+  }
+]

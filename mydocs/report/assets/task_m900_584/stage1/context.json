@@ -1,0 +1,79 @@
+{
+  "observed_at": "2026-10-12T03:22:16.300174+09:00",
+  "branch": "local/task584",
+  "stage_start_commit": "b62083b8daf0d740ed24cbf2319274b039274915",
+  "analysis_source": "e75d3ec4662457eaca990bdf95596442e5e56503",
+  "analysis_tree": "da3f08b813e5b23a89ebab799006af727afe7930",
+  "previous_public_source": "64ed89f881438efdbaec8bb33a6b52d66b83746d",
+  "main": "43b4e998b93032b62bcb0517fb9c894de3dc8ae1",
+  "final_candidate_sha": null,
+  "proposed_version": "0.2.3",
+  "proposed_build": "21",
+  "bundles": {
+    "HostApp": {
+      "version": "0.2.2",
+      "build": "20"
+    },
+    "QLExtension": {
+      "version": "0.2.2",
+      "build": "20"
+    },
+    "ThumbnailExtension": {
+      "version": "0.2.2",
+      "build": "20"
+    },
+    "SpotlightImporter": {
+      "version": "0.2.2",
+      "build": "20"
+    }
+  },
+  "core": {
+    "rhwp_release_tag": "v0.8.7",
+    "rhwp_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "rhwp_enabled_features": "native-skia"
+  },
+  "studio": {
+    "source_release_tag": "v0.8.7",
+    "source_resolved_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "studio_font_menu_adapter_sha256": "f53b4416cff6e32e63be61da5bcce271280c8db6ee2ef7ce9ad6f5d55ee59dc4"
+  },
+  "existing_protection_checks": {
+    "Sources/HostApp/Services/DocumentSaveContract.swift": {
+      "same_as_public_v022": true,
+      "sha256": "b34d6f169f8d41302a09ea74929176ce9a6331f874924410ae73a412f9ae2dfe"
+    },
+    "Sources/HostApp/Services/DocumentProtectionSaveAlert.swift": {
+      "same_as_public_v022": true,
+      "sha256": "d2dd3f2094eb3df715f812a96b3c3bf9f7e1c24115b91c64c6a8283509fc5f89"
+    },
+    "Sources/HostApp/Services/DocumentCloseConfirmationController.swift": {
+      "same_as_public_v022": false,
+      "sha256": "9d96541e6e52d5a00e1dbf116531c71c15966ffab43daf436098cfb616c969e3"
+    }
+  },
+  "product_source_mutated": false,
+  "new_app_built": false,
+  "runtime_tests_executed": false,
+  "public_release_executed": false,
+  "checks": {
+    "main_devel_content": "PASS",
+    "core_build_info": "PASS",
+    "studio_assets": "PASS",
+    "native_font_matcher": "PASS",
+    "bundle_core_studio_identity": "PASS",
+    "cargo_pin": "PASS"
+  },
+  "cargo_dependency": {
+    "git": "https://github.com/edwardkim/rhwp.git",
+    "tag": "v0.8.7",
+    "features": [
+      "native-skia"
+    ]
+  },
+  "cargo_resolved_source": "git+https://github.com/edwardkim/rhwp.git?tag=v0.8.7#1a76570e833917d15817415a53c09ad61ab3203f",
+  "completed_at": "2026-10-12T03:35:04.791213+09:00",
+  "stage": "1",
+  "stage_result": "PASS: preparation investigation only",
+  "stage2_execution": "pending approval",
+  "source_review": "Protection safeguard retained; runtime confirmation deferred; recovery limitation remains unverified in new candidate"
+}
