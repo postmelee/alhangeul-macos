@@ -58,6 +58,8 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 ## 릴리즈 안내
 
+v0.2.3 / build 21은 Mac 설치 글꼴 사용과 rhwp v0.8.7 반영을 포함한 **미공개 준비 후보**입니다. 최종 DMG·설치·실제 업데이트 수용은 아직 진행하지 않았으며, 현재 공개 제공 버전은 아래 v0.2.2입니다. 준비 상태는 [v0.2.3 기록](mydocs/release/v0.2.3.md)에서 확인할 수 있습니다.
+
 ### v0.2.2
 
 `v0.2.2 (20)`은 새 문서를 저장한 뒤 닫기·앱 종료 시 미저장 경고가 반복되는 문제를 수정하고, 동일 버전 재설치 후 Spotlight 검색 준비를 보완했습니다. 문서 처리 엔진과 편집 화면은 직전 버전과 같은 `rhwp v0.8.6`을 사용합니다.
@@ -141,7 +143,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 ### WKWebView Viewer (MVP 뷰어)
 
 - macOS SwiftUI 기반 HostApp shell과 WKWebView
-- 개발 브랜치 기준 `edwardkim/rhwp` `v0.8.6`의 `rhwp-studio` viewer/editor 통합
+- 개발 브랜치 기준 `edwardkim/rhwp` `v0.8.7`의 `rhwp-studio` viewer/editor 통합
 - HWP/HWPX 파일 열기
 - WebView 내부 찾기, 복사, 기본 편집 UI
 - Finder 또는 다른 앱에서 파일 열기 요청 수신
