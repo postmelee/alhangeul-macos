@@ -91,4 +91,4 @@ Stage 2는 production 공급에 제어 가능한 scan/signature/알림 epoch·�
 
 Stage 3는 실제 production cache에서 10개 정상 요청·동일 키·최대 2실행/16접수·17번째 busy, deadline·취소·오류·stale·경합·복구를 검증한다. 취소가 무시되는 I/O가 끝나기 전에 슬롯을 재사용하지 않는 검사가 필요하다.
 
-Stage 4의 같은 signed 후보에서 warm metadata <200ms·provider <300ms와 정상 다수 파일 busy 0을 다시 측정한다. 직접 CLI 시간과 signed 시간을 합치지 않으며 실제 사용자 수용·웹 안내·release는 #569로 인계한다.
+Stage 4의 같은 signed 후보에서 warm metadata <200ms·provider <300ms와 정상 다수 파일 busy 0을 측정했다. 2026-10-11 승인으로 metadata 약 160~170ms·provider 약 328~343ms와 정상 자동 186건 busy 0·정확성·변경/복구·실제 GUI·원상복원을 현재 #580 완료 결과로 수용한다. provider <300ms는 미충족으로 보존하고 [독립 후속](../working/task_m020_580_followup_issue.md)으로 분리한다. 현재성·취소/lease·원본/권한·한도 계약은 완화하지 않는다. 직접 CLI 시간과 signed 시간을 합치지 않으며 실제 사용자 수용·웹 안내·release는 #569로 인계한다.

@@ -268,7 +268,7 @@ HWP/HWPX warm exactHit를 합친 각 조건 40건 중앙값:
 
 ## 12. Stage 4.3 — 새 후보 signed·실제 Finder 시험과 원상복원
 
-작업지시자가 “새 후보 로컬 서명·임시 Finder 시험·원상복원 허용”으로 `finder-candidate-03`/`580.4.3`/UUID `3D58BCF7-7255-4B67-9FC5-3954F7410316` 시험을 승인했다. 커밋 `1624842b`와 준비 영수증의 제품 Source 126개·fixture/native/core/asset/input·unsigned 전체 inventory를 확인해 같은 후보를 로컬 서명했다. **정확성·정상 busy 0과 실제 GUI는 통과했지만, ON provider <300ms 목표에 미달해 부모 Stage 4는 미완료다.** [측정](assets/task_m020_580_stage4_3_signed/measurements.json), [검증·복원](assets/task_m020_580_stage4_3_signed/validation.json)을 따른다.
+작업지시자가 “새 후보 로컬 서명·임시 Finder 시험·원상복원 허용”으로 `finder-candidate-03`/`580.4.3`/UUID `3D58BCF7-7255-4B67-9FC5-3954F7410316` 시험을 승인했다. 커밋 `1624842b`와 준비 영수증의 제품 Source 126개·fixture/native/core/asset/input·unsigned 전체 inventory를 확인해 같은 후보를 로컬 서명했다. **시험 당시 정확성·정상 busy 0과 실제 GUI는 통과했지만, ON provider <300ms 목표에 미달해 부모 Stage 4를 미완료로 보고했다. 현재 완료 판정은 §13의 승인된 기준 보정을 따른다.** [측정](assets/task_m020_580_stage4_3_signed/measurements.json), [검증·복원](assets/task_m020_580_stage4_3_signed/validation.json)을 따른다.
 
 첫 표준 설치 smoke는 parent app 등록 뒤 두 확장이 matching에 나타나지 않아 10회 scoped 조회 후 exit 30으로 중단됐다. helper가 원래 앱을 자동 복원했고 첫 실패 로그·복원 state를 보존했다. 동일 원본 inventory를 확인해 재시도했으며, 설치본의 marker·Info/실행 파일 SHA가 signed 후보와 같은 두 `.appex`만 명시 등록한 뒤 표준 smoke가 exit 0이었다. 전역 reset·다른 앱 등록·tracked helper 소스 변경은 하지 않았다.
 
@@ -305,7 +305,7 @@ ON1 HWP exact 10요청의 warm trace는 activeSignature 40구간 중앙값 **81.
 
 별도 3초 sample은 ON 재활성화 뒤 첫 cold 준비와 다음 warm 두 요청이 섞였다. 계산 속성 getter·FontRegistry XPC·JSON/stat 호출이 관찰되지만 warm 비용 지분이나 원인으로 확정하지 않는다. [profile 기록](assets/task_m020_580_stage4_3_signed/profile.json)은 이 한계와 원시 SHA를 함께 보존한다.
 
-다음은 [구현계획 §6.3](../plans/task_m020_580_impl.md)의 Stage 4.4 제안이다. 먼저 warm signature 안의 URL/PS/최소 속성·원본 stat·key 구성·정렬/digest를 나누고, SDK bulk 속성 조회 또는 정확한 전체 값 비교를 유지하는 key 구성 보완이 유효한지 실험한다. 성능·동등성이 입증된 조건만 확장 경로에 적용한다. 소스 추가 변경은 아직 하지 않았고 이 범위의 승인이 필요하다.
+시험 후 [구현계획 §6.3](../plans/task_m020_580_impl.md)의 Stage 4.4 비용 분해·조건부 보완을 제안했다. 2026-10-11 작업지시자의 §13 승인으로 이 제안은 미착수 독립 후속으로 분리한다. warm signature 안의 URL/PS/최소 속성·stat·key·정렬/digest 및 bulk 속성/전체 값 비교의 동등성을 조사하는 [후속 이슈 본문](task_m020_580_followup_issue.md)을 준비했다. #580 제품 소스를 더 변경하지 않고, 후속 등록/착수 승인과 #580 Stage 5를 구분한다.
 
 ### 12.2 원상복원과 공간 정리
 
@@ -314,3 +314,25 @@ ON1 HWP exact 10요청의 warm trace는 activeSignature 40구간 중앙값 **81.
 복원 확인 후 소유 후보·fixture·두 staging·두 원본 백업 6개 bundle을 개별 해제·삭제했다. 추가 정리량은 **1,736,202,094 bytes(약 1.617GiB 논리 파일 합계)**다. 원본 OFL·입력·원시 로그/JSON/PNG·source receipt·dSYM·필요 Xcode/SwiftPM cache는 보존했다. 최종 점검은 원래 `/Applications/Alhangeul.app` provider이며 개발 등록·개발 bundle·문제·경고 모두 0이다. 마지막 볼륨 여유는 약 11GiB이고 APFS/동시 작업 때문에 논리 삭제량과 같은 증가를 보장하지 않는다. 사용자 OS 글꼴·공유 Host 설정·다른 앱 등록·공개 배포는 변경하지 않았다.
 
 표준 smoke 시작 이후 DiagnosticReports의 두 확장 이름을 대상으로 한 crash 점검은 새 report 0이었다. 모든 잠재 crash를 보증하는 검사는 아니며 원시 점검 로그 SHA를 검증 증거에 보존했다.
+
+
+## 13. Stage 4 완료 기준 보정과 후속 분리
+
+2026-10-11 작업지시자가 “현재 검증 결과를 수용하도록 Stage 4 완료 기준을 보정하고, 추가 최적화는 후속 작업으로 분리한 뒤 #580 Stage 5를 진행해줘”로 승인했다. 수행계획 §4·구현계획 §6.4·현재성/대기 계약을 함께 보정했다. 제품 소스나 기존 시험 결과를 바꾸지 않았다.
+
+| 완료 조건 | 현재 판정 |
+|------|------|
+| 같은 signed 후보·고정 workload·각 warm 조건 10건·ON 두 workload/OFF 대조 | 수용. 후보 `580.4.3`, 제품 소스 `1624842b`, 같은 Thumbnail PID; 새 PID 두 번을 뜻하지 않음 |
+| metadata <200ms | 통과. ON 약 160~170ms |
+| provider <300ms | 원래 목표 미충족. ON 각 warm 조건 중앙값 약 328~343ms를 이 후보의 현재 결과로 명시 수용; <300ms는 독립 후속 목표 |
+| 정상 다수 파일·처리 한도 | 정상 자동 186건 완료·busy 0. render 2/admission 16/bitmap 96항목·64MiB 유지; 의도적 초과·오류 대조 분리 |
+| 정확성·현재성·수명 | face/bytes·원본/권한·정책/manifest·epoch·취소/lease·변경/복구 회귀 통과; 검사를 제거하지 않음 |
+| 실제 GUI/출력 소비자 | Finder 두 폴더·첫/재방문/크기 변화, Quick Look PNG/2페이지 PDF 확인. GUI Thumbnail 85·실제 Preview 31은 자동 제어와 별도 집계 |
+| 설치본·등록·공간 | 원래 v0.2.2의 243항목 파일/link/권한 inventory·strict 서명 복원, 소유 UUID 보관함/후보 정리; 개발 등록·bundle·문제·경고 0 |
+| 최초 준비·다수 파일 대기·환경 제한 | 별도 한계로 공개. ON 다수 파일 첫 miss 중앙값 1,877.938ms/최대 5,339.784ms, warm exact 중앙값 357.995ms. arm64/macOS 26.5.2 결과이며 화면 paint·최소 OS/Intel 보장이 아님 |
+
+**부모 Stage 4 완료, Stage 5 진행 승인.** 기존 signed `measurements.json`/`validation.json`의 `goalsMet: false`, 모든 표본·원시 SHA와 이전 실패 기록은 보존한다. 새로운 보편적인 350ms 상한을 만들거나 300ms 통과로 바꾸지 않는다. 현재 결과 수용은 글꼴 정확성·원본/권한·현재성 검사 완화와 관계없다.
+
+[후속 이슈 본문](task_m020_580_followup_issue.md)은 warm 비용 분해·동등성이 입증된 작은 보완을 다룬다. 등록 시 기존 milestone과 `enhancement`/`kind:follow-up`/두 확장·rendering label을 사용한다. 구체 본문 공개 등록은 자동 승인 검토가 별도 권한을 요구해 승인 대기이며, 후속 구현·새 후보 서명/설치는 시작하지 않았다. 후속 이슈는 #580 완료와 #569 Mac 수용·안내·출시 준비의 선행 조건이 아니다.
+
+Stage 5에서는 증거 checksum·현재 제품 source receipt·core/asset/native와 문서/본문·content gate를 확인하고 기존 성공 회귀를 취합한다. 제품 변경이 없어 전체 성능·signed 설치 시험을 반복하지 않는다. 최종 보고/PR 준비 이후 공개 게시 승인 절차를 따르며, #580 merge 후 #569 Stage 3 웹 안내 → Stage 4 같은 후보 Mac 수용으로 인계한다. 공개 release나 #562/#569 전체 완료는 포함하지 않는다.
