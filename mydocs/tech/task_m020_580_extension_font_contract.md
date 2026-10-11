@@ -20,7 +20,7 @@
 
 | 대상 | 확인 항목 |
 |------|------|
-| 활성 descriptor | enabled 상태 필터 후 canonical source URL, PostScript 이름, family/style, 정렬된 variation 좌표, symbolic/weight/width/slant traits |
+| 활성 descriptor | 매번 새 CoreText 활성 목록을 얻은 뒤 canonical source URL, PostScript 이름, family/style, 정렬된 variation 좌표, symbolic/weight/width/slant traits |
 | 목록 전체 | 정렬 순서에 무관하게 비교하되 중복 descriptor의 개수는 보존; 활성 목록의 추가·제거·비활성 반영 |
 | 원본 파일 | canonical URL별 stat 중복 제거; 계산 속성 cache miss의 저장 전 stat 추가 재확인; device/inode/size/mtime/ctime의 초·나노초; 읽기 확인 실패는 성공 stamp와 다른 상태 |
 | 공유 상태 | 설치 사용 정책 revision, 관리 manifest generation/digest·선택 및 객체 stamp, 알림 epoch, 준비 성공/실패 상태 |
@@ -34,6 +34,10 @@ Stage 2 구현은 CoreText collection 안에서 이미 활성 필터를 통과�
 Stage 4.2는 확장 전용 `InstalledFontDescriptorCache`로 계산 속성만 재사용한다. 활성 collection·enabled·현재 URL/PS·원본 stat은 매 capture에서 확인한다. 전체 최소 속성 dictionary의 결정적 타입 보존 직렬화와 현재 URL/PS·stamp를 key로 삼고, 즉시 변경 epoch가 같은 cache session에서만 조회/저장한다. key 자체를 비교하며 hash만으로 같은 descriptor라고 판정하지 않는다. unknown·비정상 수·과도한 key는 cache를 사용하지 않고 기존 엄격한 getter로 처리한다. 중복·축·traits와 최종 signature 형식은 유지한다.
 
 epoch·실패·취소로 무효화한 session의 늦은 저장은 차단하고, 재사용 불가능한 signature는 이전 계산 정보를 폐기한다. 저장은 최대 20,000항목·key/필드의 논리 크기 16MiB로 제한하며 넘으면 저장을 생략한다. 이 값은 실제 RSS 상한이 아니다. bytes/FD/snapshot을 저장하거나 전후/current 검사를 생략하지 않는다. HostApp의 기본 system 경로에는 이 cache를 연결하지 않는다. 직접 동등성·회귀 근거와 signed 재측정 gate는 [Stage 4 보고](../working/task_m020_580_stage4.md)를 따른다.
+
+Stage 4.3은 확장 기본 환경의 `activeListMode`만 `activeCollection`으로 선택한다. `kCTFontCollectionIncludeDisabledFontsOption=false`로 매 capture마다 새 collection을 만들고 matching 결과의 중복을 보존한다. 활성 목록 자체나 enabled 값을 보관하지 않으며 matching 결과를 얻지 못하면 새 기본 collection과 기존 enabled getter 필터로 확인한다. HostApp 기본값은 `checkedAttributes`이고 주입 환경은 그대로 따른다. 원본 stat·epoch·계산 속성 key·전후/current 검사와 최종 digest 형식은 유지한다.
+
+제품 연결 전 두 프로세스의 실제 목록 30쌍에서 기존 필터와 명시적 collection의 URL/PS 다중집합·digest/reusable이 일치했다. 고유 OFL 파일을 process scope로 등록하고, 실제 matching descriptor의 URL/PS/등록 scope를 확인한 뒤 해당 descriptor만 비활성화·재활성화·해제했다. 제품 회귀는 강제 epoch 갱신 없이도 이 변화를 감지했다. 사용자 OS 글꼴 설치/비활성화, 다른 macOS 버전 및 signed sandbox 동등성까지 검증한 것은 아니다. 새 후보의 동일 signed 목표를 확인하기 전 부모 Stage 4를 완료하지 않는다.
 
 sandbox에서 얻는 목록과 원본 상태만 사용한다. HostApp bookmark나 관리 보관함 외의 지속 접근 권한을 공유하지 않는다. 현재성 검사가 실패하면 이전 bitmap을 성공으로 반환하지 않고 stale/준비 오류 경로로 처리한다. 모든 파일 bytes 선읽기는 금지한다.
 

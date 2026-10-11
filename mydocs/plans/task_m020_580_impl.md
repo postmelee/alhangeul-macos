@@ -4,7 +4,7 @@
 - 이슈: [#580](https://github.com/postmelee/alhangeul-macos/issues/580), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562), 후속 [#569](https://github.com/postmelee/alhangeul-macos/issues/569)
 - 제품 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`, 작업 `local/task580`
 - 수행계획 승인: 2026-10-10 “수행계획 승인·구현계획 작성 진행”. 구현계획·Stage 1 승인: 같은 날 “구현계획 승인·Stage 1 진행”.
-- 현재: Stage 1~3 완료 후 “진행해줘.”로 Stage 4 재측정·후보 준비를 승인받았다. [Stage 4 보고](../working/task_m020_580_stage4.md)의 첫 고정 후보를 2026-10-11 승인으로 시험·복원했고 정상 요청 186건 busy 0이나 ON 목표 미달이었다. 같은 날 승인받은 Stage 4.2 실험·조건부 구현·직접 검증·새 미서명 후보 준비까지 완료했다. 부모 Stage 4는 새 후보 signed 목표·실제 GUI/Preview 수용 전까지 미완료다. 이어서 새 후보 `finder-candidate-02`의 로컬 서명·임시 Finder 시험·원상복원을 명시 승인받아 완료했다. 실제 GUI/Preview는 확인했지만 ON signed 약 612~653ms로 여전히 목표 미달이다. §6.2의 추가 보완은 승인 대기다.
+- 현재: Stage 1~3 완료 후 “진행해줘.”로 Stage 4 재측정·후보 준비를 승인받았다. [Stage 4 보고](../working/task_m020_580_stage4.md)의 첫 고정 후보를 2026-10-11 승인으로 시험·복원했고 정상 요청 186건 busy 0이나 ON 목표 미달이었다. 같은 날 승인받은 Stage 4.2 실험·조건부 구현·직접 검증·새 미서명 후보 준비까지 완료했다. 부모 Stage 4는 새 후보 signed 목표·실제 GUI/Preview 수용 전까지 미완료다. 이어서 새 후보 `finder-candidate-02`의 로컬 서명·임시 Finder 시험·원상복원을 명시 승인받아 완료했다. 실제 GUI/Preview는 확인했지만 ON signed 약 612~653ms로 여전히 목표 미달이다. §6.2 Stage 4.3을 명시 승인받아 실제 목록 30쌍 동등성·확장 전용 조회 보완·직접 회귀·새 미서명 `finder-candidate-03` 준비를 완료했다. 새 후보 서명/임시 Finder 시험·복원은 구체 계획 검토 후 별도 승인 대기다.
 - 측정 기준: #569 Stage 2 `60ea06a384ce5ba9e43b60a30278ce1268efe237`. 공개 본문의 핵심 표와 로컬 브랜치·선별 증거를 대조한다. 원시 근거는 덮어쓰지 않는다.
 
 ## 1. 현행 경로와 단계 구성
@@ -135,7 +135,7 @@ Stage 4의 첫 signed 시험에서 warm metadata 중앙값은 OFF 약 4.5~5.0ms,
 
 2026-10-11 받은 보완 승인은 1~4의 실험·조건부 구현·직접 검증과 5의 미서명 후보 준비까지 포함한다. 새 후보의 Developer ID 사용·`/Applications` 교체·공개 배포는 포함하지 않는다.
 
-### 6.2 Stage 4.3 — sandbox 활성 목록 조회 보완안 (승인 대기)
+### 6.2 Stage 4.3 — sandbox 활성 목록 조회 보완안 (승인)
 
 같은 새 signed 후보의 warm ON metadata는 약 302~321ms, provider는 약 612~653ms다. `activeSignature` 한 구간 약 149ms 중 `systemEnumerate` 약 92ms이며, 별도 sample은 enabled getter의 FontRegistry XPC 대기를 보여 준다. `captureActive` 내부의 enabled 재조회는 이미 없으므로 중복 호출 제거로 잘못 설명하지 않는다.
 
@@ -146,7 +146,7 @@ Stage 4의 첫 signed 시험에서 warm metadata 중앙값은 OFF 약 4.5~5.0ms,
 3. 동등성을 입증한 경우에만 확장의 collection 옵션/조회 경로를 보완한다. HostApp 기본 경로와 활성 변경 감지를 유지한다. collection 결과 실패·알 수 없는 조건의 처리와 disabled/등록/해제·다른 원본·축/traits·권한/epoch·동시 변경/취소 회귀를 검증한다. 테스트 가능한 범위와 미검증 상태를 구분한다.
 4. 공통 FontLibrary/Host 출력·확장 PNG/단일·2페이지 PDF·current/queue/lease를 확인하고 동일 직접 non-optimized/`-O` 및 기본/진단 Release source receipt를 고정한다. 새 미서명 후보·복원 계획까지만 준비한다. 승인한 후보의 같은 signed <200ms/<300ms·10건 이상·busy 0 기준을 통과하기 전 부모 Stage 4/Stage 5로 넘기지 않는다.
 
-예상 변경은 `InstalledFontSystem.swift`와 확장 준비의 필요한 진입점, 활성 목록/변경/성능 probe 및 XCTest다. 더 큰 current 계약 재설계·검사 삭제나 완료 기준 완화가 필요하면 근거를 보고하고 다시 범위를 승인받는다. 이번 제안은 아직 승인받지 않았고 제품 코드를 바꾸지 않았다.
+예상 변경은 `InstalledFontSystem.swift`와 확장 준비의 필요한 진입점, 활성 목록/변경/성능 probe 및 XCTest다. 더 큰 current 계약 재설계·검사 삭제나 완료 기준 완화가 필요하면 근거를 보고하고 다시 범위를 승인받는다. 2026-10-11 “Stage 4.3 보완안 승인·진행”으로 이 범위를 승인받았다. 동등성 입증 후에만 제품 경로를 보완하고, 새 후보 서명/임시 설치는 포함하지 않는다.
 
 ## 7. Stage 5 — 회귀·보고·PR·후속 인계
 
@@ -172,4 +172,4 @@ Stage 4의 첫 signed 시험에서 warm metadata 중앙값은 OFF 약 4.5~5.0ms,
 
 수행계획·구현계획·Stage 1 및 Stage 2를 승인받아 완료했다. Stage 2 보고 후 작업지시자의 “진행해줘. 저장공간도 최대한 확보하면서 진행해줘.” 지시로 **Stage 3의 제한된 렌더 대기·병합·취소/과부하 구현과 소유 부산물 정리를 승인받아 완료했다.** [Stage 3 보고](../working/task_m020_580_stage3.md) 후 작업지시자의 “진행해줘.” 지시로 Stage 4 재측정·후보 수용 준비를 승인받았다.
 
-고유 후보/fixture·백업/복원 대상에 한해 로컬 서명·임시 설치를 승인받아 실제 확장을 측정하고 원래 앱을 복원했다. 정상 busy는 0이지만 ON 시간 목표를 만족하지 않아 §6.1의 구체 Stage 4.2 범위 보정을 승인받았다. 동등성 입증 전 제품 기본 재사용 경로를 연결하지 않으며, signed 목표·실제 GUI 수용 전 Stage 4 완료 커밋·Stage 5 진입을 하지 않는다. 새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·공개 release는 이번 승인에도 포함하지 않는다.
+고유 후보/fixture·백업/복원 대상에 한해 로컬 서명·임시 설치를 승인받아 실제 확장을 측정하고 원래 앱을 복원했다. 정상 busy는 0이지만 ON 시간 목표를 만족하지 않아 §6.1 Stage 4.2와 §6.2 Stage 4.3의 구체 보완 범위를 각각 승인받았다. Stage 4.3은 직접 동등성 입증 후 확장 전용 활성 collection 조회를 연결하고 회귀·미서명 후보 준비까지 진행한다. 새 후보의 서명·임시 설치는 구체 후보와 복원 계획 검토 후 별도 승인 대상이다. signed 목표·실제 GUI 수용 전 Stage 4 완료 커밋·Stage 5 진입을 하지 않는다. 새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·공개 release는 이번 승인에도 포함하지 않는다.

@@ -118,6 +118,15 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter:
         let output = URL(fileURLWithPath: CommandLine.arguments[2])
         let mode = CommandLine.arguments[3], enabled = CommandLine.arguments[4] == "on"
         let repetition = Int(CommandLine.arguments[5]) ?? 0
+        if mode == "collections" {
+            let equivalent = try await ActiveCollectionExperiment.run(input: input, output: output)
+            let result = PerformanceResult(pid: getpid(), mode: mode, installedEnabled: enabled,
+                repetition: repetition, processBundledFontWarmup: false, samples: [], events: [],
+                proofs: ["activeCollectionEquivalenceAndProcessLifecycle": equivalent])
+            let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            try encoder.encode(result).write(to: output.appendingPathComponent("result.json"))
+            return
+        }
         let root = output.appendingPathComponent("library")
         let store = FontLibraryStore(rootURL: root)
         let imported = await store.importCandidates(["Regular", "Bold"].map {
@@ -131,7 +140,8 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter:
             _ = try HwpPreviewPNGRenderer.render(context: context, mode: .coreGraphics, forceDefaultFonts: true)
         }
         let changes = InstalledFontChangeEpoch()
-        let meter = PerformanceMeter(), live = InstalledFontSystem(descriptorCache: .init(changes: changes)).environment
+        let meter = PerformanceMeter(), live = InstalledFontSystem(descriptorCache: .init(changes: changes),
+                                                                  activeListMode: .activeCollection).environment
         let environment = InstalledFontEnvironment(scan: { grants in
             let start = uptime()
             do { let value = try live.scan(grants); meter.record("scan", start); return value }

@@ -81,7 +81,8 @@ actor ExtensionFontSupply {
          environment: InstalledFontEnvironment? = nil,
          changes: InstalledFontChangeEpoch = .init(), observeChanges: Bool = true) {
         self.resolveRoot = resolveRoot
-        self.environment = environment ?? InstalledFontSystem(descriptorCache: .init(changes: changes)).environment
+        self.environment = environment ?? InstalledFontSystem(descriptorCache: .init(changes: changes),
+                                                              activeListMode: .activeCollection).environment
         self.changes = changes; self.observeChanges = observeChanges
     }
 

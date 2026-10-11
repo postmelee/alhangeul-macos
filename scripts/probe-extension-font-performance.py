@@ -67,7 +67,7 @@ def main():
     driver_source = Path(__file__).read_bytes()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--suite", choices=["snapshot", "consumers", "transitions", "guards", "signature", "attributes", "all"], default="all")
+    parser.add_argument("--suite", choices=["snapshot", "consumers", "transitions", "guards", "signature", "attributes", "collections", "all"], default="all")
     parser.add_argument("--binary", type=Path, help="동일 source receipt의 기존 격리 binary 재사용")
     parser.add_argument("--optimization", choices=["none", "speed"], default="none", help="기존 비최적화 비교와 -O 비교를 분리")
     parser.add_argument("--repetitions", type=int, choices=range(1, 4), help="부분 진단용 반복 수")

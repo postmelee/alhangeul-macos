@@ -35,13 +35,19 @@ struct InstalledFontPermissionAccess: Sendable {
 }
 
 struct InstalledFontSystem: Sendable {
+    enum ActiveListMode: Sendable {
+        case checkedAttributes
+        case activeCollection
+    }
     let access: InstalledFontPermissionAccess
     private let descriptorCache: InstalledFontDescriptorCache?
+    private let activeListMode: ActiveListMode
     static let maximumRecords = 20_000
     static let maximumBytes = 64 * 1024 * 1024
 
-    init(access: InstalledFontPermissionAccess = .system, descriptorCache: InstalledFontDescriptorCache? = nil) {
-        self.access = access; self.descriptorCache = descriptorCache
+    init(access: InstalledFontPermissionAccess = .system, descriptorCache: InstalledFontDescriptorCache? = nil,
+         activeListMode: ActiveListMode = .checkedAttributes) {
+        self.access = access; self.descriptorCache = descriptorCache; self.activeListMode = activeListMode
     }
 
     var environment: InstalledFontEnvironment {
@@ -130,6 +136,15 @@ struct InstalledFontSystem: Sendable {
         let started = DispatchTime.now().uptimeNanoseconds
         defer { ExtensionFontPerformanceTrace.interval("systemEnumerate", start: started, success: true) }
         #endif
+        if activeListMode == .activeCollection {
+            // CoreText matching 자체의 disabled 제외 계약을 사용한다. 각 검사마다 새 목록을 얻으며 중복은 보존한다.
+            let options = [kCTFontCollectionIncludeDisabledFontsOption: false] as CFDictionary
+            let collection = CTFontCollectionCreateFromAvailableFonts(options)
+            if let descriptors = CTFontCollectionCreateMatchingFontDescriptors(collection) as? [CTFontDescriptor] {
+                return descriptors
+            }
+            // collection 결과를 얻지 못한 경우 기존 조회로 다시 확인한다.
+        }
         let collection = CTFontCollectionCreateFromAvailableFonts(nil)
         return (CTFontCollectionCreateMatchingFontDescriptors(collection) as? [CTFontDescriptor] ?? []).filter {
             (CTFontDescriptorCopyAttribute($0, kCTFontEnabledAttribute) as? NSNumber)?.boolValue != false

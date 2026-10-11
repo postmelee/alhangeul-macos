@@ -221,3 +221,47 @@ GUI Preview와 소유 시험 Finder 창을 닫고, 설치 marker·실행 경로�
 첫 복원 뒤 등록 점검은 후보/staging의 LaunchServices 등록 2개를 발견해 exit 1이었다. 소유 네 bundle의 경로/marker/inventory를 검증해 개별 등록을 해제·삭제한 뒤 최종 점검은 원래 `/Applications/Alhangeul.app` provider, 개발 등록/개발 bundle/문제/경고 **모두 0**으로 통과했다. 일부 이미 미등록인 importer 개별 해제는 exit 1로 기록했으며 최종 점검과 구분한다. 이전 `mdimport -L` stale 표기를 해결하기 위한 전역 reset은 하지 않았다.
 
 완료한 후보·fixture·staging·복원 백업 네 bundle 합계 **1,015,108,423 bytes(약 968MiB 논리 파일 합계)**를 추가 정리했다. 원본 앱·사용자 글꼴·공유 Host 설정을 유지하고 원시 로그/JSON/PNG·입력/원본 OFL·dSYM·필요 compile cache는 보존했다. 마지막 볼륨 여유는 약 16GiB로 관찰했으며 APFS·동시 작업의 영향 때문에 삭제량과 여유 변화가 같다고 주장하지 않는다.
+
+## 11. Stage 4.3 — 활성 collection 동등성·확장 조회 보완·후보 준비
+
+2026-10-11 “Stage 4.3 보완안 승인·진행”으로 [구현계획 §6.2](../plans/task_m020_580_impl.md)를 승인받았다. 직접 동등성을 입증한 뒤 확장 조회를 보완하고 회귀·새 미서명 후보 준비를 완료했다. **새 후보의 Developer ID 서명·설치·시험은 수행하지 않았다.** 부모 Stage 4의 signed 시간 목표와 새 후보의 실제 Finder/Preview 수용은 남아 있다. [검증 증거](assets/task_m020_580_stage4_3/validation.json)와 [소스·빌드 영수증](assets/task_m020_580_stage4_3/source-receipt.json)을 따른다.
+
+SDK `CTFontCollection.h`의 `kCTFontCollectionIncludeDisabledFontsOption`은 nonzero일 때 disabled 글꼴을 포함하며 macOS 10.7부터 제공된다. 기본 목록에 개별 enabled getter 필터를 적용한 기존 경로와 명시적 false 옵션의 새 목록을 매번 별도로 얻었다. URL/PS의 정렬된 다중집합(중복 보존)과 기존 signature digest/reusable을 비교했다. 계산 속성 cache를 함께 사용했지만 활성 목록이나 enabled 값은 보관하지 않았다.
+
+첫 실험은 baseline 11쌍의 동등성을 확인한 뒤 `RegisterFontDescriptors(.process, enabled=false)`의 callback 성공과 달리 실제 matching descriptor가 enabled로 남아 실패했다. 이 실행은 disabled 검증으로 집계하지 않았다. 별도 진단에서 `GetScopeForURL`도 process 등록에 none을 반환했다. 따라서 새 실험은 동명 글꼴이 없는 고유 OFL 복사본을 process scope로 등록하고, 실제 matching descriptor의 **URL·PS·등록 scope=process**를 확인한 뒤 해당 descriptor만 `EnableFontDescriptors(false/true)`로 변경했다. 사용자 OS 글꼴을 설치·비활성화하지 않았으며 임의의 동명 descriptor를 변경하지 않았다.
+
+최종 제품 변경 전 **2프로세스·30쌍**이 모두 같은 다중집합·digest/reusable이었다. 각 프로세스는 baseline 11쌍, 등록·실제 비활성화·재활성화·해제 4쌍이다. 목록은 809→810→809→810→809로 변했고 해제 뒤 baseline으로 복원됐다. warm baseline 10쌍의 기존 경로 중앙값은 186.495/185.393ms, 새 collection+계산 속성 재사용 경로는 31.441/31.579ms였다. [동등성 기록](assets/task_m020_580_stage4_3/collection-equivalence.json)은 이 비교와 첫 실패·진단 SHA를 구분한다. 이 값은 sandbox 비용이나 모든 macOS 버전의 실행 증거가 아니다.
+
+`InstalledFontSystem.activeListMode`를 추가했다. 확장 기본 환경은 `activeCollection`을 선택해 매 검사마다 explicit false 옵션으로 새 목록을 얻고 중복을 보존한다. matching 결과가 없으면 새 기본 collection과 기존 enabled 필터로 확인한다. HostApp 기본값은 `checkedAttributes`이며 주입 환경·원본 stat·epoch·cache key·정밀 face/bytes·전후/current 검사와 digest 형식을 유지했다. `captureActive` 안의 enabled 중복 조회를 제거한 변경으로 설명하지 않는다. core/ABI/Studio/UI/renderer는 변경하지 않았다.
+
+공통 XCTest에 실제 Host/확장 metadata·signature 비교와 process 등록/비활성화/재활성화/해제 회귀 2개를 추가했다. 후자는 강제 epoch 갱신 없이도 새 collection이 변경을 감지했고, 두 테스트 모두 skip 없이 통과했다. 프로젝트 파일의 추가 4줄은 `project.yml` 기반 `xcodegen generate` 결과이며 직접 편집하지 않았다.
+
+동일 최종 소스·입력의 비최적화/`-O` 직접 검증은 각각 14프로세스·650표본이다. 각 검증의 정상 consumer OFF/ON 288건씩, 합계 **1,152건 success·busy 0**이다. ON 최초 전체 scan은 각 프로세스 1회, warm은 0회다. exact/larger hit bytes 0·정확한 Regular/Bold·단일/2페이지·lease 해제·정책/관리 실패·취소/과부하 분류를 통과했다. [직접 측정](assets/task_m020_580_stage4_3/measurements.json)에 전체 표본 근거·조건별 중앙값/최대와 proof를 보존했다.
+
+HWP/HWPX warm exactHit를 합친 각 조건 40건 중앙값:
+
+| 직접 조건 | metadata (ms) | 전체 (ms) |
+|------|------:|------:|
+| 비최적화 OFF | 2.272 | 4.383 |
+| 비최적화 ON | 54.890 | 107.347 |
+| `-O` OFF | 1.741 | 3.367 |
+| `-O` ON | 70.382 | 139.777 |
+
+`-O` 측정 일부는 독립 Xcode/FontLibrary 빌드와 겹쳤다. 이전 Stage 4.2의 직접 `-O` 약 117ms보다 이번 값이 높고 비최적화보다도 높으므로 순수한 개선율·최적화 효과를 주장하지 않는다. 두 직접 조건은 <200ms/<300ms 안이지만 **signed 목표 합격을 대신하지 않는다.** 실제 확장의 enabled getter XPC 대기 제거 효과는 같은 새 후보에서 측정해야 한다.
+
+| 최종 검증 | 결과 |
+|------|------|
+| FontLibrary XCTest | 162개, 실패 0; 실제 활성 상태 회귀 2개 skip 0 |
+| Host 출력·Spotlight 선택 XCTest | Debug 앱과 test bundle을 먼저 빌드한 뒤 81개, 실패 0 |
+| 진단 `-O` 확장 probe | CoreGraphics/Skia PNG·2페이지 PDF·current/queue/lease/취소·한도 PASS; 비교 PNG 네 개의 SHA가 이전 결과와 동일 |
+| 기본/진단 Release | 모두 BUILD SUCCEEDED; 기본 probe marker 없음·진단 있음, 제품 Source 126개 고정 |
+| no-AppKit·matcher/Studio receipt·로그 parser·구문·증거 SHA·diff | PASS |
+| 후보 서명/설치 guard | 해당 helper 소스는 이전 16조건 PASS 실행과 동일; source/fixture/native/asset/input·전체 unsigned inventory를 새 영수증에 고정 |
+
+완료한 실험·비최적화 binary/module·private 보관함·중복 Debug/Release bundle·native archive 복사본 등 52경로를 **2,116,721,826 bytes(약 1.971GiB 논리 파일 합계)** 추가 정리했다. 원본 OFL·입력·로그/JSON/PNG/PDF·현재 canonical `-O` CLI·dSYM·Xcode/SwiftPM cache·새 후보/fixture는 보존했다. 소유 빌드 경로만 개별 해제했으며 전역 reset이나 다른 작업의 cache 삭제는 하지 않았다. 최종 등록 점검은 원래 `/Applications/Alhangeul.app` provider·개발 등록/문제 0이고, 승인 대기 미서명 후보 1개의 bundle 경고만 남는다. 이전 importer stale 표기 해결을 위한 전역 재등록도 수행하지 않았다.
+
+원래 v0.2.2 앱 243항목 inventory는 준비 전/정리 후 동일하고 strict 서명 검증도 통과했다. 새 후보 전체 inventory도 정리 전후 같으며 install-state/고유 보관함을 만들지 않았다. 마지막 관찰의 볼륨 여유는 약 13GiB다. APFS·동시 작업 때문에 논리 삭제량과 실제 여유 변화가 같다고 주장하지 않는다.
+
+새 후보는 `build.noindex/task580/stage4/finder-candidate-03`, build **`580.4.3`**, UUID **`3D58BCF7-7255-4B67-9FC5-3954F7410316`**이다. unsigned 앱 전체 inventory는 `feb54d6d6d09d8a65196f5fbec3212c9ab32622cc42d215ea2caa36d84c6975d`, fixture는 `a2c1bcf137cdfa3e94c69fbb59f5a63c24881c878cc5d8111ce0cece9797d237`다. 준비 당시 HEAD는 `a806dc7f`이며 승인 범위의 미커밋 Source 126개 SHA를 별도로 고정했다. [후보·복원 계획](assets/task_m020_580_stage4_3/candidate-preparation.json)에 original inventory 243항목·설치 대상·백업 경로와 영수증 SHA를 기록했다.
+
+다음은 이 구체 후보와 fixture의 기존 Developer ID 로컬 서명·원본 백업/임시 Finder 시험·원상복원을 별도 승인받는다. 동일 signed warm metadata <200ms/provider <300ms·10건 이상 및 정상 다수 파일 busy 0, 실제 GUI/Preview·정확한 Regular/Bold·관리 변경/복구·원본 복원을 확인한다. macOS 12/Intel 실행·사용자 OS 글꼴 변경·공개 release는 이번 직접 검증에 포함하지 않는다. 목표를 만족하기 전 Stage 4 완료·Stage 5/PR로 넘어가지 않는다.

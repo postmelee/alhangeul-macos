@@ -1,0 +1,777 @@
+{
+  "status": "Stage 4.3 direct verification and unsigned candidate ready; signed/GUI gates pending",
+  "fontLibraryTests": {
+    "count": 162,
+    "failures": 0,
+    "logSHA256": "c6bfaf80d3e26096be3a8612f157e4d80fd15b644e9e43d94e35ef8689ee2e37"
+  },
+  "studioOutputTests": {
+    "count": 81,
+    "failures": 0,
+    "logSHA256": "dbc2490a062086de16fe0ce9db664b7414798af3d86cb89af28918bb0fdeb7e1",
+    "builtBeforeTest": true
+  },
+  "extensionAcceptance": {
+    "concurrentJobsBounded": true,
+    "documentStampInvalidated": true,
+    "permissionFallback": true,
+    "proofs": [
+      {
+        "bytes": 32775,
+        "consumer": "PNG",
+        "faces": [
+          "GowunBatang-Bold",
+          "GowunBatang-Regular"
+        ],
+        "mode": "coreGraphics",
+        "reads": 2,
+        "releases": 1
+      },
+      {
+        "bytes": 31654,
+        "consumer": "PNG",
+        "faces": [
+          "GowunBatang-Regular",
+          "GowunBatang-Bold"
+        ],
+        "mode": "skiaDecode",
+        "reads": 2,
+        "releases": 1
+      },
+      {
+        "bytes": 31826,
+        "consumer": "PNG",
+        "faces": [
+          "GowunBatang-Bold",
+          "GowunBatang-Regular"
+        ],
+        "mode": "skiaDirect",
+        "reads": 2,
+        "releases": 1
+      },
+      {
+        "consumer": "PDF",
+        "pages": 2,
+        "reads": 4,
+        "releases": 1
+      },
+      {
+        "consumer": "Thumbnail",
+        "first": "miss",
+        "reads": 4,
+        "releases": 4,
+        "second": "exactHit",
+        "settingChange": "miss",
+        "smaller": "largerBucketHit(256x256)"
+      }
+    ],
+    "scope": "unsigned CLI; actual group/Finder not tested",
+    "staleRejected": true,
+    "thumbnailQueue": {
+      "admission": 16,
+      "allCancelKeepsIOSlots": true,
+      "cancelAtSlotBoundary": true,
+      "cancelCompletionRecovery": true,
+      "deadlineExcludesRunningIO": true,
+      "deadlineIncludesMetadata": true,
+      "distinctKeys": 10,
+      "eviction64MiB": true,
+      "eviction97Entries": true,
+      "exactlyOnceRelease": true,
+      "fallbackNotCached": true,
+      "fifo": true,
+      "mergedParticipants": 5,
+      "noEarlyBytes": true,
+      "oneParticipantCancel": true,
+      "physicalSlots": 2,
+      "queuedMergeCancel": true,
+      "staleQueueRejected": true
+    }
+  },
+  "extensionResultSHA256": "7c4279b2f28e5c053f4e248897d2d5dd687b71a9eed4c30167834007c7b55abf",
+  "helperGuards": {
+    "unchangedScripts": true,
+    "previous16ConditionResult": {
+      "scope": "controlled fixtures; no external command or actual OS signing/install",
+      "proofs": {
+        "noSigningAuthorization": true,
+        "wrongPath": true,
+        "wrongTask": true,
+        "changedSource": true,
+        "addedSourceSet": true,
+        "removedSourceSet": true,
+        "changedCore": true,
+        "changedAssetReceipt": true,
+        "changedNativeArtifact": true,
+        "wrongSamplePath": true,
+        "changedSample": true,
+        "changedUnsignedResource": true,
+        "restoredUnsignedResource": true,
+        "backupContentLinkModeEquality": true,
+        "changedModeRejected": true,
+        "changedLinkRejectedWithoutFollowing": true
+      }
+    },
+    "previousResultSHA256": "3319f4fe4e5be2803bbe476980ffa0c177bc85877a0a47fff902c8234cd94351"
+  },
+  "coreLockSHA256": "975712e98ff9a83a98aa0395139794ff743b7c0d242eeaa8aec48a57e3b47697",
+  "assetManifestSHA256": "108e3cfed593fa29f1a4e34c008548184a342a9af1141ad65a746f0d499f10a7",
+  "nativeArtifactSHA256": {
+    "Frameworks/universal/librhwp.a": "521e53707bed97f95923e011076616344b17aaa42893b342923e82b973e4152a",
+    "Frameworks/generated_rhwp.h": "14994c7d1923107b5739b5518e43f98bc002e1b954a068647a377ec4d6e1fbc2"
+  },
+  "pending": [
+    "new candidate signing/temporary Finder trial approval",
+    "signed metadata <200ms/provider <300ms with warm 10+ samples",
+    "actual Finder GUI/Preview verification"
+  ],
+  "limits": [
+    "arm64/macOS 26.5.2 only",
+    "macOS 12/Intel runtime not verified",
+    "system load not fully controlled"
+  ],
+  "signedTrialRunThisSubstage": false,
+  "PNGUnchangedSHA256": {
+    "preview-coreGraphics.png": "9120fe4934333f727d458e85700b1bac73561ae162d482da31e213009dc4ee3c",
+    "preview-skiaDecode.png": "5dc2d62886b3a3596adc4f6d0f6bd86991a4a4c096595d3c0af32d3662dd5901",
+    "preview-skiaDirect.png": "6f481069347e806bba809c952f2b18f113e3749c4ac84f5efbba2a77ac1053a8",
+    "preview-permission-fallback.png": "e38021c90f07adbe46b172fa28cfcc1777fb3e94c40c42c5308cf2eec1d64954"
+  },
+  "buildOverlap": "speed timing partly overlapped independent Xcode/FontLibrary builds; not a controlled optimization comparison",
+  "activeLifecycleTests": {
+    "count": 2,
+    "skips": 0,
+    "forcedEpochInvalidation": false
+  },
+  "cleanup": {
+    "removed": [
+      {
+        "path": "build.noindex/task580/stage4/collection-equivalence-43-01/build/modules",
+        "fileCount": 68,
+        "logicalBytes": 35508932,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-equivalence-43-01/build/font-performance",
+        "fileCount": 1,
+        "logicalBytes": 65253184,
+        "fileSHA256": "7775988c3bf21467118942ed9852bb97dc14715365cc72f50df3a03e46c5c399",
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-equivalence-43-02/build/modules",
+        "fileCount": 68,
+        "logicalBytes": 35508932,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-equivalence-43-02/build/font-performance",
+        "fileCount": 1,
+        "logicalBytes": 65247824,
+        "fileSHA256": "6670f99671ac6fb286bf4ee1339a3fc00124045035b778bbbc2fe8d7858d716e",
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/build/modules",
+        "fileCount": 69,
+        "logicalBytes": 35508724,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/build/font-performance",
+        "fileCount": 1,
+        "logicalBytes": 67885296,
+        "fileSHA256": "a66688c4460416d211fe13a9138079d11e5b9068a612791fb74e11fff2ba4130",
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-lifecycle-debug-43/modules",
+        "fileCount": 58,
+        "logicalBytes": 33570118,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-lifecycle-debug-43/probe",
+        "fileCount": 1,
+        "logicalBytes": 117304,
+        "fileSHA256": "b75d8745377c800b7556d2fbd5a3e358ddb62c508a1abe32c1f4e989425e4c63",
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-lifecycle-debug-43/sync-probe",
+        "fileCount": 1,
+        "logicalBytes": 117976,
+        "fileSHA256": "c158a3f8672dd5c722bb0467f308bab32610856f64da0f7fca08123e54b5cb97",
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-lifecycle-debug-43/scope-probe",
+        "fileCount": 1,
+        "logicalBytes": 117480,
+        "fileSHA256": "7914d1c25282710d482b7d28b6b63e7c0c5466dcd9063a236f7b816953b2d922",
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/guards-on-0/library",
+        "fileCount": 7,
+        "logicalBytes": 25057530,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/guards-off-0/library",
+        "fileCount": 6,
+        "logicalBytes": 25057444,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/consumers-on-0/library",
+        "fileCount": 6,
+        "logicalBytes": 16620352,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/transitions-off-0/library",
+        "fileCount": 6,
+        "logicalBytes": 16620353,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/consumers-on-1/library",
+        "fileCount": 6,
+        "logicalBytes": 16620353,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/snapshot-on-1/library",
+        "fileCount": 6,
+        "logicalBytes": 16620353,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/snapshot-on-0/library",
+        "fileCount": 6,
+        "logicalBytes": 16620353,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/snapshot-off-2/library",
+        "fileCount": 5,
+        "logicalBytes": 16620266,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/consumers-off-0/library",
+        "fileCount": 5,
+        "logicalBytes": 16620266,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/consumers-off-1/library",
+        "fileCount": 5,
+        "logicalBytes": 16620266,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/snapshot-on-2/library",
+        "fileCount": 6,
+        "logicalBytes": 16620353,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/snapshot-off-1/library",
+        "fileCount": 5,
+        "logicalBytes": 16620266,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/transitions-on-0/library",
+        "fileCount": 6,
+        "logicalBytes": 16620354,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/snapshot-off-0/library",
+        "fileCount": 5,
+        "logicalBytes": 16620266,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/guards-on-0/library",
+        "fileCount": 7,
+        "logicalBytes": 25057533,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/guards-off-0/library",
+        "fileCount": 6,
+        "logicalBytes": 25057447,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/consumers-on-0/library",
+        "fileCount": 6,
+        "logicalBytes": 16620355,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/transitions-off-0/library",
+        "fileCount": 6,
+        "logicalBytes": 16620355,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/consumers-on-1/library",
+        "fileCount": 6,
+        "logicalBytes": 16620355,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/snapshot-on-1/library",
+        "fileCount": 6,
+        "logicalBytes": 16620355,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/snapshot-on-0/library",
+        "fileCount": 6,
+        "logicalBytes": 16620355,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/snapshot-off-2/library",
+        "fileCount": 5,
+        "logicalBytes": 16620268,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/consumers-off-0/library",
+        "fileCount": 5,
+        "logicalBytes": 16620268,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/consumers-off-1/library",
+        "fileCount": 5,
+        "logicalBytes": 16620268,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/snapshot-on-2/library",
+        "fileCount": 6,
+        "logicalBytes": 16620355,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/snapshot-off-1/library",
+        "fileCount": 5,
+        "logicalBytes": 16620267,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/transitions-on-0/library",
+        "fileCount": 6,
+        "logicalBytes": 16620356,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-speed-43-01/snapshot-off-0/library",
+        "fileCount": 5,
+        "logicalBytes": 16620268,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-direct-none-43-01/inputs",
+        "fileCount": 17,
+        "logicalBytes": 16720814,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-acceptance-43-01/private-library",
+        "fileCount": 6,
+        "logicalBytes": 16620304,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-acceptance-43-01/modules",
+        "fileCount": 68,
+        "logicalBytes": 35504868,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/collection-acceptance-43-01/extension-probe",
+        "fileCount": 1,
+        "logicalBytes": 65231168,
+        "fileSHA256": "64b83777c20765297582889d6d676d32123d4ced5e0697970340a3bd2ebaa88e",
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage4/finder-candidate-03/modules",
+        "fileCount": 67,
+        "logicalBytes": 34479948,
+        "fileSHA256": null,
+        "unregisterCommands": [],
+        "removed": true
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/Alhangeul.app",
+        "fileCount": 153,
+        "logicalBytes": 292571385,
+        "fileSHA256": null,
+        "unregisterCommands": [
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex"
+            ],
+            "exit": 0
+          },
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+            ],
+            "exit": 0
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/Alhangeul.app"
+            ],
+            "exit": 0
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+            ],
+            "exit": 0
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter"
+            ],
+            "exit": 1
+          }
+        ],
+        "removed": true,
+        "inventoryDigest": "834d685edcf86f4f5b5bf69b4d45e9bb3a9f9fe739018973d1698b9e7f7c9f15"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/AlhangeulPreview.appex",
+        "fileCount": 7,
+        "logicalBytes": 68654554,
+        "fileSHA256": null,
+        "unregisterCommands": [
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/AlhangeulPreview.appex"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/AlhangeulPreview.appex"
+            ],
+            "exit": 1
+          }
+        ],
+        "removed": true,
+        "inventoryDigest": "21054400a9764e12bc1c1d420c3e5fb9de91d233fd9af5b2be65db1b3595971e"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/AlhangeulThumbnail.appex",
+        "fileCount": 7,
+        "logicalBytes": 68884143,
+        "fileSHA256": null,
+        "unregisterCommands": [
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/AlhangeulThumbnail.appex"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/AlhangeulThumbnail.appex"
+            ],
+            "exit": 1
+          }
+        ],
+        "removed": true,
+        "inventoryDigest": "9aef9625907a1dea3830ef20ef9e9163bc36080679665b08368b9be16534fd72"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/Alhangeul.mdimporter",
+        "fileCount": 3,
+        "logicalBytes": 14391517,
+        "fileSHA256": null,
+        "unregisterCommands": [
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Debug/Alhangeul.mdimporter"
+            ],
+            "exit": 1
+          }
+        ],
+        "removed": true,
+        "inventoryDigest": "b55e2cb890f2c0b6d9a41f9097ec52af88d9882281d022982c2103d914237c68"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app",
+        "fileCount": 147,
+        "logicalBytes": 275879873,
+        "fileSHA256": null,
+        "unregisterCommands": [
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex"
+            ],
+            "exit": 0
+          },
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+            ],
+            "exit": 0
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app"
+            ],
+            "exit": 0
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+            ],
+            "exit": 0
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter"
+            ],
+            "exit": 1
+          }
+        ],
+        "removed": true,
+        "inventoryDigest": "5dae91db4421992163595b9f0a26169b04ae14b17e239dcc7ed89cdf17e7139a"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulPreview.appex",
+        "fileCount": 5,
+        "logicalBytes": 64654410,
+        "fileSHA256": null,
+        "unregisterCommands": [
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulPreview.appex"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulPreview.appex"
+            ],
+            "exit": 1
+          }
+        ],
+        "removed": true,
+        "inventoryDigest": "d0ca1123f75238ba59b34789bee5fde34928205dc310d5dee5c12abe84bfa32c"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulThumbnail.appex",
+        "fileCount": 5,
+        "logicalBytes": 64853791,
+        "fileSHA256": null,
+        "unregisterCommands": [
+          {
+            "args": [
+              "pluginkit",
+              "-r",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulThumbnail.appex"
+            ],
+            "exit": 1
+          },
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulThumbnail.appex"
+            ],
+            "exit": 1
+          }
+        ],
+        "removed": true,
+        "inventoryDigest": "ab23253a769f2cf8e25db9a541f35cf8409c1409a40ab3d8a6e5ae032edca7c8"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.mdimporter",
+        "fileCount": 3,
+        "logicalBytes": 14337709,
+        "fileSHA256": null,
+        "unregisterCommands": [
+          {
+            "args": [
+              "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister",
+              "-u",
+              "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.mdimporter"
+            ],
+            "exit": 1
+          }
+        ],
+        "removed": true,
+        "inventoryDigest": "45c56a0215ad05b63a082147a2e1294588ffad7f9c3375b073ae7a25c838f0fa"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/librhwp.a",
+        "fileCount": 1,
+        "logicalBytes": 245983992,
+        "fileSHA256": "521e53707bed97f95923e011076616344b17aaa42893b342923e82b973e4152a",
+        "unregisterCommands": [],
+        "removed": true
+      }
+    ],
+    "logicalBytesRemoved": 2116721826,
+    "installedInventoryUnchanged": true,
+    "candidateInventoryUnchanged": true,
+    "globalCacheReset": false,
+    "otherTaskArtifactsRemoved": false,
+    "timestamp": "2026-10-11T08:00:09.438501+00:00"
+  },
+  "cleanupJournalSHA256": "4a8ae59fee919a2692abfc94e65b6702826a0f51a69ad926a43e295e63d6c745",
+  "hygiene": {
+    "logSHA256": "bf9142c0ebeea0c538ddadabf4dc556a7e877d25d54fa87b87f08549a859d8ed",
+    "provider": "/Applications/Alhangeul.app",
+    "developmentRegistrations": 0,
+    "issues": 0,
+    "developmentBundles": 1,
+    "warnings": 1,
+    "candidateAwaitingApproval": true
+  },
+  "installedApp": {
+    "version": "0.2.2",
+    "inventoryEntries": 243,
+    "inventoryDigest": "fa694017af3e0b3705510b353ef0e9dc5549be57493b74e99e5ca05540b3707b",
+    "strictSealVerificationExit": 0,
+    "logSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "newCandidateInstalled": false,
+    "xattrsCompared": false
+  },
+  "storageObservation": {
+    "availableGiBApprox": 13,
+    "logicalDeletionDoesNotEqualVolumeDelta": true
+  },
+  "staticChecks": {
+    "noAppKit": true,
+    "nativeMatcherReceipt": true,
+    "studioReceipt": true,
+    "logParserSelfTest": true
+  }
+}
