@@ -4,7 +4,11 @@ import CoreGraphics
 /// 원본 이름의 OS 재조회로 공급 거부를 우회하지 않는다. stale/취소는 결과 자체를 폐기한다.
 enum ExtensionFontRenderer {
     typealias Supply = @Sendable () async throws -> StudioFontSupplySnapshot
-    static let live: Supply = { try await ExtensionFontSupply.shared.snapshot() }
+    static let live: Supply = {
+        // 첫 렌더의 기존 process-scope 번들 등록을 목록 현재성 확인보다 먼저 끝낸다.
+        HwpBundledFontRegistry.ensureRegistered()
+        return try await ExtensionFontSupply.shared.snapshot()
+    }
 
     private static func failureIdentifier(_ error: Error) -> String {
         // 관리 저장소의 고정 오류 분류/errno만 기록한다. 문서 값/원본 경로는 넣지 않는다.
@@ -24,6 +28,7 @@ enum ExtensionFontRenderer {
 
     static func png(context: HwpPreviewDocumentContext, mode: HwpPreviewPNGReplyMode,
         supply: Supply = live, current: @escaping @Sendable () async throws -> Bool = { true }) async throws -> HwpRenderedPreviewPNG {
+        HwpBundledFontRegistry.ensureRegistered()
         do {
             let snapshot = try await supply()
             return try await HwpNativeFontPageRenderer.withPreparedPage(document: context.document,
@@ -45,6 +50,7 @@ enum ExtensionFontRenderer {
 
     static func pdf(context: HwpPreviewDocumentContext, supply: Supply = live,
         current: @escaping @Sendable () async throws -> Bool = { true }) async throws -> HwpRenderedPreviewPDF {
+        HwpBundledFontRegistry.ensureRegistered()
         do {
             let snapshot = try await supply()
             let result: HwpRenderedPreviewPDF

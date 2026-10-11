@@ -10,7 +10,19 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
     )
 
     func providePreview(for request: QLFilePreviewRequest) async throws -> QLPreviewReply {
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        let id = UUID().uuidString
+        return try await ExtensionFontPerformanceTrace.request.withValue(id) {
+            let started = DispatchTime.now().uptimeNanoseconds
+            var completed = false
+            defer { ExtensionFontPerformanceTrace.interval("preview", start: started, success: completed, id: id) }
+            let reply = try await Self.createPreview(for: request)
+            completed = true
+            return reply
+        }
+        #else
         try await Self.createPreview(for: request)
+        #endif
     }
 
     private static func createPreview(for request: QLFilePreviewRequest) async throws -> QLPreviewReply {

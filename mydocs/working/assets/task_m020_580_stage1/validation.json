@@ -1,0 +1,193 @@
+{
+  "baseCommit": "702d518a",
+  "reusedDiagnosticsCommit": "60ea06a384ce5ba9e43b60a30278ce1268efe237",
+  "coreLockSHA256": "975712e98ff9a83a98aa0395139794ff743b7c0d242eeaa8aec48a57e3b47697",
+  "directEvidence": {
+    "sourceReceiptMatches": true,
+    "fixtureHashesVerifiedByDriver": true,
+    "requestSpansMatch": true,
+    "leases114PerConsumerRun": true,
+    "busy8AttributedToRenderSlots": true,
+    "hitWithoutBytes": true,
+    "allProofsPass": true
+  },
+  "defaultRegression": {
+    "concurrentJobsBounded": true,
+    "documentStampInvalidated": true,
+    "permissionFallback": true,
+    "proofs": [
+      {
+        "bytes": 32775,
+        "consumer": "PNG",
+        "faces": [
+          "GowunBatang-Bold",
+          "GowunBatang-Regular"
+        ],
+        "mode": "coreGraphics",
+        "reads": 2,
+        "releases": 1
+      },
+      {
+        "bytes": 31654,
+        "consumer": "PNG",
+        "faces": [
+          "GowunBatang-Regular",
+          "GowunBatang-Bold"
+        ],
+        "mode": "skiaDecode",
+        "reads": 2,
+        "releases": 1
+      },
+      {
+        "bytes": 31826,
+        "consumer": "PNG",
+        "faces": [
+          "GowunBatang-Bold",
+          "GowunBatang-Regular"
+        ],
+        "mode": "skiaDirect",
+        "reads": 2,
+        "releases": 1
+      },
+      {
+        "consumer": "PDF",
+        "pages": 2,
+        "reads": 4,
+        "releases": 1
+      },
+      {
+        "consumer": "Thumbnail",
+        "first": "miss",
+        "reads": 4,
+        "releases": 4,
+        "second": "exactHit",
+        "settingChange": "miss",
+        "smaller": "largerBucketHit(256x256)"
+      }
+    ],
+    "scope": "unsigned CLI; actual group/Finder not tested",
+    "staleRejected": true
+  },
+  "signedParserCompatibility": {
+    "samples": 157,
+    "statuses": {
+      "success": 126,
+      "failure": 31
+    },
+    "rawSHA256": "1a6d1197e90dbeb5d790c85a2fb2bb9309c53297aa4ed5dcbbb2aa129526c3ff",
+    "newSignedRun": false
+  },
+  "builds": [
+    {
+      "log": "build.noindex/task580/stage1/provider-build/default-unrestricted.log",
+      "sha256": "628300c40bef68f0dde0a3c7fb716fa9d748df41f89227a7a49f8d15e7e7fbd6",
+      "result": "BUILD SUCCEEDED",
+      "configuration": "Release",
+      "codesigningAllowed": false,
+      "diagnosticFlag": false,
+      "registrationObserved": true
+    },
+    {
+      "log": "build.noindex/task580/stage1/provider-build/probe-build.log",
+      "sha256": "1b15bdcc4553ae707b7af6ed5e8937f725d6a2c4f16937b4f01978b0418ca533",
+      "result": "BUILD SUCCEEDED",
+      "configuration": "Release",
+      "codesigningAllowed": false,
+      "diagnosticFlag": true,
+      "registrationObserved": false
+    }
+  ],
+  "registrationCleanup": {
+    "scope": "only Task 580 own build registration; no global reset, install or signing",
+    "operations": [
+      {
+        "command": "pluginkit -r",
+        "target": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+        "exit": 0,
+        "output": ""
+      },
+      {
+        "command": "pluginkit -r",
+        "target": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+        "exit": 0,
+        "output": ""
+      },
+      {
+        "command": "lsregister -u",
+        "target": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app",
+        "exit": 0,
+        "output": ""
+      },
+      {
+        "command": "lsregister -u",
+        "target": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+        "exit": 0,
+        "output": ""
+      }
+    ],
+    "installedInfoSHA256": "41f64c73e4d2848e2b8d34d4b3a1954e0645121072074f5d299929b5d52279a7"
+  },
+  "ownedBundlesCleanup": {
+    "reason": "completed unsigned compile products; remove own residual importer discovery after unregistration",
+    "removed": [
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app",
+        "regularFileLogicalBytes": 275103585,
+        "infoSHA256": "013efc00ca6844e0be308e94dd0ea182b9d89ac6ecc5b11c9a63c8a6da66474e"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulPreview.appex",
+        "regularFileLogicalBytes": 64403738,
+        "infoSHA256": "48818e38b5571faae8d70190f5dffcb6b532699aa30c8391157044338e557ed8"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulThumbnail.appex",
+        "regularFileLogicalBytes": 64490191,
+        "infoSHA256": "c24d79cbc11e07f9e77d73254fdbf09cca945651ae85b6e5cd94ce5ce82fcdae"
+      },
+      {
+        "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.mdimporter",
+        "regularFileLogicalBytes": 14337709,
+        "infoSHA256": "9581de3485b2852ef7fcf182a4fe38d83f0405bad8792fb3894a44c4e7adead1"
+      }
+    ],
+    "compilerCachesPreserved": true,
+    "otherTaskFilesChanged": false
+  },
+  "finalImporterCheck": {
+    "ownImporterAbsent": true,
+    "installedImporterPresent": true,
+    "logSHA256": "e96b3f7b83862f45001dda7878c911ffa649d0538a21a4c1ca06d61ee135953a"
+  },
+  "installedSignatureVerification": {
+    "command": "codesign --verify --deep --strict /Applications/Alhangeul.app",
+    "result": "passed",
+    "logBytes": 0,
+    "exit": 0
+  },
+  "cleanupAfterRemoval": [
+    {
+      "target": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app",
+      "exit": 0,
+      "output": ""
+    },
+    {
+      "target": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+      "exit": 1,
+      "output": "failed to scan <repository>/build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app: -10814\n from spotlight",
+      "interpretation": "Updater was already unregistered before bundle deletion; nonexistent path scan returned -10814; final own registration/importer checks passed"
+    }
+  ],
+  "finalHygiene": {
+    "exit": 0,
+    "issues": 0,
+    "warnings": 0,
+    "developmentRegistrations": 0,
+    "developmentAppBundles": 0,
+    "providerAppRoots": [
+      "/Applications/Alhangeul.app"
+    ],
+    "logSHA256": "44105bb94451b547391f68599534cec11fd645732ca0dd9cbfe51dbf6ae9c0cc"
+  },
+  "installedInfoSHA256": "41f64c73e4d2848e2b8d34d4b3a1954e0645121072074f5d299929b5d52279a7"
+}

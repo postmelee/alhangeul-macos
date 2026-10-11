@@ -1,0 +1,863 @@
+{
+  "status": "Stage 4.1 측정/복원 완료; ON 목표 미달·GUI/실제 preview 미검증으로 Stage 4 미완료",
+  "parentCommit": "36184af0c22a12784a31e2499cec848210e8fae0",
+  "defaultBuild": {
+    "scope": "unsigned default Release compile; no installation or Developer ID",
+    "logSHA256": "57168503b581f0d4c0ddca2aecbce362f02a67aca9917336fb99d417498924e3",
+    "bundles": {
+      "Alhangeul.app": {
+        "executableSHA256": "20d417540555a89ea088f9bdc8854681983f682e3434620e01cc342a21d44a6b",
+        "probeMarkerPresent": false,
+        "architecture": "arm64"
+      },
+      "AlhangeulPreview.appex": {
+        "executableSHA256": "3a2d26548b2a434b8f5b87ee144839dd67827e0dbef15621ac4f2dc37c74c111",
+        "probeMarkerPresent": false,
+        "architecture": "arm64"
+      },
+      "AlhangeulThumbnail.appex": {
+        "executableSHA256": "7214d03cae58013997c3924dcb256308f9afdff2957b7201d106e850c3d26b67",
+        "probeMarkerPresent": false,
+        "architecture": "arm64"
+      }
+    },
+    "seconds": 64.775
+  },
+  "diagnosticBuild": {
+    "logSHA256": "1cbfe0db8a02204537ffe014bc7558a5611f73bab22d23da9534e2806e6e2d8d",
+    "result": "BUILD SUCCEEDED",
+    "seconds": 63.013,
+    "signed": false
+  },
+  "optimizedAcceptance": {
+    "path": "build.noindex/task580/stage4/optimized-acceptance-03",
+    "resultSHA256": "7c4279b2f28e5c053f4e248897d2d5dd687b71a9eed4c30167834007c7b55abf",
+    "proof": {
+      "concurrentJobsBounded": true,
+      "documentStampInvalidated": true,
+      "permissionFallback": true,
+      "proofs": [
+        {
+          "bytes": 32775,
+          "consumer": "PNG",
+          "faces": [
+            "GowunBatang-Bold",
+            "GowunBatang-Regular"
+          ],
+          "mode": "coreGraphics",
+          "reads": 2,
+          "releases": 1
+        },
+        {
+          "bytes": 31654,
+          "consumer": "PNG",
+          "faces": [
+            "GowunBatang-Regular",
+            "GowunBatang-Bold"
+          ],
+          "mode": "skiaDecode",
+          "reads": 2,
+          "releases": 1
+        },
+        {
+          "bytes": 31826,
+          "consumer": "PNG",
+          "faces": [
+            "GowunBatang-Bold",
+            "GowunBatang-Regular"
+          ],
+          "mode": "skiaDirect",
+          "reads": 2,
+          "releases": 1
+        },
+        {
+          "consumer": "PDF",
+          "pages": 2,
+          "reads": 4,
+          "releases": 1
+        },
+        {
+          "consumer": "Thumbnail",
+          "first": "miss",
+          "reads": 4,
+          "releases": 4,
+          "second": "exactHit",
+          "settingChange": "miss",
+          "smaller": "largerBucketHit(256x256)"
+        }
+      ],
+      "scope": "unsigned CLI; actual group/Finder not tested",
+      "staleRejected": true,
+      "thumbnailQueue": {
+        "admission": 16,
+        "allCancelKeepsIOSlots": true,
+        "cancelAtSlotBoundary": true,
+        "cancelCompletionRecovery": true,
+        "deadlineExcludesRunningIO": true,
+        "deadlineIncludesMetadata": true,
+        "distinctKeys": 10,
+        "eviction64MiB": true,
+        "eviction97Entries": true,
+        "exactlyOnceRelease": true,
+        "fallbackNotCached": true,
+        "fifo": true,
+        "mergedParticipants": 5,
+        "noEarlyBytes": true,
+        "oneParticipantCancel": true,
+        "physicalSlots": 2,
+        "queuedMergeCancel": true,
+        "staleQueueRejected": true
+      }
+    }
+  },
+  "pngBaselineIdentical": {
+    "preview-coreGraphics.png": "9120fe4934333f727d458e85700b1bac73561ae162d482da31e213009dc4ee3c",
+    "preview-skiaDecode.png": "5dc2d62886b3a3596adc4f6d0f6bd86991a4a4c096595d3c0af32d3662dd5901",
+    "preview-skiaDirect.png": "6f481069347e806bba809c952f2b18f113e3749c4ac84f5efbba2a77ac1053a8",
+    "preview-permission-fallback.png": "e38021c90f07adbe46b172fa28cfcc1777fb3e94c40c42c5308cf2eec1d64954"
+  },
+  "helperGuards": {
+    "scope": "controlled fixtures; no external command or actual OS signing/install",
+    "proofs": {
+      "noSigningAuthorization": true,
+      "wrongPath": true,
+      "wrongTask": true,
+      "changedSource": true,
+      "addedSourceSet": true,
+      "removedSourceSet": true,
+      "changedCore": true,
+      "changedAssetReceipt": true,
+      "changedNativeArtifact": true,
+      "wrongSamplePath": true,
+      "changedSample": true,
+      "changedUnsignedResource": true,
+      "restoredUnsignedResource": true,
+      "backupContentLinkModeEquality": true,
+      "changedModeRejected": true,
+      "changedLinkRejectedWithoutFollowing": true
+    }
+  },
+  "coreLockSHA256": "975712e98ff9a83a98aa0395139794ff743b7c0d242eeaa8aec48a57e3b47697",
+  "nativeArtifactSHA256": {
+    "Frameworks/universal/librhwp.a": "521e53707bed97f95923e011076616344b17aaa42893b342923e82b973e4152a",
+    "Frameworks/generated_rhwp.h": "14994c7d1923107b5739b5518e43f98bc002e1b954a068647a377ec4d6e1fbc2"
+  },
+  "assetManifestSHA256": "108e3cfed593fa29f1a4e34c008548184a342a9af1141ad65a746f0d499f10a7",
+  "partialRunsExcluded": [
+    "direct-none-01 (보정 전 source)",
+    "direct-speed-01/02 (동기 TaskLocal 진단 crash)",
+    "direct-speed-03 (compile 중 source 변경으로 compiler 거부)",
+    "direct-speed-04 (진단 scan 귀속 실패)",
+    "optimized-acceptance-01 (병렬 read 순서를 가정한 시험 실패)",
+    "optimized-acceptance-01/lldb.log (기존 보관함 재사용으로 첫 import assertion; 원래 실패 위치 아님)"
+  ],
+  "minimalReproducerSHA256": "f00edda4660b40da52d39a39faf568dcce0958b34cfa62ef9abcc6b998df5b8d",
+  "crashStackSHA256": {
+    "build.noindex/task580/stage4/optimized-crash-stack.log": "7d7fc7c0624f13f2565e1083c47498bf250e35a14f5b48eee28b3365d59e35b3",
+    "build.noindex/task580/stage4/optimized-on-crash-stack.log": "f5160e4341ab61584a1101235c9944ebbc8f0b2176990b91c363f8f544137da7",
+    "build.noindex/task580/stage4/optimized-acceptance-01/repro-lldb.log": "27f94aa45a36cd4911cdd1f047d56eaf53387f6e4244c6b706580bf673a50aa6",
+    "build.noindex/task580/stage4/optimized-acceptance-01/assert-disassembly.log": "cd99a73cf3bf645d20cbcb18084a12a932d016c2822aa6ba446277d3ac93209e"
+  },
+  "pending": [
+    "현재성 계약을 유지하는 ON 비용 보완 승인",
+    "보완한 후보의 동일 signed 시간 목표 재측정",
+    "실제 Finder GUI/preview 수용"
+  ],
+  "environmentLimits": [
+    "현재 arm64 macOS 실행",
+    "macOS 12/Intel 실제 실행 없음",
+    "시간 변동 및 외부 시스템 부하 미통제",
+    "unsigned 요청 시간은 signed 잠정 목표 판정에 사용하지 않음"
+  ],
+  "installedApp": {
+    "version": "0.2.2",
+    "originalInventoryMatches": true,
+    "strictSignatureExit": 0,
+    "signatureLogSHA256": "7f44df66c515efc430a2398ec8465713ebe64714482cbe001604d1263a40d5d7",
+    "originalInventorySHA256": "fa694017af3e0b3705510b353ef0e9dc5549be57493b74e99e5ca05540b3707b",
+    "inventoryEntries": 243,
+    "probeMarkerPresent": false,
+    "inventoryScope": "파일 내용 SHA·상대 링크 대상·권한; xattr 비교 제외"
+  },
+  "signatureExperiment": {
+    "runs": 2,
+    "samples": 22,
+    "receiptSHA256": "652f2c47f9474834e5975905211111b536d9e7b12dd0b49e3a65e5bd7c5c49f6",
+    "summarySHA256": "75ba8bb266d938fec53733f074e915fc9759f3131dcc0cefa895147057966146",
+    "scope": "최적화 동기 signature 진단 경로 정확성; Finder gate가 아님"
+  },
+  "cleanup": [
+    {
+      "completed": true,
+      "entries": [
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/guards-on-0/library",
+          "bytes": 25057488,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/guards-off-0/library",
+          "bytes": 25057402,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/consumers-on-0/library",
+          "bytes": 16620325,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/transitions-off-0/library",
+          "bytes": 16620325,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/consumers-on-1/library",
+          "bytes": 16620323,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/snapshot-on-1/library",
+          "bytes": 16620325,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/snapshot-on-0/library",
+          "bytes": 16620323,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/snapshot-off-2/library",
+          "bytes": 16620238,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/consumers-off-0/library",
+          "bytes": 16620238,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/consumers-off-1/library",
+          "bytes": 16620238,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/snapshot-on-2/library",
+          "bytes": 16620324,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/snapshot-off-1/library",
+          "bytes": 16620238,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/transitions-on-0/library",
+          "bytes": 16620326,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/snapshot-off-0/library",
+          "bytes": 16620238,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-01/snapshot-off-0/library",
+          "bytes": 16620240,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-02/snapshot-on-0/library",
+          "bytes": 16620327,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-02/snapshot-off-2/library",
+          "bytes": 16620238,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-02/snapshot-off-1/library",
+          "bytes": 16620240,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-02/snapshot-off-0/library",
+          "bytes": 16620240,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/debug-speed-01/library",
+          "bytes": 16620240,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/debug-speed-02/library",
+          "bytes": 16620239,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/debug-speed-on-01/library",
+          "bytes": 16620326,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-01/build/modules",
+          "bytes": 35501468,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-01/build/font-performance",
+          "bytes": 65144848,
+          "sha256": "408e2de98c73588ef5f00ae206ae1a02f6a5a220e7b0f127c74adf4045e2ea40"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-02/build/modules",
+          "bytes": 35501468,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-02/build/font-performance",
+          "bytes": 65150256,
+          "sha256": "edc21c5a024191a9ac3701a65479a52f00e66e2a43d0905087406c65a453d8c3"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-03/build/modules",
+          "bytes": 35501468,
+          "sha256": null
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-03/build/font-performance",
+          "bytes": 65151712,
+          "sha256": "ac33bab7c5bdbde2f9626b5afa777c62641871d41248e7090f9b8ee7a9a79291"
+        }
+      ],
+      "logicalBytes": 684471661
+    },
+    {
+      "entries": [
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/guards-on-0/library",
+          "logicalBytes": 25057486,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/guards-off-0/library",
+          "logicalBytes": 25057402,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/consumers-on-0/library",
+          "logicalBytes": 16620324,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/transitions-off-0/library",
+          "logicalBytes": 16620324,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/consumers-on-1/library",
+          "logicalBytes": 16620325,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-on-1/library",
+          "logicalBytes": 16620325,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-on-0/library",
+          "logicalBytes": 16620325,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-off-2/library",
+          "logicalBytes": 16620238,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/consumers-off-0/library",
+          "logicalBytes": 16620238,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/consumers-off-1/library",
+          "logicalBytes": 16620238,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-on-2/library",
+          "logicalBytes": 16620325,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-off-1/library",
+          "logicalBytes": 16620238,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/transitions-on-0/library",
+          "logicalBytes": 16620326,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-off-0/library",
+          "logicalBytes": 16620238,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/build/modules",
+          "logicalBytes": 35501108,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-04/snapshot-on-0/library",
+          "logicalBytes": 16620326,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-04/snapshot-off-2/library",
+          "logicalBytes": 16620240,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-04/snapshot-off-1/library",
+          "logicalBytes": 16620240,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-04/snapshot-off-0/library",
+          "logicalBytes": 16620240,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-04/build/modules",
+          "logicalBytes": 35501468,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/guards-on-0/library",
+          "logicalBytes": 25057490,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/guards-off-0/library",
+          "logicalBytes": 25057405,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/consumers-on-0/library",
+          "logicalBytes": 16620326,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/transitions-off-0/library",
+          "logicalBytes": 16620327,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/consumers-on-1/library",
+          "logicalBytes": 16620327,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-on-1/library",
+          "logicalBytes": 16620327,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-on-0/library",
+          "logicalBytes": 16620327,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-off-2/library",
+          "logicalBytes": 16620240,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/consumers-off-0/library",
+          "logicalBytes": 16620240,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/consumers-off-1/library",
+          "logicalBytes": 16620240,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-on-2/library",
+          "logicalBytes": 16620327,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-off-1/library",
+          "logicalBytes": 16620239,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/transitions-on-0/library",
+          "logicalBytes": 16620328,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-off-0/library",
+          "logicalBytes": 16620240,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/build/modules",
+          "logicalBytes": 35501468,
+          "reason": "완료/제외 실행의 중복 보관함·module 및 중간 실행 파일; 원시 증거/최종 CLI/입력 보존"
+        }
+      ],
+      "logicalBytes": 672101825,
+      "complete": true
+    },
+    {
+      "entries": [
+        {
+          "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app",
+          "logicalBytes": 275716161,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulPreview.appex",
+          "logicalBytes": 64610858,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulThumbnail.appex",
+          "logicalBytes": 64793551,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.mdimporter",
+          "logicalBytes": 14337709,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/modules",
+          "logicalBytes": 34479948,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-01/modules",
+          "logicalBytes": 35502644,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-01/extension-probe",
+          "logicalBytes": 65171504,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존",
+          "sha256": "f038a589d52476a3897acbb661c7c8b46dac423d4a97c8eed3db75bdc57b06ec"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-01/private-library",
+          "logicalBytes": 16620302,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-01/queue-documents",
+          "logicalBytes": 134784,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-01/repro-01/private-library",
+          "logicalBytes": 16620304,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-01/repro-01/queue-documents",
+          "logicalBytes": 134784,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-02/modules",
+          "logicalBytes": 35502644,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-02/extension-probe",
+          "logicalBytes": 65171744,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존",
+          "sha256": "1032e3cd0c63eb2790439a66362134a6765019a70b9b84b4e67cc95b4cea373b"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-02/private-library",
+          "logicalBytes": 16620304,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-02/queue-documents",
+          "logicalBytes": 861120,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-03/modules",
+          "logicalBytes": 35502644,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-03/extension-probe",
+          "logicalBytes": 65174224,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존",
+          "sha256": "fdbfdbca8a65bbd4f40710964a65d9987687e6cb4f4af46e79c9dab3fe55f521"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-03/private-library",
+          "logicalBytes": 16620304,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-03/queue-documents",
+          "logicalBytes": 861120,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-repeat-03/private-library",
+          "logicalBytes": 16620304,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/optimized-acceptance-repeat-03/queue-documents",
+          "logicalBytes": 861120,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-01/inputs",
+          "logicalBytes": 16720814,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-01/inputs",
+          "logicalBytes": 16720814,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-02/inputs",
+          "logicalBytes": 16720814,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-03/inputs",
+          "logicalBytes": 16720814,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-04/build/font-performance",
+          "logicalBytes": 65151616,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존",
+          "sha256": "50a461ce453b235bf234422efdcdabe1cd796a7b2d8c5d0cdc6a91d854891c4e"
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-04/inputs",
+          "logicalBytes": 16720814,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/signature-speed-01/signature-on-0/library",
+          "logicalBytes": 16620331,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/signature-speed-01/signature-off-0/library",
+          "logicalBytes": 16620246,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        },
+        {
+          "path": "build.noindex/task580/stage4/signature-speed-01/inputs",
+          "logicalBytes": 16720814,
+          "reason": "검증을 마친 중복 산출물; 미서명 후보·최종 성능 CLI·원시 증거 보존"
+        }
+      ],
+      "logicalBytes": 1040635154,
+      "complete": true
+    },
+    {
+      "restoredOriginalInventoryMatches": true,
+      "entries": [
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/Alhangeul.app",
+          "logicalBytes": 274602453,
+          "inventorySHA256": "9a7e2f06ba0de34f508716c680d68a769f3ac7bb469b8f07fa34c61974e14d76",
+          "reason": "원래 앱 전체 복원 확인 후 완료된 서명 후보·fixture·staging·백업 정리"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/FontExtensionFixtureProbe.app",
+          "logicalBytes": 19345835,
+          "inventorySHA256": "5da8cd887d814af74eedfc31d8e2513e1612b2c1a978a7795a43bf9d2e95effc",
+          "reason": "원래 앱 전체 복원 확인 후 완료된 서명 후보·fixture·staging·백업 정리"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/backup/Alhangeul.app",
+          "logicalBytes": 446248370,
+          "inventorySHA256": "fa694017af3e0b3705510b353ef0e9dc5549be57493b74e99e5ca05540b3707b",
+          "reason": "원래 앱 전체 복원 확인 후 완료된 서명 후보·fixture·staging·백업 정리"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/finder-results/20261011-083017/staging/Alhangeul.app",
+          "logicalBytes": 274602453,
+          "inventorySHA256": "9a7e2f06ba0de34f508716c680d68a769f3ac7bb469b8f07fa34c61974e14d76",
+          "reason": "원래 앱 전체 복원 확인 후 완료된 서명 후보·fixture·staging·백업 정리"
+        }
+      ],
+      "logicalBytes": 1014799111,
+      "registrations": [
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+          "tool": "pluginkit",
+          "exit": 1,
+          "stderr": "remove: no plugin at /Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-01/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex\n"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+          "tool": "pluginkit",
+          "exit": 1,
+          "stderr": "remove: no plugin at /Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-01/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex\n"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/Alhangeul.app",
+          "tool": "lsregister",
+          "exit": 0,
+          "stderr": ""
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+          "tool": "lsregister",
+          "exit": 1,
+          "stderr": "failed to scan /Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-01/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app: -10814\n from spotlight"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/FontExtensionFixtureProbe.app",
+          "tool": "lsregister",
+          "exit": 0,
+          "stderr": ""
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/backup/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+          "tool": "pluginkit",
+          "exit": 1,
+          "stderr": "remove: no plugin at /Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-01/backup/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex\n"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/backup/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+          "tool": "pluginkit",
+          "exit": 1,
+          "stderr": "remove: no plugin at /Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-01/backup/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex\n"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/backup/Alhangeul.app",
+          "tool": "lsregister",
+          "exit": 0,
+          "stderr": ""
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/backup/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+          "tool": "lsregister",
+          "exit": 1,
+          "stderr": "failed to scan /Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-01/backup/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app: -10814\n from spotlight"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/finder-results/20261011-083017/staging/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+          "tool": "pluginkit",
+          "exit": 1,
+          "stderr": "remove: no plugin at /Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-01/finder-results/20261011-083017/staging/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex\n"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/finder-results/20261011-083017/staging/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+          "tool": "pluginkit",
+          "exit": 1,
+          "stderr": "remove: no plugin at /Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-01/finder-results/20261011-083017/staging/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex\n"
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/finder-results/20261011-083017/staging/Alhangeul.app",
+          "tool": "lsregister",
+          "exit": 0,
+          "stderr": ""
+        },
+        {
+          "path": "build.noindex/task580/stage4/finder-candidate-01/finder-results/20261011-083017/staging/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+          "tool": "lsregister",
+          "exit": 1,
+          "stderr": "failed to scan /Users/melee/Documents/projects/rhwp-mac/build.noindex/task580/stage4/finder-candidate-01/finder-results/20261011-083017/staging/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app: -10814\n from spotlight"
+        }
+      ],
+      "complete": true
+    }
+  ],
+  "removedLogicalBytes": 3412007751,
+  "hygiene": {
+    "path": "build.noindex/task580/stage4/hygiene-after-signed-cleanup/20261011-085902",
+    "developmentRegistrations": [],
+    "developmentBundles": [],
+    "providerRoots": [
+      "/Applications/Alhangeul.app"
+    ],
+    "issues": [],
+    "warnings": [],
+    "logSHA256": "6096a53d409d674cf01b07cfd75a2e92118aff357a08bb4385a5fdf4d59175f2",
+    "removedCandidateBundles": true
+  },
+  "importerListSHA256": "e96b3f7b83862f45001dda7878c911ffa649d0538a21a4c1ca06d61ee135953a",
+  "signedWorkloadPlanSHA256": "9864c6148813923c5db6ae4d89a5d0dc21daca26b8988a30d69095780ae9163e",
+  "signedSmoke": {
+    "installExit": 0,
+    "signExit": 0,
+    "restoreExit": 0,
+    "probeIdentifier": "02FB58C8-150B-4C37-903E-DD4C0A6B92A9",
+    "signLogSHA256": "4d27f6f6a1515a0c35c82122f00698ae1c4102abe34b933611ca1ac83a1f3dd1",
+    "installLogSHA256": "4e46f6a07ffa7c49c9b071ee74b95cbd9da80141571f1d071e06bc549988f373",
+    "restoreLogSHA256": "8ffb20e8ec9d7b4ad63d174a52ac24395847c3796df49a9866ec9f803a9d8f45",
+    "signedBundleHashes": {
+      "Alhangeul.app": {
+        "infoSHA256": "663dd78792e9d81b604800e603632f38270c6454553ba62bb00c2fc374d34cac",
+        "executableSHA256": "7e2ce15e3d9c06d09c0c95e860852b19ff92d3b8a384d751e7917cc9fff03ac4"
+      },
+      "FontExtensionFixtureProbe.app": {
+        "infoSHA256": "b9c69579378965995b5eddbcd7f4e0f03d580ba631910bf17269d1ab6fb21c34",
+        "executableSHA256": "8ff800ea7baaa1c99671c02d91efb093b1913671cb06dea62bfa17b2ec1cb53d"
+      },
+      "Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex": {
+        "infoSHA256": "b21eddc07546a5acbe8ec1e63832f21a4a6a33dd8d8b810f5056818ad2fb3547",
+        "executableSHA256": "9d61942093444a3468d25a5fce7e82f5bfdb9eb371a532dff8d706cbe550c398"
+      },
+      "Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex": {
+        "infoSHA256": "53dc3e03ec5903a6bc5f2ba9e4eb7a8f09fa425dca1fe3cde5bbf086b9ea03fe",
+        "executableSHA256": "817d8173b76bfe111af404c057dd041b8eb9a13015728ee6a67a0a1c66707f25"
+      }
+    },
+    "signedInventory": {
+      "Alhangeul.app": "9a7e2f06ba0de34f508716c680d68a769f3ac7bb469b8f07fa34c61974e14d76",
+      "FontExtensionFixtureProbe.app": "5da8cd887d814af74eedfc31d8e2513e1612b2c1a978a7795a43bf9d2e95effc"
+    },
+    "normalControlledSamples": 186,
+    "busy": 0,
+    "expectedFallbackSamples": 4,
+    "actualPreviewSamples": 0,
+    "goalMet": false
+  },
+  "restoreStateSHA256": "af5c268a996d6dd0f0a51d3cd244c5b894f2272f8a0772aa88fc52e4c85fb06f",
+  "privateUUIDRootRemoved": true,
+  "restoredOriginalInventoryMatches": true,
+  "unsignedCandidateMatchedAtPreparation": true,
+  "cleanupJournalSHA256": {
+    "build.noindex/task580/stage4/intermediate-cleanup.json": "fb9ec3ecc3af6a14ce3ba31628be047b14027924b7d121651497fe48a7f56411",
+    "build.noindex/task580/stage4/direct-artifact-cleanup.json": "3caf20b8b3f8e1b79658a7724b8a543407cf9314fe6b9aa3a29055393cafa43f",
+    "build.noindex/task580/stage4/preparation-cleanup.json": "62df1e21db8fbdd96a587890f5dcfd1764974b06f3621bf9a62900132db4af30",
+    "build.noindex/task580/stage4/signed-bundle-cleanup.json": "b8cc2dbdfb309b8527904eef57beb560de3df52e78a76b418a4f1bfbefc26e94"
+  },
+  "verificationEnvironment": {
+    "sandboxSignatureExit": 1,
+    "sandboxSignatureLogSHA256": "28933c7abbbd5e4d81b0bf092ac12cb22c891ec41ec75bb6647b1a1fd5c2480c",
+    "macOSServiceAccessibleSignatureExit": 0,
+    "note": "동일 복원 bytes에서 macOS 서비스 접근 가능한 검증은 통과; 재서명이나 설치 변경 없이 확인했다."
+  },
+  "signedProfileSHA256": "d1eb7dabc77c2a240b0c916c4d3fe0d6413dd3d79127bdac7a0aeead24bb4cc6",
+  "storageObservation": {
+    "observedAt": "2026-10-11T00:06:15.575204+00:00",
+    "freeBytes": 13434359808,
+    "note": "볼륨 여유와 논리 삭제량은 APFS·동시 작업 때문에 같은 증가량을 뜻하지 않는다."
+  },
+  "historicalScope": "Stage 4.2 보완 전 Stage 4.1 소스·측정·승인 상태의 기록; 현재 소스와 구분. 보완 후 결과는 task_m020_580_stage4_2 증거를 따른다."
+}

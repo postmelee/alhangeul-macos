@@ -1,0 +1,5655 @@
+{
+  "scope": "unsigned direct 실제 CoreText; 최적화/비최적화 별도; signed Finder 수용 전",
+  "executions": [
+    {
+      "path": "build.noindex/task580/stage4/direct-none-02",
+      "optimization": "none",
+      "runs": 14,
+      "samples": 650,
+      "sourceReceiptMatches": true,
+      "receiptSHA256": "636adbc101fa7caf88f36f0c7ae9f8953171b1eb273ecc2f0165feb0596b9114",
+      "summarySHA256": "3352fe36bac1848f09c040ea20f96fd24260f74bc636c0226f404b6b555bff5b",
+      "summary": [
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "larger",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": "largerBucketHit(256x256)",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 15.78675,
+            "median": 19.893271,
+            "maximum": 393.645083,
+            "p90": 194.623208
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 6.501833,
+            "median": 10.144874999999999,
+            "maximum": 338.369041,
+            "p90": 29.72225
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 6.492458,
+            "median": 10.128166499999999,
+            "maximum": 338.361292,
+            "p90": 29.713125
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.08660966065259801,
+            "median": 0.52987055990085,
+            "maximum": 0.8595593000205213,
+            "p90": 0.6994560118100767
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.08667431892295188,
+            "median": 0.5309726667943913,
+            "maximum": 0.8595789852657705,
+            "p90": 0.69967081708915
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "larger",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": "largerBucketHit(256x256)",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 7.975875,
+            "median": 20.0981875,
+            "maximum": 94.303917,
+            "p90": 28.647583
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 4.750292,
+            "median": 10.843104,
+            "maximum": 85.999375,
+            "p90": 17.386208
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 4.727833,
+            "median": 10.833354,
+            "maximum": 85.991041,
+            "p90": 17.374417
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.20973260321430492,
+            "median": 0.5818100354787082,
+            "maximum": 0.9118501514629557,
+            "p90": 0.7145644369996365
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.20990395840212414,
+            "median": 0.5823952128744926,
+            "maximum": 0.9119385253106719,
+            "p90": 0.7216066001800266
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-concurrent",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 164.997416,
+            "median": 306.2409375,
+            "maximum": 570.970666,
+            "p90": 475.358792
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 11.4035,
+            "median": 30.1923125,
+            "maximum": 110.699625,
+            "p90": 105.4655
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 11.394667,
+            "median": 30.0328125,
+            "maximum": 109.682417,
+            "p90": 105.149625
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.0594061393141311,
+            "median": 0.10305374017530475,
+            "maximum": 0.26866348042140287,
+            "p90": 0.19211537227458184
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.060613641313520886,
+            "median": 0.10360786146678301,
+            "maximum": 0.2694705596371215,
+            "p90": 0.19387970624746595
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-concurrent",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 24.156167,
+            "median": 50.865500499999996,
+            "maximum": 57.863042,
+            "p90": 55.078875
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 12.8125,
+            "median": 26.544771,
+            "maximum": 35.074833,
+            "p90": 30.989833
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 12.804291,
+            "median": 26.5348335,
+            "maximum": 34.562833,
+            "p90": 30.5285
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.3209027098439848,
+            "median": 0.5260570931138159,
+            "maximum": 0.6039751963402809,
+            "p90": 0.5827483832920427
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.3211254071825489,
+            "median": 0.5340526192930326,
+            "maximum": 0.6125564397578067,
+            "p90": 0.5834485890775726
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-max10",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 264.001125,
+            "median": 604.9194170000001,
+            "maximum": 928.196417,
+            "p90": 909.35125
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 65.103166,
+            "median": 75.984334,
+            "maximum": 88.678666,
+            "p90": 84.073334
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 65.089416,
+            "median": 74.38077100000001,
+            "maximum": 86.830917,
+            "p90": 82.535208
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.08018130498773517,
+            "median": 0.12490029245658793,
+            "maximum": 0.26798534318905465,
+            "p90": 0.24677530824915994
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.08197438883240163,
+            "median": 0.12670188315966086,
+            "maximum": 0.2696672330841039,
+            "p90": 0.24680608463316206
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-max10",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 108.066959,
+            "median": 129.0235625,
+            "maximum": 156.283416,
+            "p90": 151.3775
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 51.623375,
+            "median": 68.292625,
+            "maximum": 83.494792,
+            "p90": 79.599292
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 51.611666,
+            "median": 67.2588125,
+            "maximum": 81.959167,
+            "p90": 78.534458
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.45765758122288636,
+            "median": 0.5251596157227468,
+            "maximum": 0.5725482883662828,
+            "p90": 0.566715085756443
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.4577614087687466,
+            "median": 0.5330731539572705,
+            "maximum": 0.5793726434852029,
+            "p90": 0.5773483919046264
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-serial",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 131.890625,
+            "median": 152.241771,
+            "maximum": 787.993,
+            "p90": 219.861166
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 7.364958,
+            "median": 10.453708500000001,
+            "maximum": 62.027541,
+            "p90": 13.642625
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 7.352,
+            "median": 10.435020999999999,
+            "maximum": 62.016666,
+            "p90": 13.600416
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.012975896994008829,
+            "median": 0.06382660537819813,
+            "maximum": 0.2955194545406842,
+            "p90": 0.08844639190342898
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.0130122780278505,
+            "median": 0.06396847849391277,
+            "maximum": 0.29557127567644353,
+            "p90": 0.08867198749180388
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-serial",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 7.80025,
+            "median": 20.354750000000003,
+            "maximum": 75.7415,
+            "p90": 45.248666
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 4.417417,
+            "median": 12.425124499999999,
+            "maximum": 61.216208,
+            "p90": 31.002083
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 4.409625,
+            "median": 12.413896,
+            "maximum": 61.2075,
+            "p90": 30.98075
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.34393789779581446,
+            "median": 0.591396981917647,
+            "maximum": 0.8735568905290777,
+            "p90": 0.7383974359823429
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.3445091557074811,
+            "median": 0.5920110625359409,
+            "maximum": 0.8737435599381662,
+            "p90": 0.7386398619156371
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "single.hwp",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 142.081167,
+            "median": 146.2753335,
+            "maximum": 150.4695
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 9.242375,
+            "median": 11.070625,
+            "maximum": 12.898875
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 9.233125,
+            "median": 11.058875,
+            "maximum": 12.884625
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.06498486178678417,
+            "median": 0.07530717075761706,
+            "maximum": 0.08562947972844995
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.06504996541871028,
+            "median": 0.07538707436248085,
+            "maximum": 0.08572418330625142
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 133.092625,
+            "median": 148.191646,
+            "maximum": 157.435666
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 6.455416,
+            "median": 9.5214585,
+            "maximum": 14.095041
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 6.424459,
+            "median": 9.5088755,
+            "maximum": 14.080292
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.042848401428289155,
+            "median": 0.06359782657729632,
+            "maximum": 0.09890418264560084
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.043054871414791605,
+            "median": 0.06368187126273231,
+            "maximum": 0.09900778403325956
+          },
+          "scanCount": 0,
+          "readCount": 12,
+          "readBytes": 99672048,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "single.hwpx",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 134.874666,
+            "median": 147.542708,
+            "maximum": 160.21075
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 4.617458,
+            "median": 9.202104,
+            "maximum": 13.78675
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 4.608125,
+            "median": 9.1925,
+            "maximum": 13.776875
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.03416597895412027,
+            "median": 0.06007908992600005,
+            "maximum": 0.08599220089787983
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.034235176530483497,
+            "median": 0.060144507495068715,
+            "maximum": 0.08605383845965393
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 120.093042,
+            "median": 141.86599999999999,
+            "maximum": 151.279333
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 5.572834,
+            "median": 10.592020999999999,
+            "maximum": 12.703125
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 5.562791,
+            "median": 10.5515625,
+            "maximum": 12.680709
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.04632067692980914,
+            "median": 0.0725560735275951,
+            "maximum": 0.08885479911151291
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.0464043037564158,
+            "median": 0.07276024671596418,
+            "maximum": 0.08901186991700838
+          },
+          "scanCount": 0,
+          "readCount": 12,
+          "readBytes": 99672048,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "two.hwpx",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 266.51275,
+            "median": 271.72558349999997,
+            "maximum": 276.938417
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 5.427167,
+            "median": 6.897458499999999,
+            "maximum": 8.36775
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 5.417209,
+            "median": 6.885813,
+            "maximum": 8.354417
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.02032626581655099,
+            "median": 0.025246661388182996,
+            "maximum": 0.030167056959815003
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.02036362988262288,
+            "median": 0.025289415559971724,
+            "maximum": 0.030215201237320567
+          },
+          "scanCount": 0,
+          "readCount": 8,
+          "readBytes": 66448032,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "two.hwpx",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 255.6015,
+            "median": 269.5834995,
+            "maximum": 290.478542
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 9.392625,
+            "median": 11.657083,
+            "maximum": 12.836958
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 9.382041,
+            "median": 11.636646500000001,
+            "maximum": 12.8225
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.03605502767908783,
+            "median": 0.04034853842906879,
+            "maximum": 0.05016598102906282
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.03609570181523321,
+            "median": 0.040419491116588824,
+            "maximum": 0.05022254564233778
+          },
+          "scanCount": 0,
+          "readCount": 24,
+          "readBytes": 199344096,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "same",
+          "file": "single.hwp",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 274.774708,
+            "median": 283.5065625,
+            "maximum": 292.238417
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 10.983291,
+            "median": 21.1315415,
+            "maximum": 31.279792
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 10.881084,
+            "median": 21.0504585,
+            "maximum": 31.219833
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.037233585206560976,
+            "median": 0.07542666645819149,
+            "maximum": 0.11361974770982199
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.03758332361894774,
+            "median": 0.07571064141221082,
+            "maximum": 0.1138379592054739
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "same",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 11.694708,
+            "median": 17.0937495,
+            "maximum": 23.139542,
+            "p90": 22.777125
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 5.379084,
+            "median": 9.7868335,
+            "maximum": 14.573125,
+            "p90": 13.414083
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 5.369959,
+            "median": 9.7775625,
+            "maximum": 14.562625,
+            "p90": 13.405666
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.3947750190017735,
+            "median": 0.5608596018919596,
+            "maximum": 0.6609015439129334,
+            "p90": 0.6293393793187437
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.39535305295160883,
+            "median": 0.5615686974039948,
+            "maximum": 0.6616116594954864,
+            "p90": 0.6297931480234138
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "same",
+          "file": "single.hwpx",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 208.017875,
+            "median": 223.40966650000001,
+            "maximum": 238.801458
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 12.029042,
+            "median": 32.028667,
+            "maximum": 52.028292
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 12.020792,
+            "median": 32.014542,
+            "maximum": 52.008292
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.057787303134406116,
+            "median": 0.13778807046141264,
+            "maximum": 0.21778883778841918
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.05782696318765875,
+            "median": 0.13784977627926634,
+            "maximum": 0.21787258937087395
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "same",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 8.96525,
+            "median": 15.7175205,
+            "maximum": 23.751292,
+            "p90": 18.936084
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 4.548125,
+            "median": 9.000687500000002,
+            "maximum": 14.602,
+            "p90": 11.76325
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 4.537834,
+            "median": 8.992625,
+            "maximum": 14.592708,
+            "p90": 11.755292
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.33996950948980403,
+            "median": 0.5592532880753116,
+            "maximum": 0.8083369213149326,
+            "p90": 0.6943095178839023
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.3404453903747076,
+            "median": 0.5600779051656839,
+            "maximum": 0.8099826186898424,
+            "p90": 0.695048056357621
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "larger",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": "largerBucketHit(256x256)",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 366.018125,
+            "median": 424.711646,
+            "maximum": 490.313833,
+            "p90": 464.067708
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 174.352375,
+            "median": 211.1773125,
+            "maximum": 237.267958,
+            "p90": 229.503834
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 174.341291,
+            "median": 211.16731249999998,
+            "maximum": 237.255333,
+            "p90": 229.481708
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.4390597786785265,
+            "median": 0.5002956618548395,
+            "maximum": 0.5342997336510777,
+            "p90": 0.5197093551826312
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.4390782199285819,
+            "median": 0.5003172608023635,
+            "maximum": 0.5343216075489053,
+            "p90": 0.5197370103275175
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "larger",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": "largerBucketHit(256x256)",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 367.464333,
+            "median": 405.521396,
+            "maximum": 440.066625,
+            "p90": 424.452625
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 165.455167,
+            "median": 206.130333,
+            "maximum": 245.481,
+            "p90": 227.538
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 165.445,
+            "median": 206.12062500000002,
+            "maximum": 245.472417,
+            "p90": 227.527917
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.4410799747137431,
+            "median": 0.5111471515914778,
+            "maximum": 0.5719282272016353,
+            "p90": 0.5360502058386375
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.4411070801572615,
+            "median": 0.5111820620891688,
+            "maximum": 0.5719487208954522,
+            "p90": 0.5360739611399505
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-concurrent",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 1795.476292,
+            "median": 1969.1407709999999,
+            "maximum": 3469.279334,
+            "p90": 3429.700958
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 206.369334,
+            "median": 217.782708,
+            "maximum": 285.209708,
+            "p90": 274.744125
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 205.605208,
+            "median": 217.368687,
+            "maximum": 284.422333,
+            "p90": 274.734667
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.06319293919386659,
+            "median": 0.11067775638458435,
+            "maximum": 0.14310417649876123,
+            "p90": 0.12742605375107105
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.06333554806227086,
+            "median": 0.1108273267726855,
+            "maximum": 0.14331452701024164,
+            "p90": 0.12743581965032486
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-concurrent",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 370.100375,
+            "median": 439.852958,
+            "maximum": 758.467917,
+            "p90": 608.338791
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 197.066125,
+            "median": 227.4806875,
+            "maximum": 409.7045,
+            "p90": 255.011292
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 196.301041,
+            "median": 227.1040205,
+            "maximum": 409.068584,
+            "p90": 254.665667
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.3024592337502919,
+            "median": 0.5132315997448743,
+            "maximum": 0.6745840508375371,
+            "p90": 0.5863743006633235
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.30388376071548456,
+            "median": 0.5135428261365811,
+            "maximum": 0.6756327228892448,
+            "p90": 0.5863989878370469
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-max10",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 1867.187208,
+            "median": 6186.82725,
+            "maximum": 11077.230875,
+            "p90": 9440.588458
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 244.34075,
+            "median": 294.768896,
+            "maximum": 417.940584,
+            "p90": 408.539792
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 243.381959,
+            "median": 293.720646,
+            "maximum": 417.341,
+            "p90": 407.751209
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.03182828388809381,
+            "median": 0.052065017204319816,
+            "maximum": 0.13762975980030903,
+            "p90": 0.13580783131342128
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.032025033557859454,
+            "median": 0.052404642699460734,
+            "maximum": 0.13870154943545232,
+            "p90": 0.13638227523131558
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-max10",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 454.570667,
+            "median": 489.04170799999997,
+            "maximum": 559.444083,
+            "p90": 556.309
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 235.549167,
+            "median": 253.1738545,
+            "maximum": 281.954917,
+            "p90": 277.526666
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 233.419583,
+            "median": 251.37462449999998,
+            "maximum": 280.999458,
+            "p90": 275.062708
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.4653160225629878,
+            "median": 0.5026294775622158,
+            "maximum": 0.5881140940403002,
+            "p90": 0.5751282578268736
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.4694436532450063,
+            "median": 0.5065236912083309,
+            "maximum": 0.5939117822576088,
+            "p90": 0.5808262514735695
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-serial",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 1725.49625,
+            "median": 1860.935667,
+            "maximum": 2227.517917,
+            "p90": 2175.436458
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 175.894042,
+            "median": 202.9596875,
+            "maximum": 242.782209,
+            "p90": 233.404791
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 175.8655,
+            "median": 202.9510205,
+            "maximum": 242.77375,
+            "p90": 233.391959
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.08767245223015024,
+            "median": 0.10824582199090489,
+            "maximum": 0.11917279784332918,
+            "p90": 0.11633624601427774
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.08768486748322164,
+            "median": 0.10825464688588723,
+            "maximum": 0.11917787274381086,
+            "p90": 0.11634264223596098
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-serial",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 354.988208,
+            "median": 414.14137500000004,
+            "maximum": 614.051584,
+            "p90": 457.253709
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 178.008584,
+            "median": 208.7388955,
+            "maximum": 343.733417,
+            "p90": 224.153666
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 178.000417,
+            "median": 208.7298545,
+            "maximum": 343.708667,
+            "p90": 224.115833
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.34069559048641745,
+            "median": 0.5086715773162778,
+            "maximum": 0.6159372053786073,
+            "p90": 0.5362192492164627
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.34071058596927256,
+            "median": 0.5086944711100065,
+            "maximum": 0.6159815581904411,
+            "p90": 0.5362396679600387
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "single.hwp",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 1574.957583,
+            "median": 1615.1615415,
+            "maximum": 1655.3655
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 219.283125,
+            "median": 229.622167,
+            "maximum": 239.961209
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 219.268334,
+            "median": 229.6082295,
+            "maximum": 239.948125
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.1392217392815969,
+            "median": 0.1420867443041281,
+            "maximum": 0.14495174932665927
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.13923113064563086,
+            "median": 0.14209539198345322,
+            "maximum": 0.14495965332127556
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 1641.429167,
+            "median": 1673.2660205,
+            "maximum": 1888.449125
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 211.645042,
+            "median": 224.25,
+            "maximum": 256.214542
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 211.623,
+            "median": 224.2346455,
+            "maximum": 256.200209
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.1223434690092591,
+            "median": 0.13101728606311064,
+            "maximum": 0.1426660826286562
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.12234909478962001,
+            "median": 0.13104250567073966,
+            "maximum": 0.1426740640154408
+          },
+          "scanCount": 0,
+          "readCount": 12,
+          "readBytes": 99672048,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "single.hwpx",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 1689.01075,
+            "median": 1712.700729,
+            "maximum": 1736.390708
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 232.744166,
+            "median": 234.809479,
+            "maximum": 236.874792
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 232.707625,
+            "median": 234.78395849999998,
+            "maximum": 236.860292
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.13401800869346742,
+            "median": 0.13712705776942508,
+            "maximum": 0.1402361068453827
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.1340390529203408,
+            "median": 0.13714187233629938,
+            "maximum": 0.14024469175225796
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 1519.882959,
+            "median": 1726.0250624999999,
+            "maximum": 2488.233875
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 216.181584,
+            "median": 238.29668750000002,
+            "maximum": 615.715209
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 216.169958,
+            "median": 238.27354200000002,
+            "maximum": 615.702334
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.13289752911187738,
+            "median": 0.14049481907569855,
+            "maximum": 0.24744552358447414
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.1329046765744006,
+            "median": 0.14050464491361278,
+            "maximum": 0.24745069793730703
+          },
+          "scanCount": 0,
+          "readCount": 12,
+          "readBytes": 99672048,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "two.hwpx",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 2647.804416,
+            "median": 2941.413333,
+            "maximum": 3235.02225
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 206.033583,
+            "median": 214.07020849999998,
+            "maximum": 222.106834
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 206.004041,
+            "median": 214.0504785,
+            "maximum": 222.096916
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.06865390678533972,
+            "median": 0.0732278706498454,
+            "maximum": 0.07780183451435108
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.06865697260660263,
+            "median": 0.07323498214472225,
+            "maximum": 0.07781299168284188
+          },
+          "scanCount": 0,
+          "readCount": 8,
+          "readBytes": 66448032,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "two.hwpx",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 2772.351625,
+            "median": 3284.8362915,
+            "maximum": 3811.649334
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 223.059875,
+            "median": 245.199896,
+            "maximum": 302.850292
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 223.023166,
+            "median": 245.18422950000001,
+            "maximum": 302.837958
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.05933450671409533,
+            "median": 0.07532042241325078,
+            "maximum": 0.0937641100991293
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.059338343635784205,
+            "median": 0.07532520483333663,
+            "maximum": 0.09376800282323496
+          },
+          "scanCount": 0,
+          "readCount": 24,
+          "readBytes": 199344096,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "same",
+          "file": "single.hwp",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 3053.62775,
+            "median": 3134.5960210000003,
+            "maximum": 3215.564292
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 1423.667333,
+            "median": 1476.032333,
+            "maximum": 1528.397333
+          },
+          "scanMs": {
+            "count": 2,
+            "minimum": 1106.410375,
+            "median": 1106.7732085,
+            "maximum": 1107.136042
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 1423.639208,
+            "median": 1475.975375,
+            "maximum": 1528.311542
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.4662124281520562,
+            "median": 0.4707490355556491,
+            "maximum": 0.475285642959242
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.4662216385084921,
+            "median": 0.4707669806941679,
+            "maximum": 0.47531232287984365
+          },
+          "scanCount": 2,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "same",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 406.830709,
+            "median": 429.3274375,
+            "maximum": 586.280833,
+            "p90": 474.382625
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 187.524084,
+            "median": 217.465896,
+            "maximum": 270.666458,
+            "p90": 255.156375
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 187.515458,
+            "median": 217.4570625,
+            "maximum": 270.653833,
+            "p90": 255.147709
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.4506122403816581,
+            "median": 0.5021570021213907,
+            "maximum": 0.5705390938380174,
+            "p90": 0.5416890489815448
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.4506340301943388,
+            "median": 0.5021916220793294,
+            "maximum": 0.5705657073759816,
+            "p90": 0.5417070372659135
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "same",
+          "file": "single.hwpx",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 1865.943167,
+            "median": 1920.006979,
+            "maximum": 1974.070791
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 195.2795,
+            "median": 204.3693335,
+            "maximum": 213.459167
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 195.271042,
+            "median": 204.3538125,
+            "maximum": 213.436583
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.098917953140415,
+            "median": 0.10665165713377367,
+            "maximum": 0.11438536112713235
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.09892223768787833,
+            "median": 0.10665985103876599,
+            "maximum": 0.11439746438965363
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "same",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 380.410583,
+            "median": 420.10875,
+            "maximum": 467.607916,
+            "p90": 445.736125
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 183.769167,
+            "median": 211.876625,
+            "maximum": 246.104292,
+            "p90": 222.380625
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 183.759084,
+            "median": 211.86704150000003,
+            "maximum": 246.094667,
+            "p90": 222.371958
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.43564005727435967,
+            "median": 0.5070497969171576,
+            "maximum": 0.556526402460355,
+            "p90": 0.5353054508500616
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.43566576197101764,
+            "median": 0.5070854283670893,
+            "maximum": 0.5565449217172621,
+            "p90": 0.535332804319562
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "snapshot",
+          "installedEnabled": false,
+          "scenario": "snapshot",
+          "file": "none",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 3
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 3,
+            "minimum": 17.863916,
+            "median": 21.676334,
+            "maximum": 22.17475
+          },
+          "snapshotCallMs": {
+            "count": 3,
+            "minimum": 11.448042,
+            "median": 16.139042,
+            "maximum": 16.368
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 3,
+            "minimum": 11.375833,
+            "median": 15.9985,
+            "maximum": 16.177417
+          },
+          "metadataFraction": {
+            "count": 3,
+            "minimum": 0.6368051103688576,
+            "median": 0.7214737482947947,
+            "maximum": 0.746317020211997
+          },
+          "snapshotCallFraction": {
+            "count": 3,
+            "minimum": 0.6408472811896339,
+            "median": 0.7278116776964791,
+            "maximum": 0.7551092357222396
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 3,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "snapshot",
+          "installedEnabled": false,
+          "scenario": "snapshot",
+          "file": "none",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 30
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 30,
+            "minimum": 8.423,
+            "median": 13.690332999999999,
+            "maximum": 19.687625,
+            "p90": 19.168833
+          },
+          "snapshotCallMs": {
+            "count": 30,
+            "minimum": 4.740709,
+            "median": 9.901188000000001,
+            "maximum": 15.893416,
+            "p90": 14.05625
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 30,
+            "minimum": 4.721708,
+            "median": 9.879625,
+            "maximum": 15.8695,
+            "p90": 14.047292
+          },
+          "metadataFraction": {
+            "count": 30,
+            "minimum": 0.37463962905685344,
+            "median": 0.6996375732286999,
+            "maximum": 0.84789506346432,
+            "p90": 0.8047831529865219
+          },
+          "snapshotCallFraction": {
+            "count": 30,
+            "minimum": 0.37614724612925804,
+            "median": 0.7004743973574481,
+            "maximum": 0.8502887941996724,
+            "p90": 0.8054272657812643
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 30,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "snapshot",
+          "installedEnabled": true,
+          "scenario": "snapshot",
+          "file": "none",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 3
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 3,
+            "minimum": 572.829209,
+            "median": 659.645208,
+            "maximum": 722.715917
+          },
+          "snapshotCallMs": {
+            "count": 3,
+            "minimum": 477.528875,
+            "median": 577.622709,
+            "maximum": 614.882417
+          },
+          "scanMs": {
+            "count": 3,
+            "minimum": 188.615917,
+            "median": 275.68725,
+            "maximum": 322.606333
+          },
+          "metadataMs": {
+            "count": 3,
+            "minimum": 477.353625,
+            "median": 577.505208,
+            "maximum": 614.704333
+          },
+          "metadataFraction": {
+            "count": 3,
+            "minimum": 0.8333262646179065,
+            "median": 0.8505476613157256,
+            "maximum": 0.8754785163238843
+          },
+          "snapshotCallFraction": {
+            "count": 3,
+            "minimum": 0.8336322022294084,
+            "median": 0.850794070721982,
+            "maximum": 0.875656643896972
+          },
+          "scanCount": 3,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 3,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "snapshot",
+          "installedEnabled": true,
+          "scenario": "snapshot",
+          "file": "none",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 30
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 30,
+            "minimum": 235.659459,
+            "median": 266.4575415,
+            "maximum": 432.574792,
+            "p90": 305.885875
+          },
+          "snapshotCallMs": {
+            "count": 30,
+            "minimum": 153.992167,
+            "median": 178.610792,
+            "maximum": 340.512459,
+            "p90": 193.859875
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 30,
+            "minimum": 153.948208,
+            "median": 178.5979375,
+            "maximum": 340.499333,
+            "p90": 193.850458
+          },
+          "metadataFraction": {
+            "count": 30,
+            "minimum": 0.6034594697818667,
+            "median": 0.6673637687997719,
+            "maximum": 0.7871455741230524,
+            "p90": 0.7008573580366163
+          },
+          "snapshotCallFraction": {
+            "count": 30,
+            "minimum": 0.6035061205226743,
+            "median": 0.6673995523951153,
+            "maximum": 0.7871759180086481,
+            "p90": 0.7009395151142822
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 30,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": false,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "before",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 160.364542,
+            "median": 160.364542,
+            "maximum": 160.364542
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 15.339375,
+            "median": 15.339375,
+            "maximum": 15.339375
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 15.263584,
+            "median": 15.263584,
+            "maximum": 15.263584
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.09518054184322118,
+            "median": 0.09518054184322118,
+            "maximum": 0.09518054184322118
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.09565315878868036,
+            "median": 0.09565315878868036,
+            "maximum": 0.09565315878868036
+          },
+          "scanCount": 0,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": false,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "missing",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 1,
+          "totalMs": {
+            "count": 1,
+            "minimum": 1009.433708,
+            "median": 1009.433708,
+            "maximum": 1009.433708
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 211.161542,
+            "median": 211.161542,
+            "maximum": 211.161542
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 211.087583,
+            "median": 211.087583,
+            "maximum": 211.087583
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.20911485452395848,
+            "median": 0.20911485452395848,
+            "maximum": 0.20911485452395848
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.20918812233680628,
+            "median": 0.20918812233680628,
+            "maximum": 0.20918812233680628
+          },
+          "scanCount": 0,
+          "readCount": 1,
+          "readBytes": 0,
+          "readFailures": 1,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": false,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "restored",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 1960.467542,
+            "median": 1960.467542,
+            "maximum": 1960.467542
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 200.279709,
+            "median": 200.279709,
+            "maximum": 200.279709
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 200.266583,
+            "median": 200.266583,
+            "maximum": 200.266583
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.10215246042568757,
+            "median": 0.10215246042568757,
+            "maximum": 0.10215246042568757
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.10215915576734398,
+            "median": 0.10215915576734398,
+            "maximum": 0.10215915576734398
+          },
+          "scanCount": 0,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": false,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "toggle",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 3170.69175,
+            "median": 3170.69175,
+            "maximum": 3170.69175
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 1476.7235,
+            "median": 1476.7235,
+            "maximum": 1476.7235
+          },
+          "scanMs": {
+            "count": 1,
+            "minimum": 1123.0855,
+            "median": 1123.0855,
+            "maximum": 1123.0855
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 1476.713042,
+            "median": 1476.713042,
+            "maximum": 1476.713042
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.46573844398466047,
+            "median": 0.46573844398466047,
+            "maximum": 0.46573844398466047
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.4657417423185335,
+            "median": 0.4657417423185335,
+            "maximum": 0.4657417423185335
+          },
+          "scanCount": 1,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": true,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "before",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 3153.732917,
+            "median": 3153.732917,
+            "maximum": 3153.732917
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 1332.432708,
+            "median": 1332.432708,
+            "maximum": 1332.432708
+          },
+          "scanMs": {
+            "count": 1,
+            "minimum": 973.94575,
+            "median": 973.94575,
+            "maximum": 973.94575
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 1332.383,
+            "median": 1332.383,
+            "maximum": 1332.383
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.4224780712462596,
+            "median": 0.4224780712462596,
+            "maximum": 0.4224780712462596
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.422493832885342,
+            "median": 0.422493832885342,
+            "maximum": 0.422493832885342
+          },
+          "scanCount": 1,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": true,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "missing",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 1,
+          "totalMs": {
+            "count": 1,
+            "minimum": 58.068583,
+            "median": 58.068583,
+            "maximum": 58.068583
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 9.082,
+            "median": 9.082,
+            "maximum": 9.082
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 9.073166,
+            "median": 9.073166,
+            "maximum": 9.073166
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.15624913733472712,
+            "median": 0.15624913733472712,
+            "maximum": 0.15624913733472712
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.1564012677905366,
+            "median": 0.1564012677905366,
+            "maximum": 0.1564012677905366
+          },
+          "scanCount": 0,
+          "readCount": 1,
+          "readBytes": 0,
+          "readFailures": 1,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": true,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "restored",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 186.699041,
+            "median": 186.699041,
+            "maximum": 186.699041
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 11.313167,
+            "median": 11.313167,
+            "maximum": 11.313167
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 11.298875,
+            "median": 11.298875,
+            "maximum": 11.298875
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.060519191418878265,
+            "median": 0.060519191418878265,
+            "maximum": 0.060519191418878265
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.06059574242805029,
+            "median": 0.06059574242805029,
+            "maximum": 0.06059574242805029
+          },
+          "scanCount": 0,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": true,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "toggle",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 156.929708,
+            "median": 156.929708,
+            "maximum": 156.929708
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 13.029417,
+            "median": 13.029417,
+            "maximum": 13.029417
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 13.019625,
+            "median": 13.019625,
+            "maximum": 13.019625
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.08296469270177957,
+            "median": 0.08296469270177957,
+            "maximum": 0.08296469270177957
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.08302709006506276,
+            "median": 0.08302709006506276,
+            "maximum": 0.08302709006506276
+          },
+          "scanCount": 0,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        }
+      ],
+      "consumerTotals": [
+        {
+          "installedEnabled": false,
+          "consumerCount": 288,
+          "statuses": {
+            "success": 288
+          },
+          "warmExactCount": 40,
+          "warmExactMetadataMedianMs": 9.382229,
+          "warmExactTotalMedianMs": 16.4735205,
+          "warmExactReads": 0
+        },
+        {
+          "installedEnabled": true,
+          "consumerCount": 288,
+          "statuses": {
+            "success": 288
+          },
+          "warmExactCount": 40,
+          "warmExactMetadataMedianMs": 214.73335450000002,
+          "warmExactTotalMedianMs": 427.1903125,
+          "warmExactReads": 0
+        }
+      ],
+      "runsEvidence": [
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/consumers-off-0/result.json",
+          "sha256": "16883d2b2fa8c22ff4761a29642630b8716f2a90bc38a8ff05b13833d794c444",
+          "mode": "consumers",
+          "installedEnabled": false,
+          "pid": 16842,
+          "samples": 144,
+          "statuses": {
+            "success": 144
+          },
+          "proofs": {
+            "exactManagedRegularBold": true,
+            "hitWithoutBytes": true,
+            "normalQueueBusyZero": true,
+            "singleSnapshotMultiPage": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/consumers-off-1/result.json",
+          "sha256": "dea712d9aa4863330c11358a1f4598841162b3afe304f1da8863c8a306369268",
+          "mode": "consumers",
+          "installedEnabled": false,
+          "pid": 17762,
+          "samples": 144,
+          "statuses": {
+            "success": 144
+          },
+          "proofs": {
+            "exactManagedRegularBold": true,
+            "hitWithoutBytes": true,
+            "normalQueueBusyZero": true,
+            "singleSnapshotMultiPage": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/consumers-on-0/result.json",
+          "sha256": "b50d58be14901609c18ca1c8181aa2141d7050e0282f1fbb15bbaec052fed0f2",
+          "mode": "consumers",
+          "installedEnabled": true,
+          "pid": 18279,
+          "samples": 144,
+          "statuses": {
+            "success": 144
+          },
+          "proofs": {
+            "exactManagedRegularBold": true,
+            "hitWithoutBytes": true,
+            "normalQueueBusyZero": true,
+            "singleSnapshotMultiPage": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/consumers-on-1/result.json",
+          "sha256": "b764c01d86d9f50ef37e80ce362165cf50bd55dbf4388b339915c586923fbcc1",
+          "mode": "consumers",
+          "installedEnabled": true,
+          "pid": 22762,
+          "samples": 144,
+          "statuses": {
+            "success": 144
+          },
+          "proofs": {
+            "exactManagedRegularBold": true,
+            "hitWithoutBytes": true,
+            "normalQueueBusyZero": true,
+            "singleSnapshotMultiPage": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/guards-off-0/result.json",
+          "sha256": "b748217bfd4c7462b357619ccd1d68cf6a51b462f60e6c7026613f707b0481c2",
+          "mode": "guards",
+          "installedEnabled": false,
+          "pid": 28938,
+          "samples": 0,
+          "statuses": {},
+          "proofs": {
+            "admission16BeforeSupply": true,
+            "cancelledPreviewReleased": true,
+            "selectionChangesIdentityAndExactBytes": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/guards-on-0/result.json",
+          "sha256": "18f6c83235cca9485c3f9603455b9edeaeb6674cb18ff1bd935eb08ba45bf899",
+          "mode": "guards",
+          "installedEnabled": true,
+          "pid": 28997,
+          "samples": 0,
+          "statuses": {},
+          "proofs": {
+            "admission16BeforeSupply": true,
+            "cancelledPreviewReleased": true,
+            "selectionChangesIdentityAndExactBytes": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-off-0/result.json",
+          "sha256": "a0c33aed5fec6cf35adfab9d64ea5c9b2d68e5d44c18a1e97e9e86ca91484efd",
+          "mode": "snapshot",
+          "installedEnabled": false,
+          "pid": 16259,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-off-1/result.json",
+          "sha256": "c2836b9502606a78fb688190ae0cc2a3b1ffccbf75c902941f35ae4d89dee68a",
+          "mode": "snapshot",
+          "installedEnabled": false,
+          "pid": 16332,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-off-2/result.json",
+          "sha256": "ecdc00dd6599c42b8f6fe87d9d15fb8c238aadac5f660afcac42e35679d6dd6d",
+          "mode": "snapshot",
+          "installedEnabled": false,
+          "pid": 16342,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-on-0/result.json",
+          "sha256": "3c634af8dc07a176be79aeaf85b3f32813414a42b54e60d43f255721c47e811e",
+          "mode": "snapshot",
+          "installedEnabled": true,
+          "pid": 16360,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-on-1/result.json",
+          "sha256": "9aa756b4739d97266a1358b322902779676c736e1d58dc5ebde80468eba89d33",
+          "mode": "snapshot",
+          "installedEnabled": true,
+          "pid": 16526,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/snapshot-on-2/result.json",
+          "sha256": "19fc37e4774bc9a8e4f99e076406ecbe6b9fbf67b469f0850166a2066bbcab69",
+          "mode": "snapshot",
+          "installedEnabled": true,
+          "pid": 16707,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/transitions-off-0/result.json",
+          "sha256": "c4d3b1288444041ba175ec5d61fff245959f84de50b332193b98312bf413aed7",
+          "mode": "transitions",
+          "installedEnabled": false,
+          "pid": 28577,
+          "samples": 4,
+          "statuses": {
+            "success": 4
+          },
+          "proofs": {
+            "missingFallbackNotCached": true,
+            "policyInvalidatesCache": true,
+            "restoredExact": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-none-02/transitions-on-0/result.json",
+          "sha256": "6c7cc809c51970052369115a69a7aa0bd30e40e162e35a841e58f7837365526c",
+          "mode": "transitions",
+          "installedEnabled": true,
+          "pid": 28785,
+          "samples": 4,
+          "statuses": {
+            "success": 4
+          },
+          "proofs": {
+            "missingFallbackNotCached": true,
+            "policyInvalidatesCache": true,
+            "restoredExact": true
+          }
+        }
+      ]
+    },
+    {
+      "path": "build.noindex/task580/stage4/direct-speed-05",
+      "optimization": "speed",
+      "runs": 14,
+      "samples": 650,
+      "sourceReceiptMatches": true,
+      "receiptSHA256": "d9b5e13bbb0fabb6e373ff2677b94b4fdee785d91b92b9182f9f437dbb8c6db6",
+      "summarySHA256": "e03cc1dc36f317fc7a73658745a0a13609a7e35c26c98733a6944fc83bd5c47c",
+      "summary": [
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "larger",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": "largerBucketHit(256x256)",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 3.592,
+            "median": 4.41775,
+            "maximum": 9.286625,
+            "p90": 6.073917
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 1.816292,
+            "median": 2.254729,
+            "maximum": 4.929917,
+            "p90": 3.104375
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 1.813292,
+            "median": 2.2514374999999998,
+            "maximum": 4.923584,
+            "p90": 3.098959
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.38457086512904054,
+            "median": 0.5191720859092575,
+            "maximum": 0.5766867043091909,
+            "p90": 0.5568664982525593
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.3852996656091915,
+            "median": 0.519655082875216,
+            "maximum": 0.5777436202329753,
+            "p90": 0.5577521077879507
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "larger",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": "largerBucketHit(256x256)",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 3.348875,
+            "median": 4.0028749999999995,
+            "maximum": 9.938417,
+            "p90": 5.737792
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 1.773334,
+            "median": 2.161771,
+            "maximum": 6.9425,
+            "p90": 3.179334
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 1.770541,
+            "median": 2.15875,
+            "maximum": 6.93675,
+            "p90": 3.164792
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.4978252450538216,
+            "median": 0.5299471956631397,
+            "maximum": 0.6979733291529224,
+            "p90": 0.5723012259194397
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.4983965361717481,
+            "median": 0.5305129590616255,
+            "maximum": 0.6985518921172256,
+            "p90": 0.5729389634818707
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-concurrent",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 61.314625,
+            "median": 140.2131665,
+            "maximum": 259.3205,
+            "p90": 197.130166
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 2.748333,
+            "median": 9.802624999999999,
+            "maximum": 39.334958,
+            "p90": 34.561125
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 2.7405,
+            "median": 9.55775,
+            "maximum": 39.091125,
+            "p90": 34.365708
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.04013230995088716,
+            "median": 0.08765517197211165,
+            "maximum": 0.28800081477056155,
+            "p90": 0.1978922808022028
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.040247017626072454,
+            "median": 0.08914069328434085,
+            "maximum": 0.2880737804516999,
+            "p90": 0.19805608435649236
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-concurrent",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 5.381875,
+            "median": 10.070145499999999,
+            "maximum": 17.272667,
+            "p90": 14.010917
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 2.687209,
+            "median": 5.8419375,
+            "maximum": 11.20375,
+            "p90": 8.169833
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 2.683834,
+            "median": 5.7477705,
+            "maximum": 10.696333,
+            "p90": 7.69
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.4534673234322275,
+            "median": 0.5489428802499654,
+            "maximum": 0.6253667592258081,
+            "p90": 0.6126736612020489
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.45389810018466065,
+            "median": 0.5740207561860944,
+            "maximum": 0.6547941908000013,
+            "p90": 0.6275329873607437
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-max10",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 88.469125,
+            "median": 353.512104,
+            "maximum": 593.31275,
+            "p90": 545.369916
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 15.384917,
+            "median": 92.83833299999999,
+            "maximum": 176.625583,
+            "p90": 175.108542
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 15.353791,
+            "median": 92.2637295,
+            "maximum": 175.570375,
+            "p90": 174.176125
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.06062596869807646,
+            "median": 0.2340182511560817,
+            "maximum": 0.4457710345035643,
+            "p90": 0.40140263905072765
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.06401909097420752,
+            "median": 0.23493252901043876,
+            "maximum": 0.4459741359539594,
+            "p90": 0.4020052573965594
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-max10",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 22.318416,
+            "median": 26.0786255,
+            "maximum": 51.801166,
+            "p90": 51.743
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 10.642708,
+            "median": 14.794792,
+            "maximum": 31.0665,
+            "p90": 26.801542
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 10.637541,
+            "median": 14.3237085,
+            "maximum": 30.262,
+            "p90": 26.360667
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.4277680951620092,
+            "median": 0.5316944714941594,
+            "maximum": 0.6170165128911691,
+            "p90": 0.5792092713732497
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.42788894292777385,
+            "median": 0.5432536041181424,
+            "maximum": 0.6587323606158225,
+            "p90": 0.6137326786607448
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-serial",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 48.976416,
+            "median": 51.098354,
+            "maximum": 57.541708,
+            "p90": 55.559
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 1.942042,
+            "median": 2.1550835,
+            "maximum": 2.510542,
+            "p90": 2.374167
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 1.938333,
+            "median": 2.1517704999999996,
+            "maximum": 2.506417,
+            "p90": 2.36375
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.03780089613414052,
+            "median": 0.04095791171597192,
+            "maximum": 0.04720247208073869,
+            "p90": 0.045653170492214006
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.03787788655291989,
+            "median": 0.04103749097502296,
+            "maximum": 0.04726219263869273,
+            "p90": 0.045739456956452804
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "many-serial",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 3.477834,
+            "median": 4.345146,
+            "maximum": 122.330125,
+            "p90": 9.568041
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 1.728542,
+            "median": 2.3025,
+            "maximum": 76.438375,
+            "p90": 4.265959
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 1.725958,
+            "median": 2.297583,
+            "maximum": 76.4325,
+            "p90": 4.260333
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.41406784321744095,
+            "median": 0.5315098772653508,
+            "maximum": 0.7994738843120306,
+            "p90": 0.598595789547843
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.4145665301580606,
+            "median": 0.5325517924264294,
+            "maximum": 0.7996214160106492,
+            "p90": 0.601344566061685
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "single.hwp",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 53.819208,
+            "median": 70.5080415,
+            "maximum": 87.196875
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 2.342792,
+            "median": 2.778771,
+            "maximum": 3.21475
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 2.336709,
+            "median": 2.7718965,
+            "maximum": 3.207084
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.0367798043221159,
+            "median": 0.04009877792154852,
+            "maximum": 0.04341775152098113
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.03686772031681181,
+            "median": 0.04019924919943379,
+            "maximum": 0.043530778082055764
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 54.000208,
+            "median": 55.949104500000004,
+            "maximum": 59.93425
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 2.219208,
+            "median": 2.395708,
+            "maximum": 2.957333
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 2.212208,
+            "median": 2.3894795,
+            "maximum": 2.941583
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.03908559973853361,
+            "median": 0.04293456004516599,
+            "maximum": 0.049080167016355425
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.03923447870138359,
+            "median": 0.043046446945789865,
+            "maximum": 0.049342954988174544
+          },
+          "scanCount": 0,
+          "readCount": 12,
+          "readBytes": 99672048,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "single.hwpx",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 56.868042,
+            "median": 56.870396,
+            "maximum": 56.87275
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 2.254375,
+            "median": 2.4349795,
+            "maximum": 2.615584
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 2.248458,
+            "median": 2.4291665,
+            "maximum": 2.609875
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.039534891490212797,
+            "median": 0.04271420906078377,
+            "maximum": 0.04589352663135474
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.039638930770887634,
+            "median": 0.04281642385290785,
+            "maximum": 0.045993916934928054
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 53.30975,
+            "median": 54.481396000000004,
+            "maximum": 56.776625
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 2.017375,
+            "median": 2.2413125000000003,
+            "maximum": 2.881042
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 2.01075,
+            "median": 2.2342079999999997,
+            "maximum": 2.871375
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.03662409868425546,
+            "median": 0.041262058250156046,
+            "maximum": 0.05057318923060326
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.036744767416710115,
+            "median": 0.041373465236650364,
+            "maximum": 0.05074345296149604
+          },
+          "scanCount": 0,
+          "readCount": 12,
+          "readBytes": 99672048,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "two.hwpx",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 109.3845,
+            "median": 113.06631250000001,
+            "maximum": 116.748125
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 2.22,
+            "median": 2.267396,
+            "maximum": 2.314792
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 2.212666,
+            "median": 2.260416,
+            "maximum": 2.308166
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.018952475682157636,
+            "median": 0.020026937437456732,
+            "maximum": 0.02110139919275583
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.01901529467818006,
+            "median": 0.020088634590483052,
+            "maximum": 0.021161974502786045
+          },
+          "scanCount": 0,
+          "readCount": 8,
+          "readBytes": 66448032,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "preview",
+          "file": "two.hwpx",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 104.451542,
+            "median": 109.814125,
+            "maximum": 132.062666
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 2.207084,
+            "median": 2.4253955,
+            "maximum": 2.979417
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 2.194584,
+            "median": 2.4193955000000003,
+            "maximum": 2.973083
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.018874251713198033,
+            "median": 0.02106233564406915,
+            "maximum": 0.028463754034382754
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.01892851383145635,
+            "median": 0.021116345947264536,
+            "maximum": 0.028524394594385213
+          },
+          "scanCount": 0,
+          "readCount": 24,
+          "readBytes": 199344096,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "same",
+          "file": "single.hwp",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 58.219791,
+            "median": 59.462375,
+            "maximum": 60.704959
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 2.529833,
+            "median": 2.617958,
+            "maximum": 2.706083
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 2.505958,
+            "median": 2.5905620000000003,
+            "maximum": 2.675166
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.0430430607351373,
+            "median": 0.04355569400154788,
+            "maximum": 0.04406832726795845
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.04345314465316442,
+            "median": 0.044015385667185894,
+            "maximum": 0.04457762668120738
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "same",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 3.459834,
+            "median": 3.8831249999999997,
+            "maximum": 7.21975,
+            "p90": 4.360959
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 1.758083,
+            "median": 2.0047915,
+            "maximum": 3.831625,
+            "p90": 2.334833
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 1.7565,
+            "median": 2.0015415,
+            "maximum": 3.827333,
+            "p90": 2.331583
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.48197564740181786,
+            "median": 0.5301282489113384,
+            "maximum": 0.5814565099098615,
+            "p90": 0.5402682077705054
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.4824100154347453,
+            "median": 0.5307019644045172,
+            "maximum": 0.5821730954131877,
+            "p90": 0.5408717448823284
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "same",
+          "file": "single.hwpx",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 50.478,
+            "median": 61.655771,
+            "maximum": 72.833542
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 2.158625,
+            "median": 2.6453749999999996,
+            "maximum": 3.132125
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 2.1565,
+            "median": 2.642042,
+            "maximum": 3.127584
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.042721581679147344,
+            "median": 0.04283155770135832,
+            "maximum": 0.04294153372356929
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.04276367922659376,
+            "median": 0.04288378029881235,
+            "maximum": 0.04300388137103095
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": false,
+          "scenario": "same",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 3.588291,
+            "median": 4.1875205,
+            "maximum": 6.29075,
+            "p90": 4.770625
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 1.887042,
+            "median": 2.3183335,
+            "maximum": 4.173292,
+            "p90": 2.896667
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 1.885041,
+            "median": 2.314729,
+            "maximum": 4.169,
+            "p90": 2.893
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.4845961066624865,
+            "median": 0.5496759850311185,
+            "maximum": 0.6627190716528235,
+            "p90": 0.612705648086795
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.4853300387825706,
+            "median": 0.5514033697843754,
+            "maximum": 0.6634013432420618,
+            "p90": 0.6136456624514179
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "larger",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": "largerBucketHit(256x256)",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 210.028166,
+            "median": 273.8445,
+            "maximum": 465.041125,
+            "p90": 394.001417
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 104.139667,
+            "median": 142.396708,
+            "maximum": 255.905541,
+            "p90": 204.071084
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 104.12275,
+            "median": 142.390812,
+            "maximum": 255.900042,
+            "p90": 204.066084
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.4682386941770821,
+            "median": 0.5001275338689837,
+            "maximum": 0.5502740042614511,
+            "p90": 0.5408554049402198
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.4682705240118464,
+            "median": 0.5001478214881767,
+            "maximum": 0.5502858290221107,
+            "p90": 0.5408717872259035
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "larger",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": "largerBucketHit(256x256)",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 227.542667,
+            "median": 305.0304585,
+            "maximum": 695.021583,
+            "p90": 388.515209
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 113.395125,
+            "median": 154.5761665,
+            "maximum": 215.212167,
+            "p90": 200.396958
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 113.369542,
+            "median": 154.569146,
+            "maximum": 215.207333,
+            "p90": 200.37025
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.304059861116572,
+            "median": 0.50173949025035,
+            "maximum": 0.5258461741165136,
+            "p90": 0.5200711525808054
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.3040683759600599,
+            "median": 0.5017606061897734,
+            "maximum": 0.525868576865202,
+            "p90": 0.5200934749691805
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-concurrent",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 1356.519458,
+            "median": 1611.0151455,
+            "maximum": 2984.76775,
+            "p90": 2805.077625
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 148.199,
+            "median": 184.374354,
+            "maximum": 203.374917,
+            "p90": 201.110584
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 148.191958,
+            "median": 183.853958,
+            "maximum": 202.652958,
+            "p90": 200.480166
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.06198755404017156,
+            "median": 0.10952148269038346,
+            "maximum": 0.1315647730564697,
+            "p90": 0.12528361397374843
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.06208366485375728,
+            "median": 0.10952537938796356,
+            "maximum": 0.13182975562634808,
+            "p90": 0.1256981510851536
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-concurrent",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 284.231416,
+            "median": 345.4006455,
+            "maximum": 470.372083,
+            "p90": 365.305875
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 138.870042,
+            "median": 173.92485449999998,
+            "maximum": 301.749542,
+            "p90": 187.151416
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 138.662417,
+            "median": 173.808875,
+            "maximum": 301.414209,
+            "p90": 186.673375
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.4607477507239119,
+            "median": 0.5045608619050119,
+            "maximum": 0.6410608607910446,
+            "p90": 0.5284715709203859
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.46108197612555263,
+            "median": 0.5049281884413032,
+            "maximum": 0.641774061613079,
+            "p90": 0.5284920739817272
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-max10",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 1464.247416,
+            "median": 4033.592896,
+            "maximum": 6870.860084,
+            "p90": 6255.526291
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 176.613375,
+            "median": 183.189667,
+            "maximum": 186.022458,
+            "p90": 185.434833
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 175.203583,
+            "median": 182.05210399999999,
+            "maximum": 185.736083,
+            "p90": 184.571584
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.026011128154960792,
+            "median": 0.045600148986059366,
+            "maximum": 0.126606504816932,
+            "p90": 0.11703241906240482
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.02619999428009816,
+            "median": 0.045990165469890265,
+            "maximum": 0.12663840548652197,
+            "p90": 0.11703606142818158
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-max10",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 351.565167,
+            "median": 388.298583,
+            "maximum": 441.625792,
+            "p90": 440.957084
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 169.379584,
+            "median": 200.3525625,
+            "maximum": 249.109292,
+            "p90": 246.714166
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 168.829,
+            "median": 199.179146,
+            "maximum": 249.102125,
+            "p90": 244.326167
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.472638518886171,
+            "median": 0.5179428959769333,
+            "maximum": 0.565498795546649,
+            "p90": 0.5550440696898477
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.47417988444707826,
+            "median": 0.5207806117476506,
+            "maximum": 0.5655150657003768,
+            "p90": 0.5593201623680986
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-serial",
+          "file": "many",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 952.215667,
+            "median": 1535.8212705,
+            "maximum": 2374.717625,
+            "p90": 2089.482833
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 102.32125,
+            "median": 164.41835400000002,
+            "maximum": 392.153375,
+            "p90": 195.088541
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 102.316458,
+            "median": 164.411333,
+            "maximum": 392.13275,
+            "p90": 195.081042
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.07960037015328723,
+            "median": 0.10796164931498066,
+            "maximum": 0.16512815918482096,
+            "p90": 0.12093742551431494
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.07961170885748906,
+            "median": 0.10796597940619032,
+            "maximum": 0.16513684442797696,
+            "p90": 0.12094207440148835
+          },
+          "scanCount": 0,
+          "readCount": 40,
+          "readBytes": 332240160,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "many-serial",
+          "file": "many",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 40
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 40,
+            "minimum": 289.60125,
+            "median": 331.792604,
+            "maximum": 465.5995,
+            "p90": 380.003917
+          },
+          "snapshotCallMs": {
+            "count": 40,
+            "minimum": 132.911916,
+            "median": 163.452021,
+            "maximum": 231.448833,
+            "p90": 192.109709
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 40,
+            "minimum": 132.907167,
+            "median": 163.4459375,
+            "maximum": 231.443125,
+            "p90": 192.103875
+          },
+          "metadataFraction": {
+            "count": 40,
+            "minimum": 0.35571910787428873,
+            "median": 0.5008970764076105,
+            "maximum": 0.5511795318103113,
+            "p90": 0.5287286804558854
+          },
+          "snapshotCallFraction": {
+            "count": 40,
+            "minimum": 0.3557318183253609,
+            "median": 0.5009169285360449,
+            "maximum": 0.5512847378765907,
+            "p90": 0.5287436076326337
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 40,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "single.hwp",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 1274.58575,
+            "median": 1281.700021,
+            "maximum": 1288.814292
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 163.118167,
+            "median": 171.124771,
+            "maximum": 179.131375
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 163.109459,
+            "median": 171.11679199999998,
+            "maximum": 179.124125
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.12797056533858156,
+            "median": 0.13347711175276278,
+            "maximum": 0.13898365816694402
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.12797739736224104,
+            "median": 0.13348334042738072,
+            "maximum": 0.1389892834925204
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 1204.263542,
+            "median": 1342.0825,
+            "maximum": 1612.863291
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 164.981125,
+            "median": 181.036125,
+            "maximum": 332.618625
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 164.973458,
+            "median": 181.0219795,
+            "maximum": 332.603667
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.11036940890027616,
+            "median": 0.13939377199947417,
+            "maximum": 0.20621937944522292
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.11037489756080147,
+            "median": 0.13940481763431792,
+            "maximum": 0.206228653634848
+          },
+          "scanCount": 0,
+          "readCount": 12,
+          "readBytes": 99672048,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "single.hwpx",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 1329.620833,
+            "median": 1400.057021,
+            "maximum": 1470.493209
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 178.54425,
+            "median": 216.485333,
+            "maximum": 254.426416
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 178.536292,
+            "median": 216.476521,
+            "maximum": 254.41675
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.13427609403289187,
+            "median": 0.15364533193380187,
+            "maximum": 0.17301456983471183
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.134282079197837,
+            "median": 0.15365161116865092,
+            "maximum": 0.17302114313946484
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 1246.013875,
+            "median": 1335.67,
+            "maximum": 1499.860125
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 152.281334,
+            "median": 180.4400625,
+            "maximum": 310.536625
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 152.261208,
+            "median": 180.431667,
+            "maximum": 310.520583
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.1160368151036278,
+            "median": 0.13494163497613482,
+            "maximum": 0.20703302782984515
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.11604294943418075,
+            "median": 0.13494768971322899,
+            "maximum": 0.2070437234938825
+          },
+          "scanCount": 0,
+          "readCount": 12,
+          "readBytes": 99672048,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "two.hwpx",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 2296.429125,
+            "median": 2335.0717085,
+            "maximum": 2373.714292
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 187.425958,
+            "median": 191.543521,
+            "maximum": 195.661084
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 187.409084,
+            "median": 191.5189795,
+            "maximum": 195.628875
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.08160891270702726,
+            "median": 0.08201179028989286,
+            "maximum": 0.08241466787275846
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.08161626063682675,
+            "median": 0.08202224876970002,
+            "maximum": 0.08242823690257327
+          },
+          "scanCount": 0,
+          "readCount": 8,
+          "readBytes": 66448032,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "preview",
+          "file": "two.hwpx",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 6
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 6,
+            "minimum": 2335.185,
+            "median": 2489.6944165,
+            "maximum": 2667.735291
+          },
+          "snapshotCallMs": {
+            "count": 6,
+            "minimum": 160.276708,
+            "median": 179.663375,
+            "maximum": 205.696583
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 6,
+            "minimum": 160.267959,
+            "median": 179.64181250000001,
+            "maximum": 205.68425
+          },
+          "metadataFraction": {
+            "count": 6,
+            "minimum": 0.06352418456648141,
+            "median": 0.07407744749716677,
+            "maximum": 0.078812805111078
+          },
+          "snapshotCallFraction": {
+            "count": 6,
+            "minimum": 0.06353021327557196,
+            "median": 0.07408808293358374,
+            "maximum": 0.07881753079292012
+          },
+          "scanCount": 0,
+          "readCount": 24,
+          "readBytes": 199344096,
+          "readFailures": 0,
+          "releaseCount": 6,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "same",
+          "file": "single.hwp",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 1908.358083,
+            "median": 2341.203125,
+            "maximum": 2774.048167
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 869.968916,
+            "median": 1092.0194375,
+            "maximum": 1314.069959
+          },
+          "scanMs": {
+            "count": 2,
+            "minimum": 674.946667,
+            "median": 851.290021,
+            "maximum": 1027.633375
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 869.951875,
+            "median": 1091.9810625,
+            "maximum": 1314.01025
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.45586406594741785,
+            "median": 0.46477187332533465,
+            "maximum": 0.4736796807032515
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.45587299561326616,
+            "median": 0.46478710022805814,
+            "maximum": 0.47370120484285017
+          },
+          "scanCount": 2,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "same",
+          "file": "single.hwp",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 222.914708,
+            "median": 290.670729,
+            "maximum": 408.92075,
+            "p90": 393.655042
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 112.040167,
+            "median": 147.1944585,
+            "maximum": 204.708459,
+            "p90": 200.339125
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 112.035959,
+            "median": 147.18170849999998,
+            "maximum": 204.700958,
+            "p90": 200.32275
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.4450272175098929,
+            "median": 0.5007666397701364,
+            "maximum": 0.547717058402386,
+            "p90": 0.5130260546589754
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.4450425659732818,
+            "median": 0.5007855534991074,
+            "maximum": 0.5477351877637505,
+            "p90": 0.5130482190946288
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "same",
+          "file": "single.hwpx",
+          "phase": "cold",
+          "cache": "miss",
+          "statuses": {
+            "success": 2
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 2,
+            "minimum": 1037.436,
+            "median": 1450.5892705,
+            "maximum": 1863.742541
+          },
+          "snapshotCallMs": {
+            "count": 2,
+            "minimum": 125.017917,
+            "median": 210.7701875,
+            "maximum": 296.522458
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 2,
+            "minimum": 125.013209,
+            "median": 210.76431300000002,
+            "maximum": 296.515417
+          },
+          "metadataFraction": {
+            "count": 2,
+            "minimum": 0.12050209265920983,
+            "median": 0.1397994309581232,
+            "maximum": 0.15909676925703656
+          },
+          "snapshotCallFraction": {
+            "count": 2,
+            "minimum": 0.12050663077047645,
+            "median": 0.13980358895491793,
+            "maximum": 0.1591005471393594
+          },
+          "scanCount": 0,
+          "readCount": 4,
+          "readBytes": 33224016,
+          "readFailures": 0,
+          "releaseCount": 2,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "consumers",
+          "installedEnabled": true,
+          "scenario": "same",
+          "file": "single.hwpx",
+          "phase": "warm",
+          "cache": "exactHit",
+          "statuses": {
+            "success": 20
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 20,
+            "minimum": 224.2855,
+            "median": 307.8767085,
+            "maximum": 431.705333,
+            "p90": 416.323
+          },
+          "snapshotCallMs": {
+            "count": 20,
+            "minimum": 113.07325,
+            "median": 153.9479375,
+            "maximum": 229.981542,
+            "p90": 212.300084
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 20,
+            "minimum": 113.068583,
+            "median": 153.936104,
+            "maximum": 229.974958,
+            "p90": 212.295083
+          },
+          "metadataFraction": {
+            "count": 20,
+            "minimum": 0.4397682459427009,
+            "median": 0.5047198850088435,
+            "maximum": 0.5473211436162279,
+            "p90": 0.540509728825055
+          },
+          "snapshotCallFraction": {
+            "count": 20,
+            "minimum": 0.43981449222886343,
+            "median": 0.5047409984500373,
+            "maximum": 0.547336913820752,
+            "p90": 0.5405224615229378
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 20,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "snapshot",
+          "installedEnabled": false,
+          "scenario": "snapshot",
+          "file": "none",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 3
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 3,
+            "minimum": 3.749708,
+            "median": 4.075417,
+            "maximum": 4.7955
+          },
+          "snapshotCallMs": {
+            "count": 3,
+            "minimum": 2.735916,
+            "median": 2.770875,
+            "maximum": 3.358208
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 3,
+            "minimum": 2.702125,
+            "median": 2.73975,
+            "maximum": 3.236459
+          },
+          "metadataFraction": {
+            "count": 3,
+            "minimum": 0.6722624948563546,
+            "median": 0.6748950057345429,
+            "maximum": 0.720622779160404
+          },
+          "snapshotCallFraction": {
+            "count": 3,
+            "minimum": 0.6798997501359985,
+            "median": 0.7002831821499322,
+            "maximum": 0.729634414199719
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 3,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "snapshot",
+          "installedEnabled": false,
+          "scenario": "snapshot",
+          "file": "none",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 30
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 30,
+            "minimum": 2.702833,
+            "median": 3.5234794999999997,
+            "maximum": 18.2245,
+            "p90": 7.544125
+          },
+          "snapshotCallMs": {
+            "count": 30,
+            "minimum": 1.772708,
+            "median": 2.4641659999999996,
+            "maximum": 9.39475,
+            "p90": 5.30425
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 30,
+            "minimum": 1.769875,
+            "median": 2.4583335,
+            "maximum": 9.377459,
+            "p90": 5.295
+          },
+          "metadataFraction": {
+            "count": 30,
+            "minimum": 0.5145523333973497,
+            "median": 0.6841167741080295,
+            "maximum": 0.834167974599342,
+            "p90": 0.7262812412433552
+          },
+          "snapshotCallFraction": {
+            "count": 30,
+            "minimum": 0.5155011111415951,
+            "median": 0.6854395561006436,
+            "maximum": 0.835453490914502,
+            "p90": 0.7277789952484717
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 30,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "snapshot",
+          "installedEnabled": true,
+          "scenario": "snapshot",
+          "file": "none",
+          "phase": "cold",
+          "cache": null,
+          "statuses": {
+            "success": 3
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 3,
+            "minimum": 346.523167,
+            "median": 347.692042,
+            "maximum": 458.489833
+          },
+          "snapshotCallMs": {
+            "count": 3,
+            "minimum": 289.876125,
+            "median": 304.401375,
+            "maximum": 323.160167
+          },
+          "scanMs": {
+            "count": 3,
+            "minimum": 105.551167,
+            "median": 143.457916,
+            "maximum": 143.869208
+          },
+          "metadataMs": {
+            "count": 3,
+            "minimum": 289.783292,
+            "median": 304.346167,
+            "maximum": 323.060542
+          },
+          "metadataFraction": {
+            "count": 3,
+            "minimum": 0.7046187695943958,
+            "median": 0.8362595046927989,
+            "maximum": 0.8753325651324513
+          },
+          "snapshotCallFraction": {
+            "count": 3,
+            "minimum": 0.7048360590364499,
+            "median": 0.8365274030870208,
+            "maximum": 0.8754913493245841
+          },
+          "scanCount": 3,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 3,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "snapshot",
+          "installedEnabled": true,
+          "scenario": "snapshot",
+          "file": "none",
+          "phase": "warm",
+          "cache": null,
+          "statuses": {
+            "success": 30
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 30,
+            "minimum": 121.732291,
+            "median": 131.59243750000002,
+            "maximum": 204.416791,
+            "p90": 186.264375
+          },
+          "snapshotCallMs": {
+            "count": 30,
+            "minimum": 80.56975,
+            "median": 87.8734585,
+            "maximum": 140.959917,
+            "p90": 125.349333
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 30,
+            "minimum": 80.549958,
+            "median": 87.859542,
+            "maximum": 140.950625,
+            "p90": 125.342416
+          },
+          "metadataFraction": {
+            "count": 30,
+            "minimum": 0.6115304335571415,
+            "median": 0.6676058572370952,
+            "maximum": 0.7653406851034457,
+            "p90": 0.6958255158137177
+          },
+          "snapshotCallFraction": {
+            "count": 30,
+            "minimum": 0.6117192297238804,
+            "median": 0.6676627484868503,
+            "maximum": 0.7653911392652911,
+            "p90": 0.6958588817270142
+          },
+          "scanCount": 0,
+          "readCount": 0,
+          "readBytes": 0,
+          "readFailures": 0,
+          "releaseCount": 30,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": false,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "before",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 125.013542,
+            "median": 125.013542,
+            "maximum": 125.013542
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 8.263625,
+            "median": 8.263625,
+            "maximum": 8.263625
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 8.244792,
+            "median": 8.244792,
+            "maximum": 8.244792
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.06595119111175972,
+            "median": 0.06595119111175972,
+            "maximum": 0.06595119111175972
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.0661018387911927,
+            "median": 0.0661018387911927,
+            "maximum": 0.0661018387911927
+          },
+          "scanCount": 0,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": false,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "missing",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 1,
+          "totalMs": {
+            "count": 1,
+            "minimum": 915.038083,
+            "median": 915.038083,
+            "maximum": 915.038083
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 185.943042,
+            "median": 185.943042,
+            "maximum": 185.943042
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 185.93625,
+            "median": 185.93625,
+            "maximum": 185.93625
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.2032005590307218,
+            "median": 0.2032005590307218,
+            "maximum": 0.2032005590307218
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.2032079816726054,
+            "median": 0.2032079816726054,
+            "maximum": 0.2032079816726054
+          },
+          "scanCount": 0,
+          "readCount": 1,
+          "readBytes": 0,
+          "readFailures": 1,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": false,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "restored",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 1652.677042,
+            "median": 1652.677042,
+            "maximum": 1652.677042
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 213.264416,
+            "median": 213.264416,
+            "maximum": 213.264416
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 213.258333,
+            "median": 213.258333,
+            "maximum": 213.258333
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.12903811669212986,
+            "median": 0.12903811669212986,
+            "maximum": 0.12903811669212986
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.12904179738705415,
+            "median": 0.12904179738705415,
+            "maximum": 0.12904179738705415
+          },
+          "scanCount": 0,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": false,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "toggle",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 2644.692167,
+            "median": 2644.692167,
+            "maximum": 2644.692167
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 1270.154791,
+            "median": 1270.154791,
+            "maximum": 1270.154791
+          },
+          "scanMs": {
+            "count": 1,
+            "minimum": 1019.349792,
+            "median": 1019.349792,
+            "maximum": 1019.349792
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 1270.14975,
+            "median": 1270.14975,
+            "maximum": 1270.14975
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.48026373951898954,
+            "median": 0.48026373951898954,
+            "maximum": 0.48026373951898954
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.48026564560093843,
+            "median": 0.48026564560093843,
+            "maximum": 0.48026564560093843
+          },
+          "scanCount": 1,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": true,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "before",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 2674.1415,
+            "median": 2674.1415,
+            "maximum": 2674.1415
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 1279.244334,
+            "median": 1279.244334,
+            "maximum": 1279.244334
+          },
+          "scanMs": {
+            "count": 1,
+            "minimum": 989.048125,
+            "median": 989.048125,
+            "maximum": 989.048125
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 1279.216041,
+            "median": 1279.216041,
+            "maximum": 1279.216041
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.47836512802333003,
+            "median": 0.47836512802333003,
+            "maximum": 0.47836512802333003
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.4783757082413178,
+            "median": 0.4783757082413178,
+            "maximum": 0.4783757082413178
+          },
+          "scanCount": 1,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": true,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "missing",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 1,
+          "totalMs": {
+            "count": 1,
+            "minimum": 65.945709,
+            "median": 65.945709,
+            "maximum": 65.945709
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 5.324958,
+            "median": 5.324958,
+            "maximum": 5.324958
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 5.31975,
+            "median": 5.31975,
+            "maximum": 5.31975
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.08066863000896693,
+            "median": 0.08066863000896693,
+            "maximum": 0.08066863000896693
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.08074760406321509,
+            "median": 0.08074760406321509,
+            "maximum": 0.08074760406321509
+          },
+          "scanCount": 0,
+          "readCount": 1,
+          "readBytes": 0,
+          "readFailures": 1,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": true,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "restored",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 121.416417,
+            "median": 121.416417,
+            "maximum": 121.416417
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 15.770042,
+            "median": 15.770042,
+            "maximum": 15.770042
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 15.763209,
+            "median": 15.763209,
+            "maximum": 15.763209
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.1298276574905023,
+            "median": 0.1298276574905023,
+            "maximum": 0.1298276574905023
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.12988393488831088,
+            "median": 0.12988393488831088,
+            "maximum": 0.12988393488831088
+          },
+          "scanCount": 0,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        },
+        {
+          "mode": "transitions",
+          "installedEnabled": true,
+          "scenario": "change",
+          "file": "single.hwpx",
+          "phase": "toggle",
+          "cache": "miss",
+          "statuses": {
+            "success": 1
+          },
+          "fallbackCount": 0,
+          "totalMs": {
+            "count": 1,
+            "minimum": 133.877042,
+            "median": 133.877042,
+            "maximum": 133.877042
+          },
+          "snapshotCallMs": {
+            "count": 1,
+            "minimum": 15.396542,
+            "median": 15.396542,
+            "maximum": 15.396542
+          },
+          "scanMs": {
+            "count": 0
+          },
+          "metadataMs": {
+            "count": 1,
+            "minimum": 15.3895,
+            "median": 15.3895,
+            "maximum": 15.3895
+          },
+          "metadataFraction": {
+            "count": 1,
+            "minimum": 0.11495249499163569,
+            "median": 0.11495249499163569,
+            "maximum": 0.11495249499163569
+          },
+          "snapshotCallFraction": {
+            "count": 1,
+            "minimum": 0.11500509549650792,
+            "median": 0.11500509549650792,
+            "maximum": 0.11500509549650792
+          },
+          "scanCount": 0,
+          "readCount": 2,
+          "readBytes": 16612008,
+          "readFailures": 0,
+          "releaseCount": 1,
+          "note": "snapshotCall includes actor entry wait; differs from internal metadataMs"
+        }
+      ],
+      "consumerTotals": [
+        {
+          "installedEnabled": false,
+          "consumerCount": 288,
+          "statuses": {
+            "success": 288
+          },
+          "warmExactCount": 40,
+          "warmExactMetadataMedianMs": 2.137146,
+          "warmExactTotalMedianMs": 4.0627295,
+          "warmExactReads": 0
+        },
+        {
+          "installedEnabled": true,
+          "consumerCount": 288,
+          "statuses": {
+            "success": 288
+          },
+          "warmExactCount": 40,
+          "warmExactMetadataMedianMs": 150.217104,
+          "warmExactTotalMedianMs": 299.839812,
+          "warmExactReads": 0
+        }
+      ],
+      "runsEvidence": [
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/consumers-off-0/result.json",
+          "sha256": "27e1ddcf54c93a834d010cbc543006120be19ce5780c38a72328ac3132ebca3c",
+          "mode": "consumers",
+          "installedEnabled": false,
+          "pid": 25695,
+          "samples": 144,
+          "statuses": {
+            "success": 144
+          },
+          "proofs": {
+            "exactManagedRegularBold": true,
+            "hitWithoutBytes": true,
+            "normalQueueBusyZero": true,
+            "singleSnapshotMultiPage": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/consumers-off-1/result.json",
+          "sha256": "4b2f8388a65460b81ada9232ba3c224f32ffc83d66dca69f66e0ff0aa8698ab0",
+          "mode": "consumers",
+          "installedEnabled": false,
+          "pid": 26171,
+          "samples": 144,
+          "statuses": {
+            "success": 144
+          },
+          "proofs": {
+            "exactManagedRegularBold": true,
+            "hitWithoutBytes": true,
+            "normalQueueBusyZero": true,
+            "singleSnapshotMultiPage": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/consumers-on-0/result.json",
+          "sha256": "9075a33c7cce3ea488820200f08b8f6b51ae8628518e26e7190eee6b35d58ae8",
+          "mode": "consumers",
+          "installedEnabled": true,
+          "pid": 27609,
+          "samples": 144,
+          "statuses": {
+            "success": 144
+          },
+          "proofs": {
+            "exactManagedRegularBold": true,
+            "hitWithoutBytes": true,
+            "normalQueueBusyZero": true,
+            "singleSnapshotMultiPage": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/consumers-on-1/result.json",
+          "sha256": "10da4c5837881f9de9ea76d85cfecc6e479fd2611a7aebf0646e2b8f0f0eb73a",
+          "mode": "consumers",
+          "installedEnabled": true,
+          "pid": 36935,
+          "samples": 144,
+          "statuses": {
+            "success": 144
+          },
+          "proofs": {
+            "exactManagedRegularBold": true,
+            "hitWithoutBytes": true,
+            "normalQueueBusyZero": true,
+            "singleSnapshotMultiPage": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/guards-off-0/result.json",
+          "sha256": "3d54f4be1372b016941c3fb589260c5cfa4fe41ef93a8cf4b372efc8ef652b5e",
+          "mode": "guards",
+          "installedEnabled": false,
+          "pid": 42063,
+          "samples": 0,
+          "statuses": {},
+          "proofs": {
+            "admission16BeforeSupply": true,
+            "cancelledPreviewReleased": true,
+            "selectionChangesIdentityAndExactBytes": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/guards-on-0/result.json",
+          "sha256": "c77daa2d050c38e2865dbb28a083398120c38f1a35c0d1a593235728f867cf81",
+          "mode": "guards",
+          "installedEnabled": true,
+          "pid": 42220,
+          "samples": 0,
+          "statuses": {},
+          "proofs": {
+            "admission16BeforeSupply": true,
+            "cancelledPreviewReleased": true,
+            "selectionChangesIdentityAndExactBytes": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-off-0/result.json",
+          "sha256": "097f4497ead926fab1385effb04d9cbd21de95835484e5b1e63d080f3a49f989",
+          "mode": "snapshot",
+          "installedEnabled": false,
+          "pid": 22294,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-off-1/result.json",
+          "sha256": "6b5c35b830d76f41d42401c3af1e2acd93d8e6178f4e1499473592921386adc8",
+          "mode": "snapshot",
+          "installedEnabled": false,
+          "pid": 22572,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-off-2/result.json",
+          "sha256": "0acf9a49534798c080cac9487d99d022f19059d81b98b955e0140429ac221f74",
+          "mode": "snapshot",
+          "installedEnabled": false,
+          "pid": 22595,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-on-0/result.json",
+          "sha256": "69fe74b6215d110bd971677d79b566ac9bb51794ea3efcf649c7b8ce1f6f9c59",
+          "mode": "snapshot",
+          "installedEnabled": true,
+          "pid": 22616,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-on-1/result.json",
+          "sha256": "44de3b3b99e4f545e7a9a393905768836b1e3a140dc3bb972e14bcfee7b9a45f",
+          "mode": "snapshot",
+          "installedEnabled": true,
+          "pid": 23148,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/snapshot-on-2/result.json",
+          "sha256": "00c7652818d5346ae76a0eca9816af6aa7df04daecadfbeab454fa4094429a9a",
+          "mode": "snapshot",
+          "installedEnabled": true,
+          "pid": 24683,
+          "samples": 11,
+          "statuses": {
+            "success": 11
+          },
+          "proofs": {
+            "installedPreparationReused": true,
+            "metadataOnly": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/transitions-off-0/result.json",
+          "sha256": "e9bc6d06a7eb4642516d6d938882bf144c64f3902a52a31f23f5170b3f175ddb",
+          "mode": "transitions",
+          "installedEnabled": false,
+          "pid": 40992,
+          "samples": 4,
+          "statuses": {
+            "success": 4
+          },
+          "proofs": {
+            "missingFallbackNotCached": true,
+            "policyInvalidatesCache": true,
+            "restoredExact": true
+          }
+        },
+        {
+          "path": "build.noindex/task580/stage4/direct-speed-05/transitions-on-0/result.json",
+          "sha256": "a46bda40b11a7087d35df93bf8e26126f9c5b3f838f8a24f5761bc76c146ecfb",
+          "mode": "transitions",
+          "installedEnabled": true,
+          "pid": 41774,
+          "samples": 4,
+          "statuses": {
+            "success": 4
+          },
+          "proofs": {
+            "missingFallbackNotCached": true,
+            "policyInvalidatesCache": true,
+            "restoredExact": true
+          }
+        }
+      ]
+    }
+  ]
+}

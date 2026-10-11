@@ -64,9 +64,23 @@ final class FontLibraryStore: Sendable {
     }
 
     private func perform<T: Sendable>(_ operation: @escaping @Sendable () throws -> T) async throws -> T {
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        let id = ExtensionFontPerformanceTrace.request.get(), observer = ExtensionFontPerformanceTrace.details.get()
+        let started = DispatchTime.now().uptimeNanoseconds
+        return try await withCheckedThrowingContinuation { continuation in
+            Self.queue.async {
+                let result = ExtensionFontPerformanceTrace.withSynchronousContext(request: id, details: observer) {
+                    ExtensionFontPerformanceTrace.interval("managedQueueWait", start: started, success: true)
+                    return Result { try operation() }
+                }
+                continuation.resume(with: result)
+            }
+        }
+        #else
         try await withCheckedThrowingContinuation { continuation in
             Self.queue.async { continuation.resume(with: Result { try operation() }) }
         }
+        #endif
     }
 
     private func importOne(_ candidate: FontImportCandidate, index: Int, consumed: inout Int,
@@ -341,6 +355,9 @@ extension FontLibraryStore {
             guard let lockFD else { return try body() }
             while flock(lockFD, LOCK_SH | LOCK_NB) != 0 {
                 if errno == EINTR { continue }
+                #if ALHANGEUL_FONT_EXTENSION_PROBE
+                ExtensionFontPerformanceTrace.busy("managedReadLock")
+                #endif
                 throw StudioFontError.busy
             }
             defer { _ = flock(lockFD, LOCK_UN) }

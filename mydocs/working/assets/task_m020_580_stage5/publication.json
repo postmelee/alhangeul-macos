@@ -1,0 +1,95 @@
+{
+  "at": "2026-10-11T12:48:35.598929+00:00",
+  "scope": "명시 승인된 공개 게시 및 등록 결과 링크의 문서 반영; 제품 변경 없음",
+  "approval": {
+    "instruction": "최종 보고 승인·이슈/기준 갱신·push/Open PR 게시",
+    "initialAutomaticReviewRejectionResolvedByExplicitAuthorization": true,
+    "repo": "postmelee/alhangeul-macos",
+    "bodiesApprovedAtPreparationSHA256": {
+      "mydocs/working/task_m020_580_followup_issue.md": "e71cb757241181f670b0249398fd49c5f0ddd0384d5e90871741338cf9dfd68b",
+      "mydocs/working/task_m020_580_issue_update.md": "9d103161cfea466d2b46a102ae648b1cef4a9098f07b3d98f96246a41f7315a8",
+      "build.noindex/task580/stage5/task580-pr-body.md": "8dcfcce2ffc2bd4b6c82e497283be8d515d056d17b24770c25708745fe366512"
+    },
+    "mergeIssueCloseReleaseExcluded": true
+  },
+  "followupIssue": {
+    "number": 581,
+    "url": "https://github.com/postmelee/alhangeul-macos/issues/581",
+    "state": "OPEN",
+    "milestone": "글꼴 마이그레이션",
+    "labels": [
+      "enhancement",
+      "area:thumbnail",
+      "kind:follow-up",
+      "area:rendering",
+      "area:quick-look"
+    ],
+    "matchesApprovedBody": true,
+    "isReleasePreparationBlocker": false,
+    "implementationStarted": false
+  },
+  "issue580Update": {
+    "url": "https://github.com/postmelee/alhangeul-macos/issues/580",
+    "state": "OPEN",
+    "matchesApprovedBodyAtInitialUpdate": true,
+    "resultLinksAddedOnly": [
+      "https://github.com/postmelee/alhangeul-macos/issues/581",
+      "https://github.com/postmelee/alhangeul-macos/pull/582"
+    ],
+    "currentBodySHA256": "77ab58ab8ec23b6f7e3c77bafad22b63d9f621941879ff14fbcdcba5341fa27c"
+  },
+  "pullRequestAtCreation": {
+    "number": 582,
+    "url": "https://github.com/postmelee/alhangeul-macos/pull/582",
+    "state": "OPEN",
+    "isDraft": false,
+    "base": "devel",
+    "head": "publish/task580",
+    "headCommit": "95b739d924cd74097eed8b4717a67e89938d9706",
+    "bodyMatchesPreparedWithAssignedFollowupLink": true,
+    "attachedToCurrentTask": true,
+    "bodySHA256": "5c0e4a1571d8f332fb5b43031cf966749e77192569ce183c844086145b6944d1",
+    "checksSnapshot": [
+      {
+        "name": "Classify changed files",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Script syntax checks",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "macOS validation",
+        "status": "IN_PROGRESS",
+        "conclusion": ""
+      },
+      {
+        "name": "Release helper checks",
+        "status": "COMPLETED",
+        "conclusion": "SKIPPED"
+      }
+    ]
+  },
+  "rawSHA256": {
+    "published-issue581.json": "556fb343a755b4f26f0c78070a8b1a90b46c80f9adff5fc67119f64d686985e7",
+    "published-issue580.json": "5a63172c658a2ecc45478096df4ff94725942759d959635c07ca30da45064c7e",
+    "published-issue580-linked.json": "2ee7169490e9722c4e553053bc71644a0ecec2f71d10c6eced20a053849bb985",
+    "published-pr582-created.json": "bc11036f0c30a938cd23a14178cf2122fd741d188a1fbe84c06f7a2aaf30f419"
+  },
+  "operationsCompleted": [
+    "후속 #581 등록",
+    "기존 #580 승인 기준 갱신",
+    "publish/task580 push",
+    "devel 대상 Open PR #582 생성·현재 작업에 연결"
+  ],
+  "notPerformed": [
+    "PR merge",
+    "이슈 close",
+    "후속 최적화 구현",
+    "새 서명/설치",
+    "공개 제품 배포"
+  ],
+  "note": "creation head/CI snapshot은 최초 게시 시점이다. 이후 등록 결과 링크·게시 상태 문서만 커밋해 같은 PR에 추가 push하며 최종 head/CI는 GitHub PR을 기준으로 확인한다."
+}

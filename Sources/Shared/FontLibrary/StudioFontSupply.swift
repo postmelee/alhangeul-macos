@@ -6,13 +6,16 @@ struct StudioFontSupply: Sendable {
     static let live = using(installed: .shared, library: { try FontLibraryService.shared.get() })
 
     static func using(installed provider: InstalledFontServiceProvider,
-                      library makeLibrary: @escaping @Sendable () throws -> FontLibraryService) -> Self {
+                      library makeLibrary: @escaping @Sendable () throws -> FontLibraryService,
+                      preparedState: InstalledFontSnapshot? = nil) -> Self {
         Self {
             let installed = try await provider.service()
-            if await installed.snapshot().refreshFailure == .notPrepared {
+            if preparedState == nil, await installed.snapshot().refreshFailure == .notPrepared {
                 _ = try await installed.prepare()
             }
-            let state = await installed.snapshot()
+            let state: InstalledFontSnapshot
+            if let preparedState { state = preparedState }
+            else { state = await installed.snapshot() }
             let library = try makeLibrary()
             let manifest = try await library.list()
             let managed = try await library.acquireMetadataSnapshot()
@@ -73,8 +76,8 @@ struct StudioFontSupply: Sendable {
                     return StudioFontBytes(data: result.data, face: result.face)
                 }, current: {
                     let latest = await installed.snapshot()
-                    let manifest = try await library.list()
-                    return latest.generation == generation && manifest.generation == managed.generation
+                    let latestManifest = try await library.list()
+                    return latest.generation == generation && latestManifest == manifest
                 }, release: { try? await library.releaseSnapshot(managed) })
         }
     }

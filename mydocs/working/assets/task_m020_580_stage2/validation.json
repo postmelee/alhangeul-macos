@@ -1,0 +1,339 @@
+{
+  "sourceParentCommit": "b9b11d3b",
+  "coreLockSHA256": "975712e98ff9a83a98aa0395139794ff743b7c0d242eeaa8aec48a57e3b47697",
+  "finalSourceReceiptMatches": true,
+  "noReadsOnHits": true,
+  "eachConsumerSnapshotsAndReleases": 114,
+  "directSamples": 258,
+  "directStatuses": {
+    "success": 250,
+    "busy": 8
+  },
+  "tests": [
+    {
+      "log": "build.noindex/task580/stage2/font-library-tests-final-02.log",
+      "sha256": "0a815630a510b4357973bf2224cb6d715ccd4260102ad228150a865f5d28d24d",
+      "passed": 154,
+      "failures": 0
+    },
+    {
+      "log": "build.noindex/task580/stage2/studio-output-tests-final.log",
+      "sha256": "d7dcea567b94e8ae2c20683e81698cfa292af4349a43882dd66130439e7c07ea",
+      "passed": 81,
+      "failures": 0
+    }
+  ],
+  "builds": [
+    {
+      "log": "build.noindex/task580/stage2/release-default.log",
+      "sha256": "6013ab8a5e7748228e04b66ad1fe2b0fd1e60ab148683035d06485fa502ce1d5",
+      "diagnosticFlag": false,
+      "codesigningAllowed": false,
+      "result": "BUILD SUCCEEDED"
+    },
+    {
+      "log": "build.noindex/task580/stage2/release-probe.log",
+      "sha256": "79bbd8a5f28ecbb02fe5df3a92b8e8d8b3fc395e0620f65a4fddca7c29124f07",
+      "diagnosticFlag": true,
+      "codesigningAllowed": false,
+      "result": "BUILD SUCCEEDED"
+    },
+    {
+      "log": "build.noindex/task580/stage2/studio-host-build.log",
+      "sha256": "7c57bca9637521e5d09e7fbaf9dac7c14f29436aff430a7cca2611da93acc41d",
+      "diagnosticFlag": false,
+      "codesigningAllowed": false,
+      "result": "BUILD SUCCEEDED"
+    }
+  ],
+  "regressions": {
+    "default-regression-final": {
+      "rawSHA256": "ada48b1a16d61c7396657ef8435aab844052b2a7eb799a9e1e3188e4343cc49c",
+      "result": {
+        "concurrentJobsBounded": true,
+        "documentStampInvalidated": true,
+        "permissionFallback": true,
+        "proofs": [
+          {
+            "bytes": 32775,
+            "consumer": "PNG",
+            "faces": [
+              "GowunBatang-Bold",
+              "GowunBatang-Regular"
+            ],
+            "mode": "coreGraphics",
+            "reads": 2,
+            "releases": 1
+          },
+          {
+            "bytes": 31654,
+            "consumer": "PNG",
+            "faces": [
+              "GowunBatang-Regular",
+              "GowunBatang-Bold"
+            ],
+            "mode": "skiaDecode",
+            "reads": 2,
+            "releases": 1
+          },
+          {
+            "bytes": 31826,
+            "consumer": "PNG",
+            "faces": [
+              "GowunBatang-Bold",
+              "GowunBatang-Regular"
+            ],
+            "mode": "skiaDirect",
+            "reads": 2,
+            "releases": 1
+          },
+          {
+            "consumer": "PDF",
+            "pages": 2,
+            "reads": 4,
+            "releases": 1
+          },
+          {
+            "consumer": "Thumbnail",
+            "first": "miss",
+            "reads": 4,
+            "releases": 4,
+            "second": "exactHit",
+            "settingChange": "miss",
+            "smaller": "largerBucketHit(256x256)"
+          }
+        ],
+        "scope": "unsigned CLI; actual group/Finder not tested",
+        "staleRejected": true
+      }
+    },
+    "native-regression-final": {
+      "rawSHA256": "04ee6d4b2ed2467da9e18a1b5d19f528d61f0f943f80f4fbc1714e057a6a8aa7",
+      "result": {
+        "ambiguousInstalledDTORejectedWithoutReads": true,
+        "bundledProcessRegisteredCount": 0,
+        "cacheIdentityChanged": true,
+        "cancelWaitedForActualIOAndReleasedOnce": true,
+        "changedSourceCGAndSkiaBothChanged": true,
+        "disabledInstalledRejectedWithoutReads": true,
+        "fileLimitRejected": "tooLarge",
+        "installedCatalogCount": 529,
+        "installedCGAndSkia": true,
+        "installedFaces": [
+          "GowunBatang-Regular"
+        ],
+        "installedReads": 1,
+        "kind": "real services with process-scope installed fixture and isolated persistence/library; Finder not connected",
+        "managed": [
+          {
+            "backend": "coreGraphicsOnly",
+            "bytes": 16612008,
+            "faces": [
+              "GowunBatang-Bold",
+              "GowunBatang-Regular"
+            ],
+            "format": "hwpx",
+            "imageSHA256": "9120fe4934333f727d458e85700b1bac73561ae162d482da31e213009dc4ee3c",
+            "managedPriority": true,
+            "reads": 2
+          },
+          {
+            "backend": "skiaOptIn",
+            "bytes": 16612008,
+            "faces": [
+              "GowunBatang-Bold",
+              "GowunBatang-Regular"
+            ],
+            "format": "hwpx",
+            "imageSHA256": "76a361c738fd8e01e7dba534dc8626a8da87af9d09431f19284aaff14d4788ac",
+            "managedPriority": true,
+            "reads": 2
+          },
+          {
+            "backend": "coreGraphicsOnly",
+            "bytes": 16612008,
+            "faces": [
+              "GowunBatang-Bold",
+              "GowunBatang-Regular"
+            ],
+            "format": "hwp",
+            "imageSHA256": "69ac4efcc040138ab04396fb9d998efe205fa50f37d779e59e6f8c528bfc9e6b",
+            "managedPriority": true,
+            "reads": 2
+          },
+          {
+            "backend": "skiaOptIn",
+            "bytes": 16612008,
+            "faces": [
+              "GowunBatang-Bold",
+              "GowunBatang-Regular"
+            ],
+            "format": "hwp",
+            "imageSHA256": "6cd584e71c474f788078b7cd892acf5fec308cfa3f2072d72e93bbbcabd1eaaa",
+            "managedPriority": true,
+            "reads": 2
+          }
+        ],
+        "managedSourceMissingRejected": "corruptObject",
+        "managedWithInstalledDisabled": true,
+        "officialMatcherCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
+        "passed": true,
+        "previousActiveSelectionPreservedOnCollision": true,
+        "realUserInstalledReadOnly": [
+          {
+            "backend": "coreGraphicsOnly",
+            "bytes": 23278008,
+            "faces": [
+              "ArialUnicodeMS"
+            ],
+            "imageSHA256": "0213c3a2fea8b051c4fddd34f62ba50c8f2d093871d837ea19a1b13000356f15"
+          },
+          {
+            "backend": "skiaOptIn",
+            "bytes": 23278008,
+            "faces": [
+              "ArialUnicodeMS"
+            ],
+            "imageSHA256": "34b0acf4c74cc0bab99e394c2952df9992a06919c405ad271552f7835d907a62"
+          }
+        ],
+        "samePSChangedOutlinePNGChanged": true,
+        "sharedBudgetHeldUntilIOCompleted": true,
+        "sourceRestoredPNGEqual": true,
+        "staleDocumentRejectedWithoutReads": true,
+        "staleDuringReadRejected": true,
+        "staleRejected": "stale",
+        "testSourceProcessRegistered": true,
+        "unneededManagedObjectNotRead": true,
+        "unresolvedConflictDTORejectedWithoutReads": "unavailable",
+        "userFontPersistentOSRegistration": false,
+        "userSettingsChanged": false,
+        "userSourceFilesChanged": false
+      }
+    }
+  },
+  "cleanup": {
+    "scope": "only own Task 580 compile products; no global reset, installation or Developer ID signing",
+    "removedPaths": [
+      "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.app",
+      "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulPreview.appex",
+      "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/AlhangeulThumbnail.appex",
+      "build.noindex/task580/stage1/provider-build/DerivedData/Build/Products/Release/Alhangeul.mdimporter",
+      "build.noindex/task580/stage2/studio-output-tests/Build/Products/Debug/Alhangeul.app",
+      "build.noindex/task580/stage2/studio-output-tests/Build/Products/Debug/AlhangeulPreview.appex",
+      "build.noindex/task580/stage2/studio-output-tests/Build/Products/Debug/AlhangeulThumbnail.appex",
+      "build.noindex/task580/stage2/studio-output-tests/Build/Products/Debug/Alhangeul.mdimporter"
+    ],
+    "regularFileLogicalBytes": null,
+    "cleanupNote": "initial app/Updater/appex unregister operations succeeded; redundant unregister of two already-removed app paths returned 1 and stopped receipt creation; read-only postcheck confirms no own registration/importer/bundle remains",
+    "installedInfoSHA256": "41f64c73e4d2848e2b8d34d4b3a1954e0645121072074f5d299929b5d52279a7",
+    "installedStrictSignatureExit": 0,
+    "developmentRegistrations": 0,
+    "developmentAppBundles": 0,
+    "hygieneIssues": 0,
+    "hygieneWarnings": 0,
+    "ownImporterAbsent": true,
+    "installedImporterPreserved": true,
+    "compilerCachesPreservedForStage3": true
+  },
+  "testSourceSHA256": "16bb6c727b9780c759e0ebbe1efe998687d00382c2850c939708418b0c8ffbe8",
+  "excludedDiagnosticRun": {
+    "path": "build.noindex/task580/stage2/consumers-01",
+    "reason": "duplicate enabled lookup caused CoreText work; own ON process stopped after profile; partial results excluded",
+    "sampleProfileSHA256": "c9bb773a2af04031f57ad25f2ee32fa5525406deb6f0182a88d6af8fbd833545"
+  },
+  "intermediateCleanup": {
+    "scope": "only completed own intermediate module caches/private libraries; raw JSON/logs, final CLI/inputs and next-stage Xcode caches retained",
+    "targets": [
+      {
+        "path": "build.noindex/task580/stage2/compile-probe-01/modules",
+        "regularFileLogicalBytes": 35498860
+      },
+      {
+        "path": "build.noindex/task580/stage2/default-regression-01/modules",
+        "regularFileLogicalBytes": 35501708
+      },
+      {
+        "path": "build.noindex/task580/stage2/default-regression-02/modules",
+        "regularFileLogicalBytes": 35501708
+      },
+      {
+        "path": "build.noindex/task580/stage2/native-regression-01/modules",
+        "regularFileLogicalBytes": 35501108
+      },
+      {
+        "path": "build.noindex/task580/stage2/snapshot-01/build/modules",
+        "regularFileLogicalBytes": 35499484
+      },
+      {
+        "path": "build.noindex/task580/stage2/snapshot-02/build/modules",
+        "regularFileLogicalBytes": 35499484
+      },
+      {
+        "path": "build.noindex/task580/stage2/snapshot-03/build/modules",
+        "regularFileLogicalBytes": 35499484
+      },
+      {
+        "path": "build.noindex/task580/stage2/snapshot-01/snapshot-off-0/library",
+        "regularFileLogicalBytes": 16620232
+      },
+      {
+        "path": "build.noindex/task580/stage2/snapshot-02/snapshot-off-0/library",
+        "regularFileLogicalBytes": 16620232
+      },
+      {
+        "path": "build.noindex/task580/stage2/snapshot-02/snapshot-on-0/library",
+        "regularFileLogicalBytes": 16620319
+      },
+      {
+        "path": "build.noindex/task580/stage2/snapshot-03/snapshot-off-0/library",
+        "regularFileLogicalBytes": 16620232
+      },
+      {
+        "path": "build.noindex/task580/stage2/snapshot-03/snapshot-on-0/library",
+        "regularFileLogicalBytes": 16620317
+      },
+      {
+        "path": "build.noindex/task580/stage2/consumers-01/consumers-off-0/library",
+        "regularFileLogicalBytes": 16620234
+      },
+      {
+        "path": "build.noindex/task580/stage2/consumers-01/consumers-on-0/library",
+        "regularFileLogicalBytes": 16620321
+      },
+      {
+        "path": "build.noindex/task580/stage2/final-direct-01/consumers-off-0/library",
+        "regularFileLogicalBytes": 16620240
+      },
+      {
+        "path": "build.noindex/task580/stage2/final-direct-01/consumers-on-0/library",
+        "regularFileLogicalBytes": 16620327
+      },
+      {
+        "path": "build.noindex/task580/stage2/final-direct-01/guards-off-0/library",
+        "regularFileLogicalBytes": 25057405
+      },
+      {
+        "path": "build.noindex/task580/stage2/final-direct-01/guards-on-0/library",
+        "regularFileLogicalBytes": 25057491
+      },
+      {
+        "path": "build.noindex/task580/stage2/final-direct-01/snapshot-off-0/library",
+        "regularFileLogicalBytes": 16620240
+      },
+      {
+        "path": "build.noindex/task580/stage2/final-direct-01/snapshot-on-0/library",
+        "regularFileLogicalBytes": 16620327
+      },
+      {
+        "path": "build.noindex/task580/stage2/final-direct-01/transitions-off-0/library",
+        "regularFileLogicalBytes": 16620327
+      },
+      {
+        "path": "build.noindex/task580/stage2/final-direct-01/transitions-on-0/library",
+        "regularFileLogicalBytes": 16620328
+      }
+    ],
+    "completed": true
+  }
+}

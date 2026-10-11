@@ -13,6 +13,21 @@ final class HwpThumbnailProvider: QLThumbnailProvider {
         for request: QLFileThumbnailRequest,
         _ handler: @escaping (QLThumbnailReply?, Error?) -> Void
     ) {
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        let id = UUID().uuidString, started = DispatchTime.now().uptimeNanoseconds
+        ExtensionFontPerformanceTrace.request.withValue(id) {
+            createThumbnail(for: request) { reply, error in
+                ExtensionFontPerformanceTrace.interval("thumbnail", start: started, success: error == nil, id: id)
+                handler(reply, error)
+            }
+        }
+        #else
+        createThumbnail(for: request, handler)
+        #endif
+    }
+
+    private func createThumbnail(for request: QLFileThumbnailRequest,
+                                 _ handler: @escaping (QLThumbnailReply?, Error?) -> Void) {
         let policy = HwpThumbnailPolicyResolver.resolve()
         let policyID = HwpThumbnailPolicyResolver.identifier(for: policy)
         Self.logger.debug("Thumbnail requested file=\(request.fileURL.lastPathComponent, privacy: .public) policy=\(policyID, privacy: .public) max=\(Int(request.maximumSize.width), privacy: .public)x\(Int(request.maximumSize.height), privacy: .public) scale=\(request.scale, privacy: .public)")
