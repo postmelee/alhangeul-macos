@@ -4,7 +4,7 @@
 - 이슈: [#580](https://github.com/postmelee/alhangeul-macos/issues/580), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562), 후속 [#569](https://github.com/postmelee/alhangeul-macos/issues/569)
 - 제품 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`, 작업 `local/task580`
 - 수행계획 승인: 2026-10-10 “수행계획 승인·구현계획 작성 진행”. 구현계획·Stage 1 승인: 같은 날 “구현계획 승인·Stage 1 진행”.
-- 현재: Stage 1~3, Stage 4.2/4.3 보완과 새 후보 `580.4.3`의 signed Finder·실제 GUI/Preview·원상복원을 완료했다. ON metadata 약 160~170ms는 <200ms지만 provider 약 328~343ms로 원래 <300ms 목표에 미달했다. 2026-10-11 작업지시자가 현재 검증 결과의 수용·Stage 4 기준 보정·추가 최적화 후속 분리와 Stage 5 진행을 승인했다. 부모 Stage 4 완료, Stage 5 최종 보고·PR 준비 중이며 §6.3은 미착수 후속으로 인계한다.
+- 현재: Stage 1~3, Stage 4.2/4.3 보완과 새 후보 `580.4.3`의 signed Finder·실제 GUI/Preview·원상복원을 완료했다. ON metadata 약 160~170ms는 <200ms지만 provider 약 328~343ms로 원래 <300ms 목표에 미달했다. 2026-10-11 작업지시자가 현재 검증 결과의 수용·Stage 4 기준 보정·추가 최적화 후속 분리와 Stage 5 진행을 승인했다. 부모 Stage 4 완료, Stage 5 최종 보고·구체 PR 준비 완료, 공개 게시 승인 대기이며 §6.3은 미착수 후속으로 인계한다.
 - 측정 기준: #569 Stage 2 `60ea06a384ce5ba9e43b60a30278ce1268efe237`. 공개 본문의 핵심 표와 로컬 브랜치·선별 증거를 대조한다. 원시 근거는 덮어쓰지 않는다.
 
 ## 1. 현행 경로와 단계 구성
