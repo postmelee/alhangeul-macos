@@ -1,0 +1,12 @@
+## main/source content gate
+
+- main: `origin/main` → `c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4`
+- source: `origin/devel` → `5146d91e61e29959b45f6af68090cca4e9c3b97d`
+- main-only commits: 1
+- transport-only merges: 1
+- content candidates: 0
+  - transport `c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4`: tree equals second parent
+- source tree: `80fb5eadadbc9ff8f89a8652917e037715c077bd`
+- prospective merge tree: `80fb5eadadbc9ff8f89a8652917e037715c077bd`
+
+PASS: transport-only history; no history-only merge required; merging main adds no content to source.

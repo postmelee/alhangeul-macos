@@ -2,7 +2,7 @@
 
 ## 판단과 검토 범위
 
-[PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)의 main 통합을 막을 제품·배포 경계 문제를 발견하지 못했다. **통합 리뷰·필수 CI 4개 완료 / 별도 main 병합 승인 대기**다. exact head의 MERGEABLE/CLEAN을 확인했다. 이 판단은 소스 준비 PR에 대한 것이며 최종 signed/notarized DMG와 실제 설치·업데이트 수용을 뜻하지 않는다. source 현재성을 다시 확인해 별도 main 병합 승인을 받는다.
+[PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)의 main 통합을 막을 제품·배포 경계 문제를 발견하지 못했다. **통합 리뷰·필수 CI 4개 완료 / 승인된 main 병합 완료**다. exact head의 MERGEABLE/CLEAN을 병합 직전 다시 확인했고 **“main 병합·다음 실행 준비”** 승인으로 `c9d59f93`에 병합했다. 이 판단은 소스 준비 PR에 대한 것이며 최종 signed/notarized DMG와 실제 설치·업데이트 수용을 뜻하지 않는다.
 
 - base main: `43b4e998b93032b62bcb0517fb9c894de3dc8ae1`.
 - head devel: `5146d91e61e29959b45f6af68090cca4e9c3b97d`.
@@ -42,4 +42,4 @@ Copilot은 quota 때문에 리뷰하지 못했다. GitHub에 inline 지적/변�
 
 - [게시 metadata](../report/assets/task_m900_584/stage3/main-pr/pr586.json), [792개 path/blob 대조](../report/assets/task_m900_584/stage3/main-pr/publication-proof.json), [exact head CI·병합 상태](../report/assets/task_m900_584/stage3/main-pr/merge-readiness.json), [checksum](../report/assets/task_m900_584/stage3/main-pr/SHA256SUMS).
 - 전체 raw 파일 목록·exact local diff는 build.noindex/task584/stage3/main-pr에 보존한다. 제품 소스 추가 수정이나 광범위 로컬 rebuild는 하지 않았다.
-- main 병합은 [구현계획 §4](../plans/task_m900_584_impl.md)의 별도 승인 대상이다. tag·서명/공증·VM/실제 Mac 설치·공개는 아직 미실행이며 #584는 OPEN을 유지한다.
+- main 병합은 [구현계획 §4](../plans/task_m900_584_impl.md)에 따라 별도 승인받아 실행했다. [병합 증거](../report/assets/task_m900_584/stage3/main-merge/pr586-merged.json)와 [태그/DMG 준비안](../working/task_m900_584_release_execution.md)에 실제 source를 기록했다. tag·서명/공증·VM/실제 Mac 설치·공개는 아직 미실행이며 #584는 OPEN을 유지한다.
