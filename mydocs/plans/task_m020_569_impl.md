@@ -133,3 +133,5 @@ public release는 M900 운영 이슈로 추적한다. 확정 버전/build number
 기존 Stage 1–2와 해당 signed Finder 측정·복원 승인은 완료된 실행의 근거로 보존한다. 2026-10-11 PR #582 병합 후 웹 안내와 Mac 최종 수용 재개를 명시 승인받아 Stage 3의 기존 범위를 실행한다. 구체 후보의 Developer ID 사용·임시 설치는 준비 후 승인하며, 각 단계 종료 보고와 최종 공개 배포 게이트를 유지한다. 이번 웹 초안 작성이나 ad-hoc 격리 UI 촬영을 최종 제품/DMG 수용 완료로 판정하지 않는다.
 
 2026-10-12 작업지시자가 Stage 4의 같은 후보 시험·복원 결과를 수용하고 “Stage 4 수용·Stage 5 준비 진행”을 승인했다. Stage 5의 현재 회귀·최종 보고·부분 PR 초안을 준비했으며 공개 push/PR 게시·이슈 close·릴리스는 승인 범위에 포함하지 않는다. [최종 보고](../report/task_m020_569_report.md)의 Mac 부분 완료와 남은 Windows/출시 게이트를 함께 인계한다.
+
+같은 날 “최종 보고 수용·push/Open PR 게시”를 별도로 승인받아 `publish/task569` → `devel`의 [Open PR #583](https://github.com/postmelee/alhangeul-macos/pull/583)을 생성했다. 새 소스 변경 없이 승인/게시 기록을 보완하고 merge·이슈 close·릴리스는 별도 게이트로 유지한다.

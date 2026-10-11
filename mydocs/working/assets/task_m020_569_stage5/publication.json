@@ -1,0 +1,30 @@
+{
+  "task": 569,
+  "date": "2026-10-12",
+  "approval": "최종 보고 수용·push/Open PR 게시",
+  "initialPublishedCommit": "d7270a7a60117fd6ae4cab1fa85fb699a1d3e84b",
+  "repository": "postmelee/alhangeul-macos",
+  "head": "publish/task569",
+  "base": "devel",
+  "baseCommitAtPublication": "34ae2f4b14ea6baf5cce6346b5d491a8e6e6ba11",
+  "mainContentGate": "passed",
+  "pullRequest": 583,
+  "url": "https://github.com/postmelee/alhangeul-macos/pull/583",
+  "stateObservedAfterCreation": "OPEN",
+  "isDraft": false,
+  "mergeableObservedAfterCreation": "MERGEABLE",
+  "closingIssuesReferences": [],
+  "milestone": "글꼴 마이그레이션",
+  "ciObservedAfterCreation": {
+    "workflow": "PR CI",
+    "check": "Classify changed files",
+    "status": "IN_PROGRESS",
+    "url": "https://github.com/postmelee/alhangeul-macos/actions/runs/38157256379"
+  },
+  "followupRecordCommitScope": "승인/게시 문서와 영수증만, 제품·테스트·웹 변경 없음",
+  "artifactAttached": true,
+  "merged": false,
+  "issuesClosed": false,
+  "pagesPublished": false,
+  "productReleased": false
+}

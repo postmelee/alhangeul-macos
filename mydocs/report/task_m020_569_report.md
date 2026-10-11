@@ -4,7 +4,7 @@
 - 일자/브랜치: 2026-10-12 / `local/task569`, 대상 `devel`.
 - 통합 기준: PR #582 / `34ae2f4b14ea6baf5cce6346b5d491a8e6e6ba11`, merge `4a17ea87`.
 - 제품 수용 기준: `46b3d66828bc2616842abdff6821b4aea3aed162`의 Swift 126개, 공식 core/Studio v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`. 이후 제품 코드 변경 없음.
-- 승인: 수행/구현계획·각 단계 및 구체 시험 승인에 이어 “Stage 4 수용·Stage 5 준비 진행”을 승인받았다. **Mac 부분 최종 보고·PR 초안 준비 완료, 공개 승인 전**이다.
+- 승인: 수행/구현계획·각 단계 및 구체 시험 승인에 이어 “Stage 4 수용·Stage 5 준비 진행”, 최종 보고의 “최종 보고 수용·push/Open PR 게시”를 승인받았다. 승인된 `d7270a7a`를 게시하고 [Open PR #583](https://github.com/postmelee/alhangeul-macos/pull/583)을 생성했다. Mac 부분 인계이며 merge·이슈 close·출시는 수행하지 않았다.
 
 ## 1. 결과와 변경
 
@@ -50,7 +50,7 @@ core pin·FFI·글꼴 공급 구조·Studio/renderer 기본값을 이 PR에서 �
 - no-AppKit·native matcher·core build-info·bundled Studio receipt 정상. #569/#580 후보 helper guards 각각 **16개** 통과.
 - 같은 제품 Source 집합 **126개**, 출력 probe 기록 입력 **188개**, core/Studio/native hash 및 선별 checksum **59개** 일치. 홈/안내 로컬 참조·fragment·이미지 alt 정상. 변화 없는 웹 반응형/키보드와 기본/진단 Release compile은 해당 단계 증거를 인계.
 
-첫 Host 회귀는 Debug 앱 미준비로 Spotlight 테스트 1개가 실패했다. 전제 앱을 빌드한 뒤 같은 suite가 통과했으며 실패 로그를 보존했다. 제품/테스트를 바꾸지 않았다. [Stage 5](../working/task_m020_569_stage5.md)와 [검증 영수증](../working/assets/task_m020_569_stage5/validation.json)을 따른다. **공개 PR/CI는 아직 없으며 로컬 결과를 CI 통과로 설명하지 않는다.**
+첫 Host 회귀는 Debug 앱 미준비로 Spotlight 테스트 1개가 실패했다. 전제 앱을 빌드한 뒤 같은 suite가 통과했으며 실패 로그를 보존했다. 제품/테스트를 바꾸지 않았다. [Stage 5](../working/task_m020_569_stage5.md)와 [검증 영수증](../working/assets/task_m020_569_stage5/validation.json)을 따른다. PR #583 게시 후 CI가 시작됐으며 로컬 결과를 CI 통과로 설명하지 않는다. 게시 당시 관찰은 [공개 게시 기록](../working/assets/task_m020_569_stage5/publication.json)에 구분한다.
 
 ## 5. 원상복원·공간 정리
 
@@ -60,7 +60,7 @@ Stage 4 전 완료 산출물 약 683MiB, Stage 4 후보/fixture/backup/staging/p
 
 ## 6. 남은 범위·부분 PR·릴리스 인계
 
-이번 Mac 부분 PR은 `publish/task569` → `devel`로 준비한다. [PR 본문 초안](../working/task_m020_569_pr_draft.md)에 `Refs #569, #562`를 사용하며 `Closes`는 넣지 않는다. Windows 입력 [#566](https://github.com/postmelee/alhangeul-macos/issues/566)과 #569의 Windows 수용·#562 전체 완료 조건을 남긴다.
+이번 Mac 부분 [PR #583](https://github.com/postmelee/alhangeul-macos/pull/583)은 `publish/task569` → `devel`로 게시했다. [PR 본문 초안](../working/task_m020_569_pr_draft.md)에 `Refs #569, #562`를 사용하며 `Closes`는 넣지 않는다. Windows 입력 [#566](https://github.com/postmelee/alhangeul-macos/issues/566)과 #569의 Windows 수용·#562 전체 완료 조건을 남긴다.
 
 TTC 개별 face·가변 축·HFT, 복잡한 shaping/pagination의 한컴 동일 표현, 실제 한컴 앱 제거, macOS 12/Intel runtime·물리 인쇄·최종 공증 DMG는 이번 실증 범위 밖이다. 설치 원본이 남고 활성/읽기 권한이 유지돼야 사용하며 설치 사실만으로 복사/사용 라이선스를 보증하지 않는다.
 
@@ -70,4 +70,4 @@ M900 release 운영에 다음을 인계한다.
 2. 진단 flag가 없는 정상 signed/notarized pre-public DMG 설치 smoke와 원래 앱 복원.
 3. 최종 웹 기능 제공 상태·스크린샷/Help 링크·Pages 공개 시점과 Release/appcast/Cask 게이트 정렬.
 
-현재 승인은 최종 보고/부분 PR 준비까지다. 보고 수용·원격 push/Open PR 게시는 다음 승인 대상이고, merge·이슈 close·제품/사이트 공개는 포함하지 않는다.
+최종 보고 수용·원격 push/Open PR 게시를 2026-10-12 승인받아 수행했다. 같은 제품 소스의 게시/승인 기록만 후속 커밋으로 보완하며 merge·이슈 close·제품/사이트 공개는 이번 승인에 포함하지 않는다.
