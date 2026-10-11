@@ -1,0 +1,42 @@
+{
+  "pr": 586,
+  "head": "5146d91e61e29959b45f6af68090cca4e9c3b97d",
+  "base": "43b4e998b93032b62bcb0517fb9c894de3dc8ae1",
+  "open": true,
+  "draft": false,
+  "approved_body_exact_match": true,
+  "github_file_count": 792,
+  "local_changed_paths_exact_match": true,
+  "all_changed_blob_shas_match": true,
+  "base_is_head_ancestor": true,
+  "areas": {
+    ".gitattributes": 1,
+    ".github": 5,
+    ".gitignore": 1,
+    "Alhangeul.xcodeproj": 1,
+    "README.md": 1,
+    "RustBridge": 8,
+    "Sources": 89,
+    "Tests": 75,
+    "docs": 22,
+    "mydocs": 534,
+    "project.yml": 1,
+    "rhwp-core.lock": 1,
+    "rhwp-ffi-symbols.txt": 1,
+    "scripts": 52
+  },
+  "statuses": {
+    "modified": 94,
+    "added": 693,
+    "removed": 3,
+    "renamed": 2
+  },
+  "full_github_diff": "HTTP 406 / exceeds 300 file API limit",
+  "review_diff": "exact base/head local diff + all paginated GitHub file metadata/blob hashes",
+  "local_diff_bytes": 15755197,
+  "diff_check_warnings": [
+    "mydocs/working/task_m020_580_issue_update.md:72: new blank line at EOF."
+  ],
+  "warning_impact": "기존 #580 이슈 보정안의 EOF 빈줄 1개, 제품 동작과 무관한 형식 참고",
+  "automatic_issue_close": false
+}

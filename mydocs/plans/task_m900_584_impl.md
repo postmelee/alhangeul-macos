@@ -2,7 +2,7 @@
 
 ## 1. 승인 상태와 실행 기준
 
-[수행계획서](task_m900_584.md)의 범위·5단계·수용 기준을 작업지시자가 2026-10-12 **“수행계획 승인·구현계획 작성 진행”**으로 승인했다. Stage 1·2 승인에 따라 조사와 소스·안내/unsigned 검증을 완료했다. 준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 보정 head `938b59b9`의 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. 현재 작업지시자의 **“모두 통과했으면 PR #585를 병합한 뒤 #584 Stage 3 준비”** 승인으로 main 인계 PR 초안·출처·실행 입력을 준비한다. 아래 tag·서명/공증 workflow·설치·공개 명령은 별도 gate가 남은 계획이며 아직 실행하지 않았다.
+[수행계획서](task_m900_584.md)의 범위·5단계·수용 기준을 작업지시자가 2026-10-12 **“수행계획 승인·구현계획 작성 진행”**으로 승인했다. Stage 1·2 승인에 따라 조사와 소스·안내/unsigned 검증을 완료했다. 준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. **“main PR 게시·CI/리뷰 진행”** 승인으로 [main PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)을 게시했고 새 CI 4개 PASS·통합 리뷰를 완료했다. 현재는 별도 main 병합 승인이 남아 있다. 아래 tag·서명/공증 workflow·설치·공개 명령은 별도 gate가 남은 계획이며 아직 실행하지 않았다.
 
 - 이슈: [#584](https://github.com/postmelee/alhangeul-macos/issues/584), Release Operations / M900.
 - local/task584 → publish/task584 → devel 준비 PR. 시작 제품 기준 e75d3ec4662457eaca990bdf95596442e5e56503, 계획 준비 커밋 be655ab4930e9dd97ec1c334daf04cc6174ca9f4.
