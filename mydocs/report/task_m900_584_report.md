@@ -4,6 +4,8 @@
 
 **Stage 1 조사와 Stage 2 소스·사용자 안내 준비 완료 / 최종 DMG·설치·실제 업데이트·공개 수용 대기.** 이번 보고는 준비 PR을 위한 부분 인계이며 #584 전체 완료 보고가 아니다. v0.2.3 / 21의 네 bundle·release 입력을 맞추고 Mac 글꼴과 rhwp v0.8.7 안내 후보를 준비했다. 실제 public 앱·Pages·Sparkle·Homebrew는 여전히 v0.2.2다.
 
+준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 검증 이미지 보정 head `938b59b9`의 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. 현재는 [Stage 3](../working/task_m900_584_stage3.md)의 main 인계·실행 입력 준비까지 진행했다.
+
 ## 구현과 사용자 변화
 
 설정에서 Mac 글꼴 사용을 켠 뒤 기존 시스템 글꼴 목록에서 선택하는 방법을 중심으로 릴리즈 노트·홈 FAQ·Mac 안내를 연결했다. 원본 참조와 별도 보관 복사본, 권한·지원 스타일·출력 실패 동작을 구분한다. 한컴 제거 후 모든 글꼴 유지·Windows ZIP 가져오기·모든 글꼴 및 한컴 배치 동일성을 약속하지 않는다.
@@ -24,7 +26,7 @@ Rust 양 target portable·core/Studio·producer golden/Swift decoder·unsigned D
 
 | 영역 | 상태 |
 |------|------|
-| 준비 PR | 본문·로컬 커밋 준비. 승인 후 push/Open PR, 필수 CI·fresh review·별도 병합 승인 |
+| 준비 PR | #585 최신 head CI 4개 PASS·리뷰 보완 수용·devel 병합 완료. main PR 초안 게시 승인 대기 |
 | 최종 provenance/DMG | main/tag/source/run/artifact/hash 미확정·공증 DMG 미생성 |
 | ARM/Intel VM | 새 동일 DMG의 schema 3 최초 설치·재설치·cleanup 수용 대기 |
 | 실제 Mac | 일반 최종 앱의 글꼴·문서·PDF·인쇄 취소·Finder·Spotlight 대기. #569 진단 앱 증거를 최종 DMG PASS로 대체하지 않음 |
@@ -34,8 +36,8 @@ Rust 양 target portable·core/Studio·producer golden/Swift decoder·unsigned D
 
 최소 macOS 12·Intel 실기기 GUI·실제 한컴 제거·물리 인쇄를 이번 unsigned 검증으로 수행했다고 주장하지 않는다. 새 원본 손상이나 보호 우회가 확인되면 공개를 차단한다.
 
-## 게시 요청 범위
+## 준비 PR 결과와 다음 gate
 
-`local/task584`의 준비 소스·문서·검증 증거·부분 보고를 `publish/task584`로 push하고 [준비한 본문](../working/task_m900_584_pr_draft.md)으로 `devel` 대상 Open PR을 생성할 범위만 승인받는다. PR은 Refs #584 형식이며 자동 close가 없다. source 준비 커밋은 `ee453da2c68721542d05d88580f9cd26a22eb2af`; 보고 묶음 최종 commit은 게시 승인 요청에서 정확히 제시한다.
+`local/task584`의 준비 소스·문서·증거·부분 보고는 승인에 따라 `publish/task584`의 #585로 게시했다. source 준비 커밋 `ee453da2`, 보고 묶음 `39e3e131`, 이미지·checksum 보정 `938b59b9`를 포함해 최신 head의 CI 4개를 통과했고, 병합 승인에 따라 `5146d91e`로 devel에 반영했다. PR은 Refs #584 형식이며 #584는 계속 OPEN이다.
 
-tag·서명/공증·workflow dispatch·임시 설치·공개 배포·병합·이슈 close는 이번 게시 요청에 포함하지 않는다. 다음 실행은 [구현계획](../plans/task_m900_584_impl.md)의 Stage 3 승인/gate를 따른다.
+승인된 Stage 3 준비로 [main PR 초안](../working/task_m900_584_main_pr_draft.md)과 출처·Pages 보호·입력표를 준비했다. main PR 게시·병합, 정확한 main SHA의 tag, 서명/공증 workflow, VM/실제 Mac 설치와 공개는 [구현계획](../plans/task_m900_584_impl.md)의 각각의 gate를 따른다. Stage 3 완료 또는 최종 릴리즈 성공으로 기록하지 않는다.

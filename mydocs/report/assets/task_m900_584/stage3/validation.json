@@ -1,0 +1,11 @@
+{
+  "relative_links_verified": 87,
+  "fixed_sha_public_document_urls_verified": 3,
+  "stage2_checksum_count": 44,
+  "github_body_check": "PASS",
+  "git_diff_check": "PASS",
+  "main_source": "5146d91e61e29959b45f6af68090cca4e9c3b97d",
+  "product_source_changed": false,
+  "new_local_build_or_dmg_created": false,
+  "stage3_complete": false
+}

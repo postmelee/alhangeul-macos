@@ -2,11 +2,11 @@
 
 ## 1. 승인 상태와 실행 기준
 
-[수행계획서](task_m900_584.md)의 범위·5단계·수용 기준을 작업지시자가 2026-10-12 **“수행계획 승인·구현계획 작성 진행”**으로 승인했다. 이후 **“구현계획 승인·Stage 1 진행”**으로 read-only 조사와 문서를 실행해 [Stage 1](../working/task_m900_584_stage1.md)을 완료했다. **현재 Stage 1 결과 수용·Stage 2 승인 대기**다. 실행한 Stage 1의 결과는 보고서에 기록하며 아래 후속 명령은 계획이다. 제품 소스, 버전, workflow, 앱 설치, tag 또는 공개 자산은 아직 변경하지 않았다.
+[수행계획서](task_m900_584.md)의 범위·5단계·수용 기준을 작업지시자가 2026-10-12 **“수행계획 승인·구현계획 작성 진행”**으로 승인했다. Stage 1·2 승인에 따라 조사와 소스·안내/unsigned 검증을 완료했다. 준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 보정 head `938b59b9`의 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. 현재 작업지시자의 **“모두 통과했으면 PR #585를 병합한 뒤 #584 Stage 3 준비”** 승인으로 main 인계 PR 초안·출처·실행 입력을 준비한다. 아래 tag·서명/공증 workflow·설치·공개 명령은 별도 gate가 남은 계획이며 아직 실행하지 않았다.
 
 - 이슈: [#584](https://github.com/postmelee/alhangeul-macos/issues/584), Release Operations / M900.
 - local/task584 → publish/task584 → devel 준비 PR. 시작 제품 기준 e75d3ec4662457eaca990bdf95596442e5e56503, 계획 준비 커밋 be655ab4930e9dd97ec1c334daf04cc6174ca9f4.
-- 계획 기준 v0.2.3 / build 21, 직전 public v0.2.2 / build 20. 네 bundle의 현재 값은 아직 0.2.2 / 20이다.
+- 계획 기준 v0.2.3 / build 21, 직전 public v0.2.2 / build 20. 네 source bundle은 0.2.3 / 21이며 Stage 2의 unsigned Debug/universal Release에서도 일치했다. main 인계 source는 devel `5146d91e61e29959b45f6af68090cca4e9c3b97d`다.
 - core/Studio는 공식 rhwp v0.8.7 / 1a76570e833917d15817415a53c09ad61ab3203f를 유지한다. 새 dependency/FFI/renderer 변경은 없다.
 - 최종 source SHA, tag, run/artifact ID, DMG hash는 산출물이 확정되는 단계에서 기록하며 가짜 값이나 이전 후보 값으로 채우지 않는다.
 

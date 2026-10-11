@@ -1,0 +1,30 @@
+{
+  "proposed_tag": "v0.2.3",
+  "tag_target_main_sha": null,
+  "workflow": "release-publish.yml",
+  "ref": "v0.2.3",
+  "fields": {
+    "version": "0.2.3",
+    "previous_release_ref": "v0.2.2",
+    "expected_rhwp_tag": "v0.8.7",
+    "require_latest_rhwp": true,
+    "include_rhwp_in_title": false,
+    "draft": true,
+    "prerelease": false
+  },
+  "expected_bundle_build": "21",
+  "execution": "not approved / not executed",
+  "install_workflow": "release-first-install.yml",
+  "install_fields": {
+    "source_run_id": null,
+    "source_artifact_id": null,
+    "source_sha": null,
+    "dmg_sha256": null,
+    "expected_version": "0.2.3",
+    "expected_build": "21"
+  },
+  "install_runners": [
+    "macos-15",
+    "macos-15-intel"
+  ]
+}
