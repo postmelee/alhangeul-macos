@@ -1,0 +1,5 @@
+Architectures in the fat file: build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/MacOS/Alhangeul are: x86_64 arm64
+Architectures in the fat file: build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex/Contents/MacOS/AlhangeulPreview are: x86_64 arm64
+Architectures in the fat file: build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex/Contents/MacOS/AlhangeulThumbnail are: x86_64 arm64
+OK: Spotlight UTI, schema, factory, version and bundle contract
+Architectures in the fat file: build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter/Contents/MacOS/Alhangeul are: x86_64 arm64

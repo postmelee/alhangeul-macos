@@ -1,0 +1,3 @@
+Ignoring ffi-1.13.1 because its extensions are not built. Try: gem pristine ffi --version 1.13.1
+Verified Release built endpoint: build.noindex/task584/stage3/publish/mounted/Alhangeul.app
+Verified analytics endpoint source configuration (Release only).

@@ -2,7 +2,7 @@
 
 ## 기준과 상태
 
-2026-10-12 Stage 1에서 만든 검증 계약이다. 계획은 v0.2.3 / build 21이며 최종 일반 Release signed/notarized DMG의 source SHA·run/artifact/hash는 아직 없다. 모든 runtime 행은 **대기**다. Stage 2의 source/unsigned build·helper·로컬 Pages 선행 검증은 PASS지만 아래 최종 DMG 수용을 뜻하지 않는다. [Stage 2 보고](../working/task_m900_584_stage2.md)와 새 DMG 검사 결과를 구분한다.
+2026-10-12 Stage 1에서 만든 검증 계약이다. 계획은 v0.2.3 / build 21이며 source SHA는 c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4 / tag v0.2.3, 승인한 publish run은 38180977764다. 최종 일반 Release signed/notarized DMG의 artifact는 11717953850, SHA256은 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63이다. I1 파일/서명은 **PASS**이며 VM·실제 앱 runtime 행은 **대기**다. Stage 2의 source/unsigned build·helper·로컬 Pages 선행 검증은 PASS지만 아래 최종 DMG 수용을 뜻하지 않는다. [Stage 2 보고](../working/task_m900_584_stage2.md)와 새 DMG 검사 결과를 구분한다.
 
 [릴리즈 기록](../release/v0.2.3.md), [구현계획](../plans/task_m900_584_impl.md), [Stage 1 출처](../report/assets/task_m900_584/stage1/context.json)를 기준으로 한다.
 
@@ -18,7 +18,7 @@
 
 | ID | 단계·경로 | 확인 사항 | 증거와 상태 |
 |----|-----------|-----------|-------------|
-| I1 | Stage 3 파일/서명 | checksum·hdiutil verify·source/tag·네 bundle·arm64+x86_64·strict seal·staple/Gatekeeper·layout | 원본 DMG·확정 receipt·명령 로그 / 대기 |
+| I1 | Stage 3 파일/서명 | checksum·hdiutil verify·source/tag·네 bundle·arm64+x86_64·strict seal·staple/Gatekeeper·layout | [동일 파일 검증 PASS](../report/assets/task_m900_584/stage3/publish/file-verification.json), [source/artifact/hash](../report/assets/task_m900_584/stage3/publish/download-proof.json), [실제 레이아웃](../report/assets/task_m900_584/stage3/publish/dmg-layout.jpg) |
 | I2 | ARM/Intel 새 VM | schema 3 양 install/verdict PASS, 최초·종료 후 검색·실제 importer·새 설치 객체 | source proof·first-launch/stopped-search·verify-result / 대기 |
 | I3 | 같은 파일 재설치 | bytes/경로/build/mtime/기존 요청 기록 유지, 사전 안정 검색·새 요청 관찰, maintained/recovered 구분 | reinstall-search/stopped-search·lifecycle 33개·cleanup / 대기 |
 | M1 | Mac 설정/목록 | 기본 OFF 또는 원래 선택 유지, ⌘, 글꼴 ON/OFF·기존 시스템 목록·실제 family/style·재실행 | 화면·실제 count·설정 원래 값/시험 값 / 대기 |

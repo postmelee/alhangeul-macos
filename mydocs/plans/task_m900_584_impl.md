@@ -2,7 +2,7 @@
 
 ## 1. 승인 상태와 실행 기준
 
-[수행계획서](task_m900_584.md)의 범위·5단계·수용 기준을 작업지시자가 2026-10-12 **“수행계획 승인·구현계획 작성 진행”**으로 승인했다. Stage 1·2 승인에 따라 조사와 소스·안내/unsigned 검증을 완료했다. 준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. [main PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)은 게시 승인·새 CI 4개 PASS·통합 리뷰 후 **“main 병합·다음 실행 준비”** 승인으로 main `c9d59f93`에 병합했다. 이어 **“v0.2.3 태그 생성·push”** 승인으로 해당 SHA에 annotated tag를 생성·원격 게시하고 object/commit 일치를 검증했다. [실행 준비안](../working/task_m900_584_release_execution.md)에 실제 source·tag의 DMG 입력을 고정했다. 아래 서명/공증 workflow·설치·공개 명령은 별도 gate가 남은 계획이며 아직 실행하지 않았다.
+[수행계획서](task_m900_584.md)의 범위·5단계·수용 기준을 작업지시자가 2026-10-12 **“수행계획 승인·구현계획 작성 진행”**으로 승인했다. Stage 1·2 승인에 따라 조사와 소스·안내/unsigned 검증을 완료했다. 준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. [main PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)은 게시 승인·새 CI 4개 PASS·통합 리뷰 후 **“main 병합·다음 실행 준비”** 승인으로 main `c9d59f93`에 병합했다. 이어 **“v0.2.3 태그 생성·push”** 승인으로 해당 SHA에 annotated tag를 생성·원격 게시하고 object/commit 일치를 검증했다. [실행 준비안](../working/task_m900_584_release_execution.md)에 실제 source·tag의 DMG 입력을 고정했다. **“draft DMG 생성·다운로드/검증 승인”**으로 run 38180977764를 실행해 success / attempt 1 및 artifact 11717953850의 동일 DMG 파일 검증 PASS를 확인했다. 확정 SHA256은 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63이다. 아래 설치·공개 명령은 별도 gate가 남은 계획이며 아직 실행하지 않았다.
 
 - 이슈: [#584](https://github.com/postmelee/alhangeul-macos/issues/584), Release Operations / M900.
 - local/task584 → publish/task584 → devel 준비 PR. 시작 제품 기준 e75d3ec4662457eaca990bdf95596442e5e56503, 계획 준비 커밋 be655ab4930e9dd97ec1c334daf04cc6174ca9f4.
