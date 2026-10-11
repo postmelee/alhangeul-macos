@@ -8,12 +8,43 @@ enum ExtensionFontPerformanceTrace {
     static let observer = TaskLocal<(@Sendable (UInt64, UInt64, Bool) -> Void)?>(wrappedValue: nil)
     #if ALHANGEUL_FONT_EXTENSION_PROBE
     static let details = TaskLocal<(@Sendable (String, UInt64, UInt64, Bool, String?) -> Void)?>(wrappedValue: nil)
+    private static let synchronousKey = "com.postmelee.alhangeul.FontPerformance.synchronousContext"
+    static var currentRequest: String? {
+        if let synchronous = Thread.current.threadDictionary[synchronousKey] as? SynchronousContext {
+            return synchronous.request
+        }
+        return request.get()
+    }
+    private final class SynchronousContext {
+        let request: String?
+        let details: (@Sendable (String, UInt64, UInt64, Bool, String?) -> Void)?
+        init(request: String?, details: (@Sendable (String, UInt64, UInt64, Bool, String?) -> Void)?) {
+            self.request = request; self.details = details
+        }
+    }
+    /// 동기 경계에서는 최적화 빌드에서 crash가 재현된 TaskLocal push를 사용하지 않는다.
+    /// 동기 operation 범위에만 두고 continuation을 resume하기 전에 원래 상태를 복원한다.
+    static func withSynchronousContext<T>(request: String?,
+        details: (@Sendable (String, UInt64, UInt64, Bool, String?) -> Void)?,
+        operation: () throws -> T) rethrows -> T {
+        let dictionary = Thread.current.threadDictionary
+        let previous = dictionary[synchronousKey]
+        dictionary[synchronousKey] = SynchronousContext(request: request, details: details)
+        defer {
+            if let previous { dictionary[synchronousKey] = previous }
+            else { dictionary.removeObject(forKey: synchronousKey) }
+        }
+        return try operation()
+    }
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.postmelee.alhangeul.FontSupply",
                                        category: "FontPerformance")
     static func interval(_ kind: String, start: UInt64, success: Bool, id: String? = request.get()) {
+        let synchronous = Thread.current.threadDictionary[synchronousKey] as? SynchronousContext
+        let id = synchronous == nil ? id : synchronous?.request
         let end = DispatchTime.now().uptimeNanoseconds
         if kind == "metadata" { observer.get()?(start, end, success) }
-        details.get()?(kind, start, end, success, id)
+        let report = synchronous == nil ? details.get() : synchronous?.details
+        report?(kind, start, end, success, id)
         guard let id else { return }
         let milliseconds = Double(end - start) / 1_000_000
         logger.debug("FontPerformance request=\(id, privacy: .public) kind=\(kind, privacy: .public) startNanos=\(start, privacy: .public) endNanos=\(end, privacy: .public) ms=\(milliseconds, privacy: .public) success=\(success, privacy: .public)")
@@ -47,9 +78,10 @@ actor ExtensionFontSupply {
     private var root: URL?
 
     init(resolveRoot: @escaping @Sendable () throws -> URL = { try FontLibraryLocation().resolve() },
-         environment: InstalledFontEnvironment = InstalledFontSystem().environment,
+         environment: InstalledFontEnvironment? = nil,
          changes: InstalledFontChangeEpoch = .init(), observeChanges: Bool = true) {
-        self.resolveRoot = resolveRoot; self.environment = environment
+        self.resolveRoot = resolveRoot
+        self.environment = environment ?? InstalledFontSystem(descriptorCache: .init(changes: changes)).environment
         self.changes = changes; self.observeChanges = observeChanges
     }
 

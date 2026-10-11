@@ -36,18 +36,21 @@ struct InstalledFontPermissionAccess: Sendable {
 
 struct InstalledFontSystem: Sendable {
     let access: InstalledFontPermissionAccess
+    private let descriptorCache: InstalledFontDescriptorCache?
     static let maximumRecords = 20_000
     static let maximumBytes = 64 * 1024 * 1024
 
-    init(access: InstalledFontPermissionAccess = .system) { self.access = access }
+    init(access: InstalledFontPermissionAccess = .system, descriptorCache: InstalledFontDescriptorCache? = nil) {
+        self.access = access; self.descriptorCache = descriptorCache
+    }
 
     var environment: InstalledFontEnvironment {
         .init(scan: { try self.scan($0) }, read: { record, grants in
             #if ALHANGEUL_FONT_EXTENSION_PROBE
             let id = ExtensionFontPerformanceTrace.request.get(), observer = ExtensionFontPerformanceTrace.details.get()
             let work = Task.detached(priority: .utility) {
-                try ExtensionFontPerformanceTrace.request.withValue(id) {
-                    try ExtensionFontPerformanceTrace.details.withValue(observer) { try self.read(record, grants: grants) }
+                try ExtensionFontPerformanceTrace.withSynchronousContext(request: id, details: observer) {
+                    try self.read(record, grants: grants)
                 }
             }
             #else
@@ -67,7 +70,7 @@ struct InstalledFontSystem: Sendable {
         var success = false
         defer { ExtensionFontPerformanceTrace.interval("activeSignature", start: started, success: success) }
         #endif
-        let value = try InstalledFontActiveSignature.captureActive(activeDescriptors())
+        let value = try InstalledFontActiveSignature.captureActive(activeDescriptors(), cache: descriptorCache)
         #if ALHANGEUL_FONT_EXTENSION_PROBE
         success = true
         #endif

@@ -491,10 +491,8 @@ private actor HwpThumbnailFontQueue {
         let request = ExtensionFontPerformanceTrace.request.get()
         let details = ExtensionFontPerformanceTrace.details.get()
         entry.traceDeadline = {
-            ExtensionFontPerformanceTrace.request.withValue(request) {
-                ExtensionFontPerformanceTrace.details.withValue(details) {
-                    ExtensionFontPerformanceTrace.busy("thumbnailWaitDeadline")
-                }
+            ExtensionFontPerformanceTrace.withSynchronousContext(request: request, details: details) {
+                ExtensionFontPerformanceTrace.busy("thumbnailWaitDeadline")
             }
         }
         #endif
@@ -530,7 +528,7 @@ private actor HwpThumbnailFontQueue {
         let traceID = ExtensionFontPerformanceTrace.request.get()
         let observer = ExtensionFontPerformanceTrace.details.get()
         admissions[id]?.traceWait = { success in
-            ExtensionFontPerformanceTrace.details.withValue(observer) {
+            ExtensionFontPerformanceTrace.withSynchronousContext(request: traceID, details: observer) {
                 ExtensionFontPerformanceTrace.interval("thumbnailRenderWait", start: started, success: success, id: traceID)
             }
         }

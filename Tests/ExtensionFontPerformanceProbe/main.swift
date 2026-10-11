@@ -25,7 +25,7 @@ final class PerformanceMeter: @unchecked Sendable {
     private let lock = NSLock()
     private var values: [Span] = []
     func record(_ kind: String, _ start: UInt64, bytes: Int = 0, success: Bool = true, request: String? = nil) {
-        let span = Span(request: request ?? PerformanceTrace.request.get() ?? ExtensionFontPerformanceTrace.request.get() ?? "background", kind: kind,
+        let span = Span(request: request ?? PerformanceTrace.request.get() ?? ExtensionFontPerformanceTrace.currentRequest ?? "background", kind: kind,
                         start: start, end: uptime(), bytes: bytes, success: success)
         lock.lock(); values.append(span); lock.unlock()
     }
@@ -130,7 +130,8 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter:
             let context = try HwpPreviewPDFRenderer.load(fileURL: input.appendingPathComponent("single.hwpx"))
             _ = try HwpPreviewPNGRenderer.render(context: context, mode: .coreGraphics, forceDefaultFonts: true)
         }
-        let meter = PerformanceMeter(), live = InstalledFontSystem().environment
+        let changes = InstalledFontChangeEpoch()
+        let meter = PerformanceMeter(), live = InstalledFontSystem(descriptorCache: .init(changes: changes)).environment
         let environment = InstalledFontEnvironment(scan: { grants in
             let start = uptime()
             do { let value = try live.scan(grants); meter.record("scan", start); return value }
@@ -140,7 +141,7 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter:
             do { let value = try await live.read(record, grants); meter.record("installedRead", start, bytes: value.data.count); return value }
             catch { meter.record("installedRead", start, success: false); throw error }
         }, makeBookmark: live.makeBookmark, activeSignature: live.activeSignature)
-        let supply = ExtensionFontSupply(resolveRoot: { root }, environment: environment)
+        let supply = ExtensionFontSupply(resolveRoot: { root }, environment: environment, changes: changes)
         let tracked: ExtensionFontRenderer.Supply = {
             let start = uptime()
             let request = PerformanceTrace.request.get()
@@ -212,11 +213,13 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ file: URL, width: Int, meter:
                 }
                 proofs["metadataOnly"] = true
                 proofs["installedPreparationReused"] = true
+            } else if mode == "attributes" {
+                proofs["actualAttributeSignatureEquivalence"] = try AttributeSignatureExperiment.run(output: output)
             } else if mode == "signature" {
                 var previous: String?
                 for index in 0...10 {
                     let id = "signature-\(index)"
-                    let row = try PerformanceTrace.request.withValue(id) {
+                    let row = try await PerformanceTrace.request.withValue(id) { () async throws -> PerformanceSample in
                         var row = PerformanceSample(request: id, scenario: "signatureExperiment",
                             phase: index == 0 ? "cold" : "warm", file: "none", width: 0, start: uptime())
                         let start = uptime(), capture = try ActiveSignatureExperiment.capture()

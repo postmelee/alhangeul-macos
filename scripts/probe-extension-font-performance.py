@@ -67,8 +67,9 @@ def main():
     driver_source = Path(__file__).read_bytes()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--suite", choices=["snapshot", "consumers", "transitions", "guards", "signature", "all"], default="all")
+    parser.add_argument("--suite", choices=["snapshot", "consumers", "transitions", "guards", "signature", "attributes", "all"], default="all")
     parser.add_argument("--binary", type=Path, help="동일 source receipt의 기존 격리 binary 재사용")
+    parser.add_argument("--optimization", choices=["none", "speed"], default="none", help="기존 비최적화 비교와 -O 비교를 분리")
     parser.add_argument("--repetitions", type=int, choices=range(1, 4), help="부분 진단용 반복 수")
     args = parser.parse_args()
     out = args.output.resolve()
@@ -106,20 +107,24 @@ def main():
         if not binary.is_relative_to(ROOT / "build.noindex/task580"):
             raise SystemExit("다른 경로의 binary는 재사용하지 않습니다")
         receipt = json.loads((binary.parent / "receipt.json").read_text())
-        if receipt["sources"] != source_hashes or receipt["binarySHA256"] != digest(binary) or receipt.get("buildFlags") != BUILD_FLAGS:
+        if receipt["sources"] != source_hashes or receipt["binarySHA256"] != digest(binary) or receipt.get("buildFlags") != BUILD_FLAGS or receipt.get("optimization", "none") != args.optimization:
             raise SystemExit("binary/source receipt 불일치")
     else:
         build = out / "build"
         build.mkdir()
         binary = build / "font-performance"
         cmd = ["swiftc", "-parse-as-library", "-D", "ALHANGEUL_FONT_EXTENSION_PROBE", "-target", platform.machine() + "-apple-macosx12.0", "-module-cache-path", str(build / "modules"), "-I", str(ROOT / "Frameworks/modulemap")]
+        if args.optimization == "speed":
+            cmd += ["-O"]
         cmd += list(map(str, sources)) + ["-L", str(ROOT / "Frameworks/universal"), "-lrhwp"]
         for framework in ["JavaScriptCore", "CoreText", "CoreGraphics", "ImageIO", "Foundation", "CoreServices", "ApplicationServices", "Security", "Metal", "QuartzCore", "IOSurface", "OpenGL"]:
             cmd += ["-framework", framework]
         cmd += ["-lc++", "-lz", "-liconv", "-o", str(binary)]
         with (build / "compile.log").open("w") as log:
             subprocess.run(cmd, cwd=ROOT, stdout=log, stderr=log, check=True)
-        (build / "receipt.json").write_text(json.dumps({"sources": source_hashes, "binarySHA256": digest(binary), "buildFlags": BUILD_FLAGS}, indent=2) + "\n")
+        if any(digest(ROOT / name) != expected for name, expected in source_hashes.items()):
+            raise SystemExit("compile 중 source/fixture/native 변경으로 측정 거부")
+        (build / "receipt.json").write_text(json.dumps({"sources": source_hashes, "binarySHA256": digest(binary), "buildFlags": BUILD_FLAGS, "optimization": args.optimization}, indent=2) + "\n")
     modes = ["snapshot", "consumers", "transitions", "guards"] if args.suite == "all" else [args.suite]
     results = []
     for mode in modes:
@@ -133,11 +138,13 @@ def main():
                     subprocess.run([str(binary), str(inputs), str(run), mode, enabled, str(repetition)], stdout=log, stderr=log, check=True, timeout=600)
                 results.append(json.loads((run / "result.json").read_text()))
                 (out / "summary.json").write_text(json.dumps(summarize(results), indent=2) + "\n")
+    if any(digest(ROOT / name) != expected for name, expected in source_hashes.items()):
+        raise SystemExit("실행 중 source/fixture/native 변경으로 측정 거부")
     receipt = {"sourceCommit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                "uncommittedSources": source_hashes, "platform": platform.platform(), "architecture": platform.machine(),
                "coreLockSHA256": digest(ROOT / "rhwp-core.lock"), "inputs": {p.name: digest(p) for p in inputs.iterdir()},
                "binary": str(binary.relative_to(ROOT)), "scope": "unsigned direct real CoreText environment, private store; not signed Finder",
-               "buildFlags": BUILD_FLAGS,
+               "buildFlags": BUILD_FLAGS, "optimization": args.optimization,
                "driverSHA256": hashlib.sha256(driver_source).hexdigest(),
                "runs": len(results), "samples": sum(len(r["samples"]) for r in results), "installedOSFontsModified": False}
     (out / "run-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")

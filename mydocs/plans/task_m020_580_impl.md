@@ -4,7 +4,7 @@
 - 이슈: [#580](https://github.com/postmelee/alhangeul-macos/issues/580), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562), 후속 [#569](https://github.com/postmelee/alhangeul-macos/issues/569)
 - 제품 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`, 작업 `local/task580`
 - 수행계획 승인: 2026-10-10 “수행계획 승인·구현계획 작성 진행”. 구현계획·Stage 1 승인: 같은 날 “구현계획 승인·Stage 1 진행”.
-- 현재: Stage 1 완료 후 2026-10-10 “진행해줘”로 Stage 2를 승인받았다. [Stage 2 보고](../working/task_m020_580_stage2.md)의 재사용·OFF 경로·현재성/수명 검증 완료, Stage 3 진입 승인 대기다.
+- 현재: Stage 1~3 완료 후 “진행해줘.”로 Stage 4 재측정·후보 준비를 승인받았다. [Stage 4 보고](../working/task_m020_580_stage4.md)의 첫 고정 후보를 2026-10-11 승인으로 시험·복원했고 정상 요청 186건 busy 0이나 ON 목표 미달이었다. 같은 날 승인받은 Stage 4.2 실험·조건부 구현·직접 검증·새 미서명 후보 준비까지 완료했다. 부모 Stage 4는 새 후보 signed 목표·실제 GUI/Preview 수용 전까지 미완료다.
 - 측정 기준: #569 Stage 2 `60ea06a384ce5ba9e43b60a30278ce1268efe237`. 공개 본문의 핵심 표와 로컬 브랜치·선별 증거를 대조한다. 원시 근거는 덮어쓰지 않는다.
 
 ## 1. 현행 경로와 단계 구성
@@ -119,6 +119,22 @@ Developer ID 서명·고유 fixture·`/Applications/Alhangeul.app` 백업/임시
 
 CoreGraphics 기본과 Skia opt-in의 단일/다중 페이지 및 실제 공급 face 근거를 확인한다. 공통 catalog/공급 변경이 영향을 주면 Studio·PDF/인쇄 준비 회귀도 수행한다. 이는 #569의 최종 사용자 수용·최소 OS 실행·공개 DMG gate를 대신하지 않는다.
 
+### 6.1 Stage 4.2 — ON 현재성 검사 비용 보완 (승인)
+
+Stage 4의 첫 signed 시험에서 warm metadata 중앙값은 OFF 약 4.5~5.0ms, ON 약 844~948ms였다. ON provider 전체는 약 1.7~2.0초로 기존 <200ms/<300ms 목표에 미달했다. ON1 HWP exactHit 10건에서 현재성 signature가 metadata 안에 2회·전체 4회 발생했고 각 signature 중앙값은 약 465ms였다. profile은 CoreText family/style/variation/traits getter의 반복 계산을 원인 후보로 보여 준다. 이전 후보와 고유 보관함은 원상복원·정리를 완료했다.
+
+보완 범위는 **속성 조회 실험과 입증된 조건의 확장 전용 정규화 정보 재사용**이다. 새 C ABI·core/Studio pin·renderer·HostApp UI·공유 정책/보관함 schema는 바꾸지 않는다. 전후 signature·요청별 current·원본 stat·epoch 검사를 줄이거나 TTL만으로 이전 bitmap을 유효하게 답하지 않는다.
+
+1. 기존 getter 경로를 비교 기준으로 보존하고, 실제 CoreText descriptor의 `CTFontDescriptorCopyAttributes` dictionary와 개별 getter를 대조하는 격리 직접 probe를 작성한다. SDK가 최소 식별 속성만 반환하므로 family/style/variation/traits 누락을 빈 값으로 대체하지 않는다. 실제 활성 목록과 제어한 descriptor의 기존 digest/reusable 일치·getter 수·시간을 확인한다. OS에 사용자 글꼴을 설치/비활성화하지 않는다.
+2. 완전하고 결정적으로 직렬화할 수 있는 속성 dictionary, 현재 원본 URL·stat, 즉시 변경 epoch를 key로 삼아 비싼 정규화 필드만 재사용한다. 알려진 CF/숫자/문자열/URL/배열/dictionary 값의 의미를 보존하고, 알 수 없는 값·비정상 수·누락된 식별 근거는 기존 엄격한 조회로 돌아간다. 중복 descriptor·축·traits·enabled 판정 및 기존 최종 digest 형식은 유지한다. key의 충분성을 입증하지 못한 조건에는 빠른 경로를 적용하지 않는다.
+3. 재사용기는 확장 준비 소유자에 연결한 프로세스 내부 cache로 한정한다. HostApp 기본 `InstalledFontSystem` 경로는 유지한다. 기존 최대 descriptor 20,000개와 cache의 key/필드 직렬화 합계 16MiB를 상한으로 두고, 넘으면 cache 저장을 생략해 기존 조회로 처리한다. 이 값은 프로세스 실제 RSS 상한으로 주장하지 않는다. 글꼴 bytes·FD·요청 snapshot을 저장하지 않으며 다른 PID·epoch·원본 변경·실패 뒤 이전 정보를 사용하지 않는다. 검사 도중 변경이나 취소 시 결과를 게시하지 않는다.
+4. 기존/새 signature의 동일 결과를 실제 반복·동시 호출 및 순서/중복·축/traits·동명 다른 원본·inode/ctime·권한 상실/복구·epoch 변경 주입으로 검증한다. 누락/미지원 값 fallback·cache 상한·오류·취소 회귀도 확인한다. 공통 파일의 영향이 있으면 FontLibrary/Host 출력 회귀를 수행하고, 확장 PNG/단일·2페이지 PDF·current/queue/lease 회귀와 기본/진단 Release 빌드를 확인한다. 직접 비교는 동일 source/fixture/workload의 비최적화와 `-O`를 분리한다.
+5. 계약 동등성을 입증한 결과와 비용을 보고한 후 새 후보 hash·복원 계획을 준비한다. 구체 서명·임시 설치 승인을 다시 받은 후보에서 기존 warm 10건 이상·metadata <200ms/provider <300ms·정상 busy 0 기준을 재측정하고 실제 Finder GUI/Preview를 확인한다. 입증 실패·목표 미달은 미완료로 남기며 Stage 5로 넘기지 않는다.
+
+예상 변경: `InstalledFontActiveSignature.swift`, 확장 전용 속성 cache/진입점, `InstalledFontSystem.swift`·`ExtensionInstalledFontPreparation.swift`의 필요한 연결, 해당 XCTest/성능 probe와 source receipt. 준비 동시성·취소·정책·기존 렌더 대기 구조를 별도 재설계하는 범위로 확대하지 않는다. raw dictionary만으로 충분하지 않거나 더 큰 구조 변경이 필요하면 실험 근거와 대안을 보고하고 구현 전에 다시 범위를 보정한다.
+
+2026-10-11 받은 보완 승인은 1~4의 실험·조건부 구현·직접 검증과 5의 미서명 후보 준비까지 포함한다. 새 후보의 Developer ID 사용·`/Applications` 교체·공개 배포는 포함하지 않는다.
+
 ## 7. Stage 5 — 회귀·보고·PR·후속 인계
 
 변경 유형의 검증과 Stage 4 개선 전후 표·busy 경계·정확성·환경/제한을 취합한다. 최종 보고·오늘할일 완료와 PR 승인 절차 후 `publish/task580`으로 게시하고 `devel` 대상 Open PR을 만든다. #580 완료 기준을 충족한 PR은 `Closes #580`, #562/#569는 `Refs`로 참조한다. 리뷰/CI/merge 전 이슈를 닫지 않는다.
@@ -141,6 +157,6 @@ CoreGraphics 기본과 Skia opt-in의 단일/다중 페이지 및 실제 공급 
 
 ## 9. 현재 승인 범위와 다음 승인 요청
 
-수행계획·구현계획·Stage 1 및 Stage 2를 승인받아 완료했다. Stage 2 보고 후 작업지시자의 “진행해줘. 저장공간도 최대한 확보하면서 진행해줘.” 지시로 **Stage 3의 제한된 렌더 대기·병합·취소/과부하 구현과 소유 부산물 정리를 승인받아 완료했다.** [Stage 3 보고](../working/task_m020_580_stage3.md) 검토 후 Stage 4 재측정·후보 수용 준비 승인을 요청한다. 새 signed 후보·임시 설치·공개 배포는 이후 별도 승인 범위다.
+수행계획·구현계획·Stage 1 및 Stage 2를 승인받아 완료했다. Stage 2 보고 후 작업지시자의 “진행해줘. 저장공간도 최대한 확보하면서 진행해줘.” 지시로 **Stage 3의 제한된 렌더 대기·병합·취소/과부하 구현과 소유 부산물 정리를 승인받아 완료했다.** [Stage 3 보고](../working/task_m020_580_stage3.md) 후 작업지시자의 “진행해줘.” 지시로 Stage 4 재측정·후보 수용 준비를 승인받았다.
 
-Stage 2의 unsigned 반복 비용 개선은 signed 성능 목표 달성을 입증하지 않는다. Stage 3 직접 consumer에서 정상 busy 0을 확인했지만 최초 miss의 추가 현재성 비용과 실제 Finder 요청을 Stage 4에서 따로 검증한다. signed 수용이 정확성이나 잠정 목표를 만족시키기 어려우면 근거와 대안을 제시해 범위를 보정한다. 새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·새 후보 로컬 서명/임시 설치·공개 release는 Stage 3 승인 요청에 포함하지 않는다.
+고유 후보/fixture·백업/복원 대상에 한해 로컬 서명·임시 설치를 승인받아 실제 확장을 측정하고 원래 앱을 복원했다. 정상 busy는 0이지만 ON 시간 목표를 만족하지 않아 §6.1의 구체 Stage 4.2 범위 보정을 승인받았다. 동등성 입증 전 제품 기본 재사용 경로를 연결하지 않으며, signed 목표·실제 GUI 수용 전 Stage 4 완료 커밋·Stage 5 진입을 하지 않는다. 새 C ABI·renderer 기본 변경·사용자 OS 글꼴 변경·공개 release는 이번 승인에도 포함하지 않는다.

@@ -120,9 +120,7 @@ actor ExtensionInstalledFontPreparation {
             #if ALHANGEUL_FONT_EXTENSION_PROBE
             let request = ExtensionFontPerformanceTrace.request.get(), observer = ExtensionFontPerformanceTrace.details.get()
             let worker = Task.detached(priority: .utility) {
-                try ExtensionFontPerformanceTrace.request.withValue(request) {
-                    try ExtensionFontPerformanceTrace.details.withValue(observer) { try operation() }
-                }
+                try ExtensionFontPerformanceTrace.withSynchronousContext(request: request, details: observer, operation: operation)
             }
             #else
             let worker = Task.detached(priority: .utility, operation: operation)

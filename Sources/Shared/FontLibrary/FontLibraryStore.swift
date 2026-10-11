@@ -69,12 +69,11 @@ final class FontLibraryStore: Sendable {
         let started = DispatchTime.now().uptimeNanoseconds
         return try await withCheckedThrowingContinuation { continuation in
             Self.queue.async {
-                ExtensionFontPerformanceTrace.request.withValue(id) {
-                    ExtensionFontPerformanceTrace.details.withValue(observer) {
-                        ExtensionFontPerformanceTrace.interval("managedQueueWait", start: started, success: true)
-                        continuation.resume(with: Result { try operation() })
-                    }
+                let result = ExtensionFontPerformanceTrace.withSynchronousContext(request: id, details: observer) {
+                    ExtensionFontPerformanceTrace.interval("managedQueueWait", start: started, success: true)
+                    return Result { try operation() }
                 }
+                continuation.resume(with: result)
             }
         }
         #else

@@ -22,7 +22,7 @@
 |------|------|
 | 활성 descriptor | enabled 상태 필터 후 canonical source URL, PostScript 이름, family/style, 정렬된 variation 좌표, symbolic/weight/width/slant traits |
 | 목록 전체 | 정렬 순서에 무관하게 비교하되 중복 descriptor의 개수는 보존; 활성 목록의 추가·제거·비활성 반영 |
-| 원본 파일 | canonical URL마다 stat 1회; device/inode/size/mtime/ctime의 초·나노초; 읽기 확인 실패는 성공 stamp와 다른 상태 |
+| 원본 파일 | canonical URL별 stat 중복 제거; 계산 속성 cache miss의 저장 전 stat 추가 재확인; device/inode/size/mtime/ctime의 초·나노초; 읽기 확인 실패는 성공 stamp와 다른 상태 |
 | 공유 상태 | 설치 사용 정책 revision, 관리 manifest generation/digest·선택 및 객체 stamp, 알림 epoch, 준비 성공/실패 상태 |
 
 시험의 key 차이 검사는 제거·중복·각 descriptor 항목·missing/permission 실패·inode/ctime 변경을 구분했다. 실제 OS 설치·비활성·권한 변화 수용을 대신하지 않는다. 시험 구현의 20,000건 guard는 활성 필터 전에 적용되므로 제품에서는 기존처럼 활성 필터 후 한도를 검사한다.
@@ -30,6 +30,10 @@
 descriptor에 URL/PS 정보가 없거나 자료형·variation/traits를 신뢰할 수 없으면 이전 정상 metadata의 재사용을 허용하지 않는다. 기존 full scan의 생략/limitation 규칙을 따른다. descriptor에 표현되지 않는 내부 이름·축 정보는 원본 stamp 변화로 다시 정규화한다. 실제 내용/face 검증은 기존 FD·hash·PS/style 검사로 수행한다. stat만으로 정확한 bytes를 사용했다고 주장하지 않는다.
 
 Stage 2 구현은 CoreText collection 안에서 이미 활성 필터를 통과한 목록의 enabled 속성을 중복 조회하지 않는다. 렌더 후 workload의 프로파일에서 중복 조회가 CoreText 내부 분석을 반복시키는 비용을 확인했다. signature가 불완전하거나 없는 주입 환경은 매 current 경계에서 full scan으로 검증한다. 원본 stat 실패를 정상 재사용 상태로 취급하지 않는다.
+
+Stage 4.2는 확장 전용 `InstalledFontDescriptorCache`로 계산 속성만 재사용한다. 활성 collection·enabled·현재 URL/PS·원본 stat은 매 capture에서 확인한다. 전체 최소 속성 dictionary의 결정적 타입 보존 직렬화와 현재 URL/PS·stamp를 key로 삼고, 즉시 변경 epoch가 같은 cache session에서만 조회/저장한다. key 자체를 비교하며 hash만으로 같은 descriptor라고 판정하지 않는다. unknown·비정상 수·과도한 key는 cache를 사용하지 않고 기존 엄격한 getter로 처리한다. 중복·축·traits와 최종 signature 형식은 유지한다.
+
+epoch·실패·취소로 무효화한 session의 늦은 저장은 차단하고, 재사용 불가능한 signature는 이전 계산 정보를 폐기한다. 저장은 최대 20,000항목·key/필드의 논리 크기 16MiB로 제한하며 넘으면 저장을 생략한다. 이 값은 실제 RSS 상한이 아니다. bytes/FD/snapshot을 저장하거나 전후/current 검사를 생략하지 않는다. HostApp의 기본 system 경로에는 이 cache를 연결하지 않는다. 직접 동등성·회귀 근거와 signed 재측정 gate는 [Stage 4 보고](../working/task_m020_580_stage4.md)를 따른다.
 
 sandbox에서 얻는 목록과 원본 상태만 사용한다. HostApp bookmark나 관리 보관함 외의 지속 접근 권한을 공유하지 않는다. 현재성 검사가 실패하면 이전 bitmap을 성공으로 반환하지 않고 stale/준비 오류 경로로 처리한다. 모든 파일 bytes 선읽기는 금지한다.
 

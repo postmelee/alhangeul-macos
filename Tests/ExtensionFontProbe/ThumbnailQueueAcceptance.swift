@@ -3,13 +3,14 @@ import CoreGraphics
 
 private actor QueueGate {
     private var opened = false
+    private var openedIDs: Set<Int> = []
     private var seen: Set<Int> = []
     private var waiting: [Int: CheckedContinuation<Void, Never>] = [:]
     func enter(_ id: Int) async {
-        guard seen.insert(id).inserted, !opened else { return }
+        guard seen.insert(id).inserted, !opened, !openedIDs.contains(id) else { return }
         await withCheckedContinuation { waiting[id] = $0 }
     }
-    func open(_ id: Int) { waiting.removeValue(forKey: id)?.resume() }
+    func open(_ id: Int) { openedIDs.insert(id); waiting.removeValue(forKey: id)?.resume() }
     func openAll() { opened = true; waiting.values.forEach { $0.resume() }; waiting.removeAll() }
 }
 
@@ -85,6 +86,7 @@ func verifyThumbnailQueue(file: URL, output: URL, supply: @escaping ExtensionFon
     let first = Task { try await cache.renderedPageResult(for: requests[0]) }
     try await waitUntil("첫 렌더", { await meter.starts.count == 1 })
     let joined = (0..<4).map { _ in Task { try await cache.renderedPageResult(for: requests[0]) } }
+    try await waitUntil("동일 key 네 참가자의 공급", { await meter.acquired == 5 })
     var others: [Task<HwpThumbnailRenderResult, Error>] = []
     for index in 1..<10 {
         others.append(Task { try await cache.renderedPageResult(for: requests[index]) })
@@ -98,7 +100,15 @@ func verifyThumbnailQueue(file: URL, output: URL, supply: @escaping ExtensionFon
     await failed(first); await failed(joined[0])
     verify(await meter.released.count == 1, "최초 요청의 FD는 다른 참가자의 I/O 완료까지 유지")
     verify(await meter.starts.count == 2, "병합·대기 중 추가 bytes 없음")
-    await gate.openAll()
+    // 두 worker의 실제 read 진입 순서는 executor에 따라 바뀔 수 있다.
+    // 두 번째 I/O는 보유하고 한 slot씩만 열어 다음 고유 job의 FIFO를 확인한다.
+    await gate.open(1)
+    for id in 7...14 {
+        try await waitUntil("FIFO 다음 렌더", { await meter.starts.count == id - 4 })
+        verify(await meter.starts.last == id, "한 slot에서 다음 고유 miss가 FIFO로 시작")
+        await gate.open(id)
+    }
+    await gate.open(6)
     for task in joined.dropFirst() { verify(try await task.value.page.diagnostics.fontSupplyFailure == nil, "병합 참가자 성공") }
     for task in others { verify(try await task.value.page.diagnostics.fontSupplyFailure == nil, "10개 정상 대기 성공") }
     verify(await meter.released.count == 14, "14개 독립 공급 획득 해제")

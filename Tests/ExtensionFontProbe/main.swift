@@ -23,6 +23,10 @@ actor ReadGate {
     func finish() { opened = true; waiters.forEach { $0.resume() }; waiters.removeAll() }
 }
 func verify(_ value: Bool, _ message: String, line: UInt = #line) {
+    if !value {
+        fputs("FAIL: \(message) (\(line))\n", stderr)
+        fflush(stderr)
+    }
     precondition(value, "\(message) (\(line))")
 }
 func track(_ snapshot: StudioFontSupplySnapshot, meter: Meter, staleAt: Int? = nil,
@@ -152,6 +156,9 @@ func thumbnail(_ cache: HwpThumbnailRenderCache, _ request: HwpThumbnailRenderRe
         let afterChange = try await thumbnail(cache, local)
         verify(afterChange.cacheEvent == .miss && afterChange.requestedKey != beforeChange.requestedKey, "inode/ctime 변경")
         verify(try InstalledFontSystem.statURL(file) == stamp && oldStampRequest == large.key, "원본 fixture 보존")
+        #if ALHANGEUL_FONT_EXTENSION_PROBE
+        try await verifySynchronousTraceContext()
+        #endif
         let queueProof = try await verifyThumbnailQueue(file: file, output: out, supply: { try await supply.snapshot() })
         let proof: [String:Any] = ["scope":"unsigned CLI; actual group/Finder not tested", "proofs":proofs,
             "thumbnailQueue":queueProof, "staleRejected":true,"permissionFallback":true,"documentStampInvalidated":true,"concurrentJobsBounded":true]
