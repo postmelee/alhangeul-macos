@@ -4,7 +4,7 @@
 - 이슈: [#580](https://github.com/postmelee/alhangeul-macos/issues/580), 상위 [#562](https://github.com/postmelee/alhangeul-macos/issues/562), 후속 [#569](https://github.com/postmelee/alhangeul-macos/issues/569)
 - 제품 기준: `devel` / `dac73a589dc17143e744da6a12a51d638a81fb77`, 작업 `local/task580`
 - 수행계획 승인: 2026-10-10 “수행계획 승인·구현계획 작성 진행”. 구현계획·Stage 1 승인: 같은 날 “구현계획 승인·Stage 1 진행”.
-- 현재: Stage 1~3 완료 후 “진행해줘.”로 Stage 4 재측정·후보 준비를 승인받았다. [Stage 4 보고](../working/task_m020_580_stage4.md)의 첫 고정 후보를 2026-10-11 승인으로 시험·복원했고 정상 요청 186건 busy 0이나 ON 목표 미달이었다. 같은 날 승인받은 Stage 4.2 실험·조건부 구현·직접 검증·새 미서명 후보 준비까지 완료했다. 부모 Stage 4는 새 후보 signed 목표·실제 GUI/Preview 수용 전까지 미완료다.
+- 현재: Stage 1~3 완료 후 “진행해줘.”로 Stage 4 재측정·후보 준비를 승인받았다. [Stage 4 보고](../working/task_m020_580_stage4.md)의 첫 고정 후보를 2026-10-11 승인으로 시험·복원했고 정상 요청 186건 busy 0이나 ON 목표 미달이었다. 같은 날 승인받은 Stage 4.2 실험·조건부 구현·직접 검증·새 미서명 후보 준비까지 완료했다. 부모 Stage 4는 새 후보 signed 목표·실제 GUI/Preview 수용 전까지 미완료다. 이어서 새 후보 `finder-candidate-02`의 로컬 서명·임시 Finder 시험·원상복원을 명시 승인받아 완료했다. 실제 GUI/Preview는 확인했지만 ON signed 약 612~653ms로 여전히 목표 미달이다. §6.2의 추가 보완은 승인 대기다.
 - 측정 기준: #569 Stage 2 `60ea06a384ce5ba9e43b60a30278ce1268efe237`. 공개 본문의 핵심 표와 로컬 브랜치·선별 증거를 대조한다. 원시 근거는 덮어쓰지 않는다.
 
 ## 1. 현행 경로와 단계 구성
@@ -134,6 +134,19 @@ Stage 4의 첫 signed 시험에서 warm metadata 중앙값은 OFF 약 4.5~5.0ms,
 예상 변경: `InstalledFontActiveSignature.swift`, 확장 전용 속성 cache/진입점, `InstalledFontSystem.swift`·`ExtensionInstalledFontPreparation.swift`의 필요한 연결, 해당 XCTest/성능 probe와 source receipt. 준비 동시성·취소·정책·기존 렌더 대기 구조를 별도 재설계하는 범위로 확대하지 않는다. raw dictionary만으로 충분하지 않거나 더 큰 구조 변경이 필요하면 실험 근거와 대안을 보고하고 구현 전에 다시 범위를 보정한다.
 
 2026-10-11 받은 보완 승인은 1~4의 실험·조건부 구현·직접 검증과 5의 미서명 후보 준비까지 포함한다. 새 후보의 Developer ID 사용·`/Applications` 교체·공개 배포는 포함하지 않는다.
+
+### 6.2 Stage 4.3 — sandbox 활성 목록 조회 보완안 (승인 대기)
+
+같은 새 signed 후보의 warm ON metadata는 약 302~321ms, provider는 약 612~653ms다. `activeSignature` 한 구간 약 149ms 중 `systemEnumerate` 약 92ms이며, 별도 sample은 enabled getter의 FontRegistry XPC 대기를 보여 준다. `captureActive` 내부의 enabled 재조회는 이미 없으므로 중복 호출 제거로 잘못 설명하지 않는다.
+
+범위는 **기본 CoreText collection의 활성 목록 계약과 기존 enabled 필터의 동등성 실험, 입증된 조건의 확장 전용 조회 보완**이다. 현재성 확인 횟수/전후 signature·원본 stat·정책/manifest·epoch·불완전/오류/취소 처리, digest 형식과 정밀 face 판정을 유지한다. 활성 상태를 TTL/과거 getter 값으로 대신하지 않는다. 새 C ABI·core/Studio·renderer·HostApp UI·사용자 OS 글꼴 상태는 변경하지 않는다.
+
+1. SDK의 collection 옵션·enabled 속성 계약을 기록하고, 매 capture의 새 collection 결과와 기존 필터의 활성 descriptor 다중집합(중복 포함), 원본/PS·기존 digest/reusable을 격리 직접 probe에서 비교한다. 필요한 경우 고유 시험 프로세스의 OFL 등록/해제만 사용하며 사용자 OS 설치/비활성화는 하지 않는다. 제어한 descriptor 테스트를 실제 시스템 상태 변경 시험으로 부풀리지 않는다.
+2. 실제 sandbox/최소 OS의 계약 근거가 필요한 부분은 별도 고정된 진단 후보를 준비한다. 새 Developer ID 사용·임시 설치는 구체 후보와 복원 계획을 준비한 뒤 별도 승인받는다. 동등성을 입증하지 못하면 제품 보완을 적용하지 않고 기존 엄격 필터를 유지해 보고한다.
+3. 동등성을 입증한 경우에만 확장의 collection 옵션/조회 경로를 보완한다. HostApp 기본 경로와 활성 변경 감지를 유지한다. collection 결과 실패·알 수 없는 조건의 처리와 disabled/등록/해제·다른 원본·축/traits·권한/epoch·동시 변경/취소 회귀를 검증한다. 테스트 가능한 범위와 미검증 상태를 구분한다.
+4. 공통 FontLibrary/Host 출력·확장 PNG/단일·2페이지 PDF·current/queue/lease를 확인하고 동일 직접 non-optimized/`-O` 및 기본/진단 Release source receipt를 고정한다. 새 미서명 후보·복원 계획까지만 준비한다. 승인한 후보의 같은 signed <200ms/<300ms·10건 이상·busy 0 기준을 통과하기 전 부모 Stage 4/Stage 5로 넘기지 않는다.
+
+예상 변경은 `InstalledFontSystem.swift`와 확장 준비의 필요한 진입점, 활성 목록/변경/성능 probe 및 XCTest다. 더 큰 current 계약 재설계·검사 삭제나 완료 기준 완화가 필요하면 근거를 보고하고 다시 범위를 승인받는다. 이번 제안은 아직 승인받지 않았고 제품 코드를 바꾸지 않았다.
 
 ## 7. Stage 5 — 회귀·보고·PR·후속 인계
 

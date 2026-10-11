@@ -4,7 +4,7 @@
 - 계획: [구현계획](../plans/task_m020_580_impl.md), [확정 계약](../tech/task_m020_580_extension_font_contract.md).
 - 기준 커밋: `36184af0c22a12784a31e2499cec848210e8fae0` (Stage 3), 브랜치 `local/task580`.
 - 승인: Stage 3 보고 후 “진행해줘.” 지시로 Stage 4 직접 재측정·후보 준비를 승인받았다. 아래 고정 후보에 대해 2026-10-11 “로컬 서명·임시 Finder 시험·원상복원 허용” 승인을 받아 시험했다. 공간 확보 지시도 유지한다.
-- 판정: **첫 서명 시험·원상복원 완료, Stage 4 미완료.** 첫 후보의 정상 썸네일 요청 186건 busy는 0이나 설치 글꼴 ON 시간 목표는 미달이었다. 2026-10-11 승인받은 Stage 4.2 보완·직접 검증·새 후보 준비를 완료했다(§9). 아래 1~8은 보완 전 Stage 4.1 기준이다. 새 후보의 signed 목표·실제 Finder GUI/Preview 수용 전 부모 Stage 4 완료 커밋·Stage 5·PR로 넘기지 않는다.
+- 판정: **두 후보의 서명 시험·원상복원 완료, Stage 4 미완료.** 첫 후보의 정상 썸네일 요청 186건 busy는 0이나 설치 글꼴 ON 시간 목표는 미달이었다. 2026-10-11 승인받은 Stage 4.2 보완·직접 검증·새 후보 준비를 완료했다(§9). 아래 1~8은 보완 전 Stage 4.1 기준이다. 새 후보의 실제 Finder GUI/Preview도 확인했다(§10). ON 시간 목표가 여전히 미달이므로 부모 Stage 4 완료 커밋·Stage 5·PR로 넘기지 않는다.
 
 ## 1. Stage 4.1 고정 소스의 직접 비교
 
@@ -174,3 +174,50 @@ HWP/HWPX warm exactHit의 조건별 40건 중앙값:
 새 후보는 `build.noindex/task580/stage4/finder-candidate-02`, build `580.4.2`, 고유 UUID **`8649CF03-60CF-439C-B228-5A0C038BF374`**다. unsigned 전체 inventory는 앱 `a6dc66498c31389e6ddee1b63df93ea5579ee4a658b255d44b4d4cdaae21df9d`, fixture `c00c6a1f5f8ba2609a6ebb4325ba0ff722327afd34d6a52a373114e44dafe093`로 고정했다. [후보·복원 계획](assets/task_m020_580_stage4_2/candidate-preparation.json)은 원래 `/Applications/Alhangeul.app` v0.2.2·243항목을 기준으로 한다. 준비 후 source/asset/native/input·후보 bytes를 다시 대조하며 원본이 바뀌면 설치하지 않는다.
 
 이 후보에 대해서만 기존 Developer ID 로컬 서명·고유 시험 보관함 변경·원래 앱 백업/임시 Finder 시험·원상복원의 구체 승인을 요청한다. 표준 smoke와 동일 최소 표본, 정상 다수 파일 busy 0·현재성/복구·실제 GUI/Preview를 검증한다. 복원 전 시험 worker의 경로·고유 marker 소유를 확인해 종료하고 원본 inventory/서명/provider와 고유 보관함 제거를 확인한다. 공개 배포·사용자 OS 글꼴 변경·전역 reset은 포함하지 않는다.
+
+## 10. 새 후보의 signed·실제 Finder/Preview 시험과 원상복원
+
+2026-10-11 작업지시자가 “새 후보의 로컬 서명·임시 Finder 시험·원상복원을 허용할게. 진행해줘.”로 §9의 `finder-candidate-02` 시험을 승인했다. 소스 `f7e5e129`·준비 영수증의 Source 126개·fixture/core/asset/native/input·unsigned 전체 inventory guard를 통과한 동일 후보를 기존 Developer ID로 로컬 서명하고 원본 앱을 백업·임시 설치했다. 표준 scoped smoke를 사용했으며 공증·공개 배포·전역 reset은 수행하지 않았다. 결과는 [signed 측정](assets/task_m020_580_stage4_2_signed/measurements.json), [복원·정리 검증](assets/task_m020_580_stage4_2_signed/validation.json)에 보존한다.
+
+Thumbnail image UUID는 `F2C0F5C8-D0A5-342A-8655-A358151E09FF`, Preview는 `17E0D162-7BB1-3639-BDD4-20961FC58D4B`다. ON1/ON2는 같은 Thumbnail PID의 별도 workload이며 새 PID 2개라는 의미가 아니다. 각 조건 유효 10건을 PID/request/image·포함 구간으로 대응했다.
+
+| 조건 | cache | metadata 중앙값 (ms) | provider 중앙값 (ms) | <200 / <300ms |
+|------|------|------:|------:|------|
+| OFF / HWP | 256 exact | 4.852 | 9.186 | PASS |
+| OFF / HWP | 256→128 larger | 4.844 | 9.202 | PASS |
+| OFF / HWPX | 256 exact | 4.727 | 9.051 | PASS |
+| OFF / HWPX | 256→128 larger | 4.891 | 9.283 | PASS |
+| ON1 / HWP | 256 exact | 310.716 | 611.537 | 미달 |
+| ON1 / HWP | 256→128 larger | 302.265 | 613.179 | 미달 |
+| ON1 / HWPX | 256 exact | 318.961 | 643.507 | 미달 |
+| ON1 / HWPX | 256→128 larger | 320.910 | 652.681 | 미달 |
+| ON2 / HWP | 256 exact | 317.714 | 652.065 | 미달 |
+| ON2 / HWP | 256→128 larger | 307.592 | 614.513 | 미달 |
+| ON2 / HWPX | 256 exact | 310.290 | 624.137 | 미달 |
+| ON2 / HWPX | 256→128 larger | 311.050 | 620.840 | 미달 |
+
+ON 전체 중앙값은 약 612~653ms다. 같은 첫 후보의 약 1.7~2.0초보다 줄었지만 **두 시간 목표에 미달**했다. 직접 `-O` 약 117ms를 sandbox 결과로 확대하지 않는다. 서로 다른 시점의 시스템 부하를 완전히 고정하지 않았으므로 순수한 개선율을 단정하지 않는다.
+
+정상 자동 Thumbnail은 단일 반복 126건과 최대 동시 10파일×3 pass×OFF/ON 60건, 합계 **186건 모두 완료·busy 0**이다. 다수 파일 최초 miss의 OFF/ON 전체 중앙값은 158.971/3,770.765ms, 최대 444.323/8,023.890ms였다. 반복 exact 20건씩 중앙값은 14.027/674.143ms였다. 최초 대기와 warm hit를 합산하지 않는다.
+
+고유 보관함 변경 10단계·20요청을 모두 수행했다. 정상 정책·선택·복구 8단계는 첫 miss→두 번째 exactHit와 정확한 Regular/Bold 공급을 확인했다. 권한 차단/객체 삭제의 4요청은 매번 miss·identity 없음·명시적 공급 fallback으로 정상 성공 집계에서 제외했다. 허용/원본/선택을 복구한 뒤 정확한 두 face가 돌아왔으며, 마지막 권한 복구는 이미 state 파일이 제거된 경우 재실행하지 않도록 운영 명령을 보정했다.
+
+Finder는 다른 작업의 ‘폴더로 이동’ 창을 먼저 닫아 달라는 요청에 작업지시자가 “창을 닫았고 Finder 시험 가능”으로 응답한 뒤 별도 시험 창을 만들었다. 고유 두 폴더의 10개 아이콘을 각각 첫 표시·재방문·크기 변경 후 모두 확인했고 실제 화면을 CUA 결과로 보여 드렸다. 슬라이더 값은 pixel 값이 아니며 최초 128 입력이 최대 112로 제한돼 큰 아이콘이 표시됐다. 즉시 40으로 보정하고, 재방문에서는 32를 사용했다. 이 과정의 추가 1024px 요청도 실제 요청으로 보존했다. GUI Thumbnail **77건**은 첫 OFF 32px, ON 크기/폴더 변경·재방문·prefetch 등을 포함하며 정상 제어 186건과 분리한다. OS가 추가로 요청하지 않은 표시를 새 요청으로 늘려 세지 않았다.
+
+실제 Preview **38요청**이 완료됐다. 단일 `gui-single.hwpx` 열기/닫기 10요청, 2페이지 문서 1요청과 고유 10파일의 2 pass/prefetch 27요청이다. 빠른 연속 키 입력 도중 AX 상태가 이전 항목에 머물 때 현재 항목을 다시 확인했고 최종 09까지 도착했다. 전체 preview는 단일 PNG 37요청·2페이지 PDF 1요청이다. PNG 37개와 PDF 두 페이지의 font 메시지 모두 정확한 Regular/Bold·supplyFallback 없음이며 PDF 양쪽 페이지를 화면에서 확인했다. OS의 prefetch/추가 요청 7개를 사용자의 20회 순회 시도에 더하지 않는다. 최초·반복·prefetch가 섞인 Preview 중앙값 1,121.803ms는 warm gate로 주장하지 않는다. 추가 작업에서 필요한 최소 OS/Intel·실제 OS 취소 관찰과도 구분한다.
+
+전체 로그에는 327개 대응 callback 완료가 있다(표준 smoke 3, 정상 자동 186, 변경 20, GUI Thumbnail 77, Preview 38, 별도 profile 3). 명시적 공급 fallback 4개가 포함되므로 327개를 모두 글꼴 공급 성공으로 부르지 않는다. busy trace는 전체 0이다. 단일/2페이지 실제 표시와 공급은 확인했지만 ON 목표 미달이므로 **Stage 4는 미완료**다.
+
+### 10.1 남은 비용과 다음 보완 후보
+
+ON1 HWP exact 10요청은 `activeSignature` 전체 40구간 중앙값 148.865ms, 그 안의 `systemEnumerate` 40구간은 92.492ms다. 공급 조합 중앙값 2.913ms·원본 fingerprint 0.182ms이며 포함 관계가 있으므로 합산하지 않는다. 동일 signed worker의 별도 3초 sample은 `kCTFontEnabledAttribute` 조회가 CoreText `CopyIsEnabled`·FontRegistry XPC 동기 대기로 이어지는 호출 스택을 보여 준다. 이는 sample 관찰이며 CPU 비율 추정치가 아니다. [profile 근거](assets/task_m020_580_stage4_2_signed/profile.json)를 따른다.
+
+읽기 전용으로 확인한 Apple SDK `CTFontCollection.h`는 collection에 disabled fonts를 포함하는 별도 옵션을 정의한다. 기본 collection의 활성 목록 계약을 기존 개별 enabled getter와 대조하면 추가 통신을 줄일 가능성이 있다. 현재 코드의 `captureActive`는 enabled를 다시 조회하지 않으므로 같은 capture 내부의 중복 getter로 오인하지 않는다. **활성 판정 생략·결과 장기 cache는 아직 구현하지 않았으며**, SDK 계약과 실제 sandbox 동등성을 먼저 확인하는 [구현계획 §6.2](../plans/task_m020_580_impl.md)의 Stage 4.3 안을 제시한다.
+
+### 10.2 원상복원과 공간 정리
+
+GUI Preview와 소유 시험 Finder 창을 닫고, 설치 marker·실행 경로·image UUID가 모두 맞는 Thumbnail PID 89446와 Preview PID 93253만 종료했다. 원본 v0.2.2의 **243개 파일 내용·링크 대상·권한 inventory**가 준비/백업/복원본과 같고 strict 서명 검증을 통과했다. digest는 `fa694017af3e0b3705510b353ef0e9dc5549be57493b74e99e5ca05540b3707b`이며 xattr 비교는 포함하지 않는다. 고유 UUID 보관함이 없어졌고, 해당 출력 파일과 `/usr/bin/log` 실행 경로로 확인한 소유 수집기만 종료했다.
+
+첫 복원 뒤 등록 점검은 후보/staging의 LaunchServices 등록 2개를 발견해 exit 1이었다. 소유 네 bundle의 경로/marker/inventory를 검증해 개별 등록을 해제·삭제한 뒤 최종 점검은 원래 `/Applications/Alhangeul.app` provider, 개발 등록/개발 bundle/문제/경고 **모두 0**으로 통과했다. 일부 이미 미등록인 importer 개별 해제는 exit 1로 기록했으며 최종 점검과 구분한다. 이전 `mdimport -L` stale 표기를 해결하기 위한 전역 reset은 하지 않았다.
+
+완료한 후보·fixture·staging·복원 백업 네 bundle 합계 **1,015,108,423 bytes(약 968MiB 논리 파일 합계)**를 추가 정리했다. 원본 앱·사용자 글꼴·공유 Host 설정을 유지하고 원시 로그/JSON/PNG·입력/원본 OFL·dSYM·필요 compile cache는 보존했다. 마지막 볼륨 여유는 약 16GiB로 관찰했으며 APFS·동시 작업의 영향 때문에 삭제량과 여유 변화가 같다고 주장하지 않는다.
