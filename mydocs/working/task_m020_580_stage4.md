@@ -265,3 +265,52 @@ HWP/HWPX warm exactHit를 합친 각 조건 40건 중앙값:
 새 후보는 `build.noindex/task580/stage4/finder-candidate-03`, build **`580.4.3`**, UUID **`3D58BCF7-7255-4B67-9FC5-3954F7410316`**이다. unsigned 앱 전체 inventory는 `feb54d6d6d09d8a65196f5fbec3212c9ab32622cc42d215ea2caa36d84c6975d`, fixture는 `a2c1bcf137cdfa3e94c69fbb59f5a63c24881c878cc5d8111ce0cece9797d237`다. 준비 당시 HEAD는 `a806dc7f`이며 승인 범위의 미커밋 Source 126개 SHA를 별도로 고정했다. [후보·복원 계획](assets/task_m020_580_stage4_3/candidate-preparation.json)에 original inventory 243항목·설치 대상·백업 경로와 영수증 SHA를 기록했다.
 
 다음은 이 구체 후보와 fixture의 기존 Developer ID 로컬 서명·원본 백업/임시 Finder 시험·원상복원을 별도 승인받는다. 동일 signed warm metadata <200ms/provider <300ms·10건 이상 및 정상 다수 파일 busy 0, 실제 GUI/Preview·정확한 Regular/Bold·관리 변경/복구·원본 복원을 확인한다. macOS 12/Intel 실행·사용자 OS 글꼴 변경·공개 release는 이번 직접 검증에 포함하지 않는다. 목표를 만족하기 전 Stage 4 완료·Stage 5/PR로 넘어가지 않는다.
+
+## 12. Stage 4.3 — 새 후보 signed·실제 Finder 시험과 원상복원
+
+작업지시자가 “새 후보 로컬 서명·임시 Finder 시험·원상복원 허용”으로 `finder-candidate-03`/`580.4.3`/UUID `3D58BCF7-7255-4B67-9FC5-3954F7410316` 시험을 승인했다. 커밋 `1624842b`와 준비 영수증의 제품 Source 126개·fixture/native/core/asset/input·unsigned 전체 inventory를 확인해 같은 후보를 로컬 서명했다. **정확성·정상 busy 0과 실제 GUI는 통과했지만, ON provider <300ms 목표에 미달해 부모 Stage 4는 미완료다.** [측정](assets/task_m020_580_stage4_3_signed/measurements.json), [검증·복원](assets/task_m020_580_stage4_3_signed/validation.json)을 따른다.
+
+첫 표준 설치 smoke는 parent app 등록 뒤 두 확장이 matching에 나타나지 않아 10회 scoped 조회 후 exit 30으로 중단됐다. helper가 원래 앱을 자동 복원했고 첫 실패 로그·복원 state를 보존했다. 동일 원본 inventory를 확인해 재시도했으며, 설치본의 marker·Info/실행 파일 SHA가 signed 후보와 같은 두 `.appex`만 명시 등록한 뒤 표준 smoke가 exit 0이었다. 전역 reset·다른 앱 등록·tracked helper 소스 변경은 하지 않았다.
+
+Thumbnail image UUID는 `5E7DF917-CAF4-38F2-9523-5BC021A01C65`, Preview는 `055A1F1A-BD89-321A-8DC8-107F11F6070E`다. ON1/ON2는 동일 Thumbnail PID의 별도 workload다. 각 조건은 유효 warm 10건을 request/PID/image·포함 구간으로 대응한 중앙값이다.
+
+| 조건 | cache | metadata (ms) | provider (ms) | <200 / <300ms |
+|------|------|------:|------:|------|
+| OFF HWP | exact | 4.429 | 8.597 | PASS |
+| OFF HWP | 256→128 larger | 4.539 | 8.506 | PASS |
+| OFF HWPX | exact | 4.529 | 8.864 | PASS |
+| OFF HWPX | 256→128 larger | 6.349 | 11.017 | PASS |
+| ON1 HWP | exact | 168.978 | 342.597 | metadata PASS / provider 미달 |
+| ON1 HWP | 256→128 larger | 169.537 | 342.519 | metadata PASS / provider 미달 |
+| ON1 HWPX | exact | 166.330 | 333.411 | metadata PASS / provider 미달 |
+| ON1 HWPX | 256→128 larger | 163.547 | 328.222 | metadata PASS / provider 미달 |
+| ON2 HWP | exact | 163.112 | 332.648 | metadata PASS / provider 미달 |
+| ON2 HWP | 256→128 larger | 163.588 | 332.984 | metadata PASS / provider 미달 |
+| ON2 HWPX | exact | 159.958 | 329.189 | metadata PASS / provider 미달 |
+| ON2 HWPX | 256→128 larger | 159.553 | 327.689 | metadata PASS / provider 미달 |
+
+ON metadata는 약 160~170ms로 기준 안이며 provider는 약 328~343ms로 미달이다. 이전 후보의 약 612~653ms보다 낮게 관찰했지만 다른 시점의 OS 상태/부하를 완전히 고정하지 않았으므로 순수한 개선율을 단정하지 않는다. 직접 약 140ms나 빠른 일부 표본으로 signed 목표를 통과했다고 처리하지 않는다.
+
+정상 자동 Thumbnail은 반복 126건과 최대 동시 10파일×3 pass×OFF/ON 60건, 합계 **186건 모두 완료·busy 0**이다. 다수 파일 첫 miss의 OFF/ON provider 중앙값은 104.559/1,877.938ms, 최대 184.628/5,339.784ms이며 반복 exact 중앙값은 11.579/357.995ms다. cold 대기와 warm hit를 구분한다. 고유 보관함 변경 10단계·20요청도 완료했다. 권한 차단/객체 삭제의 4요청은 identity 없음·매번 miss·명시적 공급 fallback으로 정상 글꼴 성공 집계에서 제외했고, 복구 뒤 정확한 Regular/Bold로 돌아왔다.
+
+소유 Finder 창에서 두 고유 폴더의 10개 아이콘을 첫 표시·재방문·크기 변경 후 모두 확인했다. 슬라이더 관찰 값은 24/32/40이며 pixel 크기와 동일시하지 않는다. 실제 GUI Thumbnail은 **85요청**이고 정상 제어 186건과 분리했다. CUA 결과에 실제 화면을 표시했으며 저장 screenshot 파일 SHA를 제공한 것은 아니다.
+
+단일 Quick Look 실제 표시를 10회 확인했고 새 provider 요청은 9건이었다. 빠른 키 입력 뒤 창이 바뀌지 않은 시도는 횟수에 포함하지 않고 메뉴로 열어 확인했다. 고유 10파일은 00~09를 각 두 순회에서 모두 확인했고 파일별 실제 Preview 2요청씩이었다. 2페이지 PDF는 양쪽 페이지를 화면에서 확인했고 page 선택 과정에 실제 요청이 추가되어 2요청이었다. 따라서 실제 Preview는 **31요청(단일 PNG 29·2페이지 PDF 2)**이다. PNG 29개와 PDF 4페이지의 총 33개 글꼴 메시지 모두 정확한 Regular/Bold·supplyFallback 없음이다. OS cache/prefetch를 사용자 조작 횟수나 새 요청으로 임의 가산하지 않았다.
+
+총 **328개 provider 완료**가 모두 대응했고 busy 경계 시도도 0이다. 297 Thumbnail은 제어 186·관리 변경 20·GUI 85·표준 smoke 3·별도 profile 3이며 Preview는 31이다. 이 숫자는 예상 공급 fallback 4개도 포함하므로 328건 모두 로컬 글꼴 성공이라는 뜻은 아니다. GUI paint 완료 시간과 provider 완료 시간도 구분한다.
+
+### 12.1 남은 현재성 비용과 다음 범위
+
+ON1 HWP exact 10요청의 warm trace는 activeSignature 40구간 중앙값 **81.039ms**, 그 안의 systemEnumerate 40구간 **25.480ms**다. metadata에는 signature 2회, 전체에는 4회가 있다. 공급 조립 중앙값 2.640ms·원본 fingerprint 0.238ms·관리 queue 대기 0.028ms이며 포함 구간을 합산하지 않는다. 현재성 검사를 삭제해 300ms를 맞추지 않는다.
+
+별도 3초 sample은 ON 재활성화 뒤 첫 cold 준비와 다음 warm 두 요청이 섞였다. 계산 속성 getter·FontRegistry XPC·JSON/stat 호출이 관찰되지만 warm 비용 지분이나 원인으로 확정하지 않는다. [profile 기록](assets/task_m020_580_stage4_3_signed/profile.json)은 이 한계와 원시 SHA를 함께 보존한다.
+
+다음은 [구현계획 §6.3](../plans/task_m020_580_impl.md)의 Stage 4.4 제안이다. 먼저 warm signature 안의 URL/PS/최소 속성·원본 stat·key 구성·정렬/digest를 나누고, SDK bulk 속성 조회 또는 정확한 전체 값 비교를 유지하는 key 구성 보완이 유효한지 실험한다. 성능·동등성이 입증된 조건만 확장 경로에 적용한다. 소스 추가 변경은 아직 하지 않았고 이 범위의 승인이 필요하다.
+
+### 12.2 원상복원과 공간 정리
+
+소유 Quick Look과 Finder 시험 창을 닫고 기존 Home 창을 유지했다. 설치 marker·정확한 실행 경로·image UUID가 모두 일치한 Thumbnail PID 21826와 Preview PID 24203만 종료했다. 원래 v0.2.2 앱의 **243항목 파일 내용·링크·권한 inventory**가 준비/백업/복원과 동일하고 strict 서명 검증도 통과했다. digest는 `fa694017af3e0b3705510b353ef0e9dc5549be57493b74e99e5ca05540b3707b`이며 xattr 비교는 포함하지 않는다. UUID 보관함을 삭제했고 PID/실행 명령/출력 파일이 같은 로그 수집기만 종료했다.
+
+복원 확인 후 소유 후보·fixture·두 staging·두 원본 백업 6개 bundle을 개별 해제·삭제했다. 추가 정리량은 **1,736,202,094 bytes(약 1.617GiB 논리 파일 합계)**다. 원본 OFL·입력·원시 로그/JSON/PNG·source receipt·dSYM·필요 Xcode/SwiftPM cache는 보존했다. 최종 점검은 원래 `/Applications/Alhangeul.app` provider이며 개발 등록·개발 bundle·문제·경고 모두 0이다. 마지막 볼륨 여유는 약 11GiB이고 APFS/동시 작업 때문에 논리 삭제량과 같은 증가를 보장하지 않는다. 사용자 OS 글꼴·공유 Host 설정·다른 앱 등록·공개 배포는 변경하지 않았다.
+
+표준 smoke 시작 이후 DiagnosticReports의 두 확장 이름을 대상으로 한 crash 점검은 새 report 0이었다. 모든 잠재 crash를 보증하는 검사는 아니며 원시 점검 로그 SHA를 검증 증거에 보존했다.

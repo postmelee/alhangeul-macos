@@ -1,0 +1,95 @@
+{
+  "scope": "ON1 HWP exact 10요청 trace; 별도 3초 sample은 성능 gate 제외",
+  "intervals": [
+    {
+      "kind": "activeSignature",
+      "intervals": {
+        "count": 40,
+        "minimum": 74.258417,
+        "median": 81.03875,
+        "maximum": 94.614333,
+        "p90": 89.098041
+      },
+      "notAdditive": true
+    },
+    {
+      "kind": "systemEnumerate",
+      "intervals": {
+        "count": 40,
+        "minimum": 23.81025,
+        "median": 25.479583499999997,
+        "maximum": 33.822542,
+        "p90": 31.624167
+      },
+      "notAdditive": true
+    },
+    {
+      "kind": "supplyAssembly",
+      "intervals": {
+        "count": 10,
+        "minimum": 1.999083,
+        "median": 2.6403125000000003,
+        "maximum": 3.309375,
+        "p90": 3.285417
+      },
+      "notAdditive": true
+    },
+    {
+      "kind": "sourceFingerprint",
+      "intervals": {
+        "count": 40,
+        "minimum": 0.115208,
+        "median": 0.237854,
+        "maximum": 0.354875,
+        "p90": 0.283667
+      },
+      "notAdditive": true
+    },
+    {
+      "kind": "managedQueueWait",
+      "intervals": {
+        "count": 100,
+        "minimum": 0.015125,
+        "median": 0.027542,
+        "maximum": 0.163125,
+        "p90": 0.039125
+      },
+      "notAdditive": true
+    }
+  ],
+  "notAdditive": true,
+  "traceObservation": "warm 1요청의 metadata에는 activeSignature 2회, 전체에는 4회; 구간별 중앙값 activeSignature 약81.039ms/systemEnumerate 약25.480ms",
+  "sampleScope": "ON 재활성화 후 첫 cold 요청과 다음 warm 두 요청이 섞임; 계산 속성 getter·FontRegistry XPC·JSON/stat 호출이 있지만 warm 비용 지분·원인으로 확정하지 않음",
+  "sampleSHA256": "898162d41fb6d76711b661de2c1c6a4388940f45c84454c1c4d8e1f3b2d2293f",
+  "receipt": {
+    "pid": 21826,
+    "imageUUID": "5E7DF917-CAF4-38F2-9523-5BC021A01C65",
+    "scope": "동일 signed 후보의 별도 진단 요청; 성능 gate 표본 제외",
+    "start": "2026-10-11T08:39:09.939326+00:00",
+    "attempts": [
+      {
+        "sequence": 0,
+        "exit": 0
+      },
+      {
+        "sequence": 1,
+        "exit": 0
+      },
+      {
+        "sequence": 2,
+        "exit": 0
+      }
+    ],
+    "sampleExit": 0,
+    "end": "2026-10-11T08:39:15.676758+00:00"
+  },
+  "rawSHA256": {
+    "build.noindex/task580/stage4/finder-candidate-03/signature-profile/sample.txt": "898162d41fb6d76711b661de2c1c6a4388940f45c84454c1c4d8e1f3b2d2293f",
+    "build.noindex/task580/stage4/finder-candidate-03/signature-profile/receipt.json": "ad89b9f8e8a046511ddf365bab70c10729f6415656fad5880e9fabb5797d5406"
+  },
+  "nextHypotheses": [
+    "개별 URL/PS/최소 속성 조회 비용",
+    "cache key 구성·직렬화·원본 stat·tokens sort/digest 비용"
+  ],
+  "nextExperimentRequired": true
+}
