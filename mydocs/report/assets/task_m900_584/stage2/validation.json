@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "source_commit": "ee453da2c68721542d05d88580f9cd26a22eb2af",
+  "scope": "Stage 2 소스 준비·unsigned 검증",
+  "checks": {
+    "Rust portable arm64/x86_64": "PASS",
+    "reference header/staticlib sha256+size": "PASS",
+    "core build info": "PASS",
+    "Studio assets+adapter": "PASS",
+    "producer golden+Swift decoder": "PASS",
+    "no AppKit/UIKit": "PASS",
+    "xcodegen": "PASS",
+    "unsigned Debug": "PASS",
+    "unsigned universal Release": "PASS",
+    "four source+built versions/builds": "PASS",
+    "four universal executables": "PASS",
+    "Release endpoint": "PASS",
+    "Legal source+built canonical": "PASS",
+    "three native render samples": "PASS",
+    "release headings+GitHub references": "PASS",
+    "YAML+shell syntax/defaults/gates": "PASS",
+    "246 HTML local links+anchors": "PASS",
+    "15 historical release bodies": "PASS",
+    "README badge+release notices": "PASS",
+    "fresh public appcast exact bytes": "PASS",
+    "12 responsive viewport checks": "PASS",
+    "keyboard navigation": "PASS",
+    "main content gate": "PASS",
+    "owned registration cleanup+hygiene": "PASS"
+  },
+  "helper_tests": {
+    "news": 14,
+    "promotion": 16,
+    "install": 25
+  },
+  "not_executed": [
+    "GitHub PR CI",
+    "tag/workflow dispatch",
+    "Developer ID sign/notarize",
+    "new DMG/install",
+    "final Mac acceptance",
+    "public publish/Pages/Sparkle/Homebrew",
+    "real update"
+  ],
+  "release_sha256": null,
+  "synthetic_hash_used_only_in_helper_fixture": true,
+  "issue_complete": false
+}

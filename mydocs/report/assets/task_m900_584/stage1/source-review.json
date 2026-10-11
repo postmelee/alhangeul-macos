@@ -1,0 +1,39 @@
+{
+  "reviewed_at": "2026-10-12T03:35:04.791213+09:00",
+  "source": "e75d3ec4662457eaca990bdf95596442e5e56503",
+  "runtime_executed": false,
+  "issue480": {
+    "state": "OPEN",
+    "mitigation_pr": 481,
+    "mitigation_comment_url": "https://github.com/postmelee/alhangeul-macos/issues/480#issuecomment-5322761193",
+    "retained_safeguards": [
+      "only plain non-HWP3 in-place save",
+      "non-plain output plainCopy plus warning confirmation",
+      "source/destination validation and same-file rejection",
+      "unknown input without source cannot overwrite existing destination"
+    ],
+    "identical_to_public_v022": [
+      "Sources/HostApp/Services/DocumentSaveContract.swift",
+      "Sources/HostApp/Services/DocumentProtectionSaveAlert.swift"
+    ],
+    "remaining_scope": "native encrypted export and password round-trip",
+    "stage1_recommendation": "not a newly found release blocker; require same-DMG warning/cancel/original-integrity confirmation"
+  },
+  "issue525": {
+    "state": "OPEN",
+    "native_discard_source": "DocumentCloseConfirmationController: second alert button clears native bool only",
+    "store_source": "DocumentViewerStore.clearUnsavedChanges only sets hasUnsavedChanges=false",
+    "native_controller_delta": "private property visibility only, no discard bridge addition",
+    "current_runtime_reproduction": "not executed",
+    "stage1_recommendation": "keep as known recovery limitation and separate follow-up; final-DMG/source integrity and cancellation checks before explicit publish judgment"
+  },
+  "nonblocking_separate_followups": [
+    566,
+    581
+  ],
+  "scope_closed_after_merge": [
+    562,
+    569
+  ],
+  "new_scope_or_issue_updates_executed": false
+}

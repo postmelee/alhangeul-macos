@@ -1,0 +1,92 @@
+{
+  "owned_registrations_only": true,
+  "global_cache_reset": false,
+  "actions": [
+    {
+      "command": [
+        "pluginkit",
+        "-r",
+        "<workspace>/build.noindex/task584/stage2/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "pluginkit",
+        "-r",
+        "<workspace>/build.noindex/task584/stage2/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister",
+        "-u",
+        "<workspace>/build.noindex/task584/stage2/DerivedData/Build/Products/Debug/Alhangeul.app"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "pluginkit",
+        "-r",
+        "<workspace>/build.noindex/task584/stage2/DerivedDataRelease/Build/Products/Release/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "pluginkit",
+        "-r",
+        "<workspace>/build.noindex/task584/stage2/DerivedDataRelease/Build/Products/Release/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "/System/Library/Frameworks/CoreServices.framework/Versions/Current/Frameworks/LaunchServices.framework/Versions/Current/Support/lsregister",
+        "-u",
+        "<workspace>/build.noindex/task584/stage2/DerivedDataRelease/Build/Products/Release/Alhangeul.app"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "lsregister",
+        "-u",
+        "<workspace>/build.noindex/task584/stage2/DerivedData/Build/Products/Debug/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+      ],
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": [
+        "lsregister",
+        "-u",
+        "<workspace>/build.noindex/task584/stage2/DerivedDataRelease/Build/Products/Release/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+      ],
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "original_installed_app": {
+    "path": "/Applications/Alhangeul.app",
+    "version": "0.2.2",
+    "build": "20",
+    "strict_seal_exit_code": 0,
+    "temporary_replacement": false
+  },
+  "first_hygiene_check": "호스트 등록 해제 후 번들 내부 Sparkle Updater 등록이 남아 FAIL. 같은 후보의 Updater 2개도 개별 해제 후 재검증.",
+  "final_hygiene_exit_code": 0,
+  "final_provider_app_roots": [
+    "/Applications/Alhangeul.app"
+  ],
+  "final_development_registrations": [],
+  "final_development_bundles": []
+}

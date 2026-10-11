@@ -1,0 +1,11 @@
+## main/source content gate
+
+- main: `origin/main` → `43b4e998b93032b62bcb0517fb9c894de3dc8ae1`
+- source: `origin/devel` → `e75d3ec4662457eaca990bdf95596442e5e56503`
+- main-only commits: 0
+- transport-only merges: 0
+- content candidates: 0
+- source tree: `da3f08b813e5b23a89ebab799006af727afe7930`
+- prospective merge tree: `da3f08b813e5b23a89ebab799006af727afe7930`
+
+PASS: main ancestry is already incorporated; merging main adds no content to source.

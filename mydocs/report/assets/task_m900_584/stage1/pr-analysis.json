@@ -1,0 +1,645 @@
+{
+  "previous_ref": "v0.2.2",
+  "analysis_source": "e75d3ec4662457eaca990bdf95596442e5e56503",
+  "first_parent_merge_prs": 19,
+  "all_merge_prs": 28,
+  "reviewed_at": "2026-10-12T03:35:04.791213+09:00",
+  "prs": [
+    {
+      "number": 527,
+      "title": "Task #523: v0.2.2까지 업데이트 Pages 위계·Homebrew 탭 보정",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/527",
+      "merge_commit": "0903e62def26582569aa88279f921e32903bff06",
+      "merged_at": "2026-09-15T06:18:03Z",
+      "classification": "웹 안내·선공개",
+      "user_facing": "예(웹)",
+      "public_summary": "아니오",
+      "resolved_task_issues": [
+        523
+      ],
+      "related_issues": [
+        539,
+        549
+      ],
+      "reports": [
+        "mydocs/report/task_m900_523_report.md"
+      ],
+      "notes": "#553 으로 이미 Pages 공개. 앱 신규 기능으로 재계산하지 않음",
+      "metadata_path_count": 58,
+      "local_merge_path_count": 58
+    },
+    {
+      "number": 542,
+      "title": "Task #535: 재설치 비동기 요청 기록 관찰 보완",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/542",
+      "merge_commit": "19218d74b3a2b0acf09d518237626b763454ee97",
+      "merged_at": "2026-09-13T20:11:47Z",
+      "classification": "설치 검증 도구",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [
+        535
+      ],
+      "related_issues": [
+        539,
+        513,
+        337
+      ],
+      "reports": [
+        "mydocs/report/task_m900_535_report.md"
+      ],
+      "notes": "같은 v0.2.2 DMG의 비동기 요청 기록 관찰 보완",
+      "metadata_path_count": 7,
+      "local_merge_path_count": 7
+    },
+    {
+      "number": 543,
+      "title": "Release v0.2.2: 재설치 요청 기록 관찰 도구 인계",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/543",
+      "merge_commit": "bcdcd72cbda642af052b6ae985f2aa5fdae0fd06",
+      "merged_at": "2026-09-13T20:19:28Z",
+      "classification": "main 운반",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        535,
+        539
+      ],
+      "reports": [
+        "mydocs/report/task_m900_535_report.md"
+      ],
+      "notes": "#542 도구 인계, 중복 기능 아님",
+      "metadata_path_count": 7,
+      "local_merge_path_count": 7
+    },
+    {
+      "number": 544,
+      "title": "v0.2.2 후보의 VM·실제 Mac 수용 증거 기록",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/544",
+      "merge_commit": "9abfde6207649d35da62f6211010e0d23c1ce91d",
+      "merged_at": "2026-09-14T12:29:03Z",
+      "classification": "이전 후보 수용 기록",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        539,
+        535,
+        525
+      ],
+      "reports": [
+        "mydocs/report/task_m900_535_report.md",
+        "mydocs/report/task_m900_539_report.md"
+      ],
+      "notes": "v0.2.2 VM/Mac 증거 추가, 제품 변경 없음",
+      "metadata_path_count": 11,
+      "local_merge_path_count": 11
+    },
+    {
+      "number": 545,
+      "title": "v0.2.2 Spotlight 화면 검색·결과 열기 수용 기록",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/545",
+      "merge_commit": "28b454a1e9f9ee8e71f7564af439ef4ce8201d1a",
+      "merged_at": "2026-09-14T12:44:37Z",
+      "classification": "이전 후보 수용 기록",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        539
+      ],
+      "reports": [
+        "mydocs/report/task_m900_539_report.md"
+      ],
+      "notes": "v0.2.2 Spotlight GUI 확인 기록",
+      "metadata_path_count": 9,
+      "local_merge_path_count": 9
+    },
+    {
+      "number": 546,
+      "title": "Release v0.2.2: VM·실제 Mac 수용 기록 인계",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/546",
+      "merge_commit": "94ee7b7c927935ce45868e876763fc0da59de073",
+      "merged_at": "2026-09-14T12:54:16Z",
+      "classification": "main 운반",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        539,
+        535
+      ],
+      "reports": [
+        "mydocs/report/task_m900_535_report.md",
+        "mydocs/report/task_m900_539_report.md"
+      ],
+      "notes": "#544 / #545 수용 기록 인계",
+      "metadata_path_count": 15,
+      "local_merge_path_count": 15
+    },
+    {
+      "number": 547,
+      "title": "Task #539: v0.2.2 공개 및 실제 Sparkle 업데이트 수용 기록",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/547",
+      "merge_commit": "e7df8a8fba5fa34f43559bc4de6aba1a5014dce8",
+      "merged_at": "2026-09-15T03:58:16Z",
+      "classification": "이전 공개 기록",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        539,
+        520,
+        532,
+        535
+      ],
+      "reports": [
+        "mydocs/report/task_m900_520_report.md",
+        "mydocs/report/task_m900_532_report.md",
+        "mydocs/report/task_m900_535_report.md",
+        "mydocs/report/task_m900_539_report.md"
+      ],
+      "notes": "v0.2.2 공개·실제 업데이트 기록, 이미 공개된 개선 제외",
+      "metadata_path_count": 24,
+      "local_merge_path_count": 24
+    },
+    {
+      "number": 548,
+      "title": "Release: v0.2.2 공개·실제 Sparkle 및 Spotlight 최종 수용 기록",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/548",
+      "merge_commit": "878aff0f4286c68d64e21844c5a681290719a6f6",
+      "merged_at": "2026-09-15T04:06:33Z",
+      "classification": "main 운반",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        539
+      ],
+      "reports": [
+        "mydocs/report/task_m900_520_report.md",
+        "mydocs/report/task_m900_532_report.md",
+        "mydocs/report/task_m900_535_report.md",
+        "mydocs/report/task_m900_539_report.md"
+      ],
+      "notes": "#547 기록 인계",
+      "metadata_path_count": 24,
+      "local_merge_path_count": 24
+    },
+    {
+      "number": 550,
+      "title": "Release v0.2.2: Homebrew 배포·설치 수용과 종료 기록",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/550",
+      "merge_commit": "8a28f5f174e593e95e6e22d8d3629546d000c28a",
+      "merged_at": "2026-09-15T04:46:29Z",
+      "classification": "기존 Homebrew·웹 안내",
+      "user_facing": "예(설치 안내)",
+      "public_summary": "아니오",
+      "resolved_task_issues": [
+        549
+      ],
+      "related_issues": [
+        539
+      ],
+      "reports": [
+        "mydocs/report/task_m900_539_report.md",
+        "mydocs/report/task_m900_549_report.md"
+      ],
+      "notes": "v0.2.2 동일 파일의 tap/안내 반영, 이미 공개",
+      "metadata_path_count": 36,
+      "local_merge_path_count": 36
+    },
+    {
+      "number": 551,
+      "title": "v0.2.2 Homebrew 배포·종료 기록을 devel에 인계",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/551",
+      "merge_commit": "c38d27c7d585f95436394a260e310f2f3948202c",
+      "merged_at": "2026-09-15T05:08:40Z",
+      "classification": "devel 인계",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        549,
+        539
+      ],
+      "reports": [
+        "mydocs/report/task_m900_539_report.md",
+        "mydocs/report/task_m900_549_report.md"
+      ],
+      "notes": "#550 / #552 내용 인계",
+      "metadata_path_count": 40,
+      "local_merge_path_count": 40
+    },
+    {
+      "number": 552,
+      "title": "Release v0.2.2: Pages 배포를 막던 이전 DMG 링크 수정",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/552",
+      "merge_commit": "0e94a31fd80d9d3ad8016909a6d0d9cefb0d9189",
+      "merged_at": "2026-09-15T05:00:38Z",
+      "classification": "기존 Pages 배포 보정",
+      "user_facing": "예(웹)",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        549
+      ],
+      "reports": [
+        "mydocs/report/task_m900_549_report.md"
+      ],
+      "notes": "이전 버전의 미공개 DMG 링크 보정, 이미 공개",
+      "metadata_path_count": 7,
+      "local_merge_path_count": 7
+    },
+    {
+      "number": 553,
+      "title": "Release: v0.2.2 업데이트 Pages 화면 보정 공개 (#523)",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/553",
+      "merge_commit": "b1cf47fde99f48161c87b87dd165c34c01192819",
+      "merged_at": "2026-09-15T06:29:11Z",
+      "classification": "main 운반·Pages 공개",
+      "user_facing": "예(웹)",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        523
+      ],
+      "reports": [
+        "mydocs/report/task_m900_523_report.md"
+      ],
+      "notes": "#527 공개 인계, 중복 기능 아님",
+      "metadata_path_count": 58,
+      "local_merge_path_count": 58
+    },
+    {
+      "number": 554,
+      "title": "Task #523: Pages 공개 배포·사후 검증 완료 기록",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/554",
+      "merge_commit": "c0b0468c6dbfdfd2f3e3d1d9c5ccf993e7bd8a3b",
+      "merged_at": "2026-09-15T06:36:44Z",
+      "classification": "웹 공개 완료 기록",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        523
+      ],
+      "reports": [
+        "mydocs/report/task_m900_523_report.md"
+      ],
+      "notes": "#553 공개·appcast 보존 증거",
+      "metadata_path_count": 3,
+      "local_merge_path_count": 3
+    },
+    {
+      "number": 556,
+      "title": "Task #555: Threads 알한글 소식과 자동 수집 Pages 연결",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/556",
+      "merge_commit": "ffc6ff81e1cadfd6ef74c09a47a9ad96cb5b85b0",
+      "merged_at": "2026-09-15T10:59:07Z",
+      "classification": "웹 소식·배포 도구",
+      "user_facing": "예(웹)",
+      "public_summary": "아니오",
+      "resolved_task_issues": [
+        555
+      ],
+      "related_issues": [
+        523
+      ],
+      "reports": [
+        "mydocs/report/task_m010_555_report.md"
+      ],
+      "notes": "#557 로 선공개. 자동 수집은 비활성, 뒤의 수동 방식과 구분",
+      "metadata_path_count": 35,
+      "local_merge_path_count": 35
+    },
+    {
+      "number": 557,
+      "title": "Task #555: 제품 사이트 최신 소식 화면 공개",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/557",
+      "merge_commit": "1d6a5e03f151a95228da514afd144774dc85039f",
+      "merged_at": "2026-09-15T11:22:33Z",
+      "classification": "main 운반·Pages 공개",
+      "user_facing": "예(웹)",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        555,
+        523
+      ],
+      "reports": [
+        "mydocs/report/task_m010_555_report.md",
+        "mydocs/report/task_m900_523_report.md"
+      ],
+      "notes": "#556 공개, 앱 기능 추가 없음",
+      "metadata_path_count": 37,
+      "local_merge_path_count": 37
+    },
+    {
+      "number": 559,
+      "title": "Task #558: 기존 Threads 소식 6개 수동 임베드 표시",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/559",
+      "merge_commit": "45f2529aa31f40d274f575bc0d2b7952b72a0f64",
+      "merged_at": "2026-09-15T11:52:12Z",
+      "classification": "웹 소식·수동 표시",
+      "user_facing": "예(웹)",
+      "public_summary": "아니오",
+      "resolved_task_issues": [
+        558
+      ],
+      "related_issues": [],
+      "reports": [
+        "mydocs/report/task_m010_558_report.md"
+      ],
+      "notes": "기존 공개 글 링크 6개, #560 으로 선공개",
+      "metadata_path_count": 20,
+      "local_merge_path_count": 20
+    },
+    {
+      "number": 560,
+      "title": "Task #558: 기존 Threads 소식 6개 공개 반영",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/560",
+      "merge_commit": "0cd5e7964c4802ba37fa42caa8088187ea041610",
+      "merged_at": "2026-09-15T12:03:30Z",
+      "classification": "main 운반·Pages 공개",
+      "user_facing": "예(웹)",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        558
+      ],
+      "reports": [
+        "mydocs/report/task_m010_558_report.md"
+      ],
+      "notes": "#559 공개, 중복 기능 아님",
+      "metadata_path_count": 20,
+      "local_merge_path_count": 20
+    },
+    {
+      "number": 561,
+      "title": "Task #558: 소식 공개 완료 기록",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/561",
+      "merge_commit": "11c15a7d01a7036422ce28f61805054765c31640",
+      "merged_at": "2026-09-15T12:07:12Z",
+      "classification": "웹 공개 완료 기록",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        558
+      ],
+      "reports": [
+        "mydocs/report/task_m010_558_report.md"
+      ],
+      "notes": "공개 결과·문의 및 운영 기록",
+      "metadata_path_count": 3,
+      "local_merge_path_count": 3
+    },
+    {
+      "number": 570,
+      "title": "Task #563: 글꼴 마이그레이션 설계와 원본 부재 화면·PDF 검증",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/570",
+      "merge_commit": "ba53b9e31942760edced19496d776dd7fa28c3ea",
+      "merged_at": "2026-09-17T10:52:08Z",
+      "classification": "글꼴 설계·실험",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [
+        563
+      ],
+      "related_issues": [
+        562,
+        564,
+        565,
+        566,
+        567,
+        568,
+        569
+      ],
+      "reports": [
+        "mydocs/report/task_m020_563_report.md"
+      ],
+      "notes": "초기 복사 실험. 최종 Mac 기본 정책은 설치 원본 참조",
+      "metadata_path_count": 14,
+      "local_merge_path_count": 14
+    },
+    {
+      "number": 571,
+      "title": "Task #564: 공통 글꼴 가져오기·관리 기반 구현",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/571",
+      "merge_commit": "609acc302ea38d9afe08dad64ea399016340dc48",
+      "merged_at": "2026-09-18T13:43:07Z",
+      "classification": "글꼴 저장·관리 기반",
+      "user_facing": "간접",
+      "public_summary": "통합 설명",
+      "resolved_task_issues": [
+        564
+      ],
+      "related_issues": [
+        562,
+        565,
+        566,
+        567,
+        568,
+        569
+      ],
+      "reports": [
+        "mydocs/report/task_m020_564_report.md"
+      ],
+      "notes": "독립 복사본·검증 bytes·중복/충돌·lease 기반, Windows ZIP 지원 아님",
+      "metadata_path_count": 46,
+      "local_merge_path_count": 46
+    },
+    {
+      "number": 572,
+      "title": "Task #565: Mac 설치 글꼴 감지·설정 지속과 사용 기반",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/572",
+      "merge_commit": "0fa65fac9136aea0bf94cf23741de67c9a0365c9",
+      "merged_at": "2026-09-19T23:15:16Z",
+      "classification": "Mac 글꼴 감지·설정",
+      "user_facing": "예",
+      "public_summary": "예",
+      "resolved_task_issues": [
+        565
+      ],
+      "related_issues": [
+        562,
+        567,
+        568,
+        569
+      ],
+      "reports": [
+        "mydocs/report/task_m020_565_report.md"
+      ],
+      "notes": "초기 기반을 뒤의 연결 PR과 합쳐 최종 결과로 설명",
+      "metadata_path_count": 47,
+      "local_merge_path_count": 47
+    },
+    {
+      "number": 574,
+      "title": "Task #573: 포함 rhwp 버전 배지와 Windows / Linux 안내 링크",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/574",
+      "merge_commit": "b1f84d42016426c4254b17e59fd47230cf95d0b3",
+      "merged_at": "2026-09-30T15:02:08Z",
+      "classification": "웹 링크·배지·CI",
+      "user_facing": "예(웹)",
+      "public_summary": "아니오",
+      "resolved_task_issues": [
+        573
+      ],
+      "related_issues": [],
+      "reports": [
+        "mydocs/report/task_m020_573_report.md"
+      ],
+      "notes": "#575 로 선공개. 현재 bundled 배지는 #578 pin 갱신으로 0.8.7",
+      "metadata_path_count": 44,
+      "local_merge_path_count": 44
+    },
+    {
+      "number": 575,
+      "title": "Task #573: README 배지와 모바일 플랫폼 안내 공개 반영",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/575",
+      "merge_commit": "43b4e998b93032b62bcb0517fb9c894de3dc8ae1",
+      "merged_at": "2026-09-30T15:17:07Z",
+      "classification": "main 선별 공개",
+      "user_facing": "예(웹)",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        573
+      ],
+      "reports": [
+        "mydocs/report/task_m020_573_report.md"
+      ],
+      "notes": "#574 의 웹/CI 변경만 공개, Mac 글꼴 기능 제외",
+      "metadata_path_count": 44,
+      "local_merge_path_count": 44
+    },
+    {
+      "number": 576,
+      "title": "Task #573: main 문서 배포 승인·검증 기록 devel 인계",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/576",
+      "merge_commit": "17dad159fb3ae60b6f7ae2880c73331e3e5dcb91",
+      "merged_at": "2026-09-30T15:07:19Z",
+      "classification": "devel 기록 인계",
+      "user_facing": "아니오",
+      "public_summary": "아니오",
+      "resolved_task_issues": [],
+      "related_issues": [
+        573
+      ],
+      "reports": [
+        "mydocs/report/task_m020_573_report.md"
+      ],
+      "notes": "#575 승인·검증 기록만 인계",
+      "metadata_path_count": 3,
+      "local_merge_path_count": 3
+    },
+    {
+      "number": 578,
+      "title": "Task #567: v0.8.7 반영과 Mac 로컬 글꼴 Studio 연동",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/578",
+      "merge_commit": "db8a94d1eb03f5a14f265621191f85f0ddf149cb",
+      "merged_at": "2026-10-08T05:54:26Z",
+      "classification": "upstream 반영·Studio 글꼴",
+      "user_facing": "예",
+      "public_summary": "예",
+      "resolved_task_issues": [
+        567
+      ],
+      "related_issues": [
+        562,
+        564,
+        565,
+        566,
+        568,
+        569
+      ],
+      "reports": [
+        "mydocs/report/task_m020_567_report.md"
+      ],
+      "notes": "공식 v0.8.7과 기존 목록·설정 연결, 기본 OFF·최초 탐색 병합",
+      "metadata_path_count": 100,
+      "local_merge_path_count": 290
+    },
+    {
+      "number": 579,
+      "title": "Task #568: 설치·가져오기 글꼴의 PDF·인쇄·native·Finder 연결",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/579",
+      "merge_commit": "dac73a589dc17143e744da6a12a51d638a81fb77",
+      "merged_at": "2026-10-09T20:39:11Z",
+      "classification": "앱 출력·Finder 글꼴",
+      "user_facing": "예",
+      "public_summary": "예",
+      "resolved_task_issues": [
+        568
+      ],
+      "related_issues": [
+        562,
+        564,
+        565,
+        566,
+        567,
+        569
+      ],
+      "reports": [
+        "mydocs/report/task_m020_568_report.md"
+      ],
+      "notes": "PDF/인쇄·CG/Skia・QL/Thumbnail 연결. renderer 기본값 전환 아님",
+      "metadata_path_count": 100,
+      "local_merge_path_count": 218
+    },
+    {
+      "number": 582,
+      "title": "Task #580: Finder 글꼴 준비 재사용과 다수 파일 썸네일 대기 개선",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/582",
+      "merge_commit": "34ae2f4b14ea6baf5cce6346b5d491a8e6e6ba11",
+      "merged_at": "2026-10-11T14:34:52Z",
+      "classification": "Finder 반복 비용·동시 대기",
+      "user_facing": "예",
+      "public_summary": "예",
+      "resolved_task_issues": [
+        580
+      ],
+      "related_issues": [
+        562,
+        566,
+        569,
+        581
+      ],
+      "reports": [
+        "mydocs/report/task_m020_580_report.md"
+      ],
+      "notes": "정규화 재사용·제한 FIFO 대기. <300ms 달성으로 표시하지 않음",
+      "metadata_path_count": 91,
+      "local_merge_path_count": 91
+    },
+    {
+      "number": 583,
+      "title": "Task #569: Mac 로컬 글꼴 안내와 동일 후보 수용 결과 정리",
+      "url": "https://github.com/postmelee/alhangeul-macos/pull/583",
+      "merge_commit": "e75d3ec4662457eaca990bdf95596442e5e56503",
+      "merged_at": "2026-10-11T17:18:51Z",
+      "classification": "Mac 안내·Help·최종 수용",
+      "user_facing": "예",
+      "public_summary": "예",
+      "resolved_task_issues": [
+        569
+      ],
+      "related_issues": [
+        562,
+        566,
+        568,
+        580,
+        581
+      ],
+      "reports": [
+        "mydocs/report/task_m020_569_report.md"
+      ],
+      "notes": "Mac scope의 #562 / #569 종료 확인. 최종 DMG 수용은 별도",
+      "metadata_path_count": 100,
+      "local_merge_path_count": 100
+    }
+  ]
+}

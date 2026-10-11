@@ -1,0 +1,14 @@
+{
+  "stage": "1",
+  "scope": "read-only investigation and documentation",
+  "local_links": 89,
+  "unique_merge_prs": 28,
+  "acceptance_rows_pending": 17,
+  "gh_files_pagination_gaps_completed_from_git": [
+    578,
+    579
+  ],
+  "document_reference_format": "PASS",
+  "product_source_unchanged": true,
+  "new_build_install_runtime_publication": false
+}

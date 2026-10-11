@@ -1,0 +1,71 @@
+{
+  "source_commit": "ee453da2c68721542d05d88580f9cd26a22eb2af",
+  "developer_id_used": false,
+  "temporary_install": false,
+  "products": [
+    {
+      "configuration": "Debug",
+      "target": "HostApp",
+      "version": "0.2.3",
+      "build": "21",
+      "executable_sha256": "cdb9e68439696c3979fd39691085773791e81cec762c55a1003c17cc5426eb3f",
+      "archs": "arm64"
+    },
+    {
+      "configuration": "Debug",
+      "target": "QLExtension",
+      "version": "0.2.3",
+      "build": "21",
+      "executable_sha256": "713a3d4b2008f79673b6db93ae37c7769c6b3d9f4996e700de20a30d58e99ad3",
+      "archs": "arm64"
+    },
+    {
+      "configuration": "Debug",
+      "target": "ThumbnailExtension",
+      "version": "0.2.3",
+      "build": "21",
+      "executable_sha256": "d79cd3d1fa796ed2c70cb8f156b57eb616280aeebfb18b1fe5e381df7672707c",
+      "archs": "arm64"
+    },
+    {
+      "configuration": "Debug",
+      "target": "SpotlightImporter",
+      "version": "0.2.3",
+      "build": "21",
+      "executable_sha256": "b68dbd915115346b7b680e77ccce49cbf79447cec11cb06aed0ca507d137b737",
+      "archs": "arm64"
+    },
+    {
+      "configuration": "Release",
+      "target": "HostApp",
+      "version": "0.2.3",
+      "build": "21",
+      "executable_sha256": "abedd312e53a54cfc32c19cf7fe89372bad104ac3b30a70ddd4f621f8084fa69",
+      "archs": "x86_64 arm64"
+    },
+    {
+      "configuration": "Release",
+      "target": "QLExtension",
+      "version": "0.2.3",
+      "build": "21",
+      "executable_sha256": "061f51335f2f66c14bdacaa0e74f80947aa911d72a8da9dc9c197593bff83bff",
+      "archs": "x86_64 arm64"
+    },
+    {
+      "configuration": "Release",
+      "target": "ThumbnailExtension",
+      "version": "0.2.3",
+      "build": "21",
+      "executable_sha256": "9fb524e08c4e5919ca74923ee4ccf73a4711306db1b1ab005bb08ef4226c36d0",
+      "archs": "x86_64 arm64"
+    },
+    {
+      "configuration": "Release",
+      "target": "SpotlightImporter",
+      "version": "0.2.3",
+      "build": "21",
+      "executable_sha256": "18a965a4d0231378f2f79eb2fc92f6e6029aafb4c190b6a9190ee1ff537f1e4b",
+      "archs": "x86_64 arm64"
+    }
+  ]
+}

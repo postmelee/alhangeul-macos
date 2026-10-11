@@ -1,0 +1,5 @@
+LAYOUT_TABLE_OVERLAP: page=0, sec=0, para_a=14, para_b=14, a=294.4~312.6, b=294.4~312.6, overlap=18.2px
+LAYOUT_TABLE_OVERLAP: page=0, sec=0, para_a=14, para_b=14, a=294.4~312.6, b=294.4~312.6, overlap=18.2px
+OK KTX.hwp: page=1 size=1123x794 textRuns=415 hangulRuns=77 hangulScalars=234 nonWhitePixels=452659 png=<workspace>/build.noindex/task584/stage2/render/KTX-page1.png
+OK request.hwp: page=1 size=567x794 textRuns=103 hangulRuns=37 hangulScalars=312 nonWhitePixels=70672 png=<workspace>/build.noindex/task584/stage2/render/request-page1.png
+OK exam_kor.hwp: page=1 size=1123x1588 textRuns=133 hangulRuns=86 hangulScalars=1368 nonWhitePixels=173871 png=<workspace>/build.noindex/task584/stage2/render/exam_kor-page1.png
