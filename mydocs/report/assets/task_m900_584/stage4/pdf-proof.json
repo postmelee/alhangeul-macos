@@ -1,0 +1,72 @@
+[
+  {
+    "format": "hwp",
+    "sha256": "305eefaff986b08aa44ec8ca6aa1ff8e8813ef35df48c0bfcabe7d2b623d6767",
+    "pages": 1,
+    "pypdf_text": "한글가나다ABC0123고운바탕글꼴\n확인",
+    "pypdf_whitespace_ignored_matches": true,
+    "poppler_text": "한글 가나다 ABC 0123 고운바탕 글꼴 확인",
+    "poppler_spacing_matches": true,
+    "han_search_matches": 1,
+    "fonts": [
+      {
+        "resource": "/TT2",
+        "base_font": "/AAAAAC+NanumSquareR",
+        "to_unicode": 493,
+        "programs": [
+          [
+            "/FontFile2",
+            2572
+          ]
+        ]
+      },
+      {
+        "resource": "/TT4",
+        "base_font": "/AAAAAE+NanumSquareB",
+        "to_unicode": 372,
+        "programs": [
+          [
+            "/FontFile2",
+            776
+          ]
+        ]
+      }
+    ],
+    "parser_warning": "pypdf가 비어 있는 object 6/8 포인터를 무시했다. 구조 적합성 전체 검증으로 확대하지 않음"
+  },
+  {
+    "format": "hwpx",
+    "sha256": "dea2cabceaca3a4482c89dd6a0b6e50b2d0196e8ee0158dd27254b34f8c82168",
+    "pages": 1,
+    "pypdf_text": "한글가나다ABC0123고운바탕글꼴\n확인",
+    "pypdf_whitespace_ignored_matches": true,
+    "poppler_text": "한글 가나다 ABC 0123 고운바탕 글꼴 확인",
+    "poppler_spacing_matches": true,
+    "han_search_matches": 1,
+    "fonts": [
+      {
+        "resource": "/TT2",
+        "base_font": "/AAAAAC+NanumSquareR",
+        "to_unicode": 493,
+        "programs": [
+          [
+            "/FontFile2",
+            2572
+          ]
+        ]
+      },
+      {
+        "resource": "/TT4",
+        "base_font": "/AAAAAE+NanumSquareB",
+        "to_unicode": 372,
+        "programs": [
+          [
+            "/FontFile2",
+            776
+          ]
+        ]
+      }
+    ],
+    "parser_warning": "pypdf가 비어 있는 object 6/8 포인터를 무시했다. 구조 적합성 전체 검증으로 확대하지 않음"
+  }
+]

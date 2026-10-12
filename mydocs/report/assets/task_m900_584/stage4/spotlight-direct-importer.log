@@ -1,0 +1,41 @@
+Imported '/Users/melee/Documents/AlhangeulReleaseAcceptance-F779350F-3DE4-4E94-B7C2-A16578D1BA26/font-search-hwpx.hwpx' of type 'com.haansoft.hancomofficeviewer.mac.hwpx' with plugIn /Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter.
+29 attributes returned
+{
+    ":MD:DeviceId" = 16777232;
+    ":MD:kMDItemPath" = "/Users/melee/Documents/AlhangeulReleaseAcceptance-F779350F-3DE4-4E94-B7C2-A16578D1BA26/font-search-hwpx.hwpx";
+    "_kMDItemContentChangeDate" = "2026-10-12 14:58:50 +0000";
+    "_kMDItemCreationDate" = "2026-10-12 14:58:50 +0000";
+    "_kMDItemCreatorCode" = 0;
+    "_kMDItemDisplayNameWithExtensions" =     {
+        "" = "font-search-hwpx.hwpx";
+    };
+    "_kMDItemFileName" = "font-search-hwpx.hwpx";
+    "_kMDItemFinderFlags" = 0;
+    "_kMDItemFinderLabel" = 0;
+    "_kMDItemFromImporter" = 1;
+    "_kMDItemIsEvictedFile" = "<null>";
+    "_kMDItemIsExtensionHidden" = 0;
+    "_kMDItemIsFromImporter" = 1;
+    "_kMDItemOwnerGroupID" = 20;
+    "_kMDItemOwnerUserID" = 501;
+    "_kMDItemTypeCode" = 0;
+    "com_apple_metadata_modtime" = "813509930.1279912";
+    kMDItemContentCreationDate = "2026-10-12 14:58:50 +0000";
+    kMDItemContentModificationDate = "2026-10-12 14:58:50 +0000";
+    kMDItemContentType = "com.haansoft.hancomofficeviewer.mac.hwpx";
+    kMDItemContentTypeTree =     (
+        "com.haansoft.hancomofficeviewer.mac.hwpx",
+        "public.data",
+        "public.item"
+    );
+    kMDItemDateAdded = "2026-10-12 15:17:04 +0000";
+    kMDItemDisplayName =     {
+        "" = "font-search-hwpx.hwpx";
+    };
+    kMDItemDocumentIdentifier = 0;
+    kMDItemKind = "\Ud55c\Uae00 \Ubb38\Uc11c";
+    kMDItemLogicalSize = 7550;
+    kMDItemPhysicalSize = 8192;
+    kMDItemTextContent = "\Ud55c\Uae00 \Uac00\Ub098\Ub2e4 ABC 0123 \Uace0\Uc6b4\Ubc14\Ud0d5 \Uae00\Uaf34 \Ud655\Uc778";
+    kMDItemTitle = "font-search-hwpx";
+}

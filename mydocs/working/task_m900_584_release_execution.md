@@ -73,9 +73,11 @@ gh workflow run release-first-install.yml --repo postmelee/alhangeul-macos --ref
 
 대상은 새 GitHub runner macos-15/arm64 및 macos-15-intel/x86_64다. 소유 합성 corpus 준비·최초 설치·종료 후 검색·재설치·실제 importer·lifecycle 33개·cleanup·schema 3 verdict를 확인하고 maintained/recovered를 구분한다. 생성 파일의 사전 검증 PASS를 VM PASS로 바꾸지 않는다. 사용자 실제 Mac 설치나 공개 배포는 포함하지 않는다. 최종 Mac 시험·원상복원은 이후 구체 파일·설치 대상·백업 계획으로 승인받는다.
 
-## 다음 별도 승인 — 실제 Mac 시험·원상복원
+## 승인된 실제 Mac 시험·정리와 다음 gate
 
-[Stage 4 준비안](task_m900_584_stage4.md)에 검증한 DMG·기존 0.2.2/20 앱·백업 예정 경로·소유 문서 6개·기존 NanumSquare R/B·설정과 등록의 복원 범위를 제시했다. 실제 /Applications/Alhangeul.app 교체·설정 ON/OFF·문서/PDF·인쇄 취소·Finder/Spotlight GUI 시험과 원상복원을 승인받은 뒤 실행한다. 후보 bytes/서명은 유지하며 공개 Release·Pages/Sparkle·Homebrew는 이후 gate다.
+[Stage 4](task_m900_584_stage4.md)는 “진행해줘” 승인 후 같은 DMG의 일반 앱으로 실행했다. 설치 직전 사용자가 기존 앱을 직접 삭제한 것을 확인하고 “임시 설치·시험 후 앱 없음 상태로 복원”을 승인받았다. Mac 글꼴·HWP/HWPX 저장/재열기·실제 PDF·프린트 취소·Finder 주요 경로는 PASS다. 실제 Mac 검색은 색인 활성화 상태에서도 TXT 대조군이 검색되지 않아 미확인이며(원인 미확정) 실제 importer 추출과 양 VM 검색 PASS로 수용할지 판정이 필요하다. UUID container/sfl4 사전 경로를 놓쳐 전체 최근 이력 동등성도 증명하지 못했다. 확보한 기존 항목은 복구했고 앱 부재·OFF·권한·공유 policy 부재·등록/mount/소유 Documents 폴더 정리를 확인했다.
+
+Stage 4 제한과 #480/#525 한계의 수용 및 Stage 5 준비가 다음 승인 대상이다. 실제 공개 version=0.2.3/build=21, source_run_id=38180977764, source_artifact_id=11717953850, validation_run_id=38185285770, source_sha=c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4, dmg_sha256=d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63은 동일 후보 식별 입력이며 공개 승인이나 실행 기록이 아니다. 현재 앱이 없으므로 실제 Sparkle 시험의 v0.2.2 최초 설치와 최종 설치 유지/부재 복원도 구체적으로 제시해야 한다.
 
 ## 승인 근거와 공개 보호
 

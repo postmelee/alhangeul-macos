@@ -1,0 +1,5 @@
+invalid 0
+stale 1
+unavailable 2
+unsupported 3
+tooLarge 4

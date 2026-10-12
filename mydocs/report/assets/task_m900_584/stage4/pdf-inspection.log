@@ -1,0 +1,5 @@
+Ignoring wrong pointing object 6 0 (offset 0)
+Ignoring wrong pointing object 8 0 (offset 0)
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+AssertionError

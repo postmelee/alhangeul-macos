@@ -1,0 +1,55 @@
+{
+  "executed_local_dates": [
+    "2026-10-12",
+    "2026-10-13"
+  ],
+  "environment": {
+    "macOS": "26.5.2",
+    "build": "25F84",
+    "architecture": "arm64"
+  },
+  "version": "0.2.3",
+  "build": "21",
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "rhwp_tag": "v0.8.7",
+  "publish_run_id": 38180977764,
+  "artifact_id": 11717953850,
+  "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "validation_run_id": 38185285770,
+  "app_rebuilt_or_resigned": false,
+  "diagnostic_flags_injected": false,
+  "installed_families_detected": 232,
+  "installed_records": 809,
+  "system_families_on": 204,
+  "system_families_off": 0,
+  "native_ui_and_outputs": "PASS",
+  "native_print_panels_cancelled": [
+    "hwp",
+    "hwpx"
+  ],
+  "physical_print": false,
+  "finder_ui": {
+    "single_hwp_png": true,
+    "single_hwpx_png": true,
+    "two_page_hwpx_pdf": true,
+    "page_2_selected": true,
+    "fresh_thumbnails_visible": 3,
+    "earlier_stale_requests": 3,
+    "exact_face_debug_log_available": false
+  },
+  "spotlight_mac_gui": "ENVIRONMENT_UNAVAILABLE",
+  "spotlight_reason": "저장된 mdutil 상태는 Indexing enabled. TXT 대조군 검색 결과도 없어 환경 수용 불가; 구체 원인 미확정",
+  "actual_install_importer_extracts": [
+    "hwp",
+    "hwpx"
+  ],
+  "recovery_limit_525_reproduced": true,
+  "native_encrypted_save_supported": false,
+  "same_destination_picker_retest_performed": false,
+  "source_permission_loss_os_mutation_retest": false,
+  "original_app_target": "사용자가 삭제한 앱 부재",
+  "app_absence_restored": true,
+  "recent_full_equivalence_proven": false,
+  "stage4_owner_acceptance": "대기",
+  "public_promotion_executed": false
+}

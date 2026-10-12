@@ -1,0 +1,14 @@
+{
+  "time_utc": "2026-10-12T15:26:23.713686+00:00",
+  "installed_enabled_restored": false,
+  "permission_grants_unchanged_count": 0,
+  "shared_policy_original_absence_restored": true,
+  "native_recent_preserved_entries_restored": 7,
+  "system_recent_test_entries_removed": true,
+  "system_recent_preserved_entries": 6,
+  "recent_full_before_after_equivalence_proven": false,
+  "recent_limitation": "사전 계획이 실제 UUID sandbox와 sfl4를 놓쳤다. 최초 시험 문서 열기 이후에 확보한 기존 항목은 복원했으나, 그 전에 목록에 존재했던 전체 항목 수/동등성은 증명하지 못했다. 기존 문서 bytes는 변경하지 않음.",
+  "catalog_detection_cache_retained_disabled": true,
+  "whole_preferences_reset": false,
+  "other_app_recents_modified": false
+}

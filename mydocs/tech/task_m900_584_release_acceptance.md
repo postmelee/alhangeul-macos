@@ -2,7 +2,7 @@
 
 ## 기준과 상태
 
-2026-10-12 Stage 1에서 만든 검증 계약이다. 계획은 v0.2.3 / build 21이며 source SHA는 c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4 / tag v0.2.3, 승인한 publish run은 38180977764다. 최종 일반 Release signed/notarized DMG의 artifact는 11717953850, SHA256은 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63이다. I1 파일/서명과 I2/I3 양 VM은 **PASS**이며 실제 Mac 앱 runtime·공개 행은 **대기**다. Stage 2의 source/unsigned build·helper·로컬 Pages 선행 검증은 PASS지만 아래 최종 DMG 수용을 뜻하지 않는다. [Stage 2 보고](../working/task_m900_584_stage2.md)와 새 DMG 검사 결과를 구분한다.
+2026-10-12 Stage 1에서 만든 검증 계약이다. v0.2.3 / build 21, source c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4 / tag v0.2.3, publish run 38180977764, artifact 11717953850, DMG SHA256 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63을 고정했다. I1/I2/I3는 PASS다. 2026-10-12~13 [Stage 4](../working/task_m900_584_stage4.md)의 일반 Mac 앱 주요 동선도 통과했으며 M7 환경 미확인 및 R1 최근 이력의 증거 공백 수용을 기다린다. 공개 행은 대기다. [Stage 2](../working/task_m900_584_stage2.md)의 선행 unsigned/Pages 검증과 최종 DMG 직접 결과를 구분한다.
 
 [릴리즈 기록](../release/v0.2.3.md), [구현계획](../plans/task_m900_584_impl.md), [Stage 1 출처](../report/assets/task_m900_584/stage1/context.json)를 기준으로 한다.
 
@@ -21,17 +21,17 @@
 | I1 | Stage 3 파일/서명 | checksum·hdiutil verify·source/tag·네 bundle·arm64+x86_64·strict seal·staple/Gatekeeper·layout | [동일 파일 검증 PASS](../report/assets/task_m900_584/stage3/publish/file-verification.json), [source/artifact/hash](../report/assets/task_m900_584/stage3/publish/download-proof.json), [실제 레이아웃](../report/assets/task_m900_584/stage3/publish/dmg-layout.jpg) |
 | I2 | ARM/Intel 새 VM | schema 3 양 install/verdict PASS, 최초·종료 후 검색·실제 importer·새 설치 객체 | [양 VM PASS](../report/assets/task_m900_584/stage3/vm/retry/summary.json), run 38185285770 / attempt 1, schema 3·source proof·최초/종료 후·실제 importer 수용. 첫 ARM 환경 실패 별도 보존 |
 | I3 | 같은 파일 재설치 | bytes/경로/build/mtime/기존 요청 기록 유지, 사전 안정 검색·새 요청 관찰, maintained/recovered 구분 | [ARM](../report/assets/task_m900_584/stage3/vm/retry/arm-verification.json)·[Intel](../report/assets/task_m900_584/stage3/vm/retry/intel-verification.json) PASS, 재설치/종료 후 snapshot·각 lifecycle 33개·cleanup. 양쪽 maintained·각 91개 판정. 실제 색인 복구 시간 측정으로 확대하지 않음 |
-| M1 | Mac 설정/목록 | 기본 OFF 또는 원래 선택 유지, ⌘, 글꼴 ON/OFF·기존 시스템 목록·실제 family/style·재실행 | 화면·실제 count·설정 원래 값/시험 값 / 대기 |
-| M2 | HWP/HWPX | 소유 문서 복사본의 Regular/Bold 선택·실제 save-as·재열기·원문/family/서식 유지, host alias 없음 | 문서/hash·공식 WASM 판독·실제 UI / 대기 |
-| M3 | PDF | 실제 앱 PDF의 선택 face/program·ToUnicode·원문 추출/검색·확대 화면·실패/명시 대체 안내 | PDF·PDFKit/Poppler·필요 화면, 별도 helper와 구분 / 대기 |
-| M4 | 인쇄 | 두 형식의 실제 macOS 패널 열기·취소·문서 복귀 및 글꼴 준비 상태 | 취소 기록·화면, 물리 전송 없음 / 대기 |
-| M5 | Finder | fresh single/multiple Quick Look·Thumbnail, 설치 경로의 실제 active provider·지원 face/fallback | 표준 smoke receipt·GUI·새 경로·표본/시간 / 대기 |
-| M6 | 원본·권한·동명 상태 | 기존 current/source/fallback 계약 대조, 실제 확인 가능한 권한/원본 복구 동선 | 이전 #569 근거와 새 직접 시험 구분. 추가 mutation은 소유 fixture/명시 승인 / 대기 |
-| M7 | Spotlight | 저장된 평문 본문 GUI 검색·결과 열기·실제 importer, 기존 설치 이력 구분 | 실제 검색·원본/종료 상태·실제 UI / 대기 |
-| M8 | 저장·닫기/종료 | 기존 저장·취소·실패 시 문서 유지, 정상 종료/재열기 | 소유 시험 문서·UI·결과/hash / 대기 |
-| S1 | #480 안전 차단 | 소유 합성 보호 입력에서 경고 취소·원본/동일 파일 목적지 거부·원본 hash 유지, 명시 다른 평문 복사본 및 재열기 | 현재 retained guard는 정적 PASS. 실제 최종 DMG runtime 대기 |
-| S2 | #525 복구 한계 | 충분한 autosave 후 저장하지 않음의 실제 복구 후보·원본/hash, 다른 문서 및 취소/저장 동선 보존 | 최신 재현 미실행. 후속 이슈 유지·공개 owner의 구체 한계 수용 대기 |
-| R1 | 임시 시험 복원 | 원래 앱 inventory/서명·버전·provider·승인된 설정 값, 소유 파일/보관함·개발 등록 정리 | backup/restore/cleanup receipt / 대기 |
+| M1 | Mac 설정/목록 | OFF/ON·기존 시스템 목록·실제 family/style·재실행 | PASS: 실제 232 family/809 records, ON 공급 204/OFF 0, 재실행 ON 유지 후 OFF 복원 |
+| M2 | HWP/HWPX | Regular/Bold·save-as·새 프로세스 재열기·원문/family/서식·alias 없음 | [직접 PASS](../report/assets/task_m900_584/stage4/saved-core-proof.json), 두 형식 전 언어 NanumSquare·원문·굵기 유지 |
+| M3 | PDF | 실제 출력 face/program·ToUnicode·원문·검색/선택·확대 | [PDF](../report/assets/task_m900_584/stage4/pdf-proof.json)·[PDFKit](../report/assets/task_m900_584/stage4/pdfkit-proof.json) PASS. pypdf 공백 차이/object 6/8 경고 보존 |
+| M4 | 인쇄 | 실제 macOS 패널 열기·취소·문서 복귀 | 두 형식 PASS, 물리 출력 없음 |
+| M5 | Finder | fresh single/two-page Quick Look·Thumbnail·실제 active provider | 최종 0.2.3 경로, 단일 PNG 2건·PDF 2페이지 선택·새 Thumbnail 3개 표시 PASS. 앞선 stale 요청 3개는 raw 보존, 일반 Release의 개별 PS debug 추적은 미확인 |
+| M6 | 원본·권한·동명 상태 | 기존 계약 대조 및 승인된 직접 설정 동선 | 직접 ON/OFF·grant 0·OS 글꼴 hash 유지 PASS. 원본/권한 상실·동명 회귀는 #569/#580 인계, 이번 OS mutation 재시험 없음 |
+| M7 | Spotlight | 실제 Mac 검색·결과 열기·실제 importer | ENVIRONMENT_UNAVAILABLE: 색인 활성화 상태에서도 TXT 대조군 검색 실패(원인 미확정), Finder 본문 0개. 최종 설치 importer 두 형식 직접 추출 PASS. 양 VM 검색을 대체 근거로 수용할지 승인 대기 |
+| M8 | 저장·닫기/종료 | 저장·취소·정상 종료/재열기 | 관측 동선 PASS. 모든 저장 실패 유형으로 확대하지 않음 |
+| S1 | #480 안전 차단 | 경고 취소·원본/동일 목적지 금지·명시 다른 평문 복사본 | [경고/취소·원본 hash·다른 복사본 재열기 PASS](../report/assets/task_m900_584/stage4/protection-proof.json). 동일 목적지 패널 재선택은 정적 정책 인계, 직접 미시험. native 암호 저장 미지원 |
+| S2 | #525 복구 한계 | 저장하지 않음 후 후보·원본 보존 | 최종 앱에서 소유 후보 1개 잔존 관측·해당 후보만 삭제, 원본 유지. 별도 후속 및 공개 한계 수용 대기 |
+| R1 | 임시 시험 복원 | 승인된 앱/설정·소유 파일/등록 정리 | [앱 부재/설치 정리 PASS](../report/assets/task_m900_584/stage4/installation-restoration.json). [OFF·권한·policy 부재·확보한 최근 항목 복구](../report/assets/task_m900_584/stage4/settings-restoration.json). UUID/sfl4 사전 경로 누락 때문에 전체 최근 이력 동등성은 미증명·수용 대기 |
 | P1 | 동일 파일 공개 | 인증 없는 public DMG/checksum 신규 다운로드, 검사 hash 동일·stable latest·Pages/폰트 안내·배너 | public URL/hash·배포·appcast XML/정확한 항목 / 대기 |
 | P2 | 실제 Sparkle | 실제 v0.2.2 → v0.2.3 다운로드/설치/자동 재실행·문서/검색/확장·글꼴 설정 | 실제 update UI·최종 설치 버전·기존 설정/원본 / 대기 |
 | P3 | Homebrew | 정확한 public hash의 tap/본 저장소 Cask·audit·업데이트/설치 또는 승인된 독립 후속 | 실제 tap/receipt/시험 혹은 명시 분리 / 대기 |
@@ -42,7 +42,7 @@
 
 현재 #480 무경고 원본 덮어쓰기 방지는 기존 공개 v0.2.2에도 존재하며 native 암호화 저장은 미지원이다. encrypted-export RPC 제공 여부와 구현 자체는 별도 #480 범위다. S1이 실패하거나 소유 원본이 바뀌면 공개를 차단하고 별도 수정안을 제시한다.
 
-#525 native 폐기/Studio 복구 수명 연결은 아직 별도 후속이다. 현재 source에서 native bool 해제만 확인했고 새로운 runtime은 관찰하지 않았다. S2의 결과·정확한 영향 및 사용자 안내로 최종 공개 수용을 판단하며 미완료를 해결된 이슈로 표시하지 않는다.
+#525 native 폐기/Studio 복구 수명 연결은 아직 별도 후속이다. 최종 앱에서도 저장하지 않고 종료한 소유 문서의 복구 후보 잔존을 관측했다. 원본은 바뀌지 않았고 해당 후보만 정리했다. S2의 영향·안내 및 공개 owner의 한계 수용으로 출시 여부를 판단하며 해결된 이슈로 표시하지 않는다.
 
 ## 운영 경계·지원 공백
 

@@ -1,0 +1,100 @@
+[
+  {
+    "ext": "hwp",
+    "text": "한글 가나다 ABC 0123 고운바탕 글꼴 확인",
+    "rows": [
+      {
+        "offset": 0,
+        "fontFamily": "NanumSquare",
+        "fontFamilies": [
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare"
+        ],
+        "bold": false
+      },
+      {
+        "offset": 3,
+        "fontFamily": "NanumSquare",
+        "fontFamilies": [
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare"
+        ],
+        "bold": true
+      },
+      {
+        "offset": 24,
+        "fontFamily": "NanumSquare",
+        "fontFamilies": [
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare"
+        ],
+        "bold": false
+      }
+    ],
+    "rendererAliasSaved": false
+  },
+  {
+    "ext": "hwpx",
+    "text": "한글 가나다 ABC 0123 고운바탕 글꼴 확인",
+    "rows": [
+      {
+        "offset": 0,
+        "fontFamily": "NanumSquare",
+        "fontFamilies": [
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare"
+        ],
+        "bold": false
+      },
+      {
+        "offset": 3,
+        "fontFamily": "NanumSquare",
+        "fontFamilies": [
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare"
+        ],
+        "bold": true
+      },
+      {
+        "offset": 24,
+        "fontFamily": "NanumSquare",
+        "fontFamilies": [
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare",
+          "NanumSquare"
+        ],
+        "bold": false
+      }
+    ],
+    "rendererAliasSaved": false
+  }
+]

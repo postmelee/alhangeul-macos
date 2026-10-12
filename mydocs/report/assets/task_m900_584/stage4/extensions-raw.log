@@ -1,0 +1,6 @@
+Timestamp               Ty Process[PID:TID]
+2026-10-12 23:44:04.903 Df AlhangeulThumbnail[81792:1e7131] [com.apple.xpc:connection] [0xa5cc583c0] activating connection: mach=true listener=false peer=false name=com.apple.fonts
+2026-10-12 23:45:33.272 E  AlhangeulThumbnail[81792:1e8159] [com.postmelee.alhangeul.ThumbnailExtension:ThumbnailProvider] Thumbnail failed file=font-two.hwpx policy=coreGraphicsOnly error=HwpNativeFontSupplyError(domain=AlhangeulThumbnail.HwpNativeFontSupplyError, code=1)
+2026-10-12 23:45:33.272 E  AlhangeulThumbnail[81792:1e7130] [com.postmelee.alhangeul.ThumbnailExtension:ThumbnailProvider] Thumbnail failed file=font-single.hwp policy=coreGraphicsOnly error=HwpNativeFontSupplyError(domain=AlhangeulThumbnail.HwpNativeFontSupplyError, code=1)
+2026-10-12 23:45:33.272 E  AlhangeulThumbnail[81792:1e821c] [com.postmelee.alhangeul.ThumbnailExtension:ThumbnailProvider] Thumbnail failed file=font-single.hwpx policy=coreGraphicsOnly error=HwpNativeFontSupplyError(domain=AlhangeulThumbnail.HwpNativeFontSupplyError, code=1)
+2026-10-13 00:13:41.030 Df AlhangeulPreview[95425:1f6ad9] [com.apple.xpc:connection] [0xb50c85a40] activating connection: mach=true listener=false peer=false name=com.apple.fonts

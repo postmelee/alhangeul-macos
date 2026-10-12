@@ -1,0 +1,20 @@
+{
+  "control": {
+    "query": "kMDItemTextContent == \"*F779350F*\"c",
+    "returncode": 0,
+    "results": []
+  },
+  "body": {
+    "query": "kMDItemTextContent == \"*고운바탕*\"c",
+    "returncode": 0,
+    "results": []
+  },
+  "hwp": {
+    "mdls_returncode": 0,
+    "body_contains": false
+  },
+  "hwpx": {
+    "mdls_returncode": 0,
+    "body_contains": false
+  }
+}
