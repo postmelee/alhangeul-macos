@@ -1,0 +1,20 @@
+{
+  "id": 11718713502,
+  "node_id": "MDg6QXJ0aWZhY3QxMTcxODcxMzUwMg==",
+  "name": "first-install-fixtures-38184399238-1",
+  "size_in_bytes": 78509,
+  "url": "https://api.github.com/repos/postmelee/alhangeul-macos/actions/artifacts/11718713502",
+  "archive_download_url": "https://api.github.com/repos/postmelee/alhangeul-macos/actions/artifacts/11718713502/zip",
+  "expired": false,
+  "digest": "sha256:619b63f775925853daece0dabc12c2418ffad2cfb0595d02311378a5fe768fdb",
+  "created_at": "2026-10-11T23:34:38Z",
+  "updated_at": "2026-10-11T23:34:38Z",
+  "expires_at": "2026-10-25T23:34:37Z",
+  "workflow_run": {
+    "id": 38184399238,
+    "repository_id": 1218518435,
+    "head_repository_id": 1218518435,
+    "head_branch": "v0.2.3",
+    "head_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4"
+  }
+}

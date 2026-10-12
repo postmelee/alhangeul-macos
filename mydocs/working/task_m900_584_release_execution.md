@@ -4,7 +4,7 @@
 
 [PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)을 **“main 병합·다음 실행 준비”** 승인으로 병합했다. 실제 main SHA는 `c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4`, tree는 `80fb5eadadbc9ff8f89a8652917e037715c077bd`다. 검토 head `5146d91e`의 제품 내용과 같고 네 source bundle은 0.2.3 / build 21, core·Studio는 공식 v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`다.
 
-[source 증거](../report/assets/task_m900_584/stage3/main-merge/source-identity.json)를 기준으로 **“v0.2.3 태그 생성·push”** 승인을 받아 태그를 생성·게시했다. 아래 태그 명령과 DMG dispatch 명령은 실행 기록이다. **“draft DMG 생성·다운로드/검증 승인”**으로 [run 38180977764](https://github.com/postmelee/alhangeul-macos/actions/runs/38180977764)를 실행했고 success / attempt 1로 완료했다. [동일 DMG 파일 검증](../report/assets/task_m900_584/stage3/publish/file-verification.json)과 cleanup도 PASS다. 양 VM·실제 Mac·공개/업데이트 수용은 남아 있다.
+[source 증거](../report/assets/task_m900_584/stage3/main-merge/source-identity.json)를 기준으로 **“v0.2.3 태그 생성·push”** 승인을 받아 태그를 생성·게시했다. 아래 태그 명령과 DMG dispatch 명령은 실행 기록이다. **“draft DMG 생성·다운로드/검증 승인”**으로 [run 38180977764](https://github.com/postmelee/alhangeul-macos/actions/runs/38180977764)를 실행했고 success / attempt 1로 완료했다. [동일 DMG 파일 검증](../report/assets/task_m900_584/stage3/publish/file-verification.json)과 cleanup도 PASS다. 양 VM 수용도 [run 38185285770](https://github.com/postmelee/alhangeul-macos/actions/runs/38185285770)의 양 install/verdict 및 원본 schema 3 대조로 PASS다. 실제 Mac·공개/업데이트 수용은 남아 있다.
 
 ## 태그 생성·원격 게시 결과
 
@@ -57,9 +57,9 @@ gh workflow run release-publish.yml --repo postmelee/alhangeul-macos --ref v0.2.
 | 후보 로컬 경로 | build.noindex/task584/stage3/publish/candidate/alhangeul-macos-0.2.3.dmg |
 | artifact 만료 | 2026-10-26 07:58:32 KST |
 
-## 다음 별도 승인 — ARM/Intel 새 VM 설치·재설치
+## 승인된 ARM/Intel 새 VM 설치·재설치 결과
 
-[확정 VM 입력](../report/assets/task_m900_584/stage3/publish/vm-inputs.json)으로 같은 artifact의 동일 DMG를 검증한다. 아래 명령은 **미승인·미실행 준비안**이다.
+[확정 VM 입력](../report/assets/task_m900_584/stage3/publish/vm-inputs.json)은 당시 준비 snapshot으로 유지한다. **“보고 수용·ARM/Intel VM 검증 실행 승인”** 후 아래 동일 명령을 실행했다. 첫 run 38184399238의 ARM TXT 환경 실패는 보존했고, 동일 입력의 새 VM 1회 재시험 run 38185285770에서 양쪽 PASS를 확인했다. [실제 실행 입력](../report/assets/task_m900_584/stage3/vm/retry/dispatch-inputs.json)과 [수용 요약](../report/assets/task_m900_584/stage3/vm/retry/summary.json)을 우선한다.
 
 ```sh
 gh workflow run release-first-install.yml --repo postmelee/alhangeul-macos --ref v0.2.3 \
@@ -73,8 +73,12 @@ gh workflow run release-first-install.yml --repo postmelee/alhangeul-macos --ref
 
 대상은 새 GitHub runner macos-15/arm64 및 macos-15-intel/x86_64다. 소유 합성 corpus 준비·최초 설치·종료 후 검색·재설치·실제 importer·lifecycle 33개·cleanup·schema 3 verdict를 확인하고 maintained/recovered를 구분한다. 생성 파일의 사전 검증 PASS를 VM PASS로 바꾸지 않는다. 사용자 실제 Mac 설치나 공개 배포는 포함하지 않는다. 최종 Mac 시험·원상복원은 이후 구체 파일·설치 대상·백업 계획으로 승인받는다.
 
+## 다음 별도 승인 — 실제 Mac 시험·원상복원
+
+[Stage 4 준비안](task_m900_584_stage4.md)에 검증한 DMG·기존 0.2.2/20 앱·백업 예정 경로·소유 문서 6개·기존 NanumSquare R/B·설정과 등록의 복원 범위를 제시했다. 실제 /Applications/Alhangeul.app 교체·설정 ON/OFF·문서/PDF·인쇄 취소·Finder/Spotlight GUI 시험과 원상복원을 승인받은 뒤 실행한다. 후보 bytes/서명은 유지하며 공개 Release·Pages/Sparkle·Homebrew는 이후 gate다.
+
 ## 승인 근거와 공개 보호
 
-[구현계획 §4](../plans/task_m900_584_impl.md)의 “tag 생성과 Release Publish DMG 실행을 각각 승인” 규칙과 [runbook](../manual/public_release_runbook.md)의 별도 gate를 따른다. main 병합·태그 생성/push·draft DMG 실행/파일 검증을 각각 승인받았다. 설치·공개 승인으로 확장하지 않는다.
+[구현계획 §4](../plans/task_m900_584_impl.md)의 “tag 생성과 Release Publish DMG 실행을 각각 승인” 규칙과 [runbook](../manual/public_release_runbook.md)의 별도 gate를 따른다. main 병합·태그 생성/push·draft DMG 실행/파일 검증을 각각 승인받았다. VM 설치까지 별도 승인받았으며 실제 Mac 설치·공개 승인으로 확장하지 않는다.
 
 병합 후 [Pages run 38179177872](https://github.com/postmelee/alhangeul-macos/actions/runs/38179177872)은 success / 실제 deploy job skipped다. 새 public DMG가 없어 기존 asset gate가 공개를 보류했고 appcast는 0.2.2/20·기존 bytes를 유지한다. [Stage 3 보고](task_m900_584_stage3.md)를 참고한다. #584는 전체 수용 전까지 OPEN이다.

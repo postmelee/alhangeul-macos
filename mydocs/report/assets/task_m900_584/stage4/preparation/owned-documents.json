@@ -1,0 +1,51 @@
+{
+  "uuid": "F779350F-3DE4-4E94-B7C2-A16578D1BA26",
+  "root": "build.noindex/task584/stage4/owned-documents/F779350F-3DE4-4E94-B7C2-A16578D1BA26",
+  "files": [
+    {
+      "source": "build.noindex/task569/stage4/probe-inputs/single.hwp",
+      "owned_copy": "build.noindex/task584/stage4/owned-documents/F779350F-3DE4-4E94-B7C2-A16578D1BA26/font-single.hwp",
+      "size": 13312,
+      "sha256": "80f75353ba6b31c55169a7a8e29e35cbeba3ff4a2c66d0f961cadb4400caf199"
+    },
+    {
+      "source": "build.noindex/task569/stage4/probe-inputs/single.hwpx",
+      "owned_copy": "build.noindex/task584/stage4/owned-documents/F779350F-3DE4-4E94-B7C2-A16578D1BA26/font-single.hwpx",
+      "size": 7488,
+      "sha256": "d1dab09e04b996059929be22118975a1e9be88d87e526538337f13658d49bd33"
+    },
+    {
+      "source": "build.noindex/task569/stage4/probe-inputs/two.hwpx",
+      "owned_copy": "build.noindex/task584/stage4/owned-documents/F779350F-3DE4-4E94-B7C2-A16578D1BA26/font-two.hwpx",
+      "size": 7422,
+      "sha256": "0a85f61a0fcb2a5fad6fa1487db862dedca3133a0457794c9f95b2c60f5ee281"
+    },
+    {
+      "source": "build.noindex/task584/stage3/vm/fixtures/variants/protected.hwpx",
+      "source_artifact_id": 11718713502,
+      "source_validation_run_id": 38184399238,
+      "owned_copy": "build.noindex/task584/stage4/owned-documents/F779350F-3DE4-4E94-B7C2-A16578D1BA26/protected.hwpx",
+      "size": 8043,
+      "sha256": "4a28402661453e3f6ca879936b457f9785a54cfb861fe3c6b755e9e416280a04"
+    },
+    {
+      "source": "build.noindex/task584/stage3/vm/fixtures/initial/document-c.hwp",
+      "source_artifact_id": 11718713502,
+      "source_validation_run_id": 38184399238,
+      "owned_copy": "build.noindex/task584/stage4/owned-documents/F779350F-3DE4-4E94-B7C2-A16578D1BA26/legacy-hwp3.hwp",
+      "size": 1352,
+      "sha256": "4579224b962cbbad9bb981fd74bda36e983c5b79b700131ebc6b1116ace54b5f"
+    },
+    {
+      "source": "build.noindex/task584/stage3/vm/fixtures/initial/document-b.hwpx",
+      "source_artifact_id": 11718713502,
+      "source_validation_run_id": 38184399238,
+      "owned_copy": "build.noindex/task584/stage4/owned-documents/F779350F-3DE4-4E94-B7C2-A16578D1BA26/recovery-owned.hwpx",
+      "size": 7258,
+      "sha256": "230285d9adb2d3b2adb6a22dc58ffbd7e0750608d1233c0551bb2429edfd93d9"
+    }
+  ],
+  "scope": "기존 #569의 소유 시험 문서만 새 UUID 경로로 복사. 일반 최종 앱에 진단 flag/UUID를 주입하지 않음",
+  "source_app_mutated": false,
+  "app_installation_performed": false
+}

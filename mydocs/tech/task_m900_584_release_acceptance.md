@@ -2,7 +2,7 @@
 
 ## 기준과 상태
 
-2026-10-12 Stage 1에서 만든 검증 계약이다. 계획은 v0.2.3 / build 21이며 source SHA는 c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4 / tag v0.2.3, 승인한 publish run은 38180977764다. 최종 일반 Release signed/notarized DMG의 artifact는 11717953850, SHA256은 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63이다. I1 파일/서명은 **PASS**이며 VM·실제 앱 runtime 행은 **대기**다. Stage 2의 source/unsigned build·helper·로컬 Pages 선행 검증은 PASS지만 아래 최종 DMG 수용을 뜻하지 않는다. [Stage 2 보고](../working/task_m900_584_stage2.md)와 새 DMG 검사 결과를 구분한다.
+2026-10-12 Stage 1에서 만든 검증 계약이다. 계획은 v0.2.3 / build 21이며 source SHA는 c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4 / tag v0.2.3, 승인한 publish run은 38180977764다. 최종 일반 Release signed/notarized DMG의 artifact는 11717953850, SHA256은 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63이다. I1 파일/서명과 I2/I3 양 VM은 **PASS**이며 실제 Mac 앱 runtime·공개 행은 **대기**다. Stage 2의 source/unsigned build·helper·로컬 Pages 선행 검증은 PASS지만 아래 최종 DMG 수용을 뜻하지 않는다. [Stage 2 보고](../working/task_m900_584_stage2.md)와 새 DMG 검사 결과를 구분한다.
 
 [릴리즈 기록](../release/v0.2.3.md), [구현계획](../plans/task_m900_584_impl.md), [Stage 1 출처](../report/assets/task_m900_584/stage1/context.json)를 기준으로 한다.
 
@@ -19,8 +19,8 @@
 | ID | 단계·경로 | 확인 사항 | 증거와 상태 |
 |----|-----------|-----------|-------------|
 | I1 | Stage 3 파일/서명 | checksum·hdiutil verify·source/tag·네 bundle·arm64+x86_64·strict seal·staple/Gatekeeper·layout | [동일 파일 검증 PASS](../report/assets/task_m900_584/stage3/publish/file-verification.json), [source/artifact/hash](../report/assets/task_m900_584/stage3/publish/download-proof.json), [실제 레이아웃](../report/assets/task_m900_584/stage3/publish/dmg-layout.jpg) |
-| I2 | ARM/Intel 새 VM | schema 3 양 install/verdict PASS, 최초·종료 후 검색·실제 importer·새 설치 객체 | source proof·first-launch/stopped-search·verify-result / 대기 |
-| I3 | 같은 파일 재설치 | bytes/경로/build/mtime/기존 요청 기록 유지, 사전 안정 검색·새 요청 관찰, maintained/recovered 구분 | reinstall-search/stopped-search·lifecycle 33개·cleanup / 대기 |
+| I2 | ARM/Intel 새 VM | schema 3 양 install/verdict PASS, 최초·종료 후 검색·실제 importer·새 설치 객체 | [양 VM PASS](../report/assets/task_m900_584/stage3/vm/retry/summary.json), run 38185285770 / attempt 1, schema 3·source proof·최초/종료 후·실제 importer 수용. 첫 ARM 환경 실패 별도 보존 |
+| I3 | 같은 파일 재설치 | bytes/경로/build/mtime/기존 요청 기록 유지, 사전 안정 검색·새 요청 관찰, maintained/recovered 구분 | [ARM](../report/assets/task_m900_584/stage3/vm/retry/arm-verification.json)·[Intel](../report/assets/task_m900_584/stage3/vm/retry/intel-verification.json) PASS, 재설치/종료 후 snapshot·각 lifecycle 33개·cleanup. 양쪽 maintained·각 91개 판정. 실제 색인 복구 시간 측정으로 확대하지 않음 |
 | M1 | Mac 설정/목록 | 기본 OFF 또는 원래 선택 유지, ⌘, 글꼴 ON/OFF·기존 시스템 목록·실제 family/style·재실행 | 화면·실제 count·설정 원래 값/시험 값 / 대기 |
 | M2 | HWP/HWPX | 소유 문서 복사본의 Regular/Bold 선택·실제 save-as·재열기·원문/family/서식 유지, host alias 없음 | 문서/hash·공식 WASM 판독·실제 UI / 대기 |
 | M3 | PDF | 실제 앱 PDF의 선택 face/program·ToUnicode·원문 추출/검색·확대 화면·실패/명시 대체 안내 | PDF·PDFKit/Poppler·필요 화면, 별도 helper와 구분 / 대기 |

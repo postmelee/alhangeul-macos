@@ -1,0 +1,81 @@
+{
+  "checked_at_kst": "2026-10-12T09:01:50.057062+09:00",
+  "validation_run_id": 38185285770,
+  "run_attempt": 1,
+  "runner": "macos-15",
+  "artifact_id": 11720195360,
+  "archive_sha256": "565738093f4bced7324110fbd9ef45861b5c21c6def67c430423f37765386c27",
+  "archive_size": 2758056,
+  "original_archive_retained": "build.noindex/task584/stage3/vm/retry/arm-evidence.zip",
+  "architecture": "arm64",
+  "schema_version": 3,
+  "status": "PASS",
+  "release_eligible": true,
+  "candidate": {
+    "source_run_id": "38180977764",
+    "source_artifact_id": "11717953850",
+    "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+    "expected_version": "0.2.3",
+    "expected_build": "21",
+    "repository": "postmelee/alhangeul-macos"
+  },
+  "source_proof": {
+    "schema_version": 1,
+    "candidate_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "harness_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "workflow_ref": "refs/tags/v0.2.3",
+    "fixture_source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "tooling_only_changes": []
+  },
+  "elapsed_seconds": 323.04,
+  "environment_probe_seconds": 21.83,
+  "snapshots": [
+    {
+      "name": "first-launch.json",
+      "phase": "searchable",
+      "result_count": 13,
+      "launch_count": 1,
+      "assisted_actions": null
+    },
+    {
+      "name": "stopped-search.json",
+      "phase": "searchable",
+      "result_count": 22,
+      "launch_count": 1,
+      "assisted_actions": null
+    },
+    {
+      "name": "state.json",
+      "phase": "cleaned",
+      "result_count": 91,
+      "launch_count": 2,
+      "assisted_actions": [
+        "lifecycle"
+      ]
+    },
+    {
+      "name": "reinstall-search.json",
+      "phase": "searchable",
+      "result_count": 39,
+      "launch_count": 2,
+      "assisted_actions": null
+    },
+    {
+      "name": "reinstall-stopped-search.json",
+      "phase": "searchable",
+      "result_count": 48,
+      "launch_count": 2,
+      "assisted_actions": null
+    }
+  ],
+  "lifecycle_required": 33,
+  "lifecycle_all_pass": true,
+  "total_verdicts": 91,
+  "intermediate_failures": [],
+  "reinstall_outcome": "maintained",
+  "before_copy_mode": "searchable",
+  "before_launch_mode": "searchable",
+  "cleanup_index_verified": true,
+  "scope": "이 아키텍처의 동일 DMG 검증만. 전체 run verdict와 실제 Mac·공개 수용은 별도"
+}
