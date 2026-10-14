@@ -2,7 +2,7 @@
 
 ## 결론과 승인
 
-**2026-10-15 v0.2.3 / build 21 공개·Pages/Sparkle 배포, 실제 Sparkle 업데이트·글꼴/문서/Finder, Homebrew 배포·설치 시험과 원상복원을 완료했다.** 종료 정리 문서/안내는 로컬에서 준비했으며 최종 보고 수용·게시를 기다린다. #584는 이 정리가 끝날 때까지 OPEN이다.
+**2026-10-15 v0.2.3 / build 21 공개·Pages/Sparkle 배포, 실제 Sparkle 업데이트·글꼴/문서/Finder, Homebrew 배포·설치 시험과 원상복원을 완료했다.** 최종 보고 수용·종료 정리 게시/병합·후속 이슈 등록 승인을 받아 종료 PR과 devel 인계를 진행한다. #584는 종료 PR에서 완료 처리한다.
 
 작업지시자가 “동일 DMG의 양 VM 검색 PASS·실제 Mac 본문 추출 PASS를 대체 근거로 수용하고 Stage 5 진행 및 배포까지” 지시했다. 이어 [실행안](task_m900_584_stage5_remaining_plan.md)의 “Sparkle·Homebrew 시험/반영·앱 없음 복원까지 허용”을 승인했다. [Stage 4](task_m900_584_stage4.md)의 M7은 ENVIRONMENT_UNAVAILABLE로 유지하고 해당 대체 근거로 수용한다. 사용자가 인덱싱 중이라고 설명한 실제 Mac 검색은 별도 수동 시험·다음 릴리즈 조사로 남긴다. 원인·회귀 여부는 미확정이다. 과거 최근 문서 이력의 증거 공백과 #480/#525 한계도 해결로 바꾸지 않는다.
 
@@ -61,7 +61,7 @@ macOS 26.5.2 (25F84)/arm64, 현재 앱이 없는 상태에서 공식 v0.2.2/20 �
 
 ## 필요한 회귀와 종료 정리
 
-README·홈/업데이트 Homebrew 안내·Cask·수용표·릴리즈 기록·최종 보고서를 한 main 대상 종료 정리 PR로 모은다. 공개 appcast를 그대로 보존한 docs-only 배포와 devel 인계를 확인해야 한다. 새 Spotlight 조사 이슈 초안은 [후속 초안](task_m900_584_spotlight_followup_issue.md)에 준비했다. 기존 #513은 v0.2.2에서 이미 종료됐으므로 새 관측을 근거 없이 같은 회귀로 병합하지 않는다. 최종 보고·게시·이슈 등록/종료 승인을 기다리며 제품 재빌드·태그 이동·새 서명은 하지 않는다.
+README·홈/업데이트 Homebrew 안내·Cask·수용표·릴리즈 기록·최종 보고서를 한 main 대상 종료 정리 PR로 모은다. 공개 appcast를 그대로 보존한 docs-only 배포와 devel 인계를 확인해야 한다. 새 Spotlight 조사 이슈 초안은 [후속 초안](task_m900_584_spotlight_followup_issue.md)에 준비했다. 기존 #513은 v0.2.2에서 이미 종료됐으므로 새 관측을 근거 없이 같은 회귀로 병합하지 않는다. 작업지시자가 최종 보고·게시/병합·이슈 등록/종료를 승인했고 [Spotlight 후속 #587](https://github.com/postmelee/alhangeul-macos/issues/587)을 등록했다. 제품 재빌드·태그 이동·새 서명은 하지 않는다.
 
 
 검증: 변경 Markdown 13개·상대 링크 261개, JPEG 파일 형식 9개·최소 증거 checksum 28개, 공백 검사, Pages 조립과 public appcast bytes 보존·Homebrew 업데이트 탭 화면 확인을 통과했다. 제품 코드·Rust/core·Studio·bundle 버전·고정 태그는 추가 변경하지 않았다. [검증 요약](../report/assets/task_m900_584/stage5/validation.json)을 참고한다.

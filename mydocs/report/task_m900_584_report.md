@@ -2,7 +2,7 @@
 
 ## 결론
 
-**v0.2.3(21)을 2026-10-15 05:07:41 KST 공개하고 Pages/Sparkle·실제 업데이트·Mac 글꼴/문서/Finder·Homebrew 설치와 앱 없음/관련 설정 원상복원을 완료했다.** rhwp v0.8.7과 Mac 로컬 글꼴 기능을 포함한 동일 공증 DMG다. 실제 Mac Spotlight 검색은 양 VM 검색 PASS·실제 Mac 본문 추출 PASS를 대체 근거로 명시 수용했으며 원인 조사·필요 수정은 다음 릴리즈 후속으로 남긴다. 과거 최근 문서 이력 공백과 기존 저장 한계는 해결로 바꾸지 않는다. 이 보고와 README·웹 Homebrew 안내/Cask mirror를 포함한 종료 정리 PR 게시 승인을 기다리며 #584는 아직 OPEN이다.
+**v0.2.3(21)을 2026-10-15 05:07:41 KST 공개하고 Pages/Sparkle·실제 업데이트·Mac 글꼴/문서/Finder·Homebrew 설치와 앱 없음/관련 설정 원상복원을 완료했다.** rhwp v0.8.7과 Mac 로컬 글꼴 기능을 포함한 동일 공증 DMG다. 실제 Mac Spotlight 검색은 양 VM 검색 PASS·실제 Mac 본문 추출 PASS를 대체 근거로 명시 수용했으며 원인 조사·필요 수정은 다음 릴리즈 후속으로 남긴다. 과거 최근 문서 이력 공백과 기존 저장 한계는 해결로 바꾸지 않는다. 작업지시자가 최종 보고 수용·종료 정리 게시/병합·후속 이슈 등록을 승인했다. 종료 PR과 devel 인계를 진행하며 Spotlight 원인 조사는 [#587](https://github.com/postmelee/alhangeul-macos/issues/587)로 분리했다.
 
 준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 검증 이미지 보정 head `938b59b9`의 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. 이후 [Stage 3](../working/task_m900_584_stage3.md)에서 [main PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)의 통합 리뷰·CI 4개를 확인하고, **“main 병합·다음 실행 준비”** 승인으로 main `c9d59f93`에 병합했다. **“v0.2.3 태그 생성·push”** 승인으로 해당 실제 SHA에 tag를 생성·게시·검증했다. DMG workflow의 실행 입력·운영 이름 준비 후 별도 승인으로 run 38180977764를 실행해 success / attempt 1과 artifact 11717953850의 동일 원본 파일 검증 PASS를 확인했다. 별도 승인한 VM 첫 run의 ARM 환경 실패는 보존했고 같은 입력의 재시험 38185285770에서 양 아키텍처 및 verdict, 원본 schema 3·설치/재설치·검색·lifecycle/cleanup 대조를 통과했다. 이후 실제 Mac 검색의 대체 근거 수용과 Stage 5 공개·설치 검증을 완료했다. 아래는 각 단계 당시 증거를 구분한 기록이다.
 
@@ -52,7 +52,7 @@ Rust 양 target portable·core/Studio·producer golden/Swift decoder·unsigned D
 별도 승인된 [폴더 한정 재색인](assets/task_m900_584/stage4/reindex-06d6d117/summary.json)도 실행했다. 실제 검색 제외 목록에 시험 폴더 하나만 추가·제거하고 원래 목록을 복원했다. 후보 미설치 상태의 TXT 두 개가 180초 관찰(실제 182.30초, 59회)에서 모두 양성 0회여서 환경 전제를 충족하지 못했다. 이번 후보 설치/실행·HWP/HWPX 재검증은 계획의 전제에 따라 미실행으로 남기고, 파일 hash 확인 후 소유 폴더를 정리했다. Mac 환경 복구는 별도로 두고 기존 양 VM 검색·실제 설치 importer 추출을 대체 근거로 수용해 Stage 5 준비로 진행할 것을 권고한다. 역사적 이력 공백과 #480/#525 한계의 수용도 승인 대기이며, 공개 명령은 실행하지 않았다.
 
 
-## Stage 5 최종 결과·보고 승인 요청
+## Stage 5 최종 결과·보고 수용
 
 [공개 승격](https://github.com/postmelee/alhangeul-macos/actions/runs/38629062837)은 두 job 모두 성공했다. Release 409973398 및 기존 asset 632029048/632029049를 유지했으며, public 신규 다운로드는 확정 DMG SHA256 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63 / 211405232 bytes와 같다. public appcast 0.2.3/21·서명·동일 enclosure·홈/폰트 안내·새 노트·이전 배너 접근을 확인했다. 재빌드·재서명·태그 이동·DMG 교체는 없다.
 
@@ -62,6 +62,6 @@ Rust 양 target portable·core/Studio·producer golden/Swift decoder·unsigned D
 
 [Stage 5 증거](assets/task_m900_584/stage5/SHA256SUMS)를 보존한다. 첫 위생 검사의 VM metadata bundle 3개 등록 잔존은 ZIP/hash로 원본 보존 후 해당 경로만 정리했고 최종 검사는 PASS다. 전역 색인·캐시 초기화는 없다. 초기 XML 경로/fully-qualified brew list/tap 밖 style 오류는 제품 실패와 분리해 원시 기록에 남겼다.
 
-다음 공개 변경은 README·홈/업데이트 Homebrew 배지·Cask mirror·릴리즈 수용 기록을 한 main 대상 종료 정리 PR로 제출하고 CI·리뷰·병합 및 docs-only Pages의 appcast 보존을 확인하는 것이다. 이후 devel 인계와 #584 종료를 수행한다. [Spotlight 후속 이슈 초안](../working/task_m900_584_spotlight_followup_issue.md)은 기존 종료된 #513과 다른 현재 관측의 원인 분리를 소유한다. **최종 보고 수용·종료 정리 게시/검토/병합·후속 이슈 등록 승인을 기다린다.**
+다음 공개 변경은 README·홈/업데이트 Homebrew 배지·Cask mirror·릴리즈 수용 기록을 한 main 대상 종료 정리 PR로 제출하고 CI·리뷰·병합 및 docs-only Pages의 appcast 보존을 확인하는 것이다. 이후 devel 인계와 #584 종료를 수행한다. [Spotlight 후속 이슈 초안](../working/task_m900_584_spotlight_followup_issue.md)은 기존 종료된 #513과 다른 현재 관측의 원인 분리를 소유한다. 작업지시자가 **“최종 보고 수용·종료 정리/병합·후속 이슈 등록”**을 승인했으며, 후속 [#587](https://github.com/postmelee/alhangeul-macos/issues/587)을 등록했다.
 
 필요 회귀는 Ruby 문법·실제 tap style/audit·공개 파일/실제 설치 검증, Pages 조립/public appcast 보존·업데이트 탭 화면, 문서 링크·이미지 형식·checksum·공백 검사다. 제품 Swift/Rust/Studio를 바꾸지 않아 전체 빌드를 반복하지 않았다. [검증 요약](assets/task_m900_584/stage5/validation.json)과 [Homebrew 안내 미리보기](assets/task_m900_584/stage5/closeout-homebrew-preview.jpg)를 보존한다.
