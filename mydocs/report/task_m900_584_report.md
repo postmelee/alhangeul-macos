@@ -2,7 +2,7 @@
 
 ## 결론
 
-**v0.2.3(21)을 2026-10-15 05:07:41 KST 공개하고 Pages/Sparkle·실제 업데이트·Mac 글꼴/문서/Finder·Homebrew 설치와 앱 없음/관련 설정 원상복원을 완료했다.** rhwp v0.8.7과 Mac 로컬 글꼴 기능을 포함한 동일 공증 DMG다. 실제 Mac Spotlight 검색은 양 VM 검색 PASS·실제 Mac 본문 추출 PASS를 대체 근거로 명시 수용했으며 원인 조사·필요 수정은 다음 릴리즈 후속으로 남긴다. 과거 최근 문서 이력 공백과 기존 저장 한계는 해결로 바꾸지 않는다. 작업지시자가 최종 보고 수용·종료 정리 게시/병합·후속 이슈 등록을 승인했다. 종료 PR과 devel 인계를 진행하며 Spotlight 원인 조사는 [#587](https://github.com/postmelee/alhangeul-macos/issues/587)로 분리했다.
+**v0.2.3(21)을 2026-10-15 05:07:41 KST 공개하고 Pages/Sparkle·실제 업데이트·Mac 글꼴/문서/Finder·Homebrew 설치와 앱 없음/관련 설정 원상복원을 완료했다.** rhwp v0.8.7과 Mac 로컬 글꼴 기능을 포함한 동일 공증 DMG다. 실제 Mac Spotlight 검색은 양 VM 검색 PASS·실제 Mac 본문 추출 PASS를 대체 근거로 명시 수용했으며 원인 조사·필요 수정은 다음 릴리즈 후속으로 남긴다. 과거 최근 문서 이력 공백과 기존 저장 한계는 해결로 바꾸지 않는다. 작업지시자가 최종 보고 수용·종료 정리 게시/병합·후속 이슈 등록을 승인했다. 종료 [PR #588](https://github.com/postmelee/alhangeul-macos/pull/588)을 main에 병합하고 #584를 완료 처리했다. devel 인계를 진행하며 Spotlight 원인 조사는 [#587](https://github.com/postmelee/alhangeul-macos/issues/587)로 분리했다.
 
 준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 검증 이미지 보정 head `938b59b9`의 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. 이후 [Stage 3](../working/task_m900_584_stage3.md)에서 [main PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)의 통합 리뷰·CI 4개를 확인하고, **“main 병합·다음 실행 준비”** 승인으로 main `c9d59f93`에 병합했다. **“v0.2.3 태그 생성·push”** 승인으로 해당 실제 SHA에 tag를 생성·게시·검증했다. DMG workflow의 실행 입력·운영 이름 준비 후 별도 승인으로 run 38180977764를 실행해 success / attempt 1과 artifact 11717953850의 동일 원본 파일 검증 PASS를 확인했다. 별도 승인한 VM 첫 run의 ARM 환경 실패는 보존했고 같은 입력의 재시험 38185285770에서 양 아키텍처 및 verdict, 원본 schema 3·설치/재설치·검색·lifecycle/cleanup 대조를 통과했다. 이후 실제 Mac 검색의 대체 근거 수용과 Stage 5 공개·설치 검증을 완료했다. 아래는 각 단계 당시 증거를 구분한 기록이다.
 
@@ -32,7 +32,7 @@ Rust 양 target portable·core/Studio·producer golden/Swift decoder·unsigned D
 | 실제 Mac | [Stage 4](../working/task_m900_584_stage4.md): macOS 26.5.2/arm64 일반 최종 앱의 실제 232 family/204 공급, HWP/HWPX 저장·새 프로세스 재열기·실제 PDF·프린트 취소·Finder PASS. 실제 검색은 색인 활성화 상태에서도 TXT 대조군이 검색되지 않아 환경 미확인(원인 미확정), 현재 설치 importer 추출 및 양 VM 검색 PASS |
 | 복원·증거 공백 | 사용자가 삭제한 앱 부재로 복원·후보 등록/mount/소유 Documents 폴더 정리·OFF/grant 0·원본 hash 유지. UUID container/sfl4를 늦게 확인해 확보한 최근 항목은 복구했으나 전체 사전 동등성은 미증명. 과거 전체 동등성 미증명은 유지. Stage 5는 사전 UUID·7개 recent/sfl4·관련 설정 정확한 복원 PASS |
 | 저장·복구 | #480 보호 경고·취소·원본 hash 유지·명시 다른 평문 복사본 재열기 PASS, native 암호화 저장 미지원. #525 저장하지 않음 뒤 소유 복구 후보 잔존을 최종 앱에서 관측·정리. 해당 한계와 동일 목적지 패널 재선택 미시험을 수용표에 구분 |
-| 공개·업데이트 | [Stage 5](../working/task_m900_584_stage5.md) 공개·Pages/Sparkle·실제 0.2.2→0.2.3 업데이트·문서/글꼴/Finder·tap PR #2·Homebrew 설치·원상복원 PASS. README/웹 안내·최종 기록의 종료 정리 게시 대기 |
+| 공개·업데이트 | [Stage 5](../working/task_m900_584_stage5.md) 공개·Pages/Sparkle·실제 0.2.2→0.2.3 업데이트·문서/글꼴/Finder·tap PR #2·Homebrew 설치·원상복원 PASS. 종료 PR #588 main 반영·docs-only Pages 공개 안내 정렬 및 기존 appcast bytes 보존 PASS |
 | 독립 후속 | Windows #566·추가 현재성 비용 최적화 #581 OPEN. <300ms·무지연 실행을 완료 기준으로 다시 요구하지 않음 |
 
 최소 macOS 12·Intel 실기기 GUI·실제 한컴 제거·물리 인쇄를 이번 unsigned 검증으로 수행했다고 주장하지 않는다. 새 원본 손상이나 보호 우회가 확인되면 공개를 차단한다.
@@ -65,3 +65,11 @@ Rust 양 target portable·core/Studio·producer golden/Swift decoder·unsigned D
 다음 공개 변경은 README·홈/업데이트 Homebrew 배지·Cask mirror·릴리즈 수용 기록을 한 main 대상 종료 정리 PR로 제출하고 CI·리뷰·병합 및 docs-only Pages의 appcast 보존을 확인하는 것이다. 이후 devel 인계와 #584 종료를 수행한다. [Spotlight 후속 이슈 초안](../working/task_m900_584_spotlight_followup_issue.md)은 기존 종료된 #513과 다른 현재 관측의 원인 분리를 소유한다. 작업지시자가 **“최종 보고 수용·종료 정리/병합·후속 이슈 등록”**을 승인했으며, 후속 [#587](https://github.com/postmelee/alhangeul-macos/issues/587)을 등록했다.
 
 필요 회귀는 Ruby 문법·실제 tap style/audit·공개 파일/실제 설치 검증, Pages 조립/public appcast 보존·업데이트 탭 화면, 문서 링크·이미지 형식·checksum·공백 검사다. 제품 Swift/Rust/Studio를 바꾸지 않아 전체 빌드를 반복하지 않았다. [검증 요약](assets/task_m900_584/stage5/validation.json)과 [Homebrew 안내 미리보기](assets/task_m900_584/stage5/closeout-homebrew-preview.jpg)를 보존한다.
+
+## 종료 정리·devel 인계
+
+2026-10-15 05:49:33 KST 종료 [PR #588](https://github.com/postmelee/alhangeul-macos/pull/588)의 검토 head `560f229c`를 main `1688bc38`에 merge했다. 실행 대상 CI 세 개가 모두 성공했고 제품 소스 미변경으로 macOS validation은 분류에 따라 건너뛰었다. 본인 PR의 검토는 comment로 남겼으며 독립 승인 리뷰로 표시하지 않는다. #584 완료 기준은 실제 Mac Spotlight 대체 근거 수용을 명시하도록 정렬했고 CLOSED를 확인했다.
+
+[종료 증거](assets/task_m900_584/closeout/SHA256SUMS)의 docs-only Pages run 38635318675는 두 job 모두 성공했다. 공개 홈·업데이트 페이지의 Homebrew 0.2.3 안내와 HTTP 200을 확인했다. appcast는 1161 bytes/SHA256 `67274e1df34627823b6a2d0e0f71a41d46e3814748060f89cb8834b9108923ec`로 이전 공개 증거와 정확히 같다. 제품 빌드·tag·DMG를 바꾸지 않았다.
+
+main `1688bc38`을 기준으로 이 종료 기록을 추가해 devel 인계 PR로 반영한다. 해당 PR의 CI·검토·병합 후 main/devel content gate와 작업 브랜치 정리를 수행하며 최종 결과는 인계 PR/이슈 기록에 남긴다. Spotlight 후속 [#587](https://github.com/postmelee/alhangeul-macos/issues/587)은 OPEN으로 유지한다.
