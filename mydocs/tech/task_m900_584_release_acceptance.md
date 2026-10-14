@@ -27,7 +27,7 @@
 | M4 | 인쇄 | 실제 macOS 패널 열기·취소·문서 복귀 | 두 형식 PASS, 물리 출력 없음 |
 | M5 | Finder | fresh single/two-page Quick Look·Thumbnail·실제 active provider | 최종 0.2.3 경로, 단일 PNG 2건·PDF 2페이지 선택·새 Thumbnail 3개 표시 PASS. 앞선 stale 요청 3개는 raw 보존, 일반 Release의 개별 PS debug 추적은 미확인 |
 | M6 | 원본·권한·동명 상태 | 기존 계약 대조 및 승인된 직접 설정 동선 | 직접 ON/OFF·grant 0·OS 글꼴 hash 유지 PASS. 원본/권한 상실·동명 회귀는 #569/#580 인계, 이번 OS mutation 재시험 없음 |
-| M7 | Spotlight | 실제 Mac 검색·결과 열기·실제 importer | ENVIRONMENT_UNAVAILABLE: [10월 15일 재부팅 재검증](../report/assets/task_m900_584/stage4/reboot-20261015/summary.json)에서 설치 전 TXT 1회 PASS 후 TXT까지 재실패, Finder 0개. 실제 설치 importer 추출 PASS. 원인/회귀 미확정, 폴더 재색인 진단 또는 대체 근거 수용 승인 대기 |
+| M7 | Spotlight | 실제 Mac 검색·결과 열기·실제 importer | ENVIRONMENT_UNAVAILABLE: [10월 15일 재부팅 재검증](../report/assets/task_m900_584/stage4/reboot-20261015/summary.json)에서 설치 전 TXT 1회 PASS 후 TXT까지 재실패, Finder 0개. 실제 설치 importer 추출 PASS. [폴더 한정 재색인](../report/assets/task_m900_584/stage4/reindex-06d6d117/summary.json)도 후보 미설치 TXT 양성 0회로 환경 미충족. 원인/회귀 미확정, 양 VM·실제 추출의 대체 근거 수용 승인 대기 |
 | M8 | 저장·닫기/종료 | 저장·취소·정상 종료/재열기 | 관측 동선 PASS. 모든 저장 실패 유형으로 확대하지 않음 |
 | S1 | #480 안전 차단 | 경고 취소·원본/동일 목적지 금지·명시 다른 평문 복사본 | [경고/취소·원본 hash·다른 복사본 재열기 PASS](../report/assets/task_m900_584/stage4/protection-proof.json). 동일 목적지 패널 재선택은 정적 정책 인계, 직접 미시험. native 암호 저장 미지원 |
 | S2 | #525 복구 한계 | 저장하지 않음 후 후보·원본 보존 | 최종 앱에서 소유 후보 1개 잔존 관측·해당 후보만 삭제, 원본 유지. 별도 후속 및 공개 한계 수용 대기 |

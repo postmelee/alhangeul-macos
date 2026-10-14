@@ -2,7 +2,7 @@
 
 ## 현재 상태와 실행 경계
 
-**2026-10-12 “진행해줘”로 승인한 시험과 2026-10-13 정리 실행 종료. Mac 글꼴·저장/재열기·실제 PDF·인쇄 취소·Finder 주요 경로 PASS. 실제 Mac 검색은 ENVIRONMENT_UNAVAILABLE, 최근 문서 이력의 전체 사전 동등성은 미증명이다. 2026-10-15 재부팅 후 재검증도 안정적인 검색 수용을 충족하지 못했다. 제한의 수용 또는 추가 진단과 Stage 5 진입 승인을 기다린다.** [구현계획 §5](../plans/task_m900_584_impl.md)의 일반 최종 앱을 검사했으며 제품 재빌드·재서명·bundle 수정·진단 flag 주입은 없다. [Stage 3](task_m900_584_stage3.md)의 양 VM은 같은 DMG로 schema 3 PASS다. 공개 승격·Pages/Sparkle·Homebrew는 실행하지 않았다.
+**2026-10-12 “진행해줘”로 승인한 시험과 2026-10-13 정리 실행 종료. Mac 글꼴·저장/재열기·실제 PDF·인쇄 취소·Finder 주요 경로 PASS. 실제 Mac 검색은 ENVIRONMENT_UNAVAILABLE, 최근 문서 이력의 전체 사전 동등성은 미증명이다. 2026-10-15 재부팅 후 재검증도 안정적인 검색 수용을 충족하지 못했다. 이어 승인된 폴더 한정 재색인도 후보 미설치 상태의 TXT 전제를 충족하지 못해 정리했다. 제한의 수용 또는 추가 진단과 Stage 5 진입 승인을 기다린다.** [구현계획 §5](../plans/task_m900_584_impl.md)의 일반 최종 앱을 검사했으며 제품 재빌드·재서명·bundle 수정·진단 flag 주입은 없다. [Stage 3](task_m900_584_stage3.md)의 양 VM은 같은 DMG로 schema 3 PASS다. 공개 승격·Pages/Sparkle·Homebrew는 실행하지 않았다.
 
 ## 고정 후보·기존 앱·소유 문서
 
@@ -130,16 +130,35 @@ Mac 글꼴 기능에는 새 제품 차단 실패가 발견되지 않았다. Stag
 
 **결론:** 재부팅 후에도 안정적인 실제 Mac 검색 수용은 미충족이다. 설치 전 1회 양성과 이후 TXT까지 실패한 관측만으로 재부팅·OS 상태·도구 실행 경계·후보 설치/실행 중 어느 것이 원인인지 확정하지 못했다. 제품 회귀로 확정하거나 회귀가 없다고 단정하지 않는다. 이번 최근 문서 사전 보존과 복원 증거는 확보했지만, 10월 13일 이전 시험의 이력 동등성 공백을 소급 해결한 것은 아니다. Mac 검색 미확인과 역사적 공백의 수용은 여전히 승인 대기다.
 
-### 다음 좁은 진단안 — 승인 대기
+<a id="다음-좁은-진단안--승인-대기"></a>
 
-Apple이 안내하는 검색 제외 목록의 추가/제거 방식으로 **고유 시험 폴더 한 곳만 재색인**하는 진단을 제안한다. 현재 실행한 일반 mdimport 요청과 다른 OS 설정 동작이며 아직 수행하지 않았다.
+### 폴더 한정 재색인 진단안 — 승인·실행 종료
+
+Apple이 안내하는 검색 제외 목록의 추가/제거 방식으로 **고유 시험 폴더 한 곳만 재색인**하는 진단을 준비했고, 작업지시자가 “시험 폴더 재색인·후보 재검증·복원 허용”으로 승인했다. 일반 mdimport 요청과 다른 OS 설정 동작을 실제 수행했으며, 아래 결과처럼 TXT 전제 미충족으로 후보 설치 단계는 진행하지 않았다.
 
 - 후보: 동일 0.2.3/21 DMG, SHA256 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63. 재빌드·재서명 없음.
-- 목표 폴더: /Users/melee/Documents/AlhangeulReleaseReindex-06d6d117-a5f2-4fec-a83c-af17e8acb8d1. 현재 만들지 않았으며 소유 TXT 2개·HWP/HWPX 2개만 둘 예정이다. fixture와 hash는 build.noindex/task584/stage4/reboot-20261015/reindex-fixtures 및 reindex-proposal.json에 준비했다.
+- 목표 폴더: /Users/melee/Documents/AlhangeulReleaseReindex-06d6d117-a5f2-4fec-a83c-af17e8acb8d1. 승인 후 소유 TXT 2개·HWP/HWPX 2개만 복사해 생성했고 종료 후 제거했다. fixture와 hash는 build.noindex/task584/stage4/reboot-20261015/reindex-fixtures 및 reindex-proposal.json에 준비했다.
 - 재색인: 기존 제외 목록을 먼저 기록하고 위 폴더만 잠시 추가했다가 제거한다. 다른 경로·파일 검색 범주·전체 디스크 색인·캐시·daemon을 바꾸지 않는다. 원래 제외 목록을 대조한다.
 - 검증: TXT의 양성 상태를 먼저 확보한 뒤 같은 후보를 /Applications/Alhangeul.app에 임시 설치·실행해 한글/영문 본문, 실제 importer, Finder 결과 열기와 앱 종료 후 검색을 대조한다. TXT 전제가 실패하면 HWP/HWPX의 제품 실패로 판정하지 않는다. 현재 관측만으로 v0.2.2 A/B나 전역 초기화까지 자동 확대하지 않는다.
 - 복원: 앱 실행 전에 실제 UUID의 최근 key/sfl4·요청 key·글꼴 정책을 다시 보존한다. 시험 항목만 정리하고 앱 부재·관련 설정·검색 제외 목록을 복원한다. 다른 작업자의 신규 항목이 감지되면 덮어쓰지 않고 확인한다. 공개 배포·새 서명·Homebrew·Stage 5는 포함하지 않는다.
 
-기존 승인은 재부팅 후 같은 후보의 재검증이다. 이 추가 진단은 OS의 검색 제외 설정을 잠시 바꾸므로 위 구체 범위의 승인을 받은 뒤 실행한다.
+별도 승인에 따라 위 시험 폴더만 검색 제외 설정에 추가했다가 제거했다. 이번 승인과 실행은 Stage 4 추가 진단이며, Stage 5·전역 색인/캐시 초기화·공개 배포는 포함하지 않는다.
 
 재검증 기록의 최종 검사에서 갱신 문서 5개의 상대 링크 86개, 기존/새 증거 checksum 49개, 다음 진단용 fixture 4개를 대조했다. `git diff --check`는 통과했고 제품 소스는 수정하지 않았다. 검사 스크립트와 결과는 같은 build.noindex 재검증 폴더에 보존한다.
+
+
+## 2026-10-15 폴더 한정 재색인 결과
+
+[진단 요약](../report/assets/task_m900_584/stage4/reindex-06d6d117/summary.json)의 결과는 ENVIRONMENT_UNAVAILABLE다. 재색인 전 TXT 두 개의 검색은 0건이었다. 실제 macOS 검색 개인정보 보호의 원래 목록이 비어 있음을 기록하고, 승인한 폴더 한 행만 추가한 뒤 제거·완료했다. [변경 전](../report/assets/task_m900_584/stage4/reindex-06d6d117/privacy-before.ax.txt), [시험 폴더 추가](../report/assets/task_m900_584/stage4/reindex-06d6d117/privacy-added.ax.txt), [원래 목록 복원](../report/assets/task_m900_584/stage4/reindex-06d6d117/privacy-after.ax.txt), [동작 receipt](../report/assets/task_m900_584/stage4/reindex-06d6d117/privacy-toggle.json)를 보존한다.
+
+후보 앱을 설치하지 않은 상태에서 TXT 두 개의 연속 양성 검색을 180초 한도로 관찰했다. 실제 프로그램 기록은 182.30초, 관측 59회이며 두 대조군의 양성 결과는 각각 0회다. [관찰·metadata 요약](../report/assets/task_m900_584/stage4/reindex-06d6d117/after-reindex-controls-summary.json)에 첫/마지막 결과와 전체 횟수를 기록했다. Apple 기본 RichText importer의 dry-run에서는 [두 파일의 본문 표식이 정상 추출](../report/assets/task_m900_584/stage4/reindex-06d6d117/txt-extraction.json)되었다. 원문 관측 전체는 build.noindex/task584/stage4/reindex-06d6d117/after-reindex-controls.json에 보존했다.
+
+승인된 계획의 TXT 양성 전제가 실패했으므로 이번에는 **후보 앱 설치·실행, HWP/HWPX 재검증·결과 열기·앱 종료 후 검색을 수행하지 않았다.** 제품 실패로 판정하거나 전역 초기화·다른 설치본 A/B로 확대하지 않았다. 한도 안에 검색 환경을 확인하지 못한 결과이며 영구 색인 장애나 제품 회귀의 원인을 확정한 것은 아니다.
+
+[정리 receipt](../report/assets/task_m900_584/stage4/reindex-06d6d117/cleanup.json)에서 입력 4개의 hash·소유 표시를 확인해 해당 폴더만 제거하고, 원래의 빈 검색 제외 목록과 앱 부재 상태·원본 DMG hash를 보존했다. 앱의 최근 문서/sfl4·글꼴 정책·등록은 이번에 변경하지 않았고 큰 앱 복사본이나 빌드 cache도 만들지 않았다. [증거 checksum](../report/assets/task_m900_584/stage4/reindex-06d6d117/SHA256SUMS)을 인계한다.
+
+### 수용 판단과 다음 단계
+
+이 Mac의 Spotlight 환경 전제는 여전히 미충족이다. 제품의 실제 Mac 본문 추출과 동일 DMG의 양 VM 검색 PASS는 기존 증거로 유지한다. Mac 환경 복구를 제품 출시와 분리하고 M7을 ENVIRONMENT_UNAVAILABLE로 기록한 채 위 근거를 대체 수용하여 Stage 5 준비로 진행할 것을 권고한다. 이는 기준 보정 제안이며 아직 승인되지 않았다. 10월 13일의 최근 문서 전체 동등성 공백과 #480/#525의 알려진 저장 한계도 그대로 유지한다. 공개 승격·Pages/Sparkle·Homebrew·실제 업데이트 설치는 별도 구체 승인 대상이다.
+
+폴더 진단 기록의 최종 검사에서 변경 문서 5개의 상대 링크 97개, 기존/새 증거 checksum 62개, 실제 제외 행 1개의 추가·제거와 동일 DMG의 양 VM 근거를 대조했다. `git diff --check`도 통과했다. UI 전체 snapshot 후 달라진 요소 ID로 인한 첫 클릭 실패와 첫 경로 붙여넣기 미반영은 최신 상태 재확인·정확한 경로 설정으로 회복했으며, 다른 폴더를 추가한 동작은 없었다. 제품 소스 변경은 없다.

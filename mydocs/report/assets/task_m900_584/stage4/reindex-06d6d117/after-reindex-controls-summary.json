@@ -1,0 +1,57 @@
+{
+  "observed_at_utc": "2026-10-14T19:39:37.272943+00:00",
+  "result": "ENVIRONMENT_UNAVAILABLE",
+  "elapsed_seconds": 182.3,
+  "timeout_seconds": 180,
+  "required_consecutive_positive_observations": 2,
+  "metadata": {
+    "index-control.txt": {
+      "returncode": 0,
+      "stdout": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict/>\n</plist>\n",
+      "stderr": ""
+    },
+    "fresh-control.txt": {
+      "returncode": 0,
+      "stdout": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict/>\n</plist>\n",
+      "stderr": ""
+    }
+  },
+  "candidate_installed": false,
+  "global_index_reset": false,
+  "targeted_privacy_toggle_performed": true,
+  "observation_count": 59,
+  "positive_observation_counts": {
+    "index-control.txt": 0,
+    "fresh-control.txt": 0
+  },
+  "first_observation": {
+    "elapsed_seconds": 0.0,
+    "controls": {
+      "index-control.txt": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": ""
+      },
+      "fresh-control.txt": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": ""
+      }
+    }
+  },
+  "last_observation": {
+    "elapsed_seconds": 179.11,
+    "controls": {
+      "index-control.txt": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": ""
+      },
+      "fresh-control.txt": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": ""
+      }
+    }
+  }
+}

@@ -1,0 +1,86 @@
+Imported '/Users/melee/Documents/AlhangeulReleaseReindex-06d6d117-a5f2-4fec-a83c-af17e8acb8d1/index-control.txt' of type 'public.plain-text' with plugIn /System/Library/Spotlight/RichText.mdimporter.
+29 attributes returned
+{
+    ":MD:DeviceId" = 16777233;
+    ":MD:kMDItemPath" = "/Users/melee/Documents/AlhangeulReleaseReindex-06d6d117-a5f2-4fec-a83c-af17e8acb8d1/index-control.txt";
+    "_kMDItemContentChangeDate" = "2026-10-14 19:28:22 +0000";
+    "_kMDItemCreationDate" = "2026-10-14 19:28:22 +0000";
+    "_kMDItemCreatorCode" = 0;
+    "_kMDItemDisplayNameWithExtensions" =     {
+        "" = "index-control.txt";
+    };
+    "_kMDItemFileName" = "index-control.txt";
+    "_kMDItemFinderFlags" = 0;
+    "_kMDItemFinderLabel" = 0;
+    "_kMDItemFromImporter" = 1;
+    "_kMDItemIsEvictedFile" = "<null>";
+    "_kMDItemIsExtensionHidden" = 0;
+    "_kMDItemIsFromImporter" = 1;
+    "_kMDItemOwnerGroupID" = 20;
+    "_kMDItemOwnerUserID" = 501;
+    "_kMDItemTextEncodingHint" = 134217984;
+    "_kMDItemTypeCode" = 0;
+    "com_apple_metadata_modtime" = "813698902.1203378";
+    kMDItemContentCreationDate = "2026-10-14 19:28:22 +0000";
+    kMDItemContentModificationDate = "2026-10-14 19:28:22 +0000";
+    kMDItemContentType = "public.plain-text";
+    kMDItemContentTypeTree =     (
+        "public.plain-text",
+        "public.text",
+        "public.data",
+        "public.item",
+        "public.content"
+    );
+    kMDItemDateAdded = "2026-10-14 19:34:06 +0000";
+    kMDItemDisplayName =     {
+        "" = "index-control.txt";
+    };
+    kMDItemDocumentIdentifier = 0;
+    kMDItemKind =     {
+        "" = NSStringPboardType;
+        Base = NSStringPboardType;
+        ar = "\U0645\U0633\U062a\U0646\U062f \U0646\U0635\U064a \U0639\U0627\U062f\U064a";
+        ca = "Document de text sense format";
+        cs = "Prost\U00fd textov\U00fd dokument";
+        da = "Alm. tekstdokument";
+        de = "Reines Textdokument";
+        el = "\U0388\U03b3\U03b3\U03c1\U03b1\U03c6\U03bf \U03b1\U03c0\U03bb\U03bf\U03cd \U03ba\U03b5\U03b9\U03bc\U03ad\U03bd\U03bf\U03c5";
+        en = "Plain Text Document";
+        "en_AU" = "Plain Text Document";
+        "en_GB" = "Plain Text Document";
+        es = "Documento de texto sin formato";
+        "es_419" = "Documento de texto sin formato";
+        fi = "Pelkk\U00e4 teksti -dokumentti";
+        fr = "Document format texte";
+        "fr_CA" = "Document format texte";
+        he = "\U05de\U05e1\U05de\U05da \U05de\U05dc\U05dc \U05e4\U05e9\U05d5\U05d8";
+        hi = "\U092a\U094d\U0932\U0947\U0928 \U091f\U0947\U0915\U094d\U0938\U094d\U091f \U0926\U0938\U094d\U0924\U093e\U0935\U0947\U091c\U093c";
+        hr = "Dokument obi\U010dnog teksta";
+        hu = "Egyszer\U0171 sz\U00f6veges dokumentum";
+        id = "Dokumen Teks Biasa";
+        it = "Documento di solo testo";
+        ja = "\U6a19\U6e96\U30c6\U30ad\U30b9\U30c8\U66f8\U985e";
+        ko = "\Uc77c\Ubc18 \Ud14d\Uc2a4\Ud2b8 \Ubb38\Uc11c";
+        ms = "Dokumen Teks Biasa";
+        nl = "Platte-tekstdocument";
+        no = "Dokument med ren tekst";
+        pl = "dokument tekstowy (zwyk\U0142y)";
+        "pt_BR" = "Documento de Texto Simples";
+        "pt_PT" = "Documento de texto simples";
+        ro = "Document text simplu";
+        ru = "\U0414\U043e\U043a\U0443\U043c\U0435\U043d\U0442 \U043f\U0440\U043e\U0441\U0442\U043e\U0433\U043e \U0442\U0435\U043a\U0441\U0442\U0430";
+        sk = "Dokument s\U00a0oby\U010dajn\U00fdm textom";
+        sl = "Dokument z navadnim besedilom";
+        sv = "Rent textdokument";
+        th = "\U0e40\U0e2d\U0e01\U0e2a\U0e32\U0e23\U0e02\U0e49\U0e2d\U0e04\U0e27\U0e32\U0e21\U0e18\U0e23\U0e23\U0e21\U0e14\U0e32";
+        tr = "D\U00fcz Metin Belgesi";
+        uk = "\U0414\U043e\U043a\U0443\U043c\U0435\U043d\U0442 \U043f\U0440\U043e\U0441\U0442\U043e\U0433\U043e \U0442\U0435\U043a\U0441\U0442\U0443";
+        vi = "T\U00e0i li\U1ec7u v\U0103n b\U1ea3n thu\U1ea7n t\U00fay";
+        "zh_CN" = "\U7eaf\U6587\U672c\U6587\U7a3f";
+        "zh_HK" = "\U7d14\U6587\U5b57\U6587\U4ef6";
+        "zh_TW" = "\U7d14\U6587\U5b57\U6587\U4ef6";
+    };
+    kMDItemLogicalSize = 54;
+    kMDItemPhysicalSize = 4096;
+    kMDItemTextContent = "ReindexControl06d6d117a5f24feca83caf17e8acb8d1\n\Ub098\Ube44\n";
+}
