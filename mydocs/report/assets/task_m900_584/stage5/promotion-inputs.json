@@ -1,0 +1,12 @@
+{
+  "ref": "v0.2.3",
+  "version": "0.2.3",
+  "expected_build": "21",
+  "source_run_id": "38180977764",
+  "source_artifact_id": "11717953850",
+  "validation_run_id": "38185285770",
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "promotion_run_id": "38629062837",
+  "run_url": "https://github.com/postmelee/alhangeul-macos/actions/runs/38629062837"
+}

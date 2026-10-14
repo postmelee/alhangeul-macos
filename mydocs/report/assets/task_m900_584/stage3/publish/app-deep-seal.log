@@ -1,0 +1,18 @@
+--prepared:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/.
+--prepared:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/Autoupdate
+--validated:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/Autoupdate
+--prepared:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/Updater.app
+--validated:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/Updater.app
+--prepared:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/XPCServices/Downloader.xpc
+--validated:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/XPCServices/Downloader.xpc
+--prepared:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/XPCServices/Installer.xpc
+--validated:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/XPCServices/Installer.xpc
+--validated:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/.
+--prepared:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter
+--validated:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter
+--prepared:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex
+--validated:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex
+--prepared:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex
+--validated:/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/mounted/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex
+build.noindex/task584/stage3/publish/mounted/Alhangeul.app: valid on disk
+build.noindex/task584/stage3/publish/mounted/Alhangeul.app: satisfies its Designated Requirement

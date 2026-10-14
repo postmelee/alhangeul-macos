@@ -1,0 +1,31 @@
+{
+  "workflow": "release-first-install.yml",
+  "ref": "v0.2.3",
+  "fields": {
+    "source_run_id": "38180977764",
+    "source_artifact_id": "11717953850",
+    "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+    "expected_version": "0.2.3",
+    "expected_build": "21"
+  },
+  "source_run_attempt": 1,
+  "source_artifact_expires_at_kst": "2026-10-26T07:58:32+09:00",
+  "runners": [
+    {
+      "label": "macos-15",
+      "architecture": "arm64"
+    },
+    {
+      "label": "macos-15-intel",
+      "architecture": "x86_64"
+    }
+  ],
+  "approved": true,
+  "dispatched": true,
+  "scope": "새 GitHub VM의 동일 파일 최초 설치·재설치 검증. 사용자 실제 Mac 설치는 포함하지 않음",
+  "approval": "보고 수용·ARM/Intel VM 검증 실행 승인",
+  "approved_inputs_checked_at_kst": "2026-10-12T08:28:14.841403+09:00",
+  "validation_run_id": 38184399238,
+  "validation_run_url": "https://github.com/postmelee/alhangeul-macos/actions/runs/38184399238"
+}

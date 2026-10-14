@@ -1,0 +1,178 @@
+{
+  "checked_at_kst": "2026-10-12T08:06:10.489964+09:00",
+  "environment": {
+    "os": "26.5.2",
+    "architecture": "arm64"
+  },
+  "bundle_versions": {
+    "HostApp": {
+      "id": "com.postmelee.alhangeul",
+      "version": "0.2.3",
+      "build": "21",
+      "minimum_system_version": "12.0"
+    },
+    "QLExtension": {
+      "id": "com.postmelee.alhangeul.QLExtension",
+      "version": "0.2.3",
+      "build": "21",
+      "minimum_system_version": "12.0"
+    },
+    "ThumbnailExtension": {
+      "id": "com.postmelee.alhangeul.ThumbnailExtension",
+      "version": "0.2.3",
+      "build": "21",
+      "minimum_system_version": "12.0"
+    },
+    "SpotlightImporter": {
+      "id": "com.postmelee.alhangeul.SpotlightImporter",
+      "version": "0.2.3",
+      "build": "21",
+      "minimum_system_version": "12.0"
+    }
+  },
+  "component_signatures": {
+    "HostApp": {
+      "strict_seal": "PASS",
+      "authority": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+      "team": "XH6JHKYXV8",
+      "timestamp": "Oct 12, 2026 at 07:54:18",
+      "hardened_runtime": true,
+      "get_task_allow": false,
+      "app_sandbox": true,
+      "application_groups": [
+        "XH6JHKYXV8.com.postmelee.alhangeul.font-library"
+      ],
+      "canonical_entitlements_match": true
+    },
+    "QLExtension": {
+      "strict_seal": "PASS",
+      "authority": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+      "team": "XH6JHKYXV8",
+      "timestamp": "Oct 12, 2026 at 07:54:17",
+      "hardened_runtime": true,
+      "get_task_allow": false,
+      "app_sandbox": true,
+      "application_groups": [
+        "XH6JHKYXV8.com.postmelee.alhangeul.font-library"
+      ],
+      "canonical_entitlements_match": true
+    },
+    "ThumbnailExtension": {
+      "strict_seal": "PASS",
+      "authority": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+      "team": "XH6JHKYXV8",
+      "timestamp": "Oct 12, 2026 at 07:54:18",
+      "hardened_runtime": true,
+      "get_task_allow": false,
+      "app_sandbox": true,
+      "application_groups": [
+        "XH6JHKYXV8.com.postmelee.alhangeul.font-library"
+      ],
+      "canonical_entitlements_match": true
+    },
+    "SpotlightImporter": {
+      "strict_seal": "PASS",
+      "authority": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+      "team": "XH6JHKYXV8",
+      "timestamp": "Oct 12, 2026 at 07:54:18",
+      "hardened_runtime": true,
+      "get_task_allow": false,
+      "app_sandbox": null,
+      "application_groups": null,
+      "canonical_entitlements_match": null
+    },
+    "Sparkle.framework": {
+      "strict_seal": "PASS",
+      "authority": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+      "team": "XH6JHKYXV8",
+      "timestamp": "Oct 12, 2026 at 07:54:17",
+      "hardened_runtime": true,
+      "get_task_allow": false,
+      "app_sandbox": null,
+      "application_groups": null,
+      "canonical_entitlements_match": null
+    },
+    "Sparkle XPCServices/Downloader.xpc": {
+      "strict_seal": "PASS",
+      "authority": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+      "team": "XH6JHKYXV8",
+      "timestamp": "Oct 12, 2026 at 07:54:16",
+      "hardened_runtime": true,
+      "get_task_allow": false,
+      "app_sandbox": null,
+      "application_groups": null,
+      "canonical_entitlements_match": null
+    },
+    "Sparkle XPCServices/Installer.xpc": {
+      "strict_seal": "PASS",
+      "authority": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+      "team": "XH6JHKYXV8",
+      "timestamp": "Oct 12, 2026 at 07:54:16",
+      "hardened_runtime": true,
+      "get_task_allow": false,
+      "app_sandbox": null,
+      "application_groups": null,
+      "canonical_entitlements_match": null
+    },
+    "Sparkle Updater.app": {
+      "strict_seal": "PASS",
+      "authority": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+      "team": "XH6JHKYXV8",
+      "timestamp": "Oct 12, 2026 at 07:54:16",
+      "hardened_runtime": true,
+      "get_task_allow": false,
+      "app_sandbox": null,
+      "application_groups": null,
+      "canonical_entitlements_match": null
+    },
+    "Sparkle Autoupdate": {
+      "strict_seal": "PASS",
+      "authority": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+      "team": "XH6JHKYXV8",
+      "timestamp": "Oct 12, 2026 at 07:54:17",
+      "hardened_runtime": true,
+      "get_task_allow": false,
+      "app_sandbox": null,
+      "application_groups": null,
+      "canonical_entitlements_match": null
+    }
+  },
+  "legal": [
+    {
+      "file": "LICENSE",
+      "sha256": "191104c4fba7dc9cbbbfb2a9b498f623dd83f374489e241eb85e2c725d95b4d8",
+      "canonical_tag_match": true
+    },
+    {
+      "file": "THIRD_PARTY_LICENSES.md",
+      "sha256": "3888447dc02f1874aa08fe8ae23891e9608b7492f0b58adaa3b8a61ee4690f03",
+      "canonical_tag_match": true
+    },
+    {
+      "file": "FONTS.md",
+      "sha256": "c364fb9282ea6038998fca21aee4fb9e6a1483f40c840d3f851c2f7354bff0ed",
+      "canonical_tag_match": true
+    }
+  ],
+  "studio": {
+    "tag": "v0.8.7",
+    "commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "canonical_manifest_match": true
+  },
+  "layout_files": {
+    "visible_root_entries": [
+      "Alhangeul.app",
+      "Applications"
+    ],
+    "applications_symlink": "/Applications",
+    "background_dimensions": [
+      720,
+      460
+    ],
+    "ds_store_present": true,
+    "visual_review": "PASS: 일반 Finder DMG 열기의 실제 icon view·배경·아이콘/화살표·안내 배치 확인"
+  },
+  "inspection_correction": "임의 shared 그룹 예상값 대신 태그의 실제 font-library 그룹과 대조하고 Xcode PRODUCT_BUNDLE_IDENTIFIER 치환을 반영했다. 제품 수정 없음.",
+  "installation_or_app_launch_performed": false,
+  "result": "PASS (파일 metadata)"
+}

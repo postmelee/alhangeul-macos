@@ -1,0 +1,15 @@
+{
+  "observed_at_kst": "2026-10-12T07:27:11.733316+09:00",
+  "approved_scope": "v0.2.3 태그 생성·push",
+  "tag_name": "v0.2.3",
+  "tag_kind": "annotated",
+  "target_main_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "source_tree": "80fb5eadadbc9ff8f89a8652917e037715c077bd",
+  "tag_message": "Alhangeul v0.2.3",
+  "local_tag_absent": true,
+  "remote_tag_absent": true,
+  "authenticated_release_match_count": 0,
+  "version": "0.2.3",
+  "build": "21",
+  "result": "PASS"
+}

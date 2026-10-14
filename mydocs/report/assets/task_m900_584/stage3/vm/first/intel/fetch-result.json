@@ -1,0 +1,27 @@
+{
+  "schema_version": 3,
+  "status": "CANDIDATE_DOWNLOADED",
+  "release_eligible": false,
+  "phase": "fetch",
+  "harness_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "run_id": "38184399238",
+  "run_attempt": "1",
+  "candidate": {
+    "source_run_id": "38180977764",
+    "source_artifact_id": "11717953850",
+    "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+    "expected_version": "0.2.3",
+    "expected_build": "21",
+    "repository": "postmelee/alhangeul-macos"
+  },
+  "source_proof": {
+    "schema_version": 1,
+    "candidate_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "harness_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "workflow_ref": "refs/tags/v0.2.3",
+    "fixture_source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "tooling_only_changes": []
+  },
+  "elapsed_seconds": 12.1
+}

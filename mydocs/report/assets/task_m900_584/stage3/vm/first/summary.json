@@ -1,0 +1,34 @@
+{
+  "observed_at_kst": "2026-10-12T08:55:24.548377+09:00",
+  "run_id": 38184399238,
+  "run_attempt": 1,
+  "status": "completed",
+  "conclusion": "failure",
+  "candidate": {
+    "source_run_id": "38180977764",
+    "source_artifact_id": "11717953850",
+    "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+    "expected_version": "0.2.3",
+    "expected_build": "21",
+    "repository": "postmelee/alhangeul-macos"
+  },
+  "arm": {
+    "status": "ENVIRONMENT_UNAVAILABLE",
+    "release_eligible": false,
+    "reason": "TXT 자동 검색이 180초 안에 확인되지 않음",
+    "owned_files_removed": true,
+    "candidate_installation_performed": false
+  },
+  "intel": {
+    "status": "PASS",
+    "release_eligible": true,
+    "lifecycle_all_pass": true,
+    "lifecycle_required": 33,
+    "reinstall_outcome": "maintained",
+    "cleanup_index_verified": true
+  },
+  "whole_run_release_eligible": false,
+  "retry_run_id": 38185285770,
+  "retry_reason": "동일 입력으로 새 VM 1회 재시험. 첫 실패·PASS 증거는 각각 보존"
+}

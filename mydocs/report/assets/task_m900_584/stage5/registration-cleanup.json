@@ -1,0 +1,8 @@
+{
+  "first_hygiene_result": "FAIL: task584 VM 증거에서 추출된 metadata-only app bundle 3개의 LaunchServices 등록 잔존",
+  "scoped_cleanup": "해당 3개 bundle만 ZIP/66개 파일 hash 검증 보존 후 등록 해제·정리",
+  "final_hygiene_result": "PASS",
+  "app_absence_expected": true,
+  "provider_absent_warnings_expected_after_removal": true,
+  "global_reset": false
+}

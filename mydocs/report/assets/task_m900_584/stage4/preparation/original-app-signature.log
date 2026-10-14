@@ -1,0 +1,29 @@
+Executable=/Applications/Alhangeul.app/Contents/MacOS/Alhangeul
+Identifier=com.postmelee.alhangeul
+Format=app bundle with Mach-O universal (x86_64 arm64)
+CodeDirectory v=20500 size=462563 flags=0x10000(runtime) hashes=14444+7 location=embedded
+VersionPlatform=1
+VersionMin=786432
+VersionSDK=984320
+Hash type=sha256 size=32
+CandidateCDHash sha256=4dc25cf02e8f353d5dd1661aec808d3cf986f00b
+CandidateCDHashFull sha256=4dc25cf02e8f353d5dd1661aec808d3cf986f00ba069ca9c959910f2c873feb9
+Hash choices=sha256
+CMSDigest=4dc25cf02e8f353d5dd1661aec808d3cf986f00ba069ca9c959910f2c873feb9
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=44941312
+Executable Segment flags=0x1
+Page size=4096
+CDHash=4dc25cf02e8f353d5dd1661aec808d3cf986f00b
+Signature size=8971
+Authority=Developer ID Application: Taegyu Lee (XH6JHKYXV8)
+Authority=Developer ID Certification Authority
+Authority=Apple Root CA
+Timestamp=Sep 14, 2026 at 04:29:01
+Notarization Ticket=stapled
+Info.plist entries=34
+TeamIdentifier=XH6JHKYXV8
+Runtime Version=15.5.0
+Sealed Resources version=2 rules=13 files=75
+Internal requirements count=1 size=216

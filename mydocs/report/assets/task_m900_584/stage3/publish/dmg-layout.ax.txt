@@ -1,0 +1,34 @@
+Window: "Alhangeul 0.2.3", App: Finder.
+0 표준 윈도우 Alhangeul 0.2.3, ID: FinderWindow, Secondary Actions: Raise
+	1 자르기 그룹
+		2 스크롤 영역
+			3 모음 Description: 아이콘 보기, ID: IconView
+				4 섹션 (disabled)
+					5 이미지 알한글.app, Secondary Actions: 열기
+					6 이미지 Applications, Secondary Actions: 열기
+		7 알 수 없음 Details: 상태 막대, ID: statusBar
+			8 이미지 편집할 수 없음
+			9 텍스트 Value: 2개의 항목, ID: statusBarText
+			10 슬라이더 (settable, float) Description: 아이콘 크기 조절, Value: 40
+				11 값 표시기 (settable, float) 40
+		12 목록 경로
+			13 텍스트 URL: file:///Volumes/Alhangeul%200.2.3/, Value: Alhangeul 0.2.3, Secondary Actions: 열기
+	14 탭 그룹 탭 막대, Description: 탭 막대, 1개의 탭.
+		15 탭 Alhangeul 0.2.3, Value: on
+			16 버튼 탭 닫기, Description: 닫기
+		17 버튼 새로운 탭
+	18 닫기 버튼
+	19 전체 화면 버튼 Help: 이 버튼을 누르면 윈도우를 확대/축소합니다., Secondary Actions: 윈도우 확대/축소
+	20 최소화 버튼
+	21 이미지 Macintosh HD
+	22 텍스트 Alhangeul 0.2.3
+23 menu bar
+	24 Finder
+	25 파일
+	26 편집
+	27 보기
+	28 이동
+	29 윈도우
+	30 도움말
+
+The focused UI element is 3 모음 Description: 아이콘 보기, ID: IconView

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "status": "ENVIRONMENT_READY",
+  "release_eligible": false,
+  "os": "macOS-15.7.9-x86_64-i386-64bit",
+  "architecture": "x86_64",
+  "image_os": "macos15",
+  "image_version": "20260824.0482.1",
+  "run_id": "38184399238",
+  "run_attempt": "1",
+  "harness_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "gui_session_present": true,
+  "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+  "txt_automatic_search": true,
+  "owned_files_removed": true,
+  "elapsed_seconds": 180.98,
+  "raw_environment_path": "build.noindex/task584/stage3/vm/intel/environment.json",
+  "raw_environment_sha256": "a438a765524f39b80ae1fed8600eab5ad7c752ff6c0920725da9da9390d5c536",
+  "command_count": 82,
+  "commands_by_program": {
+    "mdimport": 1,
+    "lsregister": 1,
+    "launchctl": 1,
+    "mdutil": 1,
+    "mdfind": 78
+  },
+  "command_errors": []
+}

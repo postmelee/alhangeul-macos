@@ -1,0 +1,35 @@
+{
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "files": [
+    {
+      "path": "scripts/ci/verify-universal-macos-app.sh",
+      "sha256": "e26f42d9411d47954e66e01ca397e0b1801242656be908dc1afed553616cff0b",
+      "local_equals_tag": true
+    },
+    {
+      "path": "scripts/ci/verify-app-execution-endpoint-config.sh",
+      "sha256": "0844c3570450fea1ffc7c9debf0477612aebc666644d2776182236c212f03365",
+      "local_equals_tag": true
+    },
+    {
+      "path": "scripts/ci/check-spotlight-bundle.py",
+      "sha256": "ef6b4a14e67818d23727129b4078f1cecef20a1bead9fdf7da72b53b49d2c6f3",
+      "local_equals_tag": true
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "191104c4fba7dc9cbbbfb2a9b498f623dd83f374489e241eb85e2c725d95b4d8",
+      "local_equals_tag": true
+    },
+    {
+      "path": "THIRD_PARTY_LICENSES.md",
+      "sha256": "3888447dc02f1874aa08fe8ae23891e9608b7492f0b58adaa3b8a61ee4690f03",
+      "local_equals_tag": true
+    },
+    {
+      "path": "Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md",
+      "sha256": "c364fb9282ea6038998fca21aee4fb9e6a1483f40c840d3f851c2f7354bff0ed",
+      "local_equals_tag": true
+    }
+  ]
+}

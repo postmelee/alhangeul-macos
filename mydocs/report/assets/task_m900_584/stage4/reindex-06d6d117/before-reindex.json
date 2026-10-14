@@ -1,0 +1,14 @@
+{
+  "index-control.txt": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "",
+    "paths": []
+  },
+  "fresh-control.txt": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "",
+    "paths": []
+  }
+}

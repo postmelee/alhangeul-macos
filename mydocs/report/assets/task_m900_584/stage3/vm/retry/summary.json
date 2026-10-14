@@ -1,0 +1,41 @@
+{
+  "checked_at_kst": "2026-10-12T09:04:13.873450+09:00",
+  "validation_run_id": 38185285770,
+  "run_attempt": 1,
+  "status": "PASS",
+  "release_eligible": true,
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "source_run_id": 38180977764,
+  "source_artifact_id": 11717953850,
+  "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "dmg_size": 211405232,
+  "artifacts": {
+    "arm64": 11720195360,
+    "x86_64": 11719139990
+  },
+  "each_schema": 3,
+  "each_lifecycle_required": 33,
+  "each_verdict_count": {
+    "arm64": 91,
+    "x86_64": 91
+  },
+  "reinstall_outcome": {
+    "arm64": "maintained",
+    "x86_64": "maintained"
+  },
+  "environment_probe_seconds": {
+    "arm64": 21.83,
+    "x86_64": 20.73
+  },
+  "cleanup_each_pass": true,
+  "initial_failed_run_preserved": 38184399238,
+  "tooling_source_changed": false,
+  "candidate_rebuilt_or_resigned": false,
+  "draft_release_id": 409973398,
+  "draft_preserved": true,
+  "local_installation_preserved": {
+    "version": "0.2.2",
+    "build": "20"
+  },
+  "scope": "양 GitHub VM의 동일 파일 설치 검증. 실제 Mac 글꼴/출력/Finder GUI 및 공개/업데이트 수용은 별도"
+}

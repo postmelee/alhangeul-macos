@@ -1,0 +1,39 @@
+{
+  "checked_at_kst": "2026-10-12T09:10:51.790155+09:00",
+  "result": "PASS (Stage 3 VM 기록·Stage 4 미실행 준비안)",
+  "validation_run_id": 38185285770,
+  "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "checks": {
+    "docs_diff_check": "PASS",
+    "documents": [
+      "mydocs/feedback/task_m900_584_pr586_review.md",
+      "mydocs/orders/20261012.md",
+      "mydocs/plans/task_m900_584_impl.md",
+      "mydocs/release/v0.2.3.md",
+      "mydocs/report/task_m900_584_report.md",
+      "mydocs/tech/task_m900_584_release_acceptance.md",
+      "mydocs/working/task_m900_584_release_execution.md",
+      "mydocs/working/task_m900_584_stage3.md",
+      "mydocs/working/task_m900_584_stage4.md"
+    ],
+    "relative_links": {
+      "result": "PASS",
+      "count": 175
+    },
+    "previous_checksums": {
+      "result": "PASS",
+      "count": 100
+    },
+    "new_json_parse": {
+      "result": "PASS",
+      "count": 51
+    },
+    "both_schema3_source_candidate_snapshot_lifecycle_cleanup": "PASS",
+    "initial_failure_preserved": "PASS",
+    "both_reinstall_classification": "maintained",
+    "whole_run_four_jobs": "success",
+    "owned_stage4_document_hashes": "6 PASS",
+    "stage4_shell_syntax": "PASS",
+    "stage4_actual_installation": "미실행·별도 승인 대기"
+  }
+}

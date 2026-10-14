@@ -1,0 +1,22 @@
+{
+  "checked_at_kst": "2026-10-12T08:13:06.848181+09:00",
+  "opening_path": "Finder에서 내려받은 원본 DMG 열기 → /Volumes/Alhangeul 0.2.3",
+  "window_title": "Alhangeul 0.2.3",
+  "view": "아이콘 보기",
+  "background": "720x460 PNG",
+  "visible_items": [
+    "알한글.app",
+    "Applications"
+  ],
+  "icons_and_arrow": "PASS",
+  "installation_instructions_fit": "PASS",
+  "additional_root_notice_file": false,
+  "screenshot": "dmg-layout.jpg",
+  "screenshot_sha256": "7e7addad40e434ee7cd849214d4805cb404f552e028938262b7428574c52099a",
+  "screenshot_mime": "image/jpeg",
+  "ax_receipt": "dmg-layout.ax.txt",
+  "test_windows_closed": true,
+  "mounts_detached": true,
+  "app_installation_or_launch_performed": false,
+  "result": "PASS"
+}

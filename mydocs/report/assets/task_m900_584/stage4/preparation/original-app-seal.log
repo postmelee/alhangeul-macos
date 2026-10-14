@@ -1,0 +1,18 @@
+--prepared:/Applications/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/.
+--prepared:/Applications/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/Updater.app
+--prepared:/Applications/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/XPCServices/Downloader.xpc
+--validated:/Applications/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/Updater.app
+--validated:/Applications/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/XPCServices/Downloader.xpc
+--prepared:/Applications/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/Autoupdate
+--validated:/Applications/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/Autoupdate
+--prepared:/Applications/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/XPCServices/Installer.xpc
+--validated:/Applications/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/XPCServices/Installer.xpc
+--validated:/Applications/Alhangeul.app/Contents/Frameworks/Sparkle.framework/Versions/Current/.
+--prepared:/Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter
+--validated:/Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter
+--prepared:/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex
+--prepared:/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex
+--validated:/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex
+--validated:/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex
+/Applications/Alhangeul.app: valid on disk
+/Applications/Alhangeul.app: satisfies its Designated Requirement

@@ -1,0 +1,18 @@
+{
+  "observed_at_kst": "2026-10-12T08:31:17.033274+09:00",
+  "path": "/Applications/Alhangeul.app",
+  "version": "0.2.2",
+  "build": "20",
+  "bundle_id": "com.postmelee.alhangeul",
+  "bytes": 446248370,
+  "inventory_entries": 243,
+  "inventory_sha256": "875ed2eb63bcda508a11de0b45572c9514ad8774511d44aaaca407975cd208fa",
+  "running_pids": [],
+  "workspace_free_bytes": 7421038592,
+  "prepared_backup_path": "build.noindex/task584/stage4/original-backup/Alhangeul.app",
+  "backup_created": false,
+  "app_replaced": false,
+  "source_dmg": "build.noindex/task584/stage3/publish/candidate/alhangeul-macos-0.2.3.dmg",
+  "source_dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "scope": "Stage 4 후보·복원 계획을 위한 읽기 전용 조사. 설치·앱 실행·설정 변경 없음"
+}

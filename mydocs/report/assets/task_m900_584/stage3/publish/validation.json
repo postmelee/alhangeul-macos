@@ -1,0 +1,52 @@
+{
+  "validated_at_kst": "2026-10-12T08:23:51.846141+09:00",
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "source_run_id": 38180977764,
+  "source_artifact_id": 11717953850,
+  "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "dmg_size": 211405232,
+  "result": "PASS (승인된 파일 검증의 기록 및 미실행 VM 입력 대조)",
+  "checks": {
+    "changed_docs_diff_check": "PASS",
+    "changed_docs": [
+      "mydocs/feedback/task_m900_584_pr586_review.md",
+      "mydocs/orders/20261012.md",
+      "mydocs/plans/task_m900_584_impl.md",
+      "mydocs/release/v0.2.3.md",
+      "mydocs/report/task_m900_584_report.md",
+      "mydocs/tech/task_m900_584_release_acceptance.md",
+      "mydocs/working/task_m900_584_release_execution.md",
+      "mydocs/working/task_m900_584_stage3.md"
+    ],
+    "relative_markdown_links": {
+      "result": "PASS",
+      "count": 149
+    },
+    "previous_evidence_checksums": {
+      "result": "PASS",
+      "count": 73
+    },
+    "new_evidence_json_parse": {
+      "result": "PASS",
+      "count": 13
+    },
+    "run_artifact_draft_download_identity": "PASS",
+    "retained_dmg_hash_size_checksum": "PASS",
+    "signing_notary_layout_cleanup_receipt_consistency": "PASS",
+    "immutable_tag_inspection_tools": "PASS",
+    "vm_command_shell_syntax_and_immutable_workflow_fields": {
+      "result": "PASS",
+      "field_count": 6
+    },
+    "vm_scope": "미승인·미실행",
+    "user_mac_installation": "미실행, 기존 0.2.2/20 유지",
+    "public_release_promotion": "미실행",
+    "universal_log_format": {
+      "raw_preserved": "build.noindex/task584/stage3/publish/inspection/app-universal.log",
+      "raw_sha256": "e084f7f1a2dcc1f4ed18e7c186e9b3ff0d16a111190202b964c5cb79d9dcc294",
+      "report_copy_sha256": "6e63e5239a4cd0d4fc30d242da169b4b72601c80bfbb0456296c084adaf2f6b6",
+      "normalization": "공개 예정 사본의 줄 끝 공백 4개만 제거. 원시 명령 출력은 그대로 보존",
+      "result": "PASS"
+    }
+  }
+}

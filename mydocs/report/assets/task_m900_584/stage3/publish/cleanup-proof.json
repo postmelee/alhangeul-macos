@@ -1,0 +1,18 @@
+{
+  "checked_at_kst": "2026-10-12T08:13:06.848181+09:00",
+  "removed_owned_duplicate_archive": "build.noindex/task584/stage3/publish/candidate-artifact.zip",
+  "reclaimed_bytes": 210399382,
+  "archive_receipt_preserved": "download-proof.json",
+  "retained_original_dmg": "build.noindex/task584/stage3/publish/candidate/alhangeul-macos-0.2.3.dmg",
+  "dmg_sha256_after_inspection": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "mounts_detached": true,
+  "test_windows_closed": true,
+  "existing_installation": {
+    "version": "0.2.2",
+    "build": "20"
+  },
+  "source_tag_unchanged": true,
+  "public_release": "v0.2.2",
+  "public_appcast_sha256": "8b0face06819d65f60cc6e3675244eaa1cccead997927c1f27c131d523313140",
+  "new_local_app_build_or_copy": false
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "status": "ENVIRONMENT_UNAVAILABLE",
+  "release_eligible": false,
+  "os": "macOS-15.7.9-arm64-arm-64bit",
+  "architecture": "arm64",
+  "image_os": "macos15",
+  "image_version": "20260907.0337.1",
+  "run_id": "38184399238",
+  "run_attempt": "1",
+  "harness_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "gui_session_present": true,
+  "volume_states": "/:\n\tIndexing enabled. \n/System/Volumes/Data:\n\tIndexing enabled. \n/System/Volumes/Preboot:\n\tIndexing enabled. \n",
+  "reason": "TXT 자동 검색이 180초 안에 확인되지 않음",
+  "owned_files_removed": true,
+  "elapsed_seconds": 187.0,
+  "raw_environment_path": "build.noindex/task584/stage3/vm/arm/environment.json",
+  "raw_environment_sha256": "902f112e1763c320bc48e5edab853449b079aefa8cba25c18722dd3234a4f71b",
+  "command_count": 92,
+  "commands_by_program": {
+    "mdimport": 1,
+    "lsregister": 1,
+    "launchctl": 1,
+    "mdutil": 1,
+    "mdfind": 87,
+    "mdls": 1
+  },
+  "command_errors": [],
+  "txt_metadata_after_timeout": "kMDItemFSContentChangeDate = (null)\nkMDItemFSCreationDate      = (null)\nkMDItemFSCreatorCode       = \"\"\nkMDItemFSFinderFlags       = (null)\nkMDItemFSHasCustomIcon     = (null)\nkMDItemFSInvisible         = 0\nkMDItemFSIsExtensionHidden = (null)\nkMDItemFSIsStationery      = (null)\nkMDItemFSLabel             = (null)\nkMDItemFSName              = (null)\nkMDItemFSNodeCount         = (null)\nkMDItemFSOwnerGroupID      = (null)\nkMDItemFSOwnerUserID       = (null)\nkMDItemFSSize              = (null)\nkMDItemFSTypeCode          = \"\"\n"
+}

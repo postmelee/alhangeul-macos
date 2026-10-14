@@ -1,0 +1,32 @@
+{
+  "conclusion": "success",
+  "databaseId": 38633941355,
+  "headSha": "560f229cd6bdcc1bde51d4f942ec5ed1188a892d",
+  "jobs": [
+    {
+      "name": "Classify changed files",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/postmelee/alhangeul-macos/actions/runs/38633941355/job/116092225455"
+    },
+    {
+      "name": "Script syntax checks",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/postmelee/alhangeul-macos/actions/runs/38633941355/job/116092328243"
+    },
+    {
+      "name": "Release helper checks",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/postmelee/alhangeul-macos/actions/runs/38633941355/job/116092328247"
+    },
+    {
+      "name": "macOS validation",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/postmelee/alhangeul-macos/actions/runs/38633941355/job/116092331247"
+    }
+  ],
+  "status": "completed"
+}

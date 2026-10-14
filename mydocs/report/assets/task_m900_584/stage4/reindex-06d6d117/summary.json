@@ -1,0 +1,27 @@
+{
+  "verified_at_utc": "2026-10-14T19:41:02.799642+00:00",
+  "date_kst": "2026-10-15",
+  "owner_approval": "시험 폴더 재색인·후보 재검증·복원 허용",
+  "targeted_folder_privacy_add_remove_executed": true,
+  "original_privacy_list_restored": true,
+  "txt_controls_result": "ENVIRONMENT_UNAVAILABLE",
+  "control_observations": 59,
+  "positive_control_observation_counts": {
+    "index-control.txt": 0,
+    "fresh-control.txt": 0
+  },
+  "observation_limit_seconds": 180,
+  "recorded_elapsed_seconds": 182.3,
+  "apple_txt_importer_extracts_both_markers": true,
+  "candidate_installed_or_launched": false,
+  "hwp_hwpx_reverification": "TXT 환경 전제 실패로 미실행",
+  "app_absence_preserved": true,
+  "native_preferences_fonts_or_registrations_modified": false,
+  "owned_folder_removed": true,
+  "source_dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "whole_disk_index_or_global_cache_reset": false,
+  "product_regression_confirmed": false,
+  "product_regression_ruled_out": false,
+  "stage5_started": false,
+  "public_deployment_executed": false
+}

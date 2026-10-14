@@ -1,0 +1,16 @@
+{
+  "restored_at": "2026-10-15T05:24:02.011668+09:00",
+  "app_absence_restored": true,
+  "scoped_preference_keys_restored": 7,
+  "native_recent_exact_bytes_restored": true,
+  "native_recent_entries_before_and_after": 7,
+  "homebrew_original_022_receipt_restored_without_app": true,
+  "tap_main_023_kept": true,
+  "vm_metadata_bundles_archived_verified_and_removed": 3,
+  "vm_metadata_files_preserved": 66,
+  "fresh_owned_documents_removed": true,
+  "user_manual_txt_retained": true,
+  "user_manual_txt_hash_unchanged": true,
+  "global_index_or_cache_reset": false,
+  "historical_oct13_recent_equivalence_gap_resolved": false
+}

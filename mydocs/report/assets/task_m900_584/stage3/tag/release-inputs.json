@@ -1,0 +1,43 @@
+{
+  "proposed_tag": "v0.2.3",
+  "tag_target_main_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "workflow": "release-publish.yml",
+  "ref": "v0.2.3",
+  "fields": {
+    "version": "0.2.3",
+    "previous_release_ref": "v0.2.2",
+    "expected_rhwp_tag": "v0.8.7",
+    "require_latest_rhwp": true,
+    "include_rhwp_in_title": false,
+    "draft": true,
+    "prerelease": false
+  },
+  "expected_bundle_build": "21",
+  "execution": "태그 생성·원격 게시 완료 / Release Publish DMG 실행 미승인·미실행",
+  "install_workflow": "release-first-install.yml",
+  "install_fields": {
+    "source_run_id": null,
+    "source_artifact_id": null,
+    "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "dmg_sha256": null,
+    "expected_version": "0.2.3",
+    "expected_build": "21"
+  },
+  "install_runners": [
+    "macos-15",
+    "macos-15-intel"
+  ],
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "source_tree": "80fb5eadadbc9ff8f89a8652917e037715c077bd",
+  "approved_scope": "v0.2.3 태그 생성·push 완료. 서명/공증 DMG workflow는 별도 승인 대기",
+  "tag": {
+    "name": "v0.2.3",
+    "kind": "annotated",
+    "message": "Alhangeul v0.2.3",
+    "object_sha": "041343f5f1c747d50ccfdaee8e8f28040527efa3",
+    "peeled_commit_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "remote_verified": true,
+    "force_move_allowed": false
+  },
+  "main_pull_request": 586
+}

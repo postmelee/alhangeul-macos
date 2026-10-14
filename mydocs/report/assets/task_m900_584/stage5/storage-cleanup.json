@@ -1,0 +1,28 @@
+{
+  "cleaned_at": "2026-10-15T05:29:49.565130+09:00",
+  "removed": [
+    {
+      "path": "build.noindex/task584/stage5/public/alhangeul-macos-0.2.3.dmg",
+      "logical_bytes": 211405232
+    },
+    {
+      "path": "build.noindex/task584/stage5/public/alhangeul-macos-0.2.2.dmg",
+      "logical_bytes": 192864948
+    },
+    {
+      "path": "build.noindex/task584/stage5/brew-cache",
+      "logical_bytes": 263079610
+    },
+    {
+      "path": "build.noindex/task584/stage5/tap",
+      "logical_bytes": 33651
+    }
+  ],
+  "removed_logical_bytes_total": 667383441,
+  "physical_space_reclaimed_not_claimed": true,
+  "sealed_candidate_retained": "build.noindex/task584/stage3/publish/candidate/alhangeul-macos-0.2.3.dmg",
+  "private_restore_proof_retained": true,
+  "user_manual_txt_retained": true,
+  "app_absence_restored": true,
+  "public_dmg_assets_unchanged": true
+}
