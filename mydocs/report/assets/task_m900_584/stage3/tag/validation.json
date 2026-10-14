@@ -1,0 +1,22 @@
+{
+  "observed_at_kst": "2026-10-12T07:31:22.518345+09:00",
+  "scope": "#584 v0.2.3 태그 생성·push와 서명/공증 workflow 실행 준비",
+  "remote_annotated_tag_identity": "PASS",
+  "git_diff_check": "PASS",
+  "relative_markdown_links": {
+    "checked": 126,
+    "missing": [],
+    "result": "PASS"
+  },
+  "previous_stage3_checksum_receipts": {
+    "checked": 24,
+    "result": "PASS"
+  },
+  "prepared_shell_commands_bash_syntax": "PASS",
+  "json_and_workflow_fields": "PASS",
+  "credential_check_scope": "필수 secret 이름 존재와 비밀이 아닌 운영 변수만 조회. 실제 인증서·공증 인증 유효성은 미검증",
+  "product_source_changed": false,
+  "new_local_app_or_dmg_build": false,
+  "release_publish_dispatched": false,
+  "public_release_promoted": false
+}

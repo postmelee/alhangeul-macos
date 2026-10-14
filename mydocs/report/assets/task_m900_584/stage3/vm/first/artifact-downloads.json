@@ -1,0 +1,18 @@
+[
+  {
+    "runner": "macos-15",
+    "artifact_id": 11718803677,
+    "archive_sha256": "627f2c08feee6e677927407ecd0cbe96d752167a870f2b79e0ac8fc86ac28f41",
+    "archive_size": 2687375,
+    "verified": true,
+    "full_original_archive_retained": "build.noindex/task584/stage3/vm/arm-evidence.zip"
+  },
+  {
+    "runner": "macos-15-intel",
+    "artifact_id": 11719740910,
+    "archive_sha256": "39440d8aaf68a59fee7973e5f8049548a472a2defb935362d4f28130888acc73",
+    "archive_size": 2672984,
+    "verified": true,
+    "full_original_archive_retained": "build.noindex/task584/stage3/vm/intel-evidence.zip"
+  }
+]

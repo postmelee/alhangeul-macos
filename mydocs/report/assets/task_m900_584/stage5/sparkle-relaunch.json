@@ -1,0 +1,50 @@
+{
+  "observed_at": "2026-10-15T05:11:54.797998+09:00",
+  "status": "PASS",
+  "old_pid": 37569,
+  "automatic_new_pid": 38722,
+  "installed_version": "0.2.3",
+  "installed_build": "21",
+  "before_any_post_install_cua_getApp_or_AX": true,
+  "executable_sha256": "a17a9d272848a2f7b76ba050a17f5a9465f3c8ccb011af7761e553632ef2a4f9",
+  "observations": [
+    {
+      "elapsed_seconds": 0.02,
+      "pids": [
+        37569
+      ],
+      "version": "0.2.2",
+      "build": "20"
+    },
+    {
+      "elapsed_seconds": 1.04,
+      "pids": [
+        37569
+      ],
+      "version": "0.2.2",
+      "build": "20"
+    },
+    {
+      "elapsed_seconds": 2.06,
+      "pids": [
+        37569
+      ],
+      "version": "0.2.2",
+      "build": "20"
+    },
+    {
+      "elapsed_seconds": 3.1,
+      "pids": [],
+      "version": "0.2.3",
+      "build": "21"
+    },
+    {
+      "elapsed_seconds": 4.12,
+      "pids": [
+        38722
+      ],
+      "version": "0.2.3",
+      "build": "21"
+    }
+  ]
+}

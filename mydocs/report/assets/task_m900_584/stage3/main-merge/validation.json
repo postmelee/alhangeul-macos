@@ -1,0 +1,21 @@
+{
+  "observed_at_kst": "2026-10-12T07:14:06.519688+09:00",
+  "scope": "#584 main 병합 후 단계 기록·태그/DMG 실행 준비안. 제품 소스 변경 없음",
+  "git_diff_check": "PASS",
+  "relative_markdown_links": {
+    "checked": 116,
+    "missing": [],
+    "result": "PASS"
+  },
+  "existing_and_new_stage3_checksums": {
+    "checked": 23,
+    "result": "PASS"
+  },
+  "new_json_parse": "PASS",
+  "workflow_input_fields": "확정 main의 실제 dispatch 필드 7개와 준비값 일치",
+  "release_helper_analysis": "실제 main SHA 기준 완료. 자동 완료 이슈/분류 추론은 직접 보정하며 raw 초안은 공개에 사용하지 않음",
+  "product_rebuild_performed": false,
+  "signed_dmg_created": false,
+  "tag_created": false,
+  "release_dispatched": false
+}

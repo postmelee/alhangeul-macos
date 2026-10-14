@@ -1,0 +1,14 @@
+{
+  "source": "5146d91e61e29959b45f6af68090cca4e9c3b97d",
+  "asset_gate_workflow_unchanged_from_main": true,
+  "v0.2.3_release_http_status": 404,
+  "v0.2.3_public_dmg_exists": false,
+  "expected_docs_only_deploy": "skipped / deploy=false",
+  "public_appcast_sha256": "8b0face06819d65f60cc6e3675244eaa1cccead997927c1f27c131d523313140",
+  "public_appcast_latest": {
+    "version": "0.2.2",
+    "build": "20",
+    "dmg_url": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.2/alhangeul-macos-0.2.2.dmg"
+  },
+  "public_pages_sparkle_mutation": false
+}

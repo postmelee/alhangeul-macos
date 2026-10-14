@@ -1,0 +1,108 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "label": "receipt-before",
+      "command": [
+        "brew",
+        "list",
+        "--cask",
+        "--versions",
+        "alhangeul"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "upgrade",
+      "command": [
+        "brew",
+        "upgrade",
+        "--cask",
+        "postmelee/tap/alhangeul"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "receipt-after-upgrade",
+      "command": [
+        "brew",
+        "list",
+        "--cask",
+        "--versions",
+        "alhangeul"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "uninstall-after-upgrade",
+      "command": [
+        "brew",
+        "uninstall",
+        "--cask",
+        "postmelee/tap/alhangeul"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "fresh-install",
+      "command": [
+        "brew",
+        "install",
+        "--cask",
+        "postmelee/tap/alhangeul"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "strict-signature",
+      "command": [
+        "codesign",
+        "--verify",
+        "--deep",
+        "--strict",
+        "/Applications/Alhangeul.app"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "gatekeeper",
+      "command": [
+        "spctl",
+        "--assess",
+        "--type",
+        "execute",
+        "--verbose",
+        "/Applications/Alhangeul.app"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "stapler",
+      "command": [
+        "xcrun",
+        "stapler",
+        "validate",
+        "/Applications/Alhangeul.app"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "universal",
+      "command": [
+        "/Users/melee/Documents/projects/rhwp-mac/scripts/ci/verify-universal-macos-app.sh",
+        "/Applications/Alhangeul.app"
+      ],
+      "returncode": 0
+    }
+  ],
+  "receipt_before": "alhangeul 0.2.2",
+  "app_version_before_brew_upgrade": "0.2.3",
+  "app_before_brew_upgrade_already_updated_by_sparkle": true,
+  "receipt_after_upgrade": "alhangeul 0.2.3",
+  "fresh_install_version": "0.2.3",
+  "fresh_install_build": "21",
+  "executable_sha256": "a17a9d272848a2f7b76ba050a17f5a9465f3c8ccb011af7761e553632ef2a4f9",
+  "same_executable_as_sparkle_update": true,
+  "first_attempt_failure": "brew list는 설치 token alhangeul로 조회해야 했음. 첫 시도는 조회에서 중단되어 설치 변이 없음",
+  "restoration_pending": true
+}

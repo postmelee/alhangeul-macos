@@ -1,0 +1,80 @@
+{
+  "observed_at_kst": "2026-10-12T07:28:33.026650+09:00",
+  "candidate_source": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "tag": "v0.2.3",
+  "tag_object_sha": "041343f5f1c747d50ccfdaee8e8f28040527efa3",
+  "workflow": {
+    "id": 273409453,
+    "name": "Release Publish DMG",
+    "path": ".github/workflows/release-publish.yml",
+    "state": "active"
+  },
+  "release_environment_policy": {
+    "deployment_branch_policy": null,
+    "name": "release",
+    "protection_rules": []
+  },
+  "ref_policy_note": "deployment_branch_policy=null인 release 환경이다. custom branch-policy 목록 조회의 HTTP 404는 후보 ref 거부로 해석하지 않으며 환경 설정 자체로 제한 없음 확인. 보호 설정을 바꾸지 않았다.",
+  "required_secret_names": [
+    {
+      "name": "DEVELOPER_ID_APPLICATION_P12_BASE64",
+      "present": true,
+      "effective_scope": "release"
+    },
+    {
+      "name": "DEVELOPER_ID_APPLICATION_P12_PASSWORD",
+      "present": true,
+      "effective_scope": "release"
+    },
+    {
+      "name": "NOTARY_APPLE_ID",
+      "present": true,
+      "effective_scope": "release"
+    },
+    {
+      "name": "NOTARY_APP_SPECIFIC_PASSWORD",
+      "present": true,
+      "effective_scope": "release"
+    },
+    {
+      "name": "RELEASE_KEYCHAIN_PASSWORD",
+      "present": true,
+      "effective_scope": "release"
+    }
+  ],
+  "secret_values_read": false,
+  "non_secret_signing_variables": {
+    "ALHANGEUL_DEVELOPER_ID_APPLICATION": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+    "ALHANGEUL_NOTARY_PROFILE": "alhangeul-notary",
+    "APPLE_TEAM_ID": "XH6JHKYXV8"
+  },
+  "dmg_identity_fallback": "Developer ID Application: Taegyu Lee (XH6JHKYXV8)",
+  "upstream_latest": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "name": "v0.8.7 — 조판·편집 개선, 입력 안전성과 macOS 배포",
+    "publishedAt": "2026-10-06T07:54:34Z",
+    "tagName": "v0.8.7",
+    "url": "https://github.com/edwardkim/rhwp/releases/tag/v0.8.7"
+  },
+  "current_public_app": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-14T13:18:49Z",
+    "tagName": "v0.2.2",
+    "url": "https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.2"
+  },
+  "matching_publish_runs": [],
+  "workflow_inputs_verified": {
+    "version": "0.2.3",
+    "previous_release_ref": "v0.2.2",
+    "expected_rhwp_tag": "v0.8.7",
+    "require_latest_rhwp": true,
+    "include_rhwp_in_title": false,
+    "draft": true,
+    "prerelease": false
+  },
+  "runtime_credential_validity": "미검증. 승인된 workflow의 임시 keychain 인증서 import·notary credential validation·서명 preflight가 실제 유효성을 판정한다.",
+  "release_publish_dispatched": false,
+  "result": "실행 입력·운영 이름 준비 완료, 서명/공증 workflow 별도 승인 대기"
+}

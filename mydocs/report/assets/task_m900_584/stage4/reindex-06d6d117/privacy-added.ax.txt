@@ -1,0 +1,30 @@
+Window: "", App: 시스템 설정.
+0 시트 Secondary Actions: Raise
+	1 container
+		2 스크롤 영역 Secondary Actions: Scroll Up, Scroll Down
+			3 머리말 개인정보 보호
+			4 텍스트 이 위치에서 Spotlight를 통한 검색을 방지합니다.
+			5 container
+				6 스크롤 영역
+					7 표 제외된 위치
+						8 row (selectable)
+							9 이미지
+							10 텍스트 필드 AlhangeulReleaseReindex-06d6d117-a5f2-4fec-a83c-af17e8acb8d1
+				11 버튼 Description: 인덱싱에서 제외하려면 폴더 또는 디스크를 추가하십시오., Help: 제외하려는 폴더 또는 디스크를 추가합니다.
+				12 버튼 (disabled) Description: 더 이상 인덱싱에서 제외시키지 않으려면, 선택된 디스크 또는 폴더를 제거하십시오., Help: 목록에서 선택된 항목을 제거합니다.
+			13 스크롤 막대 (settable, float) 0
+				14 값 표시기 (settable, float) 0
+				15 화살표 증가 버튼
+				16 화살표 감소 버튼
+				17 페이지 증가 버튼
+				18 페이지 감소 버튼
+		19 버튼 검색 및 개인정보 보호에 관하여…
+		20 버튼 완료
+21 menu bar
+	22 시스템 설정
+	23 편집
+	24 보기
+	25 윈도우
+	26 도움말
+
+The focused UI element is 7 표 제외된 위치

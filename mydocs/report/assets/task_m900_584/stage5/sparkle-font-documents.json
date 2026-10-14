@@ -1,0 +1,19 @@
+{
+  "normal_quit_confirmed": true,
+  "font_on_persisted": true,
+  "native_records": 936,
+  "native_families": 298,
+  "before_relaunch_font_menu_system_group_visible": false,
+  "document_hwp_loaded": true,
+  "document_hwpx_loaded": true,
+  "document_family": "NanumSquare",
+  "version": "0.2.3",
+  "build": "21",
+  "status": "PASS",
+  "actual_pointer_menu_system_group_visible": true,
+  "system_font_families_supplied": 266,
+  "font_on_survived_manual_relaunch": true,
+  "accessibility_native_select_bypassed_custom_pointer_menu": true,
+  "automatic_relaunch_pass_recorded_separately": true,
+  "spotlight_search": "ENVIRONMENT_UNAVAILABLE; 사용자 수용한 후속 조사"
+}

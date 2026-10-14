@@ -1,0 +1,23 @@
+{
+  "verified_at_kst": "2026-10-12T08:00:45.155890+09:00",
+  "source_run_id": 38180977764,
+  "source_run_attempt": 1,
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "source_artifact_id": 11717953850,
+  "artifact_archive_sha256": "128a3fd240ceefeae2eec722ae4d4e69224498a332f0355f27b2e1e587c4b897",
+  "artifact_archive_size": 210399382,
+  "api_archive_digest_matches": true,
+  "dmg_path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/candidate/alhangeul-macos-0.2.3.dmg",
+  "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "dmg_size": 211405232,
+  "checksum_file_matches": true,
+  "draft_release_id": 409973398,
+  "draft_dmg_asset_id": 632029048,
+  "draft_asset_digest_matches_dmg": true,
+  "draft_asset_size_matches_dmg": true,
+  "draft": true,
+  "prerelease": false,
+  "expected_version": "0.2.3",
+  "expected_build": "21",
+  "result": "PASS"
+}

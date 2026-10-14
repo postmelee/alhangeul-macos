@@ -1,0 +1,24 @@
+{
+  "requested_at_kst": "2026-10-12T07:34:39.549028+09:00",
+  "approved_scope": "draft DMG 생성·다운로드/검증 승인",
+  "workflow": "release-publish.yml",
+  "ref": "v0.2.3",
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "fields": {
+    "version": "0.2.3",
+    "previous_release_ref": "v0.2.2",
+    "expected_rhwp_tag": "v0.8.7",
+    "require_latest_rhwp": true,
+    "include_rhwp_in_title": false,
+    "draft": true,
+    "prerelease": false
+  },
+  "expected_build": "21",
+  "upstream_latest": "v0.8.7",
+  "content_gate": "PASS",
+  "previous_matching_publish_runs": 0,
+  "previous_matching_release_count": 0,
+  "runtime_credential_validation": "workflow 실행 중 검증 예정",
+  "public_promotion_approved": false,
+  "installation_approved": false
+}

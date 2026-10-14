@@ -1,0 +1,19 @@
+Executable=/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage3/publish/candidate/alhangeul-macos-0.2.3.dmg
+Identifier=alhangeul-macos-0
+Format=disk image
+CodeDirectory v=20200 size=305 flags=0x0(none) hashes=1+6 location=embedded
+Hash type=sha256 size=32
+CandidateCDHash sha256=71066980d32d3fa6f276e0218503c5fadaa0ca63
+CandidateCDHashFull sha256=71066980d32d3fa6f276e0218503c5fadaa0ca63893c3df5c1a8968c5e6520d7
+Hash choices=sha256
+CMSDigest=71066980d32d3fa6f276e0218503c5fadaa0ca63893c3df5c1a8968c5e6520d7
+CMSDigestType=2
+Page size=none
+CDHash=71066980d32d3fa6f276e0218503c5fadaa0ca63
+Signature size=8970
+Authority=(unavailable)
+Notarization Ticket=stapled
+Info.plist=not bound
+TeamIdentifier=XH6JHKYXV8
+Sealed Resources=none
+Internal requirements count=1 size=180

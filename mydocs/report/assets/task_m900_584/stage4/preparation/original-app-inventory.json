@@ -1,0 +1,1758 @@
+[
+  {
+    "path": "Contents",
+    "mode": 493,
+    "mtime_ns": 1789327820000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/CodeResources",
+    "mode": 420,
+    "mtime_ns": 1789327820000000000,
+    "kind": "file",
+    "size": 2010,
+    "sha256": "7da947f834fe95e7d5e5cb8a87ab1d79dea87864d021cf11ebf60177bab5c1c8"
+  },
+  {
+    "path": "Contents/Frameworks",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Info.plist",
+    "mode": 420,
+    "mtime_ns": 1789327733000000000,
+    "kind": "file",
+    "size": 7595,
+    "sha256": "41f64c73e4d2848e2b8d34d4b3a1954e0645121072074f5d299929b5d52279a7"
+  },
+  {
+    "path": "Contents/Library",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/MacOS",
+    "mode": 493,
+    "mtime_ns": 1789327741000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PkgInfo",
+    "mode": 420,
+    "mtime_ns": 1789327733000000000,
+    "kind": "file",
+    "size": 8,
+    "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+  },
+  {
+    "path": "Contents/PlugIns",
+    "mode": 493,
+    "mtime_ns": 1789327732000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Resources",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/_CodeSignature",
+    "mode": 493,
+    "mtime_ns": 1789327734000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/_CodeSignature/CodeResources",
+    "mode": 420,
+    "mtime_ns": 1789327740000000000,
+    "kind": "file",
+    "size": 24031,
+    "sha256": "79ef16af3d59a92cba7ed7795e57036aefab2874c311d2a00a715d61476f4f85"
+  },
+  {
+    "path": "Contents/MacOS/Alhangeul",
+    "mode": 493,
+    "mtime_ns": 1789327741000000000,
+    "kind": "file",
+    "size": 123753120,
+    "sha256": "3ff1fd86151a658ef3d955c5a9b551bde9c98c050d0e2800452c710c670bf60f"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex",
+    "mode": 493,
+    "mtime_ns": 1789327732000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex",
+    "mode": 493,
+    "mtime_ns": 1789327732000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents/Info.plist",
+    "mode": 420,
+    "mtime_ns": 1789327733000000000,
+    "kind": "file",
+    "size": 2285,
+    "sha256": "1d3c09fd52dc1a9e4b5117931bcdcda70019eee4139bcdfc05b053105fac6ff4"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents/MacOS",
+    "mode": 493,
+    "mtime_ns": 1789327739000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents/Resources",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents/_CodeSignature",
+    "mode": 493,
+    "mtime_ns": 1789327732000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents/_CodeSignature/CodeResources",
+    "mode": 420,
+    "mtime_ns": 1789327739000000000,
+    "kind": "file",
+    "size": 2950,
+    "sha256": "6ff815a0448f9dd1e773cf453c3a034e337395290006c4510f9343b2f733e803"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents/MacOS/AlhangeulPreview",
+    "mode": 493,
+    "mtime_ns": 1789327739000000000,
+    "kind": "file",
+    "size": 121475184,
+    "sha256": "036c219cf7c999ce6f96e86926bbce8b966a2f9e08af6217491eb212a54d1483"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents/Resources/en.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents/Resources/ko.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents/Resources/en.lproj/InfoPlist.strings",
+    "mode": 420,
+    "mtime_ns": 1789327733000000000,
+    "kind": "file",
+    "size": 168,
+    "sha256": "ac732e1e8c00204baa5b59f231ee0e1eee6e112f64225f45c240ea9c6fcdbf71"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulPreview.appex/Contents/Resources/ko.lproj/InfoPlist.strings",
+    "mode": 420,
+    "mtime_ns": 1789327733000000000,
+    "kind": "file",
+    "size": 132,
+    "sha256": "8e3b46c5d0873f8028895460c0dfafc2d98009b86de48c1b432ed0ca64daae6e"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/Info.plist",
+    "mode": 420,
+    "mtime_ns": 1789327733000000000,
+    "kind": "file",
+    "size": 2206,
+    "sha256": "7c88a7598e0831510fe4be69a9d04c1e15fc785756d9f27ed01f265384f67ab0"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/MacOS",
+    "mode": 493,
+    "mtime_ns": 1789327740000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/Resources",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/_CodeSignature",
+    "mode": 493,
+    "mtime_ns": 1789327732000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/_CodeSignature/CodeResources",
+    "mode": 420,
+    "mtime_ns": 1789327739000000000,
+    "kind": "file",
+    "size": 2950,
+    "sha256": "2f9beca360c441ad2d7b1dd401d071336d75f267ddedcc8e2cc3ce32024ac748"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/MacOS/AlhangeulThumbnail",
+    "mode": 493,
+    "mtime_ns": 1789327740000000000,
+    "kind": "file",
+    "size": 121514176,
+    "sha256": "a77fc9b74f27da5444ecb5fa59dae30913207963aee0610116d745923507210d"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/Resources/en.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/Resources/ko.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/Resources/en.lproj/InfoPlist.strings",
+    "mode": 420,
+    "mtime_ns": 1789327733000000000,
+    "kind": "file",
+    "size": 176,
+    "sha256": "8bcc8018b279bfe818c058201f52b8d4c6391de0fe46ce14ce1231ddccd7e454"
+  },
+  {
+    "path": "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/Resources/ko.lproj/InfoPlist.strings",
+    "mode": 420,
+    "mtime_ns": 1789327733000000000,
+    "kind": "file",
+    "size": 128,
+    "sha256": "32e304410ecc117bcc59b2eec8fdf92e518daa70163c348de5330da220266b25"
+  },
+  {
+    "path": "Contents/Resources/AppIcon.icns",
+    "mode": 420,
+    "mtime_ns": 1789327702000000000,
+    "kind": "file",
+    "size": 52088,
+    "sha256": "de787b3a083ca709539375217db880d2cf6a7f41a02132b37d9f68db14e6b3ee"
+  },
+  {
+    "path": "Contents/Resources/Assets.car",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 761064,
+    "sha256": "ccd6bab01f64e5daabb2982ec2a90d16675fd5bc0b804f8d4f68d150ee147595"
+  },
+  {
+    "path": "Contents/Resources/Legal",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Resources/en.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Resources/ko.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Resources/sample.hwpx",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 4148807,
+    "sha256": "aefaf3913470056723e8e58e0fb8f8ae4054cb57b31bc764a6dba5d6c8df2975"
+  },
+  {
+    "path": "Contents/Resources/en.lproj/InfoPlist.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 136,
+    "sha256": "3ade99dfb8bebcbb5f81332aa99d857fc9c2d6acdf71c4f47cc023ad32fe3953"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/alhangeul-wkwebview-overrides.css",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 1188,
+    "sha256": "d6dead94e3ff10c81a178855c831f10cfa285133a9bb950a2c896373be6728b9"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/assets",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/favicon.ico",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 911,
+    "sha256": "136d51c3d0a12bc67352964998fa78a5dcf2702873f73eb261990f9e20eb0ade"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/icons",
+    "mode": 493,
+    "mtime_ns": 1789327704000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/images",
+    "mode": 493,
+    "mtime_ns": 1789327704000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/index.html",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 66939,
+    "sha256": "5c2908fd3ac68dea677664511cf8392cdc7d8065e554ec651b1ca92274910a87"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/manifest.json",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 1498,
+    "sha256": "b4a081cfaf35f7bfab4d62efa39d61fa2f6fdb2b0db65031a79646feef70b5c3"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/manifest.webmanifest",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 767,
+    "sha256": "4325b16fbd58d402adeeabe43e38eddc173a08140fdc7d3474183923747bd697"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/print.html",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 1436,
+    "sha256": "930907863afbafcc76099d386f6a995bc6c69387cb56838b18e4cdaf6eea6b79"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/registerSW.js",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 136,
+    "sha256": "e12c8db54e3cc247034427f2b661b305a78fea7e7cdec1eac179fecec3da0fc7"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/rhwp.d.ts",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 107301,
+    "sha256": "d0f6d8baa1a07d78490d16864aac7598ce0997e7e5510e1e634e593d144db5d1"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/rhwp.js",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 277153,
+    "sha256": "76a39bd2c5c81fd7d606cc9c70cc6abcd775f90017db87ad3635c27007acc99c"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/rhwp_bg.wasm.d.ts",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 37887,
+    "sha256": "ef7d8b6ea22eb42c9981644e5ca99786578f5d4580cad361ca094157e214de88"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/sw.js",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5432,
+    "sha256": "3643bf7dceac4b9a3f390ebf2e176aa9319daaf10297ba7e484d315fb559c836"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/theme-init.js",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 2783,
+    "sha256": "5a3afcc0139187bfe509414cd60fde2a0dfea72fd72751c4e6e696cdc0f6c587"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/workbox-dcde9eb3.js",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 21434,
+    "sha256": "046096e76e8c6584babb03f8d76fa963d0ccfa195f0b7de847276fa0eaf92eda"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/images/icon_small_ko.svg",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 469618,
+    "sha256": "a0ac1200a41b6a75e9afb30cda5bb850276087d45c2f25870605888238ba9b39"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/images/icon_small_ko_dark.svg",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 451775,
+    "sha256": "9d02ea0b8c1d399a89290d97613759826f19f3e3f392b6d79dcf6109e7e15fa6"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/icons/icon-128.png",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 11851,
+    "sha256": "ce3047204dedd260b62b507ef1773ecfa1e68be1ddf08304a664fcb1341d502d"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/icons/icon-192.png",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 25440,
+    "sha256": "1180863b994272a7591043ecf0ae539de78c0f404eecad15b4e67b0315cbaf9c"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/icons/icon-256.png",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 36790,
+    "sha256": "b851d2271495a9858efd51def7615f68f2204417977672cde1da1ced53120ad0"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/icons/icon-512.png",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 131957,
+    "sha256": "25074cfb4bc9e9c543fd56504e4088741e4fe2b4927f36ab90741efa7947887a"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Cafe24Ssurround-v2.0.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 391868,
+    "sha256": "2d726dbf8863d66e6d5cf56e2532c5d14d8a4b514461b565c513c1da6ae2f41a"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Cafe24Supermagic-Regular-v1.0.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 765684,
+    "sha256": "65434a217b9532867a1fe41417d0ad51210a60027a51dca40748aafed48ef0ba"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/D2Coding-Bold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 1579172,
+    "sha256": "41273810f9aed2775c6f1b9eb7e4f12997da644002872b20a31d3d3144e0cc0a"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/D2Coding-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 1485508,
+    "sha256": "358df12fdf9b65d0fd31554a826f97af4eeefd96a047297a28a856315fe872c1"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/FONTS.md",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 4889,
+    "sha256": "c364fb9282ea6038998fca21aee4fb9e6a1483f40c840d3f851c2f7354bff0ed"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/GowunBatang-Bold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 447856,
+    "sha256": "aef1b91ea9ea4688fb296044959b38dfeeaa3e1650af5d543a2b5c160fa30b36"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/GowunBatang-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 495092,
+    "sha256": "0c6a288aa0c12081dccde769c312f71f290b353243747dd24fb8c57f94f01d72"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/GowunDodum-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 406476,
+    "sha256": "349c098a6181952dab564bf891b8efcacfbf855adc28d40b4aa2e5937c101c56"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Happiness-Sans-Bold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 336604,
+    "sha256": "54becdfd4f7f58e872eba8fbc67778e29cff94c1cd03f9a0ebadfbe482b4aba0"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Happiness-Sans-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 291556,
+    "sha256": "4fc37e7663c3d440b5a6af6938bde0c6618b666553ed521745f3362050bd4988"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Happiness-Sans-Title.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 348700,
+    "sha256": "057e6821a062d9192964d99cf058fe6608230e9e4a464c9652b3756e02460e22"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/HappinessSansVF.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 613412,
+    "sha256": "cd29de60acf8c466938400561fcbfb14812dd5981f4f78b0c8da74609682423c"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/LatinModernMath-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 391760,
+    "sha256": "1177d9025d1e797c54b3c7676976365abd90f903423091de7f0f4e7a4b372162"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NanumGothic-Bold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 417252,
+    "sha256": "0bd36842cc218a7b0e1c0f5ec796d90152a02e4cd487b2d868f1130708fe551a"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NanumGothic-ExtraBold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 376972,
+    "sha256": "cffea22fa5791731b3de9f9c48b58f4c9eff52581f29377d364a751e63b81ca3"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NanumGothic-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 340688,
+    "sha256": "4a000e3bca1298c43c70dc97447e537a27e0a8c1585f410be57dfeff06d3f713"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NanumGothicCoding-Bold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 534060,
+    "sha256": "2fe66da1c9c3f8beca2c618a139e7edabd36a26dd810a324ced06f8b214b2ccd"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NanumGothicCoding-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 521332,
+    "sha256": "87ab32ebaf4e1f803099ad1d096744092c8f985b2e08a24e2304f5ac05d81d6a"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NanumMyeongjo-Bold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 575580,
+    "sha256": "f2c95c35d72782f71cb60e3cc537c461ae3f5ee7e7504db9653ba7a7024dd548"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NanumMyeongjo-ExtraBold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 694516,
+    "sha256": "b3d23b3f93f4bdad6c9b7f69b11156f90f1576b8383f6117448ee79e27609e56"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NanumMyeongjo-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 502068,
+    "sha256": "561e9193a6e848b3f7ce9f8f5907310a13e175bc9d69e77da2842a7517a97c16"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NotoSansKR-Bold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 559192,
+    "sha256": "dab3d492daa687386292cff1499225db580f931f800ee0d124eb0636378c6020"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NotoSansKR-ExtraLight.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 592496,
+    "sha256": "3b5cac6af73fd94fa91ded10f6cfc54c7ce52189986fe7ca6fd457208f1d3673"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NotoSansKR-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 562220,
+    "sha256": "d1bf8649914a4fe9477a8735bf056383e44e466141fb3d61897252e06d900c1a"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NotoSerifKR-Bold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 1033556,
+    "sha256": "504d6af6abb882acd912d47bafa383c4512a6c8c33635e4e8fb37111d9310941"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/NotoSerifKR-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 971428,
+    "sha256": "c9a1e3ac69994d680883b53b1fd83d520733b704792522a932bfaa276117de45"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Pretendard-Black.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 800404,
+    "sha256": "c5fd0c3568fc1368a3edc0d0fbb36df029935954276e3573451b3bae09e27296"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Pretendard-Bold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 791156,
+    "sha256": "4609c3356e536fafe38f4add0daeceb3d8595d3057bce13c428c33ddbd43d362"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Pretendard-ExtraBold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 793540,
+    "sha256": "dd7c1e156f508eb962acc7a33a7a1896d1e0b71e11156fad96e731689ceb6dc3"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Pretendard-ExtraLight.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 734392,
+    "sha256": "df43dc9165dff4542114674bcd8b79b7daae6dec004004586d5d076fec6fe2aa"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Pretendard-Light.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 757000,
+    "sha256": "b7426635cce2ea2b95c9c802e43fba1c620e0dafaf25f737c069b8b4e09fa841"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Pretendard-Medium.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 778432,
+    "sha256": "d03481330eeba0659ab5b87f25ceb504a35de377dd90a0d0aba2982eb2d05e2c"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Pretendard-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 765892,
+    "sha256": "fad853f7f47c6c8b103171e7193fa095708cdcd70850a71d93aa5379e8a61d63"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Pretendard-SemiBold.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 785856,
+    "sha256": "c863f76a7de5c1ddc1ed8b2fa794964530774592c4f31407a84e2a2ae93f17f0"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/Pretendard-Thin.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 694804,
+    "sha256": "1539755224a64719d5b18406762c476db74fcc299b9e4641ca1e9812fbc7a09b"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/SourceHanSerifK-OFL.txt",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 4463,
+    "sha256": "9ff5bb567e1b92c801fc1069e5fbf992ff8efccacb9db94e5959a5b3ba9bb903"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/SourceHanSerifK-OldHangul-subset.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 239628,
+    "sha256": "9e419cd16df2ea3b220aa7751320d956ac2493440ba412484d98325078f09d43"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/fonts/SpoqaHanSans-Regular.woff2",
+    "mode": 420,
+    "mtime_ns": 1789327704000000000,
+    "kind": "file",
+    "size": 275144,
+    "sha256": "6568bf80b50c14f2e54f56f2c07e668416f39f880baf5ea2825d315767f98f69"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/assets/canvaskit-SCAxUyCS.wasm",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 7317345,
+    "sha256": "25ebed8e60158c5854f8dc807b936daca21354f8bfb6a2231266b0a93812f301"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/assets/canvaskit-renderer-lKfsaVLk.js",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 246954,
+    "sha256": "bcff296f1d038e45e8ac591787d9f2703d7dc0fd93e8f0efb617e700deacaf47"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/assets/index-CTuzrDj-.css",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 108633,
+    "sha256": "99079bd4ba8b26741430215cab64683928eb6a7e545c965bdfa3fb2e9b68d02f"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/assets/index-DYLUfso_.js",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 1735649,
+    "sha256": "cd70753f45f8798ccce8f57a6a7cdf9121cd7a05177002e09fcef5dffce7dec0"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/assets/rhwp_bg-MVy1tBea.wasm",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 9936365,
+    "sha256": "d9f5000578b82349289ee85c3f680c7050dfc9b6af1605707560c21ee988f9b4"
+  },
+  {
+    "path": "Contents/Resources/rhwp-studio/assets/studio-plugin-Cp8dJ3L_.js",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 54385,
+    "sha256": "abdcbcab732aad8d91b551c97ff045bec6b140ae87d94c5fd44235d5515fb4e7"
+  },
+  {
+    "path": "Contents/Resources/ko.lproj/InfoPlist.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 112,
+    "sha256": "02605b727a45c4613de87513d15d8abfc711d46a907fb84d5ba447473c459138"
+  },
+  {
+    "path": "Contents/Resources/Legal/FONTS.md",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 4889,
+    "sha256": "c364fb9282ea6038998fca21aee4fb9e6a1483f40c840d3f851c2f7354bff0ed"
+  },
+  {
+    "path": "Contents/Resources/Legal/LICENSE",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 1072,
+    "sha256": "191104c4fba7dc9cbbbfb2a9b498f623dd83f374489e241eb85e2c725d95b4d8"
+  },
+  {
+    "path": "Contents/Resources/Legal/THIRD_PARTY_LICENSES.md",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5150,
+    "sha256": "3888447dc02f1874aa08fe8ae23891e9608b7492f0b58adaa3b8a61ee4690f03"
+  },
+  {
+    "path": "Contents/Library/Spotlight",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Library/Spotlight/Alhangeul.mdimporter",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Library/Spotlight/Alhangeul.mdimporter/Contents",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Library/Spotlight/Alhangeul.mdimporter/Contents/Info.plist",
+    "mode": 420,
+    "mtime_ns": 1789327733000000000,
+    "kind": "file",
+    "size": 2375,
+    "sha256": "882dbb4d11f8bb77a56ed141f70c4d208f8d2f56d9b13ac1443af3b487a2eb78"
+  },
+  {
+    "path": "Contents/Library/Spotlight/Alhangeul.mdimporter/Contents/MacOS",
+    "mode": 493,
+    "mtime_ns": 1789327740000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Library/Spotlight/Alhangeul.mdimporter/Contents/Resources",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Library/Spotlight/Alhangeul.mdimporter/Contents/_CodeSignature",
+    "mode": 493,
+    "mtime_ns": 1789327733000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Library/Spotlight/Alhangeul.mdimporter/Contents/_CodeSignature/CodeResources",
+    "mode": 420,
+    "mtime_ns": 1789327740000000000,
+    "kind": "file",
+    "size": 2442,
+    "sha256": "0030c7fae2e853bd1bde08cfc1f46a614a09afca5ec3cf9814017fbfa6d2256f"
+  },
+  {
+    "path": "Contents/Library/Spotlight/Alhangeul.mdimporter/Contents/MacOS/Alhangeul",
+    "mode": 493,
+    "mtime_ns": 1789327740000000000,
+    "kind": "file",
+    "size": 28017008,
+    "sha256": "322a5313fa9ad298de5a76154aeb83745a5e3ac0c879f861b1771fa898016971"
+  },
+  {
+    "path": "Contents/Library/Spotlight/Alhangeul.mdimporter/Contents/Resources/schema.xml",
+    "mode": 420,
+    "mtime_ns": 1789327733000000000,
+    "kind": "file",
+    "size": 1277,
+    "sha256": "bcc12fc834288f99148a5e824522ec733f9bc158f6a1ae483c0aea0897390bb7"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Autoupdate",
+    "mode": 493,
+    "mtime_ns": 1791734854814860141,
+    "kind": "symlink",
+    "target": "Versions/Current/Autoupdate"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Resources",
+    "mode": 493,
+    "mtime_ns": 1791734854789599354,
+    "kind": "symlink",
+    "target": "Versions/Current/Resources"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Sparkle",
+    "mode": 493,
+    "mtime_ns": 1791734854815316148,
+    "kind": "symlink",
+    "target": "Versions/Current/Sparkle"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Updater.app",
+    "mode": 493,
+    "mtime_ns": 1791734854815017476,
+    "kind": "symlink",
+    "target": "Versions/Current/Updater.app"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/XPCServices",
+    "mode": 493,
+    "mtime_ns": 1791734854815171395,
+    "kind": "symlink",
+    "target": "Versions/Current/XPCServices"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B",
+    "mode": 493,
+    "mtime_ns": 1789327739000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/Current",
+    "mode": 493,
+    "mtime_ns": 1791734854789822774,
+    "kind": "symlink",
+    "target": "B"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate",
+    "mode": 493,
+    "mtime_ns": 1789327738000000000,
+    "kind": "file",
+    "size": 711536,
+    "sha256": "e4765f3bed7e3b13ae1729726784484135e2111cbc08dd79a74d9ba182f08b32"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Sparkle",
+    "mode": 493,
+    "mtime_ns": 1789327739000000000,
+    "kind": "file",
+    "size": 980432,
+    "sha256": "e20c88300e4aa6b649c9b202946215f5b1f6ff5455af02c19124cbbf8fa6ba57"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/_CodeSignature",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/_CodeSignature/CodeResources",
+    "mode": 420,
+    "mtime_ns": 1789327739000000000,
+    "kind": "file",
+    "size": 18444,
+    "sha256": "7b25afb08a2b79fad40602c3b88965068a7f93ad81452c6993d6a1420a045ecf"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/Base.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/Info.plist",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 1341,
+    "sha256": "0379f9165e800b09a465df94459fcdc8dcf997ddbbce70f6692716763ec522c4"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ReleaseNotesColorStyle.css",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 231,
+    "sha256": "76bd6999758fd8e51d17e6b482db434f9b4768c02b037af6bd2e3a000ce8cbc1"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/SUStatus.nib",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 13016,
+    "sha256": "bba15dd37a26af87476214b68b06d6455118ce507fd77863f4947d654a6045af"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/SUUpdateAlert.nib",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 18490,
+    "sha256": "3987a333da7c2728ef2cb9656e5eeaf0832884873cabf78353fcb9099c5d8fbe"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/SUUpdatePermissionPrompt.nib",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ar.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ca.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/cs.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/da.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/de.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/el.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/es.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/fa.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/fi.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/fr.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/he.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/hr.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/hu.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/is.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/it.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ja.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ko.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/nb.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/nl.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/nn.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/pl.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/pt-BR.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/pt-PT.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ro.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ru.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/sk.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/sl.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/sv.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/th.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/tr.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/uk.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/vi.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/zh_CN.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/zh_HK.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/zh_TW.lproj",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/de.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 11559,
+    "sha256": "311035a15227fb12e85eba2a46f3f6198d98ac5590d1d38c43c4ff7430d06599"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/he.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 9657,
+    "sha256": "1d795bd7329d04b7ce84b6bdc845f917369e858b2b292f117b89a6666a185723"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ar.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 3554,
+    "sha256": "441182787471a3998908044515fe13e92230edaa7e2730638e72a49610f56cba"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/el.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5934,
+    "sha256": "638981a4f095d8b1dabb6230d452e470359711b81803bc5df8c21e1211fd3757"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ja.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 8697,
+    "sha256": "e404910028af70579cfa208bb4fadd9e3592505fc89af208f4071f2309553fb2"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/fa.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5716,
+    "sha256": "ed9dda9e271f7a97b8a7f327e71a1b6d06e5e061b367e7da3d153e47dc319263"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/uk.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5842,
+    "sha256": "ff44d58635b3e8409d54b42b72c876a43e17fa98f6ea96b32583b9e88c747ab6"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/zh_CN.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 7475,
+    "sha256": "e7f543b92977e9abc907241c411d8db0f59c4fee480859b3e88e4b495e0976c8"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/nb.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5539,
+    "sha256": "ef6f0dcae90c440b47ece09909e9cdf35f3383f34e72a614c8c5c0752ecbffe0"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/es.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 7040,
+    "sha256": "30cf2b18d30796961d88da28929d08c62ce45904553d004702877dc7449bf0df"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/is.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 3954,
+    "sha256": "403feba503410e9455cd0eaafe592a2576eedb24130ccf2cdb13dda4b101f87e"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/sl.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5646,
+    "sha256": "c62770c604a6c8c89e283357c8b322d8ce6a85f4d85c09002048331f65f8d980"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/da.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 4882,
+    "sha256": "8d0ff69b79460185f941372655433bad3934f49e63bef0b4171bd66da71e55f0"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/it.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 10956,
+    "sha256": "56a7445c1b68d76849ac59b98aa5c20c9002d5e07e9f0a2720486160f85b7366"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/sk.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5675,
+    "sha256": "e158daaa4f3f91b57cee05ab896f2c1bc467317932cc53bb7c01e7daee9e5238"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/sv.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5160,
+    "sha256": "4a21ad5bcf8d836d265710c2e4a0a64f07c9551f1c49694d6734a931d23efd39"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/cs.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 10774,
+    "sha256": "99e66decf9bc46cf5622eead4e65b3b502e3775a4e8e0f03ef1b41683ea8d518"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ko.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 7797,
+    "sha256": "a6269eb3f5a07d0c4f5d7467d5065372085aef7484c518a9d784ffd6c8f5aae4"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/Base.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 6249,
+    "sha256": "bf93bdde8ad020f2ba210ecfa0e84b5365d0342355a3ca39d88fec0acb1e4a40"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/hu.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 4449,
+    "sha256": "cc2a16e4d487c6fab357b4f7d0fbbf7ec882371b2130413ffcb1b69cd540d2cf"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/zh_HK.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 6469,
+    "sha256": "3fc210132f33d89af3d25d27c7ea19426cf6d304be50254538456e0ec4fb7858"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/tr.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 6183,
+    "sha256": "b040d3f02d341eba047c15dfcafb60406d0847096a94466ecab512dcfb16abb5"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/pl.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5453,
+    "sha256": "5c54b3f8e1eb3026e142e710e2167f2f839b73ab5ad7f18719230f33ae682aa9"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/zh_TW.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 7625,
+    "sha256": "76321e1dd844c9b6568cb4af7c63bb57d9d1b700109aeedd7e5721d78727b12d"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/pt-BR.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 9976,
+    "sha256": "0292cadc2acfc34875c1e0b54e2d50de3833cd5e20c8660c8effe2b859aac84c"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/vi.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 12418,
+    "sha256": "2b3b4acbadf534cd0e812b97e589f80a4e1655b07c8907e98cc31df458ffd8b7"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ru.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5784,
+    "sha256": "7193af28eb2a09b9fe7119cf6065a2150c6590971b22f98c56f356cd90851923"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/SUUpdatePermissionPrompt.nib/keyedobjects-101300.nib",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 25424,
+    "sha256": "e08d0688455021c52837ae7fdfaf80b0df0a0ced318aa0cb3f9ff370769924db"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/SUUpdatePermissionPrompt.nib/keyedobjects-110000.nib",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 25401,
+    "sha256": "64b752f1632c719d2994746c71672d0b603076c0268256effb5edce6b6fcbe23"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/fr.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 7855,
+    "sha256": "3d554dcd167b085e25a75248533f21f389593aeace912ab9952c825ffe141ce1"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/fi.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 3252,
+    "sha256": "c14af9bac3fce436222a4ea277a7a6c0f9b42b2d84aceea75e758ce7538acae2"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/nl.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 9574,
+    "sha256": "ca9adf34fb93fe3f394ccc92114bf6a6b1f8a128bb5f362cb9f3247d7c26c77d"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/th.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5339,
+    "sha256": "4b6c8dc2ab69a0425de3aa9dc386c6539348e3983e47aa10f94c17e345a157a5"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/nn.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5671,
+    "sha256": "1db8c6853a550aa25382da2d55431a1c1d308d6a37676c4f8593cc1633f8a5ae"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/pt-PT.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 5984,
+    "sha256": "fc958532d26a8e1e74622d3f558fc26a12800e8c49fb614afd0e1883acce4700"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ro.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 6115,
+    "sha256": "b2bf064222c38a3672b01fe09406f799718cb0fc4e715121662639d6fdfea6ed"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/hr.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 6367,
+    "sha256": "920041380a08b3ba50d44e8a83f59de551139845a72748d58f2387c65920b33a"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Resources/ca.lproj/Sparkle.strings",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 3501,
+    "sha256": "7ed0d5ca300649a7f13304015008f2dede98ad743a625c17d5a5fedacc1a3b1a"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app/Contents",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app/Contents/Info.plist",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 2400,
+    "sha256": "db7465df8fe32fb5f67b7e08f9e0b744896357e9206f56b206f5582fda2a4f17"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app/Contents/MacOS",
+    "mode": 493,
+    "mtime_ns": 1789327738000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app/Contents/PkgInfo",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 8,
+    "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app/Contents/Resources",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app/Contents/_CodeSignature",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app/Contents/_CodeSignature/CodeResources",
+    "mode": 420,
+    "mtime_ns": 1789327738000000000,
+    "kind": "file",
+    "size": 2446,
+    "sha256": "25328c7eccf8a37f15b84aaa7ee766c3ac7dc091baaac7318d4de6221407e60e"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app/Contents/MacOS/Updater",
+    "mode": 493,
+    "mtime_ns": 1789327738000000000,
+    "kind": "file",
+    "size": 291504,
+    "sha256": "e31c5fd358c7831eb3e8e7781b8976684a7f11a47204b63b691a5c76b63e4bfd"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app/Contents/Resources/SUStatus.nib",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 13016,
+    "sha256": "bba15dd37a26af87476214b68b06d6455118ce507fd77863f4947d654a6045af"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc/Contents",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc/Contents/Info.plist",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 1717,
+    "sha256": "476e0aef9d5572df1c3cc084a5ab28342d3cb04311ae6246cc92e45bfde8ba53"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc/Contents/MacOS",
+    "mode": 493,
+    "mtime_ns": 1789327738000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc/Contents/_CodeSignature",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc/Contents/_CodeSignature/CodeResources",
+    "mode": 420,
+    "mtime_ns": 1789327737000000000,
+    "kind": "file",
+    "size": 2200,
+    "sha256": "6686de10a28a2fe11b36cbb86dcbacc827cfc4ea116b4dabf1845e5aee629e9b"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc/Contents/MacOS/Downloader",
+    "mode": 493,
+    "mtime_ns": 1789327738000000000,
+    "kind": "file",
+    "size": 172848,
+    "sha256": "d27be59e8351293fbc9615dc5b048ac1c9549131b5a80d2148dfcd3cdb724a87"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc/Contents",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc/Contents/Info.plist",
+    "mode": 420,
+    "mtime_ns": 1789327705000000000,
+    "kind": "file",
+    "size": 1605,
+    "sha256": "6a27c3d0628cd832e3f04d210e68ce1d7d9e98f8cd234e92499c2d9f211e8a89"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc/Contents/MacOS",
+    "mode": 493,
+    "mtime_ns": 1789327738000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc/Contents/_CodeSignature",
+    "mode": 493,
+    "mtime_ns": 1789327705000000000,
+    "kind": "directory"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc/Contents/_CodeSignature/CodeResources",
+    "mode": 420,
+    "mtime_ns": 1789327738000000000,
+    "kind": "file",
+    "size": 2200,
+    "sha256": "6686de10a28a2fe11b36cbb86dcbacc827cfc4ea116b4dabf1845e5aee629e9b"
+  },
+  {
+    "path": "Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc/Contents/MacOS/Installer",
+    "mode": 493,
+    "mtime_ns": 1789327738000000000,
+    "kind": "file",
+    "size": 224176,
+    "sha256": "deaea9088d35e0dd985a1b13e48c5f966aaf45ca3bd2c55e873afac87c3b4669"
+  }
+]

@@ -2,11 +2,11 @@
 
 ## 1. 승인 상태와 실행 기준
 
-[수행계획서](task_m900_584.md)의 범위·5단계·수용 기준을 작업지시자가 2026-10-12 **“수행계획 승인·구현계획 작성 진행”**으로 승인했다. 이후 **“구현계획 승인·Stage 1 진행”**으로 read-only 조사와 문서를 실행해 [Stage 1](../working/task_m900_584_stage1.md)을 완료했다. **현재 Stage 1 결과 수용·Stage 2 승인 대기**다. 실행한 Stage 1의 결과는 보고서에 기록하며 아래 후속 명령은 계획이다. 제품 소스, 버전, workflow, 앱 설치, tag 또는 공개 자산은 아직 변경하지 않았다.
+[수행계획서](task_m900_584.md)의 범위·5단계·수용 기준을 작업지시자가 2026-10-12 **“수행계획 승인·구현계획 작성 진행”**으로 승인했다. Stage 1·2 승인에 따라 조사와 소스·안내/unsigned 검증을 완료했다. 준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. [main PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)은 게시 승인·새 CI 4개 PASS·통합 리뷰 후 **“main 병합·다음 실행 준비”** 승인으로 main `c9d59f93`에 병합했다. 이어 **“v0.2.3 태그 생성·push”** 승인으로 해당 SHA에 annotated tag를 생성·원격 게시하고 object/commit 일치를 검증했다. [실행 준비안](../working/task_m900_584_release_execution.md)에 실제 source·tag의 DMG 입력을 고정했다. **“draft DMG 생성·다운로드/검증 승인”**으로 run 38180977764를 실행해 success / attempt 1 및 artifact 11717953850의 동일 DMG 파일 검증 PASS를 확인했다. 확정 SHA256은 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63이다. **“보고 수용·ARM/Intel VM 검증 실행 승인”** 후 첫 실패 38184399238을 보존하고 동일 입력의 새 VM 재시험 38185285770에서 양 install/verdict 및 원본 schema 3·최초/종료 후·재설치/종료 후·lifecycle·cleanup을 수용했다. [Stage 4](../working/task_m900_584_stage4.md)는 “진행해줘”와 앱 부재 복원 범위 보정 승인 후 2026-10-12~13 실행했다. 일반 Mac 글꼴·문서/출력/Finder와 설치 정리는 통과했으며 실제 검색 환경·최근 이력 사전 증거 공백의 수용 및 Stage 5 준비 승인을 기다린다. 공개 명령은 실행하지 않았다.
 
 - 이슈: [#584](https://github.com/postmelee/alhangeul-macos/issues/584), Release Operations / M900.
 - local/task584 → publish/task584 → devel 준비 PR. 시작 제품 기준 e75d3ec4662457eaca990bdf95596442e5e56503, 계획 준비 커밋 be655ab4930e9dd97ec1c334daf04cc6174ca9f4.
-- 계획 기준 v0.2.3 / build 21, 직전 public v0.2.2 / build 20. 네 bundle의 현재 값은 아직 0.2.2 / 20이다.
+- 계획 기준 v0.2.3 / build 21, 직전 public v0.2.2 / build 20. 네 source bundle은 0.2.3 / 21이며 Stage 2의 unsigned Debug/universal Release에서도 일치했다. main 인계 source는 devel `5146d91e61e29959b45f6af68090cca4e9c3b97d`이며 실제 main 병합 source는 같은 tree의 `c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4`다.
 - core/Studio는 공식 rhwp v0.8.7 / 1a76570e833917d15817415a53c09ad61ab3203f를 유지한다. 새 dependency/FFI/renderer 변경은 없다.
 - 최종 source SHA, tag, run/artifact ID, DMG hash는 산출물이 확정되는 단계에서 기록하며 가짜 값이나 이전 후보 값으로 채우지 않는다.
 
@@ -147,6 +147,15 @@ Finder는 scripts/smoke-clean-quicklook-install.sh의 --app, --install-app /Appl
 시험 후 후보와 개발 앱 등록을 필요한 범위에서 정리하고 원래 앱/설정을 복원한다. inventory·seal·원래 버전·active provider·소유 파일/보관함 cleanup을 확인한다. 원시 실패·UI 화면과 자동/수동 수용을 나눠 기록한다. 최소 macOS 12 및 Intel 실기기 GUI는 수행하지 못했다면 계속 미검증이다.
 
 종료: 같은 DMG의 실제 Mac 수용 및 복원 PASS, 공개 전 위험/한계·정확한 hash의 최종 제시. 커밋: Task #584 Stage 4: 공증 후보 Mac 글꼴·출력·Finder 수용과 복원.
+
+### Stage 4 실행 후 수용 보정 — 2026-10-15 M7 대체 근거 수용·Stage 5 배포 승인
+
+2026-10-15 작업지시자가 동일 DMG의 양 VM 검색 PASS·실제 Mac 본문 추출 PASS를 대체 근거로 수용하고 Stage 5 진행·배포를 명시 지시했다. 이어 구체 실행안의 실제 Sparkle·Homebrew 게시/병합·설치 시험과 앱 없음 복원까지 승인했다. 아래의 M7/R1/S1/S2 관측 한계는 해결로 바꾸지 않는다. 실제 Mac 검색은 별도 수동 시험·다음 릴리즈 조사로 남긴다. [Stage 5 보고](../working/task_m900_584_stage5.md)에 실제 공개·검증·복원 결과를 기록한다.
+
+- M7은 저장된 색인 활성화 상태에서도 일반 TXT가 검색되지 않아(구체 원인 미확정) ENVIRONMENT_UNAVAILABLE로 유지한다. 같은 DMG의 ARM/Intel schema 3 검색 PASS와 최종 설치 앱의 실제 importer 원문 추출 PASS를 대체 근거로 사용한다. 실제 Mac 검색 성공으로 안내하지 않는다.
+- R1은 작업지시자가 확정한 앱 부재·OFF/grant 0·공유 policy 부재·소유 Documents 폴더·후보 등록/mount 정리 및 원본 hash 유지로 판정한다. UUID container/sfl4 사전 경로를 놓쳐 전체 최근 이력의 사전 동등성은 미증명이다. 확보한 기존 7개/시스템 6개 항목은 보존·복구했고 시험 항목만 제거했다. 이 증거 공백의 수용을 별도로 명시한다.
+- S1의 native 암호 저장 미지원과 동일 목적지 패널 재선택 미시험, S2의 저장하지 않음 후 복구 후보 잔존을 해결로 표시하지 않는다. 기존 보호 정책·직접 경고/취소/다른 평문 복사본·원본 hash와 알려진 한계로 수용 판단한다.
+- 다음 실제 Sparkle 시험은 현재 앱이 없으므로 공개 v0.2.2 설치부터 구체 범위에 넣는다. 앱 실행 전에 컨테이너 metadata로 실제 UUID 경로를 해결해 관련 key/sfl4·정책·권한을 보존하고, 시험 후 최종 앱 유지/앱 부재 복원도 승인 범위에 명시한다.
 
 ## 6. Stage 5 — 동일 파일 공개·업데이트·최종 기록
 

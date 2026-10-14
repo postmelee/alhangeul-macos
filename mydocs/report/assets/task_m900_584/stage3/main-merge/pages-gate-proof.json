@@ -1,0 +1,25 @@
+{
+  "observed_at_kst": "2026-10-12T07:10:08.774770+09:00",
+  "main_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "pages_run_id": 38179177872,
+  "pages_run_url": "https://github.com/postmelee/alhangeul-macos/actions/runs/38179177872",
+  "pages_workflow_conclusion": "success",
+  "deploy_job_conclusion": "skipped",
+  "candidate_release": {
+    "exists": false,
+    "http_status": 404,
+    "message": "Not Found",
+    "authenticated_release_list_match_count": 0,
+    "authenticated_release_list_count": 15
+  },
+  "appcast": {
+    "version": "0.2.2",
+    "build": "20",
+    "sha256": "8b0face06819d65f60cc6e3675244eaa1cccead997927c1f27c131d523313140",
+    "same_as_stage2_stage3_preparation": true
+  },
+  "reason": "linked public v0.2.3 DMG가 없어 기존 asset gate에 의해 배포를 건너뛰었다. job 실제 skip·확인한 Release 부재·기존 workflow 계약으로 대조했다.",
+  "tag_creation_executed": false,
+  "release_publish_dispatched": false,
+  "public_promotion_executed": false
+}

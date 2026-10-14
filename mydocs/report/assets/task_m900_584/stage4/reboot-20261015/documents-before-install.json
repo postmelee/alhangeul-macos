@@ -1,0 +1,16 @@
+{
+  "hwp": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "hwpx": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "query_before_install": {
+    "returncode": 0,
+    "paths": []
+  }
+}

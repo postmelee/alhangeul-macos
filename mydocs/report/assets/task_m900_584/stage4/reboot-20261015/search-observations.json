@@ -1,0 +1,223 @@
+{
+  "running": {
+    "observed_at_utc": "2026-10-14T19:12:42.468487+00:00",
+    "phase": "running",
+    "result": "FAIL",
+    "expected_paths": [
+      "/Users/melee/Documents/AlhangeulReleaseReboot-078f0ecb-47b2-4525-8988-6561e25c59a7/font-search.hwp",
+      "/Users/melee/Documents/AlhangeulReleaseReboot-078f0ecb-47b2-4525-8988-6561e25c59a7/font-search.hwpx"
+    ],
+    "elapsed_seconds": 181.22,
+    "timeout_seconds": 180,
+    "metadata": {
+      "font-search.hwp": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "font-search.hwpx": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    "direct_importer": {
+      "font-search.hwp": {
+        "returncode": 0,
+        "installed_importer_selected": true,
+        "text_content_extracted": true
+      },
+      "font-search.hwpx": {
+        "returncode": 0,
+        "installed_importer_selected": true,
+        "text_content_extracted": true
+      }
+    },
+    "assisted_install": "표준 scoped 설치 smoke에서 후보 등록; 최초 자동 설치 판정이 아님",
+    "external_document_reindex_request": false,
+    "global_index_reset": false,
+    "observation_count": 58,
+    "positive_control_observation_count": 0,
+    "first_observation": {
+      "elapsed_seconds": 0.0,
+      "control": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      },
+      "english": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      },
+      "korean": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      }
+    },
+    "last_observation": {
+      "elapsed_seconds": 177.78,
+      "control": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      },
+      "english": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      },
+      "korean": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      }
+    },
+    "acceptance_classification": "ENVIRONMENT_UNAVAILABLE"
+  },
+  "assisted": {
+    "observed_at_utc": "2026-10-14T19:15:32.140523+00:00",
+    "phase": "assisted",
+    "result": "FAIL",
+    "expected_paths": [
+      "/Users/melee/Documents/AlhangeulReleaseReboot-078f0ecb-47b2-4525-8988-6561e25c59a7/font-search.hwp",
+      "/Users/melee/Documents/AlhangeulReleaseReboot-078f0ecb-47b2-4525-8988-6561e25c59a7/font-search.hwpx"
+    ],
+    "elapsed_seconds": 62.55,
+    "timeout_seconds": 60,
+    "metadata": {
+      "font-search.hwp": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "font-search.hwpx": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    },
+    "direct_importer": {},
+    "assisted_install": "표준 scoped 설치 smoke에서 후보 등록; 최초 자동 설치 판정이 아님",
+    "external_document_reindex_request": true,
+    "global_index_reset": false,
+    "observation_count": 20,
+    "positive_control_observation_count": 0,
+    "first_observation": {
+      "elapsed_seconds": 0.0,
+      "control": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      },
+      "english": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      },
+      "korean": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      }
+    },
+    "last_observation": {
+      "elapsed_seconds": 59.33,
+      "control": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      },
+      "english": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      },
+      "korean": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "paths": []
+      }
+    },
+    "acceptance_classification": "ENVIRONMENT_UNAVAILABLE"
+  },
+  "fresh_control": {
+    "result": "ENVIRONMENT_UNAVAILABLE",
+    "elapsed_seconds": 62.27,
+    "timeout_seconds": 60,
+    "manual_import_request": false,
+    "global_index_reset": false,
+    "observation_count": 20,
+    "first_observation": {
+      "elapsed_seconds": 0.0,
+      "attribute": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": ""
+      },
+      "plain": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": "2026-10-15 04:15:45.868 mdfind[9823:63574] [UserQueryParser] Loading keywords and predicates for locale \"ko_KR\"\n2026-10-15 04:15:45.869 mdfind[9823:63574] [UserQueryParser] Loading keywords and predicates for locale \"ko\"\n"
+      }
+    },
+    "last_observation": {
+      "elapsed_seconds": 59.15,
+      "attribute": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": ""
+      },
+      "plain": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": "2026-10-15 04:16:45.019 mdfind[10010:65339] [UserQueryParser] Loading keywords and predicates for locale \"ko_KR\"\n2026-10-15 04:16:45.019 mdfind[10010:65339] [UserQueryParser] Loading keywords and predicates for locale \"ko\"\n"
+      }
+    }
+  },
+  "post_removal": {
+    "elapsed_seconds": 61.82,
+    "timeout_seconds": 60,
+    "both_controls_visible": false,
+    "observation_count": 20,
+    "first_observation": {
+      "elapsed_seconds": 0.0,
+      "original": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": ""
+      },
+      "fresh": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": ""
+      }
+    },
+    "last_observation": {
+      "elapsed_seconds": 58.74,
+      "original": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": ""
+      },
+      "fresh": {
+        "returncode": 0,
+        "paths": [],
+        "stderr": ""
+      }
+    }
+  }
+}

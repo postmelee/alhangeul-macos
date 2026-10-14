@@ -1,0 +1,16 @@
+{
+  "finished_at_utc": "2026-10-14T19:40:05.821915+00:00",
+  "owned_folder_removed": true,
+  "trial_file_hashes_unchanged": true,
+  "app_absence_preserved": true,
+  "candidate_installation_skipped": "TXT 환경 양성 전제 미충족",
+  "candidate_installed_or_launched": false,
+  "native_preferences_or_sfl4_changed": false,
+  "font_library_changed": false,
+  "registration_changes": false,
+  "spotlight_original_privacy_list_restored": true,
+  "source_dmg_unchanged": true,
+  "whole_disk_index_reset": false,
+  "global_cache_reset": false,
+  "new_signature_or_public_deployment": false
+}

@@ -1,0 +1,94 @@
+{
+  "artifact_id": 11718713502,
+  "validation_run_id": 38184399238,
+  "run_attempt": 1,
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "archive_sha256": "619b63f775925853daece0dabc12c2418ffad2cfb0595d02311378a5fe768fdb",
+  "archive_size": 78509,
+  "manifest": {
+    "replacement": "UpdatedDocumentMarker",
+    "token": "ReleaseInstallDocumentMarker"
+  },
+  "archive_entries": [
+    {
+      "path": "initial/control.hwpx",
+      "size": 7215
+    },
+    {
+      "path": "initial/document-b.hwpx",
+      "size": 7258
+    },
+    {
+      "path": "initial/document-c.hwp",
+      "size": 1352
+    },
+    {
+      "path": "initial/document-a.hwp",
+      "size": 13312
+    },
+    {
+      "path": "initial/index-control.txt",
+      "size": 31
+    },
+    {
+      "path": "manifest.json",
+      "size": 87
+    },
+    {
+      "path": "variants/distribution.hwp",
+      "size": 13312
+    },
+    {
+      "path": "variants/drm.hwp",
+      "size": 27
+    },
+    {
+      "path": "variants/empty.hwpx",
+      "size": 7185
+    },
+    {
+      "path": "variants/invalid.hwp",
+      "size": 8
+    },
+    {
+      "path": "variants/large.hwp",
+      "size": 33554433
+    },
+    {
+      "path": "variants/modified.hwp",
+      "size": 13312
+    },
+    {
+      "path": "variants/protected.hwpx",
+      "size": 8043
+    },
+    {
+      "path": "variants/truncated.hwpx",
+      "size": 12678
+    }
+  ],
+  "selected_files": [
+    {
+      "path": "initial/document-b.hwpx",
+      "size": 7258,
+      "sha256": "230285d9adb2d3b2adb6a22dc58ffbd7e0750608d1233c0551bb2429edfd93d9"
+    },
+    {
+      "path": "initial/document-c.hwp",
+      "size": 1352,
+      "sha256": "4579224b962cbbad9bb981fd74bda36e983c5b79b700131ebc6b1116ace54b5f"
+    },
+    {
+      "path": "manifest.json",
+      "size": 87,
+      "sha256": "bc0ca9c64040ee905fa9e971ff44c67db2a9a6fd9dec5b322a21b07a10709b55"
+    },
+    {
+      "path": "variants/protected.hwpx",
+      "size": 8043,
+      "sha256": "4a28402661453e3f6ca879936b457f9785a54cfb861fe3c6b755e9e416280a04"
+    }
+  ],
+  "selection_reason": "Mac 시험 문서 3개와 manifest만 추출. VM 한도 시험용 32MiB large.hwp는 로컬 추출 생략",
+  "result": "PASS"
+}

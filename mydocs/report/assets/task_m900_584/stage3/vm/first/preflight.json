@@ -1,0 +1,17 @@
+{
+  "checked_at_kst": "2026-10-12T08:28:14.841626+09:00",
+  "result": "PASS",
+  "source_run_id": 38180977764,
+  "source_run_attempt": 1,
+  "source_artifact_id": 11717953850,
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "dmg_size": 211405232,
+  "draft_release_id": 409973398,
+  "draft_dmg_asset_id": 632029048,
+  "artifact_expires_at": "2026-10-25T22:58:32Z",
+  "existing_validation_runs": 0,
+  "remote_tag_unchanged": true,
+  "local_harness_equals_tag": true,
+  "approval_scope": "새 GitHub ARM/Intel VM 설치·재설치 검증. 실제 사용자 Mac 설치·공개 배포 제외"
+}

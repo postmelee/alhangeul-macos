@@ -1,0 +1,55 @@
+{
+  "recorded_at": "2026-10-12T06:14:27.947212+09:00",
+  "issue": 584,
+  "stage": "3 preparation / incomplete",
+  "merged_preparation_pr": 585,
+  "reviewed_head": "938b59b9705a227567227a1ab3578c4208eedeef",
+  "merge_commit": "5146d91e61e29959b45f6af68090cca4e9c3b97d",
+  "merged_at_kst": "2026-10-12T06:10:44+09:00",
+  "pr_ci_run_id": 38169630236,
+  "pr_ci_pass_count": 4,
+  "main": "43b4e998b93032b62bcb0517fb9c894de3dc8ae1",
+  "devel_source": "5146d91e61e29959b45f6af68090cca4e9c3b97d",
+  "source_tree": "80fb5eadadbc9ff8f89a8652917e037715c077bd",
+  "content_gate": "PASS main-only content 0 / prospective tree equals source",
+  "bundle_versions": {
+    "HostApp": {
+      "version": "0.2.3",
+      "build": "21"
+    },
+    "QLExtension": {
+      "version": "0.2.3",
+      "build": "21"
+    },
+    "ThumbnailExtension": {
+      "version": "0.2.3",
+      "build": "21"
+    },
+    "SpotlightImporter": {
+      "version": "0.2.3",
+      "build": "21"
+    }
+  },
+  "core": {
+    "rhwp_release_tag": "v0.8.7",
+    "rhwp_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+    "rhwp_ref_kind": "release-tag"
+  },
+  "studio_tag": "v0.8.7",
+  "studio_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "public_app_tag": "v0.2.2",
+  "upstream_latest_tag": "v0.8.7",
+  "v0.2.3_remote_tag_exists": false,
+  "existing_devel_to_main_pr": false,
+  "main_pr_changed_path_count": 792,
+  "main_pr_impact": "792 files changed, 205628 insertions(+), 1870 deletions(-)",
+  "all_merged_pr_count": 29,
+  "first_parent_pr_count": 20,
+  "added_since_stage1": [
+    585
+  ],
+  "closed_issue": false,
+  "tag_created": false,
+  "signing_or_publication_run": false,
+  "final_dmg_hash": null
+}

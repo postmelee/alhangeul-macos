@@ -1,0 +1,15 @@
+{
+  "run_id": 38180977764,
+  "submissions": [
+    {
+      "artifact": "App bundle",
+      "submission_id": "203e3598-e23e-428e-b993-10045a0a59c6",
+      "status": "Accepted"
+    },
+    {
+      "artifact": "DMG",
+      "submission_id": "6027d8cb-e1ea-416f-8e3c-67a4383a3c1b",
+      "status": "Accepted"
+    }
+  ]
+}

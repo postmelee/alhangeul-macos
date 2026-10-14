@@ -1,0 +1,903 @@
+{
+  "id": "ffcc20d6e355",
+  "source_app": "/Users/runner/work/alhangeul-macos/alhangeul-macos/build.noindex/install-check/source.noindex/Alhangeul.app",
+  "fixtures": "/Users/runner/work/alhangeul-macos/alhangeul-macos/build.noindex/install-fixtures",
+  "workspace": "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355",
+  "files": "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files",
+  "install_root": "/Users/runner/Applications/AlhangeulSpotlightSmoke-ffcc20d6e355.app",
+  "install_app": "/Users/runner/Applications/AlhangeulSpotlightSmoke-ffcc20d6e355.app",
+  "evidence": "/Users/runner/work/alhangeul-macos/alhangeul-macos/build.noindex/install-check/evidence-ffcc20d6e355",
+  "token": "ReleaseInstallDocumentMarker",
+  "replacement": "UpdatedDocumentMarker",
+  "results": [
+    {
+      "case": "environment-text-control",
+      "query": "SpotlightEnvironmentControlOnly",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/index-control.txt"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 16.45,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "pre-install-body-absent",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 6.11,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "discovery-before-first-launch",
+      "result": "MISS",
+      "observed_at": 1791762960.970824,
+      "importer": "/Users/runner/Applications/AlhangeulSpotlightSmoke-ffcc20d6e355.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+      "elapsed_seconds": 0.02
+    },
+    {
+      "case": "first-launch-requested",
+      "result": "PASS",
+      "observed_at": 1791762962.081271,
+      "launch_number": 1
+    },
+    {
+      "case": "discovery-after-first-launch",
+      "result": "PASS",
+      "observed_at": 1791762975.5804858,
+      "importer": "/Users/runner/Applications/AlhangeulSpotlightSmoke-ffcc20d6e355.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+      "elapsed_seconds": 13.5
+    },
+    {
+      "case": "automatic-discovery",
+      "result": "PASS",
+      "observed_at": 1791762976.19747,
+      "importer": "/Users/runner/Applications/AlhangeulSpotlightSmoke-ffcc20d6e355.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+      "elapsed_seconds": 0.02
+    },
+    {
+      "case": "environment-text-control",
+      "query": "SpotlightEnvironmentControlOnly",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/index-control.txt"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 1.63,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "body-only-search",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-c.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 2.79,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "korean-body-only-search",
+      "query": "나비",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 2.08,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "metadata-document-a.hwp",
+      "result": "PASS",
+      "observed_at": 1791762982.821713,
+      "content_type": "com.postmelee.alhangeul.hwp",
+      "utf8_bytes": 63
+    },
+    {
+      "case": "metadata-document-b.hwpx",
+      "result": "PASS",
+      "observed_at": 1791762982.860808,
+      "content_type": "com.postmelee.alhangeul.hwpx",
+      "utf8_bytes": 63
+    },
+    {
+      "case": "metadata-document-c.hwp",
+      "result": "PASS",
+      "observed_at": 1791762982.900376,
+      "content_type": "com.postmelee.alhangeul.hwp",
+      "utf8_bytes": 41
+    },
+    {
+      "case": "automatic-first-install-search",
+      "result": "PASS",
+      "observed_at": 1791762983.326167
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS",
+      "observed_at": 1791762983.748414
+    },
+    {
+      "case": "automatic-discovery",
+      "result": "PASS",
+      "observed_at": 1791762984.245167,
+      "importer": "/Users/runner/Applications/AlhangeulSpotlightSmoke-ffcc20d6e355.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+      "elapsed_seconds": 0.06
+    },
+    {
+      "case": "environment-text-control",
+      "query": "SpotlightEnvironmentControlOnly",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/index-control.txt"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 1.03,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "body-only-search",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-c.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 2.0,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "korean-body-only-search",
+      "query": "나비",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 1.94,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "metadata-document-a.hwp",
+      "result": "PASS",
+      "observed_at": 1791762989.2478452,
+      "content_type": "com.postmelee.alhangeul.hwp",
+      "utf8_bytes": 63
+    },
+    {
+      "case": "metadata-document-b.hwpx",
+      "result": "PASS",
+      "observed_at": 1791762989.282937,
+      "content_type": "com.postmelee.alhangeul.hwpx",
+      "utf8_bytes": 63
+    },
+    {
+      "case": "metadata-document-c.hwp",
+      "result": "PASS",
+      "observed_at": 1791762989.319478,
+      "content_type": "com.postmelee.alhangeul.hwp",
+      "utf8_bytes": 41
+    },
+    {
+      "case": "automatic-first-install-search",
+      "result": "PASS",
+      "observed_at": 1791762989.713442
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS",
+      "observed_at": 1791762990.050368
+    },
+    {
+      "case": "reinstall-old-body-removed",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 6.25,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "reinstall-old-korean-removed",
+      "query": "나비",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 5.91,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "before-reinstall-search-state",
+      "result": "PASS",
+      "observed_at": 1791763015.919138,
+      "english_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-c.hwp"
+      ],
+      "korean_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "control_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/index-control.txt"
+      ],
+      "mode": "searchable",
+      "stable_seconds": 5.26,
+      "elapsed_seconds": 13.26,
+      "timeout_seconds": 180
+    },
+    {
+      "case": "same-version-reinstall-prepared",
+      "result": "PASS",
+      "observed_at": 1791763015.9199228
+    },
+    {
+      "case": "before-reinstall-launch-search-state",
+      "result": "PASS",
+      "observed_at": 1791763027.848552,
+      "english_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-c.hwp"
+      ],
+      "korean_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "control_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/index-control.txt"
+      ],
+      "mode": "searchable",
+      "stable_seconds": 5.36,
+      "elapsed_seconds": 8.43,
+      "timeout_seconds": 180
+    },
+    {
+      "case": "candidate-relaunch-requested",
+      "result": "PASS",
+      "observed_at": 1791763028.374182,
+      "launch_number": 2
+    },
+    {
+      "case": "discovery-after-relaunch",
+      "result": "PASS",
+      "observed_at": 1791763028.412981,
+      "importer": "/Users/runner/Applications/AlhangeulSpotlightSmoke-ffcc20d6e355.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+      "elapsed_seconds": 0.04
+    },
+    {
+      "case": "same-version-reinstall-launched",
+      "result": "PASS",
+      "observed_at": 1791763028.413044
+    },
+    {
+      "case": "environment-text-control",
+      "query": "SpotlightEnvironmentControlOnly",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/index-control.txt"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 2.58,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "body-only-search",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-c.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 2.5,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "korean-body-only-search",
+      "query": "나비",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 2.09,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "metadata-document-a.hwp",
+      "result": "PASS",
+      "observed_at": 1791763036.427928,
+      "content_type": "com.postmelee.alhangeul.hwp",
+      "utf8_bytes": 63
+    },
+    {
+      "case": "metadata-document-b.hwpx",
+      "result": "PASS",
+      "observed_at": 1791763036.4686358,
+      "content_type": "com.postmelee.alhangeul.hwpx",
+      "utf8_bytes": 63
+    },
+    {
+      "case": "metadata-document-c.hwp",
+      "result": "PASS",
+      "observed_at": 1791763036.512864,
+      "content_type": "com.postmelee.alhangeul.hwp",
+      "utf8_bytes": 41
+    },
+    {
+      "case": "reinstall-request-receipt",
+      "result": "PASS",
+      "observed_at": 1791763036.513331,
+      "elapsed_seconds": 0.0,
+      "timeout_seconds": 30,
+      "attempts": 1
+    },
+    {
+      "case": "automatic-same-version-reinstall-search",
+      "result": "PASS",
+      "observed_at": 1791763036.959588,
+      "search_outcome": "maintained"
+    },
+    {
+      "case": "candidate-app-not-running",
+      "result": "PASS",
+      "observed_at": 1791763037.261203
+    },
+    {
+      "case": "environment-text-control",
+      "query": "SpotlightEnvironmentControlOnly",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/index-control.txt"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 1.16,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "body-only-search",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-c.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 2.1,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "korean-body-only-search",
+      "query": "나비",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 1.93,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "metadata-document-a.hwp",
+      "result": "PASS",
+      "observed_at": 1791763042.9445891,
+      "content_type": "com.postmelee.alhangeul.hwp",
+      "utf8_bytes": 63
+    },
+    {
+      "case": "metadata-document-b.hwpx",
+      "result": "PASS",
+      "observed_at": 1791763042.9853718,
+      "content_type": "com.postmelee.alhangeul.hwpx",
+      "utf8_bytes": 63
+    },
+    {
+      "case": "metadata-document-c.hwp",
+      "result": "PASS",
+      "observed_at": 1791763043.02279,
+      "content_type": "com.postmelee.alhangeul.hwp",
+      "utf8_bytes": 41
+    },
+    {
+      "case": "reinstall-request-receipt",
+      "result": "PASS",
+      "observed_at": 1791763043.023221,
+      "elapsed_seconds": 0.0,
+      "timeout_seconds": 30,
+      "attempts": 1
+    },
+    {
+      "case": "automatic-same-version-reinstall-search",
+      "result": "PASS",
+      "observed_at": 1791763043.429095,
+      "search_outcome": "maintained"
+    },
+    {
+      "case": "deleted-original-documents",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 6.18,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "deleted-original-korean-word",
+      "query": "나비",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 9.83,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "modified-restored",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 6.17,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "modified-metadata",
+      "result": "PASS",
+      "observed_at": 1791763065.652763
+    },
+    {
+      "case": "modified-old-word-removed",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 10.3,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "modified-new-word",
+      "query": "UpdatedDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 2.05,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "modified-new-korean-word",
+      "query": "바다",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 1.92,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "modified-deleted-new-word",
+      "query": "UpdatedDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 6.11,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "modified-deleted-new-korean-word",
+      "query": "바다",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 9.97,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "protected-restored",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 6.26,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "protected-metadata",
+      "result": "PASS",
+      "observed_at": 1791763102.2915971
+    },
+    {
+      "case": "protected-old-word-removed",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 10.56,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "empty-restored",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 6.18,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "empty-metadata",
+      "result": "PASS",
+      "observed_at": 1791763119.071241
+    },
+    {
+      "case": "empty-old-word-removed",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 14.31,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "invalid-restored",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 6.15,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "invalid-metadata",
+      "result": "PASS",
+      "observed_at": 1791763139.5763578
+    },
+    {
+      "case": "invalid-old-word-removed",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 10.36,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "drm-restored",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 6.25,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "drm-metadata",
+      "result": "PASS",
+      "observed_at": 1791763156.224885
+    },
+    {
+      "case": "drm-old-word-removed",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 10.34,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "distribution-restored",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 6.18,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "distribution-metadata",
+      "result": "PASS",
+      "observed_at": 1791763172.782044
+    },
+    {
+      "case": "distribution-old-word-removed",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 10.15,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "large-restored",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 6.3,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "large-metadata",
+      "result": "PASS",
+      "observed_at": 1791763189.296322
+    },
+    {
+      "case": "large-old-word-removed",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 10.23,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "truncated-metadata",
+      "result": "PASS",
+      "observed_at": 1791763199.667017,
+      "utf8_bytes": 1048576
+    },
+    {
+      "case": "truncated-prefix-search",
+      "query": "TruncatedDocumentMarker",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 7.4,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "truncated-korean-prefix-search",
+      "query": "호랑이",
+      "paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "result": "PASS",
+      "elapsed_seconds": 1.92,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "truncated-tail-not-indexed",
+      "query": "OmittedDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 6.21,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "deleted-truncated-document",
+      "query": "TruncatedDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 6.23,
+      "timeout_seconds": 180,
+      "control_ok": true
+    },
+    {
+      "case": "deleted-final-documents",
+      "query": "ReleaseInstallDocumentMarker",
+      "paths": [],
+      "result": "PASS",
+      "elapsed_seconds": 6.07,
+      "timeout_seconds": 180,
+      "control_ok": true
+    }
+  ],
+  "phase": "lifecycle-verified",
+  "original_apps": {},
+  "providers_before": {
+    "com.postmelee.alhangeul.QLExtension": [],
+    "com.postmelee.alhangeul.ThumbnailExtension": []
+  },
+  "automatic": true,
+  "discovery_timeout": 600,
+  "search_timeout": 180,
+  "source_bundle_dates_ns": {
+    "app": 1791759252000000000,
+    "importer": 1791759250000000000
+  },
+  "source_app_hashes": {
+    "Contents/Info.plist": "55b725aea8da2beaae021746718269d79b11ba221bcf9924a00420f48e2358ae",
+    "Contents/MacOS/Alhangeul": "a17a9d272848a2f7b76ba050a17f5a9465f3c8ccb011af7761e553632ef2a4f9"
+  },
+  "source_importer_hashes": {
+    "Contents/Info.plist": "456685ff8eee3a937c559309c2738bea02550e063312123cda114b166110d07e",
+    "Contents/MacOS/Alhangeul": "06d22165b633a335097a7012cda9ee77978731136d1d2e43368462e60fa08b55"
+  },
+  "install_layout": "direct",
+  "fixture_hashes": {
+    "manifest.json": "bc0ca9c64040ee905fa9e971ff44c67db2a9a6fd9dec5b322a21b07a10709b55",
+    "variants/empty.hwpx": "0147894b5c0fd57bc6888a4848efea5cf4cb8b7ba2eaa7e7c103e0f4c007d93a",
+    "variants/truncated.hwpx": "3a00f9d794adc821b517b879b960f6a23bb3223397e094b1649ee37db1c1bb5d",
+    "variants/drm.hwp": "7c5e947991d1773bfece56dea0059334ebd48c5f893b33a3f1538b5152d46a94",
+    "variants/distribution.hwp": "559522d11ded17e2adf7449d73a55af2043c2e5225d856d337a9076b58180765",
+    "variants/large.hwp": "bdf7fbb54387c24608fd757a1b31c32cabcd7b6bee8ff3345c897139fffc072a",
+    "variants/protected.hwpx": "50e83860d8fa47f2bbfc9e74c43402eb11eb8cdbd68a51b754dbfcdefb26e5fa",
+    "variants/modified.hwp": "395b733e006ee559fbb5cf936b48349c5dc14c6b76ea3606c99e9cfe29cee40a",
+    "variants/invalid.hwp": "6dda1524c96123bdeaba431bb8bcf4eaae977606559d411919ffdda50edf3efe",
+    "initial/document-b.hwpx": "230285d9adb2d3b2adb6a22dc58ffbd7e0750608d1233c0551bb2429edfd93d9",
+    "initial/index-control.txt": "7bec3b71651f74ca19837ef26353e10525ef4a5297e5af2aad82e996039d1809",
+    "initial/document-c.hwp": "4579224b962cbbad9bb981fd74bda36e983c5b79b700131ebc6b1116ace54b5f",
+    "initial/document-a.hwp": "4ce6e72118adfdcf1c6ed1ab010bfa60bb8c720f84bb4728645a3b3bfa30c63a",
+    "initial/control.hwpx": "08f17a4f3fa93e61d37b94625ca997a63d8d2def4f1f51e6e74ed291ffbecb9c"
+  },
+  "prepared_corpus": {
+    "document-b.hwpx": [
+      7258,
+      1791762835868990535,
+      "230285d9adb2d3b2adb6a22dc58ffbd7e0750608d1233c0551bb2429edfd93d9"
+    ],
+    "index-control.txt": [
+      31,
+      1791762835923611992,
+      "7bec3b71651f74ca19837ef26353e10525ef4a5297e5af2aad82e996039d1809"
+    ],
+    "document-c.hwp": [
+      1352,
+      1791762835869059708,
+      "4579224b962cbbad9bb981fd74bda36e983c5b79b700131ebc6b1116ace54b5f"
+    ],
+    "document-a.hwp": [
+      13312,
+      1791762835867766361,
+      "4ce6e72118adfdcf1c6ed1ab010bfa60bb8c720f84bb4728645a3b3bfa30c63a"
+    ],
+    "control.hwpx": [
+      7215,
+      1791762835922858774,
+      "08f17a4f3fa93e61d37b94625ca997a63d8d2def4f1f51e6e74ed291ffbecb9c"
+    ]
+  },
+  "before_install_paths": [],
+  "index_environment": "available",
+  "pre_install_environment_verified": true,
+  "install_identity": [
+    16777220,
+    12888361523
+  ],
+  "installed_bundle_dates_ns": {
+    "app": 1791759252000000000,
+    "importer": 1791759250000000000
+  },
+  "installed_object": [
+    16777220,
+    12888361645,
+    1791759250.0
+  ],
+  "installed_at": 1791762960.9500318,
+  "launch_count": 2,
+  "initial_receipt": {
+    "importerPath": "/Users/runner/Applications/AlhangeulSpotlightSmoke-ffcc20d6e355.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+    "modificationDate": "813452050.0",
+    "buildIdentifier": "0.2.3-21",
+    "installationIdentifier": "563A508F-BDCD-3143-B445-B195B273307C:12888360680:1791759250:0"
+  },
+  "reinstall": {
+    "receipt_plist": "/Users/runner/Library/Containers/com.postmelee.alhangeul/Data/Library/Preferences/com.postmelee.alhangeul.plist",
+    "before_receipt": {
+      "importerPath": "/Users/runner/Applications/AlhangeulSpotlightSmoke-ffcc20d6e355.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+      "modificationDate": "813452050.0",
+      "buildIdentifier": "0.2.3-21",
+      "installationIdentifier": "563A508F-BDCD-3143-B445-B195B273307C:12888360680:1791759250:0"
+    },
+    "before_object": [
+      16777220,
+      12888360680,
+      1791759250.0
+    ],
+    "phase": "searchable",
+    "before_copy_search": {
+      "english_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-c.hwp"
+      ],
+      "korean_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "control_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/index-control.txt"
+      ],
+      "mode": "searchable",
+      "stable_seconds": 5.26,
+      "elapsed_seconds": 13.26,
+      "timeout_seconds": 180
+    },
+    "prepared_corpus": {
+      "document-b.hwpx": [
+        7258,
+        1791762835868990535,
+        "230285d9adb2d3b2adb6a22dc58ffbd7e0750608d1233c0551bb2429edfd93d9"
+      ],
+      "index-control.txt": [
+        31,
+        1791762835923611992,
+        "7bec3b71651f74ca19837ef26353e10525ef4a5297e5af2aad82e996039d1809"
+      ],
+      "document-c.hwp": [
+        1352,
+        1791762835869059708,
+        "4579224b962cbbad9bb981fd74bda36e983c5b79b700131ebc6b1116ace54b5f"
+      ],
+      "document-a.hwp": [
+        13312,
+        1791762835867766361,
+        "4ce6e72118adfdcf1c6ed1ab010bfa60bb8c720f84bb4728645a3b3bfa30c63a"
+      ],
+      "control.hwpx": [
+        7215,
+        1791762835922858774,
+        "08f17a4f3fa93e61d37b94625ca997a63d8d2def4f1f51e6e74ed291ffbecb9c"
+      ]
+    },
+    "after_object": [
+      16777220,
+      12888361645,
+      1791759250.0
+    ],
+    "before_launch_search": {
+      "english_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-c.hwp"
+      ],
+      "korean_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-a.hwp",
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/document-b.hwpx"
+      ],
+      "control_paths": [
+        "/Users/runner/Documents/AlhangeulSpotlightSmoke-ffcc20d6e355/Files/index-control.txt"
+      ],
+      "mode": "searchable",
+      "stable_seconds": 5.36,
+      "elapsed_seconds": 8.43,
+      "timeout_seconds": 180
+    },
+    "installed_at": 1791763028.2871091,
+    "after_receipt": {
+      "importerPath": "/Users/runner/Applications/AlhangeulSpotlightSmoke-ffcc20d6e355.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+      "modificationDate": "813452050.0",
+      "installationIdentifier": "563A508F-BDCD-3143-B445-B195B273307C:12888361645:1791759250:0",
+      "buildIdentifier": "0.2.3-21"
+    },
+    "search_outcome": "maintained"
+  },
+  "assisted_actions": [
+    "lifecycle"
+  ]
+}

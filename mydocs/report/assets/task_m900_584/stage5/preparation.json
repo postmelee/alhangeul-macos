@@ -1,0 +1,13 @@
+{
+  "prepared_at": "2026-10-15T05:09:09.828612+09:00",
+  "app_absent_before": true,
+  "actual_uuid_container_resolved_before_launch": true,
+  "native_recent_entries_before": 7,
+  "sfl4_saved_before_launch": true,
+  "font_enabled_before": false,
+  "grants_before": 0,
+  "scoped_files_backed_up": 5,
+  "homebrew_receipt_before": "0.2.2",
+  "homebrew_receipt_bytes_backed_up": 1636,
+  "user_manual_txt_unchanged": true
+}

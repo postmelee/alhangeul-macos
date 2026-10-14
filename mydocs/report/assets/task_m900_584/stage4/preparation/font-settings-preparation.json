@@ -1,0 +1,32 @@
+{
+  "fonts": [
+    {
+      "path": "/Library/Fonts/NanumSquareRegular.ttf",
+      "exists": true,
+      "size": 723640,
+      "sha256": "5a51deae5237435d9a0bc0cc6cc30619a914b29801f895698cfdacadcad06e94"
+    },
+    {
+      "path": "/Library/Fonts/NanumSquareBold.ttf",
+      "exists": true,
+      "size": 733500,
+      "sha256": "f737d58294faec9c632189af3a2a3e48e49c03c0256de09db61e879e2857bfbf"
+    }
+  ],
+  "font_setting_files": [
+    {
+      "path": "/Users/melee/Library/Containers/com.postmelee.alhangeul/Data/Library/Application Support/Alhangeul/InstalledFonts/installed-fonts-v1.json",
+      "exists": false
+    },
+    {
+      "path": "/Users/melee/Library/Group Containers/XH6JHKYXV8.com.postmelee.alhangeul.font-library/Library/Application Support/FontLibrary/v1/consumer-policy/policy.json",
+      "exists": false
+    },
+    {
+      "path": "/Users/melee/Library/Group Containers/XH6JHKYXV8.com.postmelee.alhangeul.font-library/Library/Application Support/FontLibrary/v1/consumer-policy/pending",
+      "exists": false
+    }
+  ],
+  "mutations_performed": false,
+  "bookmarks_or_user_catalog_bytes_published": false
+}

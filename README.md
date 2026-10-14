@@ -58,18 +58,17 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 ## 릴리즈 안내
 
-v0.2.3 / build 21은 Mac 설치 글꼴 사용과 rhwp v0.8.7 반영을 포함한 **미공개 준비 후보**입니다. 최종 DMG·설치·실제 업데이트 수용은 아직 진행하지 않았으며, 현재 공개 제공 버전은 아래 v0.2.2입니다. 준비 상태는 [v0.2.3 기록](mydocs/release/v0.2.3.md)에서 확인할 수 있습니다.
+### v0.2.3
 
-### v0.2.2
+`v0.2.3 (21)`은 Mac에 설치된 글꼴을 기존 글꼴 목록에서 선택하고 문서·PDF·인쇄·Finder에 사용하는 기능을 제공합니다. 반복 Finder 요청의 글꼴 준비와 다수 파일의 썸네일 대기도 개선했습니다.
 
-`v0.2.2 (20)`은 새 문서를 저장한 뒤 닫기·앱 종료 시 미저장 경고가 반복되는 문제를 수정하고, 동일 버전 재설치 후 Spotlight 검색 준비를 보완했습니다. 문서 처리 엔진과 편집 화면은 직전 버전과 같은 `rhwp v0.8.6`을 사용합니다.
-
-- 포함된 `rhwp`: [`v0.8.6`](https://github.com/edwardkim/rhwp/releases/tag/v0.8.6), core·bundled Studio commit `f1f9c6ae58344ee9368996d3543f76b9345cf227`
-- 릴리스 기록: [v0.2.2 검증·제한 사항](mydocs/release/v0.2.2.md), [업데이트 문서](https://postmelee.github.io/alhangeul-macos/updates/v0.2.2.html)
-- 다운로드: [GitHub Release v0.2.2](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.2). macOS 12 이상을 대상으로 하는 Intel·Apple Silicon 공용 서명·공증 DMG입니다. 이번 최소 macOS 12 실행 검증은 환경 부재로 수행하지 못했습니다.
+- 설정(⌘,) → 글꼴 → **Mac에 설치된 글꼴 사용**을 켠 뒤 문서의 글꼴 목록에서 **시스템 글꼴**을 선택하세요. 기본 설정은 꺼져 있습니다. [Mac 글꼴 사용 안내](https://postmelee.github.io/alhangeul-macos/fonts/)를 참고하세요.
+- 포함된 `rhwp`: [`v0.8.7`](https://github.com/edwardkim/rhwp/releases/tag/v0.8.7), core·bundled Studio commit `1a76570e833917d15817415a53c09ad61ab3203f`
+- 릴리즈 기록: [v0.2.3 검증·제한 사항](mydocs/release/v0.2.3.md), [업데이트 문서](https://postmelee.github.io/alhangeul-macos/updates/v0.2.3.html)
+- 다운로드: [GitHub Release v0.2.3](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.3). macOS 12 이상을 대상으로 하는 Intel·Apple Silicon 공용 서명·공증 DMG입니다. 최소 macOS 12와 Intel 실기기 GUI는 이번 릴리즈에서 직접 시험하지 못했습니다.
 - 기존 앱: `알한글 → 업데이트 확인...`에서 업데이트할 수 있습니다.
 
-GitHub Release, Sparkle, Homebrew Cask의 최신 공개 버전은 모두 `v0.2.2 (20)`이며 같은 signed/notarized universal DMG를 사용합니다.
+GitHub Release, Sparkle, Homebrew Cask의 최신 공개 버전은 모두 `v0.2.3 (21)`이며 같은 signed/notarized universal DMG를 사용합니다.
 
 > **이전 v0.1.10 저장 주의:** HWP3 저장 시 원본이 HWP5 bytes로 바뀌거나, 보호 문서 저장 시 보호가 제거된 평문으로 원본을 덮어쓸 수 있습니다([#482](https://github.com/postmelee/alhangeul-macos/issues/482), [#480](https://github.com/postmelee/alhangeul-macos/issues/480)). v0.1.10을 계속 사용하는 경우 HWP3·암호 문서는 먼저 사본을 만들고 native 저장을 사용하지 마세요. 원본 보호가 적용된 최신 버전으로 업데이트하세요.
 
@@ -93,7 +92,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 
 ## 현재 구현 범위
 
-현재 공개 릴리즈 v0.2.2의 제공 기능과 제한 사항입니다.
+현재 공개 릴리즈 v0.2.3의 제공 기능과 제한 사항입니다.
 
 ### 제공 기능
 
@@ -108,6 +107,8 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 - [x] 평문 HWP5/HWPX 형식별 저장과 다른 이름으로 저장, HWP3 변환 복사본 저장
 - [x] PDF 내보내기
 - [x] native 인쇄 flow 연결
+- [x] Mac 설치 글꼴의 기존 목록 선택·문서/출력/Finder 연결
+- [x] 별도 글꼴 파일을 복사해 보관·관리
 - [x] macOS 공유 sheet
 - [x] 원본 URL이 있는 문서를 Finder에서 보기
 - [x] Quick Look/Thumbnail extension 상태 진단
@@ -117,7 +118,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 
 ### 현재 제한 사항
 
-- 설치 후 검색 준비와 문서 색인에는 시간이 걸릴 수 있습니다. 동일 버전 재설치 시 이전 요청 기록에 따른 기존 문서 자동 색인 누락은 [#513](https://github.com/postmelee/alhangeul-macos/issues/513)에서 조사 중입니다.
+- 설치 후 검색 준비와 문서 색인에는 시간이 걸릴 수 있습니다. 검색 제외 설정과 지원 범위는 [Spotlight 안내](mydocs/manual/spotlight_search_guide.md)를 확인하세요. 이번 실제 Mac 검색의 검증 한계와 후속 조사는 [릴리즈 기록](mydocs/release/v0.2.3.md)에 구분했습니다.
 - `저장하지 않음`으로 닫은 문서가 다음 실행의 복구 목록에 남을 수 있습니다([#525](https://github.com/postmelee/alhangeul-macos/issues/525)). 저장된 원본은 보존되며 복구 안내에서 `나중에`를 선택할 수 있습니다.
 
 - 앱 화면의 viewer/editor와 Finder Quick Look/thumbnail, PDF 내보내기, 인쇄는 서로 다른 렌더링 경로를 사용할 수 있습니다.

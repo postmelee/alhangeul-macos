@@ -1,0 +1,61 @@
+{
+  "time_utc": "2026-10-12T15:28:49.628204+00:00",
+  "original_target": "사용자가 삭제한 앱 부재 상태",
+  "app_absence_restored": true,
+  "source_mount_detached": true,
+  "candidate_staging_removed": true,
+  "owned_spotlight_folder_removed": true,
+  "source_dmg_unchanged": true,
+  "global_cache_reset": false,
+  "other_app_registration_modified": false,
+  "removed_app_logical_bytes": 1004837678,
+  "exact_owned_extension_pids_terminated": [],
+  "registration_operations": [
+    {
+      "action": "pluginkit-remove",
+      "path": "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+      "status": 0
+    },
+    {
+      "action": "pluginkit-remove",
+      "path": "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+      "status": 0
+    },
+    {
+      "action": "ls-unregister",
+      "path": "/Applications/Alhangeul.app",
+      "status": 0
+    },
+    {
+      "action": "pluginkit-remove",
+      "path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/finder-results/20261012-234355/staging/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+      "status": 1
+    },
+    {
+      "action": "pluginkit-remove",
+      "path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/finder-results/20261012-234355/staging/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+      "status": 1
+    },
+    {
+      "action": "ls-unregister",
+      "path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/finder-results/20261012-234355/staging/Alhangeul.app",
+      "status": 1
+    },
+    {
+      "action": "pluginkit-remove",
+      "path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/source-mount/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+      "status": 1
+    },
+    {
+      "action": "pluginkit-remove",
+      "path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/source-mount/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+      "status": 1
+    },
+    {
+      "action": "ls-unregister",
+      "path": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/source-mount/Alhangeul.app",
+      "status": 1
+    }
+  ],
+  "recent_full_equivalence_proven": false
+}

@@ -1,0 +1,84 @@
+{
+  "checked_at_kst": "2026-10-12T08:14:42.838275+09:00",
+  "source_run_id": 38180977764,
+  "source_run_attempt": 1,
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "source_artifact_id": 11717953850,
+  "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "dmg_size": 211405232,
+  "draft_release_id": 409973398,
+  "draft_dmg_asset_id": 632029048,
+  "checks": [
+    {
+      "check": "artifact ZIP digest/size",
+      "result": "PASS"
+    },
+    {
+      "check": "DMG checksum/draft asset digest/size",
+      "result": "PASS"
+    },
+    {
+      "check": "hdiutil verify",
+      "result": "PASS"
+    },
+    {
+      "check": "DMG strict seal/Developer ID/timestamp",
+      "result": "PASS"
+    },
+    {
+      "check": "app deep strict seal",
+      "result": "PASS"
+    },
+    {
+      "check": "app/DMG stapler",
+      "result": "PASS"
+    },
+    {
+      "check": "app/DMG Gatekeeper",
+      "result": "PASS"
+    },
+    {
+      "check": "네 bundle 0.2.3/21 및 네 실행 파일 universal",
+      "result": "PASS"
+    },
+    {
+      "check": "9개 component signing/runtime/get-task-allow",
+      "result": "PASS"
+    },
+    {
+      "check": "canonical entitlement/Legal/Studio/endpoint",
+      "result": "PASS"
+    },
+    {
+      "check": "일반 DMG Finder 레이아웃",
+      "result": "PASS"
+    },
+    {
+      "check": "원본 hash·태그·public feed 유지 및 mount/창 cleanup",
+      "result": "PASS"
+    }
+  ],
+  "local_inspection_environment": {
+    "os": "26.5.2",
+    "architecture": "arm64"
+  },
+  "runtime_mac_font_tests": "미실행",
+  "runtime_vm_tests": "미실행",
+  "installation_performed": false,
+  "public_release_promoted": false,
+  "initial_observation_failures": [
+    {
+      "type": "CLI watch 읽기 전용 네트워크 오류",
+      "resolution": "fresh Actions 조회로 run의 계속 실행·최종 success를 확인했다. workflow 재실행 없음."
+    },
+    {
+      "type": "sandbox codesign authority unavailable",
+      "resolution": "원시 실패를 보존하고 system trust 조회 가능한 읽기 권한으로 같은 원본 strict seal PASS를 확인했다. 재서명 없음."
+    },
+    {
+      "type": "검사 도구의 entitlement 예상값",
+      "resolution": "canonical font-library 그룹과 Xcode PRODUCT_BUNDLE_IDENTIFIER 치환을 반영했다. 제품 변경 없음."
+    }
+  ],
+  "result": "PASS (signed/notarized DMG 파일 검증만)"
+}

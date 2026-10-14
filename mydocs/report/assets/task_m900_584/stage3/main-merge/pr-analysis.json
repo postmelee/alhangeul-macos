@@ -1,0 +1,80 @@
+{
+  "previous_ref": "v0.2.2",
+  "analysis_source": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "observed_at_kst": "2026-10-12T07:13:26.751337+09:00",
+  "all_merge_commits": 35,
+  "all_merge_pr_count": 30,
+  "all_merge_pr_numbers": [
+    527,
+    542,
+    543,
+    544,
+    545,
+    546,
+    547,
+    548,
+    550,
+    551,
+    552,
+    553,
+    554,
+    556,
+    557,
+    559,
+    560,
+    561,
+    570,
+    571,
+    572,
+    574,
+    575,
+    576,
+    578,
+    579,
+    582,
+    583,
+    585,
+    586
+  ],
+  "first_parent_merge_pr_count": 10,
+  "first_parent_merge_pr_numbers": [
+    586,
+    575,
+    560,
+    557,
+    553,
+    552,
+    550,
+    548,
+    546,
+    543
+  ],
+  "new_pr_numbers": [
+    586
+  ],
+  "prior_analysis": "../pr-analysis.json",
+  "prior_user_facing_classification_retained": true,
+  "new_pr": {
+    "number": 586,
+    "title": "Release v0.2.3: Mac 설치 글꼴과 rhwp v0.8.7 소스 준비",
+    "merge_commit": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+    "classification": "main 운반",
+    "user_facing": false,
+    "resolved_task_issues": [],
+    "related_issues": [
+      584
+    ],
+    "notes": "검토 devel tree의 같은 제품 내용을 main으로 운반. 기능 중복 집계 없음. #584 전체 수용 미완료"
+  },
+  "helper_draft": {
+    "path": "build.noindex/task584/stage3/main-merge/release-pr-analysis.md",
+    "sha256": "db6034ee149bfcc79f45da5a667c8e214993d6ed08ecf069137bd58557edc954",
+    "bytes": 98861
+  },
+  "delta_draft": {
+    "path": "build.noindex/task584/stage3/main-merge/release-delta-checklist.md",
+    "sha256": "c5febe9233e540c1dd1c8c511ad2872b34cad7e330e3765ba7ef07c12fa16387",
+    "bytes": 122061
+  },
+  "review": "기존 29개 분류·기존 보고서/검토를 유지하고 exact ancestry·추가 #586 본문/CI/같은 tree를 직접 대조했다. 자동 초안을 공개 문구로 사용하지 않는다."
+}
