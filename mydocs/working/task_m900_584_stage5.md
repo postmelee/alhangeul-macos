@@ -65,3 +65,5 @@ README·홈/업데이트 Homebrew 안내·Cask·수용표·릴리즈 기록·최
 
 
 검증: 변경 Markdown 13개·상대 링크 261개, JPEG 파일 형식 9개·최소 증거 checksum 28개, 공백 검사, Pages 조립과 public appcast bytes 보존·Homebrew 업데이트 탭 화면 확인을 통과했다. 제품 코드·Rust/core·Studio·bundle 버전·고정 태그는 추가 변경하지 않았다. [검증 요약](../report/assets/task_m900_584/stage5/validation.json)을 참고한다.
+
+신규 실행안의 diff 예시 안에 남은 한 칸 공백을 staged 공백 검사에서 발견해 제거했다. 최종 staged 검사까지 통과한 상태로 게시 준비한다.

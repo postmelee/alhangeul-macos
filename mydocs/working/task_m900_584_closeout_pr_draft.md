@@ -1,5 +1,6 @@
 v0.2.3(21)의 검증된 동일 DMG 공개와 실제 업데이트·Homebrew 수용 결과를 기록하고, README와 웹의 Homebrew 안내를 실제 제공 버전에 맞춥니다. 기존 ‘미공개 후보 / Homebrew 0.2.2’ 안내가 ‘공개 v0.2.3 / Homebrew 0.2.3’으로 바뀝니다.
 
+- 이 PR은 아직 공개하지 않은 Stage 3~5 검증 증거·보고서를 함께 포함합니다. 제품 변경은 Cask version/hash와 공개 안내에 한정됩니다.
 - 공개 승격 run 38629062837의 promote/Pages 성공, 신규 public 다운로드 hash·기존 자산 ID 유지와 실제 Sparkle 0.2.2→0.2.3 다운로드·설치·자동 재실행을 확인했습니다.
 - Mac 글꼴 ON/재실행 유지·HWP/HWPX·Quick Look·새 경로 썸네일, tap PR postmelee/homebrew-tap#2 의 style/audit·병합과 Homebrew 제거/신규 설치·서명/공증/universal을 검증했습니다.
 - 관련 설정·최근 문서/sfl4·글꼴 정책·기존 Homebrew metadata와 앱 없음 상태를 복원했고 사용자 TXT/Finder 검색 창을 유지했습니다.
