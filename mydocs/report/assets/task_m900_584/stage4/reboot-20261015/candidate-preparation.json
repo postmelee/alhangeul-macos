@@ -1,0 +1,27 @@
+{
+  "prepared_at_utc": "2026-10-14T19:07:25.441478+00:00",
+  "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "version": "0.2.3",
+  "build": "21",
+  "original_app_absent": true,
+  "actual_uuid_container_resolved_before_launch": true,
+  "recent_key_present": true,
+  "native_recent_entries_before": 7,
+  "system_recent_sfl4_saved_before_launch": true,
+  "font_enabled_before": false,
+  "permission_grants_before": 0,
+  "backed_up_scoped_files": 5,
+  "global_index_reset": false,
+  "documents": [
+    {
+      "name": "font-search.hwp",
+      "sha256": "60d45372892ceadf93c8ace582a35420a66bfc3e3aa6c6b3ab9dd83d045189ee",
+      "size": 13312
+    },
+    {
+      "name": "font-search.hwpx",
+      "sha256": "a881f3e70d91d8ba7fc3b01cab245b8f13c508d6437d7e0f2d13922fc4430eca",
+      "size": 7550
+    }
+  ]
+}

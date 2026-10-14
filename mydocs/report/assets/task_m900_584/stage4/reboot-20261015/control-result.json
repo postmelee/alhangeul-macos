@@ -1,0 +1,35 @@
+{
+  "result": "PASS",
+  "execution_boundary": "실제 Mac Spotlight 서비스 접근이 가능한 실행 환경",
+  "elapsed_seconds": 3.73,
+  "timeout_seconds": 120,
+  "observations": [
+    {
+      "elapsed_seconds": 0.0,
+      "query": {
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "paths": []
+    },
+    {
+      "elapsed_seconds": 3.37,
+      "query": {
+        "returncode": 0,
+        "stdout": "/Users/melee/Documents/AlhangeulReleaseReboot-078f0ecb-47b2-4525-8988-6561e25c59a7/index-control.txt\n",
+        "stderr": ""
+      },
+      "paths": [
+        "/Users/melee/Documents/AlhangeulReleaseReboot-078f0ecb-47b2-4525-8988-6561e25c59a7/index-control.txt"
+      ]
+    }
+  ],
+  "metadata": {
+    "returncode": 0,
+    "stdout": "kMDItemContentType = \"public.plain-text\"\nkMDItemTextContent = (null)\n",
+    "stderr": ""
+  },
+  "global_index_reset": false,
+  "manual_import_request": false
+}

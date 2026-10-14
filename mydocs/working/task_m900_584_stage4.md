@@ -2,7 +2,7 @@
 
 ## 현재 상태와 실행 경계
 
-**2026-10-12 “진행해줘”로 승인한 시험과 2026-10-13 정리 실행 종료. Mac 글꼴·저장/재열기·실제 PDF·인쇄 취소·Finder 주요 경로 PASS. 실제 Mac 검색은 ENVIRONMENT_UNAVAILABLE, 최근 문서 이력의 전체 사전 동등성은 미증명이다. 이 두 제한의 수용과 Stage 5 진입 승인을 기다린다.** [구현계획 §5](../plans/task_m900_584_impl.md)의 일반 최종 앱을 검사했으며 제품 재빌드·재서명·bundle 수정·진단 flag 주입은 없다. [Stage 3](task_m900_584_stage3.md)의 양 VM은 같은 DMG로 schema 3 PASS다. 공개 승격·Pages/Sparkle·Homebrew는 실행하지 않았다.
+**2026-10-12 “진행해줘”로 승인한 시험과 2026-10-13 정리 실행 종료. Mac 글꼴·저장/재열기·실제 PDF·인쇄 취소·Finder 주요 경로 PASS. 실제 Mac 검색은 ENVIRONMENT_UNAVAILABLE, 최근 문서 이력의 전체 사전 동등성은 미증명이다. 2026-10-15 재부팅 후 재검증도 안정적인 검색 수용을 충족하지 못했다. 제한의 수용 또는 추가 진단과 Stage 5 진입 승인을 기다린다.** [구현계획 §5](../plans/task_m900_584_impl.md)의 일반 최종 앱을 검사했으며 제품 재빌드·재서명·bundle 수정·진단 flag 주입은 없다. [Stage 3](task_m900_584_stage3.md)의 양 VM은 같은 DMG로 schema 3 PASS다. 공개 승격·Pages/Sparkle·Homebrew는 실행하지 않았다.
 
 ## 고정 후보·기존 앱·소유 문서
 
@@ -109,3 +109,37 @@ helper는 staging과 설치 경로에만 app을 복사하며 --preserve-signatur
 Mac 글꼴 기능에는 새 제품 차단 실패가 발견되지 않았다. Stage 4의 M7은 TXT 대조군도 검색되지 않아 환경 수용이 불가능한 상태이며 구체 원인은 미확정이다. 따라서 양 VM 검색 PASS와 실제 importer 추출 PASS를 대체 근거로 수용할지 결정해야 한다. 최근 문서 이력의 사전 증거 공백도 숨기지 않고 수용을 요청한다. #480의 native 암호 저장 미지원과 #525의 폐기 후 복구 후보 잔존은 별도 후속으로 유지한다. 최소 macOS 12·Intel 실기기 글꼴 GUI·실제 한컴 삭제·물리 인쇄·실제 Sparkle 업데이트는 미검증이다.
 
 작업지시자가 위 제한을 수용하고 Stage 5 준비를 승인하면 동일 파일 공개 승격 입력·읽기 전용 proof와 구체 게시/업데이트 시험안을 준비한다. 아직 Release 공개·Pages/Sparkle·Homebrew·#584 close는 승인되거나 실행되지 않았다. 현재 앱이 없으므로 실제 Sparkle 시험은 공개 v0.2.2를 먼저 설치하는 준비와 최종 설치 유지/부재 복원 선택을 새 구체 범위에 명시해야 한다.
+
+
+## 2026-10-15 재부팅 후 Spotlight 재검증
+
+작업지시자의 “재부팅했어. 다시 검증해줘.” 지시에 따라 Stage 4의 같은 DMG·임시 설치·앱 부재 복원 범위로 재실행했다. Stage 5는 승인되거나 시작되지 않았다. macOS 26.5.2 (25F84)/arm64, 실제 부팅 시각은 10월 15일 04:02:02 KST였다. [재검증 요약](../report/assets/task_m900_584/stage4/reboot-20261015/summary.json)과 [실제 조회 기록](../report/assets/task_m900_584/stage4/reboot-20261015/search-observations.json)을 인계한다.
+
+| 경로 | 관측 결과와 판단 |
+|------|------------------|
+| 설치 전 TXT | 새 Documents 소유 폴더의 파일명에 없는 영문 표식이 3.73초에 검색됨. [최초 대조 PASS](../report/assets/task_m900_584/stage4/reboot-20261015/control-result.json) |
+| 실행 경계 비교 | 같은 파일이 일반 workspace sandbox의 조회에서는 보이지 않음. [실행 경계 차이](../report/assets/task_m900_584/stage4/reboot-20261015/sandbox-control-comparison.json)를 확인했으나 과거 전체 실패의 원인으로 확정하지 않음 |
+| 후보 설치·실행 | 원본 hash가 같은 0.2.3/21을 표준 scoped/preserve/skip-global smoke로 설치. 설치 전 HWP/HWPX 본문 검색은 0건. 일반 앱을 flag 없이 실행했고 실제 설치 경로의 자동 재색인 요청 receipt 확인 |
+| 앱 실행 중 검색 | 180초 한도 관찰에서 TXT·두 문서의 한글/영문 검색을 모두 충족하지 못함. 프로그램 기록 181.22초이며 대조군 양성 관측은 0회. TXT 전제가 실패했으므로 실제 Mac 검색 수용은 ENVIRONMENT_UNAVAILABLE로 유지 |
+| 추출 및 보조 요청 | 설치된 /Applications importer가 두 문서를 선택해 본문 추출. 일반 TXT도 Apple RichText importer 추출 통과. 소유 폴더만 일반 mdimport 요청 후 별도 60초 관찰(기록 62.55초)과 새 TXT 대조군 60초 관찰(기록 62.27초)도 안정적인 검색 미충족. 전역 색인 초기화·검색 제외 설정 변경 없음 |
+| 실제 Finder·설정 | 소유 폴더로 검색 범위를 한정한 TXT 본문 검색이 0개. HWP/HWPX 결과 열기는 미검증. 실제 검색 제외 목록은 비어 있고 파일 검색 항목은 ON. 설정을 바꾸지 않음 |
+| 후보 제거 후 대조 | 앱 종료·후보 제거 뒤에도 같은 TXT 두 개를 60초 관찰(기록 61.82초)했으나 둘 다 검색되는 상태를 확인하지 못함. 후보 제거로 즉시 회복됐다고 주장하지 않음 |
+| 원상복원 | 앱 실행 전에 metadata로 실제 UUID sandbox를 해결하고 최근 key·sfl4·요청 receipt·글꼴 정책을 비공개 보존. 이번 시험에서 최근 key 7개와 sfl4는 그대로 유지됐고 catalog의 원래 bytes 및 관련 key/부재를 복원. 앱·staging·mount·소유 폴더 제거, 후보 provider와 지연 확인 후 importer 목록 잔존 없음 |
+
+[실제 설치 importer HWP](../report/assets/task_m900_584/stage4/reboot-20261015/font-search.hwp-direct-importer.log), [HWPX](../report/assets/task_m900_584/stage4/reboot-20261015/font-search.hwpx-direct-importer.log), [일반 TXT 추출](../report/assets/task_m900_584/stage4/reboot-20261015/txt-direct-importer.log), [Finder 관측](../report/assets/task_m900_584/stage4/reboot-20261015/finder-ui.json), [복원 receipt](../report/assets/task_m900_584/stage4/reboot-20261015/restoration.json), [checksum](../report/assets/task_m900_584/stage4/reboot-20261015/SHA256SUMS)을 보존한다. 원시 실패·전체 관찰·실제 최근 항목과 비공개 백업은 build.noindex/task584/stage4/reboot-20261015에 남겼다. importer 목록은 제거 직후 남아 있었으나 지연 재확인에서는 사라졌다. 첫 관측을 지우지 않고 최종 상태와 함께 기록했다. 앱 복사본의 논리 합계 1,004,837,678 bytes를 정리했다.
+
+**결론:** 재부팅 후에도 안정적인 실제 Mac 검색 수용은 미충족이다. 설치 전 1회 양성과 이후 TXT까지 실패한 관측만으로 재부팅·OS 상태·도구 실행 경계·후보 설치/실행 중 어느 것이 원인인지 확정하지 못했다. 제품 회귀로 확정하거나 회귀가 없다고 단정하지 않는다. 이번 최근 문서 사전 보존과 복원 증거는 확보했지만, 10월 13일 이전 시험의 이력 동등성 공백을 소급 해결한 것은 아니다. Mac 검색 미확인과 역사적 공백의 수용은 여전히 승인 대기다.
+
+### 다음 좁은 진단안 — 승인 대기
+
+Apple이 안내하는 검색 제외 목록의 추가/제거 방식으로 **고유 시험 폴더 한 곳만 재색인**하는 진단을 제안한다. 현재 실행한 일반 mdimport 요청과 다른 OS 설정 동작이며 아직 수행하지 않았다.
+
+- 후보: 동일 0.2.3/21 DMG, SHA256 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63. 재빌드·재서명 없음.
+- 목표 폴더: /Users/melee/Documents/AlhangeulReleaseReindex-06d6d117-a5f2-4fec-a83c-af17e8acb8d1. 현재 만들지 않았으며 소유 TXT 2개·HWP/HWPX 2개만 둘 예정이다. fixture와 hash는 build.noindex/task584/stage4/reboot-20261015/reindex-fixtures 및 reindex-proposal.json에 준비했다.
+- 재색인: 기존 제외 목록을 먼저 기록하고 위 폴더만 잠시 추가했다가 제거한다. 다른 경로·파일 검색 범주·전체 디스크 색인·캐시·daemon을 바꾸지 않는다. 원래 제외 목록을 대조한다.
+- 검증: TXT의 양성 상태를 먼저 확보한 뒤 같은 후보를 /Applications/Alhangeul.app에 임시 설치·실행해 한글/영문 본문, 실제 importer, Finder 결과 열기와 앱 종료 후 검색을 대조한다. TXT 전제가 실패하면 HWP/HWPX의 제품 실패로 판정하지 않는다. 현재 관측만으로 v0.2.2 A/B나 전역 초기화까지 자동 확대하지 않는다.
+- 복원: 앱 실행 전에 실제 UUID의 최근 key/sfl4·요청 key·글꼴 정책을 다시 보존한다. 시험 항목만 정리하고 앱 부재·관련 설정·검색 제외 목록을 복원한다. 다른 작업자의 신규 항목이 감지되면 덮어쓰지 않고 확인한다. 공개 배포·새 서명·Homebrew·Stage 5는 포함하지 않는다.
+
+기존 승인은 재부팅 후 같은 후보의 재검증이다. 이 추가 진단은 OS의 검색 제외 설정을 잠시 바꾸므로 위 구체 범위의 승인을 받은 뒤 실행한다.
+
+재검증 기록의 최종 검사에서 갱신 문서 5개의 상대 링크 86개, 기존/새 증거 checksum 49개, 다음 진단용 fixture 4개를 대조했다. `git diff --check`는 통과했고 제품 소스는 수정하지 않았다. 검사 스크립트와 결과는 같은 build.noindex 재검증 폴더에 보존한다.

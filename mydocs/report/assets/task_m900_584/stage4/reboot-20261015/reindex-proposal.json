@@ -1,0 +1,38 @@
+{
+  "candidate": {
+    "version": "0.2.3",
+    "build": "21",
+    "dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63"
+  },
+  "folder": "/Users/melee/Documents/AlhangeulReleaseReindex-06d6d117-a5f2-4fec-a83c-af17e8acb8d1",
+  "owner_id": "06d6d117-a5f2-4fec-a83c-af17e8acb8d1",
+  "files": [
+    "index-control.txt",
+    "fresh-control.txt",
+    "font-search.hwp",
+    "font-search.hwpx"
+  ],
+  "status": "승인 대기",
+  "fixture_files": [
+    {
+      "name": "font-search.hwp",
+      "size": 13312,
+      "sha256": "60d45372892ceadf93c8ace582a35420a66bfc3e3aa6c6b3ab9dd83d045189ee"
+    },
+    {
+      "name": "font-search.hwpx",
+      "size": 7550,
+      "sha256": "a881f3e70d91d8ba7fc3b01cab245b8f13c508d6437d7e0f2d13922fc4430eca"
+    },
+    {
+      "name": "fresh-control.txt",
+      "size": 35,
+      "sha256": "4f25994aba69836480769a5dfe2746bb609261e3be467e579839e73dbdc45895"
+    },
+    {
+      "name": "index-control.txt",
+      "size": 54,
+      "sha256": "f3af78db9dbe72c4d31806dcaa2d21d0d2815edce27ad960ef2df7263f20face"
+    }
+  ]
+}

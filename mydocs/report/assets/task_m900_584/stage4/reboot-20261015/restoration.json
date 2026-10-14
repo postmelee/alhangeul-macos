@@ -1,0 +1,103 @@
+{
+  "restored_at_utc": "2026-10-14T19:24:37.384345+00:00",
+  "app_absence_restored": true,
+  "source_mount_detached": true,
+  "source_dmg_unchanged": true,
+  "current_trial_native_recent_exactly_unchanged": true,
+  "native_recent_entries_before_and_after": 7,
+  "scoped_preference_keys_restored": [
+    "alhangeul.spotlight.reimport.requestedInstallation"
+  ],
+  "scoped_files": [
+    {
+      "name": "com.postmelee.alhangeul.sfl4",
+      "original_presence_restored": true,
+      "original_bytes_restored": true,
+      "write_needed": false
+    },
+    {
+      "name": "installed-fonts-v1.json",
+      "original_presence_restored": true,
+      "original_bytes_restored": true,
+      "write_needed": true
+    },
+    {
+      "name": "installed-fonts-v1.json",
+      "original_presence_restored": true,
+      "original_bytes_restored": false,
+      "write_needed": false
+    },
+    {
+      "name": "policy.json",
+      "original_presence_restored": true,
+      "original_bytes_restored": false,
+      "write_needed": false
+    },
+    {
+      "name": "pending",
+      "original_presence_restored": true,
+      "original_bytes_restored": false,
+      "write_needed": false
+    }
+  ],
+  "historical_oct13_recent_equivalence_gap_resolved": false,
+  "registration_operations": [
+    {
+      "action": "pluginkit-remove",
+      "target": "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+      "returncode": 0
+    },
+    {
+      "action": "pluginkit-remove",
+      "target": "/Applications/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+      "returncode": 0
+    },
+    {
+      "action": "ls-unregister",
+      "target": "/Applications/Alhangeul.app",
+      "returncode": 0
+    },
+    {
+      "action": "pluginkit-remove",
+      "target": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/reboot-20261015/install-results/20261015-040754/staging/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+      "returncode": 1
+    },
+    {
+      "action": "pluginkit-remove",
+      "target": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/reboot-20261015/install-results/20261015-040754/staging/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+      "returncode": 1
+    },
+    {
+      "action": "ls-unregister",
+      "target": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/reboot-20261015/install-results/20261015-040754/staging/Alhangeul.app",
+      "returncode": 1
+    },
+    {
+      "action": "pluginkit-remove",
+      "target": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/reboot-20261015/source-mount/Alhangeul.app/Contents/PlugIns/AlhangeulPreview.appex",
+      "returncode": 1
+    },
+    {
+      "action": "pluginkit-remove",
+      "target": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/reboot-20261015/source-mount/Alhangeul.app/Contents/PlugIns/AlhangeulThumbnail.appex",
+      "returncode": 1
+    },
+    {
+      "action": "ls-unregister",
+      "target": "/Users/melee/Documents/projects/rhwp-mac/build.noindex/task584/stage4/reboot-20261015/source-mount/Alhangeul.app",
+      "returncode": 1
+    }
+  ],
+  "candidate_importer_catalog_remaining": [
+    "    \"/Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter\","
+  ],
+  "exact_owned_extension_pids_terminated": [],
+  "removed_app_logical_bytes": 1004837678,
+  "global_index_reset": false,
+  "spotlight_privacy_settings_modified": false,
+  "owned_documents_folder_removed": true,
+  "trial_input_hashes_unchanged": true,
+  "candidate_importer_catalog_final_returncode": 0,
+  "candidate_importer_catalog_final_remaining": [],
+  "candidate_importer_catalog_cleanup_complete": true
+}
