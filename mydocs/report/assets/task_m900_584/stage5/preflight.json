@@ -1,0 +1,52 @@
+{
+  "checked_at": "2026-10-15T05:04:55.555056+09:00",
+  "latest": "v0.2.2",
+  "upstream_latest": "v0.8.7",
+  "release": {
+    "id": 409973398,
+    "tag_name": "v0.2.3",
+    "draft": true,
+    "prerelease": false
+  },
+  "assets": [
+    {
+      "id": 632029048,
+      "name": "alhangeul-macos-0.2.3.dmg",
+      "size": 211405232,
+      "digest": "sha256:d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63"
+    },
+    {
+      "id": 632029049,
+      "name": "alhangeul-macos-0.2.3.dmg.sha256",
+      "size": 92,
+      "digest": "sha256:d83d464fd191b6e431b38fb5f0fe041a00ee99f5d12b2599b7b393e283269417"
+    }
+  ],
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "source_run": 38180977764,
+  "validation_run": 38185285770,
+  "validation_attempt": 1,
+  "artifacts": [
+    {
+      "id": 11717953850,
+      "name": "alhangeul-macos-0.2.3-public-dmg",
+      "expired": false,
+      "expires_at": "2026-10-25T22:58:32Z"
+    },
+    {
+      "id": 11720195360,
+      "name": "first-install-evidence-macos-15-38185285770-1",
+      "expired": false,
+      "expires_at": "2026-11-10T23:59:26Z"
+    },
+    {
+      "id": 11719139990,
+      "name": "first-install-evidence-macos-15-intel-38185285770-1",
+      "expired": false,
+      "expires_at": "2026-11-11T00:01:11Z"
+    }
+  ],
+  "local_dmg_sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "authorization": "2026-10-15 동일 DMG 양 VM 검색·실제 Mac 본문 추출 대체 근거 수용, Stage 5 진행 및 배포 지시",
+  "actual_mac_search": "ENVIRONMENT_UNAVAILABLE; 색인 중이라는 사용자 설명에 따라 별도 시험 및 다음 릴리즈 후속 조사. 회귀 원인 확정 아님"
+}

@@ -1,0 +1,25 @@
+{
+  "checks": [
+    {
+      "command": [
+        "brew",
+        "style",
+        "--cask",
+        "postmelee/tap/alhangeul"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "brew",
+        "audit",
+        "--cask",
+        "postmelee/tap/alhangeul"
+      ],
+      "returncode": 0
+    }
+  ],
+  "candidate_version": "0.2.3",
+  "actual_tap_context": true,
+  "original_tap_cask_restored": true
+}

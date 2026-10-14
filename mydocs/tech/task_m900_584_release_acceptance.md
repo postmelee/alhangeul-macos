@@ -2,7 +2,7 @@
 
 ## 기준과 상태
 
-2026-10-12 Stage 1에서 만든 검증 계약이다. v0.2.3 / build 21, source c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4 / tag v0.2.3, publish run 38180977764, artifact 11717953850, DMG SHA256 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63을 고정했다. I1/I2/I3는 PASS다. 2026-10-12~13 [Stage 4](../working/task_m900_584_stage4.md)의 일반 Mac 앱 주요 동선도 통과했으며 M7 환경 미확인 및 R1 최근 이력의 증거 공백 수용을 기다린다. 공개 행은 대기다. [Stage 2](../working/task_m900_584_stage2.md)의 선행 unsigned/Pages 검증과 최종 DMG 직접 결과를 구분한다.
+2026-10-12 Stage 1에서 만든 검증 계약이다. v0.2.3 / build 21, source c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4 / tag v0.2.3, publish run 38180977764, artifact 11717953850, DMG SHA256 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63을 고정했다. I1/I2/I3는 PASS다. 2026-10-12~13 [Stage 4](../working/task_m900_584_stage4.md)의 일반 Mac 앱 주요 동선도 통과했으며 M7은 2026-10-15 양 VM 검색·실제 Mac 본문 추출 대체 근거로 수용했다. R1 과거 이력 공백은 유지한다. [Stage 5](../working/task_m900_584_stage5.md)의 공개·실제 Sparkle·Homebrew 시험 및 현재 시험의 원상복원을 완료했다. [Stage 2](../working/task_m900_584_stage2.md)의 선행 unsigned/Pages 검증과 최종 DMG 직접 결과를 구분한다.
 
 [릴리즈 기록](../release/v0.2.3.md), [구현계획](../plans/task_m900_584_impl.md), [Stage 1 출처](../report/assets/task_m900_584/stage1/context.json)를 기준으로 한다.
 
@@ -27,14 +27,14 @@
 | M4 | 인쇄 | 실제 macOS 패널 열기·취소·문서 복귀 | 두 형식 PASS, 물리 출력 없음 |
 | M5 | Finder | fresh single/two-page Quick Look·Thumbnail·실제 active provider | 최종 0.2.3 경로, 단일 PNG 2건·PDF 2페이지 선택·새 Thumbnail 3개 표시 PASS. 앞선 stale 요청 3개는 raw 보존, 일반 Release의 개별 PS debug 추적은 미확인 |
 | M6 | 원본·권한·동명 상태 | 기존 계약 대조 및 승인된 직접 설정 동선 | 직접 ON/OFF·grant 0·OS 글꼴 hash 유지 PASS. 원본/권한 상실·동명 회귀는 #569/#580 인계, 이번 OS mutation 재시험 없음 |
-| M7 | Spotlight | 실제 Mac 검색·결과 열기·실제 importer | ENVIRONMENT_UNAVAILABLE: [10월 15일 재부팅 재검증](../report/assets/task_m900_584/stage4/reboot-20261015/summary.json)에서 설치 전 TXT 1회 PASS 후 TXT까지 재실패, Finder 0개. 실제 설치 importer 추출 PASS. [폴더 한정 재색인](../report/assets/task_m900_584/stage4/reindex-06d6d117/summary.json)도 후보 미설치 TXT 양성 0회로 환경 미충족. 원인/회귀 미확정, 양 VM·실제 추출의 대체 근거 수용 승인 대기 |
+| M7 | Spotlight | 실제 Mac 검색·결과 열기·실제 importer | ENVIRONMENT_UNAVAILABLE: [10월 15일 재부팅 재검증](../report/assets/task_m900_584/stage4/reboot-20261015/summary.json)에서 설치 전 TXT 1회 PASS 후 TXT까지 재실패, Finder 0개. 실제 설치 importer 추출 PASS. [폴더 한정 재색인](../report/assets/task_m900_584/stage4/reindex-06d6d117/summary.json)도 후보 미설치 TXT 양성 0회로 환경 미충족. 원인/회귀 미확정, 2026-10-15 양 VM·실제 추출의 대체 근거 수용. 실제 Mac 검색은 후속 조사 |
 | M8 | 저장·닫기/종료 | 저장·취소·정상 종료/재열기 | 관측 동선 PASS. 모든 저장 실패 유형으로 확대하지 않음 |
 | S1 | #480 안전 차단 | 경고 취소·원본/동일 목적지 금지·명시 다른 평문 복사본 | [경고/취소·원본 hash·다른 복사본 재열기 PASS](../report/assets/task_m900_584/stage4/protection-proof.json). 동일 목적지 패널 재선택은 정적 정책 인계, 직접 미시험. native 암호 저장 미지원 |
-| S2 | #525 복구 한계 | 저장하지 않음 후 후보·원본 보존 | 최종 앱에서 소유 후보 1개 잔존 관측·해당 후보만 삭제, 원본 유지. 별도 후속 및 공개 한계 수용 대기 |
-| R1 | 임시 시험 복원 | 승인된 앱/설정·소유 파일/등록 정리 | [앱 부재/설치 정리 PASS](../report/assets/task_m900_584/stage4/installation-restoration.json). [OFF·권한·policy 부재·확보한 최근 항목 복구](../report/assets/task_m900_584/stage4/settings-restoration.json). UUID/sfl4 사전 경로 누락 때문에 전체 최근 이력 동등성은 미증명·수용 대기 |
-| P1 | 동일 파일 공개 | 인증 없는 public DMG/checksum 신규 다운로드, 검사 hash 동일·stable latest·Pages/폰트 안내·배너 | public URL/hash·배포·appcast XML/정확한 항목 / 대기 |
-| P2 | 실제 Sparkle | 실제 v0.2.2 → v0.2.3 다운로드/설치/자동 재실행·문서/검색/확장·글꼴 설정 | 실제 update UI·최종 설치 버전·기존 설정/원본 / 대기 |
-| P3 | Homebrew | 정확한 public hash의 tap/본 저장소 Cask·audit·업데이트/설치 또는 승인된 독립 후속 | 실제 tap/receipt/시험 혹은 명시 분리 / 대기 |
+| S2 | #525 복구 한계 | 저장하지 않음 후 후보·원본 보존 | 최종 앱에서 소유 후보 1개 잔존 관측·해당 후보만 삭제, 원본 유지. 별도 후속·공개 한계 유지 |
+| R1 | 임시 시험 복원 | 승인된 앱/설정·소유 파일/등록 정리 | [앱 부재/설치 정리 PASS](../report/assets/task_m900_584/stage4/installation-restoration.json). [OFF·권한·policy 부재·확보한 최근 항목 복구](../report/assets/task_m900_584/stage4/settings-restoration.json). UUID/sfl4 사전 경로 누락 때문에 과거 전체 최근 이력 동등성은 미증명으로 유지. Stage 5는 사전 UUID 해결·7개 key/최근 문서와 관련 파일 복원 PASS |
+| P1 | 동일 파일 공개 | 인증 없는 public DMG/checksum 신규 다운로드, 검사 hash 동일·stable latest·Pages/폰트 안내·배너 | PASS: [공개 파일](../report/assets/task_m900_584/stage5/public-download.json)·[Pages/feed](../report/assets/task_m900_584/stage5/pages.json), 동일 hash·latest 0.2.3·배포 성공 |
+| P2 | 실제 Sparkle | 실제 v0.2.2 → v0.2.3 다운로드/설치/자동 재실행·문서/검색/확장·글꼴 설정 | 업데이트·문서/글꼴/Finder PASS: [자동 재실행](../report/assets/task_m900_584/stage5/sparkle-relaunch.json), 0.2.2/20 → 0.2.3/21. Mac 검색은 M7 대체 근거 수용 |
+| P3 | Homebrew | 정확한 public hash의 tap/본 저장소 Cask·audit·업데이트/설치 또는 승인된 독립 후속 | PASS: [tap PR #2](https://github.com/postmelee/homebrew-tap/pull/2) 병합·style/audit·receipt upgrade·제거/신규 설치·동일 실행 파일·[원상복원](../report/assets/task_m900_584/stage5/restoration.json) |
 
 ## 기존 증거와 실제 새 수용의 구분
 

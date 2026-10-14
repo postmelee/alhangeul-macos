@@ -1,0 +1,7 @@
+{
+  "hdiutil_verify": "PASS; CRC32 0145A7D9",
+  "stapler": "PASS",
+  "gatekeeper": "accepted; Notarized Developer ID",
+  "sha256": "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63",
+  "same_bytes_as_accepted_candidate": true
+}

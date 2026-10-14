@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "markdown_files_checked": 13,
+  "relative_links_checked": 261,
+  "image_formats_checked": 9,
+  "image_extension_matches_bytes": true,
+  "pages_artifact_appcast_bytes_preserved": true,
+  "cask_ruby_syntax": "PASS",
+  "homebrew_style_and_audit": "PASS in actual tap",
+  "app_absence_restored": true,
+  "manual_txt_retained": true,
+  "pages_preview": "http://127.0.0.1:55028/updates/#homebrew",
+  "asset_files_including_this_proof": 28
+}

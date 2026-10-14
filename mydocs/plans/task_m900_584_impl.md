@@ -148,9 +148,9 @@ Finder는 scripts/smoke-clean-quicklook-install.sh의 --app, --install-app /Appl
 
 종료: 같은 DMG의 실제 Mac 수용 및 복원 PASS, 공개 전 위험/한계·정확한 hash의 최종 제시. 커밋: Task #584 Stage 4: 공증 후보 Mac 글꼴·출력·Finder 수용과 복원.
 
-### Stage 4 실행 후 수용 보정 제안 — 승인 대기
+### Stage 4 실행 후 수용 보정 — 2026-10-15 M7 대체 근거 수용·Stage 5 배포 승인
 
-실제 일반 앱의 Mac 글꼴·저장·PDF·인쇄 취소·Finder 시험과 설치 정리는 종료했다. 2026-10-15 재부팅 후 재검증도 실제 검색의 TXT 전제를 안정적으로 충족하지 못했다. [폴더 재색인 진단](../working/task_m900_584_stage4.md#다음-좁은-진단안--승인-대기)은 별도 승인 후 실행했다. 후보 미설치 상태의 TXT 전제가 180초 관찰에서 실패해 정리했으며, M7 대체 근거 수용과 Stage 5 준비 승인을 기다린다. Stage 5는 시작하지 않았다. [보고서](../working/task_m900_584_stage4.md)의 다음 제한을 작업지시자가 수용하면 Stage 4를 수용하고 Stage 5 준비로 진행할 것을 제안한다. 이번 문서 갱신 자체가 기준 보정 승인이나 공개 승인은 아니다.
+2026-10-15 작업지시자가 동일 DMG의 양 VM 검색 PASS·실제 Mac 본문 추출 PASS를 대체 근거로 수용하고 Stage 5 진행·배포를 명시 지시했다. 이어 구체 실행안의 실제 Sparkle·Homebrew 게시/병합·설치 시험과 앱 없음 복원까지 승인했다. 아래의 M7/R1/S1/S2 관측 한계는 해결로 바꾸지 않는다. 실제 Mac 검색은 별도 수동 시험·다음 릴리즈 조사로 남긴다. [Stage 5 보고](../working/task_m900_584_stage5.md)에 실제 공개·검증·복원 결과를 기록한다.
 
 - M7은 저장된 색인 활성화 상태에서도 일반 TXT가 검색되지 않아(구체 원인 미확정) ENVIRONMENT_UNAVAILABLE로 유지한다. 같은 DMG의 ARM/Intel schema 3 검색 PASS와 최종 설치 앱의 실제 importer 원문 추출 PASS를 대체 근거로 사용한다. 실제 Mac 검색 성공으로 안내하지 않는다.
 - R1은 작업지시자가 확정한 앱 부재·OFF/grant 0·공유 policy 부재·소유 Documents 폴더·후보 등록/mount 정리 및 원본 hash 유지로 판정한다. UUID container/sfl4 사전 경로를 놓쳐 전체 최근 이력의 사전 동등성은 미증명이다. 확보한 기존 7개/시스템 6개 항목은 보존·복구했고 시험 항목만 제거했다. 이 증거 공백의 수용을 별도로 명시한다.

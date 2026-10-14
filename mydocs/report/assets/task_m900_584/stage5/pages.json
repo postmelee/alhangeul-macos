@@ -1,0 +1,39 @@
+{
+  "pages": [
+    {
+      "name": "home.html",
+      "status": 200,
+      "sha256": "5136c5b31584afe9c931a308dab7e27a27b2712c2a57f6ab0f887b934e701bed"
+    },
+    {
+      "name": "fonts.html",
+      "status": 200,
+      "sha256": "47d749938f8e47ae4494043a906c860c279d9d89ecde64fb5ee86baafc104506"
+    },
+    {
+      "name": "notes.html",
+      "status": 200,
+      "sha256": "b3ffe47b2a2e3b894d7bf79e4c8fdc6c07c8913d267cb32b765126e2e44eef5a"
+    },
+    {
+      "name": "previous.html",
+      "status": 200,
+      "sha256": "62e3d13082147c4d60169e74b64c83a5d801011bb4c15a0a96657fb2db276884"
+    },
+    {
+      "name": "appcast.xml",
+      "status": 200,
+      "sha256": "67274e1df34627823b6a2d0e0f71a41d46e3814748060f89cb8834b9108923ec"
+    }
+  ],
+  "sparkle": {
+    "version": "0.2.3",
+    "build": "21",
+    "url": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.3/alhangeul-macos-0.2.3.dmg",
+    "length": 211405232,
+    "ed_signature": "zhjcaBgyCa9LhxJsMYEVz4EAhVUZU+ayhBuvfnMeYBXvYO6gG8REN33ZTm2zQ+5rVEQKC0gcwHEzTjqHIBolCQ=="
+  },
+  "previous_version_banner": true,
+  "home_fonts_link": true,
+  "first_check_failure": "로컬 검사기가 version을 enclosure 속성으로 가정해 KeyError. 실제 feed의 item 자식 요소를 읽도록 보정 후 통과. 제품 수정 없음"
+}

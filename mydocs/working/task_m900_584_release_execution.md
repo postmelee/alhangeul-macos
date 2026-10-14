@@ -1,6 +1,8 @@
-# Task M900 #584 v0.2.3 태그·DMG 실행 준비안
+# Task M900 #584 v0.2.3 태그·DMG 실행 기록
 
 ## 확정 source와 현재 승인
+
+**현재 상태(2026-10-15):** 동일 후보의 공개 승격 run 38629062837·Pages/Sparkle 배포, 실제 0.2.2→0.2.3 업데이트·Mac 글꼴/문서/Finder·tap PR #2 및 Homebrew 설치 시험·원상복원을 완료했다. 실제 Mac 검색은 작업지시자가 양 VM 검색/본문 추출 대체 근거로 수용했으며 후속 조사로 남겼다. [Stage 5](task_m900_584_stage5.md)를 최종 실행 기록으로 사용한다. 아래 준비/대기 표현은 각 단계 당시 경계다.
 
 [PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)을 **“main 병합·다음 실행 준비”** 승인으로 병합했다. 실제 main SHA는 `c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4`, tree는 `80fb5eadadbc9ff8f89a8652917e037715c077bd`다. 검토 head `5146d91e`의 제품 내용과 같고 네 source bundle은 0.2.3 / build 21, core·Studio는 공식 v0.8.7 / `1a76570e833917d15817415a53c09ad61ab3203f`다.
 

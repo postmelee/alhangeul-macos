@@ -1,0 +1,43 @@
+{
+  "id": 409973398,
+  "tag_name": "v0.2.3",
+  "published_at": "2026-10-14T20:07:41Z",
+  "html_url": "https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.3",
+  "draft": false,
+  "prerelease": false,
+  "latest": "v0.2.3",
+  "body_sha256": "9a6401662fa0865e8442ae47df3fe7e98573ee7c201a0494723f52a08ffcaaa2",
+  "assets": [
+    {
+      "id": 632029048,
+      "name": "alhangeul-macos-0.2.3.dmg",
+      "size": 211405232,
+      "digest": "sha256:d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63"
+    },
+    {
+      "id": 632029049,
+      "name": "alhangeul-macos-0.2.3.dmg.sha256",
+      "size": 92,
+      "digest": "sha256:d83d464fd191b6e431b38fb5f0fe041a00ee99f5d12b2599b7b393e283269417"
+    }
+  ],
+  "promotion_run": 38629062837,
+  "promotion_attempt": 1,
+  "source_sha": "c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4",
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "promote",
+      "conclusion": "success",
+      "started_at": "2026-10-14T20:05:23Z",
+      "completed_at": "2026-10-14T20:07:49Z"
+    },
+    {
+      "name": "deploy-pages",
+      "conclusion": "success",
+      "started_at": "2026-10-14T20:07:54Z",
+      "completed_at": "2026-10-14T20:09:05Z"
+    }
+  ],
+  "homebrew_instructions_updated_after_test": true
+}

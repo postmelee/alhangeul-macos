@@ -1,10 +1,10 @@
-# Task M900 #584 부분 최종 보고 — v0.2.3 소스 준비
+# Task M900 #584 최종 보고 — v0.2.3 공개·설치 수용
 
 ## 결론
 
-**Stage 1·2 소스 준비와 Stage 3 동일 공증 DMG의 파일 검증·양 VM 수용 완료. Stage 4 일반 Mac 앱의 글꼴·저장·PDF·인쇄 취소·Finder 시험과 설치 정리는 실행 종료했으며, 실제 Mac 검색 환경 및 최근 문서 사전 증거 공백의 수용을 기다린다. 업데이트·공개 수용은 대기다.** #584 전체 완료 보고가 아니다. v0.2.3 / 21의 네 bundle·release 입력과 Mac 글꼴·rhwp v0.8.7 안내 후보를 준비했다. 실제 public 앱·Pages·Sparkle·Homebrew는 여전히 v0.2.2다.
+**v0.2.3(21)을 2026-10-15 05:07:41 KST 공개하고 Pages/Sparkle·실제 업데이트·Mac 글꼴/문서/Finder·Homebrew 설치와 앱 없음/관련 설정 원상복원을 완료했다.** rhwp v0.8.7과 Mac 로컬 글꼴 기능을 포함한 동일 공증 DMG다. 실제 Mac Spotlight 검색은 양 VM 검색 PASS·실제 Mac 본문 추출 PASS를 대체 근거로 명시 수용했으며 원인 조사·필요 수정은 다음 릴리즈 후속으로 남긴다. 과거 최근 문서 이력 공백과 기존 저장 한계는 해결로 바꾸지 않는다. 이 보고와 README·웹 Homebrew 안내/Cask mirror를 포함한 종료 정리 PR 게시 승인을 기다리며 #584는 아직 OPEN이다.
 
-준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 검증 이미지 보정 head `938b59b9`의 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. 이후 [Stage 3](../working/task_m900_584_stage3.md)에서 [main PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)의 통합 리뷰·CI 4개를 확인하고, **“main 병합·다음 실행 준비”** 승인으로 main `c9d59f93`에 병합했다. **“v0.2.3 태그 생성·push”** 승인으로 해당 실제 SHA에 tag를 생성·게시·검증했다. DMG workflow의 실행 입력·운영 이름 준비 후 별도 승인으로 run 38180977764를 실행해 success / attempt 1과 artifact 11717953850의 동일 원본 파일 검증 PASS를 확인했다. 별도 승인한 VM 첫 run의 ARM 환경 실패는 보존했고 같은 입력의 재시험 38185285770에서 양 아키텍처 및 verdict, 원본 schema 3·설치/재설치·검색·lifecycle/cleanup 대조를 통과했다. 실제 Mac의 관측 결과와 한계에 대한 수용 및 최종 공개 수용은 대기다.
+준비 [PR #585](https://github.com/postmelee/alhangeul-macos/pull/585)는 검증 이미지 보정 head `938b59b9`의 CI 4개 통과 후 `5146d91e`로 devel에 병합했다. 이후 [Stage 3](../working/task_m900_584_stage3.md)에서 [main PR #586](https://github.com/postmelee/alhangeul-macos/pull/586)의 통합 리뷰·CI 4개를 확인하고, **“main 병합·다음 실행 준비”** 승인으로 main `c9d59f93`에 병합했다. **“v0.2.3 태그 생성·push”** 승인으로 해당 실제 SHA에 tag를 생성·게시·검증했다. DMG workflow의 실행 입력·운영 이름 준비 후 별도 승인으로 run 38180977764를 실행해 success / attempt 1과 artifact 11717953850의 동일 원본 파일 검증 PASS를 확인했다. 별도 승인한 VM 첫 run의 ARM 환경 실패는 보존했고 같은 입력의 재시험 38185285770에서 양 아키텍처 및 verdict, 원본 schema 3·설치/재설치·검색·lifecycle/cleanup 대조를 통과했다. 이후 실제 Mac 검색의 대체 근거 수용과 Stage 5 공개·설치 검증을 완료했다. 아래는 각 단계 당시 증거를 구분한 기록이다.
 
 ## 구현과 사용자 변화
 
@@ -22,7 +22,7 @@ Rust 양 target portable·core/Studio·producer golden/Swift decoder·unsigned D
 - [Stage 2 증거](assets/task_m900_584/stage2/validation.json), [제품/arch 기록](assets/task_m900_584/stage2/built-products.json), [Pages 보호](assets/task_m900_584/stage2/pages-proof.json), [등록 정리](assets/task_m900_584/stage2/registration-cleanup.json), [공간 정리](assets/task_m900_584/stage2/storage-cleanup.json).
 - [Mac 안내 화면](assets/task_m900_584/stage2/fonts-desktop.jpg), [새 노트 화면](assets/task_m900_584/stage2/release-desktop.jpg), [checksum](assets/task_m900_584/stage2/SHA256SUMS).
 
-## 남은 수용과 위험
+## 수용 결과와 남은 한계
 
 | 영역 | 상태 |
 |------|------|
@@ -30,14 +30,14 @@ Rust 양 target portable·core/Studio·producer golden/Swift decoder·unsigned D
 | 최종 provenance/DMG | source SHA c9d59f9300ef78b4cc6a3a8e17a10a3d766d01d4 및 v0.2.3 tag 게시·검증 완료. publish run 38180977764 / attempt 1 / success, artifact 11717953850. DMG SHA256 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63 / 211405232 bytes, 파일/서명·공증·레이아웃 PASS |
 | ARM/Intel VM | [run 38185285770 / attempt 1 PASS](assets/task_m900_584/stage3/vm/retry/summary.json), 양 schema 3·최초/종료 후·재설치/종료 후·각 lifecycle 33개·cleanup. 양쪽 maintained. 첫 실패 38184399238 보존 |
 | 실제 Mac | [Stage 4](../working/task_m900_584_stage4.md): macOS 26.5.2/arm64 일반 최종 앱의 실제 232 family/204 공급, HWP/HWPX 저장·새 프로세스 재열기·실제 PDF·프린트 취소·Finder PASS. 실제 검색은 색인 활성화 상태에서도 TXT 대조군이 검색되지 않아 환경 미확인(원인 미확정), 현재 설치 importer 추출 및 양 VM 검색 PASS |
-| 복원·증거 공백 | 사용자가 삭제한 앱 부재로 복원·후보 등록/mount/소유 Documents 폴더 정리·OFF/grant 0·원본 hash 유지. UUID container/sfl4를 늦게 확인해 확보한 최근 항목은 복구했으나 전체 사전 동등성은 미증명. 수용 판정 대기 |
+| 복원·증거 공백 | 사용자가 삭제한 앱 부재로 복원·후보 등록/mount/소유 Documents 폴더 정리·OFF/grant 0·원본 hash 유지. UUID container/sfl4를 늦게 확인해 확보한 최근 항목은 복구했으나 전체 사전 동등성은 미증명. 과거 전체 동등성 미증명은 유지. Stage 5는 사전 UUID·7개 recent/sfl4·관련 설정 정확한 복원 PASS |
 | 저장·복구 | #480 보호 경고·취소·원본 hash 유지·명시 다른 평문 복사본 재열기 PASS, native 암호화 저장 미지원. #525 저장하지 않음 뒤 소유 복구 후보 잔존을 최종 앱에서 관측·정리. 해당 한계와 동일 목적지 패널 재선택 미시험을 수용표에 구분 |
-| 공개·업데이트 | 같은 DMG public 신규 다운로드·Pages/Sparkle·실제 v0.2.2→v0.2.3 업데이트·Cask 및 README 공개 상태 갱신 대기 |
+| 공개·업데이트 | [Stage 5](../working/task_m900_584_stage5.md) 공개·Pages/Sparkle·실제 0.2.2→0.2.3 업데이트·문서/글꼴/Finder·tap PR #2·Homebrew 설치·원상복원 PASS. README/웹 안내·최종 기록의 종료 정리 게시 대기 |
 | 독립 후속 | Windows #566·추가 현재성 비용 최적화 #581 OPEN. <300ms·무지연 실행을 완료 기준으로 다시 요구하지 않음 |
 
 최소 macOS 12·Intel 실기기 GUI·실제 한컴 제거·물리 인쇄를 이번 unsigned 검증으로 수행했다고 주장하지 않는다. 새 원본 손상이나 보호 우회가 확인되면 공개를 차단한다.
 
-## 준비 PR 결과와 다음 gate
+## 이전 준비 PR과 단계별 gate 이력
 
 `local/task584`의 준비 소스·문서·증거·부분 보고는 승인에 따라 `publish/task584`의 #585로 게시했다. source 준비 커밋 `ee453da2`, 보고 묶음 `39e3e131`, 이미지·checksum 보정 `938b59b9`를 포함해 최신 head의 CI 4개를 통과했고, 병합 승인에 따라 `5146d91e`로 devel에 반영했다. PR은 Refs #584 형식이며 #584는 계속 OPEN이다.
 
@@ -50,3 +50,18 @@ Rust 양 target portable·core/Studio·producer golden/Swift decoder·unsigned D
 
 
 별도 승인된 [폴더 한정 재색인](assets/task_m900_584/stage4/reindex-06d6d117/summary.json)도 실행했다. 실제 검색 제외 목록에 시험 폴더 하나만 추가·제거하고 원래 목록을 복원했다. 후보 미설치 상태의 TXT 두 개가 180초 관찰(실제 182.30초, 59회)에서 모두 양성 0회여서 환경 전제를 충족하지 못했다. 이번 후보 설치/실행·HWP/HWPX 재검증은 계획의 전제에 따라 미실행으로 남기고, 파일 hash 확인 후 소유 폴더를 정리했다. Mac 환경 복구는 별도로 두고 기존 양 VM 검색·실제 설치 importer 추출을 대체 근거로 수용해 Stage 5 준비로 진행할 것을 권고한다. 역사적 이력 공백과 #480/#525 한계의 수용도 승인 대기이며, 공개 명령은 실행하지 않았다.
+
+
+## Stage 5 최종 결과·보고 승인 요청
+
+[공개 승격](https://github.com/postmelee/alhangeul-macos/actions/runs/38629062837)은 두 job 모두 성공했다. Release 409973398 및 기존 asset 632029048/632029049를 유지했으며, public 신규 다운로드는 확정 DMG SHA256 d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63 / 211405232 bytes와 같다. public appcast 0.2.3/21·서명·동일 enclosure·홈/폰트 안내·새 노트·이전 배너 접근을 확인했다. 재빌드·재서명·태그 이동·DMG 교체는 없다.
+
+실제 0.2.2/20에서 Sparkle 다운로드·설치·자동 재실행(37569→38722)을 도구가 앱을 다시 켜기 전에 확인했다. HWP/HWPX 열기, Mac 글꼴 기본 OFF·ON 및 재실행 유지, 실제 포인터 시스템 글꼴 266개, Quick Look 두 형식과 새 경로의 썸네일 두 개를 확인했다. 첫 AX select 조작이 기본 선택창을 연 결과를 제품 회귀로 확정하지 않았으며, 포인터 비교는 수동 재실행 후 수행했다.
+
+[Homebrew PR #2](https://github.com/postmelee/homebrew-tap/pull/2)는 version/hash 두 줄을 검토·style·audit 후 병합했다. receipt 0.2.2→0.2.3 upgrade 당시 앱은 이미 Sparkle 0.2.3이었음을 구분한다. 제거·신규 설치 0.2.3/21, universal·seal·staple·Gatekeeper 및 Sparkle 설치본 실행 파일 일치를 확인했다. 원래 앱 없는 상태와 기존 Homebrew metadata를 복원했고, 관련 앱 설정 7개·최근 문서 7개/sfl4·글꼴 정책의 bytes도 복원했다. 소유 시험 문서·등록만 정리하고 사용자 TXT와 Finder 검색 창을 유지했다.
+
+[Stage 5 증거](assets/task_m900_584/stage5/SHA256SUMS)를 보존한다. 첫 위생 검사의 VM metadata bundle 3개 등록 잔존은 ZIP/hash로 원본 보존 후 해당 경로만 정리했고 최종 검사는 PASS다. 전역 색인·캐시 초기화는 없다. 초기 XML 경로/fully-qualified brew list/tap 밖 style 오류는 제품 실패와 분리해 원시 기록에 남겼다.
+
+다음 공개 변경은 README·홈/업데이트 Homebrew 배지·Cask mirror·릴리즈 수용 기록을 한 main 대상 종료 정리 PR로 제출하고 CI·리뷰·병합 및 docs-only Pages의 appcast 보존을 확인하는 것이다. 이후 devel 인계와 #584 종료를 수행한다. [Spotlight 후속 이슈 초안](../working/task_m900_584_spotlight_followup_issue.md)은 기존 종료된 #513과 다른 현재 관측의 원인 분리를 소유한다. **최종 보고 수용·종료 정리 게시/검토/병합·후속 이슈 등록 승인을 기다린다.**
+
+필요 회귀는 Ruby 문법·실제 tap style/audit·공개 파일/실제 설치 검증, Pages 조립/public appcast 보존·업데이트 탭 화면, 문서 링크·이미지 형식·checksum·공백 검사다. 제품 Swift/Rust/Studio를 바꾸지 않아 전체 빌드를 반복하지 않았다. [검증 요약](assets/task_m900_584/stage5/validation.json)과 [Homebrew 안내 미리보기](assets/task_m900_584/stage5/closeout-homebrew-preview.jpg)를 보존한다.
