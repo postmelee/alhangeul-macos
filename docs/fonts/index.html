@@ -14,7 +14,7 @@
 
 <body class="font-guide-page">
   <a class="skip-link" href="#main">본문으로 이동</a>
-  <header class="site-header" aria-label="주요 탐색">
+  <header class="site-header has-news-nav" aria-label="주요 탐색">
     <div class="site-header-inner">
       <a class="brand-link" href="../" aria-label="알한글 홈">
         <img src="../assets/logo-256@2x.png" width="28" height="28" alt="" />
@@ -22,16 +22,29 @@
       </a>
       <nav class="header-actions" aria-label="주요 링크">
         <a class="header-link" href="./" aria-current="page">글꼴 안내</a>
-        <a class="header-link" href="../">홈</a>
-        <a class="header-link" href="../updates/">업데이트</a>
-        <a class="header-link" href="../feedback/">문의/제보</a>
+        <a class="header-link" href="../news/">최신 소식</a>
+        <a class="header-link" href="../updates/" aria-label="업데이트 안내로 이동">
+          업데이트
+        </a>
+        <a class="header-link" href="../feedback/" aria-label="문의와 제보 안내로 이동">
+          문의/제보
+        </a>
+        <a class="header-link header-platform-link" href="https://postmelee.github.io/alhangeul-tauri/">알한글 for Windows / Linux</a>
+        <a class="header-link header-secondary-link" href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer"
+          aria-label="GitHub 저장소로 이동">
+          GitHub
+        </a>
+        <a class="header-download-button"
+          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg"
+          aria-label="알한글 v0.2.3 DMG 다운로드">
+          다운로드
+        </a>
       </nav>
     </div>
   </header>
 
   <main id="main" class="font-guide" tabindex="-1">
     <section class="font-guide-hero" aria-labelledby="guide-title">
-      <p class="font-guide-eyebrow">Mac 글꼴 사용 안내</p>
       <h1 id="guide-title">Mac에 설치한 글꼴을<br />알한글에서도.</h1>
       <p class="font-guide-lead">사용 설정을 켜고, 익숙한 글꼴 목록에서 선택하세요.<br />원본과 접근 권한이 유지되면 다음 실행에도 자동으로 사용합니다.</p>
       <aside class="font-guide-status" aria-label="기능 제공 상태">

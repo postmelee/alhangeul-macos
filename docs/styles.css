@@ -2021,7 +2021,6 @@ video {
 /* Mac 글꼴 사용 안내 — 기존 사이트 색상·탐색을 재사용한다. */
 .font-guide { width: min(880px, calc(100% - 48px)); margin: 0 auto; padding-bottom: 64px; }
 .font-guide-hero { padding: 72px 0 24px; }
-.font-guide-eyebrow { color: var(--accent); font: inherit; letter-spacing: normal; margin: 0 0 16px; }
 .font-guide-hero h1 { font-size: clamp(36px, 5vw, 58px); line-height: 1.15; letter-spacing: -2px; margin: 0 0 24px; }
 .font-guide-lead { color: var(--muted); font-size: 20px; line-height: 1.65; margin: 0 0 28px; word-break: keep-all; }
 .font-guide-status { border: 1px solid #d0e1f5; border-radius: 14px; padding: 18px 22px; background: #f3f8ff; }
