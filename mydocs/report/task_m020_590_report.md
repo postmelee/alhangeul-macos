@@ -64,3 +64,11 @@ Stage 3 [검증 요약](assets/task_m020_590/stage3/validation.json)·[단계 �
 최종 보고 수용 후 PR 초안 `mydocs/working/task_m020_590_pr_draft.md`으로 `devel` 대상 Open PR을 게시하고 CI·리뷰를 진행한다. 원격 CI는 아직 실행하지 않았다. `devel` 반영만으로 공개 웹에 적용되는 것은 아니며, 이후 승인된 main 인계·Pages 배포가 필요하다. main 반영 직전 실제 공개 appcast 보존 입력과 동시 배포 상태를 확인해야 한다.
 
 소형 정적 검사와 기존 화면 재사용으로 공간 사용을 제한했다. 앱/Rust 빌드·새 DMG·사이트 미디어 복사본은 만들지 않았고, 기존 설치 앱·DMG·사용자 TXT·OS 색인은 변경하지 않았다. 로컬 서버·작은 검사 로그·선별 증거는 게시/리뷰에 필요해 유지한다.
+
+## 6. 게시·병합 결과 — 2026-10-15
+
+최종 보고 수용·게시 승인에 따라 head `c786031fd65262509358c9333f02bb92299e261e`를 `publish/task590`으로 push하고 [PR #591](https://github.com/postmelee/alhangeul-macos/pull/591)을 게시했다. 직접 리뷰에서 차단할 결함을 발견하지 못했다. Copilot은 할당량 한도로 리뷰를 수행하지 못했으며 독립 자동 리뷰 통과로 기록하지 않는다.
+
+[PR CI](https://github.com/postmelee/alhangeul-macos/actions/runs/38661985383)의 변경 분류·스크립트·릴리즈 helper 3개가 SUCCESS이고 macOS 빌드는 문서 범위에 따라 SKIPPED였다. 같은 head에 대한 병합 지시를 받아 2026-10-15 10:19 KST merge commit `11de0b745d4f373c85c1009c5ffa92867f97fffe`로 devel에 병합하고 #590 이슈를 완료 처리했다. 위 §1~5는 로컬 준비 당시 기록이며 이 절이 최신 공개 처리 상태다. main/Pages 공개 반영은 아직 실행하지 않았다.
+
+오늘할일 완료와 이 결과만 문서 후속 PR로 반영한다. 통합 브랜치에 직접 push하거나 제품 소스를 변경하지 않는다. 후속 PR 병합 뒤 `publish/task590`·`local/task590` 및 소유 임시 검사 자료를 정리하고 devel로 돌아온다.
