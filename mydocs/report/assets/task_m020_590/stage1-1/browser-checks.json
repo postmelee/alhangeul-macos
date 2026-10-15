@@ -1,0 +1,116 @@
+{
+  "screens": [
+    {
+      "clientWidth": 1440,
+      "current": [
+        "글꼴 안내"
+      ],
+      "eyebrowRemoved": true,
+      "headerHeight": 52,
+      "height": 1000,
+      "links": [
+        {
+          "height": 14,
+          "href": "./",
+          "text": "글꼴 안내",
+          "visible": true
+        },
+        {
+          "height": 14,
+          "href": "../news/",
+          "text": "최신 소식",
+          "visible": true
+        },
+        {
+          "height": 14,
+          "href": "../updates/",
+          "text": "업데이트",
+          "visible": true
+        },
+        {
+          "height": 14,
+          "href": "../feedback/",
+          "text": "문의/제보",
+          "visible": true
+        },
+        {
+          "height": 14,
+          "href": "https://postmelee.github.io/alhangeul-tauri/",
+          "text": "알한글 for Windows / Linux",
+          "visible": true
+        },
+        {
+          "height": 14,
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "text": "GitHub",
+          "visible": true
+        },
+        {
+          "height": 32,
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg",
+          "text": "다운로드",
+          "visible": true
+        }
+      ],
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "clientWidth": 390,
+      "current": [
+        "글꼴 안내"
+      ],
+      "eyebrowRemoved": true,
+      "headerHeight": 100,
+      "height": 844,
+      "links": [
+        {
+          "height": 44,
+          "href": "./",
+          "text": "글꼴 안내",
+          "visible": true
+        },
+        {
+          "height": 44,
+          "href": "../news/",
+          "text": "최신 소식",
+          "visible": true
+        },
+        {
+          "height": 44,
+          "href": "../updates/",
+          "text": "업데이트",
+          "visible": true
+        },
+        {
+          "height": 44,
+          "href": "../feedback/",
+          "text": "문의/제보",
+          "visible": true
+        },
+        {
+          "height": 0,
+          "href": "https://postmelee.github.io/alhangeul-tauri/",
+          "text": "알한글 for Windows / Linux",
+          "visible": false
+        },
+        {
+          "height": 0,
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "text": "GitHub",
+          "visible": false
+        },
+        {
+          "height": 44,
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg",
+          "text": "다운로드",
+          "visible": true
+        }
+      ],
+      "path": "/fonts/",
+      "scrollWidth": 390,
+      "width": 390
+    }
+  ],
+  "logoDestination": "/"
+}

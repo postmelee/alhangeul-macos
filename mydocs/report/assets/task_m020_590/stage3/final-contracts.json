@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "html_count": 21,
+  "local_references_checked": 295,
+  "errors": [],
+  "prior_evidence_checksums": {
+    "stage1": 7,
+    "stage1-1": 4,
+    "stage2": 7
+  },
+  "changed_path_count_before_final_report": 48,
+  "scope_check": "HTML/CSS and #590 documents/evidence only",
+  "source_head": "a626a6de",
+  "source_unchanged_since_stage1_1": true
+}
