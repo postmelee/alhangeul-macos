@@ -1,0 +1,43 @@
+{
+  "일자": "2026-10-15",
+  "제품소스기준": "a626a6dee98b416a8df310f6f6cc03eb2c789969",
+  "상태": "PASS",
+  "검사": [
+    {
+      "명령": "node --test scripts/ci/test-news-ui.cjs",
+      "성공": 9,
+      "실패": 0
+    },
+    {
+      "명령": "PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-news-pages.py",
+      "성공": 14,
+      "실패": 0,
+      "경고": "기존 Ruby ffi-1.13.1 extensions 미빌드 경고; 전체 suite OK"
+    },
+    {
+      "명령": "scripts/ci/update-release-version-notices.sh --updates-dir docs/updates --check",
+      "결과": "최신 v0.2.3 안내 일치"
+    },
+    {
+      "명령": "최종 구조·본문/다운로드 보존 검사",
+      "문서": 21,
+      "이전릴리즈": 16,
+      "결과": "PASS"
+    },
+    {
+      "명령": "로컬 HTML 링크·자산·fragment 검사",
+      "검사수": 295,
+      "오류": 0
+    },
+    {
+      "명령": "이전 단계 checksum·JPEG 형식 검사",
+      "checksum수": 18,
+      "결과": "PASS"
+    },
+    {
+      "명령": "git diff --check",
+      "결과": "PASS"
+    }
+  ],
+  "공개상태": "push/PR/CI/Pages 미실행"
+}
