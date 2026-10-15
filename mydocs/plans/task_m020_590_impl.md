@@ -8,7 +8,8 @@
 - 기준: `devel`의 `e13977ff777289a2b3235f4cf2a9a860f676c686`, 계획 준비 커밋 `be8f4663`, 작업 `local/task590`.
 - 구현계획/Stage 1 승인: 2026-10-15 작업지시자의 **“#590 구현계획과 Stage 1 실행을 승인할게. 진행하고 데스크톱·모바일 화면을 보여줘.”**
 - Stage 1.1 보정 승인: 2026-10-15 작업지시자는 **“동의해. #590 계획에 보정 범위를 반영하고, 글꼴 안내 페이지의 헤더를 다른 페이지와 통일하고 파란 안내 문구는 제거해줘. 수정한 데스크톱·모바일 화면도 보여줘.”**라고 지시했다.
-- 현재 상태: Stage 1.1 헤더 통일·파란 문구 제거·원문 예외 대조와 1440/390px 재확인 완료. [Stage 1 보고 §6](../working/task_m020_590_stage1.md)에 기록했고 전체 Stage 2 승인은 별도다.
+- 현재 상태: Stage 1.1 결과 수용 후 승인된 Stage 2를 완료했다. [Stage 2 보고](../working/task_m020_590_stage2.md)의 결과 수용·Stage 3 승인을 기다린다.
+- Stage 1.1 수용·Stage 2 승인: 2026-10-15 작업지시자가 **“수정한 화면 좋아. #590 Stage 1.1 결과를 수용하고 Stage 2의 전체 화면 폭·키보드 검증을 진행해줘.”**라고 지시했다.
 - 게시: `publish/task590` → `devel` 대상 PR을 최종 보고 후 준비한다. push/Open PR·병합·main 인계·Pages 공개 배포는 이번 승인에 포함하지 않는다.
 
 제품 앱·core·Studio·버전·DMG·Cask·appcast는 변경하지 않는다. 이번 작업은 정적 HTML/CSS와 작업 문서에 한정한다. 단계 완료 후 보고·커밋하고 다음 단계 승인을 받는다.
@@ -134,6 +135,6 @@ Stage 1 시작 시 `be8f4663` 기준을 고정하고 `build.noindex/task590/stag
 
 ## 6. 이번 승인 요청
 
-구현계획/Stage 1은 승인받아 완료했다. [Stage 1 보고](../working/task_m020_590_stage1.md)를 수용하고 **Stage 2의 전체 화면 폭·대표 하위 페이지·키보드/동작 검증과 필요한 보정**으로 진행할지 확인한다. Stage 3와 공개 push/PR·병합·Pages 배포는 이후 승인 대상이다.
+승인받은 Stage 2까지 완료했다. [Stage 2 보고](../working/task_m020_590_stage2.md)를 수용하고 **Stage 3의 필요한 회귀·최종 보고·PR 초안 준비**로 진행할지 확인한다. 공개 push/PR·병합·Pages 배포는 이후 승인 대상이다.
 
 근거: [수행계획](task_m020_590.md), [작업 절차](../manual/task_workflow_guide.md), [문서 구조](../manual/document_structure_guide.md), [빌드/검증](../manual/build_run_guide.md), [Pages/Sparkle 운영](../manual/release_github_pages_sparkle_guide.md).
