@@ -150,6 +150,11 @@ video {
   color: var(--accent);
 }
 
+.header-link[aria-current="page"] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .header-platform-link {
   white-space: nowrap;
 }
@@ -1073,6 +1078,7 @@ video {
   display: flex;
   flex-shrink: 0;
   flex-wrap: wrap;
+  max-width: 100%;
   gap: 10px;
 }
 
@@ -1499,8 +1505,13 @@ video {
 .site-footer nav {
   display: inline-flex;
   justify-self: end;
-  gap: 18px;
+  flex-wrap: wrap;
+  max-width: 100%;
+  gap: 12px 18px;
   color: var(--muted);
+}
+
+.site-footer nav a {
   white-space: nowrap;
 }
 
@@ -1511,7 +1522,7 @@ video {
 
 @media (max-width: 1180px) {
   .site-footer {
-    grid-template-columns: max-content minmax(0, 1fr) max-content;
+    grid-template-columns: max-content minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
     column-gap: 24px;
     padding-inline: 28px;
@@ -1587,7 +1598,8 @@ video {
     width: min(100% - 32px, var(--content-width));
   }
 
-  .header-platform-link {
+  .header-platform-link,
+  .header-secondary-link {
     display: none;
   }
 
@@ -1715,29 +1727,65 @@ video {
 }
 
 
-@media (max-width: 520px) {
+@media (max-width: 700px) {
+  :root {
+    --header-height: 100px;
+  }
+
   .site-header-inner {
-    width: min(100% - 24px, var(--content-width));
-    gap: 12px;
+    position: relative;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    padding-block: 6px;
+  }
+
+  .brand-link {
+    min-height: 44px;
   }
 
   .brand-link span {
-    font-size: 17px;
+    font-size: 19px;
   }
 
   .header-actions {
-    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    gap: clamp(8px, 3vw, 18px);
   }
 
-  .header-link,
-  .github-link {
-    font-size: 12px;
+  .header-link {
+    min-width: 44px;
+    min-height: 44px;
+    white-space: nowrap;
   }
 
   .header-download-button {
-    min-height: 30px;
-    padding: 0 10px;
-    font-size: 12px;
+    position: absolute;
+    top: 6px;
+    right: 0;
+    min-height: 44px;
+  }
+
+  .notice-primary-link,
+  .notice-secondary-link {
+    min-height: 44px;
+  }
+
+  .notice-font-link {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    padding-inline: 0;
+    border: 0;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
+
+@media (max-width: 520px) {
+  .site-header-inner {
+    width: min(100% - 24px, var(--content-width));
   }
 
   .release-version-notice-inner {
@@ -1751,6 +1799,10 @@ video {
   .notice-primary-link,
   .notice-secondary-link {
     flex: 1 1 150px;
+  }
+
+  .notice-font-link {
+    flex-basis: 100%;
   }
 
   .intro-screen {
@@ -1949,12 +2001,6 @@ video {
   }
 }
 
-@media (max-width: 380px) {
-  .brand-link span {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -1985,7 +2031,7 @@ video {
 .font-guide a:hover { text-decoration: underline; }
 .font-guide a:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; border-radius: 3px; }
 .font-guide-toc { display: flex; flex-wrap: wrap; gap: 12px 28px; padding: 24px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
-.font-guide-section { padding: 44px 0; border-bottom: 1px solid var(--border); scroll-margin-top: 76px; }
+.font-guide-section { padding: 44px 0; border-bottom: 1px solid var(--border); scroll-margin-top: calc(var(--header-height) + 24px); }
 .font-guide-section:last-child { border-bottom: 0; padding-bottom: 0; }
 .font-guide-section h2 { font-size: 28px; letter-spacing: -.8px; line-height: 1.3; margin: 0 0 16px; word-break: keep-all; }
 .font-guide-section p { line-height: 1.75; word-break: keep-all; overflow-wrap: anywhere; }
@@ -2016,13 +2062,11 @@ video {
   .font-guide-number { flex-basis: 32px; height: 32px; font-size: 16px; }
   .font-guide-comparison { grid-template-columns: minmax(0, 1fr); }
   .font-guide-comparison article { padding: 20px; }
-  .font-guide-page .header-actions { gap: 14px; }
 }
 @media (max-width: 380px) {
   .font-guide { width: calc(100% - 32px); }
   .font-guide-hero h1 { font-size: 32px; }
   .font-guide-section h2 { font-size: 22px; }
-  .font-guide-page .header-actions { gap: 10px; }
 }
 
 /* Threads 최신 소식 */
@@ -2040,7 +2084,6 @@ video {
 .news-more{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:13px 22px;background:#fff;border:1px solid #d6d6dc;border-radius:999px;color:var(--text);font-size:15px;text-decoration:none;transition:background .15s}
 .news-more:hover{background:#eeeef2}
 .news-more:focus-visible{outline:3px solid #0066cc;outline-offset:4px}
-.has-news-nav .header-link[aria-current=page]{color:var(--accent);font-weight:600}
 .news-page{min-width:0;min-height:100dvh;background:#f7f7f9}
 .news-page .site-header{flex-shrink:0}
 .news-page-main{display:block}
@@ -2049,7 +2092,6 @@ video {
 .news-feed-end{text-align:center;color:var(--muted);font-size:14px;line-height:1.8;margin:30px 0 16px}
 .news-page .news-feed-end a{color:var(--accent);text-decoration:none}
 @media(max-width:700px){
-.has-news-nav .header-actions a[aria-label="GitHub 저장소로 이동"]{display:none}
 .news-heading h1,.news-heading h2{font-size:32px}
 .news-home{padding:56px 16px 48px}
 .news-page{height:auto;min-height:100dvh;overflow:visible}
@@ -2104,4 +2146,4 @@ video {
 .news-privacy summary{cursor:pointer}
 .news-privacy p{margin:8px 0 0}
 .news-more[aria-disabled=true]{opacity:.55;cursor:wait}
-@media(max-width:360px){.has-news-nav .brand-link span{display:none}.news-feed{padding-left:0;padding-right:0}.news-home{padding-left:0;padding-right:0}}
+@media(max-width:360px){.news-feed{padding-left:0;padding-right:0}.news-home{padding-left:0;padding-right:0}}
