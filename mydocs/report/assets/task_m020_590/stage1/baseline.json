@@ -1,0 +1,992 @@
+{
+  "base": "be8f4663",
+  "files": {
+    "docs/feedback/index.html": {
+      "main_sha256": "ceecd4ae83390e645f846410d55cce1179d43f95ab5878889f351d79b44e2b2b",
+      "notice_sha256": null,
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../news/"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../updates/",
+          "aria-label": "업데이트 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.7/alhangeul-macos-0.1.7.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.7/alhangeul-macos-0.1.7.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/fonts/index.html": {
+      "main_sha256": "ba991561d31444396ea266ddfd6b5f02b99327923823ca437b7825f25ce496c5",
+      "notice_sha256": null,
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../"
+        },
+        {
+          "class": "header-link",
+          "href": "../updates/"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/"
+        }
+      ],
+      "downloads": [],
+      "css": [
+        "../styles.css?v=20261011-font-guide"
+      ]
+    },
+    "docs/index.html": {
+      "main_sha256": "bc8a4f06343a3923fe9b5331c2345a2b2231add0b59b7f272b255c888554907b",
+      "notice_sha256": "f8b774399fef486e42fccf7fb541c2ca96aba3ea3058a301f10ce6c348ae9fc3",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "./",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "./news/"
+        },
+        {
+          "class": "header-link",
+          "href": "./updates/",
+          "aria-label": "업데이트 안내로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "./feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg",
+          "aria-label": "알한글 v0.2.3 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg",
+          "aria-label": "알한글 v0.2.3 DMG 다운로드"
+        },
+        {
+          "class": "notice-secondary-link",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg"
+        }
+      ],
+      "css": [
+        "./styles.css?v=20261011-font-guide"
+      ]
+    },
+    "docs/news/index.html": {
+      "main_sha256": "422be19148a268246662375ef96e2ecd857ab3b4a5c79b088d2250af1a4f5faf",
+      "notice_sha256": null,
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "./",
+          "aria-current": "page"
+        },
+        {
+          "class": "header-link",
+          "href": "../updates/",
+          "aria-label": "업데이트 안내로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.2.dmg",
+          "aria-label": "알한글 v0.2.2 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.2.dmg",
+          "aria-label": "알한글 v0.2.2 DMG 다운로드"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/index.html": {
+      "main_sha256": "bdf2bdd63a3c53419eb0d0c07e694ee939d95b8bba16600c431f70e1a9897317",
+      "notice_sha256": null,
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../news/"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg",
+          "aria-label": "알한글 v0.2.3 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg",
+          "aria-label": "알한글 v0.2.3 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.0.html": {
+      "main_sha256": "1507e6b152c49b5d46a047f5b5cbf13e05d6a8d5b85098ab4cacd34a8897c6c4",
+      "notice_sha256": "6fbfcf7e6ac4ba51d16bb4dccca49aca4b2c769e30aaf5e83e228cd08e20e1f6",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.0/alhangeul-macos-0.1.0.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.0/alhangeul-macos-0.1.0.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.0/alhangeul-macos-0.1.0.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.1.html": {
+      "main_sha256": "01d8598bd985499dab4b955ca362c6bc66f2d7a24e7ca37da870179ae0ee10d0",
+      "notice_sha256": "b576623a885e7aac09c8d0b1506398db596fb57a7a9f80cde3ab457476f4c748",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.1/alhangeul-macos-0.1.1.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.1/alhangeul-macos-0.1.1.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.1/alhangeul-macos-0.1.1.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.10.html": {
+      "main_sha256": "7dafa59d19a228c413b69c0556eecb0849acad6056caeb3585904275142f851a",
+      "notice_sha256": "82331e25b85523b50ea70b8db057dafd94ccfe2db05ef9141fcd44a55114c75d",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.10/alhangeul-macos-0.1.10.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.10/alhangeul-macos-0.1.10.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.10/alhangeul-macos-0.1.10.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.11.html": {
+      "main_sha256": "7eafdf1164b729bcbc732f3479dd0df4caeafd3ca6a5c74711508b4a7e908a5c",
+      "notice_sha256": "5cf380a6195743c3d1722d3a280d92face0acfbf27641569fd4812a7afe15a04",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.11/alhangeul-macos-0.1.11.dmg",
+          "aria-label": "알한글 v0.1.11 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.11/alhangeul-macos-0.1.11.dmg",
+          "aria-label": "알한글 v0.1.11 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.11/alhangeul-macos-0.1.11.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.2.html": {
+      "main_sha256": "2fddd2a3b1ce3fb5e6ddf5f2fff4dd2d59727a7f4cfc9b17bfb8813b453c2877",
+      "notice_sha256": "ee5ef1e06e4467e006eed126d9c5a4aef2f2a8f1a61970a70ea651ecf5c7b224",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.2/alhangeul-macos-0.1.2.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.2/alhangeul-macos-0.1.2.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.2/alhangeul-macos-0.1.2.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.3.html": {
+      "main_sha256": "ab1ccc46dfcf16328557dacad1c9af8234983ee0d3ddc549d3560f837779d51a",
+      "notice_sha256": "61c34f002e7d389c7b6a832821cdc8856acc546b1bf7397fb3b0581db5719feb",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.3/alhangeul-macos-0.1.3.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.3/alhangeul-macos-0.1.3.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.3/alhangeul-macos-0.1.3.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.4.html": {
+      "main_sha256": "aadfc90aae45e29f9240b1945f3b2c31be3670f424222f93406eb5ffbb3ae387",
+      "notice_sha256": "d77c5a4801823e644b14912a0ffb8f540945e85897fb164b700c3646e221a65a",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.4/alhangeul-macos-0.1.4.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.4/alhangeul-macos-0.1.4.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.4/alhangeul-macos-0.1.4.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.5.html": {
+      "main_sha256": "a1853bcb9ad3fb7458d9d747089dc8545619eb60c927ad8964befbd2a188b852",
+      "notice_sha256": "af979e3927d45ec258b582c93828548c208a0d3ccb1f21e2748fffdfda36e9d1",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.5/alhangeul-macos-0.1.5.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.5/alhangeul-macos-0.1.5.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.5/alhangeul-macos-0.1.5.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.6.html": {
+      "main_sha256": "4752f472920cbf301f5bd2298bfb57ea2f356b299aa09e9a0b8f8e3028c80c49",
+      "notice_sha256": "2633fd279408fb39eab267fb5ecd679353e0a825226770a7a9c1dadf159ac7f7",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.6/alhangeul-macos-0.1.6.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.6/alhangeul-macos-0.1.6.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.6/alhangeul-macos-0.1.6.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.7.html": {
+      "main_sha256": "f2597d444138e72dca62977de611573e13dbed458a479a39b8bc8c1b5daedb83",
+      "notice_sha256": "c41566cd65be970ddd1db3cdf4aae7e252ac645824fddd0664821298e10d4d08",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.7/alhangeul-macos-0.1.7.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.7/alhangeul-macos-0.1.7.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.7/alhangeul-macos-0.1.7.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.8.html": {
+      "main_sha256": "4be4c2a3d1604533fa361be089d824749cbe54f0fdf2e088598bfd8376b47384",
+      "notice_sha256": "c28be5145d1a27194b408d25619f7e1cbf967fbef6141f3a0e4d8bdb2bc71bd0",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.8/alhangeul-macos-0.1.8.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.8/alhangeul-macos-0.1.8.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.8/alhangeul-macos-0.1.8.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.1.9.html": {
+      "main_sha256": "af5a6ed1103f6280cbc3de746d23ca464edb80a89dd2412a846a05cdc97d2d49",
+      "notice_sha256": "6eb3e78d40e33c610ffe28629a28649bd814ebb969bd1feaf45ee6b92f003072",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.9/alhangeul-macos-0.1.9.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.9/alhangeul-macos-0.1.9.dmg",
+          "aria-label": "Mac용 알한글 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.1.9/alhangeul-macos-0.1.9.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.2.0.html": {
+      "main_sha256": "9563c66d32e97b3ac85ec47b9ab3a5724cdfde31150085da5668cd97cead8d92",
+      "notice_sha256": "a46a653f80f104e1468dfc78e15e6f189ffa03f68795bb7eb8104719df09ad91",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.0/alhangeul-macos-0.2.0.dmg",
+          "aria-label": "알한글 v0.2.0 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.0/alhangeul-macos-0.2.0.dmg",
+          "aria-label": "알한글 v0.2.0 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.0/alhangeul-macos-0.2.0.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.2.1.html": {
+      "main_sha256": "0cdedfc2d879b828a4478c7c9d6b4c7db132e5d267f3b9077cd87bbc283ca17a",
+      "notice_sha256": "4dc1536d94d8ff3001917e5748ed7bd277922cf9ca9b0d07d8f8edb30110bea6",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest",
+          "aria-label": "최신 공개 릴리즈 확인"
+        }
+      ],
+      "downloads": [],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.2.2.html": {
+      "main_sha256": "9c6022e756c19fa21be60167eb23301356533a5b58211e457ddc3445a8846dfc",
+      "notice_sha256": "104b3a3b785bb69eb17812325ca274b26f4f783dd378c92ee53096ca8d888012",
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.2.dmg",
+          "aria-label": "알한글 v0.2.2 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.2.dmg",
+          "aria-label": "알한글 v0.2.2 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.2/alhangeul-macos-0.2.2.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    },
+    "docs/updates/v0.2.3.html": {
+      "main_sha256": "08ecb13d1aab4428c5a98a93a94b8b22a65dabc74672277d2a04ada38fa0e657",
+      "notice_sha256": null,
+      "header_links": [
+        {
+          "class": "brand-link",
+          "href": "../",
+          "aria-label": "알한글 홈"
+        },
+        {
+          "class": "header-link",
+          "href": "../",
+          "aria-label": "알한글 홈으로 이동"
+        },
+        {
+          "class": "header-link",
+          "href": "../feedback/",
+          "aria-label": "문의와 제보 안내로 이동"
+        },
+        {
+          "class": "header-link header-platform-link",
+          "href": "https://postmelee.github.io/alhangeul-tauri/"
+        },
+        {
+          "class": "header-link",
+          "href": "https://github.com/postmelee/alhangeul-macos",
+          "rel": "noreferrer",
+          "aria-label": "GitHub 저장소로 이동"
+        },
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg",
+          "aria-label": "알한글 v0.2.3 DMG 다운로드"
+        }
+      ],
+      "downloads": [
+        {
+          "class": "header-download-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.3.dmg",
+          "aria-label": "알한글 v0.2.3 DMG 다운로드"
+        },
+        {
+          "class": "page-action-button",
+          "href": "https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.3/alhangeul-macos-0.2.3.dmg"
+        }
+      ],
+      "css": [
+        "../styles.css?v=20260930-platform-mobile"
+      ]
+    }
+  },
+  "appcast_sha256": "ef2e147752a635b1cd03dae0f4b6ce37a784bf98eb08ad7e60f5e5620a9fad64"
+}

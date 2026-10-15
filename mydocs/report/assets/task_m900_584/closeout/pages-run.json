@@ -1,0 +1,20 @@
+{
+  "conclusion": "success",
+  "databaseId": 38635318675,
+  "headSha": "1688bc389402c2ddd9ffdbbbf698b64e31279256",
+  "jobs": [
+    {
+      "name": "Prepare docs-only Pages artifact",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/postmelee/alhangeul-macos/actions/runs/38635318675/job/116096854126"
+    },
+    {
+      "name": "Deploy GitHub Pages",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/postmelee/alhangeul-macos/actions/runs/38635318675/job/116097185757"
+    }
+  ],
+  "status": "completed"
+}

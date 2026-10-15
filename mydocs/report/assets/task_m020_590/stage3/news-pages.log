@@ -1,0 +1,8 @@
+...........Ignoring ffi-1.13.1 because its extensions are not built. Try: gem pristine ffi --version 1.13.1
+Ignoring ffi-1.13.1 because its extensions are not built. Try: gem pristine ffi --version 1.13.1
+Ignoring ffi-1.13.1 because its extensions are not built. Try: gem pristine ffi --version 1.13.1
+...
+----------------------------------------------------------------------
+Ran 14 tests in 2.084s
+
+OK

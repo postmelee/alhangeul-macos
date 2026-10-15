@@ -1,0 +1,156 @@
+{
+  "status": "PASS",
+  "html_count": 21,
+  "release_note_count": 16,
+  "checks": [
+    {
+      "path": "docs/feedback/index.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/fonts/index.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/index.html",
+      "main_preserved": true,
+      "old_banner_preserved": false,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/news/index.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/index.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.0.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.1.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.10.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.11.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.2.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.3.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.4.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.5.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.6.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.7.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.8.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.1.9.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.2.0.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.2.1.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.2.2.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    },
+    {
+      "path": "docs/updates/v0.2.3.html",
+      "main_preserved": true,
+      "old_banner_preserved": true,
+      "font_link_count": 1,
+      "downloads_valid": true
+    }
+  ],
+  "home_banner_font_link": true,
+  "appcast_preserved": true
+}

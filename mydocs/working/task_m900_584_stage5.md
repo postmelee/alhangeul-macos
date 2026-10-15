@@ -2,7 +2,7 @@
 
 ## 결론과 승인
 
-**2026-10-15 v0.2.3 / build 21 공개·Pages/Sparkle 배포, 실제 Sparkle 업데이트·글꼴/문서/Finder, Homebrew 배포·설치 시험과 원상복원을 완료했다.** 최종 보고 수용·종료 정리 게시/병합·후속 이슈 등록 승인을 받아 종료 PR과 devel 인계를 진행한다. #584는 종료 PR에서 완료 처리한다.
+**2026-10-15 v0.2.3 / build 21 공개·Pages/Sparkle 배포, 실제 Sparkle 업데이트·글꼴/문서/Finder, Homebrew 배포·설치 시험과 원상복원을 완료했다.** 최종 보고 수용·종료 정리 게시/병합·후속 이슈 등록 승인을 받아 종료 PR #588 main 병합·공개 Pages/appcast 보존을 확인했고 #584는 CLOSED다. main 결과와 종료 기록을 devel로 인계한다.
 
 작업지시자가 “동일 DMG의 양 VM 검색 PASS·실제 Mac 본문 추출 PASS를 대체 근거로 수용하고 Stage 5 진행 및 배포까지” 지시했다. 이어 [실행안](task_m900_584_stage5_remaining_plan.md)의 “Sparkle·Homebrew 시험/반영·앱 없음 복원까지 허용”을 승인했다. [Stage 4](task_m900_584_stage4.md)의 M7은 ENVIRONMENT_UNAVAILABLE로 유지하고 해당 대체 근거로 수용한다. 사용자가 인덱싱 중이라고 설명한 실제 Mac 검색은 별도 수동 시험·다음 릴리즈 조사로 남긴다. 원인·회귀 여부는 미확정이다. 과거 최근 문서 이력의 증거 공백과 #480/#525 한계도 해결로 바꾸지 않는다.
 
@@ -67,3 +67,7 @@ README·홈/업데이트 Homebrew 안내·Cask·수용표·릴리즈 기록·최
 검증: 변경 Markdown 13개·상대 링크 261개, JPEG 파일 형식 9개·최소 증거 checksum 28개, 공백 검사, Pages 조립과 public appcast bytes 보존·Homebrew 업데이트 탭 화면 확인을 통과했다. 제품 코드·Rust/core·Studio·bundle 버전·고정 태그는 추가 변경하지 않았다. [검증 요약](../report/assets/task_m900_584/stage5/validation.json)을 참고한다.
 
 신규 실행안의 diff 예시 안에 남은 한 칸 공백을 staged 공백 검사에서 발견해 제거했다. 최종 staged 검사까지 통과한 상태로 게시 준비한다.
+
+## 종료 정리 결과
+
+종료 [PR #588](https://github.com/postmelee/alhangeul-macos/pull/588)은 검토 head `560f229c`의 실행 대상 CI 3개 성공 후 main `1688bc38`에 병합됐다. docs-only Pages run 38635318675 성공·공개 Homebrew 0.2.3 안내·기존 1161 bytes appcast 보존을 확인했다. #584는 완료 처리했고 #587은 별도 조사로 유지한다. [최종 보고](../report/task_m900_584_report.md)의 종료 증거와 완료 기록을 main 기준의 devel 인계 PR에 함께 담는다. 인계 CI·검토·병합과 브랜치 정리가 남으며 제품·DMG 변경은 없다.

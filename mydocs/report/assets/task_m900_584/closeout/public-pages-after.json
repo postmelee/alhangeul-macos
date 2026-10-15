@@ -1,0 +1,22 @@
+{
+  "home": {
+    "url": "https://postmelee.github.io/alhangeul-macos/",
+    "status": 200,
+    "sha256": "7f9ba95fb9a3e57d5c6b24e4c18b566db86ca64a07fe8eb3b27df54b8e6768fe",
+    "bytes": 19976
+  },
+  "updates/": {
+    "url": "https://postmelee.github.io/alhangeul-macos/updates/",
+    "status": 200,
+    "sha256": "c47989aed29dbcdf6f597ac763f4df93b141d99f7fbf8a2b1c3f204425612a43",
+    "bytes": 9769
+  },
+  "appcast.xml": {
+    "url": "https://postmelee.github.io/alhangeul-macos/appcast.xml",
+    "status": 200,
+    "sha256": "67274e1df34627823b6a2d0e0f71a41d46e3814748060f89cb8834b9108923ec",
+    "bytes": 1161,
+    "preserved_release_appcast_bytes": true
+  },
+  "checked_at": "2026-10-14T20:50:48.006813+00:00"
+}
