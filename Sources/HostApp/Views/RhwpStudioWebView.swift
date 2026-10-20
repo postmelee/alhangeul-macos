@@ -34,6 +34,8 @@ struct RhwpStudioWebView: NSViewRepresentable {
     let onDroppedDocument: (RhwpStudioDroppedDocument) -> Void
     let onDroppedFileURL: (URL) -> Void
     let onDocumentSaved: (RhwpStudioSavedDocument) -> Void
+    let onCommandFailure: @MainActor (RhwpStudioCommandFailure) -> Void
+    let commandFailureSupport: RhwpStudioCommandFailureSupport
 
     init(
         document: RhwpStudioDocumentPayload?,
@@ -47,7 +49,9 @@ struct RhwpStudioWebView: NSViewRepresentable {
         onOpenDocument: @escaping () -> Void = {},
         onDroppedDocument: @escaping (RhwpStudioDroppedDocument) -> Void = { _ in },
         onDroppedFileURL: @escaping (URL) -> Void = { _ in },
-        onDocumentSaved: @escaping (RhwpStudioSavedDocument) -> Void = { _ in }
+        onDocumentSaved: @escaping (RhwpStudioSavedDocument) -> Void = { _ in },
+        onCommandFailure: @escaping @MainActor (RhwpStudioCommandFailure) -> Void = { _ in },
+        commandFailureSupport: RhwpStudioCommandFailureSupport = .unavailable
     ) {
         self.document = document
         self.sourceDocument = sourceDocument
@@ -61,9 +65,12 @@ struct RhwpStudioWebView: NSViewRepresentable {
         self.onDroppedDocument = onDroppedDocument
         self.onDroppedFileURL = onDroppedFileURL
         self.onDocumentSaved = onDocumentSaved
+        self.onCommandFailure = onCommandFailure
+        self.commandFailureSupport = commandFailureSupport
     }
 
     static func dismantleNSView(_ webView: WKWebView, coordinator: Coordinator) {
+        coordinator.stopCommandFailures()
         coordinator.cancelOutputPreparation()
         coordinator.disposeFontProvider(in: webView)
         coordinator.fontMessageHandler.reset()
@@ -71,7 +78,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(commandFailureSupport: commandFailureSupport)
     }
 
     func makeNSView(context: Context) -> WKWebView {
@@ -86,6 +93,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         context.coordinator.onDroppedDocument = onDroppedDocument
         context.coordinator.onDroppedFileURL = onDroppedFileURL
         context.coordinator.onDocumentSaved = onDocumentSaved
+        context.coordinator.onCommandFailure = onCommandFailure
         context.coordinator.onEditorSessionChange = onEditorSessionChange
         context.coordinator.update(
             document: document,
@@ -106,6 +114,8 @@ extension RhwpStudioWebView {
         var onDroppedDocument: (RhwpStudioDroppedDocument) -> Void = { _ in }
         var onDroppedFileURL: (URL) -> Void = { _ in }
         var onDocumentSaved: (RhwpStudioSavedDocument) -> Void = { _ in }
+        var onCommandFailure: @MainActor (RhwpStudioCommandFailure) -> Void = { _ in }
+        private var commandFailures: RhwpStudioCommandFailureState
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
         private static let nativeDropSuppressionInterval: TimeInterval = 2
@@ -215,12 +225,14 @@ extension RhwpStudioWebView {
         private var hasCompletedCurrentLoad = false
         var onOpenFontSettings: () -> Bool = { AppSettingsNavigation.shared.openFonts() }
 
-        override init() {
+        init(commandFailureSupport: RhwpStudioCommandFailureSupport = .unavailable) {
+            commandFailures = .init(support: commandFailureSupport)
             fontMessageHandler = StudioFontMessageHandler()
             super.init()
         }
 
         init(fontMessageHandler: StudioFontMessageHandler) {
+            commandFailures = .init()
             self.fontMessageHandler = fontMessageHandler
             super.init()
         }
@@ -305,6 +317,7 @@ extension RhwpStudioWebView {
             documentProvider.setDocument(document)
             editorSession = nil
             editorLoadToken = UUID().uuidString
+            commandFailures.beginLoad(token: editorLoadToken, loadID: loadID)
             fontMessageHandler.reset()
             installUserScripts(in: webView, loadID: loadID)
 
@@ -356,7 +369,8 @@ extension RhwpStudioWebView {
         }
 
         private func handleEditorSession(_ body: [String: Any]) {
-            guard body["token"] as? String == editorLoadToken,
+            guard !commandFailures.isSuspended,
+                  body["token"] as? String == editorLoadToken,
                   let loadID = loadedIdentity,
                   let data = try? JSONSerialization.data(withJSONObject: body),
                   let snapshot = try? JSONDecoder().decode(RhwpStudioEditorSnapshot.self, from: data),
@@ -367,6 +381,7 @@ extension RhwpStudioWebView {
             else { return }
             let previous = editorSession
             editorSession = session
+            commandFailures.updateSession(snapshot)
             if session.sourceBinding != .nativeLoad {
                 currentDocument = nil
                 currentSourceDocument = nil
@@ -569,6 +584,12 @@ extension RhwpStudioWebView {
                 onError(message)
             case "save-sync-error":
                 onError(body["message"] as? String)
+            case "command-failure":
+                let origin = message.frameInfo.securityOrigin
+                handleCommandFailure(body, source: .init(
+                    mainFrame: message.frameInfo.isMainFrame, sameWebView: message.webView === commandWebView,
+                    scheme: origin.protocol, host: origin.host, port: origin.port,
+                    frameURL: message.frameInfo.request.url))
             case "runtime-error":
                 handleRuntimeError(body)
             case "document-load-error":
@@ -583,16 +604,46 @@ extension RhwpStudioWebView {
         }
 
         private func reportFailure(_ failure: RhwpStudioWebViewFailure) {
+            // 첫 치명적 실패는 명시적인 새 load 전까지 해제하지 않는다.
+            guard !commandFailures.isSuspended else { return }
             if failure.isFatal {
-                if let webView = commandWebView { disposeFontProvider(in: webView) }
-                fontMessageHandler.reset()
-                htmlDownload?.cancel()
-                activeSaveID = nil
-                pendingSaveRequest = nil
-                editorSession = nil
-                editorLoadToken = UUID().uuidString
+                commandFailures.suspend()
+                invalidateFailedEditorSession()
             }
             onFailure(failure)
+        }
+
+        func stopCommandFailures() {
+            commandFailures.suspend()
+            onCommandFailure = { _ in }
+        }
+
+        private func handleCommandFailure(_ body: [String: Any], source: RhwpStudioCommandFailureSource) {
+            guard hasCompletedCurrentLoad else { return }
+            switch commandFailures.receive(body, source: source) {
+            case .ignored: break
+            case .recovered(let failure): onCommandFailure(failure)
+            case .fatal(let code):
+                // 수신 상태가 이미 latch했으므로 공용 fatal 정리는 한 번 별도로 실행한다.
+                reportLatchedCommandFailure(code)
+            }
+        }
+
+        private func reportLatchedCommandFailure(_ code: String) {
+            invalidateFailedEditorSession()
+            onFailure(RhwpStudioWebViewFailure(category: .runtime,
+                message: "편집 상태를 확인할 수 없어 작업을 중단했습니다.",
+                diagnosticDetail: "commandFailure=\(code)"))
+        }
+
+        private func invalidateFailedEditorSession() {
+            if let webView = commandWebView { disposeFontProvider(in: webView) }
+            fontMessageHandler.reset()
+            htmlDownload?.cancel()
+            activeSaveID = nil
+            pendingSaveRequest = nil
+            editorSession = nil
+            editorLoadToken = UUID().uuidString
         }
 
         private func handleDocumentLoadError(_ body: [String: Any]) {
@@ -643,6 +694,7 @@ extension RhwpStudioWebView {
         ) -> Bool {
             guard currentDocument != nil,
                   hasCompletedCurrentLoad,
+                  !commandFailures.usesStructuredContract,
                   Self.hasRecoverableRuntimeMessage(message) || Self.hasRecoverableRuntimeMessage(reason),
                   Self.isRecoverableRuntimeSource(sourceURL: sourceURL, line: line, column: column, reason: reason)
             else {

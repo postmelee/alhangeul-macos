@@ -13,12 +13,14 @@ import sys
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--fixture', type=pathlib.Path, required=True, help='읽기 전용 HWP/HWPX 입력')
+    parser.add_argument('--command-failures', action='store_true', help='합성 오류 계약의 native 수신·세션 보존 검사 (upstream rollback 검증 아님)')
     args = parser.parse_args()
     root = pathlib.Path(__file__).resolve().parent.parent
     fixture = args.fixture.resolve(strict=True)
     build = root / 'build.noindex'
     build.mkdir(exist_ok=True)
-    output = pathlib.Path(tempfile.mkdtemp(prefix='studio-lifecycle-', dir=build))
+    prefix = 'studio-command-failure-' if args.command_failures else 'studio-lifecycle-'
+    output = pathlib.Path(tempfile.mkdtemp(prefix=prefix, dir=build))
     app = output / 'StudioLifecycleSmoke.app'
     executable = app / 'Contents/MacOS/StudioLifecycleSmoke'
     executable.parent.mkdir(parents=True)
@@ -43,7 +45,8 @@ def main():
                       'Metal', 'QuartzCore', 'IOSurface', 'ColorSync'):
         command += ['-framework', framework]
     command += [str(p) for p in sources]
-    command += [str(root / 'Tests/StudioDocumentLifecycleSmoke/main.swift'), '-o', str(executable)]
+    test_main = 'StudioCommandFailureSmoke' if args.command_failures else 'StudioDocumentLifecycleSmoke'
+    command += [str(root / 'Tests' / test_main / 'main.swift'), '-o', str(executable)]
     print('Evidence:', output, flush=True)
     with (output / 'build.log').open('w') as log:
         subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=300)

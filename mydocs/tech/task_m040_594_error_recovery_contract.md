@@ -166,3 +166,13 @@ Stage 3는 현재 bundle에서도 suspended UI, 명령/출력 차단, 이전 저
 ## Stage 1 검증 범위
 
 두 commit의 공개 protocol/runtime/router·autosave producer/store를 `git show`로 확인하고 HostApp manifest와 대조했다. 조사 결과와 source blob ID는 로컬 `build.noindex/task594-stage1/source-audit.json`에 남겼다. 이 문서의 새 요구 계약과 메모리 정책은 구현 전 설계이며, 런타임 테스트 통과나 upstream 합의로 표시하지 않는다.
+
+## Stage 2 구현 상태
+
+2026-10-20 Stage 2에서 HostApp 내부 `command-failure` 메시지 수신 모델, native-only 지원 의존성(`unavailable` 기본값), frame/origin/문서 세대·sequence·엄격한 JSON 타입 검증을 구현했다. 복구 성공 분류와 fatal latch는 위 요구 조건을 따른다. 구조화 이벤트의 raw diagnostic은 길이만 검증한 뒤 보관하지 않고 안전한 ID·code·operation·recovery·sequence로 native 진단을 구성한다.
+
+공개 producer/adapter가 없어 제품 기본 경로의 지원은 계속 미지원이다. native에서 version 1 지원을 명시한 테스트 진단 앱이 합성 이벤트를 실제 WK message transport로 보내 수신·표시·세션 보존을 검증한다. 이는 upstream의 복구 성공 보증을 검증하는 것이 아니다. 실제 구독 함수·capability handshake·해제 구현은 공개 API 제공 이후 남아 있는 연결 범위다.
+
+복구 알림은 native Store에서 한 건만 보관하고 반복 오류는 최대 99회로 집계한다. 닫은 뒤 최근 진단을 다시 표시할 수 있다. 후속 저장/출력 오류가 오면 새 오류를 우선 표시하고 기존 명령 진단은 보존한다. fatal latch는 일반 비치명적 이벤트·session 갱신으로 해제되지 않는다. 이전 저장본 보관·fatal 입력/출력 전체 차단·명시적 복구/재시작 UX는 Stage 3 작업이다.
+
+상세 구현·검증·제약은 [Stage 2 보고서](../working/task_m040_594_stage2.md)를 따른다.

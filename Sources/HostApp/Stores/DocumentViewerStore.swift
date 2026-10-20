@@ -15,6 +15,7 @@ final class DocumentViewerStore: ObservableObject {
     @Published private(set) var webViewLoadID: Int = 0
     @Published private(set) var editorSession: RhwpStudioEditorSession?
     @Published private(set) var hasUnsavedChanges = false
+    @Published private(set) var commandFailurePresentation = RhwpStudioCommandFailurePresentation()
 
     private static let webViewErrorAutoDismissDelayNanoseconds: UInt64 = 5_000_000_000
 
@@ -193,6 +194,7 @@ final class DocumentViewerStore: ObservableObject {
         else { return }
         let isReplacement = editorSession?.snapshot.documentEpoch != session.snapshot.documentEpoch
         editorSession = session
+        if isReplacement { commandFailurePresentation.clear() }
         hasUnsavedChanges = session.snapshot.dirty
         if session.sourceBinding != .nativeLoad {
             rhwpStudioDocument = nil
@@ -220,15 +222,14 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func setWebViewFailure(_ failure: RhwpStudioWebViewFailure?) {
-        guard let failure else {
-            webViewFailure = nil
-            return
-        }
+        // 늦은 비치명적/해제 알림으로 fatal 상태를 풀지 않는다. 재시작/새 load만 허용한다.
+        guard let failure, webViewFailure == nil else { return }
 
         isWebViewLoading = false
 
         if failure.isFatal {
             editorSession = nil
+            commandFailurePresentation.clear()
             webViewFailure = failure
             dismissWebViewError()
         } else {
@@ -240,7 +241,17 @@ final class DocumentViewerStore: ObservableObject {
         }
     }
 
+    func presentCommandFailure(_ failure: RhwpStudioCommandFailure) {
+        guard failure.isRecovered, webViewFailure == nil, hasDocument else { return }
+        dismissWebViewError()
+        commandFailurePresentation.present(failure)
+    }
+
+    func dismissCommandFailure() { commandFailurePresentation.dismiss() }
+    func showCommandFailure() { commandFailurePresentation.show() }
+
     func retryWebViewLoad() {
+        commandFailurePresentation.clear()
         webViewFailure = nil
         dismissWebViewError()
         isWebViewLoading = false
@@ -312,6 +323,7 @@ final class DocumentViewerStore: ObservableObject {
         documentRevision += 1
         webViewLoadID += 1
         editorSession = nil
+        commandFailurePresentation.clear()
         hasUnsavedChanges = false
         rhwpStudioDocument = RhwpStudioDocumentPayload(
             data: data,
@@ -352,6 +364,8 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     private func presentWebViewError(_ message: String, dedupeKey: String? = nil) {
+        // 새 저장/출력 오류가 이전 명령 알림 뒤에 가려지지 않게 한다. 진단은 보존한다.
+        commandFailurePresentation.dismiss()
         if let dedupeKey,
            webViewErrorDedupeKey == dedupeKey,
            webViewErrorMessage != nil {

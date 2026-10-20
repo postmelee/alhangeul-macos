@@ -243,6 +243,7 @@ targets:
       - path: Sources/HostApp/Services/QuickLookConflictPresentation.swift
       - path: Sources/HostApp/Services/QuickLookSettingsOpener.swift
       - path: Sources/HostApp/Services/RhwpStudioHostBridgeScript.swift
+      - path: Sources/HostApp/Services/RhwpStudioCommandFailure.swift
       - path: Sources/HostApp/Services/RhwpStudioEditorSession.swift
       - path: Sources/HostApp/Services/RhwpStudioEditorSessionScript.swift
       - path: Sources/HostApp/Services/RhwpStudioSaveBridgeScript.swift

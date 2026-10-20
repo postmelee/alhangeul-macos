@@ -2,9 +2,11 @@ import SwiftUI
 
 struct DocumentViewerView: View {
     @ObservedObject var store: DocumentViewerStore
+    // 현재 제품 번들은 공개 producer가 없어 미지원이다. native 초기화 의존성으로만 설정한다.
+    var commandFailureSupport: RhwpStudioCommandFailureSupport = .unavailable
 
     var body: some View {
-        RhwpStudioContainerView(store: store, document: store.rhwpStudioDocument)
+        RhwpStudioContainerView(store: store, document: store.rhwpStudioDocument, commandFailureSupport: commandFailureSupport)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .sheet(
                 item: recoverableDocumentOpenFailure,
@@ -95,6 +97,7 @@ private struct RecoverableDocumentOpenFailureView: View {
 private struct RhwpStudioContainerView: View {
     @ObservedObject var store: DocumentViewerStore
     let document: RhwpStudioDocumentPayload?
+    let commandFailureSupport: RhwpStudioCommandFailureSupport
 
     var body: some View {
         ZStack {
@@ -160,7 +163,12 @@ private struct RhwpStudioContainerView: View {
                         Task { @MainActor in
                             store.recordSavedDocument(savedDocument)
                         }
-                    }
+                    },
+                    onCommandFailure: { failure in
+                        // 성공 통지를 지연 Task로 넘겨 문서 교체 뒤 표시하지 않도록 한다.
+                        store.presentCommandFailure(failure)
+                    },
+                    commandFailureSupport: commandFailureSupport
                 )
                 .allowsHitTesting(!store.isLoading)
 
@@ -168,7 +176,12 @@ private struct RhwpStudioContainerView: View {
                     LoadingOverlayView(message: store.isLoading ? "불러오는 중..." : "웹 viewer 로딩 중...")
                 }
 
-                if let message = store.webViewErrorMessage {
+                if store.commandFailurePresentation.isVisible {
+                    CommandFailureBanner(presentation: store.commandFailurePresentation,
+                                         onDismiss: store.dismissCommandFailure)
+                        .padding(.top, 12)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                } else if let message = store.webViewErrorMessage {
                     WebViewerErrorBanner(
                         message: message,
                         onDismiss: {
@@ -177,6 +190,13 @@ private struct RhwpStudioContainerView: View {
                     )
                         .padding(.top, 12)
                         .frame(maxHeight: .infinity, alignment: .top)
+                }
+                if !store.commandFailurePresentation.isVisible,
+                   store.webViewErrorMessage == nil,
+                   store.commandFailurePresentation.failure != nil {
+                    Button("최근 오류 진단", action: store.showCommandFailure)
+                        .padding(12)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                 }
             }
         }
@@ -228,6 +248,38 @@ private struct WebViewerErrorBanner: View {
         .padding(.vertical, 8)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
         .shadow(color: .black.opacity(0.10), radius: 6, x: 0, y: 2)
+    }
+}
+
+private struct CommandFailureBanner: View {
+    let presentation: RhwpStudioCommandFailurePresentation
+    let onDismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top) {
+                Image(systemName: "exclamationmark.triangle").foregroundStyle(.orange)
+                Text(presentation.message).fixedSize(horizontal: false, vertical: true)
+                Button(action: onDismiss) { Image(systemName: "xmark") }
+                    .buttonStyle(.plain).accessibilityLabel("알림 닫기")
+            }
+            if presentation.occurrenceCount > 1 {
+                Text("같은 작업 오류 \(presentation.occurrenceCount)회").foregroundStyle(.secondary)
+            }
+            DisclosureGroup("진단 정보") {
+                Text(presentation.failure?.diagnostic ?? "")
+                    .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                Button("진단 복사") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(presentation.failure?.diagnostic ?? "", forType: .string)
+                }
+            }
+        }
+        .font(.caption)
+        .padding(12)
+        .frame(maxWidth: 520, alignment: .leading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+        .shadow(color: .black.opacity(0.1), radius: 6, y: 2)
     }
 }
 
