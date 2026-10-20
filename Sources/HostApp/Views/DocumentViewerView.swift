@@ -104,6 +104,7 @@ private struct RhwpStudioContainerView: View {
             if let failure = store.webViewFailure {
                 WebViewerFallbackView(
                     failure: failure,
+                    store: store,
                     canRevealInFinder: store.canRevealInFinder,
                     onRetry: {
                         store.retryWebViewLoad()
@@ -121,11 +122,7 @@ private struct RhwpStudioContainerView: View {
                     sourceDocument: store.sourceDocument,
                     reloadToken: store.webViewReloadToken,
                     loadID: store.webViewLoadID,
-                    onEditorSessionChange: { session in
-                        Task { @MainActor in
-                            store.updateEditorSession(session)
-                        }
-                    },
+                    onEditorSessionChange: { session in store.updateEditorSession(session) },
                     onLoadStateChange: { isLoading in
                         Task { @MainActor in
                             store.setWebViewLoading(isLoading)
@@ -136,11 +133,7 @@ private struct RhwpStudioContainerView: View {
                             store.setWebViewError(message)
                         }
                     },
-                    onFailure: { failure in
-                        Task { @MainActor in
-                            store.setWebViewFailure(failure)
-                        }
-                    },
+                    onFailure: { failure in store.setWebViewFailure(failure) },
                     onOpenDocument: {
                         Task { @MainActor in
                             store.openDocument()
@@ -159,15 +152,12 @@ private struct RhwpStudioContainerView: View {
                             store.loadDocument(from: url, source: .fileDrop)
                         }
                     },
-                    onDocumentSaved: { savedDocument in
-                        Task { @MainActor in
-                            store.recordSavedDocument(savedDocument)
-                        }
-                    },
+                    onDocumentSaved: { savedDocument in store.recordSavedDocument(savedDocument) },
                     onCommandFailure: { failure in
                         // 성공 통지를 지연 Task로 넘겨 문서 교체 뒤 표시하지 않도록 한다.
                         store.presentCommandFailure(failure)
                     },
+                    onEditorImage: { store.preserveEditorImage($0) },
                     commandFailureSupport: commandFailureSupport
                 )
                 .allowsHitTesting(!store.isLoading)
@@ -285,61 +275,92 @@ private struct CommandFailureBanner: View {
 
 private struct WebViewerFallbackView: View {
     let failure: RhwpStudioWebViewFailure
+    @ObservedObject var store: DocumentViewerStore
     let canRevealInFinder: Bool
     let onRetry: () -> Void
     let onOpenDocument: () -> Void
     let onRevealInFinder: () -> Void
+    @State private var showsDetails = false
 
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 40))
-                .foregroundStyle(.orange)
+        TimelineView(.periodic(from: .now, by: 15)) { _ in
+            VStack(spacing: 20) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 32))
+                    .foregroundStyle(.orange)
+                    .accessibilityHidden(true)
 
-            VStack(spacing: 8) {
-                Text(failure.title)
-                    .font(.headline)
-                Text(failure.message)
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            HStack(spacing: 8) {
-                Button {
-                    onRetry()
-                } label: {
-                    Label("다시 시도", systemImage: "arrow.clockwise")
-                }
-
-                Button {
-                    onOpenDocument()
-                } label: {
-                    Label("다른 파일 열기", systemImage: "doc.badge.plus")
-                }
-
-                if canRevealInFinder {
-                    Button {
-                        onRevealInFinder()
-                    } label: {
-                        Label("Finder에서 보기", systemImage: "folder")
+                VStack(spacing: 8) {
+                    Text("문서를 계속 편집할 수 없습니다")
+                        .font(.title3.weight(.semibold))
+                    if let copy = store.previousSave {
+                        Text("\(copy.savedAt.formatted(date: .omitted, time: .shortened)) 저장본을 보관하고 있습니다.\n그 이후의 변경사항은 포함되지 않습니다.")
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("마지막 저장 이후의 변경사항은 복구할 수 없습니다.")
+                            .foregroundStyle(.secondary)
                     }
                 }
-            }
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
 
-            DisclosureGroup("진단 정보") {
-                ScrollView {
-                    Text(failure.diagnosticDetail)
-                        .font(.system(.caption, design: .monospaced))
-                        .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .textSelection(.enabled)
+                HStack(spacing: 10) {
+                    if store.previousSave != nil {
+                        Button("저장본 복사…") { Task { await store.exportPreviousSave() } }
+                            .buttonStyle(.borderedProminent)
+                        Button("다시 열기", action: onRetry)
+                    } else {
+                        Button(store.rhwpStudioDocument == nil ? "다시 시작" : "다시 열기", action: onRetry)
+                            .buttonStyle(.borderedProminent)
+                    }
                 }
-                .frame(maxHeight: 140)
+                .controlSize(.large)
+                .disabled(store.isRecoveryExporting || store.isConfirmingRecovery)
+
+                if let message = store.recoveryMessage {
+                    Text(message).font(.callout).foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+
+                Menu("다른 작업") {
+                    Button("다른 파일 열기…", action: onOpenDocument)
+                    if canRevealInFinder { Button("Finder에서 보기", action: onRevealInFinder) }
+                    Divider()
+                    Button("세부정보…") { showsDetails = true }
+                }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+                .disabled(store.isRecoveryExporting || store.isConfirmingRecovery)
             }
-            .frame(maxWidth: 560)
+            .padding(32)
+            .frame(maxWidth: 480)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding(32)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .sheet(isPresented: $showsDetails) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("오류 세부정보").font(.headline)
+                Text(store.recoveryDescription).foregroundStyle(.secondary)
+                if let image = store.lastEditorImage {
+                    DisclosureGroup("중단 시점 화면") {
+                        Image(nsImage: image).resizable().scaledToFit().frame(maxHeight: 220)
+                        Text("참고용 화면이며 문서로 저장하거나 편집할 수 없습니다.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                ScrollView {
+                    Text([failure.diagnosticDetail, store.recoveryErrorDetail].compactMap { $0 }.joined(separator: "\n"))
+                        .font(.system(.caption, design: .monospaced))
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 200)
+                HStack {
+                    Spacer()
+                    Button("닫기") { showsDetails = false }.keyboardShortcut(.cancelAction)
+                }
+            }
+            .padding(24)
+            .frame(width: 520)
+        }
     }
 }

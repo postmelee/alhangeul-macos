@@ -786,6 +786,7 @@ enum RhwpStudioHostBridgeScript {
             canonicalCommand === "file:save-as-hwpx" ||
             canonicalCommand === "file:export-pdf" ||
             canonicalCommand === "file:print" ||
+            canonicalCommand === "file:share" ||
             canonicalCommand === "file:export-doc" ||
             canonicalCommand === "file:export-html") {
           postNative({

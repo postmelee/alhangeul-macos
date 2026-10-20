@@ -129,6 +129,25 @@ final class RhwpStudioPDFExportControllerTests: XCTestCase {
         XCTAssertEqual(firstCalls,1)
     }
 
+    func testSuspensionAtFinalPublishGatePreservesDestination() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let destination = folder.appendingPathComponent("existing.pdf"), original = Data("keep original".utf8)
+        try original.write(to: destination)
+        let controller = makeController()
+        let payload = try RhwpStudioPagePayload(fileName: "a.hwpx", pageCount: 1, pages: [svg(width: 200, height: 300, text: "문서")])
+        var gates = 0, callbacks = 0
+        let result: Result<URL, Error> = await withCheckedContinuation { done in
+            controller.export(payload: payload, destinationURL: destination, permitWrite: { gates += 1; return false }) {
+                callbacks += 1; done.resume(returning: $0)
+            }
+        }
+        if case .success = result { XCTFail("suspended document published") }
+        XCTAssertEqual(gates, 1); XCTAssertEqual(callbacks, 1)
+        XCTAssertEqual(try Data(contentsOf: destination), original)
+    }
+
     func testFinalValidationAndAtomicWriteFailuresPreserveExistingDestination() async throws {
         let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at:folder,withIntermediateDirectories:true)

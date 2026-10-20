@@ -13,6 +13,9 @@ struct RhwpStudioSavedDocument {
     let data: Data
     let sourceProtection: DocumentSourceProtection
     let session: RhwpStudioEditorSession
+    var format: DocumentSaveFormat = .hwp
+    var recoveryEligible: Bool = false
+    var savedAt: Date = Date()
 }
 
 enum RhwpStudioDocumentSaveResult {
@@ -26,15 +29,16 @@ struct RhwpStudioWebView: NSViewRepresentable {
     let sourceDocument: RecentDocumentItem?
     let reloadToken: Int
     let loadID: Int
-    let onEditorSessionChange: (RhwpStudioEditorSession) -> Void
+    let onEditorSessionChange: @MainActor (RhwpStudioEditorSession) -> Void
     let onLoadStateChange: (Bool) -> Void
     let onError: (String?) -> Void
-    let onFailure: (RhwpStudioWebViewFailure) -> Void
+    let onFailure: @MainActor (RhwpStudioWebViewFailure) -> Void
     let onOpenDocument: () -> Void
     let onDroppedDocument: (RhwpStudioDroppedDocument) -> Void
     let onDroppedFileURL: (URL) -> Void
-    let onDocumentSaved: (RhwpStudioSavedDocument) -> Void
+    let onDocumentSaved: @MainActor (RhwpStudioSavedDocument) -> Void
     let onCommandFailure: @MainActor (RhwpStudioCommandFailure) -> Void
+    var onEditorImage: @MainActor (NSImage?) -> Void = { _ in }
     let commandFailureSupport: RhwpStudioCommandFailureSupport
 
     init(
@@ -42,15 +46,16 @@ struct RhwpStudioWebView: NSViewRepresentable {
         sourceDocument: RecentDocumentItem? = nil,
         reloadToken: Int = 0,
         loadID: Int,
-        onEditorSessionChange: @escaping (RhwpStudioEditorSession) -> Void = { _ in },
+        onEditorSessionChange: @escaping @MainActor (RhwpStudioEditorSession) -> Void = { _ in },
         onLoadStateChange: @escaping (Bool) -> Void = { _ in },
         onError: @escaping (String?) -> Void = { _ in },
-        onFailure: @escaping (RhwpStudioWebViewFailure) -> Void = { _ in },
+        onFailure: @escaping @MainActor (RhwpStudioWebViewFailure) -> Void = { _ in },
         onOpenDocument: @escaping () -> Void = {},
         onDroppedDocument: @escaping (RhwpStudioDroppedDocument) -> Void = { _ in },
         onDroppedFileURL: @escaping (URL) -> Void = { _ in },
-        onDocumentSaved: @escaping (RhwpStudioSavedDocument) -> Void = { _ in },
+        onDocumentSaved: @escaping @MainActor (RhwpStudioSavedDocument) -> Void = { _ in },
         onCommandFailure: @escaping @MainActor (RhwpStudioCommandFailure) -> Void = { _ in },
+        onEditorImage: @escaping @MainActor (NSImage?) -> Void = { _ in },
         commandFailureSupport: RhwpStudioCommandFailureSupport = .unavailable
     ) {
         self.document = document
@@ -66,6 +71,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         self.onDroppedFileURL = onDroppedFileURL
         self.onDocumentSaved = onDocumentSaved
         self.onCommandFailure = onCommandFailure
+        self.onEditorImage = onEditorImage
         self.commandFailureSupport = commandFailureSupport
     }
 
@@ -89,6 +95,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         context.coordinator.onLoadStateChange = onLoadStateChange
         context.coordinator.onError = onError
         context.coordinator.onFailure = onFailure
+        context.coordinator.onEditorImage = onEditorImage
         context.coordinator.onOpenDocument = onOpenDocument
         context.coordinator.onDroppedDocument = onDroppedDocument
         context.coordinator.onDroppedFileURL = onDroppedFileURL
@@ -109,12 +116,16 @@ extension RhwpStudioWebView {
     final class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
         var onLoadStateChange: (Bool) -> Void = { _ in }
         var onError: (String?) -> Void = { _ in }
-        var onFailure: (RhwpStudioWebViewFailure) -> Void = { _ in }
+        var onFailure: @MainActor (RhwpStudioWebViewFailure) -> Void = { _ in }
         var onOpenDocument: () -> Void = {}
         var onDroppedDocument: (RhwpStudioDroppedDocument) -> Void = { _ in }
         var onDroppedFileURL: (URL) -> Void = { _ in }
-        var onDocumentSaved: (RhwpStudioSavedDocument) -> Void = { _ in }
+        var onDocumentSaved: @MainActor (RhwpStudioSavedDocument) -> Void = { _ in }
         var onCommandFailure: @MainActor (RhwpStudioCommandFailure) -> Void = { _ in }
+        var onEditorImage: @MainActor (NSImage?) -> Void = { _ in }
+        private var saveCompletion: SaveCompletion?
+        private var saveTask: Task<Void, Never>?
+        private var shareID: String?
         private var commandFailures: RhwpStudioCommandFailureState
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
@@ -174,8 +185,9 @@ extension RhwpStudioWebView {
         private var loadedIdentity: Int?
         private var editorLoadToken = UUID().uuidString
         private var editorSession: RhwpStudioEditorSession?
-        var onEditorSessionChange: (RhwpStudioEditorSession) -> Void = { _ in }
+        var onEditorSessionChange: @MainActor (RhwpStudioEditorSession) -> Void = { _ in }
         private var currentDocument: RhwpStudioDocumentPayload?
+        private var recoveryOriginIsPlain = false
         private var currentSourceDocument: RecentDocumentItem?
         private weak var commandWebView: WKWebView?
         private let printLifecycle = RhwpStudioPrintLifecycle(
@@ -184,6 +196,7 @@ extension RhwpStudioWebView {
         private var pdfExportController: RhwpStudioPDFExportController?
         private var pendingSaveRequest: PendingSaveRequest?
         private var activeSaveID: String?
+        var isSavingDocument: Bool { activeSaveID != nil }
         private var activeSaveEpoch: Int?
         var chooseSaveDestination: (DocumentSaveFormat, String, NSWindow?) async -> URL? = {
             await DocumentSavePanel.chooseDestinationURL(format:$0, suggestedFilename:$1, presentingWindow:$2)
@@ -218,6 +231,7 @@ extension RhwpStudioWebView {
         }
         var writeHTMLData: (Data, URL) throws -> Void = { try DocumentSavePanel.write(data:$0, to:$1) }
         var onHTMLExported: (URL) -> Void = { DocumentFileActions.revealInFinder($0) }
+        var presentShare: (Data, String) throws -> Void = { try DocumentFileActions.share(data: $0, filename: $1) }
         private var activeLoadID = 0
         private var loadTimeoutTask: Task<Void, Never>?
         private var recentNativeDrop: NativeDropMarker?
@@ -267,6 +281,7 @@ extension RhwpStudioWebView {
                 guard let self, let webView else {
                     return false
                 }
+                guard !self.commandFailures.isSuspended else { return true }
                 self.runNativeCommand(command, in: webView)
                 return true
             }
@@ -279,6 +294,7 @@ extension RhwpStudioWebView {
             }
             webView.refreshSessionHandler = { [weak self, weak webView] completion in
                 guard let self, let webView else { return false }
+                guard !self.commandFailures.isSuspended else { completion(nil); return true }
                 Task { @MainActor in
                     do { completion(try await self.readEditorSession(in:webView)) }
                     catch { completion(nil) }
@@ -312,12 +328,18 @@ extension RhwpStudioWebView {
                 }
                 return
             }
+            saveTask?.cancel()
+            saveCompletion?.finishAfterSuspension(); saveCompletion = nil
+            webView.isHidden = false
             currentDocument = document
+            recoveryOriginIsPlain = document?.sourceProtection == .plain
             currentSourceDocument = sourceDocument
             documentProvider.setDocument(document)
             editorSession = nil
             editorLoadToken = UUID().uuidString
             commandFailures.beginLoad(token: editorLoadToken, loadID: loadID)
+            isPDFPreparing = false
+            if !isPrintSealed { isPrintPreparing = false }
             fontMessageHandler.reset()
             installUserScripts(in: webView, loadID: loadID)
 
@@ -380,6 +402,7 @@ extension RhwpStudioWebView {
                   )
             else { return }
             let previous = editorSession
+            if previous == nil, session.sourceBinding == .newDocument { recoveryOriginIsPlain = true }
             editorSession = session
             commandFailures.updateSession(snapshot)
             if session.sourceBinding != .nativeLoad {
@@ -388,6 +411,7 @@ extension RhwpStudioWebView {
                 documentProvider.setDocument(nil)
             }
             if let previous, previous.snapshot.documentEpoch != snapshot.documentEpoch {
+                recoveryOriginIsPlain = session.sourceBinding == .newDocument
                 fontMessageHandler.begin(loadToken: editorLoadToken)
                 commandWebView?.evaluateJavaScript("window.__alhangeulFontConnection?.refresh()", completionHandler: nil)
                 htmlDownload?.cancel()
@@ -402,10 +426,12 @@ extension RhwpStudioWebView {
         }
 
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+            guard !commandFailures.isSuspended else { return }
             fontMessageHandler.begin(loadToken: editorLoadToken)
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            guard !commandFailures.isSuspended else { return }
             hasCompletedCurrentLoad = true
             finishLoading()
         }
@@ -557,6 +583,12 @@ extension RhwpStudioWebView {
                 return
             }
 
+            let origin = message.frameInfo.securityOrigin
+            guard !commandFailures.isSuspended,
+                  StudioFontMessageHandler.permits(mainFrame: message.frameInfo.isMainFrame,
+                    originScheme: origin.protocol, originHost: origin.host, originPort: origin.port,
+                    frameURL: message.frameInfo.request.url, sameWebView: message.webView === commandWebView)
+            else { return }
             switch type {
             case "command":
                 if ["app:font-settings","file:print","file:export-pdf"].contains(body["command"] as? String ?? "") {
@@ -572,7 +604,7 @@ extension RhwpStudioWebView {
             case "save-document":
                 break // 이전 비상관 응답으로 파일을 쓰지 않는다.
             case "share-document":
-                shareDocument(body)
+                break // 비상관 legacy payload로 공유하지 않는다.
             case "print-document":
                 break // 요청/문서 lock에 연결되지 않은 이전 payload는 사용하지 않는다.
             case "export-pdf-document":
@@ -615,6 +647,7 @@ extension RhwpStudioWebView {
 
         func stopCommandFailures() {
             commandFailures.suspend()
+            invalidateFailedEditorSession(captureImage: false)
             onCommandFailure = { _ in }
         }
 
@@ -636,10 +669,33 @@ extension RhwpStudioWebView {
                 diagnosticDetail: "commandFailure=\(code)"))
         }
 
-        private func invalidateFailedEditorSession() {
-            if let webView = commandWebView { disposeFontProvider(in: webView) }
+        private func invalidateFailedEditorSession(captureImage: Bool = true) {
+            // native gate를 먼저 닫고 실행 중인 문서 자체를 비운다. hit testing에 의존하지 않는다.
+            if let webView = commandWebView {
+                if captureImage, webView.bounds.width > 0, webView.bounds.height > 0,
+                   webView.bounds.width * webView.bounds.height <= 4_000_000,
+                   let rep = webView.bitmapImageRepForCachingDisplay(in: webView.bounds),
+                   rep.pixelsWide * rep.pixelsHigh <= 4_000_000 {
+                    webView.cacheDisplay(in: webView.bounds, to: rep)
+                    let image = NSImage(size: webView.bounds.size); image.addRepresentation(rep)
+                    onEditorImage(image)
+                }
+                webView.isHidden = true
+                if webView.window?.firstResponder is NSView { webView.window?.makeFirstResponder(nil) }
+                (webView.window?.attachedSheet as? NSSavePanel)?.cancel(nil)
+                disposeFontProvider(in: webView)
+                webView.stopLoading()
+                webView.configuration.userContentController.removeAllUserScripts()
+                webView.loadHTMLString("<!doctype html><title>편집 중단</title>", baseURL: nil)
+            }
             fontMessageHandler.reset()
-            htmlDownload?.cancel()
+            htmlDownload?.cancel(); htmlDownload = nil; htmlExportID = nil
+            cancelOutputPreparation()
+            pdfExportState.invalidatePendingRequestForDocumentChange()
+            saveTask?.cancel()
+            saveCompletion?.finishAfterSuspension()
+            saveCompletion = nil
+            shareID = nil
             activeSaveID = nil
             pendingSaveRequest = nil
             editorSession = nil
@@ -764,6 +820,7 @@ extension RhwpStudioWebView {
         }
 
         private func handleDroppedFileURL(_ fileURL: URL) {
+            guard !commandFailures.isSuspended else { return }
             recentNativeDrop = NativeDropMarker(
                 fileName: Self.normalizedFilename(fileURL.lastPathComponent),
                 handledAt: Date()
@@ -830,6 +887,8 @@ extension RhwpStudioWebView {
                 }
             case "file:open":
                 onOpenDocument()
+            case "file:share":
+                if let webView = commandWebView { requestShare(in: webView) }
             case "file:export-pdf":
                 guard let webView = commandWebView else {
                     onError("PDF로 내보낼 viewer를 찾을 수 없습니다.")
@@ -885,7 +944,7 @@ extension RhwpStudioWebView {
             return url
         }
 
-        private func recordSavedDocument(at url: URL, payload: SavePayload, request: PendingSaveRequest) {
+        private func recordSavedDocument(at url: URL, payload: SavePayload, request: PendingSaveRequest, savedAt: Date) {
             guard let session = editorSession else { return }
             let bound = RhwpStudioEditorSession(snapshot:session.snapshot, sourceBinding:.nativeLoad)
             let protection = DocumentSaveProtectionPolicy.resultingProtection(
@@ -898,7 +957,13 @@ extension RhwpStudioWebView {
             )
             documentProvider.setDocument(currentDocument)
             currentSourceDocument = RecentDocumentItem.make(for:url)
-            onDocumentSaved(.init(url:url, data:payload.data, sourceProtection:protection, session:bound))
+            let eligible = recoveryOriginIsPlain && request.sourceProtection == .plain && request.conversionIntent == .none
+                && payload.data.count <= 32 * 1024 * 1024
+                && RhwpDocumentProtection.classify(data: payload.data) == .plain
+                && ((try? RhwpDocument(data: payload.data, filename: url.lastPathComponent).pageCount) ?? 0) > 0
+            guard !commandFailures.isSuspended else { return }
+            onDocumentSaved(.init(url:url, data:payload.data, sourceProtection:protection, session:bound,
+                format:payload.format, recoveryEligible:eligible, savedAt:savedAt))
         }
 
         private static func saveStatusTimeText() -> String {
@@ -918,39 +983,32 @@ extension RhwpStudioWebView {
             return String(arrayLiteral.dropFirst().dropLast())
         }
 
-        private func shareDocument(_ body: [String: Any]) {
-            guard let payload = exportedDocumentPayload(
-                from: body,
-                missingMessage: "공유 데이터를 만들 수 없습니다"
-            ) else {
-                return
+        private func requestShare(in webView: WKWebView) {
+            guard !commandFailures.isSuspended, shareID == nil, activeSaveID == nil,
+                  htmlExportID == nil, !isPDFPreparing, !isPrintPreparing else { return }
+            let id = "share-" + UUID().uuidString, token = editorLoadToken
+            shareID = id
+            Task { @MainActor in
+                do {
+                    let session = try await self.readEditorSession(in: webView)
+                    let body = try await self.bridgeObject(
+                        "return await window.__alhangeulHostBridgeSave.begin(id, token, epoch, 'hwp');",
+                        arguments: ["id": id, "token": token, "epoch": session.snapshot.documentEpoch], in: webView)
+                    let scope = try self.outputScope(id: id, token: token, body: body)
+                    let data = try DocumentSaveContract.decodeAndValidate(base64: body["base64"] as? String,
+                        responseFormatRawValue: body["format"] as? String, responseByteCount: self.intValue(body["byteCount"]),
+                        requestFormat: .hwp, destinationURL: URL(fileURLWithPath: "/document.hwp"))
+                    guard self.shareID == id, try await self.validateOutput(scope, in: webView),
+                          self.outputIsCurrent(scope) else { throw DocumentSaveProtectionPolicyError.documentChanged }
+                    // 임시 파일 생성과 picker 공개 사이에는 await가 없다. 공개 후는 확정된 bytes의 공유다.
+                    try self.presentShare(data,
+                        DocumentSaveFormat.hwp.normalizedFilename(self.currentDocument?.filename ?? "새 문서.hwp"))
+                } catch {
+                    if !self.commandFailures.isSuspended { self.onError("공유할 수 없습니다: \(error.localizedDescription)") }
+                }
+                await self.releaseOutputLock(id: id, token: token, in: webView)
+                if self.shareID == id { self.shareID = nil }
             }
-
-            do {
-                try DocumentFileActions.share(
-                    data: payload.data,
-                    filename: payload.fileName
-                )
-            } catch {
-                onError("공유할 수 없습니다: \(error.localizedDescription)")
-            }
-        }
-
-        private func exportedDocumentPayload(
-            from body: [String: Any],
-            missingMessage: String
-        ) -> (data: Data, fileName: String)? {
-            guard let data = decodedData(
-                from: body,
-                missingMessage: missingMessage
-            ) else {
-                return nil
-            }
-
-            let fileName = body["fileName"] as? String
-                ?? currentDocument?.filename
-                ?? "document.hwp"
-            return (data, fileName)
         }
 
         private func decodedData(
@@ -1036,6 +1094,7 @@ extension RhwpStudioWebView {
         }
 
         private func runNativeCommand(_ command: String, in webView: WKWebView) {
+            guard !commandFailures.isSuspended else { return }
             if let format = DocumentHTMLExportFormat.allCases.first(where: { $0.command == command }) {
                 requestHTMLExport(format:format, in:webView)
                 return
@@ -1058,7 +1117,8 @@ extension RhwpStudioWebView {
                 requestPrint(in:webView)
                 return
             case "file:share":
-                script = "window.__alhangeulHostBridgeRunNativeCommand?.('file:share')"
+                requestShare(in: webView)
+                return
             case "file:export-pdf":
                 requestPDFExport(in: webView)
                 return
@@ -1099,6 +1159,9 @@ extension RhwpStudioWebView {
             forcePanel: Bool,
             completion: ((RhwpStudioDocumentSaveResult) -> Void)?
         ) {
+            guard !commandFailures.isSuspended, shareID == nil else {
+                completion?(.failed("편집이 중단되어 현재 문서를 저장할 수 없습니다.")); return
+            }
             guard activeSaveID == nil, htmlExportID == nil, pdfExportState.isIdle, !isPDFPreparing, !isPrintPreparing else {
                 completion?(.failed("이미 저장이 진행 중입니다."))
                 return
@@ -1107,9 +1170,11 @@ extension RhwpStudioWebView {
             let token = editorLoadToken
             activeSaveID = id
             activeSaveEpoch = nil
-            Task { @MainActor [weak self, weak webView] in
+            let ticket = SaveCompletion(completion)
+            saveCompletion = ticket
+            saveTask = Task { @MainActor [weak self, weak webView] in
                 guard let self, let webView else {
-                    completion?(.failed("저장할 viewer를 찾을 수 없습니다."))
+                    ticket.finish(.failed("저장할 viewer를 찾을 수 없습니다."))
                     return
                 }
                 var result: RhwpStudioDocumentSaveResult = .cancelled
@@ -1192,7 +1257,12 @@ extension RhwpStudioWebView {
                             !(outputIntent == .plainCopy && sourceURL == nil))
                         url = selected
                     }
-                    // 실제 파일 쓰기 성공 후에만 원본 metadata를 연결한다.
+                    ticket.publishedURL = url
+                    let savedAt = Date()
+                    // 이미 게시된 파일은 fatal 후에도 취소/원복했다고 표시하지 않는다.
+                    guard !self.commandFailures.isSuspended, self.editorLoadToken == token else {
+                        ticket.finish(.saved(url)); return
+                    }
                     var syncError: Error?
                     do {
                         let savedState = try await self.bridgeObject(
@@ -1202,9 +1272,10 @@ extension RhwpStudioWebView {
                         try self.requireSave(id, token: token, epoch: request.documentEpoch)
                         self.handleEditorSession(savedState)
                     } catch { syncError = error }
-                    if self.activeSaveID == id, self.editorLoadToken == token,
+                    if syncError == nil, !self.commandFailures.isSuspended,
+                       self.activeSaveID == id, self.editorLoadToken == token,
                        self.editorSession?.snapshot.documentEpoch == request.documentEpoch {
-                        self.recordSavedDocument(at:url, payload:payload, request:request)
+                        self.recordSavedDocument(at:url, payload:payload, request:request, savedAt:savedAt)
                     }
                     if let syncError {
                         throw SaveSynchronizationError(detail: syncError.localizedDescription)
@@ -1214,8 +1285,9 @@ extension RhwpStudioWebView {
                     result = .cancelled
                 } catch {
                     let message = "문서를 저장할 수 없습니다: \(error.localizedDescription)"
-                    self.onError(message)
-                    result = .failed(message)
+                    if !self.commandFailures.isSuspended { self.onError(message) }
+                    result = self.commandFailures.isSuspended
+                        ? (ticket.publishedURL.map(RhwpStudioDocumentSaveResult.saved) ?? .cancelled) : .failed(message)
                 }
                 // 성공·취소·오류 모두 요청별 lock을 해제한다. 새 page의 lock은 건드리지 않는다.
                 if self.editorLoadToken == token {
@@ -1226,8 +1298,21 @@ extension RhwpStudioWebView {
                 if self.activeSaveID == id {
                     self.activeSaveID = nil
                     self.pendingSaveRequest = nil
+                    self.saveTask = nil; self.saveCompletion = nil
                 }
-                completion?(result)
+                ticket.finish(result)
+            }
+        }
+
+        private final class SaveCompletion {
+            private var callback: ((RhwpStudioDocumentSaveResult) -> Void)?
+            var publishedURL: URL?
+            init(_ callback: ((RhwpStudioDocumentSaveResult) -> Void)?) { self.callback = callback }
+            func finish(_ result: RhwpStudioDocumentSaveResult) {
+                let callback = callback; self.callback = nil; callback?(result)
+            }
+            func finishAfterSuspension() {
+                finish(publishedURL.map(RhwpStudioDocumentSaveResult.saved) ?? .cancelled)
             }
         }
 
@@ -1238,7 +1323,8 @@ extension RhwpStudioWebView {
         }
 
         private func requireSave(_ id: String, token: String, epoch: Int) throws {
-            guard activeSaveID == id, editorLoadToken == token,
+            try Task.checkCancellation()
+            guard !commandFailures.isSuspended, activeSaveID == id, editorLoadToken == token,
                   editorSession?.snapshot.documentEpoch == epoch,
                   editorSession?.snapshot.ready == true
             else { throw DocumentSaveProtectionPolicyError.documentChanged }
@@ -1266,6 +1352,7 @@ extension RhwpStudioWebView {
         }
 
         private func readEditorSession(in webView: WKWebView) async throws -> RhwpStudioEditorSession {
+            guard !commandFailures.isSuspended else { throw DocumentSaveProtectionPolicyError.documentChanged }
             let token = editorLoadToken
             let body = try await bridgeObject("return await window.__alhangeulHostBridgeReadSession();", in:webView)
             guard token == editorLoadToken, body["token"] as? String == token else {
@@ -1304,7 +1391,7 @@ extension RhwpStudioWebView {
         }
 
         private func requestHTMLExport(format: DocumentHTMLExportFormat, in webView: WKWebView) {
-            guard htmlExportID == nil, activeSaveID == nil, pdfExportState.isIdle, !isPDFPreparing, !isPrintPreparing else {
+            guard !commandFailures.isSuspended, shareID == nil, htmlExportID == nil, activeSaveID == nil, pdfExportState.isIdle, !isPDFPreparing, !isPrintPreparing else {
                 onError("저장 또는 내보내기가 이미 진행 중입니다.")
                 return
             }
@@ -1351,10 +1438,13 @@ extension RhwpStudioWebView {
                 } catch is SaveOperationCancelled {
                     // 저장 위치 선택 취소는 원본을 변경하지 않는다.
                 } catch {
-                    self.onError("문서를 내보낼 수 없습니다: \(error.localizedDescription)")
+                    if !self.commandFailures.isSuspended, self.editorLoadToken == token {
+                        self.onError("문서를 내보낼 수 없습니다: \(error.localizedDescription)")
+                    }
                 }
-                self.htmlDownload?.cancel()
-                self.htmlDownload = nil
+                if self.htmlExportID == id {
+                    self.htmlDownload?.cancel(); self.htmlDownload = nil
+                }
                 if self.editorLoadToken == token {
                     _ = try? await webView.callAsyncJavaScript(
                         "window.__alhangeulHostBridgeSave?.release(id);", arguments:["id":id], in:nil, contentWorld:.page
@@ -1365,7 +1455,7 @@ extension RhwpStudioWebView {
         }
 
         private func requireHTMLExport(_ id: String, token: String, epoch: Int) throws {
-            guard htmlExportID == id, editorLoadToken == token,
+            guard !commandFailures.isSuspended, htmlExportID == id, editorLoadToken == token,
                   editorSession?.snapshot.documentEpoch == epoch, editorSession?.snapshot.ready == true
             else { throw DocumentSaveProtectionPolicyError.documentChanged }
         }
@@ -1376,7 +1466,7 @@ extension RhwpStudioWebView {
         }
 
         private func outputScope(id: String, token: String, body: [String:Any]) throws -> OutputScope {
-            guard body["requestID"] as? String == id, body["token"] as? String == token,
+            guard !commandFailures.isSuspended, body["requestID"] as? String == id, body["token"] as? String == token,
                   editorLoadToken == token, let state = body["snapshot"] as? [String:Any],
                   let epoch = intValue(state["documentEpoch"]), let revision = intValue(state["changeSeq"]),
                   editorSession?.snapshot.documentEpoch == epoch else { throw RhwpStudioOutputFontError.stale }
@@ -1384,18 +1474,19 @@ extension RhwpStudioWebView {
                          sourceRevision:currentDocument?.revision ?? 0)
         }
 
+        private func outputIsCurrent(_ scope: OutputScope) -> Bool {
+            !commandFailures.isSuspended && editorLoadToken == scope.token && activeLoadID == scope.loadID
+                && editorSession?.snapshot.documentEpoch == scope.epoch
+                && editorSession?.snapshot.ready == true && (currentDocument?.revision ?? 0) == scope.sourceRevision
+        }
+
         private func validateOutput(_ scope: OutputScope, in webView: WKWebView) async throws -> Bool {
-            func nativeCurrent() -> Bool {
-                editorLoadToken == scope.token && activeLoadID == scope.loadID
-                    && editorSession?.snapshot.documentEpoch == scope.epoch
-                    && editorSession?.snapshot.ready == true && (currentDocument?.revision ?? 0) == scope.sourceRevision
-            }
             try Task.checkCancellation()
-            guard nativeCurrent() else { return false }
+            guard outputIsCurrent(scope) else { return false }
             let state = try await bridgeObject("return await window.__alhangeulHostBridgeSave.validate(id);",
                 arguments:["id":scope.id],in:webView)
             try Task.checkCancellation()
-            return nativeCurrent() && intValue(state["documentEpoch"]) == scope.epoch
+            return outputIsCurrent(scope) && intValue(state["documentEpoch"]) == scope.epoch
                 && intValue(state["changeSeq"]) == scope.revision
         }
 
@@ -1430,13 +1521,14 @@ extension RhwpStudioWebView {
         }
 
         private func requestPrint(in webView: WKWebView) {
-            guard !isPrintPreparing, !isPDFPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
+            guard !commandFailures.isSuspended, shareID == nil, !isPrintPreparing, !isPDFPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
                 onError("저장 또는 출력이 이미 진행 중입니다."); return
             }
             isPrintPreparing = true; isPrintSealed = false
             let token = editorLoadToken, id = "print-" + UUID().uuidString
             printTask = Task { @MainActor [weak self,weak webView] in
                 guard let self, let webView else { return }
+                var finalResult: RhwpStudioPrintResult = .cancelledBeforePanel
                 do {
                     let session = try await self.readEditorSession(in:webView)
                     let body = try await self.bridgeObject("return await window.__alhangeulHostBridgeSave.begin(id, token, epoch, 'pdf');",
@@ -1450,7 +1542,7 @@ extension RhwpStudioWebView {
                         let job = try await self.outputJob(scope,in:webView,fallbacks:fallbacks,expectedIdentity:identity)
                         identity = job.supplyIdentity
                         var result: RhwpStudioPrintResult = .cancelledBeforePanel
-                        let controller = RhwpStudioPrintController(outputFonts:job,onSealed:{
+                        let controller = RhwpStudioPrintController(outputFonts:job, canSeal: { self.outputIsCurrent(scope) }, onSealed:{
                             self.isPrintSealed = true
                             await self.releaseOutputLock(id:id,token:token,in:webView)
                         },runOperation:self.runPrintOperation,onResult:{ result = $0 },presentError:{ _ in })
@@ -1470,22 +1562,25 @@ extension RhwpStudioWebView {
                             }
                             throw error
                         }
-                        self.onPrintCompleted(outcome); break
+                        finalResult = outcome; break
                     }
-                } catch is SaveOperationCancelled { self.onPrintCompleted(.cancelledBeforePanel) }
+                } catch is SaveOperationCancelled { finalResult = .cancelledBeforePanel }
                 catch {
                     if !Task.isCancelled {
                         self.onError("인쇄할 수 없습니다: \(error.localizedDescription)")
-                        self.onPrintCompleted(.failed(error))
+                        finalResult = .failed(error)
                     }
                 }
                 await self.releaseOutputLock(id:id,token:token,in:webView)
-                self.isPrintPreparing = false; self.isPrintSealed = false; self.printTask = nil
+                self.onPrintCompleted(finalResult)
+                if self.editorLoadToken == token {
+                    self.isPrintPreparing = false; self.isPrintSealed = false; self.printTask = nil
+                }
             }
         }
 
         private func requestPDFExport(in webView: WKWebView, suggestedFilename: String? = nil) {
-            guard !isPDFPreparing, !isPrintPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
+            guard !commandFailures.isSuspended, shareID == nil, !isPDFPreparing, !isPrintPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
                 onError("저장 또는 PDF 내보내기가 이미 진행 중입니다.")
                 return
             }
@@ -1528,7 +1623,8 @@ extension RhwpStudioWebView {
                         self.pdfExportController = controller
                         do {
                             let savedURL: URL = try await withCheckedThrowingContinuation { continuation in
-                                controller.export(payload:payload,destinationURL:url,completion:{ continuation.resume(with:$0) })
+                                controller.export(payload:payload,destinationURL:url,
+                                    permitWrite: { self.outputIsCurrent(scope) }, completion:{ continuation.resume(with:$0) })
                             }
                             self.onPDFExported(savedURL); break
                         } catch {
@@ -1549,9 +1645,9 @@ extension RhwpStudioWebView {
                 self.pdfExportState.cancelDestinationSelection(requestID:id)
                 self.pdfExportState.failCollection(requestID:id)
                 self.pdfExportState.finishExport(requestID:id)
-                self.pdfExportController = nil
-                self.isPDFPreparing = false
-                self.pdfTask = nil
+                if self.editorLoadToken == token {
+                    self.pdfExportController = nil; self.isPDFPreparing = false; self.pdfTask = nil
+                }
             }
         }
 
@@ -1788,6 +1884,13 @@ enum RhwpStudioNativeCommandDispatcher {
         if let preferredWindow {
             guard let webView = preferredWindow.contentView?.firstDescendant(ofType:RhwpStudioNativeCommandWebView.self)
                     ?? registeredWebView(in:preferredWindow) else { return false }
+            return action(webView)
+        }
+        // 활성 문서창의 편집기가 제거되었어도 다른 창으로 저장/출력 명령을 넘기지 않는다.
+        let documentWindows = [NSApp.keyWindow, NSApp.mainWindow].compactMap { $0 }.map { $0.sheetParent ?? $0 }
+        if let window = documentWindows.first(where: { DocumentCloseConfirmationRegistry.contains($0) }) {
+            guard let webView = window.contentView?.firstDescendant(ofType: RhwpStudioNativeCommandWebView.self)
+                ?? registeredWebView(in: window) else { return false }
             return action(webView)
         }
         let preferredWindows = [preferredWindow].compactMap { $0 }

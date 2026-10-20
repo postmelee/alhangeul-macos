@@ -16,6 +16,7 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
     func attach(window: NSWindow, store: DocumentViewerStore) {
         if self.window === window {
             self.store = store
+            store.documentWindow = window
             if window.delegate !== self {
                 previousDelegate = window.delegate
                 window.delegate = self
@@ -27,6 +28,7 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
         detach(restorePreviousDelegate: true)
         self.window = window
         self.store = store
+        store.documentWindow = window
         previousDelegate = window.delegate
         window.delegate = self
         DocumentCloseConfirmationRegistry.register(self, for: window)
@@ -74,9 +76,17 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
     ) {
         guard !isPresentingConfirmation else { completion(.cancelled); return }
         isPresentingConfirmation = true
+        if store.webViewFailure != nil {
+            presentSuspendedConfirmation(window: window, store: store, completion: completion)
+            return
+        }
         let prepared: (RhwpStudioEditorSession?) -> Void = { [weak self, weak window] session in
             Task { @MainActor in
                 guard let self, let window else { completion(.cancelled); return }
+                if store.webViewFailure != nil {
+                    self.presentSuspendedConfirmation(window: window, store: store, completion: completion)
+                    return
+                }
                 if let session { store.updateEditorSession(session) }
                 else if store.hasDocument {
                     self.isPresentingConfirmation = false
@@ -117,6 +127,7 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
 
     func windowWillClose(_ notification: Notification) {
         previousDelegate?.windowWillClose?(notification)
+        store?.releaseRecoveryResources()
         detach(restorePreviousDelegate: false)
     }
 
@@ -159,6 +170,43 @@ final class DocumentCloseConfirmationController: NSObject, NSWindowDelegate {
                     store: store,
                     completion: completion
                 )
+            }
+        }
+    }
+
+    private func presentSuspendedConfirmation(window: NSWindow, store: DocumentViewerStore,
+                                               completion: @escaping (DocumentCloseConfirmationResult) -> Void) {
+        guard !store.isRecoveryExporting, !store.isConfirmingRecovery else {
+            isPresentingConfirmation = false; completion(.cancelled); return
+        }
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = "중단된 문서를 닫으시겠습니까?"
+        alert.informativeText = store.previousSave == nil
+            ? "저장되지 않은 변경사항은 사라집니다."
+            : "저장되지 않은 변경사항은 사라집니다. 필요한 경우 이전 저장본을 먼저 복사해 주세요."
+        alert.addButton(withTitle: "취소")
+        alert.addButton(withTitle: "저장하지 않고 닫기")
+        let canExport = store.previousSave != nil
+        if canExport { alert.addButton(withTitle: "저장본 복사…") }
+        alert.beginSheetModal(for: window) { [weak self] response in
+            Task { @MainActor in
+                guard let self else { completion(.cancelled); return }
+                switch response {
+                case .alertSecondButtonReturn:
+                    store.clearUnsavedChanges()
+                    store.releaseRecoveryResources()
+                    self.isPresentingConfirmation = false
+                    completion(.confirmed)
+                case .alertThirdButtonReturn where canExport:
+                    _ = await store.exportPreviousSave()
+                    // 내보내기 성공/실패/취소 모두 창을 유지한다. 닫기는 별도의 명시적 선택이다.
+                    self.isPresentingConfirmation = false
+                    completion(.cancelled)
+                default:
+                    self.isPresentingConfirmation = false
+                    completion(.cancelled)
+                }
             }
         }
     }
@@ -250,6 +298,10 @@ enum DocumentCloseConfirmationRegistry {
     static func unregister(_ window: NSWindow) {
         controllers.removeValue(forKey: ObjectIdentifier(window))
         cleanup()
+    }
+
+    static func contains(_ window: NSWindow) -> Bool {
+        cleanup(); return controllers[ObjectIdentifier(window)]?.controller != nil
     }
 
     static func controllersForTermination() -> [DocumentCloseConfirmationController] {

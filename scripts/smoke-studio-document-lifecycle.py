@@ -14,12 +14,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--fixture', type=pathlib.Path, required=True, help='읽기 전용 HWP/HWPX 입력')
     parser.add_argument('--command-failures', action='store_true', help='합성 오류 계약의 native 수신·세션 보존 검사 (upstream rollback 검증 아님)')
+    parser.add_argument('--fatal-recovery', action='store_true', help='치명적 오류·이전 저장본·재시작 native 통합 검사')
     args = parser.parse_args()
+    if args.command_failures and args.fatal_recovery:
+        parser.error('검사 모드는 하나만 선택하세요.')
     root = pathlib.Path(__file__).resolve().parent.parent
     fixture = args.fixture.resolve(strict=True)
     build = root / 'build.noindex'
     build.mkdir(exist_ok=True)
-    prefix = 'studio-command-failure-' if args.command_failures else 'studio-lifecycle-'
+    prefix = 'studio-fatal-recovery-' if args.fatal_recovery else ('studio-command-failure-' if args.command_failures else 'studio-lifecycle-')
     output = pathlib.Path(tempfile.mkdtemp(prefix=prefix, dir=build))
     app = output / 'StudioLifecycleSmoke.app'
     executable = app / 'Contents/MacOS/StudioLifecycleSmoke'
@@ -45,7 +48,7 @@ def main():
                       'Metal', 'QuartzCore', 'IOSurface', 'ColorSync'):
         command += ['-framework', framework]
     command += [str(p) for p in sources]
-    test_main = 'StudioCommandFailureSmoke' if args.command_failures else 'StudioDocumentLifecycleSmoke'
+    test_main = 'StudioFatalRecoverySmoke' if args.fatal_recovery else ('StudioCommandFailureSmoke' if args.command_failures else 'StudioDocumentLifecycleSmoke')
     command += [str(root / 'Tests' / test_main / 'main.swift'), '-o', str(executable)]
     print('Evidence:', output, flush=True)
     with (output / 'build.log').open('w') as log:
