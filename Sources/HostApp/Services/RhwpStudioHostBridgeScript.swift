@@ -19,7 +19,10 @@ enum RhwpStudioHostBridgeScript {
           return "";
         }
         if (reason instanceof Error) {
-          return reason.stack || reason.message || String(reason);
+          const message = String(reason);
+          return reason.stack && !reason.stack.includes(message)
+            ? message + "\\n" + reason.stack
+            : reason.stack || message;
         }
         if (typeof reason === "string") {
           return reason;

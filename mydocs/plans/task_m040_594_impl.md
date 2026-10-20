@@ -13,7 +13,9 @@
 - Stage 2 승인: 2026-10-20, 같은 채팅의 작업지시자 ‘진행해줘’
 - Stage 3 승인: 2026-10-20, 같은 채팅의 작업지시자 ‘알겠어. 다음 작업을 진행해줘.’
 - Stage 3.1 보완 승인: 같은 채팅의 오류 세부정보 드롭다운·버그 제보용 복사 요청
-- 현재 상태: Stage 3 및 3.1 완료. 간소화한 화면에 접힌 오류 상세·제보용 보고서 복사를 제공한다. Stage 4 진입 승인 대기. 공개 upstream producer/adapter는 아직 연결하지 않음.
+- Stage 4 승인: 2026-10-21 같은 채팅의 ‘좋아. Stage 4 통합 검증을 진행해줘.’
+- Stage 4 범위 보완 승인: 실제 Promise rejection에서 WebKit 스택에 원인 문구가 빠지는 것을 발견했다. 오류 이름·메시지와 스택을 함께 남기는 제품 bridge 보완 및 회귀 검사에 ‘수정하고 재검증 진행’ 답변을 받았다.
+- 현재 상태: [Stage 4](../working/task_m040_594_stage4.md) 호스트 통합·회귀 검증 완료. XCTest 74, 실제 오류 40+40, fatal 85, 합성 계약 55, 생명주기 43+43 PASS. 공개 upstream producer/adapter 미지원으로 실제 복구 성공 전체 수용은 미완료다.
 - 구현 단계: 4단계. 단계별 검증·보고·승인 후 다음 단계에 진입한다.
 
 ## 현재 구현과 결정할 경계
@@ -163,6 +165,7 @@
 
 - `Tests/StudioDocumentLifecycleSmoke/main.swift`와 `scripts/smoke-studio-document-lifecycle.py`의 필요한 확장 또는 전용 error recovery harness
 - HWP/HWPX 합성·읽기 전용 fixture, HostAppTests의 필요한 보강
+- 통합에서 발견하고 별도 승인받은 `RhwpStudioHostBridgeScript.runtimeErrorSource`의 Promise 오류 원인 문구 보존 보완
 - 타스크 Stage 4 보고와 검증 기록. 최종 보고·PR 게시 절차는 별도 승인
 
 ### 실행과 검증
@@ -205,7 +208,7 @@ XCTest 실행은 `scripts/test-studio-output.sh`의 실행 방식을 참고하�
 ```bash
 scripts/verify-rhwp-studio-assets.sh
 python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-font-dotum-empty-hancom.hwp
-python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/hwpx/hwpx-01.hwpx
+python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/hwpx/ref/ref_text.hwpx
 ```
 
 Frameworks 산출물이 없으면 `build_run_guide.md`의 pinned core 준비 절차를 따른다. renderer/FFI 변경은 범위 밖이므로 해당 renderer 검사를 불필요하게 반복하지 않는다. 실패 시 통과로 보고하거나 실패 상태로 단계 커밋하지 않고 원인·수정 방향을 보고한다.
