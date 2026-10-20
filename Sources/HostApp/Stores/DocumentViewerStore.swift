@@ -17,6 +17,7 @@ final class DocumentViewerStore: ObservableObject {
     @Published private(set) var editorSession: RhwpStudioEditorSession?
     @Published private(set) var hasUnsavedChanges = false
     private(set) var suspendedSnapshot: RhwpStudioEditorSnapshot?
+    private var failureOccurredAt: Date?
     @Published private(set) var commandFailurePresentation = RhwpStudioCommandFailurePresentation()
 
     @Published private(set) var lastEditorImage: NSImage?
@@ -264,6 +265,17 @@ final class DocumentViewerStore: ObservableObject {
         lastEditorImage = nil
     }
 
+    var errorReport: String {
+        guard let failure = webViewFailure, let failureOccurredAt else { return "" }
+        let values = [filename, rhwpStudioDocument?.filename, sourceDocument?.url.path,
+                      sourceDocument?.url.absoluteString, NSHomeDirectory()].compactMap { $0 }
+        return RhwpStudioErrorReport.make(errorID: failure.id, occurredAt: failureOccurredAt,
+            category: failure.category.rawValue, detail: failure.diagnosticDetail,
+            additionalDetail: recoveryErrorDetail, session: suspendedSnapshot,
+            loadID: webViewLoadID, reloadToken: webViewReloadToken,
+            environment: .current(), privateValues: values)
+    }
+
     func preserveEditorImage(_ image: NSImage?) { lastEditorImage = image }
     var previousSave: DocumentRecoveryCopies.Copy? { recoveryCopies.copy(for: recoveryOwner) }
     var recoveryDescription: String {
@@ -332,6 +344,7 @@ final class DocumentViewerStore: ObservableObject {
         isWebViewLoading = false
 
         if failure.isFatal {
+            failureOccurredAt = Date()
             if let snapshot = editorSession?.snapshot { suspendedSnapshot = snapshot }
             editorSession = nil
             commandFailurePresentation.clear()

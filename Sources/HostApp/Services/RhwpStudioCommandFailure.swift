@@ -43,7 +43,7 @@ struct RhwpStudioCommandFailure: Equatable {
 
     /// 외부 stack/message/diagnostic은 보관하지 않는다. 진단에는 검증한 식별자만 사용한다.
     var diagnostic: String {
-        "contractVersion=1\ncode=\(code)\noperation=\(operation)\nrecovery=\(recovery.rawValue)\nevent=\(eventID)\nsequence=\(eventSequence)\nchangeSeq=\(changeSeq)"
+        "contractVersion=1\ncode=\(code)\noperation=\(operation)\nrecovery=\(recovery.rawValue)\nevent=\(eventID)\nsequence=\(eventSequence)\nchangeSeq=\(changeSeq)\nchecks.content=\(checks.content)\nchecks.cursorSelection=\(checks.cursorSelection)\nchecks.history=\(checks.history)\nchecks.dirtyState=\(checks.dirtyState)\nchecks.readyForNextCommand=\(checks.readyForNextCommand)"
     }
 
     static func parse(_ body: [String: Any]) -> Self? {
@@ -105,6 +105,7 @@ struct RhwpStudioCommandFailureState {
     private var recent: [RhwpStudioCommandFailure] = []
     private var lastSequence = 0
     private(set) var isSuspended = false
+    private(set) var fatalDiagnostic: String?
     var usesStructuredContract: Bool { support == .version1 }
     var retainedEventCount: Int { recent.count }
 
@@ -112,7 +113,7 @@ struct RhwpStudioCommandFailureState {
 
     mutating func beginLoad(token: String, loadID: Int) {
         self.token = token; self.loadID = loadID; snapshot = nil
-        recent.removeAll(); lastSequence = 0; isSuspended = false
+        recent.removeAll(); lastSequence = 0; isSuspended = false; fatalDiagnostic = nil
     }
 
     mutating func updateSession(_ value: RhwpStudioEditorSnapshot) {
@@ -140,7 +141,7 @@ struct RhwpStudioCommandFailureState {
             return previous == failure ? .ignored : reject("CONFLICTING_COMMAND_FAILURE")
         }
         // 무결성 실패는 낮은 revision/sequence라도 현재 문서의 안전한 상태를 보증하지 못한다.
-        guard failure.isRecovered else { return reject(failure.code) }
+        guard failure.isRecovered else { return reject(failure.code, diagnostic: failure.diagnostic) }
         guard failure.eventSequence > lastSequence else { return .ignored }
         lastSequence = failure.eventSequence
         recent.append(failure)
@@ -149,7 +150,8 @@ struct RhwpStudioCommandFailureState {
         return .recovered(failure)
     }
 
-    private mutating func reject(_ code: String) -> Decision {
+    private mutating func reject(_ code: String, diagnostic: String? = nil) -> Decision {
+        fatalDiagnostic = diagnostic
         isSuspended = true
         return .fatal(code)
     }

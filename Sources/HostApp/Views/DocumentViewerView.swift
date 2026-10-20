@@ -280,7 +280,7 @@ private struct WebViewerFallbackView: View {
     let onRetry: () -> Void
     let onOpenDocument: () -> Void
     let onRevealInFinder: () -> Void
-    @State private var showsDetails = false
+    @State private var showsReferenceImage = false
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 15)) { _ in
@@ -325,38 +325,32 @@ private struct WebViewerFallbackView: View {
                 Menu("다른 작업") {
                     Button("다른 파일 열기…", action: onOpenDocument)
                     if canRevealInFinder { Button("Finder에서 보기", action: onRevealInFinder) }
-                    Divider()
-                    Button("세부정보…") { showsDetails = true }
+                    if store.lastEditorImage != nil {
+                        Divider()
+                        Button("중단 시점 화면…") { showsReferenceImage = true }
+                    }
                 }
                 .menuStyle(.borderlessButton)
                 .fixedSize()
                 .disabled(store.isRecoveryExporting || store.isConfirmingRecovery)
+
+                ErrorReportDisclosure(report: store.errorReport)
             }
             .padding(32)
             .frame(maxWidth: 480)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .sheet(isPresented: $showsDetails) {
+        .sheet(isPresented: $showsReferenceImage) {
             VStack(alignment: .leading, spacing: 16) {
-                Text("오류 세부정보").font(.headline)
-                Text(store.recoveryDescription).foregroundStyle(.secondary)
+                Text("중단 시점 화면").font(.headline)
                 if let image = store.lastEditorImage {
-                    DisclosureGroup("중단 시점 화면") {
-                        Image(nsImage: image).resizable().scaledToFit().frame(maxHeight: 220)
-                        Text("참고용 화면이며 문서로 저장하거나 편집할 수 없습니다.")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
+                    Image(nsImage: image).resizable().scaledToFit().frame(maxHeight: 300)
                 }
-                ScrollView {
-                    Text([failure.diagnosticDetail, store.recoveryErrorDetail].compactMap { $0 }.joined(separator: "\n"))
-                        .font(.system(.caption, design: .monospaced))
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .frame(maxHeight: 200)
+                Text("참고용 화면이며 문서로 저장하거나 편집할 수 없습니다.")
+                    .font(.caption).foregroundStyle(.secondary)
                 HStack {
                     Spacer()
-                    Button("닫기") { showsDetails = false }.keyboardShortcut(.cancelAction)
+                    Button("닫기") { showsReferenceImage = false }.keyboardShortcut(.cancelAction)
                 }
             }
             .padding(24)

@@ -666,7 +666,7 @@ extension RhwpStudioWebView {
             invalidateFailedEditorSession()
             onFailure(RhwpStudioWebViewFailure(category: .runtime,
                 message: "편집 상태를 확인할 수 없어 작업을 중단했습니다.",
-                diagnosticDetail: "commandFailure=\(code)"))
+                diagnosticDetail: ["commandFailure=\(code)", commandFailures.fatalDiagnostic].compactMap { $0 }.joined(separator: "\n")))
         }
 
         private func invalidateFailedEditorSession(captureImage: Bool = true) {

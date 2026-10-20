@@ -128,3 +128,32 @@ Stage 4는 실제 pinned bundle의 오류·반복 로드·여러 창 생명주�
 ## 승인 요청
 
 이 단계 소스·검증·간소화한 UI를 검토하고 Stage 4 통합 회귀 수용 단계 진입을 승인받는다. 저장소의 단계별 승인 규칙에 따라 승인 전 Stage 4로 넘어가지 않는다.
+
+
+## Stage 3.1 — 제보용 오류 세부정보·복사 보완
+
+### 요청과 변경
+
+같은 채팅의 ‘상세 오류 내용은 드롭다운으로 볼 수 있어야 하지 않을까? 그래야 버그 제보때 복사해서 그대로 제보해야 내가 추적할 수 있지 않을까?’를 소스 변경 승인으로 받아 반영했다. Stage 4에 진입한 변경이 아니다.
+
+- 기본 화면 아래에 접힌 ‘오류 세부정보’를 표시한다. 별도 창이나 메뉴를 거치지 않고 펼칠 수 있다. 펼친 영역의 전체 보고서를 ‘복사’로 클립보드에 넣으며 실제 쓰기 성공 후 ‘복사됨’을 표시한다.
+- 오류 ID·최초 발생 시각·앱 버전/build·OS/architecture·rhwp release/전체 commit·오류 분류와 상세·마지막 세션의 loadID/epoch/sequence/changeSeq/dirty/pageCount/format을 한 텍스트로 구성한다. 화면과 복사는 같은 report 값을 사용한다.
+- 파일 이름·로컬 경로·URL query/fragment/인증 정보를 생략한다. 문서 bytes나 본문을 수집하지 않는다. 오류 메시지·오류 코드·asset 발생 위치는 유지하고 과도한 상세는 항목당 16 KiB에서 생략 표시한다.
+- 구조화 명령 실패에서 code만 남던 fatal 진단에 검증된 operation/event/recovery/checks도 보존했다. 새 load에서 진단을 초기화하며 raw payload는 보관하지 않는다.
+- 참고 화면은 기존 ‘다른 작업’ 메뉴에 남긴다. [접힌 영역을 펼친 실제 컴포넌트 화면](assets/task_m040_594_stage3/error-details-disclosure.png)은 합성 오류 문구를 표시한 NSHostingView 캡처다.
+
+### 산출물
+
+`RhwpStudioErrorReport.swift`, `ErrorReportDisclosure.swift`, Store/fatal 진단 연결, `RhwpStudioErrorReportTests.swift`, `ErrorReportDisclosureTests.swift`와 기존 CommandFailure 테스트를 보완했다. `project.yml`을 갱신하고 Xcode project는 xcodegen으로 생성했다.
+
+### 검증
+
+- HostApp Debug build 및 HostAppTests build-for-testing PASS.
+- 새 보고서 4개·실제 UI 1개·fatal 진단 보존 1개를 포함한 선택 XCTest **72 tests, 0 failures**.
+- 실제 접근성 press로 초기 접힘 → 펼치기 → 복사 → 접기를 확인했다. 사용자 일반 클립보드 대신 고유 명명 클립보드에 실제 쓰기를 수행하고 report 문자열과 정확한 일치를 검증했다.
+- 버전/전체 commit·오류 ID/시각·세션 metadata, 오류 메시지/asset 위치 보존, 파일 이름·경로·URL 매개변수 생략, 누락 metadata·긴 상세를 검증했다.
+- source/build bundle asset provenance, 공통 Swift AppKit 의존 경계, `git diff --check` PASS. 이번 Debug 경로의 등록만 정리하고 설치본은 변경하지 않았다.
+- 증적: `build.noindex/task594-stage3-details/{test-build,build,unit,built-assets,cleanup}.log`.
+- 초기 UI 검사는 SwiftUI 접근성 노드의 정적 protocol cast와 부모 식별자 전파 때문에 버튼을 찾지 못했다. 접근성 트리를 활성화하고 실제 Objective-C 접근성 메서드와 각 컨트롤의 식별자로 연결한 최종 검사에서 통과했다. 제품 OS 지원 범위는 위 Stage 3와 같고 macOS 12 실제 실행으로 표시하지 않는다.
+
+이번 변경은 표시·제보 텍스트·복사와 진단 보존 보완이다. 기존 native fatal 85개 및 생명주기 43+43개 전체 harness는 재실행하지 않았으며, 앞선 Stage 3 결과와 이번 72개 XCTest 결과를 구분한다. Stage 4 승인은 계속 대기한다.

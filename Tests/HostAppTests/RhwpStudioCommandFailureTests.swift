@@ -31,6 +31,17 @@ final class RhwpStudioCommandFailureTests: XCTestCase {
         if case .fatal = value { return true }; return false
     }
 
+    func testFatalReportRetainsOperationEventAndChecksUntilNewLoad() {
+        var value = state()
+        XCTAssertTrue(isFatal(value.receive(body(recovery: "failed"), source: source)))
+        XCTAssertTrue(value.fatalDiagnostic?.contains("operation=deleteSelection") == true)
+        XCTAssertTrue(value.fatalDiagnostic?.contains("event=event-1") == true)
+        XCTAssertTrue(value.fatalDiagnostic?.contains("recovery=failed") == true)
+        XCTAssertTrue(value.fatalDiagnostic?.contains("checks.history=true") == true)
+        value.beginLoad(token: "new", loadID: 3)
+        XCTAssertNil(value.fatalDiagnostic)
+    }
+
     func testProductionDefaultCannotBeEnabledByPageCapabilityOrRecoveredBoolean() {
         var value = state(.unavailable)
         var message = body()
