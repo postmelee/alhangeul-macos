@@ -1,0 +1,38 @@
+{
+  "hwp": {
+    "exists": true,
+    "size": 945360,
+    "sha256": "d9ceb35d8abfb73e9afbe349bccb2a986cf552d66ae7f3f34dcfe4d9d385cb48"
+  },
+  "hwpx": {
+    "exists": true,
+    "size": 847607,
+    "sha256": "3395e19bebea8b6689f383df1f4ea1ddb253dee91c4320392cc40e90e2e4f191",
+    "strawberryDeclarations": [
+      {
+        "id": "3",
+        "face": "딸기",
+        "type": "HFT",
+        "isEmbedded": "0"
+      }
+    ]
+  },
+  "pdf": {
+    "exists": false
+  },
+  "original_pdf": {
+    "exists": false
+  },
+  "rhwp-core.lock": {
+    "sha256": "975712e98ff9a83a98aa0395139794ff743b7c0d242eeaa8aec48a57e3b47697"
+  },
+  "Sources/HostApp/Resources/rhwp-studio/manifest.json": {
+    "sha256": "108e3cfed593fa29f1a4e34c008548184a342a9af1141ad65a746f0d499f10a7"
+  },
+  "Sources/Shared/FontLibrary/native-font-matcher-receipt.json": {
+    "sha256": "15661c0380d618aa113340048a139f2af1a9e524e6f6013d6e85579dcc10b6d1"
+  },
+  "Sources/Shared/FontLibrary/RhwpNativeFontMatcherSource.swift": {
+    "sha256": "cea9b46e4bc7e19d7373f71ef557c1281af58cbd9d0133226a67a1ea96e6afbb"
+  }
+}

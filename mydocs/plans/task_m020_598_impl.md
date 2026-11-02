@@ -4,7 +4,7 @@
 - 수행계획: [task_m020_598.md](task_m020_598.md), 2026-11-03 작업지시자 승인.
 - 작업 브랜치: `local/task598`, 통합 대상: `devel`
 - 기준: `f64f6101863777e2bd49c2336e5e4fd967b4da6e`; core/Studio 공식 `v0.8.7`, `1a76570e833917d15817415a53c09ad61ab3203f`.
-- 상태: 구현계획 승인 대기. Stage 1 미착수.
+- 상태: 2026-11-03 작업지시자 구현계획 승인. [Stage 1](../working/task_m020_598_stage1.md) 완료·Stage 2 진입 승인 대기.
 
 ## 구현 원칙과 완료 경계
 
@@ -49,7 +49,7 @@
 4. 기존 Node 테스트에 한글/영문 별칭·스타일 제외·관리 충돌·복수 후보·갱신 경계의 부족한 사례만 추가한다. 이미 충분한 취소/전송 테스트는 중복 작성하지 않는다.
 5. 필요 Swift 테스트는 `Tests/FontLibraryTests/` 또는 격리 probe에 추가한다. 프로젝트 파일은 직접 수정하지 않는다. 앱 제품 변경이 필요하면 승인된 최소 변경만 포함하고 별칭·weight 추정으로 무조건 성공시키지 않는다.
 
-잠정 신규 파일: `scripts/probe-hft-font-supply.py`, `Tests/HFTFontSupplyProbe/main.swift`, 결과 계약 검증용 테스트. 기존 도구 확장으로 충분하면 신규 파일을 만들지 않는다. 최종 경로·CLI는 Stage 1 보고에서 확정한다.
+잠정 신규 파일: `scripts/probe-hft-font-supply.py`, `Tests/HFTFontSupplyProbe/main.swift`, 결과 계약 검증용 테스트. 기존 도구 확장으로 충분하면 신규 파일을 만들지 않는다. 최종 경로·CLI는 [Stage 1 진단 계약](../tech/task_m020_598_font_supply_contract.md)에 확정했다. Stage 2는 제품 로직 변경 없이 진단 도구와 회귀 검증만 구현한다.
 
 완료 기준: 양성 공급, 제외·읽기 실패 음성 대조, stale 결과 거부, 결과의 판정 단계·형식 검사가 재현 가능하다. OTF/TTF 우선순위는 앱에서 구현하지 않는다.
 
