@@ -24,6 +24,8 @@ python3 scripts/test-hft-font-supply-runner.py
 
 `installed`는 실제 InstalledFontSystem scan/read를 사용한다. `--family`와 CoreText family/full/PostScript 이름의 NFC·대소문자 무시 **완전 일치**로 대상을 제한한다. 전체 목록의 metadata는 열거하지만 파일 bytes는 필터와 provider를 통과한 후보만 읽는다. 한글 이름이 0건이면 확인된 영문 family/PS로 별도 실행할 수 있다. 임의 이름 치환이나 부분 문자열 검색은 하지 않는다. 대상 0건은 이 CLI 프로세스의 관측이며 Mac 전체 부재나 앱 sandbox의 실패를 의미하지 않는다.
 
+실행 도구의 격리 환경에서는 파일이 존재해도 CoreText 목록에 나타나지 않을 수 있다. 실제 대상과 함께 이미 활성화된 대조 글꼴도 조회하고, 필요하면 macOS 사용자의 일반 터미널에서 비교한다. Stage 3에서는 제한된 실행의 Pretendard/Hack 0건이 제한 밖 CLI에서는 정상 공급으로 바뀌었다. 이 차이를 제품 App Sandbox 권한 검증과 혼동하지 않는다. [Stage 3 기록](../../mydocs/working/task_m020_598_stage3.md)을 참고한다.
+
 ## 결과와 종료 코드
 
 `result.json`에 실행 커밋·dirty 상태, 도구 버전, core/Studio/matcher commit, 실제 입력 소스·fixture 해시, 후보 metadata, bytes SHA256/길이/signature, 검사별 판정이 남는다. 미커밋 도구로 실행했다면 `sourceCommit`만으로 재현하지 말고 `inputHashes`도 비교한다. compile 실패는 `compile.log`, 그 외 실행 오류는 `failedPhase`로 구분한다. 출력 경로/인자 오류는 실행 전 거부되므로 결과 파일을 만들지 않는다.

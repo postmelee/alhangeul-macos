@@ -40,6 +40,8 @@
 
 실제 OTF/TTF는 확보되지 않았다. 제보자 Mac의 파일과 다른 파일의 바이트 동일성도 확인하지 않았다. 실제 글꼴 확보 시 이름·버전·signature·PS·hash를 확인하며 상용 파일 자체는 커밋하지 않는다.
 
+Stage 3 보완: 위 “실제 OTF/TTF” 미확보는 제보 대상 딸기에 관한 기록이다. 다른 실제 사용자 Fonts의 Pretendard OTF와 Hack TTF는 제한 밖 CLI에서 5개 face를 공급하고 원본 hash와의 일치를 확인했다. 제한된 실행에서는 이 대조 글꼴도 0건이었으므로 Stage 1/2의 0건 결과를 설치 부재로 해석하지 않는다. 제한 밖 별도 조회에서도 딸기/Strawberry/HGSTRB 관련 이름 일치는 0건이었다. 실행 경계와 형식별 원본 문서의 현재 관측은 [Stage 3 기록](../working/task_m020_598_stage3.md)에 보존한다.
+
 PDF의 후속 획득 참조는 [PR #8397 제출 head의 PDF](https://github.com/edwardkim/rhwp/blob/8b0bcde745f7b78a5b1fbe2122238a57696b1feb/pdf/issue8371/hwp3-sample10-2020.pdf). PR에 기재된 기대 SHA256은 `310e3251e910ac8c7c6f34d0e50d85c4a0ecbbadd65e69fe4f5071370931a918`이다. 이번 단계에서는 다운로드·직접 렌더 판독하지 않았으며 확보 시 hash를 재검증한다. 기존 HWP/HWPX도 이번 단계에서 저장소에 복사하지 않았다.
 
 ## Stage 2 최소 구현 결정

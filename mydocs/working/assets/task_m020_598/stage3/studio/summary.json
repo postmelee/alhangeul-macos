@@ -1,0 +1,63 @@
+{
+  "exitCode": 0,
+  "functionalChecksPassed": true,
+  "settingsCapturesComplete": false,
+  "hftReproComplete": false,
+  "productBaseline": "f64f6101863777e2bd49c2336e5e4fd967b4da6e",
+  "inputHashes": {
+    "scripts/probe-studio-font-integration.py": "22b499f2ca8b8ab0a6d031f837207b65b15c6f45d0e362c911c5287beffc45cf",
+    "Tests/StudioFontIntegrationProbe/main.swift": "aba1f34a4fa58f2e79147d60560ec9b824349f64a5b7fe11bf9ac54665a31db3",
+    "Tests/StudioFontIntegrationProbe/FontChangeFixture.swift": "17933b6301fade4db56e3a53e75b616ca87a208d76ec4332b1790ecd96159ca7",
+    "scripts/ci/studio-font-integration-fixture.mjs": "77753f840052315d19cc07ee3e97a1392a444ecfb0b6bda471dd2aab99e6c5c1"
+  },
+  "runs": [
+    {
+      "name": "changes-result.json",
+      "passedChecks": 31,
+      "settingsScreenshots": {
+        "attempted": 0,
+        "captured": 0,
+        "skipped": 2,
+        "status": "NOT_RUN"
+      }
+    },
+    {
+      "name": "reopen-result.json",
+      "passedChecks": 5,
+      "settingsScreenshots": {
+        "attempted": 0,
+        "captured": 0,
+        "skipped": 2,
+        "status": "NOT_RUN"
+      }
+    },
+    {
+      "name": "installed-reopen-result.json",
+      "passedChecks": 4,
+      "settingsScreenshots": {
+        "attempted": 0,
+        "captured": 0,
+        "skipped": 2,
+        "status": "NOT_RUN"
+      }
+    }
+  ],
+  "originalCaptureAttempts": [
+    {
+      "attempt": 1,
+      "exitCode": 1,
+      "functionalChecksBeforeCaptureError": 5,
+      "error": "Error Domain=com.apple.ScreenCaptureKit.SCStreamErrorDomain Code=-3811 \"오디오/비디오 캡처 실패로 인해 스트림에 실패함\" UserInfo={NSLocalizedDescription=오디오/비디오 캡처 실패로 인해 스트림에 실패함}"
+    },
+    {
+      "attempt": 2,
+      "exitCode": 1,
+      "functionalChecksBeforeCaptureError": 5,
+      "error": "Error Domain=com.apple.ScreenCaptureKit.SCStreamErrorDomain Code=-3811 \"오디오/비디오 캡처 실패로 인해 스트림에 실패함\" UserInfo={NSLocalizedDescription=오디오/비디오 캡처 실패로 인해 스트림에 실패함}"
+    }
+  ],
+  "passedChecks": 40,
+  "savedFontAssertions": 6,
+  "settingsScreenshotSkips": 6,
+  "compileDiagnosticsBytes": 0
+}

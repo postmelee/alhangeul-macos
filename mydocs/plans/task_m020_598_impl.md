@@ -4,7 +4,7 @@
 - 수행계획: [task_m020_598.md](task_m020_598.md), 2026-11-03 작업지시자 승인.
 - 작업 브랜치: `local/task598`, 통합 대상: `devel`
 - 기준: `f64f6101863777e2bd49c2336e5e4fd967b4da6e`; core/Studio 공식 `v0.8.7`, `1a76570e833917d15817415a53c09ad61ab3203f`.
-- 상태: 2026-11-03 작업지시자 Stage 2 진입 승인 후 [Stage 2](../working/task_m020_598_stage2.md) 완료·Stage 3 진입 승인 대기.
+- 상태: 2026-11-03 작업지시자 Stage 3 진입 승인 후 [Stage 3](../working/task_m020_598_stage3.md) 완료·Stage 4 진입 승인 대기.
 
 ## 구현 원칙과 완료 경계
 
@@ -74,6 +74,8 @@
 산출물: `build.noindex/task598/stage3/<실행별 디렉터리>/` 및 `mydocs/working/task_m020_598_stage3.md`. 장기 근거는 민감 정보가 없는 최소 JSON/표·해시만 단계 보고서에 연결한다. 임시 절대 경로만으로 후속 재개를 의존하지 않는다.
 
 완료 기준: 현재 기준 결과, 알려진 실패, 환경 미확보가 명시되고 새 프로세스에서 준비 도구를 다시 실행할 수 있다. 정상 공급 회귀 실패를 예상된 HFT 실패로 낮추지 않는다.
+
+실행 보완: 기존 Studio probe의 설정 창 캡처가 ScreenCaptureKit -3811로 반복 실패하여, 테스트에 `--skip-settings-screenshots` 명시 옵션과 캡처 NOT_RUN 집계를 추가했다. 기본 모드·제품·글꼴 기능 검사·WKWebView snapshot은 유지한다. 공급 10개 시나리오 재실행, 실제 사용자 Fonts 5개 공급, Studio 기능 40개·저장 재열기 6개를 검증했고 설정 창 캡처 6개는 별도 미실행이다. 구체 증거·환경 경계는 Stage 3 보고를 따른다.
 
 커밋: `Task #598 Stage 3: 현 버전 공급 회귀와 재실행 기준 기록`
 

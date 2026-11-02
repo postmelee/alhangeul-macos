@@ -1,0 +1,40 @@
+{
+  "scope": "bundled-wasm-page0-without-host-provider",
+  "sourceCommit": "c222ac81a7d3e544a7970c5473b11fe3ff303dde",
+  "dirty": true,
+  "studioCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "scriptSHA256": "fd202e3af5ed2c90e5fdfe8ceb062295cf5a4b0c0a125dc4ff3752d022be3498",
+  "wasmSHA256": "d6a00eb16a7155607b7a81641ef33ba5414a032f74091c72c1c1d351b7086cdf",
+  "jsSHA256": "70cde06a369fa7fd4fc8bc8f3d6acaee158596ba1a116a2c72159002b0b5654e",
+  "results": [
+    {
+      "format": "hwp",
+      "inputSHA256": "d9ceb35d8abfb73e9afbe349bccb2a986cf552d66ae7f3f34dcfe4d9d385cb48",
+      "providerConnected": false,
+      "pageCount": 763,
+      "svgSHA256": "69527c388eb49c4c71c173ffe8e2ccc8e30d09b724f3b630a672d07e9376ac13",
+      "svgBytes": 18466,
+      "fontFamilies": [
+        "&apos;딸기&apos;,&apos;Malgun Gothic&apos;,&apos;맑은 고딕&apos;,&apos;Apple SD Gothic Neo&apos;,&apos;Noto Sans KR&apos;,&apos;Pretendard&apos;,&apos;HCR Batang&apos;,&apos;함초롬바탕&apos;,&apos;HCR Batang Ext&apos;,&apos;함초롬바탕 확장&apos;,&apos;HCR Batang ExtB&apos;,&apos;함초롬바탕 확장B&apos;,&apos;Source Han Serif K Old Hangul&apos;,sans-serif",
+        "&apos;신명 디나루&apos;,&apos;Malgun Gothic&apos;,&apos;맑은 고딕&apos;,&apos;Apple SD Gothic Neo&apos;,&apos;Noto Sans KR&apos;,&apos;Pretendard&apos;,&apos;HCR Batang&apos;,&apos;함초롬바탕&apos;,&apos;HCR Batang Ext&apos;,&apos;함초롬바탕 확장&apos;,&apos;HCR Batang ExtB&apos;,&apos;함초롬바탕 확장B&apos;,&apos;Source Han Serif K Old Hangul&apos;,sans-serif"
+      ],
+      "parseAndSVG": "PASS",
+      "actualFontSelection": "NOT_RUN",
+      "visualComparison": "NOT_RUN"
+    },
+    {
+      "format": "hwpx",
+      "inputSHA256": "3395e19bebea8b6689f383df1f4ea1ddb253dee91c4320392cc40e90e2e4f191",
+      "providerConnected": false,
+      "pageCount": 763,
+      "svgSHA256": "a5577939b74e30a06a860bdc1e48fdf37913ac78d2f386b57d7d81ceae7e0d04",
+      "svgBytes": 18894,
+      "fontFamilies": [
+        "&apos;돋움&apos;,&apos;Malgun Gothic&apos;,&apos;맑은 고딕&apos;,&apos;Apple SD Gothic Neo&apos;,&apos;Noto Sans KR&apos;,&apos;Pretendard&apos;,&apos;HCR Batang&apos;,&apos;함초롬바탕&apos;,&apos;HCR Batang Ext&apos;,&apos;함초롬바탕 확장&apos;,&apos;HCR Batang ExtB&apos;,&apos;함초롬바탕 확장B&apos;,&apos;Source Han Serif K Old Hangul&apos;,sans-serif"
+      ],
+      "parseAndSVG": "PASS",
+      "actualFontSelection": "NOT_RUN",
+      "visualComparison": "NOT_RUN"
+    }
+  ]
+}
