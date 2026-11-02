@@ -46,7 +46,7 @@ PDF의 후속 획득 참조는 [PR #8397 제출 head의 PDF](https://github.com/
 
 제품 코드 변경 없이 전용 CLI와 제품 adapter 실행 harness를 만든다. 기존 전체 Studio probe는 Rust framework·GUI 의존성이 있어 현재 최소 공급 진단의 필수 전제로 삼지 않는다.
 
-예정 파일:
+구현 파일:
 
 1. `scripts/probe-hft-font-supply.py`: 새 build.noindex 하위 출력만 허용하는 실행기. swiftc/Node 호출, 입력 hash·실행 source·결과 요약 및 프로세스 실패 구분.
 2. `Tests/HFTFontSupplyProbe/main.swift`: Shared/FontLibrary 제품 소스와 StudioFontSession을 컴파일한 CLI. 격리 InstalledFontCatalogService/FontLibraryStore/StudioFontSupply로 metadata 및 공급을 관측. 실제 설치 모드에서는 실제 system scan/read와 정확한 이름 필터를 사용하며 사용자 설정 저장소를 사용하지 않음.
@@ -54,7 +54,7 @@ PDF의 후속 획득 참조는 [PR #8397 제출 head의 PDF](https://github.com/
 4. `scripts/ci/test-hft-font-supply.cjs` 및 필요 runner 테스트: 출력 계약, 음성 대조, 실행 실패 집계. 기존 22개 테스트와 중복되는 전송/취소 전 범위를 새로 작성하지 않음.
 5. `Tests/HFTFontSupplyProbe/README.md`: 정확한 실행·판정·한계.
 
-최초 CLI 계약:
+확정 CLI 계약:
 
 ```bash
 python3 scripts/probe-hft-font-supply.py --mode fixtures \
@@ -63,7 +63,7 @@ python3 scripts/probe-hft-font-supply.py --mode installed --family '딸기' \
   --output-dir build.noindex/task598/stage3/installed-01
 ```
 
-이는 구현 예정 명령이며 아직 실행 가능한 도구가 아니다. fixture 모드는 scan/read 입력을 통제하되 제품 catalog/supply/session을 사용한다. 실제 파일의 검사에는 FontFileInspector를 사용한다. 실제 InstalledFontSystem.read는 installed 모드에서만 입증한다. CoreText process/global font 등록 없이 fixture 주입으로 대조한다.
+Stage 2에서 위 도구를 구현·검증했다. 실행 방법과 종료 코드의 해석은 [probe README](../../Tests/HFTFontSupplyProbe/README.md), 검증 증거는 [Stage 2 보고](../working/task_m020_598_stage2.md)에 있다. fixture 모드는 scan/read 입력을 통제하되 제품 catalog/supply/session을 사용한다. 실제 파일의 검사에는 FontFileInspector를 사용한다. 실제 InstalledFontSystem.read는 installed 모드에서 대상이 확보되고 읽기까지 성공한 경우에만 입증한다. CoreText process/global font 등록 없이 fixture 주입으로 대조한다.
 
 Node와 Swift 사이의 bytes는 테스트 전용 요청/응답 또는 실행 중 임시 전송 데이터로만 전달하고 영구 result에는 넣지 않는다. 실제 상용 bytes를 디스크 중간 파일로 남기지 않는 방식이 우선이다. Swift compile에는 Rust framework가 필요 없는 제품 파일 집합을 사용한다. 프로세스 통신 형식·취소·실패 처리가 기존 protocol을 바꾸지 않아야 한다.
 
@@ -77,7 +77,7 @@ Node와 Swift 사이의 bytes는 테스트 전용 요청/응답 또는 실행 �
 - `observations`: raw catalog와 provider 후보의 필요한 이름·PS·style·alias·limitation, opaque face ID, 읽은 bytes의 SHA256/길이/signature, revision 변경 여부. installed 목록 전체를 출력하지 않고 대상만 기록.
 - `checks`: `stage`(catalog/candidate/bytes/invalidation/selection/layout/render), `status`, `reason`, `evidenceKind`. source 경로·bookmark·raw bytes는 금지.
 - `status`: PASS, FAIL, EXPECTED_LIMITATION, NOT_RUN. 예상 제한에는 근거·조건이 필요. fixture의 의도한 실패 코드와 bytes 미공급을 확인하면 음성 대조 검사 자체는 PASS.
-- `summary`: 각 status 수와 `complete` 여부. NOT_RUN이 있으면 전체 제품 성공 표시 금지. installed 대상 0건은 NOT_RUN으로 명시하며 원인 오류를 EXPECTED_LIMITATION으로 바꾸지 않음.
+- `summary`: 각 status 수와 `complete`, `supplyComplete` 여부. NOT_RUN이 있으면 전체 제품 성공 표시 금지. `supplyComplete`는 selection/layout/render를 제외한 검사 완료이며 종료 코드 0도 이 범위에 한정한다. installed 대상 0건은 NOT_RUN으로 명시하며 원인 오류를 EXPECTED_LIMITATION으로 바꾸지 않음.
 - 종료 코드: 0=요청 범위 계약 검사 완료, 1=계약 실패/도구 오류, 2=필수 대상·환경 미확보로 불완전. 증거 결과가 남아도 실패 코드를 삼키지 않음.
 
 현재 구현에서는 HFT selection/layout/render 증거가 없으므로 NOT_RUN 또는 명확한 근거가 있는 제한으로만 표시한다. 정상 공급 계약과 이 판정을 별도 집계한다. fixture 모드 완료는 synthetic 공급 검증 완료만 뜻한다.

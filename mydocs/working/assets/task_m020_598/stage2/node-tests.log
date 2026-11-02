@@ -1,0 +1,35 @@
+✔ 공급 성공·렌더 미실행은 전체 완료가 아니다 (0.853334ms)
+✔ 대상 부재와 공급 실패는 공급 완료로 집계하지 않는다 (0.135208ms)
+✔ 허위 통과 요약·알 수 없는 판정·증거 없는 검사는 거부한다 (0.506625ms)
+✔ 중첩 결과의 원본 경로·bookmark·bytes는 거부한다 (0.351958ms)
+✔ Swift 서버 시작 실패는 완료 결과로 바꾸지 않고 종료한다 (5.136459ms)
+✔ 제품 bootstrap은 늦은 API 준비 이후 연결하고 pagehide에서 해제 (4.871208ms)
+✔ 출력 context는 native identity와 누락 후보를 제공하고 bytes 읽기 없이 갱신 때 폐기 (1.983292ms)
+✔ API 부재는 unsupported, native 읽기와 등록 없음 (0.220416ms)
+✔ metadata 페이지 조회만으로 129 faces 준비, bytes는 지연 조회 (1.639875ms)
+✔ 필요 face만 chunk 단위로 읽고 정확한 bytes와 index 반환·slot 해제 (4.773083ms)
+✔ 설치 CoreText와 관리 OS/2의 서로 다른 bits·style을 정규화 (0.739417ms)
+✔ 빈 필수 이름·중복 ID·미지원은 제외하고 빈 alias는 제거 (0.532458ms)
+✔ 선택된 관리 글꼴은 동명 설치 글꼴보다 우선, 다른 굵기는 유지 (0.25675ms)
+✔ 관리 충돌·미지원·잘못된 metadata는 동명 설치 fallback을 차단 (0.690166ms)
+✔ bounded queue가 여러 요청을 처리해도 native transfer는 최대 2개 (6.34ms)
+✔ 일시 busy는 제한 재시도로 복구 (1.241333ms)
+✔ 지속 busy는 세대 자동 복구 1회 후 중단, 외부 변경으로 다시 복구 가능 (2102.991583ms)
+✔ catalog 중간 stale은 handshake부터 재시도 (0.3735ms)
+✔ 동일 이름 bytes 변경 알림과 document token 교체 후 이전 reference 거부 (1.019958ms)
+✔ metadata 요청 취소는 호출자에 즉시 반영하고 공유 준비를 손상하지 않음 (0.262833ms)
+✔ 취소 무시한 늦은 openFace 응답도 close하고 bytes를 게시하지 않음 (2.757166ms)
+✔ generation 변경으로 진행 중 read 및 대기 read 취소·늦은 응답 폐기 (0.58875ms)
+✔ 손상 chunk 또는 metadata와 다른 face는 반환하지 않고 transfer 해제 (0.52425ms)
+✔ dispose는 provider 연결과 변경 구독을 해제하고 후속 요청 거부 (0.120458ms)
+✔ 잘못된 catalog 진행·총량은 무한 paging이나 과다 목록으로 이어지지 않음 (0.30175ms)
+✔ 대기열은 64건 한도, 이미 취소한 요청은 native 읽기 없음 (2.149042ms)
+✔ 목록 준비 중 dispose하면 늦은 연결 성공을 보고하지 않음 (0.126916ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2183.207
