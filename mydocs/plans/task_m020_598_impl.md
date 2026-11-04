@@ -4,7 +4,7 @@
 - 수행계획: [task_m020_598.md](task_m020_598.md), 2026-11-03 작업지시자 승인.
 - 작업 브랜치: `local/task598`, 통합 대상: `devel`
 - 기준: `f64f6101863777e2bd49c2336e5e4fd967b4da6e`; core/Studio 공식 `v0.8.7`, `1a76570e833917d15817415a53c09ad61ab3203f`.
-- 상태: 2026-11-04 작업지시자 Stage 4 진입 승인 후 [Stage 4](../working/task_m020_598_stage4.md)·[재개 인계](../tech/task_m020_598_release_handoff.md) 완료. 최종 보고·PR 게시 승인 대기.
+- 상태: 2026-11-04 사전 준비 4단계·[최종 보고](../report/task_m020_598_report.md)·[재개 인계](../tech/task_m020_598_release_handoff.md) 완료. 최종 보고·PR 게시 승인됨. merge·실제 릴리스 후속.
 
 ## 구현 원칙과 완료 경계
 

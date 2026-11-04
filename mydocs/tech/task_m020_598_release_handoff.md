@@ -15,7 +15,7 @@
 | core/Studio/matcher | 공식 `v0.8.7`, `1a76570e833917d15817415a53c09ad61ab3203f` |
 | upstream 참조 | [이슈 #8371](https://github.com/edwardkim/rhwp/issues/8371), [PR #8397](https://github.com/edwardkim/rhwp/pull/8397); 조사 당시 기록한 merge SHA `99a176b7cb34fde54454c03433baa1382b2de9fa` |
 
-Stage 4는 문서만 변경한다. 인계 문서 커밋은 `git log -1 --format='%H %s' -- mydocs/tech/task_m020_598_release_handoff.md`로 찾는다. 최종 보고·PR 게시 승인은 별도 단계이며, 현재 원격에 이 브랜치·문서가 게시됐다고 가정하지 않는다. 최종 보고서는 승인 후 `mydocs/report/task_m020_598_report.md`에 작성하고 이 문서와 PR을 연결한다.
+Stage 4와 최종 보고 단계는 문서만 변경한다. 인계 문서 커밋은 `git log -1 --format='%H %s' -- mydocs/tech/task_m020_598_release_handoff.md`로 찾는다. 2026-11-04 최종 보고·PR 게시 승인을 받아 [최종 보고서](../report/task_m020_598_report.md)를 작성했다. `publish/task598` → `devel` PR의 최신 게시·merge 상태는 #598에서 확인한다.
 
 처음 재개할 때 #598의 PR·merge 상태부터 확인한다. 이미 통합됐으면 최신 통합 브랜치의 후속 이슈에서 진행하며, 위 과거 커밋으로 현재 작업을 되돌리지 않는다. 미통합 상태라면 이 브랜치의 준비 변경을 먼저 확인한다. 이슈 close와 worktree 삭제는 준비 PR의 승인·merge 절차를 따른다.
 
