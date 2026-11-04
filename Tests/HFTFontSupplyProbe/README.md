@@ -2,6 +2,8 @@
 
 Task #598의 공식 upstream 릴리스 전 준비 도구다. 제품 Swift 공급 계층과 JavaScript provider를 연결하여 후보·bytes·세대 무효화를 검사한다. HFT 문서를 열거나 원본 대응 OTF/TTF를 선택하는 도구는 아니다. [진단 계약](../../mydocs/tech/task_m020_598_font_supply_contract.md)을 함께 읽는다.
 
+공식 릴리스 반영을 재개할 때는 [인계 문서](../../mydocs/tech/task_m020_598_release_handoff.md)의 기준 커밋·자산 확보·동기화·수용 순서를 따른다.
+
 ## 실행
 
 저장소 루트에서 macOS, Xcode Command Line Tools의 `xcrun swiftc`, Node.js, Python 3.9 이상이 필요하다. 검증 환경은 Swift 6.3.3, Node 24.15.0, Python 3.9.6이다. Rust framework와 GUI는 필요하지 않다.

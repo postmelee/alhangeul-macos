@@ -2,6 +2,8 @@
 
 작성일: 2026-11-03. [구현계획](../plans/task_m020_598_impl.md), [Stage 1 보고](../working/task_m020_598_stage1.md).
 
+공식 upstream 반영·알한글 새 릴리스 요청 시에는 [재개 인계](task_m020_598_release_handoff.md)에서 현재 기준과 후속 순서를 확인한다.
+
 ## 기준과 확인 범위
 
 - 조사 source: `0699d16c` (문서 계획 커밋), 제품 baseline: `f64f6101863777e2bd49c2336e5e4fd967b4da6e`.
