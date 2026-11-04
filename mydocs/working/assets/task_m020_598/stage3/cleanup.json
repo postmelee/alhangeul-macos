@@ -1,0 +1,10 @@
+{
+  "removedGeneratedPaths": [
+    "studio-changes/StudioFontIntegrationProbe.app",
+    "studio-changes/change-state-f568b8ba-502e-4c5c-8098-8a9f03980127",
+    "studio-changes/change-state-107325c1-c947-4f81-9191-3eb9b6cc2d80",
+    "studio-changes-functional/StudioFontIntegrationProbe.app",
+    "studio-changes-functional/change-state-57c3f460-8841-4ac6-a35c-3a7d38eda555"
+  ],
+  "reason": "검증 완료 및 실행기의 LaunchServices 등록 해제 후 재생성 가능한 시험 앱·fixture 상태 정리; 로그·JSON·snapshot 보존"
+}

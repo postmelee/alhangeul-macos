@@ -28,6 +28,9 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var coordinator: RhwpStudioWebView.Coordinator?
     private var session: RhwpStudioEditorSession?
     private var checks: [String] = []
+    private var settingsCaptureAttempts = 0
+    private var settingsCaptureSuccesses = 0
+    private var settingsCaptureSkips = 0
     private var documentRevisionBeforePicker = 0
     private let reads = Reads()
     private let out = URL(fileURLWithPath: CommandLine.arguments[1])
@@ -311,6 +314,13 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
         settingsWindow = settings; settings.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     }
     private func screenshotSettings(_ name: String) async throws {
+        // 캡처 불가 환경의 기능 회귀용 명시 옵션. 글꼴 검사·WKWebView snapshot은 생략하지 않는다.
+        if CommandLine.arguments.contains("--skip-settings-screenshots") {
+            settingsCaptureSkips += 1
+            print("NOT_RUN: settings screenshot \(name)")
+            return
+        }
+        settingsCaptureAttempts += 1
         try await Task.sleep(nanoseconds: 300_000_000)
         guard #available(macOS 14.4, *) else { throw Failure(message: "settings capture requires macOS 14.4") }
         // 현재 프로세스의 창만 조회/캡처한다. 다른 앱 화면이나 전역 화면 권한은 요구하지 않는다.
@@ -324,6 +334,7 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let cg = try await SCScreenshotManager.captureImage(contentFilter: SCContentFilter(desktopIndependentWindow: owned), configuration: config)
         guard let data = NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:]) else { throw Failure(message: "settings PNG") }
         try data.write(to: out.appendingPathComponent(name))
+        settingsCaptureSuccesses += 1
     }
     private func runChanges() async throws {
         let repository = URL(fileURLWithPath: CommandLine.arguments[2])
@@ -529,7 +540,11 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
             .write(to: out.appendingPathComponent("change-face-proof.json"))
     }
     private func finish(_ error: String?) {
-        let result: [String: Any] = ["checks": checks, "error": error as Any? ?? NSNull()]
+        let captureStatus = settingsCaptureAttempts > settingsCaptureSuccesses ? "FAIL" :
+            settingsCaptureSkips > 0 || settingsCaptureSuccesses == 0 ? "NOT_RUN" : "PASS"
+        let result: [String: Any] = ["checks": checks, "error": error as Any? ?? NSNull(),
+            "settingsScreenshots": ["status": captureStatus, "attempted": settingsCaptureAttempts,
+                                    "captured": settingsCaptureSuccesses, "skipped": settingsCaptureSkips]]
         if let data = try? JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys]) {
             let filename = CommandLine.arguments.contains("--changes")
                 ? (CommandLine.arguments.contains("--installed-reopen") ? "installed-reopen-result.json" :

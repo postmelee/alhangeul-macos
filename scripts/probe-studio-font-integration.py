@@ -8,10 +8,13 @@ parser.add_argument('--interactive', action='store_true', help='검증 후 테�
 parser.add_argument('--skip-build', action='store_true', help='이전에 빌드한 격리 앱을 사용')
 parser.add_argument('--output-dir', type=Path, help='검증 산출물 폴더 (.app은 build.noindex 아래)')
 parser.add_argument('--changes', action='store_true', help='격리된 native 설치/관리 변경과 새 프로세스 복원 검증')
+parser.add_argument('--skip-settings-screenshots', action='store_true', help='--changes의 설정 창 캡처만 생략하고 NOT_RUN으로 기록 (기능 검사는 유지)')
 parser.add_argument('--settings-navigation', action='store_true', help='실제 SwiftUI Settings Scene으로 연결·가져오기 진입 검증')
 args = parser.parse_args()
 if args.changes and args.settings_navigation:
     parser.error('--changes and --settings-navigation are separate probes')
+if args.skip_settings_screenshots and not args.changes:
+    parser.error('--skip-settings-screenshots requires --changes')
 
 root = Path(__file__).resolve().parent.parent
 out = (args.output_dir or root / ('build.noindex/task567/stage4-2/settings-navigation' if args.settings_navigation else
@@ -57,6 +60,8 @@ if not args.skip_build:
 try:
     command = [str(exe),str(out),str(root)]
     if args.changes:
+        if args.skip_settings_screenshots:
+            command += ['--skip-settings-screenshots']
         state_dir = out / ('change-state-' + str(uuid.uuid4()))
         command += ['--changes', '--state-dir', str(state_dir)]
         for suffix, mode in [('changes', []), ('reopen', ['--reopen']), ('installed-reopen', ['--installed-reopen'])]:
