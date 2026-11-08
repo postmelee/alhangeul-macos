@@ -2458,7 +2458,7 @@ class CGTreeRenderer {
         ctx.scaleBy(x: 1, y: -1)
 
         let font = makeTextRunFont(style: style, fontSize: fontSize, run: run)
-        let attributes = makeTextRunAttributes(style: style, font: font)
+        let attributes = styledAttributes(for: run, makeTextRunAttributes(style: style, font: font))
 
         let attrStr = NSAttributedString(string: displayRun.text, attributes: attributes)
         let line = CTLineCreateWithAttributedString(attrStr)
@@ -2564,7 +2564,7 @@ class CGTreeRenderer {
         ctx.scaleBy(x: 1, y: -1)
 
         let font = makeTextRunFont(style: style, fontSize: fontSize, run: run)
-        let attributes = makeTextRunAttributes(style: style, font: font)
+        let attributes = styledAttributes(for: run, makeTextRunAttributes(style: style, font: font))
         let line = CTLineCreateWithAttributedString(NSAttributedString(string: displayText, attributes: attributes))
         let layout = makeTextRunLayoutPlan(
             text: displayText,
@@ -2658,6 +2658,14 @@ class CGTreeRenderer {
         }
 
         return font
+    }
+
+    private func styledAttributes(for run: TextRunNode, _ attributes: [NSAttributedString.Key: Any]) -> [NSAttributedString.Key: Any] {
+        guard fontContext?.usesRegularForBold(run) == true else { return attributes }
+        var result = attributes
+        // 공식 SVG→PDF 경로의 Regular HFT 수용 결과. 음수는 CoreText 채움+획이고 단위는 글자 크기의 %다.
+        result[NSAttributedString.Key(kCTStrokeWidthAttributeName as String)] = -2.0
+        return result
     }
 
     private func normalizedTextRunRotation(_ run: TextRunNode) -> Double {

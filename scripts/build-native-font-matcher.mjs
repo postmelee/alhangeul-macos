@@ -38,6 +38,8 @@ if (args.includes('--verify')) {
   const end = policy.indexOf('      async function loadCatalog(', start);
   if (start < 0 || end < 0 || policy.indexOf('      function normalize(row) {', start+1) !== -1) throw Error('Catalog policy boundary drift');
   const entry = `import {setHostFontProvider,prepareHostFontCatalog,resolveRendererLocalFont} from './src/core/local-fonts.ts';
+  import {FONT_RULE_SUBSTITUTION_TABLES} from './src/core/font-rule-runtime.ts';
+  const hftFamilies = new Set(FONT_RULE_SUBSTITUTION_TABLES.flat().filter(row => row[1] === 2).map(row => row[0]));
   const name = value => typeof value === 'string' && value.trim().length > 0 && value.length <= 1024;
   const text = value => typeof value === 'string' && value.length <= 1024;
   const key = value => value.replace(/\\u0000/g,'').normalize('NFC').replace(/\\s+/g,' ').trim().toLowerCase();
@@ -55,10 +57,18 @@ if (args.includes('--verify')) {
       const selections = value.requests.map(request => {
         if (!name(request.key) || !name(request.family) || ![400,700].includes(request.weight)
             || !['normal','italic'].includes(request.slant)) throw Error('Invalid native request');
-        const face = resolveRendererLocalFont(request.family,request)?.hostReference?.face;
+        if (request.hftCandidateOnly && !hftFamilies.has(request.family)) return {key:request.key,status:'absent'};
+        let face = resolveRendererLocalFont(request.family,request)?.hostReference?.face;
+        let status = 'selected';
+        if (!face && request.allowHftRegular && request.weight === 700 && request.slant === 'normal' && hftFamilies.has(request.family)) {
+          const candidates = faces.filter(row => names(row).includes(key(request.family)));
+          if (candidates.length === 1 && candidates[0].weight === 400 && candidates[0].slant === 'normal') {
+            face = candidates[0]; status = 'hftRegular';
+          }
+        }
         // 선택할 수 없는 로컬 후보를 기본 글꼴로 조용히 바꾸지 않는다.
         const known = value.faces.some(row => names(row).includes(key(request.family)));
-        return face ? {key:request.key,status:'selected',id:face.id,postscriptName:face.postscriptName,
+        return face ? {key:request.key,status,id:face.id,postscriptName:face.postscriptName,
           weight:face.weight,slant:face.slant} : {key:request.key,status:known?'unavailable':'absent'};
       });
       globalThis.nativeFontResult = JSON.stringify({identity:value.identity,selections});

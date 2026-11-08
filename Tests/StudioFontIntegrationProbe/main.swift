@@ -56,6 +56,21 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
             try await Task.sleep(nanoseconds: 100_000_000)
         }
     }
+    private func waitForDocumentReady(_ description: String) async throws {
+        try await wait(description) {
+            if self.session?.snapshot.ready == true { return true }
+            // 격리 시험은 v0.9.0의 실제 선택 창에서 브라우저 감지를 건너뛴다.
+            // Mac provider의 활성화·후보·bytes는 이어지는 검사에서 별도로 확인한다.
+            let clicked = try? await self.js("""
+            const button = [...document.querySelectorAll('.modal-overlay .dialog-footer button')]
+                .find(node => node.textContent.trim() === '대체 글꼴로 보기');
+            if (!button) return false;
+            button.click(); return true;
+            """) as? Bool
+            if clicked == true { print("로컬 글꼴 감지 창에서 대체 글꼴로 보기 선택") }
+            return false
+        }
+    }
     private func screenshot(_ name: String) async throws {
         let image: NSImage = try await withCheckedThrowingContinuation { continuation in
             web!.takeSnapshot(with: nil) { image, error in
@@ -101,7 +116,80 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if(!option)throw Error('Missing existing menu font');option.click();return true;
         """)
     }
+    // 실제 문서와 관리 글꼴은 호출자가 제공한다. 각 프로세스는 같은 격리 저장소를 연다.
+    private func runHFT(document url: URL, font: URL, mode: String) async throws {
+        let state = out.deletingLastPathComponent()
+        let catalog = try InstalledFontCatalogService(persistence: .file(at: state.appendingPathComponent("catalog")), observeChanges: false)
+        _ = try await catalog.prepare()
+        _ = try await catalog.setEnabled(false)
+        let provider = InstalledFontServiceProvider(factory: { catalog })
+        let library = FontLibraryService(store: .init(rootURL: state.appendingPathComponent("library")))
+        if mode == "import" {
+            let imported = await library.importFonts(.init(candidates: [.init(sourceURL: font)], accessURLs: []))
+            try check(imported.first?.status == .added, "지정한 원본을 격리 관리 라이브러리에 가져오기")
+        }
+        let fonts = try await library.list().entries
+        try check(fonts.count == (mode == "absent" ? 0 : 1), "예상한 관리 글꼴 수")
+        let handler = StudioFontMessageHandler(installed: provider, library: { library }, onFaceRead: { [weak self] _, ps, hash in
+            self?.faceResponses.append(["ps": ps, "sha256": hash])
+        })
+        let owner = RhwpStudioWebView.Coordinator(fontMessageHandler: handler)
+        coordinator = owner
+        owner.onEditorSessionChange = { self.session = $0 }
+        let view = owner.makeWebView()
+        web = view
+        let window = NSWindow(contentRect: NSRect(x: 150, y: 120, width: 1000, height: 850),
+                              styleMask: [.titled, .closable], backing: .buffered, defer: false)
+        self.window = window; window.isReleasedWhenClosed = false; window.contentView = view; window.orderFront(nil)
+        let payload = RhwpStudioDocumentPayload(data: try Data(contentsOf: url), filename: url.lastPathComponent,
+                                                revision: 1, sourceProtection: .plain)
+        owner.update(document: payload, sourceDocument: nil, reloadToken: 0, loadID: 1, in: view)
+        try await waitForDocumentReady("원본 문서 준비")
+        try await wait("관리 글꼴 catalog 연결") {
+            let state = try await self.js("return window.__alhangeulFontConnection?.getState();") as? [String: Any]
+            return state?["status"] as? String == "connected" && state?["count"] as? Int == fonts.count
+        }
+        _ = try await js("""
+        const a=window.rhwpStudio.automation;
+        a.registerCommand({id:'ext:hft-state',label:'HFT',execute(s){window.__hftWasm=s.wasm;}});
+        a.execute('ext:hft-state');a.unregisterCommand('ext:hft-state');return true;
+        """)
+        try await wait("첫 페이지 Canvas 완료") {
+            try await self.js("return !!document.querySelector('canvas.document-page-canvas[data-rhwp-rendered-zoom]') && window.__hftWasm.getHostCanvasFontDiagnostics().pending === 0;") as? Bool == true
+        }
+        guard let snapshot = session?.snapshot else { throw Failure(message: "문서 세대") }
+        try await HFTDocumentConsumer.capture(view: view, directory: out, document: url, editor: snapshot,
+            handler: handler, displayReads: faceResponses, rendererDiagnostics: try await rendererDiagnostics(),
+            isCurrent: { self.session?.snapshot == snapshot })
+        if mode == "reopen" {
+            let absent = state.appendingPathComponent("absent")
+            let baseline = try Data(contentsOf: absent.appendingPathComponent("page.png")).base64EncodedString()
+            let expectedSVG = try String(contentsOf: absent.appendingPathComponent("page.svg"), encoding: .utf8)
+            let generation = try await fontGeneration()
+            for entry in fonts {
+                _ = try await library.remove(objectHash: entry.object.sha256, expectedGeneration: try await library.list().generation)
+            }
+            try await wait("관리 해제 후 같은 문서의 첫 쪽 복원") {
+                guard try await self.fontGeneration() > generation else { return false }
+                let restored = try await self.js("""
+                const page = document.querySelector('canvas.document-page-canvas[data-rhwp-rendered-zoom]');
+                const d = window.__hftWasm.getHostCanvasFontDiagnostics();
+                return d.loaded === 0 && d.pending === 0 && page ? page.toDataURL('image/png').split(',')[1] : null;
+                """) as? String
+                return restored == baseline
+            }
+            let svg = try await js("return await window.rhwpStudio.fonts.getOutputPageSvg(0);") as? String
+            try check(svg == expectedSVG, "관리 해제 후 기존 문서에서 미공급 화면·출력 SVG 복원")
+        }
+    }
+
     private func run() async throws {
+        let arguments = CommandLine.arguments
+        if let index = arguments.firstIndex(of: "--hft"), arguments.count == index + 4 {
+            try await runHFT(document: URL(fileURLWithPath: arguments[index + 1]),
+                             font: URL(fileURLWithPath: arguments[index + 2]), mode: arguments[index + 3])
+            return
+        }
         if CommandLine.arguments.contains("--changes") { try await runChanges(); return }
         let root = URL(fileURLWithPath: CommandLine.arguments[2])
         var assets: [String: StudioFontBytes] = [:]
@@ -167,12 +255,12 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 components.queryItems = (components.queryItems ?? []) + [.init(name: "renderer", value: "canvaskit"), .init(name: "canvaskitSurface", value: "webgl")]
                 view.load(URLRequest(url: components.url!))
             }
-            try await wait("\(ext) Studio ready") { self.session?.snapshot.ready == true }
+            try await waitForDocumentReady("\(ext) Studio ready")
             try await wait("\(ext) provider") {
                 let state = try await self.js("return window.__alhangeulFontConnection?.getState();") as? [String: Any]
                 return state?["status"] as? String == "connected" && state?["count"] as? Int == 2
             }
-            try check(true, "\(ext): actual product Coordinator + v0.8.7 Studio provider connected")
+            try check(true, "\(ext): actual product Coordinator + bundled Studio provider connected")
             _ = try await js("""
             const a=window.rhwpStudio.automation;
             a.registerCommand({id:'ext:font-probe-services',label:'probe',execute(s){window.__fontProbeWasm=s.wasm;window.__fontProbeState=s.documentState;window.__fontProbeInput=s.getInputHandler();}});
@@ -294,9 +382,16 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let state = try await self.js("return window.rhwpStudio.fonts.getState();") as? [String: Any] ?? [:]
             guard state["count"] as? Int == count, (state["generation"] as? Int ?? -1) > generation else { return false }
             let diagnostics = try await self.rendererDiagnostics()
-            guard diagnostics["effectiveBackend"] as? String == backend,
-                  ((diagnostics["selection"] as? [String: Any])?["resourceGeneration"] as? Int ?? -1) > resources else { return false }
-            if backend == "canvas2d" {
+            let selection = diagnostics["selection"] as? [String: Any]
+            guard (selection?["resourceGeneration"] as? Int ?? -1) > resources else { return false }
+            let effective = diagnostics["effectiveBackend"] as? String
+            // v0.9.0은 필수 face가 없으면 CanvasKit 초기화에서 Canvas2D로 전환한다.
+            // 두 face를 공급한 경우에는 실제 CanvasKit 완료를 계속 요구한다.
+            let missingCanvasKitFace = count == 0 && backend == "canvaskit" && effective == "canvas2d"
+                && diagnostics["backendFallbackReason"] as? String == "canvaskitResourcePreparationFailed"
+                && (selection?["selectionError"] as? String)?.contains("Gowun Batang") == true
+            guard effective == backend || missingCanvasKitFace else { return false }
+            if effective == "canvas2d" {
                 let fonts = try await self.js("return window.__fontProbeWasm.getHostCanvasFontDiagnostics();") as? [String: Any] ?? [:]
                 return fonts["loaded"] as? Int == count && fonts["pending"] as? Int == 0
             }
@@ -403,7 +498,7 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
             var components = URLComponents(url: try RhwpStudioResourceLocator.loadURL(for: payload), resolvingAgainstBaseURL: false)!
             components.queryItems = (components.queryItems ?? []) + [.init(name: "renderer", value: backend), .init(name: "canvaskitSurface", value: "webgl")]
             web.load(URLRequest(url: components.url!))
-            try await wait("change document ready") { self.session?.snapshot.ready == true }
+            try await waitForDocumentReady("change document ready")
             try await wait("change provider connected") { try await self.js("return window.__alhangeulFontConnection?.getState().status==='connected';") as? Bool == true }
             _ = try await js("""
             const a=window.rhwpStudio.automation;
@@ -551,7 +646,13 @@ private final class Probe: NSObject, NSApplicationDelegate, NSWindowDelegate {
                     CommandLine.arguments.contains("--reopen") ? "reopen-result.json" : "changes-result.json") : "integration-result.json"
             try? data.write(to: out.appendingPathComponent(filename))
         }
-        print(error.map { "FAIL: \($0)" } ?? "PASS: product Studio integration")
+        if let error {
+            print("FAIL: \(error)")
+        } else if CommandLine.arguments.contains("--hft") {
+            print("HFT 첫 쪽 화면·PDF 관찰 완료. 실제 사용 글꼴은 display-reads.json과 pdf-font-selection.json에 기록했습니다.")
+        } else {
+            print("PASS: product Studio integration")
+        }
         if error == nil && CommandLine.arguments.contains("--interactive") {
             window?.title = CommandLine.arguments.contains("--changes") ? "알한글 — 글꼴 변경 연동 · 격리 테스트 문서" : "알한글 — 고운바탕 연결 체험 · 테스트 문서"
             Task { @MainActor in

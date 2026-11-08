@@ -4,13 +4,13 @@
   "source_resolved_commit": "c9095c5f67632e6721e800ccc7fb43ea49d26682",
   "adapter_files": {
     "scripts/build-rhwp-studio.mjs": "3254da5bfc71a0ea0dddde37c7ca48cb691470d7e705d4b54781b25a7101f432",
-    "scripts/studio-font-menu-adapter.mjs": "62ad70b2fbb9eb48357715656cb65cfc1f1ca7354b052971ac3c10ab33fdc4c0"
+    "scripts/studio-font-menu-adapter.mjs": "23d8791d666b96d1d75eb51213ff2a1d30a1a3c0953652179ddc6af78d00294a"
   },
   "sources": [
     {
       "path": "src/core/local-fonts.ts",
       "original_sha256": "37f51713e87eece3bcee9fc63e683dfbc09b970dd114850fcf23a961cf726e39",
-      "adapted_sha256": "e14392490538463d844f87d9afc7cb6ab7127f972595e3d9138b9dd3e25f59ad"
+      "adapted_sha256": "e4e7ce6a9343a89d665c4bb8ca930bb83917aa4faf0dc018c11b33ae78fd6928"
     },
     {
       "path": "src/ui/toolbar.ts",
@@ -25,7 +25,12 @@
     {
       "path": "src/main.ts",
       "original_sha256": "52bdd906913b711483a4aaa5e83d61fe5d0d7b9344a2598f2db281f072bb677e",
-      "adapted_sha256": "1eeadb5c7b46859c08cc673e384fd3840b4164a57066c35963de3a47de0b4192"
+      "adapted_sha256": "00a9dc983b37df590471e1857b8f680e08c197c92d58f51a726912cbb86daf33"
+    },
+    {
+      "path": "src/core/wasm-bridge.ts",
+      "original_sha256": "1606343a91a26f0b24a5a8f863d322319212a9545e4da54a4726b51c6d9a4983",
+      "adapted_sha256": "cb2ba16219f04bd29bd5c03bb5a972948850a5fad5b7fa07ce3bb449ec2fefa6"
     }
   ]
 }

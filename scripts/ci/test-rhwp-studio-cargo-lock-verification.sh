@@ -149,6 +149,11 @@ export function getLocalFonts(options: GetLocalFontsOptions = {}): string[] {
   return [];
 }
 EOF
+  cat > "$upstream_dir/rhwp-studio/src/core/wasm-bridge.ts" <<'EOF'
+import { hasHostFontProvider, getHostFontState } from './local-fonts';
+  private canvasMetrics =
+    const metafileFontGeneration =
+EOF
   cat > "$upstream_dir/rhwp-studio/src/ui/toolbar.ts" <<'EOF'
 import { getLocalFonts } from '@/core/local-fonts';
     eventBus.on('local-fonts-changed', () => {

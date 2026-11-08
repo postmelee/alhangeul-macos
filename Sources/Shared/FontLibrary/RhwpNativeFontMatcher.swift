@@ -9,6 +9,8 @@ enum RhwpNativeFontMatcher {
         let family: String
         let weight: Int
         let slant: String
+        var allowHftRegular = false
+        var hftCandidateOnly = false
     }
     struct Selection: Decodable, Sendable {
         let key: String

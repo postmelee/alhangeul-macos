@@ -2,7 +2,7 @@
 // rhwp c9095c5f67632e6721e800ccc7fb43ea49d26682, esbuild 0.25.12
 enum RhwpNativeFontMatcherSource {
     static let commit = "c9095c5f67632e6721e800ccc7fb43ea49d26682"
-    static let sha256 = "88d32522d2f11c1f5d74d5f835584bfee03520c2ad8b0c7df2bc17f2f472f4d7"
+    static let sha256 = "077d371cdfdc6a7db3acc3db0b3ba56bea076522f691e96d073ed09b3f4be273"
     static let script = #"""
 (() => {
   var __defProp = Object.defineProperty;
@@ -15554,6 +15554,7 @@ enum RhwpNativeFontMatcherSource {
   }
 
   // <stdin>
+  var hftFamilies = new Set(FONT_RULE_SUBSTITUTION_TABLES.flat().filter((row) => row[1] === 2).map((row) => row[0]));
   var name = (value) => typeof value === "string" && value.trim().length > 0 && value.length <= 1024;
   var text = (value) => typeof value === "string" && value.length <= 1024;
   var key = (value) => value.replace(/\u0000/g, "").normalize("NFC").replace(/\s+/g, " ").trim().toLowerCase();
@@ -15642,11 +15643,20 @@ enum RhwpNativeFontMatcherSource {
       await prepareHostFontCatalog();
       const selections = value.requests.map((request) => {
         if (!name(request.key) || !name(request.family) || ![400, 700].includes(request.weight) || !["normal", "italic"].includes(request.slant)) throw Error("Invalid native request");
-        const face = resolveRendererLocalFont(request.family, request)?.hostReference?.face;
+        if (request.hftCandidateOnly && !hftFamilies.has(request.family)) return { key: request.key, status: "absent" };
+        let face = resolveRendererLocalFont(request.family, request)?.hostReference?.face;
+        let status = "selected";
+        if (!face && request.allowHftRegular && request.weight === 700 && request.slant === "normal" && hftFamilies.has(request.family)) {
+          const candidates = faces.filter((row) => names(row).includes(key(request.family)));
+          if (candidates.length === 1 && candidates[0].weight === 400 && candidates[0].slant === "normal") {
+            face = candidates[0];
+            status = "hftRegular";
+          }
+        }
         const known = value.faces.some((row) => names(row).includes(key(request.family)));
         return face ? {
           key: request.key,
-          status: "selected",
+          status,
           id: face.id,
           postscriptName: face.postscriptName,
           weight: face.weight,
