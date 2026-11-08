@@ -133,7 +133,15 @@ import WebKit
         let close = DocumentCloseConfirmationController()
         defer { close.detach(restorePreviousDelegate: true); window.orderOut(nil) }
         store.loadDocument(from: fixture)
-        try await wait("fixture ready") { store.hasDocument && !store.isLoading && !store.isWebViewLoading }
+        do {
+            try await wait("fixture ready") { store.hasDocument && !store.isLoading && !store.isWebViewLoading }
+        } catch {
+            print("DIAGNOSTIC loadID=\(store.webViewLoadID) hasDocument=\(store.hasDocument) loading=\(store.isLoading)/\(store.isWebViewLoading) session=\(String(describing: store.editorSession?.snapshot)) failure=\(String(describing: store.webViewFailure))")
+            if let live = web(in: window.contentView!) {
+                print("DIAGNOSTIC JS \(String(describing: try? await js(live, "return JSON.stringify({url:location.href, state: await window.__alhangeulHostBridgeReadSession?.(), text:document.body?.innerText?.slice(0,300)});")))")
+            }
+            throw error
+        }
         let original = web(in: window.contentView!)!
         let epoch = store.editorSession!.snapshot.documentEpoch
         _ = try await js(original, "return await window.rhwpStudio.automation.execute('file:new-doc');")

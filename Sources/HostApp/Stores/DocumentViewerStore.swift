@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 
 @MainActor
@@ -8,13 +9,46 @@ final class DocumentViewerStore: ObservableObject {
     @Published var filename: String = ""
     @Published private var documentOpenRecoveryState = DocumentOpenRecoveryState()
     @Published private(set) var webViewErrorMessage: String?
-    @Published var webViewFailure: RhwpStudioWebViewFailure?
+    @Published private(set) var webViewFailure: RhwpStudioWebViewFailure?
     @Published var isWebViewLoading = false
     @Published private(set) var documentRevision: Int = 0
     @Published private(set) var webViewReloadToken: Int = 0
     @Published private(set) var webViewLoadID: Int = 0
     @Published private(set) var editorSession: RhwpStudioEditorSession?
     @Published private(set) var hasUnsavedChanges = false
+    private(set) var suspendedSnapshot: RhwpStudioEditorSnapshot?
+    private var failureOccurredAt: Date?
+    @Published private(set) var commandFailurePresentation = RhwpStudioCommandFailurePresentation()
+
+    @Published private(set) var lastEditorImage: NSImage?
+    @Published private(set) var isRecoveryExporting = false
+    @Published private(set) var isConfirmingRecovery = false
+    @Published private(set) var recoveryMessage: String?
+    @Published private(set) var recoveryErrorDetail: String?
+    let recoveryOwner = UUID()
+    let recoveryCopies: DocumentRecoveryCopies
+    weak var documentWindow: NSWindow?
+    private var clearRecoveryOnReady = false
+    var confirmRecoveryTransition: (String, NSWindow?) async -> Bool = { action, window in
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = action
+        alert.informativeText = "저장되지 않은 변경사항이 사라질 수 있습니다."
+        alert.addButton(withTitle: "계속")
+        alert.addButton(withTitle: "취소")
+        if let window {
+            return await withCheckedContinuation { done in
+                alert.beginSheetModal(for: window) { done.resume(returning: $0 == .alertFirstButtonReturn) }
+            }
+        }
+        return alert.runModal() == .alertFirstButtonReturn
+    }
+    var chooseRecoveryDestination: (DocumentSaveFormat, String, NSWindow?) async -> URL? = {
+        await DocumentSavePanel.chooseDestinationURL(format: $0, suggestedFilename: $1, presentingWindow: $2)
+    }
+    var writeRecoveryCopy: (DocumentRecoveryCopies.Copy, URL, URL?) throws -> Void = {
+        try DocumentRecoveryExport.write($0, to: $1, currentSource: $2)
+    }
 
     private static let webViewErrorAutoDismissDelayNanoseconds: UInt64 = 5_000_000_000
 
@@ -25,11 +59,20 @@ final class DocumentViewerStore: ObservableObject {
     private var documentLoadTask: Task<Void, Never>?
 
     init(
+        recoveryCopies: DocumentRecoveryCopies? = nil,
         classifyDocumentProtection: @escaping @Sendable (Data) -> RhwpDocumentProtection = {
             RhwpDocumentProtection.classify(data: $0)
         }
     ) {
+        self.recoveryCopies = recoveryCopies ?? .shared
         self.classifyDocumentProtection = classifyDocumentProtection
+    }
+
+    deinit {
+        webViewErrorDismissTask?.cancel()
+        documentLoadTask?.cancel()
+        let pool = recoveryCopies, owner = recoveryOwner
+        Task { @MainActor in pool.remove(owner: owner) }
     }
 
     var hasDocument: Bool {
@@ -53,6 +96,7 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func openDocument() {
+        guard !isRecoveryExporting, !isConfirmingRecovery else { return }
         guard let url = DocumentOpenPanel.chooseDocumentURL() else {
             return
         }
@@ -60,11 +104,15 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func loadDocument(from url: URL, source: DocumentOpenSource = .externalOpen) {
-        let loadID = beginDocumentLoad()
-        loadDocument(from: url, source: source, loadID: loadID)
+        Task { @MainActor in
+            guard await permitRecoveryTransition("다른 문서를 여시겠습니까?") else { return }
+            let loadID = beginDocumentLoad()
+            loadDocument(from: url, source: source, loadID: loadID)
+        }
     }
 
     func loadDroppedDocument(data: Data, filename: String) {
+        guard webViewFailure == nil, !isConfirmingRecovery, !isRecoveryExporting else { return }
         let loadID = beginDocumentLoad()
 
         do {
@@ -85,22 +133,10 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func openRecentDocument(_ document: RecentDocumentItem) {
-        let loadID = beginDocumentLoad()
-
-        do {
-            let url = try document.resolvedURL()
-            loadDocument(
-                from: url,
-                source: .recentDocument,
-                loadID: loadID
-            )
-        } catch {
-            failDocumentLoad(
-                loadID: loadID,
-                source: .recentDocument,
-                filename: document.displayName,
-                error: error
-            )
+        do { loadDocument(from: try document.resolvedURL(), source: .recentDocument) }
+        catch {
+            let loadID = beginDocumentLoad()
+            failDocumentLoad(loadID: loadID, source: .recentDocument, filename: document.displayName, error: error)
         }
     }
 
@@ -164,7 +200,7 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func recordSavedDocument(_ savedDocument: RhwpStudioSavedDocument) {
-        guard let current = editorSession,
+        guard webViewFailure == nil, let current = editorSession,
               savedDocument.session.snapshot.loadID == webViewLoadID,
               savedDocument.session.snapshot.documentEpoch == current.snapshot.documentEpoch
         else { return }
@@ -182,6 +218,13 @@ final class DocumentViewerStore: ObservableObject {
             sourceProtection:savedDocument.sourceProtection
         )
         hasUnsavedChanges = snapshot.dirty
+        if savedDocument.recoveryEligible {
+            _ = recoveryCopies.admit(owner: recoveryOwner, data: savedDocument.data,
+                format: savedDocument.format, sourceURL: url, sourceProtection: .plain,
+                conversion: .none, parserValidated: true, sessionIsCurrent: true,
+                savedAt: savedDocument.savedAt, loadID: snapshot.loadID, epoch: snapshot.documentEpoch,
+                revision: savedDocument.session.snapshot.changeSeq)
+        }
     }
 
     func updateEditorSession(_ reported: RhwpStudioEditorSession) {
@@ -191,8 +234,16 @@ final class DocumentViewerStore: ObservableObject {
                 hasNativeDocument: rhwpStudioDocument != nil
               )
         else { return }
+        let hadSession = editorSession != nil
         let isReplacement = editorSession?.snapshot.documentEpoch != session.snapshot.documentEpoch
+        if (hadSession && isReplacement) || clearRecoveryOnReady {
+            recoveryCopies.remove(owner: recoveryOwner)
+        }
+        clearRecoveryOnReady = false
+        suspendedSnapshot = nil
+        lastEditorImage = nil
         editorSession = session
+        if isReplacement { commandFailurePresentation.clear() }
         hasUnsavedChanges = session.snapshot.dirty
         if session.sourceBinding != .nativeLoad {
             rhwpStudioDocument = nil
@@ -205,6 +256,73 @@ final class DocumentViewerStore: ObservableObject {
 
     func clearUnsavedChanges() {
         hasUnsavedChanges = false
+        recoveryCopies.remove(owner: recoveryOwner)
+    }
+
+    func releaseRecoveryResources() {
+        recoveryCopies.remove(owner: recoveryOwner)
+        suspendedSnapshot = nil
+        lastEditorImage = nil
+    }
+
+    var errorReport: String {
+        guard let failure = webViewFailure, let failureOccurredAt else { return "" }
+        let values = [filename, rhwpStudioDocument?.filename, sourceDocument?.url.path,
+                      sourceDocument?.url.absoluteString, NSHomeDirectory()].compactMap { $0 }
+        return RhwpStudioErrorReport.make(errorID: failure.id, occurredAt: failureOccurredAt,
+            category: failure.category.rawValue, detail: failure.diagnosticDetail,
+            additionalDetail: recoveryErrorDetail, session: suspendedSnapshot,
+            loadID: webViewLoadID, reloadToken: webViewReloadToken,
+            environment: .current(), privateValues: values)
+    }
+
+    func preserveEditorImage(_ image: NSImage?) { lastEditorImage = image }
+    var previousSave: DocumentRecoveryCopies.Copy? { recoveryCopies.copy(for: recoveryOwner) }
+    var recoveryDescription: String {
+        if let copy = previousSave {
+            return "이전 저장본: \(copy.savedAt.formatted(date: .omitted, time: .standard)). 이후의 미저장 편집은 포함되지 않습니다."
+        }
+        if rhwpStudioDocument?.sourceProtection != .plain, rhwpStudioDocument != nil {
+            return "보호 상태를 유지할 수 없어 자동 복구본을 보관하지 않았습니다. 미저장 편집 복구본이 없습니다."
+        }
+        return "사용 가능한 이전 저장본이 없습니다. 미저장 편집은 복구할 수 없습니다. 이전 저장본은 정상 저장 후 최대 30분 동안만 보관합니다."
+    }
+
+    @discardableResult
+    func exportPreviousSave() async -> Bool {
+        guard webViewFailure != nil, !isRecoveryExporting, !isConfirmingRecovery else { return false }
+        guard let lease = recoveryCopies.acquire(for: recoveryOwner) else {
+            recoveryMessage = "보관 기간이 지났거나 사용 가능한 이전 저장본이 없습니다."
+            return false
+        }
+        isRecoveryExporting = true
+        recoveryMessage = nil
+        recoveryErrorDetail = nil
+        defer { recoveryCopies.release(lease); isRecoveryExporting = false }
+        let loadID = webViewLoadID
+        let stem = (lease.copy.sourceURL.lastPathComponent as NSString).deletingPathExtension
+        guard let url = await chooseRecoveryDestination(lease.copy.format,
+            "\(stem) (이전 저장본).\(lease.copy.format.rawValue)", documentWindow) else { return false }
+        guard webViewFailure != nil, webViewLoadID == loadID else { return false }
+        do {
+            try writeRecoveryCopy(lease.copy, url, sourceDocument?.url)
+            recoveryMessage = "저장본을 새 파일로 복사했습니다."
+            return true
+        } catch {
+            recoveryMessage = "저장본을 복사하지 못했습니다. 다시 시도해 주세요."
+            recoveryErrorDetail = error.localizedDescription
+            return false
+        }
+    }
+
+    private func permitRecoveryTransition(_ action: String) async -> Bool {
+        guard webViewFailure != nil else { return !isConfirmingRecovery && !isRecoveryExporting }
+        guard !isConfirmingRecovery, !isRecoveryExporting else { return false }
+        isConfirmingRecovery = true
+        let loadID = webViewLoadID
+        let permitted = await confirmRecoveryTransition(action, documentWindow)
+        isConfirmingRecovery = false
+        return permitted && webViewFailure != nil && webViewLoadID == loadID
     }
 
     func setWebViewLoading(_ isLoading: Bool) {
@@ -220,15 +338,16 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     func setWebViewFailure(_ failure: RhwpStudioWebViewFailure?) {
-        guard let failure else {
-            webViewFailure = nil
-            return
-        }
+        // 늦은 비치명적/해제 알림으로 fatal 상태를 풀지 않는다. 재시작/새 load만 허용한다.
+        guard let failure, webViewFailure == nil else { return }
 
         isWebViewLoading = false
 
         if failure.isFatal {
+            failureOccurredAt = Date()
+            if let snapshot = editorSession?.snapshot { suspendedSnapshot = snapshot }
             editorSession = nil
+            commandFailurePresentation.clear()
             webViewFailure = failure
             dismissWebViewError()
         } else {
@@ -240,13 +359,29 @@ final class DocumentViewerStore: ObservableObject {
         }
     }
 
-    func retryWebViewLoad() {
-        webViewFailure = nil
+    func presentCommandFailure(_ failure: RhwpStudioCommandFailure) {
+        guard failure.isRecovered, webViewFailure == nil, hasDocument else { return }
         dismissWebViewError()
-        isWebViewLoading = false
-        webViewReloadToken += 1
-        webViewLoadID += 1
-        editorSession = nil
+        commandFailurePresentation.present(failure)
+    }
+
+    func dismissCommandFailure() { commandFailurePresentation.dismiss() }
+    func showCommandFailure() { commandFailurePresentation.show() }
+
+    func retryWebViewLoad() {
+        Task { @MainActor in
+            guard webViewFailure != nil,
+                  await permitRecoveryTransition(rhwpStudioDocument == nil ? "편집기를 다시 시작하시겠습니까?" : "이전 원본을 다시 여시겠습니까?") else { return }
+            commandFailurePresentation.clear()
+            webViewFailure = nil
+            recoveryMessage = nil
+            recoveryErrorDetail = nil
+            dismissWebViewError()
+            isWebViewLoading = false
+            webViewReloadToken += 1
+            webViewLoadID += 1
+            editorSession = nil
+        }
     }
 
     func dismissWebViewError() {
@@ -307,12 +442,14 @@ final class DocumentViewerStore: ObservableObject {
             return
         }
 
+        clearRecoveryOnReady = self.sourceDocument?.url != sourceDocument?.url || sourceDocument == nil
         self.filename = filename
         self.sourceDocument = sourceDocument
         documentRevision += 1
         webViewLoadID += 1
         editorSession = nil
-        hasUnsavedChanges = false
+        commandFailurePresentation.clear()
+        if webViewFailure == nil { hasUnsavedChanges = false }
         rhwpStudioDocument = RhwpStudioDocumentPayload(
             data: data,
             filename: filename,
@@ -352,6 +489,8 @@ final class DocumentViewerStore: ObservableObject {
     }
 
     private func presentWebViewError(_ message: String, dedupeKey: String? = nil) {
+        // 새 저장/출력 오류가 이전 명령 알림 뒤에 가려지지 않게 한다. 진단은 보존한다.
+        commandFailurePresentation.dismiss()
         if let dedupeKey,
            webViewErrorDedupeKey == dedupeKey,
            webViewErrorMessage != nil {

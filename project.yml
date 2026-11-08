@@ -235,6 +235,7 @@ targets:
       - path: Sources/HostApp/Services/AppExecutionEvent.swift
       - path: Sources/HostApp/Services/AppExecutionOutbox.swift
       - path: Sources/HostApp/Services/DocumentOpenRecoveryState.swift
+      - path: Sources/HostApp/Services/DocumentRecoveryCopies.swift
       - path: Sources/HostApp/Services/DocumentSaveContract.swift
       - path: Sources/HostApp/Services/DocumentSaveFormat.swift
       - path: Sources/HostApp/Services/LaunchMaintenanceService.swift
@@ -243,6 +244,9 @@ targets:
       - path: Sources/HostApp/Services/QuickLookConflictPresentation.swift
       - path: Sources/HostApp/Services/QuickLookSettingsOpener.swift
       - path: Sources/HostApp/Services/RhwpStudioHostBridgeScript.swift
+      - path: Sources/HostApp/Services/RhwpStudioErrorReport.swift
+      - path: Sources/HostApp/Views/ErrorReportDisclosure.swift
+      - path: Sources/HostApp/Services/RhwpStudioCommandFailure.swift
       - path: Sources/HostApp/Services/RhwpStudioEditorSession.swift
       - path: Sources/HostApp/Services/RhwpStudioEditorSessionScript.swift
       - path: Sources/HostApp/Services/RhwpStudioSaveBridgeScript.swift

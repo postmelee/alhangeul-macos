@@ -19,7 +19,10 @@ enum RhwpStudioHostBridgeScript {
           return "";
         }
         if (reason instanceof Error) {
-          return reason.stack || reason.message || String(reason);
+          const message = String(reason);
+          return reason.stack && !reason.stack.includes(message)
+            ? message + "\\n" + reason.stack
+            : reason.stack || message;
         }
         if (typeof reason === "string") {
           return reason;
@@ -50,6 +53,7 @@ enum RhwpStudioHostBridgeScript {
       }
 
       window.addEventListener("error", (event) => {
+        if (window.__alhangeulHandleCommandError?.(event.error)) return;
         const message = event.message || event.error?.message;
         if (!message && !event.error) {
           return;
@@ -74,6 +78,7 @@ enum RhwpStudioHostBridgeScript {
       });
 
       window.addEventListener("unhandledrejection", (event) => {
+        if (window.__alhangeulHandleCommandError?.(event.reason)) return;
         const reason = describeReason(event.reason);
         const sourceURL = window.location.href;
         if (isBenignRuntimeIssue("Unhandled promise rejection", sourceURL, reason, 0, 0)) {
@@ -351,6 +356,9 @@ enum RhwpStudioHostBridgeScript {
       }
 
       function requestRhwp(method, params = {}, timeoutMs = 15000) {
+        if (!["getDocumentState", "getSelectionContext", "pageCount"].includes(method)) {
+          window.__alhangeulAssertRecoveryReady?.();
+        }
         return new Promise((resolve, reject) => {
           const id = `alhangeul-host-${method}-${Date.now()}-${Math.random()}`;
           const timeout = setTimeout(() => {
@@ -390,6 +398,7 @@ enum RhwpStudioHostBridgeScript {
 
       \(RhwpStudioEditorSessionScript.source)
       \(RhwpStudioSaveBridgeScript.source)
+      \(RhwpStudioCommandRecoveryScript.source)
       \(RhwpStudioHTMLExportScript.source)
 
       function encodeBytesToBase64(bytes) {
@@ -786,6 +795,7 @@ enum RhwpStudioHostBridgeScript {
             canonicalCommand === "file:save-as-hwpx" ||
             canonicalCommand === "file:export-pdf" ||
             canonicalCommand === "file:print" ||
+            canonicalCommand === "file:share" ||
             canonicalCommand === "file:export-doc" ||
             canonicalCommand === "file:export-html") {
           postNative({
