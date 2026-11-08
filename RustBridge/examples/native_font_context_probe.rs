@@ -12,7 +12,9 @@ fn collect(node: &LayerNode, output: &mut BTreeMap<(u32, usize), serde_json::Val
                 collect(child, output, mode);
             }
         }
-        LayerNodeKind::ClipRect { child, .. } => collect(child, output, mode),
+        LayerNodeKind::ClipRect { child, .. } | LayerNodeKind::ClipPath { child, .. } => {
+            collect(child, output, mode)
+        }
         LayerNodeKind::Leaf { ops } => {
             for op in ops {
                 if let PaintOp::TextRun { run, .. } = op {
@@ -153,7 +155,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     fs::write(
         out.join("result.json"),
         serde_json::to_vec_pretty(&serde_json::json!({
-            "core":"v0.8.7","documentUnchanged":true,"OSFontRegistration":false,"results":results
+            "core":format!("v{}", rhwp::version()),"documentUnchanged":true,"OSFontRegistration":false,"results":results
         }))?,
     )?;
     println!("saved {}", out.join("result.json").display());
