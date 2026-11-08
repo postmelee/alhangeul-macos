@@ -12,9 +12,9 @@ import WebKit
         checks += 1
         print("PASS \(name)")
     }
-    @MainActor static func wait(_ name: String, _ predicate: () -> Bool) async throws {
+    @MainActor static func wait(_ name: String, _ predicate: () async -> Bool) async throws {
         let deadline = Date().addingTimeInterval(15)
-        while !predicate() {
+        while !(await predicate()) {
             guard Date() < deadline else { throw Failure(description: "timeout: \(name)") }
             try await Task.sleep(nanoseconds: 100_000_000)
         }
@@ -25,6 +25,23 @@ import WebKit
     }
     @MainActor static func js(_ web: WKWebView, _ source: String) async throws -> Any? {
         try await web.callAsyncJavaScript(source, arguments: [:], in: nil, contentWorld: .page)
+    }
+    @MainActor static func waitForDocument(_ name: String, store: DocumentViewerStore, window: NSWindow,
+                                           after previousLoad: Int? = nil) async throws {
+        try await wait(name) {
+            if let previousLoad, store.webViewLoadID <= previousLoad { return false }
+            if store.hasDocument && !store.isLoading && !store.isWebViewLoading { return true }
+            if let content = window.contentView, let current = web(in: content), !current.isLoading {
+                let selected = try? await js(current, """
+                const button = Array.from(document.querySelectorAll('.modal-overlay .dialog-footer button'))
+                    .find(b => b.offsetWidth > 0 && ['대체 글꼴로 보기', 'View with substitute fonts'].includes(b.textContent.trim()));
+                if (!button) return false;
+                button.click(); return true;
+                """)
+                if selected as? Bool == true { print("FONT_CHOICE substitute") }
+            }
+            return false
+        }
     }
     @MainActor static func type(_ web: WKWebView, _ text: String) async throws {
         _ = try await web.callAsyncJavaScript("""
@@ -134,7 +151,7 @@ import WebKit
         defer { close.detach(restorePreviousDelegate: true); window.orderOut(nil) }
         store.loadDocument(from: fixture)
         do {
-            try await wait("fixture ready") { store.hasDocument && !store.isLoading && !store.isWebViewLoading }
+            try await waitForDocument("fixture ready", store: store, window: window)
         } catch {
             print("DIAGNOSTIC loadID=\(store.webViewLoadID) hasDocument=\(store.hasDocument) loading=\(store.isLoading)/\(store.isWebViewLoading) session=\(String(describing: store.editorSession?.snapshot)) failure=\(String(describing: store.webViewFailure))")
             if let live = web(in: window.contentView!) {
@@ -188,9 +205,7 @@ import WebKit
             "repeat save preserves epoch")
         let previousLoad = store.webViewLoadID
         store.loadDocument(from: destination)
-        try await wait("saved document reopened") {
-            store.webViewLoadID > previousLoad && store.hasDocument && !store.isLoading && !store.isWebViewLoading
-        }
+        try await waitForDocument("saved document reopened", store: store, window: window, after: previousLoad)
         try check(web(in: window.contentView!) === current && store.sourceDocument?.url == destination,
             "explicit reopen uses new load in same WebView")
         try verifyFile(destination, format: format, text: marker + " 반복")
@@ -245,7 +260,7 @@ import WebKit
         defer { discardClose.detach(restorePreviousDelegate: true); discardWindow.orderOut(nil) }
         let savedBytes = try Data(contentsOf: destination)
         discardStore.loadDocument(from: destination)
-        try await wait("discard document ready") { discardStore.hasDocument && !discardStore.isLoading && !discardStore.isWebViewLoading }
+        try await waitForDocument("discard document ready", store: discardStore, window: discardWindow)
         try await type(web(in: discardWindow.contentView!)!, " 버릴내용")
         try await wait("discard dirty") { discardStore.hasUnsavedChanges }
         discardClose.attach(window: discardWindow, store: discardStore)
