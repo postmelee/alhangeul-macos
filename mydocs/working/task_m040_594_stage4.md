@@ -119,3 +119,103 @@ XCTest는 위 선택 목록을 `xcrun xctest -XCTest`로 실행한 결과다. �
 실제 OS WebContent process kill은 검증하지 않았다. 이 환경에서 해당 WebView의 프로세스만 안전하게 종료할 공개 소유 식별 경로를 확보하지 못했으며 광범위 kill이나 private API를 사용하지 않았다. 기존 native 종료 delegate 주입 결과와 실제 JS 오류·preflight 결과를 분리한다. 실제 보호 문서 암호 해제, macOS 12·Intel 실행, 원래 사용자 문서의 upstream 편집 버그 수정도 이번 결과로 주장하지 않는다.
 
 지원 upstream 계약 구현·안정 bundle 반영·그 버전에서의 실제 복구 성공 검증이 남는다. pin 변경, 최종 보고·PR 게시·배포·메일 발송·이슈 close는 이번 단계 승인에 포함되지 않는다. 다음 단계는 저장소의 [단계별 승인 규칙](../manual/agent_code_hyperfall_rule_conflict.md)에 따라 별도 지시를 받는다.
+
+
+## 2026-11-05 추가 통합: 실제 command-error-v1
+
+작업지시자가 메일 발송과 실제 API 연동을 승인했고, T7 재연결 뒤 구현·WKWebView 검증을 계속 지시했다. 위 2026-10-21의 API 부재·합성 검증 판정은 당시 기록이다.
+
+### 구현
+
+- `RhwpStudioCommandRecoveryScript`가 공개 capability/getState/isHandledError/inspect와 `rhwp-command-error`를 소비한다. 실제 오류 객체만 전역 fatal 처리를 유예하고 일반 오류는 기존 보호 경로로 전달한다.
+- native가 schema/code/recovery와 다섯 checks를 다시 검증한다. opaque 문서 세션·이벤트 ID와 native load/epoch를 연결한다. legacy DTO의 순번/revision 저장 필드는 실제 계약 경로에서 사용하지 않으며 진단에도 표시하지 않는다.
+- 복구 대기 중 입력과 native 편집·저장·출력을 막고, JS 저장 lock 검증에서도 공개 상태를 직접 확인한다. 같은 오류의 반복 throw는 대기 시간을 연장하지 않는다. 보고 누락·거부는 12초 제한 및 보호 처리 대상이다.
+- 문서 교체 뒤 늦은 보고·타이머를 무시한다. 동일 ID의 다른 내용은 중단한다. opaque ID에는 순서가 없으므로 한 문서에서 검증한 ID 256개를 보존하고 한도를 초과하면 재처리 대신 중단한다.
+- 기존 v0.8.7에는 capability가 없으므로 기존 오류 정책을 유지한다. 실제 지원이 관측되기 전 legacy 예외 정책을 끄지 않는다.
+
+### 검증 출처
+
+upstream checkout `1cb3a6dae1094f6ed552a8fdbffea8b89868d555`에서 locked wrapper의 최적화 web WASM을 새로 빌드했다. WASM SHA-256은 `b0143a2c2ad3397a4285b0d22e0fb8146c626e3b85ba5160fa1041cdc3acef92`다. upstream 추적 소스·lockfile은 변경하지 않았다. native parser/core와 제품 Studio pin은 여전히 v0.8.7이다. 검증 앱에만 후보 Studio와 기존 앱 전용 CSS를 넣었다. 따라서 정식 엔진·Studio 동시 갱신의 전체 수용 결과는 아니다.
+
+환경: macOS 26.5.2 arm64, Xcode 26.6. 명시 산출물은 rhwp의 라우팅된 `output/task594-api/`에 보관했으며 .app은 그 아래 `build.noindex/`에 생성했다. 사용자 설치본과 fixture 원본을 보존하고 실행 소유 앱의 등록을 해제했다.
+
+| 검증 | 결과/증적 |
+| --- | --- |
+| 실제 계약 decoder·기존 상태 모델 XCTest | 12 PASS, 0 failures. `xctest-final.log` |
+| 실제 계약·JS 설치·보고 누락·중복 오류 timeout·이전 문서 timer·미준비 native 보고 차단 | 33 PASS. `contract-smoke-final.log` |
+| fresh WASM 기본 옵션 WKWebView | 39 PASS인 회차 확인. `upstream-final-recheck.log`. 별도 초기화 실패 회차가 있으므로 항상 성공이라고 판단하지 않음 |
+| 공식 로컬 글꼴 옵션 WKWebView | 39 PASS. 실제 throw와 Promise rejection 포함. `upstream-local-fonts-integration.log`. 초기화 약 1.05초·1.68초 |
+| pinned v0.8.7 실제 JS/Promise 오류·UI·재시작·독립 창 | 재실행 40 PASS. `legacy-integration-recheck.log` |
+| 계층·Python 구문·diff 공백 | PASS |
+
+실제 복구 harness는 공개 확장 명령으로 실제 InputHandler의 snapshot 작업을 실패시킨다. payload 성공 값을 만들어 보내지 않는다. 내용·선택·dirty·WebView 유지, 실제 undo/redo, 후속 HWP/HWPX 저장 및 pinned native parser 재열기, 지연 복구 중 저장 거부, 실제 문서 교체 뒤 이전 보고 무시, RuntimeError 주입의 unknown 중단을 확인한다. 최종 HWPX 입력은 실제 ZIP/HWPX fixture다. 실제 엔진 panic이나 원 제보 문서를 재현했다는 주장은 하지 않는다.
+
+WKWebView 실행 후 native 미준비 상태의 복구 완료 보고가 무기한 대기를 남기지 않도록 `COMMAND_REPORT_NOT_READY`로 중단하는 분기를 추가했다. 이 최종 분기는 독립 계약 검사 33개에 포함해 검증했으며, 이후 WKWebView 전체 검사를 다시 실행하지는 않았다.
+
+### 발견과 한계
+
+- 최초 후보 검사에는 앱 필수 CSS가 빠져 있었다. runner가 기존 앱 CSS를 후보 앱에 함께 복사하도록 보완했다.
+- 기존 node_modules에 SDK가 누락돼 최초 Vite 빌드가 실패했다. 고정 lockfile의 npm ci 후 빌드가 통과했다. 출처 미확인 기존 WASM 실행은 최종 증거와 구분했다.
+- XCTest 독립 runner의 SDK Swift 모듈 경로 누락을 보완한 뒤 실제 12개 검사가 통과했다.
+- 기본 옵션 후보와 구버전에서 문서 준비 시간 초과 회차가 있었다. 후보 실패에서는 navigation 뒤 bridge가 설치됐지만 API getState가 null이고 native session도 없었다. 초기화 대기를 60초로 분리해도 실패한 회차가 있어 단순 대기 시간 문제로 종결하지 않는다. 동일 WASM에 공식 `RHWP_DISABLE_EXTERNAL_WEBFONTS=1` 옵션을 적용한 대조 실행은 초기화 약 1.05초·1.68초와 39개 검사를 통과했다. 외부 폰트 대기의 영향을 의심할 근거이지만 원인 확정이나 기본 옵션 수정 완료를 뜻하지 않는다.
+- PDF·인쇄·공유에는 공통 gate와 lock 검증을 적용했지만 이번 추가 실행에서 실제 출력 장치/공유 UI까지 수용하지 않았다. 기존 출력 검증과 신규 복구 중 저장 검증을 구분한다.
+- 정식 지원 release pin·bundled Studio 갱신, 실제 제보 파일, 최소 macOS 12·Intel, 실제 OS WebContent 종료는 남은 범위다. 외부 폰트 기본 옵션의 초기화 실패도 출시 전 재확인이 필요하다.
+
+#594는 진행중을 유지한다. 실제 API 소비 구현·검증과 정식 번들 반영·배포는 별도다. PR 게시·release·이슈 종료는 수행하지 않았다.
+
+## 2026-11-05 후속: 기본 웹폰트 초기화 대기 제한
+
+### 원인과 수정 범위
+
+작업지시자가 기본 옵션의 초기화 중단 해결과 마지막 보호 분기의 WKWebView 재검증을 승인했다. `main.ts`의 초기화는 `await loadWebFonts()` 이후에 WASM/InputHandler를 만든다. 기존 `font-loader.ts`는 `FontFace.load()`를 제한 없이 기다렸다. 함초롬 CDN face 응답을 미정산 상태로 주입하면 60초 뒤에도 `웹폰트 로딩 중...`, 공개 API state=null, native session=nil로 남았다. 로컬 Old Hangul face는 정상 완료했다. 이전 간헐 실패와 같은 중단 경로를 재현했지만, 당시 CDN/네트워크 자체가 왜 응답하지 않았는지까지 확정한 것은 아니다.
+
+`scripts/studio-font-load-adapter.mjs`는 후보 빌드 시 공통 로더에 5초 제한을 적용한다. 실패 파일은 현재 페이지의 요청 후보 및 CSS 등록에서 제외한다. 제한 후 늦게 성공한 face는 `document.fonts`에 추가하지 않아 이미 진행 중인 문서의 글꼴을 뒤늦게 바꾸지 않는다. 정상 응답과 외부 글꼴 비활성 옵션은 유지한다. 소스 구조가 달라지면 변환을 중단한다.
+
+이는 #594 후보 빌드용 보완이며 정식 `build-rhwp-studio.mjs`, 제품 자산·pin, upstream checkout의 추적 파일은 변경하지 않았다. upstream 공통 로더에 반영하거나 정식 번들 빌드 절차에 이 변환을 포함하는 작업이 정식 버전 반영 시 필요하다. 현재 결과를 upstream merge나 설치 앱 수정 완료로 해석하지 않는다. 글꼴 실패 시 fallback 표시가 가능해진 것이며 원래 글꼴과의 조판 동일성을 보증하지 않는다.
+
+### 재현 절차
+
+Node 24 환경에서 다음 순서로 실행한다. 산출물은 연결된 T7의 기존 `output/task594-api/`를 사용한다.
+
+```bash
+node scripts/ci/test-studio-font-load-deadline.mjs /Users/melee/Documents/projects/forks/rhwp
+node scripts/studio-font-load-adapter.mjs \
+  --upstream-dir /Users/melee/Documents/projects/forks/rhwp \
+  --out-dir /Volumes/T7/DeveloperArtifacts/rhwp/verification/main/task594-api/studio-font-deadline
+python3 scripts/smoke-studio-document-lifecycle.py \
+  --fixture samples/hwpx/ref/ref_text.hwpx --upstream-recovery \
+  --studio-resources /Volumes/T7/DeveloperArtifacts/rhwp/verification/main/task594-api/studio-font-deadline \
+  --output-root /Volumes/T7/DeveloperArtifacts/rhwp/verification/main/task594-api/build.noindex
+# 동일 명령에 --stall-web-fonts를 더하면 모든 외부 URL FontFace 응답을 지연시킨다.
+```
+
+`--stall-web-fonts`는 검증 앱 HTML에만 테스트 스크립트를 넣는다. 실제 네트워크 전체를 끄거나 제품 옵션을 바꾸지 않는다. 마지막 보호 분기는 HWPX 회차에서 실제 page의 busy 상태를 설정한 뒤 upstream의 실제 복구 보고를 전달해 `COMMAND_REPORT_NOT_READY` fatal 진입을 확인한다. 이는 미준비 상태 주입 검사이며 자연 발생한 편집 오류라고 주장하지 않는다. HWP 회차는 기존 unknown/trap 분류 검사를 유지한다.
+
+### 결과
+
+- 로더 회귀: 정상·실패·무응답, 늦은 성공 무시, CSS 공급 제거, 타이머 정리, 외부 비활성 옵션, 소스 변경 감지 통과 (`font-loader-contract-final.log`).
+- 수정 전 지연: 60초 초기화 실패를 기대대로 재현 (`font-stalled-before.log`).
+- 기본 옵션 최종 소스: 40개 통과, 초기화 5.20초·1.15초 (`font-default-final.log`). 마지막 native 보호 분기도 실제 WK transport로 통과했다.
+- 함초롬 지연 대조: 40개 통과, 초기화 7.53초·7.34초 (`font-stalled-after.log`).
+- 전체 외부 URL 지연 최종 재현 옵션: 44개 통과, 초기화 7.22초·7.15초 (`font-stalled-final.log`). 지연 face가 CSS에서 제외되고 15초 이내 준비되는지, 마지막 native 보호 분기를 함께 확인했다.
+- 최종 두 실행 모두 입력 fixture 전후 SHA 일치 및 소유 앱 등록 해제 성공. Python 구문·공통 계층·diff 공백 검사 통과.
+
+기준 upstream SHA와 WASM SHA는 직전 추가 통합과 동일하다. 변환 전 로더 SHA-256은 `f8c64ea2ec77217e2449cfbe2a132a641bd2accd3f1cf5674c7a282682c4ea5e`, 변환 후는 `ffb631ef96c6a18a1afbb22d11c05b94c76118cba43d30d7a550e18d71068f39`이며 후보 번들의 `alhangeul-font-load-deadline.json`에 기록했다. 최소 OS/Intel, 실제 사용자 문서, 실제 OS process kill 및 정식 bundle/core 동시 갱신 수용은 여전히 별도다.
+
+### upstream 후속 작업 분리 — 2026-11-05
+
+사용자 지시로 웹폰트 초기화 결함을 별도 [rhwp #8614](https://github.com/edwardkim/rhwp/issues/8614)에 등록했다. 새 전담 채팅 `01a1a906-ced4-7fe3-af4f-45ced7698803`에서 기존 `codex/studio-web-font-deadline` 브랜치와 계획 커밋 `9a54d8ac280645dc83bd984dd612ef4a999ae824`, 미커밋 구현·테스트를 인계받아 검증을 시작했다.
+
+기존 #8104 채팅은 추가 작업 중단 및 idle 상태를 확인했다. 작성된 변경은 삭제·되돌리지 않았으며 #8104의 완료 상태도 유지한다. #8614의 수정·검증은 새 채팅 한 곳에서 진행하고, 이 기록은 upstream 병합 완료를 의미하지 않는다. 정식 번들 갱신 시 #8104와 #8614의 포함 commit을 각각 확인한다.
+
+### 2026-11-08 공식 v0.9.0 반영 및 #600 인계
+
+[공식 릴리스 v0.9.0](https://github.com/edwardkim/rhwp/releases/tag/v0.9.0)의 태그 커밋은 `c9095c5f67632e6721e800ccc7fb43ea49d26682`이다. 이 태그의 조상에 #8104 (`9418ed0c7c`), #8614 (`ece9c3383b`), HFT PR #8397 (`99a176b7cb`)이 모두 있다. 태그의 Studio 소스에서 공개 복구 API와 AbortController를 사용하는 5초 웹폰트 제한을 확인했다. 태그 소스를 추출해 실제 복구 계약 18개 및 글꼴 대기 제한·오프라인 회귀 16개를 실행해 모두 통과했다.
+
+공식 core·WASM·Studio·native matcher 동기화와 #598의 글꼴 수용은 [알한글 #600](https://github.com/postmelee/alhangeul-macos/issues/600)이 담당한다. #594는 #600이 만든 번들과 native core를 함께 사용하는 통합 후보에서 복구를 검증한다. 배포 후보 커밋과 실행 증거를 두 작업에 동일하게 기록한 뒤 알한글 릴리스 운영으로 인계한다.
+
+#594 선행 실행은 SHA-256을 검증한 공식 Chrome ZIP에서 WASM 및 바인딩을 추출하고 같은 태그의 웹 Studio를 기본 옵션으로 빌드했다. WASM SHA-256은 `33bc8f9d3a3fe892ed3b73e3102fb6cadc37f7a5b640f4af677c357df253cbbc`이다. 이 조합에서 native 파서는 기존 v0.8.7이며 제품 동기화용 어댑터는 #600 후보에서 검증한다. 증적은 T7의 기존 `output/task594-api/v090/`에 보관했다.
+
+첫 실행에서 글꼴 선택 대화상자 입력을 기다리다 60초 제한에 도달했다. 공개 API는 ready, native 문서 snapshot은 ready=false였고 화면에 ‘대체 글꼴로 보기’가 표시됐다. 검사에서 이 선택을 수행하고, v0.9.0이 실제 사용하는 CDN fetch 지연/abort 경로를 확인하도록 무응답 검사를 조정했다.
+
+재실행 결과 정상 40개(`wk-choice-normal.log`), CDN fetch 무응답 44개(`wk-choice-stalled.log`)가 통과했다. 무응답 회차의 요청 취소와 준비 완료, 두 실행의 HWP/HWPX 저장·재열기 및 `COMMAND_REPORT_NOT_READY` 보호 분기를 확인했다. 입력 해시와 실행 앱 등록 해제도 두 회차 모두 확인했다. #600 공식 제품 후보가 나오면 동일 검사를 병합된 앱 소스·번들·native core로 재실행한다.

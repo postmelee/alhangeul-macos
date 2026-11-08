@@ -10,6 +10,12 @@
 - 로컬 upstream 기본 checkout HEAD: `fe9ffd27e91d8d260fbccde5ff68aa08aadf94ca`. 아래 공개 API 판정은 이 HEAD가 아닌 위 두 commit의 `git show`로 확인했다.
 - 상태: Stage 1 조사·설계 결과. HostApp 내부 계약과 다음 단계 범위 승인 대상이며, 새 upstream 공개 API가 합의·배포되었다는 뜻이 아니다.
 
+## 2026-11-05 공개 계약 확인
+
+아래 API 부재 판정은 Stage 1 당시 두 SHA의 역사적 결과다. 이후 PR #8195(`9418ed0c7cf289c5c4ac2b3bb8cdc18a1b637a9a`)에서 `command-error-v1`이 병합됐다. 현재 v0.8.7 번들은 여전히 미지원이다. 2026-11-05 호스트 adapter를 구현했으며 실제 producer 검증과 정식 번들 반영을 구분한다.
+
+실제 계약은 schemaVersion, capability, opaque eventId/documentSessionId, operation/code, recovery(succeeded/failed/unknown), checks(content/editing/history/dirty/ready)를 제공한다. 아래 잠정 eventSequence/changeSeq는 제공하지 않으므로 ID를 분해하거나 현재 revision을 대입해 보증을 꾸미지 않는다. 구현계획의 2026-11-05 연동 재개 항목을 따른다.
+
 ## 확인한 공개 API와 부재 범위
 
 | 항목 | pinned / 조사한 upstream | HostApp 적용 판단 |

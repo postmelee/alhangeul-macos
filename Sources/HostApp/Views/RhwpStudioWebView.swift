@@ -56,7 +56,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
         onDocumentSaved: @escaping @MainActor (RhwpStudioSavedDocument) -> Void = { _ in },
         onCommandFailure: @escaping @MainActor (RhwpStudioCommandFailure) -> Void = { _ in },
         onEditorImage: @escaping @MainActor (NSImage?) -> Void = { _ in },
-        commandFailureSupport: RhwpStudioCommandFailureSupport = .unavailable
+        commandFailureSupport: RhwpStudioCommandFailureSupport = .upstreamVersion1
     ) {
         self.document = document
         self.sourceDocument = sourceDocument
@@ -239,7 +239,7 @@ extension RhwpStudioWebView {
         private var hasCompletedCurrentLoad = false
         var onOpenFontSettings: () -> Bool = { AppSettingsNavigation.shared.openFonts() }
 
-        init(commandFailureSupport: RhwpStudioCommandFailureSupport = .unavailable) {
+        init(commandFailureSupport: RhwpStudioCommandFailureSupport = .upstreamVersion1) {
             commandFailures = .init(support: commandFailureSupport)
             fontMessageHandler = StudioFontMessageHandler()
             super.init()
@@ -281,7 +281,7 @@ extension RhwpStudioWebView {
                 guard let self, let webView else {
                     return false
                 }
-                guard !self.commandFailures.isSuspended else { return true }
+                guard !self.commandFailures.blocksCommands else { return true }
                 self.runNativeCommand(command, in: webView)
                 return true
             }
@@ -294,7 +294,7 @@ extension RhwpStudioWebView {
             }
             webView.refreshSessionHandler = { [weak self, weak webView] completion in
                 guard let self, let webView else { return false }
-                guard !self.commandFailures.isSuspended else { completion(nil); return true }
+                guard !self.commandFailures.blocksCommands else { completion(nil); return true }
                 Task { @MainActor in
                     do { completion(try await self.readEditorSession(in:webView)) }
                     catch { completion(nil) }
@@ -379,7 +379,7 @@ extension RhwpStudioWebView {
         private func installUserScripts(in webView: WKWebView, loadID: Int) {
             let controller = webView.configuration.userContentController
             controller.removeAllUserScripts()
-            let context = "window.__alhangeulEditorLoad = {loadID: \(loadID), token: \(Self.javaScriptStringLiteral(editorLoadToken))};"
+            let context = "window.__alhangeulEditorLoad = {loadID: \(loadID), token: \(Self.javaScriptStringLiteral(editorLoadToken)), commandRecovery: \(commandFailures.support == .upstreamVersion1 ? "true" : "false")};"
             controller.addUserScript(WKUserScript(
                 source: context + RhwpStudioEditorSessionScript.provenanceSource + RhwpStudioSaveBridgeScript.guardSource + RhwpStudioHostBridgeScript.runtimeErrorSource,
                 injectionTime: .atDocumentStart, forMainFrameOnly: true
@@ -622,6 +622,17 @@ extension RhwpStudioWebView {
                     mainFrame: message.frameInfo.isMainFrame, sameWebView: message.webView === commandWebView,
                     scheme: origin.protocol, host: origin.host, port: origin.port,
                     frameURL: message.frameInfo.request.url))
+            case "command-recovery-state", "upstream-command-failure":
+                let origin = message.frameInfo.securityOrigin
+                let source = RhwpStudioCommandFailureSource(
+                    mainFrame: message.frameInfo.isMainFrame, sameWebView: message.webView === commandWebView,
+                    scheme: origin.protocol, host: origin.host, port: origin.port,
+                    frameURL: message.frameInfo.request.url)
+                switch commandFailures.receiveUpstream(body, source: source) {
+                case .ignored: break
+                case .recovered(let failure): onCommandFailure(failure)
+                case .fatal(let code): reportLatchedCommandFailure(code)
+                }
             case "runtime-error":
                 handleRuntimeError(body)
             case "document-load-error":
@@ -820,7 +831,7 @@ extension RhwpStudioWebView {
         }
 
         private func handleDroppedFileURL(_ fileURL: URL) {
-            guard !commandFailures.isSuspended else { return }
+            guard !commandFailures.blocksCommands else { return }
             recentNativeDrop = NativeDropMarker(
                 fileName: Self.normalizedFilename(fileURL.lastPathComponent),
                 handledAt: Date()
@@ -961,7 +972,7 @@ extension RhwpStudioWebView {
                 && payload.data.count <= 32 * 1024 * 1024
                 && RhwpDocumentProtection.classify(data: payload.data) == .plain
                 && ((try? RhwpDocument(data: payload.data, filename: url.lastPathComponent).pageCount) ?? 0) > 0
-            guard !commandFailures.isSuspended else { return }
+            guard !commandFailures.blocksCommands else { return }
             onDocumentSaved(.init(url:url, data:payload.data, sourceProtection:protection, session:bound,
                 format:payload.format, recoveryEligible:eligible, savedAt:savedAt))
         }
@@ -984,7 +995,7 @@ extension RhwpStudioWebView {
         }
 
         private func requestShare(in webView: WKWebView) {
-            guard !commandFailures.isSuspended, shareID == nil, activeSaveID == nil,
+            guard !commandFailures.blocksCommands, shareID == nil, activeSaveID == nil,
                   htmlExportID == nil, !isPDFPreparing, !isPrintPreparing else { return }
             let id = "share-" + UUID().uuidString, token = editorLoadToken
             shareID = id
@@ -1094,7 +1105,7 @@ extension RhwpStudioWebView {
         }
 
         private func runNativeCommand(_ command: String, in webView: WKWebView) {
-            guard !commandFailures.isSuspended else { return }
+            guard !commandFailures.blocksCommands else { return }
             if let format = DocumentHTMLExportFormat.allCases.first(where: { $0.command == command }) {
                 requestHTMLExport(format:format, in:webView)
                 return
@@ -1159,7 +1170,7 @@ extension RhwpStudioWebView {
             forcePanel: Bool,
             completion: ((RhwpStudioDocumentSaveResult) -> Void)?
         ) {
-            guard !commandFailures.isSuspended, shareID == nil else {
+            guard !commandFailures.blocksCommands, shareID == nil else {
                 completion?(.failed("편집이 중단되어 현재 문서를 저장할 수 없습니다.")); return
             }
             guard activeSaveID == nil, htmlExportID == nil, pdfExportState.isIdle, !isPDFPreparing, !isPrintPreparing else {
@@ -1324,7 +1335,7 @@ extension RhwpStudioWebView {
 
         private func requireSave(_ id: String, token: String, epoch: Int) throws {
             try Task.checkCancellation()
-            guard !commandFailures.isSuspended, activeSaveID == id, editorLoadToken == token,
+            guard !commandFailures.blocksCommands, activeSaveID == id, editorLoadToken == token,
                   editorSession?.snapshot.documentEpoch == epoch,
                   editorSession?.snapshot.ready == true
             else { throw DocumentSaveProtectionPolicyError.documentChanged }
@@ -1352,7 +1363,7 @@ extension RhwpStudioWebView {
         }
 
         private func readEditorSession(in webView: WKWebView) async throws -> RhwpStudioEditorSession {
-            guard !commandFailures.isSuspended else { throw DocumentSaveProtectionPolicyError.documentChanged }
+            guard !commandFailures.blocksCommands else { throw DocumentSaveProtectionPolicyError.documentChanged }
             let token = editorLoadToken
             let body = try await bridgeObject("return await window.__alhangeulHostBridgeReadSession();", in:webView)
             guard token == editorLoadToken, body["token"] as? String == token else {
@@ -1391,7 +1402,7 @@ extension RhwpStudioWebView {
         }
 
         private func requestHTMLExport(format: DocumentHTMLExportFormat, in webView: WKWebView) {
-            guard !commandFailures.isSuspended, shareID == nil, htmlExportID == nil, activeSaveID == nil, pdfExportState.isIdle, !isPDFPreparing, !isPrintPreparing else {
+            guard !commandFailures.blocksCommands, shareID == nil, htmlExportID == nil, activeSaveID == nil, pdfExportState.isIdle, !isPDFPreparing, !isPrintPreparing else {
                 onError("저장 또는 내보내기가 이미 진행 중입니다.")
                 return
             }
@@ -1455,7 +1466,7 @@ extension RhwpStudioWebView {
         }
 
         private func requireHTMLExport(_ id: String, token: String, epoch: Int) throws {
-            guard !commandFailures.isSuspended, htmlExportID == id, editorLoadToken == token,
+            guard !commandFailures.blocksCommands, htmlExportID == id, editorLoadToken == token,
                   editorSession?.snapshot.documentEpoch == epoch, editorSession?.snapshot.ready == true
             else { throw DocumentSaveProtectionPolicyError.documentChanged }
         }
@@ -1466,7 +1477,7 @@ extension RhwpStudioWebView {
         }
 
         private func outputScope(id: String, token: String, body: [String:Any]) throws -> OutputScope {
-            guard !commandFailures.isSuspended, body["requestID"] as? String == id, body["token"] as? String == token,
+            guard !commandFailures.blocksCommands, body["requestID"] as? String == id, body["token"] as? String == token,
                   editorLoadToken == token, let state = body["snapshot"] as? [String:Any],
                   let epoch = intValue(state["documentEpoch"]), let revision = intValue(state["changeSeq"]),
                   editorSession?.snapshot.documentEpoch == epoch else { throw RhwpStudioOutputFontError.stale }
@@ -1475,7 +1486,7 @@ extension RhwpStudioWebView {
         }
 
         private func outputIsCurrent(_ scope: OutputScope) -> Bool {
-            !commandFailures.isSuspended && editorLoadToken == scope.token && activeLoadID == scope.loadID
+            !commandFailures.blocksCommands && editorLoadToken == scope.token && activeLoadID == scope.loadID
                 && editorSession?.snapshot.documentEpoch == scope.epoch
                 && editorSession?.snapshot.ready == true && (currentDocument?.revision ?? 0) == scope.sourceRevision
         }
@@ -1521,7 +1532,7 @@ extension RhwpStudioWebView {
         }
 
         private func requestPrint(in webView: WKWebView) {
-            guard !commandFailures.isSuspended, shareID == nil, !isPrintPreparing, !isPDFPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
+            guard !commandFailures.blocksCommands, shareID == nil, !isPrintPreparing, !isPDFPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
                 onError("저장 또는 출력이 이미 진행 중입니다."); return
             }
             isPrintPreparing = true; isPrintSealed = false
@@ -1580,7 +1591,7 @@ extension RhwpStudioWebView {
         }
 
         private func requestPDFExport(in webView: WKWebView, suggestedFilename: String? = nil) {
-            guard !commandFailures.isSuspended, shareID == nil, !isPDFPreparing, !isPrintPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
+            guard !commandFailures.blocksCommands, shareID == nil, !isPDFPreparing, !isPrintPreparing, pdfExportState.isIdle, activeSaveID == nil, htmlExportID == nil else {
                 onError("저장 또는 PDF 내보내기가 이미 진행 중입니다.")
                 return
             }

@@ -18,6 +18,21 @@
 - 현재 상태: [Stage 4](../working/task_m040_594_stage4.md) 호스트 통합·회귀 검증 완료. XCTest 74, 실제 오류 40+40, fatal 85, 합성 계약 55, 생명주기 43+43 PASS. 공개 upstream producer/adapter 미지원으로 실제 복구 성공 전체 수용은 미완료다.
 - 구현 단계: 4단계. 단계별 검증·보고·승인 후 다음 단계에 진입한다.
 
+## 2026-11-05 실제 공개 API 연동 재개
+
+작업지시자의 “위 초안대로 답장 메일을 보내고, #594의 실제 복구 API 연동 작업을 진행해줘”를 실제 연동 작업 승인으로 기록한다. 기존 `local/task594`와 Stage 4 결과를 보존한다. 아래는 기존 미완료 producer 연동의 구체화이며 배포 승인이 아니다.
+
+- 기준 계약: upstream PR #8195, merge `9418ed0c7cf289c5c4ac2b3bb8cdc18a1b637a9a`, `command-error-v1`.
+- same-page `window.rhwpCommandErrors`의 capability/getState/isHandledError/inspect와 `rhwp-command-error`를 소비한다.
+- 기존 잠정 DTO의 eventSequence/changeSeq를 upstream 사실로 만들어 채우지 않는다. opaque eventId와 documentSessionId 기반으로 수신 모델을 정합화하고 native load token/loadID 및 문서 전환에 바인딩한다.
+- COMMAND_REJECTED+succeeded는 unchanged, COMMAND_ROLLED_BACK+succeeded는 restored로 해석하되 다섯 checks가 모두 참이어야 한다. failed/unknown은 중단 상태를 유지한다.
+- 실제 소유 오류만 전역 fatal 처리를 유예한다. 보고 누락·시간 초과에는 보호 상태로 전환하고 일반 오류·프로세스 종료 보호는 유지한다.
+- recovering/blocked 상태를 native 편집·저장·PDF·인쇄·공유·내보내기 진입 및 결과 게시 검사와 연결한다. 이벤트 수신만으로 대기 중 출력 차단을 보장하지 않는다.
+- 실제 producer를 사용하는 WKWebView에서 복구 후 편집·undo/redo·저장·재열기, stale/duplicate, 문서 교체, 보고 시간 초과와 출력 경합을 검증한다. 합성 producer 검사는 별도 결과로 유지한다.
+- 정식 v0.8.7 pin은 임의로 교체하지 않는다. 검증 후보의 정확한 SHA·번들 출처와 정식 릴리스 반영은 구분한다.
+
+현재 진행: 2026-11-05 T7 재연결 후 실제 공개 API adapter·native 검증·복구 대기 출력 차단을 구현했다. 실제 producer 검증 결과는 Stage 4 보고서의 추가 통합 절에 기록한다. 정식 v0.8.7 pin·설치본·배포는 변경하지 않았다.
+
 ## 현재 구현과 결정할 경계
 
 | 현재 구현 | 이번 변경의 판단 기준 |
@@ -226,3 +241,7 @@ Frameworks 산출물이 없으면 `build_run_guide.md`의 pinned core 준비 절
 1. 위 4단계 구현계획을 승인하고 Stage 1 오류 계약·복구본 경계 조사/문서화에 진입한다.
 2. Stage 1 결과로 아직 없는 upstream API·보호 문서·복구 bytes 공급 한계를 명시하며, 후속 단계 전에 실제 지원 범위를 다시 확인한다.
 3. 단계별 보고와 승인을 유지하고, 원격 게시·배포·메일 발송은 별도 지시 범위로 둔다.
+
+## 2026-11-05 초기화 중단 후속 승인
+
+기본 글꼴 옵션의 초기화 중단 원인 조사·수정 및 마지막 native 보호 분기를 포함한 WKWebView 재검증을 승인받았다. 외부 글꼴 요청과 초기화 단계의 대기를 계측하고, 정상·지연/실패 조건을 비교한다. #594 범위에서 수정과 재현 검사를 진행하며 정식 pin 변경·배포는 별개다.

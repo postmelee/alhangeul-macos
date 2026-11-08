@@ -1,10 +1,11 @@
 import CoreFoundation
 import Foundation
 
-/// HostApp 내부 계약이다. 지원 upstream producer/adapter가 제공되기 전 제품 기본값은 미지원이다.
+/// 합성 내부 계약과 실제 upstream 공개 계약을 분리한다. 구버전 번들은 capability 부재로 미지원이다.
 enum RhwpStudioCommandFailureSupport {
     case unavailable
     case version1
+    case upstreamVersion1
 }
 
 struct RhwpStudioCommandFailureSource {
@@ -29,6 +30,7 @@ struct RhwpStudioCommandFailure: Equatable {
         var allPassed: Bool { content && cursorSelection && history && dirtyState && readyForNextCommand }
     }
 
+    var documentSessionID: String? = nil
     let eventID: String
     let eventSequence: Int
     let code: String
@@ -43,7 +45,10 @@ struct RhwpStudioCommandFailure: Equatable {
 
     /// 외부 stack/message/diagnostic은 보관하지 않는다. 진단에는 검증한 식별자만 사용한다.
     var diagnostic: String {
-        "contractVersion=1\ncode=\(code)\noperation=\(operation)\nrecovery=\(recovery.rawValue)\nevent=\(eventID)\nsequence=\(eventSequence)\nchangeSeq=\(changeSeq)\nchecks.content=\(checks.content)\nchecks.cursorSelection=\(checks.cursorSelection)\nchecks.history=\(checks.history)\nchecks.dirtyState=\(checks.dirtyState)\nchecks.readyForNextCommand=\(checks.readyForNextCommand)"
+        if let documentSessionID {
+            return "capability=command-error-v1\ndocumentSession=\(documentSessionID)\ncode=\(code)\noperation=\(operation)\nrecovery=\(recovery.rawValue)\nevent=\(eventID)\nchecks=\(checks)"
+        }
+        return "contractVersion=1\ncode=\(code)\noperation=\(operation)\nrecovery=\(recovery.rawValue)\nevent=\(eventID)\nsequence=\(eventSequence)\nchangeSeq=\(changeSeq)\nchecks.content=\(checks.content)\nchecks.cursorSelection=\(checks.cursorSelection)\nchecks.history=\(checks.history)\nchecks.dirtyState=\(checks.dirtyState)\nchecks.readyForNextCommand=\(checks.readyForNextCommand)"
     }
 
     static func parse(_ body: [String: Any]) -> Self? {
@@ -66,6 +71,35 @@ struct RhwpStudioCommandFailure: Equatable {
         return Self(eventID: eventID, eventSequence: sequence, code: code, operation: operation,
                     changeSeq: changeSeq, recovery: recovery,
                     checks: .init(content: content, cursorSelection: cursor, history: history,
+                                  dirtyState: dirty, readyForNextCommand: ready))
+    }
+
+    /// 실제 공개 계약. ID의 내부 형식을 해석하거나 revision을 만들어 넣지 않는다.
+    static func parseUpstream(_ body: [String: Any]) -> Self? {
+        guard integer(body["schemaVersion"]) == 1,
+              body["capability"] as? String == "command-error-v1",
+              let event = identifier(body["eventId"]),
+              let session = identifier(body["documentSessionId"]),
+              let operation = identifier(body["operation"]),
+              let code = body["code"] as? String,
+              let result = body["recovery"] as? String,
+              let checks = body["checks"] as? [String: Any],
+              let content = boolean(checks["content"]), let editing = boolean(checks["editing"]),
+              let history = boolean(checks["history"]), let dirty = boolean(checks["dirty"]),
+              let ready = boolean(checks["ready"]) else { return nil }
+        let recovery: Recovery
+        switch (code, result) {
+        case ("COMMAND_REJECTED", "succeeded"): recovery = .unchanged
+        case ("COMMAND_ROLLED_BACK", "succeeded"): recovery = .restored
+        case ("ROLLBACK_FAILED", "failed"): recovery = .failed
+        case ("INTEGRITY_UNKNOWN", "unknown"): recovery = .unknown
+        default: return nil
+        }
+        if result == "succeeded" && !(content && editing && history && dirty && ready) { return nil }
+        // 0은 legacy 전용 저장 필드의 미사용 값이며 upstream 순서/revision으로 소비하지 않는다.
+        return Self(documentSessionID: session, eventID: event, eventSequence: 0,
+                    code: code, operation: operation, changeSeq: 0, recovery: recovery,
+                    checks: .init(content: content, cursorSelection: editing, history: history,
                                   dirtyState: dirty, readyForNextCommand: ready))
     }
 
@@ -104,9 +138,12 @@ struct RhwpStudioCommandFailureState {
     private var snapshot: RhwpStudioEditorSnapshot?
     private var recent: [RhwpStudioCommandFailure] = []
     private var lastSequence = 0
+    private(set) var isRecovering = false
+    var blocksCommands: Bool { isSuspended || isRecovering }
+    private var upstreamSession: String?
     private(set) var isSuspended = false
     private(set) var fatalDiagnostic: String?
-    var usesStructuredContract: Bool { support == .version1 }
+    var usesStructuredContract: Bool { support == .version1 || (support == .upstreamVersion1 && upstreamSession != nil) }
     var retainedEventCount: Int { recent.count }
 
     init(support: RhwpStudioCommandFailureSupport = .unavailable) { self.support = support }
@@ -114,6 +151,7 @@ struct RhwpStudioCommandFailureState {
     mutating func beginLoad(token: String, loadID: Int) {
         self.token = token; self.loadID = loadID; snapshot = nil
         recent.removeAll(); lastSequence = 0; isSuspended = false; fatalDiagnostic = nil
+        upstreamSession = nil; isRecovering = false
     }
 
     mutating func updateSession(_ value: RhwpStudioEditorSnapshot) {
@@ -122,15 +160,50 @@ struct RhwpStudioCommandFailureState {
             guard value.documentEpoch >= previous.documentEpoch,
                   value.sequence > previous.sequence,
                   value.documentEpoch != previous.documentEpoch || value.changeSeq >= previous.changeSeq else { return }
-            if value.documentEpoch != previous.documentEpoch { recent.removeAll(); lastSequence = 0 }
+            if value.documentEpoch != previous.documentEpoch {
+                recent.removeAll(); lastSequence = 0; upstreamSession = nil; isRecovering = false
+            }
         }
         snapshot = value
+    }
+
+    mutating func receiveUpstream(_ body: [String: Any], source: RhwpStudioCommandFailureSource) -> Decision {
+        guard support == .upstreamVersion1, source.isTrusted, !isSuspended,
+              let token, body["loadToken"] as? String == token,
+              RhwpStudioCommandFailure.integer(body["loadID"]) == loadID,
+              let snapshot,
+              RhwpStudioCommandFailure.integer(body["documentEpoch"]) == snapshot.documentEpoch,
+              let session = body["documentSessionId"] as? String, !session.isEmpty, session.utf8.count <= 128
+        else { return .ignored }
+        if body["type"] as? String == "command-recovery-state" {
+            if upstreamSession != session { upstreamSession = session; recent.removeAll(); isRecovering = false }
+            switch body["status"] as? String {
+            case "recovering": isRecovering = true
+            case "ready": break // 완료 보고만 pending을 해제한다.
+            case "blocked": return reject("INTEGRITY_UNKNOWN")
+            default: return reject("INVALID_COMMAND_STATE")
+            }
+            return .ignored
+        }
+        guard session == upstreamSession else { return .ignored }
+        guard snapshot.ready else { return reject("COMMAND_REPORT_NOT_READY") }
+        guard let payload = body["payload"] as? [String: Any],
+              let failure = RhwpStudioCommandFailure.parseUpstream(payload),
+              failure.documentSessionID == session else { return reject("INVALID_COMMAND_FAILURE") }
+        if let old = recent.first(where: { $0.eventID == failure.eventID }) {
+            return old == failure ? .ignored : reject("CONFLICTING_COMMAND_FAILURE")
+        }
+        guard failure.isRecovered else { return reject(failure.code, diagnostic: failure.diagnostic) }
+        // opaque ID에는 순서가 없다. 보관 한도를 넘으면 성공 재처리를 허용하지 않는다.
+        guard recent.count < 256 else { return reject("COMMAND_EVENT_LIMIT") }
+        recent.append(failure); isRecovering = false
+        return .recovered(failure)
     }
 
     mutating func suspend() { isSuspended = true }
 
     mutating func receive(_ body: [String: Any], source: RhwpStudioCommandFailureSource) -> Decision {
-        guard usesStructuredContract, source.isTrusted, !isSuspended,
+        guard support == .version1, source.isTrusted, !isSuspended,
               let token, body["loadToken"] as? String == token,
               RhwpStudioCommandFailure.integer(body["loadID"]) == loadID,
               let snapshot, snapshot.ready,

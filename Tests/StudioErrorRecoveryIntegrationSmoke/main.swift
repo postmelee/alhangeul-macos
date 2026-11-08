@@ -25,7 +25,12 @@ import WebKit
         try await web.callAsyncJavaScript(source, arguments: args, in: nil, contentWorld: .page)
     }
     @MainActor static func ready(_ store: DocumentViewerStore) async throws {
-        try await wait("ready") { store.canRunWebViewCommands && store.editorSession?.snapshot.ready == true }
+        do {
+            try await wait("ready") { store.canRunWebViewCommands && store.editorSession?.snapshot.ready == true }
+        } catch {
+            print("READY_DIAGNOSTIC failure=\(String(describing:store.webViewFailure)) session=\(String(describing:store.editorSession)) loading=\(store.isWebViewLoading) error=\(String(describing:store.webViewErrorMessage))")
+            throw error
+        }
         try await Task.sleep(nanoseconds: 400_000_000)
     }
     @MainActor static func openFixture(_ fixture: URL, _ store: DocumentViewerStore) async throws {

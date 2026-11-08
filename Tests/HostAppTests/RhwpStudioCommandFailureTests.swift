@@ -31,6 +31,35 @@ final class RhwpStudioCommandFailureTests: XCTestCase {
         if case .fatal = value { return true }; return false
     }
 
+    func testActualUpstreamContractAndSessionBinding() throws {
+        var payload: [String: Any] = ["schemaVersion":1, "capability":"command-error-v1",
+            "eventId":"opaque-event", "documentSessionId":"opaque-session", "operation":"deleteSelection",
+            "code":"COMMAND_ROLLED_BACK", "recovery":"succeeded",
+            "checks":["content":true,"editing":true,"history":true,"dirty":true,"ready":true]]
+        let parsed = try XCTUnwrap(RhwpStudioCommandFailure.parseUpstream(payload))
+        XCTAssertTrue(parsed.isRecovered)
+        XCTAssertFalse(parsed.diagnostic.contains("changeSeq="))
+        var value = state(.upstreamVersion1)
+        XCTAssertFalse(value.usesStructuredContract) // old bundle keeps legacy policy
+        var envelope: [String: Any] = ["type":"command-recovery-state", "loadToken":"load-token",
+            "loadID":2, "documentEpoch":3, "documentSessionId":"opaque-session", "status":"recovering"]
+        XCTAssertEqual(value.receiveUpstream(envelope, source:source), .ignored)
+        XCTAssertTrue(value.blocksCommands)
+        envelope["type"] = "upstream-command-failure"; envelope["payload"] = payload
+        XCTAssertEqual(value.receiveUpstream(envelope, source:source), .recovered(parsed))
+        XCTAssertFalse(value.blocksCommands)
+        XCTAssertEqual(value.receiveUpstream(envelope, source:source), .ignored)
+        var stale = envelope; stale["documentSessionId"] = "old"
+        XCTAssertEqual(value.receiveUpstream(stale, source:source), .ignored)
+        payload["code"] = "ROLLBACK_FAILED"; payload["recovery"] = "failed"
+        payload["eventId"] = "different"
+        envelope["payload"] = payload
+        XCTAssertTrue(isFatal(value.receiveUpstream(envelope, source:source)))
+        XCTAssertTrue(value.isSuspended)
+        payload["recovery"] = "succeeded"
+        XCTAssertNil(RhwpStudioCommandFailure.parseUpstream(payload))
+    }
+
     func testFatalReportRetainsOperationEventAndChecksUntilNewLoad() {
         var value = state()
         XCTAssertTrue(isFatal(value.receive(body(recovery: "failed"), source: source)))

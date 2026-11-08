@@ -3,7 +3,7 @@ import SwiftUI
 struct DocumentViewerView: View {
     @ObservedObject var store: DocumentViewerStore
     // 현재 제품 번들은 공개 producer가 없어 미지원이다. native 초기화 의존성으로만 설정한다.
-    var commandFailureSupport: RhwpStudioCommandFailureSupport = .unavailable
+    var commandFailureSupport: RhwpStudioCommandFailureSupport = .upstreamVersion1
 
     var body: some View {
         RhwpStudioContainerView(store: store, document: store.rhwpStudioDocument, commandFailureSupport: commandFailureSupport)

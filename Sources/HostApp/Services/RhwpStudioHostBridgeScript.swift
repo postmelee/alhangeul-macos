@@ -53,6 +53,7 @@ enum RhwpStudioHostBridgeScript {
       }
 
       window.addEventListener("error", (event) => {
+        if (window.__alhangeulHandleCommandError?.(event.error)) return;
         const message = event.message || event.error?.message;
         if (!message && !event.error) {
           return;
@@ -77,6 +78,7 @@ enum RhwpStudioHostBridgeScript {
       });
 
       window.addEventListener("unhandledrejection", (event) => {
+        if (window.__alhangeulHandleCommandError?.(event.reason)) return;
         const reason = describeReason(event.reason);
         const sourceURL = window.location.href;
         if (isBenignRuntimeIssue("Unhandled promise rejection", sourceURL, reason, 0, 0)) {
@@ -354,6 +356,9 @@ enum RhwpStudioHostBridgeScript {
       }
 
       function requestRhwp(method, params = {}, timeoutMs = 15000) {
+        if (!["getDocumentState", "getSelectionContext", "pageCount"].includes(method)) {
+          window.__alhangeulAssertRecoveryReady?.();
+        }
         return new Promise((resolve, reject) => {
           const id = `alhangeul-host-${method}-${Date.now()}-${Math.random()}`;
           const timeout = setTimeout(() => {
@@ -393,6 +398,7 @@ enum RhwpStudioHostBridgeScript {
 
       \(RhwpStudioEditorSessionScript.source)
       \(RhwpStudioSaveBridgeScript.source)
+      \(RhwpStudioCommandRecoveryScript.source)
       \(RhwpStudioHTMLExportScript.source)
 
       function encodeBytesToBase64(bytes) {
