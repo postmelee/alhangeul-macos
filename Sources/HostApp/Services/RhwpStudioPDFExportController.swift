@@ -26,6 +26,7 @@ final class RhwpStudioPDFExportController {
         payload: RhwpStudioPagePayload,
         destinationURL: URL,
         validateBeforeWrite: @escaping @MainActor () async throws -> Void = {},
+        permitWrite: @escaping @MainActor () -> Bool = { true },
         completion: @escaping (Result<URL, Error>) -> Void
     ) {
         guard !isExporting else {
@@ -56,7 +57,7 @@ final class RhwpStudioPDFExportController {
                         try await validateBeforeWrite()
                         if let outputFonts = self.outputFonts { try await outputFonts.validate() }
                         try Task.checkCancellation()
-                        guard self.isExporting, !self.isFinishing else { throw RhwpStudioOutputFontError.cancelled }
+                        guard self.isExporting, !self.isFinishing, permitWrite() else { throw RhwpStudioOutputFontError.cancelled }
                         // 마지막 세션 검증과 atomic write 사이 native 문서 교체를 허용하지 않는다.
                         try data.write(to: destinationURL, options: .atomic)
                         self.finish(.success(destinationURL), generation:exportGeneration)

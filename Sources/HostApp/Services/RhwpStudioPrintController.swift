@@ -5,6 +5,7 @@ import PDFKit
 final class RhwpStudioPrintController: RhwpStudioPrintControlling {
     private let renderer: RhwpStudioPagePDFRenderer
     private let outputFonts: RhwpStudioOutputFontJob?
+    private let canSeal: @MainActor () -> Bool
     private let onSealed: @MainActor () async -> Void
     private let runOperation: @MainActor (PDFDocument, String) -> Bool?
     private let onResult: @MainActor (RhwpStudioPrintResult) -> Void
@@ -18,11 +19,13 @@ final class RhwpStudioPrintController: RhwpStudioPrintControlling {
     private var generation: UInt64 = 0
 
     init(renderer: RhwpStudioPagePDFRenderer? = nil, outputFonts: RhwpStudioOutputFontJob? = nil,
+         canSeal: @escaping @MainActor () -> Bool = { true },
          onSealed: @escaping @MainActor () async -> Void = {},
          runOperation: (@MainActor (PDFDocument, String) -> Bool?)? = nil,
          onResult: @escaping @MainActor (RhwpStudioPrintResult) -> Void = { _ in },
          presentError: @escaping @MainActor (Error) -> Void = RhwpStudioPrintErrorPresenter.present) {
         self.renderer = renderer ?? .init(outputFonts:outputFonts)
+        self.canSeal = canSeal
         self.outputFonts = outputFonts; self.onSealed = onSealed
         self.runOperation = runOperation ?? Self.runLiveOperation; self.onResult = onResult; self.presentError = presentError
     }
@@ -57,6 +60,7 @@ final class RhwpStudioPrintController: RhwpStudioPrintControlling {
                         if let outputFonts = self.outputFonts { try await outputFonts.seal() }
                         try Task.checkCancellation()
                         guard self.generation == printGeneration, !self.didFinish else { return }
+                        guard self.canSeal() else { throw RhwpStudioOutputFontError.stale }
                         self.sealed = true
                         await self.onSealed()
                         guard let result = self.runOperation(document,fileName) else {
