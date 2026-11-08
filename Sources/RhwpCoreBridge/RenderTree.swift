@@ -615,12 +615,69 @@ struct TabLeaderInfo: Decodable {
     }
 }
 
+/// v0.9.0은 HWP 표·도형의 점선 간격을 출력 좌표 또는 선 굵기 배수로 전달한다.
+enum StrokeDash: Decodable {
+    case fixed([Double])
+    case explicit([Double])
+    case hwp([Double], roundCap: Bool)
+
+    init(from decoder: Decoder) throws {
+        let value = try decoder.singleValueContainer()
+        if let name = try? value.decode(String.self) {
+            let separators = CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "_-"))
+            switch name.lowercased().components(separatedBy: separators).joined() {
+            case "dash", "dashed": self = .fixed([6, 3])
+            case "dot", "dotted": self = .fixed([2, 2])
+            case "dashdot", "dashdotted": self = .fixed([6, 3, 2, 3])
+            case "dashdotdot", "dashdotdotted": self = .fixed([6, 3, 2, 3, 2, 3])
+            case "hwpdash": self = .hwp([7.5, 4.5], roundCap: false)
+            case "hwpdot": self = .hwp([1.5, 2.25], roundCap: false)
+            case "hwpdashdot": self = .hwp([15, 4.5, 1.5, 4.5], roundCap: false)
+            case "hwpdashdotdot": self = .hwp([15, 4.5, 1.5, 4.5, 1.5, 4.5], roundCap: false)
+            case "hwplongdash": self = .hwp([15, 4.5], roundCap: false)
+            case "hwpcircle": self = .hwp([0, 2.25], roundCap: true)
+            default: self = .fixed([])
+            }
+            return
+        }
+
+        let keyed = try decoder.container(keyedBy: DynamicKey.self)
+        guard keyed.allKeys.count == 1, keyed.contains(DynamicKey("Explicit")) else {
+            throw DecodingError.dataCorruptedError(in: value, debugDescription: "Invalid stroke dash variant")
+        }
+        let intervals = try keyed.decode([Double].self, forKey: DynamicKey("Explicit"))
+        guard intervals.count == 6, intervals.allSatisfy({ $0.isFinite && $0 >= 0 }) else {
+            throw DecodingError.dataCorruptedError(forKey: DynamicKey("Explicit"), in: keyed,
+                                                   debugDescription: "Invalid stroke dash intervals")
+        }
+        self = .explicit(Array(intervals.prefix(while: { $0 > 0 })))
+    }
+
+    func pattern(width: Double) -> (width: Double, lengths: [Double], roundCap: Bool) {
+        switch self {
+        case .fixed(let lengths):
+            return (max(width, 0.5), lengths, false)
+        case .explicit(let lengths):
+            return (width > 0 ? width : 0.5, lengths, false)
+        case .hwp(let ratios, let roundCap):
+            // upstream stroke_pattern.rs의 600dpi Print pen을 96dpi 출력 좌표로 환산한다.
+            let outline = 96.0 / 600
+            let scale = max(width - outline, outline)
+            let lengths = ratios.enumerated().map { index, ratio in
+                let edge = index.isMultiple(of: 2) ? outline : -outline
+                return ratio * scale + (roundCap ? 0 : edge)
+            }
+            return (width > 0 ? width : 0.5, lengths, roundCap)
+        }
+    }
+}
+
 struct ShapeStyle: Decodable {
     let fillColor: UInt32?
     let pattern: PatternFillInfo?
     let strokeColor: UInt32?
     let strokeWidth: Double
-    let strokeDash: String   // StrokeDash enum
+    let strokeDash: StrokeDash
     let opacity: Double
     let shadow: ShadowStyleInfo?
 
@@ -679,7 +736,7 @@ struct GradientFillInfo: Decodable {
 struct LineStyle: Decodable {
     let color: UInt32
     let width: Double
-    let dash: String         // StrokeDash enum
+    let dash: StrokeDash
     let lineType: String     // LineRenderType enum
     let startArrow: String   // ArrowStyle enum
     let endArrow: String     // ArrowStyle enum

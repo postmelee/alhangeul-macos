@@ -182,7 +182,9 @@ fn visit_ops(node: &LayerNode, operation: &mut impl FnMut(&PaintOp)) {
                 visit_ops(child, operation);
             }
         }
-        LayerNodeKind::ClipRect { child, .. } => visit_ops(child, operation),
+        LayerNodeKind::ClipRect { child, .. } | LayerNodeKind::ClipPath { child, .. } => {
+            visit_ops(child, operation)
+        }
         LayerNodeKind::Leaf { ops } => {
             for op in ops {
                 operation(op);

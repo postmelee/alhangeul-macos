@@ -65,7 +65,7 @@ if (args.includes('--verify')) {
     } catch { globalThis.nativeFontResult = JSON.stringify({error:'invalidCatalog'}); }
     finally { await setHostFontProvider(null); }
   };`;
-  const build = await esbuild.build({stdin:{contents:entry,resolveDir:resolve(upstream,'rhwp-studio'),loader:'ts'},
+  const build = await esbuild.build({absWorkingDir:upstream,stdin:{contents:entry,resolveDir:resolve(upstream,'rhwp-studio'),loader:'ts'},
     bundle:true,write:false,format:'iife',platform:'neutral',target:'es2020',minify:false,metafile:true});
   const js = build.outputFiles[0].text;
   if (js.includes('\\#(') || js.includes('"""#')) throw Error('Swift raw string delimiter collision');
@@ -74,7 +74,7 @@ if (args.includes('--verify')) {
   const swift = source.replace('    """#\n}', '"""#\n}');
   const sources = {};
   for (const input of Object.keys(build.metafile.inputs).filter(p=>p!=='<stdin>').sort()) {
-    const absolute = resolve(input), path = relative(upstream,absolute);
+    const absolute = resolve(upstream, input), path = relative(upstream, absolute);
     if (path.startsWith('..')) throw Error('External matcher dependency');
     const original = readFileSync(absolute);
     const committed = execFileSync('git',['-C',upstream,'show',`${commit}:${path}`]);

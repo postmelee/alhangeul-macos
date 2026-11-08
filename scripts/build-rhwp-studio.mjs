@@ -58,8 +58,14 @@ try {
     const require = createRequire(resolve(studio, 'package.json'));
     // 변환된 소스도 pinned compiler로 검사한다. upstream checkout은 변경하지 않는다.
     mkdirSync(resolve(root, 'build.noindex'), {recursive: true});
-    const checkDir = mkdtempSync(resolve(root, 'build.noindex/studio-typecheck-'));
+    const checkRoot = mkdtempSync(resolve(root, 'build.noindex/studio-typecheck-'));
+    const checkDir = resolve(checkRoot, 'rhwp-studio');
     try {
+      // Studio 밖의 상대 import도 같은 upstream checkout을 읽도록 디렉터리 구조를 유지한다.
+      mkdirSync(checkDir);
+      for (const name of ['assets', 'rhwp-shared', 'src']) {
+        symlinkSync(resolve(upstream, name), resolve(checkRoot, name), 'dir');
+      }
       cpSync(resolve(studio, 'src'), resolve(checkDir, 'src'), {recursive: true});
       cpSync(resolve(studio, 'types'), resolve(checkDir, 'types'), {recursive: true});
       symlinkSync(resolve(studio, 'node_modules'), resolve(checkDir, 'node_modules'), 'dir');
@@ -69,13 +75,17 @@ try {
       writeFileSync(resolve(checkDir, 'tsconfig.json'), JSON.stringify(config));
       execFileSync(process.execPath, [resolve(studio, 'node_modules/typescript/lib/tsc.js'), '--project', resolve(checkDir, 'tsconfig.json')],
         {cwd: studio, stdio: 'inherit'});
-    } finally { rmSync(checkDir, {recursive: true, force: true}); }
+    } finally { rmSync(checkRoot, {recursive: true, force: true}); }
     const receipt = {schema: 1, studio_build_command: buildCommand, source_resolved_commit: git('rev-parse', 'HEAD'),
       adapter_files: fingerprints(), sources: sources.map(row => ({path: row.path,
         original_sha256: sha(row.original), adapted_sha256: sha(row.adapted)}))};
     const {build} = await import(pathToFileURL(require.resolve('vite')));
     await build({root: studio, configFile: resolve(studio, 'vite.config.ts'), base: './',
       plugins: [fontMenuPlugin(sources, receipt)]});
+    // public의 타입 사본이 뒤처져도 번들은 실제 빌드한 WASM과 같은 선언을 제공한다.
+    for (const name of ['rhwp.d.ts', 'rhwp_bg.wasm.d.ts']) {
+      cpSync(resolve(upstream, 'pkg', name), resolve(studio, 'dist', name));
+    }
     console.log('OK: Studio built with host font menu adapter; upstream source files unchanged');
   }
 } catch (error) { console.error(String(error)); process.exitCode = 1; }

@@ -243,7 +243,9 @@ pub(super) fn lower(tree: &mut PageLayerTree, context: &Context, bytes: &[u8]) -
                     bind_ltr(child);
                 }
             }
-            LayerNodeKind::ClipRect { child, .. } => bind_ltr(child),
+            LayerNodeKind::ClipRect { child, .. } | LayerNodeKind::ClipPath { child, .. } => {
+                bind_ltr(child)
+            }
             LayerNodeKind::Leaf { ops } => {
                 for op in ops {
                     if let PaintOp::GlyphRun { run, .. } = op {

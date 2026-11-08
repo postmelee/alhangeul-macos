@@ -587,8 +587,7 @@ class CGTreeRenderer {
         ctx.saveGState()
         applyShadow(style.shadow, in: ctx)
         ctx.setStrokeColor(colorRefToCGColor(style.color))
-        ctx.setLineWidth(CGFloat(max(style.width, 0.5)))
-        applyDash(style.dash, in: ctx)
+        applyDash(style.dash, width: style.width, in: ctx)
 
         ctx.move(to: strokeLine.start)
         ctx.addLine(to: strokeLine.end)
@@ -645,8 +644,7 @@ class CGTreeRenderer {
             applyShadow(ls.shadow, in: ctx)
             ctx.addPath(cgPath)
             ctx.setStrokeColor(colorRefToCGColor(ls.color))
-            ctx.setLineWidth(CGFloat(max(ls.width, 0.5)))
-            applyDash(ls.dash, in: ctx)
+            applyDash(ls.dash, width: ls.width, in: ctx)
             ctx.strokePath()
             drawConnectorArrows(for: pathNode, builtPath: builtPath, in: ctx)
             ctx.restoreGState()
@@ -3548,8 +3546,7 @@ class CGTreeRenderer {
             }
             ctx.addPath(path)
             ctx.setStrokeColor(colorRefToCGColor(strokeColor))
-            ctx.setLineWidth(CGFloat(max(style.strokeWidth, 0.5)))
-            applyDash(style.strokeDash, in: ctx)
+            applyDash(style.strokeDash, width: style.strokeWidth, in: ctx)
             ctx.strokePath()
             ctx.restoreGState()
         }
@@ -3674,34 +3671,11 @@ class CGTreeRenderer {
         min(1.0, max(0.0, CGFloat(value)))
     }
 
-    private func applyDash(_ dash: String, in ctx: CGContext) {
-        switch normalizedDashName(dash) {
-        case "Dash":
-            ctx.setLineDash(phase: 0, lengths: [6, 3])
-        case "Dot":
-            ctx.setLineDash(phase: 0, lengths: [2, 2])
-        case "DashDot":
-            ctx.setLineDash(phase: 0, lengths: [6, 3, 2, 3])
-        case "DashDotDot":
-            ctx.setLineDash(phase: 0, lengths: [6, 3, 2, 3, 2, 3])
-        default: // Solid
-            ctx.setLineDash(phase: 0, lengths: [])
-        }
-    }
-
-    private func normalizedDashName(_ dash: String) -> String {
-        switch normalizedStyleKey(dash) {
-        case "dash", "dashed":
-            return "Dash"
-        case "dot", "dotted":
-            return "Dot"
-        case "dashdot", "dashdotted":
-            return "DashDot"
-        case "dashdotdot", "dashdotdotted":
-            return "DashDotDot"
-        default:
-            return "Solid"
-        }
+    private func applyDash(_ dash: StrokeDash, width: Double, in ctx: CGContext) {
+        let pattern = dash.pattern(width: width)
+        ctx.setLineWidth(CGFloat(pattern.width))
+        ctx.setLineCap(pattern.roundCap ? .round : .butt)
+        ctx.setLineDash(phase: 0, lengths: pattern.lengths.map { CGFloat($0) })
     }
 
     private func adjustedLineForArrows(start: CGPoint, end: CGPoint, style: LineStyle) -> (start: CGPoint, end: CGPoint) {
