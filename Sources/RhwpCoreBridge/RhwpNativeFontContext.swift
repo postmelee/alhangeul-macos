@@ -28,6 +28,7 @@ struct RhwpNativeFontContext: Sendable {
         let bold: Bool
         let italic: Bool
         let faceId: String
+        var hftRegular = false
     }
 
     enum Failure: Error { case invalid, tooLarge }
@@ -119,6 +120,7 @@ final class RhwpCoreTextFontContext {
     }
     let identity: String
     private let fonts: [Key: CTFont]
+    private var hftRegularKeys = Set<Key>()
 
     init(_ context: RhwpNativeFontContext) throws {
         var faces: [String: CTFont] = [:]
@@ -138,10 +140,19 @@ final class RhwpCoreTextFontContext {
             if let previous = fontIDs[key], previous != request.faceId { throw Failure.ambiguousLanguageFaces }
             guard let font = faces[request.faceId] else { throw Failure.invalidFace }
             let traits = CTFontGetSymbolicTraits(font)
-            guard traits.contains(.traitBold) == request.bold, traits.contains(.traitItalic) == request.italic else { throw Failure.invalidFace }
+            if request.hftRegular {
+                guard request.bold, !request.italic, !traits.contains(.traitBold) else { throw Failure.invalidFace }
+                hftRegularKeys.insert(key)
+            }
+            guard traits.contains(.traitBold) == (request.bold && !request.hftRegular), traits.contains(.traitItalic) == request.italic else { throw Failure.invalidFace }
             fontIDs[key] = request.faceId; fonts[key] = font
         }
         self.identity = context.identity; self.fonts = fonts
+    }
+
+    func usesRegularForBold(_ run: TextRunNode) -> Bool {
+        guard let shape = run.charShapeId else { return false }
+        return hftRegularKeys.contains(Key(shape: shape, family: run.style.fontFamily, bold: run.style.bold, italic: run.style.italic))
     }
 
     func font(for run: TextRunNode, size: CGFloat) -> CTFont? {
@@ -159,9 +170,10 @@ final class RhwpCoreTextFontContext {
             if case .textRun(let run) = node.nodeType, let shape = run.charShapeId {
                 let key = Key(shape: shape, family: run.style.fontFamily, bold: run.style.bold, italic: run.style.italic)
                 if let font = fonts[key], !run.text.isEmpty {
-                    let characters = Array(run.text.utf16)
+                    // HFT에 공백 윤곽이 없어도 조판 위치가 공백의 advance를 보존한다.
+                    let characters = run.text.utf16.filter { $0 != 0x20 || !hftRegularKeys.contains(key) }
                     var glyphs = [CGGlyph](repeating: 0, count: characters.count)
-                    guard CTFontGetGlyphsForCharacters(font, characters, &glyphs, characters.count),
+                    guard characters.isEmpty || CTFontGetGlyphsForCharacters(font, characters, &glyphs, characters.count),
                           glyphs.allSatisfy({ $0 != 0 }) else { throw Failure.missingGlyph }
                     used.insert(key); names.insert(CTFontCopyPostScriptName(font) as String)
                 }

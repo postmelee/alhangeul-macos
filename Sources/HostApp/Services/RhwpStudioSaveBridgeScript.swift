@@ -39,7 +39,8 @@ enum RhwpStudioSaveBridgeScript {
       return message;
     }
 
-    async function readNativeSession(settle = true) {
+    async function readNativeSession(settle = true, recoveryBinding = false) {
+      if (!recoveryBinding) window.__alhangeulAssertRecoveryReady?.();
       const readVersion = ++sessionReadVersion;
       if (settle) await settleEditorState();
       const origin = readDocumentOrigin();
@@ -50,12 +51,14 @@ enum RhwpStudioSaveBridgeScript {
           state.documentEpoch !== fence.documentEpoch || state.changeSeq !== fence.changeSeq) {
         throw new Error("문서가 변경되었습니다. 다시 시도해 주세요.");
       }
+      if (!recoveryBinding) window.__alhangeulAssertRecoveryReady?.();
       const snapshot = emitNativeSession(state);
-      if (!snapshot.ready || snapshot.pageCount < 1) throw new Error("문서를 준비 중입니다.");
+      if (!recoveryBinding && (!snapshot.ready || snapshot.pageCount < 1)) throw new Error("문서를 준비 중입니다.");
       return snapshot;
     }
 
     function requireSaveLock(id) {
+      window.__alhangeulAssertRecoveryReady?.();
       const lock = window.__alhangeulSaveLock;
       if (!lock || lock.id !== id) throw new Error("저장 요청이 만료되거나 변경되었습니다.");
       return lock;

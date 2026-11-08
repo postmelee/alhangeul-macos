@@ -1,4 +1,6 @@
 import Foundation
+import CoreText
+import CoreGraphics
 
 enum RhwpStudioOutputFontRoute { static let scheme = "alhangeul-pdf-font" }
 
@@ -15,6 +17,7 @@ struct RhwpStudioOutputFontRequest: Codable, Hashable, Sendable {
     let slant: String
     let hasStroke: Bool?
     let hasUnsupportedStyle: Bool?
+    var outlineCharacters: [String]?
 
     init(key: String, family: String, weight: Int, slant: String,
          hasStroke: Bool? = nil, hasUnsupportedStyle: Bool? = nil) {
@@ -50,6 +53,7 @@ struct RhwpStudioOutputFontNode: Encodable, Sendable {
     let key: String
     let font: RhwpStudioOutputFontDescriptor?
     var useFallback: Bool = false
+    var strokeOutlines: [String: String]?
 }
 
 struct RhwpStudioOutputFontFailure: Equatable, Sendable {
@@ -148,6 +152,7 @@ final class RhwpStudioOutputFontJob {
             }
         } else { binding = (result.revision, result.generation) }
         var nodes: [RhwpStudioOutputFontNode] = []
+        var outlineBytes = 0
         var firstFailure: Error?
         for (request, selected) in zip(input, result.selections) {
             if fallbackFamilies.contains(request.family) {
@@ -159,16 +164,31 @@ final class RhwpStudioOutputFontJob {
                     else { throw RhwpStudioOutputFontError.invalidRequest }
                     nodes.append(.init(key: request.key, font: nil)); continue
                 }
-                guard selected.status == "selected", let id = selected.id,
+                let canvasBold = selected.status == "canvasBold" && request.weight == 700
+                    && selected.weight == 400 && request.slant == "normal" && selected.slant == "normal"
+                guard selected.status == "selected" || canvasBold, let id = selected.id,
                       let ps = selected.postscriptName, !ps.isEmpty,
                       let weight = selected.weight, let slant = selected.slant,
                       [400, 700].contains(request.weight), [400, 700].contains(weight),
-                      request.weight != 700 || weight == 700,
+                      request.weight != 700 || weight == 700 || canvasBold,
                       request.hasStroke != true, request.hasUnsupportedStyle != true,
                       ["normal", "italic", "oblique"].contains(slant)
                 else { throw RhwpStudioOutputFontError.unavailable }
                 let font = try await read(id, postscriptName: ps, weight: weight, slant: slant)
-                nodes.append(.init(key: request.key, font: font))
+                var outlines: [String: String]?
+                if canvasBold {
+                    guard let bytes = prepared[id]?.bytes else { throw RhwpStudioOutputFontError.unavailable }
+                    guard bytes.data.starts(with: "OTTO".utf8),
+                          bytes.face.names.contains(where: { [1, 16].contains($0.nameID) && $0.value == request.family })
+                    else { throw RhwpStudioOutputFontError.unsupported }
+                    let paths = try Self.strokeOutlines(request.outlineCharacters, bytes: bytes)
+                    outlineBytes += paths.values.reduce(0) { $0 + $1.utf8.count }
+                    guard outlineBytes <= min(limits.residentBytes, 4 * 1024 * 1024) else {
+                        throw RhwpStudioOutputFontError.tooLarge
+                    }
+                    outlines = paths
+                }
+                nodes.append(.init(key: request.key, font: font, strokeOutlines: outlines))
             } catch {
                 // 문서/세대/취소는 대체 출력으로 우회하지 않는다.
                 if error as? RhwpStudioOutputFontError == .stale || error as? RhwpStudioOutputFontError == .invalidRequest
@@ -184,6 +204,43 @@ final class RhwpStudioOutputFontJob {
         try await validate()
         if let firstFailure { throw firstFailure }
         return nodes
+    }
+
+    // WebKit은 SVG text의 fill과 stroke를 별도 PDF 텍스트로 출력한다. 글자는
+    // 원본 face로 한 번 그리고 획은 같은 실제 glyph의 외곽선으로 표현한다.
+    private static func strokeOutlines(_ characters: [String]?, bytes: StudioFontBytes) throws -> [String: String] {
+        guard let characters, characters.count <= 256,
+              let provider = CGDataProvider(data: bytes.data as CFData),
+              let graphicsFont = CGFont(provider) else { throw RhwpStudioOutputFontError.unsupported }
+        let font = CTFontCreateWithGraphicsFont(graphicsFont, 1000, nil, nil)
+        var outlines = [String: String]()
+        var length = 0
+        for character in Set(characters) where character != " " {
+            guard character.utf16.count == 1, var code = character.utf16.first,
+                  (0x21...0x7e).contains(code) || (0xac00...0xd7a3).contains(code)
+            else { throw RhwpStudioOutputFontError.unsupported }
+            var glyph: CGGlyph = 0
+            guard CTFontGetGlyphsForCharacters(font, &code, &glyph, 1), glyph != 0,
+                  let path = CTFontCreatePathForGlyph(font, glyph, nil) else { throw RhwpStudioOutputFontError.unsupported }
+            var parts = [String]()
+            path.applyWithBlock { element in
+                let e = element.pointee
+                func point(_ index: Int) -> String { "\(e.points[index].x) \(e.points[index].y)" }
+                switch e.type {
+                case .moveToPoint: parts.append("M" + point(0))
+                case .addLineToPoint: parts.append("L" + point(0))
+                case .addQuadCurveToPoint: parts.append("Q" + point(0) + " " + point(1))
+                case .addCurveToPoint: parts.append("C" + point(0) + " " + point(1) + " " + point(2))
+                case .closeSubpath: parts.append("Z")
+                @unknown default: break
+                }
+            }
+            let outline = parts.joined()
+            length += outline.utf8.count
+            guard length <= 1024 * 1024 else { throw RhwpStudioOutputFontError.tooLarge }
+            outlines[character] = outline
+        }
+        return outlines
     }
 
     func recordFaceLoadFailure(_ input: [RhwpStudioOutputFontRequest]) {

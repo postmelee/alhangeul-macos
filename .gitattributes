@@ -7,3 +7,6 @@ mydocs/working/assets/task_m020_567_stage4/font-library-tests.log -whitespace
 mydocs/working/assets/task_m020_567_stage4/host-build.log -whitespace
 mydocs/working/assets/task_m020_567_stage4_1/font-library-tests.log -whitespace
 mydocs/working/assets/task_m020_567_stage4_1/host-build.log -whitespace
+# upstream 글꼴 라이선스 원본 바이트를 보존한다.
+Sources/HostApp/Resources/rhwp-studio/fonts/licenses/*.pdf binary
+Sources/HostApp/Resources/rhwp-studio/fonts/licenses/*.txt -text -whitespace

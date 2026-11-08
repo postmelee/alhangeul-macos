@@ -1,31 +1,36 @@
 {
   "schema": 1,
   "studio_build_command": "node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>",
-  "source_resolved_commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "source_resolved_commit": "c9095c5f67632e6721e800ccc7fb43ea49d26682",
   "adapter_files": {
-    "scripts/build-rhwp-studio.mjs": "69eacdc439efae1ab9439631a659328021bbb86d2a5c138150bb4a0461ff95cd",
-    "scripts/studio-font-menu-adapter.mjs": "62ad70b2fbb9eb48357715656cb65cfc1f1ca7354b052971ac3c10ab33fdc4c0"
+    "scripts/build-rhwp-studio.mjs": "3254da5bfc71a0ea0dddde37c7ca48cb691470d7e705d4b54781b25a7101f432",
+    "scripts/studio-font-menu-adapter.mjs": "23d8791d666b96d1d75eb51213ff2a1d30a1a3c0953652179ddc6af78d00294a"
   },
   "sources": [
     {
       "path": "src/core/local-fonts.ts",
-      "original_sha256": "78228d2db58ea6467271bfe3bd5018ae7fb16b17480cc23f453cd0dc186fe1c8",
-      "adapted_sha256": "237f536fc2be44961e27590396fe1abaef51614e81a0d992d93dd207f8d5ba34"
+      "original_sha256": "37f51713e87eece3bcee9fc63e683dfbc09b970dd114850fcf23a961cf726e39",
+      "adapted_sha256": "e4e7ce6a9343a89d665c4bb8ca930bb83917aa4faf0dc018c11b33ae78fd6928"
     },
     {
       "path": "src/ui/toolbar.ts",
-      "original_sha256": "f80b61e04ddd36d64d08a4f06c364fbef174400e2ecec7186c4ae145bb3d4bb9",
-      "adapted_sha256": "d155cbb6f7c3b9d19336aeb1a5ceb1084c3f51b35c03e91b20852ed2593d3b75"
+      "original_sha256": "c002d7d96f9dde577328f476ff9d23ebe436a33cf38602dc6ac6795896987467",
+      "adapted_sha256": "f7f6caa7907817687a7eca93b587038bca7eb320693529bba0eba101d46ff770"
     },
     {
       "path": "src/ui/options-dialog.ts",
-      "original_sha256": "3c841041ecd0ad5269c422168ca73106f3b9fc73309446b2a10832f3b33d515a",
-      "adapted_sha256": "28ead95aa625dcc3b642af030869bc3890c04873b6e5609d14ebc6d78d04379e"
+      "original_sha256": "96b891e9d45582081322e50086dbfd1891767992d06e22f622df7ff11fc5efe3",
+      "adapted_sha256": "8ded28d4bd3c2d4d1da66187821563db9ec45e8b076364ed77df6110107a65da"
     },
     {
       "path": "src/main.ts",
-      "original_sha256": "277a3fa5a172035624719a19db49ca417c8684aadaa234d156655263eac383b2",
-      "adapted_sha256": "712ab370e38feb00e69750b7b8b5b87f5e3b13ba1d9bcc9bae33007232c9c4ce"
+      "original_sha256": "52bdd906913b711483a4aaa5e83d61fe5d0d7b9344a2598f2db281f072bb677e",
+      "adapted_sha256": "00a9dc983b37df590471e1857b8f680e08c197c92d58f51a726912cbb86daf33"
+    },
+    {
+      "path": "src/core/wasm-bridge.ts",
+      "original_sha256": "1606343a91a26f0b24a5a8f863d322319212a9545e4da54a4726b51c6d9a4983",
+      "adapted_sha256": "cb2ba16219f04bd29bd5c03bb5a972948850a5fad5b7fa07ce3bb449ec2fefa6"
     }
   ]
 }

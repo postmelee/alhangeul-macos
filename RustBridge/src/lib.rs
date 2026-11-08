@@ -523,6 +523,59 @@ pub extern "C" fn rhwp_close(handle: *mut RhwpHandle) {
     }
 }
 
+/// 조판 전 host가 확인할 원본 글꼴 이름. 반환 문자열은 rhwp_free_string으로 해제한다.
+#[no_mangle]
+pub extern "C" fn rhwp_declared_font_candidates(handle: *const RhwpHandle) -> *mut c_char {
+    ffi_guard!(handle, ptr::null_mut(), {
+        let doc = unsafe { &*handle }.doc.document();
+        let names: std::collections::BTreeSet<_> = doc
+            .doc_info
+            .font_faces
+            .iter()
+            .flatten()
+            .filter(|face| !face.is_embedded && matches!(face.alt_type, 0 | 2))
+            .map(|face| &face.name)
+            .collect();
+        serde_json::to_string(&names)
+            .ok()
+            .map_or(ptr::null_mut(), string_to_c)
+    })
+}
+
+/// 현재 동기 렌더 호출의 공급 snapshot을 설정한다. 빈 입력은 portable 환경을 복원한다.
+/// 입력 메모리는 호출 중에만 빌린다. 오류 시 기존 환경을 보존한다.
+#[no_mangle]
+pub extern "C" fn rhwp_set_available_font_programs(
+    handle: *mut RhwpHandle,
+    data: *const u8,
+    len: usize,
+) -> bool {
+    ffi_guard!(handle, false, {
+        let doc = &mut unsafe { &mut *handle }.doc;
+        let next = if len == 0 {
+            None
+        } else {
+            if data.is_null() || len > 65536 {
+                return false;
+            }
+            let Ok(json) = std::str::from_utf8(unsafe { std::slice::from_raw_parts(data, len) })
+            else {
+                return false;
+            };
+            let Ok(env) =
+                rhwp::renderer::font_environment::FontEnvironment::from_available_programs(
+                    &doc.document().doc_info,
+                    json,
+                )
+            else {
+                return false;
+            };
+            env
+        };
+        doc.set_font_environment(next).is_ok()
+    })
+}
+
 fn string_to_c(value: String) -> *mut c_char {
     match CString::new(value) {
         Ok(cstr) => cstr.into_raw(),

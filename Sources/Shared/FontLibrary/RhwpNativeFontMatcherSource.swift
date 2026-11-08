@@ -1,15 +1,15 @@
 // 생성 파일: scripts/build-native-font-matcher.mjs. 직접 수정 금지.
-// rhwp 1a76570e833917d15817415a53c09ad61ab3203f, esbuild 0.25.12
+// rhwp c9095c5f67632e6721e800ccc7fb43ea49d26682, esbuild 0.25.12
 enum RhwpNativeFontMatcherSource {
-    static let commit = "1a76570e833917d15817415a53c09ad61ab3203f"
-    static let sha256 = "2cfbdf0ddc3c3748b44bd66c3aaa8b262834b4479f5cb51fd9d6c58a798acb60"
+    static let commit = "c9095c5f67632e6721e800ccc7fb43ea49d26682"
+    static let sha256 = "077d371cdfdc6a7db3acc3db0b3ba56bea076522f691e96d073ed09b3f4be273"
     static let script = #"""
 (() => {
   var __defProp = Object.defineProperty;
   var __defNormalProp = (obj, key2, value) => key2 in obj ? __defProp(obj, key2, { enumerable: true, configurable: true, writable: true, value }) : obj[key2] = value;
   var __publicField = (obj, key2, value) => __defNormalProp(obj, typeof key2 !== "symbol" ? key2 + "" : key2, value);
 
-  // build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/src/core/host-font-provider.ts
+  // rhwp-studio/src/core/host-font-provider.ts
   var MAX_FACES = 25e3;
   var MAX_FONT_BYTES = 64 * 1024 * 1024;
   function validName(value, allowEmpty = false) {
@@ -155,7 +155,10 @@ enum RhwpNativeFontMatcherSource {
     }
   };
 
-  // build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/src/core/generated/font-rule-projections/canvas2d-paint.ts
+  // rhwp-studio/src/core/sfnt-face.ts
+  var MAX_NORMALIZED_SFNT_BYTES = 64 * 1024 * 1024;
+
+  // rhwp-studio/src/core/generated/font-rule-projections/canvas2d-paint.ts
   var FONT_RULE_CANVAS2D_PAINT_META = Object.freeze({
     "schemaVersion": "1.0",
     "sourceCommit": "a1f9872e28aea6755b656161ed1802f73308da58",
@@ -4912,14 +4915,14 @@ enum RhwpNativeFontMatcherSource {
     }
   ]);
 
-  // build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/src/core/generated/font-rule-projections/webfont-supply.ts
+  // rhwp-studio/src/core/generated/font-rule-projections/webfont-supply.ts
   var FONT_RULE_CANVAS2D_WEBFONT_META = Object.freeze({
     "schemaVersion": "1.0",
     "sourceCommit": "a1f9872e28aea6755b656161ed1802f73308da58",
-    "inputSha256": "6148c568b05fea9ec317759bfc7a19762f93eded557c5b5af01efbb7057ed266",
+    "inputSha256": "59bb65f77dc9a5de57db115c05ac56c7902af0be516a14839455e10e9ee33c6c",
     "projectionId": "canvas2d-webfont",
-    "projectionSha256": "b6ff0ce6d73634bc75b15d2ed20f70465d7a32f9c525b8030b365d7a7f464245",
-    "ruleCount": 153
+    "projectionSha256": "3a4759c7b701be8ee9552cf89ab7660abd6812df8990445a4548aa60bc87ad1c",
+    "ruleCount": 159
   });
   var FONT_RULE_CANVAS2D_WEBFONT_RULES = Object.freeze([
     {
@@ -6243,46 +6246,46 @@ enum RhwpNativeFontMatcherSource {
       }
     },
     {
-      "ruleId": "rule.studio-supply.9226454d982d47a1557d.canvas2d",
+      "ruleId": "rule.issue-8533.rokg-webfont-rokg",
       "sourceBoundaryId": "studio-supply.font-list",
       "relationType": "supply-source",
       "decisionPlane": "supply",
-      "sourceFace": "Government_16040911",
-      "targetFaceOrPolicy": "CDN_GOVERNMENT_SYMBOL_REGULAR",
+      "sourceFace": "ROKG",
+      "targetFaceOrPolicy": "CDN_ROKG_R",
       "conditions": {
-        "profile": "canvas2d-css-truetype"
+        "profile": "canvas2d-css-woff2"
       },
       "order": null,
       "mode": "direct",
       "metricEntryIds": [],
       "supply": {
         "external": true,
-        "fontFamily": "Government_16040911",
-        "format": "truetype",
+        "fontFamily": "ROKG",
+        "format": "woff2",
         "kind": "canvas2d-webfont",
-        "sourceUrl": "https://cdn.jsdelivr.net/gh/jangster77/korea-government-symbol-font@v1.0.0/fonts/Government_16040911.ttf",
+        "sourceUrl": "https://cdn.jsdelivr.net/gh/Alex4386/gov-symbol@eee1e7d37a5ff02ab8bf6c6eb77272d71f1829a2/src/assets/fonts/ROKG_R.woff2",
         "unicodeRange": null
       }
     },
     {
-      "ruleId": "rule.studio-supply.521afff37dd1f6357469.canvas2d",
+      "ruleId": "rule.issue-8533.rokg-webfont-rokg-r",
       "sourceBoundaryId": "studio-supply.font-list",
       "relationType": "supply-source",
       "decisionPlane": "supply",
-      "sourceFace": "\uC815\uBD80\uC0C1\uC9D5 \uBD80\uCC98\uBA85_16040911",
-      "targetFaceOrPolicy": "CDN_GOVERNMENT_SYMBOL_REGULAR",
+      "sourceFace": "ROKG R",
+      "targetFaceOrPolicy": "CDN_ROKG_R",
       "conditions": {
-        "profile": "canvas2d-css-truetype"
+        "profile": "canvas2d-css-woff2"
       },
       "order": null,
       "mode": "direct",
       "metricEntryIds": [],
       "supply": {
         "external": true,
-        "fontFamily": "\uC815\uBD80\uC0C1\uC9D5 \uBD80\uCC98\uBA85_16040911",
-        "format": "truetype",
+        "fontFamily": "ROKG R",
+        "format": "woff2",
         "kind": "canvas2d-webfont",
-        "sourceUrl": "https://cdn.jsdelivr.net/gh/jangster77/korea-government-symbol-font@v1.0.0/fonts/Government_16040911.ttf",
+        "sourceUrl": "https://cdn.jsdelivr.net/gh/Alex4386/gov-symbol@eee1e7d37a5ff02ab8bf6c6eb77272d71f1829a2/src/assets/fonts/ROKG_R.woff2",
         "unicodeRange": null
       }
     },
@@ -8267,12 +8270,12 @@ enum RhwpNativeFontMatcherSource {
       }
     },
     {
-      "ruleId": "rule.studio-supply.0aab2d58429b52047acb.canvas2d",
+      "ruleId": "rule.issue-4969.oldhangul-license-webfont",
       "sourceBoundaryId": "studio-supply.font-list",
       "relationType": "supply-source",
       "decisionPlane": "supply",
-      "sourceFace": "Source Han Serif K Old Hangul",
-      "targetFaceOrPolicy": "'fonts/SourceHanSerifK-OldHangul-subset.woff2'",
+      "sourceFace": "RHWP Old Hangul",
+      "targetFaceOrPolicy": "'fonts/RHWPOldHangul-Regular.woff2'",
       "conditions": {
         "profile": "canvas2d-css-unknown"
       },
@@ -8281,23 +8284,155 @@ enum RhwpNativeFontMatcherSource {
       "metricEntryIds": [],
       "supply": {
         "external": false,
-        "fontFamily": "Source Han Serif K Old Hangul",
+        "fontFamily": "RHWP Old Hangul",
         "format": "woff2",
         "kind": "canvas2d-webfont",
-        "sourceUrl": "fonts/SourceHanSerifK-OldHangul-subset.woff2",
+        "sourceUrl": "fonts/RHWPOldHangul-Regular.woff2",
         "unicodeRange": "U+1100-11FF, U+A960-A97F, U+D7B0-D7FF"
+      }
+    },
+    {
+      "ruleId": "rule.issue-5884.noto-symbols2.webfont",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "Noto Sans Symbols2",
+      "targetFaceOrPolicy": "'fonts/NotoSansSymbols2-Regular.ttf'",
+      "conditions": {
+        "profile": "canvas2d-css-unknown"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "external": false,
+        "fontFamily": "Noto Sans Symbols2",
+        "format": "truetype",
+        "kind": "canvas2d-webfont",
+        "sourceUrl": "fonts/NotoSansSymbols2-Regular.ttf",
+        "unicodeRange": null
+      }
+    },
+    {
+      "ruleId": "rule.issue-7445.public-batang-webfont-supply",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "RHWP Public Batang",
+      "targetFaceOrPolicy": "'fonts/RHWPPublicBatang-Regular.woff2'",
+      "conditions": {
+        "profile": "canvas2d-css-unknown"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "external": false,
+        "fontFamily": "RHWP Public Batang",
+        "format": "woff2",
+        "kind": "canvas2d-webfont",
+        "sourceUrl": "fonts/RHWPPublicBatang-Regular.woff2",
+        "unicodeRange": null
+      }
+    },
+    {
+      "ruleId": "rule.issue-8533.rokg-webfont-rokgr",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "ROKGR",
+      "targetFaceOrPolicy": "CDN_ROKG_R",
+      "conditions": {
+        "profile": "canvas2d-css-woff2"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "external": true,
+        "fontFamily": "ROKGR",
+        "format": "woff2",
+        "kind": "canvas2d-webfont",
+        "sourceUrl": "https://cdn.jsdelivr.net/gh/Alex4386/gov-symbol@eee1e7d37a5ff02ab8bf6c6eb77272d71f1829a2/src/assets/fonts/ROKG_R.woff2",
+        "unicodeRange": null
+      }
+    },
+    {
+      "ruleId": "rule.issue-8533.rokg-webfont-korean-name",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "\uB300\uD55C\uBBFC\uAD6D\uC815\uBD80\uC0C1\uC9D5\uCCB4 R",
+      "targetFaceOrPolicy": "CDN_ROKG_R",
+      "conditions": {
+        "profile": "canvas2d-css-woff2"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "external": true,
+        "fontFamily": "\uB300\uD55C\uBBFC\uAD6D\uC815\uBD80\uC0C1\uC9D5\uCCB4 R",
+        "format": "woff2",
+        "kind": "canvas2d-webfont",
+        "sourceUrl": "https://cdn.jsdelivr.net/gh/Alex4386/gov-symbol@eee1e7d37a5ff02ab8bf6c6eb77272d71f1829a2/src/assets/fonts/ROKG_R.woff2",
+        "unicodeRange": null
+      }
+    },
+    {
+      "ruleId": "rule.issue-1994.hankyoreh-webfont-0",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "\uD55C\uACA8\uB808\uACB0\uCCB4",
+      "targetFaceOrPolicy": "CDN_HANKC_400",
+      "conditions": {
+        "profile": "canvas2d-css-woff2"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "external": true,
+        "fontFamily": "\uD55C\uACA8\uB808\uACB0\uCCB4",
+        "format": "woff2",
+        "kind": "canvas2d-webfont",
+        "sourceUrl": "https://cdn.jsdelivr.net/npm/@noonnu/hankc@0.1.0/fonts/hankc-400.woff2",
+        "unicodeRange": null
+      }
+    },
+    {
+      "ruleId": "rule.issue-1994.hankyoreh-webfont-1",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "Hankc",
+      "targetFaceOrPolicy": "CDN_HANKC_400",
+      "conditions": {
+        "profile": "canvas2d-css-woff2"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "external": true,
+        "fontFamily": "Hankc",
+        "format": "woff2",
+        "kind": "canvas2d-webfont",
+        "sourceUrl": "https://cdn.jsdelivr.net/npm/@noonnu/hankc@0.1.0/fonts/hankc-400.woff2",
+        "unicodeRange": null
       }
     }
   ]);
 
-  // build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/src/core/generated/font-rule-projections/canvaskit-sfnt.ts
+  // rhwp-studio/src/core/generated/font-rule-projections/canvaskit-sfnt.ts
   var FONT_RULE_CANVASKIT_SFNT_META = Object.freeze({
     "schemaVersion": "1.0",
     "sourceCommit": "a1f9872e28aea6755b656161ed1802f73308da58",
-    "inputSha256": "a94b64311540ff736c7eb89a70dc3ce38742fdd671ec3c73a4ee05b1302be034",
+    "inputSha256": "f33a6ca90d8a01631cacaf4608e17986defafc11223f0d42e6421ac7bb22c27e",
     "projectionId": "canvaskit-sfnt",
-    "projectionSha256": "d9019fc756d4fd9334252704309bb2020c251d6a7d04dc0f5a6b2efb0f017668",
-    "ruleCount": 158
+    "projectionSha256": "4fafd58b3790c95660cf4100816854aa19d6260d9c35eb8d7a9c583290d9a15e",
+    "ruleCount": 164
   });
   var FONT_RULE_CANVASKIT_SFNT_RULES = Object.freeze([
     {
@@ -11092,12 +11227,12 @@ enum RhwpNativeFontMatcherSource {
       }
     },
     {
-      "ruleId": "rule.studio-supply.9226454d982d47a1557d.canvaskit",
+      "ruleId": "rule.issue-8533.rokg-canvaskit-rokg",
       "sourceBoundaryId": "studio-supply.font-list",
       "relationType": "supply-source",
       "decisionPlane": "supply",
-      "sourceFace": "Government_16040911",
-      "targetFaceOrPolicy": "unavailable: no CanvasKit SFNT source for CDN_GOVERNMENT_SYMBOL_REGULAR",
+      "sourceFace": "ROKG",
+      "targetFaceOrPolicy": "unavailable: no offline CanvasKit SFNT source for ROKG",
       "conditions": {
         "profile": "canvaskit-sfnt"
       },
@@ -11107,22 +11242,24 @@ enum RhwpNativeFontMatcherSource {
       "supply": {
         "capabilityAgreement": false,
         "declaredCapability": "unavailable",
-        "fontFamily": "Government_16040911",
+        "fontFamily": "ROKG",
         "kind": "canvaskit-plan",
         "offline": {
           "sources": [],
           "unavailableFonts": [
-            "Government_16040911"
+            "ROKG"
           ]
         },
         "online": {
           "sources": [
             {
               "aliases": [
-                "\uC815\uBD80\uC0C1\uC9D5 \uBD80\uCC98\uBA85_16040911",
-                "Government_16040911"
+                "ROKG",
+                "ROKG R",
+                "ROKGR",
+                "\uB300\uD55C\uBBFC\uAD6D\uC815\uBD80\uC0C1\uC9D5\uCCB4 R"
               ],
-              "url": "https://cdn.jsdelivr.net/gh/jangster77/korea-government-symbol-font@v1.0.0/fonts/Government_16040911.ttf"
+              "url": "https://cdn.jsdelivr.net/gh/Alex4386/gov-symbol@eee1e7d37a5ff02ab8bf6c6eb77272d71f1829a2/src/assets/fonts/ROKG_R.woff"
             }
           ],
           "unavailableFonts": []
@@ -11131,12 +11268,12 @@ enum RhwpNativeFontMatcherSource {
       }
     },
     {
-      "ruleId": "rule.studio-supply.521afff37dd1f6357469.canvaskit",
+      "ruleId": "rule.issue-8533.rokg-canvaskit-rokg-r",
       "sourceBoundaryId": "studio-supply.font-list",
       "relationType": "supply-source",
       "decisionPlane": "supply",
-      "sourceFace": "\uC815\uBD80\uC0C1\uC9D5 \uBD80\uCC98\uBA85_16040911",
-      "targetFaceOrPolicy": "unavailable: no CanvasKit SFNT source for CDN_GOVERNMENT_SYMBOL_REGULAR",
+      "sourceFace": "ROKG R",
+      "targetFaceOrPolicy": "unavailable: no offline CanvasKit SFNT source for ROKG",
       "conditions": {
         "profile": "canvaskit-sfnt"
       },
@@ -11146,22 +11283,24 @@ enum RhwpNativeFontMatcherSource {
       "supply": {
         "capabilityAgreement": false,
         "declaredCapability": "unavailable",
-        "fontFamily": "\uC815\uBD80\uC0C1\uC9D5 \uBD80\uCC98\uBA85_16040911",
+        "fontFamily": "ROKG R",
         "kind": "canvaskit-plan",
         "offline": {
           "sources": [],
           "unavailableFonts": [
-            "\uC815\uBD80\uC0C1\uC9D5 \uBD80\uCC98\uBA85_16040911"
+            "ROKG R"
           ]
         },
         "online": {
           "sources": [
             {
               "aliases": [
-                "\uC815\uBD80\uC0C1\uC9D5 \uBD80\uCC98\uBA85_16040911",
-                "Government_16040911"
+                "ROKG",
+                "ROKG R",
+                "ROKGR",
+                "\uB300\uD55C\uBBFC\uAD6D\uC815\uBD80\uC0C1\uC9D5\uCCB4 R"
               ],
-              "url": "https://cdn.jsdelivr.net/gh/jangster77/korea-government-symbol-font@v1.0.0/fonts/Government_16040911.ttf"
+              "url": "https://cdn.jsdelivr.net/gh/Alex4386/gov-symbol@eee1e7d37a5ff02ab8bf6c6eb77272d71f1829a2/src/assets/fonts/ROKG_R.woff"
             }
           ],
           "unavailableFonts": []
@@ -14772,12 +14911,12 @@ enum RhwpNativeFontMatcherSource {
       }
     },
     {
-      "ruleId": "rule.studio-supply.0aab2d58429b52047acb.canvaskit",
+      "ruleId": "rule.issue-4969.oldhangul-license-canvaskit",
       "sourceBoundaryId": "studio-supply.font-list",
       "relationType": "supply-source",
       "decisionPlane": "supply",
-      "sourceFace": "Source Han Serif K Old Hangul",
-      "targetFaceOrPolicy": "unavailable: no CanvasKit SFNT source for 'fonts/SourceHanSerifK-OldHangul-subset.woff2'",
+      "sourceFace": "RHWP Old Hangul",
+      "targetFaceOrPolicy": "unavailable: no CanvasKit SFNT source for 'fonts/RHWPOldHangul-Regular.woff2'",
       "conditions": {
         "profile": "canvaskit-sfnt"
       },
@@ -14787,15 +14926,15 @@ enum RhwpNativeFontMatcherSource {
       "supply": {
         "capabilityAgreement": false,
         "declaredCapability": "unavailable",
-        "fontFamily": "Source Han Serif K Old Hangul",
+        "fontFamily": "RHWP Old Hangul",
         "kind": "canvaskit-plan",
         "offline": {
           "sources": [
             {
               "aliases": [
-                "Source Han Serif K Old Hangul"
+                "RHWP Old Hangul"
               ],
-              "url": "fonts/SourceHanSerifK-OldHangul-subset.woff2"
+              "url": "fonts/RHWPOldHangul-Regular.woff2"
             }
           ],
           "unavailableFonts": []
@@ -14804,9 +14943,9 @@ enum RhwpNativeFontMatcherSource {
           "sources": [
             {
               "aliases": [
-                "Source Han Serif K Old Hangul"
+                "RHWP Old Hangul"
               ],
-              "url": "fonts/SourceHanSerifK-OldHangul-subset.woff2"
+              "url": "fonts/RHWPOldHangul-Regular.woff2"
             }
           ],
           "unavailableFonts": []
@@ -14888,10 +15027,258 @@ enum RhwpNativeFontMatcherSource {
       "mode": "direct",
       "metricEntryIds": [],
       "supply": null
+    },
+    {
+      "ruleId": "rule.issue-5884.noto-symbols2.canvaskit",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "Noto Sans Symbols2",
+      "targetFaceOrPolicy": "sfnt: fonts/NotoSansSymbols2-Regular.ttf",
+      "conditions": {
+        "profile": "canvaskit-sfnt"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "capabilityAgreement": true,
+        "declaredCapability": "sfnt-source",
+        "fontFamily": "Noto Sans Symbols2",
+        "kind": "canvaskit-plan",
+        "offline": {
+          "sources": [
+            {
+              "aliases": [
+                "Noto Sans Symbols2"
+              ],
+              "url": "fonts/NotoSansSymbols2-Regular.ttf"
+            }
+          ],
+          "unavailableFonts": []
+        },
+        "online": {
+          "sources": [
+            {
+              "aliases": [
+                "Noto Sans Symbols2"
+              ],
+              "url": "fonts/NotoSansSymbols2-Regular.ttf"
+            }
+          ],
+          "unavailableFonts": []
+        },
+        "runtimePlanStatus": "planned"
+      }
+    },
+    {
+      "ruleId": "rule.issue-7445.public-batang-canvaskit-supply",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "RHWP Public Batang",
+      "targetFaceOrPolicy": "unavailable: no CanvasKit SFNT source for 'fonts/RHWPPublicBatang-Regular.woff2'",
+      "conditions": {
+        "profile": "canvaskit-sfnt"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "capabilityAgreement": false,
+        "declaredCapability": "unavailable",
+        "fontFamily": "RHWP Public Batang",
+        "kind": "canvaskit-plan",
+        "offline": {
+          "sources": [
+            {
+              "aliases": [
+                "RHWP Public Batang"
+              ],
+              "url": "fonts/RHWPPublicBatang-Regular.woff2"
+            }
+          ],
+          "unavailableFonts": []
+        },
+        "online": {
+          "sources": [
+            {
+              "aliases": [
+                "RHWP Public Batang"
+              ],
+              "url": "fonts/RHWPPublicBatang-Regular.woff2"
+            }
+          ],
+          "unavailableFonts": []
+        },
+        "runtimePlanStatus": "planned"
+      }
+    },
+    {
+      "ruleId": "rule.issue-8533.rokg-canvaskit-rokgr",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "ROKGR",
+      "targetFaceOrPolicy": "unavailable: no offline CanvasKit SFNT source for ROKG",
+      "conditions": {
+        "profile": "canvaskit-sfnt"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "capabilityAgreement": false,
+        "declaredCapability": "unavailable",
+        "fontFamily": "ROKGR",
+        "kind": "canvaskit-plan",
+        "offline": {
+          "sources": [],
+          "unavailableFonts": [
+            "ROKGR"
+          ]
+        },
+        "online": {
+          "sources": [
+            {
+              "aliases": [
+                "ROKG",
+                "ROKG R",
+                "ROKGR",
+                "\uB300\uD55C\uBBFC\uAD6D\uC815\uBD80\uC0C1\uC9D5\uCCB4 R"
+              ],
+              "url": "https://cdn.jsdelivr.net/gh/Alex4386/gov-symbol@eee1e7d37a5ff02ab8bf6c6eb77272d71f1829a2/src/assets/fonts/ROKG_R.woff"
+            }
+          ],
+          "unavailableFonts": []
+        },
+        "runtimePlanStatus": "planned"
+      }
+    },
+    {
+      "ruleId": "rule.issue-8533.rokg-canvaskit-korean-name",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "\uB300\uD55C\uBBFC\uAD6D\uC815\uBD80\uC0C1\uC9D5\uCCB4 R",
+      "targetFaceOrPolicy": "unavailable: no offline CanvasKit SFNT source for ROKG",
+      "conditions": {
+        "profile": "canvaskit-sfnt"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "capabilityAgreement": false,
+        "declaredCapability": "unavailable",
+        "fontFamily": "\uB300\uD55C\uBBFC\uAD6D\uC815\uBD80\uC0C1\uC9D5\uCCB4 R",
+        "kind": "canvaskit-plan",
+        "offline": {
+          "sources": [],
+          "unavailableFonts": [
+            "\uB300\uD55C\uBBFC\uAD6D\uC815\uBD80\uC0C1\uC9D5\uCCB4 R"
+          ]
+        },
+        "online": {
+          "sources": [
+            {
+              "aliases": [
+                "ROKG",
+                "ROKG R",
+                "ROKGR",
+                "\uB300\uD55C\uBBFC\uAD6D\uC815\uBD80\uC0C1\uC9D5\uCCB4 R"
+              ],
+              "url": "https://cdn.jsdelivr.net/gh/Alex4386/gov-symbol@eee1e7d37a5ff02ab8bf6c6eb77272d71f1829a2/src/assets/fonts/ROKG_R.woff"
+            }
+          ],
+          "unavailableFonts": []
+        },
+        "runtimePlanStatus": "planned"
+      }
+    },
+    {
+      "ruleId": "rule.issue-1994.hankyoreh-canvaskit-0",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "\uD55C\uACA8\uB808\uACB0\uCCB4",
+      "targetFaceOrPolicy": "unavailable: no offline CanvasKit SFNT source for \uD55C\uACA8\uB808\uACB0\uCCB4",
+      "conditions": {
+        "profile": "canvaskit-sfnt"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "capabilityAgreement": false,
+        "declaredCapability": "unavailable",
+        "fontFamily": "\uD55C\uACA8\uB808\uACB0\uCCB4",
+        "kind": "canvaskit-plan",
+        "offline": {
+          "sources": [],
+          "unavailableFonts": [
+            "\uD55C\uACA8\uB808\uACB0\uCCB4"
+          ]
+        },
+        "online": {
+          "sources": [
+            {
+              "aliases": [
+                "\uD55C\uACA8\uB808\uACB0\uCCB4",
+                "Hankc",
+                "TSThgrgl"
+              ],
+              "url": "https://cdn.jsdelivr.net/npm/@noonnu/hankc@0.1.0/fonts/hankc-400.woff"
+            }
+          ],
+          "unavailableFonts": []
+        },
+        "runtimePlanStatus": "planned"
+      }
+    },
+    {
+      "ruleId": "rule.issue-1994.hankyoreh-canvaskit-1",
+      "sourceBoundaryId": "studio-supply.font-list",
+      "relationType": "supply-source",
+      "decisionPlane": "supply",
+      "sourceFace": "Hankc",
+      "targetFaceOrPolicy": "unavailable: no offline CanvasKit SFNT source for Hankc",
+      "conditions": {
+        "profile": "canvaskit-sfnt"
+      },
+      "order": null,
+      "mode": "direct",
+      "metricEntryIds": [],
+      "supply": {
+        "capabilityAgreement": false,
+        "declaredCapability": "unavailable",
+        "fontFamily": "Hankc",
+        "kind": "canvaskit-plan",
+        "offline": {
+          "sources": [],
+          "unavailableFonts": [
+            "Hankc"
+          ]
+        },
+        "online": {
+          "sources": [
+            {
+              "aliases": [
+                "\uD55C\uACA8\uB808\uACB0\uCCB4",
+                "Hankc",
+                "TSThgrgl"
+              ],
+              "url": "https://cdn.jsdelivr.net/npm/@noonnu/hankc@0.1.0/fonts/hankc-400.woff"
+            }
+          ],
+          "unavailableFonts": []
+        },
+        "runtimePlanStatus": "planned"
+      }
     }
   ]);
 
-  // build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/src/core/font-rule-runtime.ts
+  // rhwp-studio/src/core/font-rule-runtime.ts
   var SUBSTITUTION_BOUNDARY = "studio-substitution.substitution-tables";
   var GOVERNMENT_SUCCESSOR_BOUNDARY = "rust-paint-chain.installed-aliases";
   var DISPLAY_CHAIN_BOUNDARY = "studio-substitution.display-chain";
@@ -15030,11 +15417,11 @@ enum RhwpNativeFontMatcherSource {
     return value.replace(/\u0000/g, "").normalize("NFC").replace(/\s+/g, " ").trim().toLocaleLowerCase("en-US");
   }
 
-  // build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/src/core/font-loader.ts
+  // rhwp-studio/src/core/font-loader.ts
   var FONT_LIST = FONT_RULE_WEBFONT_ENTRIES;
   var REGISTERED_FONTS = new Set(FONT_LIST.map((f) => f.name));
 
-  // build.noindex/task567/stage3-2/upstream-v087/rhwp-studio/src/core/local-fonts.ts
+  // rhwp-studio/src/core/local-fonts.ts
   var cachedFontLookup = emptyLocalFontLookup();
   function normalizeFontAlias(value) {
     if (typeof value !== "string") return "";
@@ -15092,8 +15479,13 @@ enum RhwpNativeFontMatcherSource {
     if (!target) return null;
     const matches = lookup.aliases.get(target) ?? [];
     if (matches.length === 0) return null;
-    const uniqueMatch = (records) => records?.length === 1 ? records[0] : null;
-    return uniqueMatch(lookup.postscriptNames.get(target)) ?? uniqueMatch(lookup.fullNames.get(target)) ?? uniqueMatch(lookup.familyStyles.get(target)) ?? uniqueMatch(lookup.families.get(target)) ?? (matches.length === 1 ? matches[0] : null);
+    const programs = matches.filter((record) => record.detectionSource === "local-font-access" && record.postscriptName);
+    const eligible = programs.length ? programs : matches;
+    const uniqueMatch = (records) => {
+      const candidates = records?.filter((record) => eligible.includes(record)) ?? [];
+      return candidates.length === 1 ? candidates[0] : null;
+    };
+    return uniqueMatch(lookup.postscriptNames.get(target)) ?? uniqueMatch(lookup.fullNames.get(target)) ?? uniqueMatch(lookup.familyStyles.get(target)) ?? uniqueMatch(lookup.families.get(target)) ?? (eligible.length === 1 ? eligible[0] : null);
   }
   function resolveLocalFont(fontName) {
     return resolveLocalFontFromLookup(fontName, cachedFontLookup);
@@ -15162,6 +15554,7 @@ enum RhwpNativeFontMatcherSource {
   }
 
   // <stdin>
+  var hftFamilies = new Set(FONT_RULE_SUBSTITUTION_TABLES.flat().filter((row) => row[1] === 2).map((row) => row[0]));
   var name = (value) => typeof value === "string" && value.trim().length > 0 && value.length <= 1024;
   var text = (value) => typeof value === "string" && value.length <= 1024;
   var key = (value) => value.replace(/\u0000/g, "").normalize("NFC").replace(/\s+/g, " ").trim().toLowerCase();
@@ -15250,11 +15643,20 @@ enum RhwpNativeFontMatcherSource {
       await prepareHostFontCatalog();
       const selections = value.requests.map((request) => {
         if (!name(request.key) || !name(request.family) || ![400, 700].includes(request.weight) || !["normal", "italic"].includes(request.slant)) throw Error("Invalid native request");
-        const face = resolveRendererLocalFont(request.family, request)?.hostReference?.face;
+        if (request.hftCandidateOnly && !hftFamilies.has(request.family)) return { key: request.key, status: "absent" };
+        let face = resolveRendererLocalFont(request.family, request)?.hostReference?.face;
+        let status = "selected";
+        if (!face && request.allowHftRegular && request.weight === 700 && request.slant === "normal" && hftFamilies.has(request.family)) {
+          const candidates = faces.filter((row) => names(row).includes(key(request.family)));
+          if (candidates.length === 1 && candidates[0].weight === 400 && candidates[0].slant === "normal") {
+            face = candidates[0];
+            status = "hftRegular";
+          }
+        }
         const known = value.faces.some((row) => names(row).includes(key(request.family)));
         return face ? {
           key: request.key,
-          status: "selected",
+          status,
           id: face.id,
           postscriptName: face.postscriptName,
           weight: face.weight,

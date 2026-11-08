@@ -65,6 +65,8 @@ struct Request {
     bold: bool,
     italic: bool,
     face_id: String,
+    #[serde(default)]
+    hft_regular: bool,
 }
 
 impl Context {
@@ -153,7 +155,21 @@ impl Context {
                     .map_err(|_| RHWP_FONT_RENDER_INVALID_CONTEXT)?;
             // family는 원본 문서 slot을 묶는 이름이다. host matcher가 고른 face는
             // PS/SHA/스타일로 검증한다. 문서 별칭을 선택된 face의 name으로 바꾸지 않는다.
-            if face.is_bold() != request.bold || face.is_italic() != request.italic {
+            if request.hft_regular
+                && (!request.bold
+                    || request.italic
+                    || face.weight().to_number() != 400
+                    || face.tables().cff.is_none()
+                    || !face.names().into_iter().any(|n| {
+                        matches!(n.name_id, 1 | 16)
+                            && n.to_string().as_deref() == Some(request.family.as_str())
+                    }))
+            {
+                return Err(RHWP_FONT_RENDER_INVALID_CONTEXT);
+            }
+            if face.is_bold() != (request.bold && !request.hft_regular)
+                || face.is_italic() != request.italic
+            {
                 return Err(RHWP_FONT_RENDER_INVALID_CONTEXT);
             }
         }
@@ -182,7 +198,9 @@ fn visit_ops(node: &LayerNode, operation: &mut impl FnMut(&PaintOp)) {
                 visit_ops(child, operation);
             }
         }
-        LayerNodeKind::ClipRect { child, .. } => visit_ops(child, operation),
+        LayerNodeKind::ClipRect { child, .. } | LayerNodeKind::ClipPath { child, .. } => {
+            visit_ops(child, operation)
+        }
         LayerNodeKind::Leaf { ops } => {
             for op in ops {
                 operation(op);

@@ -59,7 +59,7 @@ final class Probe: NSObject, NSApplicationDelegate, WKURLSchemeHandler, WKScript
             let files = ["/index.html": "index.html", "/app.js": "app.js", "/canvaskit.wasm": "canvaskit.wasm",
                          "/fonts/NotoSansKR-Regular.woff2": "fonts/NotoSansKR-Regular.woff2",
                          "/fonts/D2Coding-Regular.woff2": "fonts/D2Coding-Regular.woff2",
-                         "/fonts/SourceHanSerifK-OldHangul-subset.woff2": "fonts/SourceHanSerifK-OldHangul-subset.woff2"]
+                         "/fonts/RHWPOldHangul-Regular.woff2": "fonts/RHWPOldHangul-Regular.woff2"]
             guard let path = files[url.path] else { throw NSError(domain: "Probe.path", code: 404) }
             let data = try Data(contentsOf: root.appendingPathComponent(path))
             let mime = path.hasSuffix("js") ? "text/javascript" : path.hasSuffix("wasm") ? "application/wasm" : path.hasSuffix("html") ? "text/html" : "font/woff2"

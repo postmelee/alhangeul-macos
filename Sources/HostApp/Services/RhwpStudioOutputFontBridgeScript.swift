@@ -7,7 +7,8 @@ enum RhwpStudioOutputFontBridgeScript {
     const connection = window.__alhangeulFontConnection;
     if (typeof api?.resolveOutputRequests !== 'function' || typeof connection?.getOutputContext !== 'function')
       throw Error('Output font adapter unavailable');
-    const result = await api.resolveOutputRequests(requests);
+    const metadata = requests.map(({outlineCharacters, ...request}) => request);
+    const result = await api.resolveOutputRequests(metadata);
     const context = connection.getOutputContext(requests);
     if (!context || result.generation !== api.getState().generation
       || (result.revision !== null && result.revision !== context.revision)) throw Error('Stale output font context');
