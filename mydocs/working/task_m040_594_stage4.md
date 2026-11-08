@@ -219,3 +219,11 @@ python3 scripts/smoke-studio-document-lifecycle.py \
 첫 실행에서 글꼴 선택 대화상자 입력을 기다리다 60초 제한에 도달했다. 공개 API는 ready, native 문서 snapshot은 ready=false였고 화면에 ‘대체 글꼴로 보기’가 표시됐다. 검사에서 이 선택을 수행하고, v0.9.0이 실제 사용하는 CDN fetch 지연/abort 경로를 확인하도록 무응답 검사를 조정했다.
 
 재실행 결과 정상 40개(`wk-choice-normal.log`), CDN fetch 무응답 44개(`wk-choice-stalled.log`)가 통과했다. 무응답 회차의 요청 취소와 준비 완료, 두 실행의 HWP/HWPX 저장·재열기 및 `COMMAND_REPORT_NOT_READY` 보호 분기를 확인했다. 입력 해시와 실행 앱 등록 해제도 두 회차 모두 확인했다. #600 공식 제품 후보가 나오면 동일 검사를 병합된 앱 소스·번들·native core로 재실행한다.
+
+### 공식 제품 후보 및 v0.2.4 리허설 통합 검증
+
+#600의 정식 core·Studio 후보 `f4bb8b03`에 실제 복구 연동을 합쳤다. 이 과정에서 HostApp과 HostAppTests의 Xcode 빌드 대상에 복구 스크립트가 포함되도록 수정했고, xcodegen 원본과 생성 결과를 대조했다.
+
+#601 제품 소스 `7a0103a4`는 v0.2.4 / build 22, rhwp v0.9.0이다. 고정 Studio로 WKWebView 일반 40개·CDN 무응답 44개를 통과했다. HWP/HWPX 내용·선택·실행 취소/다시 실행, 저장 후 core 재열기, 복구 중 출력 거부 및 `COMMAND_REPORT_NOT_READY` 중단을 확인했다. 리허설용 네이티브 브리지를 재빌드해 같은 40개·44개를 재실행했고 두 입력은 원래 해시를 유지했다. 두 창의 CDN 무응답 초기화는 5.93초·5.70초였다.
+
+CI와 같이 HostApp을 테스트 번들 옆에 빌드한 후 전체 HostApp XCTest 265개가 통과했다. Release 앱과 Quick Look·Thumbnail·Spotlight를 담은 리허설 DMG에서 네 번들의 버전 및 arm64/x86_64를 확인했다. 이 검사는 제보 원본의 타이핑 지연 측정을 포함하지 않는다. 글꼴 소비자 수용과 공개 승인은 릴리스 운영 이슈에서 추적한다. [#601](https://github.com/postmelee/alhangeul-macos/issues/601)
