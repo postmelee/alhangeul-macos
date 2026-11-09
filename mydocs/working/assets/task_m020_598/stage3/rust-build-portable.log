@@ -1,0 +1,435 @@
+Verification mode: portable (source, Cargo.lock, generated header, FFI symbols enforced)
+[1/4] Rust staticlib (arm64 + x86_64)...
+   Compiling unicode-ident v1.0.26
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling cfg-if v1.0.5
+   Compiling libc v0.2.190
+   Compiling cmov v0.5.4
+   Compiling typenum v1.20.1
+   Compiling rand_core v0.10.1
+   Compiling simd-adler32 v0.3.10
+   Compiling crc32fast v1.5.2
+   Compiling const-oid v0.10.2
+   Compiling adler2 v2.0.1
+   Compiling log v0.4.34
+   Compiling arrayvec v0.7.8
+   Compiling miniz_oxide v0.9.1
+   Compiling zlib-rs v0.6.8
+   Compiling smallvec v1.16.2
+   Compiling ctutils v0.4.3
+   Compiling libm v0.2.16
+   Compiling bitflags v2.13.2
+   Compiling memchr v2.8.3
+   Compiling zmij v1.0.23
+   Compiling serde_core v1.0.229
+   Compiling rustversion v1.0.23
+   Compiling hybrid-array v0.4.15
+   Compiling float-cmp v0.9.0
+   Compiling serde_json v1.0.151
+   Compiling strict-num v0.1.1
+   Compiling glob v0.3.4
+   Compiling version_check v0.9.5
+   Compiling arrayref v0.3.9
+   Compiling autocfg v1.5.1
+   Compiling wasm-bindgen-shared v0.2.129
+   Compiling clang-sys v1.9.1
+   Compiling num-traits v0.2.19
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+   Compiling block-padding v0.4.2
+   Compiling slotmap v1.1.1
+   Compiling fdeflate v0.3.7
+   Compiling inout v0.2.2
+   Compiling miniz_oxide v0.8.9
+   Compiling find-msvc-tools v0.1.14
+   Compiling heck v0.5.0
+   Compiling rustix v1.1.5
+   Compiling prettyplease v0.2.37
+   Compiling digest v0.11.3
+   Compiling shlex v2.0.1
+   Compiling cc v1.6.0
+   Compiling errno v0.3.14
+   Compiling cpufeatures v0.3.1
+   Compiling flate2 v1.1.10
+   Compiling core_maths v0.1.1
+   Compiling aho-corasick v1.1.5
+   Compiling polycool v0.4.0
+   Compiling ttf-parser v0.25.1
+   Compiling weezl v0.1.12
+   Compiling minimal-lexical v0.2.1
+   Compiling siphasher v1.0.4
+   Compiling regex-syntax v0.8.11
+   Compiling nom v7.1.3
+   Compiling kurbo v0.13.1
+   Compiling memmap2 v0.9.11
+   Compiling cipher v0.5.2
+   Compiling libloading v0.8.9
+   Compiling zerocopy v0.8.60
+   Compiling hashbrown v0.17.1
+   Compiling color_quant v1.1.0
+   Compiling bindgen v0.72.1
+   Compiling unicode-properties v0.1.4
+   Compiling equivalent v1.0.2
+   Compiling unicode-bidi-mirroring v0.4.0
+   Compiling tinyvec v1.13.3
+   Compiling unicode-script v0.5.8
+   Compiling quick-error v2.0.1
+   Compiling bytemuck_derive v1.12.1
+   Compiling either v1.19.0
+   Compiling unicode-ccc v0.4.0
+   Compiling winnow v1.0.4
+   Compiling itertools v0.13.0
+   Compiling indexmap v2.14.2
+   Compiling xattr v1.6.1
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling cexpr v0.6.0
+   Compiling zerocopy-derive v0.8.60
+   Compiling regex-automata v0.4.18
+   Compiling fontdb v0.23.0
+   Compiling bytemuck v1.25.2
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling serde_spanned v1.1.1
+   Compiling filetime v0.2.29
+   Compiling simplecss v0.2.2
+   Compiling semver v1.0.28
+   Compiling unicode-bidi v0.3.18
+   Compiling pico-args v0.5.0
+   Compiling rustybuzz v0.20.1
+   Compiling font-types v0.11.3
+   Compiling shlex v1.3.0
+   Compiling xmlwriter v0.1.0
+   Compiling byteorder-lite v0.1.0
+   Compiling base64 v0.22.1
+   Compiling toml_writer v1.1.2+spec-1.1.0
+   Compiling data-url v0.3.2
+   Compiling itoa v1.0.18
+   Compiling zune-core v0.5.3
+   Compiling rustc-hash v2.1.3
+   Compiling unicode-vo v0.1.0
+   Compiling toml v1.1.6+spec-1.1.0
+   Compiling zune-jpeg v0.5.15
+   Compiling read-fonts v0.39.2
+   Compiling tiny-skia-path v0.11.4
+   Compiling rustc_version v0.4.1
+   Compiling tar v0.4.46
+   Compiling regex v1.13.1
+   Compiling png v0.18.1
+   Compiling keccak v0.2.2
+   Compiling kurbo v0.11.3
+   Compiling bitflags v1.3.2
+   Compiling pkg-config v0.3.34
+   Compiling bumpalo v3.20.3
+   Compiling png v0.17.16
+   Compiling curve25519-dalek v5.0.0
+   Compiling wasm-bindgen-macro-support v0.2.129
+   Compiling image-webp v0.2.4
+   Compiling tiny-skia-path v0.12.0
+   Compiling svgtypes v0.15.3
+   Compiling rgb v0.8.53
+   Compiling gif v0.14.2
+   Compiling encoding_rs v0.8.42
+   Compiling wasm-bindgen v0.2.129
+   Compiling signature v3.0.0
+   Compiling roxmltree v0.21.1
+   Compiling getrandom v0.4.3
+   Compiling roxmltree v0.20.0
+   Compiling pxfm v0.1.30
+   Compiling zune-core v0.4.12
+   Compiling imagesize v0.13.0
+   Compiling fax v0.2.7
+   Compiling once_cell v1.21.4
+   Compiling usvg v0.45.1
+   Compiling zune-jpeg v0.4.21
+   Compiling zopfli v0.8.3
+   Compiling tiny-skia v0.11.4
+   Compiling module-lattice v0.2.3
+   Compiling svgtypes v0.16.1
+   Compiling half v2.7.1
+   Compiling gif v0.13.3
+   Compiling blake3 v1.8.7
+   Compiling tiff v0.11.3
+   Compiling sha2 v0.11.0
+   Compiling hmac v0.13.0
+   Compiling wasm-bindgen-macro v0.2.129
+   Compiling universal-hash v0.6.1
+   Compiling quick-xml v0.42.0
+   Compiling imagesize v0.14.0
+   Compiling skia-bindings v0.153.3
+   Compiling subtle v2.6.1
+   Compiling serde v1.0.229
+   Compiling simdutf8 v0.1.5
+   Compiling multiversion_no_op v1.0.0
+   Compiling cpubits v0.1.1
+   Compiling typed-path v0.12.3
+   Compiling moxcms v0.8.1
+   Compiling sponge-cursor v0.1.0
+   Compiling paste v1.0.15
+   Compiling ryu v1.0.23
+   Compiling scopeguard v1.2.0
+   Compiling zeroize v1.9.1
+   Compiling resvg v0.45.1
+   Compiling zip v8.6.0
+   Compiling write-fonts v0.48.1
+   Compiling skrifa v0.42.1
+   Compiling pdf-writer v0.12.1
+   Compiling shake v0.1.0
+   Compiling aes v0.9.3
+   Compiling usvg v0.47.0
+   Compiling image v0.25.10
+   Compiling poly1305 v0.9.1
+   Compiling pbkdf2 v0.13.0
+   Compiling ed25519 v3.0.0
+   Compiling tiny-skia v0.12.0
+   Compiling sha3 v0.11.0
+   Compiling serde_derive v1.0.229
+   Compiling snafu-derive v0.9.2
+   Compiling strum_macros v0.28.0
+   Compiling cbc v0.2.1
+   Compiling des v0.9.0
+   Compiling chacha20 v0.10.2
+   Compiling sha1 v0.11.0
+   Compiling blake2 v0.11.0
+   Compiling aead v0.6.1
+   Compiling kem v0.3.0
+   Compiling subsetter v0.2.6
+   Compiling uuid v1.27.0
+   Compiling rhwp v0.8.7 (https://github.com/edwardkim/rhwp.git?tag=v0.8.7#1a76570e)
+   Compiling base64ct v1.8.3
+   Compiling constant_time_eq v0.4.2
+   Compiling base64 v0.23.1
+   Compiling web-time v1.1.0
+   Compiling fnv v1.0.7
+   Compiling byteorder v1.5.0
+   Compiling pcx v0.2.5
+   Compiling svg2pdf v0.13.0
+   Compiling rhwp-password-crypto v0.1.0 (https://github.com/edwardkim/rhwp.git?tag=v0.8.7#1a76570e)
+   Compiling cfb v0.15.0
+   Compiling argon2 v0.6.0
+   Compiling strum v0.28.0
+   Compiling ml-kem v0.3.2
+   Compiling chacha20poly1305 v0.11.0
+   Compiling snafu v0.9.2
+   Compiling resvg v0.47.0
+   Compiling rhwp-contracts v0.1.0 (https://github.com/edwardkim/rhwp.git?tag=v0.8.7#1a76570e)
+   Compiling ed25519-dalek v3.0.0
+   Compiling skia-safe v0.153.3
+   Compiling console_error_panic_hook v0.1.7
+   Compiling codepage v0.1.3
+   Compiling ml-dsa v0.1.1
+   Compiling rhwp-ooxml-chart v0.1.0 (https://github.com/edwardkim/rhwp.git?tag=v0.8.7#1a76570e)
+   Compiling unicode-width v0.2.2
+   Compiling embedded-io v0.7.1
+   Compiling unicode-segmentation v1.13.3
+   Compiling rhwp_mac_bridge v0.1.0 (<worktree>/RustBridge)
+    Finished `release` profile [optimized] target(s) in 3m 04s
+   Compiling cfg-if v1.0.5
+   Compiling cmov v0.5.4
+   Compiling typenum v1.20.1
+   Compiling rand_core v0.10.1
+   Compiling simd-adler32 v0.3.10
+   Compiling adler2 v2.0.1
+   Compiling const-oid v0.10.2
+   Compiling log v0.4.34
+   Compiling crc32fast v1.5.2
+   Compiling arrayvec v0.7.8
+   Compiling zlib-rs v0.6.8
+   Compiling bytemuck v1.25.2
+   Compiling smallvec v1.16.2
+   Compiling memchr v2.8.3
+   Compiling miniz_oxide v0.9.1
+   Compiling ctutils v0.4.3
+   Compiling cpufeatures v0.3.1
+   Compiling bitflags v2.13.2
+   Compiling libm v0.2.16
+   Compiling libc v0.2.190
+   Compiling float-cmp v0.9.0
+   Compiling arrayref v0.3.9
+   Compiling miniz_oxide v0.8.9
+   Compiling strict-num v0.1.1
+   Compiling fdeflate v0.3.7
+   Compiling slotmap v1.1.1
+   Compiling num-traits v0.2.19
+   Compiling polycool v0.4.0
+   Compiling hybrid-array v0.4.15
+   Compiling weezl v0.1.12
+   Compiling siphasher v1.0.4
+   Compiling kurbo v0.13.1
+   Compiling color_quant v1.1.0
+   Compiling unicode-bidi-mirroring v0.4.0
+   Compiling hashbrown v0.17.1
+   Compiling unicode-properties v0.1.4
+   Compiling equivalent v1.0.2
+   Compiling quick-error v2.0.1
+   Compiling memmap2 v0.9.11
+   Compiling unicode-ccc v0.4.0
+   Compiling tinyvec v1.13.3
+   Compiling unicode-script v0.5.8
+   Compiling zerocopy v0.8.60
+   Compiling font-types v0.11.3
+   Compiling simplecss v0.2.2
+   Compiling data-url v0.3.2
+   Compiling base64 v0.22.1
+   Compiling core_maths v0.1.1
+   Compiling indexmap v2.14.2
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling block-padding v0.4.2
+   Compiling ttf-parser v0.25.1
+   Compiling inout v0.2.2
+   Compiling unicode-vo v0.1.0
+   Compiling xmlwriter v0.1.0
+   Compiling byteorder-lite v0.1.0
+   Compiling zune-core v0.5.3
+   Compiling unicode-bidi v0.3.18
+   Compiling pico-args v0.5.0
+   Compiling serde_core v1.0.229
+   Compiling zune-jpeg v0.5.15
+   Compiling read-fonts v0.39.2
+   Compiling tiny-skia-path v0.11.4
+   Compiling wasm-bindgen-shared v0.2.129
+   Compiling kurbo v0.11.3
+   Compiling digest v0.11.3
+   Compiling cipher v0.5.2
+   Compiling keccak v0.2.2
+   Compiling bitflags v1.3.2
+   Compiling itoa v1.0.18
+   Compiling signature v3.0.0
+   Compiling image-webp v0.2.4
+   Compiling gif v0.14.2
+   Compiling roxmltree v0.21.1
+   Compiling flate2 v1.1.10
+   Compiling svgtypes v0.15.3
+   Compiling tiny-skia-path v0.12.0
+   Compiling png v0.18.1
+   Compiling png v0.17.16
+   Compiling rustybuzz v0.20.1
+   Compiling fontdb v0.23.0
+   Compiling rgb v0.8.53
+   Compiling zmij v1.0.23
+   Compiling zune-core v0.4.12
+   Compiling bumpalo v3.20.3
+   Compiling pxfm v0.1.30
+   Compiling fax v0.2.7
+   Compiling roxmltree v0.20.0
+   Compiling once_cell v1.21.4
+   Compiling unicode-ident v1.0.26
+   Compiling imagesize v0.13.0
+   Compiling zopfli v0.8.3
+   Compiling zune-jpeg v0.4.21
+   Compiling getrandom v0.4.3
+   Compiling tiny-skia v0.11.4
+   Compiling wasm-bindgen v0.2.129
+   Compiling encoding_rs v0.8.42
+   Compiling curve25519-dalek v5.0.0
+   Compiling half v2.7.1
+   Compiling skia-bindings v0.153.3
+   Compiling tiff v0.11.3
+   Compiling sha2 v0.11.0
+   Compiling hmac v0.13.0
+   Compiling universal-hash v0.6.1
+   Compiling usvg v0.45.1
+   Compiling svgtypes v0.16.1
+   Compiling module-lattice v0.2.3
+   Compiling gif v0.13.3
+   Compiling moxcms v0.8.1
+   Compiling quick-xml v0.42.0
+   Compiling serde_json v1.0.151
+   Compiling curve25519-dalek-derive v0.1.1
+   Compiling subtle v2.6.1
+   Compiling simdutf8 v0.1.5
+   Compiling cpubits v0.1.1
+   Compiling ryu v1.0.23
+   Compiling core_detect v1.0.0
+   Compiling sponge-cursor v0.1.0
+   Compiling rustc-hash v2.1.3
+   Compiling imagesize v0.14.0
+   Compiling typed-path v0.12.3
+   Compiling zeroize v1.9.1
+   Compiling scopeguard v1.2.0
+   Compiling usvg v0.47.0
+   Compiling write-fonts v0.48.1
+   Compiling skrifa v0.42.1
+   Compiling image v0.25.10
+   Compiling zip v8.6.0
+   Compiling shake v0.1.0
+   Compiling pdf-writer v0.12.1
+   Compiling serde v1.0.229
+   Compiling aes v0.9.3
+   Compiling resvg v0.45.1
+   Compiling blake3 v1.8.7
+   Compiling poly1305 v0.9.1
+   Compiling pbkdf2 v0.13.0
+   Compiling tiny-skia v0.12.0
+   Compiling ed25519 v3.0.0
+   Compiling sha3 v0.11.0
+   Compiling des v0.9.0
+   Compiling cbc v0.2.1
+   Compiling chacha20 v0.10.2
+   Compiling blake2 v0.11.0
+   Compiling sha1 v0.11.0
+   Compiling kem v0.3.0
+   Compiling aead v0.6.1
+   Compiling constant_time_eq v0.4.2
+   Compiling base64 v0.23.1
+   Compiling fnv v1.0.7
+   Compiling base64ct v1.8.3
+   Compiling uuid v1.27.0
+   Compiling byteorder v1.5.0
+   Compiling web-time v1.1.0
+   Compiling pcx v0.2.5
+   Compiling cfb v0.15.0
+   Compiling rhwp v0.8.7 (https://github.com/edwardkim/rhwp.git?tag=v0.8.7#1a76570e)
+   Compiling subsetter v0.2.6
+   Compiling svg2pdf v0.13.0
+   Compiling resvg v0.47.0
+   Compiling argon2 v0.6.0
+   Compiling rhwp-password-crypto v0.1.0 (https://github.com/edwardkim/rhwp.git?tag=v0.8.7#1a76570e)
+   Compiling chacha20poly1305 v0.11.0
+   Compiling snafu v0.9.2
+   Compiling strum v0.28.0
+   Compiling ml-kem v0.3.2
+   Compiling ed25519-dalek v3.0.0
+   Compiling console_error_panic_hook v0.1.7
+   Compiling skia-safe v0.153.3
+   Compiling ml-dsa v0.1.1
+   Compiling rhwp-contracts v0.1.0 (https://github.com/edwardkim/rhwp.git?tag=v0.8.7#1a76570e)
+   Compiling codepage v0.1.3
+   Compiling rhwp-ooxml-chart v0.1.0 (https://github.com/edwardkim/rhwp.git?tag=v0.8.7#1a76570e)
+   Compiling embedded-io v0.7.1
+   Compiling unicode-segmentation v1.13.3
+   Compiling unicode-width v0.2.2
+   Compiling rhwp_mac_bridge v0.1.0 (<worktree>/RustBridge)
+    Finished `release` profile [optimized] target(s) in 2m 00s
+[2/4] Universal binary...
+Architectures in the fat file: <worktree>/Frameworks/universal/librhwp.a are: x86_64 arm64
+[3/4] cbindgen header check...
+FFI symbols:
+rhwp_close
+rhwp_document_protection
+rhwp_external_image_refs_json
+rhwp_extract_text_utf8
+rhwp_extract_thumbnail
+rhwp_free_bytes
+rhwp_free_string
+rhwp_image_data
+rhwp_inject_external_image_by_key
+rhwp_open
+rhwp_page_count
+rhwp_page_font_requests_json
+rhwp_page_overlay_images
+rhwp_page_size
+rhwp_render_page_png
+rhwp_render_page_png_with_font_context
+rhwp_render_page_svg
+rhwp_render_page_tree
+rhwp_set_file_name_utf8
+[4/4] XCFramework...
+xcframework successfully written out to: <worktree>/Frameworks/Rhwp.xcframework
+Done: <worktree>/Frameworks/Rhwp.xcframework
+235M	<worktree>/Frameworks/universal/librhwp.a
+235M	<worktree>/Frameworks/Rhwp.xcframework
+Portable: staticlib present; reference metadata valid; byte hash/size comparison excluded.
+Verified (portable): <worktree>/rhwp-core.lock

@@ -1,12 +1,12 @@
 // 앱 소유 목록·출력 선택 연결. upstream 파일·renderer·편집 명령은 수정하지 않는다.
 export const receiptName = 'alhangeul-font-menu-adapter.json';
 export const buildCommand = 'node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>';
-export const sourcePaths = ['src/core/local-fonts.ts', 'src/ui/toolbar.ts', 'src/ui/options-dialog.ts', 'src/main.ts'];
+export const sourcePaths = ['src/core/local-fonts.ts', 'src/ui/toolbar.ts', 'src/ui/options-dialog.ts', 'src/main.ts', 'src/core/wasm-bridge.ts'];
 
 export const outputResolverSource = `
 export async function resolveHostOutputFonts(requests: readonly {
   key: string; family: string; weight: number; slant: 'normal' | 'italic' | 'oblique'; hasStroke?: boolean;
-}[]) {
+}[], allowsCanvasBold: (family: string) => boolean = () => false) {
   if (!hasHostFontProvider()) throw new Error('Output host provider unavailable');
   await prepareHostFontCatalog();
   const state = getHostFontState();
@@ -18,9 +18,19 @@ export async function resolveHostOutputFonts(requests: readonly {
       || typeof request.family !== 'string' || !request.family.trim() || request.family.length > 1024
       || !Number.isInteger(request.weight) || request.weight < 1 || request.weight > 1000
       || !['normal','italic','oblique'].includes(request.slant)) throw new Error('Invalid output font request');
-    const record = resolveRendererLocalFont(request.family, request);
+    let record = resolveRendererLocalFont(request.family, request);
+    let status = 'selected';
+    if (!record && request.weight === 700 && request.slant === 'normal' && !request.hasStroke
+      && allowsCanvasBold(request.family)) {
+      const candidates = hostLookup.aliases.get(normalizeFontAlias(request.family)) ?? [];
+      if (candidates.length === 1 && candidates[0].hostReference?.face.weight === 400
+        && candidates[0].hostReference.face.slant === 'normal') {
+        record = candidates[0];
+        status = 'canvasBold';
+      }
+    }
     const reference = record?.hostReference;
-    if (reference) return {key: request.key, status: 'selected', id: reference.face.id,
+    if (reference) return {key: request.key, status, id: reference.face.id,
       postscriptName: reference.face.postscriptName, weight: reference.face.weight, slant: reference.face.slant};
     return {key: request.key, status: hostLookup.aliases.has(normalizeFontAlias(request.family)) ? 'unavailable' : 'absent'};
   });
@@ -112,7 +122,72 @@ function replaceOnce(source, before, after, label) {
   return source.replace(before, after);
 }
 
+// 공식 WasmBridge 클래스에 삽입한다. 사용 가능한 프로그램의 선택과 조판은 core가 수행한다.
+const declaredHostFontMethods = `
+  private readonly hostHftFamilies = new Set(FONT_RULE_SUBSTITUTION_TABLES.flatMap(table =>
+    table.filter(([, type]) => type === 2).map(([name]) => name)));
+  private declaredHostFonts: { document: number; host: number; environmentId: string | null; cffFamilies: Set<string> } | null = null;
+
+  usesHostHftRegular(family: string): boolean {
+    const state = this.declaredHostFonts;
+    return state?.document === this._documentGeneration && state.host === getHostFontState().generation
+      && state.cffFamilies.has(family);
+  }
+
+  private async prepareDeclaredHostFonts(current: () => boolean): Promise<void> {
+    const doc = this.doc;
+    if (!doc) return;
+    if (!hasHostFontProvider()) {
+      const previous = this.declaredHostFonts;
+      if (previous?.document === this._documentGeneration && previous.environmentId &&
+        JSON.parse(doc.getDocumentFontSelectionPlan()).environmentId === previous.environmentId) doc.setFontEnvironment(undefined);
+      this.declaredHostFonts = null;
+      return;
+    }
+    await prepareHostFontCatalog();
+    if (!current()) return;
+    const host = getHostFontState();
+    const generation = this._documentGeneration;
+    const previous = this.declaredHostFonts;
+    if (previous?.document === generation && previous.host === host.generation) return;
+    const plan = JSON.parse(doc.getDocumentFontSelectionPlan()) as DocumentFontSelectionPlan;
+    const owned = previous?.document === generation ? previous.environmentId : null;
+    if (plan.environmentId !== null && plan.environmentId !== owned) return;
+    const programs = [];
+    const names = new Set(plan.requests.map(request => request.source).filter(name => this.hostHftFamilies.has(name)));
+    if (names.size > 1024) return;
+    for (const query of names) {
+      if (plan.embeddedFamilies?.includes(query)) continue;
+      const records = resolveRendererLocalFontCandidates(query, { weight: 400, slant: 'normal' });
+      if (records.length !== 1 || !records[0].hostReference) continue;
+      const data = await loadRendererLocalFont(records[0]).catch(() => null);
+      if (!current() || host.generation !== getHostFontState().generation) return;
+      if (!data || data.faceIndex || data.bytes.byteLength < 12) continue;
+      const signature = new DataView(data.bytes).getUint32(0);
+      const trueType = signature === 0x00010000 || signature === 0x74727565;
+      const openTypeCff = signature === 0x4f54544f;
+      if ((!trueType && !openTypeCff) || !fontProgramOwnsFamily(data.bytes, query)) continue;
+      const hash = blake3(new Uint8Array(data.bytes));
+      if (!current() || host.generation !== getHostFontState().generation) return;
+      programs.push({ query, family: query, programId: bytesToHex(hash), trueType, openTypeCff });
+    }
+    if (!current() || host.generation !== getHostFontState().generation
+      || JSON.parse(doc.getDocumentFontSelectionPlan()).environmentId !== plan.environmentId) return;
+    const environment = doc.buildFontEnvironmentFromAvailablePrograms(JSON.stringify({programs}));
+    const id = JSON.parse(environment)?.id ?? null;
+    if (id !== null || owned !== null) doc.setFontEnvironment(id !== null ? environment : undefined);
+    this.declaredHostFonts = { document: generation, host: host.generation, environmentId: id,
+      cffFamilies: new Set(programs.filter(row => row.openTypeCff).map(row => row.family)) };
+  }
+`;
+
 export function adaptSource(source, path) {
+  if (path === sourcePaths[4]) {
+    source = replaceOnce(source, 'import { hasHostFontProvider,', "import { fontProgramOwnsFamily } from './canvas-intrinsic-font.mjs';\nimport { FONT_RULE_SUBSTITUTION_TABLES } from './font-rule-runtime';\nimport { resolveRendererLocalFontCandidates, loadRendererLocalFont, hasHostFontProvider,", path);
+    source = replaceOnce(source, '  private canvasMetrics =', declaredHostFontMethods + '\n  private canvasMetrics =', path);
+    return replaceOnce(source, '    const metafileFontGeneration =', '    await this.prepareDeclaredHostFonts(current);\n    if (!current()) return false;\n    const metafileFontGeneration =', path);
+  }
+
   if (path === sourcePaths[0]) {
     source = replaceOnce(source,
       'export function getLocalFonts(options: GetLocalFontsOptions = {}): string[] {\n',
@@ -128,7 +203,7 @@ export function adaptSource(source, path) {
   if (path === sourcePaths[3]) {
     source = replaceOnce(source, 'import { setHostFontProvider,', 'import { resolveHostOutputFonts, setHostFontProvider,', path);
     return replaceOnce(source, 'fonts: { setProvider: setHostFontProvider, getState: getHostFontState },',
-      'fonts: { setProvider: setHostFontProvider, getState: getHostFontState, resolveOutputRequests: resolveHostOutputFonts, getOutputPageSvg: getHostOutputPageSvg },', path) + outputPageSource;
+      'fonts: { setProvider: setHostFontProvider, getState: getHostFontState, resolveOutputRequests: (requests: Parameters<typeof resolveHostOutputFonts>[0]) => resolveHostOutputFonts(requests, family => wasm.usesHostHftRegular(family)), getOutputPageSvg: getHostOutputPageSvg },', path) + outputPageSource;
   }
   if (path === sourcePaths[1]) {
     source = replaceOnce(source,

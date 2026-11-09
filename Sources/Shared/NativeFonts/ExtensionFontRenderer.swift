@@ -59,8 +59,10 @@ enum ExtensionFontRenderer {
                     let prepared = try await HwpNativeFontPageRenderer.preparePage(document: context.document,
                         documentIdentity: context.sourceIdentity, filename: context.filename, pageIndex: index,
                         snapshot: snapshot, documentIsCurrent: current)
-                    return try HwpPageImageRenderer.renderPage(document: context.document, pageIndex: index,
-                        fontContext: prepared.context)
+                    return try context.document.withFontPrograms(prepared.programs) {
+                        try HwpPageImageRenderer.renderPage(document: context.document, pageIndex: index,
+                            fontContext: prepared.context)
+                    }
                 })
                 guard try await snapshot.current() else { throw HwpNativeFontSupplyError.stale }
                 try await validate(current)

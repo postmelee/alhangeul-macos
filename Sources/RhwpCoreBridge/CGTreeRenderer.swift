@@ -587,8 +587,7 @@ class CGTreeRenderer {
         ctx.saveGState()
         applyShadow(style.shadow, in: ctx)
         ctx.setStrokeColor(colorRefToCGColor(style.color))
-        ctx.setLineWidth(CGFloat(max(style.width, 0.5)))
-        applyDash(style.dash, in: ctx)
+        applyDash(style.dash, width: style.width, in: ctx)
 
         ctx.move(to: strokeLine.start)
         ctx.addLine(to: strokeLine.end)
@@ -645,8 +644,7 @@ class CGTreeRenderer {
             applyShadow(ls.shadow, in: ctx)
             ctx.addPath(cgPath)
             ctx.setStrokeColor(colorRefToCGColor(ls.color))
-            ctx.setLineWidth(CGFloat(max(ls.width, 0.5)))
-            applyDash(ls.dash, in: ctx)
+            applyDash(ls.dash, width: ls.width, in: ctx)
             ctx.strokePath()
             drawConnectorArrows(for: pathNode, builtPath: builtPath, in: ctx)
             ctx.restoreGState()
@@ -2460,7 +2458,7 @@ class CGTreeRenderer {
         ctx.scaleBy(x: 1, y: -1)
 
         let font = makeTextRunFont(style: style, fontSize: fontSize, run: run)
-        let attributes = makeTextRunAttributes(style: style, font: font)
+        let attributes = styledAttributes(for: run, makeTextRunAttributes(style: style, font: font))
 
         let attrStr = NSAttributedString(string: displayRun.text, attributes: attributes)
         let line = CTLineCreateWithAttributedString(attrStr)
@@ -2566,7 +2564,7 @@ class CGTreeRenderer {
         ctx.scaleBy(x: 1, y: -1)
 
         let font = makeTextRunFont(style: style, fontSize: fontSize, run: run)
-        let attributes = makeTextRunAttributes(style: style, font: font)
+        let attributes = styledAttributes(for: run, makeTextRunAttributes(style: style, font: font))
         let line = CTLineCreateWithAttributedString(NSAttributedString(string: displayText, attributes: attributes))
         let layout = makeTextRunLayoutPlan(
             text: displayText,
@@ -2660,6 +2658,14 @@ class CGTreeRenderer {
         }
 
         return font
+    }
+
+    private func styledAttributes(for run: TextRunNode, _ attributes: [NSAttributedString.Key: Any]) -> [NSAttributedString.Key: Any] {
+        guard fontContext?.usesRegularForBold(run) == true else { return attributes }
+        var result = attributes
+        // 공식 SVG→PDF 경로의 Regular HFT 수용 결과. 음수는 CoreText 채움+획이고 단위는 글자 크기의 %다.
+        result[NSAttributedString.Key(kCTStrokeWidthAttributeName as String)] = -2.0
+        return result
     }
 
     private func normalizedTextRunRotation(_ run: TextRunNode) -> Double {
@@ -3548,8 +3554,7 @@ class CGTreeRenderer {
             }
             ctx.addPath(path)
             ctx.setStrokeColor(colorRefToCGColor(strokeColor))
-            ctx.setLineWidth(CGFloat(max(style.strokeWidth, 0.5)))
-            applyDash(style.strokeDash, in: ctx)
+            applyDash(style.strokeDash, width: style.strokeWidth, in: ctx)
             ctx.strokePath()
             ctx.restoreGState()
         }
@@ -3674,34 +3679,11 @@ class CGTreeRenderer {
         min(1.0, max(0.0, CGFloat(value)))
     }
 
-    private func applyDash(_ dash: String, in ctx: CGContext) {
-        switch normalizedDashName(dash) {
-        case "Dash":
-            ctx.setLineDash(phase: 0, lengths: [6, 3])
-        case "Dot":
-            ctx.setLineDash(phase: 0, lengths: [2, 2])
-        case "DashDot":
-            ctx.setLineDash(phase: 0, lengths: [6, 3, 2, 3])
-        case "DashDotDot":
-            ctx.setLineDash(phase: 0, lengths: [6, 3, 2, 3, 2, 3])
-        default: // Solid
-            ctx.setLineDash(phase: 0, lengths: [])
-        }
-    }
-
-    private func normalizedDashName(_ dash: String) -> String {
-        switch normalizedStyleKey(dash) {
-        case "dash", "dashed":
-            return "Dash"
-        case "dot", "dotted":
-            return "Dot"
-        case "dashdot", "dashdotted":
-            return "DashDot"
-        case "dashdotdot", "dashdotdotted":
-            return "DashDotDot"
-        default:
-            return "Solid"
-        }
+    private func applyDash(_ dash: StrokeDash, width: Double, in ctx: CGContext) {
+        let pattern = dash.pattern(width: width)
+        ctx.setLineWidth(CGFloat(pattern.width))
+        ctx.setLineCap(pattern.roundCap ? .round : .butt)
+        ctx.setLineDash(phase: 0, lengths: pattern.lengths.map { CGFloat($0) })
     }
 
     private func adjustedLineForArrows(start: CGPoint, end: CGPoint, style: LineStyle) -> (start: CGPoint, end: CGPoint) {

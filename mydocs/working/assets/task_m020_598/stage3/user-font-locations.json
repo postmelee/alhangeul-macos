@@ -1,0 +1,27 @@
+[
+  {
+    "locationClass" : "user-Library-Fonts",
+    "opaqueID" : "installed:8582c34f709436637f8126e03945bcab2113bd2169f18d93d6fa91d8092e23bc",
+    "postScriptName" : "Hack-Bold"
+  },
+  {
+    "locationClass" : "user-Library-Fonts",
+    "opaqueID" : "installed:61542c4914554f22128b253527c4a1e9dcea9cf20a202526ff4e201659405086",
+    "postScriptName" : "Hack-BoldItalic"
+  },
+  {
+    "locationClass" : "user-Library-Fonts",
+    "opaqueID" : "installed:3567596e2b97c16e8d89610c4e2b5a1ee29f8202da9300176bbdf412eea9ef55",
+    "postScriptName" : "Hack-Italic"
+  },
+  {
+    "locationClass" : "user-Library-Fonts",
+    "opaqueID" : "installed:8aa20ca6d3d72d31d7c0b4a7fc59bd30313e3146ffaf7d3d8b9d3908e0b82ad1",
+    "postScriptName" : "Hack-Regular"
+  },
+  {
+    "locationClass" : "user-Library-Fonts",
+    "opaqueID" : "installed:ec28eb54cfc17202cdbbd53c2e1608d125b9b583439706c12d0f9d31f219c45f",
+    "postScriptName" : "Pretendard-Regular"
+  }
+]

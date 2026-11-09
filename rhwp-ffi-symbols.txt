@@ -1,4 +1,5 @@
 rhwp_close
+rhwp_declared_font_candidates
 rhwp_document_protection
 rhwp_external_image_refs_json
 rhwp_extract_text_utf8
@@ -16,4 +17,5 @@ rhwp_render_page_png
 rhwp_render_page_png_with_font_context
 rhwp_render_page_svg
 rhwp_render_page_tree
+rhwp_set_available_font_programs
 rhwp_set_file_name_utf8

@@ -97,6 +97,21 @@ final class RhwpStudioOutputFontPreparation {
       }
       refs.get(groups.get(signature)).push(node);
     }
+    for (const request of requests) {
+      if (request.weight !== 700 || request.slant !== 'normal' || request.hasStroke) continue;
+      const characters = new Set();
+      for (const node of refs.get(request.key)) {
+        const text = node.textContent, style = getComputedStyle(node);
+        if (node.localName !== 'text' || node.childElementCount || text.length !== 1 ||
+            node.x.baseVal.numberOfItems !== 1 || node.y.baseVal.numberOfItems !== 1 ||
+            ['dx','dy','rotate','transform','textLength','clip-path','mask','filter'].some(key => node.hasAttribute(key)) ||
+            style.textAnchor !== 'start' || style.direction !== 'ltr' || style.writingMode !== 'horizontal-tb' ||
+            style.transform !== 'none' || !/^rgb\(/.test(style.fill)) { characters.clear(); break; }
+        characters.add(text);
+        if (characters.size > 256) { characters.clear(); break; }
+      }
+      if (characters.size) request.outlineCharacters = Array.from(characters);
+    }
     // defaultClient world 전용 객체다. SVG data-*나 page world의 같은 이름은 사용하지 않는다.
     globalThis.__alhangeulPDFOutput = {refs, fallbacks, custom: new WeakSet()};
     return JSON.stringify(requests);
@@ -132,6 +147,24 @@ final class RhwpStudioOutputFontPreparation {
         node.style.setProperty('font-weight', String(row.font.weight), 'important');
         node.style.setProperty('font-style', row.font.slant, 'important');
         node.style.setProperty('font-synthesis', 'none', 'important');
+        if (row.strokeOutlines && node.textContent !== ' ') {
+          const outline = row.strokeOutlines[node.textContent];
+          if (!outline) throw Error('Missing output glyph outline');
+          const style = getComputedStyle(node);
+          const scale = parseFloat(style.fontSize) / 1000;
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', outline);
+          path.setAttribute('transform', 'translate(' + node.x.baseVal.getItem(0).value + ' ' +
+            node.y.baseVal.getItem(0).value + ') scale(' + scale + ' ' + -scale + ')');
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke', style.fill);
+          path.setAttribute('stroke-opacity', style.fillOpacity);
+          path.setAttribute('opacity', style.opacity);
+          path.setAttribute('visibility', style.visibility);
+          path.setAttribute('stroke-linejoin', 'round');
+          path.setAttribute('stroke-width', '20'); // 1000단위 윤곽의 0.02em (rhwp PDF).
+          node.after(path);
+        }
         state.custom.add(node);
       }
     }

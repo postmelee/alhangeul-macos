@@ -17,7 +17,7 @@ test('출력 wrapper는 공식 matcher를 그대로 호출하고 ID/revision/gen
     hasHostFontProvider: () => true, prepareHostFontCatalog: async () => {},
     getHostFontState: () => ({active:true, generation, lastError:null}), currentHostRecords: () => {},
     hostFontSource: {references: () => [{revision:'r1'}]},
-    hostLookup: {aliases:new Map([['ambiguous',[]]])}, normalizeFontAlias: name => name,
+    hostLookup: {aliases:new Map([['ambiguous',[regular, regular]], ['HFT',[regular]], ['Font',[regular,bold]]])}, normalizeFontAlias: name => name,
     resolveRendererLocalFont: (family, style) => {
       calls.push([family, style.weight, style.slant]);
       return family === 'Font' ? (style.weight === 700 ? bold : regular) : null;
@@ -29,6 +29,12 @@ test('출력 wrapper는 공식 matcher를 그대로 호출하고 ID/revision/gen
   assert.deepEqual(result.selections.map(r => r.status).join(','), 'selected,selected,absent,unavailable');
   assert.equal(result.selections[0].id, 'native-r'); assert.equal(result.selections[1].id, 'native-b');
   assert.equal(reads, 0); assert.equal(calls.length, 4);
+  const eligible = await api([request('r','HFT',700),request('b','Font',700),request('a','ambiguous',700),
+    {...request('i','HFT',700),slant:'italic'}, {...request('s','HFT',700),hasStroke:true}], () => true);
+  assert.equal(eligible.selections.map(r => r.status).join(','), 'canvasBold,selected,unavailable,unavailable,unavailable');
+  assert.equal(eligible.selections[0].weight, 400);
+  assert.equal(eligible.selections[1].id, 'native-b');
+  assert.equal((await api([request('n','HFT',700)])).selections[0].status, 'unavailable');
   await assert.rejects(api([request('same','Font',400),request('same','Font',700)]));
   await assert.rejects(api([request('key','Font',NaN)]));
   await assert.rejects(api(Array.from({length:2049},(_,i)=>request(String(i),'Font',400))));
@@ -37,7 +43,7 @@ test('출력 wrapper는 공식 matcher를 그대로 호출하고 ID/revision/gen
 test('main adapter만 추가 API를 노출하며 pinned anchor 중복/변경은 실패', async () => {
   const {adaptSource,sourcePaths} = await adapter;
   const source = "import { setHostFontProvider, getHostFontState } from '@/core/local-fonts';\nfonts: { setProvider: setHostFontProvider, getState: getHostFontState },";
-  assert.match(adaptSource(source,sourcePaths[3]), /resolveOutputRequests: resolveHostOutputFonts/);
+  assert.match(adaptSource(source,sourcePaths[3]), /resolveHostOutputFonts\(requests, family => wasm\.usesHostHftRegular\(family\)\)/);
   assert.throws(()=>adaptSource(source+source,sourcePaths[3]), /adapter drift/);
   assert.throws(()=>adaptSource(source.replace('fonts:', 'other:'),sourcePaths[3]), /adapter drift/);
 });

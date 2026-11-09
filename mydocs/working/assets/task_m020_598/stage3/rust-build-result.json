@@ -1,0 +1,34 @@
+{
+  "mode": "portable",
+  "exitCode": 0,
+  "initialRestrictedExitCode": 101,
+  "initialFailure": "Cargo checkout cache creation denied; retried outside exec restriction with unchanged locked version",
+  "artifacts": {
+    "Frameworks/generated_rhwp.h": {
+      "size": 7584,
+      "sha256": "14994c7d1923107b5739b5518e43f98bc002e1b954a068647a377ec4d6e1fbc2"
+    },
+    "Frameworks/generated_rhwp_symbols.txt": {
+      "size": 417,
+      "sha256": "ce7fb868a16b03599f4ea0bcccffb6af206bb6c20dcb5769b95d6937cca14d38"
+    },
+    "Frameworks/universal/librhwp.a": {
+      "size": 245983992,
+      "sha256": "521e53707bed97f95923e011076616344b17aaa42893b342923e82b973e4152a"
+    },
+    "rhwp-core.lock": {
+      "size": 586,
+      "sha256": "975712e98ff9a83a98aa0395139794ff743b7c0d242eeaa8aec48a57e3b47697"
+    },
+    "RustBridge/Cargo.toml": {
+      "size": 347,
+      "sha256": "e1fd6cd17696fb219b4490f4d04dd2e90a1920bdda473f19e7f8d4518bc0d89c"
+    },
+    "RustBridge/Cargo.lock": {
+      "size": 57897,
+      "sha256": "1950de7e756e30b8170aca2daef2568a448959c4fce09a4cd1f06f170255ee4a"
+    }
+  },
+  "strictStaticlibByteComparison": false,
+  "note": "출력 staticlib hash는 현 환경 provenance이며 lock reference hash를 갱신하지 않음"
+}

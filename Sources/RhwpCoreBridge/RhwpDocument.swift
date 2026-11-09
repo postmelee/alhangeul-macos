@@ -317,7 +317,25 @@ class RhwpDocument {
         return json
     }
 
-    /// core의 언어 분류/원본 slot을 조회한다. 반환 문자열의 C 수명은 이 메서드에서 끝낸다.
+    /// 조판 전에 공급을 확인할 원본 이름을 읽고 C 문자열을 반환한다.
+    func declaredFontCandidates() throws -> [String] {
+        guard let pointer = rhwp_declared_font_candidates(handle) else { throw RhwpNativeFontContext.Failure.invalid }
+        defer { rhwp_free_string(pointer) }
+        return try JSONDecoder().decode([String].self, from: Data(String(cString: pointer).utf8))
+    }
+
+    // 환경을 사용하는 동기 구간 사이에는 문서 핸들을 portable 상태로 되돌린다.
+    func withFontPrograms<T>(_ programs: Data?, operation: () throws -> T) throws -> T {
+        guard let programs else { return try operation() }
+        let applied = programs.withUnsafeBytes {
+            rhwp_set_available_font_programs(handle, $0.bindMemory(to: UInt8.self).baseAddress, UInt($0.count))
+        }
+        guard applied else { throw RhwpNativeFontContext.Failure.invalid }
+        defer { _ = rhwp_set_available_font_programs(handle, nil, 0) }
+        return try operation()
+    }
+
+    /// core의 언어 분류와 조판된 페이지의 글꼴 슬롯을 읽는다.
     func nativeFontRequests(at page: Int) throws -> [RhwpNativePageFontRequest] {
         guard let page = UInt32(exactly: page) else { throw RhwpNativeFontContext.Failure.invalid }
         var pointer: UnsafeMutablePointer<CChar>?

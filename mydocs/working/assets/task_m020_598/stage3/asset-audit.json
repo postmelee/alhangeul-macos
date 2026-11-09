@@ -1,0 +1,80 @@
+{
+  "scope": "task598-stage3-local-read-only",
+  "documents": {
+    "hwp": {
+      "upstreamRelativePath": "samples/hwp3-sample10.hwp",
+      "exists": true,
+      "size": 945360,
+      "sha256": "d9ceb35d8abfb73e9afbe349bccb2a986cf552d66ae7f3f34dcfe4d9d385cb48"
+    },
+    "hwpx": {
+      "upstreamRelativePath": "mydocs/pr/assets/issue7774/sql-sample10-regressions-20261015/hwp3-sample10-hwpx.hwpx",
+      "exists": true,
+      "size": 847607,
+      "sha256": "3395e19bebea8b6689f383df1f4ea1ddb253dee91c4320392cc40e90e2e4f191",
+      "strawberryDeclarations": [
+        {
+          "id": "3",
+          "face": "딸기",
+          "type": "HFT",
+          "isEmbedded": "0"
+        }
+      ]
+    },
+    "pdf": {
+      "upstreamRelativePath": "pdf/issue8371/hwp3-sample10-2020.pdf",
+      "exists": false
+    },
+    "original_pdf": {
+      "upstreamRelativePath": "output/hwp3-sample10-2020.pdf",
+      "exists": false
+    }
+  },
+  "userFontControls": [
+    {
+      "filename": "Pretendard-Regular.otf",
+      "locationClass": "user-Library-Fonts",
+      "postScriptName": "Pretendard-Regular",
+      "sha256": "3ffbacde6ab8411f1d2db54bb9b1f0b3ee2a738932033722cf0388c06aed1c93",
+      "byteCount": 1574352,
+      "signature": "4f54544f",
+      "deliveredHashMatchesFile": true
+    },
+    {
+      "filename": "Hack-Italic.ttf",
+      "locationClass": "user-Library-Fonts",
+      "postScriptName": "Hack-Italic",
+      "sha256": "7b204c4ac095daa75442916046911d0519ca3e979dcc858098b123fd351ce943",
+      "byteCount": 399700,
+      "signature": "00010000",
+      "deliveredHashMatchesFile": true
+    },
+    {
+      "filename": "Hack-BoldItalic.ttf",
+      "locationClass": "user-Library-Fonts",
+      "postScriptName": "Hack-BoldItalic",
+      "sha256": "736049c041a7d2a53d83d3ada5d0c41c9c70961d68745330567c5ee8fedfcb86",
+      "byteCount": 404732,
+      "signature": "00010000",
+      "deliveredHashMatchesFile": true
+    },
+    {
+      "filename": "Hack-Bold.ttf",
+      "locationClass": "user-Library-Fonts",
+      "postScriptName": "Hack-Bold",
+      "sha256": "7c8dc9031631c614837db2d00a05548d67a27c54d91f48f41cd1ebebf70cdd95",
+      "byteCount": 395620,
+      "signature": "00010000",
+      "deliveredHashMatchesFile": true
+    },
+    {
+      "filename": "Hack-Regular.ttf",
+      "locationClass": "user-Library-Fonts",
+      "postScriptName": "Hack-Regular",
+      "sha256": "41366767b9fd99c5bd1ef8197f97c000786acd2faf0ad7f089925facbed397d4",
+      "byteCount": 393468,
+      "signature": "00010000",
+      "deliveredHashMatchesFile": true
+    }
+  ]
+}

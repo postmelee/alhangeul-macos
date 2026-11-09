@@ -53,6 +53,7 @@ enum HwpNativeFontPageRenderer {
     }
 
     struct Prepared {
+        let programs: Data?
         let context: RhwpNativeFontContext?
         let cacheIdentity: String
         let snapshotIdentity: String
@@ -73,7 +74,7 @@ enum HwpNativeFontPageRenderer {
             let prepared = try await preparePage(document: document, documentIdentity: documentIdentity,
                 filename: filename, pageIndex: pageIndex, snapshot: snapshot, maximumPixelSize: maximumPixelSize,
                 policy: policy, documentIsCurrent: documentIsCurrent)
-            result = try operation(prepared)
+            result = try document.withFontPrograms(prepared.programs) { try operation(prepared) }
             try await validate(snapshot, documentIsCurrent)
         } catch {
             await snapshot.release()
@@ -93,8 +94,10 @@ enum HwpNativeFontPageRenderer {
         let prepared = try await preparePage(document: document, documentIdentity: digest(data), filename: filename,
             pageIndex: pageIndex, snapshot: snapshot, maximumPixelSize: maximumPixelSize, policy: policy,
             documentIsCurrent: documentIsCurrent, budget: budget, limits: limits)
-        let page = try HwpPageImageRenderer.renderPage(document: document, pageIndex: pageIndex,
-            maximumPixelSize: maximumPixelSize, policy: policy, fontContext: prepared.context)
+        let page = try document.withFontPrograms(prepared.programs) {
+            try HwpPageImageRenderer.renderPage(document: document, pageIndex: pageIndex,
+                maximumPixelSize: maximumPixelSize, policy: policy, fontContext: prepared.context)
+        }
         try await validate(snapshot, documentIsCurrent)
         return .init(page: page, cacheIdentity: prepared.cacheIdentity, snapshotIdentity: prepared.snapshotIdentity,
             selectedFaces: prepared.selectedFaces, fallbackFamilies: prepared.fallbackFamilies,
@@ -116,10 +119,45 @@ enum HwpNativeFontPageRenderer {
                   size.width <= 16_384, size.height <= 16_384 else { throw HwpNativeFontSupplyError.invalid }
         }
         try await validate(snapshot, documentIsCurrent)
-        let slots = try document.nativeFontRequests(at: pageIndex)
+        let sourceNames = Set(try document.declaredFontCandidates())
+        var sourceData = [String: StudioFontBytes]()
+        var programs = [[String: Any]]()
+        var sourceBytes = 0
+        let declaredRequests = sourceNames.sorted().map {
+            RhwpNativeFontMatcher.Request(key: $0, family: $0, weight: 400, slant: "normal", hftCandidateOnly: true)
+        }
+        var declared = [RhwpNativeFontMatcher.Selection]()
+        if !snapshot.faces.isEmpty {
+            for start in stride(from: 0, to: declaredRequests.count, by: 2048) {
+                try await validate(snapshot, documentIsCurrent)
+                let batch = Array(declaredRequests[start..<min(start + 2048, declaredRequests.count)])
+                declared += try await RhwpNativeFontMatcher.resolve(snapshot: snapshot, requests: batch)
+            }
+        }
+        for choice in declared {
+            let family = choice.key
+            guard choice.status == "selected", choice.weight == 400, let id = choice.id,
+                  let row = snapshot.faces.first(where: { $0.id == id }), row.limitation == nil else { continue }
+            let value: StudioFontBytes
+            if let existing = sourceData[row.id] { value = existing } else {
+                guard sourceData.count < limits.faces, sourceBytes <= limits.residentBytes - limits.fileBytes else {
+                    throw HwpNativeFontSupplyError.tooLarge
+                }
+                value = try await read(row.id, snapshot: snapshot, budget: budget, maximumBytes: limits.fileBytes)
+                sourceBytes += value.data.count
+                sourceData[row.id] = value
+            }
+            guard value.data.starts(with: "OTTO".utf8), value.face.weightClass == 400,
+                  value.face.names.contains(where: { [1,16].contains($0.nameID) && $0.value == family }) else { continue }
+            programs.append(["query":family, "family":family, "openTypeCff":true, "programId":digest(value.data)])
+        }
+        try await validate(snapshot, documentIsCurrent)
+        let programData = programs.isEmpty ? nil : try JSONSerialization.data(withJSONObject: ["programs":programs])
+        let hftSources = Set(programs.compactMap { $0["query"] as? String })
+        let slots = try document.withFontPrograms(programData) { try document.nativeFontRequests(at: pageIndex) }
         let requests = slots.enumerated().map { index, slot in
             RhwpNativeFontMatcher.Request(key: String(index), family: slot.family,
-                weight: slot.bold ? 700 : 400, slant: slot.italic ? "italic" : "normal")
+                weight: slot.bold ? 700 : 400, slant: slot.italic ? "italic" : "normal", allowHftRegular: hftSources.contains(slot.family))
         }
         let selections = try await RhwpNativeFontMatcher.resolve(snapshot: snapshot, requests: requests)
         try await validate(snapshot, documentIsCurrent)
@@ -128,18 +166,22 @@ enum HwpNativeFontPageRenderer {
         var fallbacks = Set<String>()
         for (slot, choice) in zip(slots, selections) {
             if choice.status == "absent" { fallbacks.insert(slot.family); continue }
-            guard choice.status == "selected", let id = choice.id, let weight = choice.weight,
+            let regular = choice.status == "hftRegular" && hftSources.contains(slot.family) && slot.bold && !slot.italic
+            guard choice.status == "selected" || regular, let id = choice.id, let weight = choice.weight,
                   choice.postscriptName != nil, let slant = choice.slant else { throw HwpNativeFontSupplyError.unavailable }
             // PS/full-name의 exact 선택은 원래 요청 스타일을 덮어쓰지 않는다.
-            guard weight == (slot.bold ? 700 : 400), slant == (slot.italic ? "italic" : "normal") else {
+            guard weight == (slot.bold && !regular ? 700 : 400), slant == (slot.italic ? "italic" : "normal") else {
                 throw HwpNativeFontSupplyError.unsupported
             }
             if let previous = needed[id], previous.weight != weight || previous.slant != slant { throw HwpNativeFontSupplyError.invalid }
             needed[id] = choice
             selected.append(.init(charShapeId: slot.charShapeId, languageIndex: slot.languageIndex,
-                family: slot.family, bold: slot.bold, italic: slot.italic, faceId: id))
+                family: slot.family, bold: slot.bold, italic: slot.italic, faceId: id, hftRegular: regular))
         }
         guard needed.count <= limits.faces else { throw HwpNativeFontSupplyError.tooLarge }
+        var sourceReads = sourceData.count
+        sourceData = sourceData.filter { needed[$0.key] != nil }
+        var remainingSourceBytes = sourceData.values.reduce(0) { $0 + $1.data.count }
         var faces: [RhwpNativeFontContext.Face] = []
         var total = 0
         for id in needed.keys.sorted() {
@@ -149,7 +191,18 @@ enum HwpNativeFontPageRenderer {
                   row.postScriptName == choice.postscriptName else { throw HwpNativeFontSupplyError.invalid }
             // read/inspect에 필요한 최악의 file slot을 읽기 전에 예약한다.
             guard total <= limits.residentBytes - limits.fileBytes else { throw HwpNativeFontSupplyError.tooLarge }
-            let value = try await read(id, snapshot: snapshot, budget: budget, maximumBytes: limits.fileBytes)
+            let value: StudioFontBytes
+            if let preloaded = sourceData.removeValue(forKey: id) {
+                value = preloaded
+                remainingSourceBytes -= value.data.count
+            } else {
+                guard total + remainingSourceBytes <= limits.residentBytes - limits.fileBytes else {
+                    throw HwpNativeFontSupplyError.tooLarge
+                }
+                value = try await read(id, snapshot: snapshot, budget: budget, maximumBytes: limits.fileBytes)
+                sourceBytes += value.data.count
+                sourceReads += 1
+            }
             try await validate(snapshot, documentIsCurrent)
             let face = value.face
             guard face.applicationSupport == .staticCandidate, face.id.sfntIndex == 0, face.axes.isEmpty,
@@ -177,9 +230,9 @@ enum HwpNativeFontPageRenderer {
         let context = faces.isEmpty ? nil : try RhwpNativeFontContext(identity: identity, faces: faces, requests: selected)
         faces.removeAll() // 합친 buffer 이외의 원본 참조를 render 전에 해제한다.
         try await validate(snapshot, documentIsCurrent)
-        return .init(context: context, cacheIdentity: identity, snapshotIdentity: snapshot.identity,
+        return .init(programs: programData, context: context, cacheIdentity: identity, snapshotIdentity: snapshot.identity,
             selectedFaces: context?.faces.map(\.postScriptName).sorted() ?? [], fallbackFamilies: fallbacks.sorted(),
-            sourceReads: needed.count, sourceBytes: total)
+            sourceReads: sourceReads, sourceBytes: sourceBytes)
     }
 
     private static func read(_ id: String, snapshot: StudioFontSupplySnapshot,

@@ -225,6 +225,31 @@ private func verifyUnsignedCellContext() throws {
     print("OK: cell context preserves UInt.max/UInt.max-1; all four unsigned fields reject negatives")
 }
 
+private func verifyStrokeDash() throws {
+    func decode(_ json: String) throws -> StrokeDash {
+        try JSONDecoder().decode(StrokeDash.self, from: Data(json.utf8))
+    }
+    let explicit = try decode(#"{"Explicit":[0.64,0.96,0,0,0,0]}"#).pattern(width: 0.32)
+    try require(explicit.width == 0.32 && explicit.lengths == [0.64, 0.96] && !explicit.roundCap,
+                "explicit producer lengths or thin width changed")
+    let circle = try decode(#""HwpCircle""#).pattern(width: 0.32)
+    try require(circle.width == 0.32 && circle.roundCap && circle.lengths == [0, 0.16 * 2.25],
+                "HWP round-cap circle lost pen scale")
+    let dot = try decode(#""HwpDot""#).pattern(width: 0.32)
+    try require(dot.lengths == [1.5 * 0.16 + 0.16, 2.25 * 0.16 - 0.16] && !dot.roundCap,
+                "HWP dot lost alternating edge widths")
+    let legacy = try decode(#""dash-dotted""#).pattern(width: 0.32)
+    try require(legacy.lengths == [6, 3, 2, 3] && legacy.width == 0.5, "legacy dash drift")
+    for json in [#"{"Explicit":[1,2]}"#, #"{"Explicit":[1,-2,0,0,0,0]}"#,
+                 #"{"Explicit":[1,2,0,0,0,0],"Other":[]}"#] {
+        do {
+            _ = try decode(json)
+            throw RenderTreeDecoderFixtureError.assertion("malformed explicit dash accepted")
+        } catch is DecodingError { }
+    }
+    print("OK: explicit, HWP pen and legacy dash patterns")
+}
+
 private func verifyEveryKnownVariant() throws {
     var root = try JSONSerialization.jsonObject(with: Data(textRunPayloadJSON.utf8)) as! [String: Any]
     let textRun = (root["node_type"] as! [String: Any])["TextRun"]!
@@ -321,6 +346,7 @@ private struct RenderTreeDecoderFixture {
             try verifyStrictKnownAndUnknownPolicy()
             try verifyUnsignedCoreIndexMetadata()
             try verifyUnsignedCellContext()
+            try verifyStrokeDash()
             try verifyEveryKnownVariant()
             print(
                 "OK: render tree decoder preserves current/legacy/future variants and diagnoses malformed known/envelope payloads"

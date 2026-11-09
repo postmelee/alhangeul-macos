@@ -1,6 +1,6 @@
 # Third Party Licenses
 
-이 문서는 Alhangeul macOS v0.1 release artifact에 포함되는 third-party code와 bundled asset의 attribution/provenance 기준을 정리한다. 저장소 자체 license는 `LICENSE`가 소유한다.
+이 문서는 Alhangeul macOS release artifact에 포함되는 third-party code와 bundled asset의 attribution/provenance 기준을 정리한다. 저장소 자체 license는 `LICENSE`가 소유한다.
 
 Alhangeul macOS 저장소 자체 코드, 문서, packaging 구성의 주 저작권자는 Taegyu Lee이며, 저장소 license는 MIT License다. Third-party code와 asset은 각 upstream 저작권자와 license 조건을 유지한다.
 
@@ -8,7 +8,7 @@ Alhangeul macOS 저장소 자체 코드, 문서, packaging 구성의 주 저작�
 
 현재 release artifact 고지는 실제 bundle과 lock 파일에 고정된 항목만 기준으로 한다.
 
-- Rust core와 Web/WASM viewer asset은 `edwardkim/rhwp` `v0.7.12` release-tag snapshot 기준이다.
+- Rust core와 Web/WASM viewer asset은 `edwardkim/rhwp` `v0.9.0` release-tag snapshot 기준이다.
 - Sparkle은 Swift Package dependency로 `2.9.1` exact version 기준이다.
 - `rhwp` upstream의 별도 GitHub Release 바이너리 asset은 Alhangeul app bundle에 포함하지 않는다.
 - 한컴/HY/HCR/Microsoft proprietary font 파일은 저장소와 release artifact에 포함하지 않는다.
@@ -20,11 +20,13 @@ Alhangeul macOS 저장소 자체 코드, 문서, packaging 구성의 주 저작�
 - Repository: https://github.com/edwardkim/rhwp
 - License: MIT
 - Ref kind: release-tag
-- Release tag: `v0.7.12`
-- Resolved commit: `1899ef9bc2dfd1c6c0c4d18b192d253a2d0a1fb5`
+- Release tag: `v0.9.0`
+- Resolved commit: `c9095c5f67632e6721e800ccc7fb43ea49d26682`
 - Provenance: `rhwp-core.lock`, `RustBridge/Cargo.toml`, `RustBridge/Cargo.lock`
 
 `Sources/RhwpCoreBridge`의 일부 Swift bridge 코드는 upstream iOS viewer 구현에서 출발했으며, 현재 macOS bridge와 renderer 정책은 이 저장소에서 유지보수한다.
+
+upstream이 제공하는 PDF·이미지 코덱 등 의존성 고지는 앱의 `Legal/RHWP-THIRD-PARTY-LICENSES.md`에 동봉한다. [v0.9.0 원문](https://github.com/edwardkim/rhwp/blob/c9095c5f67632e6721e800ccc7fb43ea49d26682/THIRD_PARTY_LICENSES.md)
 
 ## Rust bridge generated artifacts
 
@@ -41,8 +43,8 @@ HostApp WKWebView viewer는 app bundle의 `Sources/HostApp/Resources/rhwp-studio
 
 - Source repository: https://github.com/edwardkim/rhwp.git
 - Ref kind: release-tag
-- Release tag: `v0.7.12`
-- Resolved commit: `1899ef9bc2dfd1c6c0c4d18b192d253a2d0a1fb5`
+- Release tag: `v0.9.0`
+- Resolved commit: `c9095c5f67632e6721e800ccc7fb43ea49d26682`
 - Source path: `rhwp-studio/dist`
 - Excluded path: `samples/`
 - Provenance manifest: `Sources/HostApp/Resources/rhwp-studio/manifest.json`
@@ -77,7 +79,7 @@ HostApp은 Sparkle을 macOS app update framework로 사용한다.
 
 ## Bundled fonts
 
-HostApp bundle에는 `Sources/HostApp/Resources/rhwp-studio/fonts` 아래 WOFF2 font 35개가 포함된다. WebView viewer는 이 font를 CSS/WebFont로 사용하고, Swift native renderer는 같은 WOFF2를 CoreText process-local font로 등록해 fallback 후보로 재사용한다.
+HostApp bundle에는 `Sources/HostApp/Resources/rhwp-studio/fonts` 아래 WOFF2 글꼴 38개, 기호용 TTF 1개 및 수식 윤곽용 OTF 1개가 포함된다. WebView viewer는 이 font를 CSS/WebFont로 사용하고, Swift native renderer는 같은 WOFF2를 CoreText process-local font로 등록해 fallback 후보로 재사용한다.
 
 font별 또는 font family별 파일명, license, source, 대체 대상은 `Sources/HostApp/Resources/rhwp-studio/fonts/FONTS.md`가 소유한다.
 

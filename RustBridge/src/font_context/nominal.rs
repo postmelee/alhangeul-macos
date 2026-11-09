@@ -83,7 +83,14 @@ impl FontResolver for Resolver<'_> {
             ttf_parser::Face::parse(&self.bytes[input.offset..input.offset + input.length], 0)
                 .ok()?;
         // Context::parse도 검증하지만 resolver의 스타일 의미를 이 경계에서 명확히 한다.
-        if face.is_bold() != request.bold || face.is_italic() != request.italic {
+        let regular_for_bold = request.bold
+            && !face.is_bold()
+            && self.context.requests.iter().any(|entry| {
+                entry.char_shape_id == shape && entry.face_id == id && entry.hft_regular
+            });
+        if face.is_bold() != (request.bold && !regular_for_bold)
+            || face.is_italic() != request.italic
+        {
             return None;
         }
         if face.units_per_em() == 0 {
@@ -116,27 +123,33 @@ impl FontResolver for Resolver<'_> {
         let mut utf16 = 0;
         let mut delta = 0.0f64;
         for (index, character) in characters.iter().enumerate() {
-            let glyph = face.glyph_index(*character).filter(|glyph| glyph.0 != 0)?;
-            let actual = f64::from(face.glyph_hor_advance(glyph)?) * run.style.font_size
-                / f64::from(face.units_per_em());
-            let advance = producer[index + 1] - producer[index];
-            delta = delta.max((advance - actual).abs());
-            glyphs.push(u32::from(glyph.0));
-            positions.push(LayerPoint {
-                x: producer[index],
-                y: 0.0,
-            });
-            advances.push(LayerVector {
-                dx: advance,
-                dy: 0.0,
-            });
+            let first_glyph = glyphs.len() as u32;
             let end8 = utf8 + character.len_utf8() as u32;
             let end16 = utf16 + character.len_utf16() as u32;
+            // U+0020이 없는 HFT에서 보이지 않는 공백은 원본의 위치와 문자 범위만 소비한다.
+            let glyph = face.glyph_index(*character).filter(|glyph| glyph.0 != 0);
+            if let Some(glyph) = glyph {
+                let actual = f64::from(face.glyph_hor_advance(glyph)?) * run.style.font_size
+                    / f64::from(face.units_per_em());
+                let advance = producer[index + 1] - producer[index];
+                delta = delta.max((advance - actual).abs());
+                glyphs.push(u32::from(glyph.0));
+                positions.push(LayerPoint {
+                    x: producer[index],
+                    y: 0.0,
+                });
+                advances.push(LayerVector {
+                    dx: advance,
+                    dy: 0.0,
+                });
+            } else if !regular_for_bold || *character != ' ' {
+                return None;
+            }
             clusters.push(GlyphCluster {
                 source_range_utf8: TextSourceRange::new(utf8, end8),
-                source_range_utf16: Some(TextSourceRange::new(utf16, end16)),
+                source_range_utf16: Some(TextSourceRange::new(utf16 as u32, end16 as u32)),
                 text_range_utf8: Some(TextSourceRange::new(utf8, end8)),
-                glyph_range: GlyphRange::new(index as u32, index as u32 + 1),
+                glyph_range: GlyphRange::new(first_glyph, glyphs.len() as u32),
                 flags: Vec::new(),
             });
             utf8 = end8;
@@ -148,7 +161,7 @@ impl FontResolver for Resolver<'_> {
                     face_key: self.keys.get(id)?.clone(),
                     size_px: run.style.font_size,
                     variations: Vec::new(),
-                    synthetic_bold: false,
+                    synthetic_bold: regular_for_bold,
                     synthetic_italic: false,
                 },
                 direction: TextDirection::Ltr,
@@ -243,7 +256,9 @@ pub(super) fn lower(tree: &mut PageLayerTree, context: &Context, bytes: &[u8]) -
                     bind_ltr(child);
                 }
             }
-            LayerNodeKind::ClipRect { child, .. } => bind_ltr(child),
+            LayerNodeKind::ClipRect { child, .. } | LayerNodeKind::ClipPath { child, .. } => {
+                bind_ltr(child)
+            }
             LayerNodeKind::Leaf { ops } => {
                 for op in ops {
                     if let PaintOp::GlyphRun { run, .. } = op {

@@ -1,20 +1,22 @@
 {
   "schema": 1,
-  "commit": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "commit": "c9095c5f67632e6721e800ccc7fb43ea49d26682",
   "compiler": "esbuild 0.25.12",
   "adapters": {
-    "scripts/build-native-font-matcher.mjs": "45e77b6636e866a518aff849c33014f05f1501f62c0dc9d6a0e809221483feca",
+    "scripts/build-native-font-matcher.mjs": "03a79852d4f285273bba1c0a970d3ba32435c52efc1cb80f87652506a1c05271",
     "Sources/HostApp/Services/StudioFontProviderScript.swift": "5197d29761c76cb4febd3464d3ba144f3faea5433fad7aab1b5f1f1ce211c034"
   },
   "sources": {
+    "rhwp-studio/src/core/browser-font-cmap.ts": "ec3480a3885a8b5da3764e15514da7a10ef6eda997c0967fa5d1677e2ec3126d",
     "rhwp-studio/src/core/canvas-font-raw.ts": "15337a692ea0fc6ff5c58af20de502b0cd1d06bb73b8c5012c82bb9c006cfbd9",
-    "rhwp-studio/src/core/font-loader.ts": "64a7f5fa58f0aa4638ac0665875a02eb841e6225bf53b54a7e5d3aaca827cef1",
+    "rhwp-studio/src/core/font-loader.ts": "3c503a5328954fb1fdf2fbc1649e75b920c3252e9212c978053aa55087a66814",
     "rhwp-studio/src/core/font-rule-runtime.ts": "4e4ec7c6e53f077f2d91eb4a9c0cee5a2c40329c23da80f160713e9bd6a64f28",
     "rhwp-studio/src/core/generated/font-rule-projections/canvas2d-paint.ts": "7ef40df25b56b34840b095695f4b53ad140f18e90884a7c3cc25451a711af4d1",
-    "rhwp-studio/src/core/generated/font-rule-projections/canvaskit-sfnt.ts": "22d866ae1ade10daf7909ac1699911ac538ed12705e9665e3f0960a359bf64d3",
-    "rhwp-studio/src/core/generated/font-rule-projections/webfont-supply.ts": "0b96600917c7e4b78e55a77c6904c69f70cfdd0067c00d2b54a58db6887d070e",
+    "rhwp-studio/src/core/generated/font-rule-projections/canvaskit-sfnt.ts": "53f5cbbcc18eb4f342ebc103540db48ed0e00b6d32dd6fea9d45e3a53ceea93b",
+    "rhwp-studio/src/core/generated/font-rule-projections/webfont-supply.ts": "ba737bcb68911b3bb31b8d609e4fe9efb158468446ba911e7d639b5048701f1d",
     "rhwp-studio/src/core/host-font-provider.ts": "dd1928c6cf2239ab7591ae6842a6ba279a485ff3bc0663f40462adea722a0423",
-    "rhwp-studio/src/core/local-fonts.ts": "78228d2db58ea6467271bfe3bd5018ae7fb16b17480cc23f453cd0dc186fe1c8"
+    "rhwp-studio/src/core/local-fonts.ts": "37f51713e87eece3bcee9fc63e683dfbc09b970dd114850fcf23a961cf726e39",
+    "rhwp-studio/src/core/sfnt-face.ts": "022d09bf3fbed8684f6e973fcd4174c94910ee80dafebc6094f80caaaea6bf91"
   },
-  "outputSHA256": "cea9b46e4bc7e19d7373f71ef557c1281af58cbd9d0133226a67a1ea96e6afbb"
+  "outputSHA256": "51175049faee89c664325381736d808df59f449968d1582bf9c7dcdd790b71c3"
 }

@@ -294,7 +294,7 @@ fn nominal_tree(bytes: &[u8], text: &str) -> (rhwp::paint::PageLayerTree, Contex
     let mut template = None;
     visit_ops(&source.root, &mut |op| {
         if let PaintOp::TextRun { run, .. } = op {
-            template = Some(run.clone());
+            template = Some(run.as_ref().clone());
         }
     });
     let input = fixture(bytes);
@@ -321,15 +321,7 @@ fn nominal_tree(bytes: &[u8], text: &str) -> (rhwp::paint::PageLayerTree, Contex
         width: 90.0,
         height: 30.0,
     };
-    let root = LayerNode::leaf(
-        bbox,
-        None,
-        vec![PaintOp::TextRun {
-            bbox,
-            run,
-            source: None,
-        }],
-    );
+    let root = LayerNode::leaf(bbox, None, vec![PaintOp::text_run(bbox, run)]);
     (PageLayerTree::new(140.0, 70.0, root), context)
 }
 

@@ -1,0 +1,11 @@
+{
+  "baselineCommit": "c222ac81a7d3e544a7970c5473b11fe3ff303dde",
+  "comparison": "Stage 2 fixture cases, summary, provenance exact equality",
+  "status": "PASS",
+  "currentRunID": "c569c8a3-ec7f-4a56-905b-5a9a1ab1cab8",
+  "previousRunID": "eb102363-7ff3-435b-be06-cbb0d39c58ec",
+  "sourceWasClean": true,
+  "comparedCases": 10,
+  "currentResultSHA256": "da73f62077608173ad59386a88af68b28b0833287c72cd4ec309c59b80d57722",
+  "previousResultSHA256": "5c2c6e721e59f683bb366ddf8022dc907b92334d7431c37feb591b5807c480c6"
+}

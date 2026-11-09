@@ -76,6 +76,15 @@ final class RhwpStudioPrintControllerTests: XCTestCase {
         XCTAssertEqual(operations,0); XCTAssertEqual(results,1)
         let released = await meter.releases; XCTAssertEqual(released,1)
     }
+    func testNativeFatalGateBeforeSealNeverOpensPrintPanel() async throws {
+        var operations = 0, seals = 0, results = 0
+        let controller = RhwpStudioPrintController(renderer: renderer(), canSeal: { false },
+            onSealed: { seals += 1 }, runOperation: { _, _ in operations += 1; return true },
+            onResult: { _ in results += 1 }, presentError: { _ in })
+        await withCheckedContinuation { done in controller.print(payload: try! payload()) { done.resume() } }
+        XCTAssertEqual(operations, 0); XCTAssertEqual(seals, 0); XCTAssertEqual(results, 1)
+    }
+
     func testStaleDocumentNeverOpensPanelAndReleasesLease() async throws {
         let meter = PrintLeaseMeter(), job = job(meter,current:{false}); var operations = 0, error: Error?
         let controller = RhwpStudioPrintController(renderer:renderer(job),outputFonts:job,runOperation:{_,_ in operations += 1; return true},

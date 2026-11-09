@@ -2,6 +2,54 @@ import JavaScriptCore
 import XCTest
 
 final class RhwpStudioHostBridgeScriptTests: XCTestCase {
+    func testRuntimeRejectionKeepsErrorMessageWhenWebKitStackContainsOnlyLocations() throws {
+        let context = try XCTUnwrap(JSContext())
+        context.evaluateScript("""
+        var messages = [], listeners = {};
+        var window = {
+          location: {href: 'alhangeul-studio://bundle/index.html'},
+          webkit: {messageHandlers: {alhangeulHost: {postMessage: value => messages.push(value)}}},
+          addEventListener: (name, handler) => { listeners[name] = handler; }
+        };
+        """)
+        context.evaluateScript(RhwpStudioHostBridgeScript.runtimeErrorSource)
+        context.evaluateScript("""
+        const error = new TypeError('TASK594_REJECTION_REASON');
+        error.stack = 'global code@alhangeul-studio://bundle/assets/index-test.js:1:16';
+        listeners.unhandledrejection({reason: error});
+        """)
+        XCTAssertNil(context.exception)
+        let message = try XCTUnwrap(context.evaluateScript("messages[0]")?.toDictionary())
+        XCTAssertEqual(message["type"] as? String, "runtime-error")
+        XCTAssertEqual(message["message"] as? String, "Unhandled promise rejection")
+        XCTAssertEqual(message["reason"] as? String,
+            "TypeError: TASK594_REJECTION_REASON\nglobal code@alhangeul-studio://bundle/assets/index-test.js:1:16")
+    }
+
+    func testRuntimeErrorKeepsExistingStackAndNonErrorRejectionDetails() throws {
+        let context = try XCTUnwrap(JSContext())
+        context.evaluateScript("""
+        var messages = [], listeners = {};
+        var window = {
+          location: {href: 'alhangeul-studio://bundle/index.html'},
+          webkit: {messageHandlers: {alhangeulHost: {postMessage: value => messages.push(value)}}},
+          addEventListener: (name, handler) => { listeners[name] = handler; }
+        };
+        """)
+        context.evaluateScript(RhwpStudioHostBridgeScript.runtimeErrorSource)
+        context.evaluateScript("""
+        const error = new Error('TASK594');
+        error.stack = 'Error: TASK594' + String.fromCharCode(10) + 'at index-test.js:1:2';
+        listeners.error({error, message: error.message, filename: 'index-test.js', lineno: 1, colno: 2});
+        listeners.unhandledrejection({reason: 'plain rejection'});
+        listeners.unhandledrejection({reason: {code: 'REJECTED'}});
+        """)
+        XCTAssertNil(context.exception)
+        XCTAssertEqual(context.evaluateScript("messages[0].reason")?.toString(), "Error: TASK594\nat index-test.js:1:2")
+        XCTAssertEqual(context.evaluateScript("messages[1].reason")?.toString(), "plain rejection")
+        XCTAssertEqual(context.evaluateScript("messages[2].reason")?.toString(), "{\"code\":\"REJECTED\"}")
+    }
+
     func testNativeCommandSetContainsBothExplicitSaveFormats() {
         XCTAssertTrue(RhwpStudioHostBridgeScript.source.contains("\"file:save-as-hwp\""))
         XCTAssertTrue(RhwpStudioHostBridgeScript.source.contains("\"file:save-as-hwpx\""))

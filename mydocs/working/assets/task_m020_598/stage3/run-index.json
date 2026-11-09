@@ -1,0 +1,244 @@
+{
+  "runs": [
+    {
+      "run": "fixtures-01",
+      "executionBoundary": "restricted-exec",
+      "exitCode": 0,
+      "resultSHA256": "da73f62077608173ad59386a88af68b28b0833287c72cd4ec309c59b80d57722",
+      "sourceCommit": "c222ac81a7d3e544a7970c5473b11fe3ff303dde",
+      "dirty": false,
+      "summary": {
+        "PASS": 67,
+        "FAIL": 0,
+        "EXPECTED_LIMITATION": 0,
+        "NOT_RUN": 30,
+        "complete": false,
+        "supplyComplete": true
+      },
+      "cases": [
+        {
+          "scenario": "ttf",
+          "family": "Alhangeul Fixture",
+          "rawCount": 1,
+          "candidateCount": 1,
+          "readCount": 1
+        },
+        {
+          "scenario": "otf",
+          "family": "Alhangeul Fixture",
+          "rawCount": 1,
+          "candidateCount": 1,
+          "readCount": 1
+        },
+        {
+          "scenario": "both",
+          "family": "Alhangeul Fixture",
+          "rawCount": 2,
+          "candidateCount": 2,
+          "readCount": 2
+        },
+        {
+          "scenario": "none",
+          "family": "Alhangeul Fixture",
+          "rawCount": 0,
+          "candidateCount": 0,
+          "readCount": 0
+        },
+        {
+          "scenario": "book",
+          "family": "Alhangeul Fixture",
+          "rawCount": 1,
+          "candidateCount": 0,
+          "readCount": 0
+        },
+        {
+          "scenario": "empty",
+          "family": "Alhangeul Fixture",
+          "rawCount": 1,
+          "candidateCount": 0,
+          "readCount": 0
+        },
+        {
+          "scenario": "permission",
+          "family": "Alhangeul Fixture",
+          "rawCount": 1,
+          "candidateCount": 1,
+          "readCount": 1
+        },
+        {
+          "scenario": "corrupt",
+          "family": "Alhangeul Fixture",
+          "rawCount": 1,
+          "candidateCount": 1,
+          "readCount": 1
+        },
+        {
+          "scenario": "conflict",
+          "family": "Alhangeul Fixture",
+          "rawCount": 2,
+          "candidateCount": 0,
+          "readCount": 0
+        },
+        {
+          "scenario": "managed",
+          "family": "Alhangeul Fixture",
+          "rawCount": 2,
+          "candidateCount": 1,
+          "readCount": 1
+        }
+      ]
+    },
+    {
+      "run": "installed-strawberry",
+      "executionBoundary": "restricted-exec",
+      "exitCode": 2,
+      "resultSHA256": "11bcbf5e1efb920c6814a1a9e27d6b70a966736df7cfb0c879d4ec550f5e4e55",
+      "sourceCommit": "c222ac81a7d3e544a7970c5473b11fe3ff303dde",
+      "dirty": false,
+      "summary": {
+        "PASS": 3,
+        "FAIL": 0,
+        "EXPECTED_LIMITATION": 0,
+        "NOT_RUN": 4,
+        "complete": false,
+        "supplyComplete": false
+      },
+      "cases": [
+        {
+          "scenario": "installed",
+          "family": "딸기",
+          "rawCount": 0,
+          "candidateCount": 0,
+          "readCount": 0
+        }
+      ]
+    },
+    {
+      "run": "installed-user-otf",
+      "executionBoundary": "restricted-exec",
+      "exitCode": 2,
+      "resultSHA256": "d776bfe24d7766379c1aae3ffaca652a6941b02219ae6ced170d5c181a43b5db",
+      "sourceCommit": "c222ac81a7d3e544a7970c5473b11fe3ff303dde",
+      "dirty": false,
+      "summary": {
+        "PASS": 3,
+        "FAIL": 0,
+        "EXPECTED_LIMITATION": 0,
+        "NOT_RUN": 4,
+        "complete": false,
+        "supplyComplete": false
+      },
+      "cases": [
+        {
+          "scenario": "installed",
+          "family": "Pretendard-Regular",
+          "rawCount": 0,
+          "candidateCount": 0,
+          "readCount": 0
+        }
+      ]
+    },
+    {
+      "run": "installed-user-ttf",
+      "executionBoundary": "restricted-exec",
+      "exitCode": 2,
+      "resultSHA256": "c4000cf2b8673127ee366dc476f5feb43d67e26aa7738dd9e1c9fca1ae8f2464",
+      "sourceCommit": "c222ac81a7d3e544a7970c5473b11fe3ff303dde",
+      "dirty": false,
+      "summary": {
+        "PASS": 3,
+        "FAIL": 0,
+        "EXPECTED_LIMITATION": 0,
+        "NOT_RUN": 4,
+        "complete": false,
+        "supplyComplete": false
+      },
+      "cases": [
+        {
+          "scenario": "installed",
+          "family": "Hack",
+          "rawCount": 0,
+          "candidateCount": 0,
+          "readCount": 0
+        }
+      ]
+    },
+    {
+      "run": "installed-user-otf-host",
+      "executionBoundary": "host-exec",
+      "exitCode": 0,
+      "resultSHA256": "38504eab5058cb78f7666383647c10a1e5f04eb479c8f6b48090bbb28f3a6fb0",
+      "sourceCommit": "c222ac81a7d3e544a7970c5473b11fe3ff303dde",
+      "dirty": false,
+      "summary": {
+        "PASS": 7,
+        "FAIL": 0,
+        "EXPECTED_LIMITATION": 0,
+        "NOT_RUN": 3,
+        "complete": false,
+        "supplyComplete": true
+      },
+      "cases": [
+        {
+          "scenario": "installed",
+          "family": "Pretendard-Regular",
+          "rawCount": 1,
+          "candidateCount": 1,
+          "readCount": 1
+        }
+      ]
+    },
+    {
+      "run": "installed-user-ttf-host",
+      "executionBoundary": "host-exec",
+      "exitCode": 0,
+      "resultSHA256": "f29af2098bea13a8869128f4185f6ee7c6481063a365e6d4c051aa460e2c75db",
+      "sourceCommit": "c222ac81a7d3e544a7970c5473b11fe3ff303dde",
+      "dirty": false,
+      "summary": {
+        "PASS": 13,
+        "FAIL": 0,
+        "EXPECTED_LIMITATION": 0,
+        "NOT_RUN": 3,
+        "complete": false,
+        "supplyComplete": true
+      },
+      "cases": [
+        {
+          "scenario": "installed",
+          "family": "Hack",
+          "rawCount": 4,
+          "candidateCount": 4,
+          "readCount": 4
+        }
+      ]
+    },
+    {
+      "run": "installed-strawberry-host",
+      "executionBoundary": "host-exec",
+      "exitCode": 2,
+      "resultSHA256": "25a9009ac56e75deb5470849875339461fef99420f1d3daa850d80a30cbca890",
+      "sourceCommit": "c222ac81a7d3e544a7970c5473b11fe3ff303dde",
+      "dirty": false,
+      "summary": {
+        "PASS": 3,
+        "FAIL": 0,
+        "EXPECTED_LIMITATION": 0,
+        "NOT_RUN": 4,
+        "complete": false,
+        "supplyComplete": false
+      },
+      "cases": [
+        {
+          "scenario": "installed",
+          "family": "딸기",
+          "rawCount": 0,
+          "candidateCount": 0,
+          "readCount": 0
+        }
+      ]
+    }
+  ],
+  "sample10ReplayMatchesFirstRun": true,
+  "note": "host-exec는 도구 제한 밖의 CLI이며 App Sandbox가 아니다. 실제 글꼴과 원본 SVG는 Git에 보관하지 않는다."
+}

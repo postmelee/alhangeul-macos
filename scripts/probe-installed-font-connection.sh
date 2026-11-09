@@ -24,7 +24,7 @@ JS
   --alias:canvaskit-wasm="$TOOLS/canvaskit-wasm/bin/canvaskit.js" \
   --outfile="$STATIC/app.js"
 cp "$TOOLS/canvaskit-wasm/bin/canvaskit.wasm" "$STATIC/canvaskit.wasm"
-for font in NotoSansKR-Regular D2Coding-Regular SourceHanSerifK-OldHangul-subset; do
+for font in NotoSansKR-Regular D2Coding-Regular RHWPOldHangul-Regular; do
   cp "$ROOT/Sources/HostApp/Resources/rhwp-studio/fonts/$font.woff2" "$STATIC/fonts/"
 done
 cat > "$STATIC/index.html" <<'HTML'

@@ -1,0 +1,25 @@
+{
+  "provenance": "mydocs/plans/task_m020_567_impl.md",
+  "files": [
+    {
+      "name": "GowunBatang-Regular.ttf",
+      "sha256": "466c593e7147412e748af4856d5ad14709b5a860bdf62b9c2546f2c5874e9849",
+      "size": 8433296
+    },
+    {
+      "name": "GowunBatang-Bold.ttf",
+      "sha256": "dbfcaa646e5831e7478524924f02906f550285a5050699b4e38c9950b3ec4b94",
+      "size": 8178712
+    },
+    {
+      "name": "OFL.txt",
+      "sha256": "49a57cc769fa9affd6eefb9070a61e3d3f6b757c97cafb15848bc6d1c81acc78",
+      "size": 4397
+    },
+    {
+      "name": "METADATA.pb",
+      "sha256": "5ab6c5630b85b7d20e8cec7a3be246f9cd5a8f247dea4993f6fb9cf1cc24478e",
+      "size": 1307
+    }
+  ]
+}

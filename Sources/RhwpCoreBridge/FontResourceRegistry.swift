@@ -38,7 +38,9 @@ enum HwpBundledFontRegistry {
         "NanumMyeongjo-ExtraBold.woff2",
         "NanumMyeongjo-Regular.woff2",
         "NotoSansKR-Bold.woff2",
+        "NotoSansKR-ExtraLight.woff2",
         "NotoSansKR-Regular.woff2",
+        "NotoSansMath-Regular.woff2",
         "NotoSerifKR-Bold.woff2",
         "NotoSerifKR-Regular.woff2",
         "Pretendard-Black.woff2",
@@ -50,7 +52,8 @@ enum HwpBundledFontRegistry {
         "Pretendard-Regular.woff2",
         "Pretendard-SemiBold.woff2",
         "Pretendard-Thin.woff2",
-        "SourceHanSerifK-OldHangul-subset.woff2",
+        "RHWPOldHangul-Regular.woff2",
+        "RHWPPublicBatang-Regular.woff2",
         "SpoqaHanSans-Regular.woff2",
     ]
 
