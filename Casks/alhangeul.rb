@@ -1,6 +1,6 @@
 cask "alhangeul" do
-  version "0.2.3"
-  sha256 "d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63"
+  version "0.2.4"
+  sha256 "58868d2e1a2d85cdb7958e7ca470525fd4bcc7eb456342e5418ba4af9046a749"
 
   url "https://github.com/postmelee/alhangeul-macos/releases/download/v#{version}/alhangeul-macos-#{version}.dmg"
   name "알한글"

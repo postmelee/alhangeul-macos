@@ -1,0 +1,94 @@
+{
+  "version": "0.2.4",
+  "build": "22",
+  "source_commit": "41d9c77473e30cabe5f00a0179652658e55aa0ce",
+  "dmg_sha256": "58868d2e1a2d85cdb7958e7ca470525fd4bcc7eb456342e5418ba4af9046a749",
+  "dmg_size": 351264277,
+  "publish_run": 42919440881,
+  "validation_run": 42749186623,
+  "validation_attempt": 1,
+  "sparkle": {
+    "previous_version": "0.2.3",
+    "previous_build": "21",
+    "ui_download_install_automatic_relaunch": true,
+    "before_pid": 53322,
+    "after_pid": 53906,
+    "about": "0.2.4 (22), rhwp v0.9.0 (c9095c5)",
+    "hwp_display": true,
+    "hwpx_display_pages": 9,
+    "hwp_hwpx_quicklook": true,
+    "hwp_hwpx_finder_thumbnails": true,
+    "extension_smoke_exit": 0,
+    "registration_repair_used": false
+  },
+  "search": {
+    "scope": "T7 owned corpus created after update",
+    "first_txt_hit_seconds": 8.9,
+    "last_observation_before_homebrew_seconds": 248.3,
+    "hwp_body_hits_before_homebrew": 0,
+    "hwpx_body_hits_before_homebrew": 0,
+    "selected_importer": "/Applications/Alhangeul.app/Contents/Library/Spotlight/Alhangeul.mdimporter",
+    "test_mode_extract_hwp_hwpx": true,
+    "manual_index_of_search_corpus": false,
+    "result": "NOT_VERIFIED",
+    "note": "Homebrew upgrade began after 251.94 seconds. Later polling and stopped-search observation belong to the subsequent installation, not the untouched Sparkle installation."
+  },
+  "homebrew": {
+    "pr": "https://github.com/postmelee/homebrew-tap/pull/5",
+    "merge_commit": "fafbee41b3853b44e749c6b8d9faf3b0a25f6912",
+    "style_exit": 0,
+    "audit_exit": 0,
+    "ci_present": false,
+    "previous_receipt": "0.2.2",
+    "app_before_upgrade": "0.2.4",
+    "upgrade": true,
+    "uninstall_app_absence": true,
+    "fresh_install": true,
+    "final_receipt": "0.2.4",
+    "bundle_checks": {
+      "Contents/Info.plist": {
+        "version": "0.2.4",
+        "build": "22",
+        "sha256": "da96ae0e6da7cf37769313ec2b5987d34ef90ef01b8e46230524fefe118bc7f0",
+        "arch": "x86_64 arm64"
+      },
+      "Contents/PlugIns/AlhangeulPreview.appex/Contents/Info.plist": {
+        "version": "0.2.4",
+        "build": "22",
+        "sha256": "d5176f7fc42b1b1f856e8f883ed67e3b36bae0eab3c0ff46c376d3d94e7bdebd",
+        "arch": "x86_64 arm64"
+      },
+      "Contents/PlugIns/AlhangeulThumbnail.appex/Contents/Info.plist": {
+        "version": "0.2.4",
+        "build": "22",
+        "sha256": "eaa9dc2604132aab105b200151dbb4d91511c21b48ebc4eb4ebe1d42da5c2102",
+        "arch": "x86_64 arm64"
+      },
+      "Contents/Library/Spotlight/Alhangeul.mdimporter/Contents/Info.plist": {
+        "version": "0.2.4",
+        "build": "22",
+        "sha256": "baba1732536ee7cf383977454bb39279350bb1a679ee8e4dbfd429b70c90573c",
+        "arch": "x86_64 arm64"
+      }
+    }
+  },
+  "restoration": [
+    {
+      "preferences_preserved_except_expected_upgrade_records": true,
+      "preserved_upgrade_keys": [
+        "SULastCheckTime",
+        "alhangeul.analytics.state.v1",
+        "alhangeul.launchMaintenance.completedBuild",
+        "alhangeul.spotlight.reimport.requestedInstallation"
+      ],
+      "recent_documents_equal": true
+    },
+    {
+      "system_recent_documents_bytes_equal": true
+    }
+  ],
+  "remaining": [
+    "Actual Mac body search and explicit release acceptance decision",
+    "Minimum macOS 12 and Intel physical GUI not executed"
+  ]
+}
