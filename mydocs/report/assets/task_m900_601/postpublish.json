@@ -70,7 +70,8 @@
         "sha256": "baba1732536ee7cf383977454bb39279350bb1a679ee8e4dbfd429b70c90573c",
         "arch": "x86_64 arm64"
       }
-    }
+    },
+    "first_launch_confirmed": true
   },
   "restoration": [
     {
@@ -88,7 +89,24 @@
     }
   ],
   "remaining": [
-    "Actual Mac body search and explicit release acceptance decision",
-    "Minimum macOS 12 and Intel physical GUI not executed"
-  ]
+    "Actual Mac body search is unverified and transferred to #587 with explicit owner acceptance",
+    "Minimum macOS 12 and Intel physical GUI not executed",
+    "Two stale nested development Sparkle Updater registrations remain; active Finder providers are the official installation"
+  ],
+  "release_owner_acceptance": {
+    "date": "2026-11-11",
+    "instruction": "검색은 #587로 남기고 대체 근거 수용·#601 종료",
+    "actual_mac_search": "NOT_VERIFIED",
+    "accepted_evidence": [
+      "ARM and Intel VM search PASS",
+      "installed importer text extraction PASS"
+    ],
+    "followup_issue": 587
+  },
+  "registration_hygiene": {
+    "official_preview_thumbnail": "0.2.4 under /Applications/Alhangeul.app",
+    "remaining_nested_sparkle_updater_records": 2,
+    "limited_unregister_error": -10814,
+    "global_reset": false
+  }
 }
