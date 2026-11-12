@@ -388,7 +388,8 @@ def finish_trial(smoke, state_path, mounted, mount, run, result, primary_error):
 
 def verify(output, candidate, fixtures, result):
     probe = module('install_probe', 'install-environment-probe.py')
-    env = probe.probe()
+    # 새 VM에서 Spotlight가 일반 TXT를 자동 색인할 때까지 기다린다.
+    env = probe.probe(timeout=600)
     (output / 'environment.json').write_text(json.dumps(env, ensure_ascii=False, indent=2))
     result['environment'] = {k: v for k, v in env.items() if k != 'commands'}
     if env['status'] != 'ENVIRONMENT_READY':
