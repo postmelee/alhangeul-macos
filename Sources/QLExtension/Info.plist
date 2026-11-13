@@ -43,6 +43,7 @@
 				<string>com.haansoft.hancomofficeviewer.mac.hwp</string>
 				<string>com.haansoft.hancomofficeviewer.mac.hwpx</string>
 				<string>org.libreoffice.hwp-document</string>
+				<string>com.infraware.polarisofficeservice.hwp</string>
 			</array>
 			<key>QLSupportsSearchableItems</key>
 			<false/>

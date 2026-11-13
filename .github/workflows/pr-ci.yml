@@ -77,6 +77,11 @@ jobs:
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-rhwp-readme-badge.py
           python3 scripts/ci/update-rhwp-readme-badge.py --check
 
+      - name: Verify Quick Look content type contract
+        run: |
+          python3 scripts/ci/check-quicklook-content-types.py
+          python3 scripts/ci/test-quicklook-content-types.py
+
       - name: Check Python helper syntax
         shell: bash
         run: python3 -m compileall -q scripts/ci
