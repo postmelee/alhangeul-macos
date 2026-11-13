@@ -1,0 +1,93 @@
+{
+  "axis-x" : {
+    "after" : {
+      "greenPixels" : 0,
+      "inkPixels" : 813
+    },
+    "before" : {
+      "greenPixels" : 0,
+      "inkPixels" : 0
+    },
+    "reference" : {
+      "greenPixels" : 0,
+      "inkPixels" : 777
+    }
+  },
+  "axis-y" : {
+    "after" : {
+      "greenPixels" : 0,
+      "inkPixels" : 702
+    },
+    "before" : {
+      "greenPixels" : 0,
+      "inkPixels" : 0
+    },
+    "reference" : {
+      "greenPixels" : 0,
+      "inkPixels" : 730
+    }
+  },
+  "bars" : {
+    "after" : 6,
+    "before" : 0,
+    "reference" : 6
+  },
+  "caption" : {
+    "after" : {
+      "greenPixels" : 0,
+      "inkPixels" : 2073
+    },
+    "before" : {
+      "greenPixels" : 0,
+      "inkPixels" : 1600
+    },
+    "reference" : {
+      "greenPixels" : 0,
+      "inkPixels" : 1044
+    }
+  },
+  "chart" : {
+    "after" : {
+      "greenPixels" : 25703,
+      "inkPixels" : 44426
+    },
+    "before" : {
+      "greenPixels" : 0,
+      "inkPixels" : 1018
+    },
+    "reference" : {
+      "greenPixels" : 25560,
+      "inkPixels" : 43948
+    }
+  },
+  "greenAreaRatio" : 1.0055946791862285,
+  "legend" : {
+    "after" : {
+      "greenPixels" : 56,
+      "inkPixels" : 3497
+    },
+    "before" : {
+      "greenPixels" : 0,
+      "inkPixels" : 335
+    },
+    "reference" : {
+      "greenPixels" : 64,
+      "inkPixels" : 2962
+    }
+  },
+  "meaning" : "영역별 누락 검사이며 글꼴·픽셀 동등성을 보증하지 않음",
+  "overview" : {
+    "after" : {
+      "greenPixels" : 25703,
+      "inkPixels" : 46499
+    },
+    "before" : {
+      "greenPixels" : 0,
+      "inkPixels" : 2618
+    },
+    "reference" : {
+      "greenPixels" : 25560,
+      "inkPixels" : 44992
+    }
+  }
+}
