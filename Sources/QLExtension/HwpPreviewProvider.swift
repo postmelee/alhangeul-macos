@@ -89,6 +89,7 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         filename: String
     ) {
         let diagnostics = result.diagnostics
+        logger.debug("Preview RawSvg selection=\(diagnostics.rawSvgSelection ?? "none", privacy: .public)")
         logger.debug("Preview fonts identity=\(optionalStringDescription(diagnostics.fontIdentity), privacy: .public) faces=\(diagnostics.fontFaces.joined(separator: ","), privacy: .public) supplyFallback=\(optionalStringDescription(diagnostics.fontSupplyFailure), privacy: .public)")
         logger.debug("Preview PNG render backend file=\(filename, privacy: .public) requestedMode=\(diagnostics.requestedMode.identifier, privacy: .public) outputMode=\(diagnostics.outputMode.identifier, privacy: .public) backend=\(backendDescription(diagnostics.backendUsed), privacy: .public) fallback=\(optionalStringDescription(diagnostics.fallbackReason), privacy: .public)")
         logger.debug("Preview PNG render output file=\(filename, privacy: .public) bytes=\(diagnostics.outputBytes, privacy: .public) skiaPNGBytes=\(optionalIntDescription(diagnostics.skiaPNGBytes), privacy: .public) pixel=\(optionalSizeDescription(diagnostics.pngPixelSize), privacy: .public)")
@@ -122,6 +123,7 @@ final class HwpPreviewProvider: QLPreviewProvider, QLPreviewingController {
         var totalRenderMs = 0.0
 
         for page in result.pageDiagnostics {
+            logger.debug("Preview PDF RawSvg page=\(page.pageIndex, privacy: .public) selection=\(page.diagnostics.rawSvgSelection ?? "none", privacy: .public)")
             logger.debug("Preview PDF fonts page=\(page.pageIndex, privacy: .public) identity=\(optionalStringDescription(page.diagnostics.fontIdentity), privacy: .public) faces=\(page.diagnostics.fontFaces.joined(separator: ","), privacy: .public) supplyFallback=\(optionalStringDescription(page.diagnostics.fontSupplyFailure), privacy: .public)")
             switch page.diagnostics.backendUsed {
             case .coreGraphics:

@@ -9,7 +9,7 @@ enum HwpQuickLookPNGReplyModeResolver {
 #if DEBUG
         let environment = environment ?? ProcessInfo.processInfo.environment
         guard let rawValue = environment[environmentKey] else {
-            return .coreGraphics
+            return .automatic
         }
 
         switch normalizedValue(rawValue) {
@@ -20,10 +20,10 @@ enum HwpQuickLookPNGReplyModeResolver {
         case "coregraphics", "coregraphicsonly":
             return .coreGraphics
         default:
-            return .coreGraphics
+            return .automatic
         }
 #else
-        return .coreGraphics
+        return .automatic
 #endif
     }
 

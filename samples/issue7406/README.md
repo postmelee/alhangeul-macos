@@ -10,3 +10,5 @@
 [Task #612](https://github.com/postmelee/alhangeul-macos/issues/612): 본앱은 차트를 표시하지만 CoreGraphics Quick Look은 복합 RawSvg를 SVG 자리표시자로 표시한다. 별도의 Jangster 제보와 동일 문서라고 판단하지 않는다.
 
 물리 1쪽에서 누적 막대 6개, 0–100% 축, 연령대 5개와 Total, 한글 범례 6개, 그림 5 캡션을 대조한다. PDF 자체의 라벨 겹침과 글꼴 차이는 차트 누락과 분리한다.
+
+검증 진입점: `scripts/test-quicklook-raw-svg.sh` (Frameworks 및 Poppler 필요). 선택 정책·실제 확장 공급 경로·PNG/PDF 출력과 독립 PDF 영역 비교를 수행하고 `build.noindex/quicklook-raw-svg`에 이미지와 JSON을 남긴다. 글꼴 차이가 있으므로 영역 누락/막대 면적 검사와 직접 시각 검토를 구분한다.

@@ -239,6 +239,9 @@ jobs:
           if ! command -v cbindgen >/dev/null 2>&1; then
             brew install cbindgen
           fi
+          if ! command -v pdftoppm >/dev/null 2>&1; then
+            brew install poppler
+          fi
 
       - name: Test font library and HostApp service
         shell: bash
@@ -366,6 +369,7 @@ jobs:
         run: |
           set -euo pipefail
           ./scripts/validate-stage3-render.sh
+          ./scripts/test-quicklook-raw-svg.sh
 
   release-checks:
     name: Release helper checks

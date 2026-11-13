@@ -13,10 +13,13 @@ enum HwpPageRenderBackend {
 
 enum HwpPageRenderPolicy {
     case coreGraphicsOnly
+    case quickLookAutomatic
     case skiaOptIn
 
     var identifier: String {
         switch self {
+        case .quickLookAutomatic:
+            return "quickLookAutomatic"
         case .coreGraphicsOnly:
             return "coreGraphicsOnly"
         case .skiaOptIn:
@@ -64,6 +67,7 @@ struct HwpPageRenderDiagnostics {
     let pixelSize: CGSize
     let pngBytes: Int?
     let durationMs: HwpPageRenderDuration
+    var rawSvgSelection: String? = nil
     var fontIdentity: String? = nil
     var fontFaces: [String] = []
     var fontSupplyFailure: String? = nil
@@ -166,6 +170,17 @@ enum HwpPageImageRenderer {
             throw HwpRenderError.pageOutOfRange
         }
 
+        if policy == .quickLookAutomatic {
+            let selection = forceDefaultFonts ? HwpQuickLookRawSvgPolicy.Selection.fontFallback
+                : HwpQuickLookRawSvgPolicy.select(tree: document.renderPageTree(at: pageIndex))
+            let page = try renderPage(document: document, pageIndex: pageIndex,
+                maximumPixelSize: maximumPixelSize, policy: selection.policy,
+                fontContext: fontContext, forceDefaultFonts: forceDefaultFonts)
+            var diagnostics = page.diagnostics
+            diagnostics.rawSvgSelection = selection.rawValue
+            return .init(image: page.image, size: page.size, diagnostics: diagnostics)
+        }
+
         let rawPageSize = document.pageSize(at: pageIndex)
         let pageSize = CGSize(width: CGFloat(rawPageSize.width), height: CGFloat(rawPageSize.height))
         guard isValidPageSize(pageSize) else {
@@ -184,7 +199,7 @@ enum HwpPageImageRenderer {
         }
 
         switch policy {
-        case .coreGraphicsOnly:
+        case .coreGraphicsOnly, .quickLookAutomatic:
             return try renderCoreGraphicsPage(
                 document: document,
                 pageIndex: pageIndex,
@@ -573,5 +588,98 @@ enum HwpPageImageRenderer {
         }
         let cappedEdge = min(ceil(longestEdge), CGFloat(Int32.max))
         return Int(cappedEdge)
+    }
+}
+
+/// Quick Look에서만 사용한다. 임의 SVG 엔진을 활성화하지 않고 제한된 core 벡터만 허용한다.
+/// 하나라도 검사를 통과하지 못하면 페이지 전체를 기존 CoreGraphics로 유지한다.
+enum HwpQuickLookRawSvgPolicy {
+    enum Selection: String {
+        case vector, noVector, rejected, treeUnavailable, fontFallback
+        var policy: HwpPageRenderPolicy { self == .vector ? .skiaOptIn : .coreGraphicsOnly }
+    }
+
+    static func select(tree: RenderNode?) -> Selection {
+        guard let tree else { return .treeUnavailable }
+        // 선택적 fallback은 1x preview 출력 예산 안에서만 사용한다.
+        guard tree.bbox.width.isFinite, tree.bbox.height.isFinite,
+              tree.bbox.width > 0, tree.bbox.height > 0,
+              tree.bbox.width <= 8192, tree.bbox.height <= 8192,
+              tree.bbox.width * tree.bbox.height <= 8_388_608 else { return .rejected }
+        var pending: [(RenderNode, Int)] = [(tree, 0)]
+        var nodes = 0
+        var fragments = 0
+        var bytes = 0
+        var vector = false
+        while let (node, depth) = pending.popLast() {
+            nodes += 1
+            guard nodes <= 100_000, depth <= 128 else { return .rejected }
+            guard node.visible else { continue }
+            if case .rawSvg(let raw) = node.nodeType {
+                fragments += 1
+                bytes += raw.svg.utf8.count
+                let b = node.bbox
+                guard fragments <= 32, bytes <= 4 * 1024 * 1024,
+                      [b.x, b.y, b.width, b.height].allSatisfy({ $0.isFinite }),
+                      b.width > 0, b.height > 0,
+                      b.width <= 8192, b.height <= 8192,
+                      b.width * b.height <= 8_388_608 else { return .rejected }
+                // 기존 단일 래스터 조각만 있는 페이지는 전환하지 않는다.
+                // 다른 조각과 섞인 경우에도 보수적으로 CoreGraphics를 유지한다.
+                guard HwpQuickLookVectorSVG.isAllowed(raw.svg) else { return .rejected }
+                vector = true
+            }
+            guard pending.count + node.children.count <= 100_000 else { return .rejected }
+            pending.append(contentsOf: node.children.map { ($0, depth + 1) })
+        }
+        return vector ? .vector : .noVector
+    }
+}
+
+private final class HwpQuickLookVectorSVG: NSObject, XMLParserDelegate {
+    private static let elements: Set<String> = ["svg", "g", "rect", "line", "path", "text", "tspan", "circle", "ellipse", "polygon", "polyline"]
+    private static let attributes: Set<String> = [
+        "xmlns", "xmlns:xlink", "class", "id", "x", "y", "x1", "y1", "x2", "y2",
+        "width", "height", "viewBox", "preserveAspectRatio", "transform", "d", "points",
+        "cx", "cy", "r", "rx", "ry", "fill", "fill-rule", "fill-opacity", "stroke",
+        "stroke-width", "stroke-opacity", "stroke-linecap", "stroke-linejoin",
+        "stroke-dasharray", "stroke-dashoffset", "opacity", "font-family", "font-size",
+        "font-weight", "font-style", "text-anchor", "dominant-baseline", "alignment-baseline",
+        "dx", "dy", "letter-spacing", "textLength", "lengthAdjust", "xml:space"
+    ]
+    private var valid = true
+    private var count = 0
+    private var depth = 0
+    private var drawable = false
+
+    static func isAllowed(_ fragment: String) -> Bool {
+        // DTD/entity/처리 명령/CSS는 진입 전에 거부하고 외부 해석을 하지 않는다.
+        guard !fragment.isEmpty, !fragment.contains("<!"), !fragment.contains("<?"),
+              let data = ("<svg xmlns=\"http://www.w3.org/2000/svg\">" + fragment + "</svg>").data(using: .utf8) else { return false }
+        let delegate = HwpQuickLookVectorSVG()
+        let parser = XMLParser(data: data)
+        parser.shouldResolveExternalEntities = false
+        parser.delegate = delegate
+        return parser.parse() && delegate.valid && delegate.drawable
+    }
+
+    func parser(_ parser: XMLParser, didStartElement name: String, namespaceURI: String?,
+                qualifiedName: String?, attributes values: [String: String]) {
+        count += 1
+        depth += 1
+        guard count <= 16_384, depth <= 64, Self.elements.contains(name), values.count <= 32,
+              values.allSatisfy({ key, value in
+                  Self.attributes.contains(key) && !value.lowercased().contains("url")
+                      && !value.contains("\\") && !value.contains("@")
+              }) else {
+            valid = false
+            parser.abortParsing()
+            return
+        }
+        if name != "svg" && name != "g" { drawable = true }
+    }
+
+    func parser(_ parser: XMLParser, didEndElement: String, namespaceURI: String?, qualifiedName: String?) {
+        depth -= 1
     }
 }

@@ -2536,6 +2536,8 @@ private func studioCaptureSummary(_ result: StudioCaptureResult) -> String {
 
 private func renderPolicyName(_ policy: HwpPageRenderPolicy) -> String {
     switch policy {
+    case .quickLookAutomatic:
+        return "quickLookAutomatic"
     case .coreGraphicsOnly:
         return "coreGraphicsOnly"
     case .skiaOptIn:
