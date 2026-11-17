@@ -269,6 +269,81 @@ import WebKit
         try await wait("discard closed") { !discardWindow.isVisible }
         try check(try Data(contentsOf: destination) == savedBytes, "discard closes without changing saved bytes")
     }
+    @MainActor static func initialRender(mode: String, fixture: URL, output: URL) async throws {
+        let store = DocumentViewerStore()
+        let window = NSWindow(contentRect: NSRect(x: 100, y: 100, width: 1050, height: 700),
+                              styleMask: [.titled, .closable], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = NSHostingView(rootView: ContentView(store: store))
+        window.makeKeyAndOrderFront(nil)
+        defer { window.orderOut(nil) }
+        var expected = fixture
+        store.loadDocument(from: fixture)
+        if mode == "swap" {
+            try await wait("A metrics suspended") {
+                guard let live = web(in: window.contentView!) else { return false }
+                return (try? await js(live, """
+                for (const button of document.querySelectorAll('.dialog-footer button')) {
+                    if (button.offsetWidth && ['대체 글꼴로 보기', 'View with substitute fonts'].includes(button.textContent.trim())) button.click();
+                }
+                return window.initialRenderRace === true && window.initialRenderSuspended === true;
+                """)) as? Bool == true
+            }
+            expected = output.appendingPathComponent("swap-B.hwp")
+            let second = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+                .appendingPathComponent("samples/re-align-right-hancom.hwp")
+            try FileManager.default.copyItem(at: second, to: expected)
+            store.loadDocument(from: expected)
+        }
+        try await waitForDocument("native ready", store: store, window: window)
+        if mode == "reopen" {
+            let previous = store.webViewLoadID
+            store.loadDocument(from: expected)
+            try await waitForDocument("explicit reopen", store: store, window: window, after: previous)
+        }
+        let live = web(in: window.contentView!)!
+        try await wait("status reflects current file") {
+            let status = try? await js(live, "return document.querySelector('#sb-message')?.textContent")
+            return (status as? String)?.contains(expected.lastPathComponent) == true
+        }
+        try await Task.sleep(nanoseconds: mode == "swap" ? 2_000_000_000 : 400_000_000)
+        let state = try await js(live, """
+        const canvases = document.querySelectorAll('.document-page-canvas');
+        let ink = 0, xSum = 0;
+        if (canvases.length) {
+            const thumb = document.createElement('canvas');
+            thumb.width = 192; thumb.height = 256;
+            const ctx = thumb.getContext('2d');
+            ctx.fillStyle = 'white'; ctx.fillRect(0, 0, 192, 256);
+            ctx.drawImage(canvases[0], 0, 0, 192, 256);
+            const pixels = ctx.getImageData(0, 0, 192, 256).data;
+            for (let i = 0; i < pixels.length; i += 4) {
+                if (pixels[i] < 215 && pixels[i+1] < 215 && pixels[i+2] < 215) {
+                    ++ink; xSum += (i / 4) % 192;
+                }
+            }
+        }
+        return {ink, xSum, race:window.initialRenderRace || false,pages:canvases.length, injected:window.initialRenderInjection || 0,
+            loads:window.initialRenderLoads, status:document.querySelector('#sb-message')?.textContent || '',
+            placeholder:!!document.querySelector('.page-placeholder')};
+        """) as! [String: Any]
+        print("INITIAL_RENDER", state)
+        try JSONSerialization.data(withJSONObject: state).write(to: output.appendingPathComponent("initial-render.json"))
+        try check(state["loads"] as? Int == 1, "one document initialization")
+        try check((state["status"] as? String)?.contains(expected.lastPathComponent) == true, "active file status")
+        let injections = mode == "burst" ? 8 : ["swap", "control", "reopen"].contains(mode) ? 0 : 1
+        try check(state["injected"] as? Int == injections, "expected metrics injections")
+        try check(state["race"] as? Bool == (injections > 0), "revision changed during initial preparation")
+        if mode != "broken" {
+            try check((state["ink"] as? Int ?? 0) > 0, "first page contains visible ink")
+        }
+        let pages = state["pages"] as? Int ?? 0
+        try check(mode == "broken" ? pages == 0 : pages > 0, "expected canvas count")
+        try check(state["placeholder"] as? Bool == (mode == "broken"), "placeholder matches expectation")
+        let image = try await live.takeSnapshot(configuration: nil)
+        try image.tiffRepresentation?.write(to: output.appendingPathComponent("\(mode)-\(expected.lastPathComponent).tiff"))
+    }
+
     @MainActor static func main() {
         setbuf(stdout, nil)
         let app = NSApplication.shared
@@ -277,6 +352,10 @@ import WebKit
             do {
                 let fixture = URL(fileURLWithPath: CommandLine.arguments[1])
                 let output = URL(fileURLWithPath: CommandLine.arguments[2])
+                if CommandLine.arguments.count > 3 {
+                    try await initialRender(mode: CommandLine.arguments[3], fixture: fixture, output: output)
+                    exit(0)
+                }
                 let before = try Data(contentsOf: fixture)
                 for format in [DocumentSaveFormat.hwp, .hwpx] {
                     try await run(format: format, fixture: fixture, output: output)

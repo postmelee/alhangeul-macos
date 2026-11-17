@@ -174,6 +174,18 @@ const rhwpStudio = {
 };
 EOF
 
+  node --input-type=module - "$ROOT" "$upstream_dir" <<'JS'
+import {appendFileSync, mkdirSync} from 'node:fs';
+import {dirname, resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+const [root, upstream] = process.argv.slice(2);
+const {initialRenderEdits} = await import(pathToFileURL(resolve(root, 'scripts/studio-initial-render-adapter.mjs')));
+for (const [path, edits] of Object.entries(initialRenderEdits)) {
+  const file = resolve(upstream, 'rhwp-studio', path);
+  mkdirSync(dirname(file), {recursive: true});
+  appendFileSync(file, edits.map(([before]) => before).join('\n'));
+}
+JS
   git -C "$upstream_dir" init -q
   git -C "$upstream_dir" config user.name fixture
   git -C "$upstream_dir" config user.email fixture@example.invalid
@@ -188,7 +200,7 @@ import {execFileSync} from 'node:child_process';
 const [root, upstream] = process.argv.slice(2);
 const {adaptSource, sourcePaths, receiptName, buildCommand} = await import(pathToFileURL(resolve(root, 'scripts/studio-font-menu-adapter.mjs')));
 const sha = input => createHash('sha256').update(input).digest('hex');
-const files = ['scripts/build-rhwp-studio.mjs', 'scripts/studio-font-menu-adapter.mjs'];
+const files = ['scripts/build-rhwp-studio.mjs', 'scripts/studio-font-menu-adapter.mjs', 'scripts/studio-initial-render-adapter.mjs'];
 const receipt = {schema: 1, studio_build_command: buildCommand,
   source_resolved_commit: execFileSync('git', ['-C', upstream, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim(),
   adapter_files: Object.fromEntries(files.map(path => [path, sha(readFileSync(resolve(root, path)))])),

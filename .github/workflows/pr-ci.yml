@@ -350,6 +350,9 @@ jobs:
       - name: Test SwiftUI Studio document lifecycle
         run: python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-font-dotum-empty-hancom.hwp
 
+      - name: Test Studio initial rendering during font refresh
+        run: python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-align-left-hancom.hwp --initial-render suite
+
       - name: Preserve Studio lifecycle diagnostics
         if: always()
         uses: actions/upload-artifact@v7
