@@ -4,10 +4,26 @@ export const initialRenderEdits = {
   [canvasPath]: [
     ['  private rendererSelectionEpoch = 0;', `  private rendererSelectionEpoch = 0;
   private documentLoadEpoch = 0;
+  private latestPageLoad?: Promise<boolean>;
   private latestRendererPreparation?: ReturnType<CanvasView['runRendererPreparation']>;`],
     ['    this.documentLoadPrepared = true;', '    this.documentLoadEpoch += 1;\n    this.documentLoadPrepared = true;'],
     ['async loadDocument(): Promise<void> {\n    if (this.disposed) return;',
-     'async loadDocument(): Promise<boolean> {\n    if (this.disposed) return false;'],
+     `async loadDocument(): Promise<boolean> {
+    const generation = this.wasm.documentGeneration;
+    let load = this.buildDocumentPages();
+    this.latestPageLoad = load;
+    for (;;) {
+      const ready = await load;
+      if (this.disposed || generation !== this.wasm.documentGeneration) return false;
+      const latest = this.latestPageLoad;
+      if (!latest || latest === load) return ready;
+      // 같은 문서의 외부 그림 도착 등으로 페이지 구성이 다시 시작된 경우.
+      load = latest;
+    }
+  }
+
+  private async buildDocumentPages(): Promise<boolean> {
+    if (this.disposed) return false;`],
     [`    this.documentLoadPrepared = false;
     if (this.disposed) return;
     const selected = await this.prepareRendererRevision(epoch, () => this.rendererSession.resolve(this.wasm));
@@ -45,6 +61,10 @@ export const initialRenderEdits = {
     ['    // 이미 승인된 snapshot을', '    const generation = wasm.documentGeneration;\n    // 이미 승인된 snapshot을'],
     ['    await canvasView?.loadDocument();',
      '    if (generation !== wasm.documentGeneration || !await canvasView?.loadDocument()) return;'],
-    ['    msg.textContent = displayName;', '    if (generation !== wasm.documentGeneration) return;\n    msg.textContent = displayName;'],
+    ...[
+      "    await updateLoadProgress(90, '도구 모음 준비 중...');",
+      "    await updateLoadProgress(94, '문서 검증 및 글꼴 확인 중...');",
+      "    await updateLoadProgress(96, '편집 상태 초기화 중...');",
+    ].map(line => [line, line + '\n    if (generation !== wasm.documentGeneration) return;']),
   ],
 };

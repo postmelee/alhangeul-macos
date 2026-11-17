@@ -23,7 +23,7 @@ def main():
     parser.add_argument('--studio-resources', type=pathlib.Path, help='검증 전용 실제 Studio 번들')
     parser.add_argument('--upstream-recovery', action='store_true', help='공개 API의 실제 rollback WKWebView 검사')
     parser.add_argument('--stall-web-fonts', action='store_true', help='복구 통합 검사에서 외부 FontFace 응답 무한 지연 주입')
-    parser.add_argument('--initial-render', choices=('control', 'race', 'burst', 'swap', 'broken'),
+    parser.add_argument('--initial-render', choices=('control', 'race', 'burst', 'swap', 'broken', 'reopen', 'suite'),
                         help='실제 HostApp의 최초 페이지와 글꼴 완료 이벤트 경합 검사')
     args = parser.parse_args()
     if args.stall_web_fonts and not args.upstream_recovery:
@@ -71,7 +71,12 @@ def main():
         if bundle.count(anchor) != 1:
             parser.error('초기 CanvasView 진단 지점이 유일하지 않습니다.')
         hook = (root / 'Tests/StudioDocumentLifecycleSmoke/initial-render.js').read_text()
-        entry.write_text(bundle.replace(anchor, anchor + hook.replace('MODE_LITERAL', json.dumps(args.initial_render))))
+        listener = 'document.fonts.addEventListener(`loadingdone`,'
+        if bundle.count(listener) != 1:
+            parser.error('글꼴 완료 리스너 등록 지점이 유일하지 않습니다.')
+        bundle = bundle.replace(listener, '(window.initialRenderFonts = document.fonts).addEventListener(`loadingdone`,')
+        def instrument(mode):
+            entry.write_text(bundle.replace(anchor, anchor + hook.replace('MODE_LITERAL', json.dumps(mode))))
     # 독립 preferences/draft 저장소를 사용한다. 사용자 앱 bundle ID를 재사용하지 않는다.
     info = {'CFBundleIdentifier': 'com.postmelee.studio-lifecycle.' + output.name,
             'CFBundleExecutable': executable.name, 'CFBundleName': 'StudioLifecycleSmoke',
@@ -102,8 +107,27 @@ def main():
     before_hash = hashlib.sha256(fixture.read_bytes()).hexdigest()
     try:
         with (output / 'run.log').open('w') as log:
-            result = subprocess.run([str(executable), str(fixture), str(output)] + ([args.initial_render] if args.initial_render else []),
-                                    stdout=log, stderr=subprocess.STDOUT, timeout=180)
+            second = root / 'samples/re-align-right-hancom.hwp'
+            cases = [(args.initial_render, fixture)]
+            if args.initial_render == 'suite':
+                cases = [('control', fixture), ('control', second), ('race', fixture),
+                         ('burst', fixture), ('swap', fixture), ('reopen', fixture)]
+            markers = []
+            for mode, document in cases:
+                if mode:
+                    instrument(mode)
+                result = subprocess.run([str(executable), str(document), str(output)] + ([mode] if mode else []),
+                                        stdout=log, stderr=subprocess.STDOUT, timeout=180)
+                if result.returncode:
+                    break
+                if args.initial_render == 'suite':
+                    state = json.loads((output / 'initial-render.json').read_text())
+                    markers.append((state['ink'], state['xSum']))
+            if len(markers) == 6:
+                left, right, race, burst, swap, reopen = markers
+                if left == right or race != left or burst != left or swap != right or reopen != left:
+                    raise ValueError(f'첫 페이지 표식 불일치: {markers}')
+                print('PASS 최초·반복·교체 문서 픽셀 대조', markers)
         print((output / 'run.log').read_text(), end='')
     finally:
         lsregister = '/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister'

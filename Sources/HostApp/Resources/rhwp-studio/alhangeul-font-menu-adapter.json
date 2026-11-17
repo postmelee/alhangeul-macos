@@ -5,7 +5,7 @@
   "adapter_files": {
     "scripts/build-rhwp-studio.mjs": "8924c6b878106979bffb41386324d5fa3f6dc6b78744a8e792a2613ae39f8748",
     "scripts/studio-font-menu-adapter.mjs": "ada07791223d8097a21eed66ecaa42de564520a133a4c717c3e278bfc61557dc",
-    "scripts/studio-initial-render-adapter.mjs": "70eb929077eabd42bc89c4711be69f7f96998a2845edf55e5cf2635b6fd78ff5"
+    "scripts/studio-initial-render-adapter.mjs": "2d505407443b82829989f45ec81459f2cca476d6023d7b2deb2c7df6faeb0ae6"
   },
   "sources": [
     {
@@ -26,7 +26,7 @@
     {
       "path": "src/main.ts",
       "original_sha256": "52bdd906913b711483a4aaa5e83d61fe5d0d7b9344a2598f2db281f072bb677e",
-      "adapted_sha256": "839658b6e4fbc7065f8cab3b8e4cd11485dfa37f8b5a82b4653500c9d4d9b08d"
+      "adapted_sha256": "2dd2eba8ee5d1b01696fbb4d08c87b2a7ed90d8d4ce995c9bc225980fea4058f"
     },
     {
       "path": "src/core/wasm-bridge.ts",
@@ -36,7 +36,7 @@
     {
       "path": "src/view/canvas-view.ts",
       "original_sha256": "425ca2940c06d5167855285ed913ce49eaeda0b553c9fcd75735abf6d3aaedd7",
-      "adapted_sha256": "9aaf991659d41505f0b82ce469e612c79f5e55a86b653a824ab30bd061ee3b4e"
+      "adapted_sha256": "f56e7972f01125449d173b4c2d1b7e603ce66ce66541c1dacb323abec0629386"
     }
   ]
 }
