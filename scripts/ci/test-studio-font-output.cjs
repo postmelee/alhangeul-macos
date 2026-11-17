@@ -42,7 +42,9 @@ test('출력 wrapper는 공식 matcher를 그대로 호출하고 ID/revision/gen
 
 test('main adapter만 추가 API를 노출하며 pinned anchor 중복/변경은 실패', async () => {
   const {adaptSource,sourcePaths} = await adapter;
-  const source = "import { setHostFontProvider, getHostFontState } from '@/core/local-fonts';\nfonts: { setProvider: setHostFontProvider, getState: getHostFontState },";
+  const {initialRenderEdits} = await import('../studio-initial-render-adapter.mjs');
+  const source = initialRenderEdits['src/main.ts'].map(([before]) => before).join('\n') +
+    "import { setHostFontProvider, getHostFontState } from '@/core/local-fonts';\nfonts: { setProvider: setHostFontProvider, getState: getHostFontState },";
   assert.match(adaptSource(source,sourcePaths[3]), /resolveHostOutputFonts\(requests, family => wasm\.usesHostHftRegular\(family\)\)/);
   assert.throws(()=>adaptSource(source+source,sourcePaths[3]), /adapter drift/);
   assert.throws(()=>adaptSource(source.replace('fonts:', 'other:'),sourcePaths[3]), /adapter drift/);

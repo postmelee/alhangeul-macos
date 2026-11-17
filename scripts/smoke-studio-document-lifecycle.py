@@ -66,12 +66,12 @@ def main():
         studio = resources / 'rhwp-studio'
         manifest = json.loads((studio / 'manifest.json').read_text())
         entry = studio / manifest['entrypoints']['main_js']['path']
-        anchor = 'async loadDocument(){if(this.disposed)return'
+        anchor = 'async loadDocument(){'
         bundle = entry.read_text()
         if bundle.count(anchor) != 1:
             parser.error('초기 CanvasView 진단 지점이 유일하지 않습니다.')
         hook = (root / 'Tests/StudioDocumentLifecycleSmoke/initial-render.js').read_text()
-        entry.write_text(bundle.replace(anchor, anchor + ';' + hook.replace('MODE_LITERAL', json.dumps(args.initial_render))))
+        entry.write_text(bundle.replace(anchor, anchor + hook.replace('MODE_LITERAL', json.dumps(args.initial_render))))
     # 독립 preferences/draft 저장소를 사용한다. 사용자 앱 bundle ID를 재사용하지 않는다.
     info = {'CFBundleIdentifier': 'com.postmelee.studio-lifecycle.' + output.name,
             'CFBundleExecutable': executable.name, 'CFBundleName': 'StudioLifecycleSmoke',

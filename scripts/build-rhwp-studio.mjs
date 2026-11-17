@@ -9,7 +9,7 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 import {adaptSource, fontMenuPlugin, receiptName, buildCommand, sourcePaths} from './studio-font-menu-adapter.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const adapterFiles = ['scripts/build-rhwp-studio.mjs', 'scripts/studio-font-menu-adapter.mjs'];
+const adapterFiles = ['scripts/build-rhwp-studio.mjs', 'scripts/studio-font-menu-adapter.mjs', 'scripts/studio-initial-render-adapter.mjs'];
 const sha = input => createHash('sha256').update(input).digest('hex');
 const args = process.argv.slice(2);
 const value = key => { const i = args.indexOf(key); return i < 0 ? null : args[i + 1]; };

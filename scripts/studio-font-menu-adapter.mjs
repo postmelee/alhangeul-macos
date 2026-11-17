@@ -1,7 +1,8 @@
+import {canvasPath, initialRenderEdits} from './studio-initial-render-adapter.mjs';
 // 앱 소유 목록·출력 선택 연결. upstream 파일·renderer·편집 명령은 수정하지 않는다.
 export const receiptName = 'alhangeul-font-menu-adapter.json';
 export const buildCommand = 'node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>';
-export const sourcePaths = ['src/core/local-fonts.ts', 'src/ui/toolbar.ts', 'src/ui/options-dialog.ts', 'src/main.ts', 'src/core/wasm-bridge.ts'];
+export const sourcePaths = ['src/core/local-fonts.ts', 'src/ui/toolbar.ts', 'src/ui/options-dialog.ts', 'src/main.ts', 'src/core/wasm-bridge.ts', canvasPath];
 
 export const outputResolverSource = `
 export async function resolveHostOutputFonts(requests: readonly {
@@ -182,6 +183,10 @@ const declaredHostFontMethods = `
 `;
 
 export function adaptSource(source, path) {
+  for (const [before, after] of initialRenderEdits[path] ?? []) {
+    source = replaceOnce(source, before, after, path);
+  }
+  if (path === canvasPath) return source;
   if (path === sourcePaths[4]) {
     source = replaceOnce(source, 'import { hasHostFontProvider,', "import { fontProgramOwnsFamily } from './canvas-intrinsic-font.mjs';\nimport { FONT_RULE_SUBSTITUTION_TABLES } from './font-rule-runtime';\nimport { resolveRendererLocalFontCandidates, loadRendererLocalFont, hasHostFontProvider,", path);
     source = replaceOnce(source, '  private canvasMetrics =', declaredHostFontMethods + '\n  private canvasMetrics =', path);
