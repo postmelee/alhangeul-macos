@@ -23,10 +23,12 @@ def main():
     parser.add_argument('--studio-resources', type=pathlib.Path, help='검증 전용 실제 Studio 번들')
     parser.add_argument('--upstream-recovery', action='store_true', help='공개 API의 실제 rollback WKWebView 검사')
     parser.add_argument('--stall-web-fonts', action='store_true', help='복구 통합 검사에서 외부 FontFace 응답 무한 지연 주입')
+    parser.add_argument('--initial-render', choices=('control', 'race', 'burst', 'swap', 'broken'),
+                        help='실제 HostApp의 최초 페이지와 글꼴 완료 이벤트 경합 검사')
     args = parser.parse_args()
     if args.stall_web_fonts and not args.upstream_recovery:
         parser.error('--stall-web-fonts는 --upstream-recovery 전용입니다.')
-    if sum((args.command_failures, args.fatal_recovery, args.integration, args.upstream_recovery)) > 1:
+    if sum((args.command_failures, args.fatal_recovery, args.integration, args.upstream_recovery, bool(args.initial_render))) > 1:
         parser.error('검사 모드는 하나만 선택하세요.')
     root = pathlib.Path(__file__).resolve().parent.parent
     fixture = args.fixture.resolve(strict=True)
@@ -59,6 +61,17 @@ def main():
             parser.error('진단 스크립트 삽입 head가 유일하지 않습니다.')
         injection = (root / 'scripts/ci/studio-web-font-stall.js').read_text()
         index.write_text(html.replace('<head>', '<head><script>' + injection + '</script>'))
+    if args.initial_render:
+        # 진단 앱 사본에서만 최초 렌더의 다음 metrics 호출에 이벤트를 주입한다.
+        studio = resources / 'rhwp-studio'
+        manifest = json.loads((studio / 'manifest.json').read_text())
+        entry = studio / manifest['entrypoints']['main_js']['path']
+        anchor = 'async loadDocument(){if(this.disposed)return'
+        bundle = entry.read_text()
+        if bundle.count(anchor) != 1:
+            parser.error('초기 CanvasView 진단 지점이 유일하지 않습니다.')
+        hook = (root / 'Tests/StudioDocumentLifecycleSmoke/initial-render.js').read_text()
+        entry.write_text(bundle.replace(anchor, anchor + ';' + hook.replace('MODE_LITERAL', json.dumps(args.initial_render))))
     # 독립 preferences/draft 저장소를 사용한다. 사용자 앱 bundle ID를 재사용하지 않는다.
     info = {'CFBundleIdentifier': 'com.postmelee.studio-lifecycle.' + output.name,
             'CFBundleExecutable': executable.name, 'CFBundleName': 'StudioLifecycleSmoke',
@@ -89,7 +102,7 @@ def main():
     before_hash = hashlib.sha256(fixture.read_bytes()).hexdigest()
     try:
         with (output / 'run.log').open('w') as log:
-            result = subprocess.run([str(executable), str(fixture), str(output)],
+            result = subprocess.run([str(executable), str(fixture), str(output)] + ([args.initial_render] if args.initial_render else []),
                                     stdout=log, stderr=subprocess.STDOUT, timeout=180)
         print((output / 'run.log').read_text(), end='')
     finally:
