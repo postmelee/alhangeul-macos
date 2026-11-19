@@ -2,7 +2,8 @@ import {canvasPath, initialRenderEdits} from './studio-initial-render-adapter.mj
 // 앱 소유 목록·출력 선택 연결. upstream 파일·renderer·편집 명령은 수정하지 않는다.
 export const receiptName = 'alhangeul-font-menu-adapter.json';
 export const buildCommand = 'node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>';
-export const sourcePaths = ['src/core/local-fonts.ts', 'src/ui/toolbar.ts', 'src/ui/options-dialog.ts', 'src/main.ts', 'src/core/wasm-bridge.ts', canvasPath];
+export const sourcePaths = ['src/core/local-fonts.ts', 'src/ui/toolbar.ts', 'src/ui/options-dialog.ts',
+  'src/main.ts', 'src/core/wasm-bridge.ts', canvasPath];
 
 export const outputResolverSource = `
 export async function resolveHostOutputFonts(requests: readonly {
@@ -123,6 +124,50 @@ function replaceOnce(source, before, after, label) {
   return source.replace(before, after);
 }
 
+// 소스 맨 앞 import 구간만 허용한다. 비표준 선언·주석 속 import를 변환 대상으로 추측하지 않는다.
+function addLocalFontsValueImports(source, module, anchor, needed, label) {
+  const fail = () => { throw Error(`Studio font menu adapter drift: ${label} import ${module}`); };
+  const trivia = /(?:\s+|\/\/[^\r\n]*|\/\*[\s\S]*?\*\/)+/y;
+  const declarations = /import\s+(?:(?:([^;'"\x60]+?)\s+from\s+)?(['"])([^'"\r\n]+)\2)\s*;/y;
+  let offset = 0;
+  const matching = [];
+  for (;;) {
+    trivia.lastIndex = offset;
+    const gap = trivia.exec(source);
+    if (gap) offset += gap[0].length;
+    declarations.lastIndex = offset;
+    const declaration = declarations.exec(source);
+    if (!declaration) break;
+    if (declaration[3] === module) matching.push(declaration);
+    offset = declarations.lastIndex;
+  }
+  const used = new Map();
+  let selected;
+  for (const declaration of matching) {
+    const names = declaration[1]?.match(/^\{([^{}]+)\}$/);
+    if (!names) return fail();
+    for (const item of names[1].trim().replace(/,$/, '').split(',')) {
+      const token = item.trim().match(/^(type\s+)?([\w$]+)(?:\s+as\s+([\w$]+))?$/);
+      if (!token || used.has(token[2])) return fail();
+      used.set(token[2], token);
+      if (token[2] === anchor) {
+        if (selected || token[1] || token[3]) return fail();
+        selected = declaration;
+      }
+    }
+  }
+  if (!selected) return fail();
+  const additions = needed.filter(name => {
+    const token = used.get(name);
+    if (token && (token[1] || token[3])) fail();
+    if (!token && [...used.values()].some(entry => entry[3] === name)) fail();
+    return !token;
+  });
+  if (!additions.length) return source;
+  const insertAt = selected.index + selected[0].indexOf('{') + 1;
+  return source.slice(0, insertAt) + ' ' + additions.join(', ') + ',' + source.slice(insertAt);
+}
+
 // 공식 WasmBridge 클래스에 삽입한다. 사용 가능한 프로그램의 선택과 조판은 core가 수행한다.
 const declaredHostFontMethods = `
   private readonly hostHftFamilies = new Set(FONT_RULE_SUBSTITUTION_TABLES.flatMap(table =>
@@ -182,13 +227,18 @@ const declaredHostFontMethods = `
   }
 `;
 
-export function adaptSource(source, path) {
-  for (const [before, after] of initialRenderEdits[path] ?? []) {
+export function adaptSource(source, path, initialRenderMode = 'legacy') {
+  if (!sourcePaths.includes(path)) throw Error(`Unexpected Studio adapter source: ${path}`);
+  if (!['legacy', 'upstream'].includes(initialRenderMode)) throw Error('Unknown Studio initial-render mode');
+  const legacy = initialRenderMode === 'legacy';
+  for (const [before, after] of (legacy ? initialRenderEdits[path] ?? [] : [])) {
     source = replaceOnce(source, before, after, path);
   }
   if (path === canvasPath) return source;
   if (path === sourcePaths[4]) {
-    source = replaceOnce(source, 'import { hasHostFontProvider,', "import { fontProgramOwnsFamily } from './canvas-intrinsic-font.mjs';\nimport { FONT_RULE_SUBSTITUTION_TABLES } from './font-rule-runtime';\nimport { resolveRendererLocalFontCandidates, loadRendererLocalFont, hasHostFontProvider,", path);
+    if (legacy) source = replaceOnce(source, 'import { hasHostFontProvider,', "import { fontProgramOwnsFamily } from './canvas-intrinsic-font.mjs';\nimport { FONT_RULE_SUBSTITUTION_TABLES } from './font-rule-runtime';\nimport { resolveRendererLocalFontCandidates, loadRendererLocalFont, hasHostFontProvider,", path);
+    else source = "import { fontProgramOwnsFamily } from './canvas-intrinsic-font.mjs';\nimport { FONT_RULE_SUBSTITUTION_TABLES } from './font-rule-runtime';\n" +
+      addLocalFontsValueImports(source, './local-fonts', 'hasHostFontProvider', ['resolveRendererLocalFontCandidates', 'loadRendererLocalFont'], path);
     source = replaceOnce(source, '  private canvasMetrics =', declaredHostFontMethods + '\n  private canvasMetrics =', path);
     return replaceOnce(source, '    const metafileFontGeneration =', '    await this.prepareDeclaredHostFonts(current);\n    if (!current()) return false;\n    const metafileFontGeneration =', path);
   }
@@ -206,7 +256,8 @@ export function adaptSource(source, path) {
     return source + outputResolverSource;
   }
   if (path === sourcePaths[3]) {
-    source = replaceOnce(source, 'import { setHostFontProvider,', 'import { resolveHostOutputFonts, setHostFontProvider,', path);
+    if (legacy) source = replaceOnce(source, 'import { setHostFontProvider,', 'import { resolveHostOutputFonts, setHostFontProvider,', path);
+    else source = addLocalFontsValueImports(source, '@/core/local-fonts', 'setHostFontProvider', ['resolveHostOutputFonts'], path);
     return replaceOnce(source, 'fonts: { setProvider: setHostFontProvider, getState: getHostFontState },',
       'fonts: { setProvider: setHostFontProvider, getState: getHostFontState, resolveOutputRequests: (requests: Parameters<typeof resolveHostOutputFonts>[0]) => resolveHostOutputFonts(requests, family => wasm.usesHostHftRegular(family)), getOutputPageSvg: getHostOutputPageSvg },', path) + outputPageSource;
   }
@@ -268,6 +319,7 @@ export function fontMenuPlugin(sources, receipt) {
     transform(source, id) {
       const input = sources.find(row => row.absolute === id);
       if (!input) return;
+      if (!sourcePaths.includes(input.path)) throw Error(`Unexpected Studio adapter source: ${input.path}`);
       if (source !== input.original) throw Error(`Studio font menu source changed during build: ${input.path}`);
       visited.add(input.path);
       return {code: input.adapted, map: null};

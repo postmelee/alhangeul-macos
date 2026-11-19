@@ -9,7 +9,7 @@
   "recommended_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "actual_wasm_build_command": "RUSTFLAGS=$PORTABLE_RUSTFLAGS scripts/wasm-pack-locked.sh --target web --out-dir pkg",
   "studio_build_command": "node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>",
-  "studio_font_menu_adapter_sha256": "7cddaff14203aa970ff8be84978aa75002640dcffc1a979f10cb1108f6175e34",
+  "studio_font_menu_adapter_sha256": "e15b1ad6f5eadd5789e00612c9904a8aa2338a5d3bb133d945be5856ebbbc37b",
   "copied_from": "rhwp-studio/dist",
   "excluded_paths": [
     "samples/"
