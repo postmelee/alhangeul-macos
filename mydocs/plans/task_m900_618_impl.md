@@ -15,9 +15,9 @@
 
 - `scripts/studio-font-menu-adapter.mjs`에서 `@/core/local-fonts`와 `./local-fonts` 각각 기대한 모듈의 고유 named import를 찾는다. pinned TypeScript 문법의 범위 안에서 심벌 이름·alias·type-only 여부를 검사하고, 필요한 값 import만 추가한다. 순서·공백·줄바꿈, 이미 같은 심벌이 있을 때를 허용하되 대상 모듈 누락/중복, 타입 전용이거나 다른 이름으로만 존재하는 필요값, 구문이 모호한 input은 진단과 함께 거부한다. 다른 이름의 import나 동명 주석은 매칭하지 않는다. 원본 입력은 수정하지 않는다.
 - `src/main.ts` 출력 bridge 확장과 `src/core/wasm-bridge.ts`의 앱 공급 보완 중 실제 필요한 것만 남긴다. `resolveRendererLocalFontCandidates`를 두 번 추가하지 않고 upstream의 `releaseHostLayoutPrograms` 호출을 가리지 않는다. 앱이 새 upstream으로 충분히 대체된다면 임의 no-op 추가 대신 Stage 1에서 확인한 기존 정리 및 화면·출력의 책임을 근거로 변환을 조정한다.
-- #616은 v0.9.0의 확인된 SHA에서만 적용한다. v0.9.1의 확인된 SHA에서는 upstream #9170 경로를 검증하는 후보로만 #616을 적용하지 않는다. 버전 문자열·부재한 마커·다운로드된 산출물만으로 예외를 인정하지 않는다. 추후 공식 pin을 다룰 때 경로를 추측하지 않고 검증된 정책을 추가한다. 처음 보는 SHA의 초기 렌더링 변환 선택은 실패로 확인한다.
+- v0.9.0의 확인된 SHA는 #616을 유지하고 v0.9.1의 확인된 SHA는 upstream #9170 계약이 확인될 때만 임시 보정을 생략한다. 두 초기화 파일에서 이전 보정 대상 또는 upstream 초기 렌더링·취소 계약이 함께 확인돼야 한다. 알 수 없는 SHA에서도 양립하지 않는 한 계약의 정확한 마커를 모두 검증한 경우에만 수용해 이후 자동 동기화를 버전 목록으로 차단하지 않는다. 혼합·중복·불명확한 경우 실패한다.
 - `scripts/build-rhwp-studio.mjs`의 sourcePaths·plugin coverage·파일 fingerprint·receipt verification이 같은 선택 함수와 동일 순서를 사용하도록 맞춘다. verification은 receipt가 주장하는 소스 목록을 신뢰하지 않고 고정 커밋과 manifest에서 기대 목록을 다시 결정한다. 파일 수, original/adapted 해시와 변환 스크립트 해시, 원본 일치 조건을 완화하지 않는다.
-- 완료 조건: 실제 두 태그의 순수 transform과 신규 Node 회귀가 통과한다. 양성: 기존/새 순서, 줄바꿈·공백, 기존 resolver 보존, v0.9.0 임시 경로·v0.9.1 upstream 경로, 원본 불변. 음성: 대상 없음·두 선언·잘못된 모듈·동명 주석·값 대신 타입·미등록 SHA·receipt 오염. 기존 `node --test` Studio 글꼴 bootstrap, menu, provider, output 및 font-load-deadline 테스트를 함께 실행한다. 같은 커밋에 [단계 보고서](../working/task_m900_618_stage2.md)를 남긴다.
+- 완료 조건: 실제 두 태그의 순수 transform과 신규 Node 회귀가 통과한다. 양성: 기존/새 순서, 줄바꿈·공백, 기존 resolver 보존, v0.9.0 임시 경로·v0.9.1 upstream 경로, 원본 불변. 음성: 대상 없음·두 선언·잘못된 모듈·동명 주석·값 대신 타입·등록되지 않은 초기화 계약·receipt 오염. 기존 `node --test` Studio 글꼴 bootstrap, menu, provider, output 및 font-load-deadline 테스트를 함께 실행한다. 같은 커밋에 [단계 보고서](../working/task_m900_618_stage2.md)를 남긴다.
 
 ## 3단계 — 동일 SHA의 빌드 증명과 macOS 수용 확인
 

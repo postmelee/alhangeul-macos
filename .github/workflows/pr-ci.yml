@@ -228,6 +228,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Test pinned Studio font adapter contracts
+        run: node --test scripts/ci/test-studio-font*.cjs
+
       - name: Verify render tree decoder compatibility
         shell: bash
         run: |
