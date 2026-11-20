@@ -12,7 +12,7 @@ on:
         description: Validated CFBundleVersion
         required: true
         type: string
-        default: '22'
+        default: '23'
       source_run_id:
         description: Successful Release Publish DMG run ID
         required: true
