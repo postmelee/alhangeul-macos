@@ -19,3 +19,7 @@
 공식 Studio의 portable 레이어 스키마 `1.35`는 보통의 굵은 textRun을 0.02 em SVG 획으로 출력한다. 앱의 변환은 `1.23`만 받았고, `1.35`에서 획이 남아 네이티브 PDF가 관리 글꼴의 해당 출력에 `unavailable`을 반환했다. 공식 v0.9.1 WASM에서 HWP/HWPX 입력의 style과 클러스터 원점을 대조했다. 검증한 `1.35`를 명시적으로 허용하고 기존 `1.23` 및 알 수 없는 스키마와 모호한 효과에 대한 검사를 유지한다.
 
 현재 공식 동기화 CI의 동일 WASM으로 원본 소스 검사, TypeScript, Vite 및 receipt 대조를 통과했다. 네이티브 v0.9.0 라이브러리를 링크한 격리 WKWebView에서 고운바탕 Regular/Bold를 가져와 두 파일의 실제 PDF와 인쇄용 PDF를 생성했다. 정확한 PostScript 이름, 한글 검색·선택, 취소 및 글꼴 변경 때의 기존 문서 보존을 확인했다. 실제 인쇄 창은 정상 표시 후 취소했다. 최종 설치 후보의 native v0.9.1과 Finder 검증은 별도로 실행한다.
+
+## 네이티브 매처 동기화
+
+[후보 CI 44762597317](https://github.com/postmelee/alhangeul-macos/actions/runs/44762597317)은 Studio 자산 검증을 통과한 뒤 네이티브 매처의 기존 `c9095c5f` pin을 발견했다. 공식 v0.9.1의 원본 모듈 10개와 esbuild `0.25.12`로 Swift 매처와 receipt를 다시 생성하고 공식 checkout과 검증했다. 자동 동기화는 같은 sparse checkout에서 두 파일을 생성·검증하고 함께 stage한다. 자동 동기화 대상 판정도 매처 pin을 확인한다.

@@ -183,8 +183,13 @@ jobs:
             studio_current="true"
           fi
 
+          matcher_current="false"
+          if [ "$core_current" = "true" ] && node scripts/build-native-font-matcher.mjs --verify; then
+            matcher_current="true"
+          fi
+
           current="false"
-          if [ "$core_current" = "true" ] && [ "$studio_current" = "true" ]; then
+          if [ "$core_current" = "true" ] && [ "$studio_current" = "true" ] && [ "$matcher_current" = "true" ]; then
             current="true"
           fi
 
@@ -223,6 +228,7 @@ jobs:
             echo "- target URL: $target_url"
             echo "- core current: \`$core_current\`"
             echo "- studio current: \`$studio_current\`"
+            echo "- native matcher current: \`$matcher_current\`"
             echo "- full sync current: \`$current\`"
             echo "- base branch: \`$BASE_BRANCH\`"
             echo "- repository content ref: \`$BASE_BRANCH\`"
@@ -636,6 +642,12 @@ jobs:
             --commit "$target_commit" \
             --upstream-dir "$upstream_dir"
 
+          matcher_tool_dir="$work_dir/native-matcher-tool"
+          npm install --prefix "$matcher_tool_dir" --cache "$matcher_tool_dir/cache" \
+            --no-audit --no-fund --save-exact esbuild@0.25.12
+          node scripts/build-native-font-matcher.mjs --upstream-dir "$upstream_dir" --tool-dir "$matcher_tool_dir"
+          node scripts/build-native-font-matcher.mjs --verify --upstream-dir "$upstream_dir"
+
           python3 scripts/ci/update-rhwp-readme-badge.py
           python3 scripts/ci/update-rhwp-readme-badge.py --check
 
@@ -654,6 +666,7 @@ jobs:
             echo "\`scripts/check-no-appkit.sh\`: OK"
             echo "\`scripts/sync-rhwp-studio.sh --tag $target_tag --commit $target_commit\`: OK"
             echo "\`scripts/verify-rhwp-studio-assets.sh --tag $target_tag --commit $target_commit --upstream-dir <target-checkout>\`: Cargo.lock fingerprint match OK"
+            echo "\`scripts/build-native-font-matcher.mjs --verify --upstream-dir <target-checkout>\`: native matcher pin and sources OK"
             echo "\`python3 scripts/ci/update-rhwp-readme-badge.py --check\`: bundled badge and link OK"
             echo "\`git diff --check\`: OK"
           } > "$verification_file"
@@ -673,6 +686,8 @@ jobs:
             Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift \
             scripts/ci/fixtures/render-tree/request-page0.json \
             Sources/HostApp/Resources/rhwp-studio \
+            Sources/Shared/FontLibrary/RhwpNativeFontMatcherSource.swift \
+            Sources/Shared/FontLibrary/native-font-matcher-receipt.json \
             RustBridge/Cargo.toml \
             RustBridge/Cargo.lock \
             rhwp-core.lock \
