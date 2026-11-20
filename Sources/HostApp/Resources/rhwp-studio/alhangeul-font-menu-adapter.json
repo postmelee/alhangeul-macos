@@ -4,7 +4,7 @@
   "source_resolved_commit": "981ce66b4183b13c1a3b5907e04a8969c8c42034",
   "adapter_files": {
     "scripts/build-rhwp-studio.mjs": "628044a4c70998cdd852bcd3a96378859727ef6b207cfcf308d21e36e4d424d6",
-    "scripts/studio-font-menu-adapter.mjs": "27527ebf5a9eb673220df1cbc4988e2ef1bff50828d6de57476685d246ab1488",
+    "scripts/studio-font-menu-adapter.mjs": "5352d4f787db4b4b9262f456c703804fa60b823dd9a01ad9f06f416373395fdb",
     "scripts/studio-initial-render-adapter.mjs": "0736a04eea7151e8194107adbac7f3dd72f3db1b13b50663f6f456884420d726"
   },
   "sources": [
@@ -26,7 +26,7 @@
     {
       "path": "src/main.ts",
       "original_sha256": "34bb7038bdbe4fcd51d8781e677575ef1f3b7515228c7c0a1c98fb29ca3455e6",
-      "adapted_sha256": "82e90eb888c2d05e83b3d8551b016cf09d8c36e82cbbc3ed1111b5655ce40fbf"
+      "adapted_sha256": "da1300a4a03efdb890a5d75ef5ba7bd4ad48c5d5fab1bd8bbae88f98c31af579"
     },
     {
       "path": "src/core/wasm-bridge.ts",

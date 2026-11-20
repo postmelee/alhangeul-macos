@@ -42,13 +42,14 @@ export async function resolveHostOutputFonts(requests: readonly {
 `;
 
 // portable SVG와 같은 metrics transaction의 layer tree만 대조한다.
-// core v0.8.7의 일반 textRun 합성 Bold(0.02 em)를 실제 Bold 요청으로 교체한다.
+// 검증한 레이어 스키마의 일반 textRun 합성 Bold(0.02 em)를 실제 Bold 요청으로 교체한다.
 // face 선택·지원 불가 판정은 native 출력 job과 공식 matcher가 담당한다.
 export const outputPageSource = `
 function normalizeHostOutputSvg(svg: string, tree: unknown): string {
   type Row = Record<string, any>;
   const page = tree as Row;
-  if (page?.schemaVersion !== 1 || page.schemaMinorVersion !== 23
+  // 기존 스키마 1.23과 공식 v0.9.1의 1.35만 허용하고 textRun·cluster 위치를 대조한다.
+  if (page?.schemaVersion !== 1 || ![23, 35].includes(page.schemaMinorVersion)
     || page.unit !== 'px' || page.coordinateSystem !== 'page-top-left-y-down') return svg;
   const primary = (family: string) => family.split(',')[0].trim().replace(/^(['"])(.*)\\1$/, '$2').toLowerCase();
   const key = (text: string, family: string, x: number, y: number, size: number) =>
