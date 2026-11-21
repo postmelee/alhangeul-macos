@@ -77,6 +77,11 @@ jobs:
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-rhwp-readme-badge.py
           python3 scripts/ci/update-rhwp-readme-badge.py --check
 
+      - name: Verify Quick Look content type contract
+        run: |
+          python3 scripts/ci/check-quicklook-content-types.py
+          python3 scripts/ci/test-quicklook-content-types.py
+
       - name: Check Python helper syntax
         shell: bash
         run: python3 -m compileall -q scripts/ci
@@ -223,6 +228,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Test pinned Studio font adapter contracts
+        run: node --test scripts/ci/test-studio-font*.cjs
+
       - name: Verify render tree decoder compatibility
         shell: bash
         run: |
@@ -238,6 +246,9 @@ jobs:
           fi
           if ! command -v cbindgen >/dev/null 2>&1; then
             brew install cbindgen
+          fi
+          if ! command -v pdftoppm >/dev/null 2>&1; then
+            brew install poppler
           fi
 
       - name: Test font library and HostApp service
@@ -342,6 +353,9 @@ jobs:
       - name: Test SwiftUI Studio document lifecycle
         run: python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-font-dotum-empty-hancom.hwp
 
+      - name: Test Studio initial rendering during font refresh
+        run: python3 scripts/smoke-studio-document-lifecycle.py --fixture samples/re-align-left-hancom.hwp --initial-render suite
+
       - name: Preserve Studio lifecycle diagnostics
         if: always()
         uses: actions/upload-artifact@v7
@@ -366,6 +380,7 @@ jobs:
         run: |
           set -euo pipefail
           ./scripts/validate-stage3-render.sh
+          ./scripts/test-quicklook-raw-svg.sh
 
   release-checks:
     name: Release helper checks

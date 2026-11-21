@@ -507,11 +507,11 @@ struct QuickLookSkiaPolicySmoke {
     private static func makeResolverContract() -> ResolverContractResult {
         let key = HwpQuickLookPNGReplyModeResolver.environmentKey
         let cases: [(label: String, rawValue: String?, expected: HwpPreviewPNGReplyMode)] = [
-            ("missing", nil, .coreGraphics),
-            ("empty", "", .coreGraphics),
-            ("invalid", "banana", .coreGraphics),
-            ("coreGraphics", "coreGraphics", .coreGraphics),
-            ("coreGraphicsOnly", "coreGraphicsOnly", .coreGraphics),
+            ("missing", nil, .automatic),
+            ("empty", "", .automatic),
+            ("invalid", "banana", .automatic),
+            ("coreGraphics", "coreGraphics", expectedCoreGraphicsMode()),
+            ("coreGraphicsOnly", "coreGraphicsOnly", expectedCoreGraphicsMode()),
             ("skia", "skia", expectedSkiaMode()),
             ("skiaDecode", "skiaDecode", expectedSkiaMode()),
             ("skiaOptIn", "skiaOptIn", expectedSkiaMode()),
@@ -568,11 +568,19 @@ struct QuickLookSkiaPolicySmoke {
         )
     }
 
+    private static func expectedCoreGraphicsMode() -> HwpPreviewPNGReplyMode {
+#if DEBUG
+        return .coreGraphics
+#else
+        return .automatic
+#endif
+    }
+
     private static func expectedSkiaMode() -> HwpPreviewPNGReplyMode {
 #if DEBUG
         .skiaDecode
 #else
-        .coreGraphics
+        .automatic
 #endif
     }
 
@@ -580,7 +588,7 @@ struct QuickLookSkiaPolicySmoke {
 #if DEBUG
         .skiaDirect
 #else
-        .coreGraphics
+        .automatic
 #endif
     }
 

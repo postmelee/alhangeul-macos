@@ -33,7 +33,7 @@ enum ExtensionFontRenderer {
             let snapshot = try await supply()
             return try await HwpNativeFontPageRenderer.withPreparedPage(document: context.document,
                 documentIdentity: context.sourceIdentity, filename: context.filename, pageIndex: 0,
-                snapshot: snapshot, policy: mode == .coreGraphics ? .coreGraphicsOnly : .skiaOptIn,
+                snapshot: snapshot, policy: mode == .automatic ? .quickLookAutomatic : (mode == .coreGraphics ? .coreGraphicsOnly : .skiaOptIn),
                 documentIsCurrent: current) { prepared in
                     try HwpPreviewPNGRenderer.render(context: context, mode: mode, fontContext: prepared.context)
                 }
@@ -58,9 +58,9 @@ enum ExtensionFontRenderer {
                 result = try await HwpPreviewPDFRenderer.render(context: context, pageRenderer: { index in
                     let prepared = try await HwpNativeFontPageRenderer.preparePage(document: context.document,
                         documentIdentity: context.sourceIdentity, filename: context.filename, pageIndex: index,
-                        snapshot: snapshot, documentIsCurrent: current)
+                        snapshot: snapshot, policy: .quickLookAutomatic, documentIsCurrent: current)
                     return try context.document.withFontPrograms(prepared.programs) {
-                        try HwpPageImageRenderer.renderPage(document: context.document, pageIndex: index,
+                        try HwpPageImageRenderer.renderPage(document: context.document, pageIndex: index, policy: .quickLookAutomatic,
                             fontContext: prepared.context)
                     }
                 })
@@ -77,7 +77,7 @@ enum ExtensionFontRenderer {
             if isStaleOrCancelled(error) { throw error }
             try await validate(current)
             let result = try HwpPreviewPDFRenderer.render(document: context.document,
-                pageCount: context.pageCount, contentSize: context.contentSize, collectDiagnostics: true,
+                pageCount: context.pageCount, contentSize: context.contentSize, policy: .quickLookAutomatic, collectDiagnostics: true,
                 forceDefaultFonts: true)
             try await validate(current)
             return .init(data: result.data, contentSize: result.contentSize, pageCount: result.pageCount,

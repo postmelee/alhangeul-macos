@@ -19,9 +19,9 @@
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.2.4</string>
+	<string>0.2.5</string>
 	<key>CFBundleVersion</key>
-	<string>22</string>
+	<string>23</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>12.0</string>
 	<key>LSHasLocalizedDisplayName</key>
@@ -43,6 +43,7 @@
 				<string>com.haansoft.hancomofficeviewer.mac.hwp</string>
 				<string>com.haansoft.hancomofficeviewer.mac.hwpx</string>
 				<string>org.libreoffice.hwp-document</string>
+				<string>com.infraware.polarisofficeservice.hwp</string>
 			</array>
 			<key>QLSupportsSearchableItems</key>
 			<false/>

@@ -1,8 +1,8 @@
 // 생성 파일: scripts/build-native-font-matcher.mjs. 직접 수정 금지.
-// rhwp c9095c5f67632e6721e800ccc7fb43ea49d26682, esbuild 0.25.12
+// rhwp 981ce66b4183b13c1a3b5907e04a8969c8c42034, esbuild 0.25.12
 enum RhwpNativeFontMatcherSource {
-    static let commit = "c9095c5f67632e6721e800ccc7fb43ea49d26682"
-    static let sha256 = "077d371cdfdc6a7db3acc3db0b3ba56bea076522f691e96d073ed09b3f4be273"
+    static let commit = "981ce66b4183b13c1a3b5907e04a8969c8c42034"
+    static let sha256 = "febd437bd0397157890b6431a70b9e9326053364739b75201a94d691c6329a49"
     static let script = #"""
 (() => {
   var __defProp = Object.defineProperty;
@@ -45,12 +45,16 @@ enum RhwpNativeFontMatcherSource {
       __publicField(this, "controller", new AbortController());
       __publicField(this, "epoch", 0);
       __publicField(this, "connection", 0);
+      __publicField(this, "layout", false);
       __publicField(this, "snapshot", null);
       __publicField(this, "refs", []);
       __publicField(this, "pendingSnapshot", null);
       __publicField(this, "pendingBytes", /* @__PURE__ */ new Map());
       __publicField(this, "listeners", /* @__PURE__ */ new Set());
       __publicField(this, "error", null);
+    }
+    get layoutEnabled() {
+      return this.active && this.layout;
     }
     get active() {
       return this.provider !== null;
@@ -80,7 +84,8 @@ enum RhwpNativeFontMatcherSource {
       this.pendingBytes.clear();
       this.error = null;
     }
-    async setProvider(provider) {
+    async setProvider(provider, options = {}) {
+      this.layout = provider !== null && options.layout === true;
       const connection = ++this.connection;
       const off = this.off;
       this.off = null;
@@ -134,6 +139,9 @@ enum RhwpNativeFontMatcherSource {
       this.pendingSnapshot = pending;
       return pending;
     }
+    releaseLayoutPrograms() {
+      if (this.layoutEnabled) this.pendingBytes.clear();
+    }
     references() {
       return this.refs;
     }
@@ -148,7 +156,9 @@ enum RhwpNativeFontMatcherSource {
         if (!(data?.bytes instanceof ArrayBuffer) || data.bytes.byteLength === 0 || data.bytes.byteLength > MAX_FONT_BYTES || !Number.isSafeInteger(data.faceIndex ?? 0) || (data.faceIndex ?? 0) < 0) return null;
         return { bytes: data.bytes.slice(0), faceIndex: data.faceIndex ?? 0 };
       }, () => null).finally(() => {
-        if (this.pendingBytes.get(reference.key) === pending) this.pendingBytes.delete(reference.key);
+        if (!this.layoutEnabled && this.pendingBytes.get(reference.key) === pending) {
+          this.pendingBytes.delete(reference.key);
+        }
       });
       this.pendingBytes.set(reference.key, pending);
       return pending;
@@ -15501,8 +15511,8 @@ enum RhwpNativeFontMatcherSource {
     hostRecords = [];
     hostLookup = emptyLocalFontLookup();
   });
-  function setHostFontProvider(provider) {
-    return hostFontSource.setProvider(provider);
+  function setHostFontProvider(provider, options = {}) {
+    return hostFontSource.setProvider(provider, options);
   }
   function prepareHostFontCatalog() {
     return hostFontSource.ready();
