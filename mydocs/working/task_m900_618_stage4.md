@@ -23,3 +23,11 @@
 ## 네이티브 매처 동기화
 
 [후보 CI 44762597317](https://github.com/postmelee/alhangeul-macos/actions/runs/44762597317)은 Studio 자산 검증을 통과한 뒤 네이티브 매처의 기존 `c9095c5f` pin을 발견했다. 공식 v0.9.1의 원본 모듈 10개와 esbuild `0.25.12`로 Swift 매처와 receipt를 다시 생성하고 공식 checkout과 검증했다. 자동 동기화는 같은 sparse checkout에서 두 파일을 생성·검증하고 함께 stage한다. 자동 동기화 대상 판정도 매처 pin을 확인한다.
+
+수정한 #622 head `b99c8672`에서 [네 CI 작업](https://github.com/postmelee/alhangeul-macos/actions/runs/44772183143)이 통과했고 `devel` `6c1c9177`에 병합했다. [병합 뒤 동기화 dry-run 44856141808](https://github.com/postmelee/alhangeul-macos/actions/runs/44856141808)은 대상 판정만 실행하고 새 후보를 만들지 않았다.
+
+## 비공개 OLE 제보에서 확인한 공식 차트 호환 문제
+
+공개 #613 회귀 문서는 통과했다. 별도 비공개 제보의 HWP/HWPX는 SVG 요소가 허용 범위였지만 공식 v0.9.1 Rust 차트 그룹이 붙인 네 메타데이터 속성 때문에 PNG와 PDF 모두 `rejected`로 돌아갔다. 공식 생성 소스와 대조한 네 속성만 정확한 차트 그룹과 알려진 값에서 허용했다. SVG 요소, 외부 참조, CSS, 파일 크기 제한은 기존 정책을 적용한다.
+
+공개 합성 회귀에서는 차트 메타데이터를 허용하고 알 수 없는 버전·그룹·속성 및 음수 ID를 거부했다. 공개 차트의 막대·축·범례와 일반 문서·권한 거부 경로도 통과했다. 비공개 양쪽 원본은 수정 전 `coreGraphics/rejected`, 수정 뒤 PNG `skia/vector`와 PDF `vector`로 바뀌었고 두 PNG 바이트가 일치했다. 원본·출력은 비공개 검증 위치에만 저장했다. 실제 Finder 공급자의 수용은 서명 설치 후보에서 별도로 확인한다.
