@@ -1,17 +1,17 @@
 {
   "schema": 1,
   "studio_build_command": "node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>",
-  "source_resolved_commit": "c9095c5f67632e6721e800ccc7fb43ea49d26682",
+  "source_resolved_commit": "981ce66b4183b13c1a3b5907e04a8969c8c42034",
   "adapter_files": {
     "scripts/build-rhwp-studio.mjs": "628044a4c70998cdd852bcd3a96378859727ef6b207cfcf308d21e36e4d424d6",
-    "scripts/studio-font-menu-adapter.mjs": "27527ebf5a9eb673220df1cbc4988e2ef1bff50828d6de57476685d246ab1488",
+    "scripts/studio-font-menu-adapter.mjs": "5352d4f787db4b4b9262f456c703804fa60b823dd9a01ad9f06f416373395fdb",
     "scripts/studio-initial-render-adapter.mjs": "0736a04eea7151e8194107adbac7f3dd72f3db1b13b50663f6f456884420d726"
   },
   "sources": [
     {
       "path": "src/core/local-fonts.ts",
-      "original_sha256": "37f51713e87eece3bcee9fc63e683dfbc09b970dd114850fcf23a961cf726e39",
-      "adapted_sha256": "e4e7ce6a9343a89d665c4bb8ca930bb83917aa4faf0dc018c11b33ae78fd6928"
+      "original_sha256": "31afb48f00f66dc76ebea9b2e089489da572e65a73be3e5cbe786f16debff8cd",
+      "adapted_sha256": "3638f5fb3ec2b0c2a327ffb83a9edb41bcfae4881b09f1df9a50e88abd1f7b4b"
     },
     {
       "path": "src/ui/toolbar.ts",
@@ -25,18 +25,18 @@
     },
     {
       "path": "src/main.ts",
-      "original_sha256": "52bdd906913b711483a4aaa5e83d61fe5d0d7b9344a2598f2db281f072bb677e",
-      "adapted_sha256": "2dd2eba8ee5d1b01696fbb4d08c87b2a7ed90d8d4ce995c9bc225980fea4058f"
+      "original_sha256": "34bb7038bdbe4fcd51d8781e677575ef1f3b7515228c7c0a1c98fb29ca3455e6",
+      "adapted_sha256": "da1300a4a03efdb890a5d75ef5ba7bd4ad48c5d5fab1bd8bbae88f98c31af579"
     },
     {
       "path": "src/core/wasm-bridge.ts",
-      "original_sha256": "1606343a91a26f0b24a5a8f863d322319212a9545e4da54a4726b51c6d9a4983",
-      "adapted_sha256": "cb2ba16219f04bd29bd5c03bb5a972948850a5fad5b7fa07ce3bb449ec2fefa6"
+      "original_sha256": "49f08ccd2ee748fbe1989cdfa7cb453b7852b65d559b581c048fd4602adecb66",
+      "adapted_sha256": "f07e88c4087be1cd522275431757bfcbf31b17ba1f4bb4e6985178084b210b99"
     },
     {
       "path": "src/view/canvas-view.ts",
-      "original_sha256": "425ca2940c06d5167855285ed913ce49eaeda0b553c9fcd75735abf6d3aaedd7",
-      "adapted_sha256": "f56e7972f01125449d173b4c2d1b7e603ce66ce66541c1dacb323abec0629386"
+      "original_sha256": "c8d25a3f70700a3652a634a85b10221c86bb5b24fe4d250f5998780dacdfd4e2",
+      "adapted_sha256": "c8d25a3f70700a3652a634a85b10221c86bb5b24fe4d250f5998780dacdfd4e2"
     }
   ]
 }

@@ -14,7 +14,7 @@
   <a href="https://www.swift.org/"><img src="https://img.shields.io/badge/Swift-5.9-orange" alt="Swift 5.9" /></a>
   <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-native%20bridge-orange" alt="Rust native bridge" /></a>
   <!-- bundled-rhwp-badges:start -->
-  <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.9.0" title="포함된 rhwp commit: c9095c5f67632e6721e800ccc7fb43ea49d26682"><img src="https://img.shields.io/badge/bundled%20rhwp-v0.9.0-blue" alt="bundled rhwp: v0.9.0" /></a>
+  <a href="https://github.com/edwardkim/rhwp/releases/tag/v0.9.1" title="포함된 rhwp commit: 981ce66b4183b13c1a3b5907e04a8969c8c42034"><img src="https://img.shields.io/badge/bundled%20rhwp-v0.9.1-blue" alt="bundled rhwp: v0.9.1" /></a>
   <!-- bundled-rhwp-badges:end -->
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
   <a href="https://github.com/postmelee/alhangeul-macos/releases"><img src="https://img.shields.io/github/downloads/postmelee/alhangeul-macos/total?label=downloads" alt="GitHub all releases downloads" /></a>

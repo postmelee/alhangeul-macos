@@ -2,14 +2,14 @@
   "name": "rhwp-studio",
   "source_repository": "https://github.com/edwardkim/rhwp.git",
   "source_ref_kind": "release-tag",
-  "source_release_tag": "v0.9.0",
-  "source_resolved_commit": "c9095c5f67632e6721e800ccc7fb43ea49d26682",
-  "source_cargo_lock_sha256": "6184ebd0c4d86f71314b11e756f1e910001b8eac7f4fc7d4cbd2acfac393c86f",
-  "wasm_build_command": "RUSTFLAGS=$PORTABLE_RUSTFLAGS scripts/wasm-pack-locked.sh --target web --out-dir pkg",
+  "source_release_tag": "v0.9.1",
+  "source_resolved_commit": "981ce66b4183b13c1a3b5907e04a8969c8c42034",
+  "source_cargo_lock_sha256": "ae99dccf1a7c155ecfddd99b446dd0aa4a631b94e9a6404c653c9adde95c31eb",
+  "wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "recommended_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
-  "actual_wasm_build_command": "RUSTFLAGS=$PORTABLE_RUSTFLAGS scripts/wasm-pack-locked.sh --target web --out-dir pkg",
+  "actual_wasm_build_command": "docker-compose --env-file .env.docker run --rm wasm",
   "studio_build_command": "node scripts/build-rhwp-studio.mjs --upstream-dir <checkout>",
-  "studio_font_menu_adapter_sha256": "e15b1ad6f5eadd5789e00612c9904a8aa2338a5d3bb133d945be5856ebbbc37b",
+  "studio_font_menu_adapter_sha256": "bc70a99f39f2604d0e0c6675e7cb7cd275010f3a1acc875eefcbebe75dee11bd",
   "copied_from": "rhwp-studio/dist",
   "excluded_paths": [
     "samples/"
@@ -19,23 +19,23 @@
     "fonts/FONTS.md"
   ],
   "copied_file_count": 108,
-  "copied_total_bytes": 97683455,
+  "copied_total_bytes": 99887176,
   "entrypoints": {
     "index_html": {
       "path": "index.html",
-      "sha256": "46fd5682e8b3027fe0772565a176bfc2ac4b7724bd4757051192cc5d28e0ae7a"
+      "sha256": "7b443afe4c10bb8e29d955c6981fbff64514b81b04587a3e28a60ba1b1f0a5cc"
     },
     "main_js": {
-      "path": "assets/index-D91k2Cpl.js",
-      "sha256": "ceef32e43cc44d254d5fafde2a35c8baab619ce64c1e177b4f6817801c5b6fad"
+      "path": "assets/index-BSPiXcqa.js",
+      "sha256": "55cd39f8ef6de11774a2a21bea8997bdc585e1cbbebbba03c45e5a457e7f37d2"
     },
     "main_css": {
-      "path": "assets/index-Cty5qsgm.css",
-      "sha256": "6a0bf6914e398d6a274c1f970a07959c32254f1afab05ca7143725ff9d36406f"
+      "path": "assets/index-Bqn-gcq0.css",
+      "sha256": "99cd7c98ac4082a618859d5e23ab7067bb25820dc5f84587d43d0cc4ebf92798"
     },
     "wasm": {
-      "path": "assets/rhwp_bg-D2q_obRY.wasm",
-      "sha256": "5feacb4a6f29ba1b8c3ad27c2ab29feb937f93b8c98a16c21979bc83787134de"
+      "path": "assets/rhwp_bg-DL0jdWEQ.wasm",
+      "sha256": "634b92b52e635a54f6f5968bbb45dbafdf0849f0fb5e28fbedb2e5560eb8d68c"
     }
   }
 }
