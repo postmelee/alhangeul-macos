@@ -3,11 +3,14 @@ import Foundation
 
 enum HwpPreviewPNGReplyMode: Equatable {
     case coreGraphics
+    case automatic
     case skiaDecode
     case skiaDirect
 
     var identifier: String {
         switch self {
+        case .automatic:
+            return "automatic"
         case .coreGraphics:
             return "coreGraphics"
         case .skiaDecode:
@@ -36,6 +39,7 @@ struct HwpPreviewPNGDiagnostics {
     let skiaPNGBytes: Int?
     let pngPixelSize: CGSize?
     let durationMs: HwpPreviewPNGDuration
+    var rawSvgSelection: String? = nil
     var fontIdentity: String? = nil
     var fontFaces: [String] = []
     var fontSupplyFailure: String? = nil
@@ -59,10 +63,13 @@ enum HwpPreviewPNGRenderer {
         }
 
         if forceDefaultFonts {
-            return try renderEncodedPage(context: context, requestedMode: mode, policy: .coreGraphicsOnly,
+            return try renderEncodedPage(context: context, requestedMode: mode, policy: mode == .automatic ? .quickLookAutomatic : .coreGraphicsOnly,
                 forceDefaultFonts: true)
         }
         switch mode {
+        case .automatic:
+            return try renderEncodedPage(context: context, requestedMode: mode,
+                policy: .quickLookAutomatic, fontContext: fontContext)
         case .coreGraphics:
             return try renderEncodedPage(
                 context: context,
@@ -195,7 +202,7 @@ enum HwpPreviewPNGRenderer {
                     pngEncodeMs: encodeMs,
                     coreGraphicsRenderMs: renderDiagnostics.durationMs.coreGraphicsRenderMs,
                     totalMs: totalMs
-                ), fontIdentity: renderDiagnostics.fontIdentity, fontFaces: renderDiagnostics.fontFaces
+                ), rawSvgSelection: renderDiagnostics.rawSvgSelection, fontIdentity: renderDiagnostics.fontIdentity, fontFaces: renderDiagnostics.fontFaces
             )
         )
     }
@@ -207,7 +214,7 @@ enum HwpPreviewPNGRenderer {
         if requestedMode == .skiaDirect {
             return .coreGraphics
         }
-        if requestedMode == .skiaDecode, diagnostics.backendUsed == .skia {
+        if diagnostics.backendUsed == .skia {
             return .skiaDecode
         }
         return .coreGraphics

@@ -7,9 +7,10 @@ import {execFileSync} from 'node:child_process';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {adaptSource, fontMenuPlugin, receiptName, buildCommand, sourcePaths} from './studio-font-menu-adapter.mjs';
+import {chooseInitialRenderMode} from './studio-initial-render-adapter.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const adapterFiles = ['scripts/build-rhwp-studio.mjs', 'scripts/studio-font-menu-adapter.mjs'];
+const adapterFiles = ['scripts/build-rhwp-studio.mjs', 'scripts/studio-font-menu-adapter.mjs', 'scripts/studio-initial-render-adapter.mjs'];
 const sha = input => createHash('sha256').update(input).digest('hex');
 const args = process.argv.slice(2);
 const value = key => { const i = args.indexOf(key); return i < 0 ? null : args[i + 1]; };
@@ -23,14 +24,16 @@ const git = (...args) => execFileSync('git', ['-C', upstream, ...args], {encodin
 function fingerprints() {
   return Object.fromEntries(adapterFiles.map(path => [path, sha(readFileSync(resolve(root, path)))]));
 }
-function loadSources() {
-  return sourcePaths.map(path => {
+function loadSources(commit) {
+  const inputs = sourcePaths.map(path => {
     const absolute = resolve(upstream, 'rhwp-studio', path);
     const original = readFileSync(absolute, 'utf8');
-    const committed = execFileSync('git', ['-C', upstream, 'show', `HEAD:rhwp-studio/${path}`], {encoding: 'utf8'});
+    const committed = execFileSync('git', ['-C', upstream, 'show', `${commit}:rhwp-studio/${path}`], {encoding: 'utf8'});
     if (original !== committed) throw Error(`Modified upstream Studio source: ${path}`);
-    return {path, absolute, original, adapted: adaptSource(original, path)};
+    return {path, absolute, original};
   });
+  const mode = chooseInitialRenderMode(commit, Object.fromEntries(inputs.map(row => [row.path, row.original])));
+  return inputs.map(row => ({...row, adapted: adaptSource(row.original, row.path, mode)}));
 }
 try {
   if (resource) {
@@ -46,14 +49,15 @@ try {
         !/^[a-f0-9]{64}$/.test(row.original_sha256) || !/^[a-f0-9]{64}$/.test(row.adapted_sha256))) throw Error('Invalid Studio font menu source fingerprints');
     if (upstream) {
       if (receipt.source_resolved_commit !== git('rev-parse', 'HEAD')) throw Error('Studio font menu adapter commit mismatch');
-      const sources = loadSources();
+      const sources = loadSources(receipt.source_resolved_commit);
       if (sources.some((row, i) => receipt.sources[i].original_sha256 !== sha(row.original) ||
           receipt.sources[i].adapted_sha256 !== sha(row.adapted))) throw Error('Studio font menu adapter source mismatch');
     }
     console.log('OK: Studio font menu adapter receipt verified');
   } else {
     if (!upstream) throw Error('--upstream-dir is required');
-    const sources = loadSources();
+    const commit = git('rev-parse', 'HEAD');
+    const sources = loadSources(commit);
     const studio = resolve(upstream, 'rhwp-studio');
     const require = createRequire(resolve(studio, 'package.json'));
     // 변환된 소스도 pinned compiler로 검사한다. upstream checkout은 변경하지 않는다.
@@ -73,10 +77,10 @@ try {
       const config = JSON.parse(readFileSync(resolve(studio, 'tsconfig.json'), 'utf8'));
       config.compilerOptions.paths['@wasm/*'] = [resolve(upstream, 'pkg/*')];
       writeFileSync(resolve(checkDir, 'tsconfig.json'), JSON.stringify(config));
-      execFileSync(process.execPath, [resolve(studio, 'node_modules/typescript/lib/tsc.js'), '--project', resolve(checkDir, 'tsconfig.json')],
+      execFileSync(resolve(studio, 'node_modules/.bin/tsc'), ['--project', resolve(checkDir, 'tsconfig.json')],
         {cwd: studio, stdio: 'inherit'});
     } finally { rmSync(checkRoot, {recursive: true, force: true}); }
-    const receipt = {schema: 1, studio_build_command: buildCommand, source_resolved_commit: git('rev-parse', 'HEAD'),
+    const receipt = {schema: 1, studio_build_command: buildCommand, source_resolved_commit: commit,
       adapter_files: fingerprints(), sources: sources.map(row => ({path: row.path,
         original_sha256: sha(row.original), adapted_sha256: sha(row.adapted)}))};
     const {build} = await import(pathToFileURL(require.resolve('vite')));
