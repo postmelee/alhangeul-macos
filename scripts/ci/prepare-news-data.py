@@ -82,7 +82,7 @@ def main():
             summary = {'status': 'prepared', 'item_count': len(data['items']), 'updated_at': data.get('updated_at')}
         print(json.dumps(summary, ensure_ascii=False))
         if summary.get('token', {}).get('renewal_required'):
-            print('::warning::Threads 토큰이 14일 이내에 만료됩니다. 수동 갱신이 필요합니다.', file=sys.stderr)
+            print('::warning::Threads 토큰이 14일 이내에 만료됩니다. 자동 갱신 상태를 확인하세요.', file=sys.stderr)
         return 0
     except (news.NewsError, OSError, ValueError):
         print('ERROR: 소식 준비 실패. 활성 상태·토큰 만료·수집 결과를 확인하세요. 기존 배포를 유지합니다.', file=sys.stderr)
