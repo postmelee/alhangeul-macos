@@ -51,8 +51,7 @@ jobs:
         with:
           client-id: ${{ vars.THREADS_ROTATION_APP_CLIENT_ID }}
           private-key: ${{ secrets.THREADS_ROTATION_APP_PRIVATE_KEY }}
-          permission-secrets: write
-          permission-variables: write
+          # 이 저장소에만 설치된 전용 앱의 Secrets·Variables 권한을 사용한다.
       - name: Verify or rotate the Threads token
         env:
           ROTATION_GITHUB_TOKEN: ${{ steps.rotation-app.outputs.token }}
