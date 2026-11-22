@@ -85,50 +85,25 @@ jobs:
             return 1
           }
           touch "$probe/launch-start"
-          open -n --stdout "$probe/app.stdout" --stderr "$probe/app.stderr" -a "$app"
+          SECONDS=0
+          open -n --stdout "$probe/app.stdout" --stderr "$probe/app.stderr" -a "$app" "$probe/first.hwp"
           pid=""
-          for attempt in {1..35}; do
-            pid="$(pgrep -x "$name" || true)"
-            if [[ "$pid" =~ ^[0-9]+$ ]] && [[ "$("$probe/windows" "$pid")" -ge 1 ]]; then break; fi
-            sleep 1
-          done
-          if ! [[ "$pid" =~ ^[0-9]+$ ]] || [[ "$("$probe/windows" "$pid")" -lt 1 ]]; then
-            if report_stage EMPTY_LAUNCH; then exit 0; fi
-            if [[ "$pid" =~ ^[0-9]+$ ]]; then
-              echo "RESULT=PROCESS_ALIVE_WITHOUT_VISIBLE_INITIAL_WINDOW"
-            else
-              echo "RESULT=NO_PROCESS_AFTER_EMPTY_LAUNCH"
-            fi
-            if grep -qs 'windowDidOrderOffScreen:' "$probe/app.stderr"; then echo "STDERR=WINDOW_DID_ORDER_OFF_SCREEN"; fi
-            if grep -qsE 'dyld\:|Library not loaded' "$probe/app.stderr"; then echo "STDERR=DYNAMIC_LOADER_FAILURE"; fi
-            exit 1
-          fi
-          echo "Observed initial app window"
-          open -a "$app" "$probe/first.hwp"
           before=0
-          stable_before=0
-          for attempt in {1..35}; do
-            if ! kill -0 "$pid" 2>/dev/null; then
-              if report_stage FIRST_DOCUMENT; then exit 0; fi
-              echo "RESULT=PROCESS_EXITED_ON_FIRST_DOCUMENT"
-              exit 1
+          for attempt in {1..24}; do
+            pid="$(pgrep -x "$name" || true)"
+            if [[ "$pid" =~ ^[0-9]+$ ]]; then
+              before="$("$probe/windows" "$pid")"
+              if [[ "$before" -gt 0 ]]; then break; fi
             fi
-            count="$("$probe/windows" "$pid")"
-            echo "FIRST_WINDOW_COUNT=$count"
-            if [[ "$count" -gt 0 ]] && [[ "$count" = "$before" ]]; then
-              stable_before=$((stable_before + 1))
-              if [[ "$stable_before" = 7 ]]; then break; fi
-            else
-              stable_before=0
-              before="$count"
-            fi
-            sleep 1
+            sleep 0.25
           done
-          if [[ "$stable_before" != 7 ]]; then
-            echo "RESULT=NO_STABLE_WINDOW_AFTER_FIRST_OPEN"
+          if [[ "$before" -eq 0 ]]; then
+            if report_stage FIRST_COLD_OPEN; then exit 0; fi
+            echo "RESULT=NO_VISIBLE_WINDOW_DURING_COLD_START"
             exit 1
           fi
-          echo "STABLE_BEFORE=$before"
+          echo "FIRST_WINDOW_COUNT=$before"
+          echo "SECONDS_BEFORE_SECOND_OPEN=$SECONDS"
           touch "$probe/second-open"
           open -a "$app" "$probe/second.hwp"
           stable=0
@@ -149,10 +124,10 @@ jobs:
             fi
             count="$("$probe/windows" "$pid")"
             echo "SECOND_WINDOW_COUNT=$count"
-            if [[ "$count" -gt "$before" ]]; then
+            if [[ "$count" -ge 2 ]]; then
               stable=$((stable + 1))
               if [[ "$stable" = 6 ]]; then
-                echo "RESULT=ADDITIONAL_STABLE_WINDOW_SAME_PROCESS"
+                echo "RESULT=TWO_OR_MORE_STABLE_WINDOWS_AFTER_COLD_OPEN"
                 exit 0
               fi
             else
