@@ -527,6 +527,28 @@ def sync(client, embed_client, *, expected_user_id, output=None, max_pages=200,
     return summary
 
 
+def request_token(token, *, endpoint, grant, started, app_secret=None, transport=None):
+    """Return a validated Meta response in memory for local and Actions consumers."""
+    require((endpoint, grant) in {("refresh_access_token", "th_refresh_token"),
+                                  ("access_token", "th_exchange_token")}, "허용하지 않은 토큰 endpoint")
+    params = {"grant_type": grant, "access_token": token}
+    if app_secret is not None:
+        params["client_secret"] = app_secret
+    request = Request("https://graph.threads.net/" + endpoint + "?" + urlencode(params),
+                      headers={"Accept": "application/json"})
+    data = (transport or JsonTransport()).get(request, "토큰 API")
+    require(isinstance(data, dict) and "error" not in data, "토큰 응답 오류")
+    new_token = data.get("access_token")
+    require(isinstance(new_token, str) and 1 <= len(new_token) <= 8192
+            and all(33 <= ord(c) <= 126 for c in new_token), "발급 토큰 형식 오류")
+    seconds = data.get("expires_in")
+    token_type = data.get("token_type", "bearer")
+    require(type(seconds) is int and 0 < seconds <= 60 * 24 * 3600
+            and isinstance(token_type, str) and token_type.lower() == "bearer", "토큰 유효기간·유형 응답 오류")
+    expires = started + timedelta(seconds=seconds)
+    return new_token, expires
+
+
 def renew_token(token, *, expires_at, output, issued_at=None, app_secret=None,
                 transport=None, now=lambda: datetime.now(timezone.utc)):
     """운영자가 명시적으로 실행하는 토큰 교환/갱신. 자동 수집 workflow에서는 사용하지 않는다."""
@@ -544,21 +566,8 @@ def renew_token(token, *, expires_at, output, issued_at=None, app_secret=None,
     # 토큰 출력 디렉터리는 다른 사용자에게 노출하지 않는다.
     info = target.parent.stat()
     require(info.st_uid == os.getuid() and not info.st_mode & 0o077, "토큰 출력 디렉터리는 본인 소유·권한 700 필요")
-    params = {"grant_type": grant, "access_token": token}
-    if app_secret is not None:
-        params["client_secret"] = app_secret
-    request = Request("https://graph.threads.net/" + endpoint + "?" + urlencode(params),
-                      headers={"Accept": "application/json"})
-    data = (transport or JsonTransport()).get(request, "토큰 API")
-    require(isinstance(data, dict) and "error" not in data, "토큰 응답 오류")
-    new_token = data.get("access_token")
-    require(isinstance(new_token, str) and 1 <= len(new_token) <= 8192
-            and all(33 <= ord(c) <= 126 for c in new_token), "발급 토큰 형식 오류")
-    seconds = data.get("expires_in")
-    token_type = data.get("token_type", "bearer")
-    require(type(seconds) is int and 0 < seconds <= 60 * 24 * 3600
-            and isinstance(token_type, str) and token_type.lower() == "bearer", "토큰 유효기간·유형 응답 오류")
-    expires = started + timedelta(seconds=seconds)
+    new_token, expires = request_token(token, endpoint=endpoint, grant=grant, started=started,
+                                       app_secret=app_secret, transport=transport)
     require(expires > now(), "발급 토큰이 이미 만료됨")
     result = {"status": "token_exchanged" if app_secret is not None else "token_refreshed",
               "issued_at": started.isoformat(), "expires_at": expires.isoformat(),
