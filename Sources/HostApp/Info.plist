@@ -2,14 +2,46 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>AlhangeulAppExecutionEndpoint</key>
-	<string>$(ALHANGEUL_APP_EXECUTION_ENDPOINT)</string>
-	<key>AlhangeulFontLibraryGroupIdentifier</key>
-	<string>XH6JHKYXV8.com.postmelee.alhangeul.font-library</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>ko</string>
 	<key>CFBundleDisplayName</key>
 	<string>Alhangeul</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Alhangeul</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.2.6</string>
+	<key>CFBundleVersion</key>
+	<string>24</string>
+	<key>AlhangeulAppExecutionEndpoint</key>
+	<string>$(ALHANGEUL_APP_EXECUTION_ENDPOINT)</string>
+	<key>AlhangeulFontLibraryGroupIdentifier</key>
+	<string>XH6JHKYXV8.com.postmelee.alhangeul.font-library</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>12.0</string>
+	<key>LSHasLocalizedDisplayName</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2025-2026 Taegyu Lee</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUEnableInstallerLauncherService</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://postmelee.github.io/alhangeul-macos/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>5bIatnE362KFmrf9NneeE7gVvkKfTnWK7c26MwfFLSs=</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -33,50 +65,18 @@
 			</array>
 		</dict>
 	</array>
-	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>Alhangeul</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.2.6</string>
-	<key>CFBundleVersion</key>
-	<string>24</string>
-	<key>LSHasLocalizedDisplayName</key>
-	<true/>
-	<key>LSMinimumSystemVersion</key>
-	<string>12.0</string>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2025-2026 Taegyu Lee</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
-	<key>SUAutomaticallyUpdate</key>
-	<false/>
-	<key>SUEnableAutomaticChecks</key>
-	<true/>
-	<key>SUEnableInstallerLauncherService</key>
-	<true/>
-	<key>SUFeedURL</key>
-	<string>https://postmelee.github.io/alhangeul-macos/appcast.xml</string>
-	<key>SUPublicEDKey</key>
-	<string>5bIatnE362KFmrf9NneeE7gVvkKfTnWK7c26MwfFLSs=</string>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.postmelee.alhangeul.hwp</string>
+			<key>UTTypeDescription</key>
+			<string>HWP Document</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
 				<string>public.content</string>
 			</array>
-			<key>UTTypeDescription</key>
-			<string>HWP Document</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.postmelee.alhangeul.hwp</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -91,16 +91,16 @@
 			</dict>
 		</dict>
 		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.postmelee.alhangeul.hwpx</string>
+			<key>UTTypeDescription</key>
+			<string>HWPX Document</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
 				<string>public.content</string>
 				<string>public.zip-archive</string>
 			</array>
-			<key>UTTypeDescription</key>
-			<string>HWPX Document</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.postmelee.alhangeul.hwpx</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -117,15 +117,15 @@
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>public.data</string>
-				<string>public.content</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>Hancom HWP Document</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.hancom.hwp</string>
+			<key>UTTypeDescription</key>
+			<string>Hancom HWP Document</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -135,16 +135,16 @@
 			</dict>
 		</dict>
 		<dict>
-			<key>UTTypeConformsTo</key>
-			<array>
-				<string>public.data</string>
-				<string>public.content</string>
-				<string>public.zip-archive</string>
-			</array>
-			<key>UTTypeDescription</key>
-			<string>Hancom HWPX Document</string>
 			<key>UTTypeIdentifier</key>
 			<string>com.hancom.hwpx</string>
+			<key>UTTypeDescription</key>
+			<string>Hancom HWPX Document</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+				<string>public.zip-archive</string>
+			</array>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -154,15 +154,15 @@
 			</dict>
 		</dict>
 		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.haansoft.hancomofficeviewer.mac.hwp</string>
+			<key>UTTypeDescription</key>
+			<string>Hancom Office Viewer HWP Document</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
 				<string>public.content</string>
 			</array>
-			<key>UTTypeDescription</key>
-			<string>Hancom Office Viewer HWP Document</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.haansoft.hancomofficeviewer.mac.hwp</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -172,16 +172,16 @@
 			</dict>
 		</dict>
 		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.haansoft.hancomofficeviewer.mac.hwpx</string>
+			<key>UTTypeDescription</key>
+			<string>Hancom Office Viewer HWPX Document</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
 				<string>public.content</string>
 				<string>public.zip-archive</string>
 			</array>
-			<key>UTTypeDescription</key>
-			<string>Hancom Office Viewer HWPX Document</string>
-			<key>UTTypeIdentifier</key>
-			<string>com.haansoft.hancomofficeviewer.mac.hwpx</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -191,14 +191,14 @@
 			</dict>
 		</dict>
 		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>net.golbin.hop.hwp</string>
+			<key>UTTypeDescription</key>
+			<string>HOP HWP Document</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
 			</array>
-			<key>UTTypeDescription</key>
-			<string>HOP HWP Document</string>
-			<key>UTTypeIdentifier</key>
-			<string>net.golbin.hop.hwp</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -212,15 +212,15 @@
 			</dict>
 		</dict>
 		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>net.golbin.hop.hwpx</string>
+			<key>UTTypeDescription</key>
+			<string>HOP HWPX Document</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
 				<string>public.zip-archive</string>
 			</array>
-			<key>UTTypeDescription</key>
-			<string>HOP HWPX Document</string>
-			<key>UTTypeIdentifier</key>
-			<string>net.golbin.hop.hwpx</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -234,15 +234,15 @@
 			</dict>
 		</dict>
 		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.libreoffice.hwp-document</string>
+			<key>UTTypeDescription</key>
+			<string>LibreOffice Hangul WP 97 Document</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
 				<string>public.content</string>
 			</array>
-			<key>UTTypeDescription</key>
-			<string>LibreOffice Hangul WP 97 Document</string>
-			<key>UTTypeIdentifier</key>
-			<string>org.libreoffice.hwp-document</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
