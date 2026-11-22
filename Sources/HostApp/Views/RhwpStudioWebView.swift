@@ -77,6 +77,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
 
     static func dismantleNSView(_ webView: WKWebView, coordinator: Coordinator) {
         coordinator.stopCommandFailures()
+        webView.uiDelegate = nil
         coordinator.cancelOutputPreparation()
         coordinator.disposeFontProvider(in: webView)
         coordinator.fontMessageHandler.reset()
@@ -113,7 +114,7 @@ struct RhwpStudioWebView: NSViewRepresentable {
 }
 
 extension RhwpStudioWebView {
-    final class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
+    final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
         var onLoadStateChange: (Bool) -> Void = { _ in }
         var onError: (String?) -> Void = { _ in }
         var onFailure: @MainActor (RhwpStudioWebViewFailure) -> Void = { _ in }
@@ -126,6 +127,7 @@ extension RhwpStudioWebView {
         private var saveCompletion: SaveCompletion?
         private var saveTask: Task<Void, Never>?
         private var shareID: String?
+        private var fileSelectionPanel: NSOpenPanel?
         private var commandFailures: RhwpStudioCommandFailureState
 
         private static let loadTimeoutNanoseconds: UInt64 = 15_000_000_000
@@ -306,6 +308,7 @@ extension RhwpStudioWebView {
             }
             RhwpStudioNativeCommandDispatcher.register(webView)
             webView.navigationDelegate = self
+            webView.uiDelegate = self
             webView.allowsBackForwardNavigationGestures = false
             return webView
         }
@@ -328,6 +331,7 @@ extension RhwpStudioWebView {
                 }
                 return
             }
+            cancelFileSelection()
             saveTask?.cancel()
             saveCompletion?.finishAfterSuspension(); saveCompletion = nil
             webView.isHidden = false
@@ -425,7 +429,45 @@ extension RhwpStudioWebView {
             onEditorSessionChange(session)
         }
 
+        func webView(
+            _ webView: WKWebView,
+            runOpenPanelWith parameters: WKOpenPanelParameters,
+            initiatedByFrame frame: WKFrameInfo,
+            completionHandler: @escaping @MainActor @Sendable ([URL]?) -> Void
+        ) {
+            guard webView === commandWebView, hasCompletedCurrentLoad, !commandFailures.blocksCommands,
+                  frame.isMainFrame, let url = frame.request.url,
+                  RhwpStudioResourceRoute.isStudioResourceURL(url), url.path == "/index.html",
+                  let window = webView.window, window.attachedSheet == nil, fileSelectionPanel == nil else {
+                completionHandler(nil)
+                return
+            }
+
+            let panel = NSOpenPanel()
+            panel.title = "파일 선택"
+            panel.canChooseDirectories = parameters.allowsDirectories
+            panel.canChooseFiles = !parameters.allowsDirectories
+            panel.allowsMultipleSelection = parameters.allowsMultipleSelection
+            fileSelectionPanel = panel
+            panel.beginSheetModal(for: window) { [weak self, weak panel] response in
+                guard let self, let panel, self.fileSelectionPanel === panel else {
+                    completionHandler(nil)
+                    return
+                }
+
+                self.fileSelectionPanel = nil
+                completionHandler(response == .OK ? panel.urls : nil)
+            }
+        }
+
+        private func cancelFileSelection() {
+            let panel = fileSelectionPanel
+            fileSelectionPanel = nil
+            panel?.cancel(nil)
+        }
+
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+            cancelFileSelection()
             guard !commandFailures.isSuspended else { return }
             fontMessageHandler.begin(loadToken: editorLoadToken)
         }
@@ -693,12 +735,15 @@ extension RhwpStudioWebView {
                 }
                 webView.isHidden = true
                 if webView.window?.firstResponder is NSView { webView.window?.makeFirstResponder(nil) }
-                (webView.window?.attachedSheet as? NSSavePanel)?.cancel(nil)
+                if fileSelectionPanel == nil {
+                    (webView.window?.attachedSheet as? NSSavePanel)?.cancel(nil)
+                }
                 disposeFontProvider(in: webView)
                 webView.stopLoading()
                 webView.configuration.userContentController.removeAllUserScripts()
                 webView.loadHTMLString("<!doctype html><title>편집 중단</title>", baseURL: nil)
             }
+            cancelFileSelection()
             fontMessageHandler.reset()
             htmlDownload?.cancel(); htmlDownload = nil; htmlExportID = nil
             cancelOutputPreparation()
