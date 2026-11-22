@@ -183,8 +183,13 @@ jobs:
             studio_current="true"
           fi
 
+          matcher_current="false"
+          if [ "$core_current" = "true" ] && node scripts/build-native-font-matcher.mjs --verify; then
+            matcher_current="true"
+          fi
+
           current="false"
-          if [ "$core_current" = "true" ] && [ "$studio_current" = "true" ]; then
+          if [ "$core_current" = "true" ] && [ "$studio_current" = "true" ] && [ "$matcher_current" = "true" ]; then
             current="true"
           fi
 
@@ -223,6 +228,7 @@ jobs:
             echo "- target URL: $target_url"
             echo "- core current: \`$core_current\`"
             echo "- studio current: \`$studio_current\`"
+            echo "- native matcher current: \`$matcher_current\`"
             echo "- full sync current: \`$current\`"
             echo "- base branch: \`$BASE_BRANCH\`"
             echo "- repository content ref: \`$BASE_BRANCH\`"
@@ -441,8 +447,8 @@ jobs:
           artifact_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-studio-build-artifact"
           rm -rf "$artifact_dir"
           mkdir -p "$artifact_dir/rhwp-studio"
-          cp -a "$upstream_dir/pkg" "$artifact_dir/pkg"
-          cp -a "$upstream_dir/rhwp-studio/dist" "$artifact_dir/rhwp-studio/dist"
+          mv "$upstream_dir/pkg" "$artifact_dir/pkg"
+          mv "$upstream_dir/rhwp-studio/dist" "$artifact_dir/rhwp-studio/dist"
 
       - name: Upload studio build artifact
         uses: actions/upload-artifact@v7
@@ -527,23 +533,6 @@ jobs:
           name: rhwp-studio-build
           path: build.noindex/rhwp-studio-build-artifact
 
-      - name: Restore upstream checkout with built assets
-        shell: bash
-        run: |
-          set -euo pipefail
-          upstream_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream"
-          artifact_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-studio-build-artifact"
-          rm -rf "$upstream_dir"
-          mkdir -p "$(dirname "$upstream_dir")"
-          GIT_LFS_SKIP_SMUDGE=1 git clone "$UPSTREAM_GIT_URL" "$upstream_dir"
-          git -C "$upstream_dir" config lfs.skipSmudge true
-          GIT_LFS_SKIP_SMUDGE=1 git -C "$upstream_dir" checkout --detach "${{ needs.resolve-target.outputs.target_commit }}"
-
-          rm -rf "$upstream_dir/pkg" "$upstream_dir/rhwp-studio/dist"
-          mkdir -p "$upstream_dir/rhwp-studio"
-          cp -a "$artifact_dir/pkg" "$upstream_dir/pkg"
-          cp -a "$artifact_dir/rhwp-studio/dist" "$upstream_dir/rhwp-studio/dist"
-
       - name: Set up Python for golden contract helpers
         uses: actions/setup-python@v6
         with:
@@ -555,15 +544,47 @@ jobs:
         env:
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TARGET_COMMIT: ${{ needs.resolve-target.outputs.target_commit }}
+          TARGET_TAG: ${{ needs.resolve-target.outputs.target_tag }}
         run: |
           set -euo pipefail
           branch_name="${{ needs.resolve-target.outputs.branch_name }}"
-          target_tag="${{ needs.resolve-target.outputs.target_tag }}"
-          target_commit="${{ needs.resolve-target.outputs.target_commit }}"
+          target_tag="$TARGET_TAG"
+          target_commit="$TARGET_COMMIT"
           target_url="${{ needs.resolve-target.outputs.target_url }}"
           work_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-full-sync-pr"
           upstream_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream"
+          artifact_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-studio-build-artifact"
           impact_dir="$GITHUB_WORKSPACE/build.noindex/rhwp-upstream-impact"
+          cargo_home="${CARGO_HOME:-$HOME/.cargo}"
+
+          report_disk() {
+            {
+              echo "Disk usage (KiB): $1"
+              df -Pk "$GITHUB_WORKSPACE" "$cargo_home"
+              for path in "$GITHUB_WORKSPACE/.git" "$cargo_home/git/db" \
+                "$cargo_home/git/checkouts" "$cargo_home/registry" \
+                "$GITHUB_WORKSPACE/RustBridge/target" "$GITHUB_WORKSPACE/Frameworks" \
+                "$upstream_dir" "$artifact_dir"; do
+                if [ -e "$path" ]; then du -sk "$path"; fi
+              done
+            } | tee -a "$GITHUB_STEP_SUMMARY"
+          }
+
+          require_free_space() {
+            local path="$1" minimum_gib="$2" operation="$3" free_kib
+            free_kib="$(df -Pk "$path" | awk 'NR == 2 { print $4 }')"
+            if ! [[ "$free_kib" =~ ^[0-9]+$ ]] || (( free_kib < minimum_gib * 1024 * 1024 )); then
+              echo "ERROR: $operation needs at least $minimum_gib GiB free at $path (available: ${free_kib:-unknown} KiB)" >&2
+              return 1
+            fi
+          }
+
+          mkdir -p "$cargo_home"
+          trap 'result=$?; report_disk "sync finished (exit $result)" || true; exit "$result"' EXIT
+          report_disk 'before Cargo dependency resolution'
+          # These are minimum headroom checks. Keep measured usage in the run summary.
+          require_free_space "$cargo_home" 8 'Cargo dependency resolution'
           mkdir -p "$work_dir"
           body_helper="$work_dir/write-rhwp-full-sync-pr-body.sh"
           cp scripts/ci/write-rhwp-full-sync-pr-body.sh "$body_helper"
@@ -579,13 +600,37 @@ jobs:
             --channel stable \
             --tag "$target_tag"
 
+          report_disk 'after Cargo dependency resolution'
+          require_free_space "$GITHUB_WORKSPACE" 4 'Universal Rust bridge build'
           scripts/build-rust-macos.sh --update-lock
+          report_disk 'after Universal Rust bridge build'
           scripts/update-rhwp-core-build-info.sh
           scripts/verify-rhwp-core-build-info.sh
           scripts/update-render-tree-golden.sh
           scripts/verify-render-tree-golden.sh
           scripts/ci/test-render-tree-decoder.sh
           scripts/check-no-appkit.sh
+
+          # Share Git objects from Cargo's exact locked checkout. Only Studio source
+          # and root metadata are needed for the receipt and Cargo.lock checks.
+          cargo_checkout="$(cargo metadata --locked --format-version 1 \
+            --filter-platform aarch64-apple-darwin --manifest-path RustBridge/Cargo.toml | \
+            python3 -c '
+          import json, pathlib, sys
+          repo, tag, commit = sys.argv[1:]
+          source = f"git+{repo}?tag={tag}#{commit}"
+          matches = [p for p in json.load(sys.stdin)["packages"] if p["name"] == "rhwp" and p["source"] == source]
+          if len(matches) != 1:
+              sys.exit("ERROR: Cargo metadata did not identify exactly one locked upstream rhwp checkout")
+          print(pathlib.Path(matches[0]["manifest_path"]).parent)
+          ' "$UPSTREAM_GIT_URL" "$target_tag" "$target_commit")"
+          test "$(git -C "$cargo_checkout" rev-parse HEAD)" = "$target_commit"
+          git clone --shared --no-checkout -- "$cargo_checkout" "$upstream_dir"
+          git -C "$upstream_dir" sparse-checkout set rhwp-studio/src
+          GIT_LFS_SKIP_SMUDGE=1 git -C "$upstream_dir" checkout --detach "$target_commit"
+          mv "$artifact_dir/pkg" "$upstream_dir/pkg"
+          mv "$artifact_dir/rhwp-studio/dist" "$upstream_dir/rhwp-studio/dist"
+          report_disk 'after restoring Studio assets'
 
           scripts/sync-rhwp-studio.sh \
             --upstream-dir "$upstream_dir" \
@@ -596,6 +641,12 @@ jobs:
             --tag "$target_tag" \
             --commit "$target_commit" \
             --upstream-dir "$upstream_dir"
+
+          matcher_tool_dir="$work_dir/native-matcher-tool"
+          npm install --prefix "$matcher_tool_dir" --cache "$matcher_tool_dir/cache" \
+            --no-audit --no-fund --save-exact esbuild@0.25.12
+          node scripts/build-native-font-matcher.mjs --upstream-dir "$upstream_dir" --tool-dir "$matcher_tool_dir"
+          node scripts/build-native-font-matcher.mjs --verify --upstream-dir "$upstream_dir"
 
           python3 scripts/ci/update-rhwp-readme-badge.py
           python3 scripts/ci/update-rhwp-readme-badge.py --check
@@ -615,6 +666,7 @@ jobs:
             echo "\`scripts/check-no-appkit.sh\`: OK"
             echo "\`scripts/sync-rhwp-studio.sh --tag $target_tag --commit $target_commit\`: OK"
             echo "\`scripts/verify-rhwp-studio-assets.sh --tag $target_tag --commit $target_commit --upstream-dir <target-checkout>\`: Cargo.lock fingerprint match OK"
+            echo "\`scripts/build-native-font-matcher.mjs --verify --upstream-dir <target-checkout>\`: native matcher pin and sources OK"
             echo "\`python3 scripts/ci/update-rhwp-readme-badge.py --check\`: bundled badge and link OK"
             echo "\`git diff --check\`: OK"
           } > "$verification_file"
@@ -634,6 +686,8 @@ jobs:
             Sources/RhwpCoreBridge/RhwpCoreBuildInfo.swift \
             scripts/ci/fixtures/render-tree/request-page0.json \
             Sources/HostApp/Resources/rhwp-studio \
+            Sources/Shared/FontLibrary/RhwpNativeFontMatcherSource.swift \
+            Sources/Shared/FontLibrary/native-font-matcher-receipt.json \
             RustBridge/Cargo.toml \
             RustBridge/Cargo.lock \
             rhwp-core.lock \

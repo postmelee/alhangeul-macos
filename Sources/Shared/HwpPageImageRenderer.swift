@@ -667,9 +667,11 @@ private final class HwpQuickLookVectorSVG: NSObject, XMLParserDelegate {
                 qualifiedName: String?, attributes values: [String: String]) {
         count += 1
         depth += 1
+        let chartGroup = name == "g" && values["class"] == "hwp-ole-chart hwp-ole-chart-rust-svg"
         guard count <= 16_384, depth <= 64, Self.elements.contains(name), values.count <= 32,
               values.allSatisfy({ key, value in
-                  Self.attributes.contains(key) && !value.lowercased().contains("url")
+                  (Self.attributes.contains(key) || (chartGroup && Self.allowsChartMetadata(key, value: value)))
+                      && !value.lowercased().contains("url")
                       && !value.contains("\\") && !value.contains("@")
               }) else {
             valid = false
@@ -677,6 +679,17 @@ private final class HwpQuickLookVectorSVG: NSObject, XMLParserDelegate {
             return
         }
         if name != "svg" && name != "g" { drawable = true }
+    }
+
+    // rhwp의 Rust 차트 그룹이 생성하는 메타데이터만 허용한다.
+    private static func allowsChartMetadata(_ key: String, value: String) -> Bool {
+        switch key {
+        case "data-rhwp-ole-chart-renderer": return value == "rust-svg"
+        case "data-rhwp-ole-chart-schema": return value == "rhwp.oleChartIr"
+        case "data-rhwp-ole-chart-version": return value == "1"
+        case "data-rhwp-bin-data-id": return UInt32(value).map { String($0) } == value
+        default: return false
+        }
     }
 
     func parser(_ parser: XMLParser, didEndElement: String, namespaceURI: String?, qualifiedName: String?) {

@@ -83,9 +83,13 @@ test('실제 Bold 속성·같은 위치만 Bold 요청으로 바꾸고 모호한
   const normalize = vm.runInNewContext(stripTypeScriptTypes(outputPageSource) + '\nnormalizeHostOutputSvg', {
     DOMParser:class {parseFromString(){return parsed;}},XMLSerializer:class {serializeToString(){return 'serialized';}}
   });
-  nodes=[makeNode()];assert.equal(normalize('svg',tree),'serialized');
-  assert.equal(nodes[0].attrs['font-weight'],'700');assert.equal(nodes[0].attrs.stroke,undefined);
-  assert.equal(nodes[0].attrs.x,'20');assert.equal(nodes[0].attrs['font-size'],'24');
+  for (const schemaMinorVersion of [23, 35]) {
+    nodes=[makeNode()];assert.equal(normalize('svg',{...tree,schemaMinorVersion}),'serialized');
+    assert.equal(nodes[0].attrs['font-weight'],'700');assert.equal(nodes[0].attrs.stroke,undefined);
+    assert.equal(nodes[0].attrs.x,'20');assert.equal(nodes[0].attrs['font-size'],'24');
+  }
+  nodes=[makeNode()];assert.equal(normalize('svg',{...tree,schemaMinorVersion:36}),'svg');
+  assert.equal(nodes[0].attrs.stroke,'#000000');
   for (const effects of [{shadowType:1},{outlineType:1},{superscript:true},{ratio:0.8},{bold:false}]) {
     nodes=[makeNode()];normalize('svg',{...tree,root:{kind:'leaf',ops:[{...op,style:{...op.style,...effects}}]}});
     assert.equal(nodes[0].attrs.stroke,'#000000');

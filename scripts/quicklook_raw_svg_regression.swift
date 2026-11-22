@@ -19,6 +19,13 @@ struct RawSvgRegression {
     static func policyChecks() throws {
         let valid = "<g><rect x=\"113\" y=\"139\" width=\"200\" height=\"100\" fill=\"#009966\"/><text x=\"120\" y=\"160\">남성</text></g>"
         try check(HwpQuickLookRawSvgPolicy.select(tree: node(valid)) == .vector, "vector")
+        let chart = """
+        <g class="hwp-ole-chart hwp-ole-chart-rust-svg" data-rhwp-ole-chart-renderer="rust-svg"
+           data-rhwp-ole-chart-schema="rhwp.oleChartIr" data-rhwp-ole-chart-version="1" data-rhwp-bin-data-id="3">
+          <rect width="10" height="10" fill="#009966"/>
+        </g>
+        """
+        try check(HwpQuickLookRawSvgPolicy.select(tree: node(chart)) == .vector, "official OLE chart metadata")
         let empty = RenderNode(id: 0, nodeType: .masterPage,
             bbox: BBox(x: 0, y: 0, width: 794, height: 1123), children: [], visible: true)
         try check(HwpQuickLookRawSvgPolicy.select(tree: empty) == .noVector, "normal page")
@@ -33,6 +40,10 @@ struct RawSvgRegression {
             "<image href=\"data:image/png;base64,AAAA\"/>",
             "<rect width=\"10\" height=\"10\" fill=\"url(#x)\"/>",
             "<rect style=\"fill:red\"/>", "<rect onload=\"x\"/>",
+            chart.replacingOccurrences(of: "data-rhwp-ole-chart-version=\"1\"", with: "data-rhwp-ole-chart-version=\"2\""),
+            chart.replacingOccurrences(of: "data-rhwp-bin-data-id=\"3\"", with: "data-rhwp-bin-data-id=\"-1\""),
+            chart.replacingOccurrences(of: "hwp-ole-chart hwp-ole-chart-rust-svg", with: "unknown"),
+            chart.replacingOccurrences(of: "data-rhwp-bin-data-id", with: "data-other"),
             "<!DOCTYPE svg [<!ENTITY e SYSTEM 'file:///tmp/a'>]><text>&e;</text>",
             "<?xml-stylesheet href='https://example.invalid/a.css'?><rect/>",
             String(repeating: "<g>", count: 65) + "<rect/>" + String(repeating: "</g>", count: 65),
