@@ -1,0 +1,114 @@
+name: Task 597 published app window probe
+
+on:
+  push:
+    branches: [diagnostics/task597-macos27]
+    paths: ['.github/workflows/task597-macos27-probe.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  open-two-documents:
+    runs-on: xcode-27
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: '0.2.3'
+            sha256: d0050cb7de5d3fea17708aef1bebb7da54d326c7a540afbaf28276c3e50b1e63
+          - version: '0.2.5'
+            sha256: e6ad65f64fc27a15e4e03ae19a5c8155f09ec33b539b2d17b88fe057afdc2f52
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          sparse-checkout: mydocs/working/assets/task_m020_567_stage5
+      - name: Check two HWP windows in one process
+        env:
+          PROBE_VERSION: ${{ matrix.version }}
+          PROBE_CHECKSUM: ${{ matrix.sha256 }}
+        run: |
+          set -euo pipefail
+          sw_vers
+          test "$(sw_vers -buildVersion)" = 26A434
+          test "$(uname -m)" = arm64
+          probe="$(mktemp -d "$RUNNER_TEMP/task597.XXXXXX")"
+          mount="$probe/mount"
+          mkdir "$mount"
+          trap 'hdiutil detach "$mount" -quiet || true' EXIT
+          curl -fsSL --retry 3 --max-time 120 \
+            "https://github.com/postmelee/alhangeul-macos/releases/download/v$PROBE_VERSION/alhangeul-macos-$PROBE_VERSION.dmg" \
+            -o "$probe/release.dmg"
+          echo "$PROBE_CHECKSUM  $probe/release.dmg" | shasum -a 256 -c
+          hdiutil attach -readonly -nobrowse -mountpoint "$mount" "$probe/release.dmg" -quiet
+          shopt -s nullglob
+          apps=("$mount/"*.app)
+          test "${#apps[@]}" -eq 1
+          app="$probe/${apps[0]##*/}"
+          ditto "${apps[0]}" "$app"
+          codesign --verify --strict --deep "$app"
+          plist="$app/Contents/Info.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$plist")" = "$PROBE_VERSION"
+          name="$(/usr/libexec/PlistBuddy -c 'Print CFBundleExecutable' "$plist")"
+          echo "Public version=$PROBE_VERSION build=$(/usr/libexec/PlistBuddy -c 'Print CFBundleVersion' "$plist")"
+          cp mydocs/working/assets/task_m020_567_stage5/first-saved.hwp "$probe/first.hwp"
+          cp mydocs/working/assets/task_m020_567_stage5/first-saved.hwp "$probe/second.hwp"
+          cat > "$probe/windows.swift" <<'SWIFT'
+          import CoreGraphics
+          import Foundation
+          let pid = Int(CommandLine.arguments[1])!
+          guard let windows = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]]
+          else { exit(2) }
+          print(windows.filter {
+              guard $0[kCGWindowOwnerPID as String] as? Int == pid,
+                    $0[kCGWindowLayer as String] as? Int == 0,
+                    let bounds = $0[kCGWindowBounds as String] as? [String: CGFloat] else { return false }
+              return (bounds["Width"] ?? 0) >= 400 && (bounds["Height"] ?? 0) >= 300
+          }.count)
+          SWIFT
+          xcrun swiftc "$probe/windows.swift" -o "$probe/windows"
+          open -n -a "$app" "$probe/first.hwp"
+          pid=""
+          for attempt in {1..30}; do
+            pid="$(pgrep -x "$name" || true)"
+            if [[ "$pid" =~ ^[0-9]+$ ]] && [[ "$("$probe/windows" "$pid")" = 1 ]]; then break; fi
+            sleep 1
+          done
+          if ! [[ "$pid" =~ ^[0-9]+$ ]] || [[ "$("$probe/windows" "$pid")" != 1 ]]; then
+            echo "RESULT=NO_OBSERVABLE_FIRST_WINDOW"
+            exit 1
+          fi
+          echo "Observed first HWP window"
+          touch "$probe/second-open"
+          open -a "$app" "$probe/second.hwp"
+          stable=0
+          for attempt in {1..40}; do
+            if ! kill -0 "$pid" 2>/dev/null; then
+              for report_attempt in {1..12}; do
+                reports=( "$HOME/Library/Logs/DiagnosticReports/$name"*.ips )
+                for report in "${reports[@]}"; do
+                  if [[ "$report" -nt "$probe/second-open" ]] && grep -q 'windowDidOrderOffScreen:' "$report"; then
+                    echo "RESULT=REPRODUCED_WINDOW_DID_ORDER_OFF_SCREEN"
+                    exit 0
+                  fi
+                done
+                sleep 1
+              done
+              echo "RESULT=PROCESS_EXITED_WITHOUT_REPORTER_SIGNATURE"
+              exit 1
+            fi
+            if [[ "$("$probe/windows" "$pid")" = 2 ]]; then
+              stable=$((stable + 1))
+              if [[ "$stable" = 6 ]]; then
+                echo "RESULT=TWO_STABLE_WINDOWS_SAME_PROCESS"
+                exit 0
+              fi
+            else
+              stable=0
+            fi
+            sleep 1
+          done
+          echo "RESULT=SECOND_WINDOW_NOT_OBSERVED"
+          exit 1
