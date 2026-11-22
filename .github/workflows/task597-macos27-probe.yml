@@ -69,15 +69,53 @@ jobs:
           }.count)
           SWIFT
           xcrun swiftc "$probe/windows.swift" -o "$probe/windows"
-          open -n -a "$app" "$probe/first.hwp"
+          report_stage() {
+            local stage="$1"
+            local reports=()
+            for attempt in {1..8}; do
+              reports=( "$HOME/Library/Logs/DiagnosticReports/$name"*.ips "$HOME/Library/Logs/DiagnosticReports/$name"*.crash )
+              for report in "${reports[@]}"; do
+                if [[ "$report" -nt "$probe/launch-start" ]] && grep -q 'windowDidOrderOffScreen:' "$report"; then
+                  echo "RESULT=REPORTER_SIGNATURE_AT_$stage"
+                  return 0
+                fi
+              done
+              sleep 1
+            done
+            return 1
+          }
+          touch "$probe/launch-start"
+          open -n --stdout "$probe/app.stdout" --stderr "$probe/app.stderr" -a "$app"
           pid=""
-          for attempt in {1..30}; do
+          for attempt in {1..35}; do
             pid="$(pgrep -x "$name" || true)"
-            if [[ "$pid" =~ ^[0-9]+$ ]] && [[ "$("$probe/windows" "$pid")" = 1 ]]; then break; fi
+            if [[ "$pid" =~ ^[0-9]+$ ]] && [[ "$("$probe/windows" "$pid")" -ge 1 ]]; then break; fi
             sleep 1
           done
-          if ! [[ "$pid" =~ ^[0-9]+$ ]] || [[ "$("$probe/windows" "$pid")" != 1 ]]; then
-            echo "RESULT=NO_OBSERVABLE_FIRST_WINDOW"
+          if ! [[ "$pid" =~ ^[0-9]+$ ]] || [[ "$("$probe/windows" "$pid")" -lt 1 ]]; then
+            if report_stage EMPTY_LAUNCH; then exit 0; fi
+            if [[ "$pid" =~ ^[0-9]+$ ]]; then
+              echo "RESULT=PROCESS_ALIVE_WITHOUT_VISIBLE_INITIAL_WINDOW"
+            else
+              echo "RESULT=NO_PROCESS_AFTER_EMPTY_LAUNCH"
+            fi
+            if grep -qs 'windowDidOrderOffScreen:' "$probe/app.stderr"; then echo "STDERR=WINDOW_DID_ORDER_OFF_SCREEN"; fi
+            if grep -qsE 'dyld\:|Library not loaded' "$probe/app.stderr"; then echo "STDERR=DYNAMIC_LOADER_FAILURE"; fi
+            exit 1
+          fi
+          echo "Observed initial app window"
+          open -a "$app" "$probe/first.hwp"
+          for attempt in {1..30}; do
+            if ! kill -0 "$pid" 2>/dev/null; then
+              if report_stage FIRST_DOCUMENT; then exit 0; fi
+              echo "RESULT=PROCESS_EXITED_ON_FIRST_DOCUMENT"
+              exit 1
+            fi
+            if [[ "$("$probe/windows" "$pid")" = 1 ]] && (( attempt >= 5 )); then break; fi
+            sleep 1
+          done
+          if [[ "$("$probe/windows" "$pid")" != 1 ]]; then
+            echo "RESULT=NO_SINGLE_WINDOW_AFTER_FIRST_DOCUMENT"
             exit 1
           fi
           echo "Observed first HWP window"
