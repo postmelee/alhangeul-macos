@@ -4,36 +4,6 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>ko</string>
-	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>Alhangeul Spotlight Importer</string>
-	<key>CFBundlePackageType</key>
-	<string>BNDL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>0.2.5</string>
-	<key>CFBundleVersion</key>
-	<string>23</string>
-	<key>LSMinimumSystemVersion</key>
-	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
-	<key>CFPlugInDynamicRegistration</key>
-	<string>NO</string>
-	<key>CFPlugInFactories</key>
-	<dict>
-		<key>0B1601BF-0340-4A83-9924-E1485E2DDD55</key>
-		<string>AlhangeulImporterFactory</string>
-	</dict>
-	<key>CFPlugInTypes</key>
-	<dict>
-		<key>8B08C4BF-415B-11D8-B3F9-0003936726FC</key>
-		<array>
-			<string>0B1601BF-0340-4A83-9924-E1485E2DDD55</string>
-		</array>
-	</dict>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -55,5 +25,35 @@
 			</array>
 		</dict>
 	</array>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Alhangeul Spotlight Importer</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.2.6</string>
+	<key>CFBundleVersion</key>
+	<string>24</string>
+	<key>CFPlugInDynamicRegistration</key>
+	<string>NO</string>
+	<key>CFPlugInFactories</key>
+	<dict>
+		<key>0B1601BF-0340-4A83-9924-E1485E2DDD55</key>
+		<string>AlhangeulImporterFactory</string>
+	</dict>
+	<key>CFPlugInTypes</key>
+	<dict>
+		<key>8B08C4BF-415B-11D8-B3F9-0003936726FC</key>
+		<array>
+			<string>0B1601BF-0340-4A83-9924-E1485E2DDD55</string>
+		</array>
+	</dict>
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 </dict>
 </plist>
