@@ -70,6 +70,7 @@ jobs:
           node --check docs/news.js
           node --test scripts/ci/test-news-ui.cjs
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-threads-news.py
+          PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-threads-token-rotation.py
           PYTHONDONTWRITEBYTECODE=1 python3 scripts/ci/test-news-pages.py
 
       - name: Verify bundled rhwp README badge
