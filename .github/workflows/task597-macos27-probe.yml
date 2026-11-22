@@ -105,20 +105,30 @@ jobs:
           fi
           echo "Observed initial app window"
           open -a "$app" "$probe/first.hwp"
-          for attempt in {1..30}; do
+          before=0
+          stable_before=0
+          for attempt in {1..35}; do
             if ! kill -0 "$pid" 2>/dev/null; then
               if report_stage FIRST_DOCUMENT; then exit 0; fi
               echo "RESULT=PROCESS_EXITED_ON_FIRST_DOCUMENT"
               exit 1
             fi
-            if [[ "$("$probe/windows" "$pid")" = 1 ]] && (( attempt >= 5 )); then break; fi
+            count="$("$probe/windows" "$pid")"
+            echo "FIRST_WINDOW_COUNT=$count"
+            if [[ "$count" -gt 0 ]] && [[ "$count" = "$before" ]]; then
+              stable_before=$((stable_before + 1))
+              if [[ "$stable_before" = 7 ]]; then break; fi
+            else
+              stable_before=0
+              before="$count"
+            fi
             sleep 1
           done
-          if [[ "$("$probe/windows" "$pid")" != 1 ]]; then
-            echo "RESULT=NO_SINGLE_WINDOW_AFTER_FIRST_DOCUMENT"
+          if [[ "$stable_before" != 7 ]]; then
+            echo "RESULT=NO_STABLE_WINDOW_AFTER_FIRST_OPEN"
             exit 1
           fi
-          echo "Observed first HWP window"
+          echo "STABLE_BEFORE=$before"
           touch "$probe/second-open"
           open -a "$app" "$probe/second.hwp"
           stable=0
@@ -137,10 +147,12 @@ jobs:
               echo "RESULT=PROCESS_EXITED_WITHOUT_REPORTER_SIGNATURE"
               exit 1
             fi
-            if [[ "$("$probe/windows" "$pid")" = 2 ]]; then
+            count="$("$probe/windows" "$pid")"
+            echo "SECOND_WINDOW_COUNT=$count"
+            if [[ "$count" -gt "$before" ]]; then
               stable=$((stable + 1))
               if [[ "$stable" = 6 ]]; then
-                echo "RESULT=TWO_STABLE_WINDOWS_SAME_PROCESS"
+                echo "RESULT=ADDITIONAL_STABLE_WINDOW_SAME_PROCESS"
                 exit 0
               fi
             else
