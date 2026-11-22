@@ -1,0 +1,62 @@
+name: Threads Token Rotation
+
+on:
+  schedule:
+    - cron: '43 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: threads-token-rotation
+  cancel-in-progress: false
+
+jobs:
+  check-expiry:
+    if: github.repository == 'postmelee/alhangeul-macos' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      due: ${{ steps.expiry.outputs.due }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Check expiry without credentials
+        id: expiry
+        env:
+          THREADS_TOKEN_EXPIRES_AT: ${{ vars.THREADS_TOKEN_EXPIRES_AT }}
+        run: |
+          set -euo pipefail
+          due="$(python3 -B scripts/ci/rotate-threads-token.py due)"
+          echo "due=$due" >> "$GITHUB_OUTPUT"
+
+  rotate-token:
+    needs: check-expiry
+    if: >-
+      github.repository == 'postmelee/alhangeul-macos' &&
+      github.ref == 'refs/heads/main' &&
+      (needs.check-expiry.outputs.due == 'true' || github.event_name == 'workflow_dispatch')
+    environment: threads-token-rotation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Create restricted GitHub App installation token
+        id: rotation-app
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.THREADS_ROTATION_APP_CLIENT_ID }}
+          private-key: ${{ secrets.THREADS_ROTATION_APP_PRIVATE_KEY }}
+          # 이 저장소에만 설치된 전용 앱의 Secrets·Variables 권한을 사용한다.
+      - name: Verify or rotate the Threads token
+        env:
+          ROTATION_GITHUB_TOKEN: ${{ steps.rotation-app.outputs.token }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          THREADS_TOKEN_EXPIRES_AT: ${{ vars.THREADS_TOKEN_EXPIRES_AT }}
+          THREADS_EXPECTED_USER_ID: ${{ vars.THREADS_EXPECTED_USER_ID }}
+          ROTATION_MODE: ${{ github.event_name == 'workflow_dispatch' && 'verify' || 'rotate' }}
+        run: python3 -B scripts/ci/rotate-threads-token.py "$ROTATION_MODE"

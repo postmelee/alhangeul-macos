@@ -85,4 +85,4 @@ jobs:
               stream.write(f"- 표시 대상: {result['item_count']}개\n")
               stream.write('- 결과: dry-run 완료, 파일 교체·공개 배포 없음\n')
           if result['token']['renewal_required']:
-              print('::warning::Threads 토큰이 14일 이내에 만료됩니다. 수동 갱신이 필요합니다.')
+              print('::warning::Threads 토큰이 14일 이내에 만료됩니다. 자동 갱신 상태를 확인하세요.')

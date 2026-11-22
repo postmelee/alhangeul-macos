@@ -364,3 +364,11 @@ scripts/verify-rhwp-studio-assets.sh \
 - `rhwp Upstream Sync PR` 실패: target release 조회, core/studio current 판정, upstream checkout/build, checkout HEAD/expected commit과 studio manifest `source_cargo_lock_sha256` strict 비교, macOS core lock/build-info update, GitHub App token 설정, 기존 automation branch/PR 상태를 먼저 확인한다. Strict 실패는 checkout identity, malformed manifest field와 실제 target `Cargo.lock` mismatch를 verifier 진단으로 구분한다.
 
 실패 증상, 재현 조건, 원인, 재발 방지 절차가 명확해진 경우에만 `mydocs/troubleshootings/`에 별도 문서로 남긴다.
+
+### Threads 장기 토큰 갱신
+
+`Threads Token Rotation`은 main에서 매일 13:43 KST에 실행한다. 기존 만료일까지 14일 이내인 유효 토큰을 Meta에서 갱신한다. 전용 GitHub App은 대상 저장소 하나에만 설치하고 Repository Secrets 및 Variables에 각각 쓰기 권한을 부여한다. 환경 `threads-token-rotation`에 브랜치 정책 `main`을 두고, App Client ID는 변수 `THREADS_ROTATION_APP_CLIENT_ID`, 개인 키는 Secret `THREADS_ROTATION_APP_PRIVATE_KEY`에 설정한다.
+
+GitHub Actions에서 수동 실행하면 연결 계정과 자격 증명 권한을 확인한다. 정기 실행은 응답을 계정과 함께 검증한 뒤 `THREADS_ACCESS_TOKEN`을 표준 입력으로 저장하고 `THREADS_TOKEN_EXPIRES_AT`을 기록한다. 두 API가 모두 성공하고 후속 조회가 일치해야 성공으로 표시한다. 로그에 인증 URL, 응답 본문, 토큰을 남기지 않는다.
+
+Secret 저장 뒤 만료일 기록 단계가 실패했다면 만료일을 이전 값으로 보수적으로 유지한다. 다음 정기 실행은 최신 Secret에서 24시간이 지난 뒤 다시 갱신을 시도한다. 기록된 기한이 지났거나 Meta가 계속 인증을 거절하면 운영자 재인증 후 Secret과 만료 변수를 갱신하고 기존 Threads News Sync 수동 검증을 실행한다.
