@@ -6,7 +6,7 @@ on:
       version:
         description: App version to publish. The workflow must be run from tag v<version>.
         required: true
-        default: "0.2.6"
+        default: "0.2.7"
       previous_release_ref:
         description: Git ref for the previous public release used to draft the release PR analysis and delta checklist.
         required: true
@@ -144,6 +144,15 @@ jobs:
             echo "- tag: \`$tag_name\`"
             echo "- commit: \`$head_commit\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate release notes before building
+        shell: bash
+        run: |
+          set -euo pipefail
+          notes="$RUNNER_TEMP/alhangeul-release-notes-preflight.md"
+          placeholder_sha="$(printf '%064d' 0)"
+          bash scripts/ci/write-release-notes.sh "$VERSION" "$placeholder_sha" "$notes"
+          bash scripts/ci/check-release-notes-template.sh "$notes"
 
       - name: Write release PR analysis
         id: pr_analysis
