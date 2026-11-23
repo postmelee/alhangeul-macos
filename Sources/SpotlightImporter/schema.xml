@@ -28,5 +28,8 @@
     <type name="org.libreoffice.hwp-document">
       <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
     </type>
+    <type name="com.infraware.polarisofficeservice.hwp">
+      <allattrs>kMDItemTitle kMDItemKind kMDItemTextContent</allattrs>
+    </type>
   </types>
 </schema>

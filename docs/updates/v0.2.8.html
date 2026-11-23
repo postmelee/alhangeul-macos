@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="알한글 v0.2.8 릴리즈 노트입니다." />
+  <meta property="og:title" content="알한글 v0.2.8 릴리즈 노트" />
+  <meta property="og:description" content="Polaris Office 문서로 인식된 HWP의 Spotlight 본문 검색을 지원합니다." />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://postmelee.github.io/alhangeul-macos/updates/v0.2.8.html" />
+  <meta property="og:image" content="https://postmelee.github.io/alhangeul-macos/assets/og-main.png" />
+  <title>알한글 v0.2.8 릴리즈 노트</title>
+  <link rel="icon" href="../assets/logo-256@2x.png" />
+  <link rel="apple-touch-icon" href="../assets/logo-256@2x.png" />
+  <link rel="stylesheet" href="../styles.css?v=20261015-font-navigation" />
+</head>
+
+<body>
+  <a class="skip-link" href="#main">본문으로 이동</a>
+  <header class="site-header" aria-label="주요 탐색">
+    <div class="site-header-inner">
+      <a class="brand-link" href="../" aria-label="알한글 홈">
+        <img src="../assets/logo-256@2x.png" width="28" height="28" alt="" />
+        <span>알한글</span>
+      </a>
+      <nav class="header-actions" aria-label="주요 링크">
+        <a class="header-link" href="../fonts/">글꼴 안내</a>
+        <a class="header-link" href="../" aria-label="알한글 홈으로 이동">
+          홈
+        </a>
+        <a class="header-link" href="../feedback/" aria-label="문의와 제보 안내로 이동">
+          문의/제보
+        </a>
+        <a class="header-link header-platform-link" href="https://postmelee.github.io/alhangeul-tauri/">알한글 for Windows / Linux</a>
+        <a class="header-link header-secondary-link" href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer"
+          aria-label="GitHub 저장소로 이동">
+          GitHub
+        </a>
+        <a class="header-download-button"
+          href="https://github.com/postmelee/alhangeul-macos/releases/latest/download/alhangeul-macos-0.2.8.dmg"
+          aria-label="알한글 v0.2.8 DMG 다운로드">
+          다운로드
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="updates-page">
+    <section class="updates-hero" aria-labelledby="release-title">
+      <h1 id="release-title">알한글 v0.2.8</h1>
+      <p>Finder와 Spotlight에서 Polaris Office 문서로 인식된 HWP를 본문 단어로 찾을 수 있습니다.</p>
+      <p class="release-meta">배포 상태와 공개일은 <a href="https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.8">GitHub Release</a>에서 확인하세요.</p>
+      <div class="updates-actions" aria-label="릴리즈 주요 링크">
+        <a class="page-action-button"
+          href="https://github.com/postmelee/alhangeul-macos/releases/download/v0.2.8/alhangeul-macos-0.2.8.dmg">
+          DMG 다운로드
+        </a>
+        <a class="page-secondary-link" href="https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.8"
+          rel="noreferrer">GitHub Release</a>
+        <a class="page-secondary-link" href="./">업데이트 목록</a>
+      </div>
+    </section>
+
+    <div class="updates-content">
+      <section class="updates-section" aria-labelledby="release-summary-title">
+        <h2 id="release-summary-title">변경 요약</h2>
+        <p>macOS가 Polaris Office 형식으로 분류한 HWP를 알한글의 Spotlight 색인 대상에 추가했습니다.</p>
+      </section>
+      <section class="updates-section" aria-labelledby="release-app-title">
+        <h2 id="release-app-title">알한글 앱 변화</h2>
+        <p>알한글을 한 번 실행하고 색인이 끝나면 앱을 종료한 뒤에도 문서 본문으로 검색할 수 있습니다.</p>
+      </section>
+      <section class="updates-section" aria-labelledby="release-limits-title">
+        <h2 id="release-limits-title">알려진 한계</h2>
+        <ul>
+          <li>그림이 있는 일부 HWPX 문서에서는 가운데 정렬한 글줄이 한컴 출력보다 약 4pt 오른쪽에 놓일 수 있습니다.</li>
+          <li>소유권을 무시하는 외장 APFS 볼륨에서는 TXT가 검색돼도 HWPX 본문이 검색되지 않을 수 있습니다.</li>
+        </ul>
+      </section>
+      <section class="updates-section" aria-labelledby="release-install-title">
+        <h2 id="release-install-title">설치와 업데이트</h2>
+        <p>DMG에서 앱을 Applications 폴더로 옮기고 한 번 실행하세요. macOS 12 이상, Intel Mac과 Apple Silicon Mac에서 같은 파일을 사용합니다.</p>
+        <p><strong>최초 실행 후 검색 준비와 문서 색인에 시간이 걸릴 수 있으므로, 처음에는 앱을 켜 둔 채 잠시 기다려 주세요.</strong> 소요 시간은 Mac의 상태와 문서 수에 따라 달라집니다.</p>
+        <p class="updates-instruction">메뉴 막대에서 <span class="updates-menu-path">알한글 → 업데이트 확인…</span>을 선택하세요.</p>
+        <p>Homebrew의 현재 제공 버전과 명령어는 <a href="./#homebrew">Homebrew 설치·업데이트 안내</a>에서 확인하세요.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <img src="../assets/logo-256@2x.png" width="32" height="32" alt="" />
+      <span>알한글</span>
+    </div>
+    <p>Mac을 위한 HWP/HWPX 문서 미리보기 및 편집 앱입니다. 한글 파일이 더 이상 낯선 파일로 남지 않도록 만듭니다.</p>
+    <nav aria-label="푸터 링크">
+      <a class="mobile-platform-link" href="https://postmelee.github.io/alhangeul-tauri/">Windows / Linux 버전 보기 →</a>
+      <a href="https://github.com/postmelee/alhangeul-macos/blob/main/LICENSE" rel="noreferrer">MIT License</a>
+
+      <a href="https://github.com/postmelee/alhangeul-macos" rel="noreferrer">GitHub</a>
+    </nav>
+  </footer>
+</body>
+
+</html>

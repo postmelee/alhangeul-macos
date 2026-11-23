@@ -17,7 +17,8 @@
 
 | 버전 | 상태 | GitHub Release | Pages 릴리즈 노트 | 내부 기록 |
 |------|------|----------------|-------------------|-----------|
-| `v0.2.7` | 공개 후보 준비 | 공개 전 | 배포 준비 | [`v0.2.7.md`](v0.2.7.md) |
+| `v0.2.8` | 공개 후보 준비 | 공개 전 | 배포 준비 | [`v0.2.8.md`](v0.2.8.md) |
+| `v0.2.7` | 공개·Sparkle 및 Homebrew 확인 | [GitHub Release](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.7) | [릴리즈 노트](https://postmelee.github.io/alhangeul-macos/updates/v0.2.7.html) | [`v0.2.7.md`](v0.2.7.md) |
 | `v0.2.6` | 릴리스 노트 생성 실패 · 미공개 태그 보존 | 미공개 | — | [`v0.2.6.md`](v0.2.6.md) |
 | `v0.2.5` | 공개·실제 Sparkle/Finder 및 Homebrew 확인 | [Alhangeul v0.2.5](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.5) | [v0.2.5](https://postmelee.github.io/alhangeul-macos/updates/v0.2.5.html) | [`v0.2.5.md`](v0.2.5.md) |
 | `v0.2.4` | 공개·실제 Sparkle/문서/Finder·Homebrew 수용, 실제 Mac 검색 대체 근거 수용 | [Alhangeul v0.2.4](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.4) | [v0.2.4](https://postmelee.github.io/alhangeul-macos/updates/v0.2.4.html) | [`v0.2.4.md`](v0.2.4.md) |

@@ -52,8 +52,10 @@ importer는 로컬 원본을 읽기 전용으로 열고 추출 본문을 macOS S
 | importer가 목록에 없음 | 설치 위치, 앱 첫 실행, bundle timestamp 및 서명 |
 | 목록에는 있지만 다른 importer 선택 | 실제 문서 UTI와 `mdimport -t`의 선택 경로 |
 | 추출 본문 자체가 비어 있음 | 보호 여부, 지원 형식, 크기·출력 한도와 parser 결과 |
-| 본문은 추출되지만 검색 안 됨 | 같은 위치의 일반 txt 대조, 검색 제외 설정, 실제 볼륨 색인 상태 |
+| 본문은 추출되지만 검색 안 됨 | 같은 폴더의 TXT를 본문으로 검색하고 볼륨의 색인 상태와 소유권 설정을 확인 |
 | 수정·삭제 후 이전 단어가 남음 | 재색인/삭제 전파 대기와 실제 결과 집합; 즉시 삭제로 간주하지 않음 |
+
+외장 APFS에서 TXT만 검색되면 Finder에서 해당 디스크의 **정보 가져오기 → 공유 및 사용 권한 → 이 볼륨에서 소유권 무시**를 확인하세요. 이 항목이 선택된 환경에서는 같은 HWPX와 TXT의 복사본을 소유권이 활성화된 다른 색인 위치에 두고, 두 파일 이름에 없는 본문 단어로 다시 검색해 보세요. 실제 Mac의 v0.2.7에서는 이 방법으로 HWPX의 본문과 제목을 확인했습니다. [검증 기록 #587](https://github.com/postmelee/alhangeul-macos/issues/587)
 
 maintainer는 [표준 Spotlight smoke](build_run_guide.md#spotlight-설치색인-smoke)로 실제 importer 선택, metadata, 본문 검색, 전환·교체·정리를 분리해 확인합니다. `mdls` 본문 출력이나 Quick Look/Thumbnail provider 성공을 본문 색인 성공의 근거로 사용하지 않습니다. 일반 색인이 정상인 환경, 최소 지원 OS와 공개 서명·공증 설치본에서도 결과를 기록해야 합니다.
 
