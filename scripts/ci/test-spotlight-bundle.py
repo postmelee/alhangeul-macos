@@ -53,6 +53,12 @@ class BundleContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "UUID source mismatch"):
             CHECK.validate(self.info, self.schema, self.host)
 
+    def test_polaris_hwp_is_an_importer_type(self):
+        polaris = "com.infraware.polarisofficeservice.hwp"
+        self.assertIn(polaris, self.info["CFBundleDocumentTypes"][0]["LSItemContentTypes"])
+        self.assertNotIn(polaris, self.host["CFBundleDocumentTypes"][0]["LSItemContentTypes"])
+        CHECK.validate(self.info, self.schema, self.host)
+
     def test_source_uuid_and_export_drift_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "Importer.m"
