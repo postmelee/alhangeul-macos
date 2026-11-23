@@ -14,6 +14,7 @@ IMPORTER_TYPE = "8B08C4BF-415B-11D8-B3F9-0003936726FC"
 BUNDLE_PATH = Path("Contents/Library/Spotlight/Alhangeul.mdimporter")
 IDENTIFIER = "com.postmelee.alhangeul.SpotlightImporter"
 ATTRIBUTES = {"kMDItemTitle", "kMDItemKind", "kMDItemTextContent"}
+IMPORTER_ONLY_UTIS = {"com.infraware.polarisofficeservice.hwp"}
 
 
 def read_plist(path):
@@ -40,8 +41,8 @@ def validate(info, schema, host, executable=None, *, factory_source=None, export
     types = info["CFBundleDocumentTypes"]
     require(len(types) == 1 and types[0]["CFBundleTypeRole"] == "MDImporter", "MDImporter role mismatch")
     utis = types[0]["LSItemContentTypes"]
-    expected = host["CFBundleDocumentTypes"][0]["LSItemContentTypes"]
-    require(len(utis) == len(set(utis)) and set(utis) == set(expected), "HostApp UTI mismatch")
+    expected = set(host["CFBundleDocumentTypes"][0]["LSItemContentTypes"]) | IMPORTER_ONLY_UTIS
+    require(len(utis) == len(set(utis)) and set(utis) == expected, "Spotlight importer UTI mismatch")
     require(info["CFPlugInDynamicRegistration"] == "NO", "dynamic registration is not supported")
     factories = info["CFPlugInFactories"]
     require(len(factories) == 1, "one factory is required")
