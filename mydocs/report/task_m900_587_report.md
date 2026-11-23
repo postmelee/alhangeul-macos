@@ -9,3 +9,7 @@ Polaris HWP는 실제 UTI가 공개 importer 지원 목록에서 빠져 있었�
 ## 공개 후 확인
 
 다음 공개 앱에서 같은 UTI와 소유권 조건, 앱 종료 상태에서 두 형식의 자동 본문 검색을 확인한 뒤 이슈에 결과를 남긴다. 외장 볼륨의 소유권 무시 조건과 TXT까지 실패하는 검색 지연은 계속 구분한다.
+
+## 공개판 재검증
+
+실제 Sparkle 업데이트 후 설치한 v0.2.8 빌드 26에서 앱 종료 후 HWP·HWPX의 한글·영문 자동 본문 검색을 확인했다. [공개 검증 기록](../release/v0.2.8.md), [이슈 종료 근거](https://github.com/postmelee/alhangeul-macos/issues/587#issuecomment-7110855063).
