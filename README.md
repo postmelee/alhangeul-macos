@@ -58,13 +58,13 @@ Maintained with support from **OpenAI’s [Codex for Open Source](https://develo
 
 ## 릴리즈 안내
 
-### v0.2.6
+### v0.2.7
 
-`v0.2.6 (24)`는 HWP·HWPX 편집 중 그림을 삽입할 때 macOS 파일 선택창이 정상적으로 열리도록 수정했습니다.
+`v0.2.7 (25)`는 HWP·HWPX 편집 중 그림을 삽입할 때 macOS 파일 선택창이 정상적으로 열리도록 수정했습니다.
 
 - 포함된 `rhwp`: [`v0.9.1`](https://github.com/edwardkim/rhwp/releases/tag/v0.9.1), core·bundled Studio commit `981ce66b4183b13c1a3b5907e04a8969c8c42034`
-- 릴리즈 기록: [v0.2.6 검증·제한 사항](mydocs/release/v0.2.6.md), [업데이트 문서](https://postmelee.github.io/alhangeul-macos/updates/v0.2.6.html)
-- 다운로드: [GitHub Release v0.2.6](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.6). macOS 12 이상을 대상으로 하는 Intel·Apple Silicon 공용 DMG입니다.
+- 릴리즈 기록: [v0.2.7 검증·제한 사항](mydocs/release/v0.2.7.md), [업데이트 문서](https://postmelee.github.io/alhangeul-macos/updates/v0.2.7.html)
+- 다운로드: [GitHub Release v0.2.7](https://github.com/postmelee/alhangeul-macos/releases/tag/v0.2.7). macOS 12 이상을 대상으로 하는 Intel·Apple Silicon 공용 DMG입니다.
 - 기존 앱: `알한글 → 업데이트 확인...`을 선택하세요. Homebrew의 제공 버전은 [업데이트 안내](https://postmelee.github.io/alhangeul-macos/updates/#homebrew)에서 확인할 수 있습니다.
 - 일부 HWPX의 가운데 정렬은 한컴 출력과 차이가 날 수 있습니다. 실제 Mac Spotlight 본문 검색의 환경 차이는 [#587](https://github.com/postmelee/alhangeul-macos/issues/587)에서 추적합니다.
 
@@ -90,7 +90,7 @@ v0.1.x(WebView 첫 배포) -> v0.2(Mac 통합 확장) -> v0.3(변환과 자동�
 
 ## 현재 구현 범위
 
-v0.2.6의 제공 기능과 제한 사항입니다.
+v0.2.7의 제공 기능과 제한 사항입니다.
 
 ### 제공 기능
 
